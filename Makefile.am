@@ -1,7 +1,7 @@
 # this is to include the Autoconf scripts in subdir m4/
 ACLOCAL_AMFLAGS=-I m4
 
-SUBDIRS = rtxi plugins models hdf scripts 
+SUBDIRS = rtxi plugins hdf scripts 
 
 ACLOCAL_DIST = m4/ac_pkg_swig.m4 \
 	       m4/ac_python_devel.m4 \
