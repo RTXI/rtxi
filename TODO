@@ -1,0 +1,101 @@
+Development Roadmap
+
+1.0.0 (March 2007)
+
+* Test and improve the Marder models.
+
+* Add a "Run script" menu entry
+
+o [igr] Add the ability to create named structures when exporting
+  NDS files to Matlab.
+
+o [igr] Fix the setrate command in the script language.
+
+
+1.0.0-rc7 (January 2007)
+
+o [igr] Create separate Debian packages for the Scheme libraries required
+  by the nds application and the Chicken wrapper plugin.
+
+o [igr] Create a Python wrapper plugin, similar to the Chicken wrapper plugin. 
+
+* Add the ability to create named structures when exporting
+  NDS files to Matlab.
+
+o [igr] Port the Marder models to Dynamo.
+
+* Incorporate Luke Campagnola's Stimulus plugin.
+
+
+1.0 - TBA
+
+  - Source Documentation
+    - Doxygen-ize the headers
+    - Provide implementation explanations where relevant
+
+  - Formal Written Documentation
+    - Install Manual
+    - User Manual - standard plugins - model developement
+    - Developer Manual - plugin development - advanced configuration/customization
+
+  - Build System Tweaks
+    - Automake, QMake, or neither?
+    - Maybe continue to use Autoconf/Automake but depend on RPM, Deb,
+        ebuild, etc. for installation freedom?
+
+  - Release Medium
+    - RPM
+    - LiveCD
+      - Knoppix w/ custom kernel
+      - Modify kudzu-knoppix to autodetect DAQ cards
+
+1.1 - TBA
+
+  - POSIX port, port the system to run in soft realtime on POSIX compliant hosts.
+
+  - NullDevice Driver
+    - Finish the bloody thing
+    - Move it into the plugin directory
+
+  - Look into a way to read files from an executing model. Either mmap or build some
+      fifo mechanism.
+
+Future Tasks
+
+  - Error Handling Overhaul - make the system more fault tolerant
+    - Try using exceptions to report errors in the non-realtime thread
+    - Have errors detected in the realtime thread be reported to the non-realtime thread
+      - Active  : signals
+      - Passive : polling
+
+  - Rewrite the comedi driver to use synchronous commands, instead
+      of repeated instructions. If that doesn't work, consider
+      implementing insn_list in comedi_lxrt to reduce the context
+      switching over head. Either way verify that performance has
+      increased before commiting.
+
+  - Get the nidaq driver from mrci and make a plugin for it, see if it is faster than Comedi.
+
+  - System "lock" detection. In the realtime thread check to see
+      if execution lasts longer than some fraction of a single
+      period. If a lock is detected, sound some alarm and have
+      the realtime thread sleep a little to prevent starvation of
+      the GUI. This adds complexity to realtime side, and also
+      slows things down a tad, so this would be strickly opt-in
+      until it was proven safe for use in production.
+
+Wish List
+
+  - Build a Matlab Realtime Workshop target model. So you can develope
+      models in simulink, then run them in RTXI. Look at RTAI-Lab for
+      inspiration, they seem to have done it.
+
+  - Multiple realtime threads. In the simplest implementation
+      there would be a lxrt thread for each processor, allowing
+      different models to execute in parallel on different
+      processors. In the most complicated implementation there
+      would be a "user-space" threading library running on top
+      of several lxrt threads. We would provide an M-on-N
+      model with cooperative multitasking so individual models
+      could be multithreaded. This entails writting a dumbed
+      down thread library and building a scheduler.

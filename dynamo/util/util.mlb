@@ -1,0 +1,17 @@
+(* import libraries *)
+
+$(SML_LIB)/basis/basis.mlb
+$(SML_LIB)/smlnj-lib/Util/smlnj-lib.mlb
+$(SML_LIB)/smlnj-lib/PP/pp-lib.mlb
+
+
+(* program files *)
+pos.sml
+table.sig
+table.sml
+symbol.sml
+unique.sml
+BitSet.sig
+BitSet.sml
+DynArray.sml
+

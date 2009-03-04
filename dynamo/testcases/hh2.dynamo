@@ -1,0 +1,97 @@
+/*
+ This model is used to calculate the membrane potential assuming
+ some initial state. The calculation is based on sodium ion flow,
+ potassium ion flow and leakage ion flow. (Hodgkin, A. L. and Huxley,
+ A. F. (1952) "A Quantitative Description of Membrane Current and its
+ Application to Conduction and Excitation in Nerve" Journal of
+ Physiology 117: 500-544)
+
+ $Id: hh2.dynamo,v 1.1 2006/02/23 01:35:36 ivan_raikov Exp $
+*/
+
+SYSTEM Hodgkin_Huxley_reduced;
+
+PARAMETER  invC_m  = 1.0    "uF/cm^2";
+
+// Maximum possible sodium conductance
+PARAMETER  g_Na = 120.0  "mS/cm^2";
+// Maximum possible potassium conductance
+PARAMETER  g_K  = 36.0   "mS/cm^2";
+// Maximum possible leakage conductance
+PARAMETER  g_L  = 0.3    "mS/cm^2";
+
+// Sodium membrane potential
+PARAMETER  E_Na = 50.0	 "mV";
+// Potassium membrane potential
+PARAMETER  E_K  = -77.0	 "mV";
+// Leakage membrane potential
+PARAMETER  E_L  = -54.4	 "mV";
+
+// The time range during which I_stim will be applied to the system  
+PARAMETER  t_on = 0    "Beginning time for I_stim";
+PARAMETER  t_off = 10   "Ending time for I_stim";
+
+// The magnitude of the stimulus current
+PARAMETER  I_stim_mag = 10;
+
+STATE V = -65.0;
+
+// the probability that the 1 inactivation particle has not caused the 
+// Na gate to close  
+STATE h = 0.9;
+// the probability that 1 of the 3 required activation particles has
+// contributed to the activation of the Na gate  
+STATE m = 0.1;
+// the probability that 1 of 4 activation particles has influenced the
+// state of the K gate 
+STATE n = 0.1;
+
+// Stimulus current
+STATE FUNCTION I_stim;
+
+// Ionic currents across the membrane 
+// alpha and beta are rate constants for particle
+// activating/inactivating a gate, respectively
+STATE FUNCTION I_Na      "Na+ current:  I_Na (V, m, h)";
+STATE FUNCTION alpha_m   "alpha_m(V)";
+STATE FUNCTION beta_m    "beta_m(V)";
+STATE FUNCTION alpha_h   "alpha_h(V)";
+STATE FUNCTION beta_h    "beta_h(V)";
+
+STATE FUNCTION I_K       "K+ current:   I_K (V, n)";
+STATE FUNCTION alpha_n   "alpha_n(V)";
+STATE FUNCTION beta_n    "beta_n(V)";
+
+STATE FUNCTION I_L       "Leak current: I_L (V)";
+
+// This will have the value of V (total membrane potential), and will
+// be output to the data acquisition board.
+EXTERNAL OUTPUT Vout1;
+
+TIME t;
+
+AT TIME t:
+
+alpha_m  = (0.1* (V + 40))/(1 - exp(-(V + 40)*(0.10)));
+beta_m   = 4 * exp(-(V + 65)*(0.05));
+alpha_h  = 0.07 * exp(-(V + 65)*(0.05));
+beta_h   = 1/(1 + exp(-(V + 35)*(0.10)));
+alpha_n  = (0.01 * (V + 55))/(1 - exp(-(V + 55)*(0.10)));
+beta_n   = 0.125 * exp(-(V + 65)*(0.0125));
+
+// I_stim is 1V during the specified time range (t_on -- t_off), 
+// 0V otherwise  
+I_stim   = (t > t_on) ? (t < t_off) ? (1.0 * I_stim_mag): 0.0: 0.0;
+
+
+I_Na     = g_Na * cube(m) * h * (V - E_Na);
+I_K 	 = g_K * sqr(sqr (n)) * (V - E_K);
+I_L	 = g_L * (V - E_L);
+
+/* Integration of the four state variables. */
+d(V) = - (I_Na + I_K + I_L - I_stim) * invC_m;
+d(m) = alpha_m * (1 - m) - beta_m * m;
+d(h) = alpha_h * (1 - h) - beta_h * h;
+d(n) = alpha_n * (1 - n) - beta_n * n;
+
+Vout1 = V;

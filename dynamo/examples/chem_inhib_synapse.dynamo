@@ -1,0 +1,137 @@
+/*
+  This model was adapted to RTXI/Dynamo by Ivan Raikov. It was taken
+  from a model that was part of the RTLDC (Real Time Linux Dynamic
+  Controller). 
+
+  Copyright (C) 1999-2003 Neuronal Dynamics Lab, Boston University
+  License:
+    RTLDC is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+    RTLDC is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+*/
+
+// This program has been modified to connect two GM cells via two
+// inhibitory chemical synapses 
+
+// An Ih has been added to create a half center oscilator model
+
+SYSTEM Chem_Inhib_Synapse;
+
+
+STATE g_12 = 0 METHOD "mau";  // uS
+STATE g_21 = 0 METHOD "mau";  // uS
+STATE s_12 = 0 METHOD "mau";
+STATE s_21 = 0 METHOD "mau";
+STATE Ih_1 = 0 METHOD "mau";
+STATE Ih_2 = 0 METHOD "mau";
+STATE r_1  = 0 METHOD "mau";
+STATE r_2  = 0 METHOD "mau";
+
+
+PARAMETER g_max_12    = 100.0  "12 maximal conductance, nS to uS"; 
+PARAMETER g_max_21    = 100.0  "21 maximal conductance, nS to uS"; 
+PARAMETER v_half_12   = -50.0  "12 to gm2 half activation, mV";
+PARAMETER v_half_21   = -50.0  "21 to gm1 half activation, mV";
+PARAMETER tau_s_12    = 100    "12 tau_s, ms";
+PARAMETER tau_s_21    = 100    "21 tau_s, ms";
+PARAMETER gain_hs1    = 0.1    "headstage 1 gain";
+PARAMETER gain_hs2    = 1.0    "headstage 2 gain";
+PARAMETER v_h_half_1  = -50    "I-h 1 half activation, Vm";
+PARAMETER v_h_half_2  = -50    "I-h 2 half activation, Vm";
+PARAMETER g_h_1       = 40     "I-h 1 conductance, nS";  
+PARAMETER g_h_2       = 40     "I-h 2 conductance, nS";  
+PARAMETER s_r_1       = 7      "I-h 1 V-slope";
+PARAMETER s_r_2       = 7      "I-h 2 V-slope";
+
+PARAMETER c_r = 0.00033, v_kr = -110, e_h = 10, s_kr = -13;
+PARAMETER e_12 = -80, e_21 = -80, v_slope_12 = 5, v_slope_21 = 5;
+
+STATE FUNCTION r_inf_1, r_inf_2, I_1,I_2;
+STATE FUNCTION k_r_1, k_r_2, v_1, v_2, I_noh_12, I_noh_21;
+STATE FUNCTION s_12_inf, s_21_inf, tau_s_eff_12, tau_s_eff_21;
+
+pos(x) = (x>=0) ? x : 0.0;
+
+EXTERNAL INPUT VIN1, INPUT VIN2;
+EXTERNAL OUTPUT VOUT1, OUTPUT VOUT2;
+
+TIME t;
+
+AT TIME t:
+
+  
+v_1 = VIN1 * 1e3; //mV
+v_2 = VIN2 * 1e3; //mV
+
+// Calculating current injection for cell 1
+s_12_inf      = pos (tanh ((v_2 - v_half_12) / (v_slope_12)));
+tau_s_eff_12  = tau_s_12 * (1 - s_12_inf);
+//q(s_12)       = s_12_inf + (s_12 - s_12_inf) * exp (-dt / tau_s_eff_12);
+s_12_df       = exp (-dt / tau_s_eff_12);
+d(s_12)       = [s_12_df, s_12_inf * (1 - s_12_df)];
+q(g_12)       = g_max_12 * s_12;
+I_noh_12      = -g_12 * (v_1 - e_12);	// nA
+
+// Calculate Ih_gm1 and add to get I_12
+k_r_1         = c_r * (1 + exp ((v_1 - v_kr) / s_kr));
+r_inf_1       = 1 / (1 + exp ((v_1 - v_h_half_1) / s_r_1));
+d(r_1)        = r_inf_1 + (r_1 - r_inf_1) * exp (-dt * k_r_1);
+d(Ih_1)       = (g_h_1 * r_1) * (e_h - v_1);
+I_1           = I_noh_12 + Ih_1;	// nA
+
+//Calculate current injection for gm2
+s_21_inf      = pos (tanh ((v_1 - v_half_21) / (v_slope_21)));
+tau_s_eff_21  = tau_s_21 * (1 - s_21_inf);
+d(s_21)       = s_21_inf + (s_21 - s_21_inf) * exp (-dt / tau_s_eff_21);
+d(g_21)       = g_max_21 * s_21;
+I_noh_21      = -g_21 * (v_2 - e_21);	// nA
+
+// Calculate Ih_gm1 and add to get I_total_gm1
+k_r_2         = c_r * (1 + exp ((v_2 - v_kr) / s_kr));
+r_inf_2       = 1 / (1 + exp ((v_2 - v_h_half_2) / s_r_2));
+d(r_2)        = r_inf_2 + (r_2 - r_inf_2) * exp (-dt * k_r_2);
+d(Ih_2)       = (g_h_2 * r_2) * (e_h - v_2);
+I_2           = I_noh_21 + Ih_2;	// nA
+
+VOUT1 = I_1/(10.0 * gain_hs1); //V
+VOUT2 = I_2/(10.0 * gain_hs2); //V
+
+// Calculating current injection for cell 1
+s_12_inf      = pos (tanh ((v_2 - v_half_12) / (v_slope_12)));
+tau_s_eff_12  = tau_s_12 * (1 - s_12_inf);
+d(s_12)       = s_12_inf + (s_12 - s_12_inf) * exp (-dt / tau_s_eff_12);
+d(g_12)       = g_max_12 * s_12;
+I_noh_12      = -g_12 * (v_1 - e_12);	// nA
+
+// Calculate Ih_gm1 and add to get I_12
+k_r_1         = c_r * (1 + exp ((v_1 - v_kr) / s_kr));
+r_inf_1       = 1 / (1 + exp ((v_1 - v_h_half_1) / s_r_1));
+d(r_1)        = r_inf_1 + (r_1 - r_inf_1) * exp (-dt * k_r_1);
+d(Ih_1)       = (g_h_1 * r_1) * (e_h - v_1);
+I_1           = I_noh_12 + Ih_1;	// nA
+
+// Calculate current injection for gm2
+s_21_inf      = pos (tanh ((v_1 - v_half_21) / (v_slope_21)));
+tau_s_eff_21  = tau_s_21 * (1 - s_21_inf);
+d(s_21)       = s_21_inf + (s_21 - s_21_inf) * exp (-dt / tau_s_eff_21);
+d(g_21)       = g_max_21 * s_21;
+I_noh_21      = -g_21 * (v_2 - e_21);	// nA
+
+// Calculate Ih_gm1 and add to get I_total_gm1
+k_r_2         = c_r * (1 + exp ((v_2 - v_kr) / s_kr));
+r_inf_2       = 1 / (1 + exp ((v_2 - v_h_half_2) / s_r_2));
+d(r_2)        = r_inf_2 + (r_2 - r_inf_2) * exp (-dt * k_r_2);
+d(Ih_2)       = (g_h_2 * r_2) * (e_h - v_2);
+I_2           = I_noh_21 + Ih_2;	// nA
+
+VOUT1 = I_1 / (10.0 * gain_hs1);	//V
+VOUT2 = I_2 / (10.0 * gain_hs2);	//V
+

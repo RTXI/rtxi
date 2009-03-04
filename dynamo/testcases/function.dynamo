@@ -1,0 +1,177 @@
+/*
+
+	Model output iout is:
+
+	iout = itrig + istim
+
+	itrig is a triggered step function.  If the Measured voltage
+	crosses Vthresh in the positive direction, wait _trigwait_
+	milliseconds and then output a pulse _trigdur_ ms long.  The
+	pulse should have amplitude _amptrig_.
+
+	istim is a stimulus current.  It is updated according to:
+
+	d(istim)/dt = _irate_ (in other words, istim += _irate_ * dt)
+
+	where irate is the ramp rate in nA/ms.  If _irate_ = 0, we can
+	simply set _istim_ directly.
+
+
+	Inputs: VIN1 -- cell voltage to me measured (convert to mV
+	with vin1gain).
+
+	Outputs: VOUT1 -- output current (convert to V with vout1gain) 
+        	 VOUT2 -- outputs a full-range pulse for one cycle
+		 	  when threshold crossing is detected.
+
+
+	$Id: function.dynamo,v 1.1 2006/02/23 01:35:36 ivan_raikov Exp $
+*/
+
+SYSTEM Function_Generator;
+
+PARAMETER time_factor = 1.0;
+
+
+// Following are declarations for itrig, the triggered step function.  
+PARAMETER Vthresh = 5.0;
+PARAMETER trigwait = 0.1; 
+PARAMETER trigdur = 0.3;
+PARAMETER amptrig = 20.0;
+
+DISCRETE STATE itrig_status = (inactive, crossed_threshold, waiting, active);
+
+STATE trig_delay_counter = 0;
+STATE trig_pulse_counter = 0;
+/* Triggered step function
+	
+   If the measured voltage crosses vthresh in the positive direction,
+   wait trigwait milliseconds and then output a pulse trigdur ms
+   long.  The pulse should have amplitude amptrig.  
+*/
+STATE itrig = 0;
+
+
+
+// Following are declarations for istim, the stimulus current.
+PARAMETER irate = 0.0;
+
+STATE istim = 0;
+
+// Inputs and outputs
+EXTERNAL INPUT VIN1;
+EXTERNAL OUTPUT VOUT1, OUTPUT VOUT2;
+
+// Conversion parameters
+PARAMETER vin1gain = 10.0;
+PARAMETER vout1gain = 0.1;
+
+STATE FUNCTION iout;
+STATE FUNCTION onepulse;
+
+
+TIME t;
+
+
+//AT TIME START:
+
+//onepulse = 2.0;
+
+AT TIME t:
+
+q(itrig) = itrig;
+q(trig_delay_counter) = trig_delay_counter;
+q(trig_pulse_counter) = trig_pulse_counter;
+s(itrig_status) = itrig_status;
+
+
+CASE itrig_status == inactive [
+
+     // This is the case where the input voltage has NOT crossed vthresh   
+
+     // keep the pulse low
+     q(itrig) = 0;
+
+     s(itrig_status) = CONDITION [
+
+          // if the input voltage does cross the threshold, then
+	  // change state to crossed_threshold
+	  VIN1 > Vthresh   => crossed_threshold; 
+
+	  // otherwise, stay in the inactive state
+	  DEFAULT          => itrig_status;
+
+     ];
+
+];
+
+CASE itrig_status == crossed_threshold [
+
+    // This is the case where the input voltage has crossed vthresh 
+    // and we are preparing to wait trigwait ms.
+
+     // load the delay counter with the trigwait value
+     q(trig_delay_counter) = trigwait;
+
+     // load the pulse counter (to be used in the actual pulse
+     // output stage) with the pulse duration value
+     q(trig_pulse_counter) = trigdur;
+
+     // change the status to waiting
+     s(itrig_status) = waiting;
+
+];
+
+CASE itrig_status == waiting [
+
+    // This is the case where we are waiting trigwait ms
+
+     // decrement the delay counter by one timestep
+     q(trig_delay_counter) = trig_delay_counter - (1 * dt);
+
+     s(itrig_status) = CONDITION [
+	  
+	  // if the delay counter is zero or negative, switch to the
+	  // pulse active state
+	  (trig_delay_counter <= 0) => active;
+
+	  // otherwise, stay in the current state
+	  DEFAULT                   => itrig_status;
+
+     ];
+
+];
+
+CASE itrig_status == active [
+
+     // This is the case where the trigger wait time has elapsed 
+     // and we're outputting a pulse  
+
+
+     // keep the pulse high
+     q(itrig) = amptrig;
+
+     // decrement the pulse lifetime counter by one timestep
+     q(trig_pulse_counter) = trig_pulse_counter - (1 * dt);
+
+     s(itrig_status) = CONDITION [
+	  
+	  // if the pulse lifetime has expired, switch back to
+	  // inactive state
+	  (trig_pulse_counter <= 0) => inactive;
+
+	  // otherwise, stay in the current state
+	  DEFAULT                   => itrig_status;
+
+     ];
+
+];
+
+onepulse = t > 1 ? 0.0 : 1.0;
+
+d(istim) = irate;
+
+iout = itrig + istim;
+
+VOUT1 = iout * vout1gain;
+VOUT2 = itrig * vout1gain;

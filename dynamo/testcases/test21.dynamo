@@ -1,0 +1,24 @@
+
+/* Parameter declarations */
+
+SYSTEM test21;
+
+PARAMETER  C_m  = 1.0    "uF/cm^2";
+
+VECTOR PARAMETER vp = (4.0, 5, 0.1);
+
+STATE V = -65.0, v = 1.0;
+
+STATE FUNCTION alpha_m;
+
+TABLE FUNCTION F1(V) = 10, LOW=100, HIGH=100, STEP=0.1, ARGUMENT=V; 
+
+TIME t;
+
+AT TIME t:
+
+
+d(V) = exp(alpha_m);
+
+alpha_m  = exp(-(V + 40 + C_m)/(10)) + length (vp * v);
+d(v) = exp (alpha_m);

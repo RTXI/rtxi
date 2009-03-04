@@ -1,0 +1,107 @@
+rtxi (1.0.0-1) stable; urgency=low
+
+  * New upstream release.
+
+ -- Ivan Raikov <raikov@cc.gatech.edu>  Wed,  4 Apr 2007 09:32:11 -0400
+
+rtxi (1.0.0-rc10-1) unstable; urgency=low
+
+  * New upstream release.
+
+ -- Ivan Raikov <raikov@cc.gatech.edu>  Fri,  9 Mar 2007 10:16:36 -0500
+
+rtxi (1.0.0-rc9-2) unstable; urgency=low
+
+  * Added chicken-format-modular as a dependency of rtxi-nds.
+
+ -- Ivan Raikov <raikov@cc.gatech.edu>  Wed,  7 Mar 2007 12:32:36 -0500
+
+rtxi (1.0.0-rc9-1) unstable; urgency=low
+
+  * New upstream release.
+
+ -- Ivan Raikov <raikov@cc.gatech.edu>  Thu,  1 Mar 2007 14:45:15 -0500
+
+rtxi (1.0.0-rc8) unstable; urgency=low
+
+  * New upstream release.
+
+ -- Ivan Raikov <raikov@cc.gatech.edu>  Tue, 27 Feb 2007 10:42:34 -0500
+  
+rtxi (1.0.0-rc7) unstable; urgency=low
+
+  * New upstream release.
+
+ -- Ivan Raikov <raikov@cc.gatech.edu>  Mon, 12 Feb 2007 13:29:30 -0500
+
+rtxi (1.0.0-rc6-3) unstable; urgency=low
+
+  * Removed the Chicken extension from the base package; there are now
+    separate packages for each extension.
+
+ -- Ivan Raikov <raikov@cc.gatech.edu>  Sun,  4 Feb 2007 16:04:46 -0500
+
+rtxi (1.0.0-rc6-2) unstable; urgency=low
+
+  * Added libreadline5 and libchicken0 as dependencies to rtxi-base. 
+
+ -- Ivan Raikov <raikov@cc.gatech.edu>  Tue,  5 Dec 2006 11:05:33 -0500
+
+rtxi (1.0.0-rc6-1) unstable; urgency=low
+
+  * Updated to upstream version 1.0.0-rc6-1.
+
+ -- Ivan Raikov <raikov@cc.gatech.edu>  Sun,  3 Dec 2006 22:54:55 -0500
+
+rtxi (1.0.0-rc5-1) unstable; urgency=low
+
+  * Updated to upstream version 1.0.0-rc5-1.
+
+ -- Ivan Raikov <raikov@cc.gatech.edu>  Mon, 27 Nov 2006 22:50:59 -0500
+
+rtxi (1.0.0-rc4-1) unstable; urgency=low
+
+  * Updated to upstream version 1.0.0-rc4.
+
+ -- Ivan Raikov <raikov@cc.gatech.edu>  Fri, 17 Nov 2006 11:23:53 -0500
+
+rtxi (1.0.0-rc3-2) unstable; urgency=low
+
+  * Added chicken-bin as a dependency for rtxi-nds.
+  
+  * Added a postinst script for rtxi-nds that installs the required
+    Chicken Scheme modules.
+
+ -- Ivan Raikov <raikov@cc.gatech.edu>  Tue,  7 Nov 2006 17:36:16 -0500
+
+rtxi (1.0.0-rc3-1) unstable; urgency=low
+
+  * Updated to upstream version 1.0.0-rc3.
+
+ -- Ivan Raikov <raikov@cc.gatech.edu>  Tue,  7 Nov 2006 14:41:16 -0500
+
+rtxi (1.0.0-rc2-1) stable; urgency=low
+
+  * Updated to upstream version 1.0.0-rc2.
+
+ -- Ivan Raikov <raikov@cc.gatech.edu>  Wed, 20 Sep 2006 12:37:49 -0400
+
+rtxi (1.0.0-rc1-3) unstable; urgency=low
+
+  * Included make and libqt3-mt-dev as dependencies of the rtxi-dynamo package. 
+
+ -- Ivan Raikov <iraikov@ece.gatech.edu>  Thu, 20 Jul 2006 17:20:30 -0400
+
+rtxi (1.0.0-rc1-2) stable; urgency=low
+
+  * Updated to include fix for different interrupt clear/restore functions
+    between RTAI 3.1 and 3.3
+
+ -- Ivan Raikov <raikov@cc.gatech.edu>  Thu, 11 May 2006 21:55:09 -0400
+
+rtxi (1.0.0-rc1-1) stable; urgency=low
+
+  * Initial Release.
+
+ -- Ivan Raikov <raikov@cc.gatech.edu>  Tue,  2 May 2006 09:31:31 -0400
+

@@ -1,0 +1,224 @@
+
+// Stefan's model that connects a model neuron to a real neuron. RG
+// adapting to biological GM to model neuron
+
+SYSTEM Hybrid_Inhib_Chem;
+
+PARAMETER gmax_Na     = 100.0 * 628.3  "Na conductance, uS";
+PARAMETER gmax_CaT    = 0.0   * 628.3  "CaT conductance";
+PARAMETER gmax_CaS    = 4.0   * 628.3  "CaS conductance";
+PARAMETER gmax_A      = 0.0   * 628.3  "A conductance";
+PARAMETER gmax_KCa    = 15.0  * 628.3  "KCa conductance";
+PARAMETER gmax_Kd     = 50.0  * 628.3  "Kd conductance";
+PARAMETER gmax_H_mod  = 0.02  * 628.3  "model H conductance";
+PARAMETER gmax_H_bio  = 0.0   * 628.3  "biological H conductance";
+PARAMETER gmax_leak   = 0.03  * 628.3  "leak conductance";
+
+
+PARAMETER gain           = 0.1    "headstage gain";
+PARAMETER Vhalf_biomod   = -35.0  "half activation model to bio, mV";
+PARAMETER Vhalf_modbio   = -35.0  "half activation bio to model, mV";
+PARAMETER Vslope_biomod  = 5.0    "slope factor model to bio, mV";
+PARAMETER Vslope_modbio  = 5.0    "slope factor bio to model, mV";
+PARAMETER gmax_biomod    = 0      "model to bio synapse, nS";
+PARAMETER gmax_modbio    = 0      "bio to model synapse, nS";
+PARAMETER syn_tau        = 40     "synaptic time constant, both synapses, ms";
+PARAMETER mod_DC_I       = 0      "stimulus current into model, nA";
+
+
+PARAMETER C_m = 0.628;  // cell capacitance, nF
+
+STATE V_mod    = -60   METHOD "mau";
+STATE Ca       = 0.05  METHOD "mau";
+STATE m_Na     = 0.0   METHOD "mau";
+STATE h_Na     = 1.0   METHOD "mau";
+STATE m_CaT    = 0.0   METHOD "mau";
+STATE h_CaT    = 0.0   METHOD "mau";
+STATE m_CaS    = 0.0   METHOD "mau";
+STATE h_CaS    = 1.0   METHOD "mau";
+STATE m_A      = 0.0   METHOD "mau";
+STATE h_A      = 1.0   METHOD "mau";
+STATE m_KCa    = 0.0   METHOD "mau";
+STATE m_Kd     = 0.0   METHOD "mau";
+STATE m_H_mod  = 0.0   METHOD "mau";
+STATE m_H_bio  = 0.0   METHOD "mau";
+STATE s_biomod = 0.0   METHOD "mau";
+STATE s_modbio = 0.0   METHOD "mau";
+
+STATE FUNCTION E_Ca, i_Ca, V_bio;
+STATE FUNCTION m_inf_Na,  tau_m_Na,  h_inf_Na,  tau_h_Na,  g_Na_mod,  m_Na_df,  h_Na_df, i_Na_mod;
+STATE FUNCTION m_inf_CaT, tau_m_CaT, h_inf_CaT, tau_h_CaT, g_CaT_mod, m_CaT_df, h_CaT_df;
+STATE FUNCTION m_inf_CaS, tau_m_CaS, h_inf_CaS, tau_h_CaS, g_CaS_mod, m_CaS_df, h_CaS_df;
+STATE FUNCTION m_inf_A,   tau_m_A,   h_inf_A,   tau_h_A,   g_A_mod, i_A_mod, m_A_df, h_A_df;
+STATE FUNCTION m_inf_KCa, tau_m_KCa, g_KCa_mod, i_KCa_mod, m_KCa_df; 
+STATE FUNCTION m_inf_Kd,  tau_m_Kd,  g_Kd_mod,  i_Kd_mod,  m_Kd_df;
+STATE FUNCTION m_inf_H_mod, tau_m_H_bio, tau_m_H_mod, m_inf_H_bio, m_H_mod_df, m_H_bio_df;
+
+STATE FUNCTION g_total_mod;
+STATE FUNCTION s_modbio_inf, g_modbio, i_modbio, g_H_mod, i_H_mod, tau_s_modbio, s_modbio_df; 
+STATE FUNCTION s_biomod_inf, g_biomod, i_biomod, g_H_bio, i_H_bio, tau_s_biomod, s_biomod_df; 
+STATE FUNCTION v_tau_mod, v_inf_mod, i_to_bio, v_mod_df;
+STATE FUNCTION g_leak_mod, i_leak_mod, Ca_inf, Ca_df;
+STATE FUNCTION g_total_revs;
+
+EXTERNAL INPUT VIN1;
+EXTERNAL OUTPUT VOUT1, OUTPUT VOUT2;
+
+
+TIME t;
+
+AT TIME t:
+
+V_bio = VIN1 * 1e3; //mV
+
+//Ca_fac = 13670.0/3000;// factor by which the extracellular concentration is increased
+
+E_Ca = 12.193594869 * log(3000.0 / Ca); //mV
+
+// Model Na current
+m_inf_Na = 1.0 / (1.0 + exp ((V_mod + 25.5) / (-5.29)));
+tau_m_Na = 2.64 - 2.52 / (1.0 + exp (-(V_mod + 120.0) / 25.0));	// ms
+//q(m_Na)  = m_inf_Na + (m_Na - m_inf_Na) * exp (-dt / tau_m_Na);
+m_Na_df  = exp (-dt / tau_m_Na);
+d(m_Na)  = [ m_Na_df, m_inf_Na * (1 - m_Na_df) ];
+
+h_inf_Na = 1.0 / (1.0 + exp ((V_mod + 48.9) / 5.18));
+tau_h_Na = (1.5 + 1.0 / (1.0 + exp ((V_mod + 34.9) / 3.6))) * 
+           1.34 / (1.0 + exp (- (V_mod + 62.9) / 10.0));
+//q(h_Na)  = h_inf_Na + (h_Na - h_inf_Na) * exp (-dt / tau_h_Na);
+h_Na_df  = exp (-dt / tau_h_Na);
+d(h_Na)  = [h_Na_df, h_inf_Na * (1 - h_Na_df)];
+g_Na_mod = gmax_Na * cube (m_Na) * h_Na;	// uS
+i_Na_mod = -g_Na_mod * (V_mod - 50.0);	// nA, inward current is positive
+
+// Model CaT current
+m_inf_CaT = 1.0 / (1.0 + exp (-(V_mod + 27.1) / 7.2));
+tau_m_CaT = 43.4 - 42.6 / (1.0 + exp (-(V_mod + 68.1) / 20.5));
+//q(m_CaT)  = m_inf_CaT + (m_CaT - m_inf_CaT) * exp (-dt / tau_m_CaT);
+m_CaT_df  = exp (-dt / tau_m_CaT);
+d(m_CaT)  = [m_CaT_df, m_inf_CaT * (1 - m_CaT_df)];
+h_inf_CaT = 1.0 / (1.0 + exp ((V_mod + 32.1) / 5.5));
+tau_h_CaT = 210.0 - 179.6 / (1.0 + exp (-(V_mod + 55.0) / 16.9));
+//q(h_CaT)  = h_inf_CaT + (h_CaT - h_inf_CaT) * exp (-dt / tau_h_CaT);
+h_CaT_df  = exp (-dt / tau_h_CaT);
+d(h_CaT)  = [h_CaT_df, h_inf_CaT * (1 - h_CaT_df)];
+g_CaT_mod = gmax_CaT * cube (m_CaT) * h_CaT;
+
+
+//Model CaS current
+m_inf_CaS = 1.0 / (1.0 + exp (-(V_mod + 33.0) / 8.1));
+tau_m_CaS = 2.8 + 14.0 / (exp ((V_mod + 27.0) / 10.0) +
+			  exp (-(V_mod + 70.0) / 13.0));
+//q(m_CaS)  = m_inf_CaS + (m_CaS - m_inf_CaS) * exp (-dt / tau_m_CaS);
+m_CaS_df  = exp (-dt / tau_m_CaS);
+d(m_CaS)  = [m_CaS_df, m_inf_CaS * (1 - m_CaS_df)];
+h_inf_CaS = 1.0 / (1.0 + exp ((V_mod + 60.0) / 6.2));
+tau_h_CaS = 120.0 + 300.0 / (exp ((V_mod + 55.0) / 9.0) +
+	    exp (-(V_mod + 65.0) / 16.0));
+//q(h_CaS)  = h_inf_CaS + (h_CaS - h_inf_CaS) * exp (-dt / tau_h_CaS);
+h_CaS_df  = exp (-dt / tau_h_CaS);
+d(h_CaS)  = [h_CaS_df, h_inf_CaS * (1 - h_CaS_df)];
+g_CaS_mod = gmax_CaS * cube(m_CaS) * h_CaS;
+
+i_Ca = (-g_CaT_mod * (V_mod - E_Ca)) + (-g_CaS_mod * (V_mod - E_Ca));
+
+//Model A-type current
+m_inf_A = 1.0 / (1.0 + exp (-(V_mod + 27.2) / 8.7));
+tau_m_A = 23.2 - 20.8 / (1.0 + exp (-(V_mod + 32.9) / 15.2));
+//q(m_A)  = m_inf_A + (m_A - m_inf_A) * exp (-dt / tau_m_A);
+m_A_df  = exp (-dt / tau_m_A);
+d(m_A)  = [m_A_df, m_inf_A * (1 - m_A_df)];
+h_inf_A = 1.0 / (1.0 + exp ((V_mod + 56.9) / 4.9));
+tau_h_A = 77.2 - 58.4 / (1.0 + exp (-(V_mod + 38.9) / 26.5));
+//q(h_A)  = h_inf_A + (h_A - h_inf_A) * exp (-dt / tau_h_A);
+h_A_df  = exp (-dt / tau_h_A);
+d(h_A)  = [h_A_df, h_inf_A * (1 - h_A_df)];
+g_A_mod = gmax_A * cube(m_A) * h_A;
+i_A_mod = -g_A_mod * (V_mod - (-80));
+
+//Model KCa current
+m_inf_KCa = (Ca / (Ca + 3)) / (1.0 + exp (-(V_mod + 28.3) / 12.6));	// [Ca] in uM
+tau_m_KCa = 180.6 - 150.2 / (1.0 + exp (-(V_mod + 46.0) / 22.7));
+//q(m_KCa)  = m_inf_KCa + (m_KCa - m_inf_KCa) * exp (-dt / tau_m_KCa);
+m_KCa_df  = exp (-dt / tau_m_KCa);
+d(m_KCa)  = [m_KCa_df, m_inf_KCa * (1 - m_KCa_df)];
+g_KCa_mod = gmax_KCa * cube(m_KCa) * m_KCa;
+i_KCa_mod = -g_KCa_mod * (V_mod - (-80));
+
+//Model Kd current
+m_inf_Kd = 1.0 / (1.0 + exp (-(V_mod + 12.3) / 11.8));
+tau_m_Kd = 14.4 - 12.8 / (1.0 + exp (-(V_mod + 28.3) / 19.2));
+//q(m_Kd)  = m_inf_Kd + (m_Kd - m_inf_Kd) * exp (-dt / tau_m_Kd);
+m_Kd_df  = exp (-dt / tau_m_Kd);
+d(m_Kd)  = [m_Kd_df, m_inf_Kd * (1 - m_Kd_df)];
+g_Kd_mod = gmax_Kd * cube(m_Kd) * m_Kd;
+i_Kd_mod = -g_Kd_mod * (V_mod - (-80));
+
+//Model H-type current
+m_inf_H_mod = 1.0 / (1.0 + exp ((V_mod + 75.0) / 5.5));
+tau_m_H_mod = 2.0 / (exp (-(V_mod + 169.7) / 11.6) + exp ((V_mod - 26.7) / 14.3));
+//q(m_H_mod)  = m_inf_H_mod + (m_H_mod - m_inf_H_mod) * exp (-dt / tau_m_H_mod);
+m_H_mod_df  = exp (-dt / tau_m_H_mod);
+d(m_H_mod)  = [m_H_mod_df, m_inf_H_mod * (1 - m_H_mod_df)];
+g_H_mod     = gmax_H_mod * m_H_mod;
+i_H_mod     = -g_H_mod * (V_mod - (-20));
+
+//Model leak current
+g_leak_mod = gmax_leak;
+i_leak_mod = -g_leak_mod * (V_mod - (-50));
+
+//synapse from biological to model
+s_modbio_inf = 1 / (1 + exp (-(V_bio - Vhalf_modbio) / Vslope_modbio));
+tau_s_modbio = (1 - s_modbio_inf) * syn_tau;	// in ms
+//q(s_modbio)  = s_modbio_inf + (s_modbio - s_modbio_inf) * exp (-dt / tau_s_modbio);
+s_modbio_df  = exp (-dt / tau_s_modbio);
+d(s_modbio)  = [s_modbio_df, s_modbio_inf * (1 - s_modbio_df)];
+g_modbio = gmax_modbio * s_modbio;	//microS
+i_modbio = -g_modbio * (V_mod - (-70.0));
+
+// voltage update
+g_total_mod = g_Na_mod + g_A_mod + g_KCa_mod + g_Kd_mod + g_H_mod + g_leak_mod +
+              g_CaT_mod + g_CaS_mod + g_modbio;
+g_total_revs = (g_Na_mod * 50) + (g_A_mod * -80) + (g_KCa_mod * -80) + 
+               (g_Kd_mod * -80) + (g_H_mod * -20) + (g_leak_mod * -50) + 
+               (g_CaT_mod * E_Ca) + (g_CaS_mod * E_Ca) + (g_modbio * -70);	// nA
+v_inf_mod = (mod_DC_I + i_modbio + g_total_revs) / g_total_mod;
+v_tau_mod = C_m / g_total_mod;	// nF/uS == ms
+//q(V_mod)  = v_inf_mod + (V_mod - v_inf_mod) * exp (-dt / v_tau_mod);
+v_mod_df  = exp (-dt / v_tau_mod);
+d(V_mod)  = [v_mod_df, v_inf_mod * (1 - v_mod_df)];
+
+
+// calcium update
+Ca_inf = 0.05 + 14.96 * i_Ca;  // uM
+//q(Ca)  = Ca_inf+(Ca-Ca_inf)*exp(-dt/200.0);
+Ca_df  = exp(-dt/200.0);
+d(Ca)  = [Ca_df, Ca_inf * (1 - Ca_df)];
+ 
+// synapse from model to biological 
+s_biomod_inf = 1 / (1 + exp (-(V_mod - Vhalf_biomod) / Vslope_biomod));
+tau_s_biomod = (1 - s_biomod_inf) * syn_tau;	// in ms
+//q(s_biomod) = s_biomod_inf + (s_biomod - s_biomod_inf) * exp (-dt /
+//tau_s_biomod);
+s_biomod_df  = exp (-dt / tau_s_biomod);
+d(s_biomod)  = [s_biomod_df, s_biomod_inf * (1 - s_biomod_df)];
+g_biomod = gmax_biomod * s_biomod;	//microS
+i_biomod = -g_biomod * (V_bio - (-70));
+
+// biological  H-type current
+m_inf_H_bio = 1.0 / (1.0 + exp ((V_bio + 75.0) / 5.5));
+tau_m_H_bio = 2.0 / (exp (-(V_bio + 169.7) / 11.6) + exp ((V_bio - 26.7) / 14.3));
+//q(m_H_bio)  = m_inf_H_bio + (m_H_bio - m_inf_H_bio) * exp (-dt / tau_m_H_bio);
+m_H_bio_df  = exp (-dt / tau_m_H_bio);
+d(m_H_bio)  = [m_H_bio_df, m_inf_H_bio * (1 - m_H_bio_df)];
+g_H_bio     = gmax_H_bio * m_H_bio;
+i_H_bio     = -g_H_bio * (V_bio - (-20));
+
+i_to_bio = i_biomod + i_H_bio;
+
+VOUT1 = i_to_bio / gain;
+VOUT2 = V_mod * 0.01;
+
+/*   output(0) = output(0) + i_to_bio/gain[k]; //V */
+/*   output(1) = output(1) + (V_mod[k]*0.01); //V */
+

@@ -1,0 +1,51 @@
+Source: rtxi                                                                    
+Section: misc                                                            
+Priority: optional
+Maintainer: Ivan Raikov <iraikov@neuro.gatech.edu>
+Build-Depends: debhelper (>= 4.0.0), libtool, autoconf2.13, automake1.7, libqt3-mt-dev, libqt3-headers, libqt3-compat-headers, texinfo, tetex-bin, gcc-3.3, g++-3.3, rtai-modules, libcomedi-dev, mlton, swig (>= 1.3.29), chicken-bin (>= 2.3), libchicken-dev, binutils-dev, libreadline5-dev
+Standards-Version: 3.6.1
+                      
+Package: rtxi-base
+Depends: ${shlibs:Depends}, ${perl:Depends}, gcc-3.3, g++-3.3, realpath, rtai-modules, comedi-modules, libcomedi-0.7.22, chicken-format-modular 
+Recommends: rtxi-nds, rtxi-dynamo, info
+Provides: rtxi
+Architecture: any
+Description: Real-time data acquisitions and control for biological experiments.
+ RTXI is a real-time Linux based software system for hard
+ real-time data acquisition and control applications in biological
+ research. 
+ .
+ RTXI is merging three existing open-source real-time experiment control systems:
+ .
+    * RTLab: Real-Time Linux Lab is a general-purpose control system
+      used primarily for tissue-level excitable system experiments.
+ .
+    * RTLDC: Realtime Linux Dynamic Controller is an open-source
+      implementation of the dynamic clamp, which is a methodology that
+      integrates the real-time simulation of ion-channel kinetics (or
+      entire models of excitable cells, such as neurons) with
+      intracellular electrophysiological experiments.
+ .
+    * MRCI: Model Reference Current Injection system is also an
+      open-source dynamic-clamp system.
+                      
+Package: rtxi-dynamo
+Depends: ${shlibs:Depends}, ${perl:Depends}, rtxi-base, gcc, make, libqt3-mt-dev
+Recommends: info
+Architecture: any
+Description:  RTXI model generator.
+ 
+                      
+Package: rtxi-nds
+Depends: ${shlibs:Depends}, ${perl:Depends}, rtxi-base, chicken-args, chicken-datatype, chicken-endian-port, chicken-mat5-lib, chicken-srfi-40 
+Recommends: info
+Architecture: any
+Description: Reader application for the NDS format.
+ The NDS format is an extensible file format for streaming scientific
+ data. It supports multiple streams of IEEE single- or
+ double-precision floating point numbers, and metadata such as
+ sampling rate, timebase information and others.
+ .
+ The NDS reader application can read NDS data and output ASCII or
+ binary representation of the data in the form of one-dimensional
+ Pascal-style arrays (array size followed by array data).

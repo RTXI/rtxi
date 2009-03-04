@@ -1,0 +1,15 @@
+/* FitzHugh and Nagumo model */
+
+SYSTEM FitzHugh_Nagumo;
+
+PARAMETER b0 = 2, b1 = 1.5, e=0.1, I=2;
+
+STATE u = 1;
+STATE w = 1;
+
+TIME t;
+
+AT TIME t:
+
+d(u) = u - 0.33333 * cube(u) - w + I;
+d(w) = e * (b0 + b1*u - w);

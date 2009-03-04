@@ -1,0 +1,211 @@
+Installing RTXI
+===============
+
+This document will describe step by step how to install RTAI, Comedi, and RTXI.
+
+>1. Download the latest stable version of RTAI 3.x at www.rtai.org
+      For the sake of this demonstration I'll be using RTAI version 3.2
+
+>2. Extract the RTAI package. Assuming the package was downloaded to your home
+      directory and is called rtai-3.2.tar.bz2, run:
+
+ $ cd $HOME
+ $ tar -jxf rtai-3.2.tar.bz2
+
+>3. Determine the latest supported Linux kernel.
+
+ $ cd rtai-3.2/arch/base/i386/patches
+ $ ls
+
+    You should see several files with names of the form:
+      hal-linux-#-i386-r#.patch
+    The kernel version is the first #, and should be something like 2.6.10
+
+>4. Download the version of the Linux kernel determined in the previous step
+      from www.kernel.org/pub/linux/kernel/v2.6, e.g. linux-2.6.10.tar.bz2
+
+>5. Extract the Linux kernel package. Assuming the package was downloaded to
+      your home directory and is called linux-2.6.10.tar.bz2, run:
+
+ $ cd $HOME
+ $ tar -jxf linux-2.6.10.tar.bz2
+
+>6. Apply the RTAI patch to the Linux kernel source.
+
+ $ cd linux-2.6.10
+ $ patch -p1 < ../rtai-3.2/base/arch/i386/patches/hal-linux-2.6.10-r9.patch
+
+>7. Configure the Linux kernel source... unfortunately this is much easier
+      said than done.
+
+    o The easiest technique is to use an existing configuration
+        as a base, then make some minor modifications. The location of existing
+        configurations verifies from distribution to distribution, but /boot
+        seems to be a fairly popular place, try running:
+
+ $ cp /boot/config-`uname -r` .config
+ $ make oldconfig
+
+    N.B. the ` in the first command is not a regular single qoute, but rather
+           the kind on the ~ (tilda sp?) key.
+    N.B. when you run the second command you will probably be prompted
+           concerning a bunch of different configuration options... just press
+           for each.
+
+    o Given a base configuration you need to make some minor tweaks.
+
+ $ make menuconfig
+
+    o "General setup"
+      - Set "Local version - append to kernel release" to "-adeos"
+
+    o "Processor type and features"
+      - Processor family, set to your CPU or "586/K5/5x86/6x86/6x86MX"
+      - Disable "Symmetric multi-processing support"
+      - Disable "Local APIC on uniprocessors"
+      - Disable "Use register arguments"
+
+    o "Adeos support"
+      - Enable "Adeos support"
+      - Enable "Threaded domains"
+      - Disable "Pipeline profiling"
+
+    o "Power management options (ACPI, APM)"
+      - Disable "Power Management support"
+      - "ACPI (Advanced Configuration and Power Interface) Support"
+        * Disable "ACPI Support"
+      - "CPU Frequency scaling"
+        * Disable "CPU Frequency scaling"
+
+>8. Build the Adeos-enabled Linux kernel.
+
+ $ make
+
+>9. Install the Adeos-enabled Linux kernel. As root run the following:
+
+ # make modules_install install
+
+>10. Setup GRUB to boot the new kernel. Open /boot/grub/menu.lst for editing.
+       You should see a few lines that look like:
+
+title	*** Some Name ***
+root	(hd#,#)
+kernel	/boot/vmlinuz-#.#.#
+
+    o Make a copy of those three lines:
+      - Change "*** Some Name ***" to something like "RT Kernel 2.6.10"
+      - Leave the line beginning with root completely intact.
+      - Change the version number of the file in the kernel line to the
+          version of the kernel you just compiled, and add "-adeos".
+
+title	RT Kernel 2.6.10
+root	(hd#,#)
+kernel	/boot/vmlinuz-2.6.10-adeos
+
+>11. Reboot into the new Linux kernel. Reboot the system and select the new RT
+       kernel from the list provided.
+
+>12. Download the latest version of Comedi and Comedilib from www.comedi.org
+       For this example I'll be using comedi-0.7.70 and comedilib-0.7.22
+
+>13. Extract both Comedi and Comedilib into your home directory:
+
+ $ cd $HOME
+ $ tar -zxf comedi-0.7.70.tar.gz
+ $ tar -zxf comedilib-0.7.22.tar.gz
+
+>14. Configure RTAI. Fortunately this is easier than configuring the kernel.
+
+ $ cd $HOME/rtai-3.2
+ $ make menuconfig
+
+    o "General"
+      - Set "Linux source tree" to $HOME/linux-2.6.10
+
+    o "Base system"
+      - Enable "LXRT scheduler (kernel and user-space tasks)"
+      - "Other features"
+        * Enable "User-space interrupts"
+
+    o "Add-ons"
+      - Enable "Comedi support over LXRT"
+      - Set "COMEDI installation directory (NEW)" to $HOME/comedi
+
+>15. Build & Install RTAI.
+
+ $ make
+
+    o As root:
+
+ # make install
+
+>16. Configre, Build, & Install Comedi.
+
+ $ cd $HOME/comedi-0.7.70
+ $ ./configure
+ $ make
+
+    o As root:
+
+ # make install
+
+>17. Configure, Build, & Install Comedilib.
+
+ $ cd $HOME/comedilib-0.7.22
+ $ ./configure
+ $ make
+
+    o As root:
+
+ # make install
+
+>18. Download RTXI from www.rtxi.org and extract into your home directory.
+
+ $ cd $HOME
+ $ tar -jxf rtxi.tar.bz2
+
+>19. Configure, Build, & Install RTXI
+
+ $ cd rtxi
+ $ ./configure
+ $ make
+
+    o As root:
+
+ # make install
+
+>20. Automating Startup Configuration
+
+     o To use RTXI you must have the necessary RTAI & Comedi modules loaded.
+
+     o Everytime the computer is restarted the RTAI & Comedi modules have to
+         be reloaded.
+
+     o The loading of the RTAI & Comedi modules can be automated as follows:
+
+       - As root run the following:
+
+ # cd /lib/modules/`uname -r`
+ # mkdir rtai
+ # cd rtai
+ # ln -s /usr/realtime/modules/rtai_hal.ko
+ # ln -s /usr/realtime/modules/rtai_lxrt.ko
+ # ln -s /usr/realtime/modules/rtai_tasklets.ko
+ # ln -s /usr/realtime/modules/rtai_usi.ko
+ # ln -s /usr/realtime/modules/rtai_shm.ko
+ # ln -s /usr/realtime/mdoules/rtai_sem.ko
+ # ln -s /usr/realtime/modules/rtai_comedi.ko
+ # depmod -a
+
+    N.B. the ` in the first command is not a regular single qoute, but rather
+           the kind on the ~ (tilda sp?) key.
+
+       - Open the file /etc/rc.local for editing, and add the following to the
+           end of the file:
+
+ /sbin/modprobe rtai_usi
+ /sbin/modprobe rtai_comedi
+ /sbin/modprobe *DRIVER*
+ /usr/local/sbin/comedi_config /dev/comedi0 *DRIVER*
+
+    N.B. where *DRIVER* is the Comedi driver you will be using, e.g. ni_pcimio
