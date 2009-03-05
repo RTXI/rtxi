@@ -2,7 +2,7 @@ CLEANFILES = moc_*.cpp *~
 DISTCLEANFILES =
 MAINTAINERCLEANFILES = Makefile.in
 
-include $(top_srcdir)/.buildvars
+include $(top_srcdir)/Makefile.buildvars
 
 pkglib_LTLIBRARIES = dynamo_model_loader.la
 

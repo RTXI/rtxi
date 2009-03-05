@@ -2,7 +2,7 @@ CLEANFILES = *~
 DISTCLEANFILES =
 MAINTAINERCLEANFILES = Makefile.in
 
-include $(top_srcdir)/.buildvars
+include $(top_srcdir)/Makefile.buildvars
 
 pkglib_LTLIBRARIES = neuron.la
 

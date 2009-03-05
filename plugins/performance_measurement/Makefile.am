@@ -2,7 +2,7 @@ CLEANFILES = moc_*.cpp *~
 DISTCLEANFILES =
 MAINTAINERCLEANFILES = Makefile.in
 
-include $(top_srcdir)/.buildvars
+include $(top_srcdir)/Makefile.buildvars
 
 pkglib_LTLIBRARIES = performance_measurement.la
 

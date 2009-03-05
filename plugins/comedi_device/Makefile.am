@@ -2,7 +2,7 @@ CLEANFILES = *~
 DISTCLEANFILES =
 MAINTAINERCLEANFILES = Makefile.in
 
-include $(top_srcdir)/.buildvars
+include $(top_srcdir)/Makefile.buildvars
 
 if BUILD_COMEDI
 pkglib_LTLIBRARIES = comedi_driver.la

@@ -16,7 +16,6 @@ DEBIAN_DIST = debian/changelog  \
               debian/rules.rtxi-base      \
               debian/rtxi-base.rtxi.init  
 
-
 EXTRA_DIST  = autogen.sh TODO $(DEBIAN_DIST) $(ACLOCAL_DIST)
 
 dist-hook: ChangeLog
@@ -27,43 +26,20 @@ dist-hook: ChangeLog
 
 
 CLEANFILES            = *~ src/moc_*.cpp 
-DISTCLEANFILES        = rtxi_comedi.conf rtxi.conf Makefile.modcompile config.log about.h rtos
+DISTCLEANFILES        = rtxi.conf Makefile.modcompile config.log about.h rtos
 MAINTAINERCLEANFILES  = aclocal.m4 configure config.guess config.sub Makefile.in
 MAINTAINERCLEANDIRS   = autom4te.cache
 
-pkgdata_DATA = rtxi_comedi.conf rtxi.conf Makefile.modcompile 
+pkgdata_DATA = rtxi.conf Makefile.dynamo_compile Makefile.plugin_compile Makefile.plugin_example
 
 pkglib_SCRIPTS = libtool
 
 
-include $(top_srcdir)/.buildvars
+include $(top_srcdir)/Makefile.buildvars
 
 ChangeLog:
 	touch ChangeLog
 	-cvs2cl -rbt --fsf
-
-rtxi_comedi.conf: force
-	@echo "Generating rtxi_comedi.conf..."
-	@echo '## Example comedi configuration file. Lines beginning with # are'   >  $@
-	@echo '## comments and are ignored.  '                                     >> $@
-	@echo '##'                                                                 >> $@
-	@echo '## Syntax is:'                                                      >> $@
-	@echo '## /dev/comediN:driver:opts'                                        >> $@
-	@echo '##'                                                                 >> $@
-	@echo '## Where: '                                                         >> $@
-	@echo '##        /dev/comediN is a Comedi device to be configured, N=0,1,2...'   >> $@
-	@echo '##        driver is the name of a Comedi device driver (see devices.txt)' >> $@
-	@echo '##        opts is a comma-separated list of options for the driver'       >> $@
-	@echo '##'                                                                       >> $@
-	@echo '## Example:'                                                              >> $@
-	@echo '## /dev/comedi0:ni_pcimio:'                                               >> $@
-	@echo '##'                                                                       >> $@
-	@echo '## Means that we want to load driver ni_pcimio (National Instruments PCI data' >> $@
-	@echo '## acquisition boards) with no options, and configure /dev/comedi0 for'        >> $@
-	@echo '## use with that driver. '                                                     >> $@
-	@echo '##'                                                                            >> $@
-	@echo '/dev/comedi0:ni_pcimio:'                                                       >> $@
-	@echo ''                                                                              >> $@
 
 rtxi.conf: 
 	@echo "Generating rtxi.conf..."
@@ -99,8 +75,8 @@ endif
 	@echo ' <OBJECT component="plugin" library="performance_measurement.so" id="10" />'>> $@
 	@echo '</RTXI>'									>> $@
 
-Makefile.modcompile:  
-	@echo "Generating Makefile.modcompile..."
+Makefile.dynamo_compile:  
+	@echo "Generating Makefile.dynamo_compile..."
 	@echo ''						 	>  $@
 	@echo 'exec_modeldir  = ' $(pkglibdir) 				>> $@
 	@echo ''						 	>> $@
@@ -113,15 +89,11 @@ Makefile.modcompile:
 	@echo 'CXXCOMPILE     = $$(LIBTOOL) --mode=compile $$(CXX)'     >> $@
 	@echo 'CXXLINK	      = $$(LIBTOOL) --mode=link $$(CXXLD)'	>> $@
 	@echo ''                                                        >> $@
-	@echo 'INCLUDES := ' $(QT_INCLUDES)		>> $@
-	@echo 'INCLUDES += -I'$(pkgincludedir)				>> $@
-	@echo 'DEFS     += ' $(QT_DEFS)					>> $@
-	@echo 'CXXFLAGS += $$(INCLUDES) $$(DEFS)' $(CXXFLAGS) $(RTOS_CPPFLAGS) >> $@
-	@echo 'LIBS     += ' $(QT_LIBS) 				>> $@
-	@echo 'LDFLAGS  += ' $(RTOS_LDFLAGS) -module -avoid-version	>> $@
+	@echo 'CXXFLAGS := -I. -I'$(pkgincludedir) $(AM_CXXFLAGS) 	>> $@
+	@echo 'LDFLAGS  := ' $(AM_LDFLAGS) -module -avoid-version	>> $@
 	@echo ''                                                        >> $@
 	@echo 'ifdef DEBUG '						>> $@
-	@echo 'DEFS += -DDEBUG'						>> $@
+	@echo 'CXXFLAGS += -DDEBUG'					>> $@
 	@echo 'endif'							>> $@
 	@echo ''                                                        >> $@
 	@echo '.dynamo.so:'					 	>> $@
@@ -129,11 +101,62 @@ Makefile.modcompile:
 	@echo '	@echo Translation complete'		         	>> $@
 	@echo '	$$(CXXCOMPILE) $$(CXXFLAGS)  -c $$*.cpp -o $$*.lo'      >> $@
 	@echo '	@echo Compilation complete'		         	>> $@
-	@echo '	$$(CXXLINK) $$(CXXFLAGS) $$(LIBS) $$(LDFLAGS) 		\
-		-rpath `realpath $$<`  -o $$*.la $$*.lo'	>> $@
+	@echo '	$$(CXXLINK) $$(CXXFLAGS) $$(LDFLAGS) \
+		-rpath `readlink -f $$<`  -o $$*.la $$*.lo'		>> $@
 	@echo '	@echo Module created'			         	>> $@
-	@echo '	$$(LIBTOOL) --mode=install cp $$*.la `realpath $$<`'    >> $@
+	@echo '	$$(LIBTOOL) --mode=install cp $$*.la `readlink -f $$<`'	>> $@
 	@echo '	@echo Module installed'			         	>> $@
 	@echo ''						 	>> $@
+
+Makefile.plugin_compile:  
+	@echo "Generating Makefile.plugin_compile..."
+	@echo ''						 	>  $@
+	@echo 'exec_modeldir  = ' $(pkglibdir) 				>> $@
+	@echo ''						 	>> $@
+	@echo 'LIBTOOL        = ' $(pkglibdir)/libtool		 	>> $@
+	@echo 'CXX            = ' $(CXX)			 	>> $@
+	@echo 'CXXLD          = ' $(CXX)			 	>> $@
+	@echo 'CXXCOMPILE     = $$(LIBTOOL) --mode=compile $$(CXX)'     >> $@
+	@echo 'CXXLINK	      = $$(LIBTOOL) --mode=link $$(CXXLD)'	>> $@
+	@echo ''                                                        >> $@
+	@echo 'CXXFLAGS := -I. -I'$(pkgincludedir) $(AM_CXXFLAGS) 	>> $@
+	@echo 'LDFLAGS  := ' $(AM_LDFLAGS) -module -avoid-version	>> $@
+	@echo ''                                                        >> $@
+	@echo 'ifdef DEBUG '						>> $@
+	@echo 'CXXFLAGS += -DDEBUG'					>> $@
+	@echo 'endif'							>> $@
+	@echo ''                                                        >> $@
+	@echo 'all: $$(PLUGIN_NAME).la'					>> $@
+	@echo ''							>> $@
+	@echo '$$(PLUGIN_NAME).la: $$(SOURCES) $$(HEADERS)'		>> $@
+	@echo '	$$(CXXCOMPILE) $$(CXXFLAGS)  -c $$(SOURCES) \
+		-o $$(PLUGIN_NAME).lo' 					>> $@
+	@echo '	$$(CXXLINK) $$(CXXFLAGS) $$(LIBS) $$(LDFLAGS) \
+		-rpath `readlink -f $$(exec_modeldir)` \
+		-o $$(PLUGIN_NAME).la $$(PLUGIN_NAME).lo' 		>> $@
+	@echo ''							>> $@
+	@echo 'install: $$(PLUGIN_NAME).la'				>> $@
+	@echo '	$$(LIBTOOL) --mode=install cp $$(PLUGIN_NAME).la \
+		`readlink -f $$(exec_modeldir)`'			>> $@
+	@echo ''							>> $@
+	@echo 'clean:'							>> $@
+	@echo '	rm -f $$(PLUGIN_NAME).la'				>> $@
+	@echo '	rm -f $$(PLUGIN_NAME).lo'				>> $@
+	@echo '	rm -f $$(PLUGIN_NAME).o'				>> $@
+	@echo '	rm -rf .libs'						>> $@
+	@echo '	rm -f *~'						>> $@
+
+Makefile.plugin_example:
+	@echo "Generating Makefile.plugin_example..."
+	@echo ''							> $@
+	@echo 'PLUGIN_NAME = my_plugin'					>> $@
+	@echo ''							>> $@
+	@echo 'HEADERS = my_plugin.h'					>> $@
+	@echo ''							>> $@
+	@echo 'SOURCES = my_plugin.cpp'					>> $@
+	@echo ''							>> $@
+	@echo '### Do not edit below this line ###'			>> $@
+	@echo ''							>> $@
+	@echo 'include $$(shell rtxi_plugin_config --pkgdata-dir)/Makefile.plugin_compile' >> $@
 
 force:

@@ -1,0 +1,39 @@
+#!/bin/sh
+
+prefix="@prefix@"
+exec_prefix="@exec_prefix@"
+datadir="@datadir@"
+libdir="@libdir@"
+PLUGIN_DIR="${libdir}/rtxi"
+PKGDATA_DIR="${datadir}/rtxi"
+
+usage()
+{
+cat <<EOF
+Usage rtxi_plugin_config OPTIONS
+Options :
+	--help
+	--plugin-dir
+	--pkgdata-dir
+EOF
+exit $1
+}
+
+if test $# -eq 0; then
+	usage 1 1>&2
+fi
+
+while test $# -gt 0; do
+	case "$1" in
+		--plugin-dir)
+			echo $PLUGIN_DIR
+			;;
+		--pkgdata-dir)
+			echo $PKGDATA_DIR
+			;;
+		*)
+			usage 1 1>&2
+			;;
+	esac
+	shift
+done

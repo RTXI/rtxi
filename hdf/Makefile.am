@@ -2,7 +2,7 @@ CLEANFILES = *~
 DISTCLEANFILES =
 MAINTAINERCLEANFILES = Makefile.im
 
-include $(top_srcdir)/.buildvars
+include $(top_srcdir)/Makefile.buildvars
 
 LIBS = -lhdf5 -lhdf5_hl
 

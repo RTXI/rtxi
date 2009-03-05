@@ -11,7 +11,7 @@
 #include <dynamo_model_loader.h>
 
 
-#define MODEL_MAKEFILE_PATH    "/usr/share/rtxi/Makefile.modcompile"
+#define MODEL_MAKEFILE_PATH    "/usr/share/rtxi/Makefile.dynamo_compile"
 #define MAKE_CMD_PREFIX        "make -f "
 #define MODEL_SOURCE_SUFFIX    ".dynamo"
 #define MODEL_SUFFIX           ".so"
