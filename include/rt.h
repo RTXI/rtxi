@@ -338,54 +338,6 @@ namespace RT {
     public:
 
         /*!
-         * Name of the event that is posted when the period is changed.
-         *
-         * \sa RT::System::setPeriod()
-         * \sa Event::RTHandler
-         */
-        static const char *PERIOD_EVENT;
-        /*!
-         * Name of the event that is posted before the period is changed.
-         *
-         * \sa RT::System::setPeriod()
-         * \sa Event::Handler
-         */
-        static const char *PRE_PERIOD_EVENT;
-        /*!
-         * Name of the event that is posted after the period is changed.
-         *
-         * \sa RT::System::setPeriod()
-         * \sa Event::Handler
-         */
-        static const char *POST_PERIOD_EVENT;
-
-        /*!
-         * Name of the event that is posted when a thread is inserted.
-         *
-         * \sa RT::Thread
-         */
-        static const char *THREAD_INSERT_EVENT;
-        /*!
-         * Name of the event that is posted when a thread is removed.
-         *
-         * \sa RT::Thread
-         */
-        static const char *THREAD_REMOVE_EVENT;
-        /*!
-         * Name of the event that is posted when a device is inserted.
-         *
-         * \sa RT::Device
-         */
-        static const char *DEVICE_INSERT_EVENT;
-        /*!
-         * Name of the event that is posted when a device is removed.
-         *
-         * \sa RT::Device
-         */
-        static const char *DEVICE_REMOVE_EVENT;
-
-
-        /*!
          * System is a Singleton, which means that there can only be one instance.
          *   This function returns a pointer to that single instance.
          *

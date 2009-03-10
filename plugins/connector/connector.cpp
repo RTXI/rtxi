@@ -111,7 +111,7 @@ Connector::Panel::Panel(QWidget *parent)
 Connector::Panel::~Panel(void) {}
 
 void Connector::Panel::receiveEvent(const Event::Object *event) {
-    if(event->getName() == IO::Connector::BLOCK_INSERT_EVENT) {
+    if(event->getName() == Event::IO_BLOCK_INSERT_EVENT) {
         IO::Block *block = reinterpret_cast<IO::Block *>(event->getParam("block"));
 
         inputBlock->insertItem(block->getName()+QString(" ")+QString::number(block->getID()));
@@ -122,7 +122,7 @@ void Connector::Panel::receiveEvent(const Event::Object *event) {
             buildInputChannelList();
             buildOutputChannelList();
         }
-    } else if(event->getName() == IO::Connector::BLOCK_REMOVE_EVENT) {
+    } else if(event->getName() == Event::IO_BLOCK_REMOVE_EVENT) {
         IO::Block *block = reinterpret_cast<IO::Block *>(event->getParam("block"));
 
         size_t index;
@@ -145,7 +145,7 @@ void Connector::Panel::receiveEvent(const Event::Object *event) {
             outputBlock->setCurrentItem(0);
             buildOutputChannelList();
         }
-    } else if(event->getName() == IO::Connector::LINK_INSERT_EVENT) {
+    } else if(event->getName() == Event::IO_LINK_INSERT_EVENT) {
         IO::Block *src = reinterpret_cast<IO::Block *>(event->getParam("src"));
         size_t src_idx = *reinterpret_cast<size_t *>(event->getParam("src_num"));
         IO::Block *dest = reinterpret_cast<IO::Block *>(event->getParam("dest"));
@@ -155,7 +155,7 @@ void Connector::Panel::receiveEvent(const Event::Object *event) {
                                   QString::number(src_idx)+" "+src->getName(IO::OUTPUT,src_idx)+" ==> "+
                                   QString::number(dest->getID())+" "+dest->getName()+" : "+
                                   QString::number(dest_idx)+" "+dest->getName(IO::INPUT,dest_idx));
-    } else if(event->getName() == IO::Connector::LINK_REMOVE_EVENT) {
+    } else if(event->getName() == Event::IO_LINK_REMOVE_EVENT) {
         IO::Block *src = reinterpret_cast<IO::Block *>(event->getParam("src"));
         size_t src_idx = *reinterpret_cast<size_t *>(event->getParam("src_num"));
         IO::Block *dest = reinterpret_cast<IO::Block *>(event->getParam("dest"));

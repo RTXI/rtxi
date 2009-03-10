@@ -65,10 +65,6 @@ namespace DataRecorder {
         double value;
     };
 
-    extern const char *START_RECORDING_EVENT;
-    extern const char *STOP_RECORDING_EVENT;
-    extern const char *ASYNC_DATA_EVENT;
-
     void startRecording(void);
     void stopRecording(void);
     void postAsyncData(const double *,size_t);

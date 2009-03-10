@@ -75,7 +75,7 @@ Oscilloscope::Properties::Properties(Oscilloscope::Panel *parent)
 Oscilloscope::Properties::~Properties(void) {}
 
 void Oscilloscope::Properties::receiveEvent(const ::Event::Object *event) {
-    if(event->getName() == IO::Connector::BLOCK_INSERT_EVENT) {
+    if(event->getName() == Event::IO_BLOCK_INSERT_EVENT) {
         IO::Block *block = reinterpret_cast<IO::Block *>(event->getParam("block"));
 
         if(block) {
@@ -86,7 +86,7 @@ void Oscilloscope::Properties::receiveEvent(const ::Event::Object *event) {
             if(blockList->count() == 1)
                 buildChannelList();
         }
-    } else if(event->getName() == IO::Connector::BLOCK_REMOVE_EVENT) {
+    } else if(event->getName() == Event::IO_BLOCK_REMOVE_EVENT) {
         IO::Block *block = reinterpret_cast<IO::Block *>(event->getParam("block"));
 
         if(block) {
@@ -141,7 +141,7 @@ void Oscilloscope::Properties::receiveEvent(const ::Event::Object *event) {
             } else
                 DEBUG_MSG("Oscilloscope::Properties::receiveEvent : removed block never inserted\n");
         }
-    } else if(event->getName() == RT::System::POST_PERIOD_EVENT) {
+    } else if(event->getName() == Event::RT_POSTPERIOD_EVENT) {
         panel->setPeriod(RT::System::getInstance()->getPeriod()*1e-6);
         panel->adjustDataSize();
 
@@ -930,7 +930,7 @@ void Oscilloscope::Panel::execute(void) {
 
                 if((thresholdValue > value && thresholdValue < info->previous) ||
                    (thresholdValue < value && thresholdValue > info->previous)) {
-                    Event::Object event(OSCILLOSCOPE_THRESHOLD_CROSSING_EVENT);
+                    Event::Object event(Event::THRESHOLD_CROSSING_EVENT);
                     int direction = (thresholdValue > value) ? 1 : -1;
 
                     event.setParam("block",info->block);

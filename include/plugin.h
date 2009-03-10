@@ -45,20 +45,6 @@ namespace Plugin {
     public:
 
         /*!
-         * Name of the event that is posted when a plugin is inserted.
-         *
-         * \sa Plugin::Manager::load()
-         */
-        static const char *PLUGIN_INSERT_EVENT;
-        /*!
-         * Name of the event that is posted when a plugin is removed.
-         *
-         * \sa Plugin::Manager::unload()
-         * \sa Plugin::Manager::unloadAll()
-         */
-        static const char *PLUGIN_REMOVE_EVENT;
-
-        /*!
          * Manager is a Singleton, which means that there can only be one instance.
          *   This function returns a pointer to that single instance.
          *

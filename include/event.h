@@ -33,6 +33,90 @@
  */
 namespace Event {
 
+    /*!
+     * Name of the event that is posted when the period is changed.
+     *
+     * \sa RT::System::setPeriod()
+     * \sa Event::RTHandler
+     */
+    extern const char *RT_PERIOD_EVENT;
+    /*!
+     * Name of the event that is posted before the period is changed.
+     *
+     * \sa RT::System::setPeriod()
+     * \sa Event::Handler
+     */
+    extern const char *RT_PREPERIOD_EVENT;
+    /*!
+     * Name of the event that is posted after the period is changed.
+     *
+     * \sa RT::System::setPeriod()
+     * \sa Event::Handler
+     */
+    extern const char *RT_POSTPERIOD_EVENT;
+
+    /*!
+     * Name of the event that is posted when a thread is inserted.
+     *
+     * \sa RT::Thread
+     */
+    extern const char *RT_THREAD_INSERT_EVENT;
+    /*!
+     * Name of the event that is posted when a thread is removed.
+     *
+     * \sa RT::Thread
+     */
+    extern const char *RT_THREAD_REMOVE_EVENT;
+    /*!
+     * Name of the event that is posted when a device is inserted.
+     *
+     * \sa RT::Device
+     */
+    extern const char *RT_DEVICE_INSERT_EVENT;
+    /*!
+     * Name of the event that is posted when a device is removed.
+     *
+     * \sa RT::Device
+     */
+    extern const char *RT_DEVICE_REMOVE_EVENT;
+
+    extern const char *IO_BLOCK_INSERT_EVENT;
+    extern const char *IO_BLOCK_REMOVE_EVENT;
+
+    extern const char *IO_LINK_INSERT_EVENT;
+    extern const char *IO_LINK_REMOVE_EVENT;
+
+    extern const char *WORKSPACE_PARAMETER_CHANGE_EVENT;
+
+    /*!
+     * Name of the event that is posted when a plugin is inserted.
+     *
+     * \sa Plugin::Manager::load()
+     */
+    extern const char *PLUGIN_INSERT_EVENT;
+    /*!
+     * Name of the event that is posted when a plugin is removed.
+     *
+     * \sa Plugin::Manager::unload()
+     * \sa Plugin::Manager::unloadAll()
+     */
+    extern const char *PLUGIN_REMOVE_EVENT;
+
+    /*!
+     *
+     */
+    extern const char *SETTINGS_OBJECT_INSERT_EVENT;
+    /*!
+     *
+     */
+    extern const char *SETTINGS_OBJECT_REMOVE_EVENT;
+
+    extern const char *START_RECORDING_EVENT;
+    extern const char *STOP_RECORDING_EVENT;
+    extern const char *ASYNC_DATA_EVENT;
+
+    extern const char *THRESHOLD_CROSSING_EVENT;
+
     class Object {
 
     public:

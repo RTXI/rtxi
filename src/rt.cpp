@@ -89,21 +89,13 @@ int RT::System::SetPeriodEvent::callback(void) {
     if(!(retval = RT::OS::setPeriod(sys->task,period))) {
         sys->period = period;
 
-        ::Event::Object event(RT::System::PERIOD_EVENT);
+        ::Event::Object event(::Event::RT_PERIOD_EVENT);
         event.setParam("period",&period);
         ::Event::Manager::getInstance()->postEventRT(&event);
     }
 
     return retval;
 }
-
-const char *RT::System::PERIOD_EVENT = "SYSTEM : period";
-const char *RT::System::PRE_PERIOD_EVENT = "SYSTEM : pre period";
-const char *RT::System::POST_PERIOD_EVENT = "SYSTEM : post period";
-const char *RT::System::THREAD_INSERT_EVENT = "SYSTEM : thread insert";
-const char *RT::System::THREAD_REMOVE_EVENT = "SYSTEM : thread remove";
-const char *RT::System::DEVICE_INSERT_EVENT = "SYSTEM : device insert";
-const char *RT::System::DEVICE_REMOVE_EVENT = "SYSTEM : device remove";
 
 RT::Event::Event(void)
     : signal(0) {}
@@ -179,14 +171,14 @@ RT::System::~System(void) {
 }
 
 int RT::System::setPeriod(long long period) {
-    ::Event::Object event_pre(RT::System::PRE_PERIOD_EVENT);
+    ::Event::Object event_pre(::Event::RT_PREPERIOD_EVENT);
     event_pre.setParam("period",&period);
     ::Event::Manager::getInstance()->postEvent(&event_pre);
 
     SetPeriodEvent event(period);
     int retval = postEvent(&event);
 
-    ::Event::Object event_post(RT::System::POST_PERIOD_EVENT);
+    ::Event::Object event_post(::Event::RT_POSTPERIOD_EVENT);
     event_post.setParam("period",&period);
     ::Event::Manager::getInstance()->postEvent(&event_post);
 
@@ -223,7 +215,7 @@ void RT::System::insertDevice(RT::Device *device) {
 
     Mutex::Locker lock(&deviceMutex);
 
-    ::Event::Object event(RT::System::DEVICE_INSERT_EVENT);
+    ::Event::Object event(::Event::RT_DEVICE_INSERT_EVENT);
     event.setParam("device",device);
     ::Event::Manager::getInstance()->postEvent(&event);
 
@@ -238,7 +230,7 @@ void RT::System::removeDevice(RT::Device *device) {
 
     Mutex::Locker lock(&deviceMutex);
 
-    ::Event::Object event(RT::System::DEVICE_REMOVE_EVENT);
+    ::Event::Object event(::Event::RT_DEVICE_REMOVE_EVENT);
     event.setParam("device",device);
     ::Event::Manager::getInstance()->postEvent(&event);
 
@@ -260,7 +252,7 @@ void RT::System::insertThread(RT::Thread *thread) {
     List<Thread>::iterator i = threadList.begin();
     for(;i != threadList.end() && i->getPriority() >= thread->getPriority();++i);
 
-    ::Event::Object event(RT::System::THREAD_INSERT_EVENT);
+    ::Event::Object event(::Event::RT_THREAD_INSERT_EVENT);
     event.setParam("thread",thread);
     ::Event::Manager::getInstance()->postEvent(&event);
 
@@ -275,7 +267,7 @@ void RT::System::removeThread(RT::Thread *thread) {
 
     Mutex::Locker lock(&threadMutex);
 
-    ::Event::Object event(RT::System::THREAD_REMOVE_EVENT);
+    ::Event::Object event(::Event::RT_THREAD_REMOVE_EVENT);
     event.setParam("thread",thread);
     ::Event::Manager::getInstance()->postEvent(&event);
 

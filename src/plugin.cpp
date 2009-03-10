@@ -39,9 +39,6 @@ void Plugin::Object::unload(void) {
     Plugin::Manager::getInstance()->unload(this);
 }
 
-const char *Plugin::Manager::PLUGIN_INSERT_EVENT = "SYSTEM : plugin insert";
-const char *Plugin::Manager::PLUGIN_REMOVE_EVENT = "SYSTEM : plugin remove";
-
 Plugin::Object *Plugin::Manager::load(const std::string &library) {
     Mutex::Locker lock(&mutex);
 
@@ -77,7 +74,7 @@ Plugin::Object *Plugin::Manager::load(const std::string &library) {
     plugin->handle = handle;
     plugin->library = library;
 
-    Event::Object event(PLUGIN_INSERT_EVENT);
+    Event::Object event(Event::PLUGIN_INSERT_EVENT);
     event.setParam("plugin",plugin);
     Event::Manager::getInstance()->postEvent(&event);
 
@@ -97,7 +94,7 @@ void Plugin::Manager::unload(Plugin::Object *plugin) {
 void Plugin::Manager::unloadAll(void) {
     void *handle;
     for(std::list<Object *>::iterator i = pluginList.begin();i != pluginList.end();i = pluginList.begin()) {
-        Event::Object event(PLUGIN_REMOVE_EVENT);
+        Event::Object event(Event::PLUGIN_REMOVE_EVENT);
         event.setParam("plugin",*i);
         Event::Manager::getInstance()->postEvent(&event);
 
@@ -139,7 +136,7 @@ void Plugin::Manager::customEvent(QCustomEvent *e) {
 
         Object *plugin = static_cast<Plugin::Object *>(e->data());
 
-        Event::Object event(PLUGIN_REMOVE_EVENT);
+        Event::Object event(Event::PLUGIN_REMOVE_EVENT);
         event.setParam("plugin",plugin);
         Event::Manager::getInstance()->postEvent(&event);
 

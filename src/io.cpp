@@ -174,7 +174,7 @@ void IO::Block::connect(IO::Block *src,size_t src_num,IO::Block *dest,size_t des
     link.channel = src_num;
     dest->inputs[dest_num].links.push_back(link);
 
-    Event::Object event(Connector::LINK_INSERT_EVENT);
+    Event::Object event(Event::IO_LINK_INSERT_EVENT);
     event.setParam("src",src);
     event.setParam("src_num",&src_num);
     event.setParam("dest",dest);
@@ -203,7 +203,7 @@ void IO::Block::disconnect(IO::Block *src,size_t src_num,IO::Block *dest,size_t 
         return;
     }
 
-    Event::Object event(Connector::LINK_REMOVE_EVENT);
+    Event::Object event(Event::IO_LINK_REMOVE_EVENT);
     event.setParam("src",src);
     event.setParam("src_num",&src_num);
     event.setParam("dest",dest);
@@ -226,12 +226,6 @@ void IO::Block::disconnect(IO::Block *src,size_t src_num,IO::Block *dest,size_t 
             goto start_backward_remove;
         }
 }
-
-const char *IO::Connector::BLOCK_INSERT_EVENT = "SYSTEM : block insert";
-const char *IO::Connector::BLOCK_REMOVE_EVENT = "SYSTEM : block remove";
-
-const char *IO::Connector::LINK_INSERT_EVENT = "SYSTEM : link insert";
-const char *IO::Connector::LINK_REMOVE_EVENT = "SYSTEM : link remove";
 
 void IO::Connector::foreachBlock(void (*callback)(Block *,void *),void *param) {
     Mutex::Locker lock(&mutex);
@@ -350,7 +344,7 @@ void IO::Connector::insertBlock(IO::Block *block) {
         return;
     }
 
-    Event::Object event(BLOCK_INSERT_EVENT);
+    Event::Object event(Event::IO_BLOCK_INSERT_EVENT);
     event.setParam("block",block);
     Event::Manager::getInstance()->postEvent(&event);
 
@@ -365,7 +359,7 @@ void IO::Connector::removeBlock(IO::Block *block) {
 
     Mutex::Locker lock(&mutex);
 
-    Event::Object event(BLOCK_REMOVE_EVENT);
+    Event::Object event(Event::IO_BLOCK_REMOVE_EVENT);
     event.setParam("block",block);
     Event::Manager::getInstance()->postEvent(&event);
 

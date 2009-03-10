@@ -182,9 +182,6 @@ void Settings::Object::deferred(const Settings::Object::State &s) {
     doDeferred(s);
 }
 
-const char *Settings::Manager::SETTINGS_OBJECT_INSERT_EVENT = "SYSTEM : settings object insert";
-const char *Settings::Manager::SETTINGS_OBJECT_REMOVE_EVENT = "SYSTEM : settings object remove";
-
 Settings::Object *Settings::Manager::getObject(Settings::Object::ID id) const {
     Mutex::Locker lock(&mutex);
 
@@ -371,7 +368,7 @@ void Settings::Manager::insertObject(Settings::Object *object) {
     std::list<Object *>::iterator i;
     for(i = objectList.begin();i != objectList.end() && (*i)->id < object->id;++i);
 
-    Event::Object event(SETTINGS_OBJECT_INSERT_EVENT);
+    Event::Object event(Event::SETTINGS_OBJECT_INSERT_EVENT);
     event.setParam("object",object);
     Event::Manager::getInstance()->postEvent(&event);
 
@@ -381,7 +378,7 @@ void Settings::Manager::insertObject(Settings::Object *object) {
 void Settings::Manager::removeObject(Settings::Object *object) {
     Mutex::Locker lock(&mutex);
 
-    Event::Object event(SETTINGS_OBJECT_REMOVE_EVENT);
+    Event::Object event(Event::SETTINGS_OBJECT_REMOVE_EVENT);
     event.setParam("object",object);
     Event::Manager::getInstance()->postEvent(&event);
 

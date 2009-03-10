@@ -172,15 +172,6 @@ namespace Settings {
         /*!
          *
          */
-        static const char *SETTINGS_OBJECT_INSERT_EVENT;
-        /*!
-         *
-         */
-        static const char *SETTINGS_OBJECT_REMOVE_EVENT;
-
-        /*!
-         *
-         */
         static Manager *getInstance(void);
 
         /*!

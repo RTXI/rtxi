@@ -28,8 +28,6 @@
  */
 namespace Workspace {
 
-    extern const char *PARAMETER_CHANGE_EVENT;
-
     /*!
      * Bitmask used to represent an input type variable.
      *

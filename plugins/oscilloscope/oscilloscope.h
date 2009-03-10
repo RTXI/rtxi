@@ -23,8 +23,6 @@ class QTabWidget;
 
 namespace Oscilloscope {
 
-    static const char *OSCILLOSCOPE_THRESHOLD_CROSSING_EVENT = "Oscilloscope : threshold crossing event";;
-
     class Panel;
 
     class Properties : public QDialog, public Event::Handler {

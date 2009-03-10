@@ -20,6 +20,27 @@
 #include <event.h>
 #include <string.h>
 
+const char *Event::RT_PERIOD_EVENT = "SYSTEM : period";
+const char *Event::RT_PREPERIOD_EVENT = "SYSTEM : pre period";
+const char *Event::RT_POSTPERIOD_EVENT = "SYSTEM : post period";
+const char *Event::RT_THREAD_INSERT_EVENT = "SYSTEM : thread insert";
+const char *Event::RT_THREAD_REMOVE_EVENT = "SYSTEM : thread remove";
+const char *Event::RT_DEVICE_INSERT_EVENT = "SYSTEM : device insert";
+const char *Event::RT_DEVICE_REMOVE_EVENT = "SYSTEM : device remove";
+const char *Event::IO_BLOCK_INSERT_EVENT = "SYSTEM : block insert";
+const char *Event::IO_BLOCK_REMOVE_EVENT = "SYSTEM : block remove";
+const char *Event::IO_LINK_INSERT_EVENT = "SYSTEM : link insert";
+const char *Event::IO_LINK_REMOVE_EVENT = "SYSTEM : link remove";
+const char *Event::WORKSPACE_PARAMETER_CHANGE_EVENT = "SYSTEM : parameter change";
+const char *Event::PLUGIN_INSERT_EVENT = "SYSTEM : plugin insert";
+const char *Event::PLUGIN_REMOVE_EVENT = "SYSTEM : plugin remove";
+const char *Event::SETTINGS_OBJECT_INSERT_EVENT = "SYSTEM : settings object insert";
+const char *Event::SETTINGS_OBJECT_REMOVE_EVENT = "SYSTEM : settings object remove";
+const char *Event::START_RECORDING_EVENT = "SYSTEM : start recording";
+const char *Event::STOP_RECORDING_EVENT = "SYSTEM : stop recording";
+const char *Event::ASYNC_DATA_EVENT = "SYSTEM : async data";
+const char *Event::THRESHOLD_CROSSING_EVENT = "SYSTEM : threshold crossing event";
+
 Event::Handler::Handler(void) {
     Event::Manager::getInstance()->registerHandler(this);
 }

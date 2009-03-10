@@ -71,12 +71,6 @@ namespace IO {
 
     public:
 
-        static const char *BLOCK_INSERT_EVENT;
-        static const char *BLOCK_REMOVE_EVENT;
-
-        static const char *LINK_INSERT_EVENT;
-        static const char *LINK_REMOVE_EVENT;
-
         /*!
          * Connector is a Singleton, which means that there can only be one instance.
          *   This function returns a pointer to that single instance.

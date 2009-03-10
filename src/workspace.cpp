@@ -56,7 +56,7 @@ int ParameterChangeEvent::callback(void) {
 
     *data = value;
 
-    ::Event::Object event(Workspace::PARAMETER_CHANGE_EVENT);
+    ::Event::Object event(::Event::WORKSPACE_PARAMETER_CHANGE_EVENT);
     event.setParam("object",(void *)object);
     event.setParam("index",(void *)index);
     event.setParam("value",(void *)data);
@@ -64,8 +64,6 @@ int ParameterChangeEvent::callback(void) {
 
     return 0;
 }
-
-const char *Workspace::PARAMETER_CHANGE_EVENT = "WORKSPACE : parameter change";
 
 Workspace::Instance::Instance(std::string name,Workspace::variable_t *d,size_t n)
     : IO::Block(name,d,n) {
@@ -179,7 +177,7 @@ void Workspace::Instance::setValue(size_t n,double value) {
     if(RT::OS::isRealtime() && *parameter[n].data != value) {
         *parameter[n].data = value;
 
-        ::Event::Object event(Workspace::PARAMETER_CHANGE_EVENT);
+        ::Event::Object event(::Event::WORKSPACE_PARAMETER_CHANGE_EVENT);
         event.setParam("object",(void *)getID());
         event.setParam("index",(void *)n);
         event.setParam("value",(void *)parameter[n].data);

@@ -487,10 +487,10 @@ void SystemControlPanel::displayThreadTab(void) {
 }
 
 void SystemControlPanel::receiveEvent(const Event::Object *event) {
-    if(event->getName() == RT::System::POST_PERIOD_EVENT)
+    if(event->getName() == Event::RT_POSTPERIOD_EVENT)
         displayThreadTab();
-    if(event->getName() == Settings::Manager::SETTINGS_OBJECT_INSERT_EVENT ||
-       event->getName() == Settings::Manager::SETTINGS_OBJECT_REMOVE_EVENT) {
+    if(event->getName() == Event::SETTINGS_OBJECT_INSERT_EVENT ||
+       event->getName() == Event::SETTINGS_OBJECT_REMOVE_EVENT) {
         deviceList->clear();
         DAQ::Manager::getInstance()->foreachDevice(buildDAQDeviceList,deviceList);
         updateDevice();

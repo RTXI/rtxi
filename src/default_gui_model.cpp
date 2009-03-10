@@ -247,10 +247,10 @@ void DefaultGUIModel::doSave(Settings::Object::State &s) const {
 }
 
 void DefaultGUIModel::receiveEvent(const Event::Object *event) {
-    if(event->getName() == RT::System::PRE_PERIOD_EVENT) {
+    if(event->getName() == Event::RT_PREPERIOD_EVENT) {
         periodEventPaused = getActive();
         setActive(false);
-    } else if(event->getName() == RT::System::POST_PERIOD_EVENT) {
+    } else if(event->getName() == Event::RT_POSTPERIOD_EVENT) {
 #ifdef DEBUG
         if(getActive())
             ERROR_MSG("DefaultGUIModel::receiveEvent : model unpaused during a period update\n");

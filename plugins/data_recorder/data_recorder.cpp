@@ -320,12 +320,8 @@ int DoneEvent::callback(void) {
     return 0;
 }
 
-const char *DataRecorder::START_RECORDING_EVENT = "DATA RECORDER : start recording";
-const char *DataRecorder::STOP_RECORDING_EVENT  = "DATA RECORDER : stop recording";
-const char *DataRecorder::ASYNC_DATA_EVENT      = "DATA RECORDER : async data";
-
 void DataRecorder::startRecording(void) {
-    Event::Object event(START_RECORDING_EVENT);
+    Event::Object event(Event::START_RECORDING_EVENT);
 
     if(RT::OS::isRealtime())
         Event::Manager::getInstance()->postEventRT(&event);
@@ -334,7 +330,7 @@ void DataRecorder::startRecording(void) {
 }
 
 void DataRecorder::stopRecording(void) {
-    Event::Object event(STOP_RECORDING_EVENT);
+    Event::Object event(Event::STOP_RECORDING_EVENT);
 
     if(RT::OS::isRealtime())
         Event::Manager::getInstance()->postEventRT(&event);
@@ -343,7 +339,7 @@ void DataRecorder::stopRecording(void) {
 }
 
 void DataRecorder::postAsyncData(const double *data,size_t size) {
-    Event::Object event(ASYNC_DATA_EVENT);
+    Event::Object event(Event::ASYNC_DATA_EVENT);
     event.setParam("data",const_cast<double *>(data));
     event.setParam("size",&size);
 
@@ -498,7 +494,7 @@ void DataRecorder::Panel::execute(void) {
 }
 
 void DataRecorder::Panel::receiveEvent(const Event::Object *event) {
-    if(event->getName() == IO::Connector::BLOCK_INSERT_EVENT) {
+    if(event->getName() == Event::IO_BLOCK_INSERT_EVENT) {
 
         IO::Block *block = reinterpret_cast<IO::Block *>(event->getParam("block"));
 
@@ -507,7 +503,7 @@ void DataRecorder::Panel::receiveEvent(const Event::Object *event) {
         if(blockList->count() == 1)
             buildChannelList();
 
-    } else if(event->getName() == IO::Connector::BLOCK_REMOVE_EVENT) {
+    } else if(event->getName() == Event::IO_BLOCK_REMOVE_EVENT) {
 
         IO::Block *block = reinterpret_cast<IO::Block *>(event->getParam("block"));
         QString name = block->getName()+" "+QString::number(block->getID());
@@ -523,17 +519,17 @@ void DataRecorder::Panel::receiveEvent(const Event::Object *event) {
                 if(recording)
                     i->block = 0;
 
-    } else if(event->getName() == DataRecorder::START_RECORDING_EVENT) {
+    } else if(event->getName() == Event::START_RECORDING_EVENT) {
 
         StartRecordingEvent e(recording,fifo);
         RT::System::getInstance()->postEvent(&e);
 
-    } else if(event->getName() == DataRecorder::STOP_RECORDING_EVENT) {
+    } else if(event->getName() == Event::STOP_RECORDING_EVENT) {
 
         StopRecordingEvent e(recording,fifo);
         RT::System::getInstance()->postEvent(&e);
 
-    } else if(event->getName() == DataRecorder::ASYNC_DATA_EVENT) {
+    } else if(event->getName() == Event::ASYNC_DATA_EVENT) {
 
         AsyncDataEvent e(reinterpret_cast<double *>(event->getParam("data")),
                              *reinterpret_cast<size_t *>(event->getParam("size")),fifo);
@@ -543,7 +539,7 @@ void DataRecorder::Panel::receiveEvent(const Event::Object *event) {
 }
 
 void DataRecorder::Panel::receiveEventRT(const Event::Object *event) {
-    if(event->getName() == DataRecorder::START_RECORDING_EVENT) {
+    if(event->getName() == Event::START_RECORDING_EVENT) {
         DataRecorder::data_token_t *token = reinterpret_cast<DataRecorder::data_token_t *>(fifo.write(sizeof(DataRecorder::data_token_t)));
 
         if(!token)
@@ -556,7 +552,7 @@ void DataRecorder::Panel::receiveEventRT(const Event::Object *event) {
         token->time = RT::OS::getTime();
 
         fifo.writeDone();
-    } else if(event->getName() == DataRecorder::STOP_RECORDING_EVENT) {
+    } else if(event->getName() == Event::STOP_RECORDING_EVENT) {
         DataRecorder::data_token_t *token = reinterpret_cast<DataRecorder::data_token_t *>(fifo.write(sizeof(DataRecorder::data_token_t)));
 
         if(!token)
@@ -569,7 +565,7 @@ void DataRecorder::Panel::receiveEventRT(const Event::Object *event) {
         token->time = RT::OS::getTime();
 
         fifo.writeDone();
-    } else if(event->getName() == DataRecorder::ASYNC_DATA_EVENT) {
+    } else if(event->getName() == Event::ASYNC_DATA_EVENT) {
         size_t size = *reinterpret_cast<size_t *>(event->getParam("size"));
 
         DataRecorder::data_token_t *token = reinterpret_cast<DataRecorder::data_token_t *>(fifo.write(sizeof(DataRecorder::data_token_t)+size*sizeof(double)));
@@ -582,7 +578,7 @@ void DataRecorder::Panel::receiveEventRT(const Event::Object *event) {
         memcpy(data,event->getParam("data"),token->size);
 
         fifo.writeDone();
-    } else if(event->getName() == Workspace::PARAMETER_CHANGE_EVENT) {
+    } else if(event->getName() == Event::WORKSPACE_PARAMETER_CHANGE_EVENT) {
         DataRecorder::data_token_t *token = reinterpret_cast<DataRecorder::data_token_t *>(fifo.write(sizeof(DataRecorder::data_token_t)+sizeof(param_change_t)));
 
         token->type = DataRecorder::PARAM;
