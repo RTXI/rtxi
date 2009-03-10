@@ -6,7 +6,7 @@ include $(top_srcdir)/Makefile.buildvars
 
 pkglib_LTLIBRARIES = data_recorder.la
 
-LIBS = -lhdf5 -lhdf5_hl
+LIBS = $(HDF_LIBS)
 
 data_recorder_la_LDFLAGS = -module -avoid-version
 
