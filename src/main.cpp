@@ -36,11 +36,6 @@
 #include <main_window.h>
 #include <plugin.h>
 
-
-#ifdef QONSOLE
-#include <console.h>
-#endif
-
 static pid_t parentThread;
 
 struct cli_options_t {
@@ -86,39 +81,6 @@ int main(int argc,char *argv[]) {
     QApplication *app = new QApplication(argc,argv);
     app->connect(app,SIGNAL(lastWindowClosed()),app,SLOT(quit()));
     MainWindow::getInstance()->showMaximized();
-
-#ifdef QONSOLE
-    Console::getInstance();
-#endif
-
-#ifdef QONSOLE
-    int *fd;
-
-    if ((fd = Console::getInstance()->requestIoFd()) == NULL)
-    {
-	 DEBUG_MSG("console: unable to allocate I/O file descriptors\n");
-	 return -EIO;
-    }
-
-    fclose(stdin);
-    dup2(fd[2],STDIN_FILENO);
-    stdin=fdopen(STDIN_FILENO,"r");
-
-    fclose(stdout);
-    dup2(fd[1],STDOUT_FILENO);
-    stdout=fdopen(STDOUT_FILENO,"a");
-
-    fclose(stderr);
-    dup2(fd[1],STDERR_FILENO);
-    stderr=fdopen(STDERR_FILENO,"a");
-
-    Console::getInstance()->setTabLabel (fd[0],"System Log");
-
-    delete fd;
-
-    Console::getInstance()->show();
-
-#endif
 
     CmdLine::getInstance();
 

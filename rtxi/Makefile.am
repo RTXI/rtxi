@@ -56,8 +56,7 @@ nodist_rtxi_SOURCES = \
 EXTRA_DIST = \
 		$(top_srcdir)/src/rt_os-posix.cpp \
 		$(top_srcdir)/src/rt_os-rtai3.cpp \
-		$(top_srcdir)/src/rt_os-xenomai.cpp \
-		$(top_srcdir)/src/console.cpp
+		$(top_srcdir)/src/rt_os-xenomai.cpp
 
 if RTAI3
 rtxi_SOURCES += \
