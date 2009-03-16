@@ -71,13 +71,7 @@ namespace IO {
 
     public:
 
-        /*!
-         * Connector is a Singleton, which means that there can only be one instance.
-         *   This function returns a pointer to that single instance.
-         *
-         * \return The instance of Connector.
-         */
-        static Connector *getInstance(void);
+        static Connector *initialize(void);
 
         /*!
          * Loop through each Block and execute a callback.
@@ -89,7 +83,7 @@ namespace IO {
          *
          * \sa IO::Block
          */
-        void foreachBlock(void (*callback)(Block *,void *),void *param);
+        static void foreachBlock(void (*callback)(Block *,void *),void *param);
 
         /*!
          * Loop through each Connection and execute callback.
@@ -105,7 +99,7 @@ namespace IO {
          *
          * \sa IO::Block
          */
-        void foreachConnection(void (*callback)(Block *,size_t,Block *,size_t,void *),void *param);
+        static void foreachConnection(void (*callback)(Block *,size_t,Block *,size_t,void *),void *param);
 
         /*!
          * Create a connection between the two specified Blocks.
@@ -119,7 +113,7 @@ namespace IO {
          * \sa IO::Block::input()
          * \sa IO::Block::output()
          */
-        void connect(IO::Block *outputBlock,size_t outputChannel,IO::Block *inputBlock,size_t inputChannel);
+        static void connect(IO::Block *outputBlock,size_t outputChannel,IO::Block *inputBlock,size_t inputChannel);
         /*!
          * Break a connection between the two specified Blocks.
          *
@@ -132,7 +126,7 @@ namespace IO {
          * \sa IO::Block::input()
          * \sa IO::Block::output()
          */
-        void disconnect(IO::Block *outputBlock,size_t outputChannel,IO::Block *inputBlock,size_t inputChannel);
+        static void disconnect(IO::Block *outputBlock,size_t outputChannel,IO::Block *inputBlock,size_t inputChannel);
 
         /*!
          * Determine whether two channels are connected or not.
@@ -145,7 +139,7 @@ namespace IO {
          * \sa IO::Block::connect()
          * \sa IO::Block::disconnect()
          */
-        bool connected(IO::Block *outputBlock,size_t outputChannel,IO::Block *inputBlock,size_t inputChannel);
+        static bool connected(IO::Block *outputBlock,size_t outputChannel,IO::Block *inputBlock,size_t inputChannel);
 
     private:
 
@@ -160,12 +154,12 @@ namespace IO {
         Connector(void) : mutex(Mutex::RECURSIVE) {};
         ~Connector(void) {};
         Connector(const Connector &) {};
-        Connector &operator=(const Connector &) { return *getInstance(); }; 
+        Connector &operator=(const Connector &) { return *instance; }; 
 
         static Connector *instance;
 
-        void insertBlock(Block *);
-        void removeBlock(Block *);
+        static void insertBlock(Block *);
+        static void removeBlock(Block *);
 
         Mutex mutex;
         std::list<Block *> blockList;

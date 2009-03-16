@@ -27,11 +27,11 @@ extern "C" Plugin::Object *createRTXIPlugin(void *) {
 }
 
 SystemControl::SystemControl(void) {
-    menuID = MainWindow::getInstance()->createControlMenuItem("System Control",this,SLOT(createControlPanel(void)));
+    menuID = MainWindow::createControlMenuItem("System Control",this,SLOT(createControlPanel(void)));
 }
 
 SystemControl::~SystemControl(void) {
-    MainWindow::getInstance()->removeControlMenuItem(menuID);
+    MainWindow::removeControlMenuItem(menuID);
     while(panelList.size())
         delete panelList.front();
     instance = 0;

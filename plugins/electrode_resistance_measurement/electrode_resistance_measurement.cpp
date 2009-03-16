@@ -28,7 +28,7 @@ static size_t num_chans = sizeof(chans)/sizeof(chans[0]);
 
 ElectrodeResistanceMeasurement::Panel::Panel(QWidget *parent)
     : QWidget(parent,0,Qt::WStyle_NormalBorder | Qt::WDestructiveClose), RT::Thread(0), IO::Block("Electrode Resistance",chans,num_chans),
-      V0(-65e-3), dV(10e-3), T(17e-3), I1(0.0), I2(0.0), dI(0.0), cnt(round(2*T/(RT::System::getInstance()->getPeriod()*1e-9))), idx(0) {
+      V0(-65e-3), dV(10e-3), T(17e-3), I1(0.0), I2(0.0), dI(0.0), cnt(round(2*T/(RT::System::getPeriod()*1e-9))), idx(0) {
     DEBUG_MSG("ElectrodeResistanceMeasurement::Panel::Panel : starting\n");
 
     if(!cnt) {
@@ -178,7 +178,7 @@ void ElectrodeResistanceMeasurement::Panel::updateParameters(void) {
         return;
 
     UpdateParametersEvent event (this,v0,dv,t);
-    RT::System::getInstance()->postEvent(&event);
+    RT::System::postEvent(&event);
 }
 
 void ElectrodeResistanceMeasurement::Panel::togglePause(void) {
@@ -197,7 +197,7 @@ int ElectrodeResistanceMeasurement::Panel::UpdateParametersEvent::callback(void)
     panel->dV = dV;
     panel->T = T;
 
-    panel->cnt = 2*T/(RT::System::getInstance()->getPeriod()*1e-9);
+    panel->cnt = 2*T/(RT::System::getPeriod()*1e-9);
     panel->idx = 0;
 
     panel->I1 = panel->I2 = 0.0;

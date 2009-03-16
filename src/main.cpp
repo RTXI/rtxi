@@ -82,17 +82,17 @@ int main(int argc,char *argv[]) {
     app->connect(app,SIGNAL(lastWindowClosed()),app,SLOT(quit()));
     MainWindow::getInstance()->showMaximized();
 
-    CmdLine::getInstance();
+    CmdLine::initialize();
 
-    RT::System::getInstance();
-    IO::Connector::getInstance();
+    RT::System::initialize();
+    IO::Connector::initialize();
 
     /* Bootstrap the System */
-    Settings::Manager::getInstance()->load(config_file);
+    Settings::Manager::load(config_file);
 
     retval = app->exec();
 
-    Plugin::Manager::getInstance()->unloadAll();
+    Plugin::Manager::unloadAll();
     return retval;
 }
 

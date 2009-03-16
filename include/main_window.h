@@ -38,10 +38,10 @@ public:
     virtual ~MainWindow(void);
 
     /*!
-     * MainWindow is a Singleton, which means that there can only be one
-     *   instance. This function returns a pointer to that single instance.
+     * Get a pointer to the MainWindow.
+     *   Needed for adding new GUI components.
      *
-     * \return The instance of MainWindow.
+     * \return A pointer to the MainWindow widget.
      */
     static MainWindow *getInstance(void);
 
@@ -53,13 +53,13 @@ public:
      * \param slot The slot in the handler that the signal will activate.
      * \return The index of the new menu item.
      */
-    int createControlMenuItem(const std::string &label,const QObject *handler,const char *slot);
+    static int createControlMenuItem(const std::string &label,const QObject *handler,const char *slot);
     /*!
      * Remove an item from the control menu.
      *
      * \param index The index of the item to be removed.
      */
-    void removeControlMenuItem(int index);
+    static void removeControlMenuItem(int index);
 
 private slots:
 
@@ -79,7 +79,7 @@ private:
 
     MainWindow(void);
     MainWindow(const MainWindow &) {};
-    MainWindow &operator=(const MainWindow &) { return *getInstance(); };
+    MainWindow &operator=(const MainWindow &) { return *instance; };
 
     static MainWindow *instance;
 

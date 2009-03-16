@@ -26,8 +26,8 @@
 #include <rt.h>
 #include <string>
 
-//! Event Oriented Classes
-/*
+//! Event oriented classes
+/*!
  * Objects contained within this namespace are responsible
  *   for dispatching signals.
  */
@@ -54,7 +54,6 @@ namespace Event {
      * \sa Event::Handler
      */
     extern const char *RT_POSTPERIOD_EVENT;
-
     /*!
      * Name of the event that is posted when a thread is inserted.
      *
@@ -79,15 +78,38 @@ namespace Event {
      * \sa RT::Device
      */
     extern const char *RT_DEVICE_REMOVE_EVENT;
-
+    /*!
+     * Name of the event that is posted when an IO::Block is inserted.
+     *
+     * \sa IO::Block
+     */
     extern const char *IO_BLOCK_INSERT_EVENT;
+    /*!
+     * Name of the event that is posted when an IO::Block is removed.
+     *
+     * \sa IO::Block
+     */
     extern const char *IO_BLOCK_REMOVE_EVENT;
-
+    /*!
+     * Name of the event that is posted when a link is created between IO::Blocks.
+     *
+     * \sa IO::Block
+     * \sa IO::Connector::connect()
+     */
     extern const char *IO_LINK_INSERT_EVENT;
+    /*!
+     * Name of the event that is posted when a link is removed between IO::Blocks.
+     *
+     * \sa IO::Block
+     * \sa IO::Connector::disconnect()
+     */
     extern const char *IO_LINK_REMOVE_EVENT;
-
+    /*!
+     * Name of the event that is posted when a Workspace::Instance's parameter has changed.
+     *
+     * \sa Workspace::Instance
+     */
     extern const char *WORKSPACE_PARAMETER_CHANGE_EVENT;
-
     /*!
      * Name of the event that is posted when a plugin is inserted.
      *
@@ -101,33 +123,75 @@ namespace Event {
      * \sa Plugin::Manager::unloadAll()
      */
     extern const char *PLUGIN_REMOVE_EVENT;
-
     /*!
+     * Name of the event that is posted when a Settings::Object is created.
      *
+     * \sa Settings::Object
      */
     extern const char *SETTINGS_OBJECT_INSERT_EVENT;
     /*!
+     * Name of the event that is posted when a Settings::Object is removed.
      *
+     * \sa Settings::Object
      */
     extern const char *SETTINGS_OBJECT_REMOVE_EVENT;
-
+    /*!
+     * An event that is posted to signal data recorders to start recording.
+     */
     extern const char *START_RECORDING_EVENT;
+    /*!
+     * An event that is posted to signal data recorders to stop recording.
+     */
     extern const char *STOP_RECORDING_EVENT;
+    /*!
+     * An event that signals some data to be recorded.
+     */
     extern const char *ASYNC_DATA_EVENT;
-
+    /*!
+     * An event that signals that some threshold has been crossed.
+     */
     extern const char *THRESHOLD_CROSSING_EVENT;
 
+    /*!
+     * Object that represents a single instance of an event.
+     *   Stores all the parameters related to that event.
+     */
     class Object {
 
     public:
 
-        Object(const char *);
+        /*!
+         * Constructor.
+         *
+         * \param name The name of the event type to be constructed.
+         */
+        Object(const char *name);
         ~Object(void);
 
+        /*!
+         * Function used to identify the type of event.
+         *
+         * \return The type of event represented by this object.
+         */
         const char *getName(void) const { return name; };
 
-        void *getParam(const char *) const;
-        void setParam(const char *,void *);
+        /*!
+         * Function used to access the event's parameters.
+         *
+         * \param name The parameter name.
+         *
+         * \return The value of the parameter.
+         *
+         * \sa Event::Object::setParam()
+         */
+        void *getParam(const char *name) const;
+        /*!
+         * Function used to set the event's parameters.
+         *
+         * \param name The parameter's name.
+         * \param value The parameter's value.
+         */
+        void setParam(const char *name,void *value);
 
         const static size_t MAX_PARAMS = 8;
 
@@ -142,7 +206,7 @@ namespace Event {
     class Handler;
     class RTHandler;
 
-    /*
+    /*!
      * Managaes the collection of all objects waiting to
      *   receive signals from events.
      */
@@ -153,53 +217,46 @@ namespace Event {
 
     public:
 
-        /*!
-         * Manager is a Singleton, which means that there can only be
-         * one instance. This function returns a pointer to that
-         * single instance.
-         *
-         * \return The instance of Manager.
-         */
-        static Manager *getInstance(void);
+        static void initialize(void);
 
         /*!
          * Function for posting an event to be signaled. This function
          * should only be called from non-realtime, and blocks until
-         * it is been dispatched to all handlers.
+         * it has been dispatched to all handlers.
          *
          * \param event The event to be posted.
          *
          * \sa Event::Handler
          * \sa Event::Object
          */
-        void postEvent(const Object *event);
+        static void postEvent(const Object *event);
 
         /*!
          * Function for posting an event to be signaled. This function
          * should only be called from realtime, and blocks until
-         * it is been dispatched to all handlers.
+         * it has been dispatched to all handlers.
          *
          * \param event The event to be posted.
          *
          * \sa Event::RTHandler
          * \sa Event::Object
          */
-        void postEventRT(const Object *event);
+        static void postEventRT(const Object *event);
 
     private:
 
         Manager(void);
         ~Manager(void);
         Manager(const Manager &) {};
-        Manager &operator=(const Manager &) { return *getInstance(); };
+        Manager &operator=(const Manager &) { return *instance; };
 
         static Manager *instance;
 
-        void registerHandler(Handler *);
-        void unregisterHandler(Handler *);
+        static void registerHandler(Handler *);
+        static void unregisterHandler(Handler *);
 
-        void registerRTHandler(RTHandler *);
-        void unregisterRTHandler(RTHandler *);
+        static void registerRTHandler(RTHandler *);
+        static void unregisterRTHandler(RTHandler *);
 
         Mutex mutex;
         std::list<Handler *> handlerList;

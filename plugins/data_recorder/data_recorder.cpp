@@ -324,18 +324,18 @@ void DataRecorder::startRecording(void) {
     Event::Object event(Event::START_RECORDING_EVENT);
 
     if(RT::OS::isRealtime())
-        Event::Manager::getInstance()->postEventRT(&event);
+        Event::Manager::postEventRT(&event);
     else
-        Event::Manager::getInstance()->postEvent(&event);
+        Event::Manager::postEvent(&event);
 }
 
 void DataRecorder::stopRecording(void) {
     Event::Object event(Event::STOP_RECORDING_EVENT);
 
     if(RT::OS::isRealtime())
-        Event::Manager::getInstance()->postEventRT(&event);
+        Event::Manager::postEventRT(&event);
     else
-        Event::Manager::getInstance()->postEvent(&event);
+        Event::Manager::postEvent(&event);
 }
 
 void DataRecorder::postAsyncData(const double *data,size_t size) {
@@ -344,9 +344,9 @@ void DataRecorder::postAsyncData(const double *data,size_t size) {
     event.setParam("size",&size);
 
     if(RT::OS::isRealtime())
-        Event::Manager::getInstance()->postEventRT(&event);
+        Event::Manager::postEventRT(&event);
     else
-        Event::Manager::getInstance()->postEvent(&event);
+        Event::Manager::postEvent(&event);
 }
 
 DataRecorder::Channel::Channel(void) {}
@@ -441,7 +441,7 @@ DataRecorder::Panel::Panel(QWidget *parent)
     show();
 
     // Build initial block list
-    IO::Connector::getInstance()->foreachBlock(buildBlockPtrList,&blockPtrList);
+    IO::Connector::foreachBlock(buildBlockPtrList,&blockPtrList);
     for(std::vector<IO::Block *>::const_iterator i = blockPtrList.begin(),end = blockPtrList.end();i != end;++i)
         blockList->insertItem((*i)->getName()+" "+QString::number((*i)->getID()));
 
@@ -464,7 +464,7 @@ DataRecorder::Panel::~Panel(void) {
     setActive(false);
 
     DoneEvent event(fifo);
-    while(RT::System::getInstance()->postEvent(&event));
+    while(RT::System::postEvent(&event));
 
     pthread_join(thread,0);
 
@@ -522,18 +522,18 @@ void DataRecorder::Panel::receiveEvent(const Event::Object *event) {
     } else if(event->getName() == Event::START_RECORDING_EVENT) {
 
         StartRecordingEvent e(recording,fifo);
-        RT::System::getInstance()->postEvent(&e);
+        RT::System::postEvent(&e);
 
     } else if(event->getName() == Event::STOP_RECORDING_EVENT) {
 
         StopRecordingEvent e(recording,fifo);
-        RT::System::getInstance()->postEvent(&e);
+        RT::System::postEvent(&e);
 
     } else if(event->getName() == Event::ASYNC_DATA_EVENT) {
 
         AsyncDataEvent e(reinterpret_cast<double *>(event->getParam("data")),
                              *reinterpret_cast<size_t *>(event->getParam("size")),fifo);
-        RT::System::getInstance()->postEvent(&e);
+        RT::System::postEvent(&e);
 
     }
 }
@@ -652,7 +652,7 @@ void DataRecorder::Panel::changeDataFile(void) {
         filename += ".h5";
 
     OpenFileEvent event(filename,fifo);
-    RT::System::getInstance()->postEvent(&event);
+    RT::System::postEvent(&event);
 }
 
 void DataRecorder::Panel::insertChannel(void) {
@@ -688,7 +688,7 @@ void DataRecorder::Panel::insertChannel(void) {
                           channel->block->getName(channel->type,channel->index).c_str());
 
     InsertChannelEvent event(recording,channels,channels.end(),*channel);
-    if(!RT::System::getInstance()->postEvent(&event))
+    if(!RT::System::postEvent(&event))
         selectionBox->insertItem(channel->name);
 }
 
@@ -699,7 +699,7 @@ void DataRecorder::Panel::removeChannel(void) {
     for(RT::List<Channel>::iterator i = channels.begin(),end = channels.end();i != end;++i)
         if(i->name == selectionBox->currentText()) {
             RemoveChannelEvent event(recording,channels,*i);
-            if(!RT::System::getInstance()->postEvent(&event))
+            if(!RT::System::postEvent(&event))
                 selectionBox->removeItem(selectionBox->currentItem());
             break;
         }
@@ -707,12 +707,12 @@ void DataRecorder::Panel::removeChannel(void) {
 
 void DataRecorder::Panel::startRecordClicked(void) {
     StartRecordingEvent event(recording,fifo);
-    RT::System::getInstance()->postEvent(&event);
+    RT::System::postEvent(&event);
 }
 
 void DataRecorder::Panel::stopRecordClicked(void) {
     StopRecordingEvent event(recording,fifo);
-    RT::System::getInstance()->postEvent(&event);
+    RT::System::postEvent(&event);
 }
 
 void DataRecorder::Panel::updateDownsampleRate(int r) {
@@ -749,7 +749,7 @@ void DataRecorder::Panel::doDeferred(const Settings::Object::State &s) {
         std::ostringstream str;
         str << i;
 
-        block = dynamic_cast<IO::Block *>(Settings::Manager::getInstance()->getObject(s.loadInteger(str.str()+" ID")));
+        block = dynamic_cast<IO::Block *>(Settings::Manager::getObject(s.loadInteger(str.str()+" ID")));
         if(!block) continue;
 
         channel = new Channel();
@@ -914,7 +914,7 @@ void DataRecorder::Panel::processData(void) {
         } else if(token.type == PARAM) {
             param_change_t *data = reinterpret_cast<param_change_t *>(fifo.read(token.size));
 
-            IO::Block *block = dynamic_cast<IO::Block *>(Settings::Manager::getInstance()->getObject(data->id));
+            IO::Block *block = dynamic_cast<IO::Block *>(Settings::Manager::getObject(data->id));
 
             if(block) {
                 param_hdf_t param = {
@@ -1057,7 +1057,7 @@ int DataRecorder::Panel::startRecording(long long timestamp) {
     H5Tset_size(string_type,string_size);
     hid_t data;
 
-    long long period = RT::System::getInstance()->getPeriod();
+    long long period = RT::System::getPeriod();
     data = H5Dcreate(file.trial,"Period (ns)",H5T_STD_U64LE,scalar_space,H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT);
     H5Dwrite(data,H5T_STD_U64LE,H5S_ALL,H5S_ALL,H5P_DEFAULT,&period);
     H5Dclose(data);
@@ -1154,11 +1154,11 @@ extern "C" Plugin::Object *createRTXIPlugin(void *) {
 }
 
 DataRecorder::Plugin::Plugin(void) {
-    menuID = MainWindow::getInstance()->createControlMenuItem("Data Recorder",this,SLOT(createDataRecorderPanel(void)));
+    menuID = MainWindow::createControlMenuItem("Data Recorder",this,SLOT(createDataRecorderPanel(void)));
 }
 
 DataRecorder::Plugin::~Plugin(void) {
-    MainWindow::getInstance()->removeControlMenuItem(menuID);
+    MainWindow::removeControlMenuItem(menuID);
     while(panelList.size())
         delete panelList.front();
     instance = 0;

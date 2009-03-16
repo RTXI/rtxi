@@ -16,6 +16,7 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+#include <compiler.h>
 #include <debug.h>
 #include <dlfcn.h>
 #include <event.h>
@@ -24,11 +25,11 @@
 
 Plugin::Object::Object(void)
     : handle(0) {
-    Plugin::Manager::getInstance()->insertPlugin(this);
+    Plugin::Manager::insertPlugin(this);
 }
 
 Plugin::Object::~Object(void) {
-    Plugin::Manager::getInstance()->removePlugin(this);
+    Plugin::Manager::removePlugin(this);
 }
 
 std::string Plugin::Object::getLibrary(void) const {
@@ -36,11 +37,14 @@ std::string Plugin::Object::getLibrary(void) const {
 }
 
 void Plugin::Object::unload(void) {
-    Plugin::Manager::getInstance()->unload(this);
+    Plugin::Manager::unload(this);
 }
 
 Plugin::Object *Plugin::Manager::load(const std::string &library) {
-    Mutex::Locker lock(&mutex);
+    if(unlikely(!instance))
+        initialize();
+
+    Mutex::Locker lock(&instance->mutex);
 
     void *handle = dlopen(library.c_str(),RTLD_GLOBAL|RTLD_NOW);
     if(!handle) {
@@ -76,27 +80,33 @@ Plugin::Object *Plugin::Manager::load(const std::string &library) {
 
     Event::Object event(Event::PLUGIN_INSERT_EVENT);
     event.setParam("plugin",plugin);
-    Event::Manager::getInstance()->postEvent(&event);
+    Event::Manager::postEvent(&event);
 
     return plugin;
 }
 
 void Plugin::Manager::unload(Plugin::Object *plugin) {
+    if(unlikely(!instance))
+        initialize();
+
     if(!plugin) {
         ERROR_MSG("Plugin::Manager::unload : invalid plugin\n");
         return;
     }
 
     QCustomEvent *event = new QCustomEvent(CloseEvent,reinterpret_cast<void *>(plugin));
-    QApplication::postEvent(this,event);
+    QApplication::postEvent(instance,event);
 }
 
 void Plugin::Manager::unloadAll(void) {
+    if(unlikely(!instance))
+        initialize();
+
     void *handle;
-    for(std::list<Object *>::iterator i = pluginList.begin();i != pluginList.end();i = pluginList.begin()) {
+    for(std::list<Object *>::iterator i = instance->pluginList.begin();i != instance->pluginList.end();i = instance->pluginList.begin()) {
         Event::Object event(Event::PLUGIN_REMOVE_EVENT);
         event.setParam("plugin",*i);
-        Event::Manager::getInstance()->postEvent(&event);
+        Event::Manager::postEvent(&event);
 
         handle = (*i)->handle;
         delete *i;
@@ -105,40 +115,49 @@ void Plugin::Manager::unloadAll(void) {
 }
 
 void Plugin::Manager::foreachPlugin(void (*callback)(Plugin::Object *,void *),void *param) {
-    Mutex::Locker lock(&mutex);
-    for(std::list<Plugin::Object *>::iterator i = pluginList.begin();i != pluginList.end();++i)
+    if(unlikely(!instance))
+        initialize();
+
+    Mutex::Locker lock(&instance->mutex);
+    for(std::list<Plugin::Object *>::iterator i = instance->pluginList.begin();i != instance->pluginList.end();++i)
         callback(*i,param);
 }
 
 void Plugin::Manager::insertPlugin(Plugin::Object *plugin) {
+    if(unlikely(!instance))
+        initialize();
+
     if(!plugin) {
         ERROR_MSG("Plugin::Manager::insertPlugin : invalid plugin\n");
         return;
     }
 
-    Mutex::Locker lock(&mutex);
-    pluginList.push_back(plugin);
+    Mutex::Locker lock(&instance->mutex);
+    instance->pluginList.push_back(plugin);
 }
 
 void Plugin::Manager::removePlugin(Plugin::Object *plugin) {
+    if(unlikely(!instance))
+        initialize();
+
     if(!plugin) {
         ERROR_MSG("Plugin::Manager::removePlugin : invalid plugin\n");
         return;
     }
 
-    Mutex::Locker lock(&mutex);
-    pluginList.remove(plugin);
+    Mutex::Locker lock(&instance->mutex);
+    instance->pluginList.remove(plugin);
 }
 
 void Plugin::Manager::customEvent(QCustomEvent *e) {
     if(e->type() == CloseEvent) {
-        Mutex::Locker lock(&mutex);
+        Mutex::Locker lock(&instance->mutex);
 
         Object *plugin = static_cast<Plugin::Object *>(e->data());
 
         Event::Object event(Event::PLUGIN_REMOVE_EVENT);
         event.setParam("plugin",plugin);
-        Event::Manager::getInstance()->postEvent(&event);
+        Event::Manager::postEvent(&event);
 
         void *handle = plugin->handle;
         delete plugin;
@@ -149,9 +168,9 @@ void Plugin::Manager::customEvent(QCustomEvent *e) {
 static Mutex mutex;
 Plugin::Manager *Plugin::Manager::instance = 0;
 
-Plugin::Manager *Plugin::Manager::getInstance(void) {
+void Plugin::Manager::initialize(void) {
     if(instance)
-        return instance;
+        return;
 
     /*************************************************************************
      * Seems like alot of hoops to jump through, but static allocation isn't *
@@ -163,6 +182,4 @@ Plugin::Manager *Plugin::Manager::getInstance(void) {
         static Manager manager;
         instance = &manager;
     }
-
-    return instance;
 }

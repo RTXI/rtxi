@@ -169,43 +169,40 @@ namespace Settings {
 
     public:
 
-        /*!
-         *
-         */
-        static Manager *getInstance(void);
+        static void initialize(void);
 
         /*!
          *
          */
-        Object *getObject(Object::ID) const;
+        static Object *getObject(Object::ID);
         /*!
          *
          */
-        void foreachObject(void (*callback)(Object *,void *),void *param);
+        static void foreachObject(void (*callback)(Object *,void *),void *param);
 
         /*!
          *
          */
-        int load(const std::string &);
+        static int load(const std::string &);
         /*!
          *
          */
-        int save(const std::string &);
+        static int save(const std::string &);
 
     private:
 
         Manager(void) : mutex(Mutex::RECURSIVE), currentID(Object::INVALID+1) {};
         ~Manager(void) {};
         Manager(const Manager &) {};
-        Manager &operator=(const Manager &) { return *getInstance(); };
+        Manager &operator=(const Manager &) { return *instance; };
 
         static Manager *instance;
 
-        void acquireID(Object *,Object::ID =Object::INVALID);
-        void releaseID(Object *);
+        static void acquireID(Object *,Object::ID =Object::INVALID);
+        static void releaseID(Object *);
 
-        void insertObject(Object *);
-        void removeObject(Object *);
+        static void insertObject(Object *);
+        static void removeObject(Object *);
 
         mutable Mutex mutex;
         Object::ID currentID;

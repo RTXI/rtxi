@@ -17,6 +17,7 @@
  */
 
 #include <algorithm>
+#include <compiler.h>
 #include <debug.h>
 #include <event.h>
 #include <rt.h>
@@ -60,7 +61,7 @@ int ParameterChangeEvent::callback(void) {
     event.setParam("object",(void *)object);
     event.setParam("index",(void *)index);
     event.setParam("value",(void *)data);
-    ::Event::Manager::getInstance()->postEventRT(&event);
+    ::Event::Manager::postEventRT(&event);
 
     return 0;
 }
@@ -109,11 +110,11 @@ Workspace::Instance::Instance(std::string name,Workspace::variable_t *d,size_t n
         }
     }
 
-    Workspace::Manager::getInstance()->insertWorkspace(this);
+    Workspace::Manager::insertWorkspace(this);
 }
 
 Workspace::Instance::~Instance(void) {
-    Workspace::Manager::getInstance()->removeWorkspace(this);
+    Workspace::Manager::removeWorkspace(this);
 
     for(std::vector<var_t>::iterator i = parameter.begin(), end = parameter.end();i != end;++i)
         delete i->data;
@@ -181,10 +182,10 @@ void Workspace::Instance::setValue(size_t n,double value) {
         event.setParam("object",(void *)getID());
         event.setParam("index",(void *)n);
         event.setParam("value",(void *)parameter[n].data);
-        ::Event::Manager::getInstance()->postEventRT(&event);
+        ::Event::Manager::postEventRT(&event);
     } else {
         ParameterChangeEvent event(getID(),n,value,parameter[n].data);
-        RT::System::getInstance()->postEvent(&event);
+        RT::System::postEvent(&event);
     }
 }
 
@@ -208,43 +209,52 @@ void Workspace::Instance::setData(IO::flags_t type,size_t n,double *data) {
 }
 
 void Workspace::Manager::foreachWorkspace(void (*callback)(Workspace::Instance *,void *),void *param) {
-    Mutex::Locker lock(&mutex);
-    for(std::list<Instance *>::iterator i = instanceList.begin();i != instanceList.end();++i)
+    if(unlikely(!instance))
+        initialize();
+
+    Mutex::Locker lock(&instance->mutex);
+    for(std::list<Instance *>::iterator i = instance->instanceList.begin();i != instance->instanceList.end();++i)
         callback(*i,param);
 }
 
 void Workspace::Manager::insertWorkspace(Workspace::Instance *workspace) {
+    if(unlikely(!instance))
+        initialize();
+
     if(!workspace) {
         ERROR_MSG("Workspace::Manager::insertWorkspace : invalid workspace\n");
         return;
     }
 
-    Mutex::Locker lock(&mutex);
+    Mutex::Locker lock(&instance->mutex);
 
-    if(std::find(instanceList.begin(),instanceList.end(),workspace) != instanceList.end()) {
+    if(std::find(instance->instanceList.begin(),instance->instanceList.end(),workspace) != instance->instanceList.end()) {
         ERROR_MSG("Workspace::Manager::insertWorkspace : workspace already present\n");
         return;
     }
 
-    instanceList.push_back(workspace);
+    instance->instanceList.push_back(workspace);
 }
 
 void Workspace::Manager::removeWorkspace(Workspace::Instance *workspace) {
+    if(unlikely(!instance))
+        initialize();
+
     if(!workspace) {
         ERROR_MSG("Workspace::Manager::removeWorkspace : invalid workspace\n");
         return;
     }
 
-    Mutex::Locker lock(&mutex);
-    instanceList.remove(workspace);
+    Mutex::Locker lock(&instance->mutex);
+    instance->instanceList.remove(workspace);
 }
 
 static Mutex mutex;
 Workspace::Manager *Workspace::Manager::instance = 0;
 
-Workspace::Manager *Workspace::Manager::getInstance(void) {
+void Workspace::Manager::initialize(void) {
     if(instance)
-        return instance;
+        return;
 
     /*************************************************************************
      * Seems like alot of hoops to jump through, but static allocation isn't *
@@ -256,6 +266,4 @@ Workspace::Manager *Workspace::Manager::getInstance(void) {
         static Manager manager;
         instance = &manager;
     }
-
-    return instance;
 }

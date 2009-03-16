@@ -44,13 +44,7 @@ namespace Plugin {
 
     public:
 
-        /*!
-         * Manager is a Singleton, which means that there can only be one instance.
-         *   This function returns a pointer to that single instance.
-         *
-         * \return The instance of Manager.
-         */
-        static Manager *getInstance(void);
+        static void initialize(void);
 
         /*!
          * Function for loading a Plugin::Object from a shared library file.
@@ -60,17 +54,17 @@ namespace Plugin {
          *
          * \sa Plugin::Object
          */
-        Object *load(const std::string &library);
+        static Object *load(const std::string &library);
         /*!
          * Function for unloading a single Plugin::Object in the system.
          *
          * \param object The plugin object to be unloaded.
          */
-        void unload(Object *object);
+        static void unload(Object *object);
         /*!
          * Function for unloading all Plugin::Object's in the system.
          */
-        void unloadAll(void);
+        static void unloadAll(void);
 
         /*!
          * Loop through each Plugin and execute a callback.
@@ -82,7 +76,7 @@ namespace Plugin {
          *
          * \sa Plugin::Object
          */
-        void foreachPlugin(void (*callback)(Plugin::Object *,void *),void *param);
+        static void foreachPlugin(void (*callback)(Plugin::Object *,void *),void *param);
 
     public slots:
 
@@ -101,12 +95,12 @@ namespace Plugin {
         Manager(void) : mutex(Mutex::RECURSIVE) {};
         ~Manager(void) {};
         Manager(const Manager &) {};
-        Manager &operator=(const Manager &) { return *getInstance(); };
+        Manager &operator=(const Manager &) { return *instance; };
 
         static Manager *instance;
 
-        void insertPlugin(Object *);
-        void removePlugin(Object *);
+        static void insertPlugin(Object *);
+        static void removePlugin(Object *);
 
         static const QEvent::Type CloseEvent = QEvent::User;
 

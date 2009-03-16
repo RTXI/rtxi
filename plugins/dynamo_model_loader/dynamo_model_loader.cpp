@@ -83,7 +83,7 @@ void DynamoModelLoader::load(char *srcpath)
 	  .arg( MODEL_SUFFIX );
 
      DEBUG_MSG("about to compile model with command %s\n", cmd.ascii());
-     status = CmdLine::getInstance()->execute(cmd.ascii());
+     status = CmdLine::execute(cmd.ascii());
      
      if (status != 0)
      {
@@ -91,7 +91,7 @@ void DynamoModelLoader::load(char *srcpath)
 	  return;
      }
 
-     Plugin::Manager::getInstance()->load(module_name.latin1());
+     Plugin::Manager::load(module_name.latin1());
 
      if (path != NULL) free (path);
 }

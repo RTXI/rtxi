@@ -16,6 +16,7 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+#include <compiler.h>
 #include <debug.h>
 #include <event.h>
 #include <string.h>
@@ -42,21 +43,21 @@ const char *Event::ASYNC_DATA_EVENT = "SYSTEM : async data";
 const char *Event::THRESHOLD_CROSSING_EVENT = "SYSTEM : threshold crossing event";
 
 Event::Handler::Handler(void) {
-    Event::Manager::getInstance()->registerHandler(this);
+    Event::Manager::registerHandler(this);
 }
 
 Event::Handler::~Handler(void) {
-    Event::Manager::getInstance()->unregisterHandler(this);
+    Event::Manager::unregisterHandler(this);
 }
 
 void Event::Handler::receiveEvent(const Event::Object *) {}
 
 Event::RTHandler::RTHandler(void) {
-    Event::Manager::getInstance()->registerRTHandler(this);
+    Event::Manager::registerRTHandler(this);
 }
 
 Event::RTHandler::~RTHandler(void) {
-    Event::Manager::getInstance()->unregisterRTHandler(this);
+    Event::Manager::unregisterRTHandler(this);
 }
 
 void Event::RTHandler::receiveEventRT(const Event::Object *) {}
@@ -94,41 +95,59 @@ Event::Manager::Manager(void){}
 Event::Manager::~Manager(void) {}
 
 void Event::Manager::postEvent(const Object *event) {
-    Mutex::Locker lock(&mutex);
+    if(unlikely(!instance))
+        initialize();
 
-    for(std::list<Handler *>::iterator i = handlerList.begin(),end = handlerList.end();i != end;++i)
+    Mutex::Locker lock(&instance->mutex);
+
+    for(std::list<Handler *>::iterator i = instance->handlerList.begin(),end = instance->handlerList.end();i != end;++i)
         (*i)->receiveEvent(event);
 }
 
 void Event::Manager::postEventRT(const Object *event) {
-    for(RT::List<RTHandler>::iterator i = rthandlerList.begin(),end = rthandlerList.end();i != end;++i)
+    if(unlikely(!instance))
+        return;
+
+    for(RT::List<RTHandler>::iterator i = instance->rthandlerList.begin(),end = instance->rthandlerList.end();i != end;++i)
         i->receiveEventRT(event);
 }
 
 void Event::Manager::registerHandler(Handler *handler) {
-    Mutex::Locker lock(&mutex);
-    handlerList.insert(handlerList.end(),handler);
+    if(unlikely(!instance))
+        initialize();
+
+    Mutex::Locker lock(&instance->mutex);
+    instance->handlerList.insert(instance->handlerList.end(),handler);
 }
 
 void Event::Manager::unregisterHandler(Handler *handler) {
-    Mutex::Locker lock(&mutex);
-    handlerList.remove(handler);
+    if(unlikely(!instance))
+        initialize();
+
+    Mutex::Locker lock(&instance->mutex);
+    instance->handlerList.remove(handler);
 }
 
 void Event::Manager::registerRTHandler(RTHandler *handler) {
-    rthandlerList.insert(rthandlerList.end(),*handler);
+    if(unlikely(!instance))
+        initialize();
+
+    instance->rthandlerList.insert(instance->rthandlerList.end(),*handler);
 }
 
 void Event::Manager::unregisterRTHandler(RTHandler *handler) {
-    rthandlerList.remove(*handler);
+    if(unlikely(!instance))
+        initialize();
+
+    instance->rthandlerList.remove(*handler);
 }
 
 static Mutex mutex;
 Event::Manager *Event::Manager::instance = 0;
 
-Event::Manager *Event::Manager::getInstance(void) {
+void Event::Manager::initialize(void) {
     if(instance)
-        return instance;
+        return;
 
     /*************************************************************************
      * Seems like alot of hoops to jump through, but static allocation isn't *
@@ -140,6 +159,4 @@ Event::Manager *Event::Manager::getInstance(void) {
         static Manager manager;
         instance = &manager;
     }
-
-    return instance;
 }

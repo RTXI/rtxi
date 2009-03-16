@@ -112,7 +112,7 @@ void SystemControlPanel::updateDevice(void) {
     DAQ::type_t type;
     {
         struct find_daq_t info = { deviceList->currentItem(), 0, };
-        DAQ::Manager::getInstance()->foreachDevice(findDAQDevice,&info);
+        DAQ::Manager::foreachDevice(findDAQDevice,&info);
         dev = info.device;
     }
 
@@ -203,7 +203,7 @@ void SystemControlPanel::applyChannelTab(void) {
     DAQ::Device *dev;
     {
         struct find_daq_t info = { deviceList->currentItem(), 0, };
-        DAQ::Manager::getInstance()->foreachDevice(findDAQDevice,&info);
+        DAQ::Manager::foreachDevice(findDAQDevice,&info);
         dev = info.device;
     }
 
@@ -230,7 +230,7 @@ void SystemControlPanel::applyThreadTab(void) {
     double period = periodEdit->text().toDouble();
     period *= pow(10,3*(3-periodUnitList->currentItem()));
 
-    RT::System::getInstance()->setPeriod(static_cast<long long>(period));
+    RT::System::setPeriod(static_cast<long long>(period));
 }
 
 void SystemControlPanel::createChannelTab(void) {
@@ -245,7 +245,7 @@ void SystemControlPanel::createChannelTab(void) {
     label = new QLabel("Device:",hbox);
     label->setFixedWidth(60);
     deviceList = new QComboBox(hbox);
-    DAQ::Manager::getInstance()->foreachDevice(buildDAQDeviceList,deviceList);
+    DAQ::Manager::foreachDevice(buildDAQDeviceList,deviceList);
     QObject::connect(deviceList,SIGNAL(activated(int)),this,SLOT(updateDevice(void)));
 
     QGroupBox *analogBox = new QGroupBox("Analog",channelTab);
@@ -383,7 +383,7 @@ void SystemControlPanel::displayChannelTab(void) {
     DAQ::Device *dev;
     {
         struct find_daq_t info = { deviceList->currentItem(), 0, };
-        DAQ::Manager::getInstance()->foreachDevice(findDAQDevice,&info);
+        DAQ::Manager::foreachDevice(findDAQDevice,&info);
         dev = info.device;
     }
 
@@ -475,7 +475,7 @@ void SystemControlPanel::displayChannelTab(void) {
 
 void SystemControlPanel::displayThreadTab(void) {
     int i = 3;
-    long long tmp = RT::System::getInstance()->getPeriod();
+    long long tmp = RT::System::getPeriod();
     while((tmp >= 1000)&&(i)) {
         tmp /= 1000;
         i--;
@@ -492,7 +492,7 @@ void SystemControlPanel::receiveEvent(const Event::Object *event) {
     if(event->getName() == Event::SETTINGS_OBJECT_INSERT_EVENT ||
        event->getName() == Event::SETTINGS_OBJECT_REMOVE_EVENT) {
         deviceList->clear();
-        DAQ::Manager::getInstance()->foreachDevice(buildDAQDeviceList,deviceList);
+        DAQ::Manager::foreachDevice(buildDAQDeviceList,deviceList);
         updateDevice();
     }
 }
