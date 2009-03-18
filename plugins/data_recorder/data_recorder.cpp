@@ -1143,6 +1143,14 @@ void DataRecorder::Panel::stopRecording(long long timestamp,bool shutdown) {
     H5Gclose(file.adata);
     H5Gclose(file.trial);
 
+    H5Fflush(file.id,H5F_SCOPE_LOCAL);
+    void *file_handle;
+    H5Fget_vfd_handle(file.id,H5P_DEFAULT,&file_handle);
+    if(fsync(*static_cast<int *>(file_handle))) {
+        DEBUG_MSG("DataRecorder::Panel::stopRecording : fsync failed, running sync\n");
+        sync();
+    }
+
     if(!shutdown) {
         QCustomEvent *event = new QCustomEvent(QEnableGroupsEvent);
         QApplication::postEvent(this,event);
