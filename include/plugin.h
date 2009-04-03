@@ -25,6 +25,8 @@
 #include <string>
 #include <qobject.h>
 
+#include <sys/types.h>
+
 //! Classes associated with the loading/unloading of binaries at run-time.
 /*!
  * Collection of classes to control the loading and unloading of code at run-time.
@@ -156,6 +158,9 @@ namespace Plugin {
 
     private:
 
+        static const u_int32_t MAGIC_NUMBER = 0xCA24CB3F;
+
+        u_int32_t magic_number;
         std::string library;
         void *handle;
 
