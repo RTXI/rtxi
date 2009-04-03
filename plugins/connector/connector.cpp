@@ -41,7 +41,7 @@ static void buildBlockList(IO::Block *block,void *arg) {
 }
 
 Connector::Panel::Panel(QWidget *parent)
-    : QWidget(parent) {
+    : QWidget(parent,NULL,Qt::WDestructiveClose) {
 
     setCaption("Connector Panel");
 
@@ -108,7 +108,9 @@ Connector::Panel::Panel(QWidget *parent)
     }
 }
 
-Connector::Panel::~Panel(void) {}
+Connector::Panel::~Panel(void) {
+    Plugin::getInstance()->removeConnectorPanel(this);
+}
 
 void Connector::Panel::receiveEvent(const Event::Object *event) {
     if(event->getName() == IO::Connector::BLOCK_INSERT_EVENT) {
@@ -313,6 +315,11 @@ void Connector::Plugin::showConnectorPanel(void) {
     if(!panel)
         panel = new Panel(MainWindow::getInstance()->centralWidget());
     panel->show();
+}
+
+void Connector::Plugin::removeConnectorPanel(Connector::Panel *p) {
+    if(p == panel)
+        panel = NULL;
 }
 
 static Mutex mutex;
