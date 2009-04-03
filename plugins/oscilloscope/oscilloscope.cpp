@@ -890,7 +890,7 @@ void Oscilloscope::Properties::showDisplayTab(void) {
 Oscilloscope::Panel::Panel(QWidget *parent)
     : Scope(parent), RT::Thread(0), fifo(10*1048576) {
 
-    setCaption("Oscilloscope");
+    setCaption(QString::number(getID())+" Oscilloscope");
 
     adjustDataSize();
     properties = new Properties(this);
