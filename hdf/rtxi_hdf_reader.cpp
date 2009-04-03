@@ -330,7 +330,7 @@ void print_trial_info(hid_t trial,int num_trial) {
     hsize_t nsamples;
     H5PTget_num_packets(data,&nsamples);
 
-    printf("\tChannels %d X %d samples\n",nchans,nsamples);
+    printf("\t%llu Channels X %llu samples\n",nchans,nsamples);
 
     for(int i=1;i<=nchans;++i) {
         std::stringstream channel_name;
