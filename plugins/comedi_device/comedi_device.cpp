@@ -289,8 +289,11 @@ int ComediDevice::setAnalogGain(type_t type,index_t channel,double gain)
     return 0;
 }
 
-direction_t ComediDevice::getDigitalDirection(index_t) const {
-    return DAQ::INPUT;
+direction_t ComediDevice::getDigitalDirection(index_t channel) const {
+    if(channel >= subdevice[DIO].count)
+        return DAQ::INPUT;
+
+    return subdevice[DIO].chan[channel].digital.direction;
 }
 
 int ComediDevice::setDigitalDirection(index_t channel,direction_t direction) {
