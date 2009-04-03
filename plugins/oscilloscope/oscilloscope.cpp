@@ -906,6 +906,9 @@ Oscilloscope::Panel::Panel(QWidget *parent)
 }
 
 Oscilloscope::Panel::~Panel(void) {
+    while(getChannelsBegin() != getChannelsEnd())
+        delete reinterpret_cast<struct channel_info *>(removeChannel(getChannelsBegin()));
+
     Plugin::getInstance()->removeOscilloscopePanel(this);
     delete properties;
 }

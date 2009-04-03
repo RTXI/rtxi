@@ -108,7 +108,7 @@ std::list<Scope::Channel>::iterator Scope::insertChannel(QString label,double sc
     return --channels.end();
 }
 
-void *Scope::removeChannel(std::list<Scope::Channel>::iterator &channel) {
+void *Scope::removeChannel(std::list<Scope::Channel>::iterator channel) {
     void *info = channel->info;
     channels.erase(channel);
 

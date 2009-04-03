@@ -58,7 +58,7 @@ public:
     bool paused(void) const;
 
     std::list<Channel>::iterator insertChannel(QString,double,double,const QPen &,void *);
-    void *removeChannel(std::list<Channel>::iterator &);
+    void *removeChannel(std::list<Channel>::iterator);
     size_t getChannelCount(void) const;
     std::list<Channel>::iterator getChannelsBegin(void);
     std::list<Channel>::iterator getChannelsEnd(void);
