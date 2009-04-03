@@ -52,7 +52,7 @@ public:
         NEG,
     };
 
-    Scope(QWidget *);
+    Scope(QWidget *,Qt::WFlags =0);
     virtual ~Scope(void);
 
     bool paused(void) const;

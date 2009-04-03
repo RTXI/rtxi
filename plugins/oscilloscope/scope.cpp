@@ -36,8 +36,8 @@ QString Scope::Channel::getLabel(void) const {
     return label;
 }
 
-Scope::Scope(QWidget *parent)
-    : QWidget(parent) {
+Scope::Scope(QWidget *parent,Qt::WFlags flags)
+    : QWidget(parent,NULL,flags) {
     setBackgroundMode(Qt::NoBackground);
 
     setMinimumSize(16,9);

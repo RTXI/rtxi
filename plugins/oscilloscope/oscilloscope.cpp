@@ -888,7 +888,7 @@ void Oscilloscope::Properties::showDisplayTab(void) {
 }
 
 Oscilloscope::Panel::Panel(QWidget *parent)
-    : Scope(parent), RT::Thread(0), fifo(10*1048576) {
+    : Scope(parent,Qt::WDestructiveClose), RT::Thread(0), fifo(10*1048576) {
 
     setCaption(QString::number(getID())+" Oscilloscope");
 
