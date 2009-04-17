@@ -81,7 +81,7 @@ void MainWindow::removeControlMenuItem(int id) {
 
 void MainWindow::about(void)
 {
-    QMessageBox::about(this,"About RTXI","This software is provided under the GPL we make no guarantees... blah blah blah");
+    QMessageBox::about(this,"About RTXI","Version 1.1.2");
 }
 
 void MainWindow::aboutQt(void)

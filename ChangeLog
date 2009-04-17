@@ -1,0 +1,90 @@
+2009-04-03 22:10  Jonathan Bettencourt <jbetten@med.cornell.edu>
+
+	* include/plugin.h, src/plugin.cpp:
+	  
+	  Added a check in Plugin::Manager::load() to validate that the
+	  return from createRTXIPlugin is a valid Plugin::Object.
+
+2009-04-03 21:43  Jonathan Bettencourt <jbetten@med.cornell.edu>
+
+	* plugins/comedi_device/comedi_device.cpp:
+	  
+	  ComediDevice::getDigitalDirection() was always returning
+	  DAQ::INPUT instead of the digital channel's actual directin.
+
+2009-04-03 20:33  Jonathan Bettencourt <jbetten@med.cornell.edu>
+
+	* plugins/electrode_resistance_measurement/electrode_resistance_measurement.cpp:
+	  
+	  The elecrode resistance plugin had two bugs. 1) Its settings were
+	  being saved wrong, its parameters were saved with the wrong
+	  units. 2) If you specified too short of a stimulus pulse there
+	  could be a divison by zero error.
+
+2009-04-03 18:51  Jonathan Bettencourt <jbetten@med.cornell.edu>
+
+	* hdf/rtxi_hdf_reader.cpp:
+	  
+	  The rtxi_hdf_reader was using "%d" to printf hsize_t's which are
+	  unsigned long long's, this would cause rtxi_hdf_reader to print
+	  0's instead of the actual value. Now using "%llu" instead of
+	  "%d".
+
+2009-04-03 18:43  Jonathan Bettencourt <jbetten@med.cornell.edu>
+
+	* plugins/connector/connector.cpp, plugins/connector/connector.h:
+	  
+	  The connector panel was hiding whe you clicked the 'X' instead of
+	  actually closing.
+
+2009-04-03 18:37  Jonathan Bettencourt <jbetten@med.cornell.edu>
+
+	* plugins/oscilloscope/oscilloscope.cpp,
+	  plugins/oscilloscope/scope.cpp, plugins/oscilloscope/scope.h:
+	  
+	  The Oscilloscope was hiding instead of actually closing when you
+	  clicked the 'X' or selected "Exit" from the popup menu.
+
+2009-04-03 18:29  Jonathan Bettencourt <jbetten@med.cornell.edu>
+
+	* plugins/oscilloscope/oscilloscope.cpp:
+	  
+	  The Oscilloscope wasn't displaying it's Settings::ID in it's
+	  caption.
+
+2009-04-03 18:24  Jonathan Bettencourt <jbetten@med.cornell.edu>
+
+	* plugins/oscilloscope/oscilloscope.cpp,
+	  plugins/oscilloscope/scope.cpp, plugins/oscilloscope/scope.h:
+	  
+	  Fixed a bug in the Oscilloscope where it would sometimes crash
+	  RTXI if it was closed while it was displaying channels.
+
+2009-03-27 20:11  Jonathan Bettencourt <jbetten@med.cornell.edu>
+
+	* autogen.sh:
+	  
+	  Created the 1.1.1 release. Made changes to the RTXI version
+	  string in autogen.sh.
+
+2009-03-18 16:21  Jonathan Bettencourt <jbetten@med.cornell.edu>
+
+	* plugins/data_recorder/data_recorder.cpp:
+	  
+	  Added some code to explicitly flush data to disk when a recording
+	  is completed. Without this code the file wasn't valid until it
+	  was closed, this meant that in the event of a crash data could be
+	  last well after an experiment was completed.
+
+2009-03-04 19:22  Jonathan Bettencourt <jbetten@med.cornell.edu>
+
+	* .:
+	  
+	  Create the stable 1.1 branch.
+
+2009-03-04 19:14  Jonathan Bettencourt <jbetten@med.cornell.edu>
+
+	* 
+	  
+	  Initial 1.1 import from CVS.
+
