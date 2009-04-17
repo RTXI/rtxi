@@ -888,9 +888,9 @@ void Oscilloscope::Properties::showDisplayTab(void) {
 }
 
 Oscilloscope::Panel::Panel(QWidget *parent)
-    : Scope(parent), RT::Thread(0), fifo(10*1048576) {
+    : Scope(parent,Qt::WDestructiveClose), RT::Thread(0), fifo(10*1048576) {
 
-    setCaption("Oscilloscope");
+    setCaption(QString::number(getID())+" Oscilloscope");
 
     adjustDataSize();
     properties = new Properties(this);
@@ -906,6 +906,9 @@ Oscilloscope::Panel::Panel(QWidget *parent)
 }
 
 Oscilloscope::Panel::~Panel(void) {
+    while(getChannelsBegin() != getChannelsEnd())
+        delete reinterpret_cast<struct channel_info *>(removeChannel(getChannelsBegin()));
+
     Plugin::getInstance()->removeOscilloscopePanel(this);
     delete properties;
 }

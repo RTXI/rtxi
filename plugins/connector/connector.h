@@ -77,6 +77,8 @@ namespace Connector {
 
         Q_OBJECT
 
+        friend class Panel;
+
     public:
 
         static Plugin *getInstance(void);
@@ -86,6 +88,8 @@ namespace Connector {
         void showConnectorPanel(void);
 
     private:
+
+        void removeConnectorPanel(Panel *);
 
         Plugin(void);
         ~Plugin(void);

@@ -24,7 +24,7 @@
 #include <qapplication.h>
 
 Plugin::Object::Object(void)
-    : handle(0) {
+    : magic_number(Plugin::Object::MAGIC_NUMBER), handle(0) {
     Plugin::Manager::insertPlugin(this);
 }
 
@@ -71,6 +71,11 @@ Plugin::Object *Plugin::Manager::load(const std::string &library) {
     Object *plugin = create();
     if(!plugin) {
         ERROR_MSG("Plugin::load : failed to load %s : failed to create instance\n",library.c_str());
+        dlclose(handle);
+        return 0;
+    }
+    if(plugin->magic_number != Plugin::Object::MAGIC_NUMBER) {
+        ERROR_MSG("Plugin::load : the pointer returned from %s::createRTXIPlugin() isn't a valid Plugin::Object *.\n",library.c_str());
         dlclose(handle);
         return 0;
     }

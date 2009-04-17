@@ -115,9 +115,9 @@ void ElectrodeResistanceMeasurement::Panel::doLoad(const Settings::Object::State
 }
 
 void ElectrodeResistanceMeasurement::Panel::doSave(Settings::Object::State &s) const {
-    s.saveDouble("Holding Potential",V0);
-    s.saveDouble("Step Size",dV);
-    s.saveDouble("Pulse Width",T);
+    s.saveDouble("Holding Potential",V0*1e3);
+    s.saveDouble("Step Size",dV*1e3);
+    s.saveDouble("Pulse Width",T*1e3);
 }
 
 void ElectrodeResistanceMeasurement::Panel::execute(void) {
@@ -162,7 +162,7 @@ void ElectrodeResistanceMeasurement::Panel::updateDisplay(void) {
             RString.append(" G");
         else {
             QString suffix;
-            suffix.sprintf(" * 1e%d",3*exp);
+            suffix.sprintf(" * 1e%lu",3*exp);
         }
     }
 
@@ -197,7 +197,10 @@ int ElectrodeResistanceMeasurement::Panel::UpdateParametersEvent::callback(void)
     panel->dV = dV;
     panel->T = T;
 
-    panel->cnt = 2*T/(RT::System::getPeriod()*1e-9);
+    panel->cnt = 2.0*T/(RT::System::getPeriod()*1e-9);
+    if(!panel->cnt)
+        panel->cnt = 1;
+
     panel->idx = 0;
 
     panel->I1 = panel->I2 = 0.0;
