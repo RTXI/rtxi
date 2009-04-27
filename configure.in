@@ -2,6 +2,7 @@ AC_INIT([RTXI],[1.2],[rtxi-help@lists.sourceforge.net],rtxi)
 
 AM_CONFIG_HEADER(include/rtxi_config.h)
 AM_INIT_AUTOMAKE
+AM_PATH_CPPUNIT
 
 AC_PROG_LIBTOOL
 AC_PROG_CC
@@ -119,6 +120,7 @@ scripts/Makefile
 scripts/init_rtxi
 scripts/rtxi_comedi
 scripts/rtxi_plugin_config
+testsuite/Makefile
 plugins/system_control/Makefile
 plugins/neuron/Makefile
 plugins/data_recorder/Makefile
