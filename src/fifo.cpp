@@ -16,94 +16,79 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <compiler.h>
 #include <debug.h>
 #include <fifo.h>
 #include <string.h>
 
-/**********************************************************************
- * Magic is a token added to the end of the fifo buffer used to check *
- *   if the end of the buffer has been over written.                  *
- **********************************************************************/
-
-#ifdef DEBUG
-#define MAGIC 0x55
-#endif
-
-#define AVAILABLE ((size+wptr-rptr)%size)
-static inline size_t min(size_t x,size_t y,size_t z) {
-    if(x < y) {
-        if(x < z)
-            return x;
-        else
-            return z;
-    } else {
-        if(y < z)
-            return y;
-        else
-            return z;
-    }
-}
+#define AVAILABLE    ((size+wptr-rptr)%size)
 
 Fifo::Fifo(size_t s)
-    : rptr(0), wptr(0), sem(0), size(s) {
-#ifdef DEBUG
-    data = new char[size+1];
-    data[size] = MAGIC;
-#else
+    : rptr(0), wptr(0), size(s) {
     data = new char[size];
-#endif
+
+    pthread_mutexattr_t mutex_attr;
+    pthread_mutexattr_init(&mutex_attr);
+    pthread_mutexattr_setprotocol(&mutex_attr,PTHREAD_PRIO_INHERIT);
+
+    pthread_mutex_init(&mutex,&mutex_attr);
+    pthread_cond_init(&data_available,NULL);
+
+    pthread_mutexattr_destroy(&mutex_attr);
 }
 
 Fifo::~Fifo(void) {
-#ifdef DEBUG
-    if(data[size] != MAGIC)
-        ERROR_MSG("Fifo::~Fifo : end of buffer exceeded\n");
-#endif
-
     if(data) delete[] data;
+
+    pthread_mutex_destroy(&mutex);
+    pthread_cond_destroy(&data_available);
 }
 
 size_t Fifo::read(void *buffer,size_t n,bool blocking) {
-    size_t read = 0;
+    // Acquire the data lock
+    if(blocking)
+        pthread_mutex_lock(&mutex);
+    else if(pthread_mutex_trylock(&mutex) != 0)
+        return 0;
 
-    if(likely(AVAILABLE >= n)) {
-        if(n > size-rptr) {
-            memcpy(buffer,reinterpret_cast<char *>(data)+rptr,size-rptr);
-            memcpy(reinterpret_cast<char *>(buffer)+size-rptr,data,n-size+rptr);
-        } else
-            memcpy(buffer,data+rptr,n);
-        read = n;
-        rptr = (rptr+n)%size;
-    } else if(unlikely(blocking))
-        do {
-            while(!AVAILABLE) sem.down();
+    // Check that enough data is available
+    if(AVAILABLE < n)
+        if(blocking) {
+            do {
+                pthread_cond_wait(&data_available,&mutex);
+            } while(AVAILABLE < n);
+        } else {
+            pthread_mutex_unlock(&mutex);
+            return 0;
+        }
 
-            size_t chunk = min(AVAILABLE,n-read,size-rptr);
-            memcpy(reinterpret_cast<char *>(buffer)+read,data+rptr,chunk);
-            read += chunk;
-            rptr = (rptr+chunk)%size;
-        } while(read < n);
+    // Copy the data from the fifo
+    if(size-rptr < n) {
+        size_t m = size-rptr;
+        memcpy(buffer,data+rptr,m);
+        memcpy(reinterpret_cast<char *>(buffer)+m,data,n-m);
+    } else
+        memcpy(buffer,data+rptr,n);
+    rptr = (rptr+n)%size;
 
-    return read;
+    pthread_mutex_unlock(&mutex);
+    return n;
 }
 
 size_t Fifo::write(const void *buffer,size_t n) {
-    if(unlikely(n > size-AVAILABLE)) {
+    if(n >= size-AVAILABLE) {
         ERROR_MSG("Fifo::write : fifo full, data lost\n");
         return 0;
     }
 
     if(n > size-wptr) {
-        memcpy(data+wptr,buffer,size-wptr);
-        memcpy(data,reinterpret_cast<const char *>(buffer)+(size-wptr),n-(size-wptr));
+        size_t m = size-wptr;
+        memcpy(data+wptr,buffer,m);
+        memcpy(data,reinterpret_cast<const char *>(buffer)+m,n-m);
     } else
         memcpy(data+wptr,buffer,n);
-
     wptr = (wptr+n)%size;
 
-    if(likely(sem.value() < 1))
-        sem.up();
+    pthread_cond_signal(&data_available);
 
     return n;
 }

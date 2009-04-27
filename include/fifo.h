@@ -19,7 +19,8 @@
 #ifndef FIFO_H
 #define FIFO_H
 
-#include <sem.h>
+#include <cstdlib>
+#include <pthread.h>
 
 class Fifo
 {
@@ -35,10 +36,11 @@ public:
 private:
 
     char *data;
-    int rptr;
-    int wptr;
-    Semaphore sem;
+    volatile int rptr;
+    volatile int wptr;
     size_t size;
+    pthread_mutex_t mutex;
+    pthread_cond_t data_available;
 
 };
 

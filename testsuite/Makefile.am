@@ -8,7 +8,12 @@ LIBS = $(CPPUNIT_LIBS)
 run_SOURCES = \
 		main.cpp \
 		test_rt_os.h \
-		test_rt_os.cpp
+		test_rt_os.cpp \
+		test_fifo.h \
+		test_fifo.cpp \
+		$(top_srcdir)/include/rt.h \
+		$(top_srcdir)/include/fifo.h \
+		$(top_srcdir)/src/fifo.cpp
 
 if RTAI3
 run_SOURCES += \
