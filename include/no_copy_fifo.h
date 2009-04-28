@@ -1,7 +1,7 @@
 #ifndef NO_COPY_FIFO_H
 #define NO_COPY_FIFO_H
 
-#include <sem.h>
+#include <pthread.h>
 
 class NoCopyFifo {
 
@@ -19,13 +19,15 @@ public:
 private:
 
     char *data;
-    size_t rptr;
-    size_t wptr;
-    Semaphore sem;
+    volatile size_t rptr;
+    volatile size_t wptr;
     size_t rsize;
     size_t wsize;
     size_t size;
-    size_t wrap;
+    volatile size_t wrap;
+
+    pthread_mutex_t mutex;
+    pthread_cond_t data_available;
 
 }; // NoCopyFifo
 
