@@ -7,8 +7,10 @@ class Fifo;
 
 class TestFifo : public CppUnit::TestCase {
     CPPUNIT_TEST_SUITE(TestFifo);
+
     CPPUNIT_TEST(testSingleReadWrite);
     CPPUNIT_TEST(testWrappingReadWrite);
+
     CPPUNIT_TEST_SUITE_END();
 
 public:
