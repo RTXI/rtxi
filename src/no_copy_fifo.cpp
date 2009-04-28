@@ -8,14 +8,8 @@ NoCopyFifo::NoCopyFifo(size_t s)
     : rptr(0), wptr(0), rsize(0), wsize(0), size(s), wrap(s) {
     data = new char[size];
 
-    pthread_mutexattr_t mutex_attr;
-    pthread_mutexattr_init(&mutex_attr);
-    pthread_mutexattr_setprotocol(&mutex_attr,PTHREAD_PRIO_INHERIT);
-
-    pthread_mutex_init(&mutex,&mutex_attr);
+    pthread_mutex_init(&mutex,NULL);
     pthread_cond_init(&data_available,NULL);
-
-    pthread_mutexattr_destroy(&mutex_attr);
 }
 
 NoCopyFifo::~NoCopyFifo(void) {

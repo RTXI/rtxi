@@ -90,7 +90,11 @@ int RT::OS::createTask(RT::OS::Task *task,void *(*entry)(void *),void *arg,int) 
 
 void RT::OS::deleteTask(RT::OS::Task task) {
     posix_task_t *t = reinterpret_cast<posix_task_t *>(task);
+    if(t == NULL)
+        return;
+
     pthread_join(t->thread,0);
+    delete t;
 }
 
 bool RT::OS::isRealtime(void) {
@@ -118,6 +122,8 @@ int RT::OS::setPeriod(RT::OS::Task task,long long period) {
 
 void RT::OS::sleepTimestep(RT::OS::Task task) {
     posix_task_t *t = reinterpret_cast<posix_task_t *>(task);
+    if(t == NULL)
+        return;
 
     long long sleep_time = t->next_t-getTime();
     t->next_t += t->period;
