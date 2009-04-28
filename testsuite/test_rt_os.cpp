@@ -14,15 +14,17 @@ void TestRTOS::tearDown(void) {
     RT::OS::shutdown();
 }
 
+#define TARGET_SLEEP 100000ul
+
 void TestRTOS::testGetTime(void) {
     long long time, prev_time;
 
     prev_time = RT::OS::getTime();
 
     for(size_t i=0;i<10;++i) {
-        sleep(1);
+        usleep(TARGET_SLEEP);
         time = RT::OS::getTime();
-        CPPUNIT_ASSERT(time >= prev_time + 1*1e9);
+        CPPUNIT_ASSERT(time >= prev_time + TARGET_SLEEP*1e3);
         prev_time = time;
     }
 }
@@ -45,7 +47,7 @@ void TestRTOS::testTaskCreate(void) {
     CPPUNIT_ASSERT(executed == true);
 }
 
-#define TARGET_PERIOD 100000000ll
+#define TARGET_PERIOD 10000000ll
 
 struct test_task_periodic_t {
     RT::OS::Task task;
