@@ -5,20 +5,21 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-class Fifo;
+#include <no_copy_fifo.h>
 
 class RTFile {
 
 public:
 
     RTFile(void);
-    RTFile(const std::string &,int =O_CREAT|O_WRONLY|O_TRUNC,int =S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
+    RTFile(const std::string &,int,mode_t =S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
     ~RTFile(void);
 
-    int open(const std::string &,int =O_CREAT|O_WRONLY|O_TRUNC,int =S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
+    bool open(const std::string &,int,mode_t =S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
     void close(void);
 
-    void write(void *,size_t);
+    size_t write(void *,size_t);
+    size_t read(void *,size_t);
 
 private:
 
@@ -28,10 +29,9 @@ private:
     bool done;
 
     int fd;
-    std::string filename;
+    bool writing;
 
     pthread_t thread;
-
-    Fifo *fifo;
+    NoCopyFifo fifo;
 
 }; // class RTFile

@@ -13,11 +13,15 @@ run_SOURCES = \
 		test_fifo.cpp \
 		test_no_copy_fifo.h \
 		test_no_copy_fifo.cpp \
+		test_rtfile.h \
+		test_rtfile.cpp \
 		$(top_srcdir)/include/rt.h \
 		$(top_srcdir)/include/fifo.h \
 		$(top_srcdir)/include/no_copy_fifo.h \
+		$(top_srcdir)/include/rtfile.h \
 		$(top_srcdir)/src/fifo.cpp \
-		$(top_srcdir)/src/no_copy_fifo.cpp
+		$(top_srcdir)/src/no_copy_fifo.cpp \
+		$(top_srcdir)/src/rtfile.cpp
 
 if RTAI3
 run_SOURCES += \
