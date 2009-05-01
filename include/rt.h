@@ -22,7 +22,7 @@
 #include <fifo.h>
 #include <mutex.h>
 #include <pthread.h>
-#include <sem.h>
+#include <semaphore.h>
 #include <settings.h>
 
 //! Realtime Oriented Classes
@@ -86,7 +86,7 @@ namespace RT {
         void wait(void);
 
         int retval;
-        Semaphore signal;
+        sem_t signal;
 
     }; // class Event
 
@@ -426,7 +426,6 @@ namespace RT {
 
         static void *bounce(void *);
         void execute(void);
-        Semaphore signal;
 
         bool finished;
         pthread_t thread;

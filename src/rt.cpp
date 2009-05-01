@@ -97,18 +97,21 @@ int RT::System::SetPeriodEvent::callback(void) {
     return retval;
 }
 
-RT::Event::Event(void)
-    : signal(0) {}
+RT::Event::Event(void) {
+    sem_init(&signal,0,0);
+}
 
-RT::Event::~Event(void) {}
+RT::Event::~Event(void) {
+    sem_destroy(&signal);
+}
 
 void RT::Event::execute(void) {
     retval = callback();
-    signal.up();
+    sem_post(&signal);
 }
 
 void RT::Event::wait(void) {
-    signal.down();
+    sem_wait(&signal);
 }
 
 RT::Device::Device(void)
@@ -160,8 +163,6 @@ RT::System::System(void)
         ERROR_MSG("RT::System::System : failed to create realtime thread\n");
         return;
     }
-
-    signal.down();
 }
 
 RT::System::~System(void) {
@@ -323,11 +324,9 @@ void RT::System::execute(void) {
 
     if(RT::OS::setPeriod(task,period)) {
         ERROR_MSG("RT::System::execute : failed to set the initial period of the realtime thread\n");
-        signal.up();
         return;
     }
 
-    signal.up();
     while(!finished) {
         RT::OS::sleepTimestep(task);
 
