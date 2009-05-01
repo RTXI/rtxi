@@ -59,6 +59,11 @@ void TestRTFile::testLargeWrite(void) {
     }
     file.close();
 
+    // Verify that the data was written to file
+    struct stat fstats;
+    fstat(fd,&fstats);
+    CPPUNIT_ASSERT(fstats.st_size == sizeof(value1));
+
     close(fd);
 
     CPPUNIT_ASSERT((fd = open(file_name,O_RDONLY)) >= 0);
@@ -106,6 +111,13 @@ void TestRTFile::testLargeRead(void) {
         value1[i] = rand();
         CPPUNIT_ASSERT(write(fd,value1+i,sizeof(value1[0])) == sizeof(value1[0]));
     }
+    fsync(fd);
+
+    // Verify that the data was written to file
+    struct stat fstats;
+    fstat(fd,&fstats);
+    CPPUNIT_ASSERT(fstats.st_size == sizeof(value1));
+
     close(fd);
 
     CPPUNIT_ASSERT(file.open(file_name,O_RDONLY));
