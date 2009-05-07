@@ -30,7 +30,9 @@ run_SOURCES = \
 		test_no_copy_fifo.h \
 		test_no_copy_fifo.cpp \
 		test_rtfile.h \
-		test_rtfile.cpp
+		test_rtfile.cpp \
+		test_event.h \
+		test_event.cpp
 
 if RTAI3
 run_SOURCES += \
