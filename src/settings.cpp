@@ -16,7 +16,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <compiler.h>
 #include <cstdlib>
 #include <debug.h>
 #include <errno.h>
@@ -39,11 +38,11 @@ namespace {
 }; // namespace
 
 Settings::Object::Object(void) : id(0) {
-    Manager::insertObject(this);
+    Manager::getInstance()->insertObject(this);
 }
 
 Settings::Object::~Object(void) {
-    Manager::removeObject(this);
+    Manager::getInstance()->removeObject(this);
 }
 
 Settings::Object::State::State(void) : id(0) {};
@@ -169,14 +168,11 @@ Settings::Object::State Settings::Object::save(void) const {
 }
 
 void Settings::Object::load(const Settings::Object::State &s) {
-    if(unlikely(!Manager::instance))
-        Manager::initialize();
-
     if(id != s.id) {
-        Mutex::Locker lock(&Manager::instance->mutex);
+        Mutex::Locker lock(&Manager::getInstance()->mutex);
 
-        Manager::releaseID(this);
-        Manager::acquireID(this,s.id);
+        Manager::getInstance()->releaseID(this);
+        Manager::getInstance()->acquireID(this,s.id);
     }
 
     doLoad(s);
@@ -186,32 +182,23 @@ void Settings::Object::deferred(const Settings::Object::State &s) {
     doDeferred(s);
 }
 
-Settings::Object *Settings::Manager::getObject(Settings::Object::ID id) {
-    if(unlikely(!instance))
-        initialize();
+Settings::Object *Settings::Manager::getObject(Settings::Object::ID id) const {
+    Mutex::Locker lock(&mutex);
 
-    Mutex::Locker lock(&instance->mutex);
-
-    std::map<Object::ID,Object *>::const_iterator i = instance->objectMap.find(id);
-    if(i != instance->objectMap.end())
+    std::map<Object::ID,Object *>::const_iterator i = objectMap.find(id);
+    if(i != objectMap.end())
         return i->second;
     else
         return 0;
 }
 
 void Settings::Manager::foreachObject(void (*callback)(Object *,void *),void *param) {
-    if(unlikely(!instance))
-        initialize();
-
-    Mutex::Locker lock(&instance->mutex);
-    for(std::list<Object *>::iterator i = instance->objectList.begin(),end = instance->objectList.end();i != end;++i)
+    Mutex::Locker lock(&mutex);
+    for(std::list<Object *>::iterator i = objectList.begin(),end = objectList.end();i != end;++i)
         callback(*i,param);
 }
 
 int Settings::Manager::load(const std::string &filename) {
-    if(unlikely(!instance))
-        initialize();
-
     QFile file(filename);
     if(!file.open(IO_ReadOnly)) {
         ERROR_MSG("Settings::Manager::load : failed to open %s for reading\n",filename.c_str());
@@ -237,9 +224,9 @@ int Settings::Manager::load(const std::string &filename) {
      * Return RTXI to a startup like state.
      */
 
-    Plugin::Manager::unloadAll();
-    long long period = RT::System::getPeriod();
-    RT::System::setPeriod(1000000);
+    Plugin::Manager::getInstance()->unloadAll();
+    long long period = RT::System::getInstance()->getPeriod();
+    RT::System::getInstance()->setPeriod(1000000);
 
     Object::State s;
     Plugin::Object *plugin;
@@ -249,7 +236,7 @@ int Settings::Manager::load(const std::string &filename) {
 
         s.xml(e2);
         if(e2.attribute("component") == "plugin") {
-            if((plugin = Plugin::Manager::load(e2.attribute("library")))) {
+            if((plugin = Plugin::Manager::getInstance()->load(e2.attribute("library")))) {
                 defer_t defer = { plugin, s };
                 deferList.push_back(defer);
                 plugin->load(s);
@@ -260,7 +247,7 @@ int Settings::Manager::load(const std::string &filename) {
             if(period < 1000)
                 period = s.loadDouble("Period");
         } else if(e2.attribute("component") == "io") {
-            defer_t defer = { IO::Connector::initialize(), s };
+            defer_t defer = { IO::Connector::getInstance(), s };
             deferList.push_back(defer);
         }
     }
@@ -268,7 +255,7 @@ int Settings::Manager::load(const std::string &filename) {
         i->object->deferred(i->s);
 
     if(period)
-        RT::System::setPeriod(period);
+        RT::System::getInstance()->setPeriod(period);
 
     return 0;
 }
@@ -294,7 +281,7 @@ int Settings::Manager::save(const std::string &filename) {
      */
     Object::State s;
     char buffer[256];
-    snprintf(buffer,256,"%lld",RT::System::getPeriod());
+    snprintf(buffer,256,"%lld",RT::System::getInstance()->getPeriod());
     s.saveString("Period",buffer);
     e = s.xml(doc);
     e.setAttribute("component","rt");
@@ -303,14 +290,14 @@ int Settings::Manager::save(const std::string &filename) {
     /*
      * Save IO Connection information
      */
-    e = IO::Connector::initialize()->save().xml(doc);
+    e = IO::Connector::getInstance()->save().xml(doc);
     e.setAttribute("component","io");
     doc.documentElement().appendChild(e);
 
     /*
      * Save Plugin Settings information
      */
-    Plugin::Manager::foreachPlugin(saveState,&doc);
+    Plugin::Manager::getInstance()->foreachPlugin(saveState,&doc);
 
     QFile file(filename);
     if(!file.open(IO_WriteOnly)) {
@@ -325,14 +312,11 @@ int Settings::Manager::save(const std::string &filename) {
 }
 
 void Settings::Manager::acquireID(Settings::Object *object,Settings::Object::ID id) {
-    if(unlikely(!instance))
-        initialize();
-
-    Mutex::Locker lock(&instance->mutex);
+    Mutex::Locker lock(&mutex);
 
     if(id != Object::INVALID) {
-        if(instance->objectMap.find(id) == instance->objectMap.end()) {
-            instance->objectMap[id] = object;
+        if(objectMap.find(id) == objectMap.end()) {
+            objectMap[id] = object;
             object->id = id;
             return;
         } else
@@ -344,7 +328,7 @@ void Settings::Manager::acquireID(Settings::Object *object,Settings::Object::ID 
      *   It ain't pretty, O(n^2) if my math is correct...      *
      ***********************************************************/
 
-    while(instance->objectMap.find(instance->currentID) != instance->objectMap.end() && instance->currentID != Object::INVALID) ++instance->currentID;
+    while(objectMap.find(currentID) != objectMap.end() && currentID != Object::INVALID) ++currentID;
 
     /*****************************************************************************
      * It is possible that there are no more available IDs, and in that case     *
@@ -353,70 +337,61 @@ void Settings::Manager::acquireID(Settings::Object *object,Settings::Object::ID 
      *     IDs, so we would probably run out of memory before hitting this limit *
      *****************************************************************************/
 
-    if(instance->currentID == Object::INVALID) {
+    if(currentID == Object::INVALID) {
         ERROR_MSG("Settings::Manager::acquireID : maximum number of settings objects loaded.\n");
         object->id = Object::INVALID;
     } else {
-        object->id = instance->currentID;
-        instance->objectMap[instance->currentID++] = object;
+        object->id = currentID;
+        objectMap[currentID++] = object;
     }
 }
 
 void Settings::Manager::releaseID(Settings::Object *object) {
-    if(unlikely(!instance))
-        initialize();
-
-    Mutex::Locker lock(&instance->mutex);
+    Mutex::Locker lock(&mutex);
 
     if(object->id != Object::INVALID) {
-        instance->objectMap.erase(object->id);
-        if(object->id < instance->currentID) instance->currentID = object->id;
+        objectMap.erase(object->id);
+        if(object->id < currentID) currentID = object->id;
         object->id = Object::INVALID;
     }
 }
 
 void Settings::Manager::insertObject(Settings::Object *object) {
-    if(unlikely(!instance))
-        initialize();
-
     if(!object) {
         ERROR_MSG("Settings::Manager::insertObject : invalid object\n");
         return;
     }
 
-    Mutex::Locker lock(&instance->mutex);
+    Mutex::Locker lock(&mutex);
 
     acquireID(object);
     std::list<Object *>::iterator i;
-    for(i = instance->objectList.begin();i != instance->objectList.end() && (*i)->id < object->id;++i);
+    for(i = objectList.begin();i != objectList.end() && (*i)->id < object->id;++i);
 
     Event::Object event(Event::SETTINGS_OBJECT_INSERT_EVENT);
     event.setParam("object",object);
-    Event::Manager::postEvent(&event);
+    Event::Manager::getInstance()->postEvent(&event);
 
-    instance->objectList.insert(i,object);
+    objectList.insert(i,object);
 }
 
 void Settings::Manager::removeObject(Settings::Object *object) {
-    if(unlikely(!instance))
-        initialize();
-
-    Mutex::Locker lock(&instance->mutex);
+    Mutex::Locker lock(&mutex);
 
     Event::Object event(Event::SETTINGS_OBJECT_REMOVE_EVENT);
     event.setParam("object",object);
-    Event::Manager::postEvent(&event);
+    Event::Manager::getInstance()->postEvent(&event);
 
-    instance->objectList.remove(object);
+    objectList.remove(object);
     releaseID(object);
 }
 
 static Mutex mutex;
 Settings::Manager *Settings::Manager::instance = 0;
 
-void Settings::Manager::initialize(void) {
+Settings::Manager *Settings::Manager::getInstance(void) {
     if(instance)
-        return;
+        return instance;
 
     /*************************************************************************
      * Seems like alot of hoops to jump through, but static allocation isn't *
@@ -428,4 +403,5 @@ void Settings::Manager::initialize(void) {
         static Manager manager;
         instance = &manager;
     }
+    return instance;
 }

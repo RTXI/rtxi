@@ -337,21 +337,27 @@ namespace RT {
 
     public:
 
-        static void initialize(void);
+        /*!
+         * System is a Singleton, which means that there can only be one instance.
+         *   This function returns a pointer to that single instance.
+         *
+         * \return The instance of System.
+         */
+        static System *getInstance(void);
 
         /*!
          * Get the current period of the System in nanoseconds.
          *
          * \return The current period
          */
-        static long long getPeriod(void);
+        long long getPeriod(void) const { return period; };
         /*!
          * Set a new period for the System in nanoseconds.
          *
          * \param period The new desired period.
          * \return 0 on success, A negative value upon failure.
          */
-        static int setPeriod(long long period);
+        int setPeriod(long long period);
 
         /*!
          * Loop through each Device and executes a callback.
@@ -362,7 +368,7 @@ namespace RT {
          * \param param A parameter to the callback function.
          * \sa RT::Device
          */
-        static void foreachDevice(void (*callback)(Device *,void *),void *param);
+        void foreachDevice(void (*callback)(Device *,void *),void *param);
         /*!
          * Loop through each Thread and executes a callback.
          * The callback takes two parameters, a Thread pointer and param,
@@ -372,7 +378,7 @@ namespace RT {
          * \param param A parameter to the callback function
          * \sa RT::Thread
          */
-        static void foreachThread(void (*callback)(Thread *,void *),void *param);
+        void foreachThread(void (*callback)(Thread *,void *),void *param);
 
         /*!
          * Post an Event for execution by the realtime task, this acts as a
@@ -383,7 +389,7 @@ namespace RT {
          * \return The value returned from event->callback()
          * \sa RT:Event
          */
-        static int postEvent(Event *event,bool blocking =true);
+        int postEvent(Event *event,bool blocking =true);
 
     private:
 
@@ -395,20 +401,19 @@ namespace RT {
         System(void);
         ~System(void);
         System(const System &) : eventFifo(0) {};
-        System &operator=(const System &) { return *instance; };
+        System &operator=(const System &) { return *getInstance(); };
 
         class SetPeriodEvent : public RT::Event {
 
         public:
 
-            SetPeriodEvent(RT::System *,long long);
+            SetPeriodEvent(long long);
             ~SetPeriodEvent(void);
 
             int callback(void);
 
         private:
 
-            RT::System *sys;
             long long period;
 
         }; // class SetPeriodEvent
@@ -417,12 +422,12 @@ namespace RT {
         static System *instance;
 
         Mutex deviceMutex;
-        static void insertDevice(Device *);
-        static void removeDevice(Device *);
+        void insertDevice(Device *);
+        void removeDevice(Device *);
 
         Mutex threadMutex;
-        static void insertThread(Thread *);
-        static void removeThread(Thread *);
+        void insertThread(Thread *);
+        void removeThread(Thread *);
 
         static void *bounce(void *);
         void execute(void);
@@ -532,13 +537,13 @@ namespace RT {
     template<typename T>
     void List<T>::insert(iterator position,T &node) {
         InsertListNodeEvent event(this,position,&node);
-        RT::System::postEvent(&event);
+        RT::System::getInstance()->postEvent(&event);
     }
 
     template<typename T>
     void List<T>::remove(T &node) {
         RemoveListNodeEvent event(this,&node);
-        RT::System::postEvent(&event);
+        RT::System::getInstance()->postEvent(&event);
     }
 
 } // namespace RT

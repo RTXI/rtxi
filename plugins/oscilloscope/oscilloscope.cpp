@@ -142,7 +142,7 @@ void Oscilloscope::Properties::receiveEvent(const ::Event::Object *event) {
                 DEBUG_MSG("Oscilloscope::Properties::receiveEvent : removed block never inserted\n");
         }
     } else if(event->getName() == Event::RT_POSTPERIOD_EVENT) {
-        panel->setPeriod(RT::System::getPeriod()*1e-6);
+        panel->setPeriod(RT::System::getInstance()->getPeriod()*1e-6);
         panel->adjustDataSize();
 
         showTab();
@@ -502,7 +502,7 @@ void Oscilloscope::Properties::createChannelTab(void) {
     (new QLabel("Channel:",hbox0))->setFixedWidth(60);
     blockList = new QComboBox(hbox0);
     block_list_info_t info = { blockList, &panel->blocks };
-    IO::Connector::foreachBlock(::buildBlockList,&info);
+    IO::Connector::getInstance()->foreachBlock(::buildBlockList,&info);
     QObject::connect(blockList,SIGNAL(activated(int)),this,SLOT(buildChannelList(void)));
     typeList = new QComboBox(hbox0);
     typeList->insertItem("Input");
@@ -942,7 +942,7 @@ void Oscilloscope::Panel::execute(void) {
                     event.setParam("direction",&direction);
                     event.setParam("threshold",&thresholdValue);
 
-                    Event::Manager::postEventRT(&event);
+                    Event::Manager::getInstance()->postEventRT(&event);
                 }
             }
 
@@ -960,7 +960,7 @@ bool Oscilloscope::Panel::setInactiveSync(void) {
     setActive(false);
 
     SyncEvent event;
-    RT::System::postEvent(&event);
+    RT::System::getInstance()->postEvent(&event);
 
     return active;
 }
@@ -971,7 +971,7 @@ void Oscilloscope::Panel::flushFifo(void) {
 }
 
 void Oscilloscope::Panel::adjustDataSize(void) {
-    double period = RT::System::getPeriod()*1e-6;
+    double period = RT::System::getInstance()->getPeriod()*1e-6;
     size_t size = ceil(getDivT()*getDivX()/period)+1;
 
     setDataSize(size);
@@ -1028,7 +1028,7 @@ void Oscilloscope::Panel::doDeferred(const Settings::Object::State &s) {
         std::ostringstream str;
         str << i;
 
-        IO::Block *block = dynamic_cast<IO::Block *>(Settings::Manager::getObject(s.loadInteger(str.str()+" ID")));
+        IO::Block *block = dynamic_cast<IO::Block *>(Settings::Manager::getInstance()->getObject(s.loadInteger(str.str()+" ID")));
         if(!block) continue;
 
         struct channel_info *info = new struct channel_info;
@@ -1122,11 +1122,11 @@ extern "C" Plugin::Object *createRTXIPlugin(void *) {
 }
 
 Oscilloscope::Plugin::Plugin(void) {
-    menuID = MainWindow::createControlMenuItem("Oscilloscope",this,SLOT(createOscilloscopePanel(void)));
+    menuID = MainWindow::getInstance()->createControlMenuItem("Oscilloscope",this,SLOT(createOscilloscopePanel(void)));
 }
 
 Oscilloscope::Plugin::~Plugin(void) {
-    MainWindow::removeControlMenuItem(menuID);
+    MainWindow::getInstance()->removeControlMenuItem(menuID);
     while(panelList.size())
         delete panelList.front();
     instance = 0;

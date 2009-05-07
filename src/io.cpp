@@ -54,11 +54,11 @@ IO::Block::Block(std::string n,IO::channel_t *channel,size_t size)
             outputs[out++].value = 0.0;
         }
 
-    IO::Connector::insertBlock(this);
+    IO::Connector::getInstance()->insertBlock(this);
 }
 
 IO::Block::~Block(void) {
-    IO::Connector::removeBlock(this);
+    IO::Connector::getInstance()->removeBlock(this);
 
     Mutex::Locker lock(&mutex);
     for(size_t i=0;i<inputs.size();++i)
@@ -179,7 +179,7 @@ void IO::Block::connect(IO::Block *src,size_t src_num,IO::Block *dest,size_t des
     event.setParam("src_num",&src_num);
     event.setParam("dest",dest);
     event.setParam("dest_num",&dest_num);
-    Event::Manager::postEvent(&event);
+    Event::Manager::getInstance()->postEvent(&event);
 }
 
 void IO::Block::disconnect(IO::Block *src,size_t src_num,IO::Block *dest,size_t dest_num) {
@@ -208,7 +208,7 @@ void IO::Block::disconnect(IO::Block *src,size_t src_num,IO::Block *dest,size_t 
     event.setParam("src_num",&src_num);
     event.setParam("dest",dest);
     event.setParam("dest_num",&dest_num);
-    Event::Manager::postEvent(&event);
+    Event::Manager::getInstance()->postEvent(&event);
 
     // Remove the forward connection (src => dest)
   start_forward_remove:
@@ -228,31 +228,22 @@ void IO::Block::disconnect(IO::Block *src,size_t src_num,IO::Block *dest,size_t 
 }
 
 void IO::Connector::foreachBlock(void (*callback)(Block *,void *),void *param) {
-    if(unlikely(!instance))
-        initialize();
-
-    Mutex::Locker lock(&instance->mutex);
-    for(std::list<Block *>::iterator i = instance->blockList.begin();i != instance->blockList.end();++i)
+    Mutex::Locker lock(&mutex);
+    for(std::list<Block *>::iterator i = blockList.begin();i != blockList.end();++i)
         callback(*i,param);
 }
 
 void IO::Connector::foreachConnection(void (*callback)(Block *,size_t,Block *,size_t,void *),void *param) {
-    if(unlikely(!instance))
-        initialize();
+    Mutex::Locker lock(&mutex);
 
-    Mutex::Locker lock(&instance->mutex);
-
-    for(std::list<Block *>::iterator i = instance->blockList.begin(), iend = instance->blockList.end();i != iend;++i)
+    for(std::list<Block *>::iterator i = blockList.begin(), iend = blockList.end();i != iend;++i)
         for(size_t j = 0, jend = (*i)->outputs.size();j < jend;++j)
             for(std::list<Block::link_t>::iterator k = (*i)->outputs[j].links.begin(), kend = (*i)->outputs[j].links.end();k != kend;++k)
                 callback(*i,j,k->block,k->channel,param);
 }
 
 void IO::Connector::connect(IO::Block *src,size_t out,IO::Block *dest,size_t in) {
-    if(unlikely(!instance))
-        initialize();
-
-    Mutex::Locker lock(&instance->mutex);
+    Mutex::Locker lock(&mutex);
 
     if(!src) {
         ERROR_MSG("IO::Connector::connect : invalid output block\n");
@@ -268,10 +259,7 @@ void IO::Connector::connect(IO::Block *src,size_t out,IO::Block *dest,size_t in)
 }
 
 void IO::Connector::disconnect(IO::Block *src,size_t out,IO::Block *dest,size_t in) {
-    if(unlikely(!instance))
-        initialize();
-
-    Mutex::Locker lock(&instance->mutex);
+    Mutex::Locker lock(&mutex);
 
     if(!src) {
         ERROR_MSG("IO::Connector::disconnect : invalid output block\n");
@@ -287,9 +275,6 @@ void IO::Connector::disconnect(IO::Block *src,size_t out,IO::Block *dest,size_t 
 }
 
 bool IO::Connector::connected(IO::Block *src,size_t src_num,IO::Block *dest,size_t dest_num) {
-    if(unlikely(!instance))
-        initialize();
-
     if(!src) {
         ERROR_MSG("Block::connected : invalid source\n");
         return false;
@@ -322,8 +307,8 @@ void IO::Connector::doDeferred(const Settings::Object::State &s) {
         std::ostringstream str;
         str << i;
 
-        src = dynamic_cast<Block *>(Settings::Manager::getObject(s.loadInteger(str.str()+" Source ID")));
-        dest = dynamic_cast<Block *>(Settings::Manager::getObject(s.loadInteger(str.str()+" Destination ID")));
+        src = dynamic_cast<Block *>(Settings::Manager::getInstance()->getObject(s.loadInteger(str.str()+" Source ID")));
+        dest = dynamic_cast<Block *>(Settings::Manager::getInstance()->getObject(s.loadInteger(str.str()+" Destination ID")));
         if(src && dest)
             connect(src,s.loadInteger(str.str()+" Source channel"),
                     dest,s.loadInteger(str.str()+" Destination channel"));
@@ -333,7 +318,7 @@ void IO::Connector::doDeferred(const Settings::Object::State &s) {
 void IO::Connector::doSave(Settings::Object::State &s) const {
     size_t n = 0;
 
-    for(std::list<Block *>::const_iterator i = instance->blockList.begin(),iend = instance->blockList.end();i != iend;++i)
+    for(std::list<Block *>::const_iterator i = blockList.begin(),iend = blockList.end();i != iend;++i)
         for(size_t j = 0,jend = (*i)->getCount(INPUT);j < jend;++j)
             for(std::list<Block::link_t>::const_iterator k = (*i)->inputs[j].links.begin(),kend = (*i)->inputs[j].links.end();k != kend;++k) {
                 std::ostringstream str;
@@ -347,50 +332,44 @@ void IO::Connector::doSave(Settings::Object::State &s) const {
 }
 
 void IO::Connector::insertBlock(IO::Block *block) {
-    if(unlikely(!instance))
-        initialize();
-
     if(!block) {
         ERROR_MSG("IO::Connector::insertBlock : invalid block\n");
         return;
     }
 
-    Mutex::Locker lock(&instance->mutex);
+    Mutex::Locker lock(&mutex);
 
-    if(std::find(instance->blockList.begin(),instance->blockList.end(),block) != instance->blockList.end()) {
+    if(std::find(blockList.begin(),blockList.end(),block) != blockList.end()) {
         ERROR_MSG("IO::Connector::insertBlock : block already present\n");
         return;
     }
 
     Event::Object event(Event::IO_BLOCK_INSERT_EVENT);
     event.setParam("block",block);
-    Event::Manager::postEvent(&event);
+    Event::Manager::getInstance()->postEvent(&event);
 
-    instance->blockList.push_back(block);
+    blockList.push_back(block);
 }
 
 void IO::Connector::removeBlock(IO::Block *block) {
-    if(unlikely(!instance))
-        initialize();
-
     if(!block) {
         ERROR_MSG("IO::Connector::insertBlock : invalid block\n");
         return;
     }
 
-    Mutex::Locker lock(&instance->mutex);
+    Mutex::Locker lock(&mutex);
 
     Event::Object event(Event::IO_BLOCK_REMOVE_EVENT);
     event.setParam("block",block);
-    Event::Manager::postEvent(&event);
+    Event::Manager::getInstance()->postEvent(&event);
 
-    instance->blockList.remove(block);
+    blockList.remove(block);
 }
 
 static Mutex mutex;
 IO::Connector *IO::Connector::instance = 0;
 
-IO::Connector *IO::Connector::initialize(void) {
+IO::Connector *IO::Connector::getInstance(void) {
     if(instance)
         return instance;
 

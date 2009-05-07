@@ -94,14 +94,14 @@ Connector::Panel::Panel(QWidget *parent)
     QObject::connect(connectionBox,SIGNAL(selected(const QString &)),this,SLOT(highlightConnectionBox(const QString &)));
 
     block_list_info_t info = { inputBlock, outputBlock, &blocks };
-    IO::Connector::foreachBlock(::buildBlockList,&info);
+    IO::Connector::getInstance()->foreachBlock(::buildBlockList,&info);
 
     if(blocks.size() >= 1) {
         buildInputChannelList();
         buildOutputChannelList();
     }
 
-    IO::Connector::foreachConnection(&buildConnectionList,&links);
+    IO::Connector::getInstance()->foreachConnection(&buildConnectionList,&links);
     for(size_t i = 0, iend = links.size();i < iend;++i) {
         connectionBox->insertItem(QString::number(links[i].src->getID())+" "+links[i].src->getName()+" : "+QString::number(links[i].src_idx)+" "+links[i].src->getName(IO::OUTPUT,links[i].src_idx)+" ==> "+
                               QString::number(links[i].dest->getID())+" "+links[i].dest->getName()+" : "+QString::number(links[i].dest_idx)+" "+links[i].dest->getName(IO::INPUT,links[i].dest_idx));
@@ -237,7 +237,7 @@ void Connector::Panel::highlightConnectionBox(const QString &s) {
     selection = selection.right(selection.length()-sep-1);
     size_t dest_idx = substr.toULong();
 
-    IO::Block *src = dynamic_cast<IO::Block *>(Settings::Manager::getObject(src_id));
+    IO::Block *src = dynamic_cast<IO::Block *>(Settings::Manager::getInstance()->getObject(src_id));
 
     size_t index;
     for(index = 0;index < blocks.size() && blocks[index] != src;++index);
@@ -248,7 +248,7 @@ void Connector::Panel::highlightConnectionBox(const QString &s) {
     buildOutputChannelList();
     outputChannel->setCurrentItem(src_idx);
 
-    IO::Block *dest = dynamic_cast<IO::Block *>(Settings::Manager::getObject(dest_id));
+    IO::Block *dest = dynamic_cast<IO::Block *>(Settings::Manager::getInstance()->getObject(dest_id));
     for(index = 0;index < blocks.size() && blocks[index] != dest;++index);
     if(index >= blocks.size())
         ERROR_MSG("Connector::Panel::highlightConnectionBox : highlighted destination does not exist.\n");
@@ -264,13 +264,13 @@ void Connector::Panel::toggleConnection(bool on) {
     size_t src_num = outputChannel->currentItem();
     size_t dest_num = inputChannel->currentItem();
 
-    if(IO::Connector::connected(src,src_num,dest,dest_num) == on)
+    if(IO::Connector::getInstance()->connected(src,src_num,dest,dest_num) == on)
         return;
 
     if(on)
-        IO::Connector::connect(src,src_num,dest,dest_num);
+        IO::Connector::getInstance()->connect(src,src_num,dest,dest_num);
     else
-        IO::Connector::disconnect(src,src_num,dest,dest_num);
+        IO::Connector::getInstance()->disconnect(src,src_num,dest,dest_num);
 }
 
 void Connector::Panel::updateConnectionButton(void) {
@@ -279,7 +279,7 @@ void Connector::Panel::updateConnectionButton(void) {
     size_t src_num = outputChannel->currentItem();
     size_t dest_num = inputChannel->currentItem();
 
-    connectionButton->setOn(IO::Connector::connected(src,src_num,dest,dest_num));
+    connectionButton->setOn(IO::Connector::getInstance()->connected(src,src_num,dest,dest_num));
 }
 
 void Connector::Panel::buildConnectionList(IO::Block *src,size_t src_num,IO::Block *dest,size_t dest_num,void *arg) {
@@ -301,11 +301,11 @@ extern "C" Plugin::Object *createRTXIPlugin(void *) {
 
 Connector::Plugin::Plugin(void)
     : panel(0) {
-    menuID = MainWindow::createControlMenuItem("Connector",this,SLOT(showConnectorPanel(void)));
+    menuID = MainWindow::getInstance()->createControlMenuItem("Connector",this,SLOT(showConnectorPanel(void)));
 }
 
 Connector::Plugin::~Plugin(void) {
-    MainWindow::removeControlMenuItem(menuID);
+    MainWindow::getInstance()->removeControlMenuItem(menuID);
     if(panel)
         delete panel;
     instance = 0;

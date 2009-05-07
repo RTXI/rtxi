@@ -16,7 +16,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <compiler.h>
 #include <debug.h>
 #include <event.h>
 #include <mutex.h>
@@ -78,20 +77,21 @@ int SetDeviceActive::callback(void) {
     return 0;
 }
 
-RT::System::SetPeriodEvent::SetPeriodEvent(RT::System *s,long long p)
-    : sys(s), period(p) {}
+RT::System::SetPeriodEvent::SetPeriodEvent(long long p)
+    : period(p) {}
 
 RT::System::SetPeriodEvent::~SetPeriodEvent(void) {}
 
 int RT::System::SetPeriodEvent::callback(void) {
     int retval;
+    RT::System *sys = RT::System::getInstance();
 
     if(!(retval = RT::OS::setPeriod(sys->task,period))) {
         sys->period = period;
 
         ::Event::Object event(::Event::RT_PERIOD_EVENT);
         event.setParam("period",&period);
-        ::Event::Manager::postEventRT(&event);
+        ::Event::Manager::getInstance()->postEventRT(&event);
     }
 
     return retval;
@@ -116,11 +116,11 @@ void RT::Event::wait(void) {
 
 RT::Device::Device(void)
     : active(false) {
-    RT::System::insertDevice(this);
+    RT::System::getInstance()->insertDevice(this);
 }
 
 RT::Device::~Device(void) {
-    RT::System::removeDevice(this);
+    RT::System::getInstance()->removeDevice(this);
 }
 
 void RT::Device::setActive(bool state) {
@@ -128,17 +128,17 @@ void RT::Device::setActive(bool state) {
         active = state;
     else {
         SetDeviceActive event(this,state);
-        RT::System::postEvent(&event);
+        RT::System::getInstance()->postEvent(&event);
     }
 }
 
 RT::Thread::Thread(Priority p)
     : active(false), priority(p) {
-    RT::System::insertThread(this);
+    RT::System::getInstance()->insertThread(this);
 }
 
 RT::Thread::~Thread(void) {
-    RT::System::removeThread(this);
+    RT::System::getInstance()->removeThread(this);
 }
 
 void RT::Thread::setActive(bool state) {
@@ -146,7 +146,7 @@ void RT::Thread::setActive(bool state) {
         active = state;
     else {
         SetThreadActive event(this,state);
-        RT::System::postEvent(&event);
+        RT::System::getInstance()->postEvent(&event);
     }
 }
 
@@ -171,54 +171,35 @@ RT::System::~System(void) {
     RT::OS::shutdown();
 }
 
-long long RT::System::getPeriod(void) {
-    if(unlikely(!instance))
-        initialize();
-
-    return instance->period;
-}
-
 int RT::System::setPeriod(long long period) {
-    if(unlikely(!instance))
-        initialize();
-
     ::Event::Object event_pre(::Event::RT_PREPERIOD_EVENT);
     event_pre.setParam("period",&period);
-    ::Event::Manager::postEvent(&event_pre);
+    ::Event::Manager::getInstance()->postEvent(&event_pre);
 
-    SetPeriodEvent event(instance,period);
+    SetPeriodEvent event(period);
     int retval = postEvent(&event);
 
     ::Event::Object event_post(::Event::RT_POSTPERIOD_EVENT);
     event_post.setParam("period",&period);
-    ::Event::Manager::postEvent(&event_post);
+    ::Event::Manager::getInstance()->postEvent(&event_post);
 
     return retval;
 }
 
 void RT::System::foreachDevice(void (*callback)(RT::Device *,void *),void *param) {
-    if(unlikely(!instance))
-        initialize();
-
-    Mutex::Locker lock(&instance->deviceMutex);
-    for(List<Device>::iterator i = instance->deviceList.begin();i != instance->deviceList.end();++i)
+    Mutex::Locker lock(&deviceMutex);
+    for(List<Device>::iterator i = deviceList.begin();i != deviceList.end();++i)
         callback(&*i,param);
 }
 
 void RT::System::foreachThread(void (*callback)(RT::Thread *,void *),void *param) {
-    if(unlikely(!instance))
-        initialize();
-
-    Mutex::Locker lock(&instance->threadMutex);
-    for(List<Thread>::iterator i = instance->threadList.begin();i != instance->threadList.end();++i)
+    Mutex::Locker lock(&threadMutex);
+    for(List<Thread>::iterator i = threadList.begin();i != threadList.end();++i)
         callback(&*i,param);
 }
 
 int RT::System::postEvent(RT::Event *event,bool blocking) {
-    if(unlikely(!instance))
-        initialize();
-
-    instance->eventFifo.write(&event,sizeof(RT::Event *));
+    eventFifo.write(&event,sizeof(RT::Event *));
 
     if(blocking) {
         event->wait();
@@ -228,82 +209,70 @@ int RT::System::postEvent(RT::Event *event,bool blocking) {
 }
 
 void RT::System::insertDevice(RT::Device *device) {
-    if(unlikely(!instance))
-        initialize();
-
     if(!device) {
         ERROR_MSG("RT::System::insertDevice : invalid device\n");
         return;
     }
 
-    Mutex::Locker lock(&instance->deviceMutex);
+    Mutex::Locker lock(&deviceMutex);
 
     ::Event::Object event(::Event::RT_DEVICE_INSERT_EVENT);
     event.setParam("device",device);
-    ::Event::Manager::postEvent(&event);
+    ::Event::Manager::getInstance()->postEvent(&event);
 
-    instance->deviceList.insert(instance->deviceList.end(),*device);
+    deviceList.insert(deviceList.end(),*device);
 }
 
 void RT::System::removeDevice(RT::Device *device) {
-    if(unlikely(!instance))
-        initialize();
-
     if(!device) {
         ERROR_MSG("RT::System::removeDevice : invalid device\n");
         return;
     }
 
-    Mutex::Locker lock(&instance->deviceMutex);
+    Mutex::Locker lock(&deviceMutex);
 
     ::Event::Object event(::Event::RT_DEVICE_REMOVE_EVENT);
     event.setParam("device",device);
-    ::Event::Manager::postEvent(&event);
+    ::Event::Manager::getInstance()->postEvent(&event);
 
-    instance->deviceList.remove(*device);
+    deviceList.remove(*device);
 }
 
 void RT::System::insertThread(RT::Thread *thread) {
-    if(unlikely(!instance))
-        initialize();
-
     if(!thread) {
         ERROR_MSG("RT::System::insertThread : invalid thread\n");
         return;
     }
 
-    Mutex::Locker lock(&instance->threadMutex);
+    Mutex::Locker lock(&threadMutex);
 
     /*******************************************************************************
      * Traverse the list of threads and find the first thread with lower priority. *
      *******************************************************************************/
 
-    List<Thread>::iterator i = instance->threadList.begin();
-    for(;i != instance->threadList.end() && i->getPriority() >= thread->getPriority();++i);
+    List<Thread>::iterator i = threadList.begin();
+    for(;i != threadList.end() && i->getPriority() >= thread->getPriority();++i);
 
     ::Event::Object event(::Event::RT_THREAD_INSERT_EVENT);
     event.setParam("thread",thread);
-    ::Event::Manager::postEvent(&event);
+    ::Event::Manager::getInstance()->postEvent(&event);
 
-    instance->threadList.insert(i,*thread);
+    threadList.insert(i,*thread);
 }
 
 void RT::System::removeThread(RT::Thread *thread) {
-    if(unlikely(!instance))
-        initialize();
-
     if(!thread) {
         ERROR_MSG("RT::System::removeThread : invalid thread\n");
         return;
     }
 
-    Mutex::Locker lock(&instance->threadMutex);
+    Mutex::Locker lock(&threadMutex);
 
     ::Event::Object event(::Event::RT_THREAD_REMOVE_EVENT);
     event.setParam("thread",thread);
-    ::Event::Manager::postEvent(&event);
+    ::Event::Manager::getInstance()->postEvent(&event);
 
-    instance->threadList.remove(*thread);
+    threadList.remove(*thread);
 }
 
 void *RT::System::bounce(void *param) {
@@ -354,9 +323,9 @@ void RT::System::execute(void) {
 static Mutex mutex;
 RT::System *RT::System::instance = 0;
 
-void RT::System::initialize(void) {
+RT::System *RT::System::getInstance(void) {
     if(instance)
-        return;
+        return instance;
 
     /*************************************************************************
      * Seems like alot of hoops to jump through, but static allocation isn't *
@@ -368,4 +337,6 @@ void RT::System::initialize(void) {
         static System system;
         instance = &system;
     }
+
+    return instance;
 }

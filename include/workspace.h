@@ -191,7 +191,13 @@ namespace Workspace {
 
     public:
 
-        static void initialize(void);
+        /*!
+         * Manager is a Singleton, which means that there can only be one instance.
+         *   This function returns a pointer to that single instance.
+         *
+         * \return The instance of Manager.
+         */
+        static Manager *getInstance(void);
 
         /*!
          * Loop through each Instance and execute a callback.
@@ -202,7 +208,7 @@ namespace Workspace {
          * \param param A parameter to the callback function.
          * \sa Workspace::Instance
          */
-        static void foreachWorkspace(void (*callback)(Instance *,void *),void *param);
+        void foreachWorkspace(void (*callback)(Instance *,void *),void *param);
 
     private:
 
@@ -214,12 +220,12 @@ namespace Workspace {
         Manager(void) : mutex(Mutex::RECURSIVE) {};
         ~Manager(void) {};
         Manager(const Manager &) {};
-        Manager &operator=(const Manager &) { return *instance; };
+        Manager &operator=(const Manager &) { return *getInstance(); };
 
         static Manager *instance;
 
-        static void insertWorkspace(Instance *);
-        static void removeWorkspace(Instance *);
+        void insertWorkspace(Instance *);
+        void removeWorkspace(Instance *);
 
         Mutex mutex;
         std::list<Instance *> instanceList;

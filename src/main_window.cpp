@@ -16,7 +16,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <compiler.h>
 #include <debug.h>
 #include <main_window.h>
 #include <mutex.h>
@@ -73,17 +72,11 @@ MainWindow::~MainWindow(void)
 }
 
 int MainWindow::createControlMenuItem(const std::string &text,const QObject *receiver,const char *member) {
-    if(unlikely(!instance))
-        getInstance();
-
-    return instance->controlMenu->insertItem(text,receiver,member);
+    return controlMenu->insertItem(text,receiver,member);
 }
 
 void MainWindow::removeControlMenuItem(int id) {
-    if(unlikely(!instance))
-        getInstance();
-
-    instance->controlMenu->removeItem(id);
+    controlMenu->removeItem(id);
 }
 
 void MainWindow::about(void)
@@ -107,7 +100,7 @@ void MainWindow::loadSettings(void) {
 
     QString filename = dialog.selectedFile();
     if(filename != "/")
-        Settings::Manager::load(filename);
+        Settings::Manager::getInstance()->load(filename);
 }
 
 void MainWindow::saveSettings(void) {
@@ -128,7 +121,7 @@ void MainWindow::saveSettings(void) {
             DEBUG_MSG("MainWindow::saveSettings : canceled overwrite\n");
             return;
         }
-        Settings::Manager::save(filename);
+        Settings::Manager::getInstance()->save(filename);
     }
 }
 
@@ -188,6 +181,5 @@ MainWindow *MainWindow::getInstance(void) {
         static MainWindow mainwindow;
         instance = &mainwindow;
     }
-
     return instance;
 }

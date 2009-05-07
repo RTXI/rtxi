@@ -18,7 +18,6 @@
 
 #include <default_gui_model.h>
 #include <main_window.h>
-#include <qapplication.h>
 #include <qgridview.h>
 #include <qhbox.h>
 #include <qlabel.h>
@@ -150,7 +149,7 @@ void DefaultGUIModel::update(DefaultGUIModel::update_flags_t) {}
 
 void DefaultGUIModel::exit(void) {
     update(EXIT);
-    Plugin::Manager::unload(this);
+    Plugin::Manager::getInstance()->unload(this);
 }
 
 void DefaultGUIModel::refresh(void) {
@@ -170,7 +169,7 @@ void DefaultGUIModel::modify(void) {
 
     // Ensure that the realtime thread isn't in the middle of executing DefaultGUIModel::execute()
     SyncEvent event;
-    RT::System::postEvent(&event);
+    RT::System::getInstance()->postEvent(&event);
 
     update(MODIFY);
     setActive(active);

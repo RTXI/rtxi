@@ -206,7 +206,7 @@ Neuron::Neuron(void)
     m = m_inf(V0);
     h = h_inf(V0);
     n = n_inf(V0);
-    period = RT::System::getPeriod()*1e-6;
+    period = RT::System::getInstance()->getPeriod()*1e-6;
     steps = static_cast<int>(ceil(period/rate/1000.0));
 
     /*
@@ -286,7 +286,7 @@ void Neuron::update(DefaultGUIModel::update_flags_t flag) {
         h = h_inf(V0);
         n = n_inf(V0);
     } else if(flag == PERIOD) {
-        period = RT::System::getPeriod()*1e-6;
+        period = RT::System::getInstance()->getPeriod()*1e-6;
         steps = static_cast<int>(ceil(period*rate/1000.0));
     }
 }

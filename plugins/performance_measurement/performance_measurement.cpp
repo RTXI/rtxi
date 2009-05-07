@@ -123,11 +123,11 @@ extern "C" Plugin::Object *createRTXIPlugin(void *) {
 
 PerformanceMeasurement::Plugin::Plugin(void)
     : panel(0) {
-    menuID = MainWindow::createControlMenuItem("Performance Measurement",this,SLOT(createPerformanceMeasurementPanel(void)));
+    menuID = MainWindow::getInstance()->createControlMenuItem("Performance Measurement",this,SLOT(createPerformanceMeasurementPanel(void)));
 }
 
 PerformanceMeasurement::Plugin::~Plugin(void) {
-    MainWindow::removeControlMenuItem(menuID);
+    MainWindow::getInstance()->removeControlMenuItem(menuID);
     if(panel) delete panel;
     instance = 0;
     panel = 0;

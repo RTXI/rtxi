@@ -73,7 +73,13 @@ namespace DAQ {
 
     public:
 
-        static void initialize(void);
+        /*!
+         * Manager is a Singleton, which means that there can only be one
+         *   instance. This function returns a pointer to that single instance.
+         *
+         * \return The instance of Manager.
+         */
+        static Manager *getInstance(void);
 
         /*!
          * Loop through each Device and execute a callback.
@@ -85,7 +91,7 @@ namespace DAQ {
          *
          * \sa DAQ::Device
          */
-        static void foreachDevice(void (*callback)(Device *,void *),void *param);
+        void foreachDevice(void (*callback)(Device *,void *),void *param);
 
         /*!
          * Function for creating a device from the specified driver.
@@ -96,22 +102,22 @@ namespace DAQ {
          * \sa DAQ::Device
          * \sa DAQ::Driver
          */
-        static Device *loadDevice(const std::string &driver,const std::list<std::string> &params);
+        Device *loadDevice(const std::string &driver,const std::list<std::string> &params);
 
     private:
 
         Manager(void) : mutex(Mutex::RECURSIVE) {};
         ~Manager(void) {};
         Manager(const Manager &) {};
-        Manager &operator=(const Manager &) { return *instance; };
+        Manager &operator=(const Manager &) { return *getInstance(); };
 
         static Manager *instance;
 
-        static void insertDevice(Device *);
-        static void removeDevice(Device *);
+        void insertDevice(Device *);
+        void removeDevice(Device *);
 
-        static void registerDriver(Driver *,const std::string &);
-        static void unregisterDriver(const std::string &);
+        void registerDriver(Driver *,const std::string &);
+        void unregisterDriver(const std::string &);
 
         Mutex mutex;
         std::list<Device *> deviceList;
