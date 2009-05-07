@@ -41,10 +41,10 @@ void TestRTOS::testTaskCreate(void) {
     RT::OS::Task task;
     bool executed = false;
 
-    CPPUNIT_ASSERT(RT::OS::createTask(&task,testTaskCreateHelper,&executed,0) == 0);
+    CPPUNIT_ASSERT_EQUAL(0,RT::OS::createTask(&task,testTaskCreateHelper,&executed,0));
     RT::OS::deleteTask(task);
 
-    CPPUNIT_ASSERT(executed == true);
+    CPPUNIT_ASSERT(executed);
 }
 
 #define TARGET_PERIOD 10000000ll
@@ -77,11 +77,10 @@ static void *testTaskPeriodicHelper(void *arg) {
 void TestRTOS::testTaskPeriodic(void) {
     test_task_periodic_t args;
 
-    CPPUNIT_ASSERT(RT::OS::createTask(&args.task,testTaskPeriodicHelper,&args,0) == 0);
+    CPPUNIT_ASSERT_EQUAL(0,RT::OS::createTask(&args.task,testTaskPeriodicHelper,&args,0));
     RT::OS::deleteTask(args.task);
 
-    args.avg_period -= TARGET_PERIOD;
-    CPPUNIT_ASSERT(args.avg_period <= TARGET_PERIOD/10 && args.avg_period >= -TARGET_PERIOD/10);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(args.avg_period,TARGET_PERIOD,TARGET_PERIOD/10);
 }
 
 static void *testTaskIsRealtimeHelper(void *arg) {
@@ -96,10 +95,10 @@ void TestRTOS::testTaskIsRealtime(void) {
     RT::OS::Task task;
     bool isrealtime = false;
 
-    CPPUNIT_ASSERT(RT::OS::createTask(&task,testTaskIsRealtimeHelper,&isrealtime,0) == 0);
+    CPPUNIT_ASSERT_EQUAL(0,RT::OS::createTask(&task,testTaskIsRealtimeHelper,&isrealtime,0));
 
-    CPPUNIT_ASSERT(RT::OS::isRealtime() == false);
+    CPPUNIT_ASSERT(!RT::OS::isRealtime());
 
     RT::OS::deleteTask(task);
-    CPPUNIT_ASSERT(isrealtime == true);
+    CPPUNIT_ASSERT(isrealtime);
 }

@@ -53,7 +53,7 @@ void TestEvent::testEvent(void) {
 
     CPPUNIT_ASSERT(handler.called);
     for(size_t i=0;i<num_params;++i)
-        CPPUNIT_ASSERT_EQUAL(handler.args[i],event.getParam(param_name[i]));
+        CPPUNIT_ASSERT_EQUAL(event.getParam(param_name[i]),handler.args[i]);
 }
 
 void TestEvent::testEventRT(void) {
@@ -88,5 +88,5 @@ void TestEvent::testEventRT(void) {
 
     CPPUNIT_ASSERT(handler.called);
     for(size_t i=0;i<num_params;++i)
-        CPPUNIT_ASSERT_EQUAL(handler.args[i],event.getParam(param_name[i]));
+        CPPUNIT_ASSERT_EQUAL(event.getParam(param_name[i]),handler.args[i]);
 }

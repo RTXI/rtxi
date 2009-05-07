@@ -13,10 +13,10 @@ void TestFifo::testSingleReadWrite(void) {
     u_int32_t value2 = 0;
 
     CPPUNIT_ASSERT(sizeof(value1) < BUFFER_SIZE);
-    CPPUNIT_ASSERT(sizeof(value1) == sizeof(value2));
-    CPPUNIT_ASSERT(fifo.write(&value1,sizeof(value1)) == sizeof(value1));
-    CPPUNIT_ASSERT(fifo.read(&value2,sizeof(value2)) == sizeof(value2));
-    CPPUNIT_ASSERT(value1 == value2);
+    CPPUNIT_ASSERT_EQUAL(sizeof(value1),sizeof(value2));
+    CPPUNIT_ASSERT_EQUAL(sizeof(value1),fifo.write(&value1,sizeof(value1)));
+    CPPUNIT_ASSERT_EQUAL(sizeof(value2),fifo.read(&value2,sizeof(value2)));
+    CPPUNIT_ASSERT_EQUAL(value1,value2);
 }
 
 #define DATA_SIZE 1024
@@ -77,5 +77,5 @@ void TestFifo::testWrappingReadWrite(void) {
     pthread_join(reader,NULL);
 
     for(size_t i=0;i<SIZE;++i)
-        CPPUNIT_ASSERT(value1[i] == value2[i]);
+        CPPUNIT_ASSERT_EQUAL(value1[i],value2[i]);
 }

@@ -15,8 +15,8 @@ void TestRT::tearDown(void) {}
 void TestRT::testPeriod(void) {
     long long target_period = 1000000ll;
 
-    CPPUNIT_ASSERT(RT::System::getInstance()->setPeriod(target_period) == 0);
-    CPPUNIT_ASSERT(RT::System::getInstance()->getPeriod() == target_period);
+    CPPUNIT_ASSERT_EQUAL(0,RT::System::getInstance()->setPeriod(target_period));
+    CPPUNIT_ASSERT_EQUAL(target_period,RT::System::getInstance()->getPeriod());
 }
 
 void TestRT::testThread(void) {
@@ -52,15 +52,15 @@ void TestRT::testThread(void) {
     long long target_period = 10000000ll;
     pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
-    CPPUNIT_ASSERT(RT::System::getInstance()->setPeriod(target_period) == 0);
+    CPPUNIT_ASSERT_EQUAL(0,RT::System::getInstance()->setPeriod(target_period));
 
     thread.setActive(true);
 
     pthread_mutex_lock(&mutex);
-    CPPUNIT_ASSERT(pthread_cond_wait(&thread.done,&mutex) == 0);
+    CPPUNIT_ASSERT_EQUAL(0,pthread_cond_wait(&thread.done,&mutex));
     pthread_mutex_unlock(&mutex);
 
-    CPPUNIT_ASSERT(thread.avg_period <= 1.1*target_period && thread.avg_period >= 0.9*target_period);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(target_period,thread.avg_period,target_period/10);
 
     pthread_mutex_destroy(&mutex);
 }
@@ -105,16 +105,16 @@ void TestRT::testDevice(void) {
     long long target_period = 10000000ll;
     pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
-    CPPUNIT_ASSERT(RT::System::getInstance()->setPeriod(target_period) == 0);
+    CPPUNIT_ASSERT_EQUAL(0,RT::System::getInstance()->setPeriod(target_period));
 
     device.setActive(true);
 
     pthread_mutex_lock(&mutex);
-    CPPUNIT_ASSERT(pthread_cond_wait(&device.done,&mutex) == 0);
+    CPPUNIT_ASSERT_EQUAL(0,pthread_cond_wait(&device.done,&mutex));
     pthread_mutex_unlock(&mutex);
 
     CPPUNIT_ASSERT(device.avg_exectime < target_period);
-    CPPUNIT_ASSERT(device.avg_period <= 1.1*target_period && device.avg_period >= 0.9*target_period);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(target_period,device.avg_period,target_period/10);
 
     pthread_mutex_destroy(&mutex);
 }
