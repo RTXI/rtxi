@@ -31,14 +31,15 @@ void TestRT::testThread(void) {
         };
 
         void execute(void) {
-            if(count++ == 0)
+            if(count == 0)
                 prev_time = RT::OS::getTime();
-            else if(count++ <= 10) {
+            else if(count <= 10) {
                 long long time = RT::OS::getTime();
                 avg_period += (time-prev_time) / 10;
                 prev_time = time;
             } else
                 pthread_cond_signal(&done);
+            ++count;
         };
 
         size_t count;
@@ -59,7 +60,7 @@ void TestRT::testThread(void) {
     CPPUNIT_ASSERT(pthread_cond_wait(&thread.done,&mutex) == 0);
     pthread_mutex_unlock(&mutex);
 
-    CPPUNIT_ASSERT(thread.avg_period <= 1.1*target_period && thread.avg_period >= -1.1*target_period);
+    CPPUNIT_ASSERT(thread.avg_period <= 1.1*target_period && thread.avg_period >= 0.9*target_period);
 
     pthread_mutex_destroy(&mutex);
 }
@@ -80,15 +81,16 @@ void TestRT::testDevice(void) {
         };
 
         void write(void) {
-            if(count++ == 0)
+            if(count == 0)
                 prev_time = RT::OS::getTime();
-            else if(count++ <= 10) {
+            else if(count <= 10) {
                 long long time = RT::OS::getTime();
                 avg_period += (time-prev_time) / 10;
                 avg_exectime += (time-read_time) / 10;
                 prev_time = time;
             } else
                 pthread_cond_signal(&done);
+            ++count;
         };
 
         size_t count;
@@ -112,7 +114,7 @@ void TestRT::testDevice(void) {
     pthread_mutex_unlock(&mutex);
 
     CPPUNIT_ASSERT(device.avg_exectime < target_period);
-    CPPUNIT_ASSERT(device.avg_period <= 1.1*target_period && device.avg_period >= -1.1*target_period);
+    CPPUNIT_ASSERT(device.avg_period <= 1.1*target_period && device.avg_period >= 0.9*target_period);
 
     pthread_mutex_destroy(&mutex);
 }
