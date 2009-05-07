@@ -23,14 +23,14 @@ run_SOURCES = \
 		main.cpp \
 		test_rt_os.h \
 		test_rt_os.cpp \
+		test_rt.h \
+		test_rt.cpp \
 		test_fifo.h \
 		test_fifo.cpp \
 		test_no_copy_fifo.h \
 		test_no_copy_fifo.cpp \
 		test_rtfile.h \
-		test_rtfile.cpp \
-		test_rt.h \
-		test_rt.cpp
+		test_rtfile.cpp
 
 if RTAI3
 run_SOURCES += \
