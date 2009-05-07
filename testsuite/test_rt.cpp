@@ -7,7 +7,7 @@
 CPPUNIT_TEST_SUITE_REGISTRATION(TestRT);
 
 void TestRT::setUp(void) {
-    RT::System::initialize();
+    RT::System::getInstance();
 }
 
 void TestRT::tearDown(void) {}
@@ -15,8 +15,8 @@ void TestRT::tearDown(void) {}
 void TestRT::testPeriod(void) {
     long long target_period = 1000000ll;
 
-    CPPUNIT_ASSERT(RT::System::setPeriod(target_period) == 0);
-    CPPUNIT_ASSERT(RT::System::getPeriod() == target_period);
+    CPPUNIT_ASSERT(RT::System::getInstance()->setPeriod(target_period) == 0);
+    CPPUNIT_ASSERT(RT::System::getInstance()->getPeriod() == target_period);
 }
 
 void TestRT::testThread(void) {
@@ -51,7 +51,7 @@ void TestRT::testThread(void) {
     long long target_period = 10000000ll;
     pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
-    CPPUNIT_ASSERT(RT::System::setPeriod(target_period) == 0);
+    CPPUNIT_ASSERT(RT::System::getInstance()->setPeriod(target_period) == 0);
 
     thread.setActive(true);
 
@@ -103,7 +103,7 @@ void TestRT::testDevice(void) {
     long long target_period = 10000000ll;
     pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
-    CPPUNIT_ASSERT(RT::System::setPeriod(target_period) == 0);
+    CPPUNIT_ASSERT(RT::System::getInstance()->setPeriod(target_period) == 0);
 
     device.setActive(true);
 
