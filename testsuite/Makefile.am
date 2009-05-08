@@ -46,3 +46,6 @@ if POSIX
 run_SOURCES += \
 		$(top_srcdir)/src/rt_os-posix.cpp
 endif
+
+check-local:
+	$(top_srcdir)/testsuite/run
