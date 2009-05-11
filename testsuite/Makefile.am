@@ -41,7 +41,9 @@ run_SOURCES = \
 		test_event.h \
 		test_event.cpp \
 		test_plugin.h \
-		test_plugin.cpp
+		test_plugin.cpp \
+		test_settings.h \
+		test_settings.cpp
 
 nodist_run_SOURCES = \
 		$(top_srcdir)/src/moc_plugin.cpp
