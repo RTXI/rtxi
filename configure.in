@@ -22,7 +22,7 @@ AC_CHECK_LIB([hdf5_hl],[H5PTopen])
 HDF_LIBS=$LIBS
 AC_SUBST(HDF_LIBS)
 
-BNV_HAVE_QT
+AX_HAVE_QT
 
 if test "$have_qt" != "yes" ; then
     AC_MSG_ERROR([Qt not found; see help on how to specify Qt location])
