@@ -916,7 +916,7 @@ void DataRecorder::Panel::processData(void) {
 
             IO::Block *block = dynamic_cast<IO::Block *>(Settings::Manager::getInstance()->getObject(data->id));
 
-            if(block) {
+            if(block && state == RECORD) {
                 param_hdf_t param = {
                     data->step,
                     data->value,
