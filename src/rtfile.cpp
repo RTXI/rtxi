@@ -1,6 +1,7 @@
 #include <debug.h>
 #include <fifo.h>
 #include <rtfile.h>
+#include <string.h>
 
 RTFile::RTFile(void)
     : done(true), fd(-1), writing(false), fifo(1024*1024) {}
@@ -151,7 +152,7 @@ void RTFile::processData(void) {
         void *buffer;
 
         while(!done) {
-            size = MIN(1024ul,bytes_remaining(fd));
+            size = MIN(static_cast<size_t>(1024),bytes_remaining(fd));
 
             if(size == 0) {
                 sleep(1);

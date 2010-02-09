@@ -492,6 +492,7 @@ AC_DEFUN([AX_PATH_QT_DIRECT],
               ax_qt_lib_dir=
             ], [
               # Leave ax_qt_lib_dir defined
+              ax_qt_lib_dir=$ax_qt_lib_dir
             ])
           ])
         ])
