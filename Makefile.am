@@ -108,7 +108,7 @@ Makefile.dynamo_compile:
 	@echo '	@echo Module installed'			         	>> $@
 	@echo ''						 	>> $@
 
-Makefile.plugin_compile:  
+Makefile.plugin_compile: Makefile
 	@echo "Generating Makefile.plugin_compile..."
 	@echo ''						 	>  $@
 	@echo 'exec_modeldir  = ' $(pkglibdir) 				>> $@
@@ -118,6 +118,7 @@ Makefile.plugin_compile:
 	@echo 'CXXLD          = ' $(CXX)			 	>> $@
 	@echo 'CXXCOMPILE     = $$(LIBTOOL) --mode=compile $$(CXX)'     >> $@
 	@echo 'CXXLINK	      = $$(LIBTOOL) --mode=link $$(CXXLD)'	>> $@
+	@echo 'MOC            = ' $(MOC)				>> $@
 	@echo ''                                                        >> $@
 	@echo 'CXXFLAGS := -I. -I'$(pkgincludedir) $(AM_CXXFLAGS) 	>> $@
 	@echo 'LDFLAGS  := ' $(AM_LDFLAGS) -module -avoid-version	>> $@
@@ -125,26 +126,30 @@ Makefile.plugin_compile:
 	@echo 'ifdef DEBUG '						>> $@
 	@echo 'CXXFLAGS += -DDEBUG'					>> $@
 	@echo 'endif'							>> $@
-	@echo ''                                                        >> $@
+	@echo ''							>> $@
+	@echo 'OBJECTS = $$(shell echo $$(SOURCES) | sed "s/\.cpp[ \t\n]*/\.lo /g")' >> $@
+	@echo ''							>> $@
 	@echo 'all: $$(PLUGIN_NAME).la'					>> $@
 	@echo ''							>> $@
-	@echo '$$(PLUGIN_NAME).la: $$(SOURCES) $$(HEADERS)'		>> $@
-	@echo '	$$(CXXCOMPILE) $$(CXXFLAGS)  -c $$(SOURCES) \
-		-o $$(PLUGIN_NAME).lo' 					>> $@
-	@echo '	$$(CXXLINK) $$(CXXFLAGS) $$(LIBS) $$(LDFLAGS) \
-		-rpath `readlink -f $$(exec_modeldir)` \
-		-o $$(PLUGIN_NAME).la $$(PLUGIN_NAME).lo' 		>> $@
+	@echo '%.lo: %.cpp'						>> $@
+	@echo '	$$(CXXCOMPILE) $$(CXXFLAGS) -c $$< -o $$@'		>> $@
+	@echo ''							>> $@
+	@echo '$$(PLUGIN_NAME).la: $$(OBJECTS) $$(SOURCES) $$(HEADERS)' >> $@
+	@echo '	$$(CXXLINK) $$(CXXFLAGS) $$(LIBS) $$(LDFLAGS) -rpath `readlink -f $$(exec_modeldir)` -o $$(PLUGIN_NAME).la $$(OBJECTS)' >> $@
 	@echo ''							>> $@
 	@echo 'install: $$(PLUGIN_NAME).la'				>> $@
-	@echo '	$$(LIBTOOL) --mode=install cp $$(PLUGIN_NAME).la \
-		`readlink -f $$(exec_modeldir)`'			>> $@
+	@echo '	$$(LIBTOOL) --mode=install cp $$(PLUGIN_NAME).la `readlink -f $$(exec_modeldir)`' >> $@
 	@echo ''							>> $@
 	@echo 'clean:'							>> $@
+	@echo '	rm -f $$(OBJECTS)'					>> $@
+	@echo '	rm -f moc_*'						>> $@
+	@echo '	rm -f *.o'						>> $@
 	@echo '	rm -f $$(PLUGIN_NAME).la'				>> $@
-	@echo '	rm -f $$(PLUGIN_NAME).lo'				>> $@
 	@echo '	rm -f $$(PLUGIN_NAME).o'				>> $@
 	@echo '	rm -rf .libs'						>> $@
-	@echo '	rm -f *~'						>> $@
+	@echo ''							>> $@
+	@echo 'moc_%.cpp: %.h'						>> $@
+	@echo '	$$(MOC) -o $$@ $$<'					>> $@
 
 Makefile.plugin_example:
 	@echo "Generating Makefile.plugin_example..."
