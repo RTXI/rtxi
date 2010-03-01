@@ -44,7 +44,21 @@ int main(int argc,char *argv[]) {
         trial_name << "/Syncronous Data/Channel Data";
         hid_t table = H5Dopen(fid,trial_name.str().c_str(),H5P_DEFAULT);
         if(table >= 0) {
-            hsize_t cols = H5Tget_size(H5Dget_type(table))/sizeof(double);
+
+            hid_t type = H5Dget_type(table);
+            if(H5Tequal(type,H5T_IEEE_F64LE)) {
+                H5Dclose(type);
+                H5Dclose(table);
+
+
+                ++trial_num;
+                trial_name.str("");
+                trial_name << "/Trial" << trial_num;
+                continue;
+            }
+
+            hsize_t cols = H5Tget_size(type)/sizeof(double);
+            H5Dclose(type);
             H5Dclose(table);
 
             hsize_t rows;
