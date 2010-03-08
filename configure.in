@@ -1,4 +1,4 @@
-AC_INIT([RTXI],[1.2],[rtxi-help@lists.sourceforge.net],rtxi)
+AC_INIT([RTXI],[trunk-1.2],[rtxi-help@lists.sourceforge.net],rtxi)
 
 AM_CONFIG_HEADER(include/rtxi_config.h)
 AM_INIT_AUTOMAKE

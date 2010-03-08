@@ -27,6 +27,7 @@
 #include <qobjectlist.h>
 #include <qpopupmenu.h>
 #include <qworkspace.h>
+#include <rtxi_config.h>
 #include <settings.h>
 
 MainWindow::MainWindow(void)
@@ -54,7 +55,7 @@ MainWindow::MainWindow(void)
     menuBar()->insertItem("&Windows",windowsMenu);
     menuBar()->insertSeparator();
     QPopupMenu *helpMenu = new QPopupMenu(this);
-    id = helpMenu->insertItem("&About",this,SLOT(about()));
+    id = helpMenu->insertItem("&About RTXI",this,SLOT(about()));
     helpMenu->setWhatsThis(id,"Opens a Window Containing Information About this Software Package");
     id = helpMenu->insertItem("About &Qt",this,SLOT(aboutQt()));
     helpMenu->setWhatsThis(id,"Opens a Window Containing Information About the QT Widget Toolkit");
@@ -81,7 +82,7 @@ void MainWindow::removeControlMenuItem(int id) {
 
 void MainWindow::about(void)
 {
-    QMessageBox::about(this,"About RTXI","This software is provided under the GPL we make no guarantees... blah blah blah");
+    QMessageBox::about(this,"About RTXI","Version " + QString(VERSION) + "\n\nReleased under the GPLv2.\nSee rtxi.org for details.");
 }
 
 void MainWindow::aboutQt(void)
