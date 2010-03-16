@@ -88,17 +88,23 @@ public:
      */
     static const IO::flags_t EVENT     = Workspace::EVENT;
     /*!
+     * Flag that marks a variable as a comment.
+     *
+     * \sa Workspace::COMMENT
+     */
+    static const IO::flags_t COMMENT   = Workspace::COMMENT;
+    /*!
      * Flag that marks a parameter as being of double type.
      */
-    static const IO::flags_t DOUBLE    = Workspace::EVENT<<1;
+    static const IO::flags_t DOUBLE    = Workspace::COMMENT<<1;
     /*!
      * Flag that marks a parameter as being of integer type.
      */
-    static const IO::flags_t INTEGER   = Workspace::EVENT<<2;
+    static const IO::flags_t INTEGER   = Workspace::COMMENT<<2;
     /*!
      * Flag that marks a parameter as being of unsigned integer type.
      */
-    static const IO::flags_t UINTEGER  = Workspace::EVENT<<3;
+    static const IO::flags_t UINTEGER  = Workspace::COMMENT<<3;
 
     /*!
      * Structure used to pass variable information to the constructor
@@ -190,6 +196,15 @@ protected:
      * \param value The parameter's new value.
      */
     void setParameter(const QString &name,const QString value);
+    /*!
+     *
+     */
+    QString getComment(const QString &name);
+    /*!
+     *
+     */
+    void setComment(const QString &name,const QString comment);
+    
     /*!
      * Set the reference to this state within the Workspace
      *   via Workspace::setData().

@@ -1092,6 +1092,14 @@ int DataRecorder::Panel::startRecording(long long timestamp) {
             H5PTappend(data,1,&value);
             H5PTclose(data);
         }
+        for(size_t j = 0;j < block->getCount(Workspace::COMMENT);++j) {
+            QString comment_name = QString::number(block->getID())+" "+block->getName()+" : "+block->getName(Workspace::COMMENT,j);
+            hsize_t dims = dynamic_cast<Workspace::Instance *>(block)->getValueString(Workspace::COMMENT,j).size()+1;
+            hid_t comment_space = H5Screate_simple(1,&dims,&dims);
+            data = H5Dcreate(file.pdata,comment_name.latin1(),H5T_C_S1,comment_space,H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT);
+            H5Dwrite(data,H5T_C_S1,H5S_ALL,H5S_ALL,H5P_DEFAULT,dynamic_cast<Workspace::Instance *>(block)->getValueString(Workspace::COMMENT,j).c_str());
+            H5Dclose(data);
+        }
     }
 
     H5Tclose(param_type);

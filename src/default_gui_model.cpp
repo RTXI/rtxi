@@ -71,9 +71,9 @@ DefaultGUIModel::DefaultGUIModel(std::string name,DefaultGUIModel::variable_t *v
     sv->addChild(viewport);
     QGridLayout *scrollLayout = new QGridLayout(viewport,1,2);
 
-    size_t nstate = 0, nparam = 0, nevent = 0;
+    size_t nstate = 0, nparam = 0, nevent = 0, ncomment = 0;
     for(size_t i=0;i<size;i++) {
-        if(var[i].flags & (PARAMETER | STATE | EVENT)) {
+        if(var[i].flags & (PARAMETER | STATE | EVENT | COMMENT)) {
             param_t param;
 
             param.label = new QLabel(var[i].name,viewport);
@@ -100,23 +100,18 @@ DefaultGUIModel::DefaultGUIModel(std::string name,DefaultGUIModel::variable_t *v
                     param.type = PARAMETER;
                 param.index = nparam++;
                 param.str_value = new QString;
-            } else 
-                {
-                    if(var[i].flags & STATE) 
-                        {
-                            param.edit->setReadOnly(true);
-                            param.type = STATE;
-                            param.index = nstate++;
-                        } else
-                        {
-                            if(var[i].flags & EVENT) 
-                                {
-                                    param.edit->setReadOnly(true);
-                                    param.type = EVENT;
-                                    param.index = nevent++;
-                                }
-                        }
-                }
+            } else if(var[i].flags & STATE) {
+                param.edit->setReadOnly(true);
+                param.type = STATE;
+                param.index = nstate++;
+            } else if(var[i].flags & EVENT) {
+                param.edit->setReadOnly(true);
+                param.type = EVENT;
+                param.index = nevent++;
+            } else if(var[i].flags & COMMENT) {
+                param.type = COMMENT;
+                param.index = ncomment++;
+            }
 
             parameter[var[i].name] = param;
         }
@@ -158,6 +153,8 @@ void DefaultGUIModel::refresh(void) {
             i->second.edit->setText(QString::number(getValue(i->second.type,i->second.index)));
         else if((i->second.type & PARAMETER) && !i->second.edit->edited() && i->second.edit->text() != *i->second.str_value)
             i->second.edit->setText(*i->second.str_value);
+        else if((i->second.type & COMMENT) && !i->second.edit->edited() && i->second.edit->text() != getValueString(COMMENT,i->second.index))
+            i->second.edit->setText(getValueString(COMMENT,i->second.index));
     }
     pauseButton->setOn(!getActive());
 }
@@ -171,11 +168,30 @@ void DefaultGUIModel::modify(void) {
     SyncEvent event;
     RT::System::getInstance()->postEvent(&event);
 
+    for(std::map<QString,param_t>::iterator i = parameter.begin();i != parameter.end();++i)
+        if(i->second.type & COMMENT)
+            Workspace::Instance::setComment(i->second.index,i->second.edit->text().latin1());
+
     update(MODIFY);
     setActive(active);
 
     for(std::map<QString,param_t>::iterator i = parameter.begin();i != parameter.end();++i)
         i->second.edit->blacken();
+}
+
+QString DefaultGUIModel::getComment(const QString &name) {
+    std::map<QString,param_t>::iterator n = parameter.find(name);
+    if(n != parameter.end() && (n->second.type & COMMENT))
+        return QString(getValueString(COMMENT,n->second.index));
+    return "";
+}
+
+void DefaultGUIModel::setComment(const QString &name,QString comment) {
+    std::map<QString,param_t>::iterator n = parameter.find(name);
+    if(n != parameter.end() && (n->second.type & COMMENT)) {
+        n->second.edit->setText(comment);
+        Workspace::Instance::setComment(n->second.index,comment.latin1());
+    }
 }
 
 QString DefaultGUIModel::getParameter(const QString &name) {

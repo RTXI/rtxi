@@ -48,11 +48,14 @@ namespace Workspace {
      * Bitmask used to represent a state type variable.
      */
     static const IO::flags_t STATE     = IO::OUTPUT<<2;
-
     /*!
      * Bitmask used to represent an event variable.
      */
     static const IO::flags_t EVENT     = IO::OUTPUT<<3;
+    /*!
+     * Bitmask used to represent a comment variable.
+     */
+    static const IO::flags_t COMMENT   = IO::OUTPUT<<4;
 
     /*!
      * Structure used to pass informatino to a Workspace::Instance upon creation.
@@ -130,6 +133,17 @@ namespace Workspace {
          * \sa Workspace::setData()
          */
         double getValue(IO::flags_t type,size_t index) const;
+        /*!
+         * Get the value of the specified EVENT, PARAMETER, STATE,
+         *   or COMMENT variable in string form.
+         *
+         * \param type The type of the specified variable.
+         * \param index The variable's index.
+         * \return The variable's value.
+         *
+         * \sa Workspace::getValue()
+         */
+        std::string getValueString(IO::flags_t type,size_t index) const;
 
         /*!
          * Set the value of a PARAMETER type variable.
@@ -140,6 +154,15 @@ namespace Workspace {
          * \sa Workspace::PARAMETER
          */
         void setValue(size_t index,double value);
+        /*!
+         * Set the value of a COMMENT type variable
+         *
+         * \param index The variable's index.
+         * \param value The variable's new value.
+         *
+         * \sa Workspace::COMMENT
+         */
+        void setComment(size_t index,std::string comment);
 
     protected:
 
@@ -176,6 +199,14 @@ namespace Workspace {
         std::vector<var_t> parameter;
         std::vector<var_t> state;
         std::vector<var_t> event;
+
+        typedef struct {
+            std::string name;
+            std::string description;
+            std::string comment;
+        } comment_t;
+
+        std::vector<comment_t> comment;
 
     }; // class Object
 

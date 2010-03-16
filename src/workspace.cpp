@@ -20,6 +20,7 @@
 #include <debug.h>
 #include <event.h>
 #include <rt.h>
+#include <sstream>
 #include <workspace.h>
 
 namespace {
@@ -67,9 +68,9 @@ int ParameterChangeEvent::callback(void) {
 
 Workspace::Instance::Instance(std::string name,Workspace::variable_t *d,size_t n)
     : IO::Block(name,d,n) {
-    size_t count[3] = { 0, 0, 0 };
+    size_t count[] = { 0, 0, 0, 0 };
     for(size_t i=0;i<n;++i)
-        switch(d[i].flags & (PARAMETER|STATE|EVENT)) {
+        switch(d[i].flags & (PARAMETER|STATE|EVENT|COMMENT)) {
           case PARAMETER:
               count[0]++;
               break;
@@ -79,15 +80,19 @@ Workspace::Instance::Instance(std::string name,Workspace::variable_t *d,size_t n
           case EVENT:
               count[2]++;
               break;
+          case COMMENT:
+              count[3]++;
+              break;
         }
 
     parameter = std::vector<var_t>(count[0]);
     state = std::vector<var_t>(count[1]);
     event = std::vector<var_t>(count[2]);
+    comment = std::vector<comment_t>(count[3]);
 
-    size_t i[3] = { 0, 0, 0 };
+    size_t i[] = { 0, 0, 0, 0 };
     for(size_t j=0;j<n;++j) {
-        switch(d[j].flags & (PARAMETER|STATE|EVENT)) {
+        switch(d[j].flags & (PARAMETER|STATE|EVENT|COMMENT)) {
           case PARAMETER:
               parameter[i[0]].name = d[j].name;
               parameter[i[0]].description = d[j].description;
@@ -100,12 +105,18 @@ Workspace::Instance::Instance(std::string name,Workspace::variable_t *d,size_t n
               state[i[1]].data = 0;
               i[1]++;
               break;
-	case EVENT:
-	     event[i[2]].name = d[j].name;
-	     event[i[2]].description = d[j].description;
-	     event[i[2]].data = 0;
-	     i[2]++;
-	     break;
+          case EVENT:
+              event[i[2]].name = d[j].name;
+              event[i[2]].description = d[j].description;
+              event[i[2]].data = 0;
+              i[2]++;
+              break;
+          case COMMENT:
+              comment[i[3]].name = d[j].name;
+              comment[i[3]].description = d[j].description;
+              comment[i[3]].comment = "";
+              i[3]++;
+              break;
         }
     }
 
@@ -128,6 +139,8 @@ size_t Workspace::Instance::getCount(IO::flags_t type) const {
         return state.size();
     if(type & EVENT)
         return event.size();
+    if(type & COMMENT)
+        return comment.size();
 
     return 0;
 }
@@ -141,6 +154,8 @@ std::string Workspace::Instance::getName(IO::flags_t type,size_t n) const {
         return state[n].name;
     if(type & EVENT && n < event.size())
         return event[n].name;
+    if(type & COMMENT && n < comment.size())
+        return comment[n].name;
 
     return "";
 }
@@ -152,6 +167,8 @@ std::string Workspace::Instance::getDescription(IO::flags_t type,size_t n) const
         return state[n].description;
     if(type & EVENT && n < event.size())
         return event[n].description;
+    if(type & COMMENT && n < comment.size())
+        return comment[n].description;
 
     return "";
 }
@@ -167,7 +184,38 @@ double Workspace::Instance::getValue(IO::flags_t type,size_t n) const {
         return *state[n].data;
     if(type & EVENT && n < event.size() && event[n].data)
         return *event[n].data;
+    if(type & COMMENT && n < comment.size()) {
+        std::istringstream sstr(comment[n].comment);
+        double value;
+        sstr >> value;
+        return value;
+    }
     return 0.0;
+}
+
+std::string Workspace::Instance::getValueString(IO::flags_t type,size_t n) const {
+
+    if(type & (INPUT | OUTPUT | PARAMETER | STATE | EVENT)) {
+        std::ostringstream value;
+
+        if(type & INPUT)
+            value << input(n);
+        if(type & OUTPUT)
+            value << output(n);
+        if(type & PARAMETER && n < parameter.size() && parameter[n].data)
+            value << *parameter[n].data;
+        if(type & STATE && n < state.size() && state[n].data)
+            value << *state[n].data;
+        if(type & EVENT && n < event.size() && event[n].data)
+            value << *event[n].data;
+
+        return value.str();
+    }
+
+    if(type & COMMENT && n < comment.size())
+        return comment[n].comment;
+
+    return "";
 }
 
 void Workspace::Instance::setValue(size_t n,double value) {
@@ -186,6 +234,13 @@ void Workspace::Instance::setValue(size_t n,double value) {
         ParameterChangeEvent event(getID(),n,value,parameter[n].data);
         RT::System::getInstance()->postEvent(&event);
     }
+}
+
+void Workspace::Instance::setComment(size_t n,std::string newComment) {
+    if(n >= parameter.size())
+        return;
+
+    comment[n].comment = newComment;
 }
 
 double *Workspace::Instance::getData(IO::flags_t type,size_t n) {
