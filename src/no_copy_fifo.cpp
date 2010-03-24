@@ -2,7 +2,9 @@
 #include <no_copy_fifo.h>
 
 #define MAX(a,b)     ((a > b) ? (a) : (b))
-#define AVAILABLE    ((wrap+wptr-rptr)%wrap)
+//#define AVAILABLE    ((wrap+wptr-rptr)%wrap)
+
+#define AVAILABLE ((rptr <= wptr) ? (wptr - rptr) : (wrap - rptr))
 
 NoCopyFifo::NoCopyFifo(size_t s)
     : rptr(0), wptr(0), rsize(0), wsize(0), size(s), wrap(s) {
@@ -25,9 +27,14 @@ void *NoCopyFifo::read(size_t n,bool blocking) {
     else if(pthread_mutex_trylock(&mutex) != 0)
         return NULL;
 
+    if(rptr >= wrap)
+        rptr = 0;
+
     if(AVAILABLE < n)
         if(blocking) {
             do {
+                if(rptr >= wrap)
+                    rptr = 0;
                 pthread_cond_wait(&data_available,&mutex);
             } while(AVAILABLE < n);
         } else {
