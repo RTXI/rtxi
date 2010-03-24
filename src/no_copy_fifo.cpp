@@ -66,8 +66,8 @@ void *NoCopyFifo::write(size_t n) {
 
     if(rptr <= wptr)
         if(size-wptr < n) {
-            wptr = 0;
             wrap = wptr;
+            wptr = 0;
         }
 
     wsize = n;
