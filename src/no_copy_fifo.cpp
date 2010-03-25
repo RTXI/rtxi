@@ -22,14 +22,12 @@ void *NoCopyFifo::read(size_t n,bool blocking) {
     else if(pthread_mutex_trylock(&mutex) != 0)
         return NULL;
 
-    if(rptr == wrap) {
-        ERROR_MSG("NoCopyFifo::read : rptr == wrap, this shouldn't ever happen here.\n");
-        rptr = 0;
-    }
-
     void *ptr = NULL;
 
     for(;;) {
+        if(rptr == wrap)
+            rptr = 0;
+
         if(rptr <= wptr) {
             if(wptr-rptr >= n) {
                 rsize = n;
