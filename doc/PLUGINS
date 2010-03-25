@@ -1,0 +1,135 @@
+Guide to creating your own custom plugins.
+
+*** Setting up the build system ***
+
+1) Create a new directory for your plugin, the name doesn't really matter
+   but you should choose something appropriate. I'll be using "my_plugin"
+   for this tutorial.
+
+$ mkdir my_plugin
+$ cd my_plugin
+
+2) Create your starting source and header files.
+
+$ touch my_plugin.h my_plugin.cpp
+
+3) Copy the example plugin makefile into your plugin's directory.
+
+$ cp /usr/local/share/rtxi/Makefile.plugin_example Makefile
+
+4) Edit the example makefile to match your chosen plugin name.
+
+$ emacs Makefile
+
+Then change all instances of myplugin to whatever name you chose.
+
+*** Using the DefaultGUIModel ***
+
+1) Create a header for a class that inherits from DefaultGUIModel.
+
+$ emacs my_plugin.h
+
+Then copy and paste:
+
+#include <default_gui_model.h>
+
+class MyPlugin : public DefaultGUIModel {
+
+public:
+
+  MyPlugin(void);
+  virtual ~MyPlugin(void);
+
+  void execute(void);
+
+protected:
+
+  void update(DefaultGUIModel::update_flags_t);
+
+};
+
+2) Create function stubs for your new class.
+
+$ emacs my_plugin.cpp
+
+Then copy and paste:
+
+#include "my_plugin.h"
+
+MyPlugin::MyPlugin(void)
+  : DefaultGUIModel("MyPlugin",NULL,0) {}
+
+MyPlugin::~MyPlugin(void) {}
+
+void MyPlugin::execute(void) {}
+
+void MyPlugin::update(DefaultGUIModel::update_flags_t) {}
+
+3) Passing arguments to the DefaultGUIModel constructor.
+
+The DefaultGUIModel constructor takes 3 arguments.
+  #1 The name of the plugin, as it will appear at the top of the plugin window.
+  #2 An array specifying inputs, outputs, parameters, states and comments of
+       type DefaultGUIModel::variable_t. The variable_t structure has three
+       members: "Name", Description", and "Type".
+       See plugins/mimic/mimic.cpp for a simple example.
+  #3 The total number of inputs, outputs, parameters, states and comments.
+
+4) Initializing parameters and states.
+
+In your constructor you'll want to make a call to setParameter() for each
+  parameter in your plugin. This function sets the value of your parameter in
+  the GUI. The function takes two arguments: the first is the name of the
+  parameter as defined in your variable_t array above, the second is the new
+  value of the parameter to be specified in the GUI.
+
+Also in your constructor you'll want to make a call to setState() for each state
+  in your plugin. This function takes two arguments: the first is the name of
+  the state as defined in your variable_t array above, the second is a reference
+  to a double variable which will be bound to the DefaultGUIModel for use as a
+  watchable state variable. The variable should be valid for the life of the
+  plugin, or until another call to setState() is made.
+
+5) Using update()
+
+The update function is called when a variety of events occur in the system. It
+  runs in non-realtime so technically anything goes, but while update() is
+  executing the realtime component of your model will not, it is effectively
+  paused. This behavior is a feature to simplify synchronizatin between realtime
+  and non-realtime. The implication is that you shouldn't do anything that will
+  take a prolonged sleep in update().
+
+The events that trigger the execution of update() and are passed as arguments:
+    INIT	called immediately after the plugin is loaded.
+    MODIFY	called when the "Modify" button is pressed.
+    PERIOD	called when the realtime system period is changed.
+    PAUSE	called when the plugin is paused.
+    UNPAUSE	called when the plugin is unpaused.
+    EXIT	called when the plugin exits.
+
+Typically even a minimalistic plugin will handle the MODIFY event. By making
+  calls to getParameter() you can get the new parameter values entered by the
+  user. The function getParameter() takes one argument, the name of the
+  parameter, and returns its value.
+
+6) Using execute()
+
+The function execute() runs in realtime. It is where you should access the
+  inputs and outputs defined in your variable_t array passed to the
+  DefaultGUIModel constructor. To access inputs and outputs you use the
+  functions input() and output() respectively. They both take one argument, the
+  index of the desired input/output. So the first input specified in your
+  variable_t array would have index 0, and second index 1, etc. The same is
+  true for outputs.
+
+A simple example from the mimic model clearly demonstrates how this works:
+
+output(0) = gain*input(0)+offset;
+
+The first output is being set to the value of the first input scaled by gain
+  and offset by offset.
+
+When building execute() you should keep in mind that it executes in realtime
+  and thus is subject to some limitations. You should not make any system calls.
+  System calls are calls to the operating system and include but are not limited
+  to dynamically allocating memory and accessing files.
