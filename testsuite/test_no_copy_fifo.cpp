@@ -1,6 +1,9 @@
 #include "test_no_copy_fifo.h"
 
 #include <no_copy_fifo.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <string.h>
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TestNoCopyFifo);
 
@@ -9,18 +12,18 @@ CPPUNIT_TEST_SUITE_REGISTRATION(TestNoCopyFifo);
 
 void TestNoCopyFifo::testSingleReadWrite(void) {
     NoCopyFifo fifo(BUFFER_SIZE);
-    u_int32_t value1 = DAT_MAGIC;
-    u_int32_t value2 = 0;
-    u_int32_t *ptr;
+    uint32_t value1 = DAT_MAGIC;
+    uint32_t value2 = 0;
+    uint32_t *ptr;
 
     CPPUNIT_ASSERT(sizeof(value1) < BUFFER_SIZE);
     CPPUNIT_ASSERT_EQUAL(sizeof(value1),sizeof(value2));
 
-    CPPUNIT_ASSERT((ptr = reinterpret_cast<u_int32_t *>(fifo.write(sizeof(value1)))) != NULL);
+    CPPUNIT_ASSERT((ptr = reinterpret_cast<uint32_t *>(fifo.write(sizeof(value1)))) != NULL);
     memcpy(ptr,&value1,sizeof(value1));
     fifo.writeDone();
 
-    CPPUNIT_ASSERT((ptr = reinterpret_cast<u_int32_t *>(fifo.read(sizeof(value2)))) != NULL);
+    CPPUNIT_ASSERT((ptr = reinterpret_cast<uint32_t *>(fifo.read(sizeof(value2)))) != NULL);
     memcpy(&value2,ptr,sizeof(value2));
     fifo.readDone();
 
@@ -28,22 +31,22 @@ void TestNoCopyFifo::testSingleReadWrite(void) {
 }
 
 #define DATA_SIZE 1024
-#define SIZE (DATA_SIZE/sizeof(u_int32_t))
+#define SIZE (DATA_SIZE/sizeof(uint32_t))
 
 struct fifo_test_info_t {
     NoCopyFifo *fifo;
-    u_int32_t *data;
+    uint32_t *data;
 };
 
 static void *readFifo(void *p) {
     fifo_test_info_t *info = reinterpret_cast<fifo_test_info_t *>(p);
-    u_int32_t *ptr;
+    uint32_t *ptr;
 
     for(size_t i=0;i<SIZE;++i) {
         do {
-            ptr = reinterpret_cast<u_int32_t *>(info->fifo->read(sizeof(u_int32_t)));
+            ptr = reinterpret_cast<uint32_t *>(info->fifo->read(sizeof(uint32_t)));
         } while(ptr == NULL);
-        memcpy(info->data+i,ptr,sizeof(u_int32_t));
+        memcpy(info->data+i,ptr,sizeof(uint32_t));
         info->fifo->readDone();
     }
 
@@ -52,13 +55,13 @@ static void *readFifo(void *p) {
 
 static void *writeFifo(void *p) {
     fifo_test_info_t *info = reinterpret_cast<fifo_test_info_t *>(p);
-    u_int32_t *ptr;
+    uint32_t *ptr;
 
     for(size_t i=0;i<SIZE;++i) {
         do {
-            ptr = reinterpret_cast<u_int32_t *>(info->fifo->write(sizeof(u_int32_t)));
+            ptr = reinterpret_cast<uint32_t *>(info->fifo->write(sizeof(uint32_t)));
         } while(ptr == NULL);
-        memcpy(ptr,info->data+i,sizeof(u_int32_t));
+        memcpy(ptr,info->data+i,sizeof(uint32_t));
         info->fifo->writeDone();
     }
 
@@ -68,8 +71,8 @@ static void *writeFifo(void *p) {
 void TestNoCopyFifo::testWrappingReadWrite(void) {
     NoCopyFifo fifo(BUFFER_SIZE);
 
-    u_int32_t value1[SIZE];
-    u_int32_t value2[SIZE];
+    uint32_t value1[SIZE];
+    uint32_t value2[SIZE];
 
     for(size_t i=0;i<SIZE;++i)
         value1[i] = rand();

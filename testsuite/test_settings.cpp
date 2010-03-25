@@ -1,5 +1,6 @@
 #include <sstream>
 #include <settings.h>
+#include <stdlib.h>
 
 #include "test_settings.h"
 

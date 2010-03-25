@@ -1,5 +1,6 @@
 #include <cstdlib>
 #include <rtfile.h>
+#include <string.h>
 
 #include "test_rtfile.h"
 
