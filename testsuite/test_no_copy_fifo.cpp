@@ -8,7 +8,7 @@
 CPPUNIT_TEST_SUITE_REGISTRATION(TestNoCopyFifo);
 
 #define DAT_MAGIC 0xF0F05757
-#define BUFFER_SIZE 128
+#define BUFFER_SIZE 127
 
 void TestNoCopyFifo::testSingleReadWrite(void) {
     NoCopyFifo fifo(BUFFER_SIZE);
@@ -30,7 +30,7 @@ void TestNoCopyFifo::testSingleReadWrite(void) {
     CPPUNIT_ASSERT_EQUAL(value1,value2);
 }
 
-#define DATA_SIZE 1024
+#define DATA_SIZE 1021
 #define SIZE (DATA_SIZE/sizeof(uint32_t))
 
 struct fifo_test_info_t {
