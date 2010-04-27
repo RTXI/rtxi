@@ -856,7 +856,7 @@ void DataRecorder::Panel::processData(void) {
                     H5Sclose(array_space);
                 }
 
-                fifo.writeDone();
+                fifo.readDone();
             }
 
         } else if(token.type == OPEN) {
