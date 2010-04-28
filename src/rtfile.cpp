@@ -2,6 +2,7 @@
 #include <fifo.h>
 #include <rtfile.h>
 #include <string.h>
+#include <cstdlib>
 
 RTFile::RTFile(void)
     : done(true), fd(-1), writing(false), fifo(1024*1024) {}
@@ -44,10 +45,8 @@ void RTFile::close(void) {
         done = true;
 
         if(writing) {
-            size_t *zero;
-            zero = reinterpret_cast<size_t *>(fifo.write(sizeof(size_t)));
-            *zero = 0;
-            fifo.writeDone();
+            size_t zero = 0;
+            fifo.write(&zero,sizeof(zero));
         } else
             pthread_cancel(thread);
         pthread_join(thread,0);
@@ -61,13 +60,8 @@ size_t RTFile::write(void *data,size_t size) {
     if(!size)
         return 0;
 
-    void *buffer = fifo.write(size+sizeof(size));
-    if(buffer == NULL)
-        return 0;
-
-    *reinterpret_cast<size_t *>(buffer) = size;
-    memcpy(reinterpret_cast<size_t *>(buffer)+1,data,size);
-    fifo.writeDone();
+    fifo.write(&size,sizeof(size));
+    fifo.write(data,size);
 
     return size;
 }
@@ -76,12 +70,7 @@ size_t RTFile::read(void *data,size_t size) {
     if(!size)
         return 0;
 
-    void *buffer = fifo.read(size,false);
-    if(buffer == NULL)
-        return 0;
-
-    memcpy(data,buffer,size);
-    fifo.readDone();
+    fifo.read(data,size);
 
     return size;
 }
@@ -112,44 +101,39 @@ static size_t bytes_remaining(int fd) {
 void RTFile::processData(void) {
     if(writing) {
         size_t size;
-        void *buffer;
+        char buffer[1024];
 
         while(!done) {
-            buffer = fifo.read(sizeof(size));
-            size = *reinterpret_cast<size_t *>(buffer);
-            fifo.readDone();
+            fifo.read(&size,sizeof(size));
 
             if(size == 0)
                 return;
 
-            buffer = fifo.read(size);
-
             size_t nwrite = 0;
-            while(nwrite < size)
-                nwrite += ::write(fd,reinterpret_cast<char *>(buffer)+nwrite,size-nwrite);
+            while(nwrite < size) {
+                size_t chunk = size < 1024 ? size : 1024;
 
-            fifo.readDone();
+                fifo.read(buffer,chunk);
+                nwrite += ::write(fd,buffer,chunk);
+            }
         }
 
         // write any remaining data
-        while((buffer = fifo.read(sizeof(size))) != NULL) {
-            size = *reinterpret_cast<size_t *>(buffer);
-            fifo.readDone();
-
-            if(size == 0)
-                return;
-
-            buffer = fifo.read(size);
-
+        fifo.read(&size,sizeof(size));
+        while(size > 0) {
             size_t nwrite = 0;
-            while(nwrite < size)
-                nwrite += ::write(fd,reinterpret_cast<char *>(buffer)+nwrite,size-nwrite);
+            while(nwrite < size) {
+                size_t chunk = size < 1024 ? size : 1024;
 
-            fifo.readDone();
+                fifo.read(buffer,chunk);
+                nwrite += ::write(fd,buffer+nwrite,size-nwrite);
+            }
+
+            fifo.read(&size,sizeof(size));
         }
     } else {
         size_t size;
-        void *buffer;
+        char buffer[1024];
 
         while(!done) {
             size = MIN(static_cast<size_t>(1024),bytes_remaining(fd));
@@ -159,13 +143,11 @@ void RTFile::processData(void) {
                 continue;
             }
 
-            buffer = fifo.write(size);
-
             size_t nread = 0;
             while(nread < size)
-                nread += ::read(fd,reinterpret_cast<char *>(buffer)+nread,size-nread);
+                nread += ::read(fd,buffer+nread,size-nread);
 
-            fifo.writeDone();
+            fifo.write(buffer,size);
         }
     }
 }

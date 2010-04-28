@@ -5,7 +5,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#include <no_copy_fifo.h>
+#include <fifo.h>
 
 class RTFile {
 
@@ -32,6 +32,6 @@ private:
     bool writing;
 
     pthread_t thread;
-    NoCopyFifo fifo;
+    Fifo fifo;
 
 }; // class RTFile

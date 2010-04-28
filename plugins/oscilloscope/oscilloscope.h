@@ -4,9 +4,9 @@
 #include "scope.h"
 
 #include <event.h>
+#include <fifo.h>
 #include <io.h>
 #include <mutex.h>
-#include <no_copy_fifo.h>
 #include <plugin.h>
 #include <qdialog.h>
 #include <rt.h>
@@ -165,7 +165,7 @@ namespace Oscilloscope {
 
     private:
 
-        NoCopyFifo fifo;
+        Fifo fifo;
         Properties *properties;
         std::vector<IO::Block *> blocks;
 

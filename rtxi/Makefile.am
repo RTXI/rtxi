@@ -19,7 +19,6 @@ pkginclude_HEADERS = \
 		$(top_srcdir)/include/io.h \
 		$(top_srcdir)/include/main_window.h \
 		$(top_srcdir)/include/mutex.h \
-		$(top_srcdir)/include/no_copy_fifo.h \
 		$(top_srcdir)/include/plugin.h \
 		$(top_srcdir)/include/rt.h \
 		$(top_srcdir)/include/rtfile.h \
@@ -38,7 +37,6 @@ rtxi_SOURCES = \
 		$(top_srcdir)/src/main.cpp \
 		$(top_srcdir)/src/main_window.cpp \
 		$(top_srcdir)/src/mutex.cpp \
-		$(top_srcdir)/src/no_copy_fifo.cpp \
 		$(top_srcdir)/src/plugin.cpp \
 		$(top_srcdir)/src/rt.cpp \
 		$(top_srcdir)/src/rtfile.cpp \

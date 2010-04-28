@@ -109,7 +109,7 @@ namespace {
 
     public:
 
-        OpenFileEvent(QString &,NoCopyFifo &);
+        OpenFileEvent(QString &,Fifo &);
         ~OpenFileEvent(void);
 
         int callback(void);
@@ -117,7 +117,7 @@ namespace {
     private:
 
         QString &filename;
-        NoCopyFifo &fifo;
+        Fifo &fifo;
 
     }; // class OpenFileEvent
 
@@ -125,7 +125,7 @@ namespace {
 
     public:
 
-        StartRecordingEvent(bool &,NoCopyFifo &);
+        StartRecordingEvent(bool &,Fifo &);
         ~StartRecordingEvent(void);
 
         int callback(void);
@@ -133,7 +133,7 @@ namespace {
     private:
 
         bool &recording;
-        NoCopyFifo &fifo;
+        Fifo &fifo;
 
     }; // class StartRecordingEvent
 
@@ -141,7 +141,7 @@ namespace {
 
     public:
 
-        StopRecordingEvent(bool &,NoCopyFifo &);
+        StopRecordingEvent(bool &,Fifo &);
         ~StopRecordingEvent(void);
 
         int callback(void);
@@ -149,7 +149,7 @@ namespace {
     private:
 
         bool &recording;
-        NoCopyFifo &fifo;
+        Fifo &fifo;
 
     }; //class StopRecordingEvent
 
@@ -157,7 +157,7 @@ namespace {
 
     public:
 
-        AsyncDataEvent(const double *,size_t,NoCopyFifo &);
+        AsyncDataEvent(const double *,size_t,Fifo &);
         ~AsyncDataEvent(void);
 
         int callback(void);
@@ -166,7 +166,7 @@ namespace {
 
         const double *data;
         size_t size;
-        NoCopyFifo &fifo;
+        Fifo &fifo;
 
     }; // class AsyncDataEvent
 
@@ -174,14 +174,14 @@ namespace {
 
     public:
 
-        DoneEvent(NoCopyFifo &);
+        DoneEvent(Fifo &);
         ~DoneEvent(void);
 
         int callback(void);
 
     private:
 
-        NoCopyFifo &fifo;
+        Fifo &fifo;
 
     }; // class DoneEvent
 
@@ -213,109 +213,93 @@ int RemoveChannelEvent::callback(void) {
     return 0;
 }
 
-OpenFileEvent::OpenFileEvent(QString &n,NoCopyFifo &f)
+OpenFileEvent::OpenFileEvent(QString &n,Fifo &f)
     : filename(n), fifo(f) {}
 
 OpenFileEvent::~OpenFileEvent(void) {}
 
 int OpenFileEvent::callback(void) {
-    DataRecorder::data_token_t *token = reinterpret_cast<DataRecorder::data_token_t *>(fifo.write(sizeof(DataRecorder::data_token_t)+filename.length()+1));
+    DataRecorder::data_token_t token;
 
-    if(!token)
-        return -1;
+    token.type = DataRecorder::OPEN;
+    token.size = filename.length()+1;
+    token.time = RT::OS::getTime();
 
-    token->type = DataRecorder::OPEN;
-    token->size = filename.length()+1;
-    token->time = RT::OS::getTime();
-
-    char *name = reinterpret_cast<char *>(token+1);
-    strcpy(name,filename.latin1());
-
-    fifo.writeDone();
+    fifo.write(&token,sizeof(token));
+    fifo.write(filename.latin1(),token.size);
 
     return 0;
 }
 
-StartRecordingEvent::StartRecordingEvent(bool &r,NoCopyFifo &f)
+StartRecordingEvent::StartRecordingEvent(bool &r,Fifo &f)
     : recording(r), fifo(f) {}
 
 StartRecordingEvent::~StartRecordingEvent(void) {}
 
 int StartRecordingEvent::callback(void) {
-    DataRecorder::data_token_t *token = reinterpret_cast<DataRecorder::data_token_t *>(fifo.write(sizeof(DataRecorder::data_token_t)));
-
-    if(!token)
-        return -1;
+    DataRecorder::data_token_t token;
 
     recording = true;
 
-    token->type = DataRecorder::START;
-    token->size = 0;
-    token->time = RT::OS::getTime();
+    token.type = DataRecorder::START;
+    token.size = 0;
+    token.time = RT::OS::getTime();
 
-    fifo.writeDone();
+    fifo.write(&token,sizeof(token));
 
     return 0;
 }
 
-StopRecordingEvent::StopRecordingEvent(bool &r,NoCopyFifo &f)
+StopRecordingEvent::StopRecordingEvent(bool &r,Fifo &f)
     : recording(r), fifo(f) {}
 
 StopRecordingEvent::~StopRecordingEvent(void) {}
 
 int StopRecordingEvent::callback(void) {
-    DataRecorder::data_token_t *token = reinterpret_cast<DataRecorder::data_token_t *>(fifo.write(sizeof(DataRecorder::data_token_t)));
-
-    if(!token)
-        return -1;
+    DataRecorder::data_token_t token;
 
     recording = false;
 
-    token->type = DataRecorder::STOP;
-    token->size = 0;
-    token->time = RT::OS::getTime();
+    token.type = DataRecorder::STOP;
+    token.size = 0;
+    token.time = RT::OS::getTime();
 
-    fifo.writeDone();
+    fifo.write(&token,sizeof(token));
 
     return 0;
 }
 
-AsyncDataEvent::AsyncDataEvent(const double *d,size_t s,NoCopyFifo &f)
+AsyncDataEvent::AsyncDataEvent(const double *d,size_t s,Fifo &f)
     : data(d), size(s), fifo(f) {}
 
 AsyncDataEvent::~AsyncDataEvent(void) {}
 
 int AsyncDataEvent::callback(void) {
-    DataRecorder::data_token_t *token = reinterpret_cast<DataRecorder::data_token_t *>(fifo.write(sizeof(DataRecorder::data_token_t)+size*sizeof(double)));
+    DataRecorder::data_token_t token;
 
-    token->type = DataRecorder::ASYNC;
-    token->size = size*sizeof(double);
-    token->time = RT::OS::getTime();
+    token.type = DataRecorder::ASYNC;
+    token.size = size*sizeof(double);
+    token.time = RT::OS::getTime();
 
-    double *data_dest = reinterpret_cast<double *>(token+1);
-    memcpy(data_dest,data,token->size);
-
-    fifo.writeDone();
+    fifo.write(&token,sizeof(token));
+    fifo.write(data,token.size);
 
     return 1;
 }
 
-DoneEvent::DoneEvent(NoCopyFifo &f)
+DoneEvent::DoneEvent(Fifo &f)
     : fifo(f) {}
 
 DoneEvent::~DoneEvent(void) {}
 
 int DoneEvent::callback(void) {
-    DataRecorder::data_token_t *token = reinterpret_cast<DataRecorder::data_token_t *>(fifo.write(sizeof(DataRecorder::data_token_t)));
+    DataRecorder::data_token_t token;
 
-    if(!token)
-        return -1;
+    token.type = DataRecorder::DONE;
+    token.size = 0;
+    token.time = RT::OS::getTime();
 
-    token->type = DataRecorder::DONE;
-    token->size = 0;
-    token->time = RT::OS::getTime();
-
-    fifo.writeDone();
+    fifo.write(&token,sizeof(token));
 
     return 0;
 }
@@ -474,20 +458,17 @@ DataRecorder::Panel::~Panel(void) {
 
 void DataRecorder::Panel::execute(void) {
     if(recording && !counter++) {
-        void *buffer = fifo.write(sizeof(data_token_t)+channels.size()*sizeof(double));
-        if(unlikely(!buffer))
-            return;
-
-        data_token_t *token = reinterpret_cast<data_token_t *>(buffer);
-        double *data = reinterpret_cast<double *>(token+1);
+        data_token_t token;
+        double data[channels.size()];
 
         size_t n = 0;
-        token->type = SYNC;
-        token->size = channels.size()*sizeof(double);
+        token.type = SYNC;
+        token.size = channels.size()*sizeof(double);
         for(RT::List<Channel>::iterator i = channels.begin(),end = channels.end();i != end;++i)
             if(i->block) data[n++] = i->block->getValue(i->type,i->index);
 
-        fifo.writeDone();
+        fifo.write(&token,sizeof(token));
+        fifo.write(data,sizeof(data));
     }
 
     counter %= downsample_rate;
@@ -540,58 +521,51 @@ void DataRecorder::Panel::receiveEvent(const Event::Object *event) {
 
 void DataRecorder::Panel::receiveEventRT(const Event::Object *event) {
     if(event->getName() == Event::START_RECORDING_EVENT) {
-        DataRecorder::data_token_t *token = reinterpret_cast<DataRecorder::data_token_t *>(fifo.write(sizeof(DataRecorder::data_token_t)));
-
-        if(!token)
-            return;
+        data_token_t token;
 
         recording = true;
 
-        token->type = DataRecorder::START;
-        token->size = 0;
-        token->time = RT::OS::getTime();
+        token.type = DataRecorder::START;
+        token.size = 0;
+        token.time = RT::OS::getTime();
 
-        fifo.writeDone();
+        fifo.write(&token,sizeof(token));
     } else if(event->getName() == Event::STOP_RECORDING_EVENT) {
-        DataRecorder::data_token_t *token = reinterpret_cast<DataRecorder::data_token_t *>(fifo.write(sizeof(DataRecorder::data_token_t)));
-
-        if(!token)
-            return;
+        data_token_t token;
 
         recording = false;
 
-        token->type = DataRecorder::STOP;
-        token->size = 0;
-        token->time = RT::OS::getTime();
+        token.type = DataRecorder::STOP;
+        token.size = 0;
+        token.time = RT::OS::getTime();
 
-        fifo.writeDone();
+        fifo.write(&token,sizeof(token));
     } else if(event->getName() == Event::ASYNC_DATA_EVENT) {
         size_t size = *reinterpret_cast<size_t *>(event->getParam("size"));
 
-        DataRecorder::data_token_t *token = reinterpret_cast<DataRecorder::data_token_t *>(fifo.write(sizeof(DataRecorder::data_token_t)+size*sizeof(double)));
+        data_token_t token;
 
-        token->type = DataRecorder::ASYNC;
-        token->size = size*sizeof(double);
-        token->time = RT::OS::getTime();
+        token.type = DataRecorder::ASYNC;
+        token.size = size*sizeof(double);
+        token.time = RT::OS::getTime();
 
-        double *data = reinterpret_cast<double *>(token+1);
-        memcpy(data,event->getParam("data"),token->size);
-
-        fifo.writeDone();
+        fifo.write(&token,sizeof(token));
+        fifo.write(event->getParam("data"),token.size);
     } else if(event->getName() == Event::WORKSPACE_PARAMETER_CHANGE_EVENT) {
-        DataRecorder::data_token_t *token = reinterpret_cast<DataRecorder::data_token_t *>(fifo.write(sizeof(DataRecorder::data_token_t)+sizeof(param_change_t)));
+        data_token_t token;
 
-        token->type = DataRecorder::PARAM;
-        token->size = sizeof(param_change_t);
-        token->time = RT::OS::getTime();
+        token.type = DataRecorder::PARAM;
+        token.size = sizeof(param_change_t);
+        token.time = RT::OS::getTime();
 
-        param_change_t *data = reinterpret_cast<param_change_t *>(token+1);
-        data->id = reinterpret_cast<Settings::Object::ID>(event->getParam("object"));
-        data->index = reinterpret_cast<size_t>(event->getParam("index"));
-        data->step = file.idx;
-        memcpy(&data->value,event->getParam("value"),sizeof(double));
+        param_change_t data;
+        data.id = reinterpret_cast<Settings::Object::ID>(event->getParam("object"));
+        data.index = reinterpret_cast<size_t>(event->getParam("index"));
+        data.step = file.idx;
+        data.value = *reinterpret_cast<double *>(event->getParam("value"));
 
-        fifo.writeDone();
+        fifo.write(&token,sizeof(token));
+        fifo.write(&data,sizeof(data));
     }
 }
 
@@ -822,15 +796,14 @@ void DataRecorder::Panel::processData(void) {
 
     for(;;) {
 
-        memcpy(&token,reinterpret_cast<data_token_t *>(fifo.read(sizeof(token))),sizeof(token));
-        fifo.readDone();
+        fifo.read(&token,sizeof(token));
 
         if(token.type == SYNC) {
 
             if(state == RECORD) {
-                double *data = reinterpret_cast<double *>(fifo.read(token.size));
+                double data[token.size/sizeof(double)];
+                fifo.read(data,token.size);
                 H5PTappend(file.cdata,1,data);
-                fifo.readDone();
 
                 ++file.idx;
             }
@@ -839,7 +812,8 @@ void DataRecorder::Panel::processData(void) {
 
             if(state == RECORD) {
 
-                double *data = reinterpret_cast<double *>(fifo.read(token.size));
+                double data[token.size/sizeof(double)];
+                fifo.read(data,token.size);
 
                 if(data) {
                     hsize_t array_size[] = { token.size/sizeof(double) };
@@ -855,8 +829,6 @@ void DataRecorder::Panel::processData(void) {
                     H5Tclose(array_type);
                     H5Sclose(array_space);
                 }
-
-                fifo.readDone();
             }
 
         } else if(token.type == OPEN) {
@@ -867,8 +839,9 @@ void DataRecorder::Panel::processData(void) {
             if(state != CLOSED)
                 closeFile();
 
-            QString filename = reinterpret_cast<char *>(fifo.read(token.size));
-            fifo.readDone();
+            char filename_string[token.size];
+            fifo.read(filename_string,token.size);
+            QString filename = filename_string;
 
             if(openFile(filename))
                 state = CLOSED;
@@ -912,14 +885,15 @@ void DataRecorder::Panel::processData(void) {
 
             break;
         } else if(token.type == PARAM) {
-            param_change_t *data = reinterpret_cast<param_change_t *>(fifo.read(token.size));
+            param_change_t data;
+            fifo.read(&data,sizeof(data));
 
-            IO::Block *block = dynamic_cast<IO::Block *>(Settings::Manager::getInstance()->getObject(data->id));
+            IO::Block *block = dynamic_cast<IO::Block *>(Settings::Manager::getInstance()->getObject(data.id));
 
             if(block && state == RECORD) {
                 param_hdf_t param = {
-                    data->step,
-                    data->value,
+                    data.step,
+                    data.value,
                 };
 
                 hid_t param_type;
@@ -927,7 +901,7 @@ void DataRecorder::Panel::processData(void) {
                 H5Tinsert(param_type,"index",HOFFSET(param_hdf_t,index),H5T_STD_I64LE);
                 H5Tinsert(param_type,"value",HOFFSET(param_hdf_t,value),H5T_IEEE_F64LE);
 
-                QString parameter_name = QString::number(block->getID())+" "+block->getName()+" : "+block->getName(Workspace::PARAMETER,data->index);
+                QString parameter_name = QString::number(block->getID())+" "+block->getName()+" : "+block->getName(Workspace::PARAMETER,data.index);
 
                 hid_t data = H5PTopen(file.pdata,parameter_name.latin1());
                 H5PTappend(data,1,&param);
@@ -935,8 +909,6 @@ void DataRecorder::Panel::processData(void) {
 
                 H5Tclose(param_type);
             }
-
-            fifo.readDone();
         }
 
     }

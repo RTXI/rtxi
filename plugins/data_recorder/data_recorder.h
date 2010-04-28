@@ -22,7 +22,6 @@
 #include <event.h>
 #include <io.h>
 #include <mutex.h>
-#include <no_copy_fifo.h>
 #include <plugin.h>
 #include <workspace.h>
 #include <qobject.h>
@@ -136,7 +135,7 @@ namespace DataRecorder {
         size_t downsample_rate;
 
         pthread_t thread;
-        NoCopyFifo fifo;
+        Fifo fifo;
 
         struct file_t {
             hid_t id;

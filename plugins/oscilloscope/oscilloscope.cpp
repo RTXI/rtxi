@@ -917,12 +917,11 @@ void Oscilloscope::Panel::execute(void) {
     void *buffer;
     size_t nchans = getChannelCount();
 
-    if(nchans && (buffer = fifo.write(sizeof(size_t)+nchans*sizeof(double)))) {
-        size_t *token = reinterpret_cast<size_t *>(buffer);
-        *token = nchans;
-
+    if(nchans) {
         size_t idx = 0;
-        double *data = reinterpret_cast<double *>(token+1);
+        size_t token = nchans;
+        double data[nchans];
+
         for(std::list<Scope::Channel>::iterator i = getChannelsBegin(), end = getChannelsEnd(); i != end ; ++i) {
             struct channel_info *info = reinterpret_cast<struct channel_info *>(i->getInfo());
 
@@ -950,7 +949,8 @@ void Oscilloscope::Panel::execute(void) {
             data[idx++] = value;
         }
 
-        fifo.writeDone();
+        fifo.write(&token,sizeof(token));
+        fifo.write(data,sizeof(data));
     }
 }
 
@@ -966,8 +966,8 @@ bool Oscilloscope::Panel::setInactiveSync(void) {
 }
 
 void Oscilloscope::Panel::flushFifo(void) {
-    while(fifo.read(1,false))
-        fifo.readDone();
+    char junk;
+    while(fifo.read(&junk,sizeof(junk),false));
 }
 
 void Oscilloscope::Panel::adjustDataSize(void) {
@@ -984,17 +984,12 @@ void Oscilloscope::Panel::showProperties(void) {
 }
 
 void Oscilloscope::Panel::timeoutEvent(void) {
-    size_t *size_ptr;
+    size_t size;
 
-    while((size_ptr = reinterpret_cast<size_t *>(fifo.read(sizeof(size_t),false)))) {
-        size_t size = *size_ptr;
-        fifo.readDone();
-
-        double *data;
-        if((data = reinterpret_cast<double *>(fifo.read(size*sizeof(double))))) {
+    while(fifo.read(&size,sizeof(size),false)) {
+        double data[size];
+        if(fifo.read(data,sizeof(data)))
             setData(data,size);
-            fifo.readDone();
-        }
     }
 }
 

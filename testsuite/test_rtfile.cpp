@@ -6,7 +6,7 @@
 
 #define DATA_SIZE 1024
 
-static const char *file_name_template = "rtxi.test_rtfile.XXXXXX";
+static const char file_name_template[] = "rtxi.test_rtfile.XXXXXX";
 static const size_t file_name_template_size = sizeof(file_name_template)+1;
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TestRTFile);
@@ -28,7 +28,7 @@ void TestRTFile::testSingleWrite(void) {
     strcpy(file_name,file_name_template);
     CPPUNIT_ASSERT((fd = mkstemp(file_name)) >= 0);
 
-    CPPUNIT_ASSERT(file.open(file_name,O_WRONLY|O_TRUNC));
+    CPPUNIT_ASSERT(file.open(file_name,O_CREAT|O_WRONLY|O_TRUNC));
     CPPUNIT_ASSERT_EQUAL(sizeof(value1),file.write(&value1,sizeof(value1)));
     file.close();
 
@@ -53,7 +53,7 @@ void TestRTFile::testLargeWrite(void) {
     strcpy(file_name,file_name_template);
     CPPUNIT_ASSERT((fd = mkstemp(file_name)) >= 0);
 
-    CPPUNIT_ASSERT(file.open(file_name,O_WRONLY|O_TRUNC));
+    CPPUNIT_ASSERT(file.open(file_name,O_CREAT|O_WRONLY|O_TRUNC));
     for(size_t i=0;i<DATA_SIZE;++i) {
         value1[i] = rand();
         CPPUNIT_ASSERT_EQUAL(sizeof(value1[0]),file.write(value1+i,sizeof(value1[0])));

@@ -9,7 +9,6 @@ LIBS = -rdynamic $(CPPUNIT_LIBS)
 run_SOURCES = \
 		$(top_srcdir)/include/rt.h \
 		$(top_srcdir)/include/fifo.h \
-		$(top_srcdir)/include/no_copy_fifo.h \
 		$(top_srcdir)/include/rtfile.h \
 		$(top_srcdir)/include/event.h \
 		$(top_srcdir)/include/mutex.h \
@@ -18,7 +17,6 @@ run_SOURCES = \
 		$(top_srcdir)/incldue/io.h \
 		\
 		$(top_srcdir)/src/fifo.cpp \
-		$(top_srcdir)/src/no_copy_fifo.cpp \
 		$(top_srcdir)/src/rtfile.cpp \
 		$(top_srcdir)/src/rt.cpp \
 		$(top_srcdir)/src/event.cpp \
@@ -34,8 +32,6 @@ run_SOURCES = \
 		test_rt.cpp \
 		test_fifo.h \
 		test_fifo.cpp \
-		test_no_copy_fifo.h \
-		test_no_copy_fifo.cpp \
 		test_rtfile.h \
 		test_rtfile.cpp \
 		test_event.h \
