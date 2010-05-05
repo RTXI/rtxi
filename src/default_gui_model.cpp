@@ -58,7 +58,7 @@ void DefaultGUILineEdit::redden(void) {
 }
 
 DefaultGUIModel::DefaultGUIModel(std::string name,DefaultGUIModel::variable_t *var,size_t size)
-    : QWidget(MainWindow::getInstance()->centralWidget()), Workspace::Instance(name,var,size) {
+    : QWidget(MainWindow::getInstance()->centralWidget()), Workspace::Instance(name,var,size), myname(name) {
     setCaption(QString::number(getID())+" "+name);
 
     QBoxLayout *layout = new QVBoxLayout(this);
@@ -247,6 +247,10 @@ void DefaultGUIModel::pause(bool p) {
         update(PAUSE);
     else
         update(UNPAUSE);
+}
+
+void DefaultGUIModel::doDeferred(const Settings::Object::State &) {
+    setCaption(QString::number(getID())+" "+myname);
 }
 
 void DefaultGUIModel::doLoad(const Settings::Object::State &s) {

@@ -228,6 +228,7 @@ protected:
 
 private:
 
+    void doDeferred(const Settings::Object::State &);
     void doLoad(const Settings::Object::State &);
     void doSave(Settings::Object::State &) const;
 
@@ -245,6 +246,7 @@ private:
     mutable QString junk;
     std::map<QString,param_t> parameter;
     QPushButton *pauseButton;
+    std::string myname;
 
 }; // class DefaultGUIModel
 
