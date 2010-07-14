@@ -56,6 +56,10 @@ Then copy and paste:
 
 #include "my_plugin.h"
 
+extern "C" Plugin::Object *createRTXIPlugin(void) {
+    return new MyPlugin();
+}
+
 MyPlugin::MyPlugin(void)
   : DefaultGUIModel("MyPlugin",NULL,0) {}
 
