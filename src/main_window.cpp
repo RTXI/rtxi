@@ -39,9 +39,9 @@ MainWindow::MainWindow(void)
     /* Insert Menu Items */
     int id;
     QPopupMenu *fileMenu = new QPopupMenu(this);
-    id = fileMenu->insertItem("&Load",this,SLOT(loadSettings()),CTRL+Key_L);
+    id = fileMenu->insertItem("&Load Settings",this,SLOT(loadSettings()),CTRL+Key_L);
     fileMenu->setWhatsThis(id,"Load System Settings");
-    id = fileMenu->insertItem("&Save",this,SLOT(saveSettings()),CTRL+Key_S);
+    id = fileMenu->insertItem("&Save Settings",this,SLOT(saveSettings()),CTRL+Key_S);
     fileMenu->setWhatsThis(id,"Save System Settings");
     fileMenu->insertSeparator();
     id = fileMenu->insertItem("&Quit",qApp,SLOT(closeAllWindows()),CTRL+Key_Q);
