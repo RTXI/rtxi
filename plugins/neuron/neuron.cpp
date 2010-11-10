@@ -264,7 +264,7 @@ void Neuron::execute(void) {
     for(int i = 0;i < steps;++i)
         solve(period/steps,y);
 
-    output(0) = V*1e-3;
+    output(0) = V;
 }
 
 void Neuron::update(DefaultGUIModel::update_flags_t flag) {
