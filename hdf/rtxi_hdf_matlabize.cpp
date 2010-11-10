@@ -18,6 +18,10 @@ int main(int argc,char *argv[]) {
         return -EINVAL;
     }
 
+    char cmdBuff[200];
+    sprintf(cmdBuff,"cp %s %s.old",argv[1],argv[1]);
+    system(cmdBuff);
+
     hid_t fid = H5Fopen(argv[1],H5F_ACC_RDWR,H5P_DEFAULT);
     if(fid < 0) {
         fprintf(stderr,"Failed to open %s.\n",argv[0]);
