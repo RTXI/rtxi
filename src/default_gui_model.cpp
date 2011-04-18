@@ -102,6 +102,7 @@ DefaultGUIModel::DefaultGUIModel(std::string name,DefaultGUIModel::variable_t *v
                 param.str_value = new QString;
             } else if(var[i].flags & STATE) {
                 param.edit->setReadOnly(true);
+                param.edit->setPaletteForegroundColor(Qt::darkGray);
                 param.type = STATE;
                 param.index = nstate++;
             } else if(var[i].flags & EVENT) {
