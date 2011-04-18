@@ -1,0 +1,553 @@
+(*    -*- mode: sml-yacc -*- *)
+
+
+exception InvalidMethod		
+
+fun nameit(q, p) =
+    {name=Symbol.symbol q, pos=p}
+
+fun name_to_str(n) =
+    let
+	val {name=name, pos=_} = n
+    in
+	Symbol.name name
+    end
+
+
+fun componentList(nil) = 
+    nil
+  | componentList(h::rest) = 
+    Ast.COMPONENT_DECL(h)::componentList(rest)
+
+
+%%
+
+
+(* The list of terminals corresponding to DL syntactic atoms. *)
+%term
+    EOF 
+  | ID      of string
+  | STRING  of string
+  | INT     of int 
+  | REAL    of real 
+  | CBLOCK  of string
+  | LBRACKET | RBRACKET | PERIOD | QUESTION | COLON | SEMICOLON | PLUS | MINUS | TIMES 
+  | DIVIDE | PERCENT | POUND | POW | AND | NEG | OR | GT | COMMA
+  | LT | GE | LE | ASGN | LPAREN | RPAREN | EQ | NE 
+  | UPLUS | UMINUS | AT
+  | FOLLOWS | CIDENTIFIER | CDECLARATION | CONDITION | DEFAULT
+  | ARGUMENT | DISCRETE | EVENT | EXTERNAL | FUNCTION | HIGH | INPUT
+  | LOW | METHOD | OUTPUT | PARAMETER | INTEGER
+  | STATE | STEP | SYSTEM | TABLE | TIME | VECTOR | CASE 
+  | D | Q | S | X 
+
+%keyword AT PERIOD QUESTION COLON SEMICOLON PLUS MINUS TIMES DIVIDE
+   PERCENT POW NEG AND OR GT LT GE LE POUND ASGN LPAREN RPAREN EQ NE
+   FOLLOWS CIDENTIFIER CDECLARATION CONDITION DEFAULT ARGUMENT
+   DISCRETE EVENT EXTERNAL FUNCTION HIGH INPUT LOW METHOD
+   OUTPUT PARAMETER STEP SYSTEM INTEGER TABLE TIME VECTOR STATE CASE D
+   Q S X COMMA
+
+%nonassoc ASGN
+%right QUESTION COLON
+%left OR
+%left AND
+%left EQ NE
+%left LT GT GE LE
+%left MINUS PLUS
+%left TIMES DIVIDE PERCENT POUND
+%left UMINUS UPLUS NEG 
+%right POW
+%right SEMICOLON
+%left COMMA
+%nonassoc METHOD
+
+
+(* The list of rules (non-terminals) used by the parser. *)
+%nonterm 
+system                        of Ast.system
+| time_blocks                of Ast.system_time list
+| time_block                 of Ast.system_time
+| time_header                of Ast.name
+| Cblock                     of string
+| Cdecl                      of Ast.declaration
+| formal_param               of Ast.name
+| formal_params              of Ast.name list
+| function_def               of Ast.declaration 
+| equations                  of Ast.time_entry list
+| equation                   of Ast.time_entry option
+| conditional_equation_block of Ast.time_entry
+| diff_eqn                   of Ast.equation
+| difference_eqn             of Ast.equation
+| discrete_eqn               of Ast.equation
+| discrete_exp               of Ast.discrete_exp
+| discrete_case_clauses of Ast.discrete_exp_clause list
+| alg_eqn                    of Ast.equation
+| exp                        of Ast.exp 
+| arglist                    of Ast.exp list
+| time_decl                  of Ast.declaration
+| system_decl                of Ast.name
+| continuous_system          of Ast.name
+| event                      of Ast.time_entry
+| event_decl                 of Ast.declaration
+| component_decl             of Ast.component_decl list
+| state_decl                 of Ast.component_decl list
+| scalar_states_decl         of Ast.component_decl list
+| scalar_states              of Ast.component_decl list
+| scalar_state_decl          of Ast.component_decl 
+| method                     of Ast.method option
+| numlist                    of Real.real list
+| vector_states_decl         of Ast.component_decl list
+| vector_states              of Ast.component_decl list
+| vector_state_decl          of Ast.component_decl 
+| discrete_state_decl        of Ast.component_decl list
+| discrete_states            of Ast.component_decl list
+| discrete_state             of Ast.component_decl 
+| discrete_set               of Ast.set_element list               
+| discrete_set_element       of Ast.set_element 
+| int_states_decl            of Ast.component_decl list
+| int_states                 of Ast.component_decl list
+| int_state_decl             of Ast.component_decl 
+| par_decl                   of Ast.component_decl list
+| scalar_par_decl            of Ast.component_decl list
+| scalar_pars                of Ast.component_decl list
+| scalar_par                 of Ast.component_decl 
+| vector_par_decl            of Ast.component_decl list
+| vector_pars                of Ast.component_decl list
+| vector_par                 of Ast.component_decl 
+| state_fun_decl             of Ast.component_decl list
+| scalar_state_fun_decl      of Ast.component_decl list
+| scalar_state_funs          of Ast.component_decl list 
+| scalar_state_fun           of Ast.component_decl 
+| vector_state_fun_decl      of Ast.component_decl list
+| vector_state_funs          of Ast.component_decl list 
+| vector_state_fun           of Ast.component_decl 
+| table_decl                 of Ast.component_decl list
+| decls                      of Ast.declaration list 
+| decl                       of Ast.declaration list
+| external_decl              of Ast.component_decl list
+| externals_decl             of Ast.component_decl list
+| external                   of Ast.component_decl 
+| id_decl                    of Ast.component_decl list
+| id_decls                   of Ast.component_decl list 
+| string                     of string option
+| real                       of Real.real
+| pass_thrus
+| pass_thru
+
+
+(* Default values for tokens with values. *)
+
+%value ID ("bogus")
+%value STRING ("")
+%value INT (1)
+%value REAL (1.0)
+%value CBLOCK ("")
+
+%nodefault
+%name DL
+%pure
+%verbose
+%pos int
+%eop EOF
+%noshift EOF
+%start system
+%header (functor DLLrValsFun(structure Token: TOKEN
+			     structure Ast: DL_AST))
+
+%%
+system:	        pass_thrus system_decl decls time_block time_blocks 
+			   (Ast.SYSTEM{name=system_decl,
+				      decl=decls,
+				      time=time_block::time_blocks})
+
+
+decls:		(nil)
+  		| decls decl (decl@decls)
+
+
+decl:		component_decl (componentList(component_decl))
+		| time_decl (time_decl::nil)
+                | function_def (function_def::nil)
+		| event_decl (event_decl::nil)
+		| Cdecl (Cdecl::nil)
+		| pass_thru (nil)
+
+
+time_blocks:	(nil)
+		| time_blocks time_block (time_block::time_blocks)
+
+
+time_block:	time_header Cblock equations 
+			    (case name_to_str (time_header) of 
+			       "START" =>
+			       Ast.STARTTIME
+				   (rev  equations)
+			     | _ => 
+			       Ast.RUNTIME
+				   (time_header, (rev equations)))
+
+
+
+
+time_header: 	AT TIME ID COLON (nameit(ID, IDleft))
+
+Cblock:	 ("")
+      | CBLOCK (CBLOCK)
+
+Cdecl: CDECLARATION CBLOCK (Ast.C_DECL (CBLOCK))
+
+formal_param:   ID   (nameit(ID,IDleft))
+
+
+formal_params: formal_param COMMA formal_param     (formal_param1::formal_param2::nil)
+	     | formal_param COMMA formal_params (formal_param::formal_params)
+
+function_def:  ID LPAREN formal_params RPAREN ASGN exp SEMICOLON 
+		(Ast.FUNCTION_DEF{name=nameit(ID,IDleft),
+				  args=(rev formal_params),
+				  body=exp,
+				  pos=IDleft})
+	    | ID LPAREN formal_param RPAREN ASGN exp SEMICOLON 
+		(Ast.FUNCTION_DEF {name=nameit(ID, IDleft),
+				   args=formal_param::nil,
+				   body=exp,
+				   pos=IDleft})
+		
+		
+equations:	(nil)
+  	 | equations equation (case equation of 
+				 NONE => equations
+			       | SOME eq => eq::equations)
+  	 | equations conditional_equation_block 
+		(conditional_equation_block::equations)
+	 | equations event
+		(event::equations)
+
+
+equation:  diff_eqn (SOME (Ast.EQN diff_eqn))
+	|  discrete_eqn (SOME (Ast.EQN discrete_eqn))
+	|  difference_eqn (SOME (Ast.EQN difference_eqn))
+	|  alg_eqn (SOME (Ast.EQN alg_eqn))
+	|  pass_thru (NONE)
+
+
+conditional_equation_block: CASE ID EQ ID LBRACKET equations RBRACKET SEMICOLON
+		(Ast.COND 
+		     {relop=Ast.EQ,
+		      quantity1=(nameit(ID1, ID1left)),
+		      quantity2=(nameit(ID2, ID2left)),
+		      body=(rev equations), pos=CASEleft})
+		
+event: EVENT ID LPAREN formal_param RPAREN LBRACKET equations RBRACKET SEMICOLON
+		(Ast.EVENT {name=nameit(ID,IDleft),
+			    arguments=formal_param::nil,
+			    equations=(rev equations),
+		            pos=EVENTleft})
+
+     | EVENT ID LPAREN formal_params RPAREN LBRACKET equations RBRACKET SEMICOLON
+		(Ast.EVENT {name=nameit(ID,IDleft),
+			    arguments=formal_params,
+			    equations=(rev equations),
+		            pos=EVENTleft})
+
+diff_eqn:	D ID RPAREN ASGN exp SEMICOLON
+		(Ast.DIFFERENTIAL_EQN(nameit(ID, IDleft),
+				      Ast.EULER_ARGS(exp), Dleft))  
+	| D ID RPAREN ASGN LBRACKET exp COMMA exp RBRACKET  SEMICOLON 
+		(Ast.DIFFERENTIAL_EQN(nameit(ID1, ID1left),
+				      Ast.MAU_ARGS(exp1, exp2),
+				      Dleft)) 
+		
+difference_eqn:	Q ID RPAREN ASGN exp SEMICOLON 
+		(Ast.DIFFERENCE_EQN(nameit(ID,IDleft), 
+				    exp, Qleft))
+		
+discrete_eqn:	S ID RPAREN ASGN discrete_exp SEMICOLON 
+		(Ast.DISCRETE_EQN(nameit(ID,IDleft), 
+				  discrete_exp, Sleft))
+
+
+discrete_exp:  CONDITION LBRACKET discrete_case_clauses  RBRACKET  
+		(Ast.DISCRETE_CASE(discrete_case_clauses))
+	    | ID (Ast.DISCRETE_ID(nameit(ID,IDleft)))
+
+discrete_case_clauses: 
+DEFAULT FOLLOWS ID SEMICOLON (Ast.DEFAULT_COND(nameit(ID,IDleft))::nil)
+| exp FOLLOWS ID SEMICOLON discrete_case_clauses 
+		(Ast.DISCRETE_COND(exp, nameit(ID,IDleft))::
+		 discrete_case_clauses)
+
+alg_eqn:	ID ASGN exp SEMICOLON 
+		   (Ast.ALGEBRAIC_EQN(nameit(ID,IDleft), exp, IDleft))
+
+		   
+
+exp: REAL (Ast.CONSTREAL (REAL))
+   | INT (Ast.CONSTINT (INT))	 
+   | ID  (Ast.ID(nameit(ID, IDleft)))
+   | ID LPAREN RPAREN 
+		(Ast.FUNCALL {function=nameit(ID, IDleft), arguments=[], pos=IDleft})
+   | ID LPAREN arglist RPAREN 
+		(Ast.FUNCALL {function=nameit(ID, IDleft), arguments=(rev arglist), pos=IDleft})
+   | exp PLUS exp    
+		(Ast.BINOP {oper=Ast.UNKNOWN (Ast.PLUS), left=exp1, right=exp2, pos=exp1left})
+   | exp MINUS exp   
+		(Ast.BINOP {oper=Ast.UNKNOWN (Ast.MINUS), left=exp1, right=exp2, pos=exp1left})
+   | exp TIMES exp   
+		(Ast.BINOP {oper=Ast.UNKNOWN (Ast.TIMES), left=exp1, right=exp2, pos=exp1left})
+   | exp DIVIDE exp    
+		(Ast.BINOP {oper=Ast.UNKNOWN (Ast.DIVIDE), left=exp1, right=exp2, pos=exp1left})
+   | exp PERCENT exp   
+		(Ast.BINOP {oper=Ast.UNKNOWN (Ast.MODULUS), left=exp1, right=exp2, pos=exp1left}) 
+   | exp POUND exp   
+		(Ast.BINOP {oper=Ast.UNKNOWN (Ast.CROSSP), left=exp1, right=exp2, pos=exp1left}) 
+   | MINUS exp  %prec UMINUS  
+		(Ast.UNARYEXPOP {oper=Ast.UMINUS, exp=exp, pos=MINUSleft})
+
+   | PLUS exp  %prec UPLUS  
+		(Ast.UNARYEXPOP {oper=Ast.UPLUS, exp=exp, pos=PLUSleft})
+   | NEG exp 
+		(Ast.UNARYEXPOP {oper=Ast.NOT, exp=exp, pos=NEGleft})
+   | exp POW exp     
+		(Ast.BINOP {oper=Ast.UNKNOWN(Ast.POWER), left=exp1, right=exp2, pos=exp1left}) 
+   | LPAREN exp RPAREN  
+		(exp)   
+   | exp EQ exp      
+		(Ast.RELOP {oper=Ast.EQ, left=exp1, right=exp2, pos=exp1left}) 
+   | exp NE exp      
+		(Ast.RELOP {oper=Ast.NE, left=exp1, right=exp2, pos=exp1left}) 
+   | exp LE exp      
+		(Ast.RELOP {oper=Ast.LE, left=exp1, right=exp2, pos=exp1left}) 
+   | exp GE exp      
+		(Ast.RELOP {oper=Ast.GE, left=exp1, right=exp2, pos=exp1left}) 
+   | exp LT exp     
+		(Ast.RELOP {oper=Ast.LT, left=exp1, right=exp2, pos=exp1left}) 
+   | exp GT exp     
+		(Ast.RELOP {oper=Ast.GT, left=exp1, right=exp2, pos=exp1left}) 
+   | exp AND exp     
+		(Ast.RELOP {oper=Ast.AND, left=exp1, right=exp2, pos=exp1left}) 
+   | exp OR exp      
+		(Ast.RELOP {oper=Ast.OR, left=exp1, right=exp2, pos=exp1left}) 
+   | exp QUESTION exp COLON exp 
+		(Ast.CONDITIONAL {condition=exp1, iftrue=exp2, iffalse=exp3, pos=exp1left})
+
+
+arglist: 	exp		(exp::nil)
+       | arglist COMMA exp (exp::arglist)
+
+
+time_decl:	TIME ID SEMICOLON (Ast.TIME_DECL (nameit(ID,IDleft)))
+
+
+system_decl:  continuous_system (continuous_system)
+
+continuous_system: SYSTEM ID SEMICOLON (nameit(ID,IDleft))
+
+
+component_decl:	  state_decl (state_decl)
+  	      | int_states_decl (int_states_decl)
+  	      | discrete_state_decl (discrete_state_decl)
+	      | par_decl (par_decl)
+	      | state_fun_decl (state_fun_decl)
+	      | table_decl (table_decl)
+  	      | id_decl (id_decl)
+	      | external_decl (external_decl)
+			      
+state_decl:	vector_states_decl (vector_states_decl)
+	  | scalar_states_decl (scalar_states_decl)
+			       
+scalar_states_decl:      STATE scalar_states SEMICOLON (scalar_states)
+			       
+scalar_states:           scalar_state_decl (scalar_state_decl::nil)
+             | scalar_state_decl COMMA scalar_states (scalar_state_decl::scalar_states)
+
+
+scalar_state_decl:	ID ASGN exp string method 
+		(Ast.SCALAR_STATE_DECL{quantity=nameit(ID,IDleft),
+				       init=exp,
+				       method=method,
+				       description=string,
+				       pos=IDleft
+				       })
+
+
+method:           (NONE)
+      | METHOD string (
+		       case string of 
+			 NONE    => NONE
+		       | SOME "euler" => SOME Ast.EULER
+		       | SOME "mau"   => SOME Ast.MAU
+		       | SOME s       => raise InvalidMethod)
+	       
+numlist: 	REAL		(REAL::nil)
+       | INT                ((Real.fromInt (INT))::nil)
+       | numlist COMMA REAL (REAL::numlist)
+       | numlist COMMA INT ((Real.fromInt (INT))::numlist)
+		   
+		   
+vector_states_decl: VECTOR STATE vector_states SEMICOLON (vector_states)
+			   
+vector_states:      vector_state_decl (vector_state_decl::nil)
+	     |   vector_state_decl COMMA vector_states (vector_state_decl::vector_states)
+				   
+vector_state_decl: ID ASGN LPAREN numlist RPAREN string method 
+		(Ast.VECTOR_STATE_DECL{quantity=nameit(ID,IDleft),
+				       initval=Array.fromList(numlist),
+				       method=method,
+				       description=string,
+				       pos=IDleft
+				       })  
+
+		 | ID ASGN REAL COLON INT string method SEMICOLON 
+		(Ast.VECTOR_STATE_DECL{quantity=nameit(ID,IDleft),
+				       initval=Array.array(INT, REAL),
+				       method=method,
+				       description=string,
+				       pos=IDleft
+				       })
+
+discrete_state_decl:	DISCRETE STATE discrete_states SEMICOLON (discrete_states)
+				 
+discrete_states:     discrete_state (discrete_state::nil)
+               | discrete_state COMMA discrete_states (discrete_state::discrete_states)
+				
+discrete_state:	ID ASGN LPAREN discrete_set RPAREN string
+		(Ast.DISCRETE_DECL{quantity=(nameit(ID,IDleft)),
+				   set=rev discrete_set,
+				   description=string,
+				   pos=IDleft})
+
+discrete_set:     discrete_set COMMA discrete_set_element (discrete_set_element::discrete_set)
+		| discrete_set_element (discrete_set_element::nil)
+
+discrete_set_element: ID ((nameit(ID,IDleft), NONE))
+                | ID ASGN INT ((nameit(ID,IDleft), SOME INT))
+
+int_states_decl:      INTEGER STATE int_states SEMICOLON (int_states)
+
+int_states:  int_state_decl (int_state_decl::nil)
+          | int_state_decl COMMA int_states (int_state_decl::int_states)
+
+			   
+int_state_decl:	ID ASGN exp string (Ast.INT_STATE_DECL{quantity=nameit(ID,IDleft),
+						       init=exp,
+						       description=string,
+						       pos=IDleft})
+
+
+par_decl:	  scalar_par_decl (scalar_par_decl)
+        | vector_par_decl (vector_par_decl)
+
+scalar_par_decl:  PARAMETER scalar_pars SEMICOLON (scalar_pars)
+
+scalar_pars:      scalar_par (scalar_par::nil)
+	   | scalar_par COMMA scalar_pars (scalar_par::scalar_pars)
+
+scalar_par:	ID ASGN exp string (Ast.SCALAR_PAR_DECL{quantity=nameit(ID,IDleft),
+							init=exp,
+							description=string,
+							pos=IDleft })
+
+vector_par_decl:  VECTOR PARAMETER vector_pars SEMICOLON (vector_pars)
+
+vector_pars:      vector_par (vector_par::nil)
+	   | vector_par COMMA vector_pars (vector_par::vector_pars)
+
+vector_par:       ID ASGN LPAREN numlist RPAREN string 
+		(Ast.VECTOR_PAR_DECL{quantity=nameit(ID,IDleft),
+				     initval=Array.fromList(numlist),
+				     description=string,
+				     pos=IDleft
+				     })
+	  | ID ASGN REAL COLON INT string 
+		(Ast.VECTOR_PAR_DECL{quantity=nameit(ID,IDleft),
+				     initval=Array.array(INT, REAL),
+				     description=string,
+				     pos=IDleft
+				     })
+
+state_fun_decl:  scalar_state_fun_decl (scalar_state_fun_decl)
+  	      | vector_state_fun_decl (vector_state_fun_decl)
+
+vector_state_fun_decl:      VECTOR FUNCTION vector_state_funs SEMICOLON (vector_state_funs)
+scalar_state_fun_decl:      STATE FUNCTION scalar_state_funs SEMICOLON (scalar_state_funs)
+
+scalar_state_funs:    scalar_state_fun (scalar_state_fun::nil)
+		 | scalar_state_funs COMMA scalar_state_fun (scalar_state_fun::scalar_state_funs)
+
+vector_state_funs:    vector_state_fun (vector_state_fun::nil)
+		 | vector_state_funs COMMA vector_state_fun (vector_state_fun::vector_state_funs)
+
+scalar_state_fun: ID string (Ast.SCALAR_STATE_FUNC_DECL({quantity=nameit(ID,IDleft),
+							  description=string,
+							  pos=IDleft}))
+
+
+
+vector_state_fun: ID string (Ast.VECTOR_STATE_FUNC_DECL({quantity=nameit(ID,IDleft),
+							 description=string,
+							 pos=IDleft}))
+
+
+			   
+
+
+table_decl: TABLE FUNCTION ID LPAREN formal_param RPAREN ASGN exp COMMA
+		  LOW ASGN real COMMA HIGH ASGN real COMMA STEP ASGN real
+		  COMMA ARGUMENT ASGN ID string SEMICOLON  
+		(Ast.TABLE_DECL({quantity=nameit(ID1, ID1left),
+				 parameters=formal_param::nil,
+				 body=exp,
+				 low=real1,
+				 high=real2,
+				 step=real3,
+				 argument=nameit(ID2, ID2left),
+				 description=string,
+				 pos=TABLEleft
+				 })::nil)
+
+external_decl:      EXTERNAL externals_decl SEMICOLON (externals_decl)
+
+
+externals_decl:    external (external::nil)
+                | external COMMA externals_decl (external::externals_decl)
+
+
+external:	OUTPUT ID string (Ast.EXTERNAL_DECL({quantity=nameit(ID,IDleft),
+						     direction=Ast.OUTPUT,
+						     channel=NONE,
+						     description=string,
+						     pos=IDleft
+						     }))
+		| INPUT ID string (Ast.EXTERNAL_DECL({quantity=nameit(ID,IDleft),
+						      direction=Ast.INPUT,
+						      channel=NONE,
+						      description=string,
+						      pos=IDleft
+						      }))
+
+id_decl:	CIDENTIFIER id_decls SEMICOLON (id_decls)
+
+
+id_decls:      ID ((Ast.C_ID_DECL{quantity=(nameit(ID,IDleft)),
+				  pos=IDleft
+				  })::nil)
+		| ID COMMA id_decls
+		((Ast.C_ID_DECL{quantity=(nameit(ID,IDleft)),
+				pos=IDleft})::id_decls)
+
+
+string:		  (NONE)
+  	       | STRING (SOME STRING)
+
+real:		REAL (REAL)
+		| MINUS REAL ((~1.0) * REAL)
+		| INT (Real.fromInt (INT))	
+		| MINUS INT (Real.fromInt ((~1) * INT))
+
+pass_thrus:	()
+		| pass_thrus pass_thru ()
+
+pass_thru:	SEMICOLON ()
+

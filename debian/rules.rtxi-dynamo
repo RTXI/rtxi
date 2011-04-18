@@ -1,0 +1,65 @@
+#!/usr/bin/make -f
+
+# Uncomment this to turn on verbose mode.
+export DH_VERBOSE=1
+
+# This is the debhelper compatibility version to use.
+export DH_COMPAT=4
+
+# This has to be exported to make the multiple binary install work 
+export DH_OPTIONS
+
+
+INSTALL=install
+
+
+MLTON=mlton
+ML_LEX=mllex
+ML_YACC=mlyacc
+
+
+ifneq ($(CONCURRENCY_LEVEL),)
+MAKE_OPT = -j $(CONCURRENCY_LEVEL)
+endif
+
+
+echo-vars:
+	@echo " - C compiler is $(CC)"
+	@echo " - Make options are $(MAKE_OPT)"
+
+build: rtxi-dynamo.build-stamp
+rtxi-dynamo.build-stamp: 
+	cd dynamo && $(ML_LEX) dl.lex
+	cd dynamo && $(ML_YACC) dl.grm
+	cd dynamo && $(MLTON) dynamo.mlb
+	cd dynamo/doc && texi2pdf dynamo.texi
+	cd dynamo/doc && makeinfo dynamo.texi
+	touch rtxi-dynamo.build-stamp
+
+
+install: build
+	dh_testroot
+	dh_install             dynamo/dynamo /usr/bin
+	dh_installdirs         usr/bin etc/emacs/site-start.d
+	dh_installemacsen      dynamo/elisp/dynamo-mode.el
+	dh_installexamples     dynamo/examples/*.dynamo
+	dh_installman          dynamo/doc/dynamo.1
+	dh_installinfo         dynamo/doc/dynamo.info
+	dh_installdocs         dynamo/doc/dynamo.pdf 
+	dh_installchangelogs   dynamo/ChangeLog
+
+
+binary-arch: install
+
+binary-indep: 
+
+
+clean: 
+	dh_testroot
+	-dh_clean -k
+	-rm rtxi-dynamo.build-stamp
+	@-cd dynamo/doc && $(RM) dynamo.info dynamo.pdf *.aux *.cp *.fn *.ky *.log *.pg *.toc *.tp *.vr
+	@-cd dynamo && $(RM) dynamo dl.grm.sml dl.grm.sig dl.grm.desc dl.lex.sml
+	@-cd dynamo && $(RM) -r elc.*
+
+.PHONY: build clean binary-indep binary-arch binary-common binary install

@@ -1,0 +1,85 @@
+#!/bin/sh
+#
+
+prefix="@prefix@"
+exec_prefix="@exec_prefix@"
+
+BINDIR="@bindir@"
+MODULEDIR="/lib/modules/`uname -r`"
+RTAI_MODULEDIR="$MODULEDIR/rtai"
+
+OPT=$(getopt -n "init_rtxi" -o h --long help,load,unload -- "$@")
+CMD=""
+
+while true; do
+    case "$1" in
+	-h|--help) printf "Usage: \tinit_rtxi --load\
+                                  \n\tinit_rtxi --unload\
+                           \n\nOptions:\
+                                \n\t--load    Load RTXI modules\
+                                \n\t--unload  Unload RTXI modules\
+			        \n" ; exit ;;
+
+	--load) CMD="$1"; shift ;;
+	--unload) CMD="$1"; shift ;;
+	--) shift ; break ;;
+	*) break ;;
+    esac
+done
+
+if test `ls -H "$RTAI_MODULEDIR/rtai_ksched.o"` != "$RTAI_MODULEDIR/rtai_lxrt.o";
+then
+    ln -sf "$RTAI_MODULEDIR/rtai_lxrt.o" "$RTAI_MODULEDIR/rtai_ksched.o";
+    depmod -ae;
+fi
+
+case "$CMD" in 
+
+  --load)  modprobe rtai_lxrt &&
+	   modprobe rtai_fifos && 
+	   modprobe rtai_sem &&
+	   modprobe rtai_shm &&
+	   modprobe rtai_usi &&
+           $BINDIR/rtxi_comedi --load &&
+	   modprobe rtai_comedi; break;;
+
+  --unload) modprobe -r rtai_comedi 2> /dev/null;
+	    $BINDIR/rtxi_comedi --unload  2> /dev/null;
+            modprobe -r rtai_sem 2> /dev/null;
+	    modprobe -r rtai_shm 2> /dev/null; 
+            modprobe -r rtai_usi 2> /dev/null;
+	    modprobe -r rtai_fifos 2> /dev/null;
+	    modprobe -r rtai_lxrt 2> /dev/null; 
+	    break;;
+
+  *) 	   printf "Unknown command $CMD.\n";
+	   exit 5;;
+esac
+
+
+
+#
+# $Id: init_rtxi.in,v 1.5 2007/04/02 12:40:20 ivan_raikov Exp $
+#
+# 
+# $Log: init_rtxi.in,v $
+# Revision 1.5  2007/04/02 12:40:20  ivan_raikov
+# Some restructuring of the Dynamo code.
+#
+# Revision 1.4  2006/11/17 17:52:20  ivan_raikov
+# Added rtai_usi to the list of modules.
+#
+# Revision 1.3  2006/11/16 20:04:50  ivan_raikov
+# Resolved conflicts between branch 1.0.0-rc and main branch.
+#
+# Revision 1.2.2.1  2006/09/19 22:50:46  ivan_raikov
+# NDS data recorder backend updates.
+#
+# Revision 1.2  2005/07/04 17:44:05  ivan_raikov
+# Changed rtai_ksched to rtai_lxrt
+#
+# Revision 1.1  2005/07/04 14:45:03  ivan_raikov
+# Initial revision.
+#
+#
+#

@@ -1,0 +1,71 @@
+#!/usr/bin/make -f
+
+# Uncomment this to turn on verbose mode.
+export DH_VERBOSE=1
+
+# This is the debhelper compatibility version to use.
+export DH_COMPAT=4
+
+# This has to be exported to make the multiple binary install work 
+export DH_OPTIONS
+
+
+INSTALL=install
+
+
+ifneq ($(CONCURRENCY_LEVEL),)
+MAKE_OPT = -j $(CONCURRENCY_LEVEL)
+endif
+
+CONFIGURE_OPT = --prefix=/usr \
+		--disable-static \
+		--with-rtai-config=/usr/bin/rtai-config \
+		--enable-comedi  \
+		--enable-debug   \
+		--enable-console \
+		--enable-chicken 
+
+echo-vars:
+	@echo " - C compiler is $(CC)"
+	@echo " - Make options are $(MAKE_OPT)"
+	@echo " - Configure options are $(CONFIGURE_OPT)"
+
+configure:
+	./autogen.sh
+
+rtxi-base.config.status: configure
+	CC=gcc-3.3 CXX=g++-3.3 ./configure $(CONFIGURE_OPT)
+	touch rtxi-base.config.status
+
+build: rtxi-base.build-stamp
+rtxi-base.build-stamp: rtxi-base.config.status
+	$(MAKE) 
+	touch rtxi-base.build-stamp
+
+install: build
+	dh_testroot 
+	cd rtxi        && $(MAKE) install DESTDIR=$(PWD)/debian/rtxi-base
+	cd qonsole     && $(MAKE) install DESTDIR=$(PWD)/debian/rtxi-base
+	cd nds/writer  && $(MAKE) install DESTDIR=$(PWD)/debian/rtxi-base
+	cd plugins     && $(MAKE) install DESTDIR=$(PWD)/debian/rtxi-base
+	cd models      && $(MAKE) install DESTDIR=$(PWD)/debian/rtxi-base
+	cd scripts     && $(MAKE) install DESTDIR=$(PWD)/debian/rtxi-base
+	$(MAKE) install-am DESTDIR=$(PWD)/debian/rtxi-base
+#	dh_installdocs  doc/rtxi.pdf
+	dh_installdirs  etc etc/init.d 
+	dh_install 	rtxi_comedi.conf etc
+	dh_install 	rtxi.conf etc
+	dh_installinit --name=rtxi
+	dh_installchangelogs ChangeLog
+
+binary-arch:  install
+
+binary-indep: 
+
+clean: 
+	dh_testroot
+	-dh_clean -k
+	-$(MAKE) clean
+	-rm rtxi-base.build-stamp rtxi-base.config.status
+
+.PHONY: build clean binary-indep binary-arch binary-common binary install

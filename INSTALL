@@ -1,0 +1,184 @@
+Installing RTXI
+===============
+
+This document will describe step by step how to install RTAI, Comedi, and RTXI.
+
+>1. Download the latest stable version of RTAI 3.x at www.rtai.org
+      For the sake of this demonstration I'll be using RTAI version 3.8
+
+>2. Extract the RTAI package. Assuming the package was downloaded to your home
+      directory and is called rtai-3.8.tar.bz2, run:
+
+ $ cd $HOME
+ $ tar -xf rtai-3.8.tar.bz2
+
+>3. Determine the latest supported Linux kernel.
+
+ $ cd rtai-3.8/base/arch/x86/patches
+ $ ls
+
+    You should see several files with names of the form:
+      hal-linux-#-x86-r#.patch
+    The kernel version is the first #, and should be something like 2.6.31.8
+
+>4. Download the version of the Linux kernel determined in the previous step
+      from www.kernel.org/pub/linux/kernel/v2.6, e.g. linux-2.6.31.8.tar.bz2
+
+>5. Extract the Linux kernel package. Assuming the package was downloaded to
+      your home directory and is called linux-2.6.31.8.tar.bz2, run:
+
+ $ cd $HOME
+ $ tar -xf linux-2.6.31.8.tar.bz2
+
+>6. Apply the RTAI patch to the Linux kernel source.
+
+ $ cd linux-2.6.31.8
+ $ patch -p1 < ../rtai-3.8/base/arch/x86/patches/hal-linux-2.6.31.8-x86-2.4-09.patch
+
+>7. Configure the Linux kernel source... unfortunately this is much easier
+      said than done.
+
+    o The easiest technique is to use an existing configuration
+        as a base, then make some minor modifications. The location of existing
+        configurations verifies from distribution to distribution, but /boot
+        seems to be a fairly popular place, try running:
+
+ $ cp /boot/config-`uname -r` .config
+ $ make oldconfig
+
+    N.B. the ` in the first command is not a regular single qoute, but rather
+           the kind on the ~ (tilda sp?) key.
+    N.B. when you run the second command you will probably be prompted
+           concerning a bunch of different configuration options... just press
+           for each.
+
+    o Given a base configuration you need to make some minor tweaks.
+
+ $ make menuconfig
+
+    o "Processor type and features"
+      - Disable "Support sparse irq numbering"
+      - Enable "Interrupt pipeline"
+
+    o "Power management and ACPI options"
+      - Disable "Suspend/resume event tracing"
+      - Disable "Suspend to RAM and standby"
+      - Disable "Hibernation (aka 'suspend to disk')"
+      - Disable "Power Management support"
+      - "ACPI (Advanced Configuration and Power Interface) Support"
+        * Disable "Processor"
+      - "CPU Frequency scaling"
+        * Disable "CPU Frequency scaling"
+      - "Memory power savings"
+        * Disable "Intel chipset idle memory power saving driver"
+
+>8. Build the ipipe-enabled Linux kernel.
+
+ $ make bzImage modules
+
+>9. Install the ipipe-enabled Linux kernel. As root run the following:
+
+ # make modules_install install
+
+>10. Reboot into the new Linux kernel. Reboot the system and select the new RT
+       kernel from the list provided.
+
+>11. Download the latest version of Comedi and Comedilib from www.comedi.org
+       For this example I'll be using the "CVS Snapshots" from www.comedi.org/download.html
+
+>12. Extract both Comedi and Comedilib into your home directory:
+
+ $ cd $HOME
+ $ tar -xf comedi.tar.gz
+ $ tar -xf comedilib.tar.gz
+
+>13. Configure RTAI. Fortunately this is easier than configuring the kernel.
+
+ $ cd $HOME/rtai-3.8
+ $ make menuconfig
+
+    o "General"
+      - Set "Linux source tree (NEW)" to $HOME/linux-2.6.31.8
+
+    o "Base system"
+      - "Other features"
+        * Enable "User-space interrupts (NEW)"
+
+    o "Add-ons"
+      - Enable "Real time COMEDI support in user space (NEW)"
+      - Set "COMEDI installation directory (NEW)" to $HOME/comedi
+
+>14. Build & Install RTAI.
+
+ $ make
+
+    o As root:
+
+ # make install
+
+>15. Configre, Build, & Install Comedi.
+
+ $ cd $HOME/comedi
+ $ ./configure
+ $ make
+
+    o As root:
+
+ # make install
+
+>16. Configure, Build, & Install Comedilib.
+
+ $ cd $HOME/comedilib
+ $ ./configure
+ $ make
+
+    o As root:
+
+ # make install
+
+>17. Download RTXI from www.rtxi.org and extract into your home directory.
+
+ $ cd $HOME
+ $ tar -xf rtxi-1.2.x.tar.bz2
+
+>18. Configure, Build, & Install RTXI
+
+ $ cd rtxi
+ $ ./configure
+ $ make
+
+    o As root:
+
+ # make install
+
+>19. Automating Startup Configuration
+
+     o To use RTXI you must have the necessary RTAI & Comedi modules loaded.
+
+     o Everytime the computer is restarted the RTAI & Comedi modules have to
+         be reloaded.
+
+     o The loading of the RTAI & Comedi modules can be automated as follows:
+
+       - As root run the following:
+
+ # cd /lib/modules/`uname -r`
+ # mkdir rtai
+ # cd rtai
+ # ln -s /usr/realtime/modules/rtai_hal.ko
+ # ln -s /usr/realtime/modules/rtai_lxrt.ko
+ # ln -s /usr/realtime/modules/rtai_tasklets.ko
+ # ln -s /usr/realtime/modules/rtai_usi.ko
+ # ln -s /usr/realtime/modules/rtai_shm.ko
+ # ln -s /usr/realtime/mdoules/rtai_sem.ko
+ # ln -s /usr/realtime/modules/rtai_comedi.ko
+ # depmod -a
+
+    N.B. the ` in the first command is not a regular single qoute, but rather
+           the kind on the ~ (tilda sp?) key.
+
+       - Open the file /etc/modulees for editing, and add the following to the
+           end of the file:
+
+ rtai_usi
+ rtai_comedi

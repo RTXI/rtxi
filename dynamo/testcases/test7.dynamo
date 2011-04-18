@@ -1,0 +1,27 @@
+
+SYSTEM FIR;
+
+PARAMETER vout1gain = 2.0;
+
+VECTOR PARAMETER h_t =  ( 0.025, 0.1, 0.25, 0.1, 0.025 );
+
+VECTOR STATE input = ( 0.1, 0.1, 0.1, 0.1, 0.1 );
+
+STATE FUNCTION v;
+
+EXTERNAL INPUT VIN1;
+EXTERNAL OUTPUT VOUT1;
+
+TIME t;
+
+vadd(x,y) = x + y;
+
+AT TIME t:
+
+q(input) = vadd (rshift (input, VIN1), h_t);
+
+v = h_t * input;
+
+VOUT1 = v * vout1gain;
+
+

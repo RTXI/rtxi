@@ -1,0 +1,78 @@
+#!/usr/bin/make -f
+
+# Uncomment this to turn on verbose mode.
+export DH_VERBOSE=1
+
+# This is the debhelper compatibility version to use.
+export DH_COMPAT=4
+
+# This has to be exported to make the multiple binary install work 
+export DH_OPTIONS
+
+
+INSTALL=install
+
+
+ifneq ($(CONCURRENCY_LEVEL),)
+MAKE_OPT = -j $(CONCURRENCY_LEVEL)
+endif
+
+echo-vars:
+	@echo " - C compiler is $(CC)"
+	@echo " - Make options are $(MAKE_OPT)"
+	@echo " - Configure options are $(CONFIGURE_OPT)"
+
+
+%.build: 
+	$(MAKE) -f debian/rules.$* build DH_OPTIONS=-p$*
+	touch $*.build
+
+build: DH_OPTIONS=
+build: build-stamp
+build-stamp: 
+	$(MAKE) -f debian/rules rtxi-base.build rtxi-nds.build rtxi-dynamo.build
+	touch build-stamp
+
+install: DH_OPTIONS=
+install: build-stamp
+	$(MAKE) -f debian/rules rtxi-base.install rtxi-dynamo.install rtxi-nds.install
+
+%.install: %.build
+	$(MAKE) -f debian/rules.$* install DH_OPTIONS=-p$*
+
+
+binary-common: 
+	dh_compress -Xexamples
+	dh_fixperms
+	dh_strip
+	dh_makeshlibs
+	dh_shlibdeps
+	dh_python 
+	dh_perl
+	dh_installdeb
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+
+binary-arch: build install
+	$(MAKE) -f debian/rules  rtxi-base.binary rtxi-dynamo.binary rtxi-nds.binary DH_OPTIONS=-a
+
+binary-indep: 
+
+# Any other binary targets build just one binary package at a time.
+%.binary : %.build %.install
+	dh_testroot
+	$(MAKE) -f debian/rules.$* binary-arch DH_OPTIONS=-p$*
+	$(MAKE) -f debian/rules binary-common DH_OPTIONS=-p$*
+
+%.clean:
+	dh_testroot
+	$(MAKE) -f debian/rules.$* clean DH_OPTIONS=-p$*
+
+clean: 
+	dh_testroot
+	-dh_clean -k
+	-$(MAKE) -f debian/rules rtxi-base.clean rtxi-dynamo.clean rtxi-nds.clean
+
+.PHONY: build clean binary-indep binary-arch binary-common binary install

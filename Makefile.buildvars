@@ -1,0 +1,19 @@
+ACLOCAL_AMFLAGS ?= -I $(top_srcdir)/m4
+
+QT_CXXFLAGS = @QT_CXXFLAGS@
+QT_LIBS     = @QT_LIBS@
+MOC         = @QT_MOC@
+UIC         = @QT_UIC@
+
+AM_CPPFLAGS = -DEXEC_PREFIX=\"$(exec_prefix)\" -DPREFIX=\"$(prefix)\" $(QT_CXXFLAGS) $(RTOS_CPPFLAGS)
+#AM_CPPFLAGS = $(QT_CXXFLAGS) $(RTOS_CPPFLAGS)
+AM_CXXFLAGS = -pipe -Wall $(QT_CXXFLAGS)
+AM_LDFLAGS  = $(QT_LIBS) $(GSL_LIBS) $(RTOS_LDFLAGS)
+AM_CFLAGS = $(AM_CXXFLAGS) 
+
+if DEBUG
+  AM_CXXFLAGS += -W -g
+  AM_CPPFLAGS += -DDEBUG
+else
+  AM_CXXFLAGS += -O2
+endif
