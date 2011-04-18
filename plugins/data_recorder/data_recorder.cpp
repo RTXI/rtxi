@@ -402,13 +402,25 @@ DataRecorder::Panel::Panel(QWidget *parent)
     fileBox->setInsideMargin(5);
     layout->addWidget(fileBox);
 
-    hbox = new QHBox(fileBox);
+    vbox = new QVBox(fileBox);
+    hbox = new QHBox(vbox);
     hbox->setSpacing(2);
-    (new QLabel("File:",hbox))->setFixedWidth(50);
+    (new QLabel("Filename:",hbox))->setFixedWidth(60);
     fileNameEdit = new QLineEdit(hbox);
     fileNameEdit->setReadOnly(true);
     QPushButton *fileChangeButton = new QPushButton("Change",hbox);
     QObject::connect(fileChangeButton,SIGNAL(clicked(void)),this,SLOT(changeDataFile(void)));
+    hbox = new QHBox(vbox);
+    fileSizeLbl = new QLabel(hbox);
+    fileSizeLbl->setText("File Size (kb):" );
+    fileSize = new QLabel(hbox);
+    fileSize->setText("No data recorded." );
+    fileSize->setAlignment(AlignLeft | AlignVCenter);
+	trialLengthLbl = new QLabel(hbox);
+    trialLengthLbl->setText("Trial Length (s):" );
+	trialLength = new QLabel(hbox);
+    trialLength->setText("No data recorded." );
+    trialLength->setAlignment(AlignLeft | AlignVCenter);
 
     hbox = new QHBox(this);
     layout->addWidget(hbox);
@@ -417,6 +429,10 @@ DataRecorder::Panel::Panel(QWidget *parent)
     QObject::connect(startRecordButton,SIGNAL(clicked(void)),this,SLOT(startRecordClicked(void)));
     stopRecordButton  = new QPushButton("Stop Recording",hbox);
     QObject::connect(stopRecordButton,SIGNAL(clicked(void)),this,SLOT(stopRecordClicked(void)));
+    recordStatus = new QLabel(hbox);
+    recordStatus->setText( "Waiting..." );
+    recordStatus->setFrameStyle( QFrame::Panel | QFrame::Sunken );
+    recordStatus->setAlignment(AlignHCenter | AlignVCenter);
 
     QPushButton *closeButton = new QPushButton("Close",hbox);
     QObject::connect(closeButton,SIGNAL(clicked(void)),this,SLOT(close(void)));
@@ -438,7 +454,7 @@ DataRecorder::Panel::Panel(QWidget *parent)
     counter = 0;
     downsample_rate = 1;
     prev_input = 0.0;
-
+    count = 0;
     setActive(true);
 }
 
@@ -470,7 +486,7 @@ void DataRecorder::Panel::execute(void) {
         fifo.write(&token,sizeof(token));
         fifo.write(data,sizeof(data));
     }
-
+    count++;
     counter %= downsample_rate;
 }
 
@@ -680,11 +696,13 @@ void DataRecorder::Panel::removeChannel(void) {
 }
 
 void DataRecorder::Panel::startRecordClicked(void) {
+	count = 0;
     StartRecordingEvent event(recording,fifo);
     RT::System::getInstance()->postEvent(&event);
 }
 
 void DataRecorder::Panel::stopRecordClicked(void) {
+	fixedcount = count;
     StopRecordingEvent event(recording,fifo);
     RT::System::getInstance()->postEvent(&event);
 }
@@ -699,20 +717,28 @@ void DataRecorder::Panel::customEvent(QCustomEvent *e) {
         data->response = QMessageBox::information(this,"File exists","The file \""+data->filename+"\" already exists.",
                                                   "Append","Overwrite","Cancel",0,2);
         data->done.wakeAll();
+        recordStatus->setText( "Waiting..." );
     } else if(e->type() == QNoFileOpenEvent) {
-        QMessageBox::critical(this,"Failed to start recording",
+        QMessageBox::critical(this,"Failed to start recording.",
                               "No file has been opened for writing so recording could not be started.",
                               QMessageBox::Ok,QMessageBox::NoButton);
+        recordStatus->setText( "Waiting..." );
     } else if(e->type() == QSetFileNameEditEvent) {
         SetFileNameEditEventData *data = reinterpret_cast<SetFileNameEditEventData *>(e->data());
         fileNameEdit->setText(data->filename);
+        recordStatus->setText( "Ready." );
         data->done.wakeAll();
     } else if(e->type() == QDisableGroupsEvent) {
         channelBox->setEnabled(false);
         sampleBox->setEnabled(false);
+        recordStatus->setText( "Recording..." );
     } else if(e->type() == QEnableGroupsEvent) {
         channelBox->setEnabled(true);
         sampleBox->setEnabled(true);
+        recordStatus->setText( "Done.");
+        fileSize->setNum(int(QFile(fileNameEdit->text()).size())/1024);
+        trialLength->setNum(double(RT::System::getInstance()->getPeriod() * 1e-9 * fixedcount));
+        count = 0;
     }
 }
 
@@ -1114,6 +1140,12 @@ void DataRecorder::Panel::stopRecording(long long timestamp,bool shutdown) {
     hid_t scalar_space = H5Screate(H5S_SCALAR);
     hid_t data = H5Dcreate(file.trial,"Timestamp Stop (ns)",H5T_STD_U64LE,scalar_space,H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT);
     H5Dwrite(data,H5T_STD_U64LE,H5S_ALL,H5S_ALL,H5P_DEFAULT,&timestamp);
+    H5Dclose(data);
+
+    long long period = RT::System::getInstance()->getPeriod();
+    long long datalength = period * fixedcount;
+    data = H5Dcreate(file.trial,"Trial Length (ns)",H5T_STD_U64LE,scalar_space,H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT);
+    H5Dwrite(data,H5T_STD_U64LE,H5S_ALL,H5S_ALL,H5P_DEFAULT,&datalength);
     H5Dclose(data);
     H5Sclose(scalar_space);
 
