@@ -24,6 +24,8 @@ public slots:
      QString get_model_makefile_path (void) const;
      int set_model_makefile_path (char *s);
      void load_dialog(void);
+     void load_recent(int);
+     void load_setting(int);
 
 private:
 

@@ -43,7 +43,7 @@ ChangeLog:
 
 rtxi.conf: 
 	@echo "Generating rtxi.conf..."
-	@echo '<RTXI class="settings" >'						> $@
+	@echo '<RTXI class="settings" version="1.3" >'						> $@
 	@echo ' <OBJECT component="rt" id="0" >'					>> $@
 	@echo '  <PARAM name="Period" >1e+06</PARAM>'					>> $@
 	@echo ' </OBJECT>'								>> $@
@@ -73,6 +73,7 @@ endif
 	@echo ' <OBJECT component="plugin" library="data_recorder.so" id="8" />'	>> $@
 	@echo ' <OBJECT component="plugin" library="connector.so" id="9" />'		>> $@
 	@echo ' <OBJECT component="plugin" library="performance_measurement.so" id="10" />'>> $@
+	@echo ' <OBJECT component="plugin" library="userprefs.so" id="11" />'>> $@
 	@echo '</RTXI>'									>> $@
 
 Makefile.dynamo_compile:  

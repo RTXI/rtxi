@@ -14,4 +14,5 @@ SUBDIRS = \
 	ni_device \
 	oscilloscope \
 	performance_measurement \
-	system_control
+	system_control\
+	userprefs

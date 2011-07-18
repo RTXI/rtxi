@@ -1,0 +1,37 @@
+uisplitter
+Copyright 2010 Levente Hunyadi
+
+Splits a container into two resizable sub-containers (panes).
+
+uisplitter divides a container into two sub-containers with a movable splitter. The container to split can be either a figure or a uipanel with no children. Depending on orientation, the splitter is either a vertical bar that separates a left and right pane (for horizontal orientation), or a horizontal bar that separates a bottom and top pane (for vertical orientation). If no container is specified, the figure returned by gcf is assumed as the parent container. Once the container is split, sub-containers may be freely populated with MatLab components. The relative size of the sub-containers may be adjusted interactively using the mouse, or programmatically from code.
+
+This submission resembles UISplitPane by Yair Altman but uses fully documented MatLab functionality only. Usage is mostly compatible, and a wrapper function uisplitpane is available to exhibit a similar interface as UISplitPane. However, this submission is not meant to replicate Yair Altman's excellent submission: not all functionality may be available from UISplitPane.
+
+SYNTAX
+
+[panel1,panel2,splitter] = uisplitpane(parent, key, value, key, value, ...);
+[panel1,panel2,splitter] = uisplitpane(key, value, key, value, ...);
+
+EXAMPLES
+
+% create a uisplitpane with default horizontal orientation
+[left,right] = uisplitpane;
+
+% create a uisplitpane with vertical orientation
+[bottom,top] = uisplitpane('Orientation','vertical');
+
+% create a uisplitpane explicitly specifying the parent container
+fig = figure;
+[bottom,top] = uisplitpane(fig,'Orientation','ver');
+
+% create a pane where the left part is one third of the right.
+[left,right] = uisplitpane('DividerLocation',0.25);
+
+SEE ALSO
+
+UISplitPane by Yair Altman, http://undocumentedmatlab.com/blog/uisplitpane/
+
+CONTACT INFORMATION
+
+Levente Hunyadi
+http://hunyadi.info.hu/

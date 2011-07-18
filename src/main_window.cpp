@@ -29,158 +29,281 @@
 #include <qworkspace.h>
 #include <rtxi_config.h>
 #include <settings.h>
+#include <qsettings.h>
+#include <algorithm>
+#include <qaction.h>
+#include <stdlib.h>
+#include <qstringlist.h>
+#include <qtextstream.h>
 
-MainWindow::MainWindow(void)
-    : QMainWindow(NULL,NULL,Qt::WType_TopLevel)
-{
-    /* Initialize Window Settings */
-    setCaption("RTXI - Realtime Experimental Interface");
+MainWindow::MainWindow(void) :
+	QMainWindow(NULL, NULL, Qt::WType_TopLevel) {
+	/* Initialize Window Settings */
+	setCaption("RTXI - Real-time eXperimental Interface");
 
-    /* Insert Menu Items */
-    int id;
-    QPopupMenu *fileMenu = new QPopupMenu(this);
-    id = fileMenu->insertItem("&Load Settings",this,SLOT(loadSettings()),CTRL+Key_L);
-    fileMenu->setWhatsThis(id,"Load System Settings");
-    id = fileMenu->insertItem("&Save Settings",this,SLOT(saveSettings()),CTRL+Key_S);
-    fileMenu->setWhatsThis(id,"Save System Settings");
-    fileMenu->insertSeparator();
-    id = fileMenu->insertItem("&Quit",qApp,SLOT(closeAllWindows()),CTRL+Key_Q);
-    fileMenu->setWhatsThis(id,"Quits the Application");
-    menuBar()->insertItem("&File",fileMenu);
-    controlMenu = new QPopupMenu(this);
-    menuBar()->insertItem("&Control",controlMenu);
-    windowsMenu = new QPopupMenu(this);
-    windowsMenu->setCheckable(true);
-    QObject::connect(windowsMenu,SIGNAL(aboutToShow(void)),this,SLOT(windowsMenuAboutToShow(void)));
-    menuBar()->insertItem("&Windows",windowsMenu);
-    menuBar()->insertSeparator();
-    QPopupMenu *helpMenu = new QPopupMenu(this);
-    id = helpMenu->insertItem("&About RTXI",this,SLOT(about()));
-    helpMenu->setWhatsThis(id,"Opens a Window Containing Information About this Software Package");
-    id = helpMenu->insertItem("About &Qt",this,SLOT(aboutQt()));
-    helpMenu->setWhatsThis(id,"Opens a Window Containing Information About the QT Widget Toolkit");
-    helpMenu->insertSeparator();
-    helpMenu->insertItem("What's &This",this,SLOT(whatsThis()),SHIFT+Key_F1);
-    menuBar()->insertItem("&Help",helpMenu);
+	/* Insert Menu Items */
+	int id;
+	fileMenu = new QPopupMenu(this);
+	id = fileMenu->insertItem("&Load Workspace", this, SLOT(loadSettings()),
+			CTRL + Key_L);
+	fileMenu->setWhatsThis(id, "Load Workspace settings file");
+	id = fileMenu->insertItem("&Save Workspace", this, SLOT(saveSettings()),
+			CTRL + Key_S);
+	fileMenu->setWhatsThis(id, "Save Workspace settings file");
+	fileMenu->insertSeparator();
+	id = fileMenu->insertItem("&Quit", qApp, SLOT(closeAllWindows()), CTRL
+			+ Key_Q);
+	fileMenu->setWhatsThis(id, "Quits the Application");
+	menuBar()->insertItem("&File", fileMenu);
+	fileMenu->insertSeparator();
 
-    /* Create and Initialize the Workspace */
-    setCentralWidget(new QWorkspace(this,NULL));
-    ((QWorkspace *)centralWidget())->setScrollBarsEnabled(true);
+	controlMenu = new QPopupMenu(this);
+	menuBar()->insertItem("&Modules", controlMenu);
+
+	systemMenu = new QPopupMenu(this);
+    menuBar()->insertItem("&System", systemMenu);
+
+	windowsMenu = new QPopupMenu(this);
+	windowsMenu->setCheckable(true);
+	QObject::connect(windowsMenu,SIGNAL(aboutToShow(void)),this,SLOT(windowsMenuAboutToShow(void)));
+	menuBar()->insertItem("&Windows", windowsMenu);
+	menuBar()->insertSeparator();
+	QPopupMenu *helpMenu = new QPopupMenu(this);
+	id = helpMenu->insertItem("What's &This", this, SLOT(whatsThis()), SHIFT
+			+ Key_F1);
+	helpMenu->insertSeparator();
+	helpMenu->setWhatsThis(id,
+			"Allows you to click on any module to get a description of it");
+	id = helpMenu->insertItem("&About RTXI", this, SLOT(about()));
+	helpMenu->setWhatsThis(id,
+			"Opens a Window Containing Information About RTXI");
+	id = helpMenu->insertItem("About &COMEDI", this, SLOT(aboutComedi()));
+	helpMenu->setWhatsThis(id,
+			"Opens a Window Containing Information About COMEDI");
+	id = helpMenu->insertItem("About &Qt", this, SLOT(aboutQt()));
+	helpMenu->setWhatsThis(id,
+			"Opens a Window Containing Information About the Qt Widget Toolkit");
+	menuBar()->insertItem("&Help", helpMenu);
+
+	/* Create and Initialize the Workspace */
+	setCentralWidget(new QWorkspace(this, NULL));
+	((QWorkspace *) centralWidget())->setScrollBarsEnabled(true);
+
 }
 
-MainWindow::~MainWindow(void)
-{
+MainWindow::~MainWindow(void) {
 }
 
-int MainWindow::createControlMenuItem(const std::string &text,const QObject *receiver,const char *member) {
-    return controlMenu->insertItem(text,receiver,member);
+int MainWindow::createFileMenuItem(const std::string &text,
+		const QObject *receiver, const char *member) {
+	return fileMenu->insertItem(text, receiver, member);
+}
+
+void MainWindow::setFileMenuItemParameter(int menuid, int parameter) {
+	fileMenu->setItemParameter(menuid, parameter);
+}
+
+void MainWindow::clearFileMenu(void) {
+	// don't clear the entire menu b/c Load & Save Workspace and Quit are created by
+	// main_window.cpp, not while a module is loading
+	fileMenu->clear();
+	int id;
+	id = fileMenu->insertItem("&Load Workspace", this, SLOT(loadSettings()),
+			CTRL + Key_L);
+	fileMenu->setWhatsThis(id, "Load Workspace settings file");
+	id = fileMenu->insertItem("&Save Workspace", this, SLOT(saveSettings()),
+			CTRL + Key_S);
+	fileMenu->setWhatsThis(id, "Save Workspace settings file");
+	fileMenu->insertSeparator();
+	id = fileMenu->insertItem("&Quit", qApp, SLOT(closeAllWindows()), CTRL
+			+ Key_Q);
+	fileMenu->setWhatsThis(id, "Quits the Application");
+	fileMenu->insertSeparator();
+
+}
+
+int MainWindow::insertControlMenuSeparator(void) {
+	return controlMenu->insertSeparator();
+}
+
+int MainWindow::createControlMenuItem(const std::string &text,
+		const QObject *receiver, const char *member) {
+	return controlMenu->insertItem(text, receiver, member);
+}
+
+void MainWindow::setControlMenuItemParameter(int menuid, int parameter) {
+	controlMenu->setItemParameter(menuid, parameter);
+}
+
+void MainWindow::clearControlMenu(void) {
+	controlMenu->clear();
+}
+
+void MainWindow::changeControlMenuItem(int id, QString text) {
+	controlMenu->changeItem(id, text);
 }
 
 void MainWindow::removeControlMenuItem(int id) {
-    controlMenu->removeItem(id);
+	controlMenu->removeItem(id);
 }
 
-void MainWindow::about(void)
-{
-    QMessageBox::about(this,"About RTXI","Version " + QString(VERSION) + "\n\nReleased under the GPLv2.\nSee www.rtxi.org for details.");
+void MainWindow::removeControlMenuItemAt(int id) {
+	controlMenu->removeItemAt(id);
 }
 
-void MainWindow::aboutQt(void)
-{
-    QMessageBox::aboutQt(this);
+int MainWindow::insertSystemMenuSeparator(void) {
+	return systemMenu->insertSeparator();
+}
+
+int MainWindow::createSystemMenuItem(const std::string &text,
+		const QObject *receiver, const char *member) {
+	return systemMenu->insertItem(text, receiver, member);
+}
+
+void MainWindow::removeSystemMenuItem(int id) {
+	systemMenu->removeItem(id);
+}
+
+void MainWindow::about(void) {
+	QMessageBox::about(this, "About RTXI", "Version " + QString(VERSION)
+			+ "\n\nReleased under the GPLv2.\nSee www.rtxi.org for details.");
+}
+
+void MainWindow::aboutQt(void) {
+	QMessageBox::aboutQt(this);
+}
+
+void MainWindow::aboutComedi(void) {
+	QString text;
+	QStringList lines;
+    QFile file("/proc/comedi");
+	if (file.open(IO_ReadOnly)) {
+		text = "COMEDI is an open source library that provides access to DAQ"
+					" cards from\na variety of manufacturers. You are currently using ";
+		QTextStream stream(&file);
+		QString line;
+		QString comediversion = stream.readLine();
+		line = stream.readLine();
+		line = stream.readLine();
+		if (line == "no devices")
+			line = "No DAQ cards were detected.";
+		lines += line;
+		text=text+comediversion+".\n\nThe following DAQ cards were detected on your system:"
+					"\n\nDevice name   Driver name   Board name   # Subdevices";
+	} else {
+		text = "COMEDI does not seem to be installed correctly on your system.";
+	}
+
+	QMessageBox::about(this, "About COMEDI", QString(text) + "\n\n" + lines.join("\n") + "\n\nTo"
+			" calibrate your DAQ card, use the terminal command 'comedi_calibrate' \nfollowed"
+			" by the device name of the card:\n\n  $ sudo comedi_calibrate /dev/comedi0");
+
 }
 
 void MainWindow::loadSettings(void) {
-    QFileDialog dialog(this,0,true);
-    dialog.setDir(".");
-    dialog.setFilters(QString("Settings (*.set);;All Files (*)"));
-    dialog.setCaption("Choose a Settings File");
-    dialog.setMode(QFileDialog::ExistingFile);
+	QSettings userprefs;
+	userprefs.setPath( "RTXI.org", "RTXI" , QSettings::User);
+    QString settingsDir = userprefs.readEntry( "/dirs/setfiles", getenv("HOME") );
 
-    dialog.exec();
+	QFileDialog dialog(this, 0, true);
+	//dialog.setDir(".");
+	dialog.setDir(settingsDir);
+	dialog.setFilters(QString("Settings (*.set);;All Files (*)"));
+	dialog.setCaption("Choose a Settings File");
+	dialog.setMode(QFileDialog::ExistingFile);
 
-    QString filename = dialog.selectedFile();
-    if(filename != "/")
-        Settings::Manager::getInstance()->load(filename);
+	dialog.exec();
+
+	QString filename = dialog.selectedFile();
+	if (filename != "/")
+		Settings::Manager::getInstance()->load(filename);
 }
 
 void MainWindow::saveSettings(void) {
-    QFileDialog dialog(this,0,true);
-    dialog.setDir(".");
-    dialog.setFilters(QString("Settings (*.set);;All Files (*)"));
-    dialog.setCaption("Choose a Settings File");
-    dialog.setMode(QFileDialog::AnyFile);
+	QSettings userprefs;
+	userprefs.setPath( "RTXI.org", "RTXI" , QSettings::User);
+    QString settingsDir = userprefs.readEntry( "/dirs/setfiles", getenv("HOME") );
 
-    dialog.exec();
+	QFileDialog dialog(this, 0, true);
+	//dialog.setDir(".");
+	dialog.setDir(settingsDir);
+	dialog.setFilters(QString("Settings (*.set);;All Files (*)"));
+	dialog.setCaption("Choose a Settings File");
+	dialog.setMode(QFileDialog::AnyFile);
 
-    QString filename = dialog.selectedFile();
-    if(filename != "/") {
-        if((dialog.selectedFilter() == "Settings (*.set)") && !filename.endsWith(".set"))
-            filename += ".set";
-        if(QFileInfo(filename).exists() &&
-           QMessageBox::warning(this,"File Exists","Do you wish to overwrite " + filename + "?",QMessageBox::Yes|QMessageBox::Default,QMessageBox::No|QMessageBox::Escape) != QMessageBox::Yes) {
-            DEBUG_MSG("MainWindow::saveSettings : canceled overwrite\n");
-            return;
-        }
-        Settings::Manager::getInstance()->save(filename);
-    }
+	dialog.exec();
+
+	QString filename = dialog.selectedFile();
+	if (filename != "/") {
+		if ((dialog.selectedFilter() == "Settings (*.set)")
+				&& !filename.endsWith(".set"))
+			filename += ".set";
+		if (QFileInfo(filename).exists() && QMessageBox::warning(this,
+				"File Exists", "Do you wish to overwrite " + filename + "?",
+				QMessageBox::Yes | QMessageBox::Default, QMessageBox::No
+						| QMessageBox::Escape) != QMessageBox::Yes) {
+			DEBUG_MSG("MainWindow::saveSettings : canceled overwrite\n");
+			return;
+		}
+		Settings::Manager::getInstance()->save(filename);
+	}
 }
 
 void MainWindow::windowsMenuAboutToShow(void) {
-    windowsMenu->clear();
+	windowsMenu->clear();
 
-    QWorkspace *ws = dynamic_cast<QWorkspace *>(centralWidget());
-    if(!ws) {
-        ERROR_MSG("MainWindow::windowsMenuAboutToShow : centralWidget() not a QWorkspace?\n");
-        return;
-    }
+	QWorkspace *ws = dynamic_cast<QWorkspace *> (centralWidget());
+	if (!ws) {
+		ERROR_MSG("MainWindow::windowsMenuAboutToShow : centralWidget() not a QWorkspace?\n");
+		return;
+	}
 
-    int cascadeID = windowsMenu->insertItem("&Cascade",ws,SLOT(cascade(void)));
-    int tileID = windowsMenu->insertItem("&Tile",ws,SLOT(tile(void)));
-    if(ws->windowList().isEmpty()) {
-        windowsMenu->setItemEnabled(cascadeID,false);
-        windowsMenu->setItemEnabled(tileID,false);
-    }
+	int cascadeID = windowsMenu->insertItem("&Cascade",ws,SLOT(cascade(void)));
+	int tileID = windowsMenu->insertItem("&Tile",ws,SLOT(tile(void)));
+	if (ws->windowList().isEmpty()) {
+		windowsMenu->setItemEnabled(cascadeID, false);
+		windowsMenu->setItemEnabled(tileID, false);
+	}
 
-    windowsMenu->insertSeparator();
-    QWidgetList windows = ws->windowList();
-    for(size_t i = 0;i < windows.count();++i) {
-        int id = windowsMenu->insertItem(windows.at(i)->caption(),this,SLOT(windowsMenuActivated(int)));
-        windowsMenu->setItemParameter(id,i);
-        windowsMenu->setItemChecked(id,ws->activeWindow() == windows.at(i));
-    }
+	windowsMenu->insertSeparator();
+	QWidgetList windows = ws->windowList();
+	for (size_t i = 0; i < windows.count(); ++i) {
+		int id = windowsMenu->insertItem(windows.at(i)->caption(),this,SLOT(windowsMenuActivated(int)));
+		windowsMenu->setItemParameter(id, i);
+		windowsMenu->setItemChecked(id, ws->activeWindow() == windows.at(i));
+	}
 }
 
 void MainWindow::windowsMenuActivated(int id) {
-    QWorkspace *ws = dynamic_cast<QWorkspace *>(centralWidget());
-    if(!ws) {
-        ERROR_MSG("MainWindow::windowsMenuActivated : centralWidget() not a QWorkspace?\n");
-        return;
-    }
+	QWorkspace *ws = dynamic_cast<QWorkspace *> (centralWidget());
+	if (!ws) {
+		ERROR_MSG("MainWindow::windowsMenuActivated : centralWidget() not a QWorkspace?\n");
+		return;
+	}
 
-    QWidget *w = ws->windowList().at(id);
-    if(w) {
-        w->showNormal();
-        w->setFocus();
-    }
+	QWidget *w = ws->windowList().at(id);
+	if (w) {
+		w->showNormal();
+		w->setFocus();
+	}
 }
 
 static Mutex mutex;
 MainWindow *MainWindow::instance = 0;
 
 MainWindow *MainWindow::getInstance(void) {
-    if(instance)
-        return instance;
+	if (instance)
+		return instance;
 
-    /*************************************************************************
-     * Seems like alot of hoops to jump through, but static allocation isn't *
-     *   thread-safe. So effort must be taken to ensure mutual exclusion.    *
-     *************************************************************************/
+	/*************************************************************************
+	 * Seems like alot of hoops to jump through, but static allocation isn't *
+	 *   thread-safe. So effort must be taken to ensure mutual exclusion.    *
+	 *************************************************************************/
 
-    Mutex::Locker lock(&::mutex);
-    if(!instance) {
-        static MainWindow mainwindow;
-        instance = &mainwindow;
-    }
-    return instance;
+	Mutex::Locker lock(&::mutex);
+	if (!instance) {
+		static MainWindow mainwindow;
+		instance = &mainwindow;
+	}
+	return instance;
 }
