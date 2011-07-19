@@ -188,9 +188,11 @@ void MainWindow::aboutComedi(void) {
 		line = stream.readLine();
 		if (line == "no devices")
 			line = "No DAQ cards were detected.";
+        else
+            line = "/dev/comedi"+line.stripWhiteSpace();
 		lines += line;
 		text=text+comediversion+".\n\nThe following DAQ cards were detected on your system:"
-					"\n\nDevice name   Driver name   Board name   # Subdevices";
+					"\n\nDevice name   Driver name      Board name   # Subdevices";
 	} else {
 		text = "COMEDI does not seem to be installed correctly on your system.";
 	}
