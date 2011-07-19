@@ -183,6 +183,7 @@ void MainWindow::aboutComedi(void) {
 		QTextStream stream(&file);
 		QString line;
 		QString comediversion = stream.readLine();
+        comediversion.replace("comedi","COMEDI");
 		line = stream.readLine();
 		line = stream.readLine();
 		if (line == "no devices")
