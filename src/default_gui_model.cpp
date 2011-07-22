@@ -68,6 +68,20 @@ DefaultGUIModel::DefaultGUIModel(std::string name,
 			name, var, size), myname(name) {
 	setCaption(QString::number(getID()) + " " + name);
 
+	QTimer *timer = new QTimer(this);
+	timer->start(1000);
+	QObject::connect(timer,SIGNAL(timeout(void)),this,SLOT(refresh(void)));
+
+}
+
+DefaultGUIModel::~DefaultGUIModel(void) {
+	for (std::map<QString, param_t>::iterator i = parameter.begin(); i
+			!= parameter.end(); ++i)
+		if (i->second.type & PARAMETER)
+			delete i->second.str_value;
+}
+
+void DefaultGUIModel::createGUI(DefaultGUIModel::variable_t *var, int size) {
 	QBoxLayout *layout = new QVBoxLayout(this);
 
 	QScrollView *sv = new QScrollView(this);
@@ -135,18 +149,7 @@ DefaultGUIModel::DefaultGUIModel(std::string name,
 	QObject::connect(unloadButton,SIGNAL(clicked(void)),this,SLOT(exit(void)));
 	layout->addWidget(hbox1);
 
-	QTimer *timer = new QTimer(this);
-	timer->start(1000);
-	QObject::connect(timer,SIGNAL(timeout(void)),this,SLOT(refresh(void)));
-
 	show();
-}
-
-DefaultGUIModel::~DefaultGUIModel(void) {
-	for (std::map<QString, param_t>::iterator i = parameter.begin(); i
-			!= parameter.end(); ++i)
-		if (i->second.type & PARAMETER)
-			delete i->second.str_value;
 }
 
 void DefaultGUIModel::update(DefaultGUIModel::update_flags_t) {
@@ -281,7 +284,7 @@ void DefaultGUIModel::doLoad(const Settings::Object::State &s) {
 		showMaximized();
 	else if (s.loadInteger("Minimized"))
 		showMinimized();
-	// this only exist in RTXI versions >1.3
+	// this only exists in RTXI versions >1.3
 	if (s.loadInteger("W") != NULL) {
 		resize(s.loadInteger("W"), s.loadInteger("H"));
 		parentWidget()->move(s.loadInteger("X"), s.loadInteger("Y"));

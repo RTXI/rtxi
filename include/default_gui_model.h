@@ -147,6 +147,28 @@ public:
      */
     virtual void update(update_flags_t flag);
 
+    /*!
+     * Function that builds the Qt GUI.
+     *
+     * \param var The structure defining the module's parameters, states, inputs, and outputs.
+     * \param size The size of the structure vars.
+     *
+     * \sa DefaultGUIModel::update_flags_t
+     */
+	void
+	createGUI(DefaultGUIModel::variable_t *var, int size);
+
+    QPushButton *pauseButton;
+    struct param_t {
+        QLabel *label;
+        DefaultGUILineEdit *edit;
+        IO::flags_t type;
+        size_t index;
+        QString *str_value;
+    };
+    std::map<QString,param_t> parameter;
+
+
 public slots:
 
     /*!
@@ -234,18 +256,9 @@ private:
 
     void receiveEvent(const Event::Object *);
 
-    struct param_t {
-        QLabel *label;
-        DefaultGUILineEdit *edit;
-        IO::flags_t type;
-        size_t index;
-        QString *str_value;
-    };
-
     bool periodEventPaused;
     mutable QString junk;
-    std::map<QString,param_t> parameter;
-    QPushButton *pauseButton;
+
     std::string myname;
 
 }; // class DefaultGUIModel
