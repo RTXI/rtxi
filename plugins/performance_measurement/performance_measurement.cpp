@@ -124,7 +124,6 @@ extern "C" Plugin::Object *createRTXIPlugin(void *) {
 PerformanceMeasurement::Plugin::Plugin(void)
     : panel(0) {
     menuID = MainWindow::getInstance()->createSystemMenuItem("Performance Measurement",this,SLOT(createPerformanceMeasurementPanel(void)));
-    MainWindow::getInstance()->insertSystemMenuSeparator();
 }
 
 PerformanceMeasurement::Plugin::~Plugin(void) {
