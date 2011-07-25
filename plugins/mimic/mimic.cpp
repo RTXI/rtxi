@@ -49,6 +49,7 @@ static size_t num_vars = sizeof(vars)/sizeof(DefaultGUIModel::variable_t);
 
 Mimic::Mimic(void)
     : DefaultGUIModel("Mimic",::vars,::num_vars) {
+    createGUI(vars, num_vars);
     /*
      * Initialize Parameters & Variables
      */
