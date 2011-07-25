@@ -185,6 +185,7 @@ static size_t num_vars = sizeof(vars)/sizeof(DefaultGUIModel::variable_t);
 
 Neuron::Neuron(void)
     : DefaultGUIModel("Neuron",::vars,::num_vars) {
+    createGUI(vars, num_vars);
     /*
      * Initialize Parameters
      */
