@@ -1,0 +1,936 @@
+eeprom reference lsb=165 msb=255
+resulting reference voltage: 4.99991
+Id: comedi_calibrate.c,v 1.5 2006-10-16 15:11:17 fmhess Exp 
+Driver name: ni_pcimio
+Device name: pxi-6713
+Id: ni.c,v 1.3 2006-10-16 15:11:17 fmhess Exp 
+Comedi version: 0.7.73
+linearity binary: dac0 ground, ground referenced,
+dac0 mid, ground referenced,
+dac0 high, ground referenced
+caldac[4] set to 150
+relative binary: dac0 high, ground referenced, dac0 ground, ground referenced
+caldac[8] set to 73
+binary: dac0 ground, ground referenced
+caldac[7] set to 131
+linearity binary: dac1 ground, ground referenced,
+dac1 mid, ground referenced,
+dac1 high, ground referenced
+caldac[10] set to 141
+relative binary: dac1 high, ground referenced, dac1 ground, ground referenced
+caldac[2] set to 70
+binary: dac1 ground, ground referenced
+caldac[6] set to 129
+linearity binary: dac2 ground, ground referenced,
+dac2 mid, ground referenced,
+dac2 high, ground referenced
+caldac[1] set to 165
+relative binary: dac2 high, ground referenced, dac2 ground, ground referenced
+caldac[11] set to 61
+binary: dac2 ground, ground referenced
+caldac[9] set to 124
+linearity binary: dac3 ground, ground referenced,
+dac3 mid, ground referenced,
+dac3 high, ground referenced
+caldac[0] set to 147
+relative binary: dac3 high, ground referenced, dac3 ground, ground referenced
+caldac[5] set to 81
+binary: dac3 ground, ground referenced
+caldac[3] set to 133
+linearity binary: dac4 ground, ground referenced,
+dac4 mid, ground referenced,
+dac4 high, ground referenced
+caldac[20] set to 142
+relative binary: dac4 high, ground referenced, dac4 ground, ground referenced
+caldac[24] set to 75
+binary: dac4 ground, ground referenced
+caldac[23] set to 135
+linearity binary: dac5 ground, ground referenced,
+dac5 mid, ground referenced,
+dac5 high, ground referenced
+caldac[26] set to 155
+relative binary: dac5 high, ground referenced, dac5 ground, ground referenced
+caldac[18] set to 68
+binary: dac5 ground, ground referenced
+caldac[22] set to 130
+linearity binary: dac6 ground, ground referenced,
+dac6 mid, ground referenced,
+dac6 high, ground referenced
+caldac[17] set to 122
+relative binary: dac6 high, ground referenced, dac6 ground, ground referenced
+caldac[27] set to 89
+binary: dac6 ground, ground referenced
+caldac[25] set to 135
+linearity binary: dac7 ground, ground referenced,
+dac7 mid, ground referenced,
+dac7 high, ground referenced
+caldac[16] set to 160
+relative binary: dac7 high, ground referenced, dac7 ground, ground referenced
+caldac[21] set to 61
+binary: dac7 ground, ground referenced
+caldac[19] set to 137
+dac0 ground, ground referenced
+Applied calibration for subdev 1, channel 0, range 0, aref 0
+Failed to apply calibration for subdev 8, channel 0, range 0, aref 0
+reading 0.49987, target 0.499895
+caldac[0] gain=-2.66472e-08 V/bit S_min=nan dof=14
+caldac[1] gain=2.52447e-08 V/bit S_min=nan dof=14
+caldac[2] gain=2.10373e-08 V/bit S_min=nan dof=14
+caldac[3] gain=-4.20745e-09 V/bit S_min=nan dof=14
+caldac[4] gain=4.94095e-06 V/bit S_min=nan dof=14
+caldac[5] gain=-4.20745e-09 V/bit S_min=nan dof=14
+caldac[6] gain=5.46969e-08 V/bit S_min=nan dof=14
+caldac[7] gain=3.33244e-05 V/bit S_min=nan dof=14
+caldac[8] gain=-2.10373e-08 V/bit S_min=nan dof=14
+caldac[9] gain=-1.82323e-08 V/bit S_min=nan dof=14
+caldac[10] gain=-3.50621e-08 V/bit S_min=nan dof=14
+caldac[11] gain=-1.12199e-08 V/bit S_min=nan dof=14
+caldac[12] gain=8.4149e-09 V/bit S_min=nan dof=14
+caldac[13] gain=5.60993e-09 V/bit S_min=nan dof=14
+caldac[14] gain=-4.76844e-08 V/bit S_min=nan dof=14
+caldac[15] gain=3.64646e-08 V/bit S_min=nan dof=14
+caldac[16] gain=4.3477e-08 V/bit S_min=nan dof=14
+caldac[17] gain=-3.92695e-08 V/bit S_min=nan dof=14
+caldac[18] gain=-2.80497e-08 V/bit S_min=nan dof=14
+caldac[19] gain=4.20745e-09 V/bit S_min=nan dof=14
+caldac[20] gain=1.68298e-08 V/bit S_min=nan dof=14
+caldac[21] gain=2.80497e-09 V/bit S_min=nan dof=14
+caldac[22] gain=1.68298e-08 V/bit S_min=nan dof=14
+caldac[23] gain=-5.60993e-09 V/bit S_min=nan dof=14
+caldac[24] gain=-1.12199e-08 V/bit S_min=nan dof=14
+caldac[25] gain=5.60993e-09 V/bit S_min=nan dof=14
+caldac[26] gain=-2.38422e-08 V/bit S_min=nan dof=14
+caldac[27] gain=-2.10373e-08 V/bit S_min=nan dof=14
+caldac[28] gain=-1.40248e-08 V/bit S_min=nan dof=14
+caldac[29] gain=-7.01242e-08 V/bit S_min=nan dof=14
+caldac[30] gain=2.66472e-08 V/bit S_min=nan dof=14
+caldac[31] gain=1.40248e-08 V/bit S_min=nan dof=14
+dac0 mid, ground referenced
+Applied calibration for subdev 1, channel 0, range 0, aref 0
+Failed to apply calibration for subdev 8, channel 0, range 0, aref 0
+reading 0.327565, target 0.327589
+caldac[0] gain=4.0672e-08 V/bit S_min=nan dof=14
+caldac[1] gain=-1.82323e-08 V/bit S_min=nan dof=14
+caldac[2] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[3] gain=-1.26224e-08 V/bit S_min=nan dof=14
+caldac[4] gain=6.93528e-06 V/bit S_min=nan dof=14
+caldac[5] gain=-1.68298e-08 V/bit S_min=nan dof=14
+caldac[6] gain=-9.81739e-09 V/bit S_min=nan dof=14
+caldac[7] gain=3.3344e-05 V/bit S_min=nan dof=14
+caldac[8] gain=4.50478e-06 V/bit S_min=nan dof=14
+caldac[9] gain=-9.81739e-09 V/bit S_min=nan dof=14
+caldac[10] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[11] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[12] gain=9.81739e-09 V/bit S_min=nan dof=14
+caldac[13] gain=-4.20745e-09 V/bit S_min=nan dof=14
+caldac[14] gain=-1.40248e-09 V/bit S_min=nan dof=14
+caldac[15] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[16] gain=-1.54273e-08 V/bit S_min=nan dof=14
+caldac[17] gain=2.38422e-08 V/bit S_min=nan dof=14
+caldac[18] gain=1.26224e-08 V/bit S_min=nan dof=14
+caldac[19] gain=1.40248e-09 V/bit S_min=nan dof=14
+caldac[20] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[21] gain=4.20745e-09 V/bit S_min=nan dof=14
+caldac[22] gain=-5.60993e-09 V/bit S_min=nan dof=14
+caldac[23] gain=7.01242e-09 V/bit S_min=nan dof=14
+caldac[24] gain=-3.92695e-08 V/bit S_min=nan dof=14
+caldac[25] gain=1.40248e-09 V/bit S_min=nan dof=14
+caldac[26] gain=1.40248e-08 V/bit S_min=nan dof=14
+caldac[27] gain=4.20745e-09 V/bit S_min=nan dof=14
+caldac[28] gain=-2.38422e-08 V/bit S_min=nan dof=14
+caldac[29] gain=-4.20745e-09 V/bit S_min=nan dof=14
+caldac[30] gain=1.96348e-08 V/bit S_min=nan dof=14
+caldac[31] gain=-8.4149e-09 V/bit S_min=nan dof=14
+dac0 high, ground referenced
+Applied calibration for subdev 1, channel 0, range 0, aref 0
+Failed to apply calibration for subdev 8, channel 0, range 0, aref 0
+reading 0.155261, target 0.155284
+caldac[0] gain=-1.40248e-08 V/bit S_min=nan dof=14
+caldac[1] gain=7.34706e-19 V/bit S_min=nan dof=14
+caldac[2] gain=4.20745e-09 V/bit S_min=nan dof=14
+caldac[3] gain=2.80497e-09 V/bit S_min=nan dof=14
+caldac[4] gain=7.57762e-06 V/bit S_min=nan dof=14
+caldac[5] gain=2.66472e-08 V/bit S_min=nan dof=14
+caldac[6] gain=-9.81739e-09 V/bit S_min=nan dof=14
+caldac[7] gain=3.33286e-05 V/bit S_min=nan dof=14
+caldac[8] gain=8.9759e-06 V/bit S_min=nan dof=14
+caldac[9] gain=-3.08546e-08 V/bit S_min=nan dof=14
+caldac[10] gain=1.40248e-08 V/bit S_min=nan dof=14
+caldac[11] gain=-2.52447e-08 V/bit S_min=nan dof=14
+caldac[12] gain=-7.01242e-09 V/bit S_min=nan dof=14
+caldac[13] gain=2.38422e-08 V/bit S_min=nan dof=14
+caldac[14] gain=8.4149e-09 V/bit S_min=nan dof=14
+caldac[15] gain=1.12199e-08 V/bit S_min=nan dof=14
+caldac[16] gain=1.40248e-08 V/bit S_min=nan dof=14
+caldac[17] gain=-1.26224e-08 V/bit S_min=nan dof=14
+caldac[18] gain=1.40248e-08 V/bit S_min=nan dof=14
+caldac[19] gain=-2.94522e-08 V/bit S_min=nan dof=14
+caldac[20] gain=3.22571e-08 V/bit S_min=nan dof=14
+caldac[21] gain=-2.52447e-08 V/bit S_min=nan dof=14
+caldac[22] gain=-8.4149e-09 V/bit S_min=nan dof=14
+caldac[23] gain=7.01242e-09 V/bit S_min=nan dof=14
+caldac[24] gain=-7.01242e-09 V/bit S_min=nan dof=14
+caldac[25] gain=2.38422e-08 V/bit S_min=nan dof=14
+caldac[26] gain=1.26224e-08 V/bit S_min=nan dof=14
+caldac[27] gain=-6.03068e-08 V/bit S_min=nan dof=14
+caldac[28] gain=4.20745e-09 V/bit S_min=nan dof=14
+caldac[29] gain=-2.24397e-08 V/bit S_min=nan dof=14
+caldac[30] gain=2.80497e-08 V/bit S_min=nan dof=14
+caldac[31] gain=-5.04894e-08 V/bit S_min=nan dof=14
+dac1 ground, ground referenced
+Applied calibration for subdev 1, channel 1, range 0, aref 0
+Failed to apply calibration for subdev 8, channel 1, range 0, aref 0
+reading 0.49987, target 0.499895
+caldac[0] gain=3.08546e-08 V/bit S_min=nan dof=14
+caldac[1] gain=-4.20745e-09 V/bit S_min=nan dof=14
+caldac[2] gain=-1.82323e-08 V/bit S_min=nan dof=14
+caldac[3] gain=2.80497e-09 V/bit S_min=nan dof=14
+caldac[4] gain=-8.4149e-09 V/bit S_min=nan dof=14
+caldac[5] gain=2.66472e-08 V/bit S_min=nan dof=14
+caldac[6] gain=3.32711e-05 V/bit S_min=nan dof=14
+caldac[7] gain=1.68298e-08 V/bit S_min=nan dof=14
+caldac[8] gain=4.3477e-08 V/bit S_min=nan dof=14
+caldac[9] gain=-1.54273e-08 V/bit S_min=nan dof=14
+caldac[10] gain=4.96058e-06 V/bit S_min=nan dof=14
+caldac[11] gain=1.12199e-08 V/bit S_min=nan dof=14
+caldac[12] gain=-2.38422e-08 V/bit S_min=nan dof=14
+caldac[13] gain=-3.78671e-08 V/bit S_min=nan dof=14
+caldac[14] gain=-1.68298e-08 V/bit S_min=nan dof=14
+caldac[15] gain=-6.53072e-19 V/bit S_min=nan dof=14
+caldac[16] gain=-1.82323e-08 V/bit S_min=nan dof=14
+caldac[17] gain=-1.54273e-08 V/bit S_min=nan dof=14
+caldac[18] gain=1.26224e-08 V/bit S_min=nan dof=14
+caldac[19] gain=3.50621e-08 V/bit S_min=nan dof=14
+caldac[20] gain=5.04894e-08 V/bit S_min=nan dof=14
+caldac[21] gain=1.26224e-08 V/bit S_min=nan dof=14
+caldac[22] gain=1.68298e-08 V/bit S_min=nan dof=14
+caldac[23] gain=0 V/bit S_min=nan dof=14
+caldac[24] gain=0 V/bit S_min=nan dof=14
+caldac[25] gain=-1.96348e-08 V/bit S_min=nan dof=14
+caldac[26] gain=1.40248e-08 V/bit S_min=nan dof=14
+caldac[27] gain=5.60993e-09 V/bit S_min=nan dof=14
+caldac[28] gain=-1.26224e-08 V/bit S_min=nan dof=14
+caldac[29] gain=-2.10373e-08 V/bit S_min=nan dof=14
+caldac[30] gain=-2.94522e-08 V/bit S_min=nan dof=14
+caldac[31] gain=-2.38422e-08 V/bit S_min=nan dof=14
+dac1 mid, ground referenced
+Applied calibration for subdev 1, channel 1, range 0, aref 0
+Failed to apply calibration for subdev 8, channel 1, range 0, aref 0
+reading 0.327565, target 0.327589
+caldac[0] gain=1.40248e-08 V/bit S_min=nan dof=14
+caldac[1] gain=-1.40248e-08 V/bit S_min=nan dof=14
+caldac[2] gain=4.47533e-06 V/bit S_min=nan dof=14
+caldac[3] gain=-2.10373e-08 V/bit S_min=nan dof=14
+caldac[4] gain=2.80497e-08 V/bit S_min=nan dof=14
+caldac[5] gain=-1.82323e-08 V/bit S_min=nan dof=14
+caldac[6] gain=3.32276e-05 V/bit S_min=nan dof=14
+caldac[7] gain=-2.80497e-08 V/bit S_min=nan dof=14
+caldac[8] gain=2.52447e-08 V/bit S_min=nan dof=14
+caldac[9] gain=4.48795e-08 V/bit S_min=nan dof=14
+caldac[10] gain=6.92126e-06 V/bit S_min=nan dof=14
+caldac[11] gain=-3.50621e-08 V/bit S_min=nan dof=14
+caldac[12] gain=-8.97975e-19 V/bit S_min=nan dof=14
+caldac[13] gain=3.08546e-08 V/bit S_min=nan dof=14
+caldac[14] gain=2.38422e-08 V/bit S_min=nan dof=14
+caldac[15] gain=1.40248e-08 V/bit S_min=nan dof=14
+caldac[16] gain=5.60993e-09 V/bit S_min=nan dof=14
+caldac[17] gain=-2.44902e-19 V/bit S_min=nan dof=14
+caldac[18] gain=-2.38422e-08 V/bit S_min=nan dof=14
+caldac[19] gain=1.12199e-08 V/bit S_min=nan dof=14
+caldac[20] gain=-1.40248e-09 V/bit S_min=nan dof=14
+caldac[21] gain=2.94522e-08 V/bit S_min=nan dof=14
+caldac[22] gain=1.82323e-08 V/bit S_min=nan dof=14
+caldac[23] gain=7.01242e-09 V/bit S_min=nan dof=14
+caldac[24] gain=-3.22571e-08 V/bit S_min=nan dof=14
+caldac[25] gain=-2.94522e-08 V/bit S_min=nan dof=14
+caldac[26] gain=-1.54273e-08 V/bit S_min=nan dof=14
+caldac[27] gain=-5.18919e-08 V/bit S_min=nan dof=14
+caldac[28] gain=-8.4149e-09 V/bit S_min=nan dof=14
+caldac[29] gain=-9.81739e-09 V/bit S_min=nan dof=14
+caldac[30] gain=-1.96348e-08 V/bit S_min=nan dof=14
+caldac[31] gain=1.68298e-08 V/bit S_min=nan dof=14
+dac1 high, ground referenced
+Applied calibration for subdev 1, channel 1, range 0, aref 0
+Failed to apply calibration for subdev 8, channel 1, range 0, aref 0
+reading 0.155245, target 0.155284
+caldac[0] gain=-2.80497e-09 V/bit S_min=nan dof=14
+caldac[1] gain=-2.38422e-08 V/bit S_min=nan dof=14
+caldac[2] gain=8.98431e-06 V/bit S_min=nan dof=14
+caldac[3] gain=3.36596e-08 V/bit S_min=nan dof=14
+caldac[4] gain=-2.66472e-08 V/bit S_min=nan dof=14
+caldac[5] gain=4.20745e-09 V/bit S_min=nan dof=14
+caldac[6] gain=3.32375e-05 V/bit S_min=nan dof=14
+caldac[7] gain=3.64646e-08 V/bit S_min=nan dof=14
+caldac[8] gain=-5.60993e-09 V/bit S_min=nan dof=14
+caldac[9] gain=5.60993e-09 V/bit S_min=nan dof=14
+caldac[10] gain=7.57762e-06 V/bit S_min=nan dof=14
+caldac[11] gain=-1.68298e-08 V/bit S_min=nan dof=14
+caldac[12] gain=-1.82323e-08 V/bit S_min=nan dof=14
+caldac[13] gain=4.20745e-09 V/bit S_min=nan dof=14
+caldac[14] gain=7.01242e-09 V/bit S_min=nan dof=14
+caldac[15] gain=1.26224e-08 V/bit S_min=nan dof=14
+caldac[16] gain=2.80497e-09 V/bit S_min=nan dof=14
+caldac[17] gain=-2.52447e-08 V/bit S_min=nan dof=14
+caldac[18] gain=3.92695e-08 V/bit S_min=nan dof=14
+caldac[19] gain=-4.0672e-08 V/bit S_min=nan dof=14
+caldac[20] gain=7.01242e-09 V/bit S_min=nan dof=14
+caldac[21] gain=-3.64646e-08 V/bit S_min=nan dof=14
+caldac[22] gain=-4.3477e-08 V/bit S_min=nan dof=14
+caldac[23] gain=7.34706e-19 V/bit S_min=nan dof=14
+caldac[24] gain=-4.90869e-08 V/bit S_min=nan dof=14
+caldac[25] gain=1.26224e-08 V/bit S_min=nan dof=14
+caldac[26] gain=2.80497e-08 V/bit S_min=nan dof=14
+caldac[27] gain=-1.68298e-08 V/bit S_min=nan dof=14
+caldac[28] gain=4.20745e-09 V/bit S_min=nan dof=14
+caldac[29] gain=8.4149e-09 V/bit S_min=nan dof=14
+caldac[30] gain=-2.66472e-08 V/bit S_min=nan dof=14
+caldac[31] gain=2.24397e-08 V/bit S_min=nan dof=14
+dac2 ground, ground referenced
+Applied calibration for subdev 1, channel 2, range 0, aref 0
+Failed to apply calibration for subdev 8, channel 2, range 0, aref 0
+reading 0.499901, target 0.499895
+caldac[0] gain=1.30614e-18 V/bit S_min=nan dof=14
+caldac[1] gain=4.94656e-06 V/bit S_min=nan dof=14
+caldac[2] gain=1.30614e-18 V/bit S_min=nan dof=14
+caldac[3] gain=1.54273e-08 V/bit S_min=nan dof=14
+caldac[4] gain=2.52447e-08 V/bit S_min=nan dof=14
+caldac[5] gain=1.30614e-18 V/bit S_min=nan dof=14
+caldac[6] gain=1.30614e-18 V/bit S_min=nan dof=14
+caldac[7] gain=1.30614e-18 V/bit S_min=nan dof=14
+caldac[8] gain=1.30614e-18 V/bit S_min=nan dof=14
+caldac[9] gain=3.31365e-05 V/bit S_min=nan dof=14
+caldac[10] gain=-1.26224e-08 V/bit S_min=nan dof=14
+caldac[11] gain=1.30614e-18 V/bit S_min=nan dof=14
+caldac[12] gain=1.30614e-18 V/bit S_min=nan dof=14
+caldac[13] gain=1.30614e-18 V/bit S_min=nan dof=14
+caldac[14] gain=1.30614e-18 V/bit S_min=nan dof=14
+caldac[15] gain=1.26224e-08 V/bit S_min=nan dof=14
+caldac[16] gain=-1.26224e-08 V/bit S_min=nan dof=14
+caldac[17] gain=1.30614e-18 V/bit S_min=nan dof=14
+caldac[18] gain=1.30614e-18 V/bit S_min=nan dof=14
+caldac[19] gain=1.26224e-08 V/bit S_min=nan dof=14
+caldac[20] gain=1.30614e-18 V/bit S_min=nan dof=14
+caldac[21] gain=-1.40248e-09 V/bit S_min=nan dof=14
+caldac[22] gain=-1.40248e-09 V/bit S_min=nan dof=14
+caldac[23] gain=1.30614e-18 V/bit S_min=nan dof=14
+caldac[24] gain=1.54273e-08 V/bit S_min=nan dof=14
+caldac[25] gain=1.30614e-18 V/bit S_min=nan dof=14
+caldac[26] gain=1.30614e-18 V/bit S_min=nan dof=14
+caldac[27] gain=1.30614e-18 V/bit S_min=nan dof=14
+caldac[28] gain=-1.82323e-08 V/bit S_min=nan dof=14
+caldac[29] gain=4.20745e-09 V/bit S_min=nan dof=14
+caldac[30] gain=1.54273e-08 V/bit S_min=nan dof=14
+caldac[31] gain=1.30614e-18 V/bit S_min=nan dof=14
+dac2 mid, ground referenced
+Applied calibration for subdev 1, channel 2, range 0, aref 0
+Failed to apply calibration for subdev 8, channel 2, range 0, aref 0
+reading 0.327581, target 0.327589
+caldac[0] gain=-3.92695e-08 V/bit S_min=nan dof=14
+caldac[1] gain=6.95912e-06 V/bit S_min=nan dof=14
+caldac[2] gain=-2.80497e-09 V/bit S_min=nan dof=14
+caldac[3] gain=2.80497e-08 V/bit S_min=nan dof=14
+caldac[4] gain=2.94522e-08 V/bit S_min=nan dof=14
+caldac[5] gain=1.54273e-08 V/bit S_min=nan dof=14
+caldac[6] gain=2.10373e-08 V/bit S_min=nan dof=14
+caldac[7] gain=-3.36596e-08 V/bit S_min=nan dof=14
+caldac[8] gain=2.10373e-08 V/bit S_min=nan dof=14
+caldac[9] gain=3.31659e-05 V/bit S_min=nan dof=14
+caldac[10] gain=-3.36596e-08 V/bit S_min=nan dof=14
+caldac[11] gain=4.4627e-06 V/bit S_min=nan dof=14
+caldac[12] gain=-1.82323e-08 V/bit S_min=nan dof=14
+caldac[13] gain=2.94522e-08 V/bit S_min=nan dof=14
+caldac[14] gain=-1.40248e-08 V/bit S_min=nan dof=14
+caldac[15] gain=1.96348e-08 V/bit S_min=nan dof=14
+caldac[16] gain=2.10373e-08 V/bit S_min=nan dof=14
+caldac[17] gain=-5.60993e-09 V/bit S_min=nan dof=14
+caldac[18] gain=-1.40248e-09 V/bit S_min=nan dof=14
+caldac[19] gain=-1.12199e-08 V/bit S_min=nan dof=14
+caldac[20] gain=-2.44902e-19 V/bit S_min=nan dof=14
+caldac[21] gain=1.96348e-08 V/bit S_min=nan dof=14
+caldac[22] gain=-8.4149e-09 V/bit S_min=nan dof=14
+caldac[23] gain=-1.40248e-09 V/bit S_min=nan dof=14
+caldac[24] gain=2.52447e-08 V/bit S_min=nan dof=14
+caldac[25] gain=2.52447e-08 V/bit S_min=nan dof=14
+caldac[26] gain=-1.40248e-08 V/bit S_min=nan dof=14
+caldac[27] gain=3.50621e-08 V/bit S_min=nan dof=14
+caldac[28] gain=-1.40248e-09 V/bit S_min=nan dof=14
+caldac[29] gain=2.10373e-08 V/bit S_min=nan dof=14
+caldac[30] gain=-4.48795e-08 V/bit S_min=nan dof=14
+caldac[31] gain=1.40248e-09 V/bit S_min=nan dof=14
+dac2 high, ground referenced
+Applied calibration for subdev 1, channel 2, range 0, aref 0
+Failed to apply calibration for subdev 8, channel 2, range 0, aref 0
+reading 0.155276, target 0.155284
+caldac[0] gain=7.34706e-19 V/bit S_min=nan dof=14
+caldac[1] gain=7.61128e-06 V/bit S_min=nan dof=14
+caldac[2] gain=7.34706e-19 V/bit S_min=nan dof=14
+caldac[3] gain=7.34706e-19 V/bit S_min=nan dof=14
+caldac[4] gain=7.34706e-19 V/bit S_min=nan dof=14
+caldac[5] gain=7.34706e-19 V/bit S_min=nan dof=14
+caldac[6] gain=7.34706e-19 V/bit S_min=nan dof=14
+caldac[7] gain=7.34706e-19 V/bit S_min=nan dof=14
+caldac[8] gain=7.34706e-19 V/bit S_min=nan dof=14
+caldac[9] gain=3.31267e-05 V/bit S_min=nan dof=14
+caldac[10] gain=7.34706e-19 V/bit S_min=nan dof=14
+caldac[11] gain=8.87912e-06 V/bit S_min=nan dof=14
+caldac[12] gain=7.34706e-19 V/bit S_min=nan dof=14
+caldac[13] gain=7.34706e-19 V/bit S_min=nan dof=14
+caldac[14] gain=7.34706e-19 V/bit S_min=nan dof=14
+caldac[15] gain=7.34706e-19 V/bit S_min=nan dof=14
+caldac[16] gain=7.34706e-19 V/bit S_min=nan dof=14
+caldac[17] gain=7.34706e-19 V/bit S_min=nan dof=14
+caldac[18] gain=7.34706e-19 V/bit S_min=nan dof=14
+caldac[19] gain=7.34706e-19 V/bit S_min=nan dof=14
+caldac[20] gain=7.34706e-19 V/bit S_min=nan dof=14
+caldac[21] gain=7.34706e-19 V/bit S_min=nan dof=14
+caldac[22] gain=7.34706e-19 V/bit S_min=nan dof=14
+caldac[23] gain=7.34706e-19 V/bit S_min=nan dof=14
+caldac[24] gain=7.34706e-19 V/bit S_min=nan dof=14
+caldac[25] gain=7.34706e-19 V/bit S_min=nan dof=14
+caldac[26] gain=7.34706e-19 V/bit S_min=nan dof=14
+caldac[27] gain=7.34706e-19 V/bit S_min=nan dof=14
+caldac[28] gain=7.34706e-19 V/bit S_min=nan dof=14
+caldac[29] gain=7.34706e-19 V/bit S_min=nan dof=14
+caldac[30] gain=7.34706e-19 V/bit S_min=nan dof=14
+caldac[31] gain=7.34706e-19 V/bit S_min=nan dof=14
+dac3 ground, ground referenced
+Applied calibration for subdev 1, channel 3, range 0, aref 0
+Failed to apply calibration for subdev 8, channel 3, range 0, aref 0
+reading 0.499886, target 0.499895
+caldac[0] gain=5.00126e-06 V/bit S_min=nan dof=14
+caldac[1] gain=7.01242e-09 V/bit S_min=nan dof=14
+caldac[2] gain=-5.60993e-09 V/bit S_min=nan dof=14
+caldac[3] gain=3.33104e-05 V/bit S_min=nan dof=14
+caldac[4] gain=2.10373e-08 V/bit S_min=nan dof=14
+caldac[5] gain=1.82323e-08 V/bit S_min=nan dof=14
+caldac[6] gain=-1.82323e-08 V/bit S_min=nan dof=14
+caldac[7] gain=-2.80497e-08 V/bit S_min=nan dof=14
+caldac[8] gain=-7.01242e-09 V/bit S_min=nan dof=14
+caldac[9] gain=1.30614e-18 V/bit S_min=nan dof=14
+caldac[10] gain=-1.40248e-09 V/bit S_min=nan dof=14
+caldac[11] gain=-4.20745e-09 V/bit S_min=nan dof=14
+caldac[12] gain=-1.40248e-08 V/bit S_min=nan dof=14
+caldac[13] gain=1.40248e-08 V/bit S_min=nan dof=14
+caldac[14] gain=2.94522e-08 V/bit S_min=nan dof=14
+caldac[15] gain=1.40248e-08 V/bit S_min=nan dof=14
+caldac[16] gain=3.08546e-08 V/bit S_min=nan dof=14
+caldac[17] gain=6.53072e-19 V/bit S_min=nan dof=14
+caldac[18] gain=8.4149e-09 V/bit S_min=nan dof=14
+caldac[19] gain=1.40248e-09 V/bit S_min=nan dof=14
+caldac[20] gain=-2.80497e-09 V/bit S_min=nan dof=14
+caldac[21] gain=-5.60993e-09 V/bit S_min=nan dof=14
+caldac[22] gain=1.30614e-18 V/bit S_min=nan dof=14
+caldac[23] gain=-5.60993e-09 V/bit S_min=nan dof=14
+caldac[24] gain=-2.38422e-08 V/bit S_min=nan dof=14
+caldac[25] gain=2.24397e-08 V/bit S_min=nan dof=14
+caldac[26] gain=4.20745e-09 V/bit S_min=nan dof=14
+caldac[27] gain=-4.20745e-09 V/bit S_min=nan dof=14
+caldac[28] gain=1.30614e-18 V/bit S_min=nan dof=14
+caldac[29] gain=-2.52447e-08 V/bit S_min=nan dof=14
+caldac[30] gain=3.08546e-08 V/bit S_min=nan dof=14
+caldac[31] gain=-2.10373e-08 V/bit S_min=nan dof=14
+dac3 mid, ground referenced
+Applied calibration for subdev 1, channel 3, range 0, aref 0
+Failed to apply calibration for subdev 8, channel 3, range 0, aref 0
+reading 0.327596, target 0.327589
+caldac[0] gain=6.95912e-06 V/bit S_min=nan dof=14
+caldac[1] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[2] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[3] gain=3.33006e-05 V/bit S_min=nan dof=14
+caldac[4] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[5] gain=4.44026e-06 V/bit S_min=nan dof=14
+caldac[6] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[7] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[8] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[9] gain=-2.10373e-08 V/bit S_min=nan dof=14
+caldac[10] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[11] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[12] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[13] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[14] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[15] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[16] gain=-1.40248e-09 V/bit S_min=nan dof=14
+caldac[17] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[18] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[19] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[20] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[21] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[22] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[23] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[24] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[25] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[26] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[27] gain=-1.82323e-08 V/bit S_min=nan dof=14
+caldac[28] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[29] gain=2.10373e-08 V/bit S_min=nan dof=14
+caldac[30] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[31] gain=4.0817e-19 V/bit S_min=nan dof=14
+dac3 high, ground referenced
+Applied calibration for subdev 1, channel 3, range 0, aref 0
+Failed to apply calibration for subdev 8, channel 3, range 0, aref 0
+reading 0.155276, target 0.155284
+caldac[0] gain=7.62951e-06 V/bit S_min=nan dof=14
+caldac[1] gain=7.34706e-19 V/bit S_min=nan dof=14
+caldac[2] gain=-2.10373e-08 V/bit S_min=nan dof=14
+caldac[3] gain=3.33328e-05 V/bit S_min=nan dof=14
+caldac[4] gain=2.24397e-08 V/bit S_min=nan dof=14
+caldac[5] gain=8.95065e-06 V/bit S_min=nan dof=14
+caldac[6] gain=1.54273e-08 V/bit S_min=nan dof=14
+caldac[7] gain=2.80497e-08 V/bit S_min=nan dof=14
+caldac[8] gain=-2.24397e-08 V/bit S_min=nan dof=14
+caldac[9] gain=-2.24397e-08 V/bit S_min=nan dof=14
+caldac[10] gain=3.22571e-08 V/bit S_min=nan dof=14
+caldac[11] gain=-1.40248e-09 V/bit S_min=nan dof=14
+caldac[12] gain=-2.80497e-09 V/bit S_min=nan dof=14
+caldac[13] gain=1.54273e-08 V/bit S_min=nan dof=14
+caldac[14] gain=-9.81739e-09 V/bit S_min=nan dof=14
+caldac[15] gain=5.60993e-09 V/bit S_min=nan dof=14
+caldac[16] gain=9.81739e-09 V/bit S_min=nan dof=14
+caldac[17] gain=7.34706e-19 V/bit S_min=nan dof=14
+caldac[18] gain=-3.64646e-08 V/bit S_min=nan dof=14
+caldac[19] gain=1.54273e-08 V/bit S_min=nan dof=14
+caldac[20] gain=3.50621e-08 V/bit S_min=nan dof=14
+caldac[21] gain=1.96348e-08 V/bit S_min=nan dof=14
+caldac[22] gain=-4.20745e-09 V/bit S_min=nan dof=14
+caldac[23] gain=-9.81739e-09 V/bit S_min=nan dof=14
+caldac[24] gain=1.40248e-09 V/bit S_min=nan dof=14
+caldac[25] gain=-8.4149e-09 V/bit S_min=nan dof=14
+caldac[26] gain=2.10373e-08 V/bit S_min=nan dof=14
+caldac[27] gain=-1.40248e-09 V/bit S_min=nan dof=14
+caldac[28] gain=-1.68298e-08 V/bit S_min=nan dof=14
+caldac[29] gain=2.10373e-08 V/bit S_min=nan dof=14
+caldac[30] gain=9.81739e-09 V/bit S_min=nan dof=14
+caldac[31] gain=1.40248e-09 V/bit S_min=nan dof=14
+dac4 ground, ground referenced
+Applied calibration for subdev 1, channel 4, range 0, aref 0
+Failed to apply calibration for subdev 8, channel 4, range 0, aref 0
+reading 0.499901, target 0.499895
+caldac[0] gain=1.30614e-18 V/bit S_min=nan dof=14
+caldac[1] gain=1.30614e-18 V/bit S_min=nan dof=14
+caldac[2] gain=1.30614e-18 V/bit S_min=nan dof=14
+caldac[3] gain=1.30614e-18 V/bit S_min=nan dof=14
+caldac[4] gain=-1.26224e-08 V/bit S_min=nan dof=14
+caldac[5] gain=-4.20745e-09 V/bit S_min=nan dof=14
+caldac[6] gain=1.30614e-18 V/bit S_min=nan dof=14
+caldac[7] gain=-4.20745e-09 V/bit S_min=nan dof=14
+caldac[8] gain=-2.10373e-08 V/bit S_min=nan dof=14
+caldac[9] gain=1.30614e-18 V/bit S_min=nan dof=14
+caldac[10] gain=1.30614e-18 V/bit S_min=nan dof=14
+caldac[11] gain=1.30614e-18 V/bit S_min=nan dof=14
+caldac[12] gain=2.52447e-08 V/bit S_min=nan dof=14
+caldac[13] gain=1.30614e-18 V/bit S_min=nan dof=14
+caldac[14] gain=1.30614e-18 V/bit S_min=nan dof=14
+caldac[15] gain=1.30614e-18 V/bit S_min=nan dof=14
+caldac[16] gain=1.30614e-18 V/bit S_min=nan dof=14
+caldac[17] gain=1.30614e-18 V/bit S_min=nan dof=14
+caldac[18] gain=-1.40248e-09 V/bit S_min=nan dof=14
+caldac[19] gain=1.30614e-18 V/bit S_min=nan dof=14
+caldac[20] gain=4.96339e-06 V/bit S_min=nan dof=14
+caldac[21] gain=1.30614e-18 V/bit S_min=nan dof=14
+caldac[22] gain=1.30614e-18 V/bit S_min=nan dof=14
+caldac[23] gain=3.31617e-05 V/bit S_min=nan dof=14
+caldac[24] gain=1.30614e-18 V/bit S_min=nan dof=14
+caldac[25] gain=2.24397e-08 V/bit S_min=nan dof=14
+caldac[26] gain=5.60993e-09 V/bit S_min=nan dof=14
+caldac[27] gain=1.30614e-18 V/bit S_min=nan dof=14
+caldac[28] gain=9.81739e-09 V/bit S_min=nan dof=14
+caldac[29] gain=1.30614e-18 V/bit S_min=nan dof=14
+caldac[30] gain=-1.40248e-09 V/bit S_min=nan dof=14
+caldac[31] gain=1.30614e-18 V/bit S_min=nan dof=14
+dac4 mid, ground referenced
+Applied calibration for subdev 1, channel 4, range 0, aref 0
+Failed to apply calibration for subdev 8, channel 4, range 0, aref 0
+reading 0.327596, target 0.327589
+caldac[0] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[1] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[2] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[3] gain=-9.81739e-09 V/bit S_min=nan dof=14
+caldac[4] gain=-1.40248e-09 V/bit S_min=nan dof=14
+caldac[5] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[6] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[7] gain=-9.81739e-09 V/bit S_min=nan dof=14
+caldac[8] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[9] gain=-9.81739e-09 V/bit S_min=nan dof=14
+caldac[10] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[11] gain=-1.26224e-08 V/bit S_min=nan dof=14
+caldac[12] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[13] gain=1.40248e-09 V/bit S_min=nan dof=14
+caldac[14] gain=1.82323e-08 V/bit S_min=nan dof=14
+caldac[15] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[16] gain=1.40248e-08 V/bit S_min=nan dof=14
+caldac[17] gain=-1.26224e-08 V/bit S_min=nan dof=14
+caldac[18] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[19] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[20] gain=6.96754e-06 V/bit S_min=nan dof=14
+caldac[21] gain=4.20745e-09 V/bit S_min=nan dof=14
+caldac[22] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[23] gain=3.31786e-05 V/bit S_min=nan dof=14
+caldac[24] gain=4.47392e-06 V/bit S_min=nan dof=14
+caldac[25] gain=2.10373e-08 V/bit S_min=nan dof=14
+caldac[26] gain=4.20745e-09 V/bit S_min=nan dof=14
+caldac[27] gain=1.12199e-08 V/bit S_min=nan dof=14
+caldac[28] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[29] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[30] gain=-1.40248e-09 V/bit S_min=nan dof=14
+caldac[31] gain=4.0817e-19 V/bit S_min=nan dof=14
+dac4 high, ground referenced
+Applied calibration for subdev 1, channel 4, range 0, aref 0
+Failed to apply calibration for subdev 8, channel 4, range 0, aref 0
+reading 0.155291, target 0.155284
+caldac[0] gain=-5.60993e-09 V/bit S_min=nan dof=14
+caldac[1] gain=2.80497e-09 V/bit S_min=nan dof=14
+caldac[2] gain=-9.81739e-09 V/bit S_min=nan dof=14
+caldac[3] gain=-3.64646e-08 V/bit S_min=nan dof=14
+caldac[4] gain=1.26224e-08 V/bit S_min=nan dof=14
+caldac[5] gain=2.38422e-08 V/bit S_min=nan dof=14
+caldac[6] gain=-2.24397e-08 V/bit S_min=nan dof=14
+caldac[7] gain=7.34706e-19 V/bit S_min=nan dof=14
+caldac[8] gain=-1.96348e-08 V/bit S_min=nan dof=14
+caldac[9] gain=1.40248e-09 V/bit S_min=nan dof=14
+caldac[10] gain=-9.81739e-09 V/bit S_min=nan dof=14
+caldac[11] gain=-1.40248e-08 V/bit S_min=nan dof=14
+caldac[12] gain=1.54273e-08 V/bit S_min=nan dof=14
+caldac[13] gain=1.40248e-08 V/bit S_min=nan dof=14
+caldac[14] gain=-1.40248e-08 V/bit S_min=nan dof=14
+caldac[15] gain=-1.40248e-08 V/bit S_min=nan dof=14
+caldac[16] gain=-1.82323e-08 V/bit S_min=nan dof=14
+caldac[17] gain=-2.24397e-08 V/bit S_min=nan dof=14
+caldac[18] gain=-3.36596e-08 V/bit S_min=nan dof=14
+caldac[19] gain=-1.12199e-08 V/bit S_min=nan dof=14
+caldac[20] gain=7.65756e-06 V/bit S_min=nan dof=14
+caldac[21] gain=-1.12199e-08 V/bit S_min=nan dof=14
+caldac[22] gain=1.26224e-08 V/bit S_min=nan dof=14
+caldac[23] gain=3.32206e-05 V/bit S_min=nan dof=14
+caldac[24] gain=8.96327e-06 V/bit S_min=nan dof=14
+caldac[25] gain=3.22571e-08 V/bit S_min=nan dof=14
+caldac[26] gain=8.4149e-09 V/bit S_min=nan dof=14
+caldac[27] gain=4.20745e-09 V/bit S_min=nan dof=14
+caldac[28] gain=-3.08546e-08 V/bit S_min=nan dof=14
+caldac[29] gain=-2.66472e-08 V/bit S_min=nan dof=14
+caldac[30] gain=-2.10373e-08 V/bit S_min=nan dof=14
+caldac[31] gain=1.40248e-09 V/bit S_min=nan dof=14
+dac5 ground, ground referenced
+Applied calibration for subdev 1, channel 5, range 0, aref 0
+Failed to apply calibration for subdev 8, channel 5, range 0, aref 0
+reading 0.499886, target 0.499895
+caldac[0] gain=1.82323e-08 V/bit S_min=nan dof=14
+caldac[1] gain=-2.10373e-08 V/bit S_min=nan dof=14
+caldac[2] gain=0 V/bit S_min=nan dof=14
+caldac[3] gain=0 V/bit S_min=nan dof=14
+caldac[4] gain=7.01242e-09 V/bit S_min=nan dof=14
+caldac[5] gain=0 V/bit S_min=nan dof=14
+caldac[6] gain=-1.40248e-09 V/bit S_min=nan dof=14
+caldac[7] gain=-2.80497e-09 V/bit S_min=nan dof=14
+caldac[8] gain=0 V/bit S_min=nan dof=14
+caldac[9] gain=-3.64646e-08 V/bit S_min=nan dof=14
+caldac[10] gain=0 V/bit S_min=nan dof=14
+caldac[11] gain=0 V/bit S_min=nan dof=14
+caldac[12] gain=0 V/bit S_min=nan dof=14
+caldac[13] gain=0 V/bit S_min=nan dof=14
+caldac[14] gain=0 V/bit S_min=nan dof=14
+caldac[15] gain=-4.20745e-09 V/bit S_min=nan dof=14
+caldac[16] gain=9.81739e-09 V/bit S_min=nan dof=14
+caldac[17] gain=0 V/bit S_min=nan dof=14
+caldac[18] gain=0 V/bit S_min=nan dof=14
+caldac[19] gain=0 V/bit S_min=nan dof=14
+caldac[20] gain=0 V/bit S_min=nan dof=14
+caldac[21] gain=-1.26224e-08 V/bit S_min=nan dof=14
+caldac[22] gain=3.33118e-05 V/bit S_min=nan dof=14
+caldac[23] gain=0 V/bit S_min=nan dof=14
+caldac[24] gain=-5.60993e-09 V/bit S_min=nan dof=14
+caldac[25] gain=2.80497e-08 V/bit S_min=nan dof=14
+caldac[26] gain=4.96479e-06 V/bit S_min=nan dof=14
+caldac[27] gain=0 V/bit S_min=nan dof=14
+caldac[28] gain=0 V/bit S_min=nan dof=14
+caldac[29] gain=2.10373e-08 V/bit S_min=nan dof=14
+caldac[30] gain=4.20745e-09 V/bit S_min=nan dof=14
+caldac[31] gain=0 V/bit S_min=nan dof=14
+dac5 mid, ground referenced
+Applied calibration for subdev 1, channel 5, range 0, aref 0
+Failed to apply calibration for subdev 8, channel 5, range 0, aref 0
+reading 0.327581, target 0.327589
+caldac[0] gain=-8.97975e-19 V/bit S_min=nan dof=14
+caldac[1] gain=-4.20745e-09 V/bit S_min=nan dof=14
+caldac[2] gain=-8.97975e-19 V/bit S_min=nan dof=14
+caldac[3] gain=1.82323e-08 V/bit S_min=nan dof=14
+caldac[4] gain=-1.40248e-08 V/bit S_min=nan dof=14
+caldac[5] gain=-8.97975e-19 V/bit S_min=nan dof=14
+caldac[6] gain=7.01242e-09 V/bit S_min=nan dof=14
+caldac[7] gain=-8.97975e-19 V/bit S_min=nan dof=14
+caldac[8] gain=-8.97975e-19 V/bit S_min=nan dof=14
+caldac[9] gain=-8.97975e-19 V/bit S_min=nan dof=14
+caldac[10] gain=-8.97975e-19 V/bit S_min=nan dof=14
+caldac[11] gain=-8.97975e-19 V/bit S_min=nan dof=14
+caldac[12] gain=-8.97975e-19 V/bit S_min=nan dof=14
+caldac[13] gain=-8.97975e-19 V/bit S_min=nan dof=14
+caldac[14] gain=-8.97975e-19 V/bit S_min=nan dof=14
+caldac[15] gain=-8.97975e-19 V/bit S_min=nan dof=14
+caldac[16] gain=-1.68298e-08 V/bit S_min=nan dof=14
+caldac[17] gain=-2.44902e-19 V/bit S_min=nan dof=14
+caldac[18] gain=4.50618e-06 V/bit S_min=nan dof=14
+caldac[19] gain=-8.97975e-19 V/bit S_min=nan dof=14
+caldac[20] gain=-8.97975e-19 V/bit S_min=nan dof=14
+caldac[21] gain=-8.97975e-19 V/bit S_min=nan dof=14
+caldac[22] gain=3.33384e-05 V/bit S_min=nan dof=14
+caldac[23] gain=1.40248e-09 V/bit S_min=nan dof=14
+caldac[24] gain=-8.97975e-19 V/bit S_min=nan dof=14
+caldac[25] gain=-8.97975e-19 V/bit S_min=nan dof=14
+caldac[26] gain=6.93528e-06 V/bit S_min=nan dof=14
+caldac[27] gain=-8.97975e-19 V/bit S_min=nan dof=14
+caldac[28] gain=-8.97975e-19 V/bit S_min=nan dof=14
+caldac[29] gain=-8.97975e-19 V/bit S_min=nan dof=14
+caldac[30] gain=-8.97975e-19 V/bit S_min=nan dof=14
+caldac[31] gain=-8.97975e-19 V/bit S_min=nan dof=14
+dac5 high, ground referenced
+Applied calibration for subdev 1, channel 5, range 0, aref 0
+Failed to apply calibration for subdev 8, channel 5, range 0, aref 0
+reading 0.155276, target 0.155284
+caldac[0] gain=2.10373e-08 V/bit S_min=nan dof=14
+caldac[1] gain=1.12199e-08 V/bit S_min=nan dof=14
+caldac[2] gain=1.54273e-08 V/bit S_min=nan dof=14
+caldac[3] gain=9.81739e-09 V/bit S_min=nan dof=14
+caldac[4] gain=7.01242e-09 V/bit S_min=nan dof=14
+caldac[5] gain=7.34706e-19 V/bit S_min=nan dof=14
+caldac[6] gain=7.01242e-09 V/bit S_min=nan dof=14
+caldac[7] gain=7.01242e-09 V/bit S_min=nan dof=14
+caldac[8] gain=-4.20745e-09 V/bit S_min=nan dof=14
+caldac[9] gain=1.82323e-08 V/bit S_min=nan dof=14
+caldac[10] gain=7.01242e-09 V/bit S_min=nan dof=14
+caldac[11] gain=-3.50621e-08 V/bit S_min=nan dof=14
+caldac[12] gain=-1.82323e-08 V/bit S_min=nan dof=14
+caldac[13] gain=7.01242e-09 V/bit S_min=nan dof=14
+caldac[14] gain=8.4149e-09 V/bit S_min=nan dof=14
+caldac[15] gain=1.26224e-08 V/bit S_min=nan dof=14
+caldac[16] gain=-1.12199e-08 V/bit S_min=nan dof=14
+caldac[17] gain=7.34706e-19 V/bit S_min=nan dof=14
+caldac[18] gain=9.01657e-06 V/bit S_min=nan dof=14
+caldac[19] gain=-4.20745e-09 V/bit S_min=nan dof=14
+caldac[20] gain=7.34706e-19 V/bit S_min=nan dof=14
+caldac[21] gain=1.82323e-08 V/bit S_min=nan dof=14
+caldac[22] gain=3.33244e-05 V/bit S_min=nan dof=14
+caldac[23] gain=2.80497e-09 V/bit S_min=nan dof=14
+caldac[24] gain=7.34706e-19 V/bit S_min=nan dof=14
+caldac[25] gain=7.34706e-19 V/bit S_min=nan dof=14
+caldac[26] gain=7.58884e-06 V/bit S_min=nan dof=14
+caldac[27] gain=-4.20745e-09 V/bit S_min=nan dof=14
+caldac[28] gain=7.34706e-19 V/bit S_min=nan dof=14
+caldac[29] gain=8.4149e-09 V/bit S_min=nan dof=14
+caldac[30] gain=3.50621e-08 V/bit S_min=nan dof=14
+caldac[31] gain=-1.12199e-08 V/bit S_min=nan dof=14
+dac6 ground, ground referenced
+Applied calibration for subdev 1, channel 6, range 0, aref 0
+Failed to apply calibration for subdev 8, channel 6, range 0, aref 0
+reading 0.49987, target 0.499895
+caldac[0] gain=-2.80497e-09 V/bit S_min=nan dof=14
+caldac[1] gain=7.01242e-09 V/bit S_min=nan dof=14
+caldac[2] gain=2.10373e-08 V/bit S_min=nan dof=14
+caldac[3] gain=-5.60993e-09 V/bit S_min=nan dof=14
+caldac[4] gain=1.26224e-08 V/bit S_min=nan dof=14
+caldac[5] gain=1.26224e-08 V/bit S_min=nan dof=14
+caldac[6] gain=0 V/bit S_min=nan dof=14
+caldac[7] gain=0 V/bit S_min=nan dof=14
+caldac[8] gain=1.54273e-08 V/bit S_min=nan dof=14
+caldac[9] gain=1.82323e-08 V/bit S_min=nan dof=14
+caldac[10] gain=0 V/bit S_min=nan dof=14
+caldac[11] gain=-2.10373e-08 V/bit S_min=nan dof=14
+caldac[12] gain=0 V/bit S_min=nan dof=14
+caldac[13] gain=1.40248e-09 V/bit S_min=nan dof=14
+caldac[14] gain=1.82323e-08 V/bit S_min=nan dof=14
+caldac[15] gain=2.52447e-08 V/bit S_min=nan dof=14
+caldac[16] gain=1.40248e-08 V/bit S_min=nan dof=14
+caldac[17] gain=4.95217e-06 V/bit S_min=nan dof=14
+caldac[18] gain=9.81739e-09 V/bit S_min=nan dof=14
+caldac[19] gain=3.50621e-08 V/bit S_min=nan dof=14
+caldac[20] gain=-1.40248e-08 V/bit S_min=nan dof=14
+caldac[21] gain=0 V/bit S_min=nan dof=14
+caldac[22] gain=1.40248e-09 V/bit S_min=nan dof=14
+caldac[23] gain=7.01242e-09 V/bit S_min=nan dof=14
+caldac[24] gain=-1.96348e-08 V/bit S_min=nan dof=14
+caldac[25] gain=3.33356e-05 V/bit S_min=nan dof=14
+caldac[26] gain=-5.60993e-09 V/bit S_min=nan dof=14
+caldac[27] gain=-1.82323e-08 V/bit S_min=nan dof=14
+caldac[28] gain=2.52447e-08 V/bit S_min=nan dof=14
+caldac[29] gain=0 V/bit S_min=nan dof=14
+caldac[30] gain=0 V/bit S_min=nan dof=14
+caldac[31] gain=9.81739e-09 V/bit S_min=nan dof=14
+dac6 mid, ground referenced
+Applied calibration for subdev 1, channel 6, range 0, aref 0
+Failed to apply calibration for subdev 8, channel 6, range 0, aref 0
+reading 0.327565, target 0.327589
+caldac[0] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[1] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[2] gain=1.26224e-08 V/bit S_min=nan dof=14
+caldac[3] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[4] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[5] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[6] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[7] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[8] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[9] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[10] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[11] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[12] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[13] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[14] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[15] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[16] gain=-9.81739e-09 V/bit S_min=nan dof=14
+caldac[17] gain=6.92546e-06 V/bit S_min=nan dof=14
+caldac[18] gain=-7.01242e-09 V/bit S_min=nan dof=14
+caldac[19] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[20] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[21] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[22] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[23] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[24] gain=-1.54273e-08 V/bit S_min=nan dof=14
+caldac[25] gain=3.33455e-05 V/bit S_min=nan dof=14
+caldac[26] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[27] gain=4.46411e-06 V/bit S_min=nan dof=14
+caldac[28] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[29] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[30] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[31] gain=4.0817e-19 V/bit S_min=nan dof=14
+dac6 high, ground referenced
+Applied calibration for subdev 1, channel 6, range 0, aref 0
+Failed to apply calibration for subdev 8, channel 6, range 0, aref 0
+reading 0.155276, target 0.155284
+caldac[0] gain=7.34706e-19 V/bit S_min=nan dof=14
+caldac[1] gain=2.94522e-08 V/bit S_min=nan dof=14
+caldac[2] gain=-1.40248e-09 V/bit S_min=nan dof=14
+caldac[3] gain=-2.80497e-09 V/bit S_min=nan dof=14
+caldac[4] gain=-1.12199e-08 V/bit S_min=nan dof=14
+caldac[5] gain=7.34706e-19 V/bit S_min=nan dof=14
+caldac[6] gain=-1.26224e-08 V/bit S_min=nan dof=14
+caldac[7] gain=-2.66472e-08 V/bit S_min=nan dof=14
+caldac[8] gain=1.68298e-08 V/bit S_min=nan dof=14
+caldac[9] gain=-1.68298e-08 V/bit S_min=nan dof=14
+caldac[10] gain=-7.01242e-09 V/bit S_min=nan dof=14
+caldac[11] gain=2.24397e-08 V/bit S_min=nan dof=14
+caldac[12] gain=1.26224e-08 V/bit S_min=nan dof=14
+caldac[13] gain=-1.82323e-08 V/bit S_min=nan dof=14
+caldac[14] gain=-1.54273e-08 V/bit S_min=nan dof=14
+caldac[15] gain=1.40248e-08 V/bit S_min=nan dof=14
+caldac[16] gain=7.01242e-09 V/bit S_min=nan dof=14
+caldac[17] gain=7.59024e-06 V/bit S_min=nan dof=14
+caldac[18] gain=-9.81739e-09 V/bit S_min=nan dof=14
+caldac[19] gain=-1.82323e-08 V/bit S_min=nan dof=14
+caldac[20] gain=-2.80497e-09 V/bit S_min=nan dof=14
+caldac[21] gain=9.81739e-09 V/bit S_min=nan dof=14
+caldac[22] gain=1.40248e-08 V/bit S_min=nan dof=14
+caldac[23] gain=1.26224e-08 V/bit S_min=nan dof=14
+caldac[24] gain=-3.50621e-08 V/bit S_min=nan dof=14
+caldac[25] gain=3.333e-05 V/bit S_min=nan dof=14
+caldac[26] gain=-4.48795e-08 V/bit S_min=nan dof=14
+caldac[27] gain=8.96187e-06 V/bit S_min=nan dof=14
+caldac[28] gain=-9.81739e-09 V/bit S_min=nan dof=14
+caldac[29] gain=4.48795e-08 V/bit S_min=nan dof=14
+caldac[30] gain=9.81739e-09 V/bit S_min=nan dof=14
+caldac[31] gain=8.4149e-09 V/bit S_min=nan dof=14
+dac7 ground, ground referenced
+Applied calibration for subdev 1, channel 7, range 0, aref 0
+Failed to apply calibration for subdev 8, channel 7, range 0, aref 0
+reading 0.499901, target 0.499895
+caldac[0] gain=4.76844e-08 V/bit S_min=nan dof=14
+caldac[1] gain=-9.81739e-09 V/bit S_min=nan dof=14
+caldac[2] gain=4.20745e-08 V/bit S_min=nan dof=14
+caldac[3] gain=-1.68298e-08 V/bit S_min=nan dof=14
+caldac[4] gain=-9.81739e-09 V/bit S_min=nan dof=14
+caldac[5] gain=1.40248e-08 V/bit S_min=nan dof=14
+caldac[6] gain=-2.52447e-08 V/bit S_min=nan dof=14
+caldac[7] gain=-1.68298e-08 V/bit S_min=nan dof=14
+caldac[8] gain=1.82323e-08 V/bit S_min=nan dof=14
+caldac[9] gain=-3.08546e-08 V/bit S_min=nan dof=14
+caldac[10] gain=-5.60993e-09 V/bit S_min=nan dof=14
+caldac[11] gain=-2.52447e-08 V/bit S_min=nan dof=14
+caldac[12] gain=3.78671e-08 V/bit S_min=nan dof=14
+caldac[13] gain=-1.54273e-08 V/bit S_min=nan dof=14
+caldac[14] gain=2.80497e-08 V/bit S_min=nan dof=14
+caldac[15] gain=1.12199e-08 V/bit S_min=nan dof=14
+caldac[16] gain=4.95497e-06 V/bit S_min=nan dof=14
+caldac[17] gain=2.66472e-08 V/bit S_min=nan dof=14
+caldac[18] gain=3.08546e-08 V/bit S_min=nan dof=14
+caldac[19] gain=3.33791e-05 V/bit S_min=nan dof=14
+caldac[20] gain=3.22571e-08 V/bit S_min=nan dof=14
+caldac[21] gain=1.12199e-08 V/bit S_min=nan dof=14
+caldac[22] gain=2.66472e-08 V/bit S_min=nan dof=14
+caldac[23] gain=1.12199e-08 V/bit S_min=nan dof=14
+caldac[24] gain=1.68298e-08 V/bit S_min=nan dof=14
+caldac[25] gain=-1.40248e-08 V/bit S_min=nan dof=14
+caldac[26] gain=-1.26224e-08 V/bit S_min=nan dof=14
+caldac[27] gain=-2.66472e-08 V/bit S_min=nan dof=14
+caldac[28] gain=-2.80497e-08 V/bit S_min=nan dof=14
+caldac[29] gain=-2.80497e-09 V/bit S_min=nan dof=14
+caldac[30] gain=-3.64646e-08 V/bit S_min=nan dof=14
+caldac[31] gain=2.24397e-08 V/bit S_min=nan dof=14
+dac7 mid, ground referenced
+Applied calibration for subdev 1, channel 7, range 0, aref 0
+Failed to apply calibration for subdev 8, channel 7, range 0, aref 0
+reading 0.327596, target 0.327589
+caldac[0] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[1] gain=-1.26224e-08 V/bit S_min=nan dof=14
+caldac[2] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[3] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[4] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[5] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[6] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[7] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[8] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[9] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[10] gain=-1.26224e-08 V/bit S_min=nan dof=14
+caldac[11] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[12] gain=7.01242e-09 V/bit S_min=nan dof=14
+caldac[13] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[14] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[15] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[16] gain=6.95632e-06 V/bit S_min=nan dof=14
+caldac[17] gain=9.81739e-09 V/bit S_min=nan dof=14
+caldac[18] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[19] gain=3.33258e-05 V/bit S_min=nan dof=14
+caldac[20] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[21] gain=4.49496e-06 V/bit S_min=nan dof=14
+caldac[22] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[23] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[24] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[25] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[26] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[27] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[28] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[29] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[30] gain=4.0817e-19 V/bit S_min=nan dof=14
+caldac[31] gain=4.0817e-19 V/bit S_min=nan dof=14
+dac7 high, ground referenced
+Applied calibration for subdev 1, channel 7, range 0, aref 0
+Failed to apply calibration for subdev 8, channel 7, range 0, aref 0
+reading 0.155291, target 0.155284
+caldac[0] gain=2.66472e-08 V/bit S_min=nan dof=14
+caldac[1] gain=1.68298e-08 V/bit S_min=nan dof=14
+caldac[2] gain=-3.08546e-08 V/bit S_min=nan dof=14
+caldac[3] gain=-1.82323e-08 V/bit S_min=nan dof=14
+caldac[4] gain=-3.78671e-08 V/bit S_min=nan dof=14
+caldac[5] gain=-1.40248e-08 V/bit S_min=nan dof=14
+caldac[6] gain=-8.4149e-09 V/bit S_min=nan dof=14
+caldac[7] gain=-1.54273e-08 V/bit S_min=nan dof=14
+caldac[8] gain=1.40248e-08 V/bit S_min=nan dof=14
+caldac[9] gain=-5.60993e-09 V/bit S_min=nan dof=14
+caldac[10] gain=3.08546e-08 V/bit S_min=nan dof=14
+caldac[11] gain=1.96348e-08 V/bit S_min=nan dof=14
+caldac[12] gain=4.48795e-08 V/bit S_min=nan dof=14
+caldac[13] gain=7.34706e-19 V/bit S_min=nan dof=14
+caldac[14] gain=-5.60993e-09 V/bit S_min=nan dof=14
+caldac[15] gain=-1.96348e-08 V/bit S_min=nan dof=14
+caldac[16] gain=7.58183e-06 V/bit S_min=nan dof=14
+caldac[17] gain=6.17093e-08 V/bit S_min=nan dof=14
+caldac[18] gain=7.01242e-09 V/bit S_min=nan dof=14
+caldac[19] gain=3.33455e-05 V/bit S_min=nan dof=14
+caldac[20] gain=-2.80497e-09 V/bit S_min=nan dof=14
+caldac[21] gain=8.96468e-06 V/bit S_min=nan dof=14
+caldac[22] gain=-2.80497e-09 V/bit S_min=nan dof=14
+caldac[23] gain=2.80497e-09 V/bit S_min=nan dof=14
+caldac[24] gain=1.68298e-08 V/bit S_min=nan dof=14
+caldac[25] gain=-2.10373e-08 V/bit S_min=nan dof=14
+caldac[26] gain=-4.0672e-08 V/bit S_min=nan dof=14
+caldac[27] gain=-6.87217e-08 V/bit S_min=nan dof=14
+caldac[28] gain=-3.36596e-08 V/bit S_min=nan dof=14
+caldac[29] gain=-4.20745e-09 V/bit S_min=nan dof=14
+caldac[30] gain=-1.12199e-08 V/bit S_min=nan dof=14
+caldac[31] gain=2.94522e-08 V/bit S_min=nan dof=14
+Applied calibration for subdevice 1, channel 0, range 0, aref 0

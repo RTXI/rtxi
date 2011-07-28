@@ -1,0 +1,20 @@
+Warning: device not fully calibrated due to insufficient information
+Please send this output to <ds@schleef.org>
+Id: comedi_calibrate.c,v 1.21 2001/10/10 22:07:53 ds Exp 
+Driver name: ni_pcimio
+Device name: pci-mio-16xe-50
+Comedi version: 0.7.61
+postgain: ai, bipolar zero offset, low gain; ai, bipolar zero offset, high gain
+caldac[2] gain=1.7354(14)e-5 V/bit S_min=1816.77 dof=254
+caldac[2] gain=1.6481(19)e-7 V/bit S_min=262.174 dof=254
+caldac[2] set to 4665.65
+caldac set out of range (4666>255)
+linear: ai, bipolar zero offset, high gain
+caldac[8] gain=1.79213(12)e-7 V/bit S_min=362597 dof=254
+caldac set out of range (6443>4095)
+caldac[8] set to 6442.78
+linear: ai, bipolar voltage reference, low gain
+caldac[0] gain=-4.3377(14)e-5 V/bit S_min=166907 dof=254
+caldac set out of range (-1133<0)
+caldac[0] set to -1132.76
+

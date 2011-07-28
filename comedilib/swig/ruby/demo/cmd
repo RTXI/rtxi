@@ -1,0 +1,94 @@
+#!/usr/bin/env ruby
+
+require 'comedi'
+require 'getoptlong'
+require 'common'
+
+include Comedi
+
+cmdtest_messages = [ "success", "invalid source", "source conflict",
+		    "invalid argument", "argument conflict",
+		    "invalid chanlist" ]
+
+class SWIG::TYPE_p_comedi_t_struct
+
+    def prepare_cmd_lib(subdevice, freq, cmd)
+	begin
+	    cmd = get_cmd_generic_timed(subdevice, cmd,
+		1000000000.0 / freq)
+	rescue ComediError
+	    printf("comedi_get_cmd_generic_timed failed\n")
+	    return cmd
+	end
+
+	cmd.chanlist = $chanlist
+	cmd.chanlist_len = $n_chan
+
+	cmd.scan_end_arg = $n_chan
+	cmd.stop_arg = $n_scan if cmd.stop_src == TRIG_COUNT
+
+	return cmd
+    end
+
+end
+
+parse_options
+
+begin
+    dev = Comedi::open($filename)
+rescue
+    comedi_perror($filename)
+    exit 1
+end
+
+$chanlist = Chanlist.new($n_chan)
+0.upto($n_chan - 1) do |i|
+    $chanlist[i] = cr_pack($channel + i, $range, $aref)
+end
+
+cmd = dev.prepare_cmd_lib($subdevice, $freq, Comedi_cmd_struct.new)
+
+$stderr.printf("command before testing:\n")
+dump_cmd($stderr, cmd)
+
+begin
+    ret, cmd = dev.command_test(cmd)
+rescue
+    comedi_perror("comedi_command_test")
+    exit 1
+end
+$stderr.printf("first test returned %d (%s)\n", ret, cmdtest_messages[ret])
+dump_cmd($stderr, cmd)
+
+begin
+    ret, cmd = dev.command_test(cmd)
+rescue
+    comedi_perror("comedi_command_test")
+    exit 1
+end
+$stderr.printf("second test returned %d (%s)\n", ret, cmdtest_messages[ret])
+dump_cmd($stderr, cmd)
+
+tstart = Time.new
+$stderr.printf("start time: %d.%06d\n", tstart.tv_sec, tstart.tv_usec)
+
+begin
+    ret = dev.command(cmd)
+rescue
+    comedi_perror("comedi_command")
+    exit 1
+end
+
+while line = dev.ios.read(2 * $n_chan)
+    data = line.unpack('S*')
+    data.each do |d|
+	printf("%d ", d)
+    end
+    puts
+end
+
+tend = Time.new
+$stderr.printf("end time: %d.%06d\n", tend.tv_sec, tend.tv_usec)
+
+tdiff = tend - tstart
+$stderr.printf("time: %.6f\n", tdiff)

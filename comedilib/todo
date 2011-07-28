@@ -1,0 +1,7 @@
+demo/*.c doesn't always get headers right.
+
+Makefile dependencies on header files (at least comedi.h comedilib.h
+and libinternal.h) are broken - FMH
+
+fix lib/timed.c  (What's wrong with it?)
+

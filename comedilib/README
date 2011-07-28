@@ -1,0 +1,57 @@
+
+    COMEDILIB
+    The Linux Control and Measurement Device Interface Library
+    David Schleef <ds@schleef.org>
+
+
+* About Comedi:
+
+Comedi is a collection of drivers for data acquisition hardware.
+These drivers work with Linux, and also with Linux combined with
+the real-time extensions RTAI and RTLinux.  The Comedi core, which
+ties all the driver together, allows applications to be written
+that are completely hardware independent.
+
+Comedi supports a variety of data acquisition hardware; an
+incomplete list can be found in the Comedi source.
+
+This distribution contains only the user-space library.  You will
+almost certainly also want to download the Comedi kernel modules
+found in the "comedi" tarball.  Also, the calibration programs
+comedi_calibrate and comedi_soft_calibrate can be found in the
+"comedi_calibrate" tarball.  A few boards also need firmware
+found in the "comedi-nonfree-firmware" tarball.
+
+* Installation:
+
+Installation instructions are found in INSTALL.
+
+* Mailing List:
+
+Comedi has a mailing list.  Send "subscribe comedi" to
+comedi-request@comedi.org to subscribe.  Traffic is light, and mainly
+questions/answers about comedi installation, bugs, and programming.
+General questions about data acquisition are also welcome.
+Alternatively, you can subscribe and unsubscribe at
+http://www.comedi.org/cgi-bin/mailman/listinfo/comedi.
+You can always unsubscribe by sendinging "unsubscribe" (spell
+it correctly!) to comedi-request@comedi.org.
+
+* More Information:
+
+Comedi also has a web page, at http://www.comedi.org/comedi.  New versions
+of comedi can be found on the ftp site ftp://ftp.comedi.org/pub/comedi.
+
+Often bugfixes and new features that are not in the current release
+can be found in the CVS repository.  Instructions for anonymous CVS
+access to the Comedi and Comedilib repositories are found at
+http://www.comedi.org/download.php
+
+Comedilib may be freely distibuted and modified in accordance with
+the GNU Lesser General Public License.  Portions of the Comedilib
+distribution fall under different licenses; see the individual files
+for details.
+
+The person behind all this misspelled humor is David Schleef
+<ds@schleef.org>.
+

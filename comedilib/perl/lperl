@@ -1,0 +1,3 @@
+#!/bin/sh
+
+PERL_DL_NONLAZY=1 /usr/bin/perl -I./blib/arch -I./blib/lib -I/usr/lib/perl5/i386-linux/5.00404 -I/usr/lib/perl5 "$@"

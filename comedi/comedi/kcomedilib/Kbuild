@@ -1,0 +1,3 @@
+
+obj-m += kcomedilib.o
+kcomedilib-y := kcomedilib_main.o data.o dio.o get.o ksyms.o

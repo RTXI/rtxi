@@ -1,0 +1,598 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
+	"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd" [
+<!ENTITY % comedilib_entities SYSTEM "comedilib.ent">
+%comedilib_entities;
+]>
+
+<section id="introduction">
+	<title>Overview</title>
+	<para>
+		&comedi; is a <emphasis>free software</emphasis> project that develops
+		drivers, tools, and libraries for various forms of
+		<emphasis>data acquisition</emphasis>: reading and writing of analog
+		signals; reading and writing of digital inputs/outputs; pulse and
+		frequency counting; pulse generation; reading encoders; etc.
+		The source code is distributed in two main packages, comedi and
+		comedilib:
+		<itemizedlist>
+			<listitem>
+				<para>
+					<emphasis role="strong">Comedi</emphasis> is a collection of drivers for a variety
+					of common data acquisition plug-in boards (which are called
+					<quote>devices</quote> in &comedi; terminology). The drivers are
+					implemented as the combination of (i) one single core Linux kernel module
+					(called <quote><literal>comedi</literal></quote>) providing common
+					functionality, and (ii) individual low-level driver modules for
+					each device.
+				</para>
+			</listitem>
+			<listitem>
+				<para>
+					<emphasis role="strong">Comedilib</emphasis> is a separately distributed package
+					containing a user-space library that provides a
+					developer-friendly interface to the &comedi; devices. Included in the
+					<emphasis>Comedilib</emphasis> package are documentation,
+					configuration and calibration utilities, and demonstration programs.
+				</para>
+			</listitem>
+			<listitem>
+				<para>
+					<emphasis role="strong">Kcomedilib</emphasis> is a Linux kernel module
+					(distributed with the <literal>comedi</literal> package) that provides
+					the same interface as <emphasis>comedilib</emphasis> in kernel space,
+					and suitable for use by <emphasis>real-time</emphasis> kernel modules. It is
+					effectively a <quote>kernel library</quote> for using &comedi; from
+					real-time tasks.
+				</para>
+			</listitem>
+		</itemizedlist>
+		&comedi; works with standard Linux kernels, but also with its
+		real-time extensions <ulink url="http://www.rtai.org">RTAI</ulink> and
+		<ulink url="http://www.rtlinux-gpl.org/">RTLinux/GPL</ulink>.
+	</para>
+	<para>
+		This section gives a high-level introduction to which functionality
+		you can expect from the software. More technical details and
+		programming examples are given in the following sections of this
+		document.
+	</para>
+
+	<section id="whatisdevicedriver">
+		<title>
+			What is a <quote>device driver</quote>?
+		</title>
+		<para>
+			A device driver is a piece of software that interfaces a particular
+			piece of hardware: a printer, a sound card, a motor drive, etc. It
+			translates the primitive, device-dependent commands with which the
+			hardware manufacturer allows you to configure, read and write the
+			electronics of the hardware interface into more abstract and generic
+			function calls and data structures for the application programmer.
+		</para>
+
+		<para>
+			David Schleef started the &comedi; project to put a generic interface
+			on top of
+			lots of different cards for measurement and control purposes. This
+			type of cards are often called <emphasis>data acquisition</emphasis>
+			(or <emphasis role="strong">DAQ</emphasis>) cards.
+		</para>
+		<para>
+			<emphasis>Analog input and output</emphasis> cards were the first goal
+			of the project, but now &comedi; also provides a device
+			independent interface to digital <emphasis>input and output</emphasis>
+			cards, and <emphasis>counter and timer</emphasis> cards (including
+			encoders, pulse generators, frequency and pulse timers, etc.).
+		</para>
+		<para>
+			Schleef designed a structure which is a balance between
+			<emphasis>modularity</emphasis> and <emphasis>complexity</emphasis>:
+			it's fairly easy to integrate a new card because most of the
+			infrastructure part of other, similar drivers can be reused, and
+			learning the generic and hence somewhat <quote>heavier</quote> &comedi;
+			API doesn't scare away new contributors from integrating their drivers
+			into the &comedi; framework.
+		</para>
+	</section>
+
+
+	<section id="policymechanism">
+		<title>
+			Policy vs. mechanism
+		</title>
+		<para>
+			Device drivers are often written by application programmers, that have
+			only their particular application in mind; especially in real-time
+			applications. For example, one writes a
+			driver for the parallel port, because one wants to use it to generate
+			pulses that drive a stepper motor. This approach often leads to device
+			drivers that depend too much on that particular application, and are
+			not general enough to be re-used for other applications. One golden
+			rule for the device driver writer is to separate mechanism and policy:
+			<itemizedlist>
+
+				<listitem>
+					<para>
+						<emphasis role="strong">Mechanism.</emphasis>
+						The mechanism part of the device interface is a faithful
+						representation of the bare functionality of the device, independent of
+						what part of the functionality an application will use.
+					</para>
+				</listitem>
+
+				<listitem>
+					<para>
+						<emphasis role="strong">Policy.</emphasis>
+						Once a device driver offers a software interface to the mechanism of
+						the device, an application writer can use this mechanism interface to
+						use the device in one particular fashion. That is, some of the data
+						stuctures offered by the mechanism are interpreted in specific
+						physical units, or some of them are taken together because this
+						composition is relevant for the application. For example, a analog
+						output card can be used to generate voltages that are the inputs for
+						the electronic drivers of the motors of a robot; these voltages can be
+						interpreted as setpoints for the desired velocity of these motors, and
+						six of them are taken together to steer one particular robot with
+						six-degrees of freedom. Some of the other outputs of the same physical
+						device can be used by another application program, for example to
+						generate a sine wave that drives a vibration shaker.
+					</para>
+				</listitem>
+
+			</itemizedlist>
+			So, &comedi; focuses only on the <emphasis>mechanism</emphasis> part
+			of DAQ interfacing. The project does not provide the policy parts,
+			such as Graphical User Interfaces to program and display acquisitions,
+			signal processing libraries, or control algorithms.
+		</para>
+
+	</section>
+
+
+	<section id="generaldaqpackage">
+		<title>
+			A general DAQ device driver package
+		</title>
+		<para>
+			From the point of view of application developers, there are many
+			reasons to welcome the standardization of the API and the
+			architectural structure of DAQ software:
+			<itemizedlist>
+
+				<listitem>
+					<para>
+						<emphasis role="strong">API</emphasis>: devices that offer similar functionalities, should have the same
+						software interface, and their differences should be coped with by
+						parameterizing the interfaces, not by changing the interface for
+						each new device in the family. However, the DAQ manufacturers
+						have never been able (or willing) to come up with such a
+						standardization effort themselves.
+					</para>
+				</listitem>
+
+				<listitem>
+					<para>
+						<emphasis role="strong">Architectural structure</emphasis>:
+						many electronic interfaces have more than one layer of
+						functionality between the hardware and the operating system, and
+						the device driver code should reflect this fact. For example, many
+						different interface cards use the same PCI driver chips, or use the
+						parallel port as an intermediate means to connect to the hardware
+						device. Hence, <quote>lower-level</quote> device drivers for
+						these PCI chips and parallel ports allow for an increased modularity
+						and re-useability of the software. Finding the generic
+						similarities and structure among different cards helps in developing
+						device drivers faster and with better documentation.
+					</para>
+				</listitem>
+
+			</itemizedlist>
+		</para>
+		<para>
+			In the case of Linux as the host operating system, device driver
+			writers must keep the following issues in mind:
+			<itemizedlist>
+			<listitem>
+				<para>
+					<emphasis role="strong">Kernel space vs. User space.</emphasis>
+					The Linux operating system has two levels that require
+					different programming approaches. Only privileged processes
+					can run in the kernel, where they have access to all hardware and to
+					all kernel data structures. Normal application
+					programs can run their processes only in user space, where these
+					processes are shielded from each other, and from direct access to
+					hardware and to critical data of the operating system; these user
+					space programs execute much of the operating system's functionality
+					through <emphasis>system calls</emphasis>.
+				</para>
+				<para>
+					Device drivers typically must access specific addresses on the bus,
+					and hence must (at least partially) run in kernel space. Normal users
+					program against the API of the <emphasis>Comedilib</emphasis>
+					user-space library.  <emphasis>Comedilib</emphasis> then handles
+					the necessary communication with the <emphasis>Comedi</emphasis> modules
+					running in kernel-space.
+				</para>
+			</listitem>
+
+			<listitem>
+				<para>
+					<emphasis role="strong">Device files or device file system.</emphasis>
+					Users who write an application for a particular device,
+					must link their application to that device's device driver. Part of
+					this device driver, however, runs in kernel space, and the user
+					application in user space. So, the operating system provides an
+					interface between both. In Linux or Unix, these interfaces are in the
+					form of <quote>files</quote>
+					in the <filename class="directory">/dev</filename> directory.
+					Each device supported in the kernel may be
+					representated as such a user space device file, and its functionality can
+					may be accessed by classical Unix file I/O:
+					<function>open</function>,
+					<function>close</function>, <function>read</function>,
+					<function>write</function>, <function>ioctl</function>, and <function>mmap</function>.
+				</para>
+			</listitem>
+
+			<listitem>
+				<para>
+					<emphasis role="strong"><filename class="directory">/proc</filename> interface.</emphasis>
+					Linux (and some other UNIX operating systems) offer a file-like
+					interface to attached devices (and other OS-related information) via
+					the <filename class="directory">/proc</filename> directories. These
+					<quote>files</quote> do not really exist, but it gives a familiar
+					interface to users, with which they can inspect the current status of
+					each device.
+				</para>
+			</listitem>
+
+			<listitem>
+				<para>
+					<emphasis role="strong">Direct Memory Access (DMA) vs. Programmed
+					Input/Output (PIO).</emphasis>
+					Almost all devices can be interfaced in PIO mode: the processor is
+					responsible for directly accessing the bus addresses allocated to
+					the device whenever it needs
+					to read or write data. Some devices also allow DMA: the device and the
+					memory <quote>talk</quote> to each other directly, without needing the processor.
+					DMA is a feature of the bus, not of the operating system (which, of
+					course, has
+					to support its processes to use the feature).
+				</para>
+			</listitem>
+
+			<listitem>
+				<para>
+					<emphasis role="strong">Real-time vs. non real-time.</emphasis>
+					If the device is to be used in a
+					<ulink
+					url="http://www.rtlinux-gpl.org/">RTLinux/GPL
+					</ulink>
+					or <ulink url="http://www.rtai.org">RTAI</ulink> application,
+					there are a few extra requirements, because not all system calls are
+					available in the kernel of the real-time operating systems
+					<ulink
+					url="http://www.rtlinux-gpl.org/">RTLinux/GPL
+					</ulink>
+					or <ulink url="http://www.rtai.org">RTAI</ulink>.
+					The APIs of RTAI and RTLinux/Free differ in
+					different ways, so the &comedi; developers have spent a lot of efforts
+					to make generic wrappers to the required RTOS primitives: timers,
+					memory allocation, registration of interrupt handlers, etc.
+				</para>
+			</listitem>
+
+			</itemizedlist>
+		</para>
+	</section>
+
+	<section id="comediosignals">
+		<title>
+			DAQ signals
+		</title>
+		<para>
+			The cards supported in &comedi; have one or more of the following
+			<emphasis role="strong">signals</emphasis>: analog input, analog
+			output, digital input, digital output, counters input, counter output,
+			pulse input, pulse output:
+			<itemizedlist>
+
+				<listitem>
+					<para>
+						<emphasis role="strong">Digital</emphasis> signals are conceptually quite simple, and don't need
+						much configuration: the number of channels, their addresses on the
+						bus, and their input or output direction.
+					</para>
+				</listitem>
+
+				<listitem>
+					<para>
+						<emphasis role="strong">Analog</emphasis> signals are a bit more complicated. Typically, an analog
+						acquisition channel can be programmed to generate or read a voltage between a
+						lower and an upper threshold (e.g., <literal>-10V</literal> and
+						<literal>+10V</literal>).  The card's electronics may also allow
+						automatically sampling of a set of channels in a prescribed order.
+					</para>
+				</listitem>
+
+				<listitem>
+					<para>
+						<emphasis role="strong">Pulse</emphasis>-based signals (counters,
+						timers, encoders, etc.) are conceptually
+						only a bit more complex than digital inputs and outputs, in that
+						they only add some <emphasis>timing specifications</emphasis> to the
+						signal. &comedi; has still only a limited number of drivers for this
+						kind of signals, although most of the necessary API and support
+						functionality is available.
+					</para>
+				</listitem>
+
+			</itemizedlist>
+			In addition to these <quote>real</quote> DAQ functions, &comedi; also
+			offers basic timer access.
+		</para>
+	</section>
+
+	<section id="comedidevices">
+		<title>
+			Device hierarchy
+		</title>
+		<para>
+			&comedi; organizes all hardware according to the following
+			hierarchy:
+			<itemizedlist>
+
+				<listitem>
+					<para>
+						<emphasis role="strong">Channel</emphasis>: the lowest-level hardware
+						component, that represents the properties of one single data channel;
+						for example, an analog input, or a digital output.
+					</para>
+				</listitem>
+
+				<listitem>
+					<para>
+						<emphasis role="strong">Subdevice</emphasis>: a set of functionally
+						identical channels. For example, a set of 16 identical analog
+						inputs.
+					</para>
+				</listitem>
+
+				<listitem>
+					<para>
+						<emphasis role="strong">Device</emphasis>: a set of subdevices that
+						are physically implemented on the
+						same interface card; in other words, the interface card itself.
+						For example, the <literal>National Instruments 6024E</literal>
+						device has a subdevice with 16 analog input channels, another
+						subdevice with two analog output channels, and a
+						third subdevice with eight digital inputs/outputs.
+					</para>
+				</listitem>
+
+			</itemizedlist>
+			Some interface cards have extra components that don't fit in the
+			above-mentioned classification, such as an EEPROM to store
+			configuration and board parameters, or calibration inputs. These
+			special components are also classified as <quote>sub-devices</quote> in
+			&comedi;.
+		</para>
+
+	</section>
+
+	<section id="acquisitionterminology">
+		<title>
+			Acquisition terminology
+		</title>
+
+		<para>
+			This Section introduces the terminology that this document uses when
+			talking about Comedi <quote>commands</quote>, which are streaming asyncronous
+			acquisitions. <xref linkend="fig-acq-seq"/>
+			depicts a typical acquisition sequence when running a command:
+			<itemizedlist>
+
+				<listitem>
+					<para>
+						The sequence has a <emphasis role="strong">start</emphasis> and an
+						<emphasis role="strong">end</emphasis>. At both sides, the software
+						and the hardware need some finite
+						<emphasis role="strong">initialization or settling time</emphasis>.
+					</para>
+				</listitem>
+
+				<listitem>
+					<para>
+						<anchor id="scan"/>
+						The sequence consists of a number of identically repeated
+						<emphasis role="strong">scans</emphasis>. This is where the actual
+						data acquisitions are taking place: data is read from the card, or
+						written to it. Each scan also has a
+						<emphasis role="strong">begin</emphasis>, an
+						<emphasis role="strong">end</emphasis>, and a finite
+						<emphasis role="strong">setup time</emphasis>. Possibly, there is also
+						a settling time
+						(<quote><emphasis role="strong">scan delay</emphasis></quote>) at the
+						end of a scan.
+					</para>
+					<para>
+						So, the hardware puts a
+						lower boundary (the <emphasis role="strong">scan interval</emphasis>)
+						on the minimum time needed to complete a full scan.
+					</para>
+				</listitem>
+
+				<listitem>
+					<para>
+						Each scan contains one or more
+						<anchor id="conversion"/>
+						<emphasis role="strong">conversions</emphasis> on particular channels,
+						i.e., the AD/DA converter is activated on each of the programmed
+						channels, and produces a sample, again in a finite
+						<emphasis role="strong">conversion time</emphasis>, starting from the
+						moment in time called the
+						<emphasis role="strong">sample time</emphasis>
+						in <xref linkend="fig-acq-seq"/>
+						(sometimes also called the <quote>timestamp</quote>),
+						and caused by a
+						triggering event, called <emphasis role="strong">convert</emphasis>.
+					</para>
+					<para>
+						In addition, some hardware has limits on the minimum
+						<emphasis role="strong">conversion interval</emphasis> it can achieve,
+						i.e., the minimum time it needs between
+						<emphasis>subsequent</emphasis> conversions.
+						For example, some A/D hardware must <emphasis>multiplex</emphasis>
+						the conversions from different input channels onto
+						one single A/D converter.  Thus the conversions are done serially
+						in time (as shown on the <link linkend="fig-acq-seq">Figure</link>).
+						Other cards have the hardware to do two or more acquisitions in
+						parallel, and can perform all the conversions in a scan simultaneously.
+						The begin of each conversion is <quote>triggered</quote> by
+						some internally or externally generated pulse, e.g., a timer.
+					</para>
+				</listitem>
+
+			</itemizedlist>
+			In general, not only the start of a <emphasis>conversion</emphasis> is
+			triggered, but also the start of a <emphasis>scan</emphasis> and of a
+			<emphasis>sequence</emphasis>. &comedi; provides the API to configure
+			what <link linkend="comedicmdsources">triggering source</link>
+			one wants to use in each case. The API also
+			allows you to specify the <emphasis role="strong">channel list</emphasis>,
+			i.e., the sequence of channels that needs to be acquired during each
+			scan.
+		</para>
+
+		<para>
+			<figure id="fig-acq-seq" float="0" pgwide="1">
+				<title>
+					Asynchronous Acquisition Sequence
+				</title>
+				<mediaobject>
+				<imageobject>
+				<imagedata fileref="acq-seq.gif" format="GIF"/>
+				</imageobject>
+				<caption>
+					<para>
+						Figure courtesy of Kurt M&uuml;ller.
+					</para>
+				</caption>
+			</mediaobject>
+			</figure>
+		</para>
+
+	</section>
+
+
+	<section id="comedifunctions">
+		<title>
+			DAQ functions
+		</title>
+
+		<para>
+			The basic data acquisition functionalities that &comedi; offers work
+			on channels, or sets of channels:
+			<itemizedlist>
+
+				<listitem>
+					<para>
+						<emphasis role="strong">Single acquisition</emphasis>: &comedi; has
+						function calls to synchronously perform
+						<emphasis>one single</emphasis> data acquisition on a specified
+						channel: <function>comedi_data_read</function>,
+						<function>comedi_data_read_delayed</function>,
+						<function>comedi_data_write</function>,
+						<function>comedi_dio_read</function>,
+						<function>comedi_dio_write</function>.  In addition,
+						the lower-level <function>comedi_do_insn</function>
+						function can
+						be used to perform an acquisition.
+					</para>
+					<para>
+						<quote>Synchronous</quote> means that the calling process
+						blocks until the data acquisition has finished.
+					</para>
+				</listitem>
+
+				<listitem>
+					<para>
+						<emphasis role="strong">Mutiple synchronous acquisition</emphasis>:
+						The <function>comedi_data_read_n</function> function
+						performs (possibly multiple) data acquisitions on a specified channel,
+						in a <emphasis role="strong">synchronous</emphasis> way. So, the
+						function call blocks until the whole acquisition has finished.
+						The precise timing between the acquisitions is not hardware controlled.
+					</para>
+					<para>
+						In addition, <function>comedi_do_insnlist()</function> executes a
+						<emphasis>list</emphasis> of instructions in
+						one single (blocking, synchronous) call, such that the overhead
+						involved in configuring each individual acquisition is reduced.
+					</para>
+				</listitem>
+
+				<listitem>
+					<para>
+						<emphasis role="strong">Command</emphasis>: a command is
+						<emphasis>sequence</emphasis> of
+						<emphasis>scans</emphasis>, for which conditions have been specified
+						that determine when the acquisition will start and stop, and
+						when each conversion in each scan should occur.  A
+						<function>comedi_command</function> function call sets up the
+						<emphasis role="strong">aynchronous</emphasis> data acquisition:
+						as soon as the command information has been filled in, the
+						<function>comedi_command</function> function call returns.
+						The hardware of the card takes care of the sequencing and timing of
+						the data acquisition as it proceeds.
+					</para>
+				</listitem>
+
+			</itemizedlist>
+		</para>
+
+	</section>
+
+	<section id="comedisupporting">
+		<title>
+			Supporting functionality
+		</title>
+
+		<para>
+			The command functionality cannot be offered by DAQ cards that
+			lack the hardware to autonomously sequence a series of
+			scans.
+			For these cards, the command functionality may be provided in
+			software. And because of the quite strict real-time requirements for a
+			command acquisition, a real-time operating system should be used to
+			translate the command specification into a correctly timed sequence of
+			instructions. &comedi; provides the <function>comedi_rt_timer</function> kernel
+			module to support such a
+			<emphasis role="strong">virtual command execution</emphasis> under
+			<acronym>RTAI</acronym> or <acronym>RTLinux/Free</acronym>.
+		</para>
+
+		<para>
+			&comedi; not only offers the API
+			<emphasis role="strong">to access</emphasis> the functionality of the
+			cards, but also <emphasis role="strong">to query</emphasis> the
+			capabilities of the installed devices. That is, a user process can
+			find out what channels are available, and
+			what their physical parameters are (range, direction of input/output,
+			etc.).
+		</para>
+
+		<para>
+			<emphasis role="strong">Buffering</emphasis> is another important
+			aspect of device drivers: the acquired data has to be stored in such
+			buffers, because, in general, the application program cannot guarantee
+			to always be ready to provide or accept data as soon as the interface
+			board wants to do a read or write operation. &comedi; provides internal
+			buffers for data being streamed to/from devices via Comedi commands.
+			The buffer sizes are user-adjustable.
+		</para>
+
+	</section>
+</section>
+

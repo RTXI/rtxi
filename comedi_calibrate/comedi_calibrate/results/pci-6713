@@ -1,0 +1,16 @@
+Warning: device not fully calibrated due to insufficient information
+Please send this output to <ds@schleef.org>
+$Id: pci-6713,v 1.1.1.1 2006-02-05 20:53:22 fmhess Exp $
+Driver name: ni_pcimio
+Device name: pci-6713
+Comedi version: 0.7.61
+ai, bipolar zero offset, low gain
+insn barfed: subdev=0, chan=0, range=255, aref=3, n=128, ret=-1, Invalid argument
+barf
+offset 0.0( 0)e-2147483648, target 0
+insn barfed: subdev=0, chan=0, range=255, aref=3, n=128, ret=-1, Invalid argument
+barf
+insn barfed: subdev=0, chan=0, range=255, aref=3, n=128, ret=-1, Invalid argument
+barf
+insn barfed: subdev=0, chan=0, range=255, aref=3, n=128, ret=-1, Invalid argument
+barf

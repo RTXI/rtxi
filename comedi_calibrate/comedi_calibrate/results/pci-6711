@@ -1,0 +1,152 @@
+eeprom reference lsb=37 msb=0
+resulting reference voltage: 5.00004
+Id: comedi_calibrate.c,v 1.91 2004/02/15 22:24:57 fmhess Exp 
+Driver name: ni_pcimio
+Device name: pci-6711
+Id: ni.c,v 1.107 2004/03/07 22:21:10 fmhess Exp 
+Comedi version: 0.7.68
+linearity binary: dac0 ground, ground referenced,
+dac0 mid, ground referenced,
+dac0 high, ground referenced
+caldac[4] set to 143
+relative binary: dac0 high, ground referenced, dac0 ground, ground referenced
+caldac[8] set to 87
+binary: dac0 ground, ground referenced
+caldac[7] set to 125
+linearity binary: dac1 ground, ground referenced,
+dac1 mid, ground referenced,
+dac1 high, ground referenced
+caldac[10] set to 152
+relative binary: dac1 high, ground referenced, dac1 ground, ground referenced
+caldac[2] set to 88
+binary: dac1 ground, ground referenced
+caldac[6] set to 127
+linearity binary: dac2 ground, ground referenced,
+dac2 mid, ground referenced,
+dac2 high, ground referenced
+caldac[1] set to 142
+relative binary: dac2 high, ground referenced, dac2 ground, ground referenced
+caldac[11] set to 97
+binary: dac2 ground, ground referenced
+caldac[9] set to 127
+linearity binary: dac3 ground, ground referenced,
+dac3 mid, ground referenced,
+dac3 high, ground referenced
+caldac[0] set to 125
+relative binary: dac3 high, ground referenced, dac3 ground, ground referenced
+caldac[5] set to 101
+binary: dac3 ground, ground referenced
+caldac[3] set to 129
+writing calibration to blah
+dac0 ground, ground referenced
+applied calibration for subdev 1, channel 0, range 0, aref 0
+failed to apply calibration for subdev 8, channel 0, range 0, aref 0
+reading 0.4998627(54), target 0.499884
+caldac[4] gain=5.476(14)e-6 V/bit S_min=15.4614 dof=14
+caldac[7] gain=3.67149(46)e-5 V/bit S_min=125.788 dof=14
+dac0 mid, ground referenced
+applied calibration for subdev 1, channel 0, range 0, aref 0
+failed to apply calibration for subdev 8, channel 0, range 0, aref 0
+reading 0.3093690(54), target 0.309394
+caldac[4] gain= V/bit S_min=inf dof=14
+caldac[7] gain=3.6699(18)e-5 V/bit S_min=6.50588 dof=14
+caldac[8] gain=4.956(18)e-6 V/bit S_min=4.37647 dof=14
+dac0 high, ground referenced
+applied calibration for subdev 1, channel 0, range 0, aref 0
+failed to apply calibration for subdev 8, channel 0, range 0, aref 0
+reading 0.118883( 0), target 0.118905
+caldac[0] gain= V/bit S_min=inf dof=14
+caldac[1] gain= V/bit S_min=inf dof=14
+caldac[2] gain= V/bit S_min=inf dof=14
+caldac[3] gain= V/bit S_min=inf dof=14
+caldac[4] gain=8.393(23)e-6 V/bit S_min=3.11906 dof=14
+caldac[5] gain= V/bit S_min=inf dof=14
+caldac[6] gain= V/bit S_min=inf dof=14
+caldac[7] gain=3.66897(46)e-5 V/bit S_min=202.212 dof=14
+caldac[8] gain=9.909(23)e-6 V/bit S_min=4.62494 dof=14
+caldac[9] gain= V/bit S_min=inf dof=14
+caldac[10] gain= V/bit S_min=inf dof=14
+caldac[11] gain= V/bit S_min=inf dof=14
+caldac[12] gain= V/bit S_min=inf dof=14
+caldac[13] gain= V/bit S_min=inf dof=14
+caldac[15] gain= V/bit S_min=inf dof=14
+dac1 ground, ground referenced
+applied calibration for subdev 1, channel 1, range 0, aref 0
+failed to apply calibration for subdev 8, channel 1, range 0, aref 0
+reading 0.499840( 0), target 0.499884
+caldac[6] gain=3.6719(23)e-5 V/bit S_min=3.75153 dof=14
+caldac[10] gain=5.522(18)e-6 V/bit S_min=5.71176 dof=14
+dac1 mid, ground referenced
+applied calibration for subdev 1, channel 1, range 0, aref 0
+failed to apply calibration for subdev 8, channel 1, range 0, aref 0
+reading 0.309361( 0), target 0.309394
+caldac[0] gain= V/bit S_min=inf dof=14
+caldac[2] gain=4.951(18)e-6 V/bit S_min=4.58824 dof=14
+caldac[4] gain= V/bit S_min=inf dof=14
+caldac[6] gain=3.6709(18)e-5 V/bit S_min=7.78824 dof=14
+caldac[7] gain= V/bit S_min=inf dof=14
+caldac[8] gain= V/bit S_min=inf dof=14
+caldac[10] gain=7.696(14)e-6 V/bit S_min=11.7386 dof=14
+caldac[11] gain= V/bit S_min=inf dof=14
+caldac[12] gain= V/bit S_min=inf dof=14
+caldac[14] gain= V/bit S_min=inf dof=14
+caldac[15] gain= V/bit S_min=inf dof=14
+dac1 high, ground referenced
+applied calibration for subdev 1, channel 1, range 0, aref 0
+failed to apply calibration for subdev 8, channel 1, range 0, aref 0
+reading 0.1188602(54), target 0.118905
+caldac[2] gain=9.920(14)e-6 V/bit S_min=15.7542 dof=14
+caldac[6] gain=3.67107(46)e-5 V/bit S_min=284.094 dof=14
+caldac[10] gain=8.437(27)e-6 V/bit S_min=1.72288 dof=14
+caldac[11] gain= V/bit S_min=inf dof=14
+dac2 ground, ground referenced
+applied calibration for subdev 1, channel 2, range 0, aref 0
+failed to apply calibration for subdev 8, channel 2, range 0, aref 0
+reading 0.499886( 0), target 0.499884
+caldac[1] gain=5.531(14)e-6 V/bit S_min=18.2641 dof=14
+caldac[9] gain=3.68411(46)e-5 V/bit S_min=140.847 dof=14
+dac2 mid, ground referenced
+applied calibration for subdev 1, channel 2, range 0, aref 0
+failed to apply calibration for subdev 8, channel 2, range 0, aref 0
+reading 0.3093996(54), target 0.309394
+caldac[1] gain=7.702(23)e-6 V/bit S_min=4.01506 dof=14
+caldac[9] gain=3.6817(14)e-5 V/bit S_min=13.8719 dof=14
+caldac[11] gain=4.932(14)e-6 V/bit S_min=17.8458 dof=14
+dac2 high, ground referenced
+applied calibration for subdev 1, channel 2, range 0, aref 0
+failed to apply calibration for subdev 8, channel 2, range 0, aref 0
+reading 0.1189059(54), target 0.118905
+caldac[1] gain=8.4282(46)e-6 V/bit S_min=144.8 dof=14
+caldac[9] gain=3.68271(46)e-5 V/bit S_min=154.024 dof=14
+caldac[11] gain=9.8700(46)e-6 V/bit S_min=145.176 dof=14
+dac3 ground, ground referenced
+applied calibration for subdev 1, channel 3, range 0, aref 0
+failed to apply calibration for subdev 8, channel 3, range 0, aref 0
+reading 0.499886( 0), target 0.499884
+caldac[0] gain=5.4543(91)e-6 V/bit S_min=35.6235 dof=14
+caldac[3] gain=3.68678(46)e-5 V/bit S_min=190.353 dof=14
+dac3 mid, ground referenced
+applied calibration for subdev 1, channel 3, range 0, aref 0
+failed to apply calibration for subdev 8, channel 3, range 0, aref 0
+reading 0.309407( 0), target 0.309394
+caldac[0] gain=7.6239(91)e-6 V/bit S_min=13.6235 dof=14
+caldac[3] gain=3.6861(18)e-5 V/bit S_min=11.5941 dof=14
+caldac[4] gain= V/bit S_min=inf dof=14
+caldac[5] gain=4.984(18)e-6 V/bit S_min=4.49412 dof=14
+caldac[6] gain= V/bit S_min=inf dof=14
+caldac[7] gain= V/bit S_min=inf dof=14
+caldac[9] gain= V/bit S_min=inf dof=14
+caldac[10] gain= V/bit S_min=inf dof=14
+caldac[11] gain= V/bit S_min=inf dof=14
+caldac[12] gain= V/bit S_min=inf dof=14
+caldac[13] gain= V/bit S_min=inf dof=14
+caldac[14] gain= V/bit S_min=inf dof=14
+caldac[15] gain= V/bit S_min=inf dof=14
+dac3 high, ground referenced
+applied calibration for subdev 1, channel 3, range 0, aref 0
+failed to apply calibration for subdev 8, channel 3, range 0, aref 0
+reading 0.118914( 0), target 0.118905
+caldac[0] gain=8.343(18)e-6 V/bit S_min=7.49412 dof=14
+caldac[3] gain=3.68937(91)e-5 V/bit S_min=40.4471 dof=14
+caldac[5] gain=9.924(18)e-6 V/bit S_min=7.90588 dof=14
+Applied calibration for subdevice 1, channel 0, range 0, aref 0

@@ -1,0 +1,112 @@
+WARNING: unknown eeprom address for reference voltage
+correction.  This might be fixable if you send us an eeprom dump
+(see the demo/eeprom_dump program).
+Warning: device may not be not fully calibrated due to insufficient
+information.
+Please file a bug report at http://bugs.comedi.org/ and attach this output.
+This output will also allow comedi_calibrate to execute more
+quickly in the future.
+Id: comedi_calibrate.c,v 1.87 2003/07/01 21:01:31 fmhess Exp
+Driver name: ni_pcimio
+Device name: pci-6036e
+Id: ni.c,v 1.85 2003/07/01 21:14:15 fmhess Exp
+Comedi version: 0.7.66
+ai, bipolar zero offset, low gain
+reading -0.0155833(77), target 0
+caldac[0] gain=-1.187(11)e-5 V/bit S_min=2.14599 dof=14
+caldac[2] gain=-1.49(11)e-6 V/bit S_min=14.6051 dof=14
+caldac[4] gain=-6.1284(11)e-4 V/bit S_min=130.523 dof=14
+ai, bipolar zero offset, high gain
+reading -2.5866(28)e-4, target 0
+caldac[0] gain=-1.18032(38)e-5 V/bit S_min=14.2385 dof=14
+caldac[2] gain=-1.75(37)e-8 V/bit S_min=8.4881 dof=14
+caldac[4] gain=-3.0701(37)e-6 V/bit S_min=5.53302 dof=14
+caldac[8] gain=-1.969(37)e-7 V/bit S_min=4.66928 dof=14
+ai, bipolar voltage reference, low gain
+reading 4.9782207(81), target 5
+caldac[0] gain=-1.091(11)e-5 V/bit S_min=66.7788 dof=14
+caldac[2] gain=3.5380(11)e-4 V/bit S_min=249.534 dof=14
+caldac[4] gain=-6.1285(11)e-4 V/bit S_min=166.483 dof=14
+ao 0, zero offset, low gain
+reading -0.0158572(76), target 0.00015259
+caldac[0] gain=-1.202(11)e-5 V/bit S_min=51.2631 dof=14
+caldac[2] gain=-1.35(11)e-6 V/bit S_min=24.7176 dof=14
+caldac[4] gain=-6.1317(11)e-4 V/bit S_min=99.9489 dof=14
+caldac[6] gain=-4.258(11)e-5 V/bit S_min=55.6732 dof=14
+caldac[10] gain=6.028(11)e-5 V/bit S_min=68.288 dof=14
+ao 0, reference voltage, low gain
+reading 4.9794382(78), target 4.99992
+caldac[0] gain=-1.203(11)e-5 V/bit S_min=53.5029 dof=14
+caldac[2] gain=3.5370(11)e-4 V/bit S_min=260.301 dof=14
+caldac[4] gain=-6.1302(11)e-4 V/bit S_min=145.567 dof=14
+caldac[6] gain=-4.384(11)e-5 V/bit S_min=1.15896 dof=14
+caldac[7] gain=-1.9531(11)e-4 V/bit S_min=29.9515 dof=14
+caldac[10] gain=7.146(11)e-5 V/bit S_min=100.067 dof=14
+caldac[11] gain=-7.67(11)e-6 V/bit S_min=0.861428 dof=14
+ao 0, linearity (negative), low gain
+reading -5.0114395(80), target -4.99992
+caldac[0] gain=-1.192(11)e-5 V/bit S_min=47.6917 dof=14
+caldac[2] gain=-3.5650(11)e-4 V/bit S_min=481.591 dof=14
+caldac[4] gain=-6.1301(11)e-4 V/bit S_min=128.665 dof=14
+caldac[6] gain=-4.170(11)e-5 V/bit S_min=30.3458 dof=14
+caldac[7] gain=1.9508(11)e-4 V/bit S_min=51.6126 dof=14
+caldac[10] gain=5.078(11)e-5 V/bit S_min=58.5712 dof=14
+caldac[11] gain=7.75(11)e-6 V/bit S_min=70.2642 dof=14
+ao 1, zero offset, low gain
+reading -0.0157752(80), target 0.00015259
+caldac[0] gain=-1.186(11)e-5 V/bit S_min=1.71163 dof=14
+caldac[1] gain=5.984(11)e-5 V/bit S_min=43.908 dof=14
+caldac[2] gain=-1.45(11)e-6 V/bit S_min=68.9319 dof=14
+caldac[4] gain=-6.1309(11)e-4 V/bit S_min=160.922 dof=14
+caldac[9] gain=-4.180(11)e-5 V/bit S_min=76.7112 dof=14
+ao 1, reference voltage, low gain
+reading 4.9792591(77), target 4.99992
+caldac[0] gain=-1.208(11)e-5 V/bit S_min=64.0151 dof=14
+caldac[1] gain=7.113(11)e-5 V/bit S_min=4.15399 dof=14
+caldac[2] gain=3.5379(11)e-4 V/bit S_min=182.481 dof=14
+caldac[3] gain=-1.9491(11)e-4 V/bit S_min=51.3479 dof=14
+caldac[4] gain=-6.1315(11)e-4 V/bit S_min=127.362 dof=14
+caldac[5] gain=-7.66(11)e-6 V/bit S_min=23.1643 dof=14
+caldac[9] gain=-4.290(11)e-5 V/bit S_min=83.248 dof=14
+ao 1, linearity (negative), low gain
+reading -5.0111164(77), target -4.99992
+caldac[0] gain=-1.200(11)e-5 V/bit S_min=74.5937 dof=14
+caldac[1] gain=5.024(11)e-5 V/bit S_min=2.12624 dof=14
+caldac[2] gain=-3.5640(11)e-4 V/bit S_min=566.307 dof=14
+caldac[3] gain=1.9454(11)e-4 V/bit S_min=34.8615 dof=14
+caldac[4] gain=-6.1290(11)e-4 V/bit S_min=118.395 dof=14
+caldac[5] gain=7.87(11)e-6 V/bit S_min=35.68 dof=14
+caldac[9] gain=-4.084(11)e-5 V/bit S_min=51.3942 dof=14
+WARNING: you need comedi driver version 0.7.67 or later
+for this calibration to work properly
+relative binary: ai, bipolar zero offset, low gain, ai, bipolar voltage
+reference, low gain
+caldac[2] set to 144
+relative binary: ai, bipolar zero offset, low gain, ai, bipolar zero
+offset, high gain
+caldac[4] set to 101
+binary: ai, bipolar zero offset, high gain
+caldac[0] set to 111
+binary: ai, bipolar zero offset, high gain
+caldac[8] set to 176
+linearity binary: ao 0, linearity (negative), low gain,
+ao 0, zero offset, low gain,
+ao 0, reference voltage, low gain
+caldac[10] set to 131
+binary: ao 0, zero offset, low gain
+caldac[6] set to 133
+binary: ao 0, reference voltage, low gain
+caldac[7] set to 135
+binary: ao 0, reference voltage, low gain
+caldac[11] set to 137
+linearity binary: ao 1, linearity (negative), low gain,
+ao 1, zero offset, low gain,
+ao 1, reference voltage, low gain
+caldac[1] set to 47
+binary: ao 1, zero offset, low gain
+caldac[9] set to 15
+binary: ao 1, reference voltage, low gain
+caldac[3] set to 130
+binary: ao 1, reference voltage, low gain
+caldac[5] set to 127
+

@@ -1,0 +1,81 @@
+I:
+I: subdevice 0
+I: testing info...
+rev 1
+I: subdevice type: 1 (analog input)
+  number of channels: 16
+  max data value: 4095
+  ranges:
+    all chans: [0,1]
+I: testing mode0_read...
+rev 1
+comedi_trig_ioctl: 1
+I: testing insn_read...
+rev 1
+comedi_do_insn: 1
+I: testing insn_read_time...
+rev 1
+comedi_do_insn: 3
+read time: 365 us
+I: testing cmd_probe_src_mask...
+rev 1
+command source mask:
+  start: now
+  scan_begin: timer
+  convert: now
+  scan_end: count
+  stop: none|count
+I: testing cmd_probe_fast_1chan...
+command fast 1chan:
+can't do timed?!?
+  not supported
+I: testing cmd_read_fast_1chan...
+can't do timed?!?
+  not supported
+I: testing cmd_fifo_depth_check...
+can't do timed?!?
+  not supported
+64, 0
+can't do timed?!?
+  not supported
+128, 0
+can't do timed?!?
+  not supported
+256, 0
+can't do timed?!?
+  not supported
+512, 0
+can't do timed?!?
+  not supported
+1024, 0
+can't do timed?!?
+  not supported
+2048, 0
+can't do timed?!?
+  not supported
+4096, 0
+can't do timed?!?
+  not supported
+8192, 0
+can't do timed?!?
+  not supported
+16384, 0
+can't do timed?!?
+  not supported
+32768, 0
+I: testing mmap...
+can't do timed?!?
+  not supported
+I: testing read_select...
+can't do timed?!?
+  not supported
+I: testing bufconfig...
+joe
+buffer size 65536
+max buffer size 65536
+setting buffer size to 4096
+buffer size set to 4096
+buffer size now at 4096
+setting buffer size past limit, 69632
+setting buffer size to max, 65536
+buffer size now at 65536

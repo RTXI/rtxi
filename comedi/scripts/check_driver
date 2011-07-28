@@ -1,0 +1,436 @@
+#!/bin/bash
+#
+# This script shows some of the deficiencies in drivers.  Some
+# of the things that are tested here are only suggestions, and
+# don't necessarily apply to every driver.
+#
+
+check_all=no
+
+if [ "$1" ];then
+	driver=$1
+else
+	echo 'check_driver <filename>'
+	exit 1
+fi
+
+echo "I: ${driver}:"
+
+basedriver=$(basename ${driver} .c)
+
+# special cases
+case ${driver} in
+	ni_pcimio.c)
+		driver="${driver} ni_mio_common.c mite.c"
+		;;
+	ni_atmio.c)
+		driver="${driver} ni_mio_common.c mite.c"
+		;;
+	ni_mio_cs.c)
+		driver="${driver} ni_mio_common.c mite.c"
+		;;
+esac
+
+
+
+# check to see if it is a driver
+if grep '^\(static \)*comedi_driver' ${driver} &>/dev/null;then
+	echo "appears to be a driver"
+else
+	echo "not a driver file"
+	exit 1
+fi
+
+if ! grep '[[:space:]]\+module:[[:space:]]*THIS_MODULE' ${driver} &>/dev/null;then
+	echo "E: doesn't set driver->module to THIS_MODULE"
+fi
+
+# check Makefile.am for the driver
+if ! grep "${basedriver}\.ko" Makefile.am &>/dev/null; then
+	echo "E: ${basedriver}.ko missing from module_PROGRAMS in Makefile.am"
+fi
+if ! grep "${basedriver}_ko_SOURCES" Makefile.am &>/dev/null; then
+	echo "E: ${basedriver}_ko_SOURCES line missing from Makefile.am"
+fi
+
+# check Kbuild for the driver
+if ! grep "obj-.*+=.*${basedriver}\.o" Kbuild &>/dev/null; then
+	echo "E: driver missing from Kbuild"
+fi
+
+# check to see if it uses name recognition
+if grep 'board_name:' ${driver} &>/dev/null;then
+	echo uses recognize to determine type
+	probe=recognize
+else
+	if grep 'dev..board_ptr' ${driver} &>/dev/null;then
+		echo auto-probes type of board
+		probe=auto
+	else
+		echo only supports one type of board
+		probe=one
+	fi
+fi
+
+# auto checks
+if [ "$probe" = auto ];then
+	if grep 'dev..board_ptr[[:space:]]*=' ${driver} &>/dev/null;then
+		echo 'sets dev->board_ptr'
+	else
+		echo "E: doesn't set dev->board_ptr"
+	fi
+fi
+
+# recognize checks
+if [ "$probe" = recognize ];then
+	if ! grep '[[:space:]]\+offset:[[:space:]]*sizeof' ${driver} &>/dev/null;then
+		echo "E: doesn't set driver->offset"
+	fi
+	if ! grep '[[:space:]]\+num_names:[[:space:]]' ${driver} &>/dev/null;then
+		echo "E: doesn't set driver->num_names"
+	fi
+fi
+
+# I would prefer that drivers have a consistent number of subdevices
+# independent of the particular board type.  If a subdevice is not
+# relevant for a board type, the type should be set to COMEDI_SUBD_UNUSED.
+# However, for drivers that handle N identical subdevices, it's better
+# to have a variable number of subdevices.
+tmp=$(cat ${driver}|grep -c 'dev..n_subdevices[[:space:]]*=' 2>/dev/null)
+if [ "$tmp" = 0 ];then
+	echo "doesn't set n_subdevices (good)"
+else
+	echo "W: sets n_subdevices multiple ($tmp) times"
+fi
+if grep 'dev..n_subdevices[[:space:]]*=[[:space:]]*[^[:digit:][:space:]]' ${driver} &>/dev/null;then
+	echo "W: sets n_subdevices by variable"
+fi
+
+# Check to see if board_name is set
+if grep 'dev..board_name[[:space:]]*=' ${driver} &>/dev/null;then
+	echo "board_name is set"
+else
+	echo "E: board_name not set"
+fi
+
+# Do we use trig?  trig[0] has been eliminated
+if [ "$check_all" = yes ]; then
+if grep 'trig\[0\]' ${driver} &>/dev/null;then
+	echo "E: uses trig[0]"
+else
+	echo "doesn't use trig[0]"
+fi
+fi
+
+# trig[1234] has been eliminated
+if [ "$check_all" = yes ]; then
+if grep 'trig\[[1234]\]' ${driver} &>/dev/null;then
+	echo "E: uses trig[1234]"
+	trig1234=yes
+else
+	echo "doesn't use trig[1234]"
+	trig1234=no
+fi
+fi
+
+if grep 'comedi_cmd' ${driver} &>/dev/null;then 
+	echo "uses cmd"
+	cmd=yes
+else
+	if [ "$trig1234" == yes ];then
+		echo "E: doesn't use cmd"
+	else
+		echo "doesn't use cmd"
+	fi
+	cmd=no
+fi
+
+if grep 'comedi_insn' ${driver} &>/dev/null;then 
+	echo "uses insn"
+	insn=yes
+else
+	if grep 'subdev_8255_init' ${driver} &>/dev/null;then
+		echo uses subdev_8255_init
+	else
+		echo "E: doesn't use insn"
+	fi
+	insn=no
+fi
+
+# rt_printk() only needs to be used in possible real-time code paths,
+# which is basically everything except *_attach() and *_detach().
+# However, since it works correctly in non-real-time code, just use
+# it everywhere.
+if [ "$check_all" = yes ]; then
+if grep 'printk' ${driver} &>/dev/null;then
+	if ! grep 'rt_printk' ${driver} &>/dev/null;then
+		echo "W: doesn't use rt_printk"
+	fi
+fi
+fi
+
+# comedi_request_irq() handles real-time interrupts.
+if grep request_irq ${driver} &>/dev/null;then
+	irq=yes
+	if ! grep 'comedi_request_irq' ${driver} &>/dev/null;then
+		echo "E: doesn't use comedi_request_irq"
+	fi
+	if ! grep 'comedi_free_irq' ${driver} &>/dev/null;then
+		echo "E: doesn't use comedi_free_irq"
+	fi
+else
+	irq=no
+fi
+if grep SA_INTERRUPT ${driver} &>/dev/null;then
+	echo "E: uses SA_INTERRUPT"
+fi
+
+if grep 'request_region' ${driver} &>/dev/null;then
+	if ! grep 'release_region' ${driver} &>/dev/null;then
+		echo "E: release_region() not called"
+	fi
+fi
+
+if grep 'pci_dev' ${driver} &>/dev/null;then
+	pci=yes
+	echo uses pci
+	if ! grep 'pci_get_\(device\|subsys\)' ${driver} &>/dev/null; then
+		echo "W: doesn't use pci_get_device or pci_get_subsys"
+		if grep 'pci_find_device' ${driver} &>/dev/null; then
+			echo "W: recommend using pci_get_device instead of pci_find_device"
+		fi
+		if grep 'pci_find_subsys' ${driver} &>/dev/null; then
+			echo "W: recommend using pci_get_subsys instead of pci_find_subsys"
+		fi
+	else
+		if ! grep 'pci_dev_put' ${driver} &>/dev/null; then
+			echo "E: doesn't use pci_dev_put"
+		fi
+	fi
+	if ! grep 'pci_enable_device' ${driver} &>/dev/null;then
+		echo "W: doesn't use pci_enable_device"
+	else
+		if ! grep 'pci_disable_device' ${driver} &>/dev/null; then
+			echo "W: doesn't use pci_disable_device"
+			echo "W: recommend calling pci_disable_device after pci_release_regions"
+			echo "   if pci_enable_device and pci_request_regions succeeded"
+		fi
+	fi
+	if ! grep 'pci_request_regions' ${driver} &>/dev/null; then
+		echo "W: doesn't use pci_request_regions"
+	else
+		if ! grep 'pci_release_regions' ${driver} &>/dev/null; then
+			echo "E: doesn't use pci_release_regions"
+		fi
+	fi
+	if ! grep 'MODULE_DEVICE_TABLE' ${driver} &>/dev/null;then
+		echo "W: doesn't use MODULE_DEVICE_TABLE"
+	fi
+	if grep 'pcibios_' ${driver} &>/dev/null;then
+		echo "W: has pcibios_*() calls"
+	fi
+else
+	pci=no
+fi
+
+# Who doesn't use comments like this to indicate something needs
+# to be fixed?
+if [ "$check_all" = yes ]; then
+if grep '\(XXX\)\|\(FIX\)' ${driver} &>/dev/null;then
+	echo "W: has FIXME-like comments"
+fi
+fi
+
+# COMEDI_INITCLEANUP isn't strictly necessary, but it's a one-stop
+# cleanup to get Comedi to compile as part of the kernel.  It is
+# recommended to use it unless something else is necessary in module
+# init.
+if [ "$check_all" = yes ]; then
+if grep 'int init_module' ${driver} &>/dev/null;then
+	echo "W: suggest using COMEDI_INITCLEANUP"
+fi
+fi
+
+# range_unknown _should_ be used if the driver can't determine
+# the I/O range.  However, it's commonly used as a marker where
+# the author has not added more accurate range information.
+if [ "$check_all" = yes ]; then
+if grep 'range_unknown' ${driver} &>/dev/null;then
+	echo "W: uses range_unknown"
+fi
+fi
+
+# cur_trig was removed around 0.7.56
+if grep 'cur_trig' ${driver} &>/dev/null;then
+	echo "E: uses cur_trig"
+fi
+
+if grep -E 'cmd..?data' ${driver} &>/dev/null;then
+	echo "E: uses cmd->data or cmd->data_len"
+fi
+
+# buf_int_ptr is (void *), whereas the minimum sample size is
+# 2 bytes.  Should be buf_int_ptr += sizeof(sampl_t)
+if grep 'buf_int_ptr++' ${driver} &>/dev/null;then
+	echo "E: uses buf_int_ptr++"
+fi
+
+# same
+if grep 'buf_int_count++' ${driver} &>/dev/null;then
+	echo "E: uses buf_int_count++"
+fi
+
+# remnants of trig[0]
+if grep 'di_unpack' ${driver} &>/dev/null;then
+	echo "E: di_unpack() is gone"
+fi
+
+# remnants of trig[0]
+if grep 'do_pack' ${driver} &>/dev/null;then
+	echo "E: do_pack() is gone"
+fi
+
+# This is a bug that causes difficulty to unload a driver.  Easy
+# to fix.
+if grep 'request_region.*dev *-> *iobase' ${driver} &>/dev/null;then
+	echo "W: recommend assigning dev->iobase after successful request_region()"
+fi
+
+# ds got it wrong in the first driver, and it was subsequently
+# copied to others.  Use ||.
+# Doesn't check everything.  Use check_cmdtest.
+if grep 'if.*cmd.*&&.*err..;' ${driver} &>/dev/null;then
+	echo "E: Probable logic error in cmdtest"
+fi
+
+# Change in 0.7.59.  Drivers need to call subdev_8255_cleanup()
+# so the 8255 code knows when to free it's private structures.
+if grep 'subdev_8255_init' ${driver} &>/dev/null;then
+	if ! grep 'subdev_8255_cleanup' ${driver} &>/dev/null;then
+		echo "E: doesn't call subdev_8255_cleanup()"
+	fi
+fi
+
+# Policy change in 0.7.60.  Drivers should use comedi_event(),
+# which has a slightly different behavior.  Checks for use
+# of comedi_done(), comedi_error_done(), comedi_bufcheck(),
+# comedi_eos(), comedi_eobuf()
+if grep 'comedi_\(\(done\)\|\(error_done\)\|\(bufcheck\)\|\(eos\)\|\(eobuf\)\)[[:space:]]*(' \
+	${driver} &>/dev/null;then
+	echo "W: should be using comedi_event()"
+fi
+
+# Drivers should have documentation in Documentation/comedi/drivers.txt
+if false; then
+if grep "^Driver: ${basedriver}.o$" ../../Documentation/comedi/drivers.txt \
+    &>/dev/null;then
+	echo "entry in drivers.txt"
+else
+	echo "E: not documented in drivers.txt"
+fi
+fi
+
+# Drivers should have documentation in the source
+if grep "^Driver: ${basedriver}.o$" $driver &>/dev/null;then
+	echo "documentation in source"
+	if grep "^Devices:" $driver &>/dev/null;then
+		echo "has devices documentation"
+	else
+		echo "E: documentation: no Devices:"
+	fi
+	if grep "^Author:" $driver &>/dev/null;then
+		echo "has author documentation"
+	else
+		echo "E: documentation: no Author:"
+	fi
+	if grep "^Status:" $driver &>/dev/null;then
+		echo "has status documentation"
+	else
+		echo "E: documentation: no Status:"
+	fi
+	if grep "^Updated:" $driver &>/dev/null;then
+		echo "has updated documentation"
+	else
+		echo "W: documentation: no Updated:"
+	fi
+	if grep "^Description:" $driver &>/dev/null;then
+		echo "has description documentation"
+	else
+		echo "E: documentation: no Description:"
+	fi
+else
+	echo "E: not documented in source"
+fi
+
+# Check if the driver contains ^M
+if grep '' ${driver} &>/dev/null;then
+	echo "E: driver has ^M characters"
+fi
+
+if [ -f "${basedriver}.o" ];then
+	# .o checks
+	n_syms=$(nm ${basedriver}.o |grep -c ' [TDC] ')
+	echo "number of global symbols: $n_syms"
+	n_xsyms=$(nm ${basedriver}.o |grep -c ' __ksymtab')
+	echo "number of exported symbols: $n_xsyms"
+	if [ $(($n_syms-$n_xsyms)) -gt $(($(grep -c 'MODULE_DEVICE_TABLE' ${basedriver}.c)+2)) ];then
+		echo "W: driver leaks symbols"
+	fi
+fi
+
+# Check if the driver contains SDF_RT, which isn't used by the core
+if grep '' ${driver} &>/dev/null;then
+	echo "E: driver uses SDF_RT"
+fi
+
+if [ $irq = yes ];then
+if [ $pci = yes ];then
+	if ! grep SA_SHIRQ ${driver} &>/dev/null;then
+		echo "E: PCI drivers need to use SA_SHIRQ"
+	fi
+else
+	if grep SA_SHIRQ ${driver} &>/dev/null;then
+		echo "E: non PCI device using SA_SHIRQ"
+	fi
+fi
+fi
+
+if [ $pci = yes ];then
+	if ! grep pci_device_id ${driver} &>/dev/null;then
+		echo "E: PCI drivers should have pci_device_id tables"
+	fi
+fi
+
+if grep 'insn->data' ${driver} &>/dev/null;then
+	echo "E: driver uses insn->data, which is a userspace pointer"
+fi
+
+if grep 'out[wlb] *([^(,]*iobase' ${driver} &>/dev/null; then
+	echo "E: misordered outX(dev->iobase + offset,XXX)"
+fi
+
+if grep 'write[wlb] *([^(,]*iobase' ${driver} &>/dev/null; then
+	echo "E: writeX(dev->iobase + offset,XXX)"
+fi
+
+if grep 'COMEDI_SUBD_AI' ${driver} &>/dev/null;then
+	if ! grep 'SDF_\(GROUND\|COMMON\|DIFF\|OTHER\)' ${driver} &>/dev/null;then
+		echo "E: Driver doesn't set SDF flags for aref's it supports"
+	fi
+fi
+
+if grep -e 'include..linux.version.h' \
+        -e 'include..linux.config.h' \
+        -e 'include..linux.kdev_t.h' \
+        -e 'include..linux.slab.h' \
+        -e 'include..linux.errno.h' \
+        -e 'include..linux.spinlock.h' \
+        -e 'include..linux.wait.h' \
+        -e 'include..linux.mm.h' \
+        -e 'include..linux.init.h' \
+        -e 'include..linux.vmalloc.h' \
+        -e 'include..asm.uaccess.h' \
+	${driver} &>/dev/null;then
+	echo "W: Driver #includes headers included by comedidev.h"
+fi
+

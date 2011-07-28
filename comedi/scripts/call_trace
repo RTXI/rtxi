@@ -1,0 +1,75 @@
+#!/usr/bin/perl
+# vi: set ts=4:
+
+
+$ARGV=shift @ARGV;
+@output=`objdump -dr $ARGV`;
+
+$obj=$ARGV;
+
+$state=0;
+while($_=shift @output){
+	chomp;
+	if(m/^\w+\.o:\s+file format.*/){
+		$obj = $_;
+		$obj =~ s/^(\w+\.o):\s+file format.*/\1/
+	}
+	if(m/^0[0-9a-fA-F]+\s<\w+>:$/){
+		$func = $_;
+		$func =~ s/^0[0-9a-fA-F]+\s<(\w+)>:$/\1/;
+
+		$addr = $_;
+		$addr =~ s/^(0[0-9a-fA-F]+)\s<\w+>:$/\1/;
+
+		if(@cfuncs){
+			@cfuncs = sort @cfuncs;
+			@last="";
+			foreach $f (@cfuncs) {
+				if($f ne $last){
+					if($f ne "::_GLOBAL_OFFSET_TABLE_"){
+						print "	$f\n";
+					}
+				}
+				$last=$f;
+			}
+		}
+		@cfuncs=();
+		print "${obj}::$func:\n";
+
+		$state=0;
+	}
+	if(m/\scall\s/){
+		if(m/\scall\s.*<.*>/){
+			$cfunc = $_;
+			$cfunc =~ s/.*\scall\s.*<(.*)>$/\1/;
+	
+			if($cfunc =~ m/$func\+0x/){
+				# wait for a reloc
+				$state=1;
+			}else{
+				push @cfuncs, "${obj}::$cfunc";
+				$state=0;
+			}
+		}else{
+			if($state==2){
+				push @cfuncs, "#$cfunc";
+			}else{
+				push @cfuncs, "#";
+			}
+			$state=0;
+		}
+	}
+	if(m/^\s+[0-9a-fA-F]+:\s\w+\s+\w+$/){
+		$cfunc = $_;
+		$cfunc =~ s/.*\s(\w+)$/\1/;
+		if($state==0){
+			# it just showed up.  We might attach it to the next line.
+			$state=2;
+		}elsif($state==1){
+			# we're waiting for a reloc
+			push @cfuncs, "::$cfunc";
+			$state=0;
+		}
+	}
+}
+

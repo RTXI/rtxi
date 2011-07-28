@@ -1,0 +1,7 @@
+Revision history for Perl extension Comedi.
+
+0.01  Tue Nov  9 01:17:02 1999
+	- original version; created by h2xs 1.18
+
+0.02  Tue Nov 16 11:49:11 EST 1999
+	- (Comedi::Lib only) track changes to comedilib 0.7.6 (jes)

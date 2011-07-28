@@ -1,0 +1,388 @@
+#!/usr/bin/perl
+# vi: set ts=4:
+
+sub grab_function;
+sub grab_def;
+sub check_cmdtest_func;
+sub echo_cmdtest_in;
+
+@ARGV = ('-') unless @ARGV;
+
+$ARGV=shift @ARGV;
+if(!open(FILE,$ARGV)){
+	warn "Can't open $ARGV: $!\n";
+	exit 1;
+}
+
+#$func="parport_intr_cmdtest";
+
+while(<FILE>) {
+	if( m/s->do_cmdtest.*=/ ){
+		$func = $_;
+		$func =~ s/^.*do_cmdtest\s*=[\s\&]*(\w*);.*\n/\1/;
+		#chomp;
+		push @funcs, $func;
+	}
+}
+
+if(!@funcs){
+	print "no cmdtest function\n";
+	exit 0;
+}
+
+foreach $func (@funcs) {
+	print "function: $func\n";
+	check_cmdtest_func($func);
+}
+
+sub grab_function
+{
+	my $funcname = @_[0];
+	my $line="";
+	my $state=0;
+	my $ok=0;
+	seek FILE,0,SEEK_SET;
+	while(<FILE>) {
+		if( $state==0 && m/$funcname/ ){
+			$state=1;
+			$line="";
+		}
+		if( $state==1 && m/;/ ){ $state=0; }
+		if( $state==1 && m/\{/ ){
+			#print COUT "static int cmd_test(comedi_device *dev,comedi_subdevice *s,comedi_cmd *cmd)\n";
+			print COUT "$line\n";
+			$state=2;
+		}
+		if( $state==1){ $line="$line $_"; }
+		if( $state==2 ){
+			print COUT;
+			if( m/^}/ ){ $state=0; }
+			$ok=1;
+		}
+	}
+	if(!$ok){
+		print "E: couldn't grab function $funcname\n";
+	}
+	print COUT "\n";
+}
+
+sub grab_def
+{
+	my $def = @_[0];
+	my $ok=0;
+	seek FILE,0,SEEK_SET;
+	while(<FILE>) {
+		if( m/#define\s*$def/ ){
+			print COUT;
+			$ok=1;
+		}
+	}
+	if(!$ok){
+		print "E: couldn't grab definition $def\n";
+	}
+	print COUT "\n";
+}
+
+sub check_cmdtest_func
+{
+	my $func = @_[0];
+	my $output;
+
+	open(COUT,"> cmdtest.c") || die("can't open cmdtest.c: $!");
+
+#	open(CIN,"< cmdtest.in.c") || die("can't open cmdtest.in.c: $!");
+#	while(<CIN>){print COUT;}
+#	close CIN;
+	echo_cmdtest_in();
+
+	print COUT "#define $func cmd_test\n";
+
+	# Dependencies.  It's easy to do it manually
+	$func eq "dt2814_ai_cmdtest" && grab_def("DT2814_MAX_SPEED");
+	$func eq "pci9118_ai_cmdtest" && grab_def("PCI9118_BIPOLAR_RANGES");
+	$func eq "cb_pcidas_ai_cmdtest" && grab_def("TIMER_BASE");
+	$func eq "das16m1_cmd_test" && grab_def("DAS16M1_XTAL");
+	$func eq "das1800_ai_do_cmdtest" && grab_def("UNIPOLAR");
+	$func eq "das1800_ai_do_cmdtest" && grab_def("TIMER_BASE");
+	$func eq "das800_ai_do_cmdtest" && grab_def("N_CHAN_AI");
+	$func eq "das800_ai_do_cmdtest" && grab_def("TIMER_BASE");
+	$func eq "a2150_ai_cmdtest" && grab_def("CLOCK_MASK");
+	$func eq "a2150_ai_cmdtest" && grab_def("CLOCK_SELECT_BITS");
+	$func eq "a2150_ai_cmdtest" && grab_def("CLOCK_DIVISOR_BITS");
+	$func eq "ni_ai_cmdtest" && grab_def("TIMER_BASE");
+	$func eq "ni_ao_cmdtest" && grab_def("TIMER_BASE");
+	$func eq "rtd_ai_cmdtest" && grab_def("RTD_MAX_SPEED");
+	$func eq "rtd_ai_cmdtest" && grab_def("RTD_MIN_SPEED");
+	$func eq "rtd_ai_cmdtest" && grab_def("RTD_CLOCK_BASE");
+	$func eq "pci230_ai_cmdtest" && grab_function("PCI230_TIMEBASE_10MHZ");
+
+	$func eq "pci9118_ai_cmdtest" && grab_function("check_channel_list");
+	$func eq "pci171x_ai_cmdtest" && grab_function("check_channel_list");
+	$func eq "pci230_ai_cmdtest" && grab_function("pci230_ns_to_timer");
+	$func eq "cb_pcidda_ai_cmdtest" && grab_function("cb_pcidda_ns_to_timer");
+	$func eq "timer_cmdtest" && grab_function("cmdtest_helper");
+	$func eq "das1800_ai_do_cmdtest" && grab_function("burst_convert_arg");
+	$func eq "dt2814_ai_cmdtest" && grab_function("dt2814_ns_to_timer");
+	$func eq "dt282x_ai_cmdtest" && grab_function("dt282x_ns_to_timer");
+	$func eq "dt282x_ao_cmdtest" && grab_function("dt282x_ns_to_timer");
+	$func eq "a2150_ai_cmdtest" && grab_function("a2150_get_timing");
+	$func eq "ni_ai_cmdtest" && grab_function("ni_ns_to_timer");
+	$func eq "ni_ao_cmdtest" && grab_function("ni_ns_to_timer");
+	$func eq "rtd_ai_cmdtest" && grab_function("rtd_ns_to_timer");
+	$func eq "skel_ai_cmdtest" && grab_function("skel_ns_to_timer");
+
+	grab_function($func);
+
+	close COUT;
+
+	$output = `gcc -o cmdtest cmdtest.c -Wall -Wstrict-prototypes -O2 -g 2>&1`;
+
+	if ( "$output" ){
+		print $output;
+		print "E: $func: compilation failed!\n";
+		return 1;
+	}
+
+	$output = `./cmdtest`;
+	print "$output";
+	return 0;
+}
+
+
+sub echo_cmdtest_in
+{
+	print COUT <<'EOF';
+/* cmdtest.in.c */
+
+#include <comedi.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+#define CMDTEST
+#include "8253.h"
+
+typedef struct comedi_device_struct comedi_device;
+typedef struct comedi_subdevice_struct comedi_subdevice;
+typedef struct comedi_async_struct comedi_async;
+typedef struct comedi_driver_struct comedi_driver;
+typedef struct comedi_lrange_struct comedi_lrange;
+
+
+struct comedi_subdevice_struct{
+	int type;
+	int n_chan;
+	int subdev_flags;
+	int len_chanlist;		/* length of channel/gain list, if available */
+
+	void		*private;
+
+	comedi_async *async;
+
+	void *lock;
+	void *busy;
+	unsigned int runflags;
+
+	int io_bits;
+
+	lsampl_t maxdata;		/* if maxdata==0, use list */
+	lsampl_t *maxdata_list;		/* list is channel specific */
+
+	unsigned int flags;
+	unsigned int *flaglist;
+
+	comedi_lrange *range_table;
+	comedi_lrange **range_table_list;
+
+	unsigned int *chanlist;		/* driver-owned chanlist (not used) */
+
+	int (*insn_read)(comedi_device *,comedi_subdevice *,comedi_insn *,lsampl_t *);
+	int (*insn_write)(comedi_device *,comedi_subdevice *,comedi_insn *,lsampl_t *);
+	int (*insn_bits)(comedi_device *,comedi_subdevice *,comedi_insn *,lsampl_t *);
+	int (*insn_config)(comedi_device *,comedi_subdevice *,comedi_insn *,lsampl_t *);
+
+	int (*do_cmd)(comedi_device *,comedi_subdevice *);
+	int (*do_cmdtest)(comedi_device *,comedi_subdevice *,comedi_cmd *);
+	int (*poll)(comedi_device *,comedi_subdevice *);
+	int (*cancel)(comedi_device *,comedi_subdevice *);
+
+	int (*buf_change)(comedi_device *,comedi_subdevice *s);
+
+	unsigned int state;
+};
+
+struct comedi_device_struct{
+	int use_count;
+	comedi_driver *driver;
+	void *private;
+	int minor;
+	char *board_name;
+	//int board;
+	void *board_ptr;
+	int attached;
+	int rt;
+	//spinlock_t spinlock;
+	int in_request_module;
+
+	int n_subdevices;
+	comedi_subdevice *subdevices;
+	int options[COMEDI_NDEVCONFOPTS];
+
+	/* dumb */
+	int iobase;
+	int irq;
+
+	comedi_subdevice *read_subdev;
+	//wait_queue_head_t read_wait;
+
+	comedi_subdevice *write_subdev;
+	//wait_queue_head_t write_wait;
+
+	//struct fasync_struct *async_queue;
+};
+
+struct priv_struct{
+	int divisor1;
+	int divisor2;
+	unsigned int config_bits;
+	unsigned int clockbase;
+	unsigned int i8254_osc_base;
+	int usemux;
+};
+struct priv_struct priv;
+#define devpriv (&priv)
+
+struct board_struct{
+	unsigned int ai_ns_min;
+	unsigned int n_aichanlist;
+	unsigned int ai_speed;
+	unsigned int size;
+	unsigned int clock[4];
+	unsigned int num_clocks;
+	unsigned int n_aichan;
+	unsigned int n_aichand;
+};
+struct board_struct __this_board;
+#define this_board (&__this_board)
+#define thisboard (&__this_board)
+#define boardtype (__this_board)
+
+#define printk printf
+#define rt_printk printf
+#define comedi_error(a,b) printf(b)
+
+static int cmd_test(comedi_device *dev,comedi_subdevice *s, comedi_cmd *cmd);
+
+comedi_device device,*dev;
+comedi_subdevice subdevice,*s;
+
+void check_null(void);
+void check_mask(void);
+void check_mask_2(void);
+void check_timed(void);
+
+comedi_cmd cmd_mask;
+
+int main(int argc,char *argv[])
+{
+	dev=&device;
+	s=&subdevice;
+
+	check_null();
+	check_mask();
+	check_mask_2();
+	check_timed();
+
+	return 0;
+}
+
+void dump_cmd(comedi_cmd *cmd)
+{
+	printf("start_src:       %08x\n",cmd->start_src       );
+	printf("scan_begin_src:  %08x\n",cmd->scan_begin_src  );
+	printf("convert_src:     %08x\n",cmd->convert_src     );
+	printf("scan_end_src:    %08x\n",cmd->scan_end_src    );
+	printf("stop_src:        %08x\n",cmd->stop_src        );
+}
+
+void check_null(void)
+{
+	comedi_cmd cmd;
+	int ret;
+
+	memset(&cmd,0,sizeof(cmd));
+
+	ret = cmd_test(dev,s,&cmd);
+	if(ret!=1)printf("E: null returned %d\n",ret);
+}
+
+void check_mask(void)
+{
+	comedi_cmd cmd;
+	int ret;
+
+	memset(&cmd,0,sizeof(cmd));
+	cmd.start_src=TRIG_ANY;
+	cmd.scan_begin_src=TRIG_ANY;
+	cmd.convert_src=TRIG_ANY;
+	cmd.scan_end_src=TRIG_ANY;
+	cmd.stop_src=TRIG_ANY;
+
+	ret = cmd_test(dev,s,&cmd);
+	if(ret!=1)printf("E: mask returned %d\n",ret);
+
+	dump_cmd(&cmd);
+
+	cmd_mask=cmd;
+}
+
+void check_mask_2(void)
+{
+	int ret;
+	comedi_cmd cmd=cmd_mask;
+
+	ret = cmd_test(dev,s,&cmd);
+	if(ret<2)printf("E: mask_2 returned %d\n",ret);
+}
+
+void check_timed(void)
+{
+	int ret;
+	int i;
+	unsigned int freq = 10000;
+	unsigned int n_scan = 10000;
+	unsigned int n_chan = 4;
+	unsigned int chanlist[4];
+	comedi_cmd c = {
+		start_src: TRIG_NOW,
+		start_arg: 0,
+		scan_begin_src: TRIG_TIMER,
+		scan_begin_arg: 1e9/freq,
+		convert_src: TRIG_TIMER,
+		convert_arg: 1,
+		scan_end_src: TRIG_COUNT,
+		scan_end_arg: n_chan,
+		stop_src: TRIG_COUNT,
+		stop_arg: n_scan,
+		chanlist: chanlist,
+		chanlist_len: n_chan,
+	};
+	comedi_cmd *cmd = &c;
+
+	for(i=0;i<n_chan;i++){
+		chanlist[i]=CR_PACK(i,0,AREF_GROUND);
+	}
+
+	ret = cmd_test(dev,s,cmd);
+	if(ret<3)printf("W: timed returned %d\n",ret);
+	printf("timed returned %d\n",ret);
+
+	dump_cmd(cmd);
+
+}
+
+
+/* begin autogenerated */
+
+EOF
+}
+

@@ -1,0 +1,42 @@
+#!/bin/sh
+#
+# hotplug script for USBDUX. Sat Mar 20 09:56:43 GMT 2004
+# Bernd.Porr@cn.stir.ac.uk
+#
+#
+#
+#look for comedi config
+COMEDI_CONFIG=
+#
+if [ -e /usr/local/sbin/comedi_config ]; then
+	COMEDI_CONFIG=/usr/local/sbin/comedi_config
+fi
+if [ -e /usr/sbin/comedi_config ]; then 
+        COMEDI_CONFIG=/usr/sbin/comedi_config
+fi
+if [ -e /sbin/comedi_config ]; then 
+        COMEDI_CONFIG=/sbin/comedi_config
+fi
+#
+#
+#look for the firmware
+USBDUX_FIRMWARE=
+if [ -e /usr/share/usb/usbdux_firmware.hex ]; then 
+        USBDUX_FIRMWARE=/usr/share/usb/usbdux_firmware.hex
+fi
+if [ -e /usr/local/share/usb/usbdux_firmware.hex ]; then
+        USBDUX_FIRMWARE=/usr/local/share/usb/usbdux_firmware.hex
+fi
+#
+#
+# If you have more than one device please add/uncomment
+# 
+# just to make sure we remove the comedi device
+$COMEDI_CONFIG -r /dev/comedi0
+# $COMEDI_CONFIG -r /dev/comedi1
+#
+# connecting the comedi device comedi0 with the module usbdux
+$COMEDI_CONFIG -i $USBDUX_FIRMWARE /dev/comedi0 usbdux
+# $COMEDI_CONFIG -i $USBDUX_FIRMWARE /dev/comedi1 usbdux
+#
+#

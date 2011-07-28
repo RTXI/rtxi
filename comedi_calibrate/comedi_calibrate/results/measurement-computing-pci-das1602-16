@@ -1,0 +1,324 @@
+# ./comedi_calibrate
+WARNING: you need comedi driver version 0.7.67 or later
+for this calibration to work properly
+eeprom ch 0x80 gives calibration source of 7.00749V
+eeprom ch 0x84 gives calibration source of 3.50301V
+eeprom ch 0x88 gives calibration source of 1.75135V
+eeprom ch 0x8c gives calibration source of 0.875656V
+eeprom ch 0x80 gives calibration source of 7.00749V
+eeprom ch 0x84 gives calibration source of 3.50301V
+eeprom ch 0x88 gives calibration source of 1.75135V
+eeprom ch 0x8c gives calibration source of 0.875656V
+Warning: device may not be not fully calibrated due to insufficient information.
+Please file a bug report at http://bugs.comedi.org/ and attach this output.
+This output will also allow comedi_calibrate to execute more
+quickly in the future.
+Id: comedi_calibrate.c,v 1.84 2003/06/12 19:57:43 fmhess Exp 
+Driver name: cb_pcidas
+Device name: pci-das1602/16
+Id: cb.c,v 1.37 2003/05/31 16:59:29 fmhess Exp 
+Comedi version: 0.7.66
+calibration source 0, range 0, ground referenced
+reading 2.7663(96)e-3, target 0
+caldac[9] gain=1.0499(13)e-4 V/bit S_min=10763.3 dof=14
+caldac[10] gain=6.129(13)e-5 V/bit S_min=387.025 dof=14
+calibration source 1, range 0, ground referenced
+reading 7.013937(22), target 7.00749
+caldac[8] gain=-1.2075(13)e-4 V/bit S_min=31.9052 dof=14
+caldac[9] gain=1.1159(13)e-4 V/bit S_min=99631.2 dof=14
+caldac[10] gain=5.835(13)e-5 V/bit S_min=31.7509 dof=14
+calibration source 0, range 1, ground referenced
+reading 1.578(18)e-3, target 0
+caldac[9] gain=5.2492(69)e-5 V/bit S_min=10014.6 dof=14
+caldac[10] gain=5.9674(66)e-5 V/bit S_min=351.04 dof=14
+calibration source 2, range 1, ground referenced
+reading 3.49594(28), target 3.50301
+caldac[8] gain=-6.0384(73)e-5 V/bit S_min=28.6973 dof=14
+caldac[9] gain=5.5787(72)e-5 V/bit S_min=80811.8 dof=14
+caldac[10] gain=5.8134(72)e-5 V/bit S_min=28.0956 dof=14
+calibration source 0, range 2, ground referenced
+reading 7.749(86)e-4, target 0
+caldac[9] gain=2.6285(37)e-5 V/bit S_min=8533.24 dof=14
+caldac[10] gain=5.8980(35)e-5 V/bit S_min=279.341 dof=14
+calibration source 3, range 2, ground referenced
+reading 1.74975(11), target 1.75135
+caldac[1] gain=2.19(36)e-7 V/bit S_min=44.3197 dof=14
+caldac[8] gain=-3.0211(35)e-5 V/bit S_min=30.8117 dof=14
+caldac[9] gain=2.7886(35)e-5 V/bit S_min=84647.5 dof=14
+caldac[10] gain=5.8444(35)e-5 V/bit S_min=107.592 dof=14
+calibration source 0, range 3, ground referenced
+reading 3.579(43)e-4, target 0
+caldac[9] gain=1.3096(21)e-5 V/bit S_min=6620.4 dof=14
+caldac[10] gain=5.8613(21)e-5 V/bit S_min=216.875 dof=14
+calibration source 4, range 3, ground referenced
+reading 0.875432(48), target 0.875656
+caldac[8] gain=-1.5145(21)e-5 V/bit S_min=19.1356 dof=14
+caldac[9] gain=1.3957(20)e-5 V/bit S_min=61688.7 dof=14
+caldac[10] gain=5.8337(21)e-5 V/bit S_min=131.817 dof=14
+calibration source 0, range 4, ground referenced
+reading 0.0( 0)e-2147483648, target 7.62951e-05
+caldac[8] gain=2.6693(25)e-5 V/bit S_min=573096 dof=14
+caldac[9] gain=2.1697(21)e-5 V/bit S_min=1.03367e+06 dof=14
+caldac[10] gain=1.4275(22)e-5 V/bit S_min=276225 dof=14
+calibration source 1, range 4, ground referenced
+reading 7.009349(19), target 7.00749
+caldac[8] gain=-3.5058(68)e-5 V/bit S_min=22.6603 dof=14
+caldac[9] gain=5.3978(67)e-5 V/bit S_min=41855.2 dof=14
+caldac[10] gain=5.8287(68)e-5 V/bit S_min=44.4778 dof=14
+calibration source 0, range 5, ground referenced
+reading 4.5(12)e-5, target 3.81476e-05
+caldac[8] gain=1.3346(14)e-5 V/bit S_min=493324 dof=14
+caldac[9] gain=1.0849(11)e-5 V/bit S_min=910509 dof=14
+caldac[10] gain=2.0352(14)e-5 V/bit S_min=911806 dof=14
+calibration source 2, range 5, ground referenced
+reading 3.49364(28), target 3.50301
+caldac[8] gain=-1.7539(47)e-5 V/bit S_min=12.7877 dof=14
+caldac[9] gain=2.7003(47)e-5 V/bit S_min=21764.6 dof=14
+caldac[10] gain=5.8233(46)e-5 V/bit S_min=31.11 dof=14
+calibration source 0, range 6, ground referenced
+reading 2.21(55)e-5, target 1.90738e-05
+caldac[8] gain=6.5107(81)e-6 V/bit S_min=345566 dof=14
+caldac[9] gain=5.2611(66)e-6 V/bit S_min=657889 dof=14
+caldac[10] gain=2.34581(93)e-5 V/bit S_min=2.31823e+06 dof=14
+calibration source 3, range 6, ground referenced
+reading 1.74860(11), target 1.75135
+caldac[8] gain=-8.753(21)e-6 V/bit S_min=8.33917 dof=14
+caldac[9] gain=1.3500(21)e-5 V/bit S_min=27349.9 dof=14
+caldac[10] gain=5.8415(21)e-5 V/bit S_min=159.075 dof=14
+calibration source 0, range 7, ground referenced
+reading 9.8(25)e-6, target 9.53689e-06
+caldac[8] gain=3.0782(54)e-6 V/bit S_min=190038 dof=14
+caldac[9] gain=2.4566(41)e-6 V/bit S_min=396840 dof=14
+caldac[10] gain=2.50425(63)e-5 V/bit S_min=5.11232e+06 dof=14
+calibration source 4, range 7, ground referenced
+reading 0.874858(48), target 0.875656
+caldac[8] gain=-4.354(14)e-6 V/bit S_min=8.02422 dof=14
+caldac[9] gain=6.703(14)e-6 V/bit S_min=14996.1 dof=14
+caldac[10] gain=5.8424(14)e-5 V/bit S_min=229.055 dof=14
+DAC ground calibration source, ch 0, range 0
+reading 1.4854(97)e-3, target 7.62951e-05
+caldac[2] gain=-1.2281(13)e-4 V/bit S_min=364.875 dof=14
+caldac[6] gain=-1.534(15)e-5 V/bit S_min=263.776 dof=14
+caldac[9] gain=1.0515(14)e-4 V/bit S_min=9949.02 dof=14
+caldac[10] gain=6.177(13)e-5 V/bit S_min=411.836 dof=14
+DAC high calibration source, ch 0, range 0
+reading 4.489167(10), target 4.49996
+caldac[0] gain=-5.786(13)e-5 V/bit S_min=38.2987 dof=14
+caldac[1] gain=-4.9996(13)e-4 V/bit S_min=115.588 dof=14
+caldac[2] gain=-1.1998(13)e-4 V/bit S_min=32.8576 dof=14
+caldac[6] gain=-1.339(13)e-5 V/bit S_min=2.78534 dof=14
+caldac[8] gain=-7.800(13)e-5 V/bit S_min=42.0434 dof=14
+caldac[9] gain=1.0820(13)e-4 V/bit S_min=49635.5 dof=14
+caldac[10] gain=5.843(13)e-5 V/bit S_min=42.4727 dof=14
+DAC ground calibration source, ch 0, range 1
+reading -5.73(16)e-4, target 0.00015259
+caldac[2] gain=-1.2285(13)e-4 V/bit S_min=336.07 dof=14
+caldac[6] gain=-1.803(15)e-5 V/bit S_min=215.706 dof=14
+caldac[9] gain=1.0512(13)e-4 V/bit S_min=9673.89 dof=14
+caldac[10] gain=6.171(14)e-5 V/bit S_min=303.678 dof=14
+DAC high calibration source, ch 0, range 1
+reading 8.945938(15), target 8.99992
+caldac[0] gain=-1.1516(13)e-4 V/bit S_min=37.5284 dof=14
+caldac[1] gain=-9.9562(13)e-4 V/bit S_min=135.565 dof=14
+caldac[2] gain=-1.2020(13)e-4 V/bit S_min=45.5624 dof=14
+caldac[6] gain=-1.493(14)e-5 V/bit S_min=54.1826 dof=14
+caldac[8] gain=-1.5442(13)e-4 V/bit S_min=51.372 dof=14
+caldac[9] gain=1.1435(13)e-4 V/bit S_min=133535 dof=14
+caldac[10] gain=5.904(13)e-5 V/bit S_min=44.5935 dof=14
+DAC ground calibration source, ch 0, range 2
+reading 3.265(12)e-3, target 0
+caldac[2] gain=-1.2259(13)e-4 V/bit S_min=386.434 dof=14
+caldac[6] gain=-1.350(13)e-5 V/bit S_min=2.7774 dof=14
+caldac[9] gain=1.0486(13)e-4 V/bit S_min=11310.9 dof=14
+caldac[10] gain=6.105(14)e-5 V/bit S_min=377.666 dof=14
+DAC high calibration source, ch 0, range 2
+reading 4.481010(11), target 4.50004
+caldac[0] gain=-5.714(13)e-5 V/bit S_min=11.5009 dof=14
+caldac[1] gain=-4.9862(13)e-4 V/bit S_min=113.179 dof=14
+caldac[2] gain=-1.1982(13)e-4 V/bit S_min=36.403 dof=14
+caldac[6] gain=-1.375(13)e-5 V/bit S_min=4.81823 dof=14
+caldac[8] gain=-7.692(13)e-5 V/bit S_min=27.7274 dof=14
+caldac[9] gain=1.0774(13)e-4 V/bit S_min=52246.3 dof=14
+caldac[10] gain=5.776(13)e-5 V/bit S_min=9.98411 dof=14
+DAC ground calibration source, ch 0, range 3
+reading 3.334(11)e-3, target 0
+caldac[2] gain=-1.2259(13)e-4 V/bit S_min=391.228 dof=14
+caldac[6] gain=-1.354(13)e-5 V/bit S_min=2.79562 dof=14
+caldac[9] gain=1.0480(13)e-4 V/bit S_min=11427.2 dof=14
+caldac[10] gain=6.103(13)e-5 V/bit S_min=411.259 dof=14
+DAC high calibration source, ch 0, range 3
+reading 8.929456(12), target 9.00008
+caldac[0] gain=-1.1406(13)e-4 V/bit S_min=28.3385 dof=14
+caldac[1] gain=-9.9312(13)e-4 V/bit S_min=70.3478 dof=14
+caldac[2] gain=-1.1935(13)e-4 V/bit S_min=21.4438 dof=14
+caldac[6] gain=-1.385(13)e-5 V/bit S_min=5.90931 dof=14
+caldac[8] gain=-1.5392(13)e-4 V/bit S_min=46.7678 dof=14
+caldac[9] gain=1.1433(13)e-4 V/bit S_min=137228 dof=14
+caldac[10] gain=5.840(13)e-5 V/bit S_min=20.5374 dof=14
+DAC ground calibration source, ch 1, range 0
+reading 2.883(19)e-3, target 7.62951e-05
+caldac[3] gain=-1.2282(13)e-4 V/bit S_min=367.375 dof=14
+caldac[7] gain=-1.345(13)e-5 V/bit S_min=1.15301 dof=14
+caldac[9] gain=1.0506(14)e-4 V/bit S_min=9893.77 dof=14
+caldac[10] gain=6.141(13)e-5 V/bit S_min=446.711 dof=14
+DAC high calibration source, ch 1, range 0
+reading 4.493651(11), target 4.49996
+caldac[3] gain=-1.2033(13)e-4 V/bit S_min=43.4756 dof=14
+caldac[4] gain=-5.804(13)e-5 V/bit S_min=36.9516 dof=14
+caldac[5] gain=-4.9832(13)e-4 V/bit S_min=93.5171 dof=14
+caldac[7] gain=-1.387(13)e-5 V/bit S_min=19.6166 dof=14
+caldac[8] gain=-7.834(13)e-5 V/bit S_min=19.0549 dof=14
+caldac[9] gain=1.0883(13)e-4 V/bit S_min=51334.1 dof=14
+caldac[10] gain=5.898(13)e-5 V/bit S_min=37.4823 dof=14
+DAC ground calibration source, ch 1, range 1
+reading 2.039(10)e-3, target 0.00015259
+caldac[3] gain=-1.2293(13)e-4 V/bit S_min=320.881 dof=14
+caldac[7] gain=-1.364(13)e-5 V/bit S_min=4.50314 dof=14
+caldac[9] gain=1.0510(13)e-4 V/bit S_min=10960.3 dof=14
+caldac[10] gain=6.157(13)e-5 V/bit S_min=304.663 dof=14
+DAC high calibration source, ch 1, range 1
+reading 8.961557(12), target 8.99992
+caldac[3] gain=-1.2007(13)e-4 V/bit S_min=21.6244 dof=14
+caldac[4] gain=-1.1389(13)e-4 V/bit S_min=20.3375 dof=14
+caldac[5] gain=-9.9380(13)e-4 V/bit S_min=74.0387 dof=14
+caldac[7] gain=-1.342(13)e-5 V/bit S_min=4.83011 dof=14
+caldac[8] gain=-1.5430(13)e-4 V/bit S_min=43.7761 dof=14
+caldac[9] gain=1.1429(13)e-4 V/bit S_min=138060 dof=14
+caldac[10] gain=5.814(13)e-5 V/bit S_min=22.6337 dof=14
+DAC ground calibration source, ch 1, range 2
+reading 3.480(12)e-3, target 0
+caldac[3] gain=-1.2282(13)e-4 V/bit S_min=377.068 dof=14
+caldac[7] gain=-1.362(13)e-5 V/bit S_min=3.65634 dof=14
+caldac[9] gain=1.0484(13)e-4 V/bit S_min=11386.1 dof=14
+caldac[10] gain=6.108(13)e-5 V/bit S_min=472.513 dof=14
+DAC high calibration source, ch 1, range 2
+reading 4.484250(11), target 4.50004
+caldac[3] gain=-1.2014(13)e-4 V/bit S_min=39.6119 dof=14
+caldac[4] gain=-5.654(13)e-5 V/bit S_min=5.35334 dof=14
+caldac[5] gain=-4.9730(13)e-4 V/bit S_min=128.899 dof=14
+caldac[7] gain=-1.351(13)e-5 V/bit S_min=2.37465 dof=14
+caldac[8] gain=-7.726(13)e-5 V/bit S_min=47.0742 dof=14
+caldac[9] gain=1.0764(13)e-4 V/bit S_min=51611.9 dof=14
+caldac[10] gain=5.777(13)e-5 V/bit S_min=8.9178 dof=14
+DAC ground calibration source, ch 1, range 3
+reading 3.431(10)e-3, target 0
+caldac[3] gain=-1.2286(13)e-4 V/bit S_min=388.792 dof=14
+caldac[7] gain=-1.362(13)e-5 V/bit S_min=2.9964 dof=14
+caldac[9] gain=1.0482(13)e-4 V/bit S_min=11353.9 dof=14
+caldac[10] gain=6.111(13)e-5 V/bit S_min=494.685 dof=14
+DAC high calibration source, ch 1, range 3
+reading 8.942965(12), target 9.00008
+caldac[3] gain=-1.2047(13)e-4 V/bit S_min=29.349 dof=14
+caldac[4] gain=-1.1433(13)e-4 V/bit S_min=34.8405 dof=14
+caldac[5] gain=-9.9112(13)e-4 V/bit S_min=83.7798 dof=14
+caldac[7] gain=-1.341(13)e-5 V/bit S_min=2.67333 dof=14
+caldac[8] gain=-1.5466(13)e-4 V/bit S_min=19.3449 dof=14
+caldac[9] gain=1.1440(13)e-4 V/bit S_min=133433 dof=14
+caldac[10] gain=5.843(13)e-5 V/bit S_min=50.4174 dof=14
+relative binary: calibration source 0, range 0, ground referenced, calibration source 0, range 3, ground referenced
+caldac[9] set to 93
+binary peg: calibration source 0, range 4, ground referenced
+caldac[10] set to 255
+relative binary: calibration source 0, range 4, ground referenced, calibration source 0, range 7, ground referenced
+caldac[9] set to 173
+relative binary: calibration source 1, range 0, ground referenced, calibration source 0, range 0, ground referenced
+caldac[8] set to 155
+binary: calibration source 0, range 0, ground referenced
+caldac[10] set to 129
+relative binary: calibration source 2, range 1, ground referenced, calibration source 0, range 1, ground referenced
+caldac[8] set to 0
+WARNING: caldac[8] pegged!
+binary: calibration source 0, range 1, ground referenced
+caldac[10] set to 127
+relative binary: calibration source 3, range 2, ground referenced, calibration source 0, range 2, ground referenced
+caldac[8] set to 51
+binary: calibration source 0, range 2, ground referenced
+caldac[10] set to 127
+relative binary: calibration source 4, range 3, ground referenced, calibration source 0, range 3, ground referenced
+caldac[8] set to 93
+binary: calibration source 0, range 3, ground referenced
+caldac[10] set to 127
+relative binary: calibration source 1, range 4, ground referenced, calibration source 0, range 4, ground referenced
+caldac[8] set to 155
+binary: calibration source 0, range 4, ground referenced
+caldac[10] set to 84
+relative binary: calibration source 2, range 5, ground referenced, calibration source 0, range 5, ground referenced
+caldac[8] set to 1
+binary: calibration source 0, range 5, ground referenced
+caldac[10] set to 219
+relative binary: calibration source 3, range 6, ground referenced, calibration source 0, range 6, ground referenced
+caldac[8] set to 0
+WARNING: caldac[8] pegged!
+binary: calibration source 0, range 6, ground referenced
+caldac[10] set to 173
+relative binary: calibration source 4, range 7, ground referenced, calibration source 0, range 7, ground referenced
+caldac[8] set to 0
+WARNING: caldac[8] pegged!
+binary: calibration source 0, range 7, ground referenced
+caldac[10] set to 151
+relative binary: DAC high calibration source, ch 0, range 0, DAC ground calibration source, ch 0, range 0
+caldac[1] set to 99
+binary: DAC ground calibration source, ch 0, range 0
+caldac[2] set to 115
+relative binary: DAC high calibration source, ch 0, range 0, DAC ground calibration source, ch 0, range 0
+caldac[0] set to 117
+binary: DAC ground calibration source, ch 0, range 0
+caldac[6] set to 133
+relative binary: DAC high calibration source, ch 0, range 1, DAC ground calibration source, ch 0, range 1
+caldac[1] set to 68
+binary: DAC ground calibration source, ch 0, range 1
+caldac[2] set to 103
+relative binary: DAC high calibration source, ch 0, range 1, DAC ground calibration source, ch 0, range 1
+caldac[0] set to 123
+binary: DAC ground calibration source, ch 0, range 1
+caldac[6] set to 127
+relative binary: DAC high calibration source, ch 0, range 2, DAC ground calibration source, ch 0, range 2
+caldac[1] set to 77
+binary: DAC ground calibration source, ch 0, range 2
+caldac[2] set to 129
+relative binary: DAC high calibration source, ch 0, range 2, DAC ground calibration source, ch 0, range 2
+caldac[0] set to 131
+binary: DAC ground calibration source, ch 0, range 2
+caldac[6] set to 131
+relative binary: DAC high calibration source, ch 0, range 3, DAC ground calibration source, ch 0, range 3
+caldac[1] set to 47
+binary: DAC ground calibration source, ch 0, range 3
+caldac[2] set to 131
+relative binary: DAC high calibration source, ch 0, range 3, DAC ground calibration source, ch 0, range 3
+caldac[0] set to 131
+binary: DAC ground calibration source, ch 0, range 3
+caldac[6] set to 128
+relative binary: DAC high calibration source, ch 1, range 0, DAC ground calibration source, ch 1, range 0
+caldac[5] set to 105
+binary: DAC ground calibration source, ch 1, range 0
+caldac[3] set to 126
+relative binary: DAC high calibration source, ch 1, range 0, DAC ground calibration source, ch 1, range 0
+caldac[4] set to 119
+binary: DAC ground calibration source, ch 1, range 0
+caldac[7] set to 127
+relative binary: DAC high calibration source, ch 1, range 1, DAC ground calibration source, ch 1, range 1
+caldac[5] set to 82
+binary: DAC ground calibration source, ch 1, range 1
+caldac[3] set to 121
+relative binary: DAC high calibration source, ch 1, range 1, DAC ground calibration source, ch 1, range 1
+caldac[4] set to 122
+binary: DAC ground calibration source, ch 1, range 1
+caldac[7] set to 123
+relative binary: DAC high calibration source, ch 1, range 2, DAC ground calibration source, ch 1, range 2
+caldac[5] set to 83
+binary: DAC ground calibration source, ch 1, range 2
+caldac[3] set to 131
+relative binary: DAC high calibration source, ch 1, range 2, DAC ground calibration source, ch 1, range 2
+caldac[4] set to 129
+binary: DAC ground calibration source, ch 1, range 2
+caldac[7] set to 134
+relative binary: DAC high calibration source, ch 1, range 3, DAC ground calibration source, ch 1, range 3
+caldac[5] set to 61
+binary: DAC ground calibration source, ch 1, range 3
+caldac[3] set to 132
+relative binary: DAC high calibration source, ch 1, range 3, DAC ground calibration source, ch 1, range 3
+caldac[4] set to 125
+binary: DAC ground calibration source, ch 1, range 3
+caldac[7] set to 130
+failed to open file /etc/comedi/calibrations/cb_pcidas_pci-das1602-16_comedi0 for writing
+calibration function returned error

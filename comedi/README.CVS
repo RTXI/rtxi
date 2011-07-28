@@ -1,0 +1,17 @@
+
+Building Comedi from CVS is slightly different from the releases.
+There is an additional step of creating the configure script and
+makefiles from the templates using automake, autoconf, etc.  This
+is all done automatically by running the script ./autogen.sh.
+
+You may need to edit the autogen.sh script so that it runs the
+appropriate commands.  Often, the necessary commands have version
+suffixes.  Occasionally, for strange reasons, errors can be
+solved by running ./autogen.sh twice.
+
+Requirements:
+
+  automake >= 1.6
+  autoconf >= 2.54
+
+

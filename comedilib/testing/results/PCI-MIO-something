@@ -1,0 +1,387 @@
+I:
+I: subdevice 0
+I: testing info...
+rev 1
+I: subdevice type: 1 (analog input)
+  number of channels: 16
+  max data value: 4095
+  ranges:
+    all chans: [-10,10] [-5,5] [-2.5,2.5] [-1,1] [-0.5,0.5] [-0.25,0.25] [-0.1,0.1] [-0.05,0.05] [0,20] [0,10] [0,5] [0,2] [0,1] [0,0.5] [0,0.2] [0,0.1]
+I: testing mode0_read...
+rev 1
+comedi_trig_ioctl: 1
+I: testing insn_read...
+rev 1
+comedi_do_insn: 1
+I: testing insn_read_time...
+rev 1
+comedi_do_insn: 3
+read time: 8 us
+I: testing cmd_probe_src_mask...
+rev 1
+command source mask:
+  start: now
+  scan_begin: timer|ext
+  convert: timer|ext
+  scan_end: count
+  stop: none|count
+I: testing cmd_probe_fast_1chan...
+command fast 1chan:
+ret==3
+  start: now 0
+  scan_begin: timer 800
+  convert: timer 800
+  scan_end: count 1
+  stop: count 2
+I: testing cmd_read_fast_1chan...
+ret==3
+I: testing cmd_fifo_depth_check...
+64, 3
+128, 46
+256, 5
+512, 24
+1024, 3
+2048, 3
+4096, 2
+8192, 25
+16384, 30
+32768, 75
+I: testing mmap...
+read 1024 1024
+read 3072 4096
+read 13824 17920
+compare ok
+I: testing read_select...
+I:
+I: subdevice 1
+I: testing info...
+rev 1
+I: subdevice type: 2 (analog output)
+  number of channels: 2
+  max data value: 4095
+  ranges:
+    all chans: [-10,10] [0,10] [-1,1] [0,1]
+I: testing mode0_read...
+rev 1
+comedi_trig_ioctl: 1
+I: testing insn_read...
+rev 1
+comedi_do_insn: 1
+I: testing insn_read_time...
+rev 1
+comedi_do_insn: 3
+read time: 2 us
+I: testing cmd_probe_src_mask...
+rev 1
+command source mask:
+  start: now
+  scan_begin: timer
+  convert: now
+  scan_end: count
+  stop: none|count
+I: testing cmd_probe_fast_1chan...
+command fast 1chan:
+can't do timed?!?
+  not supported
+I: testing cmd_read_fast_1chan...
+can't do timed?!?
+  not supported
+I: testing cmd_fifo_depth_check...
+can't do timed?!?
+  not supported
+64, 0
+can't do timed?!?
+  not supported
+128, 0
+can't do timed?!?
+  not supported
+256, 0
+can't do timed?!?
+  not supported
+512, 0
+can't do timed?!?
+  not supported
+1024, 0
+can't do timed?!?
+  not supported
+2048, 0
+can't do timed?!?
+  not supported
+4096, 0
+can't do timed?!?
+  not supported
+8192, 0
+can't do timed?!?
+  not supported
+16384, 0
+can't do timed?!?
+  not supported
+32768, 0
+I: testing mmap...
+can't do timed?!?
+  not supported
+I: testing read_select...
+can't do timed?!?
+  not supported
+I:
+I: subdevice 2
+I: testing info...
+rev 1
+I: subdevice type: 5 (digital I/O)
+  number of channels: 8
+  max data value: 1
+  ranges:
+    all chans: [0,5]
+I: testing mode0_read...
+rev 1
+comedi_trig_ioctl: 1
+I: testing insn_read...
+rev 1
+comedi_do_insn: 1
+I: testing insn_read_time...
+rev 1
+comedi_do_insn: 3
+read time: 3 us
+I: testing cmd_probe_src_mask...
+rev 1
+not supported
+I: testing cmd_probe_fast_1chan...
+command fast 1chan:
+  not supported
+I: testing cmd_read_fast_1chan...
+  not supported
+I: testing cmd_fifo_depth_check...
+  not supported
+64, 0
+  not supported
+128, 0
+  not supported
+256, 0
+  not supported
+512, 0
+  not supported
+1024, 0
+  not supported
+2048, 0
+  not supported
+4096, 0
+  not supported
+8192, 0
+  not supported
+16384, 0
+  not supported
+32768, 0
+I: testing mmap...
+  not supported
+I: testing read_select...
+  not supported
+I:
+I: subdevice 3
+I: testing info...
+rev 1
+I: subdevice type: 0 (unused)
+I: testing mode0_read...
+rev 1
+comedi_trig_ioctl: -1
+W: comedi_trig_ioctl: errno=5 Input/output error
+I: testing insn_read...
+rev 1
+comedi_do_insn: -1
+W: comedi_do_insn: errno=5 Input/output error
+I: testing insn_read_time...
+rev 1
+comedi_do_insn: 1
+W: comedi_do_insn: returned 1 (expected 3)
+read time: 2044854542 us
+I: testing cmd_probe_src_mask...
+rev 1
+not supported
+I: testing cmd_probe_fast_1chan...
+command fast 1chan:
+  not supported
+I: testing cmd_read_fast_1chan...
+  not supported
+I: testing cmd_fifo_depth_check...
+  not supported
+64, 0
+  not supported
+128, 0
+  not supported
+256, 0
+  not supported
+512, 0
+  not supported
+1024, 0
+  not supported
+2048, 0
+  not supported
+4096, 0
+  not supported
+8192, 0
+  not supported
+16384, 0
+  not supported
+32768, 0
+I: testing mmap...
+  not supported
+I: testing read_select...
+  not supported
+I:
+I: subdevice 4
+I: testing info...
+rev 1
+I: subdevice type: 6 (counter)
+  number of channels: 1
+  max data value: 1
+  ranges:
+    all chans: [0,1]
+I: testing mode0_read...
+rev 1
+comedi_trig_ioctl: -1
+W: comedi_trig_ioctl: errno=5 Input/output error
+I: testing insn_read...
+rev 1
+comedi_do_insn: -1
+W: comedi_do_insn: errno=5 Input/output error
+I: testing insn_read_time...
+rev 1
+comedi_do_insn: 1
+W: comedi_do_insn: returned 1 (expected 3)
+read time: 2044854187 us
+I: testing cmd_probe_src_mask...
+rev 1
+not supported
+I: testing cmd_probe_fast_1chan...
+command fast 1chan:
+  not supported
+I: testing cmd_read_fast_1chan...
+  not supported
+I: testing cmd_fifo_depth_check...
+  not supported
+64, 0
+  not supported
+128, 0
+  not supported
+256, 0
+  not supported
+512, 0
+  not supported
+1024, 0
+  not supported
+2048, 0
+  not supported
+4096, 0
+  not supported
+8192, 0
+  not supported
+16384, 0
+  not supported
+32768, 0
+I: testing mmap...
+  not supported
+I: testing read_select...
+  not supported
+I:
+I: subdevice 5
+I: testing info...
+rev 1
+I: subdevice type: 9 (calibration)
+  number of channels: 12
+  max data value: 255
+  ranges:
+    all chans: [0,1]
+I: testing mode0_read...
+rev 1
+comedi_trig_ioctl: 1
+I: testing insn_read...
+rev 1
+comedi_do_insn: 1
+I: testing insn_read_time...
+rev 1
+comedi_do_insn: 3
+read time: 1 us
+I: testing cmd_probe_src_mask...
+rev 1
+not supported
+I: testing cmd_probe_fast_1chan...
+command fast 1chan:
+  not supported
+I: testing cmd_read_fast_1chan...
+  not supported
+I: testing cmd_fifo_depth_check...
+  not supported
+64, 0
+  not supported
+128, 0
+  not supported
+256, 0
+  not supported
+512, 0
+  not supported
+1024, 0
+  not supported
+2048, 0
+  not supported
+4096, 0
+  not supported
+8192, 0
+  not supported
+16384, 0
+  not supported
+32768, 0
+I: testing mmap...
+  not supported
+I: testing read_select...
+  not supported
+I:
+I: subdevice 6
+I: testing info...
+rev 1
+I: subdevice type: 8 (memory)
+  number of channels: 512
+  max data value: 255
+  ranges:
+    all chans: [0,1]
+I: testing mode0_read...
+rev 1
+comedi_trig_ioctl: 1
+I: testing insn_read...
+rev 1
+comedi_do_insn: 1
+I: testing insn_read_time...
+rev 1
+comedi_do_insn: 3
+read time: 55 us
+I: testing cmd_probe_src_mask...
+rev 1
+not supported
+I: testing cmd_probe_fast_1chan...
+command fast 1chan:
+  not supported
+I: testing cmd_read_fast_1chan...
+  not supported
+I: testing cmd_fifo_depth_check...
+  not supported
+64, 0
+  not supported
+128, 0
+  not supported
+256, 0
+  not supported
+512, 0
+  not supported
+1024, 0
+  not supported
+2048, 0
+  not supported
+4096, 0
+  not supported
+8192, 0
+  not supported
+16384, 0
+  not supported
+32768, 0
+I: testing mmap...
+  not supported
+I: testing read_select...
+  not supported

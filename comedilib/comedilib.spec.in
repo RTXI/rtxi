@@ -1,0 +1,90 @@
+Summary: Data Acquisition library for the Comedi DAQ driver.
+Name: comedilib
+Version: @VERSION@
+Release: 1
+License: LGPL
+Group: System Environment/Kernel
+URL: http://www.comedi.org/
+Source: http://www.comedi.org/comedi/download/comedilib-@VERSION@.tar.gz
+BuildRoot: /var/tmp/%{name}-buildroot
+Prereq: /sbin/ldconfig
+BuildRequires: python
+provides: comedilib
+
+%description
+Comedilib is the library for the Comedi data acquisition driver
+for Linux.  It allows Linux processes to acquire data from
+supported DAQ cards, such as those from National Instruments.
+
+%package devel
+Summary: Libraries/include files for Comedi
+Group: Development/Libraries
+
+%description devel
+Comedilib is a library for using Comedi, a driver interface for data
+acquisition hardware.
+
+%prep
+%setup -q
+
+%build
+#called when the rpm is built
+CFLAGS="${CFLAGS:-%optflags}" ; export CFLAGS ; \
+./configure \
+  --prefix=%{_prefix} \
+  --mandir=%{_mandir} \
+  --datadir=%{_datadir} \
+  --sysconfdir=%{_sysconfdir} \
+  --disable-dependency-tracking
+
+make
+
+
+%install
+[ -n "$RPM_BUILD_ROOT" -a "$RPM_BUILD_ROOT" != / ] && rm -rf $RPM_BUILD_ROOT
+
+%makeinstall
+
+# Clean out files that should not be part of the rpm. 
+# This is the recommended way of dealing with it for RH8
+#rm -f $RPM_BUILD_ROOT%{_libdir}/*.a
+rm -f $RPM_BUILD_ROOT%{_libdir}/*.la
+
+# Move files
+mv $RPM_BUILD_ROOT%{_datadir}/comedilib $RPM_BUILD_ROOT%{_datadir}/comedilib-devel
+
+%post
+/sbin/ldconfig
+
+%postun
+/sbin/ldconfig
+
+%clean
+[ -n "$RPM_BUILD_ROOT" -a "$RPM_BUILD_ROOT" != / ] && rm -rf $RPM_BUILD_ROOT
+
+%files
+%defattr(-,root,root,-)
+%doc AUTHORS COPYING README TODO ChangeLog NEWS
+%{_libdir}/libcomedi.so
+%{_libdir}/libcomedi.so.*
+%{_libdir}/python2.2/site-packages/*.so
+%{_libdir}/python2.2/site-packages/comedi.py
+%{_sbindir}/comedi_*
+%{_bindir}/comedi_*
+%{_mandir}/man7/*
+%{_mandir}/man8/*
+
+%files devel
+%defattr(-,root,root,-)
+%{_libdir}/libcomedi.a
+%{_includedir}/comedi*.h
+%{_mandir}/man3/*
+%{_datadir}/comedilib-devel/html/*
+
+%changelog
+* Tue Jun 03 2002 David Schleef <ds@schleef.org>
+- update for new build system
+
+* Wed Feb 21 2002 Tim Ousley <tim.ousley@ni.com>
+- initial build of comedilib RPM
+

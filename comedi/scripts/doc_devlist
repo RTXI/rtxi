@@ -1,0 +1,93 @@
+#!/usr/bin/perl -w
+# vi: set ts=4:
+
+sub parse_devices;
+
+@ARGV = ('-') unless @ARGV;
+
+$ARGV=shift @ARGV;
+if(!open(FILE,$ARGV)){
+	warn "Can't open $ARGV: $!\n";
+	exit 1;
+}
+
+while(<FILE>){
+	push @lines,$_;
+}
+
+$driver = "";
+$mode = 0;
+while($line=shift @lines){
+	$_ = $line;
+	if( $mode == 0){
+		if( m/^[\w-]+: / ){
+			chomp;
+			$l=$_;
+			$mode = 1;
+		}
+	}elsif($mode==1){
+		if( m/^ / ){
+			s/^ +//;
+			chomp;
+			$l="$l $_";
+			$mode = 1;
+		}else{
+			#print "$l\n";
+			if($l =~ m/^Driver: /){
+				$_ = $l;
+				s/^Driver: //;
+				$driver = $_;
+			}
+			if($l =~ m/^Devices:/){
+				$l =~ s/^Devices://;
+				parse_devices($l);
+			}
+			$l="";
+			$mode = 0;
+			$_ = $line;
+			if( m/^[\w-]+: / ){
+				chomp;
+				$l=$_;
+				$mode = 1;
+			}
+		}
+	}
+}
+
+
+sub parse_devices
+{
+	my $devs = $_[0];
+	my $mfr = "unknown";
+	my $dev = "unknown";
+	my $name = "unknown";
+
+	#print("parse_devices $devs\n");
+
+	while($devs){
+		$_=$devs;
+		if(m/^ *\[([^\]]+)\](.*)/){
+			$mfr = $1;
+			#print "recognized mfr $mfr\n";
+			$devs = $2;
+		}elsif(m/^ *\(([^\)]+)\)(.*)/){
+			$name = $1;
+			#print "recognized name $name\n";
+			$devs = $2;
+		}elsif(m/^ *([^\(,]+)(.*)/){
+			$dev = $1;
+			$devs = $2;
+			$dev =~ s/ *$//;
+			#print "recognized dev $dev\n";
+		}elsif(m/^ *,(.*)/){
+			$devs = $1;
+			printf "%s\t%s\t%s\t%s\n", $mfr, $dev, $driver, $name;
+		}else{
+			print "parse error $_\n";
+			$devs = "";
+		}
+	}
+	printf "%s\t%s\t%s\t%s\n", $mfr, $dev, $driver, $name;
+}
+
+

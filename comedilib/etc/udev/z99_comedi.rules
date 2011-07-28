@@ -1,0 +1,40 @@
+#This file provides some example udev rules which may be helpful for comedi.
+#It includes rules for creating symlinks to the device file with 
+#persistent names in /dev/comedi/by-path/, setting permissions and
+#group ownership on the comedi device files, and examples showing
+#adjustment of a device file's buffer size.
+
+SUBSYSTEM!="comedi", GOTO="comedi_end"
+
+
+ACTION!="add", GOTO="comedi_add_end"
+
+
+#create symlink with persistent name based on hardware path
+KERNEL=="comedi[0-9]*", KERNEL!="comedi[0-9]*_subd[0-9]*", SUBSYSTEMS=="pci", SYMLINK+="comedi/by-path/pci-$id"
+
+#persistent subdevice symlinks
+KERNEL=="comedi[0-9]*subd[0-9]*", SUBSYSTEMS=="pci", SYMLINK+="comedi/by-path/pci-$id_subd%n"
+
+
+#The following line would automatically run comedi_config on main device file
+#to adjust the read buffer size for a specific board at pci path
+#0000:07:0d.0 (bus 0x7, slot 0xd).
+#KERNEL=="comedi[0-9]*", KERNEL!="comedi[0-9]*_subd[0-9]*", SUBSYSTEMS=="pci", KERNELS=="0000:07:0d.0", RUN+="/usr/local/sbin/comedi_config $tempnode --read-buffer 1024"
+
+#Here we do the same, except we are matching by pci vendor/device id instead of bus/slot
+#KERNEL=="comedi[0-9]*", KERNEL!="comedi[0-9]*_subd[0-9]*", SUBSYSTEMS=="pci", ATTRS{vendor}=="0x1093", ATTRS{device}=="0x70bf", RUN+="/usr/local/sbin/comedi_config $tempnode --read-buffer 1024"
+
+
+# wide open device file permissions
+KERNEL=="comedi[0-9]*", MODE="0666"
+
+# device files restricted to the "comedi" group
+#KERNEL=="comedi[0-9]*", MODE="0660", GROUP="comedi"
+
+
+LABEL="comedi_add_end"
+
+
+LABEL="comedi_end"
+
