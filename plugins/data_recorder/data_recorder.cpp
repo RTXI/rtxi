@@ -1126,9 +1126,9 @@ int DataRecorder::Panel::startRecording(long long timestamp) {
 			H5P_DEFAULT, H5P_DEFAULT);
 	file.pdata = H5Gcreate(file.trial, "Parameters", H5P_DEFAULT, H5P_DEFAULT,
 			H5P_DEFAULT);
-	file.adata = H5Gcreate(file.trial, "Asyncronous Data", H5P_DEFAULT,
+	file.adata = H5Gcreate(file.trial, "Asynchronous Data", H5P_DEFAULT,
 			H5P_DEFAULT, H5P_DEFAULT);
-	file.sdata = H5Gcreate(file.trial, "Syncronous Data", H5P_DEFAULT,
+	file.sdata = H5Gcreate(file.trial, "Synchronous Data", H5P_DEFAULT,
 			H5P_DEFAULT, H5P_DEFAULT);
 
 	hid_t scalar_space = H5Screate(H5S_SCALAR);

@@ -15,4 +15,5 @@ SUBDIRS = \
 	oscilloscope \
 	performance_measurement \
 	system_control\
+        synch\
 	userprefs

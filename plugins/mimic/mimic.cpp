@@ -25,7 +25,7 @@ extern "C" Plugin::Object *createRTXIPlugin(void) {
 static DefaultGUIModel::variable_t vars[] = {
     {
         "Vin",
-        "The signal to be mimiced",
+        "The signal to be mimicked",
         DefaultGUIModel::INPUT,
     },
     {

@@ -134,6 +134,7 @@ plugins/connector/Makefile
 plugins/Makefile
 plugins/mimic/Makefile
 plugins/performance_measurement/Makefile
+plugins/synch/Makefile
 plugins/userprefs/Makefile
 ])
 
