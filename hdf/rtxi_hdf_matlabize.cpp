@@ -45,7 +45,7 @@ int main(int argc,char *argv[]) {
     while(H5Gget_info_by_name(fid,trial_name.str().c_str(),&junk,H5P_DEFAULT) >= 0) {
 
         // determine the dimension of the data
-        trial_name << "/Syncronous Data/Channel Data";
+        trial_name << "/Synchronous Data/Channel Data";
         hid_t table = H5Dopen(fid,trial_name.str().c_str(),H5P_DEFAULT);
         if(table >= 0) {
 

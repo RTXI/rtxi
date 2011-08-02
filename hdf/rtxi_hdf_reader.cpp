@@ -71,7 +71,7 @@ int main(int argc,char *argv[]) {
     }
 
     std::stringstream data_name;
-    data_name << "/Trial" << opts.trial << "/Syncronous Data/Channel Data";
+    data_name << "/Trial" << opts.trial << "/Synchronous Data/Channel Data";
 
     hid_t table = H5Dopen(fid,data_name.str().c_str(),H5P_DEFAULT);
     if(table < 0) {
@@ -322,11 +322,11 @@ void print_trial_info(hid_t trial,int num_trial) {
 
     printf("\tDate: %s\n",string_data);
 
-    data = H5Dopen(trial,"Syncronous Data/Channel Data",H5P_DEFAULT);
+    data = H5Dopen(trial,"Synchronous Data/Channel Data",H5P_DEFAULT);
     hsize_t nchans = H5Tget_size(H5Dget_type(data))/sizeof(double);
     H5Dclose(data);
 
-    data = H5PTopen(trial,"Syncronous Data/Channel Data");
+    data = H5PTopen(trial,"Synchronous Data/Channel Data");
     hsize_t nsamples;
     H5PTget_num_packets(data,&nsamples);
 
@@ -334,7 +334,7 @@ void print_trial_info(hid_t trial,int num_trial) {
 
     for(int i=1;i<=nchans;++i) {
         std::stringstream channel_name;
-        channel_name << "Syncronous Data/Channel "  << i << " Name";
+        channel_name << "Synchronous Data/Channel "  << i << " Name";
         data = H5Dopen(trial,channel_name.str().c_str(),H5P_DEFAULT);
         H5Dread(data,string_type,H5S_ALL,H5S_ALL,H5P_DEFAULT,string_data);
         H5Dclose(data);
