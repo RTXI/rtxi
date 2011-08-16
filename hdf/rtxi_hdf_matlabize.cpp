@@ -2,9 +2,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
-
 #include <sstream>
-
+#include <sys/stat.h>
+#include <time.h>
 #include <hdf5.h>
 #include <hdf5_hl.h>
 
@@ -21,6 +21,10 @@ int main(int argc, char *argv[]) {
 	char cmdBuff[200];
 	sprintf(cmdBuff, "cp %s %s.old", argv[1], argv[1]);
 	system(cmdBuff);
+	struct tm* clock;
+	struct stat attrib;
+	stat(argv[1], &attrib);
+	clock = localtime( &(attrib.st_mtime) ); // last modified time
 
 	hid_t fid = H5Fopen(argv[1], H5F_ACC_RDWR, H5P_DEFAULT);
 	if (fid < 0) {
@@ -196,6 +200,9 @@ int main(int argc, char *argv[]) {
 
 	H5Fclose(fid);
 	close(tmpfd);
+        sprintf(cmdBuff, "touch -m --date=\"%s\" %s", asctime(clock), argv[1]);
+        printf("%s\n",asctime(clock));
+        system(cmdBuff);
 
 	return 0;
 
