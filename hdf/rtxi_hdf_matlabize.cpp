@@ -201,6 +201,7 @@ int main(int argc, char *argv[]) {
 	H5Fclose(fid);
 	close(tmpfd);
         sprintf(cmdBuff, "touch -m --date=\"%s\" %s", asctime(clock), argv[1]);
+        sprintf(cmdBuff, "touch -m --date=\"%s\" %s.old", asctime(clock), argv[1]);
         printf("%s\n",asctime(clock));
         system(cmdBuff);
 
