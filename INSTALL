@@ -40,7 +40,7 @@ BUILDING A REAL-TIME UBUNTU LINUX KERNEL
    $ sudo apt-get install libncurses5-dev libtool automake
    $ sudo apt-get install bison flex qt3-dev-tools
    $ sudo apt-get install libboost-dev libgsl0-dev
-   $ sudo apt-get install install libboost-program-options-dev3
+   $ sudo apt-get install install libboost-program-options-dev
 
 2. Download the latest stable version of RTAI 3.x at www.rtai.org.
    For the sake of this demonstration I'll be using RTAI version 3.8.1.
@@ -143,7 +143,7 @@ BUILDING A REAL-TIME UBUNTU LINUX KERNEL
 
    $ cd /usr/src
    $ sudo dpkg -i linux-headers-2.6.31.8-adeos 2.6.31.8-adeos-10.00.Custom i386.deb
-   $ sudo dpkg -i linux-image-2.6.31.8-adeos 2.6.31.8-adeos-10.00.Custom i386.deba
+   $ sudo dpkg -i linux-image-2.6.31.8-adeos 2.6.31.8-adeos-10.00.Custom i386.deb
 
 9. Reboot into the new Linux kernel. Reboot the system and select the new RT
    kernel from the list provided.
@@ -182,7 +182,7 @@ BUILDING & INSTALLING COMEDI
     $ cd /opt
     $ sudo git clone git://comedi.org/git/comedi/comedi.git
     $ sudo git clone git://comedi.org/git/comedi/comedilib.git
-    $ sudo git clone git://comedi.org/git/comedi/comedi calibrate.git
+    $ sudo git clone git://comedi.org/git/comedi/comedi_calibrate.git
 
 13. Extract and install the COMEDI libraries.
 
