@@ -27,6 +27,10 @@ parameter.parameterName = cell(numParameters,1);
 parameter.values = cell(numParameters,1);
 parameter.modelName = cell(numParameters,1);
 
+eval(['ds = double(hdf5read(fname,''Trial',num2str(trialNum),'/Downsampling Rate''));'])
+eval(['trial.exp_dt = double(hdf5read(fname,''Trial',num2str(trialNum),'/Period (ns)''))*1e-9;'])
+trial.data_dt = trial.exp_dt*ds;
+
 for (p=1:numParameters);    
     fullName = fileinfo.GroupHierarchy(1).Groups(trialNum).Groups(2).Datasets(p).Name;
     nameStart = findstr(fullName, '/');
@@ -46,13 +50,26 @@ for (p=1:numParameters);
         end
     else
         % test if there have been changes to the parameter
-        if (size(dset,1) > 1)
-            changes = 1;
+        parameter.values{p} = dset(1).Data;
+        parameter.values{p}{1,1} = double(parameter.values{p}{1,1})*trial.data_dt;
+        for i=2:size(dset,1)
+            parameter.values{p} = [parameter.values{p};dset(i).Data];
+            parameter.values{p}{i,1} = double(parameter.values{p}{i,1})*trial.data_dt; % convert time of parameter change to s
         end
-        parameter.values{p} = dset(1).Data{2};
     end
     
 end
 
 end
 
+function strtime = convertTime(time)
+hour = time/3600;
+minute = rem(hour,1)*60;
+second = rem(minute,1)*60;
+hour = floor(hour);
+minute = floor(minute);
+
+if hour < 10; strtime = ['0',num2str(hour)]; else; strtime = num2str(hour);end
+if minute < 10; strtime = [strtime,':0',num2str(minute)]; else; strtime = [strtime,':',num2str(minute)];end
+if second < 10; strtime = [strtime,':0',num2str(second)]; else; strtime = [strtime,':',num2str(second)];end
+end

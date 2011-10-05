@@ -2,7 +2,7 @@ function [trial] = getTrial(fname,trialNum)
 % [trial] = getTrial(fname,trialNum)
 % 
 % This function returns all the channel data, metadata, and parameters used 
-% in the specified trial of an RTXI HDF5 file.
+% in the specified trial of a RTXI HDF5 file. Supports unmatlabized files.
 %
 %        parameters: [1x1 struct]
 %     numParameters: 15
@@ -22,6 +22,9 @@ function [trial] = getTrial(fname,trialNum)
 % DATE:  10/31/2010
 
 % MODIFIED:
+% 9/27/2011 - use lower level functions to read the synchronous data, users no longer have
+% to matlabize their files
+%s
 % 11/11/2010 - corrected extraction of synchronous channel names when >=10
 % channels are saved
 
@@ -61,17 +64,29 @@ trial.timestop = convertTime(trial.timestop);
 % trial.data = reshape(data,trial.numChannels,numsamples);
 % trial.data = trial.data';
 
-% New Data Recorder
-trial.numChannels = fileinfo.GroupHierarchy(1).Groups(trialNum).Groups(3).Datasets(end).Dims(1);
-trial.data = hdf5read(fileinfo.GroupHierarchy(1).Groups(trialNum).Groups(3).Datasets(end));
-trial.data = trial.data';
+% these 3 lines were for matlabized files
+%trial.numChannels = fileinfo.GroupHierarchy(1).Groups(trialNum).Groups(3).Datasets(end).Dims(1);
+%trial.data = hdf5read(fileinfo.GroupHierarchy(1).Groups(trialNum).Groups(3).Datasets(end));
+%trial.data = trial.data';
+
+% these next lines are lower level code for unmatlabized files that directly access the
+% packet table construct that RTXI writes with
+trial.numChannels = size(fileinfo.GroupHierarchy(1).Groups(trialNum).Groups(3).Datasets,2)-1;
+fileID = H5F.open(fname, 'H5F_ACC_RDWR', 'H5P_DEFAULT');
+datasetID = H5D.open(fileID, fileinfo.GroupHierarchy.Groups(trialNum).Groups(3).Datasets(end).Name);
+trial.data = H5D.read(datasetID, 'H5ML_DEFAULT','H5S_ALL','H5S_ALL','H5P_DEFAULT');
+H5F.close(fileID);
+trial.data = trial.data'; % convert to columns
 
 for i=1:trial.numChannels
     s = fileinfo.GroupHierarchy.Groups(trialNum).Groups(3).Datasets(i).Name;
     dset = hdf5read(fileinfo.GroupHierarchy(1).Groups(trialNum).Groups(3).Datasets(i));
     trial.channels{str2double(s(findstr(s,'Channel')+8:end-5))} = dset.Data;
 end
-numsamples = fileinfo.GroupHierarchy(1).Groups(trialNum).Groups(3).Datasets(end).Dims(2);
+% numsamples for matlabized files
+%numsamples = fileinfo.GroupHierarchy(1).Groups(trialNum).Groups(3).Datasets(end).Dims(2);
+% numsamples for unmatlabized files
+numsamples = fileinfo.GroupHierarchy(1).Groups(trialNum).Groups(3).Datasets(end).Dims(1);
 trial.time = 0:trial.data_dt:numsamples*trial.data_dt-trial.data_dt;
 trial.time = trial.time';
 trial.length = trial.time(end);

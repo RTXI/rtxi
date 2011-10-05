@@ -36,8 +36,8 @@ MyPluginGUI::MyPluginGUI(void) :
 {
 
   QWhatsThis::add(this, "<p><b>MyPluginGUI:</b><br>QWhatsThis description.</p>");
-  update( INIT); // this is optional, you may place initialization code directly into the constructor
   createGUI(vars, num_vars); // this is required to create the GUI
+  update( INIT); // this is optional, you may place initialization code directly into the constructor
   refresh(); // this is required to update the GUI with parameter and state values
 }
 

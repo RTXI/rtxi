@@ -1,12 +1,13 @@
 %% get basic file info
 clear; clc
 
-fname = 'dclampmod.h5';
+fname = 'testGwaveform.h5';
+
 fileinfo = rtxi_read(fname);
 trial1 = getTrial(fname,1);
 % trial2 = getTrial(fname,2);
 % trial3 = getTrial(fname,3);
-printParameters(fname,1);
+%printParameters(fname,1);
 
 
 %% browse a HDF5 file starting with a particular trial

@@ -10,7 +10,7 @@ function rtxifig = rtxibrowse(rtxifig,fname,trialNum)
 % OUTPUTS:
 %   rtxifig - returns the figure handle that was used
 %
-% This function calls rtxiplot.m and ccreates an interface that allows you
+% This function calls rtxiplot.m and creates an interface that allows you
 % to plot two different channels from the same trial of an RTXI HDF5 File.
 % Each axes is linked to its own listbox which contains all the available
 % channels. The time axis is automatically computed from the experimental

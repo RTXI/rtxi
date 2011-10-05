@@ -32,7 +32,7 @@
 #include <userprefs.h>
 
 UserPrefs::Panel::Panel(QWidget *parent) :
-	QWidget(parent, 0, Qt::WStyle_NormalBorder | Qt::WDestructiveClose) {
+QWidget(parent, 0, Qt::WStyle_NormalBorder | Qt::WDestructiveClose) {
 	QHBox *hbox;
 	QBoxLayout *layout = new QVBoxLayout(this);
 
