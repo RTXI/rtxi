@@ -37,6 +37,7 @@ class QLineEdit;
 class QListBox;
 class QPushButton;
 class QSpinBox;
+class QLabel;
 
 namespace DataRecorder {
 
@@ -133,6 +134,8 @@ namespace DataRecorder {
 
         size_t counter;
         size_t downsample_rate;
+        long long count;
+        long long fixedcount;
 
         pthread_t thread;
         Fifo fifo;
@@ -151,6 +154,7 @@ namespace DataRecorder {
         QComboBox *typeList;
         QGroupBox *channelBox;
         QListBox *selectionBox;
+        QLabel *recordStatus;
 
         QGroupBox *sampleBox;
         QSpinBox *downsampleSpin;
@@ -158,6 +162,10 @@ namespace DataRecorder {
         QGroupBox *fileBox;
         QLineEdit *fileNameEdit;
         QLineEdit *fileFormatEdit;
+        QLabel *fileSizeLbl;
+        QLabel *fileSize;
+        QLabel *trialLengthLbl;
+        QLabel *trialLength;
 
         QPushButton *startRecordButton;
         QPushButton *stopRecordButton;

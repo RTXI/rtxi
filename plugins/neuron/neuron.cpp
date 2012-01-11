@@ -185,6 +185,7 @@ static size_t num_vars = sizeof(vars)/sizeof(DefaultGUIModel::variable_t);
 
 Neuron::Neuron(void)
     : DefaultGUIModel("Neuron",::vars,::num_vars) {
+    createGUI(vars, num_vars);
     /*
      * Initialize Parameters
      */
@@ -264,7 +265,7 @@ void Neuron::execute(void) {
     for(int i = 0;i < steps;++i)
         solve(period/steps,y);
 
-    output(0) = V;
+    output(0) = V/1000; //convert to mV
 }
 
 void Neuron::update(DefaultGUIModel::update_flags_t flag) {
@@ -286,7 +287,7 @@ void Neuron::update(DefaultGUIModel::update_flags_t flag) {
         h = h_inf(V0);
         n = n_inf(V0);
     } else if(flag == PERIOD) {
-        period = RT::System::getInstance()->getPeriod()*1e-6;
+        period = RT::System::getInstance()->getPeriod()*1e-6; // ms
         steps = static_cast<int>(ceil(period*rate/1000.0));
     }
 }

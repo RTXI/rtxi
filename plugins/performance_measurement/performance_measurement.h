@@ -53,8 +53,6 @@ namespace PerformanceMeasurement {
 
         static Plugin *instance;
 
-        void removeOscilloscopePanel(Panel *);
-
         int menuID;
         Panel *panel;
 

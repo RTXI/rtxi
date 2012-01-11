@@ -31,6 +31,7 @@
 #include <rt.h>
 #include <system_control.h>
 #include <system_control_panel.h>
+#include <qwhatsthis.h>
 
 struct find_daq_t {
     int index;
@@ -52,7 +53,20 @@ static void buildDAQDeviceList(DAQ::Device *dev,void *arg) {
 SystemControlPanel::SystemControlPanel(QWidget *parent)
     : QWidget(parent,NULL,Qt::WStyle_NormalBorder | Qt::WDestructiveClose) {
     setCaption("System Control Panel");
-
+    QWhatsThis::add(
+           this,
+           "<p><b>System Control Panel:</b><br>This control panel allows you to configure "
+           "the channels on your DAQ card. RTXI automatically detects the number and types "
+           "of channels that are available. You should set the \"Scale\" of the channel "
+           "to be the inverse of the gain that is applied to the signal through the "
+           "combination of hardware and software that you are using. To acquire data from "
+           "a channel, you must set it to be Active using the toggle button. Any parameter "
+           "settings such as the \"Range\" or \"Scale\" must be set by clicking the \"Apply\" "
+           "button.<br><br> The \"Thread\" tab allows you to set the period for real-time "
+           "execution. You must click \"Apply\" to change this setting and propagate it "
+           "to other user modules such as the Data Recorder. Custom user modules can "
+           "execute special code when the real-time period is changed using the update(PERIOD) "
+           "flag.</p>");
     rateUpdate = false;
 
     QBoxLayout *layout = new QVBoxLayout(this);
