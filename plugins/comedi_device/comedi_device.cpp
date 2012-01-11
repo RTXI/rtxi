@@ -38,6 +38,7 @@ ComediDevice::ComediDevice(void *d,std::string name,IO::channel_t *chan,size_t s
                 subdevice[AI].chan[i].analog.maxdata = comedi_get_maxdata(device,subdevice[AI].id,i);
                 setAnalogGain(AI,i,1.0);
                 setAnalogRange(AI,i,0);
+                setAnalogZeroOffset(AI,i,0);
                 setAnalogReference(AI,i,0);
                 setAnalogUnits(AI,i,0);
             }
@@ -57,6 +58,7 @@ ComediDevice::ComediDevice(void *d,std::string name,IO::channel_t *chan,size_t s
                 subdevice[AO].chan[i].active = false;
                 subdevice[AO].chan[i].analog.maxdata = comedi_get_maxdata(device,subdevice[AO].id,i);
                 setAnalogGain(AO,i,1.0);
+                setAnalogZeroOffset(AI,i,0);
                 setAnalogRange(AO,i,0);
                 setAnalogReference(AO,i,0);
                 setAnalogUnits(AO,i,0);
@@ -231,12 +233,28 @@ index_t ComediDevice::getAnalogUnits(type_t type,index_t channel) const
     return subdevice[type].chan[channel].analog.units;
 }
 
+index_t ComediDevice::getAnalogOffsetUnits(type_t type,index_t channel) const
+{
+    if(!analog_exists(type,channel))
+        return 0-1;
+
+    return subdevice[type].chan[channel].analog.offsetunits;
+}
+
 double ComediDevice::getAnalogGain(type_t type,index_t channel) const
 {
     if(!analog_exists(type,channel))
         return 0;
 
     return subdevice[type].chan[channel].analog.gain;
+}
+
+double ComediDevice::getAnalogZeroOffset(type_t type,index_t channel) const
+{
+    if(!analog_exists(type,channel))
+        return 0;
+
+    return subdevice[type].chan[channel].analog.zerooffset;
 }
 
 int ComediDevice::setAnalogRange(type_t type,index_t channel,index_t index)
@@ -280,6 +298,24 @@ int ComediDevice::setAnalogUnits(type_t type,index_t channel,index_t index)
     return 0;
 }
 
+int ComediDevice::setAnalogOffsetUnits(type_t type,index_t channel,index_t index)
+{
+    if(!analog_exists(type,channel) || !((index >= 0) && (index < getAnalogUnitsCount(type,channel))))
+        return -EINVAL;
+
+    subdevice[type].chan[channel].analog.offsetunits = index;
+    return 0;
+}
+
+int ComediDevice::setAnalogZeroOffset(type_t type,index_t channel,double offset)
+{
+    if(!analog_exists(type,channel))
+        return -EINVAL;
+
+    subdevice[type].chan[channel].analog.zerooffset = offset;
+    return 0;
+}
+
 int ComediDevice::setAnalogGain(type_t type,index_t channel,double gain)
 {
     if(!analog_exists(type,channel))
@@ -319,7 +355,7 @@ void ComediDevice::read(void)
         if(subdevice[AI].chan[i].active) {
             channel = &subdevice[AI].chan[i].analog;
             comedi_data_read(device,subdevice[AI].id,i,channel->range,channel->reference,&sample);
-            output(i) = channel->gain*channel->conv*(sample-channel->offset);
+            output(i) = channel->gain*channel->conv*(sample-channel->offset)+channel->zerooffset;
         }
 
     unsigned int data;
@@ -342,7 +378,7 @@ void ComediDevice::write(void)
         for(size_t i=0;i < subdevice[AO].count;++i)
             if(subdevice[AO].chan[i].active) {
                 channel = &subdevice[AO].chan[i].analog;
-                value = round(channel->gain*channel->conv*input(i)+channel->offset);
+                value = round(channel->gain*channel->conv*(input(i)-channel->offset));
 
                 /*
                  * Prevent wrap around in the data units.
@@ -380,6 +416,7 @@ void ComediDevice::doLoad(const Settings::Object::State &s) {
         setAnalogReference(AI,i,s.loadInteger(str.str()+" AI Reference"));
         setAnalogUnits(AI,i,s.loadInteger(str.str()+" AI Units"));
         setAnalogGain(AI,i,s.loadDouble(str.str()+" AI Gain"));
+        setAnalogZeroOffset(AI,i,s.loadDouble(str.str()+" AI Zero Offset"));
     }
 
     for(size_t i = 0;i < subdevice[AO].count && i < static_cast<size_t>(s.loadInteger("AO Count"));++i) {
@@ -390,6 +427,7 @@ void ComediDevice::doLoad(const Settings::Object::State &s) {
         setAnalogReference(AO,i,s.loadInteger(str.str()+" AO Reference"));
         setAnalogUnits(AO,i,s.loadInteger(str.str()+" AO Units"));
         setAnalogGain(AO,i,s.loadDouble(str.str()+" AO Gain"));
+        setAnalogZeroOffset(AO,i,s.loadDouble(str.str()+" AO Zero Offset"));
     }
 
     for(size_t i = 0;i < subdevice[DIO].count && i < static_cast<size_t>(s.loadInteger("DIO Count"));++i) {
@@ -410,6 +448,7 @@ void ComediDevice::doSave(Settings::Object::State &s) const {
         s.saveInteger(str.str()+" AI Reference",getAnalogReference(AI,i));
         s.saveInteger(str.str()+" AI Units",getAnalogUnits(AI,i));
         s.saveDouble(str.str()+" AI Gain",getAnalogGain(AI,i));
+        s.saveDouble(str.str()+" AI Zero Offset",getAnalogZeroOffset(AI,i));
     }
 
     s.saveInteger("AO Count",subdevice[AO].count);
@@ -421,6 +460,7 @@ void ComediDevice::doSave(Settings::Object::State &s) const {
         s.saveInteger(str.str()+" AO Reference",getAnalogReference(AO,i));
         s.saveInteger(str.str()+" AO Units",getAnalogUnits(AO,i));
         s.saveDouble(str.str()+" AO Gain",getAnalogGain(AO,i));
+        s.saveDouble(str.str()+" AO Gain",getAnalogZeroOffset(AO,i));
     }
 
     s.saveInteger("DIO Count",subdevice[DIO].count);

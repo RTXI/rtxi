@@ -66,7 +66,7 @@ int RT::OS::createTask(RT::OS::Task *task,void *(*entry)(void *),void *arg,int p
     int retval = 0;
     xenomai_task_t *t = new xenomai_task_t;
 
-    if((retval = rt_task_create(&t->task,"RTXI RT Thread",2000,prio,T_FPU|T_JOINABLE))) {
+    if((retval = rt_task_create(&t->task,"RTXI RT Thread",0,prio,T_FPU|T_JOINABLE))) {
         ERROR_MSG("RT::OS::createTask : failed to create task\n");
         return retval;
     }

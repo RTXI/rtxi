@@ -67,6 +67,7 @@ namespace DataRecorder {
 
     void startRecording(void);
     void stopRecording(void);
+    void openFile(const QString &);
     void postAsyncData(const double *,size_t);
 
     class Channel : public RT::List<Channel>::Node {
@@ -166,6 +167,8 @@ namespace DataRecorder {
         QLabel *fileSize;
         QLabel *trialLengthLbl;
         QLabel *trialLength;
+        QLabel *trialNumLbl;
+        QLabel *trialNum;
 
         QPushButton *startRecordButton;
         QPushButton *stopRecordButton;

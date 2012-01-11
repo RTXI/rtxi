@@ -444,6 +444,7 @@ void SystemControlPanel::displayChannelTab(void) {
         analogRangeList->setEnabled(false);
         analogReferenceList->setEnabled(false);
         analogGainEdit->setEnabled(false);
+        analogZeroOffsetEdit->setEnabled(false);
         analogUnitPrefixList->setEnabled(false);
         analogUnitPrefixList2->setEnabled(false);
         analogUnitList->setEnabled(false);
@@ -456,6 +457,7 @@ void SystemControlPanel::displayChannelTab(void) {
         analogRangeList->setEnabled(true);
         analogReferenceList->setEnabled(true);
         analogGainEdit->setEnabled(true);
+        analogZeroOffsetEdit->setEnabled(true);
         analogUnitPrefixList->setEnabled(true);
         analogUnitPrefixList2->setEnabled(true);
         analogUnitList->setEnabled(true);

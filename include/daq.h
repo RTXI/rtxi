@@ -225,6 +225,14 @@ namespace DAQ {
          */
         virtual double getAnalogGain(type_t type,index_t index) const=0;
         /*!
+         * Get the offset of the selected channel that makes the signal zero
+         *
+         * \param type The channel's type.
+         * \param index The channel's index.
+         * \return The zero offset of the selected channel.
+         */
+        virtual double getAnalogZeroOffset(type_t type,index_t index) const=0;
+        /*!
          * Get the index of the range for the selected channel.
          *
          * \param type The channel's type.
@@ -249,6 +257,13 @@ namespace DAQ {
          */
         virtual index_t getAnalogUnits(type_t type,index_t index) const=0;
         /*!
+         * Get the index of the units for the selected channel zero offset.
+         *
+         * \param type The channel's type.
+         * \param index The channel's index.
+         * \return The index of the channel's offset units or INVALID on error.
+         */
+        virtual index_t getAnalogOffsetUnits(type_t type,index_t index) const=0;        /*!
          * Set the gain of the selected channel.
          *
          * \param type The channel's type.
@@ -267,6 +282,15 @@ namespace DAQ {
          */
         virtual int setAnalogRange(type_t type,index_t index,index_t range)=0;
         /*!
+         * Set the zero offset of the selected channel.
+         *
+         * \param type The channel's type.
+         * \param index The channel's index.
+         * \param offset The channel's new zero offset index.
+         * \return 0 if successful or a negative value on error.
+         */
+        virtual int setAnalogZeroOffset(type_t type,index_t index,double offset)=0;
+        /*!
          * Set the reference of the selected channel.
          *
          * \param type The channel's type.
@@ -284,7 +308,15 @@ namespace DAQ {
          * \return 0 if successful or a negative value on error.
          */
         virtual int setAnalogUnits(type_t type,index_t index,index_t units)=0;
-
+        /*!
+         * Set the offset units of the selected channel.
+         *
+         * \param type The channel's type.
+         * \param index The channel's index.
+         * \param units The channel's new offset units index.
+         * \return 0 if successful or a negative value on error.
+         */
+        virtual int setAnalogOffsetUnits(type_t type,index_t index,index_t units)=0;
         /*!
          * Get the direction of the specified digital channel.
          *

@@ -346,6 +346,16 @@ void DataRecorder::stopRecording(void) {
 		Event::Manager::getInstance()->postEvent(&event);
 }
 
+void DataRecorder::openFile(const QString& filename) {
+	Event::Object event(Event::OPEN_FILE_EVENT);
+	event.setParam("filename", const_cast<char *> (filename.latin1()));
+
+	if (RT::OS::isRealtime())
+		Event::Manager::getInstance()->postEventRT(&event);
+	else
+		Event::Manager::getInstance()->postEvent(&event);
+}
+
 void DataRecorder::postAsyncData(const double *data, size_t size) {
 	Event::Object event(Event::ASYNC_DATA_EVENT);
 	event.setParam("data", const_cast<double *> (data));
@@ -455,6 +465,14 @@ DataRecorder::Panel::Panel(QWidget *parent) :
 	fileSize = new QLabel(hbox);
 	fileSize->setText("No data recorded.");
 	fileSize->setAlignment(AlignLeft | AlignVCenter);
+
+	trialNumLbl = new QLabel(hbox);
+	trialNumLbl->setText("Trial:");
+	trialNumLbl->setAlignment(AlignRight | AlignVCenter);
+	trialNum = new QLabel(hbox);
+	trialNum->setText("0");
+	trialNum->setAlignment(AlignLeft | AlignVCenter);
+
 	trialLengthLbl = new QLabel(hbox);
 	trialLengthLbl->setText("Trial Length (s):");
 	trialLength = new QLabel(hbox);
@@ -566,6 +584,12 @@ void DataRecorder::Panel::receiveEvent(const Event::Object *event) {
 				if (recording)
 					i->block = 0;
 
+	} else if (event->getName() == Event::OPEN_FILE_EVENT) {
+            
+		QString filename(reinterpret_cast<char*> (event->getParam("filename")));
+		OpenFileEvent e(filename, fifo);
+		RT::System::getInstance()->postEvent(&e);
+
 	} else if (event->getName() == Event::START_RECORDING_EVENT) {
 
 		StartRecordingEvent e(recording, fifo);
@@ -586,7 +610,18 @@ void DataRecorder::Panel::receiveEvent(const Event::Object *event) {
 }
 
 void DataRecorder::Panel::receiveEventRT(const Event::Object *event) {
-	if (event->getName() == Event::START_RECORDING_EVENT) {
+	if (event->getName() == Event::OPEN_FILE_EVENT) {
+		QString filename = QString(reinterpret_cast<char*> (event->getParam("filename")));
+            
+		data_token_t token;
+            
+		token.type = DataRecorder::OPEN;
+		token.size = filename.length() + 1;
+		token.time = RT::OS::getTime();
+
+		fifo.write(&token, sizeof(token));
+		fifo.write(filename.latin1(), token.size);
+	} else if (event->getName() == Event::START_RECORDING_EVENT) {
 		data_token_t token;
 
 		recording = true;
@@ -1035,17 +1070,33 @@ int DataRecorder::Panel::openFile(QString &filename) {
 		QApplication::postEvent(this, event);
 		data.done.wait();
 
-		if (data.response == 0)
+		if (data.response == 0) { // append
 			file.id = H5Fopen(filename.latin1(), H5F_ACC_RDWR, H5P_DEFAULT);
-		else if (data.response == 1)
+			size_t trial_num;
+			QString trial_name;
+			H5Eset_auto(H5E_DEFAULT, NULL, NULL);
+			for (trial_num = 1;; ++trial_num) {
+				trial_name = "/Trial" + QString::number(trial_num);
+				file.trial = H5Gopen(file.id, trial_name.latin1(), H5P_DEFAULT);
+				if (file.trial < 0) {
+					H5Eclear(H5E_DEFAULT);
+					break;
+				} else
+				H5Gclose(file.trial);
+			}
+      			trialNum->setNum(int(trial_num)-1);
+		} else if (data.response == 1) { //overwrite
 			file.id = H5Fcreate(filename.latin1(), H5F_ACC_TRUNC, H5P_DEFAULT,
 					H5P_DEFAULT);
-		else
+			trialNum->setText("0");
+		} else {
 			return -1;
-	} else
+                }
+	} else {
 		file.id = H5Fcreate(filename.latin1(), H5F_ACC_TRUNC, H5P_DEFAULT,
 				H5P_DEFAULT);
-
+                trialNum->setText("0");
+        }
 	if (file.id < 0) {
 		H5E_type_t error_type;
 		size_t error_size;
@@ -1122,6 +1173,7 @@ int DataRecorder::Panel::startRecording(long long timestamp) {
 			H5Gclose(file.trial);
 	}
 
+        trialNum->setNum(int(trial_num));
 	file.trial = H5Gcreate(file.id, trial_name.latin1(), H5P_DEFAULT,
 			H5P_DEFAULT, H5P_DEFAULT);
 	file.pdata = H5Gcreate(file.trial, "Parameters", H5P_DEFAULT, H5P_DEFAULT,
@@ -1242,7 +1294,7 @@ void DataRecorder::Panel::stopRecording(long long timestamp, bool shutdown) {
 		PRINT_BACKTRACE();
 	}
 #endif
-
+        fixedcount = count;
 	hid_t scalar_space = H5Screate(H5S_SCALAR);
 	hid_t data = H5Dcreate(file.trial, "Timestamp Stop (ns)", H5T_STD_U64LE,
 			scalar_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);

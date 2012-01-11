@@ -36,6 +36,7 @@ const char *Event::PLUGIN_INSERT_EVENT = "SYSTEM : plugin insert";
 const char *Event::PLUGIN_REMOVE_EVENT = "SYSTEM : plugin remove";
 const char *Event::SETTINGS_OBJECT_INSERT_EVENT = "SYSTEM : settings object insert";
 const char *Event::SETTINGS_OBJECT_REMOVE_EVENT = "SYSTEM : settings object remove";
+const char *Event::OPEN_FILE_EVENT = "SYSTEM : open file";
 const char *Event::START_RECORDING_EVENT = "SYSTEM : start recording";
 const char *Event::STOP_RECORDING_EVENT = "SYSTEM : stop recording";
 const char *Event::ASYNC_DATA_EVENT = "SYSTEM : async data";

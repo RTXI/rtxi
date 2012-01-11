@@ -46,13 +46,17 @@ public:
     std::string getAnalogReferenceString(DAQ::type_t,DAQ::index_t,DAQ::index_t) const;
     std::string getAnalogUnitsString(DAQ::type_t,DAQ::index_t,DAQ::index_t) const;
     double getAnalogGain(DAQ::type_t,DAQ::index_t) const;
+    double getAnalogZeroOffset(DAQ::type_t,DAQ::index_t) const;
     DAQ::index_t getAnalogRange(DAQ::type_t,DAQ::index_t) const;
     DAQ::index_t getAnalogReference(DAQ::type_t,DAQ::index_t) const;
     DAQ::index_t getAnalogUnits(DAQ::type_t,DAQ::index_t) const;
+    DAQ::index_t getAnalogOffsetUnits(DAQ::type_t,DAQ::index_t) const;
     int setAnalogGain(DAQ::type_t,DAQ::index_t,double);
+    int setAnalogZeroOffset(DAQ::type_t,DAQ::index_t,double);
     int setAnalogRange(DAQ::type_t,DAQ::index_t,DAQ::index_t);
     int setAnalogReference(DAQ::type_t,DAQ::index_t,DAQ::index_t);
     int setAnalogUnits(DAQ::type_t,DAQ::index_t,DAQ::index_t);
+    int setAnalogOffsetUnits(DAQ::type_t,DAQ::index_t,DAQ::index_t);
 
     DAQ::direction_t getDigitalDirection(DAQ::index_t) const;
     int setDigitalDirection(DAQ::index_t,DAQ::direction_t);
@@ -76,7 +80,9 @@ private:
         DAQ::index_t units;
         double conv;
         double offset;
+        double zerooffset;
         lsampl_t maxdata;
+        DAQ::index_t offsetunits;
     };
 
     struct  digital_channel_t {

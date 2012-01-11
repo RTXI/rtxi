@@ -90,7 +90,7 @@ Makefile.dynamo_compile:
 	@echo 'CXXCOMPILE     = $$(LIBTOOL) --mode=compile $$(CXX)'     >> $@
 	@echo 'CXXLINK	      = $$(LIBTOOL) --mode=link $$(CXXLD)'	>> $@
 	@echo ''                                                        >> $@
-	@echo 'CXXFLAGS := -I. -I'$(pkgincludedir) $(AM_CXXFLAGS) 	>> $@
+	@echo 'CXXFLAGS := -I. -I/usr/include/python2.6 -I'$(pkgincludedir) $(AM_CXXFLAGS) 	>> $@
 	@echo 'LDFLAGS  := ' $(AM_LDFLAGS) -module -avoid-version	>> $@
 	@echo ''                                                        >> $@
 	@echo 'ifdef DEBUG '						>> $@
@@ -129,6 +129,7 @@ Makefile.plugin_compile: Makefile
 	@echo 'endif'							>> $@
 	@echo ''							>> $@
 	@echo 'OBJECTS = $$(shell echo $$(SOURCES) | sed "s/\.cpp[ \t\n]*/\.lo /g")' >> $@
+	@echo 'MOOBJECTS = $$(shell echo $$(SOURCES) | sed "s/\.h[ \t\n]*/\.lo /g")' >> $@
 	@echo ''							>> $@
 	@echo 'all: $$(PLUGIN_NAME).la'					>> $@
 	@echo ''							>> $@
@@ -143,6 +144,7 @@ Makefile.plugin_compile: Makefile
 	@echo ''							>> $@
 	@echo 'clean:'							>> $@
 	@echo '	rm -f $$(OBJECTS)'					>> $@
+	@echo '	rm -f $$(MOOBJECTS)'					>> $@
 	@echo '	rm -f moc_*'						>> $@
 	@echo '	rm -f *.o'						>> $@
 	@echo '	rm -f $$(PLUGIN_NAME).la'				>> $@

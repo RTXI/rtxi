@@ -111,6 +111,7 @@ namespace Event {
      */
     extern const char *SETTINGS_OBJECT_REMOVE_EVENT;
 
+    extern const char *OPEN_FILE_EVENT;
     extern const char *START_RECORDING_EVENT;
     extern const char *STOP_RECORDING_EVENT;
     extern const char *ASYNC_DATA_EVENT;

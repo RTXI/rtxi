@@ -27,7 +27,8 @@
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <stdlib.h>
-#include <asm/page.h>
+//#include <asm/page.h>
+#include <sys/user.h>
 
 #ifndef MAP_32BIT
 #define MAP_32BIT 0
