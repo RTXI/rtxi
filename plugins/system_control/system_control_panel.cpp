@@ -224,9 +224,11 @@ void SystemControlPanel::applyChannelTab(void) {
     DAQ::index_t a_chan = analogChannelList->currentItem();
     DAQ::type_t a_type = static_cast<DAQ::type_t>(analogSubdeviceList->currentItem());
     double a_gain = analogGainEdit->text().toDouble()*pow(10,-3*(analogUnitPrefixList->currentItem()-8));
+    double a_zerooffset = analogZeroOffsetEdit->text().toDouble()*pow(10,-3*(analogUnitPrefixList2->currentItem()-8));
 
     dev->setChannelActive(a_type,a_chan,analogActiveButton->isOn());
     dev->setAnalogGain(a_type,a_chan,a_gain);
+    dev->setAnalogZeroOffset(a_type,a_chan,a_zerooffset);
     dev->setAnalogRange(a_type,a_chan,analogRangeList->currentItem());
     dev->setAnalogReference(a_type,a_chan,analogReferenceList->currentItem());
     dev->setAnalogUnits(a_type,a_chan,analogUnitList->currentItem());
@@ -322,6 +324,34 @@ void SystemControlPanel::createChannelTab(void) {
     analogUnitList->setFixedWidth(70);
     new QLabel(" / Volt\n",hbox);
 
+    hbox = new QHBox(analogBox);
+    hbox->setSpacing(2);
+    analogLayout->addWidget(hbox);
+    label = new QLabel("Offset:",hbox);
+    label->setFixedWidth(60);
+    analogZeroOffsetEdit = new QLineEdit(hbox);
+    analogZeroOffsetEdit->setAlignment(Qt::AlignRight);
+    analogUnitPrefixList2 = new QComboBox(hbox);
+    analogUnitPrefixList2->setFixedWidth(70);
+    analogUnitPrefixList2->insertItem("yotta-");
+    analogUnitPrefixList2->insertItem("zetta-");
+    analogUnitPrefixList2->insertItem("exa-");
+    analogUnitPrefixList2->insertItem("peta-");
+    analogUnitPrefixList2->insertItem("tera-");
+    analogUnitPrefixList2->insertItem("giga-");
+    analogUnitPrefixList2->insertItem("mega-");
+    analogUnitPrefixList2->insertItem("kilo-");
+    analogUnitPrefixList2->insertItem("");
+    analogUnitPrefixList2->insertItem("milli-");
+    analogUnitPrefixList2->insertItem("micro-");
+    analogUnitPrefixList2->insertItem("nano-");
+    analogUnitPrefixList2->insertItem("pico-");
+    analogUnitPrefixList2->insertItem("femto-");
+    analogUnitPrefixList2->insertItem("atto-");
+    analogUnitPrefixList2->insertItem("zepto-");
+    analogUnitPrefixList2->insertItem("yocto-");
+    new QLabel(" Volt/Amps\n",hbox);
+
     QGroupBox *digitalBox = new QGroupBox("Digital",channelTab);
     layout->addWidget(digitalBox);
 
@@ -415,7 +445,9 @@ void SystemControlPanel::displayChannelTab(void) {
         analogReferenceList->setEnabled(false);
         analogGainEdit->setEnabled(false);
         analogUnitPrefixList->setEnabled(false);
+        analogUnitPrefixList2->setEnabled(false);
         analogUnitList->setEnabled(false);
+
     } else {
         DAQ::type_t type = static_cast<DAQ::type_t>(analogSubdeviceList->currentItem());
         DAQ::index_t chan = static_cast<DAQ::index_t>(analogChannelList->currentItem());
@@ -425,6 +457,7 @@ void SystemControlPanel::displayChannelTab(void) {
         analogReferenceList->setEnabled(true);
         analogGainEdit->setEnabled(true);
         analogUnitPrefixList->setEnabled(true);
+        analogUnitPrefixList2->setEnabled(true);
         analogUnitList->setEnabled(true);
 
         analogRangeList->clear();
@@ -434,15 +467,15 @@ void SystemControlPanel::displayChannelTab(void) {
         for(size_t i=0;i < dev->getAnalogReferenceCount(type,chan);++i)
             analogReferenceList->insertItem(dev->getAnalogReferenceString(type,chan,i));
         analogUnitList->clear();
-        for(size_t i=0;i < dev->getAnalogUnitsCount(type,chan);++i)
+        for(size_t i=0;i < dev->getAnalogUnitsCount(type,chan);++i) {
             analogUnitList->insertItem(dev->getAnalogUnitsString(type,chan,i));
-
+        }
         analogActiveButton->setOn(dev->getChannelActive(type,chan));
         analogRangeList->setCurrentItem(dev->getAnalogRange(type,chan));
         analogReferenceList->setCurrentItem(dev->getAnalogReference(type,chan));
         analogUnitList->setCurrentItem(dev->getAnalogUnits(type,chan));
 
-        // Determine the Correct Prefix
+        // Determine the Correct Prefix for analog gain
         int i = 8;
         double tmp;
         tmp = dev->getAnalogGain(type,chan);
@@ -459,6 +492,22 @@ void SystemControlPanel::displayChannelTab(void) {
             }
         analogGainEdit->setText(QString::number(tmp));
         analogUnitPrefixList->setCurrentItem(i);
+
+        // Determine the Correct Prefix for analog offset
+        tmp = dev->getAnalogZeroOffset(type,chan);
+        if(tmp != 0.0)
+            while(((tmp >= 1000)&&(i > 0))||((tmp < 1)&&(i < 16))) {
+                if(tmp >= 1000) {
+                    tmp /= 1000;
+                    i--;
+                }
+                else {
+                    tmp *= 1000;
+                    i++;
+                }
+            }
+        analogZeroOffsetEdit->setText(QString::number(tmp));
+        analogUnitPrefixList2->setCurrentItem(i);
     }
 
     if(!dev || !digitalChannelList->count()) {

@@ -72,7 +72,10 @@ private:
     QComboBox *analogSubdeviceList;
     QComboBox *analogUnitPrefixList;
     QComboBox *analogUnitList;
+    QComboBox *analogUnitPrefixList2;
+    QComboBox *analogUnitList2;
     QLineEdit *analogGainEdit;
+    QLineEdit *analogZeroOffsetEdit;
     QPushButton *analogActiveButton;
 
     QComboBox *digitalChannelList;
