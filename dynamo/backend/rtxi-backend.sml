@@ -955,6 +955,7 @@ fun output_constructor (outstream, modelname, init_table) =
 		    SUB (
 			 [$("DEBUG_MSG(\""^modelname^"::"^fname^": starting\\n\");"),
 			  $(""),
+                          $("createGUI(vars, num_vars);"),
 			  $("update(INIT);"),
 			  $("refresh();"),
 			  $("setActive(true);"),
@@ -1498,7 +1499,7 @@ fun main(dir, modelname, outputname, inline_c, env, startenv, envgraph, startenv
 	     $"#include <fcntl.h>",
 	     $"#include <signal.h>",
 	     $"#include <errno.h>",
-	     $"#include <rtai_shm.h>",
+	     $"//#include <rtai_shm.h>",
 	     $"",
 	     $"extern \"C\" Plugin::Object *createRTXIPlugin(void)",
 	     $"{",
