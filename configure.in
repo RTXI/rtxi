@@ -54,9 +54,16 @@ AM_CONDITIONAL([POSIX],[test x$rtos = xposix])
 if test x$rtos = xrtai3; then
   RTOS_CPPFLAGS=$RTAI_CPPFLAGS
   RTOS_LDFLAGS=$RTAI_LDFLAGS
-elif test x$rtos = xxenomai -a -x /usr/xenomai/bin/xeno-config; then
-  RTOS_CPPFLAGS=`/usr/xenomai/bin/xeno-config --xeno-cflags`
-  RTOS_LDFLAGS="`/usr/xenomai/bin/xeno-config --xeno-ldflags` -lnative"
+elif test x$rtos = xxenomai; then
+  if test -x /usr/xenomai/bin/xeno-config; then
+    XENO_CONFIG='/usr/xenomai/bin/xeno-config'
+  elif test -x /usr/bin/xeno-config; then
+    XENO_CONFIG='/usr/bin/xeno-config'
+  else
+    XENO_CONFIG=`which xeno-config`
+  fi
+  RTOS_CPPFLAGS=`$XENO_CONFIG --skin=native --cflags`
+  RTOS_LDFLAGS=`$XENO_CONFIG --skin=native --ldflags`
 elif test x$rtos = xposix; then
   RTOS_CPPFLAGS=
   RTOS_LDFLAGS=-lpthread
