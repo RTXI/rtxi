@@ -50,7 +50,14 @@ rtxi.conf:
 	@echo ' <OBJECT component="io" id="1" >'					>> $@
 	@echo '  <PARAM name="Num Links" >0</PARAM>'					>> $@
 	@echo ' </OBJECT>'								>> $@
-if BUILD_COMEDI
+if BUILD_COMEDI 
+	@echo ' <OBJECT component="plugin" library="comedi_driver.so" id="2" >'		>> $@
+	@echo '  <PARAM name="0" >/dev/comedi0</PARAM>'					>> $@
+	@echo '  <PARAM name="Num Devices" >1</PARAM>'					>> $@
+	@echo '  <OBJECT id="13" name="0" />'						>> $@
+	@echo ' </OBJECT>'								>> $@
+endif
+if BUILD_COMEDILIB 
 	@echo ' <OBJECT component="plugin" library="comedi_driver.so" id="2" >'		>> $@
 	@echo '  <PARAM name="0" >/dev/comedi0</PARAM>'					>> $@
 	@echo '  <PARAM name="Num Devices" >1</PARAM>'					>> $@
