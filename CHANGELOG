@@ -1,3 +1,8 @@
+2012-01-10 RTXI v1.31
+- Comedilib device added; driver enables using 'pure' Comedilib without RTAI
+- Minor updates to System Control Panel
+- Updates to included MATLAB files so that reading from HDF5 tables uses low-level APIs that no longer require matlabizing step 
+
 2011-07-18 RTXI v1.3 
 - implementation of user preferences for directories used to store data, settings files, and DYNAMO models
 - Data Recorder: remembers the last used directory for saving files, displays current recording status, displays file size and the time length of the data saved, FIFO buffer increased from 1MB to 10MB
