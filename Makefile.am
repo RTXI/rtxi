@@ -136,7 +136,7 @@ Makefile.plugin_compile: Makefile
 	@echo 'endif'							>> $@
 	@echo ''							>> $@
 	@echo 'OBJECTS = $$(shell echo $$(SOURCES) | sed "s/\.cpp[ \t\n]*/\.lo /g")' >> $@
-	@echo 'MOOBJECTS = $$(shell echo $$(SOURCES) | sed "s/\.h[ \t\n]*/\.lo /g")' >> $@
+	@echo 'MOOBJECTS = $$(shell echo $$(HEADERS) | sed "s/\.h[ \t\n]*/\.lo /g")' >> $@
 	@echo ''							>> $@
 	@echo 'all: $$(PLUGIN_NAME).la'					>> $@
 	@echo ''							>> $@
