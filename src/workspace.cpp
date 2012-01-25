@@ -237,7 +237,7 @@ void Workspace::Instance::setValue(size_t n,double value) {
 }
 
 void Workspace::Instance::setComment(size_t n,std::string newComment) {
-    if(n >= parameter.size())
+    if(n >= comment.size())
         return;
 
     comment[n].comment = newComment;
