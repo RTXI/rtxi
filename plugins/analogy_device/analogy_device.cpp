@@ -260,7 +260,7 @@ std::string AnalogyDevice::getAnalogUnitsString(type_t type,index_t channel,inde
       case 0:
           return "Volts";
       case 1:
-          return "mAmps";
+          return "Amps";
       default:
           return "";
     }
