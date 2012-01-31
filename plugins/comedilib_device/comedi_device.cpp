@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2004 Boston University
+ *               2012 University of Bristol, UK
  *
  *  This program is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU General Public License as
@@ -378,7 +379,7 @@ void ComediDevice::write(void)
         for(size_t i=0;i < subdevice[AO].count;++i)
             if(subdevice[AO].chan[i].active) {
                 channel = &subdevice[AO].chan[i].analog;
-                value = round(channel->gain*channel->conv*(input(i)-channel->offset));
+                value = round(channel->gain*channel->conv*(input(i)+channel->zerooffset)+channel->offset);
 
                 /*
                  * Prevent wrap around in the data units.
