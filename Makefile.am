@@ -64,6 +64,13 @@ if BUILD_COMEDILIB
 	@echo '  <OBJECT id="13" name="0" />'						>> $@
 	@echo ' </OBJECT>'								>> $@
 endif
+if BUILD_ANALOGY 
+	@echo ' <OBJECT component="plugin" library="analogy_driver.so" id="2" >'		>> $@
+	@echo '  <PARAM name="0" >analogy0</PARAM>'					>> $@
+	@echo '  <PARAM name="Num Devices" >1</PARAM>'					>> $@
+	@echo '  <OBJECT id="13" name="0" />'						>> $@
+	@echo ' </OBJECT>'								>> $@
+endif
 if BUILD_NI
 	@echo ' <OBJECT component="plugin" library="ni_driver.so" id="3" >'		>> $@
 	@echo '  <PARAM name="0" >PCI::SCAN</PARAM>'					>> $@

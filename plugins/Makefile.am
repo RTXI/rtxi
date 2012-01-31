@@ -5,6 +5,7 @@ MAINTAINERCLEANFILES = Makefile.in
 SUBDIRS = \
 	comedi_device \
 	comedilib_device \
+	analogy_device \
 	connector \
 	data_recorder \
 	dynamo_model_loader \
