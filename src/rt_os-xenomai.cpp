@@ -65,8 +65,13 @@ void RT::OS::shutdown(void) {
 int RT::OS::createTask(RT::OS::Task *task,void *(*entry)(void *),void *arg,int prio) {
     int retval = 0;
     xenomai_task_t *t = new xenomai_task_t;
+    int priority = 99;
 
-    if((retval = rt_task_create(&t->task,"RTXI RT Thread",0,prio,T_FPU|T_JOINABLE))) {
+    // Invert priority, default prio=0 but max priority for xenomai task is 99
+    if ((prio >=0) && (prio <=99))
+        priority -= prio;
+
+    if((retval = rt_task_create(&t->task,"RTXI RT Thread",0,priority,T_FPU|T_JOINABLE))) {
         ERROR_MSG("RT::OS::createTask : failed to create task\n");
         return retval;
     }
