@@ -14,8 +14,12 @@ SUBDIRS = \
 	model_loader \
 	neuron \
 	ni_device \
+	noisegen \
 	oscilloscope \
 	performance_measurement \
+	siggen\
 	system_control\
         synch\
-	userprefs
+	userprefs\
+	wave_maker
+

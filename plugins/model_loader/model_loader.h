@@ -18,12 +18,15 @@ public slots:
 
     void load(void);
     void load_recent(int);
+
     //void load_setting(int);
 
 private:
 
     int menuID;
     void updateRecentModules(QString, int);
+
 };
+
 
 #endif /* MODEL_LOADER_H */

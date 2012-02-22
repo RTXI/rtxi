@@ -21,13 +21,13 @@ extern "C" Plugin::Object *createRTXIPlugin(void *) {
 
 DynamoModelLoader::DynamoModelLoader(void) {
 	DEBUG_MSG("DynamoModelLoader::DynamoModelLoader : starting\n");
-	menuID = MainWindow::getInstance()->createControlMenuItem("Load DYNAMO Model",this,SLOT(load_dialog(void)));
+	menuID = MainWindow::getInstance()->createModuleMenuItem("Load DYNAMO Model",this,SLOT(load_dialog(void)));
 
 	model_makefile_path = QString(MODEL_MAKEFILE_PATH);
 	DEBUG_MSG("model_makefile_path = %s\n", model_makefile_path.ascii());
 	DEBUG_MSG("DynamoModelLoader::DynamoModelLoader : finished\n");
 
-	MainWindow::getInstance()->insertControlMenuSeparator();
+	MainWindow::getInstance()->insertModuleMenuSeparator();
 
 	// add recently used modules to the menu
 	QSettings userprefs;
@@ -39,8 +39,8 @@ DynamoModelLoader::DynamoModelLoader(void) {
 	for (int i = 0; i < std::min(numRecentFiles-2,10); ++i) {
 		listmodule = userprefs.readEntry("/recentFileList/" + entries[i]);
 		text = tr("&%1 %2").arg(i).arg(listmodule);
-		menuID = MainWindow::getInstance()->createControlMenuItem(text,this,SLOT(load_recent(int)));
-		MainWindow::getInstance()->setControlMenuItemParameter(menuID, i);
+		menuID = MainWindow::getInstance()->createModuleMenuItem(text,this,SLOT(load_recent(int)));
+		MainWindow::getInstance()->setModuleMenuItemParameter(menuID, i);
 	}
 
 	// add recently used settings files to the menu
@@ -56,7 +56,7 @@ DynamoModelLoader::DynamoModelLoader(void) {
 }
 
 DynamoModelLoader::~DynamoModelLoader(void) {
-	MainWindow::getInstance()->removeControlMenuItem(menuID);
+	MainWindow::getInstance()->removeModuleMenuItem(menuID);
 }
 
 /* Set and retrieve the name of the model make file. */

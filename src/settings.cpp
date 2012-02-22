@@ -229,7 +229,7 @@ int Settings::Manager::load(const std::string &filename) {
 
     Plugin::Manager::getInstance()->unloadAll();
 	MainWindow::getInstance()->clearFileMenu();
-	MainWindow::getInstance()->clearControlMenu();
+	MainWindow::getInstance()->clearModuleMenu();
 
 	long long period = RT::System::getInstance()->getPeriod();
     RT::System::getInstance()->setPeriod(1000000);

@@ -213,11 +213,11 @@ extern "C" Plugin::Object *createRTXIPlugin(void *) {
 }
 
 ElectrodeResistanceMeasurement::Plugin::Plugin(void) {
-    menuID = MainWindow::getInstance()->createControlMenuItem("Electrode Resistance Measurement",this,SLOT(createElectrodeResistanceMeasurementPanel(void)));
+    menuID = MainWindow::getInstance()->createModuleMenuItem("Electrode Resistance Measurement",this,SLOT(createElectrodeResistanceMeasurementPanel(void)));
 }
 
 ElectrodeResistanceMeasurement::Plugin::~Plugin(void) {
-    MainWindow::getInstance()->removeControlMenuItem(menuID);
+    MainWindow::getInstance()->removeModuleMenuItem(menuID);
     while(panelList.size())
         delete panelList.front();
     instance = 0;
