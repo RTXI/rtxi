@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2004 Boston University
+ * Copyright (C) 2011 Georgia Institute of Technology, University of Utah, Weill Cornell Medical College
  *               2012 University of Bristol, UK
  *
  *  This program is free software; you can redistribute it and/or

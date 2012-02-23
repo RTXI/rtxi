@@ -463,7 +463,7 @@ void AnalogyDevice::write(void)
         for(size_t i=0;i < subdevice[AO].count;++i)
             if(subdevice[AO].chan[i].active) {
                 channel = &subdevice[AO].chan[i].analog;
-                value = round(channel->gain*channel->conv*(input(i)+channel->zerooffset)+channel->offset);
+                value = round(channel->gain*channel->conv*(input(i)-channel->zerooffset)+channel->offset);
 
                 /*
                  * Prevent wrap around in the data units.

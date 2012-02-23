@@ -336,7 +336,7 @@ FIRwindow::saveFIRData()
                 << " lambda2= " << (double) lambda2;
             break;
             }
-
+          stream << QString(" ");
           switch (window_shape)
             {
           case RECT: // rectangular
