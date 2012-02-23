@@ -24,6 +24,7 @@
 #include <../include/gen_zap.h>
 #include <math.h>
 #include <string>
+#include <qcombobox.h>
 
 class SigGen : public DefaultGUIModel
 {
@@ -82,6 +83,7 @@ private:
 
   // QT components
   QPushButton *sineButton;
+  QComboBox *waveShape;
 
 private slots:
 

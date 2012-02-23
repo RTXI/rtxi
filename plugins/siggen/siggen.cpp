@@ -76,7 +76,7 @@ SigGen::SigGen(void) :
   initParameters();
   initStimulus();
   createGUI(vars, num_vars); // this is required to create the GUI
-  update( INIT);
+  update(INIT);
   refresh();
 }
 
@@ -131,6 +131,7 @@ SigGen::update(DefaultGUIModel::update_flags_t flag)
     setParameter("Amplitude", QString::number(amp));
     setState("Time (s)", systime);
     updateMode(0);
+    waveShape->setCurrentItem(mode);
     break;
   case MODIFY:
     delay = getParameter("Delay").toDouble();
@@ -139,6 +140,7 @@ SigGen::update(DefaultGUIModel::update_flags_t flag)
     ZAPduration = getParameter("ZAP duration (s)").toDouble();
     width = getParameter("Width").toDouble();
     amp = getParameter("Amplitude").toDouble();
+    mode = mode_t(waveShape->currentItem());
     initStimulus();
     break;
   case PERIOD:
@@ -178,31 +180,33 @@ SigGen::initParameters()
 void
 SigGen::initStimulus()
 {
-  if (mode == SINE)
+
+  switch (mode)
     {
-      sineWave.clear();
-      sineWave.init(freq, amp, dt);
+  case SINE:
+    sineWave.clear();
+    sineWave.init(freq, amp, dt);
+    break;
+  case MONOSQUARE: // triangular
+    monoWave.clear();
+    monoWave.init(delay, width, amp, dt);
+    break;
+  case BISQUARE: // Hamming
+    biWave.clear();
+    biWave.init(delay, width, amp, dt);
+    break;
+  case SAWTOOTH: // Hann
+    sawWave.clear();
+    sawWave.init(delay, width, amp, dt);
+    break;
+  case ZAP: // Dolph-Chebyshev
+    zapWave.clear();
+    zapWave.init(freq, freq2, amp, ZAPduration, dt);
+    break;
+  default:
+    break;
     }
-  else if (mode == MONOSQUARE)
-    {
-      monoWave.clear();
-      monoWave.init(delay, width, amp, dt);
-    }
-  else if (mode == BISQUARE)
-    {
-      biWave.clear();
-      biWave.init(delay, width, amp, dt);
-    }
-  else if (mode == SAWTOOTH)
-    {
-      sawWave.clear();
-      sawWave.init(delay, width, amp, dt);
-    }
-  else if (mode == ZAP)
-    {
-      zapWave.clear();
-      zapWave.init(freq, freq2, amp, ZAPduration, dt);
-    }
+
 }
 
 void
@@ -212,31 +216,31 @@ SigGen::updateMode(int index)
     {
       mode = SINE;
       printf("Signal generator now set to sine wave\n");
-      update( MODIFY);
+      update(MODIFY);
     }
   else if (index == 1)
     {
       mode = MONOSQUARE;
       printf("Signal generator now set to monophasic square wave\n");
-      update( MODIFY);
+      update(MODIFY);
     }
   else if (index == 2)
     {
       mode = BISQUARE;
       printf("Signal generator now set to biphasic square wave\n");
-      update( MODIFY);
+      update(MODIFY);
     }
   else if (index == 3)
     {
       mode = SAWTOOTH;
       printf("Signal generator now set to sawtooth wave\n");
-      update( MODIFY);
+      update(MODIFY);
     }
   else if (index == 4)
     {
       mode = ZAP;
       printf("Signal generator now set to a ZAP stimulus\n");
-      update( MODIFY);
+      update(MODIFY);
     }
 }
 
@@ -247,24 +251,19 @@ SigGen::createGUI(DefaultGUIModel::variable_t *var, int size)
   QBoxLayout *layout = new QVBoxLayout(this);
 
   QVButtonGroup *modeBox = new QVButtonGroup("Signal Type", this);
-  modeBox->setRadioButtonExclusive(true);
-  QRadioButton *sineButton = new QRadioButton("Sine Wave", modeBox);
-  QRadioButton *monoButton =
-      new QRadioButton("Monophasic Square Wave", modeBox);
-  QRadioButton *biButton = new QRadioButton("Biphasic Square Wave", modeBox);
-  QRadioButton *sawButton = new QRadioButton("Sawtooth Wave", modeBox);
-  QRadioButton *zapButton = new QRadioButton("ZAP Stimulus", modeBox);
 
-  QToolTip::add(sineButton, "Sine Wave: frequency, amplitude");
-  QToolTip::add(monoButton, "Monophasic Square Wave: delay, pulse width, pulse amplitude");
-  QToolTip::add(biButton, "Biphasic Square Wave: delay, pulse width, pulse amplitude");
-  QToolTip::add(sawButton, "Sawtooth Wave: delay, triangle width, triangle peak amplitude");
-  QToolTip::add(zapButton, "ZAP stimulus: initial frequency, maximum frequency, duration of ZAP");
-  sineButton->setChecked(true);
-  QObject::connect(modeBox,SIGNAL(clicked(int)),this,SLOT(updateMode(int)));
+  waveShape = new QComboBox(FALSE, modeBox, "Signal Type:");
+  waveShape->insertItem("Sine Wave");
+  waveShape->insertItem("Monophasic Square Wave");
+  waveShape->insertItem("Biphasic Square Wave");
+  waveShape->insertItem("Sawtooth Wave");
+  waveShape->insertItem("ZAP Stimulus");
+  QToolTip::add(waveShape, "Choose a signal to generate.");
+  QObject::connect(waveShape,SIGNAL(activated(int)), this, SLOT(updateMode(int)));
 
   // add custom GUI components to layout above default_gui_model components
   layout->addWidget(modeBox);
+  //layout->addWidget(waveShape);
 
   QScrollView *sv = new QScrollView(this);
   sv->setResizePolicy(QScrollView::AutoOneFit);
