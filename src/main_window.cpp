@@ -67,7 +67,6 @@ MainWindow::MainWindow(void) :
 
   updateUtilModules();
 
-
   systemMenu = new QPopupMenu(this);
   menuBar()->insertItem("&System", systemMenu);
 
@@ -346,29 +345,45 @@ MainWindow::updateUtilModules()
   QStringList entries = userprefs.entryList("/utilFileList");
   int numUtilFiles = entries.size();
 
-  if (numUtilFiles != 5) { // no settings file exists, so write one
-    userprefs.writeEntry("/utilFileList/" + QString::number(0), "neuron.so");
-    userprefs.writeEntry("/utilFileList/" + QString::number(1), "siggen.so");
-    userprefs.writeEntry("/utilFileList/" + QString::number(2), "noisegen.so");
-    userprefs.writeEntry("/utilFileList/" + QString::number(3), "synch.so");
-    userprefs.writeEntry("/utilFileList/" + QString::number(4), "wave_maker.so");
-  }
+  // rewrite list of bundled modules
+  for (int i = 0; i < numUtilFiles; i++)
+    {
+      userprefs.removeEntry("/utilFileList/util" + QString::number(i));
+      userprefs.removeEntry("/utilFileList/sig" + QString::number(i));
+    }
+  userprefs.writeEntry("/utilFileList/util" + QString::number(0), "neuron.so");
+  userprefs.writeEntry("/utilFileList/util" + QString::number(1), "synch.so");
+  userprefs.writeEntry("/utilFileList/util" + QString::number(2),
+      "FIRwindow.so");
+  userprefs.writeEntry("/utilFileList/sig" + QString::number(0), "siggen.so");
+  userprefs.writeEntry("/utilFileList/sig" + QString::number(1), "noisegen.so");
+  userprefs.writeEntry("/utilFileList/sig" + QString::number(2),
+      "wave_maker.so");
 
   int i = 0;
   int menuID = utilMenu->insertItem("Model HH Neuron",this,SLOT(loadUtil(int)));
   setUtilMenuItemParameter(menuID, i);
   i++;
-  menuID = utilMenu->insertItem("Signal Generator",this,SLOT(loadUtil(int)));
-  setUtilMenuItemParameter(menuID, i);
-  i++;
-  menuID = utilMenu->insertItem("Noise Generator",this,SLOT(loadUtil(int)));
-  setUtilMenuItemParameter(menuID, i);
-  i++;
   menuID = utilMenu->insertItem("Synchronize Modules",this,SLOT(loadUtil(int)));
   setUtilMenuItemParameter(menuID, i);
   i++;
-  menuID = utilMenu->insertItem("Wave Maker",this,SLOT(loadUtil(int)));
+  menuID = utilMenu->insertItem("FIR Filter",this,SLOT(loadUtil(int)));
   setUtilMenuItemParameter(menuID, i);
+
+  QPopupMenu *signalSubMenu = new QPopupMenu(this);
+
+  i = 0;
+  menuID = signalSubMenu->insertItem("Signal Generator",this,SLOT(loadSignal(int)));
+  signalSubMenu->setItemParameter(menuID, i);
+  i++;
+  menuID = signalSubMenu->insertItem("Noise Generator",this,SLOT(loadSignal(int)));
+  signalSubMenu->setItemParameter(menuID, i);
+  i++;
+  menuID = signalSubMenu->insertItem("Wave Maker",this,SLOT(loadSignal(int)));
+  signalSubMenu->setItemParameter(menuID, i);
+
+  utilMenu->insertItem(tr("&Signals"), signalSubMenu);
+
 }
 
 void
@@ -376,11 +391,20 @@ MainWindow::loadUtil(int i)
 {
   QSettings userprefs;
   userprefs.setPath("RTXI.org", "RTXI", QSettings::User);
-  QString filename = userprefs.readEntry("/utilFileList/"
+  QString filename = userprefs.readEntry("/utilFileList/util"
       + QString::number(i));
   Plugin::Manager::getInstance()->load(filename.latin1());
 }
 
+void
+MainWindow::loadSignal(int i)
+{
+  QSettings userprefs;
+  userprefs.setPath("RTXI.org", "RTXI", QSettings::User);
+  QString filename = userprefs.readEntry("/utilFileList/sig" + QString::number(
+      i));
+  Plugin::Manager::getInstance()->load(filename.latin1());
+}
 
 void
 MainWindow::windowsMenuAboutToShow(void)

@@ -194,6 +194,7 @@ private slots:
   void
   windowsMenuActivated(int);
   void loadUtil(int);
+  void loadSignal(int);
 
 private:
 

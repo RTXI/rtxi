@@ -51,7 +51,7 @@ static NoiseGen::variable_t vars[] =
 static size_t num_vars = sizeof(vars) / sizeof(DefaultGUIModel::variable_t);
 
 NoiseGen::NoiseGen(void) :
-  DefaultGUIModel("NoiseGen", ::vars, ::num_vars)
+  DefaultGUIModel("Noise Generator", ::vars, ::num_vars)
 {
   QWhatsThis::add(this,
       "<p><b>Noise Generator:</b></p><p>Generates noise of the type specified.</p>");

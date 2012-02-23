@@ -3,13 +3,14 @@ DISTCLEANFILES =
 MAINTAINERCLEANFILES = Makefile.in
 
 SUBDIRS = \
+	analogy_device \
 	comedi_device \
 	comedilib_device \
-	analogy_device \
 	connector \
 	data_recorder \
 	dynamo_model_loader \
 	electrode_resistance_measurement \
+	FIRwindow\
 	mimic \
 	model_loader \
 	neuron \
