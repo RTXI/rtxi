@@ -28,6 +28,7 @@
 #include <qlistbox.h>
 #include <qmessagebox.h>
 #include <qpushbutton.h>
+#include <qsettings.h>
 #include <qspinbox.h>
 #include <qstringlist.h>
 #include <qvbox.h>
@@ -373,11 +374,11 @@ DataRecorder::Channel::Channel(void) {
 DataRecorder::Channel::~Channel(void) {
 }
 
-DataRecorder::Panel::Panel(QWidget *parent) :
+DataRecorder::Panel::Panel(QWidget *parent, size_t buffersize) :
 	QWidget(parent, 0, Qt::WStyle_NormalBorder | Qt::WDestructiveClose),
-			RT::Thread(RT::Thread::MinimumPriority), fifo(10*1048576), recording(
+			RT::Thread(RT::Thread::MinimumPriority), fifo(buffersize), recording(
 					false) {
-	setCaption(QString::number(getID()) + " Data Recorder");
+        setCaption(QString::number(getID()) + " Data Recorder");
 	QWhatsThis::add(
 			this,
 			"<p><b>Data Recorder:</b><br>The Data Recorder writes data to an HDF5 file format "
@@ -1334,7 +1335,12 @@ extern "C" Plugin::Object *createRTXIPlugin(void *) {
 }
 
 DataRecorder::Plugin::Plugin(void) {
-menuID = MainWindow::getInstance()->createSystemMenuItem("HDF Data Recorder",this,SLOT(createDataRecorderPanel(void)));
+        // get the HDF data recorder buffer size from user preference
+        QSettings userprefs;
+        userprefs.setPath("RTXI.org", "RTXI", QSettings::User);
+
+        buffersize = userprefs.readNumEntry("/system/HDFbuffer", 10*1048576);
+        menuID = MainWindow::getInstance()->createSystemMenuItem("HDF Data Recorder",this,SLOT(createDataRecorderPanel(void)));
 }
 
 DataRecorder::Plugin::~Plugin(void) {
@@ -1345,7 +1351,8 @@ DataRecorder::Plugin::~Plugin(void) {
 }
 
 DataRecorder::Panel *DataRecorder::Plugin::createDataRecorderPanel(void) {
-	Panel *panel = new Panel(MainWindow::getInstance()->centralWidget());
+        //size_t buffersize = 10*1048576;
+	Panel *panel = new Panel(MainWindow::getInstance()->centralWidget(), buffersize);
 	panelList.push_back(panel);
 	return panel;
 }
@@ -1363,7 +1370,8 @@ void DataRecorder::Plugin::doDeferred(const Settings::Object::State &s) {
 
 void DataRecorder::Plugin::doLoad(const Settings::Object::State &s) {
 	for (size_t i = 0; i < static_cast<size_t> (s.loadInteger("Num Panels")); ++i) {
-		Panel *panel = new Panel(MainWindow::getInstance()->centralWidget());
+                //size_t buffersize = 10*1048576;
+		Panel *panel = new Panel(MainWindow::getInstance()->centralWidget(), buffersize);
 		panelList.push_back(panel);
 		panel->load(s.loadState(QString::number(i)));
 	}

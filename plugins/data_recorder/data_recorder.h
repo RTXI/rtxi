@@ -93,7 +93,7 @@ namespace DataRecorder {
 
     public:
 
-        Panel(QWidget *);
+        Panel(QWidget *, size_t);
         ~Panel(void);
 
         void execute(void);
@@ -211,6 +211,8 @@ namespace DataRecorder {
 
         int menuID;
         std::list<Panel *> panelList;
+        size_t buffersize;
+
 
     }; // class Plugin
 

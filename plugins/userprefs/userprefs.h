@@ -28,73 +28,87 @@
 
 class QLineEdit;
 
-namespace UserPrefs {
+namespace UserPrefs
+{
 
-class Panel;
+  class Panel;
 
-class Prefs: public QObject, public ::Plugin::Object {
+  class Prefs : public QObject, public ::Plugin::Object
+  {
 
-	Q_OBJECT
+    Q_OBJECT
 
-	friend class Panel;
+    friend class Panel;
 
-public:
+  public:
 
-	static Prefs *getInstance(void);
-
-public slots:
-
-	void createPrefsPanel(void);
-
-private:
-
-	Prefs(void);
-	~Prefs(void);
-	Prefs(const Prefs &) {
-	}
-	;
-	Prefs &operator=(const Prefs &) {
-		return *getInstance();
-	}
-	;
-
-	static Prefs *instance;
-
-	int menuID;
-	Panel *panel;
-
-}; // class Prefs
-
-class Panel: public QWidget {
-
-Q_OBJECT
-
-public:
-
-	Panel(QWidget *);
-	virtual ~Panel(void);
+    static Prefs *
+    getInstance(void);
 
 public slots:
 
-	void apply(void); // save and close
-	void reset(void); // reset to defaults
-	void cancel(void); // close with saving
+  void createPrefsPanel(void);
 
-	void chooseSettingsDir(void);
-	void chooseDynamoDir(void);
-	void chooseDataDir(void);
+  private:
 
-private:
+    Prefs(void);
+    ~Prefs(void);
+    Prefs(const Prefs &)
+    {
+    }
+    ;
+    Prefs &
+    operator=(const Prefs &)
+    {
+      return *getInstance();
+    }
+    ;
 
-	int menuID;
+    static Prefs *instance;
 
-	QSettings userprefs;
+    int menuID;
+    Panel *panel;
 
-	QLineEdit *settingsDirEdit; // directory for settings files
-	QLineEdit *dynamoDirEdit; // directory for DYNAMO files
-	QLineEdit *dataDirEdit; // directory of most recent data file
+  }; // class Prefs
 
-}; // class Panel
+  class Panel : public QWidget
+  {
+
+  Q_OBJECT
+
+  public:
+
+    Panel(QWidget *);
+    virtual
+    ~Panel(void);
+
+  public slots:
+
+    void apply(void); // save and close
+    void
+    reset(void); // reset to defaults
+    void
+    cancel(void); // close with saving
+
+    void
+    chooseSettingsDir(void);
+    void
+    chooseDynamoDir(void);
+    void
+    chooseDataDir(void);
+
+  private:
+
+    int menuID;
+
+    QSettings userprefs;
+
+    QLineEdit *settingsDirEdit; // directory for settings files
+    QLineEdit *dynamoDirEdit; // directory for DYNAMO files
+    QLineEdit *dataDirEdit; // directory of most recent data file
+    QLineEdit *HDFBufferEdit; // buffer size for HDF Data Recorder
+
+  }; // class Panel
 
 }
 ; // namespace USERPREFS

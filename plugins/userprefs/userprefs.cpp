@@ -22,6 +22,8 @@
  */
 
 #include <qhbox.h>
+#include <qhbuttongroup.h>
+#include <qvbuttongroup.h>
 #include <qlabel.h>
 #include <qlayout.h>
 #include <qlineedit.h>
@@ -32,149 +34,186 @@
 #include <userprefs.h>
 
 UserPrefs::Panel::Panel(QWidget *parent) :
-QWidget(parent, 0, Qt::WStyle_NormalBorder | Qt::WDestructiveClose) {
-	QHBox *hbox;
-	QBoxLayout *layout = new QVBoxLayout(this);
+  QWidget(parent, 0, Qt::WStyle_NormalBorder | Qt::WDestructiveClose)
+{
 
-	setCaption("RTXI User Preferences");
+  QBoxLayout *layout = new QVBoxLayout(this);
 
-	// load QSettings
-	QSettings userprefs;
-	userprefs.setPath("RTXI.org", "RTXI", QSettings::User);
+  setCaption("RTXI User Preferences");
 
-	// create GUI elements and set text
+  // load QSettings
+  QSettings userprefs;
+  userprefs.setPath("RTXI.org", "RTXI", QSettings::User);
 
-	hbox = new QHBox(this);
-	layout->addWidget(hbox);
-	(void) (new QLabel("Default settings directory:", hbox))->setFixedWidth(250);
-	settingsDirEdit = new QLineEdit(hbox);
-	settingsDirEdit->setFixedWidth(200);
-	settingsDirEdit->setText(userprefs.readEntry("/dirs/setfiles", getenv(
-			"HOME")));
-	QPushButton *chooseSettingsDirButton = new QPushButton("Browse", hbox);
-	QObject::connect(chooseSettingsDirButton,SIGNAL(clicked(void)),this,SLOT(chooseSettingsDir(void)));
+  // create GUI elements and set text
+  QVButtonGroup *dirGroup;
+  dirGroup = new QVButtonGroup("Default Directories", this);
 
-	hbox = new QHBox(this);
-	layout->addWidget(hbox);
-	(void) (new QLabel("Default DYNAMO models directory:", hbox))->setFixedWidth(
-			250);
-	dynamoDirEdit = new QLineEdit(hbox);
-	dynamoDirEdit->setText(userprefs.readEntry("/dirs/dynamomodels", getenv(
-			"HOME")));
-	QPushButton *chooseDynamoDirButton = new QPushButton("Browse", hbox);
-	QObject::connect(chooseDynamoDirButton,SIGNAL(clicked(void)),this,SLOT(chooseDynamoDir(void)));
+  QHBox *hbox;
+  hbox = new QHBox(dirGroup);
+  (void) (new QLabel("Default settings directory:", hbox))->setFixedWidth(250);
+  settingsDirEdit = new QLineEdit(hbox);
+  settingsDirEdit->setFixedWidth(200);
+  settingsDirEdit->setText(
+      userprefs.readEntry("/dirs/setfiles", getenv("HOME")));
+  QPushButton *chooseSettingsDirButton = new QPushButton("Browse", hbox);
+  QObject::connect(chooseSettingsDirButton,SIGNAL(clicked(void)),this,SLOT(chooseSettingsDir(void)));
 
-	hbox = new QHBox(this);
-	layout->addWidget(hbox);
-	(void) (new QLabel("Default HDF5 data directory:", hbox))->setFixedWidth(
-			250);
-	dataDirEdit = new QLineEdit(hbox);
-	dataDirEdit->setText(userprefs.readEntry("/dirs/data", getenv("HOME")));
-	QPushButton *chooseDataDirButton = new QPushButton("Browse", hbox);
-	QObject::connect(chooseDataDirButton,SIGNAL(clicked(void)),this,SLOT(chooseDataDir(void)));
+  hbox = new QHBox(dirGroup);
+  (void) (new QLabel("Default DYNAMO models directory:", hbox))->setFixedWidth(
+      250);
+  dynamoDirEdit = new QLineEdit(hbox);
+  dynamoDirEdit->setText(userprefs.readEntry("/dirs/dynamomodels", getenv(
+      "HOME")));
+  QPushButton *chooseDynamoDirButton = new QPushButton("Browse", hbox);
+  QObject::connect(chooseDynamoDirButton,SIGNAL(clicked(void)),this,SLOT(chooseDynamoDir(void)));
 
-	hbox = new QHBox(this);
+  hbox = new QHBox(dirGroup);
+  (void) (new QLabel("Default HDF5 data directory:", hbox))->setFixedWidth(250);
+  dataDirEdit = new QLineEdit(hbox);
+  dataDirEdit->setText(userprefs.readEntry("/dirs/data", getenv("HOME")));
+  QPushButton *chooseDataDirButton = new QPushButton("Browse", hbox);
+  QObject::connect(chooseDataDirButton,SIGNAL(clicked(void)),this,SLOT(chooseDataDir(void)));
 
-	QPushButton *resetButton = new QPushButton("Reset and Close", hbox);
-	QObject::connect(resetButton,SIGNAL(clicked(void)),this,SLOT(reset(void)));
+  layout->addWidget(dirGroup);
 
-	QPushButton *applyButton = new QPushButton("Save and Close", hbox);
-	QObject::connect(applyButton,SIGNAL(clicked(void)),this,SLOT(apply(void)));
+  hbox = new QHBox(this);
+  (void) (new QLabel("HDF Data Recorder Buffer Size:", hbox))->setFixedWidth(250);
+  HDFBufferEdit = new QLineEdit(hbox);
+  HDFBufferEdit->setText(QString::number(userprefs.readNumEntry("/system/HDFbuffer", 10*1048576)));
 
-	QPushButton *cancelButton = new QPushButton("Close without Saving", hbox);
-	QObject::connect(cancelButton,SIGNAL(clicked(void)),this,SLOT(cancel(void)));
+  layout->addWidget(hbox);
 
-	layout->addWidget(hbox);
+  hbox = new QHBox(this);
 
-	show();
+  QPushButton *resetButton = new QPushButton("Reset and Close", hbox);
+  QObject::connect(resetButton,SIGNAL(clicked(void)),this,SLOT(reset(void)));
 
-	//setActive(true);
+  QPushButton *applyButton = new QPushButton("Save and Close", hbox);
+  QObject::connect(applyButton,SIGNAL(clicked(void)),this,SLOT(apply(void)));
+
+  QPushButton *cancelButton = new QPushButton("Close without Saving", hbox);
+  QObject::connect(cancelButton,SIGNAL(clicked(void)),this,SLOT(cancel(void)));
+
+  layout->addWidget(hbox);
+
+  show();
+
+  //setActive(true);
 }
 
-UserPrefs::Panel::~Panel(void) {
-	Prefs::getInstance()->panel = 0;
+UserPrefs::Panel::~Panel(void)
+{
+  Prefs::getInstance()->panel = 0;
 }
 
-void UserPrefs::Panel::reset(void) {
-	settingsDirEdit->setText(getenv("HOME"));
-	dynamoDirEdit->setText(getenv("HOME"));
-	dataDirEdit->setText(getenv("HOME"));
-	apply();
+void
+UserPrefs::Panel::reset(void)
+{
+  settingsDirEdit->setText(getenv("HOME"));
+  dynamoDirEdit->setText(getenv("HOME"));
+  dataDirEdit->setText(getenv("HOME"));
+  HDFBufferEdit->setText(QString::number(10*1048576));
+
+  apply();
 }
 
-void UserPrefs::Panel::apply(void) {
-	userprefs.writeEntry("/dirs/setfiles", settingsDirEdit->text());
-	userprefs.writeEntry("/dirs/dynamomodels", dynamoDirEdit->text());
-	userprefs.writeEntry("/dirs/data", dataDirEdit->text());
-	this->close();
+void
+UserPrefs::Panel::apply(void)
+{
+  userprefs.writeEntry("/dirs/setfiles", settingsDirEdit->text());
+  userprefs.writeEntry("/dirs/dynamomodels", dynamoDirEdit->text());
+  userprefs.writeEntry("/dirs/data", dataDirEdit->text());
+  bool ok;
+  QString buffer = HDFBufferEdit->text();
+  userprefs.writeEntry("/system/HDFbuffer", buffer.toInt(&ok));
+
+  this->close();
+
 }
 
-void UserPrefs::Panel::cancel(void) {
-	this->close();
+void
+UserPrefs::Panel::cancel(void)
+{
+  this->close();
 }
 
-void UserPrefs::Panel::chooseSettingsDir(void) {
-	QString dir_name = QFileDialog::getExistingDirectory(userprefs.readEntry(
-			"/dirs/setfiles", getenv("HOME")), MainWindow::getInstance(),
-			"get existing directory",
-			"Choose a default directory for settings files", TRUE);
-	settingsDirEdit->setText(dir_name);
+void
+UserPrefs::Panel::chooseSettingsDir(void)
+{
+  QString dir_name = QFileDialog::getExistingDirectory(userprefs.readEntry(
+      "/dirs/setfiles", getenv("HOME")), MainWindow::getInstance(),
+      "get existing directory",
+      "Choose a default directory for settings files", TRUE);
+  settingsDirEdit->setText(dir_name);
 }
 
-void UserPrefs::Panel::chooseDynamoDir(void) {
-	QString dir_name = QFileDialog::getExistingDirectory(userprefs.readEntry(
-			"/dirs/setfiles", getenv("HOME")), MainWindow::getInstance(),
-			"get existing directory",
-			"Choose a default directory for DYNAMO models", TRUE);
-	dynamoDirEdit->setText(dir_name);
+void
+UserPrefs::Panel::chooseDynamoDir(void)
+{
+  QString dir_name = QFileDialog::getExistingDirectory(userprefs.readEntry(
+      "/dirs/setfiles", getenv("HOME")), MainWindow::getInstance(),
+      "get existing directory", "Choose a default directory for DYNAMO models",
+      TRUE);
+  dynamoDirEdit->setText(dir_name);
 }
 
-void UserPrefs::Panel::chooseDataDir(void) {
-	QString dir_name = QFileDialog::getExistingDirectory(userprefs.readEntry(
-			"/dirs/data", getenv("HOME")), MainWindow::getInstance(),
-			"get existing directory",
-			"Choose a default directory for HDF5 data files", TRUE);
-	dataDirEdit->setText(dir_name);
+void
+UserPrefs::Panel::chooseDataDir(void)
+{
+  QString dir_name = QFileDialog::getExistingDirectory(userprefs.readEntry(
+      "/dirs/data", getenv("HOME")), MainWindow::getInstance(),
+      "get existing directory",
+      "Choose a default directory for HDF5 data files", TRUE);
+  dataDirEdit->setText(dir_name);
 }
 
-extern "C" Plugin::Object *createRTXIPlugin(void *) {
-	return UserPrefs::Prefs::getInstance();
+extern "C" Plugin::Object *
+createRTXIPlugin(void *)
+{
+  return UserPrefs::Prefs::getInstance();
 }
 
 UserPrefs::Prefs::Prefs(void) :
-	panel(0) {
+  panel(0)
+{
 menuID = MainWindow::getInstance()->createSystemMenuItem("Preferences",this,SLOT(createPrefsPanel(void)));
 }
 
-UserPrefs::Prefs::~Prefs(void) {
-	MainWindow::getInstance()->removeSystemMenuItem(menuID);
-	if (panel)
-		delete panel;
-	instance = 0;
-	panel = 0;
+UserPrefs::Prefs::~Prefs(void)
+{
+  MainWindow::getInstance()->removeSystemMenuItem(menuID);
+  if (panel)
+    delete panel;
+  instance = 0;
+  panel = 0;
 }
 
-void UserPrefs::Prefs::createPrefsPanel(void) {
-	if (!panel)
-		panel = new Panel(MainWindow::getInstance()->centralWidget());
-	panel->show();
+void
+UserPrefs::Prefs::createPrefsPanel(void)
+{
+  if (!panel)
+    panel = new Panel(MainWindow::getInstance()->centralWidget());
+  panel->show();
 }
 
 static Mutex mutex;
 UserPrefs::Prefs *UserPrefs::Prefs::instance = 0;
 
-UserPrefs::Prefs *UserPrefs::Prefs::getInstance(void) {
-	if (instance)
-		return instance;
+UserPrefs::Prefs *
+UserPrefs::Prefs::getInstance(void)
+{
+  if (instance)
+    return instance;
 
-	/*************************************************************************
-	 * Seems like alot of hoops to jump through, but allocation isn't        *
-	 *   thread-safe. So effort must be taken to ensure mutual exclusion.    *
-	 *************************************************************************/
+  /*************************************************************************
+   * Seems like alot of hoops to jump through, but allocation isn't        *
+   *   thread-safe. So effort must be taken to ensure mutual exclusion.    *
+   *************************************************************************/
 
-	Mutex::Locker lock(&::mutex);
-	if (!instance)
-		instance = new Prefs();
+  Mutex::Locker lock(&::mutex);
+  if (!instance)
+    instance = new Prefs();
 
-	return instance;
+  return instance;
 }
