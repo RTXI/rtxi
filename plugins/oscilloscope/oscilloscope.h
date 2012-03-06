@@ -56,6 +56,11 @@ namespace Oscilloscope {
 
         void receiveEvent(const ::Event::Object *);
 
+    public slots:
+
+        void updateDownsampleRate(int);
+
+
     protected:
 
         void closeEvent(QCloseEvent *);
@@ -79,6 +84,9 @@ namespace Oscilloscope {
         void showAdvancedTab(void);
         void showChannelTab(void);
         void showDisplayTab(void);
+
+
+        size_t downsample_rate;
 
         Panel *panel;
 
@@ -183,9 +191,13 @@ namespace Oscilloscope {
 
     private:
 
+        void updateDownsampleRate(int);
+
         Fifo fifo;
         Properties *properties;
         std::vector<IO::Block *> blocks;
+        size_t counter;
+        size_t downsample_rate;
 
     }; // class Panel
 

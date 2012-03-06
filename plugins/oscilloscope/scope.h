@@ -59,6 +59,7 @@ public:
         QString label;
         double scale;
         double offset;
+        std::vector<double> prevdata;
         std::vector<double> data;
         void *info;
 
