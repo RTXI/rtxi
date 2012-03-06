@@ -283,13 +283,13 @@ double Scope::getDivT(void) const {
 
 void Scope::setDivT(double divT) {
     hScl = divT;
-
+    QChar mu = QChar(0x3BC);
     if(divT >= 1000.)
         dtLabel = QString::number(divT*1e-3)+"s";
     else if(divT >= 1.)
         dtLabel = QString::number(divT)+"ms";
     else if(divT >= 1e-3)
-        dtLabel = QString::number(divT*1e3)+"us";
+        dtLabel = QString::number(divT*1e3)+mu+"s";
     else
         dtLabel = QString::number(divT*1e6)+"ns";
 

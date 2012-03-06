@@ -477,7 +477,7 @@ void Oscilloscope::Properties::createAdvancedTab(void) {
     sizeSpin = new QSpinBox(hbox1);
     sizeSpin->setMinValue(500);
     sizeSpin->setMaxValue(50000);
-    //sizeSpin->setValue(panel->getDataSize());
+    sizeSpin->setValue(panel->getDataSize());
     sizeSpin->setEnabled(false);
 
     QGroupBox *gridBox = new QGroupBox("Grid Properties",advancedTab);
@@ -548,71 +548,112 @@ void Oscilloscope::Properties::createChannelTab(void) {
     displayLayout->addWidget(hbox1);
     (new QLabel("   Scale: ",hbox1))->setFixedWidth(125);
     scaleList = new QComboBox(hbox1);
-    scaleList->insertItem(" 10  V/div"); // 0  case 0
-    scaleList->insertItem("  5  V/div"); // 1  case 1
-    scaleList->insertItem("  2.5 V/div");// 2  case 2
-    scaleList->insertItem("  2  V/div"); // 3  case 3
-    scaleList->insertItem("  1  V/div"); // 4  case 0
-    scaleList->insertItem("500 mV/div"); // 5  case 1
-    scaleList->insertItem("250 mV/div"); // 6  case 2
-    scaleList->insertItem("200 mV/div"); // 7  case 3
-    scaleList->insertItem("100 mV/div"); // 8  case 0
-    scaleList->insertItem(" 50 mV/div"); // 9  case 1
-    scaleList->insertItem(" 25 mV/div");
-    scaleList->insertItem(" 20 mV/div");
-    scaleList->insertItem(" 10 mV/div");
-    scaleList->insertItem("  5 mV/div");
+    QFont scaleListFont( "DejaVu Sans Mono");
+    scaleList->setFont(scaleListFont);
+    scaleList->insertItem(" 10    V/div"); // 0  case 0
+    scaleList->insertItem("  5    V/div"); // 1  case 1
+    scaleList->insertItem("  2.5  V/div");// 2  case 2
+    scaleList->insertItem("  2    V/div"); // 3  case 3
+    scaleList->insertItem("  1    V/div"); // 4  case 0
+    scaleList->insertItem("500   mV/div"); // 5  case 1
+    scaleList->insertItem("250   mV/div"); // 6  case 2
+    scaleList->insertItem("200   mV/div"); // 7  case 3
+    scaleList->insertItem("100   mV/div"); // 8  case 0
+    scaleList->insertItem(" 50   mV/div"); // 9  case 1
+    scaleList->insertItem(" 25   mV/div");
+    scaleList->insertItem(" 20   mV/div");
+    scaleList->insertItem(" 10   mV/div");
+    scaleList->insertItem("  5   mV/div");
     scaleList->insertItem("  2.5 mV/div");
-    scaleList->insertItem("  2 mV/div");
-    scaleList->insertItem("  1 mV/div");
-    scaleList->insertItem("500 uV/div");
-    scaleList->insertItem("250 uV/div");
-    scaleList->insertItem("200 uV/div");
-    scaleList->insertItem("100 uV/div");
-    scaleList->insertItem(" 50 uV/div");
-    scaleList->insertItem(" 25 uV/div");
-    scaleList->insertItem(" 20 uV/div");
-    scaleList->insertItem(" 10 uV/div");
-    scaleList->insertItem("  5 uV/div");
-    scaleList->insertItem("  2.5 uV/div");
-    scaleList->insertItem("  2 uV/div");
-    scaleList->insertItem("  1 uV/div");
-    scaleList->insertItem("500 nV/div");
-    scaleList->insertItem("250 nV/div");
-    scaleList->insertItem("200 nV/div");
-    scaleList->insertItem("100 nV/div");
-    scaleList->insertItem(" 50 nV/div");
-    scaleList->insertItem(" 25 nV/div");
-    scaleList->insertItem(" 20 nV/div");
-    scaleList->insertItem(" 10 nV/div");
-    scaleList->insertItem("  5 nV/div");
+    scaleList->insertItem("  2   mV/div");
+    scaleList->insertItem("  1   mV/div");
+    QChar mu = QChar(0x3BC);
+    QString suffix = QString("V/div");
+    QString text = QString("500   ");
+    text.append(mu);
+    text.append(suffix);
+    scaleList->insertItem(text);
+    text = QString("250   ");
+    text.append(mu);
+    text.append(suffix);
+    scaleList->insertItem(text);
+    text = QString("200   ");
+    text.append(mu);
+    text.append(suffix);
+    scaleList->insertItem(text);
+    text = QString("100   ");
+    text.append(mu);
+    text.append(suffix);
+    scaleList->insertItem(text);
+    text = QString(" 50   ");
+    text.append(mu);
+    text.append(suffix);
+    scaleList->insertItem(text);
+    text = QString(" 25   ");
+    text.append(mu);
+    text.append(suffix);
+    scaleList->insertItem(text);
+    text = QString(" 20   ");
+    text.append(mu);
+    text.append(suffix);
+    scaleList->insertItem(text);
+    text = QString(" 10   ");
+    text.append(mu);
+    text.append(suffix);
+    scaleList->insertItem(text);
+    text = QString("  5   ");
+    text.append(mu);
+    text.append(suffix);
+    scaleList->insertItem(text);
+    text = QString("  2.5 ");
+    text.append(mu);
+    text.append(suffix);
+    scaleList->insertItem(text);
+    text = QString("  2   ");
+    text.append(mu);
+    text.append(suffix);
+    scaleList->insertItem(text);
+    text = QString("  1   ");
+    text.append(mu);
+    text.append(suffix);
+    scaleList->insertItem(text);
+
+    scaleList->insertItem("500   nV/div");
+    scaleList->insertItem("250   nV/div");
+    scaleList->insertItem("200   nV/div");
+    scaleList->insertItem("100   nV/div");
+    scaleList->insertItem(" 50   nV/div");
+    scaleList->insertItem(" 25   nV/div");
+    scaleList->insertItem(" 20   nV/div");
+    scaleList->insertItem(" 10   nV/div");
+    scaleList->insertItem("  5   nV/div");
     scaleList->insertItem("  2.5 nV/div");
-    scaleList->insertItem("  2 nV/div");
-    scaleList->insertItem("  1 nV/div");
-    scaleList->insertItem("500 pV/div");
-    scaleList->insertItem("250 pV/div");
-    scaleList->insertItem("200 pV/div");
-    scaleList->insertItem("100 pV/div");
-    scaleList->insertItem(" 50 pV/div");
-    scaleList->insertItem(" 25 pV/div");
-    scaleList->insertItem(" 20 pV/div");
-    scaleList->insertItem(" 10 pV/div");
-    scaleList->insertItem("  5 pV/div");
+    scaleList->insertItem("  2   nV/div");
+    scaleList->insertItem("  1   nV/div");
+    scaleList->insertItem("500   pV/div");
+    scaleList->insertItem("250   pV/div");
+    scaleList->insertItem("200   pV/div");
+    scaleList->insertItem("100   pV/div");
+    scaleList->insertItem(" 50   pV/div");
+    scaleList->insertItem(" 25   pV/div");
+    scaleList->insertItem(" 20   pV/div");
+    scaleList->insertItem(" 10   pV/div");
+    scaleList->insertItem("  5   pV/div");
     scaleList->insertItem("  2.5 pV/div");
-    scaleList->insertItem("  2 pV/div");
-    scaleList->insertItem("  1 pV/div");
-    scaleList->insertItem("500 fV/div");
-    scaleList->insertItem("250 fV/div");
-    scaleList->insertItem("200 fV/div");
-    scaleList->insertItem("100 fV/div");
-    scaleList->insertItem(" 50 fV/div");
-    scaleList->insertItem(" 25 fV/div");
-    scaleList->insertItem(" 20 fV/div");
-    scaleList->insertItem(" 10 fV/div");
-    scaleList->insertItem("  5 fV/div");
+    scaleList->insertItem("  2   pV/div");
+    scaleList->insertItem("  1   pV/div");
+    scaleList->insertItem("500   fV/div");
+    scaleList->insertItem("250   fV/div");
+    scaleList->insertItem("200   fV/div");
+    scaleList->insertItem("100   fV/div");
+    scaleList->insertItem(" 50   fV/div");
+    scaleList->insertItem(" 25   fV/div");
+    scaleList->insertItem(" 20   fV/div");
+    scaleList->insertItem(" 10   fV/div");
+    scaleList->insertItem("  5   fV/div");
     scaleList->insertItem("  2.5 fV/div");
-    scaleList->insertItem("  2 fV/div");
-    scaleList->insertItem("  1 fV/div");
+    scaleList->insertItem("  2   fV/div");
+    scaleList->insertItem("  1   fV/div");
 
     QHBox *hbox2 = new QHBox(displayBox);
     displayLayout->addWidget(hbox2);
@@ -704,11 +745,13 @@ void Oscilloscope::Properties::createDisplayTab(void) {
 
     QBoxLayout *timeLayout = new QVBoxLayout(timeBox);
     timeLayout->setMargin(15);
-
+    QChar mu = QChar(0x3BC);
     QHBox *hbox0 = new QHBox(timeBox);
     timeLayout->addWidget(hbox0);
     (new QLabel("Time Scale:",hbox0))->setFixedWidth(125);
     timeList = new QComboBox(hbox0);
+    QFont timeListFont( "DejaVu Sans Mono");
+    timeList->setFont(timeListFont);
     timeList->insertItem("  5  s/div");
     timeList->insertItem("  2  s/div");
     timeList->insertItem("  1  s/div");
@@ -721,15 +764,43 @@ void Oscilloscope::Properties::createDisplayTab(void) {
     timeList->insertItem("  5 ms/div");
     timeList->insertItem("  2 ms/div");
     timeList->insertItem("  1 ms/div");
-    timeList->insertItem("500 us/div");
-    timeList->insertItem("200 us/div");
-    timeList->insertItem("100 us/div");
-    timeList->insertItem(" 50 us/div");
-    timeList->insertItem(" 20 us/div");
-    timeList->insertItem(" 10 us/div");
-    timeList->insertItem("  5 us/div");
-    timeList->insertItem("  2 us/div");
-    timeList->insertItem("  1 us/div");
+    QString suffix = QString("s/div");
+    QString text = QString("500 ");
+    text.append(mu);
+    text.append(suffix);
+    timeList->insertItem(text);
+    text = QString("200 ");
+    text.append(mu);
+    text.append(suffix);
+    timeList->insertItem(text);
+    text = QString("100 ");
+    text.append(mu);
+    text.append(suffix);
+    timeList->insertItem(text);
+    text = QString(" 50 ");
+    text.append(mu);
+    text.append(suffix);
+    timeList->insertItem(text);
+    text = QString(" 20 ");
+    text.append(mu);
+    text.append(suffix);
+    timeList->insertItem(text);
+    text = QString(" 10 ");
+    text.append(mu);
+    text.append(suffix);
+    timeList->insertItem(text);
+    text = QString("  5 ");
+    text.append(mu);
+    text.append(suffix);
+    timeList->insertItem(text);
+    text = QString("  2 ");
+    text.append(mu);
+    text.append(suffix);
+    timeList->insertItem(text);
+    text = QString("  1 ");
+    text.append(mu);
+    text.append(suffix);
+    timeList->insertItem(text);
 
     QHBox *hbox1 = new QHBox(timeBox);
     timeLayout->addWidget(hbox1);
@@ -789,7 +860,7 @@ void Oscilloscope::Properties::createDisplayTab(void) {
 
 void Oscilloscope::Properties::showAdvancedTab(void) {
     //rateSpin->setValue(panel->rate);
-    //sizeSpin->setValue(panel->getDataSize());
+    sizeSpin->setValue(panel->getDataSize());
 
     divXSpin->setValue(panel->getDivX());
     divYSpin->setValue(panel->getDivY());
