@@ -140,8 +140,8 @@ private:
     size_t data_idx;
     size_t data_size;
 
-    double hScl;
-    double period;
+    double hScl;        // horizontal scale for time (ms)
+    double period;      // real-time period of system (ms)
 
     size_t refresh;
 

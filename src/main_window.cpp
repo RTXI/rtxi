@@ -36,6 +36,7 @@
 #include <stdlib.h>
 #include <qstringlist.h>
 #include <qtextstream.h>
+#include <cmdline.h>
 
 MainWindow::MainWindow(void) :
   QMainWindow(NULL, NULL, Qt::WType_TopLevel)
@@ -247,6 +248,7 @@ MainWindow::aboutComedi(void)
   QString text;
   QStringList lines;
   QFile file("/proc/comedi");
+  bool DAQdetected = false;
   if (file.open(IO_ReadOnly))
     {
       text = "COMEDI is an open source library that provides access to DAQ"
@@ -258,27 +260,58 @@ MainWindow::aboutComedi(void)
       line = stream.readLine();
       line = stream.readLine();
       if (line == "no devices")
-        line = "No DAQ cards were detected.";
+        {
+          line = "No DAQ cards were detected.";
+          text = text + comediversion + ".";
+        }
       else
-        line = "/dev/comedi" + line.stripWhiteSpace();
+        {
+          line = "/dev/comedi" + line.stripWhiteSpace();
+          DAQdetected = true;
+          text = text + comediversion
+              + ".\n\nThe following DAQ cards were detected on your system:"
+                "\n\nDevice name   Driver name      Board name   # Subdevices";
+        }
       lines += line;
-      text = text + comediversion
-          + ".\n\nThe following DAQ cards were detected on your system:"
-            "\n\nDevice name   Driver name      Board name   # Subdevices";
+
     }
   else
     {
       text = "COMEDI does not seem to be installed correctly on your system.";
     }
+  QString cmd;
+  int status;
 
-  QMessageBox::about(
-      this,
-      "About COMEDI",
-      QString(text) + "\n\n" + lines.join("\n")
-          + "\n\nTo"
-            " calibrate your DAQ card, use the terminal command 'comedi_calibrate' \nfollowed"
-            " by the device name of the card:\n\n  $ sudo comedi_calibrate /dev/comedi0");
+  if (DAQdetected)
+    {
+      switch (QMessageBox::information(this, "About COMEDI", QString(text)
+          + "\n\n" + lines.join("\n")
+          + "\n\nDo you want to calibrate your DAQ card?", QMessageBox::Yes,
+          QMessageBox::No, QMessageBox::NoButton))
+        {
+      case 0:
+        cmd
+            = QString(
+                "sudo comedi_calibrate --reset --dump --calibrate --results --verbose /dev/comedi0");
+        DEBUG_MSG("RTXI is about to calibrate DAQ card for COMEDI driver%s\n", cmd.ascii());
+        status = CmdLine::getInstance()->execute(cmd.ascii());
 
+        if (status != 0)
+          {
+            ERROR_MSG("RTXI COMEDI calibration error\n");
+            return;
+          }
+      case 1:
+      default: // just for sanity
+
+        break;
+        }
+    }
+  else
+    {
+      QMessageBox::information(this, "About COMEDI", QString(text) + "\n\n"
+          + lines.join("\n"), QMessageBox::Ok);
+    }
 }
 
 void

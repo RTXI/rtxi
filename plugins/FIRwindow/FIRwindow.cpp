@@ -84,9 +84,9 @@ FIRwindow::FIRwindow(void) :
   QWhatsThis::add(
       this,
       "<p><b>FIR Window:</b><br>This plugin computes FIR filter coefficients using the window method "
-        "given the number of taps desired and the cutoff frequencies. For a lowpass or highpass filter, use the"
-        "Freq 1 parameter. For a bandpass or bandstop filter, use both frequencies to define the frequency band."
-        "Since this plug-in computes new filter coefficients whenever you change the parameters, you should not"
+        "given the number of taps desired and the cutoff frequencies. For a lowpass or highpass filter, use the "
+        "Freq 1 parameter. For a bandpass or bandstop filter, use both frequencies to define the frequency band. "
+        "Since this plug-in computes new filter coefficients whenever you change the parameters, you should not "
         "change any settings during real-time.</p>");
 
   initParameters();
