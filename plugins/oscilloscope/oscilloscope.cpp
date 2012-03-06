@@ -328,15 +328,18 @@ void Oscilloscope::Properties::applyChannelTab(void) {
         }
 
         double scale;
-        switch(scaleList->currentItem()%3) {
+        switch(scaleList->currentItem()%4) {
           case 0:
-              scale = pow(10,1-scaleList->currentItem()/3);
+              scale = pow(10,1-scaleList->currentItem()/4);
               break;
           case 1:
-              scale = 5*pow(10,-scaleList->currentItem()/3);
+              scale = 5*pow(10,-scaleList->currentItem()/4);
               break;
           case 2:
-              scale = 2*pow(10,-scaleList->currentItem()/3);
+              scale = 2.5*pow(10,-scaleList->currentItem()/4);
+              break;
+          case 3:
+              scale = 2*pow(10,-scaleList->currentItem()/4);
               break;
           default:
               ERROR_MSG("Oscilloscope::Properties::applyChannelTab : invalid scale selection\n");
@@ -545,46 +548,71 @@ void Oscilloscope::Properties::createChannelTab(void) {
     displayLayout->addWidget(hbox1);
     (new QLabel("   Scale: ",hbox1))->setFixedWidth(125);
     scaleList = new QComboBox(hbox1);
-    scaleList->insertItem(" 10  V/div");
-    scaleList->insertItem("  5  V/div");
-    scaleList->insertItem("  2  V/div");
-    scaleList->insertItem("  1  V/div");
-    scaleList->insertItem("500 mV/div");
-    scaleList->insertItem("200 mV/div");
-    scaleList->insertItem("100 mV/div");
-    scaleList->insertItem(" 50 mV/div");
+    scaleList->insertItem(" 10  V/div"); // 0  case 0
+    scaleList->insertItem("  5  V/div"); // 1  case 1
+    scaleList->insertItem("  2.5 V/div");// 2  case 2
+    scaleList->insertItem("  2  V/div"); // 3  case 3
+    scaleList->insertItem("  1  V/div"); // 4  case 0
+    scaleList->insertItem("500 mV/div"); // 5  case 1
+    scaleList->insertItem("250 mV/div"); // 6  case 2
+    scaleList->insertItem("200 mV/div"); // 7  case 3
+    scaleList->insertItem("100 mV/div"); // 8  case 0
+    scaleList->insertItem(" 50 mV/div"); // 9  case 1
+    scaleList->insertItem(" 25 mV/div");
     scaleList->insertItem(" 20 mV/div");
     scaleList->insertItem(" 10 mV/div");
     scaleList->insertItem("  5 mV/div");
+    scaleList->insertItem("  2.5 mV/div");
     scaleList->insertItem("  2 mV/div");
     scaleList->insertItem("  1 mV/div");
     scaleList->insertItem("500 uV/div");
+    scaleList->insertItem("250 uV/div");
     scaleList->insertItem("200 uV/div");
     scaleList->insertItem("100 uV/div");
     scaleList->insertItem(" 50 uV/div");
+    scaleList->insertItem(" 25 uV/div");
     scaleList->insertItem(" 20 uV/div");
     scaleList->insertItem(" 10 uV/div");
     scaleList->insertItem("  5 uV/div");
+    scaleList->insertItem("  2.5 uV/div");
     scaleList->insertItem("  2 uV/div");
     scaleList->insertItem("  1 uV/div");
     scaleList->insertItem("500 nV/div");
+    scaleList->insertItem("250 nV/div");
     scaleList->insertItem("200 nV/div");
     scaleList->insertItem("100 nV/div");
     scaleList->insertItem(" 50 nV/div");
+    scaleList->insertItem(" 25 nV/div");
     scaleList->insertItem(" 20 nV/div");
     scaleList->insertItem(" 10 nV/div");
     scaleList->insertItem("  5 nV/div");
+    scaleList->insertItem("  2.5 nV/div");
     scaleList->insertItem("  2 nV/div");
     scaleList->insertItem("  1 nV/div");
     scaleList->insertItem("500 pV/div");
+    scaleList->insertItem("250 pV/div");
     scaleList->insertItem("200 pV/div");
     scaleList->insertItem("100 pV/div");
     scaleList->insertItem(" 50 pV/div");
+    scaleList->insertItem(" 25 pV/div");
     scaleList->insertItem(" 20 pV/div");
     scaleList->insertItem(" 10 pV/div");
     scaleList->insertItem("  5 pV/div");
+    scaleList->insertItem("  2.5 pV/div");
     scaleList->insertItem("  2 pV/div");
     scaleList->insertItem("  1 pV/div");
+    scaleList->insertItem("500 fV/div");
+    scaleList->insertItem("250 fV/div");
+    scaleList->insertItem("200 fV/div");
+    scaleList->insertItem("100 fV/div");
+    scaleList->insertItem(" 50 fV/div");
+    scaleList->insertItem(" 25 fV/div");
+    scaleList->insertItem(" 20 fV/div");
+    scaleList->insertItem(" 10 fV/div");
+    scaleList->insertItem("  5 fV/div");
+    scaleList->insertItem("  2.5 fV/div");
+    scaleList->insertItem("  2 fV/div");
+    scaleList->insertItem("  1 fV/div");
 
     QHBox *hbox2 = new QHBox(displayBox);
     displayLayout->addWidget(hbox2);
@@ -798,7 +826,7 @@ void Oscilloscope::Properties::showChannelTab(void) {
            info->type == type && info->index == static_cast<size_t>(channelList->currentItem())) {
             found = true;
 
-            scaleList->setCurrentItem(static_cast<int>(round(3*(log10(1/i->getScale())+1))));
+            scaleList->setCurrentItem(static_cast<int>(round(4*(log10(1/i->getScale())+1))));
 
             double offset = i->getOffset();
             int offsetUnits = 0;
@@ -858,7 +886,7 @@ void Oscilloscope::Properties::showChannelTab(void) {
     displayBox->setEnabled(found);
     lineBox->setEnabled(found);
     if(!found) {
-        scaleList->setCurrentItem(2);
+        scaleList->setCurrentItem(3);
         offsetEdit->setText(QString::number(0));
         offsetList->setCurrentItem(0);
         colorList->setCurrentItem(0);
@@ -1071,7 +1099,7 @@ void Oscilloscope::Panel::doDeferred(const Settings::Object::State &s) {
                                                                       static_cast<Qt::PenStyle>(s.loadInteger(str.str()+" pen style"))),
                                                                  info);
 
-        setChannelLabel(chan,info->name+" "+properties->scaleList->text(static_cast<int>(round(3*(log10(1/chan->getScale())+1)))).simplifyWhiteSpace());
+        setChannelLabel(chan,info->name+" "+properties->scaleList->text(static_cast<int>(round(4*(log10(1/chan->getScale())+1)))).simplifyWhiteSpace());
     }
 
     flushFifo();
