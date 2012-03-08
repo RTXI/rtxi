@@ -25,11 +25,20 @@
 
 #include <default_gui_model.h>
 #include "../include/DSP/iir_dsgn.h"
+#include "../include/DSP/dir1_iir.h"
+#include "../include/DSP/unq_iir.h"
+#include "../include/DSP/buttfunc.h"
+#include "../include/DSP/chebfunc.h"
+#include "../include/DSP/elipfunc.h"
+#include "../include/DSP/bilinear.h"
 #include <qcombobox.h>
 #include <qfiledialog.h>
+#include <qmessagebox.h>
 #include <qtextstream.h>
+#include <qvalidator.h>
+#include <qvbox.h>
 
-DEFINE TWO_PI 6.283189
+#define TWO_PI 6.283189
 
 class IIRfilter : public DefaultGUIModel
 {
@@ -64,26 +73,26 @@ private:
   IirFilterDesign *filter_design;
   FilterImplementation *filter_implem;
 
-  double* h3; 							// filter coefficients
-  filter_t filter_type; 		// type of filter
-	double passband_ripple;   // dB?
-	double stopband_ripple;   // dB?
-	double passband_edge;			// Hz
-	double stopband_edge;			// Hz
-  int filter_order;					// filter order
-	int ripple_bw_norm;				// type of normalization for Chebyshev filter
-	
-	bool quant_enabled;       // quantize input signal and coefficients
-	bool predistort_enable;		// predistort frequencies for bilinear transform
-	long input_quan_factor;   // quantization factor 2^bits for input signal
-  long coeff_quan_factor;   // quantization factor 2^bits for filter coefficients
-	
-	// bookkeeping
-  double out;				// bookkeeping for computing convolution
-  int n;						// bookkeeping for computing convolution
-  double dt;				// real-time period of system (s)
-  long long count;  // keep track of time
-  double systime;		// time that module has been running
+  double* h3; // filter coefficients
+  filter_t filter_type; // type of filter
+  double passband_ripple; // dB?
+  double stopband_ripple; // dB?
+  double passband_edge; // Hz
+  double stopband_edge; // Hz
+  int filter_order; // filter order
+  int ripple_bw_norm; // type of normalization for Chebyshev filter
+
+  bool quant_enabled; // quantize input signal and coefficients
+  bool predistort_enabled; // predistort frequencies for bilinear transform
+  long input_quan_factor; // quantization factor 2^bits for input signal
+  long coeff_quan_factor; // quantization factor 2^bits for filter coefficients
+
+  // bookkeeping
+  double out; // bookkeeping for computing convolution
+  int n; // bookkeeping for computing convolution
+  double dt; // real-time period of system (s)
+  long long count; // keep track of time
+  double systime; // time that module has been running
 
   // IIRfilter functions
   void
@@ -93,9 +102,8 @@ private:
   void
   makeFilter();
   QComboBox *filterType;
-	QComboBox *normType;
+  QComboBox *normType;
 
-	
   // Saving FIR filter data to file without Data Recorder
   bool
   OpenFile(QString);
@@ -104,11 +112,15 @@ private:
 
 private slots:
 
-	// all custom slots
-	void saveIIRData(); // write filter parameters to a file
-	void updateFilterType(int);
-	void updateNormType(int);
-  void togglePredistort(bool);
-  void toggleQuantize(bool);
+  // all custom slots
+  void saveIIRData(); // write filter parameters to a file
+  void
+  updateFilterType(int);
+  void
+  updateNormType(int);
+  void
+  togglePredistort(bool);
+  void
+  toggleQuantize(bool);
 
 };

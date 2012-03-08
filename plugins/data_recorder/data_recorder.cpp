@@ -1339,7 +1339,7 @@ DataRecorder::Plugin::Plugin(void) {
         QSettings userprefs;
         userprefs.setPath("RTXI.org", "RTXI", QSettings::User);
 
-        buffersize = userprefs.readNumEntry("/system/HDFbuffer", 10*1048576);
+        buffersize = userprefs.readNumEntry("/system/HDFbuffer", 10)*1048576;
         menuID = MainWindow::getInstance()->createSystemMenuItem("HDF Data Recorder",this,SLOT(createDataRecorderPanel(void)));
 }
 
@@ -1351,7 +1351,6 @@ DataRecorder::Plugin::~Plugin(void) {
 }
 
 DataRecorder::Panel *DataRecorder::Plugin::createDataRecorderPanel(void) {
-        //size_t buffersize = 10*1048576;
 	Panel *panel = new Panel(MainWindow::getInstance()->centralWidget(), buffersize);
 	panelList.push_back(panel);
 	return panel;
@@ -1370,7 +1369,7 @@ void DataRecorder::Plugin::doDeferred(const Settings::Object::State &s) {
 
 void DataRecorder::Plugin::doLoad(const Settings::Object::State &s) {
 	for (size_t i = 0; i < static_cast<size_t> (s.loadInteger("Num Panels")); ++i) {
-                //size_t buffersize = 10*1048576;
+
 		Panel *panel = new Panel(MainWindow::getInstance()->centralWidget(), buffersize);
 		panelList.push_back(panel);
 		panel->load(s.loadState(QString::number(i)));

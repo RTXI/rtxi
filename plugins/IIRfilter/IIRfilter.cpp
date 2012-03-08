@@ -51,30 +51,25 @@ createRTXIPlugin(void)
 }
 
 //set up parameters/inputs/outputs derived from defaultGUIModel, calls for initialization, creation, update, and refresh of GUI
-static DefaultGUIModel::variable_t
-    vars[] =
-      {
-            { "Input", "Input to Filter", DefaultGUIModel::INPUT, },
-            { "Output", "Output of Filter", DefaultGUIModel::OUTPUT },
-            { "Filter Order", "Filter Order",
-                DefaultGUIModel::PARAMETER | DefaultGUIModel::INTEGER, },
-            {
-                "Passband Ripple",
-                "Passband Ripple",
-                DefaultGUIModel::PARAMETER | DefaultGUIModel::DOUBLE, },
-            {
-                "Passband Edge (Hz)",
-                "Passband Edge (Hz)",
-                DefaultGUIModel::PARAMETER | DefaultGUIModel::DOUBLE, },
-            { "Stopband Ripple", "Stopband Ripple",
-                DefaultGUIModel::PARAMETER | DefaultGUIModel::DOUBLE, },
-            { "Stopband Edge (Hz)", "Stopband Edge (Hz)",
-                DefaultGUIModel::PARAMETER | DefaultGUIModel::DOUBLE, },
-            { "Input quantizing factor", "Bits eg. 10, 12, 16",
-                DefaultGUIModel::PARAMETER | DefaultGUIModel::INTEGER, },
-            { "Coefficients quantizing factor", "Bits eg. 10, 12, 16",
-                DefaultGUIModel::PARAMETER | DefaultGUIModel::INTEGER, },
-						{ "Time (s)", "Time (s)", DefaultGUIModel::STATE, }, };
+static DefaultGUIModel::variable_t vars[] =
+  {
+    { "Input", "Input to Filter", DefaultGUIModel::INPUT, },
+    { "Output", "Output of Filter", DefaultGUIModel::OUTPUT },
+    { "Filter Order", "Filter Order", DefaultGUIModel::PARAMETER
+        | DefaultGUIModel::INTEGER, },
+    { "Passband Ripple", "Passband Ripple", DefaultGUIModel::PARAMETER
+        | DefaultGUIModel::DOUBLE, },
+    { "Passband Edge (Hz)", "Passband Edge (Hz)", DefaultGUIModel::PARAMETER
+        | DefaultGUIModel::DOUBLE, },
+    { "Stopband Ripple", "Stopband Ripple", DefaultGUIModel::PARAMETER
+        | DefaultGUIModel::DOUBLE, },
+    { "Stopband Edge (Hz)", "Stopband Edge (Hz)", DefaultGUIModel::PARAMETER
+        | DefaultGUIModel::DOUBLE, },
+    { "Input quantizing factor", "Bits eg. 10, 12, 16",
+        DefaultGUIModel::PARAMETER | DefaultGUIModel::INTEGER, },
+    { "Coefficients quantizing factor", "Bits eg. 10, 12, 16",
+        DefaultGUIModel::PARAMETER | DefaultGUIModel::INTEGER, },
+    { "Time (s)", "Time (s)", DefaultGUIModel::STATE, }, };
 
 static size_t num_vars = sizeof(vars) / sizeof(DefaultGUIModel::variable_t);
 
@@ -91,7 +86,7 @@ IIRfilter::IIRfilter(void) :
 
   initParameters();
   createGUI(vars, num_vars);
-  update( INIT);
+  update(INIT);
   refresh(); // refresh the GUI
   printf("\nStarting IIR filter:\n"); // prints to terminal
 }
@@ -105,7 +100,7 @@ void
 IIRfilter::execute(void)
 {
   systime = count * dt; // current time, s
-  output(0) = filt_implem->ProcessSample(input(0));
+  output(0) = filter_implem->ProcessSample(input(0));
 
   count++; // increment count to measure time
   return;
@@ -122,8 +117,8 @@ IIRfilter::update(DefaultGUIModel::update_flags_t flag)
     setParameter("Passband Edge (Hz)", QString::number(passband_edge));
     setParameter("Stopband Ripple", QString::number(stopband_ripple));
     setParameter("Stopband Edge (Hz)", QString::number(stopband_edge));
-		setParameter("Input quantizing factor", log2(QString::number(input_quan_factor)));
-		setParameter("Coefficients quantizing factor", log2(QString::number(coeff_quan_factor)));
+    setParameter("Input quantizing factor", QString::number(log2(input_quan_factor)));
+    setParameter("Coefficients quantizing factor", QString::number(log2(coeff_quan_factor)));
     setState("Time (s)", systime);
     filterType->setCurrentItem(filter_type);
     break;
@@ -134,9 +129,10 @@ IIRfilter::update(DefaultGUIModel::update_flags_t flag)
     stopband_ripple = getParameter("Stopband Ripple").toDouble();
     stopband_edge = getParameter("Stopband Edge (Hz)").toDouble();
     filter_type = filter_t(filterType->currentItem());
-		stopband_edge *= TWO_PI;
-		input_quan_factor = 2^getParameter("Input quantizing factor").toInt(); // quantize input to 12 bits
-	  coeff_quan_factor = 2^getParameter("Coefficients quantizing factor").toInt(); // quantize filter coefficients to 12 bits
+    stopband_edge *= TWO_PI;
+    input_quan_factor = 2 ^ getParameter("Input quantizing factor").toInt(); // quantize input to 12 bits
+    coeff_quan_factor = 2
+        ^ getParameter("Coefficients quantizing factor").toInt(); // quantize filter coefficients to 12 bits
     bookkeep();
     makeFilter();
     break;
@@ -167,11 +163,11 @@ IIRfilter::initParameters()
   passband_edge = 60;
   stopband_ripple = 60;
   stopband_edge = 200;
-	ripple_bw_norm = 0;
-	predistort_enable = true;
-	quant_enabled = false;
-	input_quan_factor = 2^12; // quantize input to 12 bits
-	coeff_quan_factor = 2^12; // quantize filter coefficients to 12 bits
+  ripple_bw_norm = 0;
+  predistort_enabled = true;
+  quant_enabled = false;
+  input_quan_factor = 2 ^ 12; // quantize input to 12 bits
+  coeff_quan_factor = 2 ^ 12; // quantize filter coefficients to 12 bits
   makeFilter();
   bookkeep();
 }
@@ -190,21 +186,21 @@ IIRfilter::updateFilterType(int index)
     {
       filter_type = BUTTER;
       printf("Filter type now set to BUTTERWORTH\n");
-			normType->setEnabled(false);
+      normType->setEnabled(false);
       makeFilter();
     }
   else if (index == 1)
     {
       filter_type = CHEBY;
       printf("Filter type now set to CHEBYSHEV\n");
-			normType->setEnabled(true);
+      normType->setEnabled(true);
       makeFilter();
     }
   else if (index == 2)
     {
       filter_type = ELLIP;
       printf("Filter type now set to ELLIPTICAL\n");
-			normType->setEnabled(false);
+      normType->setEnabled(false);
       makeFilter();
     }
 }
@@ -213,70 +209,62 @@ void
 IIRfilter::updateNormType(int index)
 {
   ripple_bw_norm = index;
-	if (ripple_bw_norm)
-		printf("Chebyshev normalization now set to ripple bandwidth\n");
+  if (ripple_bw_norm)
+    printf("Chebyshev normalization now set to ripple bandwidth\n");
   else
-		printf("Chebyshev normalization now set to 3 dB bandwidth\n");
+    printf("Chebyshev normalization now set to 3 dB bandwidth\n");
   makeFilter();
 }
 
 void
 IIRfilter::makeFilter()
 {
-  switch (filter_t)
+  switch (filter_type)
     {
-  case BUTTER: 
-     analog_filter = new ButterworthTransFunc(filter_order);
-     analog_filter->LowpassDenorm(passband_edge);
-		 break;
-  case CHEBY: 
-     analog_filter = new ChebyshevTransFunc(filter_order,
-                                            passband_ripple,
-                                            ripple_bw_norm);
-     analog_filter->LowpassDenorm(passband_edge);
-		 break;
-  case ELLIP:    
-     int upper_summation_limit = 5;
-     analog_filter = new EllipticalTransFunc( 
-                                   filter_order, 
-                                   passband_ripple,
-                                   stopband_ripple,
-                                   passband_edge,
-                                   stopband_edge,
-                                   upper_summation_limit);
-		 break;
+  case BUTTER:
+    analog_filter = new ButterworthTransFunc(filter_order);
+    analog_filter->LowpassDenorm(passband_edge);
+    break;
+  case CHEBY:
+    analog_filter = new ChebyshevTransFunc(filter_order, passband_ripple,
+        ripple_bw_norm);
+    analog_filter->LowpassDenorm(passband_edge);
+    break;
+  case ELLIP:
+    int upper_summation_limit = 5;
+    analog_filter = new EllipticalTransFunc(filter_order, passband_ripple,
+        stopband_ripple, passband_edge, stopband_edge, upper_summation_limit);
+    break;
     } // end of switch on window_shape
-  if( predistort_enabled ) 
-       analog_filter->FrequencyPrewarp(dt);
+  if (predistort_enabled)
+    analog_filter->FrequencyPrewarp(dt);
 
-  filter_design = BilinearTransf(analog_filter, dt);  
+  filter_design = BilinearTransf(analog_filter, dt);
 
-	if(quant_enabled)
-	{
-		filter_implem = new DirectFormIir(
-										 filter_design->GetNumNumerCoeffs(),
-										 filter_design->GetNumDenomCoeffs(),
-										 filter_design->GetNumerCoefficients(),
-										 filter_design->GetDenomCoefficients(),
-										 coeff_quan_factor,
-										 input_quan_factor);
-	}
-	else
-	{
-		filter_implem = new UnquantDirectFormIir(
-										 filter_design->GetNumNumerCoeffs(),
-										 filter_design->GetNumDenomCoeffs(),
-										 filter_design->GetNumerCoefficients(),
-										 filter_design->GetDenomCoefficients());
-	}
-			
-	h3 = filter_design->GetCoefficients();
-  printf("\n      IIR Filter\n");
-  for (int i = 0; i < num_taps; i++)
+  if (quant_enabled)
     {
-      printf("h[%i] = %f\n", i, h3[i]);
+      filter_implem = new DirectFormIir(filter_design->GetNumNumerCoeffs(),
+          filter_design->GetNumDenomCoeffs(),
+          filter_design->GetNumerCoefficients(),
+          filter_design->GetDenomCoefficients(), coeff_quan_factor,
+          input_quan_factor);
     }
-  printf("\n");
+  else
+    {
+      filter_implem = new UnquantDirectFormIir(
+          filter_design->GetNumNumerCoeffs(),
+          filter_design->GetNumDenomCoeffs(),
+          filter_design->GetNumerCoefficients(),
+          filter_design->GetDenomCoefficients());
+    }
+  /*
+   printf("\n      IIR Filter\n");
+   for (int i = 0; i < num_taps; i++)
+   {
+   printf("h[%i] = %f\n", i, h3[i]);
+   }
+   printf("\n");
+   */
 }
 
 void
@@ -297,45 +285,48 @@ IIRfilter::saveIIRData()
             {
           case BUTTER:
             stream << QString("BUTTERWORTH order=") << (int) filter_order
-									 << " passband edge=" << (double) passband_edge;
+                << " passband edge=" << (double) passband_edge;
             break;
           case CHEBY:
-            stream << QString("CHEBYSHEV order=") << (int) filter_order;
-									 << " passband ripple=" << (double) passband_ripple
-									 << " passband edge=" << (double) passband_edge;
-						if (ripple_bw_norm == 0)
-								stream << " with 3 dB bandwidth normalization";
-						else
-						    stream << " with ripple bandwidth normalization";		
+            stream << QString("CHEBYSHEV order=") << (int) filter_order
+                << " passband ripple=" << (double) passband_ripple
+                << " passband edge=" << (double) passband_edge;
+            if (ripple_bw_norm == 0)
+              stream << " with 3 dB bandwidth normalization";
+            else
+              stream << " with ripple bandwidth normalization";
             break;
           case ELLIP:
             stream << QString("ELLIPTICAL order=") << (int) filter_order
-									 << " passband ripple=" << (double) passband_ripple
-									 << " passband edge=" << (double) passband_edge
-									 << " stopband ripple=" << (double) stopband_ripple
-									 << " stopband edge=" << (double) stopband_edge;
-					 break;
+                << " passband ripple=" << (double) passband_ripple
+                << " passband edge=" << (double) passband_edge
+                << " stopband ripple=" << (double) stopband_ripple
+                << " stopband edge=" << (double) stopband_edge;
+            break;
             }
           stream << QString(" ");
 
-					numer_coeff = new long[filter_design->GetNumNumerCoeffs()];
-					denom_coeff = new long[filter_design->GetNumDenomCoeff()+1];
-					numer_coeff = filter_design->GetNumerCoefficients();
-					denom_coeff = filter_design->GetDenomCoefficients();
-					
+          double *numer_coeff = new double[filter_design->GetNumNumerCoeffs()];
+          double *denom_coeff = new double[filter_design->GetNumDenomCoeffs()
+              + 1];
+          numer_coeff = filter_design->GetNumerCoefficients();
+          denom_coeff = filter_design->GetDenomCoefficients();
+
           printf("Filter numerator coefficients:\n");
-					stream << QString("Filter numerator coefficients:\n")
+          stream << QString("Filter numerator coefficients:\n");
           for (int i = 0; i < filter_design->GetNumNumerCoeffs(); i++)
             {
               printf("%f\n", numer_coeff[i]);
-              stream << QString("numer_coeff[") << i << "] = " << (double) numer_coeff[i] << "\n";
+              stream << QString("numer_coeff[") << i << "] = "
+                  << (double) numer_coeff[i] << "\n";
             }
-					printf("Filter denominator coefficients:\n");
-					stream << QString("Filter denominator coefficients:\n")
-          for (int i = 0; i < filter_design->GetNumDenomCoeff()+1; i++)
+          printf("Filter denominator coefficients:\n");
+          stream << QString("Filter denominator coefficients:\n");
+          for (int i = 0; i < filter_design->GetNumDenomCoeffs() + 1; i++)
             {
               printf("%f\n", denom_coeff[i]);
-              stream << QString("denom_coeff[") << i << "] = " << (double) denom_coeff[i] << "\n";
+              stream << QString("denom_coeff[") << i << "] = "
+                  << (double) denom_coeff[i] << "\n";
             }
           dataFile.close();
           printf("File closed.\n");
@@ -415,17 +406,16 @@ IIRfilter::createGUI(DefaultGUIModel::variable_t *var, int size)
   optionLayout->addWidget(filterType, 1, 1);
   QObject::connect(filterType,SIGNAL(activated(int)), this, SLOT(updateFilterType(int)));
 
-	QLabel *normTypeLabel = new QLabel("Type of Chebyshev normalization:", this);
+  QLabel *normTypeLabel = new QLabel("Type of Chebyshev normalization:", this);
   normType = new QComboBox(FALSE, this, "Chebyshev Normalization");
   normType->insertItem("3 dB bandwidth");
   normType->insertItem("Ripple bandwidth");
-  QToolTip::add(normType,
-      "Type of Chebyshev normalization");
+  QToolTip::add(normType, "Type of Chebyshev normalization");
   optionLayout->addWidget(normTypeLabel, 0, 0);
   optionLayout->addWidget(normType, 0, 1);
   QObject::connect(normType,SIGNAL(activated(int)), this, SLOT(updateNormType(int)));
-	normType->setEnabled(false);
-	
+  normType->setEnabled(false);
+
   // Add custom left side GUI components to layout above default_gui_model components
   //    leftlayout->addLayout(optionLayout);
 
@@ -502,14 +492,17 @@ IIRfilter::createGUI(DefaultGUIModel::variable_t *var, int size)
 
   QVBox *optionBox = new QVBox(this);
   QHBox *optionRow1 = new QHBox(optionBox);
-  QCheckBox *predistortCheckBox = new QCheckBox("Predistort frequencies", optionRow1);
+  QCheckBox *predistortCheckBox = new QCheckBox("Predistort frequencies",
+      optionRow1);
   QHBox *optionRow2 = new QHBox(optionBox);
-  QCheckBox *quantizeCheckBox = new QCheckBox("Quantize input and coefficients", optionRow2);
+  QCheckBox *quantizeCheckBox = new QCheckBox(
+      "Quantize input and coefficients", optionRow2);
   QObject::connect(predistortCheckBox,SIGNAL(toggled(bool)),this,SLOT(togglePredistort(bool)));
   QObject::connect(quantizeCheckBox,SIGNAL(toggled(bool)),this,SLOT(toggleQuantize(bool)));
-  QToolTip::add(predistortCheckBox, "Predistort frequencies for bilinear transform");
+  QToolTip::add(predistortCheckBox,
+      "Predistort frequencies for bilinear transform");
   QToolTip::add(quantizeCheckBox, "Quantize input and coefficients");
-	
+
   QHBox *utilityBox = new QHBox(this);
   pauseButton = new QPushButton("Pause", utilityBox);
   pauseButton->setToggleButton(true);
@@ -535,12 +528,14 @@ IIRfilter::createGUI(DefaultGUIModel::variable_t *var, int size)
 
 }
 
-void IIRfilter::togglePredistort(bool on)
+void
+IIRfilter::togglePredistort(bool on)
 {
-	predistort_enable = on;
+  predistort_enabled = on;
 }
 
-void IIRfilter::toggleQuantize(bool on)
+void
+IIRfilter::toggleQuantize(bool on)
 {
-	quant_enabled = on;
+  quant_enabled = on;
 }

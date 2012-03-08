@@ -305,7 +305,6 @@ Oscilloscope::Properties::showTab(void)
 void
 Oscilloscope::Properties::applyAdvancedTab(void)
 {
-  //panel->setDataSize(sizeSpin->value());
   panel->setDivXY(divXSpin->value(), divYSpin->value());
 
   panel->adjustDataSize();
@@ -535,12 +534,11 @@ Oscilloscope::Properties::createAdvancedTab(void)
 {
   QWidget *advancedTab = new QWidget(tabWidget);
   tabWidget->addTab(advancedTab, "Advanced");
-  QWhatsThis::add(advancedTab,
-       "<p><b>Oscilloscope: Advanced Options</b><br>"
-       "The Oscilloscope automatically computes the necessary buffer size based on "
-       "the number of horizontal divisions displayed, the scale of time axis, "
-       "and the current real-time period of the system. You may choose to "
-       "downsample the oscilloscope using a sample-and-hold method.</p>");
+  QWhatsThis::add(advancedTab, "<p><b>Oscilloscope: Advanced Options</b><br>"
+    "The Oscilloscope automatically computes the necessary buffer size based on "
+    "the number of horizontal divisions displayed, the scale of time axis, "
+    "and the current real-time period of the system. You may choose to "
+    "downsample the oscilloscope using a sample-and-hold method.</p>");
   QBoxLayout *layout = new QVBoxLayout(advancedTab);
 
   QGroupBox *resBox = new QGroupBox("Data Properties", advancedTab);
@@ -560,17 +558,10 @@ Oscilloscope::Properties::createAdvancedTab(void)
   QHBox *hbox1 = new QHBox(resBox);
   resLayout->addWidget(hbox1);
   (new QLabel("Data Buffer Size: ", hbox1))->setFixedWidth(130);
-  sizeSpin = new QSpinBox(hbox1);
-  sizeSpin->setMinValue(1);
-  sizeSpin->setMaxValue(50000);
-  sizeSpin->setValue(panel->getDataSize());
-  sizeSpin->setEnabled(false);
-
-	sizeEdit = new QLineEdit(hbox1);
-	resLayout->addWidget(hbox1);
-	sizeEdit->setText(QString::number(panel->getDataSize()));
+  sizeEdit = new QLineEdit(hbox1);
+  sizeEdit->setText(QString::number(panel->getDataSize()));
   sizeEdit->setEnabled(false);
-	
+
   QGroupBox *gridBox = new QGroupBox("Grid Properties", advancedTab);
   layout->addWidget(gridBox);
 
@@ -612,11 +603,12 @@ Oscilloscope::Properties::createChannelTab(void)
 {
   QWidget *channelTab = new QWidget(tabWidget);
   tabWidget->addTab(channelTab, "Channel");
-  QWhatsThis::add(channelTab,
-       "<p><b>Oscilloscope: Channel Options</b><br>"
-       "Use the dropdown boxes to select the signal streams you want to plot from "
-       "any loaded modules or your DAQ device. You may change the plotting scale for "
-       "the signal, apply a DC offset, and change the color and style of the line.</p>");
+  QWhatsThis::add(
+      channelTab,
+      "<p><b>Oscilloscope: Channel Options</b><br>"
+        "Use the dropdown boxes to select the signal streams you want to plot from "
+        "any loaded modules or your DAQ device. You may change the plotting scale for "
+        "the signal, apply a DC offset, and change the color and style of the line.</p>");
   QBoxLayout *layout = new QVBoxLayout(channelTab);
 
   QHBox *hbox0 = new QHBox(channelTab);
@@ -842,12 +834,13 @@ Oscilloscope::Properties::createDisplayTab(void)
 
   QWidget *displayTab = new QWidget(tabWidget);
   tabWidget->addTab(displayTab, "Display");
-  QWhatsThis::add(displayTab,
-       "<p><b>Oscilloscope: Display Options</b><br>"
-       "Use the dropdown box to select the time scale for the Oscilloscope. This "
-       "scaling is applied to all signals plotted in the same window. You may also "
-       "set a trigger on any signal that is currently plotted in the window. A yellow "
-       "line will appear at the trigger threshold.</p>");
+  QWhatsThis::add(
+      displayTab,
+      "<p><b>Oscilloscope: Display Options</b><br>"
+        "Use the dropdown box to select the time scale for the Oscilloscope. This "
+        "scaling is applied to all signals plotted in the same window. You may also "
+        "set a trigger on any signal that is currently plotted in the window. A yellow "
+        "line will appear at the trigger threshold.</p>");
   QBoxLayout *layout = new QVBoxLayout(displayTab);
 
   QGroupBox *timeBox = new QGroupBox("Time Properties", displayTab);
@@ -972,8 +965,7 @@ void
 Oscilloscope::Properties::showAdvancedTab(void)
 {
   //rateSpin->setValue(panel->rate);
-  sizeSpin->setValue(panel->getDataSize());
-	sizeEdit->setText(QString::number(panel->getDataSize()));
+  sizeEdit->setText(QString::number(panel->getDataSize()));
 
   divXSpin->setValue(panel->getDivX());
   divYSpin->setValue(panel->getDivY());

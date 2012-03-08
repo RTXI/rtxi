@@ -25,108 +25,132 @@
 #include <plugin.h>
 #include <rt.h>
 
+#include <qfile.h>
+#include <qfiledialog.h>
+#include <qmessagebox.h>
+
 class QLineEdit;
 
-namespace PerformanceMeasurement {
+namespace PerformanceMeasurement
+{
 
-    class Panel;
+  class Panel;
 
-    class Plugin : public QObject, public ::Plugin::Object {
+  class Plugin : public QObject, public ::Plugin::Object
+  {
 
-        Q_OBJECT
+    Q_OBJECT
 
-        friend class Panel;
+    friend class Panel;
 
-    public:
+  public:
 
-        static Plugin *getInstance(void);
+    static Plugin *
+    getInstance(void);
 
-    public slots:
+public slots:
 
-        void createPerformanceMeasurementPanel(void);
+  void createPerformanceMeasurementPanel(void);
 
-    private:
+  private:
 
-        Plugin(void);
-        ~Plugin(void);
-        Plugin(const Plugin &) {};
-        Plugin &operator=(const Plugin &) { return *getInstance(); };
+    Plugin(void);
+    ~Plugin(void);
+    Plugin(const Plugin &)
+    {
+    }
+    ;
+    Plugin &
+    operator=(const Plugin &)
+    {
+      return *getInstance();
+    }
+    ;
 
-        static Plugin *instance;
+    static Plugin *instance;
 
-        int menuID;
-        Panel *panel;
+    int menuID;
+    Panel *panel;
 
-    }; // class Plugin
+  }; // class Plugin
 
-    class Panel : public QWidget, public RT::Device {
+  class Panel : public QWidget, public RT::Device
+  {
 
-        Q_OBJECT
+  Q_OBJECT
 
-    public:
+  public:
 
-        Panel(QWidget *);
-        virtual ~Panel(void);
+    Panel(QWidget *);
+    virtual
+    ~Panel(void);
 
-		   /*!
-			  * Measures the real-time period of the system
-				*/
-        void read(void);
+    /*!
+     * Measures the real-time period of the system
+     */
+    void
+    read(void);
 
-		   /*!
-			  * Measures the computation time for loaded modules
-				*/
-        void write(void);
+    /*!
+     * Measures the computation time for loaded modules
+     */
+    void
+    write(void);
 
-    public slots:
+  public slots:
 
-			 /*!
-			  * Starts the statistics over
-				*/
-        void reset(void);
+    /*!
+     * Starts the statistics over
+     */
+    void reset(void);
 
-		   /*!
-			  * Updates the GUI with the latest values
-				*/				
-        void update(void);
+    /*!
+     * Updates the GUI with the latest values
+     */
+    void
+    update(void);
 
-			 /*!
-			  * Starts writing the real-time periods to a file
-				*/				
-        void startSave(void);
+    /*!
+     * Starts writing the real-time periods to a file
+     */
+    void
+    startSave(void);
 
-			 /*!
-			  * Stop writing the real-time periods to a file
-				*/				
-        void stopSave(void);
-				
-				bool OpenFile(QString);
+    /*!
+     * Stop writing the real-time periods to a file
+     */
+    void
+    stopSave(void);
 
-	private:
+    bool
+    OpenFile(QString);
 
-        enum {
-            INIT1,
-            INIT2,
-            EXEC,
-        } state;
+  private:
 
-        long long duration;
-        long long lastRead;
-        long long timestep;
-        long long maxDuration;
-        long long maxTimestep;
+    enum
+    {
+      INIT1, INIT2, EXEC,
+    } state;
 
-				RunningStat timestepStat;
-				bool saveStats;
-				
-        QLineEdit *durationEdit;
-        QLineEdit *timestepEdit;
-        QLineEdit *maxDurationEdit;
-        QLineEdit *maxTimestepEdit;
-				QFile dataFile;
-				QTextStream stream;
-    }; // class Panel
+    long long duration;
+    long long lastRead;
+    long long timestep;
+    long long maxDuration;
+    long long maxTimestep;
 
-}; // namespace PerformanceMeasurement
+    RunningStat timestepStat;
+    bool saveStats;
+
+    QLineEdit *durationEdit;
+    QLineEdit *timestepEdit;
+    QLineEdit *maxDurationEdit;
+    QLineEdit *maxTimestepEdit;
+    QLineEdit *timestepJitterEdit;
+    QFile dataFile;
+    QTextStream stream;
+  }; // class Panel
+
+}
+; // namespace PerformanceMeasurement
 
 #endif /* PERFORMANCE_MEASUREMENT_H */

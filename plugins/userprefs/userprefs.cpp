@@ -78,9 +78,9 @@ UserPrefs::Panel::Panel(QWidget *parent) :
   layout->addWidget(dirGroup);
 
   hbox = new QHBox(this);
-  (void) (new QLabel("HDF Data Recorder Buffer Size:", hbox))->setFixedWidth(250);
+  (void) (new QLabel("HDF Data Recorder Buffer Size (MB):", hbox))->setFixedWidth(250);
   HDFBufferEdit = new QLineEdit(hbox);
-  HDFBufferEdit->setText(QString::number(userprefs.readNumEntry("/system/HDFbuffer", 10*1048576)));
+  HDFBufferEdit->setText(QString::number(userprefs.readNumEntry("/system/HDFbuffer", 10)));
 
   layout->addWidget(hbox);
 
@@ -113,7 +113,7 @@ UserPrefs::Panel::reset(void)
   settingsDirEdit->setText(getenv("HOME"));
   dynamoDirEdit->setText(getenv("HOME"));
   dataDirEdit->setText(getenv("HOME"));
-  HDFBufferEdit->setText(QString::number(10*1048576));
+  HDFBufferEdit->setText(QString::number(10));
 
   apply();
 }

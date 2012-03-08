@@ -23,8 +23,6 @@
  */
 
 #include <FIRwindow.h>
-#include <main_window.h>
-#include <rtfile.h>
 #include <math.h>
 #include <algorithm>
 #include <numeric>

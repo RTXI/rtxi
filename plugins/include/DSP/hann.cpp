@@ -28,7 +28,7 @@ void HannWindow::GenerateWindow(int length, int zero_ends) {
 				Half_Lag_Win[n] = 0.5 + 0.5 * cos((2 * n + 1) * M_PI / (length + 1));
 			}
 		}
-		//    cout << n << "  " << Half_Lag_Win[n] << endl;
+		//    std::cout << n << "  " << Half_Lag_Win[n] << std::endl;
 	}
 	return;
 }

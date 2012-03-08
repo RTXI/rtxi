@@ -95,7 +95,7 @@ namespace Oscilloscope {
         QSpinBox *divXSpin;
         QSpinBox *divYSpin;
         QSpinBox *rateSpin;
-        QSpinBox *sizeSpin;
+        QLineEdit *sizeEdit;
 
         QComboBox *blockList;
         QComboBox *channelList;

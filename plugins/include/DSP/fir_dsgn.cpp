@@ -110,7 +110,7 @@ int FirFilterDesign::GetNumTaps(void) {
 }
 
 double* FirFilterDesign::GetCoefficients(void) {
-	// cout << "in fs_dsgn, Imp_Resp_Coeff = " << (void*)Imp_Resp_Coeff << endl;
+	// std::cout << "in fs_dsgn, Imp_Resp_Coeff = " << (void*)Imp_Resp_Coeff << std::endl;
 	return (Imp_Resp_Coeff);
 }
 
