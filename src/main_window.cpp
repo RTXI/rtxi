@@ -281,7 +281,12 @@ MainWindow::aboutComedi(void)
     }
   QString cmd;
   int status;
-
+  QMessageBox notice("RTXI COMEDI Calibration",
+      "RTXI will attempt to calibrate your DAQ device on /dev/comedi0. Please wait for the results.\n",
+      QMessageBox::Information,
+      QMessageBox::Ok | QMessageBox::Default, QMessageBox::NoButton, QMessageBox::NoButton,
+      this);
+  //notice.setModal(false);
   if (DAQdetected)
     {
       switch (QMessageBox::information(this, "About COMEDI", QString(text)
@@ -289,21 +294,29 @@ MainWindow::aboutComedi(void)
           + "\n\nDo you want to calibrate your DAQ card?", QMessageBox::Yes,
           QMessageBox::No, QMessageBox::NoButton))
         {
-      case 0:
+      case QMessageBox::Yes:
         cmd
             = QString(
                 "sudo comedi_calibrate --reset --dump --calibrate --results --verbose /dev/comedi0");
         DEBUG_MSG("RTXI is about to calibrate DAQ card for COMEDI driver%s\n", cmd.ascii());
-        status = CmdLine::getInstance()->execute(cmd.ascii());
+        printf("calibrating DAQ card...\n");
+	notice.exec();
+
+	status = CmdLine::getInstance()->execute(cmd.ascii());
 
         if (status != 0)
           {
             ERROR_MSG("RTXI COMEDI calibration error\n");
-            return;
-          }
-      case 1:
+	    notice.close();
+	    QMessageBox::information( this, "RTXI COMEDI Calibration",
+		    "RTXI failed to calibrate your DAQ device on /dev/comedi0.\n");
+        } else {
+	   notice.close();
+	   QMessageBox::information( this, "RTXI COMEDI Calibration",
+		"RTXI successfully calibrated your DAQ device on /dev/comedi0.\n");
+	}
+      case QMessageBox::No:
       default: // just for sanity
-
         break;
         }
     }
