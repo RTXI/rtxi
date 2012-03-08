@@ -4,8 +4,8 @@
 //  computes cost (in terms of arithmetic operations)
 //  of multistage decimator and interpolator implementations
 //
-#include <iostream.h> 
-#include <fstream.h>
+#include <iostream> 
+#include <fstream>
 #include <math.h>
 
 #include "filtmath.h"
@@ -30,7 +30,7 @@
 
   delta_p = passband_ripple/num_stages;
   d_sub_inf = DSubInf( delta_p, stopband_ripple );
-  cout << "D_inf is " << d_sub_inf << endl;
+  std::cout << "D_inf is " << d_sub_inf << std::endl;
 
   overall_rate_factor = 1;
   for(stage=0; stage<num_stages; stage++)
@@ -46,7 +46,7 @@
                           /stage_factor[stage];
     trans_width = low_stage_samp_rate - stopband_edge_freq
                   - passband_edge_freq;
-    cout << "trans_width = " << trans_width << endl;
+    std::cout << "trans_width = " << trans_width << std::endl;
     num_taps[stage] = 
          (int)ceil(d_sub_inf*high_stage_samp_rate/trans_width);
     if((num_taps[stage]%2 != 1)&& num_taps_must_be_odd)
@@ -55,12 +55,12 @@
     mult_rate[stage] = num_taps[stage]*low_stage_samp_rate/2.0;
     total_mult_rate += mult_rate[stage];
 
-    cout << "num taps for stage " << stage << " = "
-         << num_taps[stage] << endl;
-    cout << "mult rate = " << mult_rate[stage] << endl;
+    std::cout << "num taps for stage " << stage << " = "
+         << num_taps[stage] << std::endl;
+    std::cout << "mult rate = " << mult_rate[stage] << std::endl;
     high_stage_samp_rate = low_stage_samp_rate;
   }
-  cout << "total mult rate = "<< total_mult_rate << endl;
+  std::cout << "total mult rate = "<< total_mult_rate << std::endl;
   delete[] num_taps;
   delete[] mult_rate;
   return;

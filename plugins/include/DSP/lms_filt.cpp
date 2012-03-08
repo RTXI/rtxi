@@ -3,12 +3,12 @@
 //
 
 #include <stdlib.h>
-#include <fstream.h>
+#include <fstream>
 #include "lms_filt.h"
 #include "adap_fir.h"
 
 #ifdef _DEBUG
-extern ofstream DebugFile;
+extern std::ofstream DebugFile;
 #endif
 
 LmsFilter::LmsFilter( int num_taps,
@@ -31,7 +31,7 @@ LmsFilter::LmsFilter( int num_taps,
 {
  Two_Mu = 2.0*mu;
  #ifdef _DEBUG
- DebugFile << "In LmsFilter constructor" << endl;
+ DebugFile << "In LmsFilter constructor" << std::endl;
  #endif
  return;
 }

@@ -3,13 +3,13 @@
 //
 
 #include <stdlib.h>
-#include <fstream.h>
+#include <fstream>
 #include "autometh.h"
 #include "levin.h"
 #include "yulewalk.h"
 
 #ifdef _DEBUG
-  extern ofstream DebugFile;
+  extern std::ofstream DebugFile;
 #endif
 
 template <class T>
@@ -31,14 +31,14 @@ YuleWalker<T>::YuleWalker( T *signal,
   #ifdef _DEBUG
     for(idb=0; idb<=ar_ord; idb++)
     {
-     DebugFile << "R[" << idb << "] = " << correl_vec[idb] << endl;
+     DebugFile << "R[" << idb << "] = " << correl_vec[idb] << std::endl;
     }
   #endif
   *err_stat = LevinsonRecursion( correl_vec,
                                  ar_ord,
                                  a_vec,
                                  drv_noise_var);
-  cout << "err_stat = " << (*err_stat) << endl;
+  std::cout << "err_stat = " << (*err_stat) << std::endl;
 
   sum = 0.0;
   for(idb=1; idb<=ar_ord; idb++)

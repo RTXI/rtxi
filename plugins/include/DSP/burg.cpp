@@ -3,7 +3,7 @@
 //
 
 #include <stdlib.h>
-#include <fstream.h>
+#include <fstream>
 #include "burg.h"
 #include "yulewalk.h"
 #include "matrix_T.h"
@@ -37,8 +37,8 @@ BurgMethod<T>::BurgMethod( int est_order,
     }
   rho[0] /= sig_len;
   double awgn_adjustment;
-  cout << "rho[0] = " << rho[0] << endl;
-  cout << " enter amount to be subtracted from this value" << endl;
+  std::cout << "rho[0] = " << rho[0] << std::endl;
+  std::cout << " enter amount to be subtracted from this value" << std::endl;
   cin >> awgn_adjustment;
   rho[0] -= awgn_adjustment;
   for(n=0; n< sig_len-1; n++)
@@ -82,7 +82,7 @@ BurgMethod<T>::BurgMethod( int est_order,
   for(i=1; i<=est_order; i++)
     {
     A_Coeffs[i] = kappa[i][est_order];
-    cout << "A_Coeff[" << i << "] = " << A_Coeffs[i] << endl;
+    std::cout << "A_Coeff[" << i << "] = " << A_Coeffs[i] << std::endl;
     }
   delete[] rho;
   delete[] err_bak;
@@ -101,10 +101,10 @@ BurgMethod<T>::~BurgMethod( void ){};
 template<class T>
 void BurgMethod<T>::DumpParameters( ostream& uout)
   {
-  uout << "Drv_Noise_Var = " << Drv_Noise_Var << endl;
+  uout << "Drv_Noise_Var = " << Drv_Noise_Var << std::endl;
   for(int indx=0; indx<=Ar_Order; indx++)
     {
-    uout << "a[" << indx << "] = " << A_Coeffs[indx] << endl;
+    uout << "a[" << indx << "] = " << A_Coeffs[indx] << std::endl;
     }
   return;
   };

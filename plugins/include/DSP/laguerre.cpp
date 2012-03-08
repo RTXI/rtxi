@@ -7,13 +7,13 @@
 
 #include <math.h>
 #include <stdlib.h>
-#include <iostream.h>
-#include <fstream.h>
+#include <iostream>
+#include <fstream>
 #include "complex.h"
 #include "laguerre.h"
 
 #ifdef _DEBUG
-  extern ofstream DebugFile;
+  extern std::ofstream DebugFile;
 #endif
 
 int LaguerreMethod( CmplxPolynomial *poly,
@@ -54,8 +54,8 @@ for(iter=1; iter<=max_iter; iter++)
 
   if(mag(p_eval) < error)
     {
-    cout << "mag(p_eval) = " << mag(p_eval) << "  error = "
-         << error << endl;
+    std::cout << "mag(p_eval) = " << mag(p_eval) << "  error = "
+         << error << std::endl;
     *root_ptr = root;
     delete [] coeff;
     return(1);
@@ -91,7 +91,7 @@ for(iter=1; iter<=max_iter; iter++)
   old_delta_mag = mag(delta_root);
   }
 #ifdef _DEBUG
-  DebugFile << "Laguerre method failed to converge" << endl;
+  DebugFile << "Laguerre method failed to converge" << std::endl;
 #endif
 delete [] coeff;
 return(-1);

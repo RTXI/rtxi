@@ -7,7 +7,7 @@
 #ifndef _IMPRESP_H_
 #define _IMPRESP_H_
 
-#include <fstream.h>
+#include <fstream>
 #include "poly.h"
 #include "typedefs.h"
 #include "filtfunc.h"
@@ -27,7 +27,7 @@ class ImpulseResponse
    FilterTransFunc *Trans_Func;
    double Delta_Time;
    int Num_Resp_Pts;
-   ofstream *Response_File;
+   std::ofstream *Response_File;
    double H_Sub_Zero;
    complex* K_Sub_R;
    double *Sigma, *Omega;

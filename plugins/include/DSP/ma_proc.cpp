@@ -3,14 +3,14 @@
 //
 
 #include <stdlib.h>
-#include <fstream.h>
+#include <fstream>
 #include "ma_proc.h"
 #include "gausrand.h"
 #include "yulewalk.h"
 #include "sig_type.h"
 
 #ifdef _DEBUG
-  extern ofstream DebugFile;
+  extern std::ofstream DebugFile;
 #endif
 
 //=============================================
@@ -39,10 +39,10 @@ MaProcess<T>::~MaProcess( void )
 template < class T >
 void MaProcess<T>::DumpParameters(ostream& uout)
   {
-  uout << "Drv_Noise_Var = " << Drv_Noise_Var << endl;
+  uout << "Drv_Noise_Var = " << Drv_Noise_Var << std::endl;
   for(int indx=0; indx<=Ma_Order; indx++)
     {
-    uout << "b[" << indx << "] = " << B_Coeffs[indx] << endl;
+    uout << "b[" << indx << "] = " << B_Coeffs[indx] << std::endl;
     }
   return;
   }

@@ -2,7 +2,7 @@
 //  File = iirswept.cpp
 //
 
-#include <fstream.h>
+#include <fstream>
 #include <math.h> 
 #include <stdlib.h>
 #include "iirswept.h"
@@ -10,7 +10,7 @@
 #include "typedefs.h"
 #include "misdefs.h"
 
-extern ofstream AnalogWaveFile;
+extern std::ofstream AnalogWaveFile;
 ofstream DigitalOutputFile("digital.txt",ios::out);
 
 
@@ -39,48 +39,48 @@ SweptResponse::SweptResponse( FilterImplementation *filter_implem,
  double phase_delta, peak_mag;
  AnalogReconst *reconst_output;
  
- uout << "number of points in plot of frequency response?" << endl;
+ uout << "number of points in plot of frequency response?" << std::endl;
  uin >> Num_Resp_Pts;
 
- uout << "maximum swept frequency?" << endl;
+ uout << "maximum swept frequency?" << std::endl;
  uin >> Max_Sweep_Freq;
  if(Max_Sweep_Freq > (0.5/sampling_interval) )
    {
     uout << "maximum swept frequency will be limited\n"
          << "to folding frequency of " 
-         << (0.5/sampling_interval) << endl;
+         << (0.5/sampling_interval) << std::endl;
     Max_Sweep_Freq = 0.5/sampling_interval;
    }
  uout << "scaling?\n"
-      << "  0 = linear, 1 = dB"  << endl;
+      << "  0 = linear, 1 = dB"  << std::endl;
  uin >> Db_Scale_Enabled;
 
  uout << "phase resolution?\n"
-      << "  (in degrees)" << endl;
+      << "  (in degrees)" << std::endl;
  uin >> phase_delta;
  if(phase_delta > 0.0) phase_delta = -phase_delta;
 
  uout << "number of worsening phases allowed\n"
       << "before aborting search and accepting\n"
-      << "best found up to that point?" << endl;
+      << "best found up to that point?" << std::endl;
  uin >> max_worsening_phases;
 
- uout << "numb sinewave cycles per correlation?" << endl;
+ uout << "numb sinewave cycles per correlation?" << std::endl;
  uin >> cycles_per_corr;
   
  if( Db_Scale_Enabled != 0) Db_Scale_Enabled = 1;
 
- uout << "analog interpolation rate (integer)?" << endl;
+ uout << "analog interpolation rate (integer)?" << std::endl;
  uin >> anlg_intrp_rate;
 
- uout << "number of signif. sidelobes for sinc interp." << endl;
+ uout << "number of signif. sidelobes for sinc interp." << std::endl;
  uin >> num_sidelobes;
   
  uout << "default name for magnitude response output\n"
       << "file is win_resp.txt\n\n"
       << "is this okay?"
       << "  0 = NO, 1 = YES"
-      << endl;
+      << std::endl;
  uin >> default_file_ok;
   
  if( default_file_ok) 
@@ -93,7 +93,7 @@ SweptResponse::SweptResponse( FilterImplementation *filter_implem,
      file_name = new char[31];
      
      uout << "enter complete name for output file (30 chars max)"
-          << endl;
+          << std::endl;
      uin >> file_name;
      Response_File = new ofstream(file_name, ios::out);
      delete []file_name;
@@ -128,7 +128,7 @@ SweptResponse::SweptResponse( FilterImplementation *filter_implem,
        if(resp_indx == 6)
          {
          DigitalOutputFile << samp_indx << ", " << input_val << ", "
-                           << output_tone[samp_indx] << endl;
+                           << output_tone[samp_indx] << std::endl;
          }
        if(samp_indx >= num_holdoff_samps)
          {
@@ -273,7 +273,7 @@ void SweptResponse::DumpMagResp( void )
     freq = n * Max_Sweep_Freq / (double) Num_Resp_Pts;
     (*Response_File) << freq << ", " 
                      << Mag_Resp[n] << ", "
-                     << Phase_Resp[n] << endl;
+                     << Phase_Resp[n] << std::endl;
    }
  //Response_File->setf(0, ios::floatfield);
  return;

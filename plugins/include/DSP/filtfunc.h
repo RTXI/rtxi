@@ -7,7 +7,7 @@
 #ifndef _FILTFUNC_H_
 #define _FILTFUNC_H_
 
-#include <fstream.h>
+#include <fstream>
 #include "poly.h"
 #include "typedefs.h"
 
@@ -41,7 +41,7 @@ class FilterTransFunc
    
    float GetHSubZero( void );
    
-   void DumpBiquads( ofstream* output_stream);
+   void DumpBiquads( std::ofstream* output_stream);
 
    Polynomial GetDenomPoly( void );
  
@@ -72,7 +72,7 @@ class FilterTransFunc
    complex *Denorm_Zero_Locs;
    Polynomial Denom_Poly;
    Polynomial Numer_Poly;
-   ofstream *Response_File;
+   std::ofstream *Response_File;
 };
 
 #endif

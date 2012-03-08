@@ -3,13 +3,13 @@
 //
 
 #include <stdlib.h>
-#include <fstream.h>
+#include <fstream>
 #include "ar_proc.h"
 #include "gausrand.h"
 #include "sig_type.h"
 
 #ifdef _DEBUG
-  extern ofstream DebugFile;
+  extern std::ofstream DebugFile;
 #endif
 
 //===============================================
@@ -42,10 +42,10 @@ delete[] Old_Output;
 template<class T>
 void ArProcess<T>::DumpParameters( ostream& uout)
   {
-  uout << "Drv_Noise_Var = " << Drv_Noise_Var << endl;
+  uout << "Drv_Noise_Var = " << Drv_Noise_Var << std::endl;
   for(int indx=0; indx<=Ar_Order; indx++)
     {
-    uout << "a[" << indx << "] = " << A_Coeffs[indx] << endl;
+    uout << "a[" << indx << "] = " << A_Coeffs[indx] << std::endl;
     }
   return;
   }
@@ -103,7 +103,7 @@ T* ArProcess<T>::OutputSequence( long noise_seed_init,
     Old_Output[0] = out_samp;
     out_seq[samp_indx] = out_samp;
     #ifdef _DEBUG
-      DebugFile << samp_indx << ", " << out_samp << endl;
+      DebugFile << samp_indx << ", " << out_samp << std::endl;
     #endif
     } // end of loop over samp_indx
 
@@ -145,8 +145,8 @@ T ArProcess<T>::GetVariance( void )
   mean = Sum_Samps/double(Num_Samps);
   var = (Sum_Squares/double(Num_Samps)) - (mean*mean);
   #ifdef _DEBUG
-    DebugFile << "mean = " << mean << endl;
-    DebugFile << "variance = " << var << endl;
+    DebugFile << "mean = " << mean << std::endl;
+    DebugFile << "variance = " << var << std::endl;
   #endif
   return(var);
 }

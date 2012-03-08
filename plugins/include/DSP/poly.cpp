@@ -175,12 +175,12 @@ Polynomial& Polynomial::operator/= (const Polynomial &right)
 
 void Polynomial::DumpToStream( ofstream* output_stream)
 {
- (*output_stream) << "Degree = " << Degree << endl;
+ (*output_stream) << "Degree = " << Degree << std::endl;
  
  for(int i=Degree; i>=0; i--)
    {
     (*output_stream) << "Coeff[" << i << "] = " 
-                     << Coefficient[i] << endl;
+                     << Coefficient[i] << std::endl;
    }
  return;
 }  

@@ -3,7 +3,7 @@
 //
 
 #include <stdlib.h>
-#include <fstream.h>
+#include <fstream>
 #include "arma_src.h"
 #include "gausrand.h"
 #include "yulewalk.h"

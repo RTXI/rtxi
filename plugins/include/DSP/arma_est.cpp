@@ -3,7 +3,7 @@
 //
 
 #include <stdlib.h>
-#include <fstream.h>
+#include <fstream>
 #include "arma_est.h"
 #include "gausrand.h"
 #include "yulewalk.h"
@@ -41,8 +41,8 @@ ArmaEstimate<T>::ArmaEstimate( int est_ar_order,
                 Old_Output[i] = 0.0;
   //------------------------------------------------------
   //  Fit AR model of specified order to the data
-  cout << "in ArmaModel, sig_seq[0] = " << sig_seq[0] << endl;
-  cout << "in ArmaModel, sig_seq[1] = " << sig_seq[1] << endl;
+  std::cout << "in ArmaModel, sig_seq[0] = " << sig_seq[0] << std::endl;
+  std::cout << "in ArmaModel, sig_seq[1] = " << sig_seq[1] << std::endl;
   mod_yw_ptr = new ModYuleWalker<T>( sig_seq, 
                                      seq_len, 
                                      est_ar_order,
@@ -100,8 +100,8 @@ ArmaEstimate<T>::ArmaEstimate( int est_ar_order,
                                 B_Coeffs,
                                 &dummy_var,
                                 &err_stat);
-    cout << "B_Coeffs[1] = " << B_Coeffs[1] << endl;
-    cout << "B_Coeffs[2] = " << B_Coeffs[2] << endl;
+    std::cout << "B_Coeffs[1] = " << B_Coeffs[1] << std::endl;
+    std::cout << "B_Coeffs[2] = " << B_Coeffs[2] << std::endl;
 
     delete yw_ptr;
     delete[] a_coeffs;

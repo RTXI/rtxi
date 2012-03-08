@@ -3,7 +3,7 @@
 //
 
 #include <stdlib.h>
-#include <fstream.h>
+#include <fstream>
 #include "ar_est.h"
 #include "yulewalk.h"
 #include "sig_type.h"
@@ -56,10 +56,10 @@ ArEstimate<T>::~ArEstimate( void ){};
 template<class T>
 void ArEstimate<T>::DumpParameters( ostream& uout)
   {
-  uout << "estim. Drv_Noise_Var = " << Drv_Noise_Var << endl;
+  uout << "estim. Drv_Noise_Var = " << Drv_Noise_Var << std::endl;
   for(int indx=0; indx<=Ar_Order; indx++)
     {
-    uout << "estimated a[" << indx << "] = " << A_Coeffs[indx] << endl;
+    uout << "estimated a[" << indx << "] = " << A_Coeffs[indx] << std::endl;
     }
   return;
   }

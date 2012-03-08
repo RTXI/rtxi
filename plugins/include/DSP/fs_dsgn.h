@@ -5,7 +5,7 @@
 #ifndef _FS_DSGN_H_
 #define _FS_DSGN_H_ 
 
-#include <fstream.h>
+#include <fstream>
 #include "fir_dsgn.h"
 #include "fs_spec.h"
 #include "gen_win.h"

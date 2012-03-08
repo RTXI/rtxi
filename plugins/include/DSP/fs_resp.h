@@ -31,7 +31,7 @@ public:
                          
   double* GetMagResp( void);
   
-  void DumpMagResp( ofstream* output_stream);
+  void DumpMagResp( std::ofstream* output_stream);
   
   void NormalizeResponse(int db_scale);
   

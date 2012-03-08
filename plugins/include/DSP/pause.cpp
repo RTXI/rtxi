@@ -3,11 +3,11 @@
 //  File = pause.cpp
 //
 
-#include <iostream.h>
+#include <iostream>
 
 void pause(void)
 {
 int i;
-cout << "enter any digit to continue" << endl;
+std::cout << "enter any digit to continue" << std::endl;
 cin >> i;
 }

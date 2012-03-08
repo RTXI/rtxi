@@ -3,7 +3,7 @@
 //
 
 #include <math.h>
-#include <iostream.h>
+#include <iostream>
 
 #include "complex.h"   
 
@@ -25,8 +25,8 @@ istream& operator>>( istream& s, complex& z)
       {
       // bad stream input
       s.clear();
-      cout << "format for complex value is '( double, double)'\n"
-           << " -- try again" << endl;
+      std::cout << "format for complex value is '( double, double)'\n"
+           << " -- try again" << std::endl;
       continue;
       }
     break;

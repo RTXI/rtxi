@@ -12,7 +12,7 @@
 #include "fs_spec.h"
 #include "remezalg.h"
 #ifdef _DEBUG
-extern ofstream DebugFile;
+extern std::ofstream DebugFile;
 #endif
 
 //======================================================
@@ -33,12 +33,12 @@ RemezAlgorithm::RemezAlgorithm( istream& uin,
  // get user-specified parameters
 
   uout << "\nparameters for Remez algorithm\n"
-       << "--------------------------------" << endl;
+       << "--------------------------------" << std::endl;
   uout << "number of grid points per extremal frequency?\n"
-       << "( MUST be an integer)" << endl;
+       << "( MUST be an integer)" << std::endl;
   uin >> grid_density;
 
-  //uout << "ripple ratio?" << endl;
+  //uout << "ripple ratio?" << std::endl;
   //uin >> ripple_ratio;
 
  //--------------------------------
@@ -83,7 +83,7 @@ RemezAlgorithm::RemezAlgorithm( istream& uin,
     RemezStop2();
     if(RemezStop()) break;
     #ifdef _DEBUG
-    DebugFile << "done iteration " << m << endl;
+    DebugFile << "done iteration " << m << std::endl;
     #endif
   }
    
@@ -92,7 +92,7 @@ RemezAlgorithm::RemezAlgorithm( istream& uin,
     extremal_freqs[j] = GetFrequency(Ext_Freq[j]);
     #ifdef _DEBUG
     DebugFile << "extremal_freqs[ " << j << " ] = "
-              << extremal_freqs[j] << endl;
+              << extremal_freqs[j] << std::endl;
     #endif
    }
 
@@ -130,7 +130,7 @@ void RemezAlgorithm::RemezFinish( double *filter_coeffs )
    {
     #ifdef _DEBUG
     DebugFile << "Coeff[ " << k << " ] = "
-              << filter_coeffs[k] << endl;
+              << filter_coeffs[k] << std::endl;
     #endif
    }
 }

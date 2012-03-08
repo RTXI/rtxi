@@ -5,7 +5,7 @@
 #ifndef _ANLG_RCN_H_
 #define _ANLG_RCN_H_ 
 
-#include <fstream.h>
+#include <fstream>
 #include "typedefs.h"
 
 
@@ -25,7 +25,7 @@ public:
   
   void AddSample(double new_samp);
 
-  void DumpResult(ofstream* out_file);
+  void DumpResult(std::ofstream* out_file);
 
   void CopyResult( double* output_array );
 

@@ -28,8 +28,8 @@ public:
   //  streams uin and uout
                      
   IirFilterResponse( IirFilterDesign *filter_design,
-                     istream& uin,
-                     ostream& uout );
+                     std::istream& uin,
+                     std::ostream& uout );
   
   //--------------------------------------
   // method to compute frequency response
@@ -67,7 +67,7 @@ protected:
   int Num_Resp_Pts;
   int Db_Scale_Enabled;
   int Normalize_Enabled;
-  ofstream *Response_File;
+  std::ofstream *Response_File;
   int Num_Numer_Coeffs; 
   int Num_Denom_Coeffs; 
   complex* Freq_Resp;

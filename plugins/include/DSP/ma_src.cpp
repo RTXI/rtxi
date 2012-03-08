@@ -3,14 +3,14 @@
 //
 
 #include <stdlib.h>
-#include <fstream.h>
+#include <fstream>
 #include "ma_src.h"
 
 #include "sig_type.h" //selects signal type for template 
                       //instantiation
 
 #ifdef _DEBUG
-  extern ofstream DebugFile;
+  extern std::ofstream DebugFile;
 #endif
 
 //======================================================

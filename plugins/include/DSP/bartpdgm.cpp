@@ -28,7 +28,7 @@
   if( (freq_seg == NULL)||
       (time_seg==NULL))
     {
-     cout << "Allocation error in BartlettPeriodogram" << endl;
+     std::cout << "Allocation error in BartlettPeriodogram" << std::endl;
      exit(99);
     }
   

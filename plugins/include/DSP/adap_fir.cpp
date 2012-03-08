@@ -3,12 +3,12 @@
 //
 
 #include <stdlib.h>
-#include <fstream.h>
+#include <fstream>
 #include <math.h>
 #include "dirform1.h"
 #include "adap_fir.h"
 #ifdef _DEBUG
-extern ofstream DebugFile;
+extern std::ofstream DebugFile;
 #endif
 
 AdaptiveFir::AdaptiveFir( int num_taps,
@@ -43,7 +43,7 @@ AdaptiveFir::AdaptiveFir( int num_taps,
    Sample_Trans_2[samp_idx] = 0.0;
  }
  #ifdef _DEBUG
- DebugFile << "In AdaptiveFir" << endl;
+ DebugFile << "In AdaptiveFir" << std::endl;
  #endif
  return;
 }
@@ -58,7 +58,7 @@ void AdaptiveFir::DumpAvgTransient( int decim_factor )
     trans_file << samp_idx << ", "
                << (Tally_For_Avg[samp_idx]/double(Trial_Count))
                << ", " << Sample_Transient[samp_idx]
-               << endl;
+               << std::endl;
     }
   trans_file.close();
 }
@@ -70,7 +70,7 @@ void AdaptiveFir::DumpTrajectory( double min_dist )
 
   old_x = Sample_Transient[0];
   old_y = Sample_Trans_2[0];
-  trans_file << (0) << ", " << old_x << ", " << old_y << endl;
+  trans_file << (0) << ", " << old_x << ", " << old_y << std::endl;
 
   for(samp_idx=1; samp_idx<Transient_Len; samp_idx++)
     {
@@ -78,7 +78,7 @@ void AdaptiveFir::DumpTrajectory( double min_dist )
     y = Sample_Trans_2[samp_idx];
     dist = sqrt((old_x-x)*(old_x-x) + (old_y-y)*(old_y-y));
     if(dist < min_dist) continue;
-    trans_file << samp_idx << ", " << x << ", " << y << endl;
+    trans_file << samp_idx << ", " << x << ", " << y << std::endl;
     old_x = x;
     old_y = y;
     }
@@ -92,7 +92,7 @@ void AdaptiveFir::DumpAvgTrajectory( double min_dist )
 
   old_x = Tally_For_Avg[0]/double(Trial_Count);
   old_y = Tally_For_Avg_2[0]/double(Trial_Count);
-  trans_file << (0) << ", " << old_x << ", " << old_y << endl;
+  trans_file << (0) << ", " << old_x << ", " << old_y << std::endl;
 
   for(samp_idx=1; samp_idx<Transient_Len; samp_idx++)
     {
@@ -100,7 +100,7 @@ void AdaptiveFir::DumpAvgTrajectory( double min_dist )
     y = Tally_For_Avg_2[samp_idx]/double(Trial_Count);
     dist = sqrt((old_x-x)*(old_x-x) + (old_y-y)*(old_y-y));
     if(dist < min_dist) continue;
-    trans_file << samp_idx << ", " << x << ", " << y << endl;
+    trans_file << samp_idx << ", " << x << ", " << y << std::endl;
     old_x = x;
     old_y = y;
     }
@@ -116,7 +116,7 @@ void AdaptiveFir::DumpTransient( int decim_factor )
     {
     trans_file << samp_idx << ", "
                << Sample_Transient[samp_idx]
-               << endl;
+               << std::endl;
     }
   trans_file.close();
 }

@@ -7,9 +7,9 @@
 #include "matrix_T.h"
 
 #ifdef _DEBUG
-  #include <fstream.h>
+  #include <fstream>
   //#define _VEC_DEBUG 1
-  extern ofstream DebugFile;
+  extern std::ofstream DebugFile;
 #endif
 
 template<class T> class vector;
@@ -21,7 +21,7 @@ rowvec<T>::rowvec( void )
   {
   #ifdef _VEC_DEBUG
     DebugFile << "\nshallow ctor for rowvec at " << (void*)this 
-              << endl;
+              << std::endl;
   #endif
   //p->is_row_vec = 0;
   }
@@ -33,7 +33,7 @@ rowvec<T>::rowvec(int origin, int size)
   {
   #ifdef _VEC_DEBUG
     DebugFile << "\nctor for rowvec at " << (void*)this 
-              << "  (vrep = " << (void*)p << ")" << endl;
+              << "  (vrep = " << (void*)p << ")" << std::endl;
   #endif
   }
 //------------------------------------------------
@@ -45,10 +45,10 @@ rowvec<T>& colvec<T>::operator!( void )
   rowvec<T> *rv = new rowvec<T>();
   #ifdef _VEC_DEBUG
     DebugFile << "\ncv::op!(): new rowvec at " 
-              << (void*)rv << endl;
+              << (void*)rv << std::endl;
     DebugFile << "\ncv::op!(): hook vrep "
               << (void*)p << " to rowvec " 
-              << (void*)rv << endl;
+              << (void*)rv << std::endl;
   #endif
   rv->p = p;
   *(rv->p)=*p;
@@ -58,7 +58,7 @@ rowvec<T>& colvec<T>::operator!( void )
     {
     #ifdef _VEC_DEBUG
       DebugFile << "\ncv::op!(): deleting colvec at " 
-                << (void*)this << endl;
+                << (void*)this << std::endl;
     #endif
     delete this;
     }
@@ -72,10 +72,10 @@ colvec<T>& rowvec<T>::operator!( void )
 {
   colvec<T> *cv = new colvec<T>(p->orig_indx,p->length);
   #ifdef _VEC_DEBUG
-    DebugFile << "\nnew colvec at " << (void*)cv << endl;
+    DebugFile << "\nnew colvec at " << (void*)cv << std::endl;
     DebugFile << "\nrv::op!(): hook vrep "
               << (void*)p << " to colvec " 
-              << (void*)cv << endl;
+              << (void*)cv << std::endl;
   #endif
   cv->p = p;
   *(cv->p)=*p;
@@ -84,7 +84,7 @@ colvec<T>& rowvec<T>::operator!( void )
     {
     #ifdef _VEC_DEBUG
       DebugFile << "\nrv::op!(): deleting rowvec at " 
-                << (void*)this << endl;
+                << (void*)this << std::endl;
     #endif
     delete this;
     }
@@ -108,7 +108,7 @@ T& rowvec<T>::operator*( colvec<T> &v2)
   //T *result = new T;
  // #ifdef _VEC_DEBUG
  //   DebugFile << "rv::op*(cv): new scalar alloc at "
- //             << (void*)result << endl;
+ //             << (void*)result << std::endl;
  // #endif
   T sum;
   sum = 0;
@@ -122,7 +122,7 @@ T& rowvec<T>::operator*( colvec<T> &v2)
     {
     #ifdef _VEC_DEBUG
       DebugFile << "\nrv::op*(cv): deleting colvec at " 
-                << (void*)(&v2) << endl;
+                << (void*)(&v2) << std::endl;
     #endif
     delete (&v2);
     }
@@ -130,7 +130,7 @@ T& rowvec<T>::operator*( colvec<T> &v2)
     {
     #ifdef _VEC_DEBUG
       DebugFile << "\nrv::op*(cv): deleting rowvec at " 
-                << (void*)this << endl;
+                << (void*)this << std::endl;
     #endif
     delete this;
     }
@@ -153,7 +153,7 @@ rowvec<T>& rowvec<T>::operator*( matrix<T> &m2)
   if(nrows != vec_len)
     {
     #ifdef _DEBUG
-      DebugFile << "error in vector method" << endl;
+      DebugFile << "error in vector method" << std::endl;
     #endif
     return(*this);
     }
@@ -162,7 +162,7 @@ rowvec<T>& rowvec<T>::operator*( matrix<T> &m2)
   v_res->Is_Temp = 1;
   #ifdef _VEC_DEBUG
     DebugFile << "rv::op*(m): new rowvec at " 
-              << (void*)v_res << endl;
+              << (void*)v_res << std::endl;
   #endif
 
   // perform multiplication and populate results vector
@@ -181,7 +181,7 @@ rowvec<T>& rowvec<T>::operator*( matrix<T> &m2)
     {
     #ifdef _VEC_DEBUG
       DebugFile << "\nrv::op*(m): deleting matrix at " 
-                << (void*)(&m2) << endl;
+                << (void*)(&m2) << std::endl;
     #endif
     delete (&m2);
     }
@@ -189,7 +189,7 @@ rowvec<T>& rowvec<T>::operator*( matrix<T> &m2)
     {
     #ifdef _VEC_DEBUG
       DebugFile << "\nrv::op*(m): deleting rowvec at " 
-                << (void*)this << endl;
+                << (void*)this << std::endl;
     #endif
     delete this;
     }
@@ -203,7 +203,7 @@ colvec<T>::colvec( void )
   {
   #ifdef _VEC_DEBUG
     DebugFile << "\nshallow ctor for colvec at " << (void*)this 
-              << endl;
+              << std::endl;
   #endif
   //p->is_row_vec = 0;
   }
@@ -216,7 +216,7 @@ colvec<T>::colvec(int origin, int size)
   {
   #ifdef _VEC_DEBUG
     DebugFile << "\nctor for colvec at " << (void*)this 
-              << "  (vrep = " << (void*)p << ")" << endl;
+              << "  (vrep = " << (void*)p << ")" << std::endl;
   #endif
   }
 
@@ -239,7 +239,7 @@ matrix<T>& colvec<T>::operator*( rowvec<T> &v2)
   m_res->Is_Temp = 1;
   #ifdef _VEC_DEBUG
     DebugFile << "\ncv::op*(rv): new matrix at " 
-              << (void*)m_res << endl;
+              << (void*)m_res << std::endl;
   #endif
   for(int row=0; row<v1_len; row++)
     {
@@ -253,7 +253,7 @@ matrix<T>& colvec<T>::operator*( rowvec<T> &v2)
     {
     #ifdef _VEC_DEBUG
       DebugFile << "\ncv::op*(rv): deleting rowvec at " 
-                << (void*)(&v2) << endl;
+                << (void*)(&v2) << std::endl;
     #endif
     delete (&v2);
     }
@@ -261,7 +261,7 @@ matrix<T>& colvec<T>::operator*( rowvec<T> &v2)
     {
     #ifdef _VEC_DEBUG
       DebugFile << "\ncv::op*(rv): deleting colvec at " 
-                << (void*)this << endl;
+                << (void*)this << std::endl;
     #endif
     delete this;
     }
@@ -273,7 +273,7 @@ vector<T>::vector( void )
   {
   #ifdef _VEC_DEBUG
     DebugFile << "\nctor for vector(void) at " 
-              << (void*)this << endl;
+              << (void*)this << std::endl;
   #endif
   //p = new vrep;
   //p->refcnt = 1;
@@ -286,14 +286,14 @@ void vector<T>::PurgeData(void)
   {
   #ifdef _VEC_DEBUG
     DebugFile << "\nv::PurgeData(): deleting elem array at "
-              << (void*)(p->f) << endl;
+              << (void*)(p->f) << std::endl;
   #endif
   if(p!=NULL)
     {
     delete[] p->f;
     #ifdef _VEC_DEBUG
       DebugFile << "\nv::PurgeData(): deleting vrep at "
-                << (void*)p << endl;
+                << (void*)p << std::endl;
     #endif
     delete p;
     p = NULL;
@@ -304,10 +304,10 @@ template < class T >
 vector<T>::vector(int origin, int size)
   {
   #ifdef _VEC_DEBUG
-    DebugFile << "\nctor for vector at " << (void*)this << endl;
+    DebugFile << "\nctor for vector at " << (void*)this << std::endl;
   #endif
   if( size <= 0)
-      cout << "illegal vector dimension" << endl;
+      std::cout << "illegal vector dimension" << std::endl;
   p = new vrep;
   p->orig_indx = origin;
   p->length = size;
@@ -315,7 +315,7 @@ vector<T>::vector(int origin, int size)
   p->f = new T[size];
   #ifdef _VEC_DEBUG
     DebugFile << "v::v(i,i): array " << size << " long alloc at "
-              << (void*)(p->f) << endl;
+              << (void*)(p->f) << std::endl;
   #endif
   for(int i=0; i<size; i++)
     p->f[i] = T(0.0);
@@ -329,7 +329,7 @@ template < class T >
 rowvec<T>::~rowvec()
   {
   #ifdef _VEC_DEBUG
-    DebugFile << "\ndtor for rowvec at " << (void*)this << endl;
+    DebugFile << "\ndtor for rowvec at " << (void*)this << std::endl;
   #endif
   //~vector();
   };
@@ -339,7 +339,7 @@ template < class T >
 colvec<T>::~colvec()
   {
   #ifdef _VEC_DEBUG
-    DebugFile << "\ndtor for colvec at " << (void*)this << endl;
+    DebugFile << "\ndtor for colvec at " << (void*)this << std::endl;
   #endif
   //~vector();
   };
@@ -349,23 +349,23 @@ template < class T >
 vector<T>::~vector()
   {
   #ifdef _VEC_DEBUG
-    DebugFile << "\ndtor for vector at " << (void*)this << endl;
+    DebugFile << "\ndtor for vector at " << (void*)this << std::endl;
   #endif
   if(p!=NULL)
     {
     #ifdef _VEC_DEBUG
-      DebugFile << "refcnt = " << (p->refcnt) << endl;
+      DebugFile << "refcnt = " << (p->refcnt) << std::endl;
     #endif
     if(--p->refcnt == 0)
       {
       #ifdef _VEC_DEBUG
         DebugFile << "\nv::~v(): deleting elem array at "
-                  << (void*)(p->f) << endl;
+                  << (void*)(p->f) << std::endl;
       #endif
       delete[] p->f;
       #ifdef _VEC_DEBUG
         DebugFile << "\nv::~v(): deleting vrep at "
-                  << (void*)p << endl;
+                  << (void*)p << std::endl;
       #endif
       delete p;
       p = NULL;
@@ -383,7 +383,7 @@ T* vector<T>::array( void )
   result = new T[len];
   #ifdef _VEC_DEBUG
     DebugFile << "\nv::array(): alloc new array of T at " 
-              << (void*)result << endl;
+              << (void*)result << std::endl;
   #endif
   for(int i=0; i<len; i++)
     {
@@ -393,7 +393,7 @@ T* vector<T>::array( void )
     {
     #ifdef _VEC_DEBUG
       DebugFile << "\nv::array(): deleting vector at " 
-                << (void*)this << endl;
+                << (void*)this << std::endl;
     #endif
     delete this;
     }
@@ -405,7 +405,7 @@ template < class T >
 vector<T>::vector( vector<T> &x)
 {
   #ifdef _VEC_DEBUG
-    DebugFile << "in copy constructor v::v(v)" << endl;
+    DebugFile << "in copy constructor v::v(v)" << std::endl;
   #endif
   x.p->refcnt++;
   p=x.p;
@@ -420,7 +420,7 @@ vector<T>& vector<T>::operator/(T denom)
   #ifdef _VEC_DEBUG
     DebugFile << "\nv::op/(T): new vector at " 
               << (void*)res_vec << " (vrep = "
-              << (void*)(res_vec->p) << ")" << endl;
+              << (void*)(res_vec->p) << ")" << std::endl;
   #endif
 
   (res_vec->p)->refcnt = p->refcnt;
@@ -430,14 +430,14 @@ vector<T>& vector<T>::operator/(T denom)
   res_vec->Is_Temp = 1;
   for(int i=0; i<(p->length); i++)
     {
-    //cout << "p->f[" << i << "] = " << (p->f[i]) << endl;
+    //std::cout << "p->f[" << i << "] = " << (p->f[i]) << std::endl;
     res_vec->p->f[i] = ((p->f[i])/denom);
     }
   if(Is_Temp)
     {
     #ifdef _VEC_DEBUG
       DebugFile << "\nv::op/(T): deleting vector at " 
-                << (void*)this << endl;
+                << (void*)this << std::endl;
     #endif
     delete this;
     }
@@ -453,7 +453,7 @@ vector<T>& vector<T>::operator=(vector<T> &vec)
     {
     #ifdef _VEC_DEBUG
       DebugFile << "\nv::op=(v): deleting vrep at " 
-                << (void*)p << endl;
+                << (void*)p << std::endl;
     #endif
     delete[] p->f;
     delete p;
@@ -462,14 +462,14 @@ vector<T>& vector<T>::operator=(vector<T> &vec)
   #ifdef _VEC_DEBUG
     DebugFile << "\nv::op=(v): hook vrep "
           << (void*)(vec.p) << " to vector " 
-          << (void*)this << endl;
+          << (void*)this << std::endl;
   #endif
   p = vec.p;
   if(vec.Is_Temp)
     {
     #ifdef _VEC_DEBUG
       DebugFile << "\nv::op=(v): deleting vector at " 
-                << (void*)(&vec) << endl;
+                << (void*)(&vec) << std::endl;
     #endif
     delete &vec;
     }
@@ -486,7 +486,7 @@ rowvec<T>& rowvec<T>::operator=(vector<T> &vec)
     {
     #ifdef _VEC_DEBUG
       DebugFile << "\nrv::op=(v): deleting vrep at " 
-                << (void*)p << endl;
+                << (void*)p << std::endl;
     #endif
     delete[] p->f;
     delete p;
@@ -495,14 +495,14 @@ rowvec<T>& rowvec<T>::operator=(vector<T> &vec)
   #ifdef _VEC_DEBUG
     DebugFile << "\nrv::op=(v): hook vrep "
           << (void*)(vec.p) << " to vector " 
-          << (void*)this << endl;
+          << (void*)this << std::endl;
   #endif
   p = vec.p;
   if(vec.Is_Temp)
     {
     #ifdef _VEC_DEBUG
       DebugFile << "\nrv::op=(v): deleting vector at " 
-                << (void*)(&vec) << endl;
+                << (void*)(&vec) << std::endl;
     #endif
     delete &vec;
     }
@@ -519,7 +519,7 @@ colvec<T>& colvec<T>::operator=(vector<T> &vec)
     {
     #ifdef _VEC_DEBUG
       DebugFile << "\ncv::op=(v): deleting vrep at " 
-                << (void*)p << endl;
+                << (void*)p << std::endl;
     #endif
     delete[] p->f;
     delete p;
@@ -527,14 +527,14 @@ colvec<T>& colvec<T>::operator=(vector<T> &vec)
   #ifdef _VEC_DEBUG
     DebugFile << "\ncv::op=(v): hook vrep "
           << (void*)(vec.p) << " to vector " 
-          << (void*)this << endl;
+          << (void*)this << std::endl;
   #endif
   p = vec.p;
   if(vec.Is_Temp)
     {
     #ifdef _VEC_DEBUG
       DebugFile << "\ncv::op=(v): deleting vector at " 
-                << (void*)(&vec) << endl;
+                << (void*)(&vec) << std::endl;
     #endif
     delete &vec;
     }
@@ -558,7 +558,7 @@ vector<T>& vector<T>::operator=(T x)
     p->f = new T[lng];
     #ifdef _VEC_DEBUG
       DebugFile << "v::op=(T): array " << lng << " long alloc at "
-                << (void*)(p->f) << endl;
+                << (void*)(p->f) << std::endl;
     #endif
     }
   T *f = p->f;
@@ -589,7 +589,7 @@ vector<T>& vector<T>::operator*( matrix<T> &m2)
   if(nrows != vec_len)
     {
     #ifdef _VEC_DEBUG
-      DebugFile << "error in vector method" << endl;
+      DebugFile << "error in vector method" << std::endl;
     #endif
     return(*this);
     }
@@ -598,7 +598,7 @@ vector<T>& vector<T>::operator*( matrix<T> &m2)
   v_res->Is_Temp = 1;
   #ifdef _VEC_DEBUG
     DebugFile << "\nv op*(m): new rowvec at " 
-              << (void*)v_res << endl;
+              << (void*)v_res << std::endl;
   #endif
 
   // perform multiplication and populate results vector
@@ -617,7 +617,7 @@ vector<T>& vector<T>::operator*( matrix<T> &m2)
     {
     #ifdef _VEC_DEBUG
       DebugFile << "\nv op*(m): deleting matrix at " 
-                << (void*)(&m2) << endl;
+                << (void*)(&m2) << std::endl;
     #endif
     delete (&m2);
     }
@@ -625,7 +625,7 @@ vector<T>& vector<T>::operator*( matrix<T> &m2)
     {
     #ifdef _VEC_DEBUG
       DebugFile << "\nv op*(m): deleting rowvec at " 
-                << (void*)this << endl;
+                << (void*)this << std::endl;
     #endif
     delete this;
     }

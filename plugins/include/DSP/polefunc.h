@@ -10,6 +10,6 @@ class AllPoleTransFunc : public FilterTransFunc
 {
 public: 
   // constructor to initialize for a specified filter order 
-  AllPoleTransFunc( istream& uin, ostream& uout );
+  AllPoleTransFunc( std::istream& uin, std::ostream& uout );
 }; 
 #endif 

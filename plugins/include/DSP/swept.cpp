@@ -2,14 +2,14 @@
 //  File = swept.cpp
 //
 
-#include <fstream.h>
+#include <fstream>
 #include <math.h> 
 #include <stdlib.h>
 #include "swept.h"
 #include "typedefs.h"
 #include "misdefs.h"
 #ifdef _DEBUG
-extern ofstream DebugFile;
+extern std::ofstream DebugFile;
 #endif
 
 SweptResponse::SweptResponse( FilterImplementation *filter_implem,
@@ -31,24 +31,24 @@ SweptResponse::SweptResponse( FilterImplementation *filter_implem,
  double cycles_per_corr;
  double max_output_mag;
  
- uout << "number of points in plot of frequency response?" << endl;
+ uout << "number of points in plot of frequency response?" << std::endl;
  uin >> Num_Resp_Pts;
 
- uout << "maximum swept frequency?" << endl;
+ uout << "maximum swept frequency?" << std::endl;
  uin >> Max_Sweep_Freq;
  if(Max_Sweep_Freq > (0.5/sampling_interval) )
    {
     uout << "maximum swept frequency will be limited\n"
          << "to folding frequency of " 
-         << (0.5/sampling_interval) << endl;
+         << (0.5/sampling_interval) << std::endl;
     Max_Sweep_Freq = 0.5/sampling_interval;
    }
  
  uout << "scaling?\n"
-      << "  0 = linear, 1 = dB"  << endl;
+      << "  0 = linear, 1 = dB"  << std::endl;
  uin >> Db_Scale_Enabled;
 
- uout << "number of output cycles to examine?" << endl;
+ uout << "number of output cycles to examine?" << std::endl;
  uin >> cycles_per_corr;
   
  if( Db_Scale_Enabled != 0) Db_Scale_Enabled = 1;
@@ -57,7 +57,7 @@ SweptResponse::SweptResponse( FilterImplementation *filter_implem,
       << "file is win_resp.txt\n\n"
       << "is this okay?"
       << "  0 = NO, 1 = YES"
-      << endl;
+      << std::endl;
  uin >> default_file_ok;
   
  if( default_file_ok) 
@@ -70,7 +70,7 @@ SweptResponse::SweptResponse( FilterImplementation *filter_implem,
      file_name = new char[31];
      
      uout << "enter complete name for output file (30 chars max)"
-          << endl;
+          << std::endl;
      uin >> file_name;
      Response_File = new ofstream(file_name, ios::out);
      delete []file_name;
@@ -146,7 +146,7 @@ void SweptResponse::NormalizeResponse( void )
       {if(Mag_Resp[n]>biggest) biggest = Mag_Resp[n];}
     #ifdef _DEBUG
     DebugFile << "before normaliz, biggest Mag_Resp was "
-              << biggest << endl;
+              << biggest << std::endl;
     #endif
     for( n=1; n < Num_Resp_Pts; n++)
       {Mag_Resp[n] = Mag_Resp[n] - biggest;}
@@ -176,7 +176,7 @@ void SweptResponse::DumpMagResp( void )
    {
     freq = n * Max_Sweep_Freq / (double) Num_Resp_Pts;
     (*Response_File) << freq << ", " 
-                     << Mag_Resp[n] << endl;
+                     << Mag_Resp[n] << std::endl;
    }
  //Response_File->setf(0, ios::doublefield);
  return;

@@ -15,7 +15,7 @@ public:
 
   ~ArProcess(void);
   
-  void DumpParameters( ostream& uout);
+  void DumpParameters( std::ostream& uout);
 
   void GetParameters( int *ar_order, T *a_coeff);
 

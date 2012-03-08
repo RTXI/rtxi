@@ -3,11 +3,11 @@
 //
 
 #include <stdlib.h>
-#include <fstream.h>
+#include <fstream>
 #include "covmeth.h"
 
 #ifdef _DEBUG
-  extern ofstream DebugFile;
+  extern std::ofstream DebugFile;
 #endif
 
 CovarMethCorrMtx::CovarMethCorrMtx( complex *x,

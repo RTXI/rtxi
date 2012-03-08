@@ -2,7 +2,7 @@
 //  file = dan_pdgm.cpp
 //
  #include <stdlib.h>  
- #include <iostream.h>
+ #include <iostream>
  #include "complex.h" 
  #include "dan_pdgm.h"
  #include "fft.h"

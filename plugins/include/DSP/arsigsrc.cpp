@@ -1,9 +1,9 @@
 //
 //  File = arsigsrc.cpp
 //
-#include <iostream.h> 
-#include <iomanip.h>
-#include <fstream.h>
+#include <iostream> 
+#include <iostream>
+#include <fstream>
 #include "pause.h"
 #include "complex.h"
 #include "polefunc.h"
@@ -14,7 +14,7 @@
    
 
 #ifdef _DEBUG
-  extern ofstream DebugFile;
+  extern std::ofstream DebugFile;
 #endif
 
 void ArSignalSource( istream& uin, ostream& uout, 
@@ -42,23 +42,23 @@ void ArSignalSource( istream& uin, ostream& uout,
 
   ofstream inp_seq_file("inp_seq.txt", ios::out);
 
-  uout << "time increment for simulated analog waveform?" << endl;
+  uout << "time increment for simulated analog waveform?" << std::endl;
   uin >> delta_t;
-  uout << "decim rate for discrete time seq?" << endl;
+  uout << "decim rate for discrete time seq?" << std::endl;
   uin >> sim_cyc_per_samp;
   samp_intvl = sim_cyc_per_samp * delta_t;
   *ret_samp_intvl = samp_intvl;
 
   uout << "How is AR process to be specified?\n"
        << "  1 = AR coefficients\n"
-       << "  2 = pole locations" << endl;
+       << "  2 = pole locations" << std::endl;
   uin >> spec_meth;
 
   int cp_order;
   double d_val;
   switch (spec_meth){
   case 1:   // AR coefficients
-    uout << "order of AR process?" << endl;
+    uout << "order of AR process?" << std::endl;
     uin >> cp_order;
     ar_order = cp_order;
     denom_coeff = new double[cp_order+1];
@@ -88,8 +88,8 @@ void ArSignalSource( istream& uin, ostream& uout,
     denom_coeff = dig_filt_dsgn->GetDenomCoefficients();
 
     int mod_flag;
-    uout << "want chance to modify IIR coeffs?" << endl;
-    uout << "( 0=NO, 1=YES )" << endl;
+    uout << "want chance to modify IIR coeffs?" << std::endl;
+    uout << "( 0=NO, 1=YES )" << std::endl;
     uin >> mod_flag;
     if(mod_flag >0)
       {
@@ -98,8 +98,8 @@ void ArSignalSource( istream& uin, ostream& uout,
         {
         d_val = denom_coeff[ii];
         uout << "denom_coeff[" << ii << "] = " 
-             << d_val << endl;
-        uout << "enter modified value " << endl;
+             << d_val << std::endl;
+        uout << "enter modified value " << std::endl;
         uin >> d_val;
         denom_coeff[ii] = d_val;
         }
@@ -123,7 +123,7 @@ void ArSignalSource( istream& uin, ostream& uout,
     if( cabs(cp_roots[ii])<1.0) continue;
       uout << "generator root " << ii << " (val=" 
            << cp_roots[ii] << ")\n is outside the unit circle" 
-           << endl;
+           << std::endl;
       char_poly->ReflectRoot(ii);
     }
   delete [] cp_coeff;
@@ -139,7 +139,7 @@ void ArSignalSource( istream& uin, ostream& uout,
                  single_numer_coeff,
                  denom_coeff);
   double noise_pwr;
-  uout << "power of noise to be added to signal?" << endl;
+  uout << "power of noise to be added to signal?" << std::endl;
   uin >> noise_pwr;
 
   double std_dev = sqrt(noise_pwr);                
@@ -149,7 +149,7 @@ void ArSignalSource( istream& uin, ostream& uout,
   if(std_dev >0.0) 
          out_samp += std_dev * GaussRandom(&noise_seed);
   signal[i] = out_samp;
-  inp_seq_file << i*samp_intvl << ", " << out_samp << endl;
+  inp_seq_file << i*samp_intvl << ", " << out_samp << std::endl;
 
   for(i=1; i<seq_len; i++)
     {
@@ -157,7 +157,7 @@ void ArSignalSource( istream& uin, ostream& uout,
     if(std_dev >0.0) 
            out_samp += std_dev * GaussRandom(&noise_seed);
     signal[i] = out_samp;
-    inp_seq_file << i*samp_intvl << ", " << out_samp << endl;
+    inp_seq_file << i*samp_intvl << ", " << out_samp << std::endl;
     }
   inp_seq_file.close();
   delete filt_implem;

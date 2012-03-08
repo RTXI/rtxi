@@ -3,10 +3,10 @@
 //
 
 #include <stdlib.h>
-#include <fstream.h>
+#include <fstream>
 #include "dir1_iir.h"
 #ifdef _DEBUG
-extern ofstream DebugFile;
+extern std::ofstream DebugFile;
 #endif
 
 DirectFormIir::DirectFormIir( int num_numer_coeff,
@@ -30,7 +30,7 @@ DirectFormIir::DirectFormIir( int num_numer_coeff,
  Output_Quan_Factor = double( coeff_quan_factor * input_quan_factor);
  
  #ifdef _DEBUG
- DebugFile << "In DirectFormIir" << endl;
+ DebugFile << "In DirectFormIir" << std::endl;
  #endif
  
  for(n=0; n<num_numer_coeff; n++)
@@ -38,7 +38,7 @@ DirectFormIir::DirectFormIir( int num_numer_coeff,
     Quan_Numer_Coeff[n] = long((coeff_quan_factor * numer_coeff[n]) + 0.5);
     #ifdef _DEBUG
     DebugFile << numer_coeff[n] << " quantized to " 
-              << Quan_Numer_Coeff[n] << endl;
+              << Quan_Numer_Coeff[n] << std::endl;
     #endif
     Input_Buffer[n] = 0;
    }
@@ -47,7 +47,7 @@ DirectFormIir::DirectFormIir( int num_numer_coeff,
     Quan_Denom_Coeff[n] = long((coeff_quan_factor * denom_coeff[n]) + 0.5);
     #ifdef _DEBUG
     DebugFile << denom_coeff[n] << " quantized to " 
-              << Quan_Denom_Coeff[n] << endl;
+              << Quan_Denom_Coeff[n] << std::endl;
     #endif
     Output_Buffer[n] = 0;
    }

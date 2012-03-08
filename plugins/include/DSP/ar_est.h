@@ -18,7 +18,7 @@ public:
 
   ~ArEstimate(void);
  
-  void DumpParameters( ostream& uout);
+  void DumpParameters( std::ostream& uout);
 };
 
 #endif

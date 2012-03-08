@@ -3,10 +3,10 @@
 //
 
 #include <stdlib.h>
-#include <fstream.h>
+#include <fstream>
 #include "unq_iir.h"
 #ifdef _DEBUG
-extern ofstream DebugFile;
+extern std::ofstream DebugFile;
 #endif
 
 UnquantDirectFormIir::UnquantDirectFormIir( 
@@ -26,7 +26,7 @@ UnquantDirectFormIir::UnquantDirectFormIir(
  Output_Write_Indx = 1;
  
  #ifdef _DEBUG
- DebugFile << "In UnquantDirectFormIir" << endl;
+ DebugFile << "In UnquantDirectFormIir" << std::endl;
  #endif
  
  for(n=0; n<num_numer_coeff; n++)

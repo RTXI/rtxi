@@ -4,7 +4,7 @@
 #ifndef _CMPXPOLY_H_
 #define _CMPXPOLY_H_  
 
-#include <fstream.h>
+#include <fstream>
 #include "complex.h"
 
 
@@ -46,16 +46,16 @@ public:
   void ReflectRoot( int root_idx );
 
   // dump polynomial to an output stream
-  void DumpToStream( ostream* output_stream);
+  void DumpToStream( std::ostream* output_stream);
   
   // get degree of polynomial
-  int CmplxPolynomial::GetDegree(void); 
+  int GetDegree(void);
   
   // return specified coefficient
-  complex CmplxPolynomial::GetCoeff(int k);
+  complex GetCoeff(int k);
 
   // return pointer to copy of coefficients
-  void CmplxPolynomial::CopyCoeffs(complex*);
+  void CopyCoeffs(complex*);
 
   friend class Polynomial;
 

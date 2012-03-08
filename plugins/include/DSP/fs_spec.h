@@ -24,7 +24,7 @@ public:
                       int num_taps,
                       double *des_mag_resp);
                       
-  FreqSampFilterSpec( istream &uin,
+  FreqSampFilterSpec( std::istream &uin,
                       ostream &uout);
 
   logical IsOptimizeEnabled(void);

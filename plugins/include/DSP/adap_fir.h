@@ -39,7 +39,7 @@ protected:
   double* Tally_For_Avg_2;
   double* Sample_Transient;
   double* Sample_Trans_2;
-  ofstream* Tap_File;
+  std::ofstream* Tap_File;
 };
 
 #endif

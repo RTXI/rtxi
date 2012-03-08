@@ -12,7 +12,7 @@
 #include "misdefs.h"
 #include "unwrap.h"
 #ifdef _DEBUG
-extern ofstream DebugFile;
+extern std::ofstream DebugFile;
 #endif
 //==================================================
 //  constructor with all configuration parameters
@@ -55,11 +55,11 @@ IirFilterResponse::IirFilterResponse( IirFilterDesign *filter_design,
  logical default_file_ok;
  Filter_Design = filter_design;
  
- uout << "number of points in plot of frequency response?" << endl;
+ uout << "number of points in plot of frequency response?" << std::endl;
  uin >> Num_Resp_Pts;
  
  uout << "scaling?\n"
-      << "  0 = linear, 1 = dB"  << endl;
+      << "  0 = linear, 1 = dB"  << std::endl;
  uin >> Db_Scale_Enabled;
   
  if( Db_Scale_Enabled != 0) Db_Scale_Enabled = 1;
@@ -69,7 +69,7 @@ IirFilterResponse::IirFilterResponse( IirFilterDesign *filter_design,
       << "file is iir_resp.txt\n\n"
       << "is this okay?"
       << "  0 = NO, 1 = YES"
-      << endl;
+      << std::endl;
  uin >> default_file_ok;
   
  if( default_file_ok)
@@ -82,7 +82,7 @@ IirFilterResponse::IirFilterResponse( IirFilterDesign *filter_design,
      file_name = new char[31];
      
      uout << "enter complete name for output file (30 chars max)"
-          << endl;
+          << std::endl;
      uin >> file_name;
      Response_File = new ofstream(file_name, ios::out);
      delete []file_name;
@@ -110,10 +110,10 @@ void IirFilterResponse::ComputeResponse( void )
  double *numer_coeff, *denom_coeff;
  complex numerator, denominator;
  
- cout << " in IirFilterResponse::ComputeResponse" << endl;
+ std::cout << " in IirFilterResponse::ComputeResponse" << std::endl;
  #ifdef _DEBUG
  DebugFile << " in IirFilterResponse::ComputeResponse" 
-           << endl;
+           << std::endl;
  #endif
  numer_coeff = Filter_Design->GetNumerCoefficients();
  denom_coeff = Filter_Design->GetDenomCoefficients();
@@ -124,9 +124,9 @@ void IirFilterResponse::ComputeResponse( void )
 
  #ifdef _DEBUG
  DebugFile << "in ComputeResponse, Num_Numer_Coeffs = " 
-           << Num_Numer_Coeffs << endl;
+           << Num_Numer_Coeffs << std::endl;
  DebugFile << "in ComputeResponse, Num_Denom_Coeffs = " 
-           << Num_Denom_Coeffs << endl;
+           << Num_Denom_Coeffs << std::endl;
  #endif
 
  for( resp_indx=0; resp_indx<Num_Resp_Pts; resp_indx++)
@@ -230,7 +230,7 @@ void IirFilterResponse::DumpMagResp( void )
     UnwrapPhase(n, &phase);
     (*Response_File) << freq << ", " 
                      << Mag_Resp[n] << ", "
-                     << phase << endl;
+                     << phase << std::endl;
    }
  return;
 }

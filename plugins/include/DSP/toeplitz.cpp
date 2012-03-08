@@ -3,7 +3,7 @@
 //
 
 #include <stdlib.h>
-#include <fstream.h>
+#include <fstream>
 #include "toeplitz.h"
 
 template <class T>

@@ -3,7 +3,7 @@
 //
 
  #include <stdlib.h>  
- #include <iostream.h>
+ #include <iostream>
  #include "complex.h" 
  #include "sam_spec.h"
  #include "fft.h"

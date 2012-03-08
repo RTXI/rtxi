@@ -2,12 +2,12 @@
  //  File = cholesky.cpp
  //
 
-#include <fstream.h>
+#include <fstream>
 #include "complex.h"
 #include "cholesky.h"
 
 #ifdef _DEBUG
-  extern ofstream DebugFile;
+  extern std::ofstream DebugFile;
 #endif
 
  int CholeskyDecomp( int ord,

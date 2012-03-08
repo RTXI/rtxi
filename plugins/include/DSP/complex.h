@@ -128,10 +128,10 @@ inline complex operator* ( const complex value1,
   }
   
   
-#include <iostream.h>
+#include <iostream>
 
-ostream& operator<< (ostream&, const complex&);
-istream& operator>> (istream&, complex&);
+std::ostream& operator<< (std::ostream&, const complex&);
+std::istream& operator>> (std::istream&, complex&);
 
 static const complex complex_zero(0.0, 0.0);
 

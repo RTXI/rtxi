@@ -3,7 +3,7 @@
 //
 
 #include <math.h>
-#include <iostream.h>
+#include <iostream>
 #include "con_tngl.h"
 #include "misdefs.h"
 #include "typedefs.h"
@@ -27,7 +27,7 @@ ContTriangularMagResp::ContTriangularMagResp( istream& uin,
     x = PI * freq * tau /2.0;
     value = 0.5 * tau * sinc_sqrd(x) / amp0;
     if(Db_Scale_Enab) value = 20.0*log10(value);
-    (*Response_File) << freq << ", " << value << endl;
+    (*Response_File) << freq << ", " << value << std::endl;
    }
  
 }

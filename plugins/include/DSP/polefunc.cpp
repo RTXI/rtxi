@@ -10,7 +10,7 @@
 #include "polefunc.h"
 
 #ifdef _DEBUG
-extern ofstream DebugFile;
+extern std::ofstream DebugFile;
 #endif
 
 //======================================================
@@ -22,7 +22,7 @@ AllPoleTransFunc::AllPoleTransFunc( istream& uin,
 {
   int k, order;
   double real_part, imag_part;
-  uout << "number of poles?" << endl;
+  uout << "number of poles?" << std::endl;
   uin >> order;
   Filter_Order = order;
   Prototype_Pole_Locs = new complex[order+1];
@@ -35,15 +35,15 @@ AllPoleTransFunc::AllPoleTransFunc( istream& uin,
   if(order%2 ==0)
     { // order is even
     uout << "poles must occur in " << order/2
-         << " complex conjugate pairs" << endl;
+         << " complex conjugate pairs" << std::endl;
     uout << "each pair will be entered as a real part\n"
          << "and the imaginary part of the pole in the upper half plane\n"
-         << "(i.e. sign of imaginary part will always be positive)" << endl;
+         << "(i.e. sign of imaginary part will always be positive)" << std::endl;
     for( k=1; k<=(order/2); k++)
       {
-      uout << "real part of pole pair " << k << "?" << endl;
+      uout << "real part of pole pair " << k << "?" << std::endl;
       uin >> real_part;
-      uout << "pos imag part of pole pair " << k << "?" << endl;
+      uout << "pos imag part of pole pair " << k << "?" << std::endl;
       uin >> imag_part;
       Prototype_Pole_Locs[k] = complex( real_part, imag_part ); 
       Prototype_Pole_Locs[order+1-k] = complex( real_part, -imag_part ); 
@@ -51,21 +51,21 @@ AllPoleTransFunc::AllPoleTransFunc( istream& uin,
     }
   else
     {  // order is odd
-    uout << "one pole will be real" << endl;
+    uout << "one pole will be real" << std::endl;
     uout << "other poles must occur in " << order/2
-         << " complex conjugate pairs" << endl;
+         << " complex conjugate pairs" << std::endl;
     uout << "each pair will be entered as a real part\n"
          << "and the imaginary part of the pole in the upper half plane\n"
-         << "(i.e. sign of imaginary part will always be positive)" << endl;
-    uout << "\nenter value for real pole" << endl;
+         << "(i.e. sign of imaginary part will always be positive)" << std::endl;
+    uout << "\nenter value for real pole" << std::endl;
     uin >> real_part;
     Prototype_Pole_Locs[(order+1)/2] = complex( real_part, 0.0 ); 
 
     for( k=1; k<=((order-1)/2); k++)
       {
-      uout << "real part of pole pair " << k << "?" << endl;
+      uout << "real part of pole pair " << k << "?" << std::endl;
       uin >> real_part;
-      uout << "pos imag part of pole pair " << k << "?" << endl;
+      uout << "pos imag part of pole pair " << k << "?" << std::endl;
       uin >> imag_part;
       Prototype_Pole_Locs[k] = complex( real_part, imag_part ); 
       Prototype_Pole_Locs[order+1-k] = complex( real_part, -imag_part ); 

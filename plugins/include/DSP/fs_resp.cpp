@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include "fs_resp.h"
 #include "misdefs.h"
-extern ofstream DebugFile;
+extern std::ofstream DebugFile;
 
 FreqSampFilterResponse::FreqSampFilterResponse()
 {
@@ -39,7 +39,7 @@ double FreqSampFilterResponse::GetStopbandPeak()
 double peak;
 int n, nBeg, nEnd, indexOfPeak;
 
-cout << "doing case " << Band_Config << endl;
+std::cout << "doing case " << Band_Config << std::endl;
 switch (Band_Config)
   {
    case 1:       /* lowpass */
@@ -56,8 +56,8 @@ switch (Band_Config)
     nEnd = 2*Num_Resp_Pts*N3/Num_Taps;
     break;
   }
-cout << "nBeg = " << nBeg << endl;
-cout << "nEnd = " << nEnd << endl;
+std::cout << "nBeg = " << nBeg << std::endl;
+std::cout << "nEnd = " << nEnd << std::endl;
 
 peak = -9999.0;
 for(n=nBeg; n<nEnd; n++) {
@@ -89,9 +89,9 @@ int index, L, n;
 double lambda, work;
 
 double* coeff = filter_design->GetCoefficients();
-cout << "in fs_rsp, coeff = " << (void*)coeff << endl; 
-cout << "Num_Taps = " << Num_Taps << endl;
-cout << "Num_Resp_Pts = " << Num_Resp_Pts << endl;
+std::cout << "in fs_rsp, coeff = " << (void*)coeff << std::endl; 
+std::cout << "Num_Taps = " << Num_Taps << std::endl;
+std::cout << "Num_Resp_Pts = " << Num_Resp_Pts << std::endl;
 
 for( L=0; L<Num_Resp_Pts; L++)
   {
@@ -170,10 +170,10 @@ double* FreqSampFilterResponse::GetMagResp( void)
 void FreqSampFilterResponse::DumpMagResp( ofstream* output_stream)
 {
  int n;
- cout << "in FreqSampFilterResponse::DumpMagResp" << endl;
+ std::cout << "in FreqSampFilterResponse::DumpMagResp" << std::endl;
  for( n=0; n < Num_Resp_Pts; n++)
    {
-    (*output_stream) << n << ", " << Mag_Resp[n] << endl;
+    (*output_stream) << n << ", " << Mag_Resp[n] << std::endl;
    }
  return;
 }

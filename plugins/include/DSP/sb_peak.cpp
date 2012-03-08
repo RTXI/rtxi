@@ -3,7 +3,7 @@
 //     
 
 #include "fs_spec.h"
-#include <iostream.h>
+#include <iostream>
 
 double FindStopbandPeak(  FreqSampFilterSpec *filter,
                           int numPts,
@@ -12,7 +12,7 @@ double FindStopbandPeak(  FreqSampFilterSpec *filter,
 double peak;
 int n, nBeg, nEnd, indexOfPeak;
 
-cout << "doing case " << filter->GetBandConfig() << endl;
+std::cout << "doing case " << filter->GetBandConfig() << std::endl;
 switch (filter->GetBandConfig())
   {
    case 1:       /* lowpass */
@@ -29,8 +29,8 @@ switch (filter->GetBandConfig())
     nEnd = 2*numPts*filter->GetN3()/filter->GetNumTaps();
     break;
   }
-cout << "nBeg = " << nBeg << endl;
-cout << "nEnd = " << nEnd << endl;
+std::cout << "nBeg = " << nBeg << std::endl;
+std::cout << "nEnd = " << nEnd << std::endl;
 
 peak = -9999.0;
 for(n=nBeg; n<nEnd; n++) {

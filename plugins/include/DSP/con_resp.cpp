@@ -18,16 +18,16 @@ ContinWindowResponse::ContinWindowResponse( istream& uin,
        << _HAMMING << " = Hamming\n  "
        << _HANN << " = Hann (hanning, vonHann)\n  "
        << _DOLPH_CHEBY << " = Dolph-Chebyshev\n  "
-       << endl;
+       << std::endl;
   uin >> Window_Shape;
   
   if( Window_Shape < _RECTANGULAR)
     { exit(0);}
     
-  uout << "number of points in plot?" << endl;
+  uout << "number of points in plot?" << std::endl;
   uin >> Num_Resp_Pts; 
   uout << "scaling?\n"
-       << "  0 = linear, 1 = dB"  << endl;
+       << "  0 = linear, 1 = dB"  << std::endl;
   uin >> Db_Scale_Enab;
   
   if( Db_Scale_Enab != 0) Db_Scale_Enab = 1;
@@ -36,7 +36,7 @@ ContinWindowResponse::ContinWindowResponse( istream& uin,
        << "file is cwinresp.txt\n\n"
        << "is this okay?"
        << "  0 = NO, 1 = YES"
-       << endl;
+       << std::endl;
   uin >> default_file_ok;
   
   if( default_file_ok)
@@ -49,7 +49,7 @@ ContinWindowResponse::ContinWindowResponse( istream& uin,
      file_name = new char[31];
      
      uout << "enter complete name for output file"
-          << endl;
+          << std::endl;
      uin >> file_name;
      Response_File = new ofstream(file_name, ios::out);
      delete []file_name;

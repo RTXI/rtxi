@@ -22,8 +22,8 @@ public:
   //  setting of configuration parameters
   
   LinearPhaseFirResponse( LinearPhaseFirDesign *filter_design,
-                          istream& uin,
-                          ostream& uout );
+                          std::istream& uin,
+                          std::ostream& uout );
  
   //----------------------------------------
   // method to compute magnitude response 

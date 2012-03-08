@@ -3,7 +3,7 @@
 //
 
 #include <stdlib.h>  
-#include <iostream.h>
+#include <iostream>
 #include "psd_est.h"
 
 PsdEstimate::PsdEstimate( int num_samps,
@@ -25,7 +25,7 @@ void PsdEstimate::DumpNumeric( ofstream *out_file,
      theor_val = ref_spec->GetPsdValue(freq);
      value = Psd_Est[samp_idx];
      (*out_file) << freq << ",  " << value 
-                  << ", " << theor_val << endl; 
+                  << ", " << theor_val << std::endl; 
     } 
 };
 
@@ -37,7 +37,7 @@ void PsdEstimate::DumpNumeric( ofstream *out_file )
     {
      freq = samp_idx*Delta_F;
      value = Psd_Est[samp_idx];
-     (*out_file) << freq << ",  " << value << endl; 
+     (*out_file) << freq << ",  " << value << std::endl; 
     } 
 };
 
@@ -52,7 +52,7 @@ void PsdEstimate::DumpDecibels( ofstream *out_file,
      theor_val = 10.0 * log10(ref_spec->GetPsdValue(freq));
      value = 10.0 * log10(Psd_Est[samp_idx]);
      (*out_file) << freq << ",  " << value 
-                  << ", " << theor_val << endl; 
+                  << ", " << theor_val << std::endl; 
     } 
 };
 void PsdEstimate::DumpDecibels( ofstream *out_file )
@@ -63,7 +63,7 @@ void PsdEstimate::DumpDecibels( ofstream *out_file )
     {
      freq = samp_idx*Delta_F;
      value = 10.0 * log10(Psd_Est[samp_idx]);
-     (*out_file) << freq << ",  " << value << endl; 
+     (*out_file) << freq << ",  " << value << std::endl; 
     } 
 };
 

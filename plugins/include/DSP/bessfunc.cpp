@@ -13,7 +13,7 @@
 #include "complex.h"
 #include "cmpxpoly.h"
 #ifdef _DEBUG
-extern ofstream DebugFile;
+extern std::ofstream DebugFile;
 #endif
 
 //======================================================
@@ -94,7 +94,7 @@ BesselTransFunc::BesselTransFunc( int order,
                       double(q_poly[indx][i]), 0.0);
       #ifdef _DEBUG
       DebugFile << "q_poly[" << i << "] = "
-                << q_poly[indx][i] << endl;
+                << q_poly[indx][i] << std::endl;
       #endif
       }
     }
@@ -130,7 +130,7 @@ BesselTransFunc::BesselTransFunc( int order,
 
     #ifdef _DEBUG
     DebugFile << "laguerre_status = "
-              << laguerre_status << endl;
+              << laguerre_status << std::endl;
     #endif
 
     if(laguerre_status <0)
@@ -139,13 +139,13 @@ BesselTransFunc::BesselTransFunc( int order,
       DebugFile << "FATAL ERROR - \n"
                 << "Laguerre method failed to converge.\n"
                 << "Unable to find poles for desired Bessel filter." 
-                << endl;
+                << std::endl;
       #endif
       exit(-1);
       }
 
     #ifdef _DEBUG
-    DebugFile << "root = " << root << endl;
+    DebugFile << "root = " << root << std::endl;
     #endif
 
     //--------------------------------------------
@@ -171,15 +171,15 @@ BesselTransFunc::BesselTransFunc( int order,
       }
     } // end of loop over i
   #ifdef _DEBUG
-  DebugFile << "work_coeff[1] = " << work_coeff[1] << endl;
-  DebugFile << "work_coeff[0] = " << work_coeff[0] << endl;
+  DebugFile << "work_coeff[1] = " << work_coeff[1] << std::endl;
+  DebugFile << "work_coeff[0] = " << work_coeff[0] << std::endl;
   #endif
   
   Prototype_Pole_Locs[order] = -work_coeff[0];
 
   #ifdef _DEBUG
   DebugFile << "pole[" << order << "] = "
-            << Prototype_Pole_Locs[order] << endl;
+            << Prototype_Pole_Locs[order] << std::endl;
   #endif
   //----------------------------------------------
   // sort poles so that imaginary parts are in
@@ -203,7 +203,7 @@ BesselTransFunc::BesselTransFunc( int order,
   for(i=1; i<=order; i++)
     {
     DebugFile << "pole[" << i << "] = " 
-              << Prototype_Pole_Locs[i] << endl;
+              << Prototype_Pole_Locs[i] << std::endl;
     }
   #endif
 

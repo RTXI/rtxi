@@ -41,7 +41,7 @@ ChebyshevTransFunc::ChebyshevTransFunc( int order,
    {
     big_a = log((1.0+sqrt(1.0-epsilon*epsilon))/epsilon)/order;
     big_r = (exp(big_a)+exp(-big_a))/2.0;
-    cout << "big_r = " << big_r << endl; 
+    std::cout << "big_r = " << big_r << std::endl; 
    }
               
  sigma_mult = ( (1.0/gamma) - gamma) / (2.0 * big_r);

@@ -4,11 +4,11 @@
 
 #include <math.h>
 #include <stdlib.h>
-#include <iomanip.h>
+#include <iostream>
 #include "misdefs.h"   
 #include "iir_dsgn.h"
 #ifdef _DEBUG
-extern ofstream DebugFile;
+extern std::ofstream DebugFile;
 #endif
 
 //=========================================
@@ -23,10 +23,10 @@ IirFilterDesign::IirFilterDesign( void )
 // constructor that provides interactive initialization
 //------------------------------------------------------
 
-IirFilterDesign::IirFilterDesign( istream& uin,
-                                  ostream& uout)
+IirFilterDesign::IirFilterDesign( std::istream& uin,
+                                  std::ostream& uout)
 {
- uout << "We made it into interactive constructor" << endl;
+ uout << "We made it into interactive constructor" << std::endl;
 }
 //===============================================
 //  constructor that allocates arrays of
@@ -60,12 +60,12 @@ IirFilterDesign::IirFilterDesign( int num_numer_coeffs,
  Num_Numer_Coeffs = num_numer_coeffs;
  #ifdef _DEBUG
  DebugFile << "in IirFilterDesign, num_numer_coeffs = "
-           << num_numer_coeffs << endl;
+           << num_numer_coeffs << std::endl;
  #endif
  Num_Denom_Coeffs = num_denom_coeffs;
  #ifdef _DEBUG
  DebugFile << "in IirFilterDesign, num_denom_coeffs = "
-           << num_denom_coeffs << endl;
+           << num_denom_coeffs << std::endl;
  #endif
  Numer_Coeffs = new double[num_numer_coeffs];
  Denom_Coeffs = new double[num_denom_coeffs+1];
@@ -150,7 +150,7 @@ void IirFilterDesign::QuantizeCoefficients( long quant_factor,
    DebugFile << "numer coeff " << n << " quant from "
              << Orig_Numer_Coeffs[n] << "\n    to "
              << Numer_Coeffs[n] << " error is "
-             << quan_err << endl;
+             << quan_err << std::endl;
    #endif
   }
  for( n=1; n<= Num_Denom_Coeffs; n++)
@@ -167,7 +167,7 @@ void IirFilterDesign::QuantizeCoefficients( long quant_factor,
    DebugFile << "denom coeff " << n << " quant from "
              << Orig_Denom_Coeffs[n] << "\n   to "
              << Denom_Coeffs[n] << " error is "
-             << quan_err << endl;
+             << quan_err << std::endl;
    #endif
   }
  return;
@@ -219,7 +219,7 @@ void IirFilterDesign::CopyCoefficients( double *numer_coeff,
 //----------------------------------------------
 double* IirFilterDesign::GetNumerCoefficients(void)
 {
- cout << "in iir_dsgn, Numer_Coeffs = " << (void*)Numer_Coeffs << endl;
+ std::cout << "in iir_dsgn, Numer_Coeffs = " << (void*)Numer_Coeffs << std::endl;
  return(Numer_Coeffs);
 }
 
@@ -229,8 +229,8 @@ double* IirFilterDesign::GetNumerCoefficients(void)
 //----------------------------------------------
 double* IirFilterDesign::GetDenomCoefficients(void)
 {
- cout << "in iir_dsgn, Denom_Coeffs = " 
-      << (void*)Denom_Coeffs << endl;
+ std::cout << "in iir_dsgn, Denom_Coeffs = " 
+      << (void*)Denom_Coeffs << std::endl;
  double* ret_ptr = new double[Num_Denom_Coeffs+1];
  for(int i=0; i<=Num_Denom_Coeffs; i++)
    ret_ptr[i] = Denom_Coeffs[i];
@@ -287,7 +287,7 @@ int IirFilterDesign::GetNumDenomCoeffs(void)
 // dump complete set of coefficients to output_stream
 //--------------------------------------------------------------
 
-void IirFilterDesign::DumpCoefficients( ofstream* output_stream)
+void IirFilterDesign::DumpCoefficients( std::ofstream* output_stream)
 {
  int n; 
  //output_stream->setf(ios::fixed, ios::floatfield);
@@ -295,12 +295,12 @@ void IirFilterDesign::DumpCoefficients( ofstream* output_stream)
  for(n=0; n<Num_Numer_Coeffs; n++)
    {
     (*output_stream) << "b[" << n << "] = " 
-                     << Numer_Coeffs[n] << endl;
+                     << Numer_Coeffs[n] << std::endl;
    }
  for(n=1; n<=Num_Denom_Coeffs; n++)
    {
     (*output_stream) << "a[" << n << "] = " 
-                     << Denom_Coeffs[n] << endl;
+                     << Denom_Coeffs[n] << std::endl;
    }
  //output_stream->precision(0);
  //output_stream->setf(0, ios::floatfield);

@@ -2,14 +2,14 @@
 //  File = mr_lpf.cpp
 //
 #include <stdlib.h> 
-#include <fstream.h>
+#include <fstream>
 #include "dirform1.h"
 #include "fir_dsgn.h"
 #include "mr_lpf.h"
    
 
 #ifdef _DEBUG
- extern ofstream DebugFile;
+ extern std::ofstream DebugFile;
 #endif
 
  MultirateLowpass::MultirateLowpass( FirFilterDesign *dec_proto_filt,

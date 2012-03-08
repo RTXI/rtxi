@@ -3,7 +3,7 @@
 //
 
 #include <stdlib.h>
-#include <fstream.h>
+#include <fstream>
 #include "armaproc.h"
 #include "gausrand.h"
 #include "yulewalk.h"
@@ -39,20 +39,20 @@ template <class T>
 void ArmaProcess<T>::DumpParameters(ostream& uout)
   {
   int indx;
-  uout << "Drv_Noise_Var = " << Drv_Noise_Var << endl;
+  uout << "Drv_Noise_Var = " << Drv_Noise_Var << std::endl;
 
   if(Ar_Order > 0)
     {
     for(indx=0; indx<=Ar_Order; indx++)
                   uout << "a[" << indx << "] = " 
-                       << A_Coeffs[indx] << endl;
+                       << A_Coeffs[indx] << std::endl;
     }
 
   if(Ma_Order > 0)
     {
     for(indx=0; indx<=Ma_Order; indx++)
                   uout << "b[" << indx << "] = " 
-                       << B_Coeffs[indx] << endl;
+                       << B_Coeffs[indx] << std::endl;
     }
 
   return;

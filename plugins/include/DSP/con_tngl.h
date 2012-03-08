@@ -13,8 +13,8 @@ class ContTriangularMagResp : public ContinWindowResponse
 
   // constructor
 
-  ContTriangularMagResp( istream& uin,
-                         ostream& uout );
+  ContTriangularMagResp( std::istream& uin,
+                         std::ostream& uout );
 
 };
 

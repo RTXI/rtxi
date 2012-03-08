@@ -4,8 +4,8 @@
  
  
  #include <stdlib.h>
- #include <iostream.h>
- #include <fstream.h>
+ #include <iostream>
+ #include <fstream>
  #include <math.h>
  #include "cpfsk.h"
  #include "complex.h"
@@ -184,7 +184,7 @@
         }
       } // end of loop over samp_idx
     }
-  if(Seg_Num==0) cout << "td_energy = " << td_energy << endl;
+  if(Seg_Num==0) std::cout << "td_energy = " << td_energy << std::endl;
   Seg_Num++;
   
   return;

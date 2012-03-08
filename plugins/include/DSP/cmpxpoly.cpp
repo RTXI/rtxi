@@ -79,7 +79,7 @@ CmplxPolynomial::CmplxPolynomial( const complex *coeff,
  for(int i=0; i<=degree; i++) Coeff[i] = coeff[i];
  for(int j=0; j<=degree; j++)
    {
-   cout << "poly_coeff[" << j << "] = " << coeff[j] << endl;
+   std::cout << "poly_coeff[" << j << "] = " << coeff[j] << std::endl;
    }
  
  return;
@@ -231,18 +231,18 @@ void CmplxPolynomial::FindRoots( void )
                              epsilon, epsilon2, max_iter);
     if(status <0) 
       {
-      cout << "Laguerre method did not converge" << endl;
+      std::cout << "Laguerre method did not converge" << std::endl;
       exit(55);
       }
-    cout << "Root[" << i << "] = " << Root[i] 
-         << " (" << status << ")" << endl;
+    std::cout << "Root[" << i << "] = " << Root[i] 
+         << " (" << status << ")" << std::endl;
     root_factor = CmplxPolynomial( complex(1.0,0.0),-Root[i]);
     work_poly /= root_factor;
-    work_poly.DumpToStream(&cout);
+    work_poly.DumpToStream(&std::cout);
     pause();
     }
   Root[Degree-1] = -(work_poly.GetCoeff(0));
-  cout << "Root[" << Degree-1 << "] = " << Root[Degree-1] << endl;
+  std::cout << "Root[" << Degree-1 << "] = " << Root[Degree-1] << std::endl;
 
   //------------------------------------------------
   //  polish the roots
@@ -253,11 +253,11 @@ void CmplxPolynomial::FindRoots( void )
                              epsilon, epsilon2, max_iter);
     if(status <0) 
       {
-      cout << "Laguerre method did not converge" << endl;
+      std::cout << "Laguerre method did not converge" << std::endl;
       exit(55);
       }
-    cout << "Polished Root[" << i << "] = " << Root[i] 
-         << " (" << status << ")" << endl;
+    std::cout << "Polished Root[" << i << "] = " << Root[i] 
+         << " (" << status << ")" << std::endl;
     pause();
     }
   return;
@@ -305,12 +305,12 @@ void CmplxPolynomial::BuildFromRoots( void )
 
 void CmplxPolynomial::DumpToStream( ostream* output_stream)
 {
- (*output_stream) << "Degree = " << Degree << endl;
+ (*output_stream) << "Degree = " << Degree << std::endl;
  
  for(int i=Degree; i>=0; i--)
    {
     (*output_stream) << "Coeff[" << i << "] = " 
-                     << Coeff[i] << endl;
+                     << Coeff[i] << std::endl;
    }
  return;
 }  

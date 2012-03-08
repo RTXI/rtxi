@@ -6,8 +6,8 @@
 //
 
 #include <stdlib.h> 
-#include <iostream.h> 
-#include <fstream.h>
+#include <iostream> 
+#include <fstream>
 #include <math.h>
 #include "misdefs.h"
 #include "abstmath.h"
@@ -56,8 +56,8 @@ PrimeFactorSet::PrimeFactorSet( int num_factors, int* factors )
   }
   for(n1=0; n1<Num_Distinct_Factors; n1++)
   {
-    cout << Factor_Vector[n1] << " ** " 
-         << Factor_Multiplicity[n1] << endl;
+    std::cout << Factor_Vector[n1] << " ** " 
+         << Factor_Multiplicity[n1] << std::endl;
   }
   return;
 };
@@ -106,7 +106,7 @@ PrimeFactorSet* PrimeFactorization( int number )
         residue /= n;
         geom_middle = (int) ceil(sqrt(double(residue)));
         first_n = n;
-        cout << "found factor " << n << endl;
+        std::cout << "found factor " << n << std::endl;
         break;
     }
     if(residue == 1) break;
@@ -117,7 +117,7 @@ PrimeFactorSet* PrimeFactorization( int number )
     temp_factors[num_factors] = residue;
     num_factors++;
   }
-  cout << "final residue is " << residue << endl;
+  std::cout << "final residue is " << residue << std::endl;
   PrimeFactorSet* factor_set = new PrimeFactorSet( num_factors, 
                                          temp_factors);
 

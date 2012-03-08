@@ -3,7 +3,7 @@
 //
 
 #include <stdlib.h>
-#include <fstream.h>
+#include <fstream>
 #include "autometh.h"
 #include "complex.h"
 #include "overload.h"

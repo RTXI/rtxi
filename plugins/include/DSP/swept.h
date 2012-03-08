@@ -12,8 +12,8 @@ class SweptResponse
 public:
   SweptResponse( FilterImplementation *filter_implem,
                  double sampling_interval,
-                 istream& uin,
-                 ostream& uout );
+                 std::istream& uin,
+                 std::ostream& uout );
   ~SweptResponse();
   void SweptResponse::NormalizeResponse( void );
   void DumpMagResp( void );
@@ -26,7 +26,7 @@ private:
   double *Mag_Resp;
   double *Phase_Resp;
   double Max_Sweep_Freq;
-  ofstream *Response_File;
+  std::ofstream *Response_File;
   FilterImplementation *Filter_Implem;
 
 };

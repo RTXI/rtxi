@@ -4,7 +4,7 @@
 #ifndef _POLY_H_
 #define _POLY_H_  
 
-#include <fstream.h>
+#include <fstream>
 #include "cmpxpoly.h"
 
 
@@ -35,13 +35,13 @@ public:
   Polynomial& operator/= (const Polynomial &right);
   
   // dump polynomial to an output stream
-  void DumpToStream( ofstream* output_stream);
+  void DumpToStream( std::ofstream* output_stream);
 
   // get degree of polynomial
-  int Polynomial::GetDegree(void); 
+  int GetDegree(void);
   
   // return specified coefficient
-  double Polynomial::GetCoefficient(int k);
+  double GetCoefficient(int k);
 
 private:
    

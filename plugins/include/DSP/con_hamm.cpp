@@ -3,7 +3,7 @@
 //
 
 #include <math.h>
-#include <iostream.h>
+#include <iostream>
 #include "misdefs.h"
 #include "typedefs.h"
 #include "con_hamm.h"
@@ -28,6 +28,6 @@ ContHammingMagResp::ContHammingMagResp( istream& uin,
     x += (0.23 * tau * sinc(PI * tau * (freq-tau)));
     x += (0.23 * tau * sinc(PI * tau * (freq+tau)));
     if(Db_Scale_Enab) x = 20.0*log10(fabs(x/amp0));
-    (*Response_File) << freq << ", " << x << endl;    
+    (*Response_File) << freq << ", " << x << std::endl;    
    }
 }

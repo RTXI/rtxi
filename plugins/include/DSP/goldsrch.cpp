@@ -9,14 +9,14 @@
 #include "fs_dsgn.h"
 #include "sb_peak.h"
 #include "fs_spec.h"
-#include <fstream.h>
+#include <fstream>
 #include <math.h> 
 #include <stdlib.h>
 
 #ifdef _DEBUG
-extern ofstream DebugFile;
+extern std::ofstream DebugFile;
 #endif
-extern ofstream LogFile;
+extern std::ofstream LogFile;
 extern logical PauseEnabled;
 
 double GoldenSearch( double tol,
@@ -33,7 +33,7 @@ double GoldenSearch( double tol,
  int n;
  logical db_scale, rounding_enab;
 
- cout << "in goldenSearch\n" << endl;
+ std::cout << "in goldenSearch\n" << std::endl;
  db_scale = TRUE;
  rounding_enab = FALSE;
 
@@ -44,7 +44,7 @@ double GoldenSearch( double tol,
  filter_resp->ComputeMagResp(filter_design, db_scale);
  filter_resp->NormalizeResponse(db_scale);
  leftOrd = filter_resp->GetStopbandPeak();
- cout << "leftOrd = " << leftOrd << endl;
+ std::cout << "leftOrd = " << leftOrd << std::endl;
 
  filter_spec->SetTrans(1.0);
  filter_design->ComputeCoefficients(filter_spec);
@@ -52,13 +52,13 @@ double GoldenSearch( double tol,
  filter_resp->ComputeMagResp(filter_design, db_scale);
  filter_resp->NormalizeResponse(db_scale);
  rightOrd = filter_resp->GetStopbandPeak();
- cout << "rightOrd = " << rightOrd << endl;
+ std::cout << "rightOrd = " << rightOrd << std::endl;
  pause(PauseEnabled);
 
 if(leftOrd < rightOrd) {
   trans_val=1.0;
   for(;;) {
-    cout << "checkpoint 3" << endl;
+    std::cout << "checkpoint 3" << std::endl;
     trans_val = GOLD3 * trans_val;
     filter_spec->SetTrans(trans_val);
     filter_design->ComputeCoefficients(filter_spec);
@@ -66,7 +66,7 @@ if(leftOrd < rightOrd) {
     filter_resp->ComputeMagResp(filter_design, db_scale);
     filter_resp->NormalizeResponse(db_scale);
     midOrd = filter_resp->GetStopbandPeak();
-    cout << "midOrd = " << midOrd << endl;
+    std::cout << "midOrd = " << midOrd << std::endl;
     if(midOrd < leftOrd) break;
     }
   }
@@ -75,14 +75,14 @@ else {
   for(;;) {
     x = GOLD3 * x;
     trans_val = 1.0 - x;
-    cout << "checkpoint 4" << endl;
+    std::cout << "checkpoint 4" << std::endl;
     filter_spec->SetTrans(trans_val);
     filter_design->ComputeCoefficients(filter_spec);
     filter_design->QuantizeCoefficients(quant_factor, rounding_enab);
     filter_resp->ComputeMagResp(filter_design, db_scale);
     filter_resp->NormalizeResponse(db_scale);
     midOrd = filter_resp->GetStopbandPeak();
-    cout << "midOrd = " << midOrd << endl;
+    std::cout << "midOrd = " << midOrd << std::endl;
     if(midOrd < rightOrd) break;
     }
   }
@@ -93,8 +93,8 @@ x0 = 0.0;
 x3 = 1.0;
 x1 = xb;
 x2 = xb + GOLD3 * (1.0 - xb);
-cout << "x0= " << x0 << " x1= " << x1
-     << " x2= " << x2 << " x3= " << x3 << endl;
+std::cout << "x0= " << x0 << " x1= " << x1
+     << " x2= " << x2 << " x3= " << x3 << std::endl;
 
 filter_spec->SetTrans(x1);
 filter_design->ComputeCoefficients(filter_spec);
@@ -125,8 +125,8 @@ for(n=1; n<=100; n++) {
     filter_resp->ComputeMagResp(filter_design, db_scale);
     filter_resp->NormalizeResponse(db_scale);
     f1 = filter_resp->GetStopbandPeak();
-    cout << "x0= " << x0 << " x1= " << x1
-         << " x2= " << x2 << " x3= " << x3 << endl;
+    std::cout << "x0= " << x0 << " x1= " << x1
+         << " x2= " << x2 << " x3= " << x3 << std::endl;
     }
   else {
     x0 = x1;
@@ -140,14 +140,14 @@ for(n=1; n<=100; n++) {
     filter_resp->ComputeMagResp(filter_design, db_scale);
     filter_resp->NormalizeResponse(db_scale);
     f2 = filter_resp->GetStopbandPeak();
-    cout << "x0= " << x0 << " x1= " << x1
-         << " x2= " << x2 << " x3= " << x3 << endl;
+    std::cout << "x0= " << x0 << " x1= " << x1
+         << " x2= " << x2 << " x3= " << x3 << std::endl;
     }
 
   delta = fabs(x3 - x0);
   oldXmin = xmin;
-  cout << "at iter " << n << " delta = " << delta << endl;
-  cout << "tol = " << tol << endl;
+  std::cout << "at iter " << n << " delta = " << delta << std::endl;
+  std::cout << "tol = " << tol << std::endl;
   if(delta <= tol) break;
   }
 if(f1<f2)
@@ -156,8 +156,8 @@ if(f1<f2)
 else
   {xmin = x2;
   *fmin=f2;}
-cout << "minimum of " << *fmin << " at x = " << xmin << endl;
-LogFile << "minimum of " << *fmin << " at x = " << xmin << endl;
+std::cout << "minimum of " << *fmin << " at x = " << xmin << std::endl;
+LogFile << "minimum of " << *fmin << " at x = " << xmin << std::endl;
 return(xmin);
 }
 

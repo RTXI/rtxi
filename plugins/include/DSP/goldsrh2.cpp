@@ -9,14 +9,14 @@
 #include "fs_dsgn.h"
 #include "sb_peak.h"
 #include "fs_spec.h"
-#include <fstream.h>
+#include <fstream>
 #include <math.h> 
 #include <stdlib.h>
 
 #ifdef _DEBUG
-extern ofstream DebugFile;
+extern std::ofstream DebugFile;
 #endif
-extern ofstream LogFile;
+extern std::ofstream LogFile;
 extern logical PauseEnabled;
 
 double GoldenSearch2( double tol,
@@ -36,8 +36,8 @@ double GoldenSearch2( double tol,
  int n;
  logical db_scale;
 
- cout << "in goldenSearch\n" << endl;
- LogFile << "in goldenSearch\n" << endl;
+ std::cout << "in goldenSearch\n" << std::endl;
+ LogFile << "in goldenSearch\n" << std::endl;
  db_scale = TRUE; 
 
  /*--------------------------------------------*/
@@ -46,14 +46,14 @@ double GoldenSearch2( double tol,
  filter_resp->ComputeMagResp(filter_design, db_scale);
  filter_resp->NormalizeResponse(db_scale);
  leftOrd = filter_resp->GetStopbandPeak();
- LogFile << "leftOrd = " << leftOrd << endl;
+ LogFile << "leftOrd = " << leftOrd << std::endl;
 
  filter_spec->SetTrans(origins, slopes, 1.0);
  filter_design->ComputeCoefficients(filter_spec);
  filter_resp->ComputeMagResp(filter_design, db_scale);
  filter_resp->NormalizeResponse(db_scale);
  rightOrd = filter_resp->GetStopbandPeak();
- LogFile << "rightOrd = " << rightOrd << endl;
+ LogFile << "rightOrd = " << rightOrd << std::endl;
  pause(PauseEnabled);
 
 if(leftOrd < rightOrd) {
@@ -65,7 +65,7 @@ if(leftOrd < rightOrd) {
     filter_resp->ComputeMagResp(filter_design, db_scale);
     filter_resp->NormalizeResponse(db_scale);
     midOrd = filter_resp->GetStopbandPeak();
-    LogFile << "midOrd = " << midOrd << endl;
+    LogFile << "midOrd = " << midOrd << std::endl;
     if(midOrd < leftOrd) break;
     }
   }
@@ -79,7 +79,7 @@ else {
     filter_resp->ComputeMagResp(filter_design, db_scale);
     filter_resp->NormalizeResponse(db_scale);
     midOrd = filter_resp->GetStopbandPeak();
-    LogFile << "midOrd = " << midOrd << endl;
+    LogFile << "midOrd = " << midOrd << std::endl;
     if(midOrd < rightOrd) break;
     }
   }
@@ -91,21 +91,21 @@ x3 = rho_max;
 x1 = xb;
 x2 = xb + GOLD3 * (rho_max - xb);
 LogFile << "x0= " << x0 << " x1= " << x1
-     << " x2= " << x2 << " x3= " << x3 << endl;
+     << " x2= " << x2 << " x3= " << x3 << std::endl;
 
 filter_spec->SetTrans(origins, slopes, x1);
 filter_design->ComputeCoefficients(filter_spec);
 filter_resp->ComputeMagResp(filter_design, db_scale);
 filter_resp->NormalizeResponse(db_scale);
 f1 = filter_resp->GetStopbandPeak();
-LogFile << "f1 = " << f1 << endl;
+LogFile << "f1 = " << f1 << std::endl;
 
 filter_spec->SetTrans(origins, slopes, x2);
 filter_design->ComputeCoefficients(filter_spec);
 filter_resp->ComputeMagResp(filter_design, db_scale);
 filter_resp->NormalizeResponse(db_scale);
 f2 = filter_resp->GetStopbandPeak();
-LogFile << "f2 = " << f2 << endl;
+LogFile << "f2 = " << f2 << std::endl;
 
 oldXmin = 0.0;
 
@@ -122,8 +122,8 @@ for(n=1; n<=100; n++) {
     filter_resp->NormalizeResponse(db_scale);
     f1 = filter_resp->GetStopbandPeak();
     LogFile << "x0= " << x0 << " x1= " << x1
-         << " x2= " << x2 << " x3= " << x3 << endl;
-    LogFile << "f1 = " << f1 << endl;
+         << " x2= " << x2 << " x3= " << x3 << std::endl;
+    LogFile << "f1 = " << f1 << std::endl;
     }
   else {
     x0 = x1;
@@ -136,15 +136,15 @@ for(n=1; n<=100; n++) {
     filter_resp->ComputeMagResp(filter_design, db_scale);
     filter_resp->NormalizeResponse(db_scale);
     f2 = filter_resp->GetStopbandPeak();
-    LogFile << "f2 = " << f2 << endl;
+    LogFile << "f2 = " << f2 << std::endl;
     LogFile << "x0= " << x0 << " x1= " << x1
-         << " x2= " << x2 << " x3= " << x3 << endl;
+         << " x2= " << x2 << " x3= " << x3 << std::endl;
     }
 
   delta = fabs(x3 - x0);
   oldXmin = xmin;
-  LogFile << "at iter " << n << " delta = " << delta << endl;
-  LogFile << "tol = " << tol << endl;
+  LogFile << "at iter " << n << " delta = " << delta << std::endl;
+  LogFile << "tol = " << tol << std::endl;
   if(delta <= tol) break;
   }
 if(f1<f2)
@@ -153,8 +153,8 @@ if(f1<f2)
 else
   {xmin = x2;
   *fmin=f2;}
-cout << "minimum of " << *fmin << " at x = " << xmin << endl;
-LogFile << "minimum of " << *fmin << " at x = " << xmin << endl;
+std::cout << "minimum of " << *fmin << " at x = " << xmin << std::endl;
+LogFile << "minimum of " << *fmin << " at x = " << xmin << std::endl;
 return(xmin);
 }
 

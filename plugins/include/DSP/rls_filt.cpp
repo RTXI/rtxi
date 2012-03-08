@@ -3,14 +3,14 @@
 //
 
 #include <stdlib.h>
-#include <fstream.h>
+#include <fstream>
 #include "rls_filt.h"
 #include "adap_fir.h"
 #include "matrix_T.h"
 #ifdef _DEBUG
-  #include <fstream.h>
+  #include <fstream>
   //#define _RLS_DEBUG 1
-  extern ofstream DebugFile;
+  extern std::ofstream DebugFile;
 #endif
 
 RlsFilter::RlsFilter( int num_taps,
@@ -37,7 +37,7 @@ RlsFilter::RlsFilter( int num_taps,
  //double lambda=0.95;
  Lambda = lambda;
  #ifdef _DEBUG
- DebugFile << "In RlsFilter constructor" << endl;
+ DebugFile << "In RlsFilter constructor" << std::endl;
  #endif
 
  Cv_Work = new colvec<double>(0,num_taps);
@@ -46,7 +46,7 @@ RlsFilter::RlsFilter( int num_taps,
  P_Mtx = new matrix<double>(0,num_taps,0,num_taps);
  Rv_Work = new rowvec<double>(0,Num_Taps);
  #ifdef _DEBUG
- DebugFile << "End of RLS ctor" << endl;
+ DebugFile << "End of RLS ctor" << std::endl;
  #endif
  Trial_Count = 0;
  //ResetTaps();
@@ -87,7 +87,7 @@ double RlsFilter::UpdateTaps( double true_samp,
   double *test_ptr;
 
   #ifdef _RLS_DEBUG
-    DebugFile << "in UpdateTaps" << endl;
+    DebugFile << "in UpdateTaps" << std::endl;
   #endif
 
   /*
@@ -115,32 +115,32 @@ double RlsFilter::UpdateTaps( double true_samp,
   //------------------------------------------------
   // perform update calculations
   #ifdef _RLS_DEBUG
-    DebugFile << "\n------------------------------" << endl;
-    DebugFile << "*cv_work = (*P_Mtx) * (*u_vec)" << endl;
+    DebugFile << "\n------------------------------" << std::endl;
+    DebugFile << "*cv_work = (*P_Mtx) * (*u_vec)" << std::endl;
   #endif
   *cv_work = (*P_Mtx) * (*u_vec);
 
   #ifdef _RLS_DEBUG
-    DebugFile << "\n-----------------------------------------" << endl;
-    DebugFile << "denom = Lambda + (!(*u_vec) * (*cv_work))" << endl;
+    DebugFile << "\n-----------------------------------------" << std::endl;
+    DebugFile << "denom = Lambda + (!(*u_vec) * (*cv_work))" << std::endl;
   #endif
   denom = Lambda + (!(*u_vec) * (*cv_work));
 
   #ifdef _RLS_DEBUG
-    DebugFile << "\n-------------------------" << endl;
-    DebugFile << "*k_vec = (*cv_work)/denom" << endl;
+    DebugFile << "\n-------------------------" << std::endl;
+    DebugFile << "*k_vec = (*cv_work)/denom" << std::endl;
   #endif
   *k_vec = (*cv_work)/denom;
 
   #ifdef _RLS_DEBUG
-    DebugFile << "\n---------------------------------" << endl;
-    DebugFile << "*rv_work = (!(*u_vec) * (*P_Mtx))" << endl;
+    DebugFile << "\n---------------------------------" << std::endl;
+    DebugFile << "*rv_work = (!(*u_vec) * (*P_Mtx))" << std::endl;
   #endif
   *rv_work = (!(*u_vec) * (*P_Mtx));
 
   #ifdef _RLS_DEBUG
-    DebugFile << "\n-----------------------------------" << endl;
-    DebugFile << "(*P_Mtx) -= ((*k_vec) * (*rv_work))" << endl;
+    DebugFile << "\n-----------------------------------" << std::endl;
+    DebugFile << "(*P_Mtx) -= ((*k_vec) * (*rv_work))" << std::endl;
   #endif
   (*P_Mtx) -= ((*k_vec) * (*rv_work));
 
@@ -173,21 +173,21 @@ double RlsFilter::UpdateTaps( double true_samp,
   int ii, jj;
   for(ii=0; ii<Num_Taps; ii++)
     {
-    cout << "u_vec[" << ii << "] = " << ((*u_vec)[ii]) << endl;
+    std::cout << "u_vec[" << ii << "] = " << ((*u_vec)[ii]) << std::endl;
     }
   for(ii=0; ii<Num_Taps; ii++)
     {
     for(jj=0; jj<Num_Taps; jj++)
       {
-      cout << "P_Mtx[" << ii << "][" << jj << "] = " 
-           << ((*P_Mtx)[ii][jj]) << endl;
+      std::cout << "P_Mtx[" << ii << "][" << jj << "] = " 
+           << ((*P_Mtx)[ii][jj]) << std::endl;
       }
     }
-  cout << "denom = " << denom << endl;
+  std::cout << "denom = " << denom << std::endl;
   for(ii=0; ii<Num_Taps; ii++)
     {
-    cout << "cv_work[" << ii << "] = " << ((*cv_work)[ii]) 
-         << "  k_vec = " << ((*k_vec)[ii])<< endl;
+    std::cout << "cv_work[" << ii << "] = " << ((*cv_work)[ii]) 
+         << "  k_vec = " << ((*k_vec)[ii])<< std::endl;
     }
   } // end of if(Update_Count == 5)
   #endif
@@ -205,7 +205,7 @@ double RlsFilter::UpdateTaps( double true_samp,
     {
     test_ptr = new double[21];
     #ifdef _DEBUG
-    DebugFile << (void*)test_ptr << endl;
+    DebugFile << (void*)test_ptr << std::endl;
     #endif
     delete[] test_ptr;
     }

@@ -13,8 +13,8 @@ class ContHannMagResp : public ContinWindowResponse
 
   // constructor
 
-  ContHannMagResp( istream& uin,
-                   ostream& uout );
+  ContHannMagResp( std::istream& uin,
+                   std::ostream& uout );
 
 };
 

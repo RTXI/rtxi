@@ -3,10 +3,10 @@
 //
 
 #include <stdlib.h>
-#include <fstream.h>
+#include <fstream>
 #include "dirform1.h"
 #ifdef _DEBUG
-extern ofstream DebugFile;
+extern std::ofstream DebugFile;
 #endif
 
 DirectFormFir::DirectFormFir( int num_taps,
@@ -32,14 +32,14 @@ DirectFormFir::DirectFormFir( int num_taps,
       Quan_Coeff[n] = long((coeff_quan_factor * coeff[n]) + 0.5);
       #ifdef _DEBUG
       DebugFile << coeff[n] << " quantized to " 
-                << Quan_Coeff[n] << endl;
+                << Quan_Coeff[n] << std::endl;
       #endif
       Quan_In_Buf[n] = 0;
      }
  }
  else {
    #ifdef _DEBUG
-   DebugFile << "Initializing DirectFormFir unquantized" << endl;
+   DebugFile << "Initializing DirectFormFir unquantized" << std::endl;
    #endif
    Input_Quan_Factor = 32768;
    Long_Out_Quan_Factor = 32768;
@@ -53,7 +53,7 @@ DirectFormFir::DirectFormFir( int num_taps,
  }
  
  #ifdef _DEBUG
- DebugFile << "In DirectFormFir" << endl;
+ DebugFile << "In DirectFormFir" << std::endl;
  #endif
  
  return;

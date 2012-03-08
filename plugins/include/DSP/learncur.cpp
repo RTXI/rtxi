@@ -3,10 +3,10 @@
 //
 
 #include <stdlib.h>
-#include <fstream.h>
+#include <fstream>
 #include "learncur.h"
 #ifdef _DEBUG
-extern ofstream DebugFile;
+extern std::ofstream DebugFile;
 #endif
 
 LearningCurve::LearningCurve( int num_samps,
@@ -50,12 +50,12 @@ void LearningCurve::DumpCurve( void )
     /*
     out_file << i << ", " 
              << (mean-Min_Mse) << ", "
-             << (Trial_Buf[i]-Min_Mse) << endl;
+             << (Trial_Buf[i]-Min_Mse) << std::endl;
     */
     
     out_file << i << ", " 
              << mean << ", "
-             << Trial_Buf[i] << ", " << Min_Mse << endl;
+             << Trial_Buf[i] << ", " << Min_Mse << std::endl;
     
     }
   out_file.close();

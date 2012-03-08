@@ -3,7 +3,7 @@
 //
 
 #include <stdlib.h>
-#include <fstream.h>
+#include <fstream>
 #include "autometh.h"
 #include "gen_lev.h"
 #include "yulewalk.h"
@@ -11,7 +11,7 @@
 #include "matrix_T.h"
 
 #ifdef _DEBUG
-  extern ofstream DebugFile;
+  extern std::ofstream DebugFile;
 #endif
 
 template <class T>
@@ -41,12 +41,12 @@ ModYuleWalker<T>::ModYuleWalker( T *signal,
                                   epsilon,
                                   A_Vec);
   #ifdef _DEBUG
-    DebugFile << "returned to ModYuleWalker" << endl;
-    DebugFile << "err_stat = " << err_stat << endl;
+    DebugFile << "returned to ModYuleWalker" << std::endl;
+    DebugFile << "err_stat = " << err_stat << std::endl;
     for(int indx=0; indx<=ar_order; indx++)
       {
       DebugFile << "A_Vec[ " << indx << " ] = " 
-                << A_Vec[indx] << endl;
+                << A_Vec[indx] << std::endl;
       }
   #endif
   return;

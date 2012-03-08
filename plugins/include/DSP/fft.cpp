@@ -2,8 +2,8 @@
 //  File = fft.cpp
 //
 
-#include <iostream.h> 
-#include <fstream.h>
+#include <iostream> 
+#include <fstream>
 
 #include "complex.h"
 #include "dit_sino.h"

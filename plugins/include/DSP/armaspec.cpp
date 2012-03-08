@@ -3,7 +3,7 @@
 //
 
 #include <stdlib.h>
-#include <fstream.h>
+#include <fstream>
 #include "armaspec.h"
 #include "misdefs.h"
 
@@ -25,11 +25,11 @@ ArmaSpectrum<T>::ArmaSpectrum( int ar_order,
   int f_idx, cof_idx;
 
   Samp_Intvl = samp_intvl;
-  cout << "Now preparing ARMA spectrum estimate" << endl;
-  cout << "How many points in spectrum plot?" << endl;
+  std::cout << "Now preparing ARMA spectrum estimate" << std::endl;
+  std::cout << "How many points in spectrum plot?" << std::endl;
   cin >> Num_Pts;
   Spec_Buf = new double[Num_Pts];
-  cout << "Maximum frequency?" << endl;
+  std::cout << "Maximum frequency?" << std::endl;
   cin >> Max_Freq;
   Freq_Delt = Max_Freq/(Num_Pts-1);
   for(f_idx=0; f_idx<Num_Pts; f_idx++)
@@ -83,11 +83,11 @@ void ArmaSpectrum<T>::DumpSpectrum( char* out_file_nam,
       out_file << freq << ", " 
                << ((10.0 * log10(Spec_Buf[i]))-vert_offset) 
                << ", "
-               << ((10.0* log10(ref_value))-ref_offset) << endl;
+               << ((10.0* log10(ref_value))-ref_offset) << std::endl;
       }
     else {
       out_file << freq << ", " << (Spec_Buf[i])
-               << ", " << ref_value << endl;
+               << ", " << ref_value << std::endl;
       }
     }
   out_file.close();

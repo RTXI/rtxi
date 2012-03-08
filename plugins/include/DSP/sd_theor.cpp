@@ -2,13 +2,13 @@
 //  File = sd_filt.cpp
 //
 
-#include <fstream.h>
+#include <fstream>
 #include <math.h>
 #include "sd_theor.h"
 #include "misdefs.h"
 
 #ifdef _DEBUG
-  extern ofstream DebugFile;
+  extern std::ofstream DebugFile;
 #endif
 
 void SteepestDescentTheoretic( double start_pt_0,
@@ -20,7 +20,7 @@ void SteepestDescentTheoretic( double start_pt_0,
   int n;
   double w0, w1, old_w0, old_w1, grad_0, grad_1;
   double dist, radius, angle, deg_per_rad;
-  cout << "in SteepestDescentTheoretic" << endl;
+  std::cout << "in SteepestDescentTheoretic" << std::endl;
   ofstream out_file("sd_traj.txt", ios::out);
 
   deg_per_rad = 180.0/PI;
@@ -28,7 +28,7 @@ void SteepestDescentTheoretic( double start_pt_0,
   w1 = start_pt_1;
   old_w0 = w0;
   old_w1 = w1;
-  out_file << "0, " << old_w0 << ", " << old_w1 << endl;
+  out_file << "0, " << old_w0 << ", " << old_w1 << std::endl;
 
   for(n=1; n<num_pts; n++)
     {
@@ -41,7 +41,7 @@ void SteepestDescentTheoretic( double start_pt_0,
     if(dist < min_dist) continue;
       radius = sqrt(w0*w0 + w1*w1);
       angle = deg_per_rad * atan2(w1, w0);
-      out_file << n << ", " << w0 << ", " << w1 << endl;
+      out_file << n << ", " << w0 << ", " << w1 << std::endl;
       old_w0 = w0;
       old_w1 = w1;
     }

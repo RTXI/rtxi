@@ -1,11 +1,11 @@
 #include <stdlib.h> 
-#include <iostream.h> 
-#include <fstream.h>
+#include <iostream> 
+#include <fstream>
 #include <math.h>
 #include "misdefs.h"
 #include "croscorr.h"
 
-extern ofstream DebugFile;
+extern std::ofstream DebugFile;
 
 void CrossCorrelation( int seg_len,
                        double* input_segment, 

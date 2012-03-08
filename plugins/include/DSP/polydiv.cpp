@@ -6,12 +6,12 @@
 
 #include <math.h>
 #include <stdlib.h>
-#include <iostream.h>
-#include <fstream.h>
+#include <iostream>
+#include <fstream>
 #include "complex.h"
 #include "polydiv.h"
 #ifdef _DEBUG
-extern ofstream DebugFile;
+extern std::ofstream DebugFile;
 #endif
 
 void polydiv( complex *dvnd,

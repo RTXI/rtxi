@@ -7,7 +7,7 @@
 #ifndef _STEPRESP_H_
 #define _STEPRESP_H_
 
-#include <fstream.h>
+#include <fstream>
 #include "poly.h"
 #include "typedefs.h"
 #include "filtfunc.h"
@@ -27,7 +27,7 @@ class StepResponse
    ImpulseResponse* Imp_Resp;
    double Delta_Time;
    int Num_Resp_Pts;
-   ofstream *Response_File;
+   std::ofstream *Response_File;
 };
 
 #endif

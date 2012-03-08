@@ -3,7 +3,7 @@
 //
 
 #include <stdlib.h>
-#include <fstream.h>
+#include <fstream>
 #include "arspec.h"
 #include "misdefs.h"
 
@@ -21,11 +21,11 @@ ArSpectrum<T>::ArSpectrum( int ar_order,
   int f_idx, cof_idx;
 
   Samp_Intvl = samp_intvl;
-  cout << "drv_var = " << drv_var << endl;
-  cout << "How many points in spectrum plot?" << endl;
+  std::cout << "drv_var = " << drv_var << std::endl;
+  std::cout << "How many points in spectrum plot?" << std::endl;
   cin >> Num_Pts;
   Spec_Buf = new double[Num_Pts];
-  cout << "Maximum frequency?" << endl;
+  std::cout << "Maximum frequency?" << std::endl;
   cin >> Max_Freq;
   Freq_Delt = Max_Freq/(Num_Pts-1);
   double total_pwr = 0.0;
@@ -77,11 +77,11 @@ void ArSpectrum<T>::DumpSpectrum( char* out_file_nam,
       out_file << freq << ", " 
                << ((10.0 * log10(Spec_Buf[i]))-vert_offset) 
                << ", "
-               << ((10.0* log10(ref_value))-ref_offset) << endl;
+               << ((10.0* log10(ref_value))-ref_offset) << std::endl;
       }
     else {
       out_file << freq << ", " << (Spec_Buf[i])
-               << ", " << ref_value << endl;
+               << ", " << ref_value << std::endl;
       }
     }
   out_file.close();
@@ -101,11 +101,11 @@ void ArSpectrum<T>::DumpSpectrum( char* out_file_nam,
     if( db_plot_enab) {
       out_file << freq << ", " 
                << ((10.0 * log10(Spec_Buf[i]))-vert_offset) 
-               << endl;
+               << std::endl;
       }
     else {
       out_file << freq << ", " << (Spec_Buf[i])
-               << endl;
+               << std::endl;
       }
     }
   out_file.close();

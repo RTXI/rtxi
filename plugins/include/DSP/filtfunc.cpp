@@ -12,7 +12,7 @@
 #include "cmpxpoly.h" 
 
 #ifdef _DEBUG
-extern ofstream DebugFile;
+extern std::ofstream DebugFile;
 #endif
 
 //===========================================================
@@ -120,13 +120,13 @@ void FilterTransFunc::FrequencyPrewarp(
  freq_scale = warped_analog_cutoff/desired_digital_cutoff;
 
  #ifdef _DEBUG
- DebugFile << "freq_scale = " << freq_scale << endl;
+ DebugFile << "freq_scale = " << freq_scale << std::endl;
  DebugFile << "Num_Denorm_Poles = "
-           << Num_Denorm_Poles << endl;
+           << Num_Denorm_Poles << std::endl;
  DebugFile << "Num_Denorm_Zeros = "
-           << Num_Denorm_Zeros << endl;
+           << Num_Denorm_Zeros << std::endl;
  DebugFile << "in prewarp, orig H_Sub_Zero = "
-           << H_Sub_Zero << endl;
+           << H_Sub_Zero << std::endl;
  #endif
 
  for(n=1; n<=Num_Denorm_Poles; n++)
@@ -143,7 +143,7 @@ void FilterTransFunc::FrequencyPrewarp(
    }
 #ifdef _DEBUG
  DebugFile << "scaled H_Sub_Zero = "
-           << H_Sub_Zero << endl;
+           << H_Sub_Zero << std::endl;
 #endif
  return;
 }
@@ -209,7 +209,7 @@ void FilterTransFunc::FilterFrequencyResponse(void)
     (*Response_File) << i*delta_freq << ",  "
                      << (mag_resp[i]-peak_magnitude)
                      << ",  " << phase_resp[i] 
-                     << ",  " << group_dly[i] << endl;
+                     << ",  " << group_dly[i] << std::endl;
    }
  Response_File->close();
  delete []phase_resp;
@@ -274,14 +274,14 @@ float FilterTransFunc::GetHSubZero( void )
 
 void FilterTransFunc::DumpBiquads( ofstream* output_stream)
 {
- (*output_stream) << "\nBiquad Coefficients\n" << endl;
+ (*output_stream) << "\nBiquad Coefficients\n" << std::endl;
  
  for(int i=1; i<=Num_Biquad_Sects; i++)
    {
     (*output_stream) << i << ") a = " << A_Biquad_Coef[i]
                         << "    b = " << B_Biquad_Coef[i]
                         << "    c = " << C_Biquad_Coef[i]
-                        << endl;
+                        << std::endl;
    }                            
  return;
 }
@@ -311,7 +311,7 @@ void FilterTransFunc::LowpassDenorm(double cutoff_freq)
    }
  #ifdef _DEBUG
  DebugFile << "in LP denorm, H_Sub_Zero scaled to "
-           << H_Sub_Zero << endl;
+           << H_Sub_Zero << std::endl;
  #endif
  return;
 }
@@ -345,7 +345,7 @@ Polynomial FilterTransFunc::GetDenomPoly( void )
     Degree_Of_Denom = Denom_Poly.GetDegree();
     
     #ifdef _DEBUG
-    DebugFile << "\nreal-valued version:" << endl;
+    DebugFile << "\nreal-valued version:" << std::endl;
     Denom_Poly.DumpToStream(&DebugFile);
     #endif
    }                                    
@@ -383,7 +383,7 @@ Polynomial FilterTransFunc::GetNumerPoly()
     Degree_Of_Numer = Numer_Poly.GetDegree();
     
     #ifdef _DEBUG
-    DebugFile << "\nreal-valued version:" << endl;
+    DebugFile << "\nreal-valued version:" << std::endl;
     Numer_Poly.DumpToStream(&DebugFile);
     #endif
    }                                    

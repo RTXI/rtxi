@@ -3,7 +3,7 @@
 //
 
 #include "fs_util.h"
-#include <iostream.h>
+#include <iostream>
 
 void DumpRectangCompon( double *origins,
                         double *slopes, 
@@ -16,7 +16,7 @@ void DumpRectangCompon( double *origins,
  for( n=0; n<num_trans_samps; n++)
    {
     rect_comp = origins[n+1] + x * slopes[n+1];
-    cout << "rect_comp[" << n << "] = " << rect_comp << endl;
+    std::cout << "rect_comp[" << n << "] = " << rect_comp << std::endl;
    }
  return;
 }
@@ -27,7 +27,7 @@ void pause( logical pause_enabled)
  char input_string[20];
  if(pause_enabled)
    {
-    cout << "enter anything to continue" << endl;
+    std::cout << "enter anything to continue" << std::endl;
     cin >> input_string;
    }
  return;

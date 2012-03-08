@@ -3,14 +3,14 @@
 //                     
 
  #include <stdlib.h> 
- #include <iostream.h>
- #include <fstream.h> 
+ #include <iostream>
+ #include <fstream> 
  #include "misdefs.h"
  #include "typedefs.h" 
  #include "complex.h"
  #include "bilinear.h"
  #ifdef _DEBUG
- extern ofstream DebugFile;
+ extern std::ofstream DebugFile;
  #endif
  
 //====================================================
@@ -42,8 +42,8 @@ IirFilterDesign* BilinearTransf(
  zero = analog_filter->GetZeros(&num_zeros);
  h_sub_zero = analog_filter->GetHSubZero();
  #ifdef _DEBUG
- DebugFile << "num analog poles = " << num_poles << endl;
- DebugFile << "num analog zeros = " << num_zeros << endl;
+ DebugFile << "num analog poles = " << num_poles << std::endl;
+ DebugFile << "num analog zeros = " << num_zeros << std::endl;
  #endif
 
  if(num_poles > num_zeros)
@@ -76,19 +76,19 @@ IirFilterDesign* BilinearTransf(
    {
     work = work * (c_two - (sampling_interval * pole[n]));
     #ifdef _DEBUG
-    DebugFile << "work = " << work << endl;
+    DebugFile << "work = " << work << std::endl;
     #endif
     h_const = h_const * sampling_interval;
    } 
  #ifdef _DEBUG
- DebugFile << "T**2 = " << h_const << endl;                         
+ DebugFile << "T**2 = " << h_const << std::endl;                         
  #endif
  h_const = h_sub_zero * h_const / real(work);
  
  #ifdef _DEBUG
  DebugFile << "in BilinearTransf, h_const = "
-           << h_const << endl;
- DebugFile << "work = " << work << endl;
+           << h_const << std::endl;
+ DebugFile << "work = " << work << std::endl;
  #endif
 
  //--------------------------------------------------
@@ -100,15 +100,15 @@ IirFilterDesign* BilinearTransf(
    {
     #ifdef _DEBUG
     DebugFile << "in BilinearTransf, pole [" << n
-              << "] = " << pole[n] << endl;
+              << "] = " << pole[n] << std::endl;
     #endif
     
     gamma = complex( (2.0/sampling_interval), 0.0) - pole[n];
     delta = complex( (-2.0/sampling_interval), 0.0) - pole[n];
     
     #ifdef _DEBUG
-    DebugFile << "gamma = " << gamma << endl;
-    DebugFile << "delta = " << delta << endl;
+    DebugFile << "gamma = " << gamma << std::endl;
+    DebugFile << "delta = " << delta << std::endl;
     #endif
     
     for(j=n; j>=1; j--)
@@ -118,16 +118,16 @@ IirFilterDesign* BilinearTransf(
     mu[0] = gamma * mu[0];
    } 
  #ifdef _DEBUG
- DebugFile << "for denom, mu[0] = " << mu[0] << endl;  
+ DebugFile << "for denom, mu[0] = " << mu[0] << std::endl;  
  #endif
  denom_mu_zero = real(mu[0]);                                
  for( j=1; j<=num_poles; j++)
    {
     a[j] = -1.0 * real(mu[j])/denom_mu_zero;
     #ifdef _DEBUG
-    DebugFile << "a[" << j << "] = " << a[j] << endl;
+    DebugFile << "a[" << j << "] = " << a[j] << std::endl;
     DebugFile << "imag(mu[" << j << "]) = "
-              << imag(mu[j]) << endl;
+              << imag(mu[j]) << std::endl;
     #endif
    }
  //-----------------------------------------------------
@@ -156,7 +156,7 @@ max_coeff = 0;
    {
     max_coeff++;
     #ifdef _DEBUG
-    DebugFile << "zero[" << m << "] = " << zero[m] << endl;
+    DebugFile << "zero[" << m << "] = " << zero[m] << std::endl;
     #endif
     alpha = complex( (2.0/sampling_interval), 0.0) - zero[m];
     beta = complex( (-2.0/sampling_interval), 0.0) - zero[m]; 
@@ -172,9 +172,9 @@ max_coeff = 0;
    {
     b[j] = h_sub_zero * real(mu[j])/denom_mu_zero;
     #ifdef _DEBUG
-    DebugFile << "b[" << j << "] = " << b[j] << endl;
+    DebugFile << "b[" << j << "] = " << b[j] << std::endl;
     DebugFile << "imag(mu[" << j << "]) = " 
-              << imag(mu[j]) << endl;
+              << imag(mu[j]) << std::endl;
     #endif
    }                             
  

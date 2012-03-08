@@ -5,7 +5,7 @@
 #ifndef _IIR_DSGN_H_
 #define _IIR_DSGN_H_ 
 
-#include <fstream.h>
+#include <fstream>
 #include "typedefs.h"
 
 class IirFilterDesign
@@ -21,8 +21,8 @@ public:
   // constructor that provides 
   // interactive initialization
 
-  IirFilterDesign( istream& uin,
-                   ostream& uout);
+  IirFilterDesign( std::istream& uin,
+                   std::ostream& uout);
                    
   //-------------------------------------
   // constructor that allocates arrays 
@@ -72,7 +72,7 @@ public:
   //----------------------------------------------
   // dump coefficient set to output_stream 
   
-  void DumpCoefficients( ofstream* output_stream);
+  void DumpCoefficients( std::ofstream* output_stream);
  
   //----------------------------------
   // get pointers to coefficient arrays 

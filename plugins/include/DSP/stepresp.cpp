@@ -10,7 +10,7 @@
 #include "complex.h"
 
 #ifdef _DEBUG
-extern ofstream DebugFile;
+extern std::ofstream DebugFile;
 #endif
 
 //===========================================================
@@ -48,7 +48,7 @@ void StepResponse::GenerateResponse( void )
     time = delta_t * resp_indx;
     h_of_t = Imp_Resp->ComputeSample(time);
     u_of_t += (delta_t * h_of_t);
-    (*Response_File) << time << ",  " << u_of_t << endl;
+    (*Response_File) << time << ",  " << u_of_t << std::endl;
     }
   Response_File->close();
   return;

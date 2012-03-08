@@ -6,8 +6,8 @@
 //
 
 #include <stdlib.h> 
-#include <iostream.h> 
-#include <fstream.h>
+#include <iostream> 
+#include <fstream>
 #include <math.h>
 
 #include "filtmath.h"
@@ -32,7 +32,7 @@
 
   delta_p = passband_ripple/num_stages;
   d_sub_inf = DSubInf( delta_p, stopband_ripple );
-  cout << "D_inf is " << d_sub_inf << endl;
+  std::cout << "D_inf is " << d_sub_inf << std::endl;
 
   decim_factor = 1;
   for(stage=0; stage<num_stages; stage++)
@@ -49,7 +49,7 @@
     stage_output_rate = samp_rate/stage_decim_rate[stage];
     trans_width = stage_output_rate - stopband_edge_freq
                   - passband_edge_freq;
-    cout << "trans_width = " << trans_width << endl;
+    std::cout << "trans_width = " << trans_width << std::endl;
 
     // new stuff for better estimate
     f_dp_ds = 11.01217 + 0.51244 * log10(delta_p/stopband_ripple);
@@ -65,14 +65,14 @@
     mult_rate[stage] = num_taps[stage]*stage_output_rate/2.0;
     total_mult_rate += mult_rate[stage];
 
-    cout << "num taps for stage " << stage << " = "
-         << num_taps[stage] << endl;
-    cout << "new way num taps is " << new_num_taps << endl;
-    cout << "f(dp, ds) term is " << f_dp_ds << endl;
-    cout << "mult rate = " << mult_rate[stage] << endl;
+    std::cout << "num taps for stage " << stage << " = "
+         << num_taps[stage] << std::endl;
+    std::cout << "new way num taps is " << new_num_taps << std::endl;
+    std::cout << "f(dp, ds) term is " << f_dp_ds << std::endl;
+    std::cout << "mult rate = " << mult_rate[stage] << std::endl;
     samp_rate = stage_output_rate;
   }
-  cout << "total mult rate = "<< total_mult_rate << endl;
+  std::cout << "total mult rate = "<< total_mult_rate << std::endl;
   delete[] num_taps;
   delete[] mult_rate;
   return;

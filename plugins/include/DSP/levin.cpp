@@ -3,12 +3,12 @@
  //
 
 #include "complex.h"
-#include <fstream.h>
+#include <fstream>
 #include "levin.h"
 #include "overload.h"
 
 #ifdef _DEBUG
-  extern ofstream DebugFile;
+  extern std::ofstream DebugFile;
 #endif
 
  int LevinsonRecursion( double *toeplitz,
@@ -46,7 +46,7 @@
       }
     #ifdef _DEBUG
        DebugFile << "k = " << k << "  ar_drv_var = "
-                 << ar_drv_var << endl;
+                 << ar_drv_var << std::endl;
     #endif
     } // end of loop over k
   *ar_drv_var_ret = ar_drv_var;
@@ -93,7 +93,7 @@
       }
     #ifdef _DEBUG
       DebugFile << "k = " << k << "  ar_drv_var = "
-                << ar_drv_var << endl;
+                << ar_drv_var << std::endl;
     #endif
     } // end of loop over k
   *ar_drv_var_ret = ar_drv_var;
@@ -142,7 +142,7 @@
       }
     #ifdef _DEBUG
       DebugFile << "k = " << k << "  ar_drv_var = "
-                << ar_drv_var << endl;
+                << ar_drv_var << std::endl;
     #endif
     } // end of loop over k
   *ar_drv_var_ret = ar_drv_var;

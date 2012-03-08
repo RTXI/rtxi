@@ -16,7 +16,7 @@ public:
 
   ~ArmaProcess( void);
 
-  void DumpParameters(ostream& uout);
+  void DumpParameters(std::ostream& uout);
 
   T* OutputSequence( long noise_seed,
                      int seq_len );

@@ -4,7 +4,7 @@
 
 #include <math.h>
 #include <stdlib.h>
-#include <iomanip.h>
+#include <iostream>
 #include "misdefs.h" 
 #include "sinc.h"  
 #include "anlg_rcn.h"
@@ -71,7 +71,7 @@ void AnalogReconst::DumpResult( ofstream* out_file )
   mse = 0.0;
   for(i=Max_Offset; i<(Num_Analog_Samps-Max_Offset); i++)
   {
-    (*out_file) << i << ", " << Analog_Signal[i] << endl;
+    (*out_file) << i << ", " << Analog_Signal[i] << std::endl;
   }
   return;
 } 

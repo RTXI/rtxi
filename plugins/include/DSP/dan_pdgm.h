@@ -17,8 +17,8 @@ public:
                       int fft_len,
                       GenericWindow* data_wind,
                       int big_p );
-  //DumpNumeric( ofstream *out_stream ); 
-  //DumpDecibels( ofstream *out_stream ); 
+  //DumpNumeric( std::ofstream *out_stream ); 
+  //DumpDecibels( std::ofstream *out_stream ); 
 }; 
 #endif
  

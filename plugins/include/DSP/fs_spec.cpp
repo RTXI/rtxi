@@ -2,8 +2,8 @@
 //  File = fs_spec.cpp
 //
 
-#include <iostream.h> 
-#include <fstream.h>
+#include <iostream> 
+#include <fstream>
 #include <math.h>
 #include "fs_spec.h"
 
@@ -55,7 +55,7 @@ FreqSampFilterSpec::FreqSampFilterSpec( istream& uin,
       << "  2 = bandpass\n"
       << "  3 = highpass\n"
       << "  4 = bandstop" 
-      << endl;
+      << std::endl;
  uin >> Band_Config;
  if((Band_Config < 1)||(Band_Config > 4)) exit(0);
 
@@ -64,12 +64,12 @@ FreqSampFilterSpec::FreqSampFilterSpec( istream& uin,
       << "  2 = even symmetry and even length\n"
       << "  3 = odd symmetry and odd length\n"
       << "  4 = odd symmetry and even length\n"
-      << endl;
+      << std::endl;
  uin >> Fir_Type;
  if( (Fir_Type < 1)||(Fir_Type > 4)) exit(0);
  
  //--------------------------------------------
- uout << "number of taps?" << endl;
+ uout << "number of taps?" << std::endl;
  uin >> Num_Taps;
  
  if(Num_Taps%2)
@@ -83,7 +83,7 @@ FreqSampFilterSpec::FreqSampFilterSpec( istream& uin,
       << "  0 = discrete frequencies specified via indices\n"
       << "  1 = normalized for folding frequency of PI\n"
       << "  2 = actual frequencies\n"
-      << endl;
+      << std::endl;
  uin >> Freq_Type;
                              
  switch (Freq_Type)
@@ -93,10 +93,10 @@ FreqSampFilterSpec::FreqSampFilterSpec( istream& uin,
        {
        //- - - - - - - - - - - - - - - - - - - - - - - - - - -
        case _LOWPASS_RESP_:
-         uout << "index of last sample in passband?" << endl;
+         uout << "index of last sample in passband?" << std::endl;
          uin >> N1; 
        
-         uout << "index of first sample in stopband?" << endl;
+         uout << "index of first sample in stopband?" << std::endl;
          uin >> N2;
        
          N3 = 0;
@@ -118,7 +118,7 @@ FreqSampFilterSpec::FreqSampFilterSpec( istream& uin,
      uout << "type of cutoff frequencies?\n"
           << "  0 = half power (i.e. 3 dB freq)\n"
           << "  1 = half amplitude  (i.e. 6 dB freq)\n"
-          << endl;
+          << std::endl;
      uin >> Cutoff_Is_Half_Amp;
      
      switch (Band_Config)
@@ -126,13 +126,13 @@ FreqSampFilterSpec::FreqSampFilterSpec( istream& uin,
        case _LOWPASS_RESP_:
          uout << "cutoff frequency is (N/D) * PI rad/sec\n"
               << "  enter numerator N\n" 
-              << endl;
+              << std::endl;
          uin >> Lambda_Numer;
          uout << "  enter denominator D\n"
-              << endl;
+              << std::endl;
          uin >> Lambda_Denom;
          
-         //uout << "cutoff frequency as fraction of PI" << endl;
+         //uout << "cutoff frequency as fraction of PI" << std::endl;
         //uin >> Lambda;
          if(Num_Taps%2)  // odd number of taps
            {
@@ -165,19 +165,19 @@ FreqSampFilterSpec::FreqSampFilterSpec( istream& uin,
          Lambda = PI * Lambda_Numer/Lambda_Denom;
          //Lambda = PI * Lambda;
          uout << "last sample in passband is sample ["
-              << N1 << "]" << endl;
+              << N1 << "]" << std::endl;
          uout << "with no transition samples,\n"
               << " predicted cutoff is " 
               << lambda_predic << " times PI\n"
               << " or " << (lambda_predic*PI)
-              << endl;
+              << std::endl;
         /* uout << "cutoff error is " 
               << (lambda_predic - Lambda_Numer/Lambda_Denom)
               << " times PI\n or "
               << (PI*(lambda_predic - Lambda_Numer/Lambda_Denom))
-              << endl; */
+              << std::endl; */
          uout << "desired number of transition samples?\n"
-              << " (0, 1, or 2)" << endl;
+              << " (0, 1, or 2)" << std::endl;
          uin >> Num_Trans_Samps;
          N2 = N1 + 1 + Num_Trans_Samps;
          N3 = 0;
@@ -192,23 +192,23 @@ FreqSampFilterSpec::FreqSampFilterSpec( istream& uin,
     uout << "Frequency units?\n"
          << "  0 = Hz\n"
          << "  1 = radians/sec\n"
-         << endl;
+         << std::endl;
     uin >> Freqs_Specif_In_Hz;
 
-    uout << "Sampling frequency?\n" << endl;
+    uout << "Sampling frequency?\n" << std::endl;
     uin >> Samp_Freq;
     if(Freqs_Specif_In_Hz) Samp_Freq *= TWO_PI;
     
      uout << "type of cutoff frequencies?\n"
           << "  0 = half power (i.e. 3 dB freq)\n"
           << "  1 = half amplitude  (i.e. 6 dB freq)\n"
-          << endl;
+          << std::endl;
      uin >> Cutoff_Is_Half_Amp;
     
      switch (Band_Config)
        {
        case _LOWPASS_RESP_:
-         uout << "cutoff frequency?" << endl;
+         uout << "cutoff frequency?" << std::endl;
          uin >> Lambda;
          if(Freqs_Specif_In_Hz) Lambda *= TWO_PI;
        } // end of switch on Band_Config for Freq_Type 2
@@ -251,8 +251,8 @@ FreqSampFilterSpec::FreqSampFilterSpec( istream& uin,
     }
   else
     {
-     uout << "transition sample placement:" << endl;
-     uout << "  0 = manual, 1 = optimal" << endl;
+     uout << "transition sample placement:" << std::endl;
+     uout << "  0 = manual, 1 = optimal" << std::endl;
      uin >> Optimize_Enabled;
   
      if(!Optimize_Enabled)
@@ -260,7 +260,7 @@ FreqSampFilterSpec::FreqSampFilterSpec( istream& uin,
         for( n=N1+1; n<N2; n++)
           {
            uout << "magnitude response sample [" << n
-                << "] ?" << endl;
+                << "] ?" << std::endl;
            uin >> resp_val;
            Des_Mag_Resp[n] = resp_val;
           }

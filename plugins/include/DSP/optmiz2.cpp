@@ -3,11 +3,11 @@
 //
 
 #include <math.h>
-#include <fstream.h>
+#include <fstream>
 #include "optmiz2.h"
 #include "goldsrh2.h"
 #include "fs_util.h"
-extern ofstream LogFile;
+extern std::ofstream LogFile;
 
 void optimize2( FreqSampFilterSpec *filter_spec,
                 FreqSampFilterDesign *filter_design,
@@ -47,9 +47,9 @@ for(;;)
                       origins,
                       slopes,
                       &min_func_val);
-  cout << "x1 = " << x1 << endl;
-  //cout << "y3 = " << y3 << endl;
-  cout << "min = " << min_func_val << endl;
+  std::cout << "x1 = " << x1 << std::endl;
+  //std::cout << "y3 = " << y3 << std::endl;
+  std::cout << "min = " << min_func_val << std::endl;
   pause(TRUE);
   
   /*-------------------------------------*/
@@ -73,15 +73,15 @@ for(;;)
   /*  and find optimal point along line  */
   
   slopes[2] = y_base*(1-tweak_factor)/(x1-x2);
-  LogFile << "\n slopes[2] = " << slopes[2] << endl;
+  LogFile << "\n slopes[2] = " << slopes[2] << std::endl;
   origins[2] = y_base - slopes[2] * x1;
-  LogFile << "y_base = " << y_base << endl;
-  LogFile << "x1 = " << x1 << endl;
-  LogFile << " origins[2] = " << origins[2] << "\n" << endl;
+  LogFile << "y_base = " << y_base << std::endl;
+  LogFile << "x1 = " << x1 << std::endl;
+  LogFile << " origins[2] = " << origins[2] << "\n" << std::endl;
   x_max = (1.0 - origins[2])/slopes[2];
-  cout << "x2 = " << x2 << endl;
-  //cout << "y3 = " << y3 << endl;
-  cout << "min = " << min_func_val << endl;
+  std::cout << "x2 = " << x2 << std::endl;
+  //std::cout << "y3 = " << y3 << std::endl;
+  std::cout << "min = " << min_func_val << std::endl;
   pause(TRUE);
 
   x3 = GoldenSearch2( tol,
@@ -101,15 +101,15 @@ for(;;)
   /*    then stop; otherwise stay in loop and define a new line    */
   /*    starting at the best point on line just completed.         */
 
-  LogFile << "old_min = " << old_min << endl;
-  LogFile << "min_func_val = " << min_func_val << endl;
+  LogFile << "old_min = " << old_min << std::endl;
+  LogFile << "min_func_val = " << min_func_val << std::endl;
   //if(fabs(old_min-min_func_val) < tol) break;
   if(fabs(old_min-min_func_val) < 0.1) break;
   old_min = min_func_val;
   y_base = y3;
-  cout << "x3 = " << x3 << endl;
-  cout << "y3 = " << y3 << endl;
-  cout << "min = " << min_func_val << endl;
+  std::cout << "x3 = " << x3 << std::endl;
+  std::cout << "y3 = " << y3 << std::endl;
+  std::cout << "min = " << min_func_val << std::endl;
   pause(TRUE);
   }
 rectComps[0] = x3;

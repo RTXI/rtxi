@@ -3,8 +3,8 @@
 //
 
  #include <stdlib.h>  
- #include <iostream.h>
- #include <fstream.h>
+ #include <iostream>
+ #include <fstream>
  #include <math.h> 
  #include "misdefs.h"
  #include "sinc.h"
@@ -58,7 +58,7 @@
         } // end of loop over m
       }  // end of loop over n
     phi = big_t*(sum/2.0 + (sum2 /big_m))/big_m;
-    if(freq_idx == 0) cout << "at f=0, phi = " << phi << endl;
+    if(freq_idx == 0) std::cout << "at f=0, phi = " << phi << std::endl;
     } // end of loop over freq_idx
  }
  double CpfskSpectrum::GetPsdValue( double freq )

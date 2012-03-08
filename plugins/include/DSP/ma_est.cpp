@@ -3,14 +3,14 @@
 //
 
 #include <stdlib.h>
-#include <fstream.h>
+#include <fstream>
 #include "ma_est.h"
 #include "gausrand.h"
 #include "yulewalk.h"
 #include "sig_type.h"
 
 #ifdef _DEBUG
-  extern ofstream DebugFile;
+  extern std::ofstream DebugFile;
 #endif
 
 //========================================================

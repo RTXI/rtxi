@@ -26,7 +26,7 @@
   double *win_seq;
   double scale_factor;
   
-  cout << "in WelchPeriodogram" << endl;
+  std::cout << "in WelchPeriodogram" << std::endl;
   
   Psd_Est = new double[fft_len];
   time_seg = new complex[num_samps_per_seg];
@@ -37,8 +37,8 @@
       (windowed_seg ==NULL)||
       (freq_seg ==NULL) )
     {
-     cout << "Allocation error in freq_seg in WelchPeriodogram" 
-          << endl;
+     std::cout << "Allocation error in freq_seg in WelchPeriodogram" 
+          << std::endl;
      exit(99);
     }
   

@@ -6,8 +6,8 @@
 #include "matrix_T.h"
 
 #ifdef _DEBUG
-  #include <fstream.h>
-  extern ofstream DebugFile;
+  #include <fstream>
+  extern std::ofstream DebugFile;
   //#define _MTX_DEBUG 1
 #endif
 
@@ -20,11 +20,11 @@ matrix<T>::matrix( int row_orig,
                    int ncols)
   {
   if( (nrows <= 0) || (ncols <=0))
-      cout << "illegal matrix dimension" << endl;
+      std::cout << "illegal matrix dimension" << std::endl;
   _p = new mrep;
   #ifdef _MTX_DEBUG
   DebugFile << "\nctor for matrix at " << this 
-            << "   (mrep = " << (void*)_p << ")" << endl;
+            << "   (mrep = " << (void*)_p << ")" << std::endl;
   #endif
   _p->length = nrows;
   _p->orig_indx = row_orig;
@@ -33,7 +33,7 @@ matrix<T>::matrix( int row_orig,
   #ifdef _MTX_DEBUG
     DebugFile << "v::v(i,i): ptr array " << nrows 
               << " long alloc at "
-              << (void*)(_p->f) << endl;
+              << (void*)(_p->f) << std::endl;
   #endif
   for(int i=0; i<nrows; i++)
     _p->f[i] = new rowvec<T>( col_orig, ncols);
@@ -48,7 +48,7 @@ matrix<T>::~matrix(void)
   //rowvec<T> *row_ptr;
 
   #ifdef _MTX_DEBUG
-  DebugFile << "\ndtor for matrix at " << (void*)this << endl;
+  DebugFile << "\ndtor for matrix at " << (void*)this << std::endl;
   #endif
   if( --_p->refcnt == 0)
     {
@@ -58,7 +58,7 @@ matrix<T>::~matrix(void)
     delete _p->f;
     #ifdef _MTX_DEBUG
     DebugFile << "\nm::~m(): deleting mrep at " 
-              << (void*)_p << endl;
+              << (void*)_p << std::endl;
     #endif
     delete _p;
     }
@@ -87,7 +87,7 @@ colvec<T>& matrix<T>::operator*( colvec<T> &v2)
   
   if(ncols != vec_len)
     {
-    cout << "error in matrix method" << endl;
+    std::cout << "error in matrix method" << std::endl;
     return( v2 );
     }
 
@@ -95,7 +95,7 @@ colvec<T>& matrix<T>::operator*( colvec<T> &v2)
   colvec<T> *v_res = new colvec<T>(row_orig, nrows);
   #ifdef _MTX_DEBUG
   DebugFile << "\nm::op*(cv): new colvec at "
-            << (void*)v_res << endl;
+            << (void*)v_res << std::endl;
   #endif
   v_res->Is_Temp = 1;
 
@@ -115,7 +115,7 @@ colvec<T>& matrix<T>::operator*( colvec<T> &v2)
     {
     #ifdef _MTX_DEBUG
     DebugFile << "\nm::op*(cv): deleting colvec at " 
-              << (void*)(&v2) << endl;
+              << (void*)(&v2) << std::endl;
     #endif
     delete (&v2);
     }
@@ -123,7 +123,7 @@ colvec<T>& matrix<T>::operator*( colvec<T> &v2)
     {
     #ifdef _MTX_DEBUG
     DebugFile << "\nm::op*(cv): deleting matrix at " 
-              << (void*)this << endl;
+              << (void*)this << std::endl;
     #endif
     delete this;
     }
@@ -147,7 +147,7 @@ matrix<T>& matrix<T>::operator-=(matrix<T> &m2)
     {
     #ifdef _MTX_DEBUG
     DebugFile << "\nm::op-=(m): deleting matrix at " 
-              << (void*)(&m2) << endl;
+              << (void*)(&m2) << std::endl;
     #endif
     delete (&m2);
     }

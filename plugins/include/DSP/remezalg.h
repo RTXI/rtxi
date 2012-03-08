@@ -11,8 +11,8 @@ class RemezAlgorithm
 public: 
 
   //  constructor
-  RemezAlgorithm( istream& uin,
-                  ostream& uout,
+  RemezAlgorithm( std::istream& uin,
+                  std::ostream& uout,
                   int filter_length,
                   double passband_edge_freq,
                   double stopband_edge_freq,

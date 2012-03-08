@@ -69,8 +69,8 @@ void FreqSampFilterDesign::ComputeCoefficients( FreqSampFilterSpec *filter_spec)
         }
       else 
         {
-         cout << "FATAL ERROR -- type 1 FIR cannot have even length"
-              << endl;
+         std::cout << "FATAL ERROR -- type 1 FIR cannot have even length"
+              << std::endl;
          exit(-1);
         }
       break;
@@ -78,8 +78,8 @@ void FreqSampFilterDesign::ComputeCoefficients( FreqSampFilterSpec *filter_spec)
     case 2:     // even symmetry, even length
       if(num_taps%2)
         {
-         cout << "FATAL ERROR -- type 2 FIR cannot have odd length"
-              << endl;
+         std::cout << "FATAL ERROR -- type 2 FIR cannot have odd length"
+              << std::endl;
          exit(-1);
         }
       else
@@ -114,8 +114,8 @@ void FreqSampFilterDesign::ComputeCoefficients( FreqSampFilterSpec *filter_spec)
         }
       else
         {
-         cout << "FATAL ERROR -- type 3 FIR cannot have even length"
-              << endl;
+         std::cout << "FATAL ERROR -- type 3 FIR cannot have even length"
+              << std::endl;
          exit(-1);
         }
       break;
@@ -123,8 +123,8 @@ void FreqSampFilterDesign::ComputeCoefficients( FreqSampFilterSpec *filter_spec)
     case 4:     // odd symmetry, even length
       if(num_taps%2)
         {
-         cout << "FATAL ERROR -- type 4 FIR cannot have odd length"
-              << endl;
+         std::cout << "FATAL ERROR -- type 4 FIR cannot have odd length"
+              << std::endl;
          exit(-1);
         }
       else 

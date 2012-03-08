@@ -11,7 +11,7 @@
 #include "elipfunc.h"
 #include "complex.h"
 #ifdef _DEBUG
-extern ofstream DebugFile;
+extern std::ofstream DebugFile;
 #endif
 
 //======================================================
@@ -64,9 +64,9 @@ EllipticalTransFunc::EllipticalTransFunc(
                         
  if(order < min_order)
    {
-    cout << "Fatal error -- minimum order of "
+    std::cout << "Fatal error -- minimum order of "
          << min_order << " required"
-         << endl;
+         << std::endl;
     exit(1);
    }        
    
@@ -228,7 +228,7 @@ EllipticalTransFunc::EllipticalTransFunc(
     
     #ifdef _DEBUG
     DebugFile << "in ellip response, pole[" << i << "] = "
-              << Prototype_Pole_Locs[i] << endl;
+              << Prototype_Pole_Locs[i] << std::endl;
     #endif
     
     Prototype_Pole_Locs[order+1-i] = 
@@ -264,7 +264,7 @@ EllipticalTransFunc::EllipticalTransFunc(
       }
     #ifdef _DEBUG
     DebugFile << "in ellip response, zero[" << i << "] = "
-              << Prototype_Zero_Locs[i] << endl;
+              << Prototype_Zero_Locs[i] << std::endl;
     #endif
    }
  //---------------------------
@@ -277,9 +277,9 @@ EllipticalTransFunc::EllipticalTransFunc(
     H_Sub_Zero *= p_sub_zero;
     Prototype_Pole_Locs[(order+1)/2] = complex(-p_sub_zero, 0.0);
     #ifdef _DEBUG
-    DebugFile << "p_sub_zero = " << p_sub_zero << endl;
+    DebugFile << "p_sub_zero = " << p_sub_zero << std::endl;
     DebugFile << "in ellip, H_Sub_Zero = "
-              << H_Sub_Zero << endl;
+              << H_Sub_Zero << std::endl;
     #endif
    }
  else

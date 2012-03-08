@@ -13,8 +13,8 @@
  public:
 
  SinesInAwgn( double sampling_interval,
-              istream &uin,
-              ostream &uout);
+              std::istream &uin,
+              std::ostream &uout);
 
   SinesInAwgn( double sampling_interval,
                int num_sines,

@@ -10,7 +10,7 @@
 #include "buttfunc.h"
 
 #ifdef _DEBUG
-extern ofstream DebugFile;
+extern std::ofstream DebugFile;
 #endif
 
 //======================================================
@@ -29,7 +29,7 @@ ButterworthTransFunc::ButterworthTransFunc( int order )
  H_Sub_Zero = 1.0;
  #ifdef _DEBUG
  DebugFile << "in Butterworth Resp, H_Sub_Zero set to "
-           << H_Sub_Zero << endl;
+           << H_Sub_Zero << std::endl;
  #endif
 
  for(int k=1; k<=order; k++)
@@ -38,7 +38,7 @@ ButterworthTransFunc::ButterworthTransFunc( int order )
     Prototype_Pole_Locs[k] = complex( cos(x), sin(x) ); 
     #ifdef _DEBUG
     DebugFile << "pole[" << k << "] = "
-              << Prototype_Pole_Locs[k] << endl;
+              << Prototype_Pole_Locs[k] << std::endl;
     #endif
    }
  return;

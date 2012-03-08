@@ -50,7 +50,7 @@
                            ostream &uout)
  {
   Samp_Intvl = samp_intvl;
-  uout << "How many sinusoids?" << endl;
+  uout << "How many sinusoids?" << std::endl;
   uin >> Num_Sines;
   Freq = new double[Num_Sines];
   Phase = new double[Num_Sines];
@@ -58,22 +58,22 @@
   for(int sin_idx=0; sin_idx<Num_Sines; sin_idx++)
     {
     uout << "Desired frequency of sinusoid #" << sin_idx
-         << " ?" << endl;
+         << " ?" << std::endl;
     uin >> (Freq[sin_idx]);
     Freq[sin_idx] *= TWO_PI;
     uout << "Desired phase of sinusoid #" << sin_idx
-         << " ?" << endl;
+         << " ?" << std::endl;
     uin >> (Phase[sin_idx]);
     Phase[sin_idx] *= TWO_PI;
     uout << "Desired amplitude of sinusoid #" << sin_idx
-         << " ?" << endl;
+         << " ?" << std::endl;
     uin >> (Ampl[sin_idx]);
     }
-  uout << "Sigma for noise?" << endl;
+  uout << "Sigma for noise?" << std::endl;
   uin >> Agn_Sigma;
   Orig_Agn_Seed = 4973;
   Agn_Seed = Orig_Agn_Seed;
-  uout << "default noise seed is " << Agn_Seed << endl;
+  uout << "default noise seed is " << Agn_Seed << std::endl;
   Seg_Offset = 0;
  }
   

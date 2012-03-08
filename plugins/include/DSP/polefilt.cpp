@@ -9,7 +9,7 @@
 #include "polefilt.h"
 
 #ifdef _DEBUG
-extern ofstream DebugFile;
+extern std::ofstream DebugFile;
 #endif
 
 //======================================================
@@ -38,7 +38,7 @@ AnalogAllPoleFilt::AnalogAllPoleFilt( Polynomial denom_poly,
     B_Coef[k] = -(denom_poly.GetCoefficient(k));
     #ifdef _DEBUG
     DebugFile << "in AnalogAllPoleFilt, B_Coef["
-              << k << "] = " << B_Coef[k] << endl;
+              << k << "] = " << B_Coef[k] << std::endl;
     #endif
     Y_Prime[k] = 0.0;
    }
