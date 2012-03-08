@@ -173,7 +173,7 @@ Polynomial& Polynomial::operator/= (const Polynomial &right)
 //=========================================================
 //  dump polynomial to an output stream
 
-void Polynomial::DumpToStream( ofstream* output_stream)
+void Polynomial::DumpToStream( std::ofstream* output_stream)
 {
  (*output_stream) << "Degree = " << Degree << std::endl;
  

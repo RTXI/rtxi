@@ -27,10 +27,10 @@ ArmaSpectrum<T>::ArmaSpectrum( int ar_order,
   Samp_Intvl = samp_intvl;
   std::cout << "Now preparing ARMA spectrum estimate" << std::endl;
   std::cout << "How many points in spectrum plot?" << std::endl;
-  cin >> Num_Pts;
+  std::cin >> Num_Pts;
   Spec_Buf = new double[Num_Pts];
   std::cout << "Maximum frequency?" << std::endl;
-  cin >> Max_Freq;
+  std::cin >> Max_Freq;
   Freq_Delt = Max_Freq/(Num_Pts-1);
   for(f_idx=0; f_idx<Num_Pts; f_idx++)
     {

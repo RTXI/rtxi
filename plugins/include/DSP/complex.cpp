@@ -7,13 +7,13 @@
 
 #include "complex.h"   
 
-ostream& operator<<( ostream& s, const complex& z)
+std::ostream& operator<<( std::ostream& s, const complex& z)
 {
  s << "(" << real(z) << "," << imag(z) << ")";
  return s;
 }
 
-istream& operator>>( istream& s, complex& z)
+std::istream& operator>>( std::istream& s, complex& z)
 {
   char lpar, rpar, comma;
   double _r, _i;

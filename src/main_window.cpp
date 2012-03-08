@@ -395,12 +395,15 @@ MainWindow::updateUtilModules()
   for (int i = 0; i < numUtilFiles; i++)
     {
       userprefs.removeEntry("/utilFileList/util" + QString::number(i));
+      userprefs.removeEntry("/utilFileList/filter" + QString::number(i));
       userprefs.removeEntry("/utilFileList/sig" + QString::number(i));
     }
   userprefs.writeEntry("/utilFileList/util" + QString::number(0), "neuron.so");
   userprefs.writeEntry("/utilFileList/util" + QString::number(1), "synch.so");
-  userprefs.writeEntry("/utilFileList/util" + QString::number(2),
-      "FIRwindow.so");
+
+  userprefs.writeEntry("/utilFileList/filter" + QString::number(0), "FIRwindow.so");
+  userprefs.writeEntry("/utilFileList/filter" + QString::number(1), "IIRfilter.so");
+
   userprefs.writeEntry("/utilFileList/sig" + QString::number(0), "siggen.so");
   userprefs.writeEntry("/utilFileList/sig" + QString::number(1), "noisegen.so");
   userprefs.writeEntry("/utilFileList/sig" + QString::number(2),
@@ -414,9 +417,16 @@ MainWindow::updateUtilModules()
   i++;
   menuID = utilMenu->insertItem("Synchronize Modules",this,SLOT(loadUtil(int)));
   setUtilMenuItemParameter(menuID, i);
+
+  QPopupMenu *filterSubMenu = new QPopupMenu(this);
+  i = 0;
+  menuID = filterSubMenu->insertItem("FIR Filter (Window Method)",this,SLOT(loadFilter(int)));
+  filterSubMenu->setItemParameter(menuID, i);
   i++;
-  menuID = utilMenu->insertItem("FIR Filter",this,SLOT(loadUtil(int)));
-  setUtilMenuItemParameter(menuID, i);
+  menuID = filterSubMenu->insertItem("IIR Filter",this,SLOT(loadFilter(int)));
+  filterSubMenu->setItemParameter(menuID, i);
+
+  utilMenu->insertItem(tr("&Filters"), filterSubMenu);
 
   QPopupMenu *signalSubMenu = new QPopupMenu(this);
 
@@ -443,6 +453,16 @@ MainWindow::loadUtil(int i)
   QSettings userprefs;
   userprefs.setPath("RTXI.org", "RTXI", QSettings::User);
   QString filename = userprefs.readEntry("/utilFileList/util"
+      + QString::number(i));
+  Plugin::Manager::getInstance()->load(filename.latin1());
+}
+
+void
+MainWindow::loadFilter(int i)
+{
+  QSettings userprefs;
+  userprefs.setPath("RTXI.org", "RTXI", QSettings::User);
+  QString filename = userprefs.readEntry("/utilFileList/filter"
       + QString::number(i));
   Plugin::Manager::getInstance()->load(filename.latin1());
 }

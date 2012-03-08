@@ -38,7 +38,7 @@
 #include <qvalidator.h>
 #include <qvbox.h>
 
-#define TWO_PI 6.283189
+#define TWO_PI 6.28318531
 
 class IIRfilter : public DefaultGUIModel
 {

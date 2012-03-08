@@ -39,7 +39,7 @@ BurgMethod<T>::BurgMethod( int est_order,
   double awgn_adjustment;
   std::cout << "rho[0] = " << rho[0] << std::endl;
   std::cout << " enter amount to be subtracted from this value" << std::endl;
-  cin >> awgn_adjustment;
+  std::cin >> awgn_adjustment;
   rho[0] -= awgn_adjustment;
   for(n=0; n< sig_len-1; n++)
     {

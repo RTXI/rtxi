@@ -5,6 +5,7 @@
 //
 
 #include <math.h>
+#include <iostream>
 #include <stdlib.h>
 #include "misdefs.h"
 #include "filtfunc.h"
@@ -162,7 +163,7 @@ void FilterTransFunc::FilterFrequencyResponse(void)
  delta_freq = 0.0125;
  peak_magnitude = -1000.0;
 
- Response_File = new ofstream("anlg_rsp.txt", ios::out);
+ Response_File = new std::ofstream("anlg_rsp.txt", std::ios::out);
  mag_resp = new double[800];
  phase_resp = new double[800];
  group_dly = new double[800];
@@ -272,7 +273,7 @@ float FilterTransFunc::GetHSubZero( void )
 //===============================================================
 //
 
-void FilterTransFunc::DumpBiquads( ofstream* output_stream)
+void FilterTransFunc::DumpBiquads( std::ofstream* output_stream)
 {
  (*output_stream) << "\nBiquad Coefficients\n" << std::endl;
  

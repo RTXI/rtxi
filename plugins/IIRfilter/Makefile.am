@@ -18,13 +18,27 @@ IIRfilter_la_SOURCES = \
 		../include/DSP/chebfunc.cpp\
 		../include/DSP/elipfunc.cpp\
 		../include/DSP/bilinear.cpp\
+		../include/DSP/filtfunc.cpp\
+		../include/DSP/cmpxpoly.cpp\
+		../include/DSP/poly.cpp\
+		../include/DSP/pause.cpp\
+		../include/DSP/complex.cpp\
+		../include/DSP/unwrap.cpp\
+		../include/DSP/laguerre.cpp\
 		../include/DSP/iir_dsgn.h\
 		../include/DSP/dir1_iir.h\
 		../include/DSP/unq_iir.h\
 		../include/DSP/buttfunc.h\
 		../include/DSP/chebfunc.h\
 		../include/DSP/elipfunc.h\
-		../include/DSP/bilinear.h
+		../include/DSP/bilinear.h\
+		../include/DSP/filtfunc.h\
+		../include/DSP/cmpxpoly.h\
+		../include/DSP/poly.h\
+		../include/DSP/pause.h\
+		../include/DSP/complex.h\
+		../include/DSP/unwrap.h\
+		../include/DSP/laguerre.h
 
 nodist_IIRfilter_la_SOURCES = \
    		moc_IIRfilter.cpp

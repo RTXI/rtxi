@@ -239,7 +239,7 @@ void CmplxPolynomial::FindRoots( void )
     root_factor = CmplxPolynomial( complex(1.0,0.0),-Root[i]);
     work_poly /= root_factor;
     work_poly.DumpToStream(&std::cout);
-    pause();
+    pausewait();
     }
   Root[Degree-1] = -(work_poly.GetCoeff(0));
   std::cout << "Root[" << Degree-1 << "] = " << Root[Degree-1] << std::endl;
@@ -303,7 +303,7 @@ void CmplxPolynomial::BuildFromRoots( void )
 //=========================================================
 //  dump polynomial to an output stream
 
-void CmplxPolynomial::DumpToStream( ostream* output_stream)
+void CmplxPolynomial::DumpToStream( std::ostream* output_stream)
 {
  (*output_stream) << "Degree = " << Degree << std::endl;
  

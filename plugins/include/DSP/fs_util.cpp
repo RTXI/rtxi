@@ -28,7 +28,7 @@ void pause( logical pause_enabled)
  if(pause_enabled)
    {
     std::cout << "enter anything to continue" << std::endl;
-    cin >> input_string;
+    std::cin >> input_string;
    }
  return;
 }

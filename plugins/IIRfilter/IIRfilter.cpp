@@ -304,7 +304,7 @@ IIRfilter::saveIIRData()
                 << " stopband edge=" << (double) stopband_edge;
             break;
             }
-          stream << QString(" ");
+          stream << QString(" \n");
 
           double *numer_coeff = new double[filter_design->GetNumNumerCoeffs()];
           double *denom_coeff = new double[filter_design->GetNumDenomCoeffs()
@@ -312,7 +312,7 @@ IIRfilter::saveIIRData()
           numer_coeff = filter_design->GetNumerCoefficients();
           denom_coeff = filter_design->GetDenomCoefficients();
 
-          printf("Filter numerator coefficients:\n");
+          printf("\nFilter numerator coefficients:\n");
           stream << QString("Filter numerator coefficients:\n");
           for (int i = 0; i < filter_design->GetNumNumerCoeffs(); i++)
             {
@@ -387,10 +387,10 @@ IIRfilter::createGUI(DefaultGUIModel::variable_t *var, int size)
 
   // Left side GUI
   QBoxLayout *leftlayout = new QVBoxLayout();
-  QPushButton *saveDataButton = new QPushButton("Save FIR Parameters", this);
+  QPushButton *saveDataButton = new QPushButton("Save IIR Coefficients", this);
   leftlayout->addWidget(saveDataButton);
 
-  QObject::connect(saveDataButton, SIGNAL(clicked()), this, SLOT(saveFIRData()));
+  QObject::connect(saveDataButton, SIGNAL(clicked()), this, SLOT(saveIIRData()));
   QToolTip::add(saveDataButton,
       "Save filter parameters and coefficients to a file");
 
@@ -502,6 +502,8 @@ IIRfilter::createGUI(DefaultGUIModel::variable_t *var, int size)
   QToolTip::add(predistortCheckBox,
       "Predistort frequencies for bilinear transform");
   QToolTip::add(quantizeCheckBox, "Quantize input and coefficients");
+
+  leftlayout->addWidget(optionBox);
 
   QHBox *utilityBox = new QHBox(this);
   pauseButton = new QPushButton("Pause", utilityBox);
