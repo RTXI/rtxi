@@ -552,10 +552,6 @@ FIRwindow::createGUI(DefaultGUIModel::variable_t *var, int size)
   layout->addLayout(leftlayout);
   //    layout->setResizeMode(QLayout::Fixed);
 
-  // set GUI refresh rate
-  QTimer *timer = new QTimer(this);
-  timer->start(1000);
-  QObject::connect(timer, SIGNAL(timeout(void)), this, SLOT(refresh(void)));
   show();
 
 }

@@ -566,6 +566,11 @@ Oscilloscope::Properties::createAdvancedTab(void)
   sizeSpin->setValue(panel->getDataSize());
   sizeSpin->setEnabled(false);
 
+	sizeEdit = new QLineEdit(hbox1);
+	resLayout->addWidget(hbox1);
+	sizeEdit->setText(QString::number(panel->getDataSize()));
+  sizeEdit->setEnabled(false);
+	
   QGroupBox *gridBox = new QGroupBox("Grid Properties", advancedTab);
   layout->addWidget(gridBox);
 
@@ -968,6 +973,7 @@ Oscilloscope::Properties::showAdvancedTab(void)
 {
   //rateSpin->setValue(panel->rate);
   sizeSpin->setValue(panel->getDataSize());
+	sizeEdit->setText(QString::number(panel->getDataSize()));
 
   divXSpin->setValue(panel->getDivX());
   divYSpin->setValue(panel->getDivY());

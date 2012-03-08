@@ -20,6 +20,7 @@
 #define PERFORMANCE_MEASUREMENT_H
 
 #include <qwidget.h>
+#include "../include/runningstat.h"
 
 #include <plugin.h>
 #include <rt.h>
@@ -67,15 +68,41 @@ namespace PerformanceMeasurement {
         Panel(QWidget *);
         virtual ~Panel(void);
 
+		   /*!
+			  * Measures the real-time period of the system
+				*/
         void read(void);
+
+		   /*!
+			  * Measures the computation time for loaded modules
+				*/
         void write(void);
 
     public slots:
 
+			 /*!
+			  * Starts the statistics over
+				*/
         void reset(void);
+
+		   /*!
+			  * Updates the GUI with the latest values
+				*/				
         void update(void);
 
-    private:
+			 /*!
+			  * Starts writing the real-time periods to a file
+				*/				
+        void startSave(void);
+
+			 /*!
+			  * Stop writing the real-time periods to a file
+				*/				
+        void stopSave(void);
+				
+				bool OpenFile(QString);
+
+	private:
 
         enum {
             INIT1,
@@ -89,11 +116,15 @@ namespace PerformanceMeasurement {
         long long maxDuration;
         long long maxTimestep;
 
+				RunningStat timestepStat;
+				bool saveStats;
+				
         QLineEdit *durationEdit;
         QLineEdit *timestepEdit;
         QLineEdit *maxDurationEdit;
         QLineEdit *maxTimestepEdit;
-
+				QFile dataFile;
+				QTextStream stream;
     }; // class Panel
 
 }; // namespace PerformanceMeasurement

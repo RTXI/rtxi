@@ -32,7 +32,7 @@ PerformanceMeasurement::Panel::Panel(QWidget *parent)
     QHBox *hbox;
     QBoxLayout *layout = new QVBoxLayout(this);
 
-    setCaption("Performance Monitor");
+    setCaption("Real-time Benchmarks");
 
     hbox = new QHBox(this);
     layout->addWidget(hbox);
@@ -46,14 +46,26 @@ PerformanceMeasurement::Panel::Panel(QWidget *parent)
 
     hbox = new QHBox(this);
     layout->addWidget(hbox);
-    (void)(new QLabel("Realtime Period  (us)",hbox))->setFixedWidth(175);
+    (void)(new QLabel("Real-time Period  (us)",hbox))->setFixedWidth(175);
     timestepEdit = new QLineEdit(hbox);
 
     hbox = new QHBox(this);
     layout->addWidget(hbox);
-    (void)(new QLabel("Peak Realtime Period (us)",hbox))->setFixedWidth(175);
+    (void)(new QLabel("Peak Real-time Period (us)",hbox))->setFixedWidth(175);
     maxTimestepEdit = new QLineEdit(hbox);
 
+    hbox = new QHBox(this);
+    layout->addWidget(hbox);
+    (void)(new QLabel("Real-time Jitter (us)",hbox))->setFixedWidth(175);
+    timestepJitterEdit = new QLineEdit(hbox);
+
+		hbox = new QHBox(this);
+    layout->addWidget(hbox);
+    QPushButton *startButton = new QPushButton("Start Saving",hbox);
+    QObject::connect(startButton,SIGNAL(clicked(void)),this,SLOT(startSave(void)));
+    QPushButton *stopButton = new QPushButton("Stop Saving",hbox);
+    QObject::connect(stopButton,SIGNAL(clicked(void)),this,SLOT(stopSave(void)));
+		
     QPushButton *resetButton = new QPushButton("Reset",this);
     layout->addWidget(resetButton);
     QObject::connect(resetButton,SIGNAL(clicked(void)),this,SLOT(reset(void)));
@@ -63,6 +75,7 @@ PerformanceMeasurement::Panel::Panel(QWidget *parent)
     QObject::connect(timer,SIGNAL(timeout(void)),this,SLOT(update(void)));
 
     setActive(true);
+		saveStats = false;
 }
 
 PerformanceMeasurement::Panel::~Panel(void) {
@@ -77,15 +90,18 @@ void PerformanceMeasurement::Panel::read(void) {
           if(maxTimestep < now-lastRead)
               maxTimestep = now-lastRead;
           timestep = 0.9*timestep + 0.1*(now-lastRead);
+					timestepStat.push(timestep);
           break;
       case INIT2:
           timestep = maxTimestep = now-lastRead;
+					timestepStat.push(timestep);
           state = EXEC;
           break;
       case INIT1:
           state = INIT2;
     }
-
+		if (saveStats)
+			stream << << timestep << "\n";
     lastRead = now;
 }
 
@@ -108,6 +124,7 @@ void PerformanceMeasurement::Panel::write(void) {
 
 void PerformanceMeasurement::Panel::reset(void) {
     state = INIT1;
+		timestepStat.clear();
 }
 
 void PerformanceMeasurement::Panel::update(void) {
@@ -115,6 +132,78 @@ void PerformanceMeasurement::Panel::update(void) {
     maxDurationEdit->setText(QString::number(maxDuration*1e-3));
     timestepEdit->setText(QString::number(timestep*1e-3));
     maxTimestepEdit->setText(QString::number(maxTimestep*1e-3));
+    timestepJitterEdit->setText(QString::number(timestepStat.var()*1e-3));
+}
+
+void
+PerformanceMeasurement::Panel::startSave()
+{
+  QFileDialog* fd = new QFileDialog(this, "Save File As", TRUE);
+  fd->setMode(QFileDialog::AnyFile);
+  fd->setViewMode(QFileDialog::Detail);
+  QString fileName;
+  if (fd->exec() == QDialog::Accepted)
+    {
+      fileName = fd->selectedFile();
+
+      if (OpenFile(fileName))
+        {
+					reset();
+					saveStats = true;
+        }
+      else
+        {
+          QMessageBox::information(this, "Real-time Benchmarks: Save real-time period",
+              "There was an error writing to this file.\n");
+					saveStats = false;
+        }
+    }
+}
+
+void
+PerformanceMeasurement::Panel::stopSave()
+{
+	dataFile.close();
+	saveStats = false;
+}
+		
+bool
+PerformanceMeasurement::Panel::OpenFile(QString FName)
+{	
+	dataFile.setName(FName);
+  if (dataFile.exists())
+    {
+      switch (QMessageBox::warning(this, "Real-time Benchmarks", tr(
+          "This file already exists: %1.\n").arg(FName), "Overwrite", "Append",
+          "Cancel", 0, 2))
+        {
+      case 0: // overwrite
+        dataFile.remove();
+        if (!dataFile.open(IO_Raw | IO_WriteOnly))
+          {
+            return false;
+          }
+        break;
+      case 1: // append
+        if (!dataFile.open(IO_Raw | IO_WriteOnly | IO_Append))
+          {
+            return false;
+          }
+        break;
+      case 2: // cancel
+        return false;
+        break;
+        }
+    }
+  else
+    {
+      if (!dataFile.open(IO_Raw | IO_WriteOnly))
+        return false;
+    }
+  stream.setDevice(&dataFile);
+  //	stream.setPrintableData(false); // write binary
+  printf("File opened: %s\n", FName.latin1());
+  return true;
 }
 
 extern "C" Plugin::Object *createRTXIPlugin(void *) {
@@ -123,7 +212,7 @@ extern "C" Plugin::Object *createRTXIPlugin(void *) {
 
 PerformanceMeasurement::Plugin::Plugin(void)
     : panel(0) {
-    menuID = MainWindow::getInstance()->createSystemMenuItem("Performance Measurement",this,SLOT(createPerformanceMeasurementPanel(void)));
+    menuID = MainWindow::getInstance()->createSystemMenuItem("Real-time Benchmarks",this,SLOT(createPerformanceMeasurementPanel(void)));
 }
 
 PerformanceMeasurement::Plugin::~Plugin(void) {

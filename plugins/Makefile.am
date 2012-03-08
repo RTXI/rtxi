@@ -10,7 +10,8 @@ SUBDIRS = \
 	data_recorder \
 	dynamo_model_loader \
 	electrode_resistance_measurement \
-	FIRwindow\
+	FIRwindow \
+	IIRfilter \
 	mimic \
 	model_loader \
 	neuron \
@@ -18,9 +19,9 @@ SUBDIRS = \
 	noisegen \
 	oscilloscope \
 	performance_measurement \
-	siggen\
-	system_control\
-        synch\
-	userprefs\
+	siggen \
+	system_control \
+  synch \
+	userprefs \
 	wave_maker
 

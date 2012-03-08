@@ -233,7 +233,7 @@ void
 MainWindow::about(void)
 {
   QMessageBox::about(this, "About RTXI", "Version " + QString(VERSION)
-      + "\n\nReleased under the GPLv2.\nSee www.rtxi.org for details.");
+      + "\n\nReleased under the GPLv3.\nSee www.rtxi.org for details.");
 }
 
 void
@@ -338,7 +338,7 @@ MainWindow::loadSettings(void)
   //dialog.setDir(".");
   dialog.setDir(settingsDir);
   dialog.setFilters(QString("Settings (*.set);;All Files (*)"));
-  dialog.setCaption("Choose a Settings File");
+  dialog.setCaption("Choose a settings file");
   dialog.setMode(QFileDialog::ExistingFile);
 
   dialog.exec();
@@ -359,7 +359,7 @@ MainWindow::saveSettings(void)
   //dialog.setDir(".");
   dialog.setDir(settingsDir);
   dialog.setFilters(QString("Settings (*.set);;All Files (*)"));
-  dialog.setCaption("Choose a Settings File");
+  dialog.setCaption("Choose a settings file");
   dialog.setMode(QFileDialog::AnyFile);
 
   dialog.exec();
