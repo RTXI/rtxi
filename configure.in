@@ -152,12 +152,12 @@ scripts/rtxi_plugin_config
 testsuite/Makefile
 plugins/Makefile
 plugins/analogy_device/Makefile
+plugins/clamp_utilities/Makefile
 plugins/comedi_device/Makefile
 plugins/comedilib_device/Makefile
 plugins/connector/Makefile
 plugins/data_recorder/Makefile
 plugins/dynamo_model_loader/Makefile
-plugins/electrode_resistance_measurement/Makefile
 plugins/FIRwindow/Makefile
 plugins/IIRfilter/Makefile
 plugins/mimic/Makefile

@@ -4,6 +4,7 @@ MAINTAINERCLEANFILES = Makefile.in
 
 SUBDIRS = \
 	analogy_device \
+	clamp_utilities \
 	comedi_device \
 	comedilib_device \
 	connector \
@@ -21,7 +22,7 @@ SUBDIRS = \
 	performance_measurement \
 	siggen \
 	system_control \
-  synch \
+	synch \
 	userprefs \
 	wave_maker
 
