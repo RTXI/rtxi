@@ -61,7 +61,7 @@ ClampUtilities::Panel::Panel( QWidget *parent )
     zapWidth( 10 ), updateRate( 1 ), numStepsAvg( 5 ), memTestMode( SINGLE ), collectMemTestData( false ), memTestOn( false ),
     idx( 0 ), cnt( round( (2*10*1e-3) / (RT::System::getInstance()->getPeriod()*1e-9)) ), zidx( 0 ), stepsSaved( 1 ),
     zcnt( round( ( 10*1e-3 ) / (RT::System::getInstance()->getPeriod()*1e-9)) ), midx( 0 ) {
-        
+    
     QBoxLayout *layout = new QVBoxLayout( this );
     ui = new ClampUtilitiesUI( this ); // UI created with Qt Designer
     layout->addWidget( ui );
@@ -133,6 +133,7 @@ ClampUtilities::Panel::Panel( QWidget *parent )
     // Display updates
     QObject::connect( timer, SIGNAL(timeout(void)), this, SLOT(updateRDisplay(void)) ); // Display update rate dependent on timer
     QObject::connect( memTestTimer, SIGNAL(timeout(void)), this, SLOT(updateMemTestDisplay(void)) );
+    QObject::connect( this, SIGNAL(memTestRun(void)), this, SLOT(updateMemTestDisplay(void)) );
     
     show();
     setActive( false );
@@ -213,7 +214,7 @@ void ClampUtilities::Panel::doSave( Settings::Object::State &s ) const {
     s.saveInteger( "Mem Test Mode", static_cast<int>( memTestMode ) );
 }
 
-void ClampUtilities::Panel::execute( void ) {
+void ClampUtilities::Panel::execute( void ) { 
     if( zapOn ) { // If zap is on
         if( ++zidx < zcnt )
             output(0) = ( zapSize + holdingOptionValue ) * 1e-3; // Zap: single voltage step
@@ -264,11 +265,6 @@ void ClampUtilities::Panel::execute( void ) {
                 midx = 0;
                 currentData.clear();
                 currentData.resize( cnt, 0 );
-
-                if( memTestMode == SINGLE ) {
-                    UpdateMemTestDisplayEvent event ( this );
-                    RT::System::getInstance()->postEvent( &event ); // Update membrane properties test display, async event
-                }
             }
         }
     }
@@ -330,15 +326,9 @@ void ClampUtilities::Panel::updateRDisplay( void ) {
 }
 
 // Membrane Test Slot Functions
-void ClampUtilities::Panel::updateMemTestDisplay( void ) { 
-    memTestCalculate(); // Perform membrane properties calculation
-
-    ui->membraneCapOutput->setText( QString::number( Cm ).append( " pF" ) );
-    ui->accessResistOutput->setText( QString::number( Ra ).append( " M").append( omega ) );
-    ui->membraneResistOutput->setText( QString::number( Rm ).append( " M").append( omega ) );
-
-    if( memTestMode == SINGLE )
-        ui->acquireMemPropButton->setOn( false );
+void ClampUtilities::Panel::updateMemTestDisplay( void ) {    
+    UpdateMemTestDisplayEvent event ( this );
+    RT::System::getInstance()->postEvent( &event ); // Update membrane properties test display, async event    
 }
 
 void ClampUtilities::Panel::memTestCalculate( void ) {
@@ -538,10 +528,7 @@ void ClampUtilities::Panel::toggleZap( void ) {
 void ClampUtilities::Panel::toggleMemTest( bool on ) {    
     if( on ) {
         memTestOn = true;
-
-        if( memTestMode == CONTINUOUS ) {
-            memTestTimer->start( ( 1.0 / updateRate ) * 1e3 ); // Start timer, Hertz to ms conversion
-        }
+        memTestTimer->start( ( 1.0 / updateRate ) * 1e3 ); // Start timer, Hertz to ms conversion
     }
     else {
         if( memTestTimer->isActive() ){ 
@@ -694,11 +681,19 @@ int ClampUtilities::Panel::UpdateMemTestEvent::callback( void ) {
 }
 
 ClampUtilities::Panel::UpdateMemTestDisplayEvent::UpdateMemTestDisplayEvent( Panel *p )
-    : panel( p ) {    
+    : panel( p ) {
 }
 
 int ClampUtilities::Panel::UpdateMemTestDisplayEvent::callback( void ) {
-    panel->updateMemTestDisplay();    
+    panel->memTestCalculate();
+    panel->ui->membraneCapOutput->setText( QString::number( panel->Cm ).append( " pF" ) );
+    panel->ui->accessResistOutput->setText( QString::number( panel->Ra ).append( " M").append( QChar(0x3A9) ) );
+    panel->ui->membraneResistOutput->setText( QString::number( panel->Rm ).append( " M").append( QChar(0x3A9) ) );
+
+    if( panel->memTestMode == SINGLE ) {
+        panel->ui->acquireMemPropButton->setOn( false );
+        panel->memTestTimer->stop();
+    }
 }
 
 // Class Plugin
