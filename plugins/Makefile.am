@@ -10,7 +10,6 @@ SUBDIRS = \
 	connector \
 	data_recorder \
 	dynamo_model_loader \
-	electrode_resistance_measurement \
 	FIRwindow \
 	IIRfilter \
 	mimic \
