@@ -27,6 +27,7 @@
 #include <algorithm>
 #include <numeric>
 #include <time.h>
+#include "../include/DSP/log2.h"
 
 #include <qcheckbox.h>
 #include <qdatetime.h>
@@ -119,8 +120,8 @@ IIRfilter::update(DefaultGUIModel::update_flags_t flag)
     setParameter("Passband Edge (Hz)", QString::number(passband_edge));
     setParameter("Stopband Ripple", QString::number(stopband_ripple));
     setParameter("Stopband Edge (Hz)", QString::number(stopband_edge));
-    setParameter("Input quantizing factor", QString::number(log2(input_quan_factor)));
-    setParameter("Coefficients quantizing factor", QString::number(log2(coeff_quan_factor)));
+    setParameter("Input quantizing factor", QString::number(ilog2(input_quan_factor)));
+    setParameter("Coefficients quantizing factor", QString::number(ilog2(coeff_quan_factor)));
     setState("Time (s)", systime);
     filterType->setCurrentItem(filter_type);
     break;
@@ -168,8 +169,8 @@ IIRfilter::initParameters()
   ripple_bw_norm = 0;
   predistort_enabled = true;
   quant_enabled = false;
-  input_quan_factor = 2 ^ 12; // quantize input to 12 bits
-  coeff_quan_factor = 2 ^ 12; // quantize filter coefficients to 12 bits
+  input_quan_factor = 4096; // quantize input to 12 bits
+  coeff_quan_factor = 4096; // quantize filter coefficients to 12 bits
   makeFilter();
   bookkeep();
 }
@@ -179,6 +180,8 @@ IIRfilter::bookkeep()
 {
   count = 0;
   systime = 0;
+  printf("input quan factor: %i, coeff quan factor: %i\n", input_quan_factor, coeff_quan_factor);
+  printf("input quan bits: %i, coeff quan bits: %i\n", ilog2(input_quan_factor), ilog2(coeff_quan_factor));
 }
 
 void

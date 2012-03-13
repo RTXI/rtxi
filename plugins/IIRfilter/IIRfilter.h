@@ -84,8 +84,8 @@ private:
 
   bool quant_enabled; // quantize input signal and coefficients
   bool predistort_enabled; // predistort frequencies for bilinear transform
-  long input_quan_factor; // quantization factor 2^bits for input signal
-  long coeff_quan_factor; // quantization factor 2^bits for filter coefficients
+  int input_quan_factor; // quantization factor 2^bits for input signal
+  int coeff_quan_factor; // quantization factor 2^bits for filter coefficients
 
   // bookkeeping
   double out; // bookkeeping for computing convolution

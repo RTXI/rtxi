@@ -25,6 +25,7 @@ IIRfilter_la_SOURCES = \
 		../include/DSP/complex.cpp\
 		../include/DSP/unwrap.cpp\
 		../include/DSP/laguerre.cpp\
+		../include/DSP/log2.cpp\
 		../include/DSP/iir_dsgn.h\
 		../include/DSP/dir1_iir.h\
 		../include/DSP/unq_iir.h\
@@ -38,7 +39,8 @@ IIRfilter_la_SOURCES = \
 		../include/DSP/pause.h\
 		../include/DSP/complex.h\
 		../include/DSP/unwrap.h\
-		../include/DSP/laguerre.h
+		../include/DSP/laguerre.h\
+		../include/DSP/log2.h
 
 nodist_IIRfilter_la_SOURCES = \
    		moc_IIRfilter.cpp
