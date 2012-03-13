@@ -78,9 +78,11 @@ IIRfilter::IIRfilter(void) :
 {
   QWhatsThis::add(
       this,
-      "<p><b>IIR Filter:</b><br>This plugin computes FIR filter coefficients using the window method "
-        "given the number of taps desired and the cutoff frequencies. For a lowpass or highpass filter, use the"
-        "Freq 1 parameter. For a bandpass or bandstop filter, use both frequencies to define the frequency band."
+      "<p><b>IIR Filter:</b><br>This plugin computes filter coefficients for three types of IIR filters. "
+      "They require the following parameters: <br><br>"
+      "Butterworth: passband edge <br>"
+      "Chebyshev: passband ripple, passband edge, ripple bw_norm <br>"
+      "Elliptical: passband ripple, stopband ripple, passband edge, stopband edge <br><br>"
         "Since this plug-in computes new filter coefficients whenever you change the parameters, you should not"
         "change any settings during real-time.</p>");
 

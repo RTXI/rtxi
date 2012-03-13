@@ -45,6 +45,7 @@ public:
    *
    * \return The instance of MainWindow.
    */
+
   static MainWindow *
   getInstance(void);
 
@@ -56,62 +57,86 @@ public:
    * \param slot The slot in the handler that the signal will activate.
    * \return The index of the new menu item.
    */
+
   int
   createFileMenuItem(const std::string &label, const QObject *handler,
       const char *slot);
 
   /*!
-   * Sets the parameter value of a menu item in the file menu.
+   * Sets the parameter value of a menu item in the File menu.
+   *
+   * \param menuid The index of the item to be removed.
+   * \param parameter The parameter value to set.
    */
 
   void
-  setFileMenuItemParameter(int, int);
+  setFileMenuItemParameter(int menuid, int parameter);
+
+  /*!
+   * Clears the File menu.
+   */
 
   void
   clearFileMenu(void);
 
   /*!
-   * Add an item to the module menu.
+   * Add an item to the Modules menu.
    *
    * \param label The text that will appear in the menu.
    * \param handler The object that will handle signals from the menu.
    * \param slot The slot in the handler that the signal will activate.
    * \return The index of the new menu item.
    */
+
   int
   createModuleMenuItem(const std::string &label, const QObject *handler,
       const char *slot);
 
   /*!
-   * Sets the parameter value of a menu item in the module menu.
+   * Sets the parameter value of a menu item in the Modules menu.
+   *
+   * \param menuid The index of the item to be removed.
+   * \param parameter The parameter value to set.
    */
 
   void
-  setModuleMenuItemParameter(int, int);
+  setModuleMenuItemParameter(int menuid, int parameter);
 
   /*!
-   * Insert a line separator into the module menu.
+   * Insert a line separator into the Modules menu.
    */
 
   int
   insertModuleMenuSeparator();
 
+  /*!
+   * Clears the Modules menu.
+   */
+
   void
   clearModuleMenu(void);
+
+  /*!
+   * Change the text associated with the Modules menu item.
+   *
+   * \param id The index of the item to change.
+   * \param text The next text to assign to that menu item.
+   */
 
   void
   changeModuleMenuItem(int id, QString text);
 
   /*!
-   * Remove an item from the module menu.
+   * Remove an item from the Modules menu.
    *
    * \param index The index of the item to be removed.
    */
+
   void
   removeModuleMenuItem(int index);
 
   /*!
-   * Remove an item from the module menu.
+   * Remove an item from the Modules menu.
    *
    * \param index The position of the item to be removed.
    */
@@ -127,6 +152,7 @@ public:
    * \param slot The slot in the handler that the signal will activate.
    * \return The index of the new menu item.
    */
+
   int
   createUtilMenuItem(const std::string &label, const QObject *handler,
       const char *slot);
@@ -134,11 +160,23 @@ public:
   /*!
    * Sets the parameter value of a menu item in the Utilities menu.
    */
+
   void
   setUtilMenuItemParameter(int, int);
 
+  /*!
+   * Clears the Utilities menu.
+   */
+
   void
   clearUtilMenu(void);
+
+  /*!
+   * Change the text associated with the Utilities menu item.
+   *
+   * \param id The index of the item to change.
+   * \param text The next text to assign to that menu item.
+   */
 
   void
   changeUtilMenuItem(int id, QString text);
@@ -152,26 +190,27 @@ public:
   removeUtilMenuItem(int index);
 
   /*!
-   * Add an item to the system menu.
+   * Add an item to the System menu.
    *
    * \param label The text that will appear in the menu.
    * \param handler The object that will handle signals from the menu.
    * \param slot The slot in the handler that the signal will activate.
    * \return The index of the new menu item.
    */
+
   int
   createSystemMenuItem(const std::string &label, const QObject *handler,
       const char *slot);
 
   /*!
-   * Insert a line separator into the system menu.
+   * Insert a line separator into the System menu.
    */
 
   int
   insertSystemMenuSeparator();
 
   /*!
-   * Remove an item from the system menu.
+   * Remove an item from the System menu.
    *
    * \param index The index of the item to be removed.
    */
