@@ -133,7 +133,7 @@ ClampUtilities::Panel::Panel( QWidget *parent )
     // Display updates
     QObject::connect( timer, SIGNAL(timeout(void)), this, SLOT(updateRDisplay(void)) ); // Display update rate dependent on timer
     QObject::connect( memTestTimer, SIGNAL(timeout(void)), this, SLOT(updateMemTestDisplay(void)) );
-    QObject::connect( this, SIGNAL(memTestRun(void)), this, SLOT(updateMemTestDisplay(void)) );
+    //QObject::connect( this, SIGNAL(memTestRun(void)), this, SLOT(updateMemTestDisplay(void)) );
     
     show();
     setActive( false );
@@ -702,11 +702,11 @@ extern "C" Plugin::Object *createRTXIPlugin(void *) {
 }
 
 ClampUtilities::Plugin::Plugin( void ) {
-    menuID = MainWindow::getInstance()->createSystemMenuItem( "Clamp Utilities", this, SLOT(createClampUtilitiesPanel(void)) );
+    menuID = MainWindow::getInstance()->createUtilMenuItem( "Clamp Utilities", this, SLOT(createClampUtilitiesPanel(void)) );
 }
 
 ClampUtilities::Plugin::~Plugin( void ) {
-    MainWindow::getInstance()->removeSystemMenuItem(menuID);
+    MainWindow::getInstance()->removeUtilMenuItem(menuID);
     while(panelList.size())
         delete panelList.front();
     instance = 0;
