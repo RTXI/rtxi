@@ -123,7 +123,6 @@ namespace ClampUtilities {
         friend class UpdatePulseEvent;
         friend class UpdateZapEvent;
         friend class UpdateMemTestEvent;
-        friend class UpdateMemTestDisplayEvent;
 
         enum MemTestMode_t { SINGLE = 0, CONTINUOUS = 1 };
 
@@ -197,19 +196,6 @@ namespace ClampUtilities {
             MemTestMode_t memTestMode;
 
         }; // class UpdateMemTestEvent
-
-        class UpdateMemTestDisplayEvent : public RT::Event {
-
-        public:
-            UpdateMemTestDisplayEvent( Panel * );
-            ~UpdateMemTestDisplayEvent( void ) { };
-
-            int callback( void );
-
-        private:            
-            Panel *panel;
-
-        }; // class UpdateMemTestDisplayEvent
 
         ClampUtilitiesUI *ui;
         QChar omega;

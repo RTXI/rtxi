@@ -133,7 +133,6 @@ ClampUtilities::Panel::Panel( QWidget *parent )
     // Display updates
     QObject::connect( timer, SIGNAL(timeout(void)), this, SLOT(updateRDisplay(void)) ); // Display update rate dependent on timer
     QObject::connect( memTestTimer, SIGNAL(timeout(void)), this, SLOT(updateMemTestDisplay(void)) );
-    //QObject::connect( this, SIGNAL(memTestRun(void)), this, SLOT(updateMemTestDisplay(void)) );
     
     show();
     setActive( false );
@@ -326,9 +325,16 @@ void ClampUtilities::Panel::updateRDisplay( void ) {
 }
 
 // Membrane Test Slot Functions
-void ClampUtilities::Panel::updateMemTestDisplay( void ) {    
-    UpdateMemTestDisplayEvent event ( this );
-    RT::System::getInstance()->postEvent( &event ); // Update membrane properties test display, async event    
+void ClampUtilities::Panel::updateMemTestDisplay( void ) { // Runs membrane test calculation and updates GUI output
+    memTestCalculate();
+    ui->membraneCapOutput->setText( QString::number( Cm ).append( " pF" ) );
+    ui->accessResistOutput->setText( QString::number( Ra ).append( " M").append( QChar(0x3A9) ) );
+    ui->membraneResistOutput->setText( QString::number( Rm ).append( " M").append( QChar(0x3A9) ) );
+
+    if( memTestMode == SINGLE ) {
+        ui->acquireMemPropButton->setOn( false );
+        memTestTimer->stop();
+    }
 }
 
 void ClampUtilities::Panel::memTestCalculate( void ) {
@@ -678,22 +684,6 @@ int ClampUtilities::Panel::UpdateMemTestEvent::callback( void ) {
         panel->memTestTimer->stop();
     
     return 0;
-}
-
-ClampUtilities::Panel::UpdateMemTestDisplayEvent::UpdateMemTestDisplayEvent( Panel *p )
-    : panel( p ) {
-}
-
-int ClampUtilities::Panel::UpdateMemTestDisplayEvent::callback( void ) {
-    panel->memTestCalculate();
-    panel->ui->membraneCapOutput->setText( QString::number( panel->Cm ).append( " pF" ) );
-    panel->ui->accessResistOutput->setText( QString::number( panel->Ra ).append( " M").append( QChar(0x3A9) ) );
-    panel->ui->membraneResistOutput->setText( QString::number( panel->Rm ).append( " M").append( QChar(0x3A9) ) );
-
-    if( panel->memTestMode == SINGLE ) {
-        panel->ui->acquireMemPropButton->setOn( false );
-        panel->memTestTimer->stop();
-    }
 }
 
 // Class Plugin
