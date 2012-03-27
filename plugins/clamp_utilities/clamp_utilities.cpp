@@ -112,11 +112,10 @@ ClampUtilities::Panel::Panel( QWidget *parent )
     QObject::connect( ui->pulseButton, SIGNAL(toggled(bool)), ui->zapButton, SLOT(setEnabled(bool)) ); // Enable zap only when pulse is toggled
     QObject::connect( ui->pulseButton, SIGNAL(toggled(bool)), ui->acquireMemPropButton, SLOT(setEnabled(bool)) ); // Enable acquire only when pulse is toggled
     // Pause and Modify/Refresh Button
-    QObject::connect( ui->pauseButton1, SIGNAL(toggled(bool)), this, SLOT(pause(bool)) );
-    QObject::connect( ui->pauseButton1, SIGNAL(toggled(bool)), ui->pauseButton2, SLOT(setOn(bool)) );
+    // Two pause buttons for each tab, cannot use toggled() since setOn() function retriggers slot
+    QObject::connect( ui->pauseButton1, SIGNAL(clicked(void)), this, SLOT(pause1(void)) );
     QObject::connect( ui->modifyButton1, SIGNAL(clicked(void)), this, SLOT(updateAll(void)) );
-    QObject::connect( ui->pauseButton2, SIGNAL(toggled(bool)), this, SLOT(pause(bool)) );
-    QObject::connect( ui->pauseButton2, SIGNAL(toggled(bool)), ui->pauseButton1, SLOT(setOn(bool)) );
+    QObject::connect( ui->pauseButton2, SIGNAL(clicked(void)), this, SLOT(pause2(void)) );
     QObject::connect( ui->modifyButton2, SIGNAL(clicked(void)), this, SLOT(updateAll(void)) );
     // Update parameters when enter is pressed
     QObject::connect( ui->holdingGroup, SIGNAL(pressed(int)), this, SLOT(updateHoldingGroup(int)) );
@@ -277,18 +276,42 @@ void ClampUtilities::Panel::receiveEvent(const ::Event::Object *event) {
     }
 }
 
-void ClampUtilities::Panel::pause( bool paused ) {
-    if( paused ) {
+void ClampUtilities::Panel::pause1( void ) { // Called when pauseButton1 is clicked
+    if( ui->pauseButton1->isOn() ) { // If button is down, paused
+        ui->pauseButton2->setOn( true ); // Set second pause button to pause
         setActive( false );
         output(0) = 0;
         if( memTestTimer->isActive() )
             memTestTimer->stop();
+        ui->pulseButton->setDisabled( true );
     }
-    else {
+    else { // Button is up, unpause
+        ui->pauseButton2->setOn( false );
         if( memTestOn )
             memTestTimer->start( ( 1.0 / updateRate ) * 1e3 ); // Start timer, Hertz to ms conversion
-        setActive( true );
+        ui->pulseButton->setEnabled( true );
+        if( ui->pulseButton->isOn() ) // If pulse is on
+            setActive( true );        
+    }        
+}
+
+void ClampUtilities::Panel::pause2( void ) { // Called when either pauseButton2 is clicked
+    if( ui->pauseButton2->isOn() ) { // If button is down, paused
+        ui->pauseButton1->setOn( true ); // Set second pause button to pause
+        setActive( false );
+        output(0) = 0;
+        if( memTestTimer->isActive() )
+            memTestTimer->stop();
+        ui->pulseButton->setDisabled( true );
     }
+    else { // Button is up, unpause
+        ui->pauseButton1->setOn( false );
+        if( memTestOn )
+            memTestTimer->start( ( 1.0 / updateRate ) * 1e3 ); // Start timer, Hertz to ms conversion
+        ui->pulseButton->setEnabled( true );
+        if( ui->pulseButton->isOn() ) // If pulse is on
+            setActive( true );        
+    }        
 }
 
 void ClampUtilities::Panel::updateRDisplay( void ) {
@@ -515,7 +538,7 @@ void ClampUtilities::Panel::memTestCalculate( void ) {
 }
 
 // Toggle Slot Functions
-void ClampUtilities::Panel::togglePulse( bool on ) {    
+void ClampUtilities::Panel::togglePulse( bool on ) {
     setActive( on );
     if( !on ) {
         if( memTestTimer->isActive() ) // Pause timer if it is update to prevent display updates

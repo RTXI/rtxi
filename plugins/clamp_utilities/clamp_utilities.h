@@ -63,7 +63,7 @@ namespace ClampUtilities {
         static Plugin *getInstance( void );
 
     public slots:
-        void createClampUtilitiesPanel(void); // Create panel GUI through menu item
+        void createClampUtilitiesPanel( void ); // Create panel GUI through menu item
 
     protected:
         void doDeferred( const Settings::Object::State & );
@@ -94,7 +94,7 @@ namespace ClampUtilities {
         ~Panel( void );
 
         void execute( void );
-        void receiveEvent(const ::Event::Object *);
+        void receiveEvent( const ::Event::Object * );
 
     public slots:
         void updateRDisplay( void ); // Update resistance measurement reading
@@ -109,7 +109,8 @@ namespace ClampUtilities {
         void toggleZap( void ); // Toggle a zap (single pulse)
         void toggleMemTest( bool ); // Toggle membrane property test on or off
         void memTestCalculate( void ); // Performs the membrane properties calculation
-        void pause( bool ); // Set panel active or inactive        
+        void pause1( void ); // Set RT thread and display inactive or active, parameters may be changed
+        void pause2( void ); // Set RT thread and display inactive or active, parameters may be changed
 
     protected:
         void doDeferred( const Settings::Object::State & );

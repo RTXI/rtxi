@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Form implementation generated from reading ui file 'clamp_utilitiesUI.ui'
 **
-** Created: Thu Mar 8 16:37:22 2012
+** Created: Tue Mar 27 16:29:27 2012
 **
 ** WARNING! All changes made in this file will be lost!
 ****************************************************************************/
@@ -380,6 +380,7 @@ ClampUtilitiesUI::ClampUtilitiesUI( QWidget* parent, const char* name, WFlags fl
     pauseButton2 = new QPushButton( tab_2, "pauseButton2" );
     pauseButton2->setMaximumSize( QSize( 25, 25 ) );
     pauseButton2->setPixmap( image0 );
+    pauseButton2->setToggleButton( TRUE );
     buttonLayout2->addWidget( pauseButton2 );
 
     modifyButton2 = new QPushButton( tab_2, "modifyButton2" );
