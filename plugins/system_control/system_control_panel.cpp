@@ -496,6 +496,7 @@ void SystemControlPanel::displayChannelTab(void) {
         analogUnitPrefixList->setCurrentItem(i);
 
         // Determine the Correct Prefix for analog offset
+        i = 8;
         tmp = dev->getAnalogZeroOffset(type,chan);
         if(tmp != 0.0)
             while(((tmp >= 1000)&&(i > 0))||((tmp < 1)&&(i < 16))) {
