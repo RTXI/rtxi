@@ -179,6 +179,8 @@ int NIDevice::DIOConfig::callback(void) {
     }
 
     board->DIO_Direction.writeRegister(dio_direction);
+
+    return 0;
 }
 
 NIDevice::NIDevice(IO::channel_t *channels,size_t channel_count,const char *name,ni_device_t *device_info,u32 *bar,size_t bar_count)
