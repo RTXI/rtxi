@@ -193,6 +193,8 @@ NIDevice::NIDevice(IO::channel_t *channels,size_t channel_count,const char *name
         subdevice[AI].chan[i].analog.range = 0;
         subdevice[AI].chan[i].analog.reference = 0;
         subdevice[AI].chan[i].analog.units = 0;
+        subdevice[AI].chan[i].analog.zerooffset = 0;
+        subdevice[AI].chan[i].analog.offsetunits = 0;
     }
     subdevice[AO].count = device_info->ao_count;
     subdevice[AO].active = 0;
@@ -203,6 +205,8 @@ NIDevice::NIDevice(IO::channel_t *channels,size_t channel_count,const char *name
         subdevice[AO].chan[i].analog.range = 0;
         subdevice[AO].chan[i].analog.reference = 0;
         subdevice[AO].chan[i].analog.units = 0;
+        subdevice[AO].chan[i].analog.zerooffset = 0;
+        subdevice[AO].chan[i].analog.offsetunits = 0;
     }
     subdevice[DIO].count = device_info->dio_count > 32 ? 32 : device_info->dio_count;
     subdevice[DIO].active = 0;
@@ -359,6 +363,22 @@ index_t NIDevice::getAnalogUnits(type_t type,index_t chan) const {
     return subdevice[type].chan[chan].analog.units;
 }
 
+index_t NIDevice::getAnalogOffsetUnits(type_t type,index_t chan) const
+{
+    if(!analog_exists(type,chan))
+        return 0-1;
+
+    return subdevice[type].chan[chan].analog.offsetunits;
+}
+
+double NIDevice::getAnalogZeroOffset(type_t type,index_t chan) const
+{
+    if(!analog_exists(type,chan))
+        return 0;
+
+    return subdevice[type].chan[chan].analog.zerooffset;
+}
+
 int NIDevice::setAnalogGain(type_t type,index_t chan,double value) {
     if(!analog_exists(type,chan))
         return -EINVAL;
@@ -390,6 +410,24 @@ int NIDevice::setAnalogUnits(type_t type,index_t chan,index_t value) {
     if(!analog_exists(type,chan))
         return -EINVAL;
     subdevice[type].chan[chan].analog.units = value;
+    return 0;
+}
+
+int NIDevice::setAnalogOffsetUnits(type_t type,index_t chan,index_t index)
+{
+    if(!analog_exists(type,chan) || !((index >= 0) && (index < getAnalogUnitsCount(type,chan))))
+        return -EINVAL;
+
+    subdevice[type].chan[chan].analog.offsetunits = index;
+    return 0;
+}
+
+int NIDevice::setAnalogZeroOffset(type_t type,index_t chan,double offset)
+{
+    if(!analog_exists(type,chan))
+        return -EINVAL;
+
+    subdevice[type].chan[chan].analog.zerooffset = offset;
     return 0;
 }
 
@@ -428,7 +466,7 @@ void NIDevice::read(void) {
             if(getChannelActive(AI,i)) {
                 value = board->AI_FIFO_Data.readRegister ();
                 aiPolynomialScaler (&value,&scaled,&subdevice[AI].chan[i].analog.scale);
-                output(i) = subdevice[AI].chan[i].analog.gain*scaled;
+                output(i) = subdevice[AI].chan[i].analog.gain*scaled+subdevice[AI].chan[i].analog.zerooffset;
 
                 if(++count >= subdevice[AI].active) break;
             }
@@ -470,7 +508,7 @@ void NIDevice::write(void) {
         count = 0;
         for(size_t i=0;i<getChannelCount(AO);++i)
             if(getChannelActive(AO,i)) {
-                voltage = input(i)/subdevice[AO].chan[i].analog.gain;
+                voltage = (input(i)-subdevice[AO].chan[i].analog.zerooffset)/subdevice[AO].chan[i].analog.gain;
                 aoLinearScaler(&value,&voltage,&subdevice[AO].chan[i].analog.scale);
                 board->DAC_Direct_Data[i].writeRegister(value);
 
@@ -502,6 +540,7 @@ void NIDevice::doLoad(const Settings::Object::State &s) {
         setAnalogReference(AI,i,s.loadInteger(str.str()+" AI Reference"));
         setAnalogUnits(AI,i,s.loadInteger(str.str()+" AI Units"));
         setAnalogGain(AI,i,s.loadDouble(str.str()+" AI Gain"));
+        setAnalogZeroOffset(AI,i,s.loadDouble(str.str()+" AI Zero Offset"));
         setChannelActive(AI,i,s.loadInteger(str.str()+" AI Active"));
     }
 
@@ -512,6 +551,7 @@ void NIDevice::doLoad(const Settings::Object::State &s) {
         setAnalogReference(AO,i,s.loadInteger(str.str()+" AO Reference"));
         setAnalogUnits(AO,i,s.loadInteger(str.str()+" AO Units"));
         setAnalogGain(AO,i,s.loadDouble(str.str()+" AO Gain"));
+        setAnalogZeroOffset(AO,i,s.loadDouble(str.str()+" AO Zero Offset"));
         setChannelActive(AO,i,s.loadInteger(str.str()+" AO Active"));
     }
 
@@ -533,6 +573,7 @@ void NIDevice::doSave(Settings::Object::State &s) const {
         s.saveInteger(str.str()+" AI Reference",getAnalogReference(AI,i));
         s.saveInteger(str.str()+" AI Units",getAnalogUnits(AI,i));
         s.saveDouble(str.str()+" AI Gain",getAnalogGain(AI,i));
+        s.saveDouble(str.str()+" AI Zero Offset",getAnalogZeroOffset(AI,i));
     }
 
     s.saveInteger("AO Count",subdevice[AO].count);
@@ -544,6 +585,7 @@ void NIDevice::doSave(Settings::Object::State &s) const {
         s.saveInteger(str.str()+" AO Reference",getAnalogReference(AO,i));
         s.saveInteger(str.str()+" AO Units",getAnalogUnits(AO,i));
         s.saveDouble(str.str()+" AO Gain",getAnalogGain(AO,i));
+        s.saveDouble(str.str()+" AO Gain",getAnalogZeroOffset(AO,i));
     }
 
     s.saveInteger("DIO Count",subdevice[DIO].count);

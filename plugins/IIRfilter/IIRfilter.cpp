@@ -58,12 +58,12 @@ static DefaultGUIModel::variable_t vars[] =
     { "Output", "Output of Filter", DefaultGUIModel::OUTPUT },
     { "Filter Order", "Filter Order", DefaultGUIModel::PARAMETER
         | DefaultGUIModel::INTEGER, },
-    { "Passband Ripple", "Passband Ripple", DefaultGUIModel::PARAMETER
-        | DefaultGUIModel::DOUBLE, },
+    { "Passband Ripple (dB)", "Passband Ripple (dB)",
+        DefaultGUIModel::PARAMETER | DefaultGUIModel::DOUBLE, },
     { "Passband Edge (Hz)", "Passband Edge (Hz)", DefaultGUIModel::PARAMETER
         | DefaultGUIModel::DOUBLE, },
-    { "Stopband Ripple", "Stopband Ripple", DefaultGUIModel::PARAMETER
-        | DefaultGUIModel::DOUBLE, },
+    { "Stopband Ripple (dB)", "Stopband Ripple (dB)",
+        DefaultGUIModel::PARAMETER | DefaultGUIModel::DOUBLE, },
     { "Stopband Edge (Hz)", "Stopband Edge (Hz)", DefaultGUIModel::PARAMETER
         | DefaultGUIModel::DOUBLE, },
     { "Input quantizing factor", "Bits eg. 10, 12, 16",
@@ -80,10 +80,11 @@ IIRfilter::IIRfilter(void) :
   QWhatsThis::add(
       this,
       "<p><b>IIR Filter:</b><br>This plugin computes filter coefficients for three types of IIR filters. "
-      "They require the following parameters: <br><br>"
-      "Butterworth: passband edge <br>"
-      "Chebyshev: passband ripple, passband edge, ripple bw_norm <br>"
-      "Elliptical: passband ripple, stopband ripple, passband edge, stopband edge <br><br>"
+        "They require the following parameters: <br><br>"
+        "Butterworth: passband edge <br>"
+        "Chebyshev: passband ripple, passband edge, ripple bw_norm <br>"
+        "Elliptical: passband ripple, stopband ripple, passband edge, stopband edge <br>"
+        "Bessel: passband edge<br><br>"
         "Since this plug-in computes new filter coefficients whenever you change the parameters, you should not"
         "change any settings during real-time.</p>");
 
@@ -116,23 +117,26 @@ IIRfilter::update(DefaultGUIModel::update_flags_t flag)
     {
   case INIT:
     setParameter("Filter Order", QString::number(filter_order));
-    setParameter("Passband Ripple", QString::number(passband_ripple));
+    setParameter("Passband Ripple (dB)", QString::number(passband_ripple));
     setParameter("Passband Edge (Hz)", QString::number(passband_edge));
-    setParameter("Stopband Ripple", QString::number(stopband_ripple));
+    setParameter("Stopband Ripple (dB)", QString::number(stopband_ripple));
     setParameter("Stopband Edge (Hz)", QString::number(stopband_edge));
-    setParameter("Input quantizing factor", QString::number(ilog2(input_quan_factor)));
-    setParameter("Coefficients quantizing factor", QString::number(ilog2(coeff_quan_factor)));
+    setParameter("Input quantizing factor", QString::number(ilog2(
+        input_quan_factor)));
+    setParameter("Coefficients quantizing factor", QString::number(ilog2(
+        coeff_quan_factor)));
     setState("Time (s)", systime);
     filterType->setCurrentItem(filter_type);
     break;
   case MODIFY:
     filter_order = int(getParameter("Filter Order").toDouble());
-    passband_ripple = getParameter("Passband Ripple").toDouble();
+    passband_ripple = getParameter("Passband Ripple (dB)").toDouble();
     passband_edge = getParameter("Passband Edge (Hz)").toDouble();
-    stopband_ripple = getParameter("Stopband Ripple").toDouble();
+    stopband_ripple = getParameter("Stopband Ripple (dB)").toDouble();
     stopband_edge = getParameter("Stopband Edge (Hz)").toDouble();
     filter_type = filter_t(filterType->currentItem());
-    stopband_edge *= TWO_PI;
+    stopband_edge *= TWO_PI; // because frequency specified in Hz, not rad/s
+    passband_edge *= TWO_PI;
     input_quan_factor = 2 ^ getParameter("Input quantizing factor").toInt(); // quantize input to 12 bits
     coeff_quan_factor = 2
         ^ getParameter("Coefficients quantizing factor").toInt(); // quantize filter coefficients to 12 bits
@@ -180,8 +184,10 @@ IIRfilter::bookkeep()
 {
   count = 0;
   systime = 0;
-  printf("input quan factor: %i, coeff quan factor: %i\n", input_quan_factor, coeff_quan_factor);
-  printf("input quan bits: %i, coeff quan bits: %i\n", ilog2(input_quan_factor), ilog2(coeff_quan_factor));
+  printf("input quan factor: %i, coeff quan factor: %i\n", input_quan_factor,
+      coeff_quan_factor);
+  printf("input quan bits: %i, coeff quan bits: %i\n",
+      ilog2(input_quan_factor), ilog2(coeff_quan_factor));
 }
 
 void
@@ -198,6 +204,7 @@ IIRfilter::updateFilterType(int index)
     {
       filter_type = CHEBY;
       printf("Filter type now set to CHEBYSHEV\n");
+      normType->changeItem("3 dB attenuation at passband", 0);
       normType->setEnabled(true);
       makeFilter();
     }
@@ -208,22 +215,49 @@ IIRfilter::updateFilterType(int index)
       normType->setEnabled(false);
       makeFilter();
     }
+  else if (index == 3)
+    {
+      filter_type = BESSEL;
+      printf("Filter type now set to BESSEL\n");
+      normType->changeItem("Unit delay at w=0", 0);
+      normType->setEnabled(true);
+      makeFilter();
+    }
 }
 
 void
 IIRfilter::updateNormType(int index)
 {
   ripple_bw_norm = index;
-  if (ripple_bw_norm)
-    printf("Chebyshev normalization now set to ripple bandwidth\n");
-  else
-    printf("Chebyshev normalization now set to 3 dB bandwidth\n");
+  switch (filter_type)
+    {
+  case CHEBY:
+    if (ripple_bw_norm)
+      printf("Chebyshev normalization now set to ripple bandwidth\n");
+    else
+      printf(
+          "Chebyshev normalization now set to 3 dB attenuation at the passband edge\n");
+
+    break;
+  case BESSEL:
+    if (ripple_bw_norm)
+      printf("Bessel normalization now set to unit delay at zero frequency\n");
+    else
+      printf(
+          "Bessel normalization now set to 3 dB attenuation at the passband edge\n");
+    break;
+  case ELLIP:
+  case BUTTER:
+  default:
+    break;
+    }
   makeFilter();
 }
 
 void
 IIRfilter::makeFilter()
 {
+  int upper_summation_limit = 5;
   switch (filter_type)
     {
   case BUTTER:
@@ -236,9 +270,12 @@ IIRfilter::makeFilter()
     analog_filter->LowpassDenorm(passband_edge);
     break;
   case ELLIP:
-    int upper_summation_limit = 5;
     analog_filter = new EllipticalTransFunc(filter_order, passband_ripple,
         stopband_ripple, passband_edge, stopband_edge, upper_summation_limit);
+    break;
+  case BESSEL:
+    analog_filter = new BesselTransFunc(filter_order, passband_edge,
+        ripple_bw_norm);
     break;
     } // end of switch on window_shape
   if (predistort_enabled)
@@ -262,14 +299,7 @@ IIRfilter::makeFilter()
           filter_design->GetNumerCoefficients(),
           filter_design->GetDenomCoefficients());
     }
-  /*
-   printf("\n      IIR Filter\n");
-   for (int i = 0; i < num_taps; i++)
-   {
-   printf("h[%i] = %f\n", i, h3[i]);
-   }
-   printf("\n");
-   */
+
 }
 
 void
@@ -285,7 +315,7 @@ IIRfilter::saveIIRData()
 
       if (OpenFile(fileName))
         {
-          //			stream.setPrintableData(true);
+          //                    stream.setPrintableData(true);
           switch (filter_type)
             {
           case BUTTER:
@@ -307,6 +337,14 @@ IIRfilter::saveIIRData()
                 << " passband edge=" << (double) passband_edge
                 << " stopband ripple=" << (double) stopband_ripple
                 << " stopband edge=" << (double) stopband_edge;
+            break;
+          case BESSEL:
+            stream << QString("BESSEL order=") << (int) filter_order
+                << " passband edge=" << (double) passband_edge;
+            if (ripple_bw_norm == 0)
+              stream << " with 3 dB bandwidth normalization";
+            else
+              stream << " unit delay at zero frequency";
             break;
             }
           stream << QString(" \n");
@@ -379,7 +417,7 @@ IIRfilter::OpenFile(QString FName)
         return false;
     }
   stream.setDevice(&dataFile);
-  //	stream.setPrintableData(false); // write binary
+  //    stream.setPrintableData(false); // write binary
   printf("File opened: %s\n", FName.latin1());
   return true;
 }
@@ -407,13 +445,14 @@ IIRfilter::createGUI(DefaultGUIModel::variable_t *var, int size)
   filterType->insertItem("Butterworth");
   filterType->insertItem("Chebyshev");
   filterType->insertItem("Elliptical");
+  filterType->insertItem("Bessel");
   optionLayout->addWidget(filterLabel, 1, 0);
   optionLayout->addWidget(filterType, 1, 1);
   QObject::connect(filterType,SIGNAL(activated(int)), this, SLOT(updateFilterType(int)));
 
   QLabel *normTypeLabel = new QLabel("Type of Chebyshev normalization:", this);
   normType = new QComboBox(FALSE, this, "Chebyshev Normalization");
-  normType->insertItem("3 dB bandwidth");
+  normType->insertItem("3 dB attenuation at passband");
   normType->insertItem("Ripple bandwidth");
   QToolTip::add(normType, "Type of Chebyshev normalization");
   optionLayout->addWidget(normTypeLabel, 0, 0);

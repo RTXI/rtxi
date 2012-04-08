@@ -21,6 +21,7 @@
  * Butterworth: passband_edge
  * Chebyshev: passband_ripple, passband_edge, ripple_bw_norm
  * Elliptical: passband_ripple, stopband_ripple, passband_edge, stopband_edge
+ * Bessel:
  */
 
 #include <default_gui_model.h>
@@ -30,6 +31,7 @@
 #include "../include/DSP/buttfunc.h"
 #include "../include/DSP/chebfunc.h"
 #include "../include/DSP/elipfunc.h"
+#include "../include/DSP/bessfunc.h"
 #include "../include/DSP/bilinear.h"
 #include <qcombobox.h>
 #include <qfiledialog.h>
@@ -58,7 +60,7 @@ public:
 
   enum filter_t
   {
-    BUTTER, CHEBY, ELLIP,
+    BUTTER, CHEBY, ELLIP, BESSEL,
   };
 
 protected:

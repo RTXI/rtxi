@@ -17,6 +17,7 @@ IIRfilter_la_SOURCES = \
 		../include/DSP/buttfunc.cpp\
 		../include/DSP/chebfunc.cpp\
 		../include/DSP/elipfunc.cpp\
+		../include/DSP/bessfunc.cpp\
 		../include/DSP/bilinear.cpp\
 		../include/DSP/filtfunc.cpp\
 		../include/DSP/cmpxpoly.cpp\
@@ -32,6 +33,7 @@ IIRfilter_la_SOURCES = \
 		../include/DSP/buttfunc.h\
 		../include/DSP/chebfunc.h\
 		../include/DSP/elipfunc.h\
+		../include/DSP/bessfunc.h\
 		../include/DSP/bilinear.h\
 		../include/DSP/filtfunc.h\
 		../include/DSP/cmpxpoly.h\
