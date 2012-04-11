@@ -32,7 +32,7 @@ rtos=""
 
 AC_CHECK_RTAI
 AC_ARG_ENABLE(xenomai,
-  [  --enable-xenomai       build the Xenomai interface],
+  [  --enable-xenomai        build the Xenomai interface],
   [case "${enablecal}" in
     "" | y | ye | yes) rtos=xenomai;;
     n | no);;
@@ -40,7 +40,7 @@ AC_ARG_ENABLE(xenomai,
   esac],
   [])
 AC_ARG_ENABLE(posix,
-  [  --enable-posix         build the POSIX non-RT interface],
+  [  --enable-posix          build the POSIX non-RT interface],
   [case "${enableval}" in
     "" | y | ye | yes) rtos=posix;;
     n | no);;
@@ -84,7 +84,7 @@ AC_ARG_ENABLE(debug,
 AM_CONDITIONAL(DEBUG, test x$debug = xtrue)
 
 AC_ARG_ENABLE(comedi,
-  [  --enable-comedi        build the comedi driver],
+  [  --enable-comedi         build the comedi driver],
   [case "${enableval}" in
     "" | y | ye | yes) comedi=true;;
     n | no) comedi=false;;
@@ -99,7 +99,7 @@ AC_ARG_ENABLE(analogy,
     n | no) analogy=false;;
     *) AC_MSG_ERROR(bad value ${enableval} for --enable-analogy);;
   esac],
-  [analogy=true])
+  [analogy=true])  
 
 if test x$rtos = xrtai3; then
   AM_CONDITIONAL(BUILD_COMEDI, test x$comedi = xtrue)
@@ -120,7 +120,7 @@ else
 fi
 
 AC_ARG_ENABLE(ni,
-  [  --enable-ni            build the ni driver],
+  [  --enable-ni             build the ni driver],
   [case "${enableval}" in
     "" | y | ye | yes) ni=true;;
     n | no) ni=false;;
@@ -128,6 +128,16 @@ AC_ARG_ENABLE(ni,
   esac],
   [ni=false])
 AM_CONDITIONAL(BUILD_NI, test x$ni = xtrue)
+
+AC_ARG_ENABLE(clampsuite,
+  [  --enable-clampsuite     build the clamp suite module (default=enabled)],
+  [case "${enableval}" in
+    "" | y | ye | yes) clampsuite=true ;;
+    n | no) clampsuite=false ;;
+    *) AC_MSG_ERROR(bad value ${enableval} for --enable-clampsuite) ;;
+  esac],
+  [clampsuite=true])
+AM_CONDITIONAL(BUILD_CLAMPSUITE, test x$clampsuite = xtrue)
 
 dnl Clear build variables
 
@@ -152,6 +162,7 @@ scripts/rtxi_plugin_config
 testsuite/Makefile
 plugins/Makefile
 plugins/analogy_device/Makefile
+plugins/clamp_suite/Makefile
 plugins/clamp_utilities/Makefile
 plugins/comedi_device/Makefile
 plugins/comedilib_device/Makefile
