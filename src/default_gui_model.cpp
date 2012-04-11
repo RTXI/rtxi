@@ -28,7 +28,7 @@
 #include <qvalidator.h>
 #include <qvbox.h>
 #include <qwhatsthis.h>
-
+#include <iostream>
 namespace {
 
 class SyncEvent: public RT::Event {
@@ -75,6 +75,11 @@ DefaultGUIModel::DefaultGUIModel(std::string name,
 }
 
 DefaultGUIModel::~DefaultGUIModel(void) {
+    // Ensure that the realtime thread isn't in the middle of executing DefaultGUIModel::execute()    
+    setActive( false );
+	SyncEvent event;
+	RT::System::getInstance()->postEvent(&event);
+    
 	for (std::map<QString, param_t>::iterator i = parameter.begin(); i
 			!= parameter.end(); ++i)
 		if (i->second.type & PARAMETER)
@@ -155,7 +160,12 @@ void DefaultGUIModel::createGUI(DefaultGUIModel::variable_t *var, int size) {
 void DefaultGUIModel::update(DefaultGUIModel::update_flags_t) {
 }
 
-void DefaultGUIModel::exit(void) {
+void DefaultGUIModel::exit(void) {    
+    // Ensure that the realtime thread isn't in the middle of executing DefaultGUIModel::execute()    
+    setActive( false );
+	SyncEvent event;
+	RT::System::getInstance()->postEvent(&event);
+    
 	update(EXIT);
 	Plugin::Manager::getInstance()->unload(this);
 }
