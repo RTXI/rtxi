@@ -8,7 +8,7 @@ if BUILD_CLAMPSUITE
 pkglib_LTLIBRARIES = clamp_suite.la
 endif
 
-clamp_suite_la_LDFLAGS = -module -avoid-version
+clamp_suite_la_LDFLAGS = -module -avoid-version -lqwt
 
 clamp_suite_la_SOURCES = \
 		clamp_suite.cpp\

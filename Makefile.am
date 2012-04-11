@@ -89,6 +89,9 @@ endif
 	@echo ' <OBJECT component="plugin" library="performance_measurement.so" id="10" />'>> $@
 	@echo ' <OBJECT component="plugin" library="userprefs.so" id="11" />'>> $@
 	@echo ' <OBJECT component="plugin" library="clamp_utilities.so" id="12" />'>> $@
+if BUILD_CLAMPSUITE
+	@echo ' <OBJECT component="plugin" library="clamp_suite.so" id="13" />'>> $@
+endif
 	@echo '</RTXI>'									>> $@
 
 Makefile.dynamo_compile:  
