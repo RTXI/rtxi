@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Form implementation generated from reading ui file 'clamp_utilitiesUI.ui'
 **
-** Created: Tue Mar 27 16:29:27 2012
+** Created: Thu Apr 12 15:37:23 2012
 **
 ** WARNING! All changes made in this file will be lost!
 ****************************************************************************/
@@ -559,11 +559,12 @@ ClampUtilitiesUI::~ClampUtilitiesUI()
 void ClampUtilitiesUI::languageChange()
 {
     setCaption( tr( "Clamp Utilities" ) );
-    QToolTip::add( mainTabWidget, tr( "Update all parameters" ) );
+    QToolTip::add( mainTabWidget, QString::null );
     resistLabel->setText( tr( "Resistance Measurement" ) );
     pauseButton1->setText( QString::null );
     QToolTip::add( pauseButton1, tr( "Pause module" ) );
     modifyButton1->setText( QString::null );
+    QToolTip::add( modifyButton1, tr( "Refresh all parameters" ) );
     pulseGroup->setTitle( QString::null );
     QToolTip::add( pulseGroup, QString::null );
     QWhatsThis::add( pulseGroup, QString::null );
