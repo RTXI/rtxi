@@ -2,6 +2,7 @@
 #include "CS_protocol_editor.h"
 
 #include <cmath>
+#include <iostream>
 #include <main_window.h>
 #include <qfiledialog.h>
 #include <qlineedit.h>

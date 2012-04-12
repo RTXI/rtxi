@@ -1,6 +1,7 @@
 #include "CS_protocol_editor.h"
 #include "plot/basicplot.h"
 
+#include <iostream>
 #include <qdialog.h>
 #include <qlayout.h>
 #include <qstring.h>
