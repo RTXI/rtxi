@@ -24,6 +24,7 @@
 
 #include <plugin.h>
 #include <rt.h>
+#include <workspace.h>
 
 #include <qfile.h>
 #include <qfiledialog.h>
@@ -74,7 +75,7 @@ public slots:
 
   }; // class Plugin
 
-  class Panel : public QWidget, public RT::Device
+  class Panel : public QWidget, public RT::Device, public Workspace::Instance
   {
 
   Q_OBJECT
@@ -110,21 +111,6 @@ public slots:
     void
     update(void);
 
-    /*!
-     * Starts writing the real-time periods to a file
-     */
-    void
-    startSave(void);
-
-    /*!
-     * Stop writing the real-time periods to a file
-     */
-    void
-    stopSave(void);
-
-    bool
-    OpenFile(QString);
-
   private:
 
     enum
@@ -132,11 +118,12 @@ public slots:
       INIT1, INIT2, EXEC,
     } state;
 
-    long long duration;
-    long long lastRead;
-    long long timestep;
-    long long maxDuration;
-    long long maxTimestep;
+    double duration;
+    double lastRead;
+    double timestep;
+    double maxDuration;
+    double maxTimestep;
+    double jitter;
 
     RunningStat timestepStat;
     bool saveStats;

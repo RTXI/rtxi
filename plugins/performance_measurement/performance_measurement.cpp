@@ -28,9 +28,25 @@
 #include <main_window.h>
 #include <performance_measurement.h>
 
-PerformanceMeasurement::Panel::Panel(QWidget *parent) :
-  QWidget(parent, 0, Qt::WStyle_NormalBorder | Qt::WDestructiveClose), state(
-      INIT1)
+static Workspace::variable_t vars[] = { 
+    {
+        "Comp Time (ns)", "", Workspace::STATE, },
+    {
+        "Peak Comp Time (ns)", "", Workspace::STATE, }, 
+    {
+        "Real-time Period (ns)", "", Workspace::STATE, },
+    {
+        "Peak RT Jitter (ns)", "", Workspace::STATE, },
+    {
+        "RT Jitter (ns)", "", Workspace::STATE, },
+};
+
+static size_t num_vars = sizeof( vars ) / sizeof( Workspace::variable_t ); // Required variable (number of variables)
+
+PerformanceMeasurement::Panel::Panel(QWidget *parent)
+  : QWidget(parent, 0, Qt::WStyle_NormalBorder | Qt::WDestructiveClose),
+    Workspace::Instance( "Performance Measuremnt", vars, num_vars ), state( INIT1),
+    duration( 0 ), lastRead( 0 ), timestep( 0 ), maxDuration( 0 ), maxTimestep( 0 ), jitter( 0 )
 {
   QHBox *hbox;
   QBoxLayout *layout = new QVBoxLayout(this);
@@ -84,11 +100,6 @@ PerformanceMeasurement::Panel::Panel(QWidget *parent) :
 
   hbox = new QHBox(this);
   layout->addWidget(hbox);
-  QPushButton *startButton = new QPushButton("Start Saving", hbox);
-  QObject::connect(startButton,SIGNAL(clicked(void)),this,SLOT(startSave(void)));
-  QPushButton *stopButton = new QPushButton("Stop Saving", hbox);
-  QObject::connect(stopButton,SIGNAL(clicked(void)),this,SLOT(stopSave(void)));
-
   QPushButton *resetButton = new QPushButton("Reset", this);
   layout->addWidget(resetButton);
   QObject::connect(resetButton,SIGNAL(clicked(void)),this,SLOT(reset(void)));
@@ -96,6 +107,13 @@ PerformanceMeasurement::Panel::Panel(QWidget *parent) :
   QTimer *timer = new QTimer(this);
   timer->start(500);
   QObject::connect(timer,SIGNAL(timeout(void)),this,SLOT(update(void)));
+
+  // Connect states to workspace
+  setData( Workspace::STATE, 0, &duration );
+  setData( Workspace::STATE, 1, &maxDuration );
+  setData( Workspace::STATE, 2, &timestep );
+  setData( Workspace::STATE, 3, &maxTimestep );
+  setData( Workspace::STATE, 4, &jitter );
 
   setActive(true);
   saveStats = false;
@@ -127,9 +145,8 @@ PerformanceMeasurement::Panel::read(void)
   case INIT1:
     state = INIT2;
     }
-  if (saveStats)
-    stream << (double) timestep << "\n";
   lastRead = now;
+  jitter = timestepStat.var();
 }
 
 void
@@ -165,81 +182,8 @@ PerformanceMeasurement::Panel::update(void)
   durationEdit->setText(QString::number(duration * 1e-3));
   maxDurationEdit->setText(QString::number(maxDuration * 1e-3));
   timestepEdit->setText(QString::number(timestep * 1e-3));
-  maxTimestepEdit->setText(QString::number(maxTimestep * 1e-3));
-  timestepJitterEdit->setText(QString::number(timestepStat.var() * 1e-3));
-}
-
-void
-PerformanceMeasurement::Panel::startSave()
-{
-  QFileDialog* fd = new QFileDialog(this, "Save File As", TRUE);
-  fd->setMode(QFileDialog::AnyFile);
-  fd->setViewMode(QFileDialog::Detail);
-  QString fileName;
-  if (fd->exec() == QDialog::Accepted)
-    {
-      fileName = fd->selectedFile();
-
-      if (OpenFile(fileName))
-        {
-          reset();
-          saveStats = true;
-        }
-      else
-        {
-          QMessageBox::information(this,
-              "Real-time Benchmarks: Save real-time period",
-              "There was an error writing to this file.\n");
-          saveStats = false;
-        }
-    }
-}
-
-void
-PerformanceMeasurement::Panel::stopSave()
-{
-  dataFile.close();
-  saveStats = false;
-}
-
-bool
-PerformanceMeasurement::Panel::OpenFile(QString FName)
-{
-  dataFile.setName(FName);
-  if (dataFile.exists())
-    {
-      switch (QMessageBox::warning(this, "Real-time Benchmarks", tr(
-          "This file already exists: %1.\n").arg(FName), "Overwrite", "Append",
-          "Cancel", 0, 2))
-        {
-      case 0: // overwrite
-        dataFile.remove();
-        if (!dataFile.open(IO_Raw | IO_WriteOnly))
-          {
-            return false;
-          }
-        break;
-      case 1: // append
-        if (!dataFile.open(IO_Raw | IO_WriteOnly | IO_Append))
-          {
-            return false;
-          }
-        break;
-      case 2: // cancel
-        return false;
-        break;
-        }
-    }
-  else
-    {
-      if (!dataFile.open(IO_Raw | IO_WriteOnly))
-        return false;
-    }
-  stream.setDevice(&dataFile);
-  stream << QString("time step in nanoseconds");
-  //	stream.setPrintableData(false); // write binary
-  printf("File opened for saving real-time benchmarks: %s\n", FName.latin1());
-  return true;
+  maxTimestepEdit->setText(QString::number(maxTimestep * 1e-3));  
+  timestepJitterEdit->setText(QString::number(jitter * 1e-3));
 }
 
 extern "C" Plugin::Object *
