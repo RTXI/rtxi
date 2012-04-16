@@ -460,7 +460,7 @@ void ComediDevice::doSave(Settings::Object::State &s) const {
         s.saveInteger(str.str()+" AO Reference",getAnalogReference(AO,i));
         s.saveInteger(str.str()+" AO Units",getAnalogUnits(AO,i));
         s.saveDouble(str.str()+" AO Gain",getAnalogGain(AO,i));
-        s.saveDouble(str.str()+" AO Gain",getAnalogZeroOffset(AO,i));
+        s.saveDouble(str.str()+" AO Zero Offset",getAnalogZeroOffset(AO,i));
     }
 
     s.saveInteger("DIO Count",subdevice[DIO].count);
