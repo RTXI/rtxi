@@ -274,7 +274,7 @@ void ClampSuite::Panel::execute( void ) { // RT thread execution
                 if( stepTime % pulseRate < pulseWidth )
                     output( 0 ) = stepOutput * outputFactor;
                 else
-                    ouutput( 0 ) = 0;                
+                    output( 0 ) = 0;                
                 break;
                 
             default:
