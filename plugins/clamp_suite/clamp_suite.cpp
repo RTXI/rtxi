@@ -249,8 +249,10 @@ void ClampSuite::Panel::execute( void ) { // RT thread execution
                 pulseWidth = step->pulseWidth / period; // Unitless to prevent rounding errors
                 pulseRate = step->pulseRate / ( period * 1000 ); // Unitless to prevent rounding errors
             }
-            
-            outputFactor = 1.0 / 1000.0; // stepOutput in mV, must convert to V
+ 
+            // Factors will help if switching modes
+            outputFactor = 1e-3;; // stepOutput in mV, must convert to V
+            inputFactor = 1e-6; // input in A, conver to nA
 
             if( plotting )
                 stepStart = time / period;
@@ -272,7 +274,7 @@ void ClampSuite::Panel::execute( void ) { // RT thread execution
                 if( stepTime % pulseRate < pulseWidth )
                     output( 0 ) = stepOutput * outputFactor;
                 else
-                    output( 0 ) = 0;                
+                    ouutput( 0 ) = 0;                
                 break;
                 
             default:
@@ -283,7 +285,7 @@ void ClampSuite::Panel::execute( void ) { // RT thread execution
             stepTime++;
 
             if( plotting ) // Track data if plot window is open
-            data.push_back( output(0) * 100 );
+            data.push_back( input(0) * inputFactor );
             
             if( stepTime > stepEndTime ) { // If step is finished
 
@@ -337,7 +339,7 @@ void ClampSuite::Panel::execute( void ) { // RT thread execution
                     data.clear(); // Clear data vector in preparation for next step
 
                     // Re-add previous point in order to connect curves
-                    data.push_back( output(0) * 100 );
+                    data.push_back( input(0) * inputFactor );
                 }                
             } // end stepTime > stepEndTime                            
         } // end ( protocolMode == EXECUTE )        

@@ -157,6 +157,7 @@ namespace ClampSuite {
         double protocolEndTime; // Used to determine time elapsed between trials
         double stepOutput;
         double outputFactor;
+        double inputFactor;
         double rampIncrement;
         int pulseWidth;
         int pulseRate;
