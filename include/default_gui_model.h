@@ -174,23 +174,23 @@ public slots:
     /*!
      * Function that allows the object to safely delete and unload itself.
      */
-    void exit(void);
+    virtual void exit(void);
     /*!
      * Function that updates the GUI with new parameter values.
      *
      * \sa DefaultGUIModel::update_flags_t
      */
-    void refresh(void);
+    virtual void refresh(void);
     /*!
      * Function that calls DefaultGUIModel::update with the MODIFY flag
      *
      * \sa DefaultGUIModel::update_flags_t
      */
-    void modify(void);
+    virtual void modify(void);
     /*!
      * Function that pauses/unpauses the model.
      */
-    void pause(bool);
+    virtual void pause(bool);
 
 protected:
 
