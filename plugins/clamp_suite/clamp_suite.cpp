@@ -71,6 +71,7 @@ ClampSuite::Panel::Panel( QWidget *parent )
     QObject::connect( mainWindow->loadProtocolButton, SIGNAL(clicked(void)), this, SLOT( loadProtocol(void)) );
     QObject::connect( mainWindow->protocolEditorButton, SIGNAL(clicked(void)), this, SLOT( openProtocolEditor(void)) );
     QObject::connect( mainWindow->plotWindowButton, SIGNAL(clicked(void)), this, SLOT( openPlotWindow(void)) );
+    QObject::connect( mainWindow->dataRecordCheckBox, SIGNAL(clicked(void)), this, SLOT( updateOptions(void)) );
     QObject::connect( refreshTimer, SIGNAL(timeout(void)), this, SLOT(updateDisplay(void)) );
     QObject::connect( plotTimer, SIGNAL(timeout(void)), this, SLOT(updatePlot(void)) );
 
