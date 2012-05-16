@@ -215,6 +215,7 @@ namespace ClampUtilities {
         MemTestMode_t memTestMode;
         bool memTestOn;
         bool collectMemTestData;
+        bool memTestDone;
         double Ra, Rm, Cm; // Membrane properties
         int data_size;
         QTimer *memTestTimer;

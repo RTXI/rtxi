@@ -59,8 +59,8 @@ ClampUtilities::Panel::Panel( QWidget *parent )
     IO::Block( "Clamp Utilities", chans ,num_chans ), zapOn( false ), holdingSelection(1), holdingOptionValue(0),
     holdingOption1( 0 ), holdingOption2( -80 ), holdingOption3( -40 ),  pulseSize( 10 ), pulseWidth( 10 ), zapSize( 1000 ),
     zapWidth( 10 ), updateRate( 1 ), numStepsAvg( 5 ), memTestMode( SINGLE ), collectMemTestData( false ), memTestOn( false ),
-    idx( 0 ), cnt( round( (2*10*1e-3) / (RT::System::getInstance()->getPeriod()*1e-9)) ), zidx( 0 ), stepsSaved( 1 ),
-    zcnt( round( ( 10*1e-3 ) / (RT::System::getInstance()->getPeriod()*1e-9)) ), midx( 0 ) {
+    memTestDone( false ), idx( 0 ), cnt( round( (2*10*1e-3) / (RT::System::getInstance()->getPeriod()*1e-9)) ), zidx( 0 ),
+    stepsSaved( 1 ), zcnt( round( ( 10*1e-3 ) / (RT::System::getInstance()->getPeriod()*1e-9)) ), midx( 0 ) {
     
     QBoxLayout *layout = new QVBoxLayout( this );
     ui = new ClampUtilitiesUI( this ); // UI created with Qt Designer
@@ -263,6 +263,7 @@ void ClampUtilities::Panel::execute( void ) {
                 midx = 0;
                 currentData.clear();
                 currentData.resize( cnt, 0 );
+                memTestDone = true; // Used to make sure display is not updated until data was collected correctly
             }
         }
     }
@@ -349,14 +350,16 @@ void ClampUtilities::Panel::updateRDisplay( void ) {
 
 // Membrane Test Slot Functions
 void ClampUtilities::Panel::updateMemTestDisplay( void ) { // Runs membrane test calculation and updates GUI output
-    memTestCalculate();
-    ui->membraneCapOutput->setText( QString::number( Cm ).append( " pF" ) );
-    ui->accessResistOutput->setText( QString::number( Ra ).append( " M").append( QChar(0x3A9) ) );
-    ui->membraneResistOutput->setText( QString::number( Rm ).append( " M").append( QChar(0x3A9) ) );
+    if( memTestDone ) { // Make sure data was collected first
+        memTestCalculate();
+        ui->membraneCapOutput->setText( QString::number( Cm ).append( " pF" ) );
+        ui->accessResistOutput->setText( QString::number( Ra ).append( " M").append( QChar(0x3A9) ) );
+        ui->membraneResistOutput->setText( QString::number( Rm ).append( " M").append( QChar(0x3A9) ) );
 
-    if( memTestMode == SINGLE ) {
-        ui->acquireMemPropButton->setOn( false );
-        memTestTimer->stop();
+        if( memTestMode == SINGLE ) {
+            ui->acquireMemPropButton->setOn( false );
+            memTestTimer->stop();
+        }
     }
 }
 
@@ -557,6 +560,7 @@ void ClampUtilities::Panel::toggleZap( void ) {
 void ClampUtilities::Panel::toggleMemTest( bool on ) {    
     if( on ) {
         memTestOn = true;
+        memTestDone = false;
         memTestTimer->start( ( 1.0 / updateRate ) * 1e3 ); // Start timer, Hertz to ms conversion
     }
     else {
@@ -564,6 +568,7 @@ void ClampUtilities::Panel::toggleMemTest( bool on ) {
             memTestTimer->stop();}
         memTestOn = false;
         collectMemTestData = false;
+        memTestDone = false;
     }
 }
 
