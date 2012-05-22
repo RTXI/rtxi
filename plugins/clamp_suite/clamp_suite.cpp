@@ -253,7 +253,7 @@ void ClampSuite::Panel::execute( void ) { // RT thread execution
  
             // Factors will help if switching modes
             outputFactor = 1e-3;; // stepOutput in mV, must convert to V
-            inputFactor = 1e-6; // input in A, conver to nA
+            inputFactor = 1e9; // input in A, conver to nA
 
             if( plotting )
                 stepStart = time / period;
