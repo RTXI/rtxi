@@ -21,19 +21,19 @@ namespace ClampSuite {
     public:
         ProtocolStep();
         ~ProtocolStep() { };        
-        int retrieve( int );
+        double retrieve( int );
 
         enum ampMode_t{VOLTAGE,CURRENT} ampMode;
         enum stepType_t{STEP,RAMP,TRAIN} stepType;
-        int stepDuration;
-        int deltaStepDuration;
-        int delayBefore;
-        int delayAfter;
-        int holdingLevel1;
-        int deltaHoldingLevel1;
-        int holdingLevel2;
-        int deltaHoldingLevel2;
-        int pulseWidth;
+        double stepDuration;
+        double deltaStepDuration;
+        double delayBefore;
+        double delayAfter;
+        double holdingLevel1;
+        double deltaHoldingLevel1;
+        double holdingLevel2;
+        double deltaHoldingLevel2;
+        double pulseWidth;
         int pulseRate;
     }; // class ProtocolStep
 

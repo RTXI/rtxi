@@ -3,6 +3,7 @@
 
 #include <cmath>
 #include <iostream>
+#include <debug.h>
 #include <main_window.h>
 #include <qfiledialog.h>
 #include <qlineedit.h>

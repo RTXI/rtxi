@@ -159,7 +159,7 @@ namespace ClampSuite {
         double outputFactor;
         double inputFactor;
         double rampIncrement;
-        int pulseWidth;
+        double pulseWidth;
         int pulseRate;
         Fifo fifo;
         std::vector<double> data;

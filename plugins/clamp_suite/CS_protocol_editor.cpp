@@ -291,31 +291,31 @@ void ClampSuite::ProtocolEditor::updateStepAttribute( int row, int col ) { // Up
         break;
     case 2:
         text = protocolTable->text( row, col );
-        step->stepDuration = text.toInt( &check );
+        step->stepDuration = text.toDouble( &check );
         break;
     case 3:
         text = protocolTable->text( row, col );
-        step->deltaStepDuration = text.toInt( &check );
+        step->deltaStepDuration = text.toDouble( &check );
         break;
     case 4:
         text = protocolTable->text( row, col );
-        step->holdingLevel1 = text.toInt( &check );
+        step->holdingLevel1 = text.toDouble( &check );
         break;
     case 5:
         text = protocolTable->text( row, col );
-        step->deltaHoldingLevel1 = text.toInt( &check );
+        step->deltaHoldingLevel1 = text.toDouble( &check );
         break;        
     case 6:
         text = protocolTable->text( row, col );
-        step->holdingLevel2 = text.toInt( &check );
+        step->holdingLevel2 = text.toDouble( &check );
         break;
     case 7:
         text = protocolTable->text( row, col );
-        step->deltaHoldingLevel2 = text.toInt( &check );
+        step->deltaHoldingLevel2 = text.toDouble( &check );
         break;
     case 8:
         text = protocolTable->text( row, col );
-        step->pulseWidth = text.toInt( &check );
+        step->pulseWidth = text.toDouble( &check );
         break;
     case 9:
         text = protocolTable->text( row, col );
@@ -326,10 +326,17 @@ void ClampSuite::ProtocolEditor::updateStepAttribute( int row, int col ) { // Up
         break;
     }
 
+    // Check to make sure entries are valid
     if( !check && row > 1 && text != "---" ) {
-        QMessageBox::warning( this,
-                             "Error",
-                             "Step attributes must be a valid integer to\nprevent rounding errors." );
+        if( row == 9 )
+            QMessageBox::warning( this,
+                                  "Error",
+                                  "Pulse rate must be a whole number integer." );        
+        else
+            QMessageBox::warning( this,
+                                  "Error",
+                                  "Step attribute is not a valid number." );
+        
         protocolTable->setText( row, col, "0" );
     }
 }

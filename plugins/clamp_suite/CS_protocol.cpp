@@ -10,7 +10,7 @@ ClampSuite::ProtocolStep::ProtocolStep()
    deltaHoldingLevel1(0), holdingLevel2(0), deltaHoldingLevel2(0), pulseWidth(0), pulseRate(0) {
 }
 
-int ClampSuite::ProtocolStep::retrieve(int row){
+double ClampSuite::ProtocolStep::retrieve(int row){
     switch(row){
     case 0: return ampMode;
         break;
@@ -221,15 +221,15 @@ void ClampSuite::Protocol::fromDoc( QDomDocument doc ) { // Load protocol from Q
             Step step = getStep( segmentCount, stepCount ); // Retrieve step pointer
             QDomElement stepElement = stepNode.toElement();
             // Retrieve attributes
-            step->ampMode = ( ProtocolStep::ampMode_t )stepElement.attribute( "ampMode" ).toInt();
-            step->stepType = ( ProtocolStep::stepType_t )stepElement.attribute( "stepType" ).toInt();
-            step->stepDuration = stepElement.attribute( "stepDuration" ).toInt();
-            step->deltaStepDuration = stepElement.attribute( "deltaStepDuration" ).toInt();
-            step->holdingLevel1 = stepElement.attribute( "holdingLevel1" ).toInt();
-            step->deltaHoldingLevel1 = stepElement.attribute( "deltaHoldingLevel1" ).toInt();            
-            step->holdingLevel2 = stepElement.attribute( "holdingLevel2" ).toInt();
-            step->deltaHoldingLevel2 = stepElement.attribute( "deltaHoldingLevel2" ).toInt();
-            step->pulseWidth = stepElement.attribute( "pulseWidth" ).toInt();
+            step->ampMode = ( ProtocolStep::ampMode_t )stepElement.attribute( "ampMode" ).toDouble();
+            step->stepType = ( ProtocolStep::stepType_t )stepElement.attribute( "stepType" ).toDouble();
+            step->stepDuration = stepElement.attribute( "stepDuration" ).toDouble();
+            step->deltaStepDuration = stepElement.attribute( "deltaStepDuration" ).toDouble();
+            step->holdingLevel1 = stepElement.attribute( "holdingLevel1" ).toDouble();
+            step->deltaHoldingLevel1 = stepElement.attribute( "deltaHoldingLevel1" ).toDouble();            
+            step->holdingLevel2 = stepElement.attribute( "holdingLevel2" ).toDouble();
+            step->deltaHoldingLevel2 = stepElement.attribute( "deltaHoldingLevel2" ).toDouble();
+            step->pulseWidth = stepElement.attribute( "pulseWidth" ).toDouble();
             step->pulseRate = stepElement.attribute( "pulseRate" ).toInt();
             
             stepNode = stepNode.nextSibling(); // Move to next step
@@ -261,7 +261,7 @@ std::vector< std::vector<double> > ClampSuite::Protocol::run( double period ) {
     int stepTime = 0, stepEndTime = 0; // Time elapsed during the current step
     double stepOutput = 0;
     double rampIncrement = 0;
-    int pulseWidth = 0;
+    double pulseWidth = 0;
     int pulseRate = 0;
 
     while( protocolMode != END ) {
