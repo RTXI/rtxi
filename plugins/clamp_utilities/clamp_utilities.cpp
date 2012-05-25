@@ -607,6 +607,8 @@ void ClampUtilities::Panel::updateHoldingOption( void ) {
 
     UpdateHoldingOptionEvent event ( this, h1, h2, h3 );
     RT::System::getInstance()->postEvent( &event ); // Post parameter change event
+
+    updateHoldingGroup( holdingSelection ); // Update holding potential based on selection
 }
 
 void ClampUtilities::Panel::updatePulse( void ) {
