@@ -20,6 +20,7 @@
 #include <debug.h>
 #include <math.h>
 #include <sstream>
+#include <iostream>
 
 using namespace DAQ;
 
