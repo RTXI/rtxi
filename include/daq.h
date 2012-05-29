@@ -318,6 +318,14 @@ namespace DAQ {
          */
         virtual int setAnalogOffsetUnits(type_t type,index_t index,index_t units)=0;
         /*!
+         * Set the calibration of the selected channel
+         *
+         * \param type The channel's type.
+         * \param index The channel's index.
+         * \return 0 if successful or a negative value on error.
+         */
+        virtual int setAnalogCalibration(type_t type,index_t index)=0;
+        /*!
          * Get the direction of the specified digital channel.
          *
          * \param index The digital channel's index.
