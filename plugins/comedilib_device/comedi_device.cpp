@@ -21,11 +21,25 @@
 #include <debug.h>
 #include <math.h>
 #include <sstream>
+#include <iostream>
 
 using namespace DAQ;
 
 ComediDevice::ComediDevice(comedi_t *d,std::string name,IO::channel_t *chan,size_t size)
-    : DAQ::Device(name,chan,size), device(d) {
+    : DAQ::Device(name,chan,size), device(d) {    
+
+    // If board uses soft calibration, retrieve calibration file    
+    int aiSubDevice = comedi_find_subdevice_by_type(device,COMEDI_SUBD_AI,0);
+    int aoSubDevice = comedi_find_subdevice_by_type(device,COMEDI_SUBD_AO,0);
+    
+    if( (comedi_get_subdevice_flags(device,aiSubDevice) & SDF_SOFT_CALIBRATED) > 0
+            || (comedi_get_subdevice_flags(device,aoSubDevice) & SDF_SOFT_CALIBRATED) > 0 ) { // If board uses software calibration
+            char *calibpath = comedi_get_default_calibration_path(device);
+            calibration = comedi_parse_calibration_file( calibpath ); // Returns NULL if failed
+            free( calibpath );
+            if( calibration == NULL )
+                ERROR_MSG("ComediDevice::ComediDevice : Failed to parse comedi soft calibration file/n");
+    }
 
     if((subdevice[AI].id = comedi_find_subdevice_by_type(device,COMEDI_SUBD_AI,0)) >= 0) {
         subdevice[AI].active = 0;
@@ -42,6 +56,7 @@ ComediDevice::ComediDevice(comedi_t *d,std::string name,IO::channel_t *chan,size
                 setAnalogZeroOffset(AI,i,0);
                 setAnalogReference(AI,i,0);
                 setAnalogUnits(AI,i,0);
+                setAnalogCalibration(AI,i);
             }
     } else {
         subdevice[AI].active = 0;
@@ -63,6 +78,7 @@ ComediDevice::ComediDevice(comedi_t *d,std::string name,IO::channel_t *chan,size
                 setAnalogRange(AO,i,0);
                 setAnalogReference(AO,i,0);
                 setAnalogUnits(AO,i,0);
+                setAnalogCalibration(AO,i);
             }
     } else {
         subdevice[AO].active = 0;
@@ -87,7 +103,7 @@ ComediDevice::ComediDevice(comedi_t *d,std::string name,IO::channel_t *chan,size
         subdevice[DIO].count = 0;
         subdevice[DIO].chan = NULL;
     }
-
+        
     setActive(true);
 }
 
@@ -96,6 +112,7 @@ ComediDevice::~ComediDevice(void) {
     if(subdevice[AO].chan) delete[] subdevice[AO].chan;
     if(subdevice[DIO].chan) delete[] subdevice[DIO].chan;
     if(device) comedi_close(device);
+    if(calibration != NULL) comedi_cleanup_calibration(calibration);
 }
 
 bool ComediDevice::analog_exists(type_t type,index_t count) const {
@@ -321,8 +338,65 @@ int ComediDevice::setAnalogGain(type_t type,index_t channel,double gain)
 {
     if(!analog_exists(type,channel))
         return -EINVAL;
-
     subdevice[type].chan[channel].analog.gain = gain;
+    return 0;
+}
+
+int ComediDevice::setAnalogCalibration(type_t type,index_t channel) {
+    if(!analog_exists(type,channel))
+        return -EINVAL;
+
+    analog_channel_t *chanPtr = &subdevice[type].chan[channel].analog;
+    comedi_polynomial_t polynomial;
+    int retval = -1;
+    
+    if( calibration != NULL ) { // Board was soft calibrated
+        if( type == AI )
+            retval = comedi_get_softcal_converter(subdevice[type].id,channel,chanPtr->range,
+                                                  COMEDI_TO_PHYSICAL,calibration,&polynomial);        
+        else if( type == AO )
+            retval = comedi_get_softcal_converter(subdevice[type].id,channel,chanPtr->range,
+                                                  COMEDI_FROM_PHYSICAL,calibration,&polynomial);
+        else
+            ERROR_MSG("ComediDevice::setAnalogCalibration : invalid type\n");
+
+        if( retval < 0 ) {
+            ERROR_MSG("ComediDevice::setAnalogCalibration : unable to retrieve softcal converter\n");
+            chanPtr->calibrated = false;
+        }
+        else { // Calibration retrieval successful
+            chanPtr->calibrated = true;
+            chanPtr->order = polynomial.order;
+            chanPtr->expansionOrigin = polynomial.expansion_origin;
+
+            for( int i = 0; i < 4; i++ ) // Max 4 coefficients
+                chanPtr->coefficients[i] = polynomial.coefficients[i];
+        }
+    }
+    else { // Check if board is hard calibrated
+        if( type == AI )
+            retval = comedi_get_hardcal_converter(device,subdevice[type].id,channel,chanPtr->range,
+                                                  COMEDI_TO_PHYSICAL,&polynomial);
+        else if( type == AO )
+            retval = comedi_get_hardcal_converter(device,subdevice[type].id,channel,chanPtr->range,
+                                                  COMEDI_FROM_PHYSICAL,&polynomial);
+        else
+            ERROR_MSG("ComediDevice::setAnalogCalibration : invalid type\n");
+        
+        if( retval < 0 ) {
+            ERROR_MSG("ComediDevice::setAnalogCalibration : unable to retrieve calibration, no calibration is being used");
+            chanPtr->calibrated = false;
+        }
+        else { // Calibration retrieval successful
+            chanPtr->calibrated = true;
+            chanPtr->order = polynomial.order;
+            chanPtr->expansionOrigin = polynomial.expansion_origin;
+
+            for( int i = 0; i < 4; i++ ) // Max 4 coefficients
+                chanPtr->coefficients[i] = polynomial.coefficients[i];
+        }
+    }
+
     return 0;
 }
 
@@ -356,7 +430,18 @@ void ComediDevice::read(void)
         if(subdevice[AI].chan[i].active) {
             channel = &subdevice[AI].chan[i].analog;
             comedi_data_read(device,subdevice[AI].id,i,channel->range,channel->reference,&sample);
-            output(i) = channel->gain*channel->conv*(sample-channel->offset)+channel->zerooffset;
+            if( channel->calibrated ) { // Use polynomial fitting if channel was calibrated
+                double value = 0.;
+                double term = 1.;
+                
+                for(unsigned j = 0; j <= channel->order; ++j) {
+                        value += channel->coefficients[j] * term;
+                        term *= sample - channel->expansionOrigin;
+                    }
+                output(i) = channel->gain * value + channel->zerooffset;
+            }
+            else // No calibration is used
+                output(i) = channel->gain * channel->conv * (sample-channel->offset) + channel->zerooffset;
         }
 
     unsigned int data;
@@ -379,7 +464,22 @@ void ComediDevice::write(void)
         for(size_t i=0;i < subdevice[AO].count;++i)
             if(subdevice[AO].chan[i].active) {
                 channel = &subdevice[AO].chan[i].analog;
-                value = round(channel->gain*channel->conv*(input(i)+channel->zerooffset)+channel->offset);
+                
+                if( channel->calibrated ) { // Use polynomial fitting if channel was calibrated
+                    double in = channel->gain * ( input(i) + channel->zerooffset ); // Physical value
+
+                    value = 0.;
+                    double term = 1.;
+                
+                    for(unsigned j = 0; j <= channel->order; ++j) {
+                            value += channel->coefficients[j] * term;
+                            term *= in - channel->expansionOrigin;
+                        }
+                    
+                    value = round( value ); 
+                }
+                else // No calibration is used
+                    value = round(channel->gain*channel->conv*(input(i)+channel->zerooffset)+channel->offset);
 
                 /*
                  * Prevent wrap around in the data units.
@@ -388,6 +488,7 @@ void ComediDevice::write(void)
                     value = channel->maxdata;
                 else if(value < 0.0)
                     value = 0.0;
+                
                 sample = static_cast<sampl_t>(value);
 
                 comedi_data_write(device,subdevice[AO].id,i,channel->range,channel->reference,sample);
@@ -418,6 +519,7 @@ void ComediDevice::doLoad(const Settings::Object::State &s) {
         setAnalogUnits(AI,i,s.loadInteger(str.str()+" AI Units"));
         setAnalogGain(AI,i,s.loadDouble(str.str()+" AI Gain"));
         setAnalogZeroOffset(AI,i,s.loadDouble(str.str()+" AI Zero Offset"));
+        setAnalogCalibration(AI,i);
     }
 
     for(size_t i = 0;i < subdevice[AO].count && i < static_cast<size_t>(s.loadInteger("AO Count"));++i) {
@@ -429,6 +531,7 @@ void ComediDevice::doLoad(const Settings::Object::State &s) {
         setAnalogUnits(AO,i,s.loadInteger(str.str()+" AO Units"));
         setAnalogGain(AO,i,s.loadDouble(str.str()+" AO Gain"));
         setAnalogZeroOffset(AO,i,s.loadDouble(str.str()+" AO Zero Offset"));
+        setAnalogCalibration(AO,i);
     }
 
     for(size_t i = 0;i < subdevice[DIO].count && i < static_cast<size_t>(s.loadInteger("DIO Count"));++i) {

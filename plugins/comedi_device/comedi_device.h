@@ -27,12 +27,21 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+/*
+  ComediLib is used to gather calibration from comedi_calibrate and
+  comedi_soft_calibrate. A namespace is used to prevent collisions
+  between rtai_comedi.h and comedilib.h
+*/
+namespace ComediLib {
+#include <comedilib.h>
+}
+
 class ComediDevice : public DAQ::Device
 {
 
 public:
 
-    ComediDevice(void *,std::string,IO::channel_t *,size_t);
+    ComediDevice(void *,ComediLib::comedi_t *,std::string,IO::channel_t *,size_t);
     ~ComediDevice(void);
 
     size_t getChannelCount(DAQ::type_t) const;
@@ -57,6 +66,7 @@ public:
     int setAnalogReference(DAQ::type_t,DAQ::index_t,DAQ::index_t);
     int setAnalogUnits(DAQ::type_t,DAQ::index_t,DAQ::index_t);
     int setAnalogOffsetUnits(DAQ::type_t,DAQ::index_t,DAQ::index_t);
+    int setAnalogCalibration(DAQ::type_t,DAQ::index_t);
 
     DAQ::direction_t getDigitalDirection(DAQ::index_t) const;
     int setDigitalDirection(DAQ::index_t,DAQ::direction_t);
@@ -83,6 +93,10 @@ private:
         double zerooffset;
         lsampl_t maxdata;
         DAQ::index_t offsetunits;
+        bool calibrated;
+        double coefficients[4]; // If comedi calibrated, will have max 4 coefficients
+        unsigned order;
+        double expansionOrigin;
     };
 
     struct  digital_channel_t {
@@ -108,6 +122,8 @@ private:
     std::string deviceName;
     subdevice_t subdevice[3];
     void *device;
+    ComediLib::comedi_t *comedi_device;
+    ComediLib::comedi_calibration_t *calibration;
 
 };
 

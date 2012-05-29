@@ -232,6 +232,7 @@ void SystemControlPanel::applyChannelTab(void) {
     dev->setAnalogRange(a_type,a_chan,analogRangeList->currentItem());
     dev->setAnalogReference(a_type,a_chan,analogReferenceList->currentItem());
     dev->setAnalogUnits(a_type,a_chan,analogUnitList->currentItem());
+    dev->setAnalogCalibration(a_type,a_chan);
 
     DAQ::index_t d_chan = digitalChannelList->currentItem();
     DAQ::type_t d_type = static_cast<DAQ::type_t>(digitalSubdeviceList->currentItem()+2);

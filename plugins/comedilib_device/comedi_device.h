@@ -58,6 +58,7 @@ public:
     int setAnalogReference(DAQ::type_t,DAQ::index_t,DAQ::index_t);
     int setAnalogUnits(DAQ::type_t,DAQ::index_t,DAQ::index_t);
     int setAnalogOffsetUnits(DAQ::type_t,DAQ::index_t,DAQ::index_t);
+    int setAnalogCalibration(DAQ::type_t,DAQ::index_t);
 
     DAQ::direction_t getDigitalDirection(DAQ::index_t) const;
     int setDigitalDirection(DAQ::index_t,DAQ::direction_t);
@@ -73,7 +74,7 @@ protected:
 private:
 
     bool analog_exists(DAQ::type_t,DAQ::index_t) const;
-
+    
     struct analog_channel_t {
         double gain;
         DAQ::index_t range;
@@ -84,6 +85,10 @@ private:
         double zerooffset;
         lsampl_t maxdata;
         DAQ::index_t offsetunits;
+        bool calibrated;
+        double coefficients[4]; // If comedi calibrated, will have max 4 coefficients
+        unsigned order;
+        double expansionOrigin;
     };
 
     struct  digital_channel_t {
@@ -103,13 +108,13 @@ private:
         int id;
         DAQ::index_t active;
         DAQ::index_t count;
-        channel_t *chan;
+        channel_t *chan;        
     };
 
     std::string deviceName;
     subdevice_t subdevice[3];
     comedi_t *device;
-
+    comedi_calibration_t *calibration;
 };
 
 #endif /* COMEDI_DEVICE_H */

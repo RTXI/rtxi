@@ -33,9 +33,15 @@ ComediDriver::~ComediDriver(void) {
 
 DAQ::Device *ComediDriver::createDevice(const std::list<std::string> &args) {
     void *device;
+    ComediLib::comedi_t *comedi_device;
     std::string name = args.front();
     if(!(device = comedi_open(name.c_str()))) {
         ERROR_MSG("ComediDriver::createDevice : unable to open %s.\n",name.c_str());
+        return 0;
+    }
+
+    if(!(comedi_device = ComediLib::comedi_open(name.c_str()))) { // ComediLib version used for integration with comedi_calibrate
+        ERROR_MSG("ComediDriver::createDevice : (ComediLib) unable to open %s.\n",name.c_str());
         return 0;
     }
 
@@ -107,7 +113,7 @@ DAQ::Device *ComediDriver::createDevice(const std::list<std::string> &args) {
         channel[i].flags = IO::INPUT;
     }
 
-    ComediDevice *dev = new ComediDevice(device,name,channel,count[0]+count[1]+2*count[2]);
+    ComediDevice *dev = new ComediDevice(device,comedi_device,name,channel,count[0]+count[1]+2*count[2]);
     deviceList.push_back(dev);
     return dev;
 }
