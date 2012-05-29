@@ -351,6 +351,9 @@ int ComediDevice::setAnalogCalibration(type_t type,index_t channel) {
     int retval = -1;
     
     if( calibration != NULL ) { // Board was soft calibrated
+        DEBUG_MSG("ComediDevice::setAnalogCalibration - Soft calibration used for [subd,channel] [%i,%i]\n",
+                  subdevice[type].id,channel);
+        
         if( type == AI )
             retval = comedi_get_softcal_converter(subdevice[type].id,channel,chanPtr->range,
                                                   COMEDI_TO_PHYSICAL,calibration,&polynomial);        
@@ -374,6 +377,9 @@ int ComediDevice::setAnalogCalibration(type_t type,index_t channel) {
         }
     }
     else { // Check if board is hard calibrated
+        DEBUG_MSG("ComediDevice::setAnalogCalibration - Soft calibration used for [subd,channel] [%i,%i]\n",
+                  subdevice[type].id,channel);
+        
         if( type == AI )
             retval = comedi_get_hardcal_converter(device,subdevice[type].id,channel,chanPtr->range,
                                                   COMEDI_TO_PHYSICAL,&polynomial);
@@ -384,7 +390,7 @@ int ComediDevice::setAnalogCalibration(type_t type,index_t channel) {
             ERROR_MSG("ComediDevice::setAnalogCalibration : invalid type\n");
         
         if( retval < 0 ) {
-            ERROR_MSG("ComediDevice::setAnalogCalibration : unable to retrieve calibration, no calibration is being used");
+            ERROR_MSG("ComediDevice::setAnalogCalibration : unable to retrieve calibration, no calibration is being used\n");
             chanPtr->calibrated = false;
         }
         else { // Calibration retrieval successful

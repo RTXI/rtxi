@@ -347,6 +347,9 @@ int ComediDevice::setAnalogCalibration(type_t type,index_t channel) {
     int retval = -1;
     
     if( calibration != NULL ) { // Board was soft calibrated
+        DEBUG_MSG("ComediDevice::setAnalogCalibration - Soft calibration used for [subd,channel] [%i,%i]\n",
+                  subdevice[type].id,channel);
+        
         if( type == AI ) 
             retval = ComediLib::comedi_get_softcal_converter(subdevice[type].id,channel,chanPtr->range,
                                                              ComediLib::COMEDI_TO_PHYSICAL,calibration,&polynomial);        
@@ -370,6 +373,9 @@ int ComediDevice::setAnalogCalibration(type_t type,index_t channel) {
         }
     }
     else { // Check if board is hard calibrated
+        DEBUG_MSG("ComediDevice::setAnalogCalibration - Soft calibration used for [subd,channel] [%i,%i]\n",
+                  subdevice[type].id,channel);
+        
         if( type == AI )
             retval = ComediLib::comedi_get_hardcal_converter(comedi_device,subdevice[type].id,channel,chanPtr->range,
                                                              ComediLib::COMEDI_TO_PHYSICAL,&polynomial);
@@ -380,7 +386,7 @@ int ComediDevice::setAnalogCalibration(type_t type,index_t channel) {
             ERROR_MSG("ComediDevice::setAnalogCalibration : invalid type\n");
         
         if( retval < 0 ) {
-            ERROR_MSG("ComediDevice::setAnalogCalibration : unable to retrieve calibration, no calibration is being used");
+            ERROR_MSG("ComediDevice::setAnalogCalibration : unable to retrieve calibration, no calibration is being used\n");
             chanPtr->calibrated = false;
         }
         else { // Calibration retrieval successful
@@ -515,6 +521,7 @@ void ComediDevice::doLoad(const Settings::Object::State &s) {
         setAnalogUnits(AI,i,s.loadInteger(str.str()+" AI Units"));
         setAnalogGain(AI,i,s.loadDouble(str.str()+" AI Gain"));
         setAnalogZeroOffset(AI,i,s.loadDouble(str.str()+" AI Zero Offset"));
+        setAnalogCalibration(AI,i);
     }
 
     for(size_t i = 0;i < subdevice[AO].count && i < static_cast<size_t>(s.loadInteger("AO Count"));++i) {
@@ -526,6 +533,7 @@ void ComediDevice::doLoad(const Settings::Object::State &s) {
         setAnalogUnits(AO,i,s.loadInteger(str.str()+" AO Units"));
         setAnalogGain(AO,i,s.loadDouble(str.str()+" AO Gain"));
         setAnalogZeroOffset(AO,i,s.loadDouble(str.str()+" AO Zero Offset"));
+        setAnalogCalibration(AO,i);
     }
 
     for(size_t i = 0;i < subdevice[DIO].count && i < static_cast<size_t>(s.loadInteger("DIO Count"));++i) {
