@@ -77,11 +77,12 @@ private:
     QLineEdit *analogGainEdit;
     QLineEdit *analogZeroOffsetEdit;
     QPushButton *analogActiveButton;
+    QPushButton *analogCalibrationButton;
 
     QComboBox *digitalChannelList;
     QComboBox *digitalDirectionList;
     QComboBox *digitalSubdeviceList;
-    QPushButton *digitalActiveButton;
+    QPushButton *digitalActiveButton;    
 
     /* Thread Tab Items */
     bool rateUpdate;

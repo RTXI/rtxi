@@ -19,6 +19,7 @@
 #include <debug.h>
 #include <daq.h>
 #include <math.h>
+#include <qcheckbox.h>
 #include <qcombobox.h>
 #include <qgroupbox.h>
 #include <qhbox.h>
@@ -227,12 +228,13 @@ void SystemControlPanel::applyChannelTab(void) {
     double a_zerooffset = analogZeroOffsetEdit->text().toDouble()*pow(10,-3*(analogUnitPrefixList2->currentItem()-8));
 
     dev->setChannelActive(a_type,a_chan,analogActiveButton->isOn());
+    dev->setAnalogCalibrationActive(a_type,a_chan,analogCalibrationButton->isOn());
     dev->setAnalogGain(a_type,a_chan,a_gain);
     dev->setAnalogZeroOffset(a_type,a_chan,a_zerooffset);
     dev->setAnalogRange(a_type,a_chan,analogRangeList->currentItem());
     dev->setAnalogReference(a_type,a_chan,analogReferenceList->currentItem());
     dev->setAnalogUnits(a_type,a_chan,analogUnitList->currentItem());
-    dev->setAnalogCalibration(a_type,a_chan);
+    dev->setAnalogCalibrationActive(a_type,a_chan,analogCalibrationButton->isOn());
 
     DAQ::index_t d_chan = digitalChannelList->currentItem();
     DAQ::type_t d_type = static_cast<DAQ::type_t>(digitalSubdeviceList->currentItem()+2);
@@ -286,6 +288,9 @@ void SystemControlPanel::createChannelTab(void) {
     analogActiveButton = new QPushButton("Active",hbox);
     analogActiveButton->setToggleButton(true);
     analogActiveButton->setFixedWidth(60);
+    analogCalibrationButton = new QPushButton("Calibrate",hbox);
+    analogCalibrationButton->setToggleButton(true);
+    analogCalibrationButton->setFixedWidth(60);
 
     hbox = new QHBox(analogBox);
     hbox->setSpacing(2);
@@ -384,6 +389,7 @@ void SystemControlPanel::createChannelTab(void) {
     digitalDirectionList = new QComboBox(hbox);
     digitalDirectionList->insertItem("Input");
     digitalDirectionList->insertItem("Output");
+    
 }
 
 void SystemControlPanel::createThreadTab(void) {
@@ -439,8 +445,10 @@ void SystemControlPanel::displayChannelTab(void) {
     }
 
     if(!dev || !analogChannelList->count()) {
-        analogActiveButton->setOn(false);
+        analogActiveButton->setOn(false);        
         analogActiveButton->setEnabled(false);
+        analogActiveButton->setOn(false);
+        analogCalibrationButton->setEnabled(false);
         analogChannelList->setEnabled(false);
         analogRangeList->setEnabled(false);
         analogReferenceList->setEnabled(false);
@@ -448,20 +456,20 @@ void SystemControlPanel::displayChannelTab(void) {
         analogZeroOffsetEdit->setEnabled(false);
         analogUnitPrefixList->setEnabled(false);
         analogUnitPrefixList2->setEnabled(false);
-        analogUnitList->setEnabled(false);
+        analogUnitList->setEnabled(false);        
 
     } else {
         DAQ::type_t type = static_cast<DAQ::type_t>(analogSubdeviceList->currentItem());
         DAQ::index_t chan = static_cast<DAQ::index_t>(analogChannelList->currentItem());
 
-        analogActiveButton->setEnabled(true);
+        analogActiveButton->setEnabled(true);        
         analogRangeList->setEnabled(true);
         analogReferenceList->setEnabled(true);
         analogGainEdit->setEnabled(true);
         analogZeroOffsetEdit->setEnabled(true);
         analogUnitPrefixList->setEnabled(true);
         analogUnitPrefixList2->setEnabled(true);
-        analogUnitList->setEnabled(true);
+        analogUnitList->setEnabled(true);        
 
         analogRangeList->clear();
         for(size_t i=0;i < dev->getAnalogRangeCount(type,chan);++i)
@@ -474,6 +482,8 @@ void SystemControlPanel::displayChannelTab(void) {
             analogUnitList->insertItem(dev->getAnalogUnitsString(type,chan,i));
         }
         analogActiveButton->setOn(dev->getChannelActive(type,chan));
+        analogCalibrationButton->setEnabled(dev->getAnalogCalibrationState(type,chan));
+        analogCalibrationButton->setOn(dev->getAnalogCalibrationActive(type,chan));        
         analogRangeList->setCurrentItem(dev->getAnalogRange(type,chan));
         analogReferenceList->setCurrentItem(dev->getAnalogReference(type,chan));
         analogUnitList->setCurrentItem(dev->getAnalogUnits(type,chan));

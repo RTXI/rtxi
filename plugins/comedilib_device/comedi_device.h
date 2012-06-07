@@ -52,6 +52,8 @@ public:
     DAQ::index_t getAnalogReference(DAQ::type_t,DAQ::index_t) const;
     DAQ::index_t getAnalogUnits(DAQ::type_t,DAQ::index_t) const;
     DAQ::index_t getAnalogOffsetUnits(DAQ::type_t,DAQ::index_t) const;
+    bool getAnalogCalibrationActive(DAQ::type_t,DAQ::index_t) const;
+    bool getAnalogCalibrationState(DAQ::type_t,DAQ::index_t) const;
     int setAnalogGain(DAQ::type_t,DAQ::index_t,double);
     int setAnalogZeroOffset(DAQ::type_t,DAQ::index_t,double);
     int setAnalogRange(DAQ::type_t,DAQ::index_t,DAQ::index_t);
@@ -59,6 +61,7 @@ public:
     int setAnalogUnits(DAQ::type_t,DAQ::index_t,DAQ::index_t);
     int setAnalogOffsetUnits(DAQ::type_t,DAQ::index_t,DAQ::index_t);
     int setAnalogCalibration(DAQ::type_t,DAQ::index_t);
+    int setAnalogCalibrationActive(DAQ::type_t,DAQ::index_t,bool);
 
     DAQ::direction_t getDigitalDirection(DAQ::index_t) const;
     int setDigitalDirection(DAQ::index_t,DAQ::direction_t);
@@ -86,6 +89,7 @@ private:
         lsampl_t maxdata;
         DAQ::index_t offsetunits;
         bool calibrated;
+        bool calibrationActive;
         double coefficients[4]; // If comedi calibrated, will have max 4 coefficients
         unsigned order;
         double expansionOrigin;
