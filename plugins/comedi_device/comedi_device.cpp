@@ -341,7 +341,7 @@ int ComediDevice::setAnalogGain(type_t type,index_t channel,double gain)
     return 0;
 }
 
-bool ComediDevice::getAnalogCalibrationActive(type_t type, index_t channel) {    
+bool ComediDevice::getAnalogCalibrationActive(type_t type, index_t channel) const {    
     if(!analog_exists(type,channel))
         return false;
 
@@ -357,7 +357,7 @@ int ComediDevice::setAnalogCalibrationActive(type_t type,index_t channel,bool st
     return 0;
 }
 
-bool ComediDevice::getAnalogCalibrationState(type_t type, index_t channel) {    
+bool ComediDevice::getAnalogCalibrationState(type_t type, index_t channel) const {    
     if(!analog_exists(type,channel))
         return false;
 
