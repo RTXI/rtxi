@@ -57,7 +57,7 @@ ComediDevice::ComediDevice(comedi_t *d,std::string name,IO::channel_t *chan,size
                 setAnalogReference(AI,i,0);
                 setAnalogUnits(AI,i,0);
                 setAnalogCalibration(AI,i);
-                setAnalogCalibratoinActive(AI,i,getAnalogCalibrationState(AI,i)); // If device is calibrated, set it to use calibration by default
+                setAnalogCalibrationActive(AI,i,getAnalogCalibrationState(AI,i)); // If device is calibrated, set it to use calibration by default
             }
     } else {
         subdevice[AI].active = 0;
@@ -80,7 +80,7 @@ ComediDevice::ComediDevice(comedi_t *d,std::string name,IO::channel_t *chan,size
                 setAnalogReference(AO,i,0);
                 setAnalogUnits(AO,i,0);
                 setAnalogCalibration(AO,i);
-                setAnalogCalibratoinActive(AO,i,getAnalogCalibrationState(AO,i)); // If device is calibrated, set it to use calibration by default
+                setAnalogCalibrationActive(AO,i,getAnalogCalibrationState(AO,i)); // If device is calibrated, set it to use calibration by default
             }
     } else {
         subdevice[AO].active = 0;
