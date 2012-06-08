@@ -55,7 +55,8 @@ ComediDevice::ComediDevice(void *d,ComediLib::comedi_t *cd,std::string name,IO::
                 setAnalogZeroOffset(AI,i,0);
                 setAnalogReference(AI,i,0);
                 setAnalogUnits(AI,i,0);
-                setAnalogCalibration(AI,i);                
+                setAnalogCalibration(AI,i);
+                setAnalogCalibratoinActive(AI,i,getAnalogCalibrationState(AI,i)); // If device is calibrated, set it to use calibration by default
             }
     } else {
         subdevice[AI].active = 0;
@@ -78,6 +79,7 @@ ComediDevice::ComediDevice(void *d,ComediLib::comedi_t *cd,std::string name,IO::
                 setAnalogReference(AO,i,0);
                 setAnalogUnits(AO,i,0);
                 setAnalogCalibration(AO,i);
+                setAnalogCalibratoinActive(AO,i,getAnalogCalibrationState(AO,i)); // If device is calibrated, set it to use calibration by default
             }
     } else {
         subdevice[AO].active = 0;
@@ -392,7 +394,6 @@ int ComediDevice::setAnalogCalibration(type_t type,index_t channel) {
         }
         else { // Calibration retrieval successful
             chanPtr->calibrated = true;
-            chanPtr->calibrationActive = true;
             chanPtr->order = polynomial.order;
             chanPtr->expansionOrigin = polynomial.expansion_origin;
 
@@ -420,7 +421,6 @@ int ComediDevice::setAnalogCalibration(type_t type,index_t channel) {
         }
         else { // Calibration retrieval successful
             chanPtr->calibrated = true;
-            chanPtr->calibrationActive = true;
             chanPtr->order = polynomial.order;
             chanPtr->expansionOrigin = polynomial.expansion_origin;
 
@@ -545,27 +545,27 @@ void ComediDevice::doLoad(const Settings::Object::State &s) {
     for(size_t i = 0;i < subdevice[AI].count && i < static_cast<size_t>(s.loadInteger("AI Count"));++i) {
         std::ostringstream str;
         str << i;
-        setChannelActive(AI,i,s.loadInteger(str.str()+" AI Active"));        
+        setChannelActive(AI,i,s.loadInteger(str.str()+" AI Active"));
+        setAnalogCalibrationActive(AI,i,s.loadInteger(str.str()+" AI Calibration Active"));
         setAnalogRange(AI,i,s.loadInteger(str.str()+" AI Range"));
         setAnalogReference(AI,i,s.loadInteger(str.str()+" AI Reference"));
         setAnalogUnits(AI,i,s.loadInteger(str.str()+" AI Units"));
         setAnalogGain(AI,i,s.loadDouble(str.str()+" AI Gain"));
         setAnalogZeroOffset(AI,i,s.loadDouble(str.str()+" AI Zero Offset"));
-        setAnalogCalibration(AI,i);
-        setAnalogCalibrationActive(AI,i,s.loadInteger(str.str()+" AI Calibration Active"));
+        setAnalogCalibration(AI,i);        
     }
 
     for(size_t i = 0;i < subdevice[AO].count && i < static_cast<size_t>(s.loadInteger("AO Count"));++i) {
         std::ostringstream str;
         str << i;
-        setChannelActive(AO,i,s.loadInteger(str.str()+" AO Active"));        
+        setChannelActive(AO,i,s.loadInteger(str.str()+" AO Active"));
+        setAnalogCalibrationActive(AO,i,s.loadInteger(str.str()+" AO Calibration Active"));
         setAnalogRange(AO,i,s.loadInteger(str.str()+" AO Range"));
         setAnalogReference(AO,i,s.loadInteger(str.str()+" AO Reference"));
         setAnalogUnits(AO,i,s.loadInteger(str.str()+" AO Units"));
         setAnalogGain(AO,i,s.loadDouble(str.str()+" AO Gain"));
         setAnalogZeroOffset(AO,i,s.loadDouble(str.str()+" AO Zero Offset"));
-        setAnalogCalibration(AO,i);
-        setAnalogCalibrationActive(AO,i,s.loadInteger(str.str()+" AO Calibration Active"));
+        setAnalogCalibration(AO,i);        
     }
 
     for(size_t i = 0;i < subdevice[DIO].count && i < static_cast<size_t>(s.loadInteger("DIO Count"));++i) {
