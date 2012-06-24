@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Form interface generated from reading ui file 'CS_main_windowUI.ui'
 **
-** Created: Sun Jun 24 13:12:43 2012
+** Created: Sun Jun 24 13:48:31 2012
 **
 ** WARNING! All changes made in this file will be lost!
 ****************************************************************************/

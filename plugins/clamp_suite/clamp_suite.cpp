@@ -276,26 +276,26 @@ void ClampSuite::Panel::execute( void ) { // RT thread execution
             protocolMode = EXECUTE; // Move on to tep execution    
         } // end ( protocolMode == STEP )
         
-        if( protocolMode == EXECUTE ) {
+        if( protocolMode == EXECUTE ) { // Assuming whole-cell configuration, Vcmd = Vm + LJP
             switch( stepType ) {
             case ProtocolStep::STEP:
                 voltage = stepOutput;
-                output( 0 ) = ( voltage - junctionPotential ) * outputFactor;
+                output( 0 ) = ( voltage + junctionPotential ) * outputFactor;
                 break;
                 
             case ProtocolStep::RAMP:
                 voltage = ( stepOutput + (stepTime * rampIncrement) );
-                output( 0 ) = ( voltage - junctionPotential ) * outputFactor;
+                output( 0 ) = ( voltage + junctionPotential ) * outputFactor;
                 break;
                 
             case ProtocolStep::TRAIN:
                 if( stepTime % pulseRate < pulseWidth ) {
                     voltage =  stepOutput;
-                    output( 0 ) = ( voltage - junctionPotential ) * outputFactor;
+                    output( 0 ) = ( voltage + junctionPotential ) * outputFactor;
                 }
                 else {
                     voltage = 0;
-                    output( 0 ) = ( voltage - junctionPotential ) * outputFactor;
+                    output( 0 ) = ( voltage + junctionPotential ) * outputFactor;
                 }
                 break;
                 

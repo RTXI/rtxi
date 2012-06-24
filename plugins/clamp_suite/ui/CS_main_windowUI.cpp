@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Form implementation generated from reading ui file 'CS_main_windowUI.ui'
 **
-** Created: Sun Jun 24 13:12:43 2012
+** Created: Sun Jun 24 13:48:31 2012
 **
 ** WARNING! All changes made in this file will be lost!
 ****************************************************************************/
@@ -671,11 +671,11 @@ void CS_main_windowUI::languageChange()
     QToolTip::add( intervalTimeLabel, tr( "Time between trials, only applicable when running multiple trials" ) );
     trialsLabel->setText( tr( "# of Trials" ) );
     QToolTip::add( trialsLabel, tr( "Number of trials that will be run after hitting run button" ) );
-    junctionPotentialLabel->setText( tr( "Junction Potential" ) );
-    QToolTip::add( junctionPotentialLabel, tr( "Junction potential. (Vm = Vcmd - LJP)" ) );
+    junctionPotentialLabel->setText( tr( "LJP (mV)" ) );
+    QToolTip::add( junctionPotentialLabel, tr( "Liquid Junction potential (mV). (Vcmd = Vm + LJP)" ) );
     dataRecordCheckBox->setText( tr( "Record Data" ) );
     QToolTip::add( dataRecordCheckBox, tr( "Check if data will be recorded by data recorder module" ) );
-    QToolTip::add( junctionPotentialEdit, tr( "Junction potential. (Vm = Vcmd - LJP). Hit enter to save changes." ) );
+    QToolTip::add( junctionPotentialEdit, tr( "Junction potential (mV). (Vcmd = Vm + LJP). Hit enter to save changes." ) );
     protocolStatesGroup->setTitle( tr( "Protocol States" ) );
     trialNumberLabel->setText( tr( "Trial" ) );
     QToolTip::add( trialNumberLabel, tr( "Current trial number, applicable when running multiple trials" ) );
