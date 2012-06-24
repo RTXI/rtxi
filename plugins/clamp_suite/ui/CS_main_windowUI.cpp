@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Form implementation generated from reading ui file 'CS_main_windowUI.ui'
 **
-** Created: Thu Mar 29 15:26:22 2012
+** Created: Sun Jun 24 13:12:43 2012
 **
 ** WARNING! All changes made in this file will be lost!
 ****************************************************************************/
@@ -432,15 +432,15 @@ CS_main_windowUI::CS_main_windowUI( QWidget* parent, const char* name, WFlags fl
     CS_main_windowUILayout->addWidget( protocolControlButtonGroup );
 
     protocolOptionGroup = new QGroupBox( this, "protocolOptionGroup" );
-    protocolOptionGroup->setMaximumSize( QSize( 32767, 200 ) );
+    protocolOptionGroup->setMaximumSize( QSize( 32767, 300 ) );
     QFont protocolOptionGroup_font(  protocolOptionGroup->font() );
     protocolOptionGroup_font.setBold( TRUE );
     protocolOptionGroup->setFont( protocolOptionGroup_font ); 
     protocolOptionGroup->setLineWidth( 2 );
     protocolOptionGroup->setAlignment( int( QGroupBox::AlignHCenter ) );
     protocolOptionGroup->setColumnLayout(0, Qt::Vertical );
-    protocolOptionGroup->layout()->setSpacing( 2 );
-    protocolOptionGroup->layout()->setMargin( 11 );
+    protocolOptionGroup->layout()->setSpacing( 1 );
+    protocolOptionGroup->layout()->setMargin( 6 );
     protocolOptionGroupLayout = new QGridLayout( protocolOptionGroup->layout() );
     protocolOptionGroupLayout->setAlignment( Qt::AlignTop );
 
@@ -460,8 +460,6 @@ CS_main_windowUI::CS_main_windowUI( QWidget* parent, const char* name, WFlags fl
     intervalTimeLabel->setAlignment( int( QLabel::AlignCenter ) );
 
     protocolOptionGroupLayout->addWidget( intervalTimeLabel, 0, 0 );
-    spacer12 = new QSpacerItem( 0, 20, QSizePolicy::Expanding, QSizePolicy::Minimum );
-    protocolOptionGroupLayout->addItem( spacer12, 4, 1 );
 
     intervalTimeEdit = new QSpinBox( protocolOptionGroup, "intervalTimeEdit" );
     intervalTimeEdit->setButtonSymbols( QSpinBox::UpDownArrows );
@@ -469,16 +467,8 @@ CS_main_windowUI::CS_main_windowUI( QWidget* parent, const char* name, WFlags fl
     intervalTimeEdit->setLineStep( 10 );
 
     protocolOptionGroupLayout->addWidget( intervalTimeEdit, 0, 1 );
-
-    dataRecordCheckBox = new QCheckBox( protocolOptionGroup, "dataRecordCheckBox" );
-    QFont dataRecordCheckBox_font(  dataRecordCheckBox->font() );
-    dataRecordCheckBox->setFont( dataRecordCheckBox_font ); 
-
-    protocolOptionGroupLayout->addWidget( dataRecordCheckBox, 4, 0 );
     spacer6 = new QSpacerItem( 20, 3, QSizePolicy::Minimum, QSizePolicy::Expanding );
     protocolOptionGroupLayout->addItem( spacer6, 1, 0 );
-    spacer11 = new QSpacerItem( 20, 3, QSizePolicy::Minimum, QSizePolicy::Expanding );
-    protocolOptionGroupLayout->addItem( spacer11, 3, 1 );
 
     trialsLabel = new QLabel( protocolOptionGroup, "trialsLabel" );
     trialsLabel->setMinimumSize( QSize( 0, 22 ) );
@@ -488,8 +478,37 @@ CS_main_windowUI::CS_main_windowUI( QWidget* parent, const char* name, WFlags fl
     trialsLabel->setAlignment( int( QLabel::AlignCenter ) );
 
     protocolOptionGroupLayout->addWidget( trialsLabel, 2, 0 );
+
+    junctionPotentialLabel = new QLabel( protocolOptionGroup, "junctionPotentialLabel" );
+    junctionPotentialLabel->setMinimumSize( QSize( 0, 22 ) );
+    QFont junctionPotentialLabel_font(  junctionPotentialLabel->font() );
+    junctionPotentialLabel->setFont( junctionPotentialLabel_font ); 
+    junctionPotentialLabel->setTextFormat( QLabel::AutoText );
+    junctionPotentialLabel->setAlignment( int( QLabel::AlignCenter ) );
+
+    protocolOptionGroupLayout->addWidget( junctionPotentialLabel, 4, 0 );
+
+    dataRecordCheckBox = new QCheckBox( protocolOptionGroup, "dataRecordCheckBox" );
+    QFont dataRecordCheckBox_font(  dataRecordCheckBox->font() );
+    dataRecordCheckBox->setFont( dataRecordCheckBox_font ); 
+
+    protocolOptionGroupLayout->addWidget( dataRecordCheckBox, 6, 0 );
+    spacer12 = new QSpacerItem( 0, 20, QSizePolicy::Expanding, QSizePolicy::Minimum );
+    protocolOptionGroupLayout->addItem( spacer12, 6, 1 );
     spacer7 = new QSpacerItem( 20, 3, QSizePolicy::Minimum, QSizePolicy::Expanding );
     protocolOptionGroupLayout->addItem( spacer7, 3, 0 );
+    spacer11 = new QSpacerItem( 20, 3, QSizePolicy::Minimum, QSizePolicy::Expanding );
+    protocolOptionGroupLayout->addItem( spacer11, 3, 1 );
+    spacer11_2 = new QSpacerItem( 20, 28, QSizePolicy::Minimum, QSizePolicy::Expanding );
+    protocolOptionGroupLayout->addItem( spacer11_2, 5, 1 );
+    spacer7_2 = new QSpacerItem( 20, 28, QSizePolicy::Minimum, QSizePolicy::Expanding );
+    protocolOptionGroupLayout->addItem( spacer7_2, 5, 0 );
+
+    junctionPotentialEdit = new QLineEdit( protocolOptionGroup, "junctionPotentialEdit" );
+    junctionPotentialEdit->setMaximumSize( QSize( 32767, 32767 ) );
+    junctionPotentialEdit->setAlignment( int( QLineEdit::AlignHCenter ) );
+
+    protocolOptionGroupLayout->addWidget( junctionPotentialEdit, 4, 1 );
     CS_main_windowUILayout->addWidget( protocolOptionGroup );
 
     protocolStatesGroup = new QGroupBox( this, "protocolStatesGroup" );
@@ -612,7 +631,7 @@ CS_main_windowUI::CS_main_windowUI( QWidget* parent, const char* name, WFlags fl
     protocolStatesGroupLayout->addLayout( layout5 );
     CS_main_windowUILayout->addWidget( protocolStatesGroup );
     languageChange();
-    resize( QSize(260, 365).expandedTo(minimumSizeHint()) );
+    resize( QSize(260, 379).expandedTo(minimumSizeHint()) );
     clearWState( WState_Polished );
 }
 
@@ -650,10 +669,13 @@ void CS_main_windowUI::languageChange()
     protocolOptionGroup->setTitle( tr( "Options" ) );
     intervalTimeLabel->setText( tr( "Interval Time (ms)" ) );
     QToolTip::add( intervalTimeLabel, tr( "Time between trials, only applicable when running multiple trials" ) );
-    dataRecordCheckBox->setText( tr( "Record Data" ) );
-    QToolTip::add( dataRecordCheckBox, tr( "Check if data will be recorded by data recorder module" ) );
     trialsLabel->setText( tr( "# of Trials" ) );
     QToolTip::add( trialsLabel, tr( "Number of trials that will be run after hitting run button" ) );
+    junctionPotentialLabel->setText( tr( "Junction Potential" ) );
+    QToolTip::add( junctionPotentialLabel, tr( "Junction potential. (Vm = Vcmd - LJP)" ) );
+    dataRecordCheckBox->setText( tr( "Record Data" ) );
+    QToolTip::add( dataRecordCheckBox, tr( "Check if data will be recorded by data recorder module" ) );
+    QToolTip::add( junctionPotentialEdit, tr( "Junction potential. (Vm = Vcmd - LJP). Hit enter to save changes." ) );
     protocolStatesGroup->setTitle( tr( "Protocol States" ) );
     trialNumberLabel->setText( tr( "Trial" ) );
     QToolTip::add( trialNumberLabel, tr( "Current trial number, applicable when running multiple trials" ) );

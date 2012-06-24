@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Form interface generated from reading ui file 'CS_main_windowUI.ui'
 **
-** Created: Thu Mar 29 15:26:22 2012
+** Created: Sun Jun 24 13:12:43 2012
 **
 ** WARNING! All changes made in this file will be lost!
 ****************************************************************************/
@@ -47,8 +47,10 @@ public:
     QSpinBox* trialsEdit;
     QLabel* intervalTimeLabel;
     QSpinBox* intervalTimeEdit;
-    QCheckBox* dataRecordCheckBox;
     QLabel* trialsLabel;
+    QLabel* junctionPotentialLabel;
+    QCheckBox* dataRecordCheckBox;
+    QLineEdit* junctionPotentialEdit;
     QGroupBox* protocolStatesGroup;
     QLabel* trialNumberLabel;
     QLineEdit* trialNumberEdit;
@@ -67,10 +69,12 @@ protected:
     QHBoxLayout* layout1;
     QGridLayout* protocolOptionGroupLayout;
     QSpacerItem* spacer13;
-    QSpacerItem* spacer12;
     QSpacerItem* spacer6;
-    QSpacerItem* spacer11;
+    QSpacerItem* spacer12;
     QSpacerItem* spacer7;
+    QSpacerItem* spacer11;
+    QSpacerItem* spacer11_2;
+    QSpacerItem* spacer7_2;
     QVBoxLayout* protocolStatesGroupLayout;
     QSpacerItem* spacer8;
     QSpacerItem* spacer9;

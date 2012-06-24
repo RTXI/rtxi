@@ -16,13 +16,14 @@
 #include <qtooltip.h>
 #include <qcheckbox.h>
 #include <qspinbox.h>
+#include <qvalidator.h>
 #include <qwt-qt3/qwt_legend.h>
 
 static Workspace::variable_t vars[] = { // Variables
     {
         "Current Input (A)", "", Workspace::INPUT, },
     {
-        "Voltage Output (V)", "", Workspace::OUTPUT, },
+        "V Output (V) (w/ LJP)", "", Workspace::OUTPUT, },
     {
         "Protocol Name", "", Workspace::COMMENT, }, // Name of loaded protocol
     {
@@ -34,9 +35,13 @@ static Workspace::variable_t vars[] = { // Variables
     {
         "Time (ms)", "", Workspace::STATE, }, // Time elapsed for current trial
     {
+        "V Output (mV) (w/o LJP)", "", Workspace::STATE, }, // Voltage output without liquid junction potential
+    {
         "Interval Time", "", Workspace::PARAMETER }, // Time allocated between trials
     {
         "Number of Trials", "", Workspace::PARAMETER }, // Number of trials to be run
+    {
+        "Liquid Junction Potential (mv)", "", Workspace::PARAMETER }, // Number of trials to be run
 };
 
 static size_t num_vars = sizeof( vars ) / sizeof( Workspace::variable_t ); // Required variable (number of variables)
@@ -46,9 +51,9 @@ ClampSuite::Panel::Panel( QWidget *parent )
  : QWidget( parent, 0, Qt::WStyle_NormalBorder | Qt::WDestructiveClose ),
    RT::Thread( 0 ),
    Workspace::Instance( "Clamp Suite", vars, num_vars ),
-   trial( 1 ), time( 0 ), segmentNumber( 1 ), sweep( 1 ),  intervalTime( 1000 ), numTrials( 1 ),
-   executeMode( IDLE ), segmentIdx( 0 ), sweepIdx( 0 ), stepIdx( 0 ), trialIdx( 0 ),
-   fifo( 10 * 1048576 ), recordData( false ), recording( false ), plotting( false )
+   trial( 1 ), time( 0 ), segmentNumber( 1 ), sweep( 1 ),  voltage( 0 ), intervalTime( 1000 ),
+   numTrials( 1 ), junctionPotential( 0 ), executeMode( IDLE ), segmentIdx( 0 ), sweepIdx( 0 ),
+   stepIdx( 0 ), trialIdx( 0 ), fifo( 10 * 1048576 ), recordData( false ), recording( false ), plotting( false )
    {
     
     mainWindow = new CS_main_windowUI( this ); // GUI built using Qt Desinger
@@ -62,6 +67,9 @@ ClampSuite::Panel::Panel( QWidget *parent )
     QTimer *refreshTimer = new QTimer( this );
 	refreshTimer->start(100);
     plotTimer = new QTimer( this ); // Only started when a plot window is open
+
+    // Set validator for line edit
+    mainWindow->junctionPotentialEdit->setValidator( new QDoubleValidator(mainWindow->junctionPotentialEdit) );
     
     // GUI connection
     QObject::connect( mainWindow->pauseButton, SIGNAL(toggled(bool)), this, SLOT( pause(bool)) );
@@ -69,6 +77,7 @@ ClampSuite::Panel::Panel( QWidget *parent )
     QObject::connect( mainWindow->modifyButton, SIGNAL(clicked(void)), this, SLOT(updateOptions(void)) );
     QObject::connect( mainWindow->intervalTimeEdit, SIGNAL(valueChanged(int)), this, SLOT(updateOptions(void)) );
     QObject::connect( mainWindow->trialsEdit, SIGNAL(valueChanged(int)), this, SLOT(updateOptions(void)) );
+    QObject::connect( mainWindow->junctionPotentialEdit, SIGNAL(returnPressed(void)), this, SLOT(updateOptions(void)) );
     QObject::connect( mainWindow->loadProtocolButton, SIGNAL(clicked(void)), this, SLOT( loadProtocol(void)) );
     QObject::connect( mainWindow->protocolEditorButton, SIGNAL(clicked(void)), this, SLOT( openProtocolEditor(void)) );
     QObject::connect( mainWindow->plotWindowButton, SIGNAL(clicked(void)), this, SLOT( openPlotWindow(void)) );
@@ -79,6 +88,7 @@ ClampSuite::Panel::Panel( QWidget *parent )
     // Set parameter inputs to default values
     mainWindow->intervalTimeEdit->setValue( intervalTime );
     mainWindow->trialsEdit->setValue( numTrials );
+    mainWindow->junctionPotentialEdit->setText( QString::number(junctionPotential) );
     mainWindow->protocolNameEdit->setText( "No protocol loaded" );
     QToolTip::add( mainWindow->protocolNameEdit, "No protocol loaded" );
 
@@ -88,7 +98,8 @@ ClampSuite::Panel::Panel( QWidget *parent )
     setData( Workspace::STATE, 0, &trial );
     setData( Workspace::STATE, 1, &segmentNumber );
     setData( Workspace::STATE, 2, &sweep );
-    setData( Workspace::STATE, 3, &time );    
+    setData( Workspace::STATE, 3, &time );
+    setData( Workspace::STATE, 4, &voltage );
     
     resize( minimumSize() ); // Set window size to minimum
     show();
@@ -120,11 +131,13 @@ void ClampSuite::Panel::doLoad( const Settings::Object::State &s ) {
     }
 
     // Load saved parameter values
-    intervalTime = s.loadInteger( "Interval Time" );
+    intervalTime = s.loadDouble( "Interval Time" );
     numTrials = s.loadInteger( "Num Trials" );
+    junctionPotential = s.loadDouble( "Junction Potential" );
     recordData = s.loadInteger( "Record Data" );
     mainWindow->intervalTimeEdit->setValue( intervalTime );
     mainWindow->trialsEdit->setValue( numTrials );
+    mainWindow->junctionPotentialEdit->setText( QString::number(junctionPotential) );
     mainWindow->dataRecordCheckBox->setChecked( recordData );
 
     // Load File
@@ -192,6 +205,7 @@ void ClampSuite::Panel::doSave( Settings::Object::State &s ) const {
     // Save parameter values directly from GUI
     s.saveInteger( "Interval Time", mainWindow->intervalTimeEdit->value() );
     s.saveInteger( "Num Trials", mainWindow->trialsEdit->value() );
+    s.saveDouble( "Junction Potential", mainWindow->junctionPotentialEdit->text().toDouble() );
     s.saveInteger( "Record Data", mainWindow->dataRecordCheckBox->isChecked() );
     s.saveString( "Protocol", Workspace::Instance::getValueString(Workspace::COMMENT, 0) );
 
@@ -265,18 +279,24 @@ void ClampSuite::Panel::execute( void ) { // RT thread execution
         if( protocolMode == EXECUTE ) {
             switch( stepType ) {
             case ProtocolStep::STEP:
-                output( 0 ) = stepOutput * outputFactor;                
+                voltage = stepOutput;
+                output( 0 ) = ( voltage - junctionPotential ) * outputFactor;
                 break;
                 
             case ProtocolStep::RAMP:
-                output( 0 ) = ( stepOutput + (stepTime * rampIncrement) ) * outputFactor;
+                voltage = ( stepOutput + (stepTime * rampIncrement) );
+                output( 0 ) = ( voltage - junctionPotential ) * outputFactor;
                 break;
                 
             case ProtocolStep::TRAIN:
-                if( stepTime % pulseRate < pulseWidth )
-                    output( 0 ) = stepOutput * outputFactor;
-                else
-                    output( 0 ) = 0;                
+                if( stepTime % pulseRate < pulseWidth ) {
+                    voltage =  stepOutput;
+                    output( 0 ) = ( voltage - junctionPotential ) * outputFactor;
+                }
+                else {
+                    voltage = 0;
+                    output( 0 ) = ( voltage - junctionPotential ) * outputFactor;
+                }
                 break;
                 
             default:
@@ -426,18 +446,21 @@ void ClampSuite::Panel::updatePlot( void ) { // Plot refresh
 
 void ClampSuite::Panel::updateOptions( void ) { // Update changes to parameter values
     int it = mainWindow->intervalTimeEdit->value();
-    int nt = mainWindow->trialsEdit->value();    
+    int nt = mainWindow->trialsEdit->value();
+    double jp = mainWindow->junctionPotentialEdit->text().toDouble();
     bool rd = mainWindow->dataRecordCheckBox->isChecked();    
     
-    if( it == intervalTime && nt == numTrials && rd == recordData ) // If nothing has changed
+    if( it == intervalTime && nt == numTrials && jp == junctionPotential
+        && rd == recordData ) // If nothing has changed
         return ;
 
     // Set parameters, posts parameter change event
     // Since function posts event, must be called from within GUI thread
     setValue( 0, it ); 
     setValue( 1, nt );
+    setValue( 2, jp );
     
-    UpdateOptionsEvent event( this, it, nt, rd );
+    UpdateOptionsEvent event( this, it, nt, jp, rd );
     RT::System::getInstance()->postEvent( &event );
 }
 
@@ -524,14 +547,15 @@ void ClampSuite::Panel::toggleProtocol( void ) { // Starts and stops protocol
 }
 
 // RT::Events - Called from GUI thread, handled by RT thread
-ClampSuite::Panel::UpdateOptionsEvent::UpdateOptionsEvent( Panel *p, int it, int nt, bool rd )
-    : panel( p ), intervalTimeValue( it ), numTrialsValue( nt ), recordDataValue( rd ) {
+ClampSuite::Panel::UpdateOptionsEvent::UpdateOptionsEvent( Panel *p, int it, int nt, double jp, bool rd )
+    : panel( p ), intervalTimeValue( it ), numTrialsValue( nt ), junctionPotentialValue( jp ), recordDataValue( rd ) {
 }
 
 int ClampSuite::Panel::UpdateOptionsEvent::callback( void ) {
     // Set workspace parameter values
     panel->intervalTime = intervalTimeValue;
     panel->numTrials = numTrialsValue;
+    panel->junctionPotential = junctionPotentialValue;
     panel->recordData = recordDataValue;
     return 0;
 }

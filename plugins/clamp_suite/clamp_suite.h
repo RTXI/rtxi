@@ -95,7 +95,7 @@ namespace ClampSuite {
         class UpdateOptionsEvent : public RT::Event {
 
         public:
-            UpdateOptionsEvent( Panel *, int, int, bool ); // Updates interval time, number of trials, and data recording
+            UpdateOptionsEvent( Panel *, int, int, double, bool ); // Updates interval time, number of trials, and data recording
             ~UpdateOptionsEvent( void ) { };
 
             int callback( void );
@@ -104,6 +104,7 @@ namespace ClampSuite {
             Panel *panel;
             int intervalTimeValue;
             int numTrialsValue;
+            double junctionPotentialValue;
             bool recordDataValue;
 
         }; // class UpdateOptionsEvent
@@ -134,11 +135,13 @@ namespace ClampSuite {
         double trial;
         double time;
         double segmentNumber;
-        double sweep; 
+        double sweep;
+        double voltage; // Voltage output without LJP
         
         // Parameters
         double intervalTime; // Wait time between trials
         int numTrials;
+        double junctionPotential;
         
         // Protocol
         Protocol protocol;
