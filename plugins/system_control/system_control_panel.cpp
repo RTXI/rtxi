@@ -491,7 +491,10 @@ void SystemControlPanel::displayChannelTab(void) {
         // Determine the Correct Prefix for analog gain
         int i = 8;
         double tmp;
-        tmp = dev->getAnalogGain(type,chan);
+        bool sign = true;
+        if( dev->getAnalogGain(type,chan) < 0.0 )
+            sign = false; // Negative value
+        tmp = fabs( dev->getAnalogGain(type,chan) );
         if(tmp != 0.0)
             while(((tmp >= 1000)&&(i > 0))||((tmp < 1)&&(i < 16))) {
                 if(tmp >= 1000) {
@@ -503,12 +506,18 @@ void SystemControlPanel::displayChannelTab(void) {
                     i++;
                 }
             }
-        analogGainEdit->setText(QString::number(tmp));
+        if( sign )
+            analogGainEdit->setText(QString::number(tmp));
+        else
+            analogGainEdit->setText(QString::number(-tmp));
         analogUnitPrefixList->setCurrentItem(i);
 
         // Determine the Correct Prefix for analog offset
         i = 8;
-        tmp = dev->getAnalogZeroOffset(type,chan);
+        sign = true;
+        if( dev->getAnalogZeroOffset(type,chan) < 0.0 )
+            sign = false; // Negative value
+        tmp = fabs( dev->getAnalogZeroOffset(type,chan) );
         if(tmp != 0.0)
             while(((tmp >= 1000)&&(i > 0))||((tmp < 1)&&(i < 16))) {
                 if(tmp >= 1000) {
@@ -520,7 +529,10 @@ void SystemControlPanel::displayChannelTab(void) {
                     i++;
                 }
             }
-        analogZeroOffsetEdit->setText(QString::number(tmp));
+        if( sign )
+            analogZeroOffsetEdit->setText(QString::number(tmp));
+        else
+            analogZeroOffsetEdit->setText(QString::number(-tmp));
         analogUnitPrefixList2->setCurrentItem(i);
     }
 
