@@ -510,7 +510,7 @@ void NIDevice::write(void) {
         count = 0;
         for(size_t i=0;i<getChannelCount(AO);++i)
             if(getChannelActive(AO,i)) {
-                voltage = (input(i)-subdevice[AO].chan[i].analog.zerooffset)/subdevice[AO].chan[i].analog.gain;
+	        voltage = (input(i)-subdevice[AO].chan[i].analog.zerooffset)*subdevice[AO].chan[i].analog.gain;
                 aoLinearScaler(&value,&voltage,&subdevice[AO].chan[i].analog.scale);
                 board->DAC_Direct_Data[i].writeRegister(value);
 
