@@ -500,7 +500,7 @@ Oscilloscope::Properties::applyDisplayTab(void)
   else
     divT = 5 * pow(10, 3 - timeList->currentItem() / 3);
   panel->setDivT(divT);
-
+  panel->setPeriod(RT::System::getInstance()->getPeriod() * 1e-6);
   panel->adjustDataSize();
 
   Scope::trig_t trigDirection = static_cast<Scope::trig_t> (trigGroup->id(
