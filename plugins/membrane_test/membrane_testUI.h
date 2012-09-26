@@ -1,13 +1,13 @@
 /****************************************************************************
-** Form interface generated from reading ui file 'clamp_utilitiesUI.ui'
+** Form interface generated from reading ui file 'membrane_testUI.ui'
 **
-** Created: Thu Apr 12 15:37:23 2012
+** Created: Wed Sep 26 15:30:08 2012
 **
 ** WARNING! All changes made in this file will be lost!
 ****************************************************************************/
 
-#ifndef CLAMPUTILITIESUI_H
-#define CLAMPUTILITIESUI_H
+#ifndef MEMBRANETESTUI_H
+#define MEMBRANETESTUI_H
 
 #include <qvariant.h>
 #include <qpixmap.h>
@@ -28,13 +28,13 @@ class QSpinBox;
 class QComboBox;
 class QFrame;
 
-class ClampUtilitiesUI : public QWidget
+class MembraneTestUI : public QWidget
 {
     Q_OBJECT
 
 public:
-    ClampUtilitiesUI( QWidget* parent = 0, const char* name = 0, WFlags fl = 0 );
-    ~ClampUtilitiesUI();
+    MembraneTestUI( QWidget* parent = 0, const char* name = 0, WFlags fl = 0 );
+    ~MembraneTestUI();
 
     QTabWidget* mainTabWidget;
     QWidget* tab;
@@ -80,7 +80,7 @@ public:
     QLabel* pulseOutputLabel;
 
 protected:
-    QVBoxLayout* ClampUtilitiesUILayout;
+    QVBoxLayout* MembraneTestUILayout;
     QVBoxLayout* tabLayout;
     QSpacerItem* spacer1;
     QHBoxLayout* resistTitleLayout;
@@ -132,4 +132,4 @@ private:
 
 };
 
-#endif // CLAMPUTILITIESUI_H
+#endif // MEMBRANETESTUI_H

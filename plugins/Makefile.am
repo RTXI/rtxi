@@ -5,7 +5,6 @@ MAINTAINERCLEANFILES = Makefile.in
 SUBDIRS = \
 	analogy_device \
 	clamp_suite \
-	clamp_utilities \
 	comedi_device \
 	comedilib_device \
 	connector \
@@ -13,6 +12,7 @@ SUBDIRS = \
 	dynamo_model_loader \
 	FIRwindow \
 	IIRfilter \
+	membrane_test \
 	mimic \
 	model_loader \
 	neuron \

@@ -17,9 +17,9 @@
  */
 
 /*** INTRO
- * Clamp Utilities
+ * Membrane Test
  * 
- * clamp_utilities.h, v1.0
+ * membrane_test.h, v1.0
  *
  * Author: Francis A. Ortega (2012)
  *
@@ -27,16 +27,17 @@
  *
  * Electrode Resistance Measurement and Clamp Utilities
  *
- * v2.0 - Initial Version, replaces original electrode test
+ * v1.0 - Initial Version, replaces original electrode test
  *          electrode membrane resistance test
  *          membrane properties test
+ * v1.1 - Renamed from clamp_utilities to membrane_test
  *
  ***/
 
-#ifndef CLAMP_UTILITIES_H
-#define CLAMP_UTILITIES_H
+#ifndef MEMBRANE_TEST_H
+#define MEMBRANE_TEST_H
 
-#include "clamp_utilitiesUI.h"
+#include "membrane_testUI.h"
 #include <vector>
 
 #include <qtimer.h>
@@ -49,7 +50,7 @@
 #include <rt.h>
 #include <settings.h>
 
-namespace ClampUtilities {
+namespace MembraneTest {
 
     class Panel;
 
@@ -63,7 +64,7 @@ namespace ClampUtilities {
         static Plugin *getInstance( void );
 
     public slots:
-        void createClampUtilitiesPanel( void ); // Create panel GUI through menu item
+        void createMembraneTestPanel( void ); // Create panel GUI through menu item
 
     protected:
         void doDeferred( const Settings::Object::State & );
@@ -76,7 +77,7 @@ namespace ClampUtilities {
         Plugin( const Plugin & ) { };
         Plugin &operator=( const Plugin & ) { return *getInstance(); };
 
-        void removeClampUtilitiesPanel( Panel * ); // Remove panel GUI
+        void removeMembraneTestPanel( Panel * ); // Remove panel GUI
 
         static Plugin *instance;
 
@@ -198,7 +199,7 @@ namespace ClampUtilities {
 
         }; // class UpdateMemTestEvent
 
-        ClampUtilitiesUI *ui;
+        MembraneTestUI *ui;
         QChar omega;
         
         // Electrode resistance measurement parameters
@@ -231,6 +232,6 @@ namespace ClampUtilities {
         
     }; // class Panel
 
-}; // namespace ClampUtilities
+}; // namespace MembraneTest
 
-#endif // CLAMP_UTILITIES_H
+#endif // MEMBRANE_TEST_H

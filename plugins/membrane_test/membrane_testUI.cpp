@@ -1,12 +1,12 @@
 /****************************************************************************
-** Form implementation generated from reading ui file 'clamp_utilitiesUI.ui'
+** Form implementation generated from reading ui file 'membrane_testUI.ui'
 **
-** Created: Thu Apr 12 15:37:23 2012
+** Created: Wed Sep 26 15:30:08 2012
 **
 ** WARNING! All changes made in this file will be lost!
 ****************************************************************************/
 
-#include "clamp_utilitiesUI.h"
+#include "membrane_testUI.h"
 
 #include <qvariant.h>
 #include <qpushbutton.h>
@@ -120,10 +120,10 @@ static const unsigned char image1_data[] = {
 
 
 /*
- *  Constructs a ClampUtilitiesUI as a child of 'parent', with the
+ *  Constructs a MembraneTestUI as a child of 'parent', with the
  *  name 'name' and widget flags set to 'f'.
  */
-ClampUtilitiesUI::ClampUtilitiesUI( QWidget* parent, const char* name, WFlags fl )
+MembraneTestUI::MembraneTestUI( QWidget* parent, const char* name, WFlags fl )
     : QWidget( parent, name, fl )
 {
     QImage img;
@@ -132,11 +132,11 @@ ClampUtilitiesUI::ClampUtilitiesUI( QWidget* parent, const char* name, WFlags fl
     img.loadFromData( image1_data, sizeof( image1_data ), "PNG" );
     image1 = img;
     if ( !name )
-	setName( "ClampUtilitiesUI" );
+	setName( "MembraneTestUI" );
     QFont f( font() );
     f.setBold( TRUE );
     setFont( f ); 
-    ClampUtilitiesUILayout = new QVBoxLayout( this, 11, 6, "ClampUtilitiesUILayout"); 
+    MembraneTestUILayout = new QVBoxLayout( this, 11, 6, "MembraneTestUILayout"); 
 
     mainTabWidget = new QTabWidget( this, "mainTabWidget" );
     mainTabWidget->setSizePolicy( QSizePolicy( (QSizePolicy::SizeType)5, (QSizePolicy::SizeType)5, 0, 0, mainTabWidget->sizePolicy().hasHeightForWidth() ) );
@@ -519,7 +519,7 @@ ClampUtilitiesUI::ClampUtilitiesUI( QWidget* parent, const char* name, WFlags fl
     memPropOutputFrameLayout->addItem( spacerM8 );
     tabLayout_2->addWidget( memPropOutputFrame );
     mainTabWidget->insertTab( tab_2, QString::fromLatin1("") );
-    ClampUtilitiesUILayout->addWidget( mainTabWidget );
+    MembraneTestUILayout->addWidget( mainTabWidget );
 
     pulseOutputLayout = new QHBoxLayout( 0, 0, 0, "pulseOutputLayout"); 
     spacerPO1 = new QSpacerItem( 0, 16, QSizePolicy::Expanding, QSizePolicy::Minimum );
@@ -538,7 +538,7 @@ ClampUtilitiesUI::ClampUtilitiesUI( QWidget* parent, const char* name, WFlags fl
     pulseOutputLayout->addWidget( pulseOutputLabel );
     spacerPO2 = new QSpacerItem( 0, 16, QSizePolicy::Expanding, QSizePolicy::Minimum );
     pulseOutputLayout->addItem( spacerPO2 );
-    ClampUtilitiesUILayout->addLayout( pulseOutputLayout );
+    MembraneTestUILayout->addLayout( pulseOutputLayout );
     languageChange();
     resize( QSize(322, 389).expandedTo(minimumSizeHint()) );
     clearWState( WState_Polished );
@@ -547,7 +547,7 @@ ClampUtilitiesUI::ClampUtilitiesUI( QWidget* parent, const char* name, WFlags fl
 /*
  *  Destroys the object and frees any allocated resources
  */
-ClampUtilitiesUI::~ClampUtilitiesUI()
+MembraneTestUI::~MembraneTestUI()
 {
     // no need to delete child widgets, Qt does it all for us
 }
@@ -556,9 +556,9 @@ ClampUtilitiesUI::~ClampUtilitiesUI()
  *  Sets the strings of the subwidgets using the current
  *  language.
  */
-void ClampUtilitiesUI::languageChange()
+void MembraneTestUI::languageChange()
 {
-    setCaption( tr( "Clamp Utilities" ) );
+    setCaption( tr( "Membrane Test" ) );
     QToolTip::add( mainTabWidget, QString::null );
     resistLabel->setText( tr( "Resistance Measurement" ) );
     pauseButton1->setText( QString::null );

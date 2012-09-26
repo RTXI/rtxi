@@ -17,9 +17,9 @@
  */
 
 /*** INTRO
- * Clamp Utilities
+ * Membrane Test
  * 
- * clamp_utilities.cpp, v1.0
+ * membrane_test.cpp, v1.1
  *
  * Author: Francis A. Ortega (2012)
  *
@@ -27,7 +27,7 @@
  *
  ***/
 
-#include "clamp_utilities.h"
+#include "membrane_test.h"
 #include <main_window.h>
 #include <iostream>
 #include <cmath>
@@ -54,19 +54,19 @@ static IO::channel_t chans[] = {
 static size_t num_chans = sizeof( chans ) / sizeof( chans[0] ); // Required variable (number of input and output channels)
 
 // Class Panel - GUI and execution
-ClampUtilities::Panel::Panel( QWidget *parent )
+MembraneTest::Panel::Panel( QWidget *parent )
   : QWidget( parent, 0, Qt::WStyle_NormalBorder | Qt::WDestructiveClose ),  RT::Thread( 0 ),
-    IO::Block( "Clamp Utilities", chans ,num_chans ), zapOn( false ), holdingSelection(1), holdingOptionValue(0),
+    IO::Block( "Membrane Test", chans ,num_chans ), zapOn( false ), holdingSelection(1), holdingOptionValue(0),
     holdingOption1( 0 ), holdingOption2( -80 ), holdingOption3( -40 ),  pulseSize( 10 ), pulseWidth( 10 ), zapSize( 1000 ),
     zapWidth( 10 ), updateRate( 1 ), numStepsAvg( 5 ), memTestMode( SINGLE ), collectMemTestData( false ), memTestOn( false ),
     memTestDone( false ), idx( 0 ), cnt( round( (2*10*1e-3) / (RT::System::getInstance()->getPeriod()*1e-9)) ), zidx( 0 ),
     stepsSaved( 1 ), zcnt( round( ( 10*1e-3 ) / (RT::System::getInstance()->getPeriod()*1e-9)) ), midx( 0 ) {
     
     QBoxLayout *layout = new QVBoxLayout( this );
-    ui = new ClampUtilitiesUI( this ); // UI created with Qt Designer
+    ui = new MembraneTestUI( this ); // UI created with Qt Designer
     layout->addWidget( ui );
 
-    setCaption( QString::number( getID() ) + " Clamp Utilities" );
+    setCaption( QString::number( getID() ) + " Membrane Test" );
     
     // Set validators and set text to defaults
     ui->holdingOption1Edit->setValidator( new QDoubleValidator( ui->holdingOption1Edit ) );
@@ -137,14 +137,14 @@ ClampUtilities::Panel::Panel( QWidget *parent )
     setActive( false );
 }
 
-ClampUtilities::Panel::~Panel( void ) {
-    Plugin::getInstance()->removeClampUtilitiesPanel(this);
+MembraneTest::Panel::~Panel( void ) {
+    Plugin::getInstance()->removeMembraneTestPanel(this);
 }
 
-void ClampUtilities::Panel::doDeferred( const Settings::Object::State & ) {}
+void MembraneTest::Panel::doDeferred( const Settings::Object::State & ) {}
 
 // Settings Functions
-void ClampUtilities::Panel::doLoad( const Settings::Object::State &s ) {
+void MembraneTest::Panel::doLoad( const Settings::Object::State &s ) {
     if (s.loadInteger("Maximized"))
         showMaximized();
     else if (s.loadInteger("Minimized"))
@@ -178,14 +178,14 @@ void ClampUtilities::Panel::doLoad( const Settings::Object::State &s ) {
     updateMemTest();
 }
 
-void ClampUtilities::Panel::updateAll( void ) {
+void MembraneTest::Panel::updateAll( void ) {
     updateHoldingOption();
     updatePulse();
     updateZap();
     updateMemTest();
 }
 
-void ClampUtilities::Panel::doSave( Settings::Object::State &s ) const {
+void MembraneTest::Panel::doSave( Settings::Object::State &s ) const {
     if (isMaximized())
         s.saveInteger("Maximized", 1);
     else if (isMinimized())
@@ -212,7 +212,7 @@ void ClampUtilities::Panel::doSave( Settings::Object::State &s ) const {
     s.saveInteger( "Mem Test Mode", static_cast<int>( memTestMode ) );
 }
 
-void ClampUtilities::Panel::execute( void ) { 
+void MembraneTest::Panel::execute( void ) { 
     if( zapOn ) { // If zap is on
         if( ++zidx < zcnt )
             output(0) = ( zapSize + holdingOptionValue ) * 1e-3; // Zap: single voltage step
@@ -269,7 +269,7 @@ void ClampUtilities::Panel::execute( void ) {
     }
 }
 
-void ClampUtilities::Panel::receiveEvent(const ::Event::Object *event) {
+void MembraneTest::Panel::receiveEvent(const ::Event::Object *event) {
     if(event->getName() == Event::RT_POSTPERIOD_EVENT) { // When thread rate is changed, update rate dependent parameters
         cnt = ( ( 2.0 * pulseWidth ) * 1e-3 ) / ( RT::System::getInstance()->getPeriod() * 1e-9 ); // Number of loops for complete step (2x step width)
         zcnt = ( (zapWidth * 1e-3 ) / (RT::System::getInstance()->getPeriod()*1e-9) ); // Number of loops for complete zap pulse
@@ -277,7 +277,7 @@ void ClampUtilities::Panel::receiveEvent(const ::Event::Object *event) {
     }
 }
 
-void ClampUtilities::Panel::pause1( void ) { // Called when pauseButton1 is clicked
+void MembraneTest::Panel::pause1( void ) { // Called when pauseButton1 is clicked
     if( ui->pauseButton1->isOn() ) { // If button is down, paused
         ui->pauseButton2->setOn( true ); // Set second pause button to pause
         setActive( false );
@@ -296,7 +296,7 @@ void ClampUtilities::Panel::pause1( void ) { // Called when pauseButton1 is clic
     }        
 }
 
-void ClampUtilities::Panel::pause2( void ) { // Called when either pauseButton2 is clicked
+void MembraneTest::Panel::pause2( void ) { // Called when either pauseButton2 is clicked
     if( ui->pauseButton2->isOn() ) { // If button is down, paused
         ui->pauseButton1->setOn( true ); // Set second pause button to pause
         setActive( false );
@@ -315,7 +315,7 @@ void ClampUtilities::Panel::pause2( void ) { // Called when either pauseButton2 
     }        
 }
 
-void ClampUtilities::Panel::updateRDisplay( void ) {
+void MembraneTest::Panel::updateRDisplay( void ) {
     if( !getActive() )
         return ; // Return if pulse is not on
 
@@ -349,7 +349,7 @@ void ClampUtilities::Panel::updateRDisplay( void ) {
 }
 
 // Membrane Test Slot Functions
-void ClampUtilities::Panel::updateMemTestDisplay( void ) { // Runs membrane test calculation and updates GUI output
+void MembraneTest::Panel::updateMemTestDisplay( void ) { // Runs membrane test calculation and updates GUI output
     if( memTestDone ) { // Make sure data was collected first
         memTestCalculate();
         ui->membraneCapOutput->setText( QString::number( Cm ).append( " pF" ) );
@@ -363,7 +363,7 @@ void ClampUtilities::Panel::updateMemTestDisplay( void ) { // Runs membrane test
     }
 }
 
-void ClampUtilities::Panel::memTestCalculate( void ) {
+void MembraneTest::Panel::memTestCalculate( void ) {
     double Vpp = pulseSize;
     data_size = cnt;
     if( data_size != data.size() ) // Check to make sure data size is correct
@@ -541,7 +541,7 @@ void ClampUtilities::Panel::memTestCalculate( void ) {
 }
 
 // Toggle Slot Functions
-void ClampUtilities::Panel::togglePulse( bool on ) {
+void MembraneTest::Panel::togglePulse( bool on ) {
     setActive( on );
     if( !on ) {
         if( memTestTimer->isActive() ) // Pause timer if it is update to prevent display updates
@@ -552,12 +552,12 @@ void ClampUtilities::Panel::togglePulse( bool on ) {
             memTestTimer->start( ( 1.0 / updateRate ) * 1e3 ); // Start timer, Hertz to ms conversion
 }
 
-void ClampUtilities::Panel::toggleZap( void ) {
+void MembraneTest::Panel::toggleZap( void ) {
     zidx = 0;
     zapOn = true;
 }
 
-void ClampUtilities::Panel::toggleMemTest( bool on ) {    
+void MembraneTest::Panel::toggleMemTest( bool on ) {    
     if( on ) {
         memTestOn = true;
         memTestDone = false;
@@ -573,7 +573,7 @@ void ClampUtilities::Panel::toggleMemTest( bool on ) {
 }
 
 // Update Parameter Slot Functions
-void ClampUtilities::Panel::updateHoldingGroup( int ho ) {
+void MembraneTest::Panel::updateHoldingGroup( int ho ) {
     holdingSelection = ho;
     
     switch( holdingSelection ) {
@@ -588,7 +588,7 @@ void ClampUtilities::Panel::updateHoldingGroup( int ho ) {
         break;
     default:
         holdingOptionValue = holdingOption1;
-        std::cout << "Error: ClampUtilities::Panel::updateHoldingGroup(int) default case called" << std::endl;
+        std::cout << "Error: MembraneTest::Panel::updateHoldingGroup(int) default case called" << std::endl;
         break;
     }
         return ; // Return if parameters have not changed
@@ -597,7 +597,7 @@ void ClampUtilities::Panel::updateHoldingGroup( int ho ) {
     RT::System::getInstance()->postEvent( &event ); // Post parameter change event
 }
 
-void ClampUtilities::Panel::updateHoldingOption( void ) {
+void MembraneTest::Panel::updateHoldingOption( void ) {
     double h1 = ui->holdingOption1Edit->text().toDouble();
     double h2 = ui->holdingOption2Edit->text().toDouble();
     double h3 = ui->holdingOption3Edit->text().toDouble();
@@ -611,7 +611,7 @@ void ClampUtilities::Panel::updateHoldingOption( void ) {
     updateHoldingGroup( holdingSelection ); // Update holding potential based on selection
 }
 
-void ClampUtilities::Panel::updatePulse( void ) {
+void MembraneTest::Panel::updatePulse( void ) {
     double ps = ui->pulseSizeEdit->text().toDouble();
     double pw = ui->pulseWidthEdit->text().toDouble();
 
@@ -622,7 +622,7 @@ void ClampUtilities::Panel::updatePulse( void ) {
     RT::System::getInstance()->postEvent( &event ); // Post parameter change event
 }
 
-void ClampUtilities::Panel::updateZap( void ) {
+void MembraneTest::Panel::updateZap( void ) {
     double zs =  ui->zapSizeEdit->text().toDouble();
     double zw = ui->zapWidthEdit->text().toDouble();
 
@@ -633,7 +633,7 @@ void ClampUtilities::Panel::updateZap( void ) {
     RT::System::getInstance()->postEvent( &event ); // Post parameter change event
 }
 
-void ClampUtilities::Panel::updateMemTest( void ) {
+void MembraneTest::Panel::updateMemTest( void ) {
     int ur = ui->memRateSpinBox->value();
     int nsa = ui->numStepAvgSpinBox->value();
     int mtm  = ui->memModeComboBox->currentItem();
@@ -646,21 +646,21 @@ void ClampUtilities::Panel::updateMemTest( void ) {
 }
 
 // Event Class UpdateHoldingGroupEvent
-ClampUtilities::Panel::UpdateHoldingGroupEvent::UpdateHoldingGroupEvent( Panel *p, int ho )
+MembraneTest::Panel::UpdateHoldingGroupEvent::UpdateHoldingGroupEvent( Panel *p, int ho )
     : panel( p ), holdingOptionValue( ho ) {
 }
 
-int ClampUtilities::Panel::UpdateHoldingGroupEvent::callback( void ) {
+int MembraneTest::Panel::UpdateHoldingGroupEvent::callback( void ) {
     panel->holdingOptionValue = holdingOptionValue;
     return 0;
 }
 
 // Event Class UpdateHoldingOptionEvent
-ClampUtilities::Panel::UpdateHoldingOptionEvent::UpdateHoldingOptionEvent( Panel *p, double h1, double h2, double h3 )
+MembraneTest::Panel::UpdateHoldingOptionEvent::UpdateHoldingOptionEvent( Panel *p, double h1, double h2, double h3 )
     : panel( p ), holdingOption1( h1 ), holdingOption2( h2 ), holdingOption3( h3 ) {
 }
 
-int ClampUtilities::Panel::UpdateHoldingOptionEvent::callback( void ) {
+int MembraneTest::Panel::UpdateHoldingOptionEvent::callback( void ) {
     panel->holdingOption1 = holdingOption1;
     panel->holdingOption2 = holdingOption2;
     panel->holdingOption3 = holdingOption3;
@@ -668,11 +668,11 @@ int ClampUtilities::Panel::UpdateHoldingOptionEvent::callback( void ) {
 }
 
 // Event Class UpdatePulseEvent
-ClampUtilities::Panel::UpdatePulseEvent::UpdatePulseEvent( Panel *p, double ps, double pw )
+MembraneTest::Panel::UpdatePulseEvent::UpdatePulseEvent( Panel *p, double ps, double pw )
     : panel( p ), pulseSize( ps ), pulseWidth( pw ) {
 }
 
-int ClampUtilities::Panel::UpdatePulseEvent::callback( void ) {
+int MembraneTest::Panel::UpdatePulseEvent::callback( void ) {
     panel->pulseSize = pulseSize;
     panel->pulseWidth = pulseWidth;
 
@@ -685,11 +685,11 @@ int ClampUtilities::Panel::UpdatePulseEvent::callback( void ) {
 }
 
 // Event Class UpdateZapEvent
-ClampUtilities::Panel::UpdateZapEvent::UpdateZapEvent( Panel *p, double zs, double zw )
+MembraneTest::Panel::UpdateZapEvent::UpdateZapEvent( Panel *p, double zs, double zw )
     : panel( p ), zapSize( zs ), zapWidth( zw ) {
 }
 
-int ClampUtilities::Panel::UpdateZapEvent::callback( void ) {
+int MembraneTest::Panel::UpdateZapEvent::callback( void ) {
     panel->zapSize = zapSize;
     panel->zapWidth = zapWidth;
 
@@ -700,11 +700,11 @@ int ClampUtilities::Panel::UpdateZapEvent::callback( void ) {
 }
 
 // Event Class UpdateMemTestEvent
-ClampUtilities::Panel::UpdateMemTestEvent::UpdateMemTestEvent( Panel *p, int ur, int nsa, int mtm )
+MembraneTest::Panel::UpdateMemTestEvent::UpdateMemTestEvent( Panel *p, int ur, int nsa, int mtm )
     : panel( p ), updateRate( ur ), numStepsAvg( nsa ), memTestMode( static_cast<MemTestMode_t>( mtm ) ) {
 }
 
-int ClampUtilities::Panel::UpdateMemTestEvent::callback( void ) {
+int MembraneTest::Panel::UpdateMemTestEvent::callback( void ) {
     panel->updateRate = updateRate;
     panel->numStepsAvg = numStepsAvg;
     panel->memTestMode = memTestMode;
@@ -718,32 +718,32 @@ int ClampUtilities::Panel::UpdateMemTestEvent::callback( void ) {
 
 // Class Plugin
 extern "C" Plugin::Object *createRTXIPlugin(void *) {
-    return ClampUtilities::Plugin::getInstance();
+    return MembraneTest::Plugin::getInstance();
 }
 
-ClampUtilities::Plugin::Plugin( void ) {
-    menuID = MainWindow::getInstance()->createUtilMenuItem( "Clamp Utilities", this, SLOT(createClampUtilitiesPanel(void)) );
+MembraneTest::Plugin::Plugin( void ) {
+    menuID = MainWindow::getInstance()->createUtilMenuItem( "Membrane Test", this, SLOT(createMembraneTestPanel(void)) );
 }
 
-ClampUtilities::Plugin::~Plugin( void ) {
+MembraneTest::Plugin::~Plugin( void ) {
     MainWindow::getInstance()->removeUtilMenuItem(menuID);
     while(panelList.size())
         delete panelList.front();
     instance = 0;
 }
 
-void ClampUtilities::Plugin::createClampUtilitiesPanel( void ) {
+void MembraneTest::Plugin::createMembraneTestPanel( void ) {
     Panel *panel = new Panel( MainWindow::getInstance()->centralWidget() );
     panelList.push_back( panel );
 }
 
-void ClampUtilities::Plugin::removeClampUtilitiesPanel( ClampUtilities::Panel *panel ) {
+void MembraneTest::Plugin::removeMembraneTestPanel( MembraneTest::Panel *panel ) {
     panelList.remove( panel );
 }
 
-void ClampUtilities::Plugin::doDeferred( const Settings::Object::State & ) {}
+void MembraneTest::Plugin::doDeferred( const Settings::Object::State & ) {}
 
-void ClampUtilities::Plugin::doLoad( const Settings::Object::State &s ) {
+void MembraneTest::Plugin::doLoad( const Settings::Object::State &s ) {
     for( size_t i = 0 ; i < static_cast<size_t>(s.loadInteger("Num Panels")) ; ++i ) {
         Panel *panel = new Panel( MainWindow::getInstance()->centralWidget() );
         panelList.push_back ( panel );
@@ -751,7 +751,7 @@ void ClampUtilities::Plugin::doLoad( const Settings::Object::State &s ) {
     }
 }
 
-void ClampUtilities::Plugin::doSave( Settings::Object::State &s ) const {
+void MembraneTest::Plugin::doSave( Settings::Object::State &s ) const {
     s.saveInteger("Num Panels",panelList.size());
     size_t n = 0;
     for( std::list<Panel *>::const_iterator i = panelList.begin(),end = panelList.end() ; i != end ; ++i )
@@ -759,9 +759,9 @@ void ClampUtilities::Plugin::doSave( Settings::Object::State &s ) const {
 }
 
 static Mutex mutex;
-ClampUtilities::Plugin *ClampUtilities::Plugin::instance = 0;
+MembraneTest::Plugin *MembraneTest::Plugin::instance = 0;
 
-ClampUtilities::Plugin *ClampUtilities::Plugin::getInstance(void) {
+MembraneTest::Plugin *MembraneTest::Plugin::getInstance(void) {
     if(instance)
         return instance;
 
