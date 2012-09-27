@@ -1,4 +1,4 @@
-#include "CS_protocol_editor.h"
+#include "CP_protocol_editor.h"
 #include "plot/basicplot.h"
 
 #include <iostream>
@@ -21,15 +21,15 @@
 
 using namespace std;
 
-ClampSuite::CenterAlignTableItem::CenterAlignTableItem( QTable *table, EditType et = QTableItem::OnTyping) 
+ClampProtocol::CenterAlignTableItem::CenterAlignTableItem( QTable *table, EditType et = QTableItem::OnTyping) 
     : QTableItem(table, et) { // QTableItem subclass: used to make sure text is aligned in center
 }
 
-int ClampSuite::CenterAlignTableItem::alignment() const {
+int ClampProtocol::CenterAlignTableItem::alignment() const {
     return Qt::AlignHCenter | Qt::AlignVCenter;
 }
 
-ClampSuite::ProtocolEditor::ProtocolEditor( QWidget * parent )
+ClampProtocol::ProtocolEditor::ProtocolEditor( QWidget * parent )
     : ProtocolEditorUI( parent, 0, false, Qt::WDestructiveClose ), currentSegmentNumber( 0 ) {
     // QStringList for amp mode and step type combo boxes;
     ampModeList = "Voltage";
@@ -59,9 +59,9 @@ ClampSuite::ProtocolEditor::ProtocolEditor( QWidget * parent )
     resize( minimumSize() ); // Set window size to minimum
 }
 
-void ClampSuite::ProtocolEditor::addSegment( void ) { // Adds another segment to protocol: listview, protocol container, and calls summary update
+void ClampProtocol::ProtocolEditor::addSegment( void ) { // Adds another segment to protocol: listview, protocol container, and calls summary update
     if( !protocol.addSegment( currentSegmentNumber ) ) { // Protocol::addSegment returns 0 if it fails
-        cout << "Error - ClampSuite::ProtocolEditor::addSegment() failure" << endl;
+        cout << "Error - ClampProtocol::ProtocolEditor::addSegment() failure" << endl;
         return ;
     }
     
@@ -88,7 +88,7 @@ void ClampSuite::ProtocolEditor::addSegment( void ) { // Adds another segment to
     updateSegment(element);
 }
 
-void ClampSuite::ProtocolEditor::deleteSegment( void ) { // Deletes segment selected in listview: listview, protocol container, and calls summary update
+void ClampProtocol::ProtocolEditor::deleteSegment( void ) { // Deletes segment selected in listview: listview, protocol container, and calls summary update
     if( currentSegmentNumber == 0 ) {// If no segment exists, return and output error box
         QMessageBox::warning(this,
                              "Error",
@@ -139,7 +139,7 @@ void ClampSuite::ProtocolEditor::deleteSegment( void ) { // Deletes segment sele
     }
 }
 
-void ClampSuite::ProtocolEditor::addStep( void ) { // Adds step to a protocol segment: updates protocol container
+void ClampProtocol::ProtocolEditor::addStep( void ) { // Adds step to a protocol segment: updates protocol container
     if( currentSegmentNumber == 0 ) {// If no segment exists, return and output error box
         QMessageBox::warning( this,
                               "Error",
@@ -157,7 +157,7 @@ void ClampSuite::ProtocolEditor::addStep( void ) { // Adds step to a protocol se
     hbar->setValue(hbar->maxValue());    
 }
 
-void ClampSuite::ProtocolEditor::insertStep( void ) { // Insert step to a protocol segment: updates protocol container
+void ClampProtocol::ProtocolEditor::insertStep( void ) { // Insert step to a protocol segment: updates protocol container
     if( currentSegmentNumber == 0 ) {// If no segment exists, return and output error box
         QMessageBox::warning( this,
                               "Error",
@@ -173,7 +173,7 @@ void ClampSuite::ProtocolEditor::insertStep( void ) { // Insert step to a protoc
     updateTable(); // Rebuild table
 }
 
-void ClampSuite::ProtocolEditor::deleteStep( void ) { // Delete step from a protocol segment: updates table, listview, and protocol container
+void ClampProtocol::ProtocolEditor::deleteStep( void ) { // Delete step from a protocol segment: updates table, listview, and protocol container
     if( currentSegmentNumber == 0 ) {// If no segment exists, return and output error box
         QMessageBox::warning( this,
                               "Error",
@@ -210,7 +210,7 @@ void ClampSuite::ProtocolEditor::deleteStep( void ) { // Delete step from a prot
     }
 }
 
-void ClampSuite::ProtocolEditor::createStep( int stepNum ) { // Creates and initializes protocol step
+void ClampProtocol::ProtocolEditor::createStep( int stepNum ) { // Creates and initializes protocol step
     protocolTable->insertColumns( stepNum ); // Insert new column
     QHeader *horizontalHeader = protocolTable->horizontalHeader();
     QString headerLabel = "Step " + QString( "%1" ).arg( stepNum + 1 ); // Make header label
@@ -232,7 +232,7 @@ void ClampSuite::ProtocolEditor::createStep( int stepNum ) { // Creates and init
     // Due to alignment issues, all cells are manually set with CenterAlignTableItem
     // Sets each attribute to its correct valueable
     for( int i = 2; i <= 9; i++ ) {
-        item = new ClampSuite::CenterAlignTableItem( protocolTable );
+        item = new ClampProtocol::CenterAlignTableItem( protocolTable );
         protocolTable->setItem( i, stepNum, item );
         text.setNum( step->retrieve(i) ); // Retrieve attribute value
         item->setText( text );
@@ -240,7 +240,7 @@ void ClampSuite::ProtocolEditor::createStep( int stepNum ) { // Creates and init
     updateStepAttribute( 1, stepNum ); // Update column based on step type
 }
 
-void ClampSuite::ProtocolEditor::updateSegment( QListViewItem *segment ) { // Updates protocol description table when segment is clicked in listview
+void ClampProtocol::ProtocolEditor::updateSegment( QListViewItem *segment ) { // Updates protocol description table when segment is clicked in listview
     // Update currentSegment to indicate which segment is selected
     QString label = segment->text( 0 ); // Grab label from selected item in listview
     label = label.right( 2 ); // Truncate label to get segment number
@@ -249,11 +249,11 @@ void ClampSuite::ProtocolEditor::updateSegment( QListViewItem *segment ) { // Up
     updateTableLabel(); // Update label of protocol table
 }
 
-void ClampSuite::ProtocolEditor::updateSegmentSweeps( int sweepNum ) { // Update container that holds number of segment sweeps when spinbox value is changed
+void ClampProtocol::ProtocolEditor::updateSegmentSweeps( int sweepNum ) { // Update container that holds number of segment sweeps when spinbox value is changed
     protocol.setSweeps( currentSegmentNumber - 1, sweepNum ); // Set segment sweep value to spin box value
 }
 
-void ClampSuite::ProtocolEditor::updateTableLabel( void ) { // Updates the label above protocol table to show current selected segment and step
+void ClampProtocol::ProtocolEditor::updateTableLabel( void ) { // Updates the label above protocol table to show current selected segment and step
     QString text = "Segment ";
     text.append( QString::number(currentSegmentNumber) );
     int col = protocolTable->currentColumn() + 1;
@@ -263,7 +263,7 @@ void ClampSuite::ProtocolEditor::updateTableLabel( void ) { // Updates the label
     }
     segmentStepLabel->setText(text);
 }
-void ClampSuite::ProtocolEditor::updateTable( void ) { // Updates protocol description table: clears and reloads table from scratch
+void ClampProtocol::ProtocolEditor::updateTable( void ) { // Updates protocol description table: clears and reloads table from scratch
     protocolTable->setNumCols( 0 ); // Clear table by setting columns to 0 *Note: deletes QTableItem objects*
     
     // Load steps from current clicked segment into protocol
@@ -272,7 +272,7 @@ void ClampSuite::ProtocolEditor::updateTable( void ) { // Updates protocol descr
         createStep( i ); // Update step in protocol table        
 }
              
-void ClampSuite::ProtocolEditor::updateStepAttribute( int row, int col ) { // Updates protocol container when a table cell is changed
+void ClampProtocol::ProtocolEditor::updateStepAttribute( int row, int col ) { // Updates protocol container when a table cell is changed
     Step step = protocol.getStep( currentSegmentNumber - 1, col );
     QComboTableItem *comboItem;
     QString text;
@@ -341,7 +341,7 @@ void ClampSuite::ProtocolEditor::updateStepAttribute( int row, int col ) { // Up
     }
 }
 
-void ClampSuite::ProtocolEditor::updateStepType( int stepNum, ProtocolStep::stepType_t stepType ) {
+void ClampProtocol::ProtocolEditor::updateStepType( int stepNum, ProtocolStep::stepType_t stepType ) {
     // Disable unneeded attributes depending on step type
     // Enable needed attributes and set text to stored value
     Step step = protocol.getStep( currentSegmentNumber - 1, stepNum );
@@ -402,7 +402,7 @@ void ClampSuite::ProtocolEditor::updateStepType( int stepNum, ProtocolStep::step
     }
 }
 
-int ClampSuite::ProtocolEditor::loadFileToProtocol( QString fileName ) { // Loads XML file of protocol data: updates table, listview, and protocol container
+int ClampProtocol::ProtocolEditor::loadFileToProtocol( QString fileName ) { // Loads XML file of protocol data: updates table, listview, and protocol container
     // If protocol is present, warn user that protocol will be lost upon loading
     if( protocol.numSegments() != 0 &&
         QMessageBox::warning(
@@ -456,11 +456,11 @@ int ClampSuite::ProtocolEditor::loadFileToProtocol( QString fileName ) { // Load
 }
 
 
-QString ClampSuite::ProtocolEditor::loadProtocol(void) {
+QString ClampProtocol::ProtocolEditor::loadProtocol(void) {
     // Save dialog to retrieve desired filename and location
     QString fileName = QFileDialog::getOpenFileName(
                                                     "~/",
-                                                    "Clamp Suite Protocol Files (*.csp);;All Files(*.*)",
+                                                    "Clamp Protocol Files (*.csp);;All Files(*.*)",
                                                     this,
                                                     "open file dialog",
                                                     "Open a protocol" );
@@ -475,11 +475,11 @@ QString ClampSuite::ProtocolEditor::loadProtocol(void) {
     return fileName;
 }
 
-void ClampSuite::ProtocolEditor::loadProtocol(QString fileName) {
+void ClampProtocol::ProtocolEditor::loadProtocol(QString fileName) {
     loadFileToProtocol(fileName);
 }
 
-void ClampSuite::ProtocolEditor::saveProtocol(void) { // Takes data within protocol container and converts to XML and saves to file    
+void ClampProtocol::ProtocolEditor::saveProtocol(void) { // Takes data within protocol container and converts to XML and saves to file    
     if( protocolEmpty() ) // Exit if protocol is empty
         return ;
     
@@ -488,7 +488,7 @@ void ClampSuite::ProtocolEditor::saveProtocol(void) { // Takes data within proto
     // Save dialog to retrieve desired filename and location
     QString fileName = QFileDialog::getSaveFileName(
                                                     "~/",
-                                                    "Clamp Suite Protocol Files (*.csp);;All Files (*.*)",
+                                                    "Clamp Protocol Files (*.csp);;All Files (*.*)",
                                                     this,
                                                     "save file dialog",
                                                     "Save the protocol" );
@@ -518,7 +518,7 @@ void ClampSuite::ProtocolEditor::saveProtocol(void) { // Takes data within proto
     file.close(); // Close file
 }
 
-void ClampSuite::ProtocolEditor::clearProtocol( void ) { // Clear protocol
+void ClampProtocol::ProtocolEditor::clearProtocol( void ) { // Clear protocol
     protocol.clear();
     currentSegmentNumber = 0;
     protocolTable->setNumCols( 0 ); // Clear table    
@@ -530,7 +530,7 @@ void ClampSuite::ProtocolEditor::clearProtocol( void ) { // Clear protocol
     QObject::connect( segmentSweepSpinBox, SIGNAL(valueChanged(int)), this, SLOT(updateSegmentSweeps(int)) );
 }
 
-void ClampSuite::ProtocolEditor::exportProtocol( void ) { // Export protocol to a text file format ( time : output )
+void ClampProtocol::ProtocolEditor::exportProtocol( void ) { // Export protocol to a text file format ( time : output )
     if( protocolEmpty() ) // Exit if protocol is empty
         return ;
     
@@ -590,7 +590,7 @@ void ClampSuite::ProtocolEditor::exportProtocol( void ) { // Export protocol to 
     file.close(); // Close file
 }
 
-void ClampSuite::ProtocolEditor::previewProtocol( void ) { // Graph protocol output in a simple plot window
+void ClampProtocol::ProtocolEditor::previewProtocol( void ) { // Graph protocol output in a simple plot window
     if( protocolEmpty() ) // Exit if protocol is empty
         return ;
     
@@ -626,7 +626,7 @@ void ClampSuite::ProtocolEditor::previewProtocol( void ) { // Graph protocol out
     plot->replot();
 }
 
-bool ClampSuite::ProtocolEditor::protocolEmpty( void ) { // Make sure protocol has at least one segment with one step
+bool ClampProtocol::ProtocolEditor::protocolEmpty( void ) { // Make sure protocol has at least one segment with one step
     if( protocol.numSegments() == 0) { // Check if first segment exists
         QMessageBox::warning(this,
                              "Error",

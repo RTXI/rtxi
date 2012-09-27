@@ -1,9 +1,9 @@
-#ifndef CLAMP_SUITE_H
-#define CLAMP_SUITE_H
+#ifndef CLAMP_PROTOCOL_H
+#define CLAMP_PROTOCOL_H
 
-#include "ui/CS_main_windowUI.h"
-#include "CS_protocol.h"
-#include "CS_plot_window.h"
+#include "ui/CP_main_windowUI.h"
+#include "CP_protocol.h"
+#include "CP_plot_window.h"
 
 #include <vector>
 
@@ -18,7 +18,7 @@
 #include <qobject.h>
 #include <qwidget.h>
 
-namespace ClampSuite {
+namespace ClampProtocol {
 
     class Panel;
 
@@ -32,7 +32,7 @@ namespace ClampSuite {
         static Plugin *getInstance( void );
 
     public slots:
-        void createClampSuitePanel( void ); // Create panel GUI through menu item
+        void createClampProtocolPanel( void ); // Create panel GUI through menu item
 
     protected:
         void doDeferred( const Settings::Object::State & );
@@ -45,7 +45,7 @@ namespace ClampSuite {
         Plugin( const Plugin & ) { };
         Plugin &operator=( const Plugin & ) { return *getInstance(); };
 
-        void removeClampSuitePanel( Panel * ); // Remove panel GUI
+        void removeClampProtocolPanel( Panel * ); // Remove panel GUI
 
         static Plugin *instance;
 
@@ -127,7 +127,7 @@ namespace ClampSuite {
         }; // class ToggleProtocolEvent
 
         // GUI
-        CS_main_windowUI *mainWindow;
+        CP_main_windowUI *mainWindow;
         std::list< PlotWindow * > plotWindowList;
         QTimer *plotTimer;
 
@@ -183,6 +183,6 @@ namespace ClampSuite {
         
     }; // class Panel
     
-}; // namespace ClampSuite
+}; // namespace ClampProtocol
 
-#endif // CLAMP_SUITE_H
+#endif // CLAMP_PROTOCOL_H

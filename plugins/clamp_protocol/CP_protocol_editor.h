@@ -1,14 +1,14 @@
-#ifndef CS_PROTOCOL_EDITOR_H
-#define CS_PROTOCOL_EDITOR_H
+#ifndef CP_PROTOCOL_EDITOR_H
+#define CP_PROTOCOL_EDITOR_H
 
 
-#include "CS_protocol.h"
-#include "ui/CS_protocol_editorUI.h"
+#include "CP_protocol.h"
+#include "ui/CP_protocol_editorUI.h"
 
 #include <qtable.h>
 #include <qstringlist.h>
 
-namespace ClampSuite {
+namespace ClampProtocol {
     // No function to change alignment in Qt3.3, so subclassing must be done
     class CenterAlignTableItem : public QTableItem {
     public:
@@ -54,6 +54,6 @@ namespace ClampSuite {
         void updateStepType( int, ProtocolStep::stepType_t );
         void saveProtocol( void );
     };    
-}; // namespace ClampSuite
+}; // namespace ClampProtocol
 
-#endif // CS_protocol_editor.h
+#endif // CP_protocol_editor.h

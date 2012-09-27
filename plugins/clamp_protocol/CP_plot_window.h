@@ -1,7 +1,7 @@
-#ifndef CS_PLOT_WINDOW_H
-#define CS_PLOT_WINDOW_H
+#ifndef CP_PLOT_WINDOW_H
+#define CP_PLOT_WINDOW_H
 
-#include "ui/CS_plot_windowUI.h"
+#include "ui/CP_plot_windowUI.h"
 #include "plot/basicplot.h"
 
 #include <settings.h>
@@ -9,7 +9,7 @@
 #include <boost/shared_ptr.hpp>
 #include <qwt-qt3/qwt_plot_curve.h>
 
-namespace ClampSuite {
+namespace ClampProtocol {
     class Panel;
 
     typedef boost::shared_ptr<QwtPlotCurve> QwtPlotCurvePtr;    
@@ -59,6 +59,6 @@ namespace ClampSuite {
         QFont font;
     }; // class PlotWindow    
 
-}; // namespace ClampSuite
+}; // namespace ClampProtocol
 
 #endif

@@ -1,16 +1,16 @@
-#include "CS_protocol.h"
+#include "CP_protocol.h"
 
 #include <iostream>
 
 using namespace std;
 
 // Class ProtocolStep - base unit of a protocol
-ClampSuite::ProtocolStep::ProtocolStep()
+ClampProtocol::ProtocolStep::ProtocolStep()
  : ampMode(VOLTAGE), stepType(STEP), stepDuration(0), deltaStepDuration(0), holdingLevel1(0),
    deltaHoldingLevel1(0), holdingLevel2(0), deltaHoldingLevel2(0), pulseWidth(0), pulseRate(0) {
 }
 
-double ClampSuite::ProtocolStep::retrieve(int row){
+double ClampProtocol::ProtocolStep::retrieve(int row){
     switch(row){
     case 0: return ampMode;
         break;
@@ -33,31 +33,31 @@ double ClampSuite::ProtocolStep::retrieve(int row){
     case 9: return pulseRate;
     break;
     default:
-        cout << "Error - ClampSuite::ProtocolStep::retrieve() - default case";
+        cout << "Error - ClampProtocol::ProtocolStep::retrieve() - default case";
         return 0;
         break;
     }
 }
 
 // Class ProtocolSegment - segment of a protocol, made up of ProtocolSteps
-ClampSuite::ProtocolSegment::ProtocolSegment()
+ClampProtocol::ProtocolSegment::ProtocolSegment()
   : numSweeps(1) {
 
 }
 
 // Class Protocol - Protocol used by clamp suite module
-ClampSuite::Protocol::Protocol() {
+ClampProtocol::Protocol::Protocol() {
 }
 
-ClampSuite::Step ClampSuite::Protocol::getStep( int seg, int step ) {
+ClampProtocol::Step ClampProtocol::Protocol::getStep( int seg, int step ) {
     return protocolContainer.at( seg )->segmentContainer.at( step );
 }
 
-int ClampSuite::Protocol::numSteps( int seg ) {
+int ClampProtocol::Protocol::numSteps( int seg ) {
     return protocolContainer.at( seg )->segmentContainer.size();
 }
 
-int ClampSuite::Protocol::addStep( int seg, int step ) {
+int ClampProtocol::Protocol::addStep( int seg, int step ) {
     if( seg > numSegments() ) // If segment doesn't exist or not at end
         return 0;
     if( step > numSteps( seg ) ) // If step doesn't exist or not at end
@@ -76,7 +76,7 @@ int ClampSuite::Protocol::addStep( int seg, int step ) {
     }
 }
 
-int ClampSuite::Protocol::deleteStep( int seg, int step ) {
+int ClampProtocol::Protocol::deleteStep( int seg, int step ) {
     if( seg > numSegments() ) // If segment doesn't exist or not at end
         return 0;
     if( step > numSteps( seg ) ) // If step doesn't exist or not at end
@@ -91,7 +91,7 @@ int ClampSuite::Protocol::deleteStep( int seg, int step ) {
 }
 
 
-int ClampSuite::Protocol::addSegment( int seg ) {
+int ClampProtocol::Protocol::addSegment( int seg ) {
     if( seg > numSegments() ) { // If segment doesn't exist or not at end
         return 0;
     }
@@ -108,7 +108,7 @@ int ClampSuite::Protocol::addSegment( int seg ) {
     return 0;
 }
 
-int ClampSuite::Protocol::deleteSegment( int seg ) {
+int ClampProtocol::Protocol::deleteSegment( int seg ) {
     if( seg > numSegments() ) { // If segment doesn't exist or not at end
         return 0;
     }
@@ -118,11 +118,11 @@ int ClampSuite::Protocol::deleteSegment( int seg ) {
     return 1;
 }
 
-int ClampSuite::Protocol::numSweeps( int seg ) {
+int ClampProtocol::Protocol::numSweeps( int seg ) {
     return getSegment( seg )->numSweeps;
 }
 
-int ClampSuite::Protocol::segmentLength( int seg, double period, bool withSweeps ) { // Period in ms
+int ClampProtocol::Protocol::segmentLength( int seg, double period, bool withSweeps ) { // Period in ms
     int time = 0;
     
     if( withSweeps ) { // Length of all sweeps
@@ -138,19 +138,19 @@ int ClampSuite::Protocol::segmentLength( int seg, double period, bool withSweeps
     return time / period;
 }
 
-void ClampSuite::Protocol::setSweeps( int seg, int sweeps ) {
+void ClampProtocol::Protocol::setSweeps( int seg, int sweeps ) {
     getSegment( seg )->numSweeps = sweeps;
 }
 
-ClampSuite::Segment ClampSuite::Protocol::getSegment( int segNum ) { // Returns segment of a protocol
+ClampProtocol::Segment ClampProtocol::Protocol::getSegment( int segNum ) { // Returns segment of a protocol
     return protocolContainer.at( segNum );
 }
 
-int ClampSuite::Protocol::numSegments( void ) { // Returns number of segments in a protocol / size of protocol
+int ClampProtocol::Protocol::numSegments( void ) { // Returns number of segments in a protocol / size of protocol
     return protocolContainer.size();
 }
 
-QDomElement ClampSuite::Protocol::stepToNode( QDomDocument &doc, int seg, int stepNum ) { // Converts protocol step to XML node
+QDomElement ClampProtocol::Protocol::stepToNode( QDomDocument &doc, int seg, int stepNum ) { // Converts protocol step to XML node
     QDomElement stepElement = doc.createElement("step"); // Step element
     Step step = getStep( seg, stepNum );
 
@@ -170,7 +170,7 @@ QDomElement ClampSuite::Protocol::stepToNode( QDomDocument &doc, int seg, int st
     return stepElement;
 }
 
-QDomElement ClampSuite::Protocol::segmentToNode( QDomDocument &doc, int seg ) { // Converts protocol segment to XML node
+QDomElement ClampProtocol::Protocol::segmentToNode( QDomDocument &doc, int seg ) { // Converts protocol segment to XML node
     QDomElement segmentElement = doc.createElement( "segment" ); // Segment element
     segmentElement.setAttribute( "numSweeps", numSweeps( seg ) );
     
@@ -183,12 +183,12 @@ QDomElement ClampSuite::Protocol::segmentToNode( QDomDocument &doc, int seg ) { 
     return segmentElement; // Return segment element   
 }
 
-void ClampSuite::Protocol::clear( void ) { // Clears protocol container
+void ClampProtocol::Protocol::clear( void ) { // Clears protocol container
     protocolContainer.clear();
 }
 
-void ClampSuite::Protocol::toDoc( void ) { // Convert protocol to QDomDocument   
-    QDomDocument doc("ClampSuiteML");
+void ClampProtocol::Protocol::toDoc( void ) { // Convert protocol to QDomDocument   
+    QDomDocument doc("ClampProtocolML");
     
     QDomElement root = doc.createElement( "Clamp-Suite-Protocol-v1.0");
     doc.appendChild(root);
@@ -201,7 +201,7 @@ void ClampSuite::Protocol::toDoc( void ) { // Convert protocol to QDomDocument
     protocolDoc = doc; // Shallow copy
 }
 
-void ClampSuite::Protocol::fromDoc( QDomDocument doc ) { // Load protocol from QDomDocument
+void ClampProtocol::Protocol::fromDoc( QDomDocument doc ) { // Load protocol from QDomDocument
     QDomElement root = doc.documentElement(); // Get root element from document
     
     // Retrieve information from document and set to protocolContainer
@@ -241,9 +241,9 @@ void ClampSuite::Protocol::fromDoc( QDomDocument doc ) { // Load protocol from Q
     } // End segment iteration
 }
 
-std::vector< std::vector<double> > ClampSuite::Protocol::run( double period ) {
+std::vector< std::vector<double> > ClampProtocol::Protocol::run( double period ) {
     // Run the protocol and keep track of time (ms) and output (mv)
-    // Return time and output vector, based off of clamp_suite.cpp execute function
+    // Return time and output vector, based off of clamp_protocol.cpp execute function
 
     std::vector<double> timeVector;
     std::vector<double> outputVector;

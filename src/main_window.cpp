@@ -71,6 +71,9 @@ MainWindow::MainWindow(void) :
   systemMenu = new QPopupMenu(this);
   menuBar()->insertItem("&System", systemMenu);
 
+  patchClampSubMenu = new QPopupMenu(this);
+  utilMenu->insertItem(tr("&Patch Clamp"), patchClampSubMenu);
+
   windowsMenu = new QPopupMenu(this);
   windowsMenu->setCheckable(true);
   QObject::connect(windowsMenu,SIGNAL(aboutToShow(void)),this,SLOT(windowsMenuAboutToShow(void)));
@@ -208,6 +211,13 @@ void
 MainWindow::removeUtilMenuItem(int id)
 {
   utilMenu->removeItem(id);
+}
+
+int
+MainWindow::createPatchClampMenuItem(const std::string &text,
+    const QObject *receiver, const char *member)
+{
+  return patchClampSubMenu->insertItem(text, receiver, member);
 }
 
 int

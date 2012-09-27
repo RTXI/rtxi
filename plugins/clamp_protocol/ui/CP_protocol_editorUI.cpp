@@ -1,12 +1,12 @@
 /****************************************************************************
-** Form implementation generated from reading ui file 'CS_protocol_editorUI.ui'
+** Form implementation generated from reading ui file 'CP_protocol_editorUI.ui'
 **
-** Created: Wed Apr 4 11:39:46 2012
+** Created: Wed Sep 26 15:49:24 2012
 **
 ** WARNING! All changes made in this file will be lost!
 ****************************************************************************/
 
-#include "CS_protocol_editorUI.h"
+#include "CP_protocol_editorUI.h"
 
 #include <qvariant.h>
 #include <qpushbutton.h>
@@ -230,7 +230,7 @@ ProtocolEditorUI::~ProtocolEditorUI()
  */
 void ProtocolEditorUI::languageChange()
 {
-    setCaption( tr( "Clamp Suite Protocol Editor" ) );
+    setCaption( tr( "Protocol Editor" ) );
     saveProtocolButton->setText( tr( "Save" ) );
     QToolTip::add( saveProtocolButton, tr( "Save protocol to .csp file for loading into clamp suite" ) );
     loadProtocolButton->setText( tr( "Load" ) );

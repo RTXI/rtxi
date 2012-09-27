@@ -1,5 +1,5 @@
-#include "CS_plot_window.h"
-#include "clamp_suite.h"
+#include "CP_plot_window.h"
+#include "clamp_protocol.h"
 
 #include <qlayout.h>
 #include <qstring.h>
@@ -16,7 +16,7 @@
 #include <qwt-qt3/qwt_text.h>
 #include <qwt-qt3/qwt_legend.h>
 
-ClampSuite::PlotWindow::PlotWindow( QWidget *parent, Panel *p )
+ClampProtocol::PlotWindow::PlotWindow( QWidget *parent, Panel *p )
     : PlotWindowUI( parent, "Plot Window", Qt::WDestructiveClose ), panel( p ), overlaySweeps( false ),
       plotAfter( false ), colorScheme( 0 ),  runCounter( 0 ), sweepsShown( 0 ) {
 
@@ -73,11 +73,11 @@ ClampSuite::PlotWindow::PlotWindow( QWidget *parent, Panel *p )
     QToolTip::add( colorByComboBox, tooltip );
 }
 
-ClampSuite::PlotWindow::~PlotWindow( void ) {
+ClampProtocol::PlotWindow::~PlotWindow( void ) {
     panel->removePlotWindow( this );
 }
 
-void ClampSuite::PlotWindow::addCurve( double *output, curve_token_t token ) { // Attach curve to plot
+void ClampProtocol::PlotWindow::addCurve( double *output, curve_token_t token ) { // Attach curve to plot
    double time[ token.points ];
 
    if( overlaySweeps ) 
@@ -142,7 +142,7 @@ void ClampSuite::PlotWindow::addCurve( double *output, curve_token_t token ) { /
    plot->replot(); // Attaching curve does not refresh plot, must replot
 }
 
-void ClampSuite::PlotWindow::colorCurve( QwtPlotCurvePtr curve, int idx ) {
+void ClampProtocol::PlotWindow::colorCurve( QwtPlotCurvePtr curve, int idx ) {
     QColor color;
         
     switch( idx ) {
@@ -163,7 +163,7 @@ void ClampSuite::PlotWindow::colorCurve( QwtPlotCurvePtr curve, int idx ) {
     curve->setPen( pen );
 }
 
-void ClampSuite::PlotWindow::setAxes( void ) {    
+void ClampProtocol::PlotWindow::setAxes( void ) {    
     double timeFactor, currentFactor;
     
     switch( timeScaleEdit->currentItem() ) { // Determine time scaling factor, convert to ms
@@ -199,12 +199,12 @@ void ClampSuite::PlotWindow::setAxes( void ) {
     plot->setAxes( x1, x2, y1, y2 );
 }
 
-void ClampSuite::PlotWindow::clearPlot( void ) {
+void ClampProtocol::PlotWindow::clearPlot( void ) {
     curveContainer.clear();
     plot->replot();
 }
 
-void ClampSuite::PlotWindow::toggleOverlay( void ) {    
+void ClampProtocol::PlotWindow::toggleOverlay( void ) {    
     if( overlaySweepsCheckBox->isChecked() ) { // Checked
     // Check if curves are plotted, if true check if user wants plot cleared in
     // order to overlay sweeps during next run
@@ -215,7 +215,7 @@ void ClampSuite::PlotWindow::toggleOverlay( void ) {
     }
 }
 
-void ClampSuite::PlotWindow::togglePlotAfter( void ) {
+void ClampProtocol::PlotWindow::togglePlotAfter( void ) {
     if( plotAfterCheckBox->isChecked() ) // Checked
         plotAfter = true;    
     else  // Unchecked
@@ -224,7 +224,7 @@ void ClampSuite::PlotWindow::togglePlotAfter( void ) {
     plot->replot(); // Replot since curve container is cleared    
 }
 
-void ClampSuite::PlotWindow::changeColorScheme( int choice ) {
+void ClampProtocol::PlotWindow::changeColorScheme( int choice ) {
     if( choice == colorScheme ) // If choice is the same
         return ;    
     
@@ -247,9 +247,9 @@ void ClampSuite::PlotWindow::changeColorScheme( int choice ) {
     plot->replot(); // Replot since curve container is cleared
 }
 
-void  ClampSuite::PlotWindow::doDeferred( const Settings::Object::State &s ) { }
+void  ClampProtocol::PlotWindow::doDeferred( const Settings::Object::State &s ) { }
 
-void  ClampSuite::PlotWindow::doLoad( const Settings::Object::State &s ) {
+void  ClampProtocol::PlotWindow::doLoad( const Settings::Object::State &s ) {
     if ( s.loadInteger("Maximized") )
         showMaximized();
     else if ( s.loadInteger("Minimized") )
@@ -278,7 +278,7 @@ void  ClampSuite::PlotWindow::doLoad( const Settings::Object::State &s ) {
     
 }
 
-void  ClampSuite::PlotWindow::doSave( Settings::Object::State &s ) const {
+void  ClampProtocol::PlotWindow::doSave( Settings::Object::State &s ) const {
     if ( isMaximized() )
         s.saveInteger( "Maximized", 1 );
     else if ( isMinimized() )

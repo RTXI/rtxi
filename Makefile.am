@@ -88,9 +88,9 @@ endif
 	@echo ' <OBJECT component="plugin" library="connector.so" id="9" />'		>> $@
 	@echo ' <OBJECT component="plugin" library="performance_measurement.so" id="10" />'>> $@
 	@echo ' <OBJECT component="plugin" library="userprefs.so" id="11" />'>> $@
-	@echo ' <OBJECT component="plugin" library="clamp_utilities.so" id="12" />'>> $@
-if BUILD_CLAMPSUITE
-	@echo ' <OBJECT component="plugin" library="clamp_suite.so" id="13" />'>> $@
+	@echo ' <OBJECT component="plugin" library="membrane_test.so" id="12" />'>> $@
+if BUILD_CLAMPPROTOCOL
+	@echo ' <OBJECT component="plugin" library="clamp_protocol.so" id="13" />'>> $@
 endif
 	@echo '</RTXI>'									>> $@
 

@@ -1,11 +1,11 @@
-#ifndef CS_PROTOCOL_H
-#define CS_PROTOCOL_H
+#ifndef CP_PROTOCOL_H
+#define CP_PROTOCOL_H
 
 #include <boost/shared_ptr.hpp>
 #include <vector>
 #include <qdom.h>
 
-namespace ClampSuite {
+namespace ClampProtocol {
     class Protocol;
     class ProtocolStep;
     class ProtocolSegment;
@@ -82,7 +82,7 @@ namespace ClampSuite {
         
     }; // class Protocol   
     
-}; // namespace ClampSuite
+}; // namespace ClampProtocol
 
 
-#endif // CS_protocol.h
+#endif // CP_protocol.h

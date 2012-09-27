@@ -1,7 +1,7 @@
 /****************************************************************************
-** Form interface generated from reading ui file 'CS_plot_windowUI.ui'
+** Form interface generated from reading ui file 'CP_plot_windowUI.ui'
 **
-** Created: Mon Apr 9 16:51:25 2012
+** Created: Wed Sep 26 15:47:57 2012
 **
 ** WARNING! All changes made in this file will be lost!
 ****************************************************************************/

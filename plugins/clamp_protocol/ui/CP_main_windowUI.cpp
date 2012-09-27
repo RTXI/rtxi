@@ -1,12 +1,12 @@
 /****************************************************************************
-** Form implementation generated from reading ui file 'CS_main_windowUI.ui'
+** Form implementation generated from reading ui file 'CP_main_windowUI.ui'
 **
-** Created: Sun Jun 24 13:48:31 2012
+** Created: Wed Sep 26 15:47:51 2012
 **
 ** WARNING! All changes made in this file will be lost!
 ****************************************************************************/
 
-#include "CS_main_windowUI.h"
+#include "CP_main_windowUI.h"
 
 #include <qvariant.h>
 #include <qpushbutton.h>
@@ -298,10 +298,10 @@ static const unsigned char image5_data[] = {
 
 
 /*
- *  Constructs a CS_main_windowUI as a child of 'parent', with the
+ *  Constructs a CP_main_windowUI as a child of 'parent', with the
  *  name 'name' and widget flags set to 'f'.
  */
-CS_main_windowUI::CS_main_windowUI( QWidget* parent, const char* name, WFlags fl )
+CP_main_windowUI::CP_main_windowUI( QWidget* parent, const char* name, WFlags fl )
     : QWidget( parent, name, fl )
 {
     QImage img;
@@ -318,10 +318,10 @@ CS_main_windowUI::CS_main_windowUI( QWidget* parent, const char* name, WFlags fl
     img.loadFromData( image5_data, sizeof( image5_data ), "PNG" );
     image5 = img;
     if ( !name )
-	setName( "CS_main_windowUI" );
+	setName( "CP_main_windowUI" );
     setSizePolicy( QSizePolicy( (QSizePolicy::SizeType)5, (QSizePolicy::SizeType)5, 254, 0, sizePolicy().hasHeightForWidth() ) );
     setMinimumSize( QSize( 260, 0 ) );
-    CS_main_windowUILayout = new QVBoxLayout( this, 11, 6, "CS_main_windowUILayout"); 
+    CP_main_windowUILayout = new QVBoxLayout( this, 11, 6, "CP_main_windowUILayout"); 
 
     protocolControlButtonGroup = new QButtonGroup( this, "protocolControlButtonGroup" );
     QFont protocolControlButtonGroup_font(  protocolControlButtonGroup->font() );
@@ -429,7 +429,7 @@ CS_main_windowUI::CS_main_windowUI( QWidget* parent, const char* name, WFlags fl
     protocolNameEdit->setAlignment( int( QLineEdit::AlignAuto ) );
     protocolNameEdit->setReadOnly( TRUE );
     protocolControlButtonGroupLayout->addWidget( protocolNameEdit );
-    CS_main_windowUILayout->addWidget( protocolControlButtonGroup );
+    CP_main_windowUILayout->addWidget( protocolControlButtonGroup );
 
     protocolOptionGroup = new QGroupBox( this, "protocolOptionGroup" );
     protocolOptionGroup->setMaximumSize( QSize( 32767, 300 ) );
@@ -509,7 +509,7 @@ CS_main_windowUI::CS_main_windowUI( QWidget* parent, const char* name, WFlags fl
     junctionPotentialEdit->setAlignment( int( QLineEdit::AlignHCenter ) );
 
     protocolOptionGroupLayout->addWidget( junctionPotentialEdit, 4, 1 );
-    CS_main_windowUILayout->addWidget( protocolOptionGroup );
+    CP_main_windowUILayout->addWidget( protocolOptionGroup );
 
     protocolStatesGroup = new QGroupBox( this, "protocolStatesGroup" );
     QFont protocolStatesGroup_font(  protocolStatesGroup->font() );
@@ -629,7 +629,7 @@ CS_main_windowUI::CS_main_windowUI( QWidget* parent, const char* name, WFlags fl
     timeEdit->setReadOnly( TRUE );
     layout5->addWidget( timeEdit );
     protocolStatesGroupLayout->addLayout( layout5 );
-    CS_main_windowUILayout->addWidget( protocolStatesGroup );
+    CP_main_windowUILayout->addWidget( protocolStatesGroup );
     languageChange();
     resize( QSize(260, 379).expandedTo(minimumSizeHint()) );
     clearWState( WState_Polished );
@@ -638,7 +638,7 @@ CS_main_windowUI::CS_main_windowUI( QWidget* parent, const char* name, WFlags fl
 /*
  *  Destroys the object and frees any allocated resources
  */
-CS_main_windowUI::~CS_main_windowUI()
+CP_main_windowUI::~CP_main_windowUI()
 {
     // no need to delete child widgets, Qt does it all for us
 }
@@ -647,10 +647,10 @@ CS_main_windowUI::~CS_main_windowUI()
  *  Sets the strings of the subwidgets using the current
  *  language.
  */
-void CS_main_windowUI::languageChange()
+void CP_main_windowUI::languageChange()
 {
-    setCaption( tr( "Clamp Suite" ) );
-    protocolControlButtonGroup->setTitle( tr( "Protocol Control" ) );
+    setCaption( tr( "Clamp Protocol" ) );
+    protocolControlButtonGroup->setTitle( tr( "Control" ) );
     QToolTip::add( protocolControlButtonGroup, QString::null );
     pauseButton->setText( QString::null );
     QToolTip::add( pauseButton, tr( "Pause module" ) );
@@ -676,7 +676,7 @@ void CS_main_windowUI::languageChange()
     dataRecordCheckBox->setText( tr( "Record Data" ) );
     QToolTip::add( dataRecordCheckBox, tr( "Check if data will be recorded by data recorder module" ) );
     QToolTip::add( junctionPotentialEdit, tr( "Junction potential (mV). (Vcmd = Vm + LJP). Hit enter to save changes." ) );
-    protocolStatesGroup->setTitle( tr( "Protocol States" ) );
+    protocolStatesGroup->setTitle( tr( "States" ) );
     trialNumberLabel->setText( tr( "Trial" ) );
     QToolTip::add( trialNumberLabel, tr( "Current trial number, applicable when running multiple trials" ) );
     trialNumberEdit->setText( QString::null );

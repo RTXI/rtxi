@@ -722,7 +722,7 @@ extern "C" Plugin::Object *createRTXIPlugin(void *) {
 }
 
 MembraneTest::Plugin::Plugin( void ) {
-    menuID = MainWindow::getInstance()->createUtilMenuItem( "Membrane Test", this, SLOT(createMembraneTestPanel(void)) );
+    menuID = MainWindow::getInstance()->createPatchClampMenuItem( "Membrane Test", this, SLOT(createMembraneTestPanel(void)) );
 }
 
 MembraneTest::Plugin::~Plugin( void ) {

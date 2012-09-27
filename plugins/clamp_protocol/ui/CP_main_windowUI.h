@@ -1,13 +1,13 @@
 /****************************************************************************
-** Form interface generated from reading ui file 'CS_main_windowUI.ui'
+** Form interface generated from reading ui file 'CP_main_windowUI.ui'
 **
-** Created: Sun Jun 24 13:48:31 2012
+** Created: Wed Sep 26 15:47:51 2012
 **
 ** WARNING! All changes made in this file will be lost!
 ****************************************************************************/
 
-#ifndef CS_MAIN_WINDOWUI_H
-#define CS_MAIN_WINDOWUI_H
+#ifndef CP_MAIN_WINDOWUI_H
+#define CP_MAIN_WINDOWUI_H
 
 #include <qvariant.h>
 #include <qpixmap.h>
@@ -26,13 +26,13 @@ class QSpinBox;
 class QLabel;
 class QCheckBox;
 
-class CS_main_windowUI : public QWidget
+class CP_main_windowUI : public QWidget
 {
     Q_OBJECT
 
 public:
-    CS_main_windowUI( QWidget* parent = 0, const char* name = 0, WFlags fl = 0 );
-    ~CS_main_windowUI();
+    CP_main_windowUI( QWidget* parent = 0, const char* name = 0, WFlags fl = 0 );
+    ~CP_main_windowUI();
 
     QButtonGroup* protocolControlButtonGroup;
     QPushButton* pauseButton;
@@ -62,7 +62,7 @@ public:
     QLineEdit* timeEdit;
 
 protected:
-    QVBoxLayout* CS_main_windowUILayout;
+    QVBoxLayout* CP_main_windowUILayout;
     QVBoxLayout* protocolControlButtonGroupLayout;
     QSpacerItem* spacer1;
     QSpacerItem* spacer2;
@@ -97,4 +97,4 @@ private:
 
 };
 
-#endif // CS_MAIN_WINDOWUI_H
+#endif // CP_MAIN_WINDOWUI_H

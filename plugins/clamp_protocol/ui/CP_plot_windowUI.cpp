@@ -1,12 +1,12 @@
 /****************************************************************************
-** Form implementation generated from reading ui file 'CS_plot_windowUI.ui'
+** Form implementation generated from reading ui file 'CP_plot_windowUI.ui'
 **
-** Created: Mon Apr 9 16:51:25 2012
+** Created: Wed Sep 26 15:47:57 2012
 **
 ** WARNING! All changes made in this file will be lost!
 ****************************************************************************/
 
-#include "CS_plot_windowUI.h"
+#include "CP_plot_windowUI.h"
 
 #include <qvariant.h>
 #include <qpushbutton.h>
@@ -274,7 +274,7 @@ PlotWindowUI::~PlotWindowUI()
  */
 void PlotWindowUI::languageChange()
 {
-    setCaption( tr( "Clamp Suite Plot Window" ) );
+    setCaption( tr( "Clamp Protocol Plot Window" ) );
     currentScaleLabel->setText( tr( "Current" ) );
     QToolTip::add( currentScaleLabel, tr( "Current Scale" ) );
     currentScaleEdit->clear();
@@ -297,11 +297,12 @@ void PlotWindowUI::languageChange()
     plotAfterCheckBox->setText( tr( "Plot after protocol" ) );
     QToolTip::add( plotAfterCheckBox, tr( "Check to plot only at the end of a protocol instead of after each step in a protocol" ) );
     textLabel1->setText( tr( "Color by:" ) );
-    QToolTip::add( textLabel1, tr( "Change whether color of curves will change for trials or sweeps" ) );
+    QToolTip::add( textLabel1, tr( "Change the color scheme of the plot" ) );
     colorByComboBox->clear();
     colorByComboBox->insertItem( tr( "Run" ) );
     colorByComboBox->insertItem( tr( "Trial" ) );
     colorByComboBox->insertItem( tr( "Sweep" ) );
+    QToolTip::add( colorByComboBox, QString::null );
     clearButton->setText( QString::null );
     QToolTip::add( clearButton, tr( "Clear plot" ) );
 }

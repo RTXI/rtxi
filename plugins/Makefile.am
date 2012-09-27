@@ -4,7 +4,7 @@ MAINTAINERCLEANFILES = Makefile.in
 
 SUBDIRS = \
 	analogy_device \
-	clamp_suite \
+	clamp_protocol \
 	comedi_device \
 	comedilib_device \
 	connector \

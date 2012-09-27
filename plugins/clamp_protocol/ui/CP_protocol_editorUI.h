@@ -1,7 +1,7 @@
 /****************************************************************************
-** Form interface generated from reading ui file 'CS_protocol_editorUI.ui'
+** Form interface generated from reading ui file 'CP_protocol_editorUI.ui'
 **
-** Created: Wed Apr 4 11:39:46 2012
+** Created: Wed Sep 26 15:49:24 2012
 **
 ** WARNING! All changes made in this file will be lost!
 ****************************************************************************/

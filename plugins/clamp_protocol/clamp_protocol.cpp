@@ -1,5 +1,5 @@
-#include "clamp_suite.h"
-#include "CS_protocol_editor.h"
+#include "clamp_protocol.h"
+#include "CP_protocol_editor.h"
 
 #include <cmath>
 #include <iostream>
@@ -47,17 +47,17 @@ static Workspace::variable_t vars[] = { // Variables
 static size_t num_vars = sizeof( vars ) / sizeof( Workspace::variable_t ); // Required variable (number of variables)
 
 // Class Panel - GUI and Execution
-ClampSuite::Panel::Panel( QWidget *parent )
+ClampProtocol::Panel::Panel( QWidget *parent )
  : QWidget( parent, 0, Qt::WStyle_NormalBorder | Qt::WDestructiveClose ),
    RT::Thread( 0 ),
-   Workspace::Instance( "Clamp Suite", vars, num_vars ),
+   Workspace::Instance( "Clamp Protocol", vars, num_vars ),
    trial( 1 ), time( 0 ), segmentNumber( 1 ), sweep( 1 ),  voltage( 0 ), intervalTime( 1000 ),
    numTrials( 1 ), junctionPotential( 0 ), executeMode( IDLE ), segmentIdx( 0 ), sweepIdx( 0 ),
    stepIdx( 0 ), trialIdx( 0 ), fifo( 10 * 1048576 ), recordData( false ), recording( false ), plotting( false )
    {
     
-    mainWindow = new CS_main_windowUI( this ); // GUI built using Qt Desinger
-    setCaption( QString::number( getID() ) + " Clamp Suite" );
+    mainWindow = new CP_main_windowUI( this ); // GUI built using Qt Desinger
+    setCaption( QString::number( getID() ) + " Clamp Protocol" );
 
     // Construct main layout
     QBoxLayout *layout = new QVBoxLayout( this );
@@ -106,19 +106,19 @@ ClampSuite::Panel::Panel( QWidget *parent )
     setActive( true );
 }
 
-ClampSuite::Panel::~Panel( void ) {
+ClampProtocol::Panel::~Panel( void ) {
     setActive( false ); // Stop RT thread
     
-    Plugin::getInstance()->removeClampSuitePanel( this );
+    Plugin::getInstance()->removeClampProtocolPanel( this );
 
     while( plotWindowList.size() )
         delete plotWindowList.front();
 }
 
 // Settings Functions
-void ClampSuite::Panel::doDeferred( const Settings::Object::State & ) {}
+void ClampProtocol::Panel::doDeferred( const Settings::Object::State & ) {}
  
-void ClampSuite::Panel::doLoad( const Settings::Object::State &s ) {
+void ClampProtocol::Panel::doLoad( const Settings::Object::State &s ) {
     if ( s.loadInteger("Maximized") )
         showMaximized();
     else if ( s.loadInteger("Minimized") )
@@ -179,7 +179,7 @@ void ClampSuite::Panel::doLoad( const Settings::Object::State &s ) {
         QObject::connect( this, SIGNAL(plotCurve(double * , curve_token_t)), plotWindow, SLOT(addCurve(double *, curve_token_t)) );
         plotWindowList.push_back ( plotWindow );;
         plotWindow->show();
-        plotWindow->setCaption( QString::number( getID() ) + " Clamp Suite: Plot Window (" + QString::number( i + 1 ) + ")" );
+        plotWindow->setCaption( QString::number( getID() ) + " Clamp Protocol: Plot Window (" + QString::number( i + 1 ) + ")" );
         plotWindow->load( s.loadState( QString::number(i) ) );
     }
 
@@ -189,7 +189,7 @@ void ClampSuite::Panel::doLoad( const Settings::Object::State &s ) {
     }
 }
 
-void ClampSuite::Panel::doSave( Settings::Object::State &s ) const {
+void ClampProtocol::Panel::doSave( Settings::Object::State &s ) const {
     if ( isMaximized() )
         s.saveInteger( "Maximized", 1 );
     else if ( isMinimized() )
@@ -216,7 +216,7 @@ void ClampSuite::Panel::doSave( Settings::Object::State &s ) const {
         s.saveState( QString::number(n++), (*i)->save() );
 }
 
-void ClampSuite::Panel::execute( void ) { // RT thread execution
+void ClampProtocol::Panel::execute( void ) { // RT thread execution
     switch( executeMode ) {
         
     case IDLE:
@@ -300,7 +300,7 @@ void ClampSuite::Panel::execute( void ) { // RT thread execution
                 break;
                 
             default:
-                std::cout << "Error - ClampSuite::execute(): switch( stepType ) default case reached" << std::endl;
+                std::cout << "Error - ClampProtocol::execute(): switch( stepType ) default case reached" << std::endl;
                 break;
             } // end switch( stepType)
 
@@ -393,7 +393,7 @@ void ClampSuite::Panel::execute( void ) { // RT thread execution
 
 
 // Event handling
-void ClampSuite::Panel::receiveEvent( const ::Event::Object *event ) {
+void ClampProtocol::Panel::receiveEvent( const ::Event::Object *event ) {
     if( event->getName() == Event::RT_POSTPERIOD_EVENT )
         period = RT::System::getInstance()->getPeriod()*1e-6; // Grabs RTXI thread period and converts to ms (from ns)    
     if( event->getName() == Event::START_RECORDING_EVENT )
@@ -402,7 +402,7 @@ void ClampSuite::Panel::receiveEvent( const ::Event::Object *event ) {
         recording = false;
 }
 
-void ClampSuite::Panel::receiveEventRT( const ::Event::Object *event ) {
+void ClampProtocol::Panel::receiveEventRT( const ::Event::Object *event ) {
     if( event->getName() == Event::RT_POSTPERIOD_EVENT )
         period = RT::System::getInstance()->getPeriod()*1e-6; // Grabs RTXI thread period and converts to ms (from ns)
     if( event->getName() == Event::START_RECORDING_EVENT )
@@ -412,7 +412,7 @@ void ClampSuite::Panel::receiveEventRT( const ::Event::Object *event ) {
 }
 
 // Panel Slot Functions
-void ClampSuite::Panel::pause( bool paused ) { // Outputs set to 0, RT thread halted
+void ClampProtocol::Panel::pause( bool paused ) { // Outputs set to 0, RT thread halted
     if( paused ) {
         setActive( false );
         output( 0 ) = 0;
@@ -421,7 +421,7 @@ void ClampSuite::Panel::pause( bool paused ) { // Outputs set to 0, RT thread ha
         setActive( true );    
 }
 
-void ClampSuite::Panel::updateDisplay( void ) { // GUI refresh
+void ClampProtocol::Panel::updateDisplay( void ) { // GUI refresh
     mainWindow->trialNumberEdit->setText( QString::number(trial) );
     mainWindow->segmentEdit->setText( QString::number(segmentNumber) );
     mainWindow->sweepEdit->setText( QString::number(sweep) );
@@ -433,7 +433,7 @@ void ClampSuite::Panel::updateDisplay( void ) { // GUI refresh
         }
 }
 
-void ClampSuite::Panel::updatePlot( void ) { // Plot refresh    
+void ClampProtocol::Panel::updatePlot( void ) { // Plot refresh    
     curve_token_t token;
 
     // Read from FIFO every refresh and emit plot signals if necessary
@@ -444,7 +444,7 @@ void ClampSuite::Panel::updatePlot( void ) { // Plot refresh
     }
 }
 
-void ClampSuite::Panel::updateOptions( void ) { // Update changes to parameter values
+void ClampProtocol::Panel::updateOptions( void ) { // Update changes to parameter values
     int it = mainWindow->intervalTimeEdit->value();
     int nt = mainWindow->trialsEdit->value();
     double jp = mainWindow->junctionPotentialEdit->text().toDouble();
@@ -464,11 +464,11 @@ void ClampSuite::Panel::updateOptions( void ) { // Update changes to parameter v
     RT::System::getInstance()->postEvent( &event );
 }
 
-void ClampSuite::Panel::loadProtocol( void ) {
+void ClampProtocol::Panel::loadProtocol( void ) {
      // Save dialog to retrieve desired filename and location
     QString fileName = QFileDialog::getOpenFileName(
                                                     "~/",
-                                                    "Clamp Suite Protocol Files (*.csp)",
+                                                    "Clamp Protocol Files (*.csp)",
                                                     this,
                                                     "open file dialog",
                                                     "Open a protocol" );
@@ -507,22 +507,22 @@ void ClampSuite::Panel::loadProtocol( void ) {
     QToolTip::add( mainWindow->protocolNameEdit, fileName );
 }
 
-void ClampSuite::Panel::openProtocolEditor( void ) {
+void ClampProtocol::Panel::openProtocolEditor( void ) {
     ProtocolEditor *protocolEditor = new ProtocolEditor( this );
     protocolEditor->show();
 }
 
-void ClampSuite::Panel::openPlotWindow( void ) {
+void ClampProtocol::Panel::openPlotWindow( void ) {
     PlotWindow *plotWindow = new PlotWindow( MainWindow::getInstance()->centralWidget(), this );
     QObject::connect( this, SIGNAL(plotCurve(double * , curve_token_t)), plotWindow, SLOT(addCurve(double *, curve_token_t)) );
     plotWindowList.push_back( plotWindow );
     plotWindow->show();
-    plotWindow->setCaption( QString::number( getID() ) + " Clamp Suite: Plot Window (" + QString::number( plotWindowList.size() ) + ")" );
+    plotWindow->setCaption( QString::number( getID() ) + " Clamp Protocol: Plot Window (" + QString::number( plotWindowList.size() ) + ")" );
     plotting = true;
     plotTimer->start(25); // 25ms refresh rate for plotting
 }
 
-void ClampSuite::Panel::removePlotWindow( PlotWindow *plotWindow ) {
+void ClampProtocol::Panel::removePlotWindow( PlotWindow *plotWindow ) {
     plotWindowList.remove( plotWindow );
     if( plotWindowList.empty() ) {
         plotting = false;
@@ -530,7 +530,7 @@ void ClampSuite::Panel::removePlotWindow( PlotWindow *plotWindow ) {
     }
 }
 
-void ClampSuite::Panel::toggleProtocol( void ) { // Starts and stops protocol
+void ClampProtocol::Panel::toggleProtocol( void ) { // Starts and stops protocol
     bool on = mainWindow->runProtocolButton->isOn();
     if( on ) {
         if( protocol.numSegments() == 0 ) { // If no protocol has been loaded
@@ -547,11 +547,11 @@ void ClampSuite::Panel::toggleProtocol( void ) { // Starts and stops protocol
 }
 
 // RT::Events - Called from GUI thread, handled by RT thread
-ClampSuite::Panel::UpdateOptionsEvent::UpdateOptionsEvent( Panel *p, int it, int nt, double jp, bool rd )
+ClampProtocol::Panel::UpdateOptionsEvent::UpdateOptionsEvent( Panel *p, int it, int nt, double jp, bool rd )
     : panel( p ), intervalTimeValue( it ), numTrialsValue( nt ), junctionPotentialValue( jp ), recordDataValue( rd ) {
 }
 
-int ClampSuite::Panel::UpdateOptionsEvent::callback( void ) {
+int ClampProtocol::Panel::UpdateOptionsEvent::callback( void ) {
     // Set workspace parameter values
     panel->intervalTime = intervalTimeValue;
     panel->numTrials = numTrialsValue;
@@ -560,11 +560,11 @@ int ClampSuite::Panel::UpdateOptionsEvent::callback( void ) {
     return 0;
 }
 
-ClampSuite::Panel::ToggleProtocolEvent::ToggleProtocolEvent( Panel *p, bool po, bool rd )
+ClampProtocol::Panel::ToggleProtocolEvent::ToggleProtocolEvent( Panel *p, bool po, bool rd )
  : panel( p ), protocolOn( po ), recordData( rd ) {
 }
 
-int ClampSuite::Panel::ToggleProtocolEvent::callback( void ) {
+int ClampProtocol::Panel::ToggleProtocolEvent::callback( void ) {
     if( protocolOn ) { // Start protocol, reinitialize parameters to start values
         panel->period = RT::System::getInstance()->getPeriod()*1e-6; // Grabs RTXI thread period and converts to ms (from ns)
         panel->trial = 1;
@@ -598,32 +598,32 @@ int ClampSuite::Panel::ToggleProtocolEvent::callback( void ) {
 
 // Class Plugin
 extern "C" Plugin::Object *createRTXIPlugin( void * ) {
-    return ClampSuite::Plugin::getInstance();
+    return ClampProtocol::Plugin::getInstance();
 }
 
-ClampSuite::Plugin::Plugin( void ) {
-    menuID = MainWindow::getInstance()->createUtilMenuItem( "Clamp Suite", this, SLOT(createClampSuitePanel(void)) );
+ClampProtocol::Plugin::Plugin( void ) {
+    menuID = MainWindow::getInstance()->createPatchClampMenuItem( "Clamp Protocol", this, SLOT(createClampProtocolPanel(void)) );
 }
 
-ClampSuite::Plugin::~Plugin( void ) {
+ClampProtocol::Plugin::~Plugin( void ) {
     MainWindow::getInstance()->removeUtilMenuItem( menuID );
     while( panelList.size() )
         delete panelList.front();
     instance = 0;
 }
 
-void ClampSuite::Plugin::createClampSuitePanel( void ) {
+void ClampProtocol::Plugin::createClampProtocolPanel( void ) {
     Panel *panel = new Panel( MainWindow::getInstance()->centralWidget() );
     panelList.push_back( panel );
 }
 
-void ClampSuite::Plugin::removeClampSuitePanel( Panel *p ) {
+void ClampProtocol::Plugin::removeClampProtocolPanel( Panel *p ) {
     panelList.remove( p );
 }
 
-void ClampSuite::Plugin::doDeferred( const Settings::Object::State & ) { }
+void ClampProtocol::Plugin::doDeferred( const Settings::Object::State & ) { }
 
-void ClampSuite::Plugin::doLoad( const Settings::Object::State &s ) {
+void ClampProtocol::Plugin::doLoad( const Settings::Object::State &s ) {
     for( size_t i = 0 ; i < static_cast<size_t>( s.loadInteger("Num Panels") ) ; ++i ) {
         Panel *panel = new Panel( MainWindow::getInstance()->centralWidget() );
         panelList.push_back ( panel );
@@ -631,7 +631,7 @@ void ClampSuite::Plugin::doLoad( const Settings::Object::State &s ) {
     }
 }
 
-void ClampSuite::Plugin::doSave( Settings::Object::State &s ) const {
+void ClampProtocol::Plugin::doSave( Settings::Object::State &s ) const {
     s.saveInteger( "Num Panels",panelList.size() );
     size_t n = 0;
     for( std::list<Panel *>::const_iterator i = panelList.begin(), end = panelList.end() ; i != end ; ++i )
@@ -639,9 +639,9 @@ void ClampSuite::Plugin::doSave( Settings::Object::State &s ) const {
 }
 
 static Mutex mutex;
-ClampSuite::Plugin *ClampSuite::Plugin::instance = 0;
+ClampProtocol::Plugin *ClampProtocol::Plugin::instance = 0;
 
-ClampSuite::Plugin *ClampSuite::Plugin::getInstance( void ) {
+ClampProtocol::Plugin *ClampProtocol::Plugin::getInstance( void ) {
     if( instance )
         return instance;
 

@@ -190,6 +190,19 @@ public:
   removeUtilMenuItem(int index);
 
   /*!
+   * Add an item to the Utilities->Patch Clamp menu.
+   *
+   * \param label The text that will appear in the menu.
+   * \param handler The object that will handle signals from the menu.
+   * \param slot The slot in the handler that the signal will activate.
+   * \return The index of the new menu item.
+   */
+
+  int
+  createPatchClampMenuItem(const std::string &label, const QObject *handler,
+      const char *slot);
+    
+  /*!
    * Add an item to the System menu.
    *
    * \param label The text that will appear in the menu.
@@ -201,7 +214,7 @@ public:
   int
   createSystemMenuItem(const std::string &label, const QObject *handler,
       const char *slot);
-
+    
   /*!
    * Insert a line separator into the System menu.
    */
@@ -260,6 +273,7 @@ private:
   QPopupMenu *fileMenu;
   QPopupMenu *moduleMenu;
   QPopupMenu *utilMenu;
+  QPopupMenu *patchClampSubMenu;
   QPopupMenu *systemMenu;
   QPopupMenu *windowsMenu;
 
