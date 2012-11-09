@@ -3,6 +3,10 @@ DISTCLEANFILES =
 MAINTAINERCLEANFILES = Makefile.in
 
 SUBDIRS = \
+	amplifier_control/am_2400_commander \
+	amplifier_control/axon_axopatch1d_commander \
+	amplifier_control/axon_axopatch200_commander \
+	amplifier_control/axon_multiclamp700_commander \
 	analogy_device \
 	clamp_protocol \
 	comedi_device \

@@ -161,6 +161,10 @@ scripts/rtxi_comedi
 scripts/rtxi_plugin_config
 testsuite/Makefile
 plugins/Makefile
+plugins/amplifier_control/am_2400_commander/Makefile
+plugins/amplifier_control/axon_axopatch1d_commander/Makefile
+plugins/amplifier_control/axon_axopatch200_commander/Makefile
+plugins/amplifier_control/axon_multiclamp700_commander/Makefile
 plugins/analogy_device/Makefile
 plugins/clamp_protocol/Makefile
 plugins/comedi_device/Makefile

@@ -33,8 +33,7 @@ static void getDevice(DAQ::Device *d,void *p) {
 
 Axon200Commander::Panel::Panel(QWidget *parent)
     : QWidget(parent,"Axon 200 Amp Commander",Qt::WStyle_NormalBorder|Qt::WDestructiveClose),
-      RT::Thread(0), IO::Block("Axon 200 Commander",chan,2), currentGain(1), oldGain(1) {
-std::cout<<num_chan<<std::endl;
+      RT::Thread(0), IO::Block("Axon 200 Commander",chan,num_chan), currentGain(1), oldGain(1) {
     mainUI = new Axon_200_Amp_CommanderUI( this );
     
     QBoxLayout *mainLayout = new QVBoxLayout( this );
