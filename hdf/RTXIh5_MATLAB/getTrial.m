@@ -1,9 +1,10 @@
 function [trial] = getTrial(fname,trialNum)
-% [trial] = getTrial(fname,trialNum)
+%% [trial] = getTrial(fname,trialNum)
 % 
 % This function returns all the channel data, metadata, and parameters used 
 % in the specified trial of a RTXI HDF5 file. Supports unmatlabized files.
 %
+%      trial_number: 3
 %        parameters: [1x1 struct]
 %     numParameters: 15
 %          datetime: '2009-10-21T23:02:28'
@@ -19,82 +20,83 @@ function [trial] = getTrial(fname,trialNum)
 %              file: 'dclamp.h5'
 %
 % AUTHOR: Risa Lin
+%         Francis Ortega (12/13/2012)
 % DATE:  10/31/2010
 
 % MODIFIED:
-% 9/27/2011 - use lower level functions to read the synchronous data, users no longer have
-% to matlabize their files
-%s
+% 9/27/2011 - use lower level functions to read the synchronous data, users
+% no longer have to matlabize their files
+%
 % 11/11/2010 - corrected extraction of synchronous channel names when >=10
 % channels are saved
+%
+% 12/13/2012 - corrected extraction of data when trials >= 10 by replacing
+%              low level functions with high level functions using explicit
+%              path as argument
+%            - replaced depracted hdf5read function with h5read
+%            - removed "Old Data Recorder" code
+%            - added more comments and removed eval statements for
+%              readability
+%            - added Trial number
+%            - rearranged order of variables, so file name and trial are at
+%              top
 
-
+%% Setup
+% If trial is not specified, default to trial 1
 if nargin < 2
     trialNum = 1;
 end
 
+% Load file and check if trial requested is valid
 fileinfo = rtxi_read(fname);
 if trialNum>fileinfo.numTrials
     error('There are only %i trials in this file.\n',fileinfo.numTrials)
 end
 
+% Trial path
+path = strcat( '/Trial', num2str(trialNum) );
+
+%% Metadata
+% File
+trial.file = fname;
+% Trial Number
+trial.trial_number = trialNum;
+% Parameters 
 [trial.parameters, trial.numParameters] = getParameters(fname,trialNum);
-
-eval(['dset = hdf5read(fname,''Trial',num2str(trialNum),'/Date'');'])
-trial.datetime = dset.Data;
-eval(['ds = double(hdf5read(fname,''Trial',num2str(trialNum),'/Downsampling Rate''));'])
-eval(['trial.exp_dt = double(hdf5read(fname,''Trial',num2str(trialNum),'/Period (ns)''))*1e-9;'])
-trial.data_dt = trial.exp_dt*ds;
-eval(['trial.timestart = double(hdf5read(fname,''Trial',num2str(trialNum),'/Timestamp Start (ns)''))*1e-9;'])
-eval(['trial.timestop = double(hdf5read(fname,''Trial',num2str(trialNum),'/Timestamp Stop (ns)''))*1e-9;'])
-
+% Date
+trial.datetime = h5read( fname, [path '/Date'] );
+% Downsampling Rate
+ds = double( h5read( fname, [path '/Downsampling Rate'] ) );
+% RTXI Thread Period
+trial.exp_dt = double( h5read( fname, [path '/Period (ns)'] ) ) * 1e-9;
+% Period of Data Sampling
+trial.data_dt = trial.exp_dt * ds;
+% Time start
+trial.timestart = double( h5read( fname, [path '/Timestamp Start (ns)'] ) ) * 1e-9;
+% Time stop
+trial.timestop = double( h5read( fname, [path '/Timestamp Stop (ns)'] ) ) * 1e-9;
+% Time Conversion
 trial.timestart = convertTime(trial.timestart);
 trial.timestop = convertTime(trial.timestop);
 
-% Old Data Recorder
-% trial.numChannels = size(fileinfo.GroupHierarchy(1).Groups(trialNum).Groups(3).Datasets,2)-1;
-% 
-% for i=1:trial.numChannels
-%     dset = hdf5read(fileinfo.GroupHierarchy(1).Groups(trialNum).Groups(3).Datasets(i));
-%     trial.channels{i} = dset.Data;
-% end
-% 
-% data = hdf5read(fileinfo.GroupHierarchy(1).Groups(trialNum).Groups(3).Datasets(trial.numChannels+1));
-% numsamples = size(data,2)/trial.numChannels;
-% trial.data = reshape(data,trial.numChannels,numsamples);
-% trial.data = trial.data';
+%% Channel Data
+trial.data = h5read( fname, [path '/Synchronous Data/Channel Data'] )';
+% Number of Channels
+trial.numChannels = size( trial.data, 2 );
 
-% these 3 lines were for matlabized files
-%trial.numChannels = fileinfo.GroupHierarchy(1).Groups(trialNum).Groups(3).Datasets(end).Dims(1);
-%trial.data = hdf5read(fileinfo.GroupHierarchy(1).Groups(trialNum).Groups(3).Datasets(end));
-%trial.data = trial.data';
-
-% these next lines are lower level code for unmatlabized files that directly access the
-% packet table construct that RTXI writes with
-trial.numChannels = size(fileinfo.GroupHierarchy(1).Groups(trialNum).Groups(3).Datasets,2)-1;
-fileID = H5F.open(fname, 'H5F_ACC_RDWR', 'H5P_DEFAULT');
-datasetID = H5D.open(fileID, fileinfo.GroupHierarchy.Groups(trialNum).Groups(3).Datasets(end).Name);
-trial.data = H5D.read(datasetID, 'H5ML_DEFAULT','H5S_ALL','H5S_ALL','H5P_DEFAULT');
-H5F.close(fileID);
-trial.data = trial.data'; % convert to columns
-
+% Names of Channels
 for i=1:trial.numChannels
-    s = fileinfo.GroupHierarchy.Groups(trialNum).Groups(3).Datasets(i).Name;
-    dset = hdf5read(fileinfo.GroupHierarchy(1).Groups(trialNum).Groups(3).Datasets(i));
-    trial.channels{str2double(s(findstr(s,'Channel')+8:end-5))} = dset.Data;
+    trial.channels{i} = h5read( fname, [path '/Synchronous Data/Channel ' num2str(i) ' Name'] );
 end
-% numsamples for matlabized files
-%numsamples = fileinfo.GroupHierarchy(1).Groups(trialNum).Groups(3).Datasets(end).Dims(2);
-% numsamples for unmatlabized files
-numsamples = fileinfo.GroupHierarchy(1).Groups(trialNum).Groups(3).Datasets(end).Dims(1);
+
+% Number of Samples
+numsamples = size( trial.data, 1 );
 trial.time = 0:trial.data_dt:numsamples*trial.data_dt-trial.data_dt;
 trial.time = trial.time';
 trial.length = trial.time(end);
-
-trial.file = fname;
-
 end
 
+%% convertTime Function
 function strtime = convertTime(time)
 hour = time/3600;
 minute = rem(hour,1)*60;
