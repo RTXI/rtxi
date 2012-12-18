@@ -1,2 +1,0 @@
-
-obj-m += addi_common.o
