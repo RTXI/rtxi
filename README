@@ -39,23 +39,14 @@ Building a real-time Ubuntu linux kernel
 1. Install a clean version of Ubuntu. Update and get the following required packages.
 
    $ sudo apt-get update
-
    $ sudo apt-get upgrade
-
    $ sudo apt-get install cvs subversion build-essential
-
-   $sudo apt-get install kernel-package linux-source
-
+   $ sudo apt-get install kernel-package linux-source
    $ sudo apt-get install libncurses5-dev libtool automake
-
    $ sudo apt-get install bison flex qt4-dev-tools
-
    $ sudo apt-get install libboost-dev libgsl0-dev
-
    $ sudo apt-get install install libboost-program-options-dev
-
    $ sudo apt-get install libhdf5-serial-1.8.4
-
    $ sudo apt-get install libqwt5-qt4-dev
 
 2. Download the latest stable version of RTAI 3.x at www.rtai.org.
