@@ -1,0 +1,11 @@
+
+  perl Makefile.PL
+  make
+  make install
+
+Yow!  Who'da guessed?
+
+You can add '-DLIB_DEBUG' to Makefile.PL for a little extra verbosity.
+
+You can run the examples before 'make install' using the 'lperl' script.
+

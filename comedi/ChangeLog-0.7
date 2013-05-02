@@ -1,0 +1,151 @@
+Comedi-0.7.70:
+Ian Abbot:  Replaced use of obsolete kernel pci_find_*() functions with 
+	pci_get_*() replacements.  Fixed loading of dt3000 driver.  
+	Fixed some corner cases in 
+	8253/8254 counter support.  Fixed gcc 3.4 compile 
+	error.  Made improvements to and extensions of
+	compatibility headers used when compiling against older kernels.
+	New amplc_dio200 and amplc_pci224 drivers.
+Phil Blacker:  Fixed fifo-half-full interrupt reliability problems 
+	for PCMCIA boards in ni_mio_common.c.
+Klaas Gadeyne, et al:  Fixed initialization in ni_660x for boards
+	with more than one TIO chip.  Fixed a bug in the configuration of the 
+	TIO to serve as an encoder, for taking into account the index pulse
+	or not.
+Frank Hess:
+	Added INSN_CONFIG_DIO_QUERY for querying the input/output 
+	configuration of a dio line.
+	Added support for firmware upload to pci-6534 in ni_pci_dio driver,
+	and fixed firmware upload for 64 bit arches
+	(requires Comedilib from CVS or next release).
+	Unbroke pcmcia_driver.drv.name in das08_cs.c.
+	Added support for memory mapped output commands (requires 
+	Comedilib from CVS or next release).
+	Added udev support.  Fixed munging in ni_at_ao driver, and made channel 0
+	work. Fixed ai commands in ni_mio_common.c when only 1 scan 
+	is requested.
+	Fixed bogus sample at beginning of ao command in
+	ni_mio_common.c.
+	Added support for pci-6014 to cb_pcidas64 driver.
+Brent Ledvina:  Added support to ni_pcidio driver for stop_src=TRIG_NONE
+	on input commands.
+Emmanuel Pacaud:  Added missing close of comedi device file when
+	detaching comedi_rt_timer driver.  Extended AI streaming capabilities 
+	of the adl_pci9111 driver, and fixed analog output.
+Bernd Porr:  New usbduxfast driver, and updates for usbdux driver.  Fixed
+	submit_urb definition in linux/usb.h compatibility header.
+Jose Luis Sanchez:  New acl7225b and pcl730 drivers.
+Dave Schleef:  Fixes and improvements to autoconf/automake build system.
+	Documentation fixes.  Cleanup of obsolete files.
+Steve Sharples:  Added the ability for the AI command in amplc_pci230
+	driver to support "triggered burst mode" sampling, 
+	ie: scan_begin_src=TRIG_EXT and
+	convert_src=TRIG_TIMER.
+Yeow Ngee Soon:  New adl_pci6208 driver.  Added simple event counting
+	support to ni_660x driver.
+
+Comedi-0.7.69:
+Fixed compilation with rtai-adeos.  USBDUX driver updates (Bernd Porr).
+Command support added to pcl818 driver (Nils Juergens).  Fixes for 64 bit
+cpus.  Fixes for compilation against 2.6 kernels (Dave Schleef).  PCMCIA
+support ported to 2.6 kernel api.  Various unrelated driver bugfixes and
+enhancements (me, Alberto Sechi, Luis Martinez, Eugene Zharkov, Steve
+Sharples).  Fixed RTLinux crashes due to comedi_udelay().
+
+Comedi-0.7.65:
+
+ - ni_atmio.o, ni_pcimio.o: changes to caldacs listed for some boards, should
+   make calibration better
+ - ni_mio_common: ignore more errors from MITE during DMA, and don't
+   disable the interrupt.  Clean up AO error handling.  Add support
+   for CR_ALT_SOURCE to replace AREF_OTHER.  Added TRIG_INT for AI.
+   Added PFI subdevice.
+ - mite.o: removed request_mem_region(), because it's wrong.
+ - comedi_parport.o: fix EOS event handling
+ - cb_pcidas64.o: bug fixes, additional boards, additional features
+ - added devfs support
+ - serial2002.o: new driver from Anders.  Don't know what it supports.
+ - comedi_rt_timer.o: fix for RTAI timer not being started
+ - core: fix analog output streaming.
+ - core: Change bogus locking to spin locks.
+ - contec_pci_dio.o: new driver
+ - kcomedilib: global switch from (int) to (comedi_t *) to be compatible
+   with Comedilib.  Can be reverted by using KCOMEDILIB_DEPRECATED or
+   using the old header.
+ - kcomedilib: added various functions
+ - ni_at_a2150, ni_labpc, pcl711, pcl816, pcl818, rti800: removed settling
+   delay
+ - das16: bug fixes, fixes to interrupt handling
+
+Comedi-0.7.64:
+ 
+ - documentation updates in many drivers
+ - changed stm.lbl.gov to comedi.org or schleef.org
+ - more event bug fixes
+ - made buffer resizing a driver-overridable function
+ - PCI support for 2.0 kernels removed
+ - adl_pci9111.o: new driver from Emmanuel Pacaud <emmanuel.pacaud@free.fr>
+ - adl_pci9118.o: updates from Michal
+ - cb_pcidas64.o: support for additional boards, AI insn and commands
+   working with DMA
+ - various drivers: converted to pci_resource_start()
+ - comedi_rt_timer.o: 64-bit divide code moved to compatibility header
+ - comedi_test.o: new driver from Joachim Wuttke, Frank
+ - das16.o: support for DAS16JR/16
+ - dt3000.o: preliminary AI cmd support.  untested.
+ - icp_multi.o: update from Anne
+ - ni_daq_dio24.o: new driver from Daniel Vecino Castel <dvecino@able.es>
+ - ni_pcidio.o: DMA now works for input streams.
+ - ni_pcimio.o: DMA support mostly rewritten.  AI passes comedi_test with
+   DMA enabled.  Directly accesssing STC registers disabled to better
+   understand problems with 611x boards.  Added CMDF_RAWDATA support.
+   Many fixes for 611x abd 671x boards.
+ - ni_at_ao.o: new driver (ds)
+ - ni_mio_common: made caldacs more flexible.  Added debugging caldac.
+ - rtd520.o: update from Dan
+ - debian/: new Debian packaging
+ - include/linux/pci.h: cleanups of compatiblity macros
+ - rpm/: new RPM packaging
+ - pcl816.o: new driver from Juan Grigera <juan@grigera.com.ar>
+
+Comedi-0.7.63:
+
+ - Fix event bug introduced in 0.7.62
+ - Fix resizing buffers on subdevice!=0
+ - ni_mio_common: fixes for pci-611x boards (incomplete)
+
+Comedi-0.7.62:
+
+ - rewrite build system
+ - added menuconfig
+ - bugfix for old bash versions
+ - Makefiles are now autogenerated from kbuild-2.5-style Makefile.in
+ - overall: added MODULE_LICENSE tags
+ - removal of trig support
+ - most drivers: change comedi_done(), etc., to async flag setting
+ - all drivers: cleanups
+ - 8255.o: 64-bit cleanups
+ - icp_multi.o: new driver
+ - amcc_s5933.o: made PCI chip driver into separate module
+ - cb_pcidas.o: fixes for 1602/16, PCI cleanup
+ - comedi_rt_timer.o: added support for DIO subdevices
+ - das1800.o: DMA fixes
+ - ni_labpc.o: command improvements
+ - ni_pcidio.o: command support added
+ - kcomedilib.o: fix problem with removal of trig support
+
+Comedi-0.7.61:
+
+ - overall: support for kbuild-2.5
+ - overall: removal of comedi_trig support and cleanup
+ - overall: cleanup of kernel dependencies
+ - overall: Documentation/comedi/drivers.txt now autogenerated from inline
+   information
+ - Documentation/comedi/hardware.txt: same
+ - amplc_pci230.o: new driver
+ - cb_pcidas64.o: new driver
+ - ni_670x.o: new driver
+ - ni_labpc.o: new driver
+ - ssv_dnp.o: new driver
+
+

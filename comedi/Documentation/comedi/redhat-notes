@@ -1,0 +1,174 @@
+From: Dan Christian <dac@ptolemy.arc.nasa.gov>
+Reply-To: dac@ptolemy.arc.nasa.gov
+Organization: NASA Ames Research Center
+To: comedi@stm.lbl.gov
+Subject: Notes on building under RedHat 7.1
+Date: Wed, 23 May 2001 10:25:37 -0700
+
+
+I just got comedi building under a stock Redhat 7.1 kernel.  Here are 
+my notes on how to make it work.  There are really just two issues to 
+fix: getting the right .config file, and working around RedHat's custom 
+version.h file.
+
+You have to have kernel-headers and kernel-source installed and then 
+you have to get the right config file in place.  In my case, I'm 
+building for a K6-2 (i586 compatible).
+
+# as root
+cd /usr/src
+ln -s linux-2.4.2 linux		# this may already have been done
+cd linux
+# now copy the right config file to the standard place
+cp -p configs/kernel-2.4.2-i586.config .config
+
+# as any user
+cd comedi
+make config
+# you will get a message about the kernel version.  Ignore it (for now)
+# This is due to RedHat's multi-kernel version.h file.
+emacs .uts_version
+# it will have multiple values for UTS_VERSION.  
+# Edit to just have your kernel (e.g. 2.4.2-2)
+make clean
+make dep
+make
+
+# as root
+make install
+
+Everything seems to work fine.
+
+-Dan
+
+
+_______________________________________________
+comedi mailing list
+comedi@stm.lbl.gov
+http://stm.lbl.gov/cgi-bin/mailman/listinfo/comedi
+
+
+
+From: Kevin Thayer <kthayer@sytronics.com>
+Subject: RE: error when make comedi
+Date: Thu, 26 Jul 2001 15:01:20 -0400
+
+
+Hi, 
+
+I am developing applications using Labview 6.0 on Linux 7.0
+(2.2.16-22).  Here are the detailed instructions on how I
+successfully installed the comedi drivers for an NI-6023E Daq
+board. I was receiving the same errors as mentioned in the previous
+e-mail.
+
+Linux E-series Installation Document for Red Hat Linux 7.0
+(2.2.16-22) (comedi drivers)
+
+1.) The first thing you will need to do is create a .config file
+for the comedi installation in /usr/src/linux (note: in Red Hat
+7.0, usr/src/linux is a symbolic link to usr/src/linux- 2.2.16).
+First install the kernel source header files from the Red Hat
+installation CD if they are not already in place. Make sure that
+there is a symbolic link to the source headers from the kernel
+source directory (usr/src/linux should be symbolically linked to
+usr/src/linux2.2.16). Backup the old ./config file first.
+
+2.) Navigate to the /usr/src/linux directory and enter the command
+make menuconfig.  When the menu comes up, click on the exit button
+(to accept all of the default settings) and opt to save the new
+configuration.
+
+3.) Copy the comedi-0.7.59.tgz file to the /usr/local directory
+and unzip it (tar xzvf comedi-0.7.59.tgz).
+
+4.) Navigate inside the newly created
+/usr/local/comedi-0.7.59/include/linux and make the following
+changes to the file fs.h with the editor of your choice, so that
+it resembles the following text (basically, four lines commented
+out from the original version):
+
+/*
+*  linux / fs.h compatability header
+*/
+
+#ifndef  __COMPAT_LINUX_FS_H_
+#define __COMPAT_LINUX_FS_H_
+
+#include <linux/version.h>
+
+/* #if LINUX_VERSION_CODE < 0x020400 */
+/* #define KILL_FASYSNC(a,b,c)	kill_fasync((a),(c)) */
+/* #else */
+
+#define KILL_FASYNC(a,b,c)	kill_fasync(&(a),(b),(c))
+
+/* #endif */
+
+#include_next <linux/fs.h>
+
+#endif
+
+
+5.)  Edit the file /usr/src/linux/include/linux/version.h.
+Ensure that the value for UTS_RELEASE matches the current kernel
+(type uname -r from the console).
+
+6.) Navigate back to the /usr/local/comedi-0.7.59 directory and
+enter make config.
+
+7.) Press enter to accept the default linux source tree.
+
+8.) Enter 'y' for the first two features, Trig compatability and
+Verbose debugging.
+
+9.) Enter 'm' for the kernel comedilib feature.
+
+10.) Enter 'n' for all of the remaining features except for the
+following:
+
+National Instruments Boards: 'y'
+PCI-MIO E Series: 'm'
+Generic 8255 support: 'm'
+
+11.) After configuring the features, edit the file .uts_version
+(pico or emacs) and ensure that the correct kernel version is
+listed. If not, change it.
+
+12.) Run the following commands consecutively:
+
+make clean
+make dep
+make
+make install
+make dev
+		the last command installs the following devices:
+
+		/dev/comedi0
+		/dev/comedi1
+		/dev/comedi2
+		/dev/comedi3
+
+13.) Next, install the comedi Library. Copy the file
+comedilib-0.7.16.tgz to the /usr/local directory and unzip using
+the tar command.
+
+14.) Navigate to the /usr/local/comedilib-0.7.16 directory.
+
+15.) Run the following commands consecutively:
+
+make
+make install
+
+16.) To install the driver into the kernel, enter the command:
+/sbin/modprobe ni_pcimio
+
+17.) Next, we must associate the device file with the driver:
+/usr/sbin/comedi_config  /dev/comedi0 ni_pcimio
+
+
+_______________________________________________
+comedi mailing list
+comedi@stm.lbl.gov
+http://stm.lbl.gov/cgi-bin/mailman/listinfo/comedi
+

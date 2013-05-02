@@ -1,0 +1,202 @@
+I: Comedi version: 0.7.59
+I: Comedilib version: unknown =)
+I: driver name: pcl812
+I: device name: pcl812pg
+I:
+I: subdevice 0
+I: testing info...
+rev 1
+I: subdevice type: 1 (analog input)
+  number of channels: 16
+  max data value: 4095
+  ranges:
+    all chans: [-5,5] [-2.5,2.5] [-1.25,1.25] [-0.625,0.625] [-0.3125,0.3125]
+I: testing mode0_read...
+rev 1
+comedi_trig_ioctl: -1
+W: comedi_trig_ioctl: errno=5 Chyba vstupu/výstupu
+I: testing insn_read...
+rev 1
+comedi_do_insn returned 1, good
+I: testing insn_read_time...
+rev 1
+comedi_do_insn: 3
+read time: 36 us
+I: testing cmd_no_cmd...
+not applicable
+I: testing cmd_probe_src_mask...
+rev 1
+command source mask:
+  start: now
+  scan_begin: follow
+  convert: timer
+  scan_end: count
+  stop: none|count
+I: testing cmd_probe_fast_1chan...
+command fast 1chan:
+  start: now 0
+  scan_begin: follow 0
+  convert: timer 33000
+  scan_end: count 1
+  stop: count 2
+I: testing cmd_read_fast_1chan...
+I: testing cmd_logic_bug...
+rev 1
+command_test returned 1, good
+I: testing cmd_fifo_depth_check...
+64, 1
+128, 1
+256, 1
+512, 1
+1024, 1
+2048, 1
+4096, 1
+8192, 2
+16384, 4
+32768, 8
+I: testing cmd_start_inttrig...
+  not supported
+I: testing mmap...
+0x40141000 ok
+0x40142000 ok
+0x40143000 ok
+0x40144000 ok
+0x40145000 ok
+compare ok
+0x40141000 segfaulted (ok)
+0x40142000 segfaulted (ok)
+0x40143000 segfaulted (ok)
+0x40144000 segfaulted (ok)
+0x40145000 segfaulted (ok)
+I: testing read_select...
+I: testing bufconfig...
+buffer size 65536
+max buffer size 65536
+setting buffer size to 4096
+buffer size set to 4096
+buffer size now at 4096
+setting buffer size past limit, 69632
+got EPERM, good
+setting buffer size to max, 65536
+buffer size now at 65536
+I:
+I: subdevice 1
+I: testing info...
+rev 1
+I: subdevice type: 2 (analog output)
+  number of channels: 2
+  max data value: 4095
+  ranges:
+    all chans: [0,5]
+I: testing mode0_read...
+rev 1
+comedi_trig_ioctl: -1
+W: comedi_trig_ioctl: errno=5 Chyba vstupu/výstupu
+I: testing insn_read...
+rev 1
+comedi_do_insn returned 1, good
+I: testing insn_read_time...
+rev 1
+comedi_do_insn: 3
+read time: 5 us
+I: testing cmd_no_cmd...
+got EIO, good
+I: testing cmd_probe_src_mask...
+not applicable
+I: testing cmd_probe_fast_1chan...
+not applicable
+I: testing cmd_read_fast_1chan...
+not applicable
+I: testing cmd_logic_bug...
+not applicable
+I: testing cmd_fifo_depth_check...
+not applicable
+I: testing cmd_start_inttrig...
+not applicable
+I: testing mmap...
+not applicable
+I: testing read_select...
+not applicable
+I: testing bufconfig...
+buffer length is 0, good
+I:
+I: subdevice 2
+I: testing info...
+rev 1
+I: subdevice type: 3 (digital input)
+  number of channels: 16
+  max data value: 1
+  ranges:
+    all chans: [0,5]
+I: testing mode0_read...
+rev 1
+comedi_trig_ioctl: -1
+W: comedi_trig_ioctl: errno=5 Chyba vstupu/výstupu
+I: testing insn_read...
+rev 1
+comedi_do_insn returned 1, good
+I: testing insn_read_time...
+rev 1
+comedi_do_insn: 3
+read time: 42 us
+I: testing cmd_no_cmd...
+got EIO, good
+I: testing cmd_probe_src_mask...
+not applicable
+I: testing cmd_probe_fast_1chan...
+not applicable
+I: testing cmd_read_fast_1chan...
+not applicable
+I: testing cmd_logic_bug...
+not applicable
+I: testing cmd_fifo_depth_check...
+not applicable
+I: testing cmd_start_inttrig...
+not applicable
+I: testing mmap...
+not applicable
+I: testing read_select...
+not applicable
+I: testing bufconfig...
+buffer length is 0, good
+I:
+I: subdevice 3
+I: testing info...
+rev 1
+I: subdevice type: 4 (digital output)
+  number of channels: 16
+  max data value: 1
+  ranges:
+    all chans: [0,5]
+I: testing mode0_read...
+rev 1
+comedi_trig_ioctl: -1
+W: comedi_trig_ioctl: errno=5 Chyba vstupu/výstupu
+I: testing insn_read...
+rev 1
+comedi_do_insn returned 1, good
+I: testing insn_read_time...
+rev 1
+comedi_do_insn: 3
+read time: 5 us
+I: testing cmd_no_cmd...
+got EIO, good
+I: testing cmd_probe_src_mask...
+not applicable
+I: testing cmd_probe_fast_1chan...
+not applicable
+I: testing cmd_read_fast_1chan...
+not applicable
+I: testing cmd_logic_bug...
+not applicable
+I: testing cmd_fifo_depth_check...
+not applicable
+I: testing cmd_start_inttrig...
+not applicable
+I: testing mmap...
+not applicable
+I: testing read_select...
+not applicable
+I: testing bufconfig...
+buffer length is 0, good
+

@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
+	"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd" [
+<!ENTITY % comedilib_entities SYSTEM "comedilib.ent">
+%comedilib_entities;
+]>
+
+<glossary id="comedilib-glossary">
+  <title>
+    Glossary
+  </title>
+
+  <glossentry id="api">
+    <glossterm>
+    Application Program Interface
+    </glossterm>
+    <acronym>API</acronym>
+    <glossdef>
+      <para>
+The (documented) set of function calls supported by a particular
+application, by which programmers can access the functionality
+available in the application.
+      </para>
+    </glossdef>
+  </glossentry>
+
+
+  <glossentry id="buffer">
+    <glossterm>
+buffer
+    </glossterm>
+    <glossdef>
+      <para>
+&comedi; uses permanently allocated kernel memory for streaming input
+and output to store data that has been measured by a device, but has
+not been read by an application.  These buffers can be resized by the
+Comedilib function <function>comedi_buffer_XXX()</function> or the
+<function>comedi_config</function>
+utility.
+      </para>
+    </glossdef>
+  </glossentry>
+
+  <glossentry id="bufferoverflow">
+    <glossterm>
+buffer overflow
+    </glossterm>
+    <glossdef>
+      <para>
+This is an error message that indicates that the driver ran out of
+space in a &comedi; buffer to put samples.  It means that the application
+is not copying data out of the buffer quickly enough.  Often, this
+problem can be fixed by making the &comedi; buffer larger.  See
+<function>comedi_buffer_XXX</function> for more information.
+      </para>
+    </glossdef>
+  </glossentry>
+
+  <glossentry id="differentialIO">
+    <glossterm>
+    Differential IO
+    </glossterm>
+    <glossdef>
+      <para>
+&hellip;
+      </para>
+    </glossdef>
+  </glossentry>
+
+  <glossentry id="dma">
+    <glossterm>
+    Direct Memory Access
+    </glossterm>
+    <acronym>DMA</acronym>
+    <glossdef>
+      <para>
+DMA is a method of transferring data between
+a device and the main memory of a computer.  DMA operates differently
+on ISA and PCI cards.  ISA DMA is handled by a controller on the
+motherboard and is limited to transfers to/from the lowest 16 MB of
+physical RAM and can only handle a single segment of memory at a time.
+These limitations make it almost useless.  PCI ("bus mastering") DMA
+is handled by a controller on the device, and can typically address
+4 GB of RAM and handle many segments of memory simultaneously.  DMA
+is usually not the only means to data transfer, and may or may not
+be the optimal transfer mechanism for a particular situation.
+      </para>
+    </glossdef>
+  </glossentry>
+
+  <glossentry id="fifo">
+    <glossterm>
+    First In, First Out
+    </glossterm>
+    <acronym>FIFO</acronym>
+    <glossdef>
+      <para>
+Most devices have a limited amount of on-board space to store samples
+before they are transferred to the Comedi buffer.  This allows the CPU or
+DMA controller to do other things, and then efficiently process a
+large number of samples simultaneously.  It also increases the
+maximum interrupt latency that the system can handle without
+interruptions in data.
+      </para>
+    </glossdef>
+  </glossentry>
+
+
+  <glossentry id="comedicommand">
+    <glossterm>
+&comedi; command
+    </glossterm>
+    <glossdef>
+      <para>
+&comedi; commands are the mechanism that applications configure
+subdevices for streaming input and output.
+      </para>
+    </glossdef>
+  </glossentry>
+
+  <glossentry id="command">
+    <glossterm>
+command
+    </glossterm>
+    <glosssee otherterm="comedicommand"></glosssee>
+  </glossentry>
+
+  <glossentry id="configoption">
+    <glossterm>
+configuration option
+    </glossterm>
+    <glossdef>
+      <para>
+      </para>
+    </glossdef>
+  </glossentry>
+
+  <glossentry id="instruction">
+    <glossterm>
+instruction
+    </glossterm>
+    <glossdef>
+      <para>
+&comedi; instructions are the mechanism used by applications to do
+immediate input from channels, output to channels, and configuration
+of subdevices and channels.
+      </para>
+    </glossdef>
+  </glossentry>
+
+  <glossentry id="instructionlist">
+    <glossterm>
+instruction list
+    </glossterm>
+    <glossdef>
+      <para>
+Instruction lists allow the application to perform multiple &comedi;
+instructions in the same system call.
+      </para>
+    </glossdef>
+  </glossentry>
+
+  <glossentry id="option">
+    <glossterm>
+option
+    </glossterm>
+    <glossdef>
+      <para>
+      </para>
+      <glossseealso otherterm="optionlist"></glossseealso>
+    </glossdef>
+  </glossentry>
+
+
+  <glossentry id="optionlist">
+    <glossterm>
+option list
+    </glossterm>
+    <glossdef>
+      <para>
+Option lists are used with <function>comedi_config</function> to
+perform driver configuration.
+      </para>
+      <glossseealso otherterm="configoption"></glossseealso>
+      <glossseealso otherterm="option"></glossseealso>
+    </glossdef>
+  </glossentry>
+
+  <glossentry id="overrun">
+    <glossterm>
+overrun
+    </glossterm>
+    <glossdef>
+      <para>
+This is an error message that indicates that there was device-level
+problem, typically with trigger pulses occurring faster than the
+board can handle.
+      </para>
+    </glossdef>
+  </glossentry>
+
+  <glossentry id="poll">
+    <glossterm>
+poll
+    </glossterm>
+    <glossdef>
+      <para>
+The term poll (and polling) is used for several different related
+concepts in &comedi;.  &comedi; implements the
+<function>poll()</function> system call for Comedi devices, which is
+similar to <function>select()</function>, and returns information
+about file descriptors that can be read or written.  Comedilib also
+has a function called <function>comedi_poll()</function>, which causes
+the driver to copy all available data from the device to the &comedi;
+buffer.  In addition, some drivers may use a polling technique in
+place of interrupts.
+      </para>
+    </glossdef>
+  </glossentry>
+
+<!--
+  <glossentry>
+    <glossterm>
+
+    </glossterm>
+    <glossdef>
+      <para>
+
+      </para>
+    </glossdef>
+  </glossentry>
+-->
+
+</glossary>
+
+

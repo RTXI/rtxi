@@ -1,0 +1,127 @@
+.TH comedi_config 8 ""
+.SH NAME
+\fBcomedi_config\fR - COMEDI configuration utility
+.SH SYNOPSIS
+\fBcomedi_config\fR [-vVq] /dev/comediN <driver>
+[<option1>[,<option2>...]]
+.br
+.SH DESCRIPTION
+\fBcomedi_config\fR is used to configure \fBcomedi\fR drivers.
+You must have \fBcomedi\fR support compiled
+into your kernel or loaded as a separate module in order
+to use this utility.
+Each control and measurement device is associated with a
+particular \fBcomedi\fR device file \fB/dev/comedi\fRN, where
+N is 0,1,2,3, etc.
+\fBComedi_config\fR allows you to associate a particular
+driver and device with a \fBcomedi\fR device file, and also
+configure driver parameters for the particular device.
+
+\fBComedi_config\fR can be used with optional
+parameters which are driver dependent.  Parameters are
+specified by comma-delimited list of integers.  The integers
+may be expressed as decimal, hexidecimal (starting with 0x)
+or octal (stating with 0).  In addition, a parameter may be
+left blank, indicating 0.  PCI-based devices typically
+require no parameters, although some allow you to specify
+the bus and slot of the card to configure
+as the first two parameters.
+ISA-based devices typically use
+the first and second parameters to indicate I/O base
+address and interrupt level.
+
+More information about the parameters required by individual
+drivers can be found in the \fBcomedi\fR documentation, in
+the file \fBdrivers.txt\fR.
+
+
+
+.SH OPTIONS
+
+\fBcomedi_config\fR recognizes the following options:
+
+\fB-q, --quiet\fR	don't print output while running.
+
+\fB-v, --verbose\fR	print verbose output while running.
+
+\fB-V, --version\fR	print version number and exit.
+
+\fB-r, --remove\fR	remove previously configured driver.
+
+.TP
+.BI "--read-buffer " "num"
+set read buffer size to
+.I num
+kilobytes.  The default size is 64k.
+
+.TP
+.BI "--write-buffer " "num"
+set write buffer size to
+.I num
+kilobytes.  The default size is 64k.
+
+.TP
+.BI "-i, --init-data, --init-data0 " "file"
+upload initialization data (typically firmware) from 
+.I file
+to board.
+
+.TP
+.BI "--init-data1 " "file"
+.TP
+.BI "--init-data2 " "file"
+.TP
+.BI "--init-data3 " "file"
+Some drivers require more than one file for initialization 
+data.  Use these
+options to specify additional initialization data files.  
+See the driver-specific documentation for further details.
+
+
+.SH CONFIGURATION FILE
+
+[This section has not been implemented yet.]
+
+A list of device configurations can be put into the file
+\fB/etc/comedi.conf\fR.  This file takes the form
+
+	<device> <driver> <param1>,<param2>,...
+
+These configurations will be read and performed when the
+switch \fB-a\fR is used.  This is potentially useful when
+run from an initialization script.
+
+.SH EXAMPLES
+
+A National Instruments PCI-MIO E series board can be
+configured to use /dev/comedi0 using the command:
+
+	comedi_config /dev/comedi0 ni_pcimio
+
+A National Instruments AT-MIO E series board can be
+configured to use /dev/comedi3 using the command:
+
+	comedi_config /dev/comedi3 ni_atmio 0x220,3
+
+This tells the driver that the board is configured
+for I/O base 0x220 and IRQ 3.
+
+.SH ADDITIONAL INFORMATION
+
+Additional text documentation can be found in /usr/doc/comedilib-0.7.11.
+The current version of \fBComedi\fR and \fBComedilib\fR can be
+obtained from ftp://ftp.comedi.org/pub/comedi.  The Comedi web site
+is located at http://www.comedi.org/comedi.
+
+.SH SEE ALSO
+
+\fBcomedi\fR(7) 
+
+.SH VERSION
+
+0.7.x
+
+.SH AUTHOR
+
+David Schleef, <ds@schleef.org>
+

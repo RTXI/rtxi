@@ -1,0 +1,148 @@
+
+Version 0.8.x will feature a replacement for the comedi_trig
+structure that allows much more flexible acquisition with
+applicable hardware.  Gone will be the days of "mode2" and
+friends.
+
+The replacement for mode0, i.e., immediate acquisition, is a
+new ioctl that is very similar to the old trigger ioctl, but
+just implements mode0 features.
+
+The other modes are replaced by the comedi "command" ioctl.
+The command structure allows you to specify what causes each
+action that is taken during acquisition.  The actions currently
+understood by comedi are:
+
+	- Start acquisition
+	- Stop acquisition
+	- Begin a scan
+	- End a scan
+	- Convert a sample
+
+A "scan" is a repeated measurement of N different channels.
+
+The different types of "triggers" or "trigger signals" that can
+cause events to occur are:
+
+	- TRIG_NONE - don't ever trigger
+	- TRIG_NOW - cause trigger to occur right now (or really soon)
+	- TRIG_FOLLOW - (see below)
+	- TRIG_TIME - trigger at specific time
+	- TRIG_TIMER - trigger at specific rate
+	- TRIG_COUNT - trigger when count reaches specific value
+	- TRIG_EXT - trigger on external signal
+	- TRIG_INT - trigger on an internal comedi signal
+
+Not all triggers are applicable to all events.  Supported triggers
+for specific events depends significantly on your particular
+device.  In addition, for every trigger type, there is a cooresponding
+argument that specifies the rate, the count, which external signal,
+etc.
+
+In particular, scan_end events will almost always be triggered on
+TRIG_COUNT, with the argument being the number of channels in the
+scan.  (Actually, samples in the scan, since on most boards you can
+measure a single channel multiple times in a scan.)  Also, until
+otherwise supported, start events can only be TRIG_NOW.
+
+TRIG_FOLLOW is a special type of trigger for scan_begin events that
+triggers on the next lower level trigger, in this case, the trigger
+for convert events.  It may or may not be supported.  Later, it may
+also be used for start events if you want to chain multiple commands.
+
+The command strucure is as follows:
+
+struct comedi_cmd_struct{
+       unsigned int subdev;
+       unsigned int flags;
+
+       unsigned int start_src;
+       unsigned int start_arg;
+
+       unsigned int scan_begin_src;
+       unsigned int scan_begin_arg;
+
+       unsigned int convert_src;
+       unsigned int convert_arg;
+
+       unsigned int scan_end_src;
+       unsigned int scan_end_arg;
+
+       unsigned int stop_src;
+       unsigned int stop_arg;
+
+       unsigned int *chanlist;         /* channel/range list */
+       unsigned int chanlist_len;
+
+       sampl_t *data;                  /* data list, size depends on subd flags */
+       unsigned int data_len;
+};
+
+subdev is the target subdevice.  flags are flags, similar to the
+old trigger structure.  chanlist, chanlist_len, data, and data_len
+are similar to the old trigger structure, although chanlist_len has
+been changed from n_chan.  data and data_len are used only by users
+who write kernel-space code, i.e., virtual comedi devices or RTLinux.
+
+
+Some examples for commands:
+
+Suppose you want to measure channels 1,2,3,4 at a rate of 10 khz, with
+the inter-sample time at 10 us (100 khz), and that you want to measure
+10000 scans.  This is analogous to the old mode2 acquisition.
+Initialization of the command structure to do this would include:
+
+	start_src	= TRIG_NOW;
+	start_arg	= 0;		// doesn't matter
+	scan_begin_src	= TRIG_TIMER;
+	scan_begin_arg	= 100000;	// == 100e3 nanoseconds
+	convert_src	= TRIG_TIMER;
+	convert_arg	= 10000;	// == 10e3 nanoseconds
+	scan_end_src	= TRIG_COUNTER;
+	scan_end_arg	= 4;		// == number of channels
+	stop_src	= TRIG_COUNTER;
+	stop_arg	= 10000;	// == 10000 scans
+
+If, instead, you wish to start continuous acquisition, and stop it with
+a comedi_cancel(), you would change the stop event trigger to:
+
+	stop_src	= TRIG_NONE;
+	stop_arg	= 0;
+
+Suppose you want to use an external signal to trigger scan_begin events.
+Then you would change the scan_begin event trigger to:
+
+	scan_begin_src	= TRIG_EXT;
+	scan_begin_arg	= 2;		// external trigger #2
+
+The number of possible external trigger lines is board dependent.  Your
+board may only have one non-configurable digital external trigger, or
+it may support complicated selection of external triggering, including
+analog triggers at multiple levels, edge or level digital triggers,
+synchonization signals with other boards, etc.  Eventually, boards
+that support complicated triggering will have a triggering subdevice
+with which you can configure all the different features.
+
+Here's some pseudo-code that describes how the device should interpret
+your command:
+
+do_command()
+{
+	while(!start_trigger)
+		do_nothing();
+	
+	while(!stop_trigger){
+		if(!scan_begin_trigger)
+			continue;
+		
+		while(!scan_end_trigger){
+			while(!convert_trigger)
+				do_nothing();
+			do_conversion();
+		}
+	}
+}
+
+The fencepost issues, i.e., what happens when you have conflicting
+triggers, is device-dependent.
+

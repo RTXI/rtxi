@@ -1,0 +1,489 @@
+eeprom reference lsb=111 msb=0
+resulting reference voltage: 5.00011
+Id: comedi_calibrate.c,v 1.77 2003/05/22 20:49:53 fmhess Exp 
+Driver name: ni_pcimio
+Device name: pci-6110
+Id: ni.c,v 1.79 2003/05/22 20:42:34 fmhess Exp 
+Comedi version: 0.7.66
+ao ch 0, zero offset
+reading 0.167749(55), target 0.00015259
+ao ch 0, reference voltage
+reading 5.248164(37), target 4.99992
+ao ch 1, zero offset
+reading 0.084316(65), target 0.00015259
+ao ch 1, reference voltage
+reading 5.124542(66), target 4.99992
+ai, ch 0, range 0, zero offset
+reading -0.03737(14), target 0
+ai, ch 0, range 0, voltage reference
+reading 3.97212(62)e1, target 39.7509
+ai, ch 1, range 0, zero offset
+reading -0.06172(13), target 0
+ai, ch 1, range 0, voltage reference
+reading 3.95901(62)e1, target 39.7509
+ai, ch 2, range 0, zero offset
+reading -0.06069(12), target 0
+ai, ch 2, range 0, voltage reference
+reading 3.96365(63)e1, target 39.7509
+ai, ch 3, range 0, zero offset
+reading -0.03305(27), target 0
+ai, ch 3, range 0, voltage reference
+reading 3.96762(62)e1, target 39.7509
+ai, ch 0, range 1, zero offset
+reading -0.014910(56), target 0
+ai, ch 0, range 1, voltage reference
+reading 1.57468(86)e1, target 15.7503
+ai, ch 1, range 1, zero offset
+reading -0.025450(94), target 0
+ai, ch 1, range 1, voltage reference
+reading 1.56933(86)e1, target 15.7503
+ai, ch 2, range 1, zero offset
+reading -0.024907(72), target 0
+ai, ch 2, range 1, voltage reference
+reading 1.57111(86)e1, target 15.7503
+ai, ch 3, range 1, zero offset
+reading -0.01376(11), target 0
+ai, ch 3, range 1, voltage reference
+reading 1.57287(86)e1, target 15.7503
+ai, ch 0, range 2, zero offset
+reading -7.550(32)e-3, target 0
+ai, ch 0, range 2, voltage reference
+reading 4.993809(21), target 5.00011
+ai, ch 1, range 2, zero offset
+reading -0.012286(20), target 0
+ai, ch 1, range 2, voltage reference
+reading 4.974927(49), target 5.00011
+ai, ch 2, range 2, zero offset
+reading -0.012000(31), target 0
+ai, ch 2, range 2, voltage reference
+reading 4.982963(65), target 5.00011
+ai, ch 3, range 2, zero offset
+reading -6.553(57)e-3, target 0
+ai, ch 3, range 2, voltage reference
+reading 4.988711(43), target 5.00011
+ai, ch 0, range 3, zero offset
+reading -3.751(14)e-3, target 0
+ai, ch 0, range 3, voltage reference
+reading 3.97205(62), target 3.97509
+ai, ch 1, range 3, zero offset
+reading -6.150(12)e-3, target 0
+ai, ch 1, range 3, voltage reference
+reading 3.95907(62), target 3.97509
+ai, ch 2, range 3, zero offset
+reading -6.043(13)e-3, target 0
+ai, ch 2, range 3, voltage reference
+reading 3.96385(62), target 3.97509
+ai, ch 3, range 3, zero offset
+reading -3.262(28)e-3, target 0
+ai, ch 3, range 3, voltage reference
+reading 3.96762(62), target 3.97509
+ai, ch 0, range 4, zero offset
+reading -1.4871(53)e-3, target 0
+ai, ch 0, range 4, voltage reference
+reading 1.57476(86), target 1.57503
+ai, ch 1, range 4, zero offset
+reading -2.5307(89)e-3, target 0
+ai, ch 1, range 4, voltage reference
+reading 1.56936(86), target 1.57503
+ai, ch 2, range 4, zero offset
+reading -2.4840(71)e-3, target 0
+ai, ch 2, range 4, voltage reference
+reading 1.57114(86), target 1.57503
+ai, ch 3, range 4, zero offset
+reading -1.3956(99)e-3, target 0
+ai, ch 3, range 4, voltage reference
+reading 1.57276(86), target 1.57503
+ai, ch 0, range 5, zero offset
+reading -7.297(36)e-4, target 0
+ai, ch 0, range 5, voltage reference
+reading 0.77509(49), target 0.775017
+ai, ch 1, range 5, zero offset
+reading -1.3641(69)e-3, target 0
+ai, ch 1, range 5, voltage reference
+reading 0.77230(49), target 0.775017
+ai, ch 2, range 5, zero offset
+reading -1.4399(77)e-3, target 0
+ai, ch 2, range 5, voltage reference
+reading 0.77314(49), target 0.775017
+ai, ch 3, range 5, zero offset
+reading -7.717(66)e-4, target 0
+ai, ch 3, range 5, voltage reference
+reading 0.77403(49), target 0.775017
+ai, ch 0, range 6, zero offset
+reading -3.157(35)e-4, target 0
+ai, ch 0, range 6, voltage reference
+reading 0.37521(25), target 0.375008
+ai, ch 1, range 6, zero offset
+reading -7.696(37)e-4, target 0
+ai, ch 1, range 6, voltage reference
+reading 0.37377(25), target 0.375008
+ai, ch 2, range 6, zero offset
+reading -8.735(32)e-4, target 0
+ai, ch 2, range 6, voltage reference
+reading 0.37395(24), target 0.375008
+ai, ch 3, range 6, zero offset
+reading -4.781(43)e-4, target 0
+ai, ch 3, range 6, voltage reference
+reading 0.37450(24), target 0.375008
+ai, ch 0, range 7, zero offset
+reading 3.19(22)e-5, target 0
+ai, ch 0, range 7, voltage reference
+reading 0.150259(100), target 0.150003
+ai, ch 1, range 7, zero offset
+reading -2.899(19)e-4, target 0
+ai, ch 1, range 7, voltage reference
+reading 0.14954(10), target 0.150003
+ai, ch 2, range 7, zero offset
+reading -4.497(21)e-4, target 0
+ai, ch 2, range 7, voltage reference
+reading 0.14949(10), target 0.150003
+ai, ch 3, range 7, zero offset
+reading -2.098(27)e-4, target 0
+ai, ch 3, range 7, voltage reference
+reading 0.14980(10), target 0.150003
+relative binary: ai, ch 0, range 0, voltage reference, ai, ch 0, range 0, zero offset
+caldac[1] set to 119
+binary: ai, ch 0, range 0, zero offset
+caldac[2] set to 140
+relative binary: ai, ch 0, range 1, voltage reference, ai, ch 0, range 1, zero offset
+caldac[1] set to 123
+binary: ai, ch 0, range 1, zero offset
+caldac[2] set to 139
+relative binary: ai, ch 0, range 2, voltage reference, ai, ch 0, range 2, zero offset
+caldac[1] set to 123
+binary: ai, ch 0, range 2, zero offset
+caldac[2] set to 140
+relative binary: ai, ch 0, range 3, voltage reference, ai, ch 0, range 3, zero offset
+caldac[1] set to 119
+binary: ai, ch 0, range 3, zero offset
+caldac[2] set to 140
+relative binary: ai, ch 0, range 4, voltage reference, ai, ch 0, range 4, zero offset
+caldac[1] set to 123
+binary: ai, ch 0, range 4, zero offset
+caldac[2] set to 139
+relative binary: ai, ch 0, range 5, voltage reference, ai, ch 0, range 5, zero offset
+caldac[1] set to 127
+binary: ai, ch 0, range 5, zero offset
+caldac[2] set to 139
+relative binary: ai, ch 0, range 6, voltage reference, ai, ch 0, range 6, zero offset
+caldac[1] set to 127
+binary: ai, ch 0, range 6, zero offset
+caldac[2] set to 137
+relative binary: ai, ch 0, range 7, voltage reference, ai, ch 0, range 7, zero offset
+caldac[1] set to 125
+binary: ai, ch 0, range 7, zero offset
+caldac[2] set to 125
+relative binary: ai, ch 1, range 0, voltage reference, ai, ch 1, range 0, zero offset
+caldac[3] set to 155
+binary: ai, ch 1, range 0, zero offset
+caldac[4] set to 147
+relative binary: ai, ch 1, range 1, voltage reference, ai, ch 1, range 1, zero offset
+caldac[3] set to 155
+binary: ai, ch 1, range 1, zero offset
+caldac[4] set to 148
+relative binary: ai, ch 1, range 2, voltage reference, ai, ch 1, range 2, zero offset
+caldac[3] set to 157
+binary: ai, ch 1, range 2, zero offset
+caldac[4] set to 147
+relative binary: ai, ch 1, range 3, voltage reference, ai, ch 1, range 3, zero offset
+caldac[3] set to 155
+binary: ai, ch 1, range 3, zero offset
+caldac[4] set to 147
+relative binary: ai, ch 1, range 4, voltage reference, ai, ch 1, range 4, zero offset
+caldac[3] set to 159
+binary: ai, ch 1, range 4, zero offset
+caldac[4] set to 148
+relative binary: ai, ch 1, range 5, voltage reference, ai, ch 1, range 5, zero offset
+caldac[3] set to 163
+binary: ai, ch 1, range 5, zero offset
+caldac[4] set to 149
+relative binary: ai, ch 1, range 6, voltage reference, ai, ch 1, range 6, zero offset
+caldac[3] set to 159
+binary: ai, ch 1, range 6, zero offset
+caldac[4] set to 151
+relative binary: ai, ch 1, range 7, voltage reference, ai, ch 1, range 7, zero offset
+caldac[3] set to 161
+binary: ai, ch 1, range 7, zero offset
+caldac[4] set to 151
+relative binary: ai, ch 2, range 0, voltage reference, ai, ch 2, range 0, zero offset
+caldac[5] set to 139
+binary: ai, ch 2, range 0, zero offset
+caldac[6] set to 145
+relative binary: ai, ch 2, range 1, voltage reference, ai, ch 2, range 1, zero offset
+caldac[5] set to 144
+binary: ai, ch 2, range 1, zero offset
+caldac[6] set to 147
+relative binary: ai, ch 2, range 2, voltage reference, ai, ch 2, range 2, zero offset
+caldac[5] set to 140
+binary: ai, ch 2, range 2, zero offset
+caldac[6] set to 145
+relative binary: ai, ch 2, range 3, voltage reference, ai, ch 2, range 3, zero offset
+caldac[5] set to 141
+binary: ai, ch 2, range 3, zero offset
+caldac[6] set to 145
+relative binary: ai, ch 2, range 4, voltage reference, ai, ch 2, range 4, zero offset
+caldac[5] set to 144
+binary: ai, ch 2, range 4, zero offset
+caldac[6] set to 147
+relative binary: ai, ch 2, range 5, voltage reference, ai, ch 2, range 5, zero offset
+caldac[5] set to 148
+binary: ai, ch 2, range 5, zero offset
+caldac[6] set to 149
+relative binary: ai, ch 2, range 6, voltage reference, ai, ch 2, range 6, zero offset
+caldac[5] set to 149
+binary: ai, ch 2, range 6, zero offset
+caldac[6] set to 155
+relative binary: ai, ch 2, range 7, voltage reference, ai, ch 2, range 7, zero offset
+caldac[5] set to 151
+binary: ai, ch 2, range 7, zero offset
+caldac[6] set to 163
+relative binary: ai, ch 3, range 0, voltage reference, ai, ch 3, range 0, zero offset
+caldac[7] set to 135
+binary: ai, ch 3, range 0, zero offset
+caldac[8] set to 137
+relative binary: ai, ch 3, range 1, voltage reference, ai, ch 3, range 1, zero offset
+caldac[7] set to 138
+binary: ai, ch 3, range 1, zero offset
+caldac[8] set to 137
+relative binary: ai, ch 3, range 2, voltage reference, ai, ch 3, range 2, zero offset
+caldac[7] set to 141
+binary: ai, ch 3, range 2, zero offset
+caldac[8] set to 136
+relative binary: ai, ch 3, range 3, voltage reference, ai, ch 3, range 3, zero offset
+caldac[7] set to 135
+binary: ai, ch 3, range 3, zero offset
+caldac[8] set to 137
+relative binary: ai, ch 3, range 4, voltage reference, ai, ch 3, range 4, zero offset
+caldac[7] set to 138
+binary: ai, ch 3, range 4, zero offset
+caldac[8] set to 137
+relative binary: ai, ch 3, range 5, voltage reference, ai, ch 3, range 5, zero offset
+caldac[7] set to 143
+binary: ai, ch 3, range 5, zero offset
+caldac[8] set to 139
+relative binary: ai, ch 3, range 6, voltage reference, ai, ch 3, range 6, zero offset
+caldac[7] set to 143
+binary: ai, ch 3, range 6, zero offset
+caldac[8] set to 141
+relative binary: ai, ch 3, range 7, voltage reference, ai, ch 3, range 7, zero offset
+caldac[7] set to 147
+binary: ai, ch 3, range 7, zero offset
+caldac[8] set to 143
+relative binary: ao ch 0, zero offset, ao ch 0, reference voltage
+caldac[13] set to 191
+binary: ao ch 0, zero offset
+caldac[14] set to 32
+relative binary: ao ch 1, zero offset, ao ch 1, reference voltage
+caldac[15] set to 158
+binary: ao ch 1, zero offset
+caldac[16] set to 77
+writing calibration to foo
+ao ch 0, zero offset
+applied calibration for subdev 1, channel 0, range 0, aref 0
+applied calibration for subdev 0, channel 0, range 2, aref 2
+reading -5.01(75)e-4, target 0.00015259
+ao ch 0, reference voltage
+applied calibration for subdev 1, channel 0, range 0, aref 0
+applied calibration for subdev 0, channel 0, range 2, aref 2
+reading 4.998669(24), target 4.99992
+ao ch 1, zero offset
+applied calibration for subdev 1, channel 1, range 0, aref 0
+applied calibration for subdev 0, channel 0, range 2, aref 2
+reading -9.40(70)e-4, target 0.00015259
+ao ch 1, reference voltage
+applied calibration for subdev 1, channel 1, range 0, aref 0
+applied calibration for subdev 0, channel 0, range 2, aref 2
+reading 4.998822(17), target 4.99992
+ai, ch 0, range 0, zero offset
+applied calibration for subdev 0, channel 0, range 0, aref 2
+reading -2.81(37)e-3, target 0
+ai, ch 0, range 0, voltage reference
+applied calibration for subdev 0, channel 0, range 0, aref 2
+reading 3.97350(62)e1, target 39.7509
+ai, ch 1, range 0, zero offset
+applied calibration for subdev 0, channel 1, range 0, aref 2
+reading -5.79(34)e-3, target 0
+ai, ch 1, range 0, voltage reference
+applied calibration for subdev 0, channel 1, range 0, aref 2
+reading 3.97332(62)e1, target 39.7509
+ai, ch 2, range 0, zero offset
+applied calibration for subdev 0, channel 2, range 0, aref 2
+reading -6.51(32)e-3, target 0
+ai, ch 2, range 0, voltage reference
+applied calibration for subdev 0, channel 2, range 0, aref 2
+reading 3.97287(62)e1, target 39.7509
+ai, ch 3, range 0, zero offset
+applied calibration for subdev 0, channel 3, range 0, aref 2
+reading -1.62(38)e-3, target 0
+ai, ch 3, range 0, voltage reference
+applied calibration for subdev 0, channel 3, range 0, aref 2
+reading 3.97325(62)e1, target 39.7509
+ai, ch 0, range 1, zero offset
+applied calibration for subdev 0, channel 0, range 1, aref 2
+reading -2.28(13)e-3, target 0
+ai, ch 0, range 1, voltage reference
+applied calibration for subdev 0, channel 0, range 1, aref 2
+reading 1.57575(86)e1, target 15.7503
+ai, ch 1, range 1, zero offset
+applied calibration for subdev 0, channel 1, range 1, aref 2
+reading -1.96(14)e-3, target 0
+ai, ch 1, range 1, voltage reference
+applied calibration for subdev 0, channel 1, range 1, aref 2
+reading 1.57523(86)e1, target 15.7503
+ai, ch 2, range 1, zero offset
+applied calibration for subdev 0, channel 2, range 1, aref 2
+reading -2.22(14)e-3, target 0
+ai, ch 2, range 1, voltage reference
+applied calibration for subdev 0, channel 2, range 1, aref 2
+reading 1.57503(85)e1, target 15.7503
+ai, ch 3, range 1, zero offset
+applied calibration for subdev 0, channel 3, range 1, aref 2
+reading -1.77(14)e-3, target 0
+ai, ch 3, range 1, voltage reference
+applied calibration for subdev 0, channel 3, range 1, aref 2
+reading 1.57543(86)e1, target 15.7503
+ai, ch 0, range 2, zero offset
+applied calibration for subdev 0, channel 0, range 2, aref 2
+reading -6.87(73)e-4, target 0
+ai, ch 0, range 2, voltage reference
+applied calibration for subdev 0, channel 0, range 2, aref 2
+reading 4.998979(30), target 5.00011
+ai, ch 1, range 2, zero offset
+applied calibration for subdev 0, channel 1, range 2, aref 2
+reading -1.178(67)e-3, target 0
+ai, ch 1, range 2, voltage reference
+applied calibration for subdev 0, channel 1, range 2, aref 2
+reading 4.998793(17), target 5.00011
+ai, ch 2, range 2, zero offset
+applied calibration for subdev 0, channel 2, range 2, aref 2
+reading -1.087(68)e-3, target 0
+ai, ch 2, range 2, voltage reference
+applied calibration for subdev 0, channel 2, range 2, aref 2
+reading 4.998641(26), target 5.00011
+ai, ch 3, range 2, zero offset
+applied calibration for subdev 0, channel 3, range 2, aref 2
+reading -9.44(70)e-4, target 0
+ai, ch 3, range 2, voltage reference
+applied calibration for subdev 0, channel 3, range 2, aref 2
+reading 4.999304(49), target 5.00011
+ai, ch 0, range 3, zero offset
+applied calibration for subdev 0, channel 0, range 3, aref 2
+reading -2.38(37)e-4, target 0
+ai, ch 0, range 3, voltage reference
+applied calibration for subdev 0, channel 0, range 3, aref 2
+reading 3.97356(62), target 3.97509
+ai, ch 1, range 3, zero offset
+applied calibration for subdev 0, channel 1, range 3, aref 2
+reading -6.08(33)e-4, target 0
+ai, ch 1, range 3, voltage reference
+applied calibration for subdev 0, channel 1, range 3, aref 2
+reading 3.97333(62), target 3.97509
+ai, ch 2, range 3, zero offset
+applied calibration for subdev 0, channel 2, range 3, aref 2
+reading -5.94(33)e-4, target 0
+ai, ch 2, range 3, voltage reference
+applied calibration for subdev 0, channel 2, range 3, aref 2
+reading 3.97349(62), target 3.97509
+ai, ch 3, range 3, zero offset
+applied calibration for subdev 0, channel 3, range 3, aref 2
+reading -1.96(38)e-4, target 0
+ai, ch 3, range 3, voltage reference
+applied calibration for subdev 0, channel 3, range 3, aref 2
+reading 3.97315(62), target 3.97509
+ai, ch 0, range 4, zero offset
+applied calibration for subdev 0, channel 0, range 4, aref 2
+reading -2.57(13)e-4, target 0
+ai, ch 0, range 4, voltage reference
+applied calibration for subdev 0, channel 0, range 4, aref 2
+reading 1.57571(86), target 1.57503
+ai, ch 1, range 4, zero offset
+applied calibration for subdev 0, channel 1, range 4, aref 2
+reading -1.65(14)e-4, target 0
+ai, ch 1, range 4, voltage reference
+applied calibration for subdev 0, channel 1, range 4, aref 2
+reading 1.57555(85), target 1.57503
+ai, ch 2, range 4, zero offset
+applied calibration for subdev 0, channel 2, range 4, aref 2
+reading -1.93(14)e-4, target 0
+ai, ch 2, range 4, voltage reference
+applied calibration for subdev 0, channel 2, range 4, aref 2
+reading 1.57577(86), target 1.57503
+ai, ch 3, range 4, zero offset
+applied calibration for subdev 0, channel 3, range 4, aref 2
+reading -1.85(14)e-4, target 0
+ai, ch 3, range 4, voltage reference
+applied calibration for subdev 0, channel 3, range 4, aref 2
+reading 1.57540(86), target 1.57503
+ai, ch 0, range 5, zero offset
+applied calibration for subdev 0, channel 0, range 5, aref 2
+reading -2.53(76)e-5, target 0
+ai, ch 0, range 5, voltage reference
+applied calibration for subdev 0, channel 0, range 5, aref 2
+reading 0.77586(49), target 0.775017
+ai, ch 1, range 5, zero offset
+applied calibration for subdev 0, channel 1, range 5, aref 2
+reading -9.11(71)e-5, target 0
+ai, ch 1, range 5, voltage reference
+applied calibration for subdev 0, channel 1, range 5, aref 2
+reading 0.77579(49), target 0.775017
+ai, ch 2, range 5, zero offset
+applied calibration for subdev 0, channel 2, range 5, aref 2
+reading -1.307(65)e-4, target 0
+ai, ch 2, range 5, voltage reference
+applied calibration for subdev 0, channel 2, range 5, aref 2
+reading 0.77570(49), target 0.775017
+ai, ch 3, range 5, zero offset
+applied calibration for subdev 0, channel 3, range 5, aref 2
+reading -5.15(75)e-5, target 0
+ai, ch 3, range 5, voltage reference
+applied calibration for subdev 0, channel 3, range 5, aref 2
+reading 0.77573(49), target 0.775017
+ai, ch 0, range 6, zero offset
+applied calibration for subdev 0, channel 0, range 6, aref 2
+reading -1.86(39)e-5, target 0
+ai, ch 0, range 6, voltage reference
+applied calibration for subdev 0, channel 0, range 6, aref 2
+reading 0.37528(24), target 0.375008
+ai, ch 1, range 6, zero offset
+applied calibration for subdev 0, channel 1, range 6, aref 2
+reading -4.48(36)e-5, target 0
+ai, ch 1, range 6, voltage reference
+applied calibration for subdev 0, channel 1, range 6, aref 2
+reading 0.37541(25), target 0.375008
+ai, ch 2, range 6, zero offset
+applied calibration for subdev 0, channel 2, range 6, aref 2
+reading -3.84(37)e-5, target 0
+ai, ch 2, range 6, voltage reference
+applied calibration for subdev 0, channel 2, range 6, aref 2
+reading 0.37545(25), target 0.375008
+ai, ch 3, range 6, zero offset
+applied calibration for subdev 0, channel 3, range 6, aref 2
+reading -3.91(42)e-5, target 0
+ai, ch 3, range 6, voltage reference
+applied calibration for subdev 0, channel 3, range 6, aref 2
+reading 0.37542(25), target 0.375008
+ai, ch 0, range 7, zero offset
+applied calibration for subdev 0, channel 0, range 7, aref 2
+reading 3.7(21)e-6, target 0
+ai, ch 0, range 7, voltage reference
+applied calibration for subdev 0, channel 0, range 7, aref 2
+reading 0.15022(10), target 0.150003
+ai, ch 1, range 7, zero offset
+applied calibration for subdev 0, channel 1, range 7, aref 2
+reading 0.4(19)e-6, target 0
+ai, ch 1, range 7, voltage reference
+applied calibration for subdev 0, channel 1, range 7, aref 2
+reading 0.15021(10), target 0.150003
+ai, ch 2, range 7, zero offset
+applied calibration for subdev 0, channel 2, range 7, aref 2
+reading -2.11(21)e-5, target 0
+ai, ch 2, range 7, voltage reference
+applied calibration for subdev 0, channel 2, range 7, aref 2
+reading 0.14994(10), target 0.150003
+ai, ch 3, range 7, zero offset
+applied calibration for subdev 0, channel 3, range 7, aref 2
+reading -1.06(26)e-5, target 0
+ai, ch 3, range 7, voltage reference
+applied calibration for subdev 0, channel 3, range 7, aref 2
+reading 0.150191(99), target 0.150003
+Applied calibration for subdevice 0, channel 0, range 0, aref 0

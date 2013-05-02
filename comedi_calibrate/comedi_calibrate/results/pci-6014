@@ -1,0 +1,131 @@
+mbdyn-rt:/home/sechi/comedilib/comedi_calibrate # ./comedi_calibrate 
+WARNING: unknown eeprom address for reference voltage
+correction.  This might be fixable if you send us an eeprom dump
+(see the demo/eeprom_dump program).
+Warning: device may not be not fully calibrated due to insufficient information.
+Please file a bug report at https://bugs.comedi.org/ and attach this output.
+This output will also allow comedi_calibrate to execute more
+quickly in the future.
+Forcing option: --verbose
+Forcing options: --reset --dump --no-calibrate --no-results
+Id: comedi_calibrate.c,v 1.92 2004/03/29 01:34:15 fmhess Exp 
+Driver name: ni_pcimio
+Device name: pci-6014
+Id: ni.c,v 1.115 2004/05/22 01:08:48 fmhess Exp 
+Comedi version: 0.7.68
+ai, bipolar zero offset, low gain
+reading 0.017656(16), target 0
+caldac[0] gain=-5.768(11)e-5 V/bit S_min=10.3056 dof=14
+caldac[2] gain=-3.13(11)e-6 V/bit S_min=0.921059 dof=14
+caldac[4] gain=-6.2683(11)e-4 V/bit S_min=55.8791 dof=14
+caldac[8] gain=-1.01(11)e-6 V/bit S_min=1.45739 dof=14
+ai, bipolar zero offset, high gain
+reading 8.7501(28)e-4, target 0
+caldac[0] gain=-5.67757(39)e-5 V/bit S_min=140.21 dof=14
+caldac[2] gain=4.43(39)e-8 V/bit S_min=6.16357 dof=14
+caldac[4] gain=-3.1322(39)e-6 V/bit S_min=2.45954 dof=14
+caldac[8] gain=-9.759(39)e-7 V/bit S_min=1.34279 dof=14
+ai, bipolar voltage reference, low gain
+reading 5.0101744(75), target 5
+caldac[0] gain=-5.699(11)e-5 V/bit S_min=20.6668 dof=14
+caldac[2] gain=3.5617(11)e-4 V/bit S_min=192.542 dof=14
+caldac[4] gain=-6.2683(11)e-4 V/bit S_min=36.8218 dof=14
+caldac[8] gain=-8.7(10)e-7 V/bit S_min=0.91184 dof=14
+ao 0, zero offset, low gain
+reading 6.452(87)e-4, target 0.00015259
+caldac[0] gain=-5.759(12)e-5 V/bit S_min=23.5811 dof=14
+caldac[2] gain=-4.34(12)e-6 V/bit S_min=1.48953 dof=14
+caldac[4] gain=-6.2662(12)e-4 V/bit S_min=55.6746 dof=14
+caldac[6] gain=-1.04453(12)e-3 V/bit S_min=116.539 dof=14
+caldac[8] gain=-9.5(12)e-7 V/bit S_min=0.835527 dof=14
+caldac[10] gain=-1.0048(12)e-4 V/bit S_min=10.8132 dof=14
+ao 0, reference voltage, low gain
+reading 7.9836195(94), target 8.00015
+caldac[0] gain=-5.799(12)e-5 V/bit S_min=16.1238 dof=14
+caldac[2] gain=5.7015(12)e-4 V/bit S_min=334.607 dof=14
+caldac[4] gain=-6.2677(12)e-4 V/bit S_min=46.0133 dof=14
+caldac[6] gain=-1.04468(12)e-3 V/bit S_min=109.296 dof=14
+caldac[7] gain=-1.56748(12)e-3 V/bit S_min=72.6876 dof=14
+caldac[8] gain=-8.5(11)e-7 V/bit S_min=2.03799 dof=14
+caldac[10] gain=-1.0072(12)e-4 V/bit S_min=10.5832 dof=14
+caldac[11] gain=-1.2026(12)e-4 V/bit S_min=7.25575 dof=14
+ao 0, linearity (mid), low gain
+reading 3.9921535(80), target 4.00015
+caldac[0] gain=-5.796(12)e-5 V/bit S_min=22.5702 dof=14
+caldac[2] gain=2.8288(12)e-4 V/bit S_min=107.619 dof=14
+caldac[3] gain=-4.7(11)e-7 V/bit S_min=1.37003 dof=14
+caldac[4] gain=-6.2670(12)e-4 V/bit S_min=34.8243 dof=14
+caldac[6] gain=-1.04468(12)e-3 V/bit S_min=100.675 dof=14
+caldac[7] gain=-7.8375(12)e-4 V/bit S_min=22.6948 dof=14
+caldac[8] gain=-10.0(11)e-7 V/bit S_min=0.986251 dof=14
+caldac[10] gain=-1.0071(12)e-4 V/bit S_min=15.8146 dof=14
+caldac[11] gain=-6.028(12)e-5 V/bit S_min=5.13472 dof=14
+ao 1, zero offset, low gain
+reading 2.7344(80)e-3, target 0.00015259
+caldac[0] gain=-5.752(12)e-5 V/bit S_min=22.8584 dof=14
+caldac[1] gain=-1.0003(12)e-4 V/bit S_min=10.4798 dof=14
+caldac[2] gain=-4.04(12)e-6 V/bit S_min=0.465639 dof=14
+caldac[3] gain=-7.9(11)e-7 V/bit S_min=0.907061 dof=14
+caldac[4] gain=-6.2674(12)e-4 V/bit S_min=51.6414 dof=14
+caldac[8] gain=-9.3(11)e-7 V/bit S_min=0.920044 dof=14
+caldac[9] gain=-1.04284(12)e-3 V/bit S_min=135.769 dof=14
+ao 1, reference voltage, low gain
+reading 7.9737756(95), target 8.00015
+caldac[0] gain=-5.769(12)e-5 V/bit S_min=32.723 dof=14
+caldac[1] gain=-1.0020(12)e-4 V/bit S_min=16.6388 dof=14
+caldac[2] gain=5.6944(12)e-4 V/bit S_min=342.563 dof=14
+caldac[3] gain=-1.56801(12)e-3 V/bit S_min=298.429 dof=14
+caldac[4] gain=-6.2670(12)e-4 V/bit S_min=22.2871 dof=14
+caldac[5] gain=-1.2067(12)e-4 V/bit S_min=4.72096 dof=14
+caldac[8] gain=-9.6(12)e-7 V/bit S_min=1.49009 dof=14
+caldac[9] gain=-1.04266(12)e-3 V/bit S_min=125.881 dof=14
+ao 1, linearity (mid), low gain
+reading 3.9882860(82), target 4.00015
+caldac[0] gain=-5.768(12)e-5 V/bit S_min=32.4881 dof=14
+caldac[1] gain=-1.0019(12)e-4 V/bit S_min=9.26381 dof=14
+caldac[2] gain=2.8245(12)e-4 V/bit S_min=78.7483 dof=14
+caldac[3] gain=-7.8421(12)e-4 V/bit S_min=80.6435 dof=14
+caldac[4] gain=-6.2676(12)e-4 V/bit S_min=54.1094 dof=14
+caldac[5] gain=-6.025(12)e-5 V/bit S_min=4.15581 dof=14
+caldac[8] gain=-9.2(11)e-7 V/bit S_min=1.56265 dof=14
+caldac[9] gain=-1.04275(12)e-3 V/bit S_min=139.837 dof=14
+Failed to apply calibration for subdevice 0, channel 0, range 0, aref 0
+
+
+
+
+mbdyn-rt:/home/sechi/comedilib/demo # ./eeprom_dump 
+0000: ffffffffffffffffffffffffffffffff  ................
+0010: ffffffffffffffffffffffffffffffff  ................
+0020: ffffffffffffffffffffffffffffffff  ................
+0030: ffffffffffffffffffffffffffffffff  ................
+0040: ffffffffffffffffffffffffffffffff  ................
+0050: ffffffffffffffffffffffffffffffff  ................
+0060: ffffffffffffffffffffffffffffffff  ................
+0070: ffffffffffffffffffffffffffffffff  ................
+0080: ffffffffffffffffffffffffffffffff  ................
+0090: ffffffffffffffffffffffffffffffff  ................
+00a0: ffffffffffffffffffffffffffffffff  ................
+00b0: ffffffffffffffffffffffffffffffff  ................
+00c0: ffffffffffffffffffffffffffff0000  ................
+00d0: 000000000000000000000000e239bdbc  .............9..
+00e0: 000000000000e239bdbc000000000049  .......9.......I
+00f0: 00540041004e0000000000000049004e  .T.A.N.......I.N
+0100: 30144ea0a44d10003d2e033ca01b380c  0.N..M..=..<..8.
+0110: 000c0000000000000000000000000000  ................
+0120: 00000000000000000000000000000000  ................
+0130: 00000000000000000000000000000000  ................
+0140: 00000000000000000000000000000000  ................
+0150: 00000000000000000000000000000000  ................
+0160: 000000000000747c71847c6f807e998b  ......t|q.|o.~..
+0170: 8c935f00000000000000a601aa01ac01  .._.............
+0180: 00000000000000000000000000000000  ................
+0190: 00000000000000000000000000000074  ...............t
+01a0: 7c71847c6f807e998b8c935f00624161  |q.|o.~...._.bAa
+01b0: 416161ad456541026542026742020c03  Aaa.EeA.eB.gB...
+01c0: 0e0309010a0b08090601070b05090201  ................
+01d0: 01080b000403ff000000012511010608  ...........%....
+01e0: 0808040101000c010804105001001002  ...........P....
+01f0: 011001100a000a0bdf010405d407036f  ...............o
+
+

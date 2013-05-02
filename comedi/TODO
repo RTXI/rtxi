@@ -1,0 +1,52 @@
+
+make menuconfig
+
+bug: buffer resize to 0 convinces comedi that buffer doesn't exist
+
+doc: how to use kcomedilib
+
+comedi_rt_timer segfaults when the lower-level driver disappears
+and reappears.  This is a problem with the Comedi core, not the
+driver.  I don't really know how to fix this.  Actually, I do.
+kcomedilib needs an implementation of comedi_open() and comedi_close().
+
+das6402 needs cleanup
+
+fix PCI code, use pci_find_device()
+
+pci_enable_device() needs to be added to many drivers
+
+get rid of spurious "char-major-98-0 not found"
+
+spinlocks
+
+autoloading causes BUG on failure.
+
+das1800: kmalloc could fail on large buffer sizes (see dt282x).  Needs
+to be fixed to use a bounce buffer.
+
+move /proc/comedi to /proc/driver/comedi
+
+Drivers that do DMA need to be fixed for big-endian machines.
+
+ni_pcimio: doesn't do DMA with AO
+
+ni_pcimio: ai COMEDI_WAKE_EOS doesn't work with DMA
+
+create separate fops structure for unconfigured devices (probably not)
+
+ni_mio_common: resetting AO sets ao chan 1 to -10V
+
+Dan Christian 07/01: rtd520.o: problems with buffer
+
+ni_pcimio: polling
+
+migrate COMEDI_CB interface to COMEDI_EV flags, move #defines to comedidev.h
+
+rename prealloc_buf and prealloc_bufsz
+
+fix RT interrupts and comedi_irq[] dumbness
+
+ni_mio_common: analog output doesn't work correctly with insns after
+  running a command
+

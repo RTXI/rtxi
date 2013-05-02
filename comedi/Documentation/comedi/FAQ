@@ -1,0 +1,32 @@
+
+1. I get the error message:
+
+  Makefile:14: /usr/src/linux/.config: No such file or directory
+  make: *** No rule to make target `/usr/src/linux/.config'.  Stop.
+
+It means you don't have the file /usr/src/linux/.config.  This file
+contains all the configuration information about your linux kernel,
+which comedi needs in order to compile correctly.  Some distributions
+don't contain this file, so you will need to create your own, by
+compiling your own kernel.  This file is automatically created
+when you run 'make config', the first step in compiling a kernel.
+
+
+2. I'm using Red Hat 7.x and it doesn't work...
+
+Red Hat kernels are not supported because they are too heavily
+modified.  The recommended solution is to download pristine kernel
+sources from kernel.org and compile a new kernel, then compile
+Comedi with that new kernel.  Alternatively, there are a few notes
+in Documentation/comedi/redhat-notes from users that have
+successfully used Red Hat kernels.
+
+
+3. Compilation fails with the error message:
+
+  comedi_fops.c:1749: too few arguments to function
+  `kill_fasync_Rsmpd2040200'
+
+See #2.
+
+

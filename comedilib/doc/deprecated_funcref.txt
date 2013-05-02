@@ -1,0 +1,141 @@
+Function: comedi_dio_bitfield -- read/write multiple digital channels
+Retval: int
+Param: comedi_t * device
+Param: unsigned int subdevice
+Param: unsigned int write_mask
+Param: unsigned int * bits
+Status: deprecated
+Description:
+ This function is deprecated.  Use comedi_dio_bitfield2() instead.
+
+Function: comedi_from_phys -- convert physical units to sample
+Retval: lsampl_t
+Param: double data
+Param: comedi_range * range
+Param: lsampl_t maxdata
+Status: deprecated
+Description:
+ Converts data given in physical units (data) into sample values
+ (lsampl_t, between 0 and maxdata).  The parameter rng
+ represents the conversion information to use, and the parameter
+ maxdata represents the maximum possible data value for the
+ channel that the data will be written to.
+
+ Conversion is not affected by out-of-range behavior.  Out-of-range
+ data parameters are silently truncated to the range 0 to maxdata.
+
+Function: comedi_get_timer -- timer information (deprecated)
+Retval: int
+Param: comedi_t * device
+Param: unsigned int subdevice
+Param: double frequency
+Param: unsigned int * trigvar
+Param: double * actual_frequency
+Status: deprecated
+Description:
+ The function comedi_get_timer converts the frequency frequency
+ to a number suitable to send to the driver in a comedi_trig
+ structure.  This function remains for compatibility with very
+ old versions of Comedi, that converted sampling rates to timer
+ values in the libary.  This conversion is now done in the kernel,
+ and every device has the timer type nanosec_timer, indicating
+ that timer values are simply a time specified in nanoseconds.
+
+Function: comedi_set_global_oor_behavior -- out-of-range behavior
+Retval: int
+Param: enum comedi_oor_behavior behavior
+Status: deprecated
+Description:
+ This function changes the Comedilib out-of-range behavior.
+ This currently affects the behavior of comedi_to_phys() when
+ converting endpoint sample values, that is, sample values
+ equal to 0 or maxdata.  If the out-of-range behavior is set to
+ COMEDI_OOR_NAN, endpoint values are converted to NAN.  If the
+ out-of-range behavior is set to COMEDI_OOR_NUMBER, the endpoint
+ values are converted similarly to other values.
+
+ The previous out-of-range behavior is returned.
+
+Function: comedi_sv_init -- slowly-varying inputs
+Retval: int
+Param: comedi_sv_t * sv
+Param: comedi_t * device
+Param: unsigned int subdevice
+Param: unsigned int channel
+Status: deprecated
+Description:
+ The function comedi_sv_init() initializes the slow varying Comedi
+ structure sv to use the device device, the analog input subdevice
+ subdevice, and the channel channel.  The slow varying Comedi
+ structure is used by comedi_sv_measure() to accurately measure
+ an analog input by averaging over many samples.  The default
+ number of samples is 100.  This function returns 0 on success,
+ -1 on error.
+
+Function: comedi_sv_measure -- slowly-varying inputs
+Retval: int
+Param: comedi_sv_t * sv
+Param: double * data
+Status: deprecated
+Description:
+ The function comedi_sv_measure() uses the slowly varying Comedi
+ structure sv to measure a slowly varying signal.  If successful,
+ the result (in physical units) is stored in the location pointed
+ to by data, and the number of samples is returned.  On error, -1
+ is returned.
+
+Function: comedi_sv_update -- slowly-varying inputs
+Retval: int
+Param: comedi_sv_t * sv
+Status: deprecated
+Description:
+ The function comedi_sv_update() updates internal parameters of
+ the slowly varying Comedi structure sv.
+
+Function: comedi_timed_1chan -- streaming input (deprecated)
+Retval: int
+Param: comedi_t * device
+Param: unsigned int subdevice
+Param: unsigned int channel
+Param: unsigned int range
+Param: unsigned int aref
+Param: double frequency
+Param: unsigned int num_samples
+Param: double * data
+Status: deprecated
+Description:
+ Not documented.
+
+Function: comedi_to_phys -- convert sample to physical units
+Retval: double
+Param: lsampl_t data
+Param: comedi_range * range
+Param: lsampl_t maxdata
+Status: deprecated
+Description:
+ Converts data given in sample values (lsampl_t, between 0 and
+ maxdata) into physical units (double).  The parameter range
+ represents the conversion information to use, and the parameter
+ maxdata represents the maximum possible data value for the
+ channel that the data was read.
+
+ Conversion of endpoint sample values, that is, sample values
+ equal to 0 or maxdata, is affected by the Comedilib out-of-range
+ behavior.  If the out-of-range behavior is set to COMEDI_OOR_NAN,
+ endpoint values are converted to NAN.  If the out-of-range
+ behavior is set to COMEDI_OOR_NUMBER, the endpoint values are
+ converted similarly to other values.
+
+ If there is an error, NAN is returned.
+
+Function: comedi_trigger -- perform streaming input/output (deprecated)
+Retval: int
+Param: comedi_t * device
+Param: comedi_trig * trig
+Status: deprecated
+Description:
+ The function comedi_trigger() instructs Comedi to
+ perform the command specified by the trigger structure trig.
+ The return value depends on
+ the particular trig being issued.  If there is an
+ error, -1 is returned.

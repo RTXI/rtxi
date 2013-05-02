@@ -1,0 +1,60 @@
+
+
+at-mio-64f-5	320487.pdf	has info
+at-mio-16x	320640b.pdf	has info
+at-mio-16d	320489.pdf	has info
+at-mio-16f-5	320266.pdf	has info
+at-mio-16	320476.pdf	no info
+
+
+E series:
+
+see ni_E.c
+
+
+
+
+E series:
+
+issues:
+
+- extra interrupt when changing from NE to HF FIFO mode
+
+ai reset registers:
+
+ AI_Command_1_Register
+ AI_Command_2_Register
+
+ AI_Mode_1_Register
+ AI_Mode_2_Register
+ AI_Mode_3_Register
+ AI_START_STOP_Select_Register
+
+ AI_Output_Control_Register
+ AI_Personal_Register
+ AI_Trigger_Select_Register
+
+
+ai mode registers:
+
+ 2:
+ 
+ AI_START_STOP_Select_Register
+ AI_Mode_2_Register
+ AI_Mode_3_Register
+ AI_Command_1_Register
+ AI_Command_2_Register
+
+ 4:
+ 
+ AI_START_STOP_Select_Register
+ AI_Mode_2_Register
+ AI_Command_1_Register
+ 
+
+ai_reset():
+
+ AI_Personal_Register
+ AI_Output_Control_Register
+ AI_Trigger_Select_Register
+ 

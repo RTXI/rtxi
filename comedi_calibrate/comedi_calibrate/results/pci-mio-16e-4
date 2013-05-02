@@ -1,0 +1,371 @@
+eeprom reference lsb=183 msb=255
+resulting reference voltage: 4.99993
+Warning: device may not be not fully calibrated due to insufficient information.
+Please file a bug report at https://bugs.comedi.org/ and attach this output.
+This output will also allow comedi_calibrate to execute more
+quickly in the future.
+Forcing option: --verbose
+Forcing options: --reset --dump --calibrate --results
+Id: comedi_calibrate.c,v 1.8 2008/01/11 13:29:19 abbotti Exp 
+Driver name: ni_pcimio
+Device name: pci-mio-16e-4
+Id: ni.c,v 1.7 2008/06/15 15:15:40 fmhess Exp 
+Comedi version: 0.7.76
+ai, bipolar zero offset, low gain
+reading -0.040894(94), target 0
+caldac[4] gain=-1.0152(13)e-3 V/bit S_min=17.6487 dof=14
+caldac[8] gain=-1.31(13)e-5 V/bit S_min=0.574241 dof=14
+ai, bipolar zero offset, high gain
+reading -1.1373(58)e-4, target 0
+caldac[4] gain=-5.0789(82)e-6 V/bit S_min=9.10872 dof=14
+caldac[8] gain=-1.39995(81)e-5 V/bit S_min=24.6671 dof=14
+ai, bipolar voltage reference, low gain
+reading 4.954465(97), target 4.99993
+caldac[2] gain=-5.945(13)e-4 V/bit S_min=6.16919 dof=14
+caldac[4] gain=-1.0022(13)e-3 V/bit S_min=19.7122 dof=14
+caldac[8] gain=-1.48(13)e-5 V/bit S_min=0.882375 dof=14
+ai, unipolar zero offset, low gain
+reading 0.0( 0)e-2147483648, target 0.002442
+caldac[0] gain=0.0( 0)e-2147483648 V/bit S_min=nan dof=14
+caldac[1] gain=0.0( 0)e-2147483648 V/bit S_min=nan dof=14
+caldac[2] gain=4.4133(53)e-4 V/bit S_min=285877 dof=14
+caldac[3] gain=0.0( 0)e-2147483648 V/bit S_min=nan dof=14
+caldac[4] gain=-4.3710(58)e-4 V/bit S_min=185011 dof=14
+caldac[5] gain=0.0( 0)e-2147483648 V/bit S_min=nan dof=14
+caldac[6] gain=0.0( 0)e-2147483648 V/bit S_min=nan dof=14
+caldac[7] gain=-1.0157(44)e-4 V/bit S_min=33417.6 dof=14
+caldac[8] gain=0.0( 0)e-2147483648 V/bit S_min=nan dof=14
+caldac[9] gain=0.0( 0)e-2147483648 V/bit S_min=nan dof=14
+caldac[10] gain=0.0( 0)e-2147483648 V/bit S_min=nan dof=14
+caldac[11] gain=0.0( 0)e-2147483648 V/bit S_min=nan dof=14
+caldac[12] gain=0.0( 0)e-2147483648 V/bit S_min=nan dof=14
+caldac[13] gain=0.0( 0)e-2147483648 V/bit S_min=nan dof=14
+caldac[14] gain=0.0( 0)e-2147483648 V/bit S_min=nan dof=14
+caldac[15] gain=0.0( 0)e-2147483648 V/bit S_min=nan dof=14
+ai, unipolar zero offset, high gain
+reading 4.91(33)e-6, target 1.221e-05
+caldac[2] gain=2.7218(38)e-6 V/bit S_min=150022 dof=14
+caldac[4] gain=-2.7154(43)e-6 V/bit S_min=84334.1 dof=14
+caldac[7] gain=-1.0194(43)e-6 V/bit S_min=12011.5 dof=14
+caldac[8] gain=-7.5632(42)e-6 V/bit S_min=707805 dof=14
+ai, unipolar voltage reference, low gain
+reading 4.975556(94), target 4.99993
+caldac[2] gain=6.014(13)e-4 V/bit S_min=49.9969 dof=14
+caldac[4] gain=-1.0009(13)e-3 V/bit S_min=17.7527 dof=14
+caldac[7] gain=-3.828(13)e-4 V/bit S_min=3.06885 dof=14
+caldac[8] gain=-1.41(13)e-5 V/bit S_min=0.9272 dof=14
+ao 0, zero offset, low gain
+reading -0.039215(97), target 0.002442
+caldac[2] gain=5.6(13)e-6 V/bit S_min=0.669279 dof=14
+caldac[4] gain=-1.0155(13)e-3 V/bit S_min=16.5024 dof=14
+caldac[6] gain=-7.754(13)e-4 V/bit S_min=17.9896 dof=14
+caldac[8] gain=-1.37(13)e-5 V/bit S_min=0.644588 dof=14
+caldac[10] gain=-1.144(13)e-4 V/bit S_min=1.42453 dof=14
+ao 0, reference voltage, low gain
+reading 7.952009(96), target 8.00244
+caldac[2] gain=-9.590(13)e-4 V/bit S_min=28.5498 dof=14
+caldac[4] gain=-1.0100(13)e-3 V/bit S_min=3.65187 dof=14
+caldac[6] gain=-7.731(13)e-4 V/bit S_min=2.39998 dof=14
+caldac[8] gain=-1.34(13)e-5 V/bit S_min=1.23801 dof=14
+caldac[10] gain=-1.754(13)e-4 V/bit S_min=1.59836 dof=14
+caldac[11] gain=-2.073(13)e-4 V/bit S_min=1.593 dof=14
+ao 0, linearity (mid), low gain
+reading 3.957914(95), target 4.00244
+caldac[2] gain=-4.780(13)e-4 V/bit S_min=7.19619 dof=14
+caldac[4] gain=-1.0106(13)e-3 V/bit S_min=1.38028 dof=14
+caldac[6] gain=-7.723(13)e-4 V/bit S_min=1.9208 dof=14
+caldac[8] gain=-1.40(13)e-5 V/bit S_min=1.61271 dof=14
+caldac[10] gain=-1.609(13)e-4 V/bit S_min=2.23788 dof=14
+caldac[11] gain=-1.040(13)e-4 V/bit S_min=1.15864 dof=14
+ao 1, zero offset, low gain
+reading -0.038414(97), target 0.002442
+caldac[1] gain=-1.150(13)e-4 V/bit S_min=2.43099 dof=14
+caldac[4] gain=-1.0149(13)e-3 V/bit S_min=13.587 dof=14
+caldac[8] gain=-1.42(13)e-5 V/bit S_min=1.02164 dof=14
+caldac[9] gain=-7.749(13)e-4 V/bit S_min=14.5798 dof=14
+ao 1, reference voltage, low gain
+reading 7.955414(93), target 8.00244
+caldac[1] gain=-1.758(13)e-4 V/bit S_min=1.94581 dof=14
+caldac[2] gain=-9.585(13)e-4 V/bit S_min=33.0733 dof=14
+caldac[4] gain=-1.0101(13)e-3 V/bit S_min=3.0675 dof=14
+caldac[5] gain=-2.070(13)e-4 V/bit S_min=3.26994 dof=14
+caldac[8] gain=-1.41(13)e-5 V/bit S_min=0.888138 dof=14
+caldac[9] gain=-7.716(13)e-4 V/bit S_min=2.91712 dof=14
+ao 1, linearity (mid), low gain
+reading 3.959702(98), target 4.00244
+caldac[1] gain=-1.614(13)e-4 V/bit S_min=1.01601 dof=14
+caldac[2] gain=-4.777(13)e-4 V/bit S_min=5.33355 dof=14
+caldac[4] gain=-1.0102(13)e-3 V/bit S_min=1.76484 dof=14
+caldac[5] gain=-1.042(13)e-4 V/bit S_min=1.93421 dof=14
+caldac[8] gain=-1.35(13)e-5 V/bit S_min=1.91935 dof=14
+caldac[9] gain=-7.718(13)e-4 V/bit S_min=1.79553 dof=14
+ao 0, unipolar zero offset, low gain
+reading -0.038948(95), target 0
+caldac[4] gain=-1.0158(13)e-3 V/bit S_min=14.5306 dof=14
+caldac[6] gain=-7.752(13)e-4 V/bit S_min=19.0844 dof=14
+caldac[8] gain=-1.36(13)e-5 V/bit S_min=0.897032 dof=14
+caldac[10] gain=-3.79(13)e-5 V/bit S_min=0.558685 dof=14
+ao 0, unipolar high, low gain
+reading 8.952510(95), target 9.00122
+caldac[2] gain=-1.0797(13)e-3 V/bit S_min=30.856 dof=14
+caldac[4] gain=-1.0102(13)e-3 V/bit S_min=1.12994 dof=14
+caldac[6] gain=-7.726(13)e-4 V/bit S_min=3.40901 dof=14
+caldac[8] gain=-1.38(13)e-5 V/bit S_min=1.42288 dof=14
+caldac[10] gain=-8.78(13)e-5 V/bit S_min=1.66566 dof=14
+caldac[11] gain=-2.345(13)e-4 V/bit S_min=2.49548 dof=14
+ao 0, unipolar linearity (low), low gain
+reading 0.962965(89), target 1.00122
+caldac[2] gain=-1.145(13)e-4 V/bit S_min=1.67743 dof=14
+caldac[4] gain=-1.0080(13)e-3 V/bit S_min=5.02702 dof=14
+caldac[6] gain=-7.693(13)e-4 V/bit S_min=3.15971 dof=14
+caldac[8] gain=-1.36(12)e-5 V/bit S_min=1.13418 dof=14
+caldac[10] gain=-5.53(13)e-5 V/bit S_min=1.06132 dof=14
+caldac[11] gain=-2.53(13)e-5 V/bit S_min=1.21048 dof=14
+ao 0, unipolar linearity (mid), low gain
+reading 4.959182(98), target 5.00122
+caldac[2] gain=-5.944(13)e-4 V/bit S_min=9.79464 dof=14
+caldac[4] gain=-1.0026(13)e-3 V/bit S_min=24.3422 dof=14
+caldac[6] gain=-7.657(13)e-4 V/bit S_min=21.8115 dof=14
+caldac[8] gain=-1.30(13)e-5 V/bit S_min=1.66766 dof=14
+caldac[10] gain=-5.64(13)e-5 V/bit S_min=0.97342 dof=14
+caldac[11] gain=-1.296(13)e-4 V/bit S_min=1.77131 dof=14
+ao 1, unipolar zero offset, low gain
+reading -0.039272(95), target 0
+caldac[1] gain=-3.75(13)e-5 V/bit S_min=0.641757 dof=14
+caldac[4] gain=-1.0156(13)e-3 V/bit S_min=12.6807 dof=14
+caldac[8] gain=-1.35(13)e-5 V/bit S_min=0.850689 dof=14
+caldac[9] gain=-7.746(13)e-4 V/bit S_min=17.0073 dof=14
+ao 1, unipolar high, low gain
+reading 8.951885(97), target 9.00122
+caldac[1] gain=-8.78(13)e-5 V/bit S_min=2.08832 dof=14
+caldac[2] gain=-1.0794(13)e-3 V/bit S_min=36.2477 dof=14
+caldac[4] gain=-1.0115(13)e-3 V/bit S_min=3.78387 dof=14
+caldac[5] gain=-2.335(13)e-4 V/bit S_min=3.23454 dof=14
+caldac[8] gain=-1.35(13)e-5 V/bit S_min=1.34065 dof=14
+caldac[9] gain=-7.715(13)e-4 V/bit S_min=2.99986 dof=14
+ao 1, unipolar linearity (low), low gain
+reading 0.962435(89), target 1.00122
+caldac[1] gain=-5.53(13)e-5 V/bit S_min=0.649933 dof=14
+caldac[2] gain=-1.139(13)e-4 V/bit S_min=1.73297 dof=14
+caldac[4] gain=-1.0079(13)e-3 V/bit S_min=1.76904 dof=14
+caldac[5] gain=-2.47(13)e-5 V/bit S_min=1.23905 dof=14
+caldac[8] gain=-1.37(12)e-5 V/bit S_min=0.62875 dof=14
+caldac[9] gain=-7.685(13)e-4 V/bit S_min=2.40603 dof=14
+ao 1, unipolar linearity (mid), low gain
+reading 4.958214(94), target 5.00122
+caldac[1] gain=-5.69(13)e-5 V/bit S_min=1.16193 dof=14
+caldac[2] gain=-5.944(13)e-4 V/bit S_min=7.58221 dof=14
+caldac[4] gain=-1.0023(13)e-3 V/bit S_min=25.1852 dof=14
+caldac[5] gain=-1.291(13)e-4 V/bit S_min=1.42122 dof=14
+caldac[8] gain=-1.33(13)e-5 V/bit S_min=0.479612 dof=14
+caldac[9] gain=-7.648(13)e-4 V/bit S_min=21.7911 dof=14
+relative binary: ai, bipolar zero offset, low gain, ai, bipolar voltage reference, low gain
+caldac[2] set to 119
+relative binary: ai, bipolar zero offset, low gain, ai, bipolar zero offset, high gain
+caldac[4] set to 86
+binary: ai, bipolar zero offset, high gain
+caldac[8] set to 133
+binary: ai, unipolar zero offset, high gain
+caldac[7] set to 161
+linearity binary: ao 0, zero offset, low gain,
+ao 0, linearity (mid), low gain,
+ao 0, reference voltage, low gain
+caldac[10] set to 198
+binary: ao 0, zero offset, low gain
+caldac[6] set to 115
+binary: ao 0, reference voltage, low gain
+caldac[11] set to 105
+linearity binary: ao 0, unipolar linearity (low), low gain,
+ao 0, unipolar linearity (mid), low gain,
+ao 0, unipolar high, low gain
+caldac[10] set to 64
+binary: ao 0, unipolar zero offset, low gain
+caldac[6] set to 133
+binary: ao 0, unipolar high, low gain
+caldac[11] set to 138
+linearity binary: ao 1, zero offset, low gain,
+ao 1, linearity (mid), low gain,
+ao 1, reference voltage, low gain
+caldac[1] set to 205
+binary: ao 1, zero offset, low gain
+caldac[9] set to 115
+binary: ao 1, reference voltage, low gain
+caldac[5] set to 117
+linearity binary: ao 1, unipolar linearity (low), low gain,
+ao 1, unipolar linearity (mid), low gain,
+ao 1, unipolar high, low gain
+caldac[1] set to 81
+binary: ao 1, unipolar zero offset, low gain
+caldac[9] set to 131
+binary: ao 1, unipolar high, low gain
+caldac[5] set to 135
+ai, bipolar zero offset, low gain
+Applied calibration for subdev 0, channel 0, range 0, aref 3
+reading 5.7(95)e-5, target 0
+caldac[4] gain=-1.0158(13)e-3 V/bit S_min=14.2048 dof=14
+caldac[8] gain=-1.36(13)e-5 V/bit S_min=0.290384 dof=14
+ai, bipolar zero offset, high gain
+Applied calibration for subdev 0, channel 0, range 7, aref 3
+reading 9.44(62)e-6, target 0
+caldac[4] gain=-5.0795(82)e-6 V/bit S_min=4.8793 dof=14
+caldac[8] gain=-1.40128(80)e-5 V/bit S_min=8.99988 dof=14
+ai, bipolar voltage reference, low gain
+Applied calibration for subdev 0, channel 5, range 0, aref 3
+reading 5.000143(98), target 4.99993
+caldac[2] gain=-5.928(13)e-4 V/bit S_min=12.7774 dof=14
+caldac[4] gain=-1.0038(13)e-3 V/bit S_min=26.2679 dof=14
+caldac[8] gain=-1.27(13)e-5 V/bit S_min=1.11875 dof=14
+ai, unipolar zero offset, low gain
+Applied calibration for subdev 0, channel 0, range 8, aref 3
+reading 9.40(61)e-4, target 0.002442
+caldac[2] gain=6.0449(65)e-4 V/bit S_min=208485 dof=14
+caldac[4] gain=-3.0988(50)e-4 V/bit S_min=206941 dof=14
+caldac[7] gain=-2.8273(88)e-4 V/bit S_min=8549 dof=14
+caldac[8] gain=-7.49(85)e-6 V/bit S_min=2.79663 dof=14
+ai, unipolar zero offset, high gain
+Applied calibration for subdev 0, channel 0, range 15, aref 3
+reading 1.231(49)e-5, target 1.221e-05
+caldac[2] gain=3.0828(41)e-6 V/bit S_min=128460 dof=14
+caldac[4] gain=-1.6057(30)e-6 V/bit S_min=142971 dof=14
+caldac[7] gain=-1.4599(56)e-6 V/bit S_min=4691.74 dof=14
+caldac[8] gain=-8.1225(45)e-6 V/bit S_min=575473 dof=14
+ai, unipolar voltage reference, low gain
+Applied calibration for subdev 0, channel 5, range 8, aref 3
+reading 4.998803(97), target 4.99993
+caldac[2] gain=5.933(13)e-4 V/bit S_min=47.148 dof=14
+caldac[4] gain=-1.0033(13)e-3 V/bit S_min=24.0413 dof=14
+caldac[7] gain=-3.741(13)e-4 V/bit S_min=16.8791 dof=14
+caldac[8] gain=-1.36(13)e-5 V/bit S_min=0.922424 dof=14
+ao 0, zero offset, low gain
+Applied calibration for subdev 1, channel 0, range 0, aref 0
+Applied calibration for subdev 0, channel 2, range 0, aref 3
+reading 2.995(98)e-3, target 0.002442
+caldac[4] gain=-1.0159(13)e-3 V/bit S_min=15.5518 dof=14
+caldac[6] gain=-7.778(13)e-4 V/bit S_min=14.5575 dof=14
+caldac[8] gain=-1.45(13)e-5 V/bit S_min=0.688454 dof=14
+caldac[10] gain=-1.133(13)e-4 V/bit S_min=1.27048 dof=14
+ao 0, reference voltage, low gain
+Applied calibration for subdev 1, channel 0, range 0, aref 0
+Applied calibration for subdev 0, channel 2, range 0, aref 3
+reading 8.002490(95), target 8.00244
+caldac[2] gain=-9.641(13)e-4 V/bit S_min=32.1323 dof=14
+caldac[4] gain=-1.0117(13)e-3 V/bit S_min=2.1086 dof=14
+caldac[6] gain=-7.731(13)e-4 V/bit S_min=1.88842 dof=14
+caldac[8] gain=-1.42(13)e-5 V/bit S_min=1.124 dof=14
+caldac[10] gain=-1.768(13)e-4 V/bit S_min=2.66276 dof=14
+caldac[11] gain=-2.083(13)e-4 V/bit S_min=2.50054 dof=14
+ao 0, linearity (mid), low gain
+Applied calibration for subdev 1, channel 0, range 0, aref 0
+Applied calibration for subdev 0, channel 2, range 0, aref 3
+reading 4.003043(94), target 4.00244
+caldac[2] gain=-4.810(13)e-4 V/bit S_min=7.60663 dof=14
+caldac[4] gain=-1.0121(13)e-3 V/bit S_min=1.58609 dof=14
+caldac[6] gain=-7.720(13)e-4 V/bit S_min=4.79452 dof=14
+caldac[8] gain=-1.45(13)e-5 V/bit S_min=1.05734 dof=14
+caldac[10] gain=-1.611(13)e-4 V/bit S_min=1.41202 dof=14
+caldac[11] gain=-1.039(13)e-4 V/bit S_min=0.580306 dof=14
+ao 1, zero offset, low gain
+Applied calibration for subdev 1, channel 1, range 0, aref 0
+Applied calibration for subdev 0, channel 3, range 0, aref 3
+reading 2.800(96)e-3, target 0.002442
+caldac[1] gain=-1.174(13)e-4 V/bit S_min=4.14089 dof=14
+caldac[4] gain=-1.0163(13)e-3 V/bit S_min=16.1451 dof=14
+caldac[8] gain=-1.43(13)e-5 V/bit S_min=0.957457 dof=14
+caldac[9] gain=-7.780(13)e-4 V/bit S_min=14.5705 dof=14
+ao 1, reference voltage, low gain
+Applied calibration for subdev 1, channel 1, range 0, aref 0
+Applied calibration for subdev 0, channel 3, range 0, aref 3
+reading 8.002122(94), target 8.00244
+caldac[1] gain=-1.770(13)e-4 V/bit S_min=2.30511 dof=14
+caldac[2] gain=-9.662(13)e-4 V/bit S_min=24.9353 dof=14
+caldac[4] gain=-1.0109(13)e-3 V/bit S_min=2.35308 dof=14
+caldac[5] gain=-2.067(13)e-4 V/bit S_min=1.5823 dof=14
+caldac[8] gain=-1.40(13)e-5 V/bit S_min=2.30619 dof=14
+caldac[9] gain=-7.728(13)e-4 V/bit S_min=2.82035 dof=14
+ao 1, linearity (mid), low gain
+Applied calibration for subdev 1, channel 1, range 0, aref 0
+Applied calibration for subdev 0, channel 3, range 0, aref 3
+reading 4.002747(92), target 4.00244
+caldac[1] gain=-1.608(13)e-4 V/bit S_min=1.31442 dof=14
+caldac[2] gain=-4.834(13)e-4 V/bit S_min=8.73585 dof=14
+caldac[4] gain=-1.0106(13)e-3 V/bit S_min=1.25249 dof=14
+caldac[5] gain=-1.032(13)e-4 V/bit S_min=1.86641 dof=14
+caldac[8] gain=-1.37(13)e-5 V/bit S_min=0.972851 dof=14
+caldac[9] gain=-7.706(13)e-4 V/bit S_min=3.41984 dof=14
+ao 0, unipolar zero offset, low gain
+Applied calibration for subdev 1, channel 0, range 1, aref 0
+Applied calibration for subdev 0, channel 2, range 0, aref 3
+reading 1.24(97)e-4, target 0
+caldac[4] gain=-1.0163(13)e-3 V/bit S_min=14.649 dof=14
+caldac[6] gain=-7.782(13)e-4 V/bit S_min=13.8321 dof=14
+caldac[8] gain=-1.31(13)e-5 V/bit S_min=0.811386 dof=14
+caldac[10] gain=-3.61(13)e-5 V/bit S_min=0.479647 dof=14
+ao 0, unipolar high, low gain
+Applied calibration for subdev 1, channel 0, range 1, aref 0
+Applied calibration for subdev 0, channel 2, range 0, aref 3
+reading 9.001087(93), target 9.00122
+caldac[2] gain=-1.0837(13)e-3 V/bit S_min=27.4389 dof=14
+caldac[4] gain=-1.0108(13)e-3 V/bit S_min=3.71161 dof=14
+caldac[6] gain=-7.715(13)e-4 V/bit S_min=2.6497 dof=14
+caldac[8] gain=-1.34(13)e-5 V/bit S_min=2.09994 dof=14
+caldac[10] gain=-8.87(13)e-5 V/bit S_min=0.87513 dof=14
+caldac[11] gain=-2.336(13)e-4 V/bit S_min=1.86087 dof=14
+ao 0, unipolar linearity (low), low gain
+Applied calibration for subdev 1, channel 0, range 1, aref 0
+Applied calibration for subdev 0, channel 2, range 0, aref 3
+reading 1.003634(93), target 1.00122
+caldac[2] gain=-1.207(13)e-4 V/bit S_min=0.628773 dof=14
+caldac[4] gain=-1.0084(13)e-3 V/bit S_min=3.669 dof=14
+caldac[6] gain=-7.700(13)e-4 V/bit S_min=2.9748 dof=14
+caldac[8] gain=-1.41(13)e-5 V/bit S_min=1.26414 dof=14
+caldac[10] gain=-5.75(13)e-5 V/bit S_min=0.696937 dof=14
+caldac[11] gain=-2.68(13)e-5 V/bit S_min=0.630503 dof=14
+ao 0, unipolar linearity (mid), low gain
+Applied calibration for subdev 1, channel 0, range 1, aref 0
+Applied calibration for subdev 0, channel 2, range 0, aref 3
+reading 5.002504(99), target 5.00122
+caldac[2] gain=-5.932(13)e-4 V/bit S_min=14.9688 dof=14
+caldac[4] gain=-1.0040(13)e-3 V/bit S_min=26.1644 dof=14
+caldac[6] gain=-7.621(13)e-4 V/bit S_min=17.8851 dof=14
+caldac[8] gain=-1.43(13)e-5 V/bit S_min=1.20833 dof=14
+caldac[10] gain=-5.55(13)e-5 V/bit S_min=3.08768 dof=14
+caldac[11] gain=-1.293(13)e-4 V/bit S_min=2.73993 dof=14
+ao 1, unipolar zero offset, low gain
+Applied calibration for subdev 1, channel 1, range 1, aref 0
+Applied calibration for subdev 0, channel 3, range 0, aref 3
+reading 4.24(100)e-4, target 0
+caldac[1] gain=-3.65(13)e-5 V/bit S_min=0.881557 dof=14
+caldac[4] gain=-1.0163(13)e-3 V/bit S_min=16.2466 dof=14
+caldac[8] gain=-1.32(13)e-5 V/bit S_min=1.36812 dof=14
+caldac[9] gain=-7.775(13)e-4 V/bit S_min=12.6282 dof=14
+ao 1, unipolar high, low gain
+Applied calibration for subdev 1, channel 1, range 1, aref 0
+Applied calibration for subdev 0, channel 3, range 0, aref 3
+reading 9.001154(93), target 9.00122
+caldac[1] gain=-8.87(13)e-5 V/bit S_min=1.5571 dof=14
+caldac[2] gain=-1.0833(13)e-3 V/bit S_min=25.7785 dof=14
+caldac[4] gain=-1.0118(13)e-3 V/bit S_min=0.844644 dof=14
+caldac[5] gain=-2.326(13)e-4 V/bit S_min=2.11074 dof=14
+caldac[8] gain=-1.40(13)e-5 V/bit S_min=2.84209 dof=14
+caldac[9] gain=-7.712(13)e-4 V/bit S_min=2.45812 dof=14
+ao 1, unipolar linearity (low), low gain
+Applied calibration for subdev 1, channel 1, range 1, aref 0
+Applied calibration for subdev 0, channel 3, range 0, aref 3
+reading 1.003849(96), target 1.00122
+caldac[1] gain=-5.79(13)e-5 V/bit S_min=1.65311 dof=14
+caldac[2] gain=-1.208(13)e-4 V/bit S_min=1.15024 dof=14
+caldac[4] gain=-1.0084(13)e-3 V/bit S_min=2.16553 dof=14
+caldac[5] gain=-2.64(13)e-5 V/bit S_min=0.754988 dof=14
+caldac[8] gain=-1.42(13)e-5 V/bit S_min=0.840359 dof=14
+caldac[9] gain=-7.694(13)e-4 V/bit S_min=2.13424 dof=14
+ao 1, unipolar linearity (mid), low gain
+Applied calibration for subdev 1, channel 1, range 1, aref 0
+Applied calibration for subdev 0, channel 3, range 0, aref 3
+reading 5.00262(10), target 5.00122
+caldac[1] gain=-5.55(13)e-5 V/bit S_min=4.00827 dof=14
+caldac[2] gain=-5.929(13)e-4 V/bit S_min=13.8776 dof=14
+caldac[4] gain=-1.0039(13)e-3 V/bit S_min=17.908 dof=14
+caldac[5] gain=-1.285(13)e-4 V/bit S_min=3.45195 dof=14
+caldac[8] gain=-1.39(13)e-5 V/bit S_min=1.21207 dof=14
+caldac[9] gain=-7.620(13)e-4 V/bit S_min=20.9053 dof=14
+Applied calibration for subdevice 0, channel 0, range 0, aref 0

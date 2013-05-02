@@ -1,0 +1,189 @@
+
+GETTING STARTED:
+
+After installing comedi and comedilib, cd to this directory (comedilib*/demo).
+
+Use ./board_info for a very first test. If hardware and software are correctly
+installed, the program prints a list of subdevices it recognises. If the
+device is not /dev/comedi0, use here and in the following the command-line
+option -f <device>.
+
+Continue with ./inp -s <subdevice> -c <channel> to read individual samples,
+and with ./outp -s <subdevice> -c <channel> <integer value> to set an
+output value.  Other beginning demos are: cmd, dio, inpn, tut1, tut2.
+You should understand how these work before trying to understand the
+other demos.
+
+The perl subdirectory contains a few examples for the perl wrapper.
+
+
+
+DEMO PROGRAMS:
+
+ao_waveform:
+	You need a device (and driver) capable of streaming analog output,
+	which currently is some of the members of the NI AT-MIO and PCI-MIO
+	E series.  Creates a sine wave on an analog output channel.  You
+	can specify the frequency of the generated sine wave on the
+	command line.
+
+board_info:
+	Displays some information that Comedi knows about a device.
+
+choose_clock:
+	Selects a master clock source.  The subdevice must support
+	INSN_CONFIG_CLOCK_SRC.  The command-line argument specifies
+	the clock source, and the optional -F option specifies the clock's
+	frequency.
+
+choose_routing:
+	Changes the signal routed to a specified channel.  The subdevice must support
+	INSN_CONFIG_SET_ROUTING.  The command-line argument specifies
+	the signal you want routed to the specified channel.  This demo
+	can be used, for example, to choose a what signal you want to
+	appear on a PFI line (which has been configured as an output)
+	of a National Instruments board.
+
+common:
+	This is not an example.  The file common.c just contains some code
+	that is common to many of the examples.
+
+cmd:
+	An example for directly using Comedi commands.  Comedi commands
+	are used for asynchronous acquisition, with the timing controlled
+	by on-board timers or external events.  If this demo doesn't work
+	with your hardware, read the comments in the source.  Hint: data
+	is written to stdout, comments to stderr.
+
+dio:
+	Requirements:  A board with a digital I/O subdevice.  Not just
+	a 'digital input' or 'digital output' subdevice, but one in
+	which the channels can be configured between input and output.
+	Configures the specified channel as an output if passed a
+	nonzero argument.  Otherwise, the channel is configured as
+	an input.  Once the channel's direction has been configured,
+	you can read/write to it with the inp/outp demo programs.
+
+do_waveform:
+	Requirements: NI M-Series board.
+	This demo uses the digital io subdevice with an
+	asynchronous command to generate waveforms.  The
+	waveforms in this example are square waves with
+	varying periods depending on the digital output
+	channel.  Channel N outputs a square wave with
+	period 2*(N+1) clocks. The command line argument chooses the
+	clock signal for updating the outputs.  As a suggestion,
+	you might use the output of one of the general
+	purpose counters for a clock (the default clock
+	source is the output of general purpose counter 0),
+	and run the gpct_pulse_generator demo to start the counter
+	generating pulses on its output.
+
+	Note, you must configure at least one of the digital channels as
+	an output (for example by running the dio demo program)
+	before running this program. You must also pass the dio
+	subdevice file using the -f option, since the default write
+	subdevice for the m-series boards is the analog output.  For
+	example, "dio_waveform -f /dev/comedi0_sub2".
+
+eeprom_dump:
+	Dumps the EEPROM of a card, if it has one.  Useful for debugging
+	devices/drivers.
+
+gpct_pulse_generator:
+	Configures a NI general-purpose counter subdevice to produce a
+	continuous train of pulses on its output.  The -F option specifies
+	the pulse period (as a frequency in Hertz), and the argument specifies
+	the pulse width (in nanoseconds).  By default, the pulse width will
+	be set to half the pulse period.  You may need to use the "dio"
+	and "choose_routing" demos to route the counter's output to
+	an output line that you can observe (for instance one of the PFI
+	lines).
+
+gpct_simple_counting:
+	Configures a NI general-purpose counter subdevice to act as a
+	simple event counter.  You can select the input to the counter
+	using the "choose_clock" demo.  The counter's value can be read
+	out using the "inp" demo.
+
+inp:
+	Simple input:  Reads one sample from one channel on one subdevice.
+
+inpn:
+	Slightly more complicated input demo.  (It has a for() loop.)
+	Reads each channel on a subdevice, at every possible input
+	range, and converts the data to a voltage.
+
+insn:
+	Example showing how to use instructions directly. Not
+	recommended for beginners: use higher-level functions such
+	as comedi_data_read(), comedi_data_write(), etc., as demonstrated
+	in the inp, outp, and dio examples.
+
+ledclock:
+	This demo requires a Fantazein clock modified to be directly
+	controlled by the parallel port on a computer.  The original
+	demo used a real-time task and controlled the parallel port
+	directly.  This version is not complete.
+
+mmap:
+	This example shows how to map the internal Comedi buffer
+	and directly access samples instead of using read() and
+	write().  This is very similar to cmd.c, so look there for
+	comments on most of the code.
+
+outp <value>:
+	Write one <value> to one channel of one subdevice.  Requires
+	a digital or analog output subdevice.
+
+receiver:
+	This demo is meant to be used in conjunction with the sender
+	demo.  Receiver requires a digital input subdevice, and sender
+	requires a digital output subdevice.  When the clock and data
+	pins are connected between the sending and receiving devices,
+	one should be able to send bits over the link.
+
+select:
+	An example for using select() with asynchronous input.  This
+	example requires an asynchronous input subdevice that can
+	handle TRIG_TIMER as a scan_begin_src.
+
+sender:
+	See receiver.
+
+sigio:
+	Similar to the cmd demo.  This demo sets up a signal handler
+	for SIGIO, which is called whenever data is ready to be read
+	from the device.
+
+sv:
+	Similar to inp, but measures the input using the comedi_sv_*()
+	functions, which average many samples to try to get a more accurate
+	estimate of the actual input.
+
+tut1:
+tut2:
+	Tutorial examples.  See the Comedilib documentation.
+
+
+COMMAND-LINE OPTIONS:
+
+Many of these demos are linked with the file common.c, which parses
+command line options.  Some options don't make sense with all programs.
+The options are:
+
+  -a <aref>	use analog reference <aref> (default: 0 == ground)
+  -c <chan>	use channel <chan> (default: 0)
+  -s <subd>	use subdevice <subd> (default: 0)
+  -r <index>	use voltage range <index> (default: 0)
+  -f <file>	use device file <file> (default: /dev/comedi0)
+  -n <value>	use <value> for the number of channels in a scan
+  -N <value>	use <value> for the number of scans
+  -F <freq>	use <freq> as the scan frequency
+  -v		verbose
+  -d		set analog reference to differential
+  -g		set analog reference to ground
+  -o		set analog reference to other
+  -m		set analog reference to common
+  -p		display values in physical units
+

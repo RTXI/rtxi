@@ -1,0 +1,119 @@
+eeprom reference lsb=255 msb=255
+resulting reference voltage: 5
+Warning: device may not be not fully calibrated due to insufficient information.
+Please file a bug report at https://bugs.comedi.org/ and attach this output.
+This output will also allow comedi_calibrate to execute more
+quickly in the future.
+Forcing options: --reset --dump --calibrate --results
+Id: comedi_calibrate.c,v 1.91 2004/02/15 22:24:57 fmhess Exp
+Driver name: ni_pcimio
+Device name: pci-6033e
+Id: ni.c,v 1.104 2004/02/21 14:34:08 fmhess Exp
+Comedi version: 0.7.67
+ai, bipolar zero offset, low gain
+reading -9.899(50)e-3, target 0
+caldac[2] gain=4.05815(66)e-4 V/bit S_min=160.14 dof=14
+caldac[3] gain=3.980(65)e-6 V/bit S_min=1.32374 dof=14
+caldac[8] gain=5.215(41)e-7 V/bit S_min=9.43182 dof=14
+ai, bipolar zero offset, high gain
+reading 9.819(23)e-5, target 0
+caldac[2] gain=4.0585(29)e-6 V/bit S_min=3.7347 dof=14
+caldac[3] gain=4.00(30)e-8 V/bit S_min=0.937716 dof=14
+caldac[8] gain=5.1188(18)e-7 V/bit S_min=6.92651 dof=14
+ai, bipolar voltage reference, low gain
+reading 4.9894975(49), target 5
+caldac[0] gain=-4.5577(67)e-5 V/bit S_min=22.9715 dof=14
+caldac[1] gain=-2.492(68)e-6 V/bit S_min=0.991261 dof=14
+caldac[2] gain=4.05245(67)e-4 V/bit S_min=92.0068 dof=14
+caldac[3] gain=3.986(68)e-6 V/bit S_min=2.25732 dof=14
+caldac[8] gain=5.240(42)e-7 V/bit S_min=8.35406 dof=14
+ai, unipolar zero offset, low gain
+reading nan, target 7.62951e-05
+caldac[2] gain=4.0619(11)e-4 V/bit S_min=32.5208 dof=4
+ai, unipolar zero offset, high gain
+reading 9.631(21)e-5, target 7.62951e-07
+caldac[2] gain=4.0549(50)e-6 V/bit S_min=7.65813 dof=7
+caldac[3] gain=4.04(29)e-8 V/bit S_min=1.10986 dof=14
+caldac[8] gain=5.1133(36)e-7 V/bit S_min=1.48799 dof=6
+ai, unipolar voltage reference, low gain
+reading 4.9892792(34), target 5
+caldac[0] gain=-4.5533(44)e-5 V/bit S_min=18.6982 dof=14
+caldac[1] gain=-2.498(44)e-6 V/bit S_min=1.28035 dof=14
+caldac[2] gain=4.05390(44)e-4 V/bit S_min=183.052 dof=14
+caldac[3] gain=3.918(44)e-6 V/bit S_min=1.27415 dof=14
+caldac[8] gain=5.148(28)e-7 V/bit S_min=3.90862 dof=14
+relative binary: ai, bipolar zero offset, low gain, ai, bipolar voltage
+reference, low gain
+caldac[0] set to 131
+relative binary: ai, bipolar zero offset, low gain, ai, bipolar zero offset,
+high gain
+caldac[2] set to 153
+relative binary: ai, bipolar zero offset, low gain, ai, bipolar zero offset,
+high gain
+caldac[3] set to 201
+binary: ai, bipolar zero offset, high gain
+caldac[8] set to 1647
+relative binary: ai, bipolar zero offset, low gain, ai, bipolar voltage
+reference, low gain
+caldac[1] set to 88
+binary peg: ai, unipolar zero offset, low gain
+caldac[8] set to 0
+binary peg: ai, unipolar zero offset, low gain
+caldac[2] set to 255
+relative binary: ai, unipolar zero offset, low gain, ai, unipolar voltage
+reference, low gain
+caldac[0] set to 130
+relative binary: ai, unipolar zero offset, low gain, ai, unipolar zero offset,
+high gain
+caldac[2] set to 156
+relative binary: ai, unipolar zero offset, low gain, ai, unipolar zero offset,
+high gain
+caldac[3] set to 175
+binary: ai, unipolar zero offset, high gain
+caldac[8] set to 1617
+relative binary: ai, unipolar zero offset, low gain, ai, unipolar voltage
+reference, low gain
+caldac[1] set to 127
+writing calibration to ./ni_pcimio_pci-6033e_comedi0
+ai, bipolar zero offset, low gain
+applied calibration for subdev 0, channel 0, range 0, aref 3
+reading 4.29(81)e-5, target 0
+caldac[2] gain=4.05675(65)e-4 V/bit S_min=152.289 dof=14
+caldac[3] gain=3.861(65)e-6 V/bit S_min=1.57508 dof=14
+caldac[8] gain=5.128(41)e-7 V/bit S_min=1.59219 dof=14
+ai, bipolar zero offset, high gain
+applied calibration for subdev 0, channel 0, range 6, aref 3
+reading 1.02(25)e-6, target 0
+caldac[2] gain=4.0554(30)e-6 V/bit S_min=7.41243 dof=14
+caldac[3] gain=3.98(30)e-8 V/bit S_min=1.81005 dof=14
+caldac[8] gain=5.1188(18)e-7 V/bit S_min=4.95673 dof=14
+ai, bipolar voltage reference, low gain
+applied calibration for subdev 0, channel 5, range 0, aref 3
+reading 4.9999660(72), target 5
+caldac[0] gain=-4.5825(67)e-5 V/bit S_min=36.1478 dof=14
+caldac[1] gain=-2.774(72)e-6 V/bit S_min=0.879831 dof=14
+caldac[2] gain=4.05129(67)e-4 V/bit S_min=102.117 dof=14
+caldac[3] gain=3.933(67)e-6 V/bit S_min=2.60807 dof=14
+caldac[8] gain=5.125(42)e-7 V/bit S_min=4.66901 dof=14
+ai, unipolar zero offset, low gain
+applied calibration for subdev 0, channel 0, range 7, aref 3
+reading 9.042(33)e-4, target 7.62951e-05
+caldac[2] gain=1.24217(16)e-4 V/bit S_min=3.21485e+07 dof=14
+caldac[3] gain=3.941(41)e-6 V/bit S_min=2.37018 dof=14
+caldac[8] gain=5.087(26)e-7 V/bit S_min=3.06702 dof=14
+ai, unipolar zero offset, high gain
+applied calibration for subdev 0, channel 0, range 13, aref 3
+reading 9.54(78)e-7, target 7.62951e-07
+caldac[2] gain=1.1642(10)e-6 V/bit S_min=730218 dof=14
+caldac[3] gain=5.31(68)e-9 V/bit S_min=4.78958 dof=14
+caldac[8] gain=3.10170(98)e-7 V/bit S_min=1.58412e+06 dof=14
+ai, unipolar voltage reference, low gain
+applied calibration for subdev 0, channel 5, range 7, aref 3
+reading 5.0007925(32), target 5
+caldac[0] gain=-4.5870(44)e-5 V/bit S_min=34.7342 dof=14
+caldac[1] gain=-2.533(44)e-6 V/bit S_min=1.01379 dof=14
+caldac[2] gain=4.05338(44)e-4 V/bit S_min=178.116 dof=14
+caldac[3] gain=3.945(44)e-6 V/bit S_min=1.46842 dof=14
+caldac[8] gain=5.131(28)e-7 V/bit S_min=5.89766 dof=14
+Applied calibration for subdevice 0, channel 0, range 0, aref 0
+

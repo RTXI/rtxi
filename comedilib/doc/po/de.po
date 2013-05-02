@@ -1,0 +1,198 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR Free Software Foundation, Inc.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: comedilib 0.7.16\n"
+"POT-Creation-Date: 2001-08-18 18:01-0700\n"
+"PO-Revision-Date: 2001-08-18 17:38-0700\n"
+"Last-Translator: David Schleef <ds@schleef.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=iso-8859-1\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#
+#: ../comedi_config/comedi_config.c:73
+msgid ""
+"usage:  comedi_config [OPTIONS] <device file> [<driver> <opt1>,<opt2>,...]\n"
+"\n"
+"OPTIONS:\n"
+"  -v, --verbose\n"
+"      verbose output\n"
+"  -q, --quiet\n"
+"      quiet output\n"
+"  -V, --version\n"
+"      print program version\n"
+"  -i, --init-data <filename>\n"
+"      Use file for driver initialization data, typically firmware code.\n"
+"  -r, --remove\n"
+"      remove previously configured driver\n"
+"  --read-buffer <size>\n"
+"      set buffer size in kilobytes used for reading\n"
+"  --write-buffer <size>\n"
+"      set buffer size in kilobytes used for writing\n"
+"\n"
+"  <optN> are integers whose interpretation is driver dependent.\n"
+"  In general, for PCI boards, <opt1> and <opt2> refer to the bus/slot\n"
+"  indices of the board.  If not specified, a board will automatically\n"
+"  be chosen.  For non-PCI boards, <opt1> specifies the I/O port base\n"
+"  address and, if applicable, <opt2> specifies the IRQ.  Additional\n"
+"  options may be useful, see the Comedi documentation for details.\n"
+msgstr ""
+"Benutzung: comedi_config [OPTION] <Gerätdatei> [<Treiber> <opt1>,<opt2>,...]\n"
+"\n"
+"  -v, --verbose\n"
+"      verbose output\n"
+"  -q, --quiet\n"
+"      quiet output\n"
+"  -V, --version\n"
+"      Zeige Versionsnummer an.  -i, --init-data <Datei>\n"
+"  -i, --init-data <Datei>\n"
+"      Use file for driver initialization data, typically firmware code.\n"
+"  -r, --remove\n"
+"      remove previously configured driver\n"
+"  --read-buffer <size>\n"
+"      set buffer size in kilobytes used for reading\n"
+"  --write-buffer <size>\n"
+"      set buffer size in kilobytes used for writing\n"
+"\n"
+"  <optN> sind Ganzzähle, dessen Bedeutung treiberabhängig ist.\n"
+"  Typisch, für PCI Geräte, <opt1> und <opt2> sind die PCI Bus- und\n"
+"  Schlitz- Nummern von dem Gerät.  Wann die Nummern unspezifiziert\n"
+"  oder null sind, ein Gerät wird automatisch wählen.  Für non-PCI\n"
+"  Geräte, <opt1> spezifiziert the I/O port base address und <opt2>\n"
+"  gegebenenfalls die IRQ.  Zusätliche Optionen kann auch nützlich\n"
+"  sein; lesen die Dokumentation für weiterer Information.\n"
+
+#: ../comedi_config/comedi_config.c:120
+msgid "comedi_config should be run as root.  Attempting to continue anyway.\n"
+msgstr ""
+"comedi_config wirt bei root fahren sollen.  Versuche jedenfalls zu "
+"weitermachen.\n"
+
+#: ../comedi_config/comedi_config.c:146 ../comedi_config/comedi_config.c:154
+msgid "invalid buffer size\n"
+msgstr "ungültige Puffergröße\n"
+
+#: ../comedi_config/comedi_config.c:174
+msgid "comedi.o not loaded\n"
+msgstr ""
+
+#: ../comedi_config/comedi_config.c:177
+msgid "device not configured\n"
+msgstr "Gerät nicht konfiguriert\n"
+
+#: ../comedi_config/comedi_config.c:180
+msgid "modprobe problem\n"
+msgstr "modprobe Fehler\n"
+
+#: ../comedi_config/comedi_config.c:248
+msgid "allocating initialization data\n"
+msgstr ""
+
+#: ../comedi_config/comedi_config.c:254
+msgid "reading initialization data\n"
+msgstr ""
+
+#: ../comedi_config/comedi_config.c:265
+#, c-format
+msgid "configuring driver=%s "
+msgstr ""
+
+#: ../comedi_config/comedi_config.c:271
+msgid "Configure failed!"
+msgstr ""
+
+#: ../comedi_config/comedi_config.c:272
+msgid "Check kernel log for more information\n"
+msgstr "Prüfen die Kernaufzeichnung für weiterer Information\n"
+
+#: ../comedi_config/comedi_config.c:273
+msgid "Possible reasons for failure:\n"
+msgstr ""
+
+#: ../comedi_config/comedi_config.c:279
+msgid "  Already configured\n"
+msgstr "  schon konfiguriert\n"
+
+#: ../comedi_config/comedi_config.c:282
+msgid "  Driver not found\n"
+msgstr "  Treiber nicht gefunden\n"
+
+#: ../comedi_config/comedi_config.c:285
+msgid "  Not root\n"
+msgstr "  nicht root\n"
+
+#: ../comedi_config/comedi_config.c:288
+msgid "  Comedi bug\n"
+msgstr "  Fehler mit Comedi\n"
+
+#
+#: ../comedi_config/comedi_config.c:291
+msgid "  Unknown\n"
+msgstr "  ungültig\n"
+
+#: ../comedi_config/comedi_config.c:309
+msgid "Buffer resizing requires Comedi version >= 0.7.57\n"
+msgstr "Puffergrößänderung erfordert Comedi Versionnummer >= 0.7.57\n"
+
+#
+#: ../comedi_config/comedi_config.c:318
+msgid "warning: no read subdevice, resize ignored\n"
+msgstr "Warnung: kein Leseuntergerät, Puffergrößänderung ignoriert\n"
+
+#: ../comedi_config/comedi_config.c:326 ../comedi_config/comedi_config.c:347
+msgid "buffer resize error"
+msgstr "Puffergrößänderungsfehler"
+
+#: ../comedi_config/comedi_config.c:331
+#, c-format
+msgid "%s read buffer resized to %i kilobytes\n"
+msgstr ""
+
+#: ../comedi_config/comedi_config.c:339
+msgid "warning: no write subdevice, resize ignored\n"
+msgstr "Warnung: kein Schreibuntergerät, Puffergrößänderung ignoriert\n"
+
+#: ../comedi_config/comedi_config.c:352
+#, c-format
+msgid "%s write buffer resized to %i kilobytes\n"
+msgstr ""
+
+#: ../lib/error.c:34
+msgid "No error"
+msgstr "keine Fehler"
+
+#: ../lib/error.c:35
+msgid "Unknown error"
+msgstr "ungültige Fehler"
+
+#: ../lib/error.c:36
+msgid "Bad comedi_t structure"
+msgstr "schlechte comedi_t Structur"
+
+#: ../lib/error.c:37
+msgid "Invalid subdevice"
+msgstr "ungültiges Untergerät"
+
+#: ../lib/error.c:38
+msgid "Invalid channel"
+msgstr "ungültige Kanal"
+
+#: ../lib/error.c:39
+msgid "Buffer overflow"
+msgstr "Pufferüberlauf"
+
+#: ../lib/error.c:40
+msgid "Buffer underflow"
+msgstr "Pufferunterlauf"
+
+#: ../lib/error.c:41
+msgid "Command not supported"
+msgstr "Befehl nicht unterstützt"
+
+#: ../lib/error.c:42
+msgid "Not supported"
+msgstr "nicht unterstützt"

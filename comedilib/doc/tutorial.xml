@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
+	"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd" [
+<!ENTITY % comedilib_entities SYSTEM "comedilib.ent">
+%comedilib_entities;
+]>
+
+<section id="writingprograms" xmlns:xi="http://www.w3.org/2001/XInclude">
+<title>
+Writing &comedi; programs
+</title>
+<para>
+This section describes how &comedi;
+can be used in an application, to communicate data with a set
+of &comedi; devices.
+<xref linkend="acquisitionfunctions"/> gives more details about
+the various acquisition functions with which the application
+programmer can perform data acquisition in &comedi;.
+</para>
+<para>
+Also don't forget to take a good look at the
+<filename class="directory">demo</filename>
+directory of the Comedilib source code. It contains lots of examples
+for the basic functionalities of &comedi;.
+</para>
+
+<section id="firstprogram">
+<title>
+Your first &comedi; program
+</title>
+
+<para>
+This example requires a card that has analog or digital input. This
+progam opens the device, gets the data, and prints it out:
+<programlisting>
+<xi:include href="../demo/tut1.c" parse="text"/>
+</programlisting>
+</para>
+<para>
+The source code file for the above program can be found in Comedilib,
+at <filename>demo/tut1.c</filename>.  You can compile the program using
+</para>
+
+<screen>
+cc tut1.c -lcomedi -o tut1
+</screen>
+<para>
+The
+<function>
+ <link linkend="func-ref-comedi-open">comedi_open</link>
+</function> call can only be successful if the
+<filename>comedi0</filename> device file is configured with a
+valid &comedi; driver. <xref linkend="cardconfiguration"/> explains
+how this driver is linked to the <quote>device file</quote>.
+</para>
+<para>
+The <parameter class="function">range</parameter> variable tells
+&comedi; which gain to use when measuring an analog voltage.  Since we
+don't know (yet) which numbers are valid, or what each means, we'll
+use <literal>0</literal>, because it won't cause errors.  Likewise
+with <parameter class="function">aref</parameter>, which determines the
+analog reference used.
+</para>
+</section>
+
+
+<section id="convertingsamples">
+<title>
+Converting between integer data and physical units
+</title>
+
+<para>
+If you selected an analog input subdevice, you probably noticed
+that the output of <command>tut1</command> is an unsigned number, for
+example between <literal>0</literal> and <literal>65535</literal>
+for a 16 bit analog input. &comedi; samples are
+unsigned,
+with <literal>0</literal>  representing the lowest voltage of the ADC,
+and a hardware-dependent maximum value representing the highest voltage.
+&comedi; compensates for anything else the manual for
+your device says (for example, many boards represent bipolar
+analog input voltages as signed integers).  However, you probably prefer to have this number
+translated to a voltage.  Naturally, as a good programmer, your first
+question is: <quote>How do I do this in a device-independent
+manner?</quote>
+</para>
+
+<para>
+The functions
+<link linkend="func-ref-comedi-to-physical"><function>comedi_to_physical</function></link> and
+<link linkend="func-ref-comedi-from-physical"><function>comedi_from_physical</function></link>
+are used to convert between &comedi;'s integer data and floating point numbers corresponding
+to physical values (voltages, etc.).  In order to use the conversion functions, you must
+first obtain a <link linkend="ref-type-comedi-polynomial-t">comedi_polynomial_t</link>
+corresponding to the subdevice, range, and possibly channel the integer data is associated
+with.  The comedi_polynomial_t object specifies the polynomial function that will be applied
+to convert between &comedi;'s integer data and physical values.
+</para>
+
+<para>
+A  <link linkend="ref-type-comedi-polynomial-t">comedi_polynomial_t</link> may be obtained
+from one of two functions:
+<link linkend="func-ref-comedi-get-hardcal-converter"><function>comedi_get_hardcal_converter</function></link> or
+<link linkend="func-ref-comedi-get-softcal-converter"><function>comedi_get_softcal_converter</function></link>.
+Which function to use depends on whether your board does calibration in hardware, or relies on
+the host computer for a software calibration.  The
+SDF_SOFT_CALIBRATED flag (queried by calling
+<link linkend="func-ref-comedi-get-subdevice-flags"><function>comedi_get_subdevice_flags</function></link>)
+will be set for boards that use software calibration.
+</para>
+
+</section>
+
+<section id="secondprogram">
+<title>
+Your second &comedi; program
+</title>
+
+
+<para>
+Actually, this is the first &comedi; program again, except
+we've added code to convert the integer data value to physical units.
+The program handles both the case of a software-calibrated
+board and a hardware-calibrated board.
+</para>
+
+<programlisting>
+<xi:include href="../demo/tut2.c" parse="text"/>
+</programlisting>
+<para>
+The source code file for the above program can be found in Comedilib, at demo/tut2.c.
+</para>
+</section>
+
+<section>
+	<title>Further examples</title>
+	<para>
+		See the demo subdirectory of Comedilib for more example programs.  The directory contains
+		a README file with descriptions of the various demo programs.
+	</para>
+</section>
+</section>
+
