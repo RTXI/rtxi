@@ -15,9 +15,9 @@
 #include <qpushbutton.h>
 #include <qstringlist.h>
 #include <qinputdialog.h>
-#include <qwt/qwt_plot.h>
-#include <qwt/qwt_plot_curve.h>
-#include <qwt/qwt_text.h>
+#include <qwt-qt3/qwt_plot.h>
+#include <qwt-qt3/qwt_plot_curve.h>
+#include <qwt-qt3/qwt_text.h>
 
 using namespace std;
 

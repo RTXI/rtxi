@@ -7,7 +7,7 @@
 #include <settings.h>
 #include <vector>
 #include <boost/shared_ptr.hpp>
-#include <qwt/qwt_plot.h>
+#include <qwt-qt3/qwt_plot_curve.h>
 
 namespace ClampProtocol {
     class Panel;

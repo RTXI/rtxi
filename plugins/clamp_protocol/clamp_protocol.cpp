@@ -17,7 +17,7 @@
 #include <qcheckbox.h>
 #include <qspinbox.h>
 #include <qvalidator.h>
-#include <qwt/qwt_legend.h>
+#include <qwt-qt3/qwt_legend.h>
 
 static Workspace::variable_t vars[] = { // Variables
     {
