@@ -6,8 +6,8 @@
 #define _SCATTERPLOT_H_ 1
 
 #include "incrementalplot.h"
-#include <qwt-qt3/qwt_scale_widget.h>
-#include <qwt-qt3/qwt_scale_draw.h>
+#include <qwt/qwt_scale_widget.h>
+#include <qwt/qwt_scale_draw.h>
 
 class QTimer;
 /*

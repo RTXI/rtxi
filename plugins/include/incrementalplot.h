@@ -8,9 +8,9 @@
 #define _INCREMENTALPLOT_H_ 1
 
 #include "basicplot.h"
-#include <qwt-qt3/qwt_array.h>
-#include <qwt-qt3/qwt_plot.h>
-#include <qwt-qt3/qwt_symbol.h>
+#include <qwt/qwt_array.h>
+#include <qwt/qwt_plot.h>
+#include <qwt/qwt_symbol.h>
 
 class QwtPlotCurve;
 
