@@ -13,8 +13,8 @@
 #include <qscrollview.h>
 #include <qsizepolicy.h>
 #include <qtooltip.h>
-#include <qwt-qt3/qwt_text.h>
-#include <qwt-qt3/qwt_legend.h>
+#include <qwt/qwt_text.h>
+#include <qwt/qwt_legend.h>
 
 ClampProtocol::PlotWindow::PlotWindow( QWidget *parent, Panel *p )
     : PlotWindowUI( parent, "Plot Window", Qt::WDestructiveClose ), panel( p ), overlaySweeps( false ),

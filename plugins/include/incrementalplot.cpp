@@ -1,6 +1,6 @@
-#include <qwt-qt3/qwt_plot.h>
-#include <qwt-qt3/qwt_plot_canvas.h>
-#include <qwt-qt3/qwt_plot_curve.h>
+#include <qwt/qwt_plot.h>
+#include <qwt/qwt_plot_canvas.h>
+#include <qwt/qwt_plot_curve.h>
 #include "incrementalplot.h"
 #if QT_VERSION >= 0x040000
 #include <qpaintengine.h>
