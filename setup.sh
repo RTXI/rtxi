@@ -57,7 +57,7 @@ echo "----->Starting xi-bone installation..."
 
 cd ../../
 ./autogen.sh
-./configure 
+./configure --enable-posix
 sudo make -C ./
 sudo make install -C ./
 
