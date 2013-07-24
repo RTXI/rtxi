@@ -58,6 +58,7 @@ cd ../../
 ./configure --enable-posix --disable-comedi --disable-analogy --disable-rtai --disable-xenomai
 sudo make -C ./
 sudo make install -C ./
+sudo cp rtxi.conf /etc
 
 if [ $? -eq 0 ]; then
 	echo "----->RTXI intallation successful."

@@ -10,7 +10,7 @@
 #if QT_VERSION < 0x040000
 #include <qscrollview.h>
 #endif
-#include <qwt/qwt_plot_zoomer.h>
+#include <qwt-qt3/qwt_plot_zoomer.h>
 
 class ScrollData;
 class ScrollBar;
