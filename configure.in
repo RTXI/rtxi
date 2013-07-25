@@ -1,7 +1,7 @@
 AC_INIT([RTXI],[trunk],[rtxi-help@lists.sourceforge.net],rtxi)
 
 AM_CONFIG_HEADER(include/rtxi_config.h)
-AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE(foreign)
 AM_PATH_CPPUNIT
 
 AC_PROG_LIBTOOL
