@@ -56,26 +56,26 @@ echo "----->Starting RTXI installation..."
 cd ../../
 ./autogen.sh
 
-echo "----->Kernel configuration..."
-echo "1. RTAI+Comedi"
-echo "2. RTAI+Analogy"
-echo "3. Xenomai+Analogy"
-echo "4. POSIX (Non-RT)+Analogy"
-echo "----->Please select your configuration:"
-read -n 1 kernel
+#echo "----->Kernel configuration..."
+#echo "1. RTAI+Comedi"
+#echo "2. RTAI+Analogy"
+#echo "3. Xenomai+Analogy"
+#echo "4. POSIX (Non-RT)+Analogy"
+#echo "----->Please select your configuration:"
+#read -n 1 kernel
 
-if [ $kernel -eq "1" ]; then
-	./configure --enable-comedi --enable-rtai
-elif [ $kernel -eq "2" ]; then
-	./configure --enable-rtai --enable-analogy
-elif [ $kernel -eq "3" ]; then
+#if [ $kernel -eq "1" ]; then
+#	./configure --enable-comedi --enable-rtai
+#elif [ $kernel -eq "2" ]; then
+#	./configure --enable-rtai --enable-analogy
+#elif [ $kernel -eq "3" ]; then
 	./configure --enable-xenomai --enable-analogy
-elif [ $kernel -eq "4" ]; then
-	./configure --disable-xenomai --enable-posix --enable-analogy --disable-comedi
-else
-	echo "Invalid configuration."
-	exit 1
-fi
+#elif [ $kernel -eq "4" ]; then
+#	./configure --disable-xenomai --enable-posix --enable-analogy --disable-comedi
+#else
+#	echo "Invalid configuration."
+#	exit 1
+#fi
 
 sudo make -C ./
 sudo make install -C ./
