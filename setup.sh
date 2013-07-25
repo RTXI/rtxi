@@ -55,7 +55,28 @@ echo "----->Starting RTXI installation..."
 
 cd ../../
 ./autogen.sh
-./configure --enable-posix --disable-comedi --disable-analogy --disable-rtai --disable-xenomai
+
+echo "----->Kernel configuration..."
+echo "1. RTAI+Comedi"
+echo "2. RTAI+Analogy"
+echo "3. Xenomai+Analogy"
+echo "4. POSIX (Non-RT)+Analogy"
+echo "----->Please select your configuration:"
+read -n 1 kernel
+
+if [ $kernel == "1" ]; then
+	./configure --enable-comedi --enable-rtai
+elif [ $kernel == "2" ]; then
+	./configure --enable-rtai --enable-analogy
+elif [ $kernel == "3" ]; then
+	./configure --enable-xenomai --enable-analogy
+elif [ $kernel == "4" ]; then
+	./configure --disable-xenomai --enable-posix --enable-analogy --disable-comedi
+else
+	echo "Invalid configuration."
+	exit 1
+fi
+
 sudo make -C ./
 sudo make install -C ./
 sudo cp rtxi.conf /etc
