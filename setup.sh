@@ -64,13 +64,13 @@ echo "4. POSIX (Non-RT)+Analogy"
 echo "----->Please select your configuration:"
 read -n 1 kernel
 
-if [ $kernel == "1" ]; then
+if [ $kernel -eq "1" ]; then
 	./configure --enable-comedi --enable-rtai
-elif [ $kernel == "2" ]; then
+elif [ $kernel -eq "2" ]; then
 	./configure --enable-rtai --enable-analogy
-elif [ $kernel == "3" ]; then
+elif [ $kernel -eq "3" ]; then
 	./configure --enable-xenomai --enable-analogy
-elif [ $kernel == "4" ]; then
+elif [ $kernel -eq "4" ]; then
 	./configure --disable-xenomai --enable-posix --enable-analogy --disable-comedi
 else
 	echo "Invalid configuration."
@@ -79,6 +79,7 @@ fi
 
 sudo make -C ./
 sudo make install -C ./
+sudo cp libtool /usr/local/lib/rtxi/.
 sudo cp rtxi.conf /etc
 
 if [ $? -eq 0 ]; then
