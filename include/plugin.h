@@ -145,7 +145,6 @@ namespace Plugin {
     private:
 
         static const u_int32_t MAGIC_NUMBER = 0xCA24CB3F;
-
         u_int32_t magic_number;
         std::string library;
         void *handle;
