@@ -61,8 +61,8 @@ public:
     int setAnalogReference(DAQ::type_t,DAQ::index_t,DAQ::index_t);
     int setAnalogUnits(DAQ::type_t,DAQ::index_t,DAQ::index_t);
     int setAnalogOffsetUnits(DAQ::type_t,DAQ::index_t,DAQ::index_t);
-    int setAnalogConversion(DAQ::type_t,DAQ::index_t) {}; // Placeholder
-    int setAnalogCalibrationActive(DAQ::type_t,DAQ::index_t,bool) {};
+    int setAnalogConversion(DAQ::type_t,DAQ::index_t) {return 0;}; // Placeholder
+    int setAnalogCalibrationActive(DAQ::type_t,DAQ::index_t,bool) {return 0;};
 
     DAQ::direction_t getDigitalDirection(DAQ::index_t) const;
     int setDigitalDirection(DAQ::index_t,DAQ::direction_t);
