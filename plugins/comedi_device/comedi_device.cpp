@@ -31,7 +31,7 @@ ComediDevice::ComediDevice(void *d,ComediLib::comedi_t *cd,std::string name,IO::
     int aiSubDevice = ComediLib::comedi_find_subdevice_by_type(comedi_device,COMEDI_SUBD_AI,0);
     int aoSubDevice = ComediLib::comedi_find_subdevice_by_type(comedi_device,COMEDI_SUBD_AO,0);
 
-    calibration = NULL:
+    calibration = NULL;
     
     if( (ComediLib::comedi_get_subdevice_flags(comedi_device,aiSubDevice) & SDF_SOFT_CALIBRATED) > 0
             || (ComediLib::comedi_get_subdevice_flags(comedi_device,aoSubDevice) & SDF_SOFT_CALIBRATED) > 0 ) { // If board uses software calibration
