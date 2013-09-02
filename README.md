@@ -1,4 +1,4 @@
-rtxi
+RTXI
 ====
 
-Real-Time eXperiment Interface is an extensible hard realtime platform for the development of novel experiment control and signal processing applications.
+The Real-Time eXperiment Interface (RTXI) is a collaborative open-source software development project aimed at producing a real-time Linux based software system for hard real-time data acquisition and control applications in biological research.
