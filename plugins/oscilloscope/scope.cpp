@@ -66,8 +66,8 @@ Scope::Scope(QWidget *parent,Qt::WFlags flags)
     isPaused = false;
 
     drawZero = true;
-    divX = 16;
-    divY = 10;
+    divX = 10;
+    divY = 8;
 
     data_idx = 0;
     data_size = 100;
