@@ -38,7 +38,6 @@ echo "----->Checking for HDF5"
 
 if [ ! -f "/usr/include/hdf5" ]; then
 	echo "----->HDF5 already installed."
-	./autogen.sh
 else
 	echo "----->Installing HDF5..."
 	cd hdf
@@ -60,6 +59,7 @@ fi
 
 # Start configuring - by default configured to run on non-RT kernel
 echo "----->Starting RTXI installation..."
+./autogen.sh
 
 echo "----->Kernel configuration..."
 echo "1. RTAI+Comedi"
