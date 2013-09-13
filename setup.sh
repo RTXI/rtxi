@@ -47,7 +47,6 @@ else
 	sudo make
 	sudo make install
 	cd ../../
-	./autogen.sh
 fi
 
 if [ $? -eq 0 ]; then
