@@ -34,14 +34,16 @@ fi
 sudo ln -s /usr/lib/libqwt-qt3.so.5 /usr/lib/libqwt.so
 
 # Installing HDF5
-echo "----->Installing HDF5..."
 
-cd hdf
-tar xf hdf5-1.8.4.tar.bz2
-cd hdf5-1.8.4
-./configure --prefix=/usr
-sudo make
-sudo make install
+if [ ! -f /usr/include/hdf5.h ]; then
+	echo "----->Installing HDF5..."
+	cd hdf
+	tar xf hdf5-1.8.4.tar.bz2
+	cd hdf5-1.8.4
+	./configure --prefix=/usr
+	sudo make
+	sudo make install
+fi
 
 if [ $? -eq 0 ]; then
 	echo "----->HDF5 installed."
