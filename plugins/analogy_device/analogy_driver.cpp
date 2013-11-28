@@ -53,7 +53,7 @@ DAQ::Device *AnalogyDriver::createDevice(const std::list<std::string> &args) {
 	// Get this data 
 	err = a4l_fill_desc(&dsc);
 	if (err < 0) {
-		ERROR_MSG("AnalogyDriver: a4l_fill_desc failed (err=%d)\n",	err);
+		ERROR_MSG("AnalogyDriver: a4l_fill_desc failed (err=%d)\nPlease run rtxi_load_analogy script in scripts directory.\n",	err);
         return 0;
 	}
 

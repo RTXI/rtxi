@@ -6,5 +6,42 @@
 *.swp
 *~
 
+#Ignore user specific rtxi files
+rtxi.conf
+Makefile.dynamo_compile
+Makefile.plugin_compile
+Makefile.plugin_example
+hdf/rtxi_hdf_matlabize
+hdf/rtxi_hdf_reader
+include/rtxi_config.h
+include/rtxi_config.h.in
+rtxi.conf
+rtxi/rtxi
+scripts/init_rtxi
+scripts/rtxi_comedi
+scripts/rtxi_plugin_config
+
 #Ignore qt generated mocs
 moc_*
+.libs/
+.deps/
+
+#Ignore automake files
+Makefile
+Makefile.in
+aclocal.m4
+autom4te.cache/
+config.*
+configure
+depcomp
+install-sh
+libtool
+ltmain.sh
+m4/
+missing
+stamp-h?
+.deps/
+.dirstamp
+.libs/
+*.l[ao]
+*~
