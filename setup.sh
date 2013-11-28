@@ -73,7 +73,7 @@ if [ $kernel -eq "1" ]; then
 elif [ $kernel -eq "2" ]; then
 	./configure --enable-rtai --enable-analogy
 elif [ $kernel -eq "3" ]; then
-	./configure --enable-xenomai --enable-analogy
+	./configure --enable-xenomai --enable-analogy --disable-rtai
 elif [ $kernel -eq "4" ]; then
 	./configure --disable-xenomai --enable-posix --enable-analogy --disable-comedi
 else

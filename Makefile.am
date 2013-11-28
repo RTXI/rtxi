@@ -34,7 +34,6 @@ pkgdata_DATA = rtxi.conf Makefile.dynamo_compile Makefile.plugin_compile Makefil
 
 pkgdata_SCRIPTS = libtool
 
-
 include $(top_srcdir)/Makefile.buildvars
 
 ChangeLog:

@@ -1,0 +1,10 @@
+#Ignore compiled objects and libraries
+*.o
+*.lo
+*.la
+*.so
+*.swp
+*~
+
+#Ignore qt generated mocs
+moc_*

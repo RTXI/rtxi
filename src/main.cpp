@@ -17,7 +17,6 @@
  */
 
 #include <iostream>
-
 #include <cstdlib>
 #include <dirent.h>
 #include <errno.h>
@@ -25,9 +24,7 @@
 #include <signal.h>
 #include <string>
 #include <unistd.h>
-
 #include <qapplication.h>
-
 #include <cmdline.h>
 #include <ctype.h>
 #include <daq.h>
@@ -74,7 +71,6 @@ int main(int argc,char *argv[]) {
      *  These need to be created early because they should have *
      *  Settings::IDs of 0 and 1.                               *
      ************************************************************/
-
 
     /* Create GUI Objects */
     QApplication *app = new QApplication(argc,argv);
