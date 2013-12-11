@@ -83,8 +83,16 @@ fi
 
 sudo make -C ./
 sudo make install -C ./
-sudo cp libtool /usr/local/lib/rtxi/.
-sudo cp rtxi.conf /etc
+
+echo "----->Putting things into place."
+sudo cp libtool /usr/local/lib/rtxi/
+sudo cp rtxi.conf /etc/
+sudo cp /usr/xenomai/sbin/analogy_config /usr/sbin/
+sudo cp ./scripts/rtxi_load_analogy /etc/init.d/
+sudo update-rc.d rtxi_load_analogy defaults
+
+echo "----->Loading device."
+./scripts/rtxi_load_analogy
 
 if [ $? -eq 0 ]; then
 	echo "----->RTXI intallation successful."
