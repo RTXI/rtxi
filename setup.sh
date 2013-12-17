@@ -36,9 +36,7 @@ sudo ln -s /usr/lib/libqwt-qt3.so.5 /usr/lib/libqwt.so
 # Installing HDF5
 echo "----->Checking for HDF5"
 
-if [ ! -f "/usr/include/hdf5" ]; then
-	echo "----->HDF5 already installed."
-else
+if [ ! -d "/usr/include/hdf5" ]; then
 	echo "----->Installing HDF5..."
 	cd hdf
 	tar xf hdf5-1.8.4.tar.bz2
@@ -47,6 +45,8 @@ else
 	sudo make
 	sudo make install
 	cd ../../
+else
+	echo "----->HDF5 already installed."
 fi
 
 if [ $? -eq 0 ]; then
