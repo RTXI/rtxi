@@ -92,7 +92,7 @@ void Plugin::Manager::unload(Plugin::Object *plugin) {
         return;
     }
 
-    QCustomEvent *event = new QCustomEvent(CloseEvent,reinterpret_cast<void *>(plugin));
+    QEvent *event = new QEvent(CloseEvent,reinterpret_cast<void *>(plugin));
     QApplication::postEvent(this,event);
 }
 
@@ -135,7 +135,7 @@ void Plugin::Manager::removePlugin(Plugin::Object *plugin) {
     pluginList.remove(plugin);
 }
 
-void Plugin::Manager::customEvent(QCustomEvent *e) {
+void Plugin::Manager::customEvent(QEvent *e) {
     if(e->type() == CloseEvent) {
         Mutex::Locker lock(&mutex);
 

@@ -19,8 +19,8 @@
 #ifndef SETTINGS_H
 #define SETTINGS_H
 
+#include <QString>
 #include <debug.h>
-
 #include <list>
 #include <map>
 #include <mutex.h>
@@ -186,11 +186,11 @@ namespace Settings {
         /*!
          *
          */
-        int load(const std::string &);
+        int load(const QString &);
         /*!
          *
          */
-        int save(const std::string &);
+        int save(const QString &filename);
 
     private:
 

@@ -16,19 +16,21 @@
 
  */
 
+#include <QTableWidget>
+#include <QWidget>
+#include <QLabel>
+#include <QLayout>
+#include <QPushButton>
+#include <QToolTip>
+#include <QValidator>
+#include <QWhatsThis>
+#include <QScrollArea>
+#include <QTimer>
+#include <QLineEdit>
 #include <default_gui_model.h>
 #include <main_window.h>
-#include <qgridview.h>
-#include <qhbox.h>
-#include <qlabel.h>
-#include <qlayout.h>
-#include <qpushbutton.h>
-#include <qtimer.h>
-#include <qtooltip.h>
-#include <qvalidator.h>
-#include <qvbox.h>
-#include <qwhatsthis.h>
 #include <iostream>
+
 namespace {
 
 class SyncEvent: public RT::Event {
@@ -66,7 +68,7 @@ DefaultGUIModel::DefaultGUIModel(std::string name,
 		DefaultGUIModel::variable_t *var, size_t size) :
 	QWidget(MainWindow::getInstance()->centralWidget()), Workspace::Instance(
 			name, var, size), myname(name) {
-	setCaption(QString::number(getID()) + " " + name);
+	setCaption(QString::number(getID()) + " " + QString::fromStdString(name));
 
 	QTimer *timer = new QTimer(this);
 	timer->start(1000);
@@ -89,12 +91,12 @@ DefaultGUIModel::~DefaultGUIModel(void) {
 void DefaultGUIModel::createGUI(DefaultGUIModel::variable_t *var, int size) {
 	QBoxLayout *layout = new QVBoxLayout(this);
 
-	QScrollView *sv = new QScrollView(this);
-	sv->setResizePolicy(QScrollView::AutoOneFit);
+	QScrollArea *sv = new QScrollArea(this);
+	sv->setWidgetResizable(true);
 	layout->addWidget(sv);
 
 	QWidget *viewport = new QWidget(sv->viewport());
-	sv->addChild(viewport);
+	sv->setWidget(viewport);
 	QGridLayout *scrollLayout = new QGridLayout(viewport, 1, 2);
 
 	size_t nstate = 0, nparam = 0, nevent = 0, ncomment = 0;
@@ -102,13 +104,14 @@ void DefaultGUIModel::createGUI(DefaultGUIModel::variable_t *var, int size) {
 		if (var[i].flags & (PARAMETER | STATE | EVENT | COMMENT)) {
 			param_t param;
 
-			param.label = new QLabel(var[i].name, viewport);
+			param.label = new QLabel(QString::fromStdString(var[i].name), viewport);
 			scrollLayout->addWidget(param.label, parameter.size(), 0);
 			param.edit = new DefaultGUILineEdit(viewport);
 			scrollLayout->addWidget(param.edit, parameter.size(), 1);
 
-			QToolTip::add(param.label, var[i].description);
-			QToolTip::add(param.edit, var[i].description);
+			// VISITTWO
+			/*QToolTip::add(param.label, var[i].description);
+			QToolTip::add(param.edit, var[i].description);*/
 
 			if (var[i].flags & PARAMETER) {
 				if (var[i].flags & DOUBLE) {
@@ -140,19 +143,31 @@ void DefaultGUIModel::createGUI(DefaultGUIModel::variable_t *var, int size) {
 				param.index = ncomment++;
 			}
 
-			parameter[var[i].name] = param;
+			// VISITTWO
+			//parameter[var[i].name] = param;
 		}
 	}
 
-	QHBox *hbox1 = new QHBox(this);
-	pauseButton = new QPushButton("Pause", hbox1);
+	QWidget *hbox1 = new QWidget;
+	QPushButton *pauseButton = new QPushButton;
+	QPushButton *modifyButton = new QPushButton;
+	QPushButton *unloadButton = new QPushButton;
+
+	QHBoxLayout *qhboxlayout = new QHBoxLayout;
+	qhboxlayout->addWidget(pauseButton);
+	qhboxlayout->addWidget(modifyButton);
+	qhboxlayout->addWidget(unloadButton);
+	hbox1->setLayout(qhboxlayout);
+
+	//QHBox *hbox1 = new QHBox(this);
 	pauseButton->setToggleButton(true);
+	//pauseButton = new QPushButton("Pause", hbox1);
 	QObject::connect(pauseButton,SIGNAL(toggled(bool)),this,SLOT(pause(bool)));
-	QPushButton *modifyButton = new QPushButton("Modify", hbox1);
+	//QPushButton *modifyButton = new QPushButton("Modify", hbox1);
 	QObject::connect(modifyButton,SIGNAL(clicked(void)),this,SLOT(modify(void)));
-	QPushButton *unloadButton = new QPushButton("Unload", hbox1);
+	//QPushButton *unloadButton = new QPushButton("Unload", hbox1);
 	QObject::connect(unloadButton,SIGNAL(clicked(void)),this,SLOT(exit(void)));
-	layout->addWidget(hbox1);
+	//layout->addWidget(hbox1);
 
 	show();
 }
@@ -171,19 +186,16 @@ void DefaultGUIModel::exit(void) {
 }
 
 void DefaultGUIModel::refresh(void) {
-	for (std::map<QString, param_t>::iterator i = parameter.begin(); i
-			!= parameter.end(); ++i) {
+	for (std::map<QString, param_t>::iterator i = parameter.begin(); i!= parameter.end(); ++i) {
 		if (i->second.type & (STATE | EVENT)) {
-			i->second.edit->setText(QString::number(getValue(i->second.type,
-					i->second.index)));
+			i->second.edit->setText(QString::number(getValue(i->second.type, i->second.index)));
 			i->second.edit->setPaletteForegroundColor(Qt::darkGray);
 		} else if ((i->second.type & PARAMETER) && !i->second.edit->edited()
 				&& i->second.edit->text() != *i->second.str_value) {
 			i->second.edit->setText(*i->second.str_value);
 		} else if ((i->second.type & COMMENT) && !i->second.edit->edited()
-				&& i->second.edit->text() != getValueString(COMMENT,
-						i->second.index)) {
-			i->second.edit->setText(getValueString(COMMENT, i->second.index));
+				&& i->second.edit->text() != QString::fromStdString(getValueString(COMMENT, i->second.index))) {
+			i->second.edit->setText(QString::fromStdString(getValueString(COMMENT, i->second.index)));
 		}
 	}
 	pauseButton->setOn(!getActive());
@@ -215,7 +227,7 @@ void DefaultGUIModel::modify(void) {
 QString DefaultGUIModel::getComment(const QString &name) {
 	std::map<QString, param_t>::iterator n = parameter.find(name);
 	if (n != parameter.end() && (n->second.type & COMMENT))
-		return QString(getValueString(COMMENT, n->second.index));
+		return QString::fromStdString(getValueString(COMMENT, n->second.index));
 	return "";
 }
 
@@ -283,13 +295,13 @@ void DefaultGUIModel::pause(bool p) {
 }
 
 void DefaultGUIModel::doDeferred(const Settings::Object::State &) {
-	setCaption(QString::number(getID()) + " " + myname);
+	setCaption(QString::number(getID()) + " " + QString::fromStdString(myname));
 }
 
 void DefaultGUIModel::doLoad(const Settings::Object::State &s) {
 	for (std::map<QString, param_t>::iterator i = parameter.begin(); i
 			!= parameter.end(); ++i)
-		i->second.edit->setText(s.loadString(i->first));
+		i->second.edit->setText(QString::fromStdString(s.loadString((i->first).toStdString())));
 	if (s.loadInteger("Maximized"))
 		showMaximized();
 	else if (s.loadInteger("Minimized"))
@@ -319,7 +331,7 @@ void DefaultGUIModel::doSave(Settings::Object::State &s) const {
 
 	for (std::map<QString, param_t>::const_iterator i = parameter.begin(); i
 			!= parameter.end(); ++i)
-		s.saveString(i->first, i->second.edit->text());
+		s.saveString((i->first).toStdString(), (i->second.edit->text()).toStdString());
 }
 
 void DefaultGUIModel::receiveEvent(const Event::Object *event) {

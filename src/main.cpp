@@ -83,7 +83,7 @@ int main(int argc,char *argv[]) {
     IO::Connector::getInstance();
 
     /* Bootstrap the System */
-    Settings::Manager::getInstance()->load(config_file);
+    Settings::Manager::getInstance()->load(QString::fromStdString(config_file));
 
     retval = app->exec();
 

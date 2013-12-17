@@ -23,9 +23,9 @@
 #include <mutex.h>
 #include <settings.h>
 #include <string>
-#include <qobject.h>
-
 #include <sys/types.h>
+#include <QObject>
+#include <QEvent>
 
 //! Classes associated with the loading/unloading of binaries at run-time.
 /*!
@@ -91,7 +91,7 @@ namespace Plugin {
         /*!
          *
          */
-        void customEvent(QCustomEvent *);
+        void customEvent(QEvent *);
 
     private:
 

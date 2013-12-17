@@ -200,7 +200,7 @@ void Settings::Manager::foreachObject(void (*callback)(Object *,void *),void *pa
         callback(*i,param);
 }
 
-int Settings::Manager::load(const std::string &filename) {
+int Settings::Manager::load(const QString &filename) {
     QFile file(filename);
     if(!file.open(IO_ReadOnly)) {
         ERROR_MSG("Settings::Manager::load : failed to open %s for reading\n",filename.c_str());
@@ -311,7 +311,7 @@ static void saveState(Plugin::Object *plugin,void *param) {
     doc->documentElement().appendChild(e);
 }
 
-int Settings::Manager::save(const std::string &filename) {
+int Settings::Manager::save(const QString &filename) {
     QDomDocument doc;
     QDomElement e;
 
