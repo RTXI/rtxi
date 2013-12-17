@@ -92,7 +92,7 @@ void Plugin::Manager::unload(Plugin::Object *plugin) {
         return;
     }
 
-    QEvent *event = new QEvent(CloseEvent,reinterpret_cast<void *>(plugin));
+    QEvent *event = new QEvent(CloseEvent);//,reinterpret_cast<void *>(plugin));
     QApplication::postEvent(this,event);
 }
 
