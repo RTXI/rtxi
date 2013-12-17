@@ -264,9 +264,7 @@ int MainWindow::insertSystemMenuSeparator (void) {
 	return systemMenu->addAction (text, receiver, member);
 }*/
 
-	void
-MainWindow::removeSystemMenuItem (int id)
-{
+void MainWindow::removeSystemMenuItem (int id) {
 	systemMenu->removeItem (id);
 }
 
@@ -378,14 +376,6 @@ void MainWindow::loadSettings (void) {
 	QString filename = QFileDialog::getOpenFileName(this,
 			tr("Load saved workspace"), "/home/", tr("Settings (*.set)"));
 
-	/*QFileDialog dialog(this);
-	dialog.setDir(settingsDir);
-	dialog.setNameFilters(QString("Settings (*.set);;All Files (*)"));
-	dialog.setCaption("Choose a settings file");
-	dialog.setMode(QFileDialog::ExistingFile);
-	dialog.exec();*/
-
-	//QString filename = dialog.selectedFile ();
 	if (filename != "/")
 		Settings::Manager::getInstance()->load(filename);
 }
@@ -397,14 +387,6 @@ void MainWindow::saveSettings(void) {
 	
 	QString filename = QFileDialog::getSaveFileName(this,
 			tr("Save current workspace"), "/home/", tr("Settings (*.set)"));
-
-	/*QFileDialog dialog (this);
-	dialog.setDir (settingsDir);
-	dialog.setNameFilters (QString ("Settings (*.set);;All Files (*)"));
-	dialog.setCaption ("Choose a settings file");
-	dialog.setMode (QFileDialog::AnyFile);
-	dialog.exec ();
-	QString filename = dialog.selectedFile ();*/
 
 	if(filename != "/") {
 		if(!filename.endsWith(".set"))
@@ -427,50 +409,35 @@ void MainWindow::updateUtilModules () {
 	QStringList entries = userprefs.entryList ("/utilFileList");
 	int numUtilFiles = entries.size ();
 
-	// rewrite list of bundled modules
-	for (int i = 0; i < numUtilFiles; i++)
-	{
+	for (int i = 0; i < numUtilFiles; i++) {
 		userprefs.removeEntry ("/utilFileList/util" + QString::number (i));
 		userprefs.removeEntry ("/utilFileList/filter" + QString::number (i));
 		userprefs.removeEntry ("/utilFileList/sig" + QString::number (i));
 	}
-	userprefs.writeEntry ("/utilFileList/util" + QString::number (0),
-			"neuron.so");
-	userprefs.writeEntry ("/utilFileList/util" + QString::number (1),
-			"synch.so");
+	userprefs.writeEntry ("/utilFileList/util" + QString::number (0), "neuron.so");
+	userprefs.writeEntry ("/utilFileList/util" + QString::number (1), "synch.so");
 
-	userprefs.writeEntry ("/utilFileList/filter" + QString::number (0),
-			"FIRwindow.so");
-	userprefs.writeEntry ("/utilFileList/filter" + QString::number (1),
-			"IIRfilter.so");
+	userprefs.writeEntry ("/utilFileList/filter" + QString::number (0), "FIRwindow.so");
+	userprefs.writeEntry ("/utilFileList/filter" + QString::number (1), "IIRfilter.so");
 
-	userprefs.writeEntry ("/utilFileList/sig" + QString::number (0),
-			"siggen.so");
-	userprefs.writeEntry ("/utilFileList/sig" + QString::number (1),
-			"noisegen.so");
-	userprefs.writeEntry ("/utilFileList/sig" + QString::number (2),
-			"wave_maker.so");
-	userprefs.writeEntry ("/utilFileList/sig" + QString::number (3),
-			"mimic.so");
+	userprefs.writeEntry ("/utilFileList/sig" + QString::number (0), "siggen.so");
+	userprefs.writeEntry ("/utilFileList/sig" + QString::number (1), "noisegen.so");
+	userprefs.writeEntry ("/utilFileList/sig" + QString::number (2), "wave_maker.so");
+	userprefs.writeEntry ("/utilFileList/sig" + QString::number (3), "mimic.so");
 
 	int i = 0;
-	int menuID =
-		utilMenu->insertItem ("Model HH Neuron", this, SLOT (loadUtil (int)));
+	int menuID = utilMenu->insertItem ("Model HH Neuron", this, SLOT (loadUtil (int)));
 	setUtilMenuItemParameter (menuID, i);
 	i++;
-	menuID =
-		utilMenu->insertItem ("Synchronize Modules", this, SLOT (loadUtil (int)));
+	menuID = utilMenu->insertItem ("Synchronize Modules", this, SLOT (loadUtil (int)));
 	setUtilMenuItemParameter (menuID, i);
 
 	QMenu *filterSubMenu = new QMenu (this);
 	i = 0;
-	menuID =
-		filterSubMenu->insertItem ("FIR Filter (Window Method)", this,
-				SLOT (loadFilter (int)));
+	menuID = filterSubMenu->insertItem ("FIR Filter (Window Method)", this, SLOT (loadFilter (int)));
 	filterSubMenu->setItemParameter (menuID, i);
 	i++;
-	menuID =
-		filterSubMenu->insertItem ("IIR Filter", this, SLOT (loadFilter (int)));
+	menuID = filterSubMenu->insertItem ("IIR Filter", this, SLOT (loadFilter (int)));
 	filterSubMenu->setItemParameter (menuID, i);
 
 	utilMenu->insertItem (tr ("&Filters"), filterSubMenu);
@@ -478,30 +445,22 @@ void MainWindow::updateUtilModules () {
 	QMenu *signalSubMenu = new QMenu (this);
 
 	i = 0;
-	menuID =
-		signalSubMenu->insertItem ("Signal Generator", this,
-				SLOT (loadSignal (int)));
+	menuID = signalSubMenu->insertItem ("Signal Generator", this, SLOT (loadSignal (int)));
 	signalSubMenu->setItemParameter (menuID, i);
 	i++;
-	menuID =
-		signalSubMenu->insertItem ("Noise Generator", this,
-				SLOT (loadSignal (int)));
+	menuID = signalSubMenu->insertItem ("Noise Generator", this, SLOT (loadSignal (int)));
 	signalSubMenu->setItemParameter (menuID, i);
 	i++;
-	menuID =
-		signalSubMenu->insertItem ("Wave Maker", this, SLOT (loadSignal (int)));
+	menuID = signalSubMenu->insertItem ("Wave Maker", this, SLOT (loadSignal (int)));
 	signalSubMenu->setItemParameter (menuID, i);
 	i++;
 	menuID = signalSubMenu->insertItem ("Mimic", this, SLOT (loadSignal (int)));
 	signalSubMenu->setItemParameter (menuID, i);
 
 	utilMenu->insertItem (tr ("&Signals"), signalSubMenu);
-
 }
 
-	void
-MainWindow::loadUtil (int i)
-{
+void MainWindow::loadUtil (int i) {
 	QSettings userprefs;
 	userprefs.setPath ("RTXI.org", "RTXI", QSettings::User);
 	QString filename = userprefs.readEntry ("/utilFileList/util"
