@@ -36,7 +36,7 @@ sudo ln -s /usr/lib/libqwt-qt3.so.5 /usr/lib/libqwt.so
 # Installing HDF5
 echo "----->Checking for HDF5"
 
-if [ -d "/usr/include/hdf5" ]; then
+if [ -f "/usr/include/hdf5.h" ]; then
 	echo "----->HDF5 already installed."
 else
 	echo "----->Installing HDF5..."
