@@ -20,10 +20,9 @@
 # Check for compilation dependencies
 echo "Checking for dependencies..."
 
-sudo yum update
-sudo yum upgrade
-sudo yum groupinstall “Development Tools”
-sudo yum install automake libtool autoconf boost-devel bison flex ncurses-devel.x86_64 qwt-devel.x86_64 gsl-devel.x86_64 boost-program-options.x86_64 qt qt-devel
+sudo apt-get update
+sudo apt-get upgrade
+sudo apt-get install automake libtool autoconf autotools-dev build-essential qt4-dev-tools libboost-dev libboost-program-options-dev libgsl0-dev bison flex libncurses5-dev libqwt5-qt4-dev
 
 if [ $? -eq 0 ]; then
 	echo "----->Dependencies installed."
@@ -32,12 +31,12 @@ else
 	exit
 fi
 
-sudo ln -s /usr/lib/libqwt-qt3.so.5 /usr/lib/libqwt.so
+sudo ln -s /usr/lib/libqwt-qt4.so.5 /usr/lib/libqwt.so
 
 # Installing HDF5
 echo "----->Checking for HDF5"
 
-if [ -a "/usr/include/hdf5.h" ]; then
+if [ -f "/usr/include/hdf5.h" ]; then
 	echo "----->HDF5 already installed."
 else
 	echo "----->Installing HDF5..."
@@ -49,13 +48,12 @@ else
 	sudo make install
 	cd ../../
 	if [ $? -eq 0 ]; then
-		echo "----->HDF5 installed."
+			echo "----->HDF5 installed."
 	else
 		echo "----->HDF5 installation failed."
 		exit
 	fi
 fi
-
 
 # Start configuring - by default configured to run on non-RT kernel
 echo "----->Starting RTXI installation..."
@@ -101,8 +99,8 @@ else
 	echo "----->RTXI installation failed."
 	exit
 fi
-echo "----->Putting things into place."
 
+echo "----->Putting things into place."
 sudo cp libtool /usr/local/lib/rtxi/
 sudo cp rtxi.conf /etc/
 sudo cp /usr/xenomai/sbin/analogy_config /usr/sbin/
