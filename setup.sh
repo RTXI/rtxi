@@ -56,7 +56,6 @@ else
 	fi
 fi
 
-
 # Start configuring - by default configured to run on non-RT kernel
 echo "----->Starting RTXI installation..."
 ./autogen.sh
