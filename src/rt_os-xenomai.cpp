@@ -47,7 +47,7 @@ int RT::OS::initiate(void) {
     struct rlimit rlim = { RLIM_INFINITY, RLIM_INFINITY };
     setrlimit(RLIMIT_MEMLOCK,&rlim);
 
-    if(mlockall(MCL_CURRENT | MCL_FUTURE)) {
+    if (mlockall(MCL_CURRENT | MCL_FUTURE)) {
         ERROR_MSG("RTOS:RTAI::initiate : failed to lock memory.\n");
         return -EPERM;
     }
@@ -71,7 +71,7 @@ int RT::OS::createTask(RT::OS::Task *task,void *(*entry)(void *),void *arg,int p
     if ((prio >=0) && (prio <=99))
         priority -= prio;
 
-    if((retval = rt_task_create(&t->task,"RTXI RT Thread",0,priority,T_FPU|T_JOINABLE))) {
+    if ((retval = rt_task_create(&t->task,"RTXI RT Thread",0,priority,T_FPU|T_JOINABLE))) {
         ERROR_MSG("RT::OS::createTask : failed to create task\n");
         return retval;
     }
@@ -81,7 +81,7 @@ int RT::OS::createTask(RT::OS::Task *task,void *(*entry)(void *),void *arg,int p
     *task = t;
     pthread_setspecific(is_rt_key,reinterpret_cast<const void *>(t));
 
-    if((retval = rt_task_start(&t->task,reinterpret_cast<void(*)(void *)>(entry),arg))) {
+    if ((retval = rt_task_start(&t->task,reinterpret_cast<void(*)(void *)>(entry),arg))) {
         ERROR_MSG("RT::OS::createTask : failed to start task\n");
         return retval;
     }
@@ -95,7 +95,7 @@ void RT::OS::deleteTask(RT::OS::Task task) {
 }
 
 bool RT::OS::isRealtime(void) {
-    if(init_rt && pthread_getspecific(is_rt_key))
+    if (init_rt && pthread_getspecific(is_rt_key))
         return true;
     return false;
 }

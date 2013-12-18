@@ -55,21 +55,21 @@ void DefaultGUILineEdit::blacken(void) {
 
 void DefaultGUILineEdit::redden(void) {
 		//if(isModified())
-			//setPaletteForegroundColor(Qt::red);
+		//setPaletteForegroundColor(Qt::red);
 }
 
-DefaultGUIModel::DefaultGUIModel(std::string name, DefaultGUIModel::variable_t *var, size_t size): 
+DefaultGUIModel::DefaultGUIModel(std::string name, DefaultGUIModel::variable_t *var, size_t size):
 		QWidget(MainWindow::getInstance()->centralWidget()), Workspace::Instance(name, var, size), myname(name) {
-				
-		// VISITTWO
-		//setCaption(QString::number(getID()) + " " + QString::fromStdString(name));
-		QTimer *timer = new QTimer(this);
-		timer->start(1000);
-		QObject::connect(timer,SIGNAL(timeout(void)),this,SLOT(refresh(void)));
-}
+
+				// VISITTWO
+				//setCaption(QString::number(getID()) + " " + QString::fromStdString(name));
+				QTimer *timer = new QTimer(this);
+				timer->start(1000);
+				QObject::connect(timer,SIGNAL(timeout(void)),this,SLOT(refresh(void)));
+		}
 
 DefaultGUIModel::~DefaultGUIModel(void) {
-		// Ensure that the realtime thread isn't in the middle of executing DefaultGUIModel::execute()    
+		// Ensure that the realtime thread isn't in the middle of executing DefaultGUIModel::execute()
 		setActive( false );
 		SyncEvent event;
 		RT::System::getInstance()->postEvent(&event);
@@ -168,8 +168,8 @@ void DefaultGUIModel::createGUI(DefaultGUIModel::variable_t *var, int size) {
 void DefaultGUIModel::update(DefaultGUIModel::update_flags_t) {
 }
 
-void DefaultGUIModel::exit(void) {    
-		// Ensure that the realtime thread isn't in the middle of executing DefaultGUIModel::execute()    
+void DefaultGUIModel::exit(void) {
+		// Ensure that the realtime thread isn't in the middle of executing DefaultGUIModel::execute()
 		setActive( false );
 		SyncEvent event;
 		RT::System::getInstance()->postEvent(&event);
@@ -339,7 +339,7 @@ void DefaultGUIModel::receiveEvent(const Event::Object *event) {
 				setActive(false);
 		} else if (event->getName() == Event::RT_POSTPERIOD_EVENT) {
 #ifdef DEBUG
-				if(getActive())
+				if (getActive())
 						ERROR_MSG("DefaultGUIModel::receiveEvent : model unpaused during a period update\n");
 #endif
 				update(PERIOD);

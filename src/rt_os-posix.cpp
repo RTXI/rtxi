@@ -40,7 +40,7 @@ int RT::OS::initiate(void) {
      */
     ERROR_MSG("***WARNING*** You are using the POSIX compatibility layer, RTXI is NOT running in realtime!!!\n");
 
-    if(mlockall(MCL_CURRENT | MCL_FUTURE)) {
+    if (mlockall(MCL_CURRENT | MCL_FUTURE)) {
         ERROR_MSG("RT::OS(POSIX)::initiate : failed to lock memory.\n");
 
         /*
@@ -97,7 +97,7 @@ int RT::OS::createTask(RT::OS::Task *task,void *(*entry)(void *),void *arg,int) 
     sem_init(&info.sem,0,0);
 
     retval = pthread_create(&t->thread,NULL,&::bounce,&info);
-    if(!retval)
+    if (!retval)
         sem_wait(&info.sem);
     else
         ERROR_MSG("RT::OS::createTask : pthread_create failed\n");
@@ -108,7 +108,7 @@ int RT::OS::createTask(RT::OS::Task *task,void *(*entry)(void *),void *arg,int) 
 
 void RT::OS::deleteTask(RT::OS::Task task) {
     posix_task_t *t = reinterpret_cast<posix_task_t *>(task);
-    if(t == NULL)
+    if (t == NULL)
         return;
 
     pthread_join(t->thread,0);
@@ -116,7 +116,7 @@ void RT::OS::deleteTask(RT::OS::Task task) {
 }
 
 bool RT::OS::isRealtime(void) {
-    if(init_rt && pthread_getspecific(is_rt_key))
+    if (init_rt && pthread_getspecific(is_rt_key))
         return true;
     return false;
 }
@@ -140,7 +140,7 @@ int RT::OS::setPeriod(RT::OS::Task task,long long period) {
 
 void RT::OS::sleepTimestep(RT::OS::Task task) {
     posix_task_t *t = reinterpret_cast<posix_task_t *>(task);
-    if(t == NULL)
+    if (t == NULL)
         return;
 
     long long sleep_time = t->next_t-getTime();
@@ -151,5 +151,5 @@ void RT::OS::sleepTimestep(RT::OS::Task task) {
         sleep_time % 1000000000ll,
     };
 
-    while(nanosleep(&ts,&ts) < 0 && errno == EINTR);
+    while (nanosleep(&ts,&ts) < 0 && errno == EINTR);
 }

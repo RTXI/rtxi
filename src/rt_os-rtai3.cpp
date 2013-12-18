@@ -62,7 +62,7 @@ static pthread_key_t is_rt_key;
 static int rtai_lxrt_loaded(void);
 
 int RT::OS::initiate(void) {
-    if(rtai_lxrt_loaded()) {
+    if (rtai_lxrt_loaded()) {
         ERROR_MSG("RTOS:RTAI::initiate : rtai_lxrt module not loaded.\n");
         return -ENOENT;
     }
@@ -82,7 +82,7 @@ int RT::OS::initiate(void) {
     struct rlimit rlim = { RLIM_INFINITY, RLIM_INFINITY };
     setrlimit(RLIMIT_MEMLOCK,&rlim);
 
-    if(mlockall(MCL_CURRENT | MCL_FUTURE)) {
+    if (mlockall(MCL_CURRENT | MCL_FUTURE)) {
         stop_rt_timer();
         ERROR_MSG("RTOS:RTAI::initiate : failed to lock memory.\n");
         return -EPERM;
@@ -114,7 +114,7 @@ static void *bounce(void *bounce_info) {
     void *(*entry)(void *) = info->entry;
     void *arg = info->arg;
 
-    if(!(t->task = rt_task_init_schmod(reinterpret_cast<unsigned long>(t),1,2000,0,SCHED_FIFO,info->prio))) {
+    if (!(t->task = rt_task_init_schmod(reinterpret_cast<unsigned long>(t),1,2000,0,SCHED_FIFO,info->prio))) {
         ERROR_MSG("RT::OS::createTask : failed to create task\n");
         return reinterpret_cast<void *>(-EPERM);
     }
@@ -153,7 +153,7 @@ int RT::OS::createTask(RT::OS::Task *task,void *(*entry)(void *),void *arg,int p
     sem_init(&info.sem,0,0);
 
     retval = pthread_create(&t->thread,NULL,&::bounce,&info);
-    if(!retval)
+    if (!retval)
         sem_wait(&info.sem);
     else
         ERROR_MSG("RT::OS::createTask : pthread_create failed\n");
@@ -168,7 +168,7 @@ void RT::OS::deleteTask(RT::OS::Task task) {
 }
 
 bool RT::OS::isRealtime(void) {
-    if(init_rt && pthread_getspecific(is_rt_key))
+    if (init_rt && pthread_getspecific(is_rt_key))
         return true;
     return false;
 }
@@ -194,7 +194,7 @@ int RT::OS::setPeriod(RT::OS::Task task,long long period) {
      *     If that number is sufficently small to not starve the non-realtime component of the
      *     system then you should see sub-microsecond jitter in the period.
      */
-    if(period/10 > 100000ll)
+    if (period/10 > 100000ll)
         /*
          * Early wake isn't to exceed 100us
          *
@@ -229,7 +229,7 @@ void RT::OS::sleepTimestep(RT::OS::Task task) {
      */
     rtai_save_flags_and_cli(t->eflags);
     sleep_time = t->next_t-rt_get_time();
-    if(sleep_time > 0)
+    if (sleep_time > 0)
         rt_busy_sleep(count2nano(sleep_time));
 
     t->next_t += t->period;
@@ -241,20 +241,20 @@ int rtai_lxrt_loaded(void) {
     char buffer[CHUNK_SIZE+1], *tmp;
     int fd, size;
 
-    if((fd = open("/proc/modules",O_RDONLY)) < 0) {
+    if ((fd = open("/proc/modules",O_RDONLY)) < 0) {
         ERROR_MSG("rtai_lxrt_loaded : failed to open /proc/modules for reading.\n");
         return -ENOENT;
     }
-                                                                                                                               
+
     memset(buffer,0,CHUNK_SIZE+1);
     do {
         size = read(fd,buffer,CHUNK_SIZE);
         buffer[size] = 0;
-        if(!strncmp(buffer,"rtai_lxrt ",10))
+        if (!strncmp(buffer,"rtai_lxrt ",10))
             return 0;
         tmp = strchr(buffer,'\n');
         lseek(fd,(off_t)tmp-size-(off_t)buffer+1,SEEK_CUR);
-    } while(size > 0);
+    } while (size > 0);
 
     return -ENOENT;
 }
