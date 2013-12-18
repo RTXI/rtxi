@@ -36,7 +36,9 @@ sudo ln -s /usr/lib/libqwt-qt3.so.5 /usr/lib/libqwt.so
 # Installing HDF5
 echo "----->Checking for HDF5"
 
-if [ ! -d "/usr/include/hdf5" ]; then
+if [ -d "/usr/include/hdf5" ]; then
+	echo "----->HDF5 already installed."
+else
 	echo "----->Installing HDF5..."
 	cd hdf
 	tar xf hdf5-1.8.4.tar.bz2
@@ -45,15 +47,12 @@ if [ ! -d "/usr/include/hdf5" ]; then
 	sudo make
 	sudo make install
 	cd ../../
-else
-	echo "----->HDF5 already installed."
-fi
-
-if [ $? -eq 0 ]; then
-	echo "----->HDF5 installed."
-else
-echo "----->HDF5 installation failed."
-	exit
+	if [ $? -eq 0 ]; then
+			echo "----->HDF5 installed."
+	else
+		echo "----->HDF5 installation failed."
+		exit
+	fi
 fi
 
 # Start configuring - by default configured to run on non-RT kernel
