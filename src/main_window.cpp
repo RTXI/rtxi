@@ -38,10 +38,11 @@
 #include <mutex.h>
 #include <plugin.h>
 
-MainWindow::MainWindow (void):QMainWindow (NULL, NULL, Qt::WType_TopLevel) {
+//MainWindow::MainWindow (void):QMainWindow (NULL, NULL, Qt::WType_TopLevel) {
+MainWindow::MainWindow (void):QMainWindow (NULL, NULL) {
 
 	/* Initialize Window Settings */
-	setCaption ("RTXI - Real-time eXperimental Interface");
+	//setCaption ("RTXI - Real-time eXperimental Interface");
 
 	/* Initialize Menus */
 	createActions();
@@ -110,15 +111,16 @@ MainWindow::MainWindow (void):QMainWindow (NULL, NULL, Qt::WType_TopLevel) {
 MainWindow::~MainWindow (void) {
 }
 
-//OUT
+// OUT
 /*int MainWindow::createFileMenuItem(const std::string &text, const QObject *receiver, const char *member) {
 	return fileMenu->addAction(text, receiver, member);
 }*/
 
-void MainWindow::setFileMenuItemParameter (int menuid, int parameter) {
-	fileMenu->setItemParameter (menuid, parameter);
+void MainWindow::setFileMenuItemParameter(int menuid, int parameter) {
+	fileMenu->setItemParameter(menuid, parameter);
 }
 
+// VISITTWO
 void MainWindow::clearFileMenu (void) {
 
 	// don't clear the entire menu b/c Load & Save Workspace and Quit are created by
@@ -300,7 +302,7 @@ void MainWindow::aboutComedi (void) {
 		}
 		else
 		{
-			line = "/dev/comedi" + line.stripWhiteSpace ();
+			line = "/dev/comedi" + line.trimmed();//stripWhiteSpace ();
 			DAQdetected = true;
 			text = text + comediversion
 				+ ".\n\nThe following DAQ cards were detected on your system:"
@@ -426,46 +428,47 @@ void MainWindow::updateUtilModules () {
 	userprefs.writeEntry ("/utilFileList/sig" + QString::number (3), "mimic.so");
 
 	int i = 0;
-	int menuID = utilMenu->insertItem ("Model HH Neuron", this, SLOT (loadUtil (int)));
-	setUtilMenuItemParameter (menuID, i);
+	int menuID = utilMenu->insertItem("Model HH Neuron", this, SLOT (loadUtil (int)));
+	setUtilMenuItemParameter(menuID, i);
 	i++;
-	menuID = utilMenu->insertItem ("Synchronize Modules", this, SLOT (loadUtil (int)));
-	setUtilMenuItemParameter (menuID, i);
+	menuID = utilMenu->insertItem("Synchronize Modules", this, SLOT (loadUtil (int)));
+	setUtilMenuItemParameter(menuID, i);
 
-	QMenu *filterSubMenu = new QMenu (this);
+	QMenu *filterSubMenu = new QMenu(this);
 	i = 0;
-	menuID = filterSubMenu->insertItem ("FIR Filter (Window Method)", this, SLOT (loadFilter (int)));
-	filterSubMenu->setItemParameter (menuID, i);
+	menuID = filterSubMenu->insertItem("FIR Filter (Window Method)", this, SLOT (loadFilter (int)));
+	filterSubMenu->setItemParameter(menuID, i);
 	i++;
-	menuID = filterSubMenu->insertItem ("IIR Filter", this, SLOT (loadFilter (int)));
-	filterSubMenu->setItemParameter (menuID, i);
+	menuID = filterSubMenu->insertItem("IIR Filter", this, SLOT (loadFilter (int)));
+	filterSubMenu->setItemParameter(menuID, i);
 
-	utilMenu->insertItem (tr ("&Filters"), filterSubMenu);
+	utilMenu->insertItem(tr("&Filters"), filterSubMenu);
 
-	QMenu *signalSubMenu = new QMenu (this);
+	QMenu *signalSubMenu = new QMenu(this);
 
 	i = 0;
-	menuID = signalSubMenu->insertItem ("Signal Generator", this, SLOT (loadSignal (int)));
-	signalSubMenu->setItemParameter (menuID, i);
+	menuID = signalSubMenu->insertItem("Signal Generator", this, SLOT (loadSignal (int)));
+	signalSubMenu->setItemParameter(menuID, i);
 	i++;
-	menuID = signalSubMenu->insertItem ("Noise Generator", this, SLOT (loadSignal (int)));
-	signalSubMenu->setItemParameter (menuID, i);
+	menuID = signalSubMenu->insertItem("Noise Generator", this, SLOT (loadSignal (int)));
+	signalSubMenu->setItemParameter(menuID, i);
 	i++;
-	menuID = signalSubMenu->insertItem ("Wave Maker", this, SLOT (loadSignal (int)));
-	signalSubMenu->setItemParameter (menuID, i);
+	menuID = signalSubMenu->insertItem("Wave Maker", this, SLOT (loadSignal (int)));
+	signalSubMenu->setItemParameter(menuID, i);
 	i++;
-	menuID = signalSubMenu->insertItem ("Mimic", this, SLOT (loadSignal (int)));
-	signalSubMenu->setItemParameter (menuID, i);
+	menuID = signalSubMenu->insertItem("Mimic", this, SLOT (loadSignal (int)));
+	signalSubMenu->setItemParameter(menuID, i);
 
-	utilMenu->insertItem (tr ("&Signals"), signalSubMenu);
+	utilMenu->insertItem(tr ("&Signals"), signalSubMenu);
 }
 
 void MainWindow::loadUtil (int i) {
 	QSettings userprefs;
 	userprefs.setPath ("RTXI.org", "RTXI", QSettings::User);
-	QString filename = userprefs.readEntry ("/utilFileList/util"
-			+ QString::number (i));
-	Plugin::Manager::getInstance ()->load (filename.latin1 ());
+	QString filename = userprefs.readEntry ("/utilFileList/util" + QString::number (i));
+	QByteArray textData = filename.toLatin1();
+	const char *text = textData.constData();
+	Plugin::Manager::getInstance()->load(text);
 }
 
 	void
@@ -473,9 +476,10 @@ MainWindow::loadFilter (int i)
 {
 	QSettings userprefs;
 	userprefs.setPath ("RTXI.org", "RTXI", QSettings::User);
-	QString filename = userprefs.readEntry ("/utilFileList/filter"
-			+ QString::number (i));
-	Plugin::Manager::getInstance ()->load (filename.latin1 ());
+	QString filename = userprefs.readEntry ("/utilFileList/filter"+ QString::number (i));
+	QByteArray textData = filename.toLatin1();
+	const char *text = textData.constData();
+	Plugin::Manager::getInstance()->load(text);
 }
 
 	void
@@ -483,59 +487,49 @@ MainWindow::loadSignal (int i)
 {
 	QSettings userprefs;
 	userprefs.setPath ("RTXI.org", "RTXI", QSettings::User);
-	QString filename =
-		userprefs.readEntry ("/utilFileList/sig" + QString::number (i));
-	Plugin::Manager::getInstance ()->load (filename.latin1 ());
+	QString filename = userprefs.readEntry ("/utilFileList/sig" + QString::number (i));
+	QByteArray textData = filename.toLatin1();
+	const char *text = textData.constData();
+	Plugin::Manager::getInstance()->load(text);
 }
 
-	void
-MainWindow::windowsMenuAboutToShow (void)
-{
+void MainWindow::windowsMenuAboutToShow (void) {
 	windowsMenu->clear ();
 
 	QWorkspace *ws = dynamic_cast < QWorkspace * >(centralWidget ());
-	if (!ws)
-	{
+	if(!ws) {
 		ERROR_MSG
 			("MainWindow::windowsMenuAboutToShow : centralWidget() not a QWorkspace?\n");
 		return;
 	}
 
-	int cascadeID =
-		windowsMenu->insertItem ("&Cascade", ws, SLOT (cascade (void)));
+	int cascadeID = windowsMenu->insertItem ("&Cascade", ws, SLOT (cascade (void)));
 	int tileID = windowsMenu->insertItem ("&Tile", ws, SLOT (tile (void)));
-	if (ws->windowList ().isEmpty ())
-	{
+	if (ws->windowList ().isEmpty ()) {
 		windowsMenu->setItemEnabled (cascadeID, false);
 		windowsMenu->setItemEnabled (tileID, false);
 	}
 
 	windowsMenu->insertSeparator ();
 	QWidgetList windows = ws->windowList ();
-	for (size_t i = 0; i < windows.count (); ++i)
-	{
-		int id =
-			windowsMenu->insertItem (windows.at (i)->caption (), this,
+	for(size_t i = 0; i < windows.count (); ++i) {
+		int id = windowsMenu->insertItem (windows.at (i)->caption (), this,
 					SLOT (windowsMenuActivated (int)));
 		windowsMenu->setItemParameter (id, i);
 		windowsMenu->setItemChecked (id, ws->activeWindow () == windows.at (i));
 	}
 }
 
-	void
-MainWindow::windowsMenuActivated (int id)
-{
+void MainWindow::windowsMenuActivated (int id) {
 	QWorkspace *ws = dynamic_cast < QWorkspace * >(centralWidget ());
-	if (!ws)
-	{
+	if(!ws) {
 		ERROR_MSG
 			("MainWindow::windowsMenuActivated : centralWidget() not a QWorkspace?\n");
 		return;
 	}
 
 	QWidget *w = ws->windowList ().at (id);
-	if (w)
-	{
+	if(w) {
 		w->showNormal ();
 		w->setFocus ();
 	}
@@ -554,8 +548,7 @@ MainWindow * MainWindow::getInstance (void) {
 	 *************************************************************************/
 
 	Mutex::Locker lock (&::mutex);
-	if (!instance)
-	{
+	if (!instance) {
 		static MainWindow mainwindow;
 		instance = &mainwindow;
 	}

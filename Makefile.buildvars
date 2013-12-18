@@ -1,12 +1,12 @@
 ACLOCAL_AMFLAGS ?= -I $(top_srcdir)/m4
 
 QT_CXXFLAGS = -I/usr/include/qt4/ -I/usr/include/qt4/QtCore/ -I/usr/include/qt4/QtGui/ -I/usr/include/qt4/QtXml/
-QT_LIBS     = -L/usr/lib/qt4/
+QT_LIBS     = -L/usr/lib/qt4/ -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_XML_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_SHARED
 MOC									= /usr/bin/moc
 UIC 								= /usr/bin/uic
 
-AM_CPPFLAGS = -DEXEC_PREFIX=\"$(exec_prefix)\" -DPREFIX=\"$(prefix)\" $(QT_CXXFLAGS) $(RTOS_CPPFLAGS) -DQT3_SUPPORT
-AM_CXXFLAGS = -pipe -Wall $(QT_CXXFLAGS)
+AM_CPPFLAGS = -DEXEC_PREFIX=\"$(exec_prefix)\" -DPREFIX=\"$(prefix)\" $(QT_CXXFLAGS) $(RTOS_CPPFLAGS) 
+AM_CXXFLAGS = -pipe -Wall $(QT_CXXFLAGS) 
 AM_LDFLAGS  = $(QT_LIBS) $(GSL_LIBS) $(RTOS_LDFLAGS)
 AM_CFLAGS = $(AM_CXXFLAGS) 
 

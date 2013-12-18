@@ -32,19 +32,13 @@
 #include <iostream>
 
 namespace {
-
 		class SyncEvent: public RT::Event {
-
 				public:
-
 						int callback(void) {
 								return 0;
-						}
-						;
-
-		}; // class SyncEvent
-
-} // namespace
+						};
+		};
+};
 
 DefaultGUILineEdit::DefaultGUILineEdit(QWidget *parent):QLineEdit(parent) {
 		QObject::connect(this,SIGNAL(textChanged(const QString &)),this,SLOT(redden(void)));
@@ -53,27 +47,26 @@ DefaultGUILineEdit::DefaultGUILineEdit(QWidget *parent):QLineEdit(parent) {
 DefaultGUILineEdit::~DefaultGUILineEdit(void) {
 }
 
+// VISITTWO
 void DefaultGUILineEdit::blacken(void) {
-		setPaletteForegroundColor(Qt::black);
-		setEdited(false);
+		//setPaletteForegroundColor(Qt::black);
+		setModified(false);
 }
 
-		void DefaultGUILineEdit::redden(void) {
-				if (edited())
-						setPaletteForegroundColor(Qt::red);
-		}
+void DefaultGUILineEdit::redden(void) {
+		//if(isModified())
+			//setPaletteForegroundColor(Qt::red);
+}
 
-DefaultGUIModel::DefaultGUIModel(std::string name,
-				DefaultGUIModel::variable_t *var, size_t size) :
-		QWidget(MainWindow::getInstance()->centralWidget()), Workspace::Instance(
-						name, var, size), myname(name) {
-				setCaption(QString::number(getID()) + " " + QString::fromStdString(name));
-
-				QTimer *timer = new QTimer(this);
-				timer->start(1000);
-				QObject::connect(timer,SIGNAL(timeout(void)),this,SLOT(refresh(void)));
-
-		}
+DefaultGUIModel::DefaultGUIModel(std::string name, DefaultGUIModel::variable_t *var, size_t size): 
+		QWidget(MainWindow::getInstance()->centralWidget()), Workspace::Instance(name, var, size), myname(name) {
+				
+		// VISITTWO
+		//setCaption(QString::number(getID()) + " " + QString::fromStdString(name));
+		QTimer *timer = new QTimer(this);
+		timer->start(1000);
+		QObject::connect(timer,SIGNAL(timeout(void)),this,SLOT(refresh(void)));
+}
 
 DefaultGUIModel::~DefaultGUIModel(void) {
 		// Ensure that the realtime thread isn't in the middle of executing DefaultGUIModel::execute()    
@@ -96,7 +89,8 @@ void DefaultGUIModel::createGUI(DefaultGUIModel::variable_t *var, int size) {
 
 		QWidget *viewport = new QWidget(sv->viewport());
 		sv->setWidget(viewport);
-		QGridLayout *scrollLayout = new QGridLayout(viewport, 1, 2);
+		QGridLayout *scrollLayout = new QGridLayout(viewport);
+		//QGridLayout *scrollLayout = new QGridLayout(viewport, 1, 2);
 
 		size_t nstate = 0, nparam = 0, nevent = 0, ncomment = 0;
 		for (size_t i = 0; i < size; i++) {
@@ -130,7 +124,7 @@ void DefaultGUIModel::createGUI(DefaultGUIModel::variable_t *var, int size) {
 								param.str_value = new QString;
 						} else if (var[i].flags & STATE) {
 								param.edit->setReadOnly(true);
-								param.edit->setPaletteForegroundColor(Qt::darkGray);
+								//param.edit->setPaletteForegroundColor(Qt::darkGray);
 								param.type = STATE;
 								param.index = nstate++;
 						} else if (var[i].flags & EVENT) {
@@ -159,7 +153,7 @@ void DefaultGUIModel::createGUI(DefaultGUIModel::variable_t *var, int size) {
 		hbox1->setLayout(qhboxlayout);
 
 		//QHBox *hbox1 = new QHBox(this);
-		pauseButton->setToggleButton(true);
+		pauseButton->setCheckable(true);
 		//pauseButton = new QPushButton("Pause", hbox1);
 		QObject::connect(pauseButton,SIGNAL(toggled(bool)),this,SLOT(pause(bool)));
 		//QPushButton *modifyButton = new QPushButton("Modify", hbox1);
@@ -184,20 +178,21 @@ void DefaultGUIModel::exit(void) {
 		Plugin::Manager::getInstance()->unload(this);
 }
 
+// VISITTWO
 void DefaultGUIModel::refresh(void) {
 		for (std::map<QString, param_t>::iterator i = parameter.begin(); i!= parameter.end(); ++i) {
 				if (i->second.type & (STATE | EVENT)) {
 						i->second.edit->setText(QString::number(getValue(i->second.type, i->second.index)));
-						i->second.edit->setPaletteForegroundColor(Qt::darkGray);
-				} else if ((i->second.type & PARAMETER) && !i->second.edit->edited()
+						//i->second.edit->setPaletteForegroundColor(Qt::darkGray);
+				} else if ((i->second.type & PARAMETER) && !i->second.edit->isModified()
 								&& i->second.edit->text() != *i->second.str_value) {
 						i->second.edit->setText(*i->second.str_value);
-				} else if ((i->second.type & COMMENT) && !i->second.edit->edited()
+				} else if ((i->second.type & COMMENT) && !i->second.edit->isModified()
 								&& i->second.edit->text() != QString::fromStdString(getValueString(COMMENT, i->second.index))) {
 						i->second.edit->setText(QString::fromStdString(getValueString(COMMENT, i->second.index)));
 				}
 		}
-		pauseButton->setOn(!getActive());
+		pauseButton->setChecked(!getActive());
 }
 
 void DefaultGUIModel::modify(void) {
@@ -209,17 +204,18 @@ void DefaultGUIModel::modify(void) {
 		SyncEvent event;
 		RT::System::getInstance()->postEvent(&event);
 
-		for (std::map<QString, param_t>::iterator i = parameter.begin(); i
-						!= parameter.end(); ++i)
-				if (i->second.type & COMMENT)
-						Workspace::Instance::setComment(i->second.index,
-										i->second.edit->text().latin1());
+		for (std::map<QString, param_t>::iterator i = parameter.begin(); i != parameter.end(); ++i)
+				if (i->second.type & COMMENT) {
+						QByteArray textData = i->second.edit->text().toLatin1();
+						const char *text = textData.constData();
+						//Workspace::Instance::setComment(i->second.index, i->second.edit->text().latin1());
+						Workspace::Instance::setComment(i->second.index, text);
+				}
 
 		update(MODIFY);
 		setActive(active);
 
-		for (std::map<QString, param_t>::iterator i = parameter.begin(); i
-						!= parameter.end(); ++i)
+		for (std::map<QString, param_t>::iterator i = parameter.begin(); i != parameter.end(); ++i)
 				i->second.edit->blacken();
 }
 
@@ -234,7 +230,10 @@ void DefaultGUIModel::setComment(const QString &name, QString comment) {
 		std::map<QString, param_t>::iterator n = parameter.find(name);
 		if (n != parameter.end() && (n->second.type & COMMENT)) {
 				n->second.edit->setText(comment);
-				Workspace::Instance::setComment(n->second.index, comment.latin1());
+				QByteArray textData = comment.toLatin1();
+				const char *text = textData.constData();
+				//Workspace::Instance::setComment(n->second.index, comment.latin1());
+				Workspace::Instance::setComment(n->second.index, text);
 		}
 }
 
@@ -283,7 +282,7 @@ void DefaultGUIModel::setEvent(const QString &name, double &ref) {
 }
 
 		void DefaultGUIModel::pause(bool p) {
-				if (pauseButton->isOn() != p)
+				if (pauseButton->isChecked() != p)
 						pauseButton->setDown(p);
 
 				setActive(!p);
@@ -293,8 +292,9 @@ void DefaultGUIModel::setEvent(const QString &name, double &ref) {
 						update(UNPAUSE);
 		}
 
+// VISITTWO
 void DefaultGUIModel::doDeferred(const Settings::Object::State &) {
-		setCaption(QString::number(getID()) + " " + QString::fromStdString(myname));
+		//setCaption(QString::number(getID()) + " " + QString::fromStdString(myname));
 }
 
 void DefaultGUIModel::doLoad(const Settings::Object::State &s) {
@@ -311,12 +311,12 @@ void DefaultGUIModel::doLoad(const Settings::Object::State &s) {
 				parentWidget()->move(s.loadInteger("X"), s.loadInteger("Y"));
 		}
 
-		pauseButton->setOn(s.loadInteger("paused"));
+		pauseButton->setChecked(s.loadInteger("paused"));
 		modify();
 }
 
 void DefaultGUIModel::doSave(Settings::Object::State &s) const {
-		s.saveInteger("paused", pauseButton->isOn());
+		s.saveInteger("paused", pauseButton->isChecked());
 		if (isMaximized())
 				s.saveInteger("Maximized", 1);
 		else if (isMinimized())
