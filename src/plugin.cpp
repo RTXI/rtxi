@@ -39,16 +39,16 @@ void Plugin::Object::unload(void) {
     Plugin::Manager::getInstance()->unload(this);
 }
 
-Plugin::Object *Plugin::Manager::load(const std::string &library) {
+Plugin::Object *Plugin::Manager::load(const QString &library) {
     Mutex::Locker lock(&mutex);
 
-    void *handle = dlopen(library.c_str(),RTLD_GLOBAL|RTLD_NOW);
+    void *handle = dlopen(library.toStdString().c_str(),RTLD_GLOBAL|RTLD_NOW);
     if(!handle) {
         std::string plugin_dir = std::string(EXEC_PREFIX) + std::string("/lib/rtxi/");
-        handle = dlopen((plugin_dir+library).c_str(),RTLD_GLOBAL|RTLD_NOW);
+        handle = dlopen((plugin_dir+library.toStdString()).c_str(),RTLD_GLOBAL|RTLD_NOW);
     }
     if(!handle) {
-        ERROR_MSG("Plugin::load : failed to load %s: %s\n",library.c_str(),dlerror());
+        ERROR_MSG("Plugin::load : failed to load %s: %s\n",library.toStdString().c_str(),dlerror());
         return 0;
     }
 
@@ -59,25 +59,25 @@ Plugin::Object *Plugin::Manager::load(const std::string &library) {
 
     Object *(*create)(void) = (Object *(*)(void))(dlsym(handle,"createRTXIPlugin"));
     if(!create) {
-        ERROR_MSG("Plugin::load : failed to load %s : %s\n",library.c_str(),dlerror());
+        ERROR_MSG("Plugin::load : failed to load %s : %s\n",library.toStdString().c_str(),dlerror());
         dlclose(handle);
         return 0;
     }
 
     Object *plugin = create();
     if(!plugin) {
-        ERROR_MSG("Plugin::load : failed to load %s : failed to create instance\n",library.c_str());
+        ERROR_MSG("Plugin::load : failed to load %s : failed to create instance\n",library.toStdString().c_str());
         dlclose(handle);
         return 0;
     }
     if(plugin->magic_number != Plugin::Object::MAGIC_NUMBER) {
-        ERROR_MSG("Plugin::load : the pointer returned from %s::createRTXIPlugin() isn't a valid Plugin::Object *.\n",library.c_str());
+        ERROR_MSG("Plugin::load : the pointer returned from %s::createRTXIPlugin() isn't a valid Plugin::Object *.\n",library.toStdString().c_str());
         dlclose(handle);
         return 0;
     }
 
     plugin->handle = handle;
-    plugin->library = library;
+    plugin->library = library.toStdString();
 
     Event::Object event(Event::PLUGIN_INSERT_EVENT);
     event.setParam("plugin",plugin);
@@ -139,15 +139,17 @@ void Plugin::Manager::customEvent(QEvent *e) {
     if(e->type() == CloseEvent) {
         Mutex::Locker lock(&mutex);
 
-        Object *plugin = static_cast<Plugin::Object *>(e->data());
+				// VISITTWO
+        //Object *plugin = static_cast<Plugin::Object *>(e->data());
 
         Event::Object event(Event::PLUGIN_REMOVE_EVENT);
-        event.setParam("plugin",plugin);
+        //event.setParam("plugin",plugin);
         Event::Manager::getInstance()->postEvent(&event);
 
-        void *handle = plugin->handle;
-        delete plugin;
-        if(handle) dlclose(handle);
+        //void *handle = plugin->handle;
+        //adelete plugin;
+        //if(handle)
+        	//dlclose(handle);
     }
 }
 

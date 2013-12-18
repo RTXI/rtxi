@@ -62,7 +62,7 @@ namespace Plugin {
          *
          * \sa Plugin::Object
          */
-        Object *load(const std::string &library);
+        Object *load(const QString &library);
         /*!
          * Function for unloading a single Plugin::Object in the system.
          *
