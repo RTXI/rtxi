@@ -19,11 +19,11 @@
 #ifndef DEFAULT_GUI_MODEL_H
 #define DEFAULT_GUI_MODEL_H
 
+#include <QLineEdit>
 #include <event.h>
 #include <map>
 #include <mutex.h>
 #include <plugin.h>
-#include <qlineedit.h>
 #include <rt.h>
 #include <workspace.h>
 

@@ -16,6 +16,7 @@
 
  */
 
+#include <QApplication>
 #include <iostream>
 #include <cstdlib>
 #include <dirent.h>
@@ -24,7 +25,6 @@
 #include <signal.h>
 #include <string>
 #include <unistd.h>
-#include <qapplication.h>
 #include <cmdline.h>
 #include <ctype.h>
 #include <daq.h>

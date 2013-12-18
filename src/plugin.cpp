@@ -16,11 +16,11 @@
 
  */
 
+#include <QApplication>
 #include <debug.h>
 #include <dlfcn.h>
 #include <event.h>
 #include <plugin.h>
-#include <qapplication.h>
 
 Plugin::Object::Object(void)
     : magic_number(Plugin::Object::MAGIC_NUMBER), handle(0) {
