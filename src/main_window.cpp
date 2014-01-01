@@ -328,7 +328,7 @@ void MainWindow::aboutComedi (void) {
 								DEBUG_MSG
 										("RTXI is about to calibrate DAQ card for COMEDI driver%s\n",
 											cmd.ascii ());
-								printf ("calibrating DAQ card...\n");
+								rt_printf ("calibrating DAQ card...\n");
 								notice.exec ();
 
 								status = CmdLine::getInstance ()->execute (cmd.ascii ());
