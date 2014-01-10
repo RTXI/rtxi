@@ -214,7 +214,7 @@ void Multiclamp700Commander::Amplifier::setMode(mode_t mode) {
             device->setAnalogGain(DAQ::AI,0,iclamp_ai_gain / iclamp_out_gain); // Out gain refers to output of amplifier, which is connected analog input of the DAQ
             device->setAnalogGain(DAQ::AO,0,iclamp_ao_gain);
         }
-        output(0) = 5.0;
+        output(0) = 0.0;
         break;
     case Vclamp:
         if(device) {
@@ -222,7 +222,7 @@ void Multiclamp700Commander::Amplifier::setMode(mode_t mode) {
             device->setAnalogGain(DAQ::AI,0,vclamp_ai_gain / vclamp_out_gain);
             device->setAnalogGain(DAQ::AO,0,vclamp_ao_gain);
         }
-        output(0) = 0.0;
+        output(0) = 5.0;
         break;
     case Izero:
         if(device) {
@@ -230,7 +230,7 @@ void Multiclamp700Commander::Amplifier::setMode(mode_t mode) {
             device->setAnalogGain(DAQ::AI,0,izero_ai_gain);
             device->setAnalogGain(DAQ::AO,0,izero_ao_gain);
         }
-        output(0) = 5.0;
+        output(0) = 0.0;
         break;
     }
 }
