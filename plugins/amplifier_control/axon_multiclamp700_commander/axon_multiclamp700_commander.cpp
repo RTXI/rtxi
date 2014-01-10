@@ -124,16 +124,16 @@ void Multiclamp700Commander::Panel::updateGains( void ) { // Update gains whenev
     default: iclamp_ao_gain = 1.0 / 2e-9; // 2 nA / V
     }
 
-    amp.setGains( vclamp_out_gain, vclamp_ao_gain, iclamp_out_gain, iclamp_ao_gain );
+    amp.setGains( vclamp_out_gain, vclamp_ao_gain, iclamp_out_gain, iclamp_ao_gain, inputChan, outputChan );
 }
 
 void Multiclamp700Commander::Panel::updateMode(int mode) {
     switch(mode) {
-    case 0: amp.setMode(Multiclamp700Commander::Amplifier::Vclamp);
+    case 0: amp.setMode(Multiclamp700Commander::Amplifier::Vclamp, inputChan, outputChan);
         break;
-    case 1: amp.setMode(Multiclamp700Commander::Amplifier::Izero);
+    case 1: amp.setMode(Multiclamp700Commander::Amplifier::Izero, inputChan, outputChan);
         break;
-    case 2: amp.setMode(Multiclamp700Commander::Amplifier::Iclamp);
+    case 2: amp.setMode(Multiclamp700Commander::Amplifier::Iclamp, inputChan, outputChan);
         break;
     default: std::cout << "Error: Multiclamp700Commander::Plugin::updateMode() default case called" << std::endl;
         break;
@@ -198,50 +198,50 @@ Multiclamp700Commander::Amplifier::Amplifier(void)
     iclamp_out_gain = 1;
     vclamp_out_gain = 1;
 
-    setMode(Izero);
+    setMode(Izero, 0, 0);
 }
 
 Multiclamp700Commander::Amplifier::~Amplifier(void) {}
 
-void Multiclamp700Commander::Amplifier::setMode(mode_t mode) {
+void Multiclamp700Commander::Amplifier::setMode(mode_t mode, int inputChan, int outputChan) {
 
     this->mode = mode;
 
     switch(mode) {
     case Iclamp:
         if(device) {
-            device->setAnalogRange(DAQ::AI,0,0);
-            device->setAnalogGain(DAQ::AI,0,iclamp_ai_gain / iclamp_out_gain); // Out gain refers to output of amplifier, which is connected analog input of the DAQ
-            device->setAnalogGain(DAQ::AO,0,iclamp_ao_gain);
+            //device->setAnalogRange(DAQ::AI,inputChan,0);
+            device->setAnalogGain(DAQ::AI,inputChan,iclamp_ai_gain / iclamp_out_gain); // Out gain refers to output of amplifier, which is connected analog input of the DAQ
+            device->setAnalogGain(DAQ::AO,outputChan,iclamp_ao_gain);
         }
         output(0) = 0.0;
         break;
     case Vclamp:
         if(device) {
-            device->setAnalogRange(DAQ::AI,0,0);
-            device->setAnalogGain(DAQ::AI,0,vclamp_ai_gain / vclamp_out_gain);
-            device->setAnalogGain(DAQ::AO,0,vclamp_ao_gain);
+            //device->setAnalogRange(DAQ::AI,inputChan,0);
+            device->setAnalogGain(DAQ::AI,inputChan,vclamp_ai_gain / vclamp_out_gain);
+            device->setAnalogGain(DAQ::AO,outputChan,vclamp_ao_gain);
         }
         output(0) = 5.0;
         break;
     case Izero:
         if(device) {
-            device->setAnalogRange(DAQ::AI,0,0);
-            device->setAnalogGain(DAQ::AI,0,izero_ai_gain);
-            device->setAnalogGain(DAQ::AO,0,izero_ao_gain);
+            //device->setAnalogRange(DAQ::AI,inputChan,0);
+            device->setAnalogGain(DAQ::AI,inputChan,izero_ai_gain / iclamp_out_gain);
+            device->setAnalogGain(DAQ::AO,outputChan,izero_ao_gain);
         }
         output(0) = 0.0;
         break;
     }
 }
 
-void Multiclamp700Commander::Amplifier::setGains( double vc_out, double vc_ao, double ic_out, double ic_ao ) {
+void Multiclamp700Commander::Amplifier::setGains( double vc_out, double vc_ao, double ic_out, double ic_ao, int ic, int oc ) {
     vclamp_out_gain = vc_out;
     vclamp_ao_gain = vc_ao;
     iclamp_out_gain = ic_out;
     iclamp_ao_gain = ic_ao;
 
-    setMode( mode ); // Update gains by setting mode to current mode
+    setMode( mode, ic, oc ); // Update gains by setting mode to current mode
 }
 
 Multiclamp700Commander::Amplifier::mode_t Multiclamp700Commander::Amplifier::getMode() {

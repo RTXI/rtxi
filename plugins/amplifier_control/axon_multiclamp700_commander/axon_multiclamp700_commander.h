@@ -28,8 +28,8 @@ namespace Multiclamp700Commander {
         Amplifier( void );
         ~Amplifier( void );
 
-        void setMode( mode_t );
-        void setGains( double, double, double, double );
+        void setMode( mode_t, int, int );
+        void setGains( double, double, double, double, int, int );
         mode_t getMode();
 
     private:
