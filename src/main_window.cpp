@@ -16,18 +16,7 @@
 
 */
 
-#include <QApplication>
-#include <QFileDialog>
-#include <QFileInfo>
-#include <QMenuBar>
-#include <QMessageBox>
-#include <QList>
-#include <QMenu>
-#include <QWorkspace>
-#include <QSettings>
-#include <QAction>
-#include <QStringList>
-#include <QTextStream>
+#include <QtGui>
 #include <cmdline.h>
 #include <debug.h>
 #include <algorithm>
