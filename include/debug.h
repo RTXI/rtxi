@@ -21,7 +21,8 @@
 
 #include <execinfo.h>
 #include <stdio.h>
-#include <rtdk.h>
+
+//#include <rtdk.h>
 
 //! Prints a backtrace to standard error.
 static inline void PRINT_BACKTRACE(void) {
@@ -29,15 +30,15 @@ static inline void PRINT_BACKTRACE(void) {
     void *buffer[256];
 
     buffer_size = backtrace(buffer,sizeof(buffer));
-    rt_fprintf(stderr,"Backtrace:\n");
+    fprintf(stderr,"Backtrace:\n");
     backtrace_symbols_fd(buffer,buffer_size,2);
 }
 
-#define ERROR_MSG(fmt,args...) do { rt_fprintf(stderr,"%s:%d:",__FILE__,__LINE__); rt_fprintf(stderr,fmt,## args); } while(0)
+#define ERROR_MSG(fmt,args...) do { fprintf(stderr,"%s:%d:",__FILE__,__LINE__); fprintf(stderr,fmt,## args); } while(0)
 
 #ifdef DEBUG
 
-#define DEBUG_MSG(fmt,args...) do { rt_fprintf(stderr,"%s:%d:",__FILE__,__LINE__); rt_fprintf(stderr,fmt,## args); } while(0)
+#define DEBUG_MSG(fmt,args...) do { fprintf(stderr,"%s:%d:",__FILE__,__LINE__); fprintf(stderr,fmt,## args); } while(0)
 
 #else /* !DEBUG */
 

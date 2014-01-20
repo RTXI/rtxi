@@ -31,7 +31,7 @@
 #include <debug.h>
 #include <main_window.h>
 #include <plugin.h>
-#include <rtdk.h>
+//#include <rtdk.h>
 
 static pid_t parentThread;
 
@@ -47,7 +47,7 @@ int main(int argc,char *argv[]) {
 		int retval = 0;
 
 		/* Initialize rtdk */
-		rt_print_auto_init(1);
+		//rt_print_auto_init(1);
 
 		/* Try to Exit Cleanly on Signals */
 		parentThread = getpid();
