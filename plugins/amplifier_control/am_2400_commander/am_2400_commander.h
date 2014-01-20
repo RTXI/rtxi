@@ -1,117 +1,113 @@
 #ifndef AM_2400_COMMANDER_H
 #define AM_2400_COMMANDER_H
 
-
 #include <am_2400_commanderUI.h>
-
 #include <daq.h>
 #include <io.h>
 #include <plugin.h>
-#include <qvbuttongroup.h>
-#include <qwidget.h>
+#include <QButtonGroup>
+#include <QWidget>
 #include <rt.h>
 #include <settings.h>
 
 namespace AM2400Commander {
 
-    class Amplifier : public IO::Block {
-        
-    public:
+	class Amplifier : public IO::Block {
 
-        enum mode_t {
-            Vclamp,
-            Izero,
-            Iclamp,
-            Vcomp,
-            Vtest,            
-            Iresist,
-            Ifollow
-        };
+		public:
 
-        Amplifier(void);
-        ~Amplifier(void);
+			enum mode_t {
+				Vclamp,
+				Izero,
+				Iclamp,
+				Vcomp,
+				Vtest,            
+				Iresist,
+				Ifollow
+			};
 
-        void setMode(mode_t, int, int);
-        mode_t getMode();
+			Amplifier(void);
+			~Amplifier(void);
 
-    private:
+			void setMode(mode_t, int, int);
+			mode_t getMode();
 
-        void setIclamp(void);
-        void setVclamp(void);
+		private:
 
-        DAQ::Device *device;
+			void setIclamp(void);
+			void setVclamp(void);
 
-        double iclamp_ai_gain;
-        double iclamp_ao_gain;
-        double izero_ai_gain;
-        double izero_ao_gain;
-        double vclamp_ai_gain;
-        double vclamp_ao_gain;
-        double iclamp_ao_offset;
-        mode_t mode;
+			DAQ::Device *device;
 
-    }; // class Amplifier
-    
-    class Panel : public QWidget, public RT::Thread, virtual public Settings::Object {
-        Q_OBJECT
+			double iclamp_ai_gain;
+			double iclamp_ao_gain;
+			double izero_ai_gain;
+			double izero_ao_gain;
+			double vclamp_ai_gain;
+			double vclamp_ao_gain;
+			double iclamp_ao_offset;
+			mode_t mode;
 
-    public:
+	}; // class Amplifier
 
-        Panel(QWidget *);
-        ~Panel(void);
+	class Panel : public QWidget, public RT::Thread, virtual public Settings::Object {
+		Q_OBJECT
 
-        QVButtonGroup *buttonGroup;
+		public:
 
-        Amplifier amp;
+			Panel(QWidget *);
+			~Panel(void);
+			QButtonGroup *buttonGroup;
+			Amplifier amp;
 
-    public slots:
-        void updateMode(int);
-        void updateChannels(void);
+			public slots:
+				void updateMode(int);
+				void updateChannels(void);
 
-    private:        
-        virtual void doLoad(const Settings::Object::State &);
-        virtual void doSave(Settings::Object::State &) const;
+		private:        
+			virtual void doLoad(const Settings::Object::State &);
+			virtual void doSave(Settings::Object::State &) const;
 
-        AM_Amp_CommanderUI *ui;
-        int inputChan;
-        int outputChan;
+			AM_Amp_CommanderUI *ui;
+			int inputChan;
+			int outputChan;
 
-    }; // class Panel
-    
-    class Plugin : public QObject, public ::Plugin::Object {
+	}; // class Panel
 
-        Q_OBJECT
+	class Plugin : public QObject, public ::Plugin::Object {
 
-        public:
+		Q_OBJECT
 
-        static Plugin *getInstance(void);
+		public:
 
-        //   Amplifier *getAmplifier(size_t =0);
+			static Plugin *getInstance(void);
 
-    public slots:
+			//   Amplifier *getAmplifier(size_t =0);
 
-        void createAM2400CommanderPanel(void);
-        void removeAM2400CommanderPanel(Panel *);
-        //   void updateMode(int);
+			public slots:
 
-    protected:
+				void createAM2400CommanderPanel(void);
+			void removeAM2400CommanderPanel(Panel *);
+			//   void updateMode(int);
 
-        virtual void doLoad(const Settings::Object::State &);
-        virtual void doSave(Settings::Object::State &) const;
+		protected:
 
-    private:
+			virtual void doLoad(const Settings::Object::State &);
+			virtual void doSave(Settings::Object::State &) const;
 
-        Plugin(void);
-        ~Plugin(void);
-        Plugin(const Plugin &) {};
-        Plugin &operator=(const Plugin &) { return *getInstance(); };
+		private:
 
-        static Plugin *instance;        
+			Plugin(void);
+			~Plugin(void);
+			Plugin(const Plugin &) {};
+			Plugin &operator=(const Plugin &) { return *getInstance(); };
 
-        int menuID;
-        std::list<Panel *> panelList;
+			static Plugin *instance;        
 
-    }; // class Plugin
+			int menuID;
+			std::list<Panel *> panelList;
+
+	}; // class Plugin
 
 }; // namespace AM2400Commander
 
