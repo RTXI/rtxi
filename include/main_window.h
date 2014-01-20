@@ -221,7 +221,7 @@ class MainWindow : public QMainWindow
 
 		void removeSystemMenuItem (int index);
 		private slots:
-				void about(void);
+		void about(void);
 		void aboutQt(void);
 		void aboutXeno(void);
 		void aboutDAQ(void);
