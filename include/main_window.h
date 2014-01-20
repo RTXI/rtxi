@@ -56,8 +56,7 @@ class MainWindow : public QMainWindow
 			* \return The index of the new menu item.
 			*/
 
-		int createFileMenuItem(const std::string &label, const QObject *handler,
-						const char *slot);
+		int createFileMenuItem(const std::string &label, const QObject *handler, const char *slot);
 
 		/*!
 			* Sets the parameter value of a menu item in the File menu.
@@ -66,8 +65,7 @@ class MainWindow : public QMainWindow
 			* \param parameter The parameter value to set.
 			*/
 
-		void
-				setFileMenuItemParameter(int menuid, int parameter);
+		void setFileMenuItemParameter(int menuid, int parameter);
 
 		/*!
 			* Clears the File menu.
@@ -80,6 +78,7 @@ class MainWindow : public QMainWindow
 			* Add an item to the Modules menu.
 			*
 			* \param label The text that will appear in the menu.
+			*
 			* \param handler The object that will handle signals from the menu.
 			* \param slot The slot in the handler that the signal will activate.
 			* \return The index of the new menu item.
@@ -222,7 +221,7 @@ class MainWindow : public QMainWindow
 
 		void removeSystemMenuItem (int index);
 		private slots:
-		void about(void);
+				void about(void);
 		void aboutQt(void);
 		void aboutXeno(void);
 		void aboutDAQ(void);
@@ -245,9 +244,9 @@ class MainWindow : public QMainWindow
 			*   private to control instantiation of the class.             *
 			****************************************************************/
 
-		MainWindow (void);
-		MainWindow (const MainWindow &) {};
-		MainWindow & operator= (const MainWindow &) {return *getInstance();};
+		MainWindow(void);
+		MainWindow(const MainWindow &) {};
+		MainWindow &operator = (const MainWindow &) {return *getInstance();};
 
 		static MainWindow *instance;
 

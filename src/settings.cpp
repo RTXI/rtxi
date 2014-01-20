@@ -148,7 +148,7 @@ void Settings::Object::State::xml(const QDomElement &e1) {
 		paramMap.clear();
 		stateMap.clear();
 
-		if (e1.tagName().upper() != "OBJECT") {
+		if (e1.tagName().toUpper() != "OBJECT") {
 				ERROR_MSG("Settings::Object::State::xml : invalid element\n");
 				return;
 		}
@@ -202,19 +202,19 @@ void Settings::Manager::foreachObject(void (*callback)(Object *,void *),void *pa
 
 int Settings::Manager::load(const QString &filename) {
 		QFile file(filename);
-		if (!file.open(IO_ReadOnly)) {
+		/*if (!file.open(IO_ReadOnly)) {
 				ERROR_MSG("Settings::Manager::load : failed to open %s for reading\n",filename.toStdString().c_str());
 				return -EPERM;
-		}
+		}*/
 
 		QDomDocument doc;
 		QString errorMsg;
 		int errorLine, errorColumn;
 
-		if (!doc.setContent(&file,false,&errorMsg,&errorLine,&errorColumn)) {
+		/*if (!doc.setContent(&file,false,&errorMsg,&errorLine,&errorColumn)) {
 				ERROR_MSG("Settings::Manager::load : %s:%d:%d: %s\n",filename.toStdString().c_str(),errorLine,errorColumn,errorMsg.latin1());
 				return -EINVAL;
-		}
+		}*/
 
 		QDomElement e1 = doc.documentElement();
 
@@ -265,29 +265,28 @@ int Settings::Manager::load(const QString &filename) {
 
 		// create QSettings
 		QSettings userprefs;
-		userprefs.setPath("RTXI.org", "RTXI", QSettings::User);
+		userprefs.setPath (QSettings::NativeFormat, QSettings::UserScope, "RTXI");
 
-		int oldestsetting = userprefs.readNumEntry("/recentSettingsList/start", 0);
+		/*int oldestsetting = userprefs.readNumEntry("/recentSettingsList/start", 0);
 		int num_settings = userprefs.readNumEntry("/recentSettingsList/num", 0);
 
-		QStringList entries = userprefs.entryList("/recentSettingsList");
-		int numRecentFiles = entries.size();
+		QStringList entries = userprefs.entryList("/recentSettingsList");*/
+		//int numRecentFiles = entries.size();
 		QString listsetting;
 		bool doesnotexist = true;
 
-		for (int i = 0; i < numRecentFiles; ++i) {
+		/*for (int i = 0; i < numRecentFiles; ++i) {
 				listsetting = userprefs.readEntry("/recentSettingsList/" + entries[i]);
 				if (filename == listsetting)
 						doesnotexist = false;
-		}
+		}*/
 
 		if (filename == "/etc/rtxi.conf")
 				doesnotexist = false;
 
 		if (doesnotexist) {
-				if (num_settings == 10) {
-						userprefs.writeEntry("/recentSettingsList/" + QString::number(
-												oldestsetting), filename);
+				/*if (num_settings == 10) {
+						userprefs.writeEntry("/recentSettingsList/" + QString::number(oldestsetting), filename);
 						oldestsetting++;
 						if (oldestsetting == 10)
 								oldestsetting = 0;
@@ -296,7 +295,7 @@ int Settings::Manager::load(const QString &filename) {
 						userprefs.writeEntry("/recentSettingsList/" + QString::number(
 												num_settings++), filename);
 						userprefs.writeEntry("/recentSettingsList/num", num_settings);
-				}
+				}*/
 		}
 
 		return 0;
@@ -343,48 +342,48 @@ int Settings::Manager::save(const QString &filename) {
 		Plugin::Manager::getInstance()->foreachPlugin(saveState,&doc);
 
 		QFile file(filename);
-		if (!file.open(IO_WriteOnly)) {
+		/*if (!file.open(IO_WriteOnly)) {
 				ERROR_MSG("Settings::Manager::save : failed to open %s for writing\n",filename.toStdString().c_str());
 				return -EPERM;
-		}
+		}*/
 
 		QTextStream stream(&file);
 		stream << doc;
 
 		// create QSettings
 		QSettings userprefs;
-		userprefs.setPath("RTXI.org", "RTXI", QSettings::User);
+		userprefs.setPath (QSettings::NativeFormat, QSettings::UserScope, "RTXI");
 
-		int oldestsetting = userprefs.readNumEntry("/recentSettingsList/start", 0);
-		int num_settings = userprefs.readNumEntry("/recentSettingsList/num", 0);
+		//int oldestsetting = userprefs.readNumEntry("/recentSettingsList/start", 0);
+		//int num_settings = userprefs.readNumEntry("/recentSettingsList/num", 0);
 
-		QStringList entries = userprefs.entryList("/recentSettingsList");
-		int numRecentFiles = entries.size();
+		//QStringList entries = userprefs.entryList("/recentSettingsList");
+		//int numRecentFiles = entries.size();
 		QString listsetting;
 		bool doesnotexist = true;
 
-		for (int i = 0; i < numRecentFiles; ++i) {
+		/*for (int i = 0; i < numRecentFiles; ++i) {
 				listsetting = userprefs.readEntry("/recentSettingsList/" + entries[i]);
 				if (filename == listsetting)
 						doesnotexist = false;
-		}
+		}*/
 
 		if (filename == "/etc/rtxi.conf")
 				doesnotexist = false;
 
 		if (doesnotexist) {
-				if (num_settings == 10) {
-						userprefs.writeEntry("/recentSettingsList/" + QString::number(
-												oldestsetting), filename);
+				/*if (num_settings == 10) {
+						//userprefs.writeEntry("/recentSettingsList/" + QString::number(
+						//						oldestsetting), filename);
 						oldestsetting++;
 						if (oldestsetting == 11)
 								oldestsetting = 1;
-						userprefs.writeEntry("/recentSettingsList/start", oldestsetting);
+						//userprefs.writeEntry("/recentSettingsList/start", oldestsetting);
 				} else {
-						userprefs.writeEntry("/recentSettingsList/" + QString::number(
-												num_settings++), filename);
-						userprefs.writeEntry("/recentSettingsList/num", num_settings);
-				}
+						//userprefs.writeEntry("/recentSettingsList/" + QString::number(
+						//						num_settings++), filename);
+						//userprefs.writeEntry("/recentSettingsList/num", num_settings);
+				}*/
 		}
 
 		return 0;

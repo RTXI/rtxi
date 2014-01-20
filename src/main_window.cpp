@@ -28,7 +28,10 @@
 #include <plugin.h>
 
 //MainWindow::MainWindow (void):QMainWindow (NULL, NULL, Qt::WType_TopLevel) {
-MainWindow::MainWindow (void):QMainWindow (NULL, NULL) {
+MainWindow::MainWindow (void){ //:QMainWindow (NULL, NULL) {
+
+		QWidget *centralWidget = new QWidget(this);
+		setCentralWidget(centralWidget);
 
 		/* Initialize Window Settings */
 		//setCaption ("RTXI - Real-time eXperimental Interface");
@@ -93,8 +96,8 @@ MainWindow::MainWindow (void):QMainWindow (NULL, NULL) {
 		//menuBar()->addMenu("&Help", helpMenu);
 
 		/* Create and Initialize the Workspace */
-		setCentralWidget (new QWorkspace (this, NULL));
-		((QWorkspace *) centralWidget ())->setScrollBarsEnabled (true);
+		//setCentralWidget(new QWorkspace(this, NULL));
+		//((QWorkspace *)centralWidget())->setScrollBarsEnabled(true);
 }
 
 MainWindow::~MainWindow (void) {
@@ -106,7 +109,7 @@ MainWindow::~MainWindow (void) {
 		}*/
 
 void MainWindow::setFileMenuItemParameter(int menuid, int parameter) {
-		fileMenu->setItemParameter(menuid, parameter);
+		//fileMenu->setItemParameter(menuid, parameter);
 }
 
 // VISITTWO
@@ -116,18 +119,18 @@ void MainWindow::clearFileMenu (void) {
 		// main_window.cpp, not while a module is loading
 		fileMenu->clear ();
 		int id;
-		id = fileMenu->insertItem ("&Load Workspace", this, SLOT (loadSettings ()), QKeySequence (Qt::CTRL + Qt::Key_L));
-		fileMenu->setWhatsThis (id, "Load Workspace settings file");
-		id = fileMenu->insertItem ("&Save Workspace", this, SLOT (saveSettings ()), QKeySequence (Qt::CTRL + Qt::Key_S));
-		fileMenu->setWhatsThis (id, "Save Workspace settings file");
-		fileMenu->insertSeparator ();
-		id = fileMenu->insertItem ("&Quit", qApp, SLOT (closeAllWindows ()), QKeySequence (Qt::CTRL + Qt::Key_Q));
-		fileMenu->setWhatsThis (id, "Quits the Application");
-		fileMenu->insertSeparator ();
+		//id = fileMenu->insertItem ("&Load Workspace", this, SLOT (loadSettings ()), QKeySequence (Qt::CTRL + Qt::Key_L));
+		//fileMenu->setWhatsThis (id, "Load Workspace settings file");
+		//id = fileMenu->insertItem ("&Save Workspace", this, SLOT (saveSettings ()), QKeySequence (Qt::CTRL + Qt::Key_S));
+		//fileMenu->setWhatsThis (id, "Save Workspace settings file");
+		//fileMenu->insertSeparator ();
+		//id = fileMenu->insertItem ("&Quit", qApp, SLOT (closeAllWindows ()), QKeySequence (Qt::CTRL + Qt::Key_Q));
+		//fileMenu->setWhatsThis (id, "Quits the Application");
+		//fileMenu->insertSeparator ();
 }
 
 int MainWindow::insertModuleMenuSeparator (void) {
-		return moduleMenu->insertSeparator();
+		//return moduleMenu->insertSeparator();
 }
 
 /*int MainWindow::createModuleMenuItem (const std::string & text, const QObject * receiver, const char *member) {
@@ -135,25 +138,23 @@ int MainWindow::insertModuleMenuSeparator (void) {
 		}*/
 
 void MainWindow::setModuleMenuItemParameter (int menuid, int parameter) {
-		moduleMenu->setItemParameter (menuid, parameter);
+		//moduleMenu->setItemParameter (menuid, parameter);
 }
 
 void MainWindow::clearModuleMenu (void) {
-		moduleMenu->clear ();
+		//moduleMenu->clear ();
 }
 
 void MainWindow::changeModuleMenuItem (int id, QString text) {
-		moduleMenu->changeItem (id, text);
+		//moduleMenu->changeItem (id, text);
 }
 
-void
-MainWindow::removeModuleMenuItem (int id) {
-		moduleMenu->removeItem (id);
+void MainWindow::removeModuleMenuItem (int id) {
+		//moduleMenu->removeItem (id);
 }
 
-void
-MainWindow::removeModuleMenuItemAt (int id) {
-		moduleMenu->removeItemAt (id);
+void MainWindow::removeModuleMenuItemAt (int id) {
+		//moduleMenu->removeItemAt (id);
 }
 
 /*int MainWindow::createUtilMenuItem (const std::string & text,
@@ -165,18 +166,16 @@ MainWindow::removeModuleMenuItemAt (int id) {
 		utilMenu->setItemParameter (menuid, parameter);
 		}*/
 
-void
-MainWindow::clearUtilMenu (void) {
-		utilMenu->clear ();
+void MainWindow::clearUtilMenu (void) {
+		//utilMenu->clear ();
 }
 
-void
-MainWindow::changeUtilMenuItem (int id, QString text) {
-		utilMenu->changeItem (id, text);
+void MainWindow::changeUtilMenuItem (int id, QString text) {
+		//utilMenu->changeItem (id, text);
 }
 
 void MainWindow::removeUtilMenuItem (int id) {
-		utilMenu->removeItem(id);
+		//utilMenu->removeItem(id);
 }
 
 void MainWindow::createMenus() {
@@ -195,7 +194,7 @@ void MainWindow::createMenus() {
 		systemMenu = menuBar()->addMenu(tr("&System"));
 
 		windowsMenu = menuBar()->addMenu(tr("&Windows"));
-		windowsMenu->setCheckable (true);
+		//windowsMenu->setCheckable (true);
 
 		helpMenu = menuBar()->addMenu(tr("&Help"));
 		helpMenu->addAction(artxi);
@@ -243,7 +242,7 @@ void MainWindow::createActions() {
 		}*/
 
 int MainWindow::insertSystemMenuSeparator (void) {
-		return systemMenu->insertSeparator ();
+		//return systemMenu->insertSeparator ();
 }
 
 /*int MainWindow::createSystemMenuItem (const std::string & text,
@@ -252,7 +251,7 @@ int MainWindow::insertSystemMenuSeparator (void) {
 		}*/
 
 void MainWindow::removeSystemMenuItem (int id) {
-		systemMenu->removeItem (id);
+		//systemMenu->removeItem (id);
 }
 
 void MainWindow::about(void) {
@@ -270,7 +269,7 @@ void MainWindow::aboutComedi (void) {
 		QStringList lines;
 		QFile file ("/proc/comedi");
 		bool DAQdetected = false;
-		if (file.open (IO_ReadOnly)) {
+		/*if (file.open (IO_ReadOnly)) {
 				text = "COMEDI is an open source library that provides access to DAQ"
 						" cards from\na variety of manufacturers. You are currently using ";
 				QTextStream stream (&file);
@@ -290,7 +289,6 @@ void MainWindow::aboutComedi (void) {
 								"\n\nDevice name   Driver name      Board name   # Subdevices";
 				}
 				lines += line;
-
 		} else {
 				text = "COMEDI does not seem to be installed correctly on your system.";
 		}
@@ -339,13 +337,13 @@ void MainWindow::aboutComedi (void) {
 		} else {
 				QMessageBox::information (this, "About COMEDI", QString (text) + "\n\n"
 								+ lines.join ("\n"), QMessageBox::Ok);
-		}
+		}*/
 }
 
 void MainWindow::loadSettings (void) {
 		QSettings userprefs;
-		userprefs.setPath ("RTXI.org", "RTXI", QSettings::User);
-		QString settingsDir = userprefs.readEntry ("/dirs/setfiles", getenv ("HOME"));
+		userprefs.setPath (QSettings::NativeFormat, QSettings::UserScope, "RTXI");
+		//QString settingsDir = userprefs.readEntry ("/dirs/setfiles", getenv ("HOME"));
 
 		QString filename = QFileDialog::getOpenFileName(this,
 						tr("Load saved workspace"), "/home/", tr("Settings (*.set)"));
@@ -356,8 +354,8 @@ void MainWindow::loadSettings (void) {
 
 void MainWindow::saveSettings(void) {
 		QSettings userprefs;
-		userprefs.setPath ("RTXI.org", "RTXI", QSettings::User);
-		QString settingsDir = userprefs.readEntry ("/dirs/setfiles", getenv ("HOME"));
+		userprefs.setPath (QSettings::NativeFormat, QSettings::UserScope, "RTXI");
+		//QString settingsDir = userprefs.readEntry ("/dirs/setfiles", getenv ("HOME"));
 
 		QString filename = QFileDialog::getSaveFileName(this,
 						tr("Save current workspace"), "/home/", tr("Settings (*.set)"));
@@ -378,9 +376,9 @@ void MainWindow::saveSettings(void) {
 
 void MainWindow::updateUtilModules () {
 		QSettings userprefs;
-		userprefs.setPath ("RTXI.org", "RTXI", QSettings::User);
+		userprefs.setPath (QSettings::NativeFormat, QSettings::UserScope, "RTXI");
 
-		QStringList entries = userprefs.entryList ("/utilFileList");
+		/*QStringList entries = userprefs.entryList ("/utilFileList");
 		int numUtilFiles = entries.size ();
 
 		for (int i = 0; i < numUtilFiles; i++) {
@@ -431,36 +429,36 @@ void MainWindow::updateUtilModules () {
 		menuID = signalSubMenu->insertItem("Mimic", this, SLOT (loadSignal (int)));
 		signalSubMenu->setItemParameter(menuID, i);
 
-		utilMenu->insertItem(tr ("&Signals"), signalSubMenu);
+		utilMenu->insertItem(tr ("&Signals"), signalSubMenu);*/
 }
 
 void MainWindow::loadUtil (int i) {
 		QSettings userprefs;
-		userprefs.setPath ("RTXI.org", "RTXI", QSettings::User);
-		QString filename = userprefs.readEntry ("/utilFileList/util" + QString::number (i));
+		userprefs.setPath (QSettings::NativeFormat, QSettings::UserScope, "RTXI");
+		/*QString filename = userprefs.readEntry ("/utilFileList/util" + QString::number (i));
 		QByteArray textData = filename.toLatin1();
 		const char *text = textData.constData();
-		Plugin::Manager::getInstance()->load(text);
+		Plugin::Manager::getInstance()->load(text);*/
 }
 
 void
 MainWindow::loadFilter (int i) {
 		QSettings userprefs;
-		userprefs.setPath ("RTXI.org", "RTXI", QSettings::User);
-		QString filename = userprefs.readEntry ("/utilFileList/filter"+ QString::number (i));
+		userprefs.setPath (QSettings::NativeFormat, QSettings::UserScope, "RTXI");
+		/*QString filename = userprefs.readEntry ("/utilFileList/filter"+ QString::number (i));
 		QByteArray textData = filename.toLatin1();
 		const char *text = textData.constData();
-		Plugin::Manager::getInstance()->load(text);
+		Plugin::Manager::getInstance()->load(text);*/
 }
 
 void
 MainWindow::loadSignal (int i) {
 		QSettings userprefs;
-		userprefs.setPath ("RTXI.org", "RTXI", QSettings::User);
-		QString filename = userprefs.readEntry ("/utilFileList/sig" + QString::number (i));
+		userprefs.setPath (QSettings::NativeFormat, QSettings::UserScope, "RTXI");
+		/*QString filename = userprefs.readEntry ("/utilFileList/sig" + QString::number (i));
 		QByteArray textData = filename.toLatin1();
 		const char *text = textData.constData();
-		Plugin::Manager::getInstance()->load(text);
+		Plugin::Manager::getInstance()->load(text);*/
 }
 
 void MainWindow::windowsMenuAboutToShow (void) {
@@ -473,21 +471,21 @@ void MainWindow::windowsMenuAboutToShow (void) {
 				return;
 		}
 
-		int cascadeID = windowsMenu->insertItem ("&Cascade", ws, SLOT (cascade (void)));
-		int tileID = windowsMenu->insertItem ("&Tile", ws, SLOT (tile (void)));
+		//int cascadeID = windowsMenu->insertItem ("&Cascade", ws, SLOT (cascade (void)));
+		//int tileID = windowsMenu->insertItem ("&Tile", ws, SLOT (tile (void)));
 		if (ws->windowList ().isEmpty ()) {
-				windowsMenu->setItemEnabled (cascadeID, false);
-				windowsMenu->setItemEnabled (tileID, false);
+				//windowsMenu->setItemEnabled (cascadeID, false);
+				//windowsMenu->setItemEnabled (tileID, false);
 		}
 
-		windowsMenu->insertSeparator ();
+		//windowsMenu->insertSeparator ();
 		QWidgetList windows = ws->windowList ();
-		for (size_t i = 0; i < windows.count (); ++i) {
+		/*for (size_t i = 0; i < windows.count (); ++i) {
 				int id = windowsMenu->insertItem (windows.at (i)->caption (), this,
 								SLOT (windowsMenuActivated (int)));
 				windowsMenu->setItemParameter (id, i);
 				windowsMenu->setItemChecked (id, ws->activeWindow () == windows.at (i));
-		}
+		}*/
 }
 
 void MainWindow::windowsMenuActivated (int id) {
