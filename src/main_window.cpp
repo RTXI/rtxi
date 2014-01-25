@@ -401,26 +401,6 @@ MainWindow::updateUtilModules()
   QStringList entries = userprefs.entryList("/utilFileList");
   int numUtilFiles = entries.size();
 
-  // rewrite list of bundled modules
-  for (int i = 0; i < numUtilFiles; i++)
-    {
-      userprefs.removeEntry("/utilFileList/util" + QString::number(i));
-      userprefs.removeEntry("/utilFileList/filter" + QString::number(i));
-      userprefs.removeEntry("/utilFileList/sig" + QString::number(i));
-    }
-  userprefs.writeEntry("/utilFileList/util" + QString::number(0), "neuron.so");
-  userprefs.writeEntry("/utilFileList/util" + QString::number(1), "synch.so");
-
-  userprefs.writeEntry("/utilFileList/filter" + QString::number(0), "FIRwindow.so");
-  userprefs.writeEntry("/utilFileList/filter" + QString::number(1), "IIRfilter.so");
-
-  userprefs.writeEntry("/utilFileList/sig" + QString::number(0), "siggen.so");
-  userprefs.writeEntry("/utilFileList/sig" + QString::number(1), "noisegen.so");
-  userprefs.writeEntry("/utilFileList/sig" + QString::number(2),
-      "wave_maker.so");
-  userprefs.writeEntry("/utilFileList/sig" + QString::number(3),
-        "mimic.so");
-
   int i = 0;
   int menuID = utilMenu->insertItem("Model HH Neuron",this,SLOT(loadUtil(int)));
   setUtilMenuItemParameter(menuID, i);
@@ -454,7 +434,6 @@ MainWindow::updateUtilModules()
   signalSubMenu->setItemParameter(menuID, i);
 
   utilMenu->insertItem(tr("&Signals"), signalSubMenu);
-
 }
 
 void
