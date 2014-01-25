@@ -14,4 +14,4 @@ SUBDIRS = \
 	oscilloscope \
 	performance_measurement \
 	system_control \
-	userprefs \
+	userprefs

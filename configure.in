@@ -1,8 +1,9 @@
 AC_INIT([RTXI],[trunk],[help@rtxi.org],rtxi)
 
 AM_CONFIG_HEADER(include/rtxi_config.h)
-AM_INIT_AUTOMAKE(foreign)
+AM_INIT_AUTOMAKE([foreign])
 AM_PATH_CPPUNIT
+AM_SILENT_RULES([yes])
 
 AC_PROG_LIBTOOL
 AC_PROG_CC
