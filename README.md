@@ -1,7 +1,7 @@
 Welcome to RTXI!
 ====
 
-<a href="http://www.rtxi.org">aThe Real-Time eXperiment Interface (RTXI)</a> is a collaborative open-source software development project aimed at producing a real-time Linux based software system for hard real-time data acquisition and control applications in biological research.
+<a href="http://www.rtxi.org">The Real-Time eXperiment Interface (RTXI)</a> is a collaborative open-source software development project aimed at producing a real-time Linux based software system for hard real-time data acquisition and control applications in biological research.
 
 RTXI uses the open source <a href="http://xenomai.org">Xenomai framework</a> to implement communication with a variety of commercially available multifunction DAQ cards with both analog and digital input and output channels. This makes RTXI essentially hardware-agnostic and able to communicate with multiple actuators and sensors that may span different modalities.
 
