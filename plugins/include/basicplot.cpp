@@ -1,8 +1,8 @@
 #include "basicplot.h"
 #include <stdlib.h>
-#include <qwt-qt3/qwt_plot_grid.h>
-#include <qwt-qt3/qwt_plot_canvas.h>
-#include <qwt-qt3/qwt_plot_layout.h>
+#include <qwt-qt4/qwt_plot_grid.h>
+#include <qwt-qt4/qwt_plot_canvas.h>
+#include <qwt-qt4/qwt_plot_layout.h>
 
 BasicPlot::BasicPlot(QWidget *parent) :
   QwtPlot(parent)

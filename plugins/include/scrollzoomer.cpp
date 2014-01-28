@@ -1,8 +1,8 @@
 #include <qevent.h>
-#include <qwt-qt3/qwt_plot_canvas.h>
-#include <qwt-qt3/qwt_plot_layout.h>
-#include <qwt-qt3/qwt_scale_engine.h>
-#include <qwt-qt3/qwt_scale_widget.h>
+#include <qwt-qt4/qwt_plot_canvas.h>
+#include <qwt-qt4/qwt_plot_layout.h>
+#include <qwt-qt4/qwt_scale_engine.h>
+#include <qwt-qt4/qwt_scale_widget.h>
 #include "scrollbar.h"
 #include "scrollzoomer.h"
 
