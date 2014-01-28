@@ -20,9 +20,14 @@
 # Check for compilation dependencies
 echo "Checking for dependencies..."
 
+<<<<<<< HEAD
 sudo apt-get update
 sudo apt-get upgrade
 sudo apt-get install automake libtool autoconf autotools-dev build-essential qt4-dev-tools libboost-dev libboost-program-options-dev libgsl0-dev bison flex libncurses5-dev libqwt5-qt4-dev libqt4-gui libqt4-core libqt4-dev
+=======
+sudo apt-get update -q=2
+sudo apt-get install automake libtool autoconf autotools-dev build-essential qt3-dev-tools libboost-dev libboost-program-options-dev libgsl0-dev bison flex libncurses5-dev libqwt5-qt3-dev
+>>>>>>> refactor
 
 if [ $? -eq 0 ]; then
 	echo "----->Dependencies installed."
@@ -72,7 +77,7 @@ if [ $kernel -eq "1" ]; then
 elif [ $kernel -eq "2" ]; then
 	./configure --enable-rtai --enable-analogy
 elif [ $kernel -eq "3" ]; then
-	./configure --enable-xenomai --enable-analogy --disable-rtai
+	./configure --enable-xenomai --enable-analogy
 elif [ $kernel -eq "4" ]; then
 	./configure --disable-xenomai --enable-posix --enable-analogy --disable-comedi
 else

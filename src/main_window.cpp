@@ -204,6 +204,7 @@ void MainWindow::createMenus() {
 	helpMenu->addAction(acomedi);
 }
 
+<<<<<<< HEAD
 void MainWindow::createActions() {
 	load = new QAction(tr("&Load Workspace"), this);
 	load->setShortcuts(QKeySequence::Open);
@@ -234,6 +235,50 @@ void MainWindow::createActions() {
 
 	acomedi = new QAction(tr("About &COMEDI"),this);
 	connect(acomedi, SIGNAL(triggered()), this, SLOT(aboutComedi));
+=======
+void
+MainWindow::updateUtilModules()
+{
+  QSettings userprefs;
+  userprefs.setPath("RTXI.org", "RTXI", QSettings::User);
+
+  QStringList entries = userprefs.entryList("/utilFileList");
+  int numUtilFiles = entries.size();
+
+  int i = 0;
+  int menuID = utilMenu->insertItem("Model HH Neuron",this,SLOT(loadUtil(int)));
+  setUtilMenuItemParameter(menuID, i);
+  i++;
+  menuID = utilMenu->insertItem("Synchronize Modules",this,SLOT(loadUtil(int)));
+  setUtilMenuItemParameter(menuID, i);
+
+  QPopupMenu *filterSubMenu = new QPopupMenu(this);
+  i = 0;
+  menuID = filterSubMenu->insertItem("FIR Filter (Window Method)",this,SLOT(loadFilter(int)));
+  filterSubMenu->setItemParameter(menuID, i);
+  i++;
+  menuID = filterSubMenu->insertItem("IIR Filter",this,SLOT(loadFilter(int)));
+  filterSubMenu->setItemParameter(menuID, i);
+
+  utilMenu->insertItem(tr("&Filters"), filterSubMenu);
+
+  QPopupMenu *signalSubMenu = new QPopupMenu(this);
+
+  i = 0;
+  menuID = signalSubMenu->insertItem("Signal Generator",this,SLOT(loadSignal(int)));
+  signalSubMenu->setItemParameter(menuID, i);
+  i++;
+  menuID = signalSubMenu->insertItem("Noise Generator",this,SLOT(loadSignal(int)));
+  signalSubMenu->setItemParameter(menuID, i);
+  i++;
+  menuID = signalSubMenu->insertItem("Wave Maker",this,SLOT(loadSignal(int)));
+  signalSubMenu->setItemParameter(menuID, i);
+  i++;
+  menuID = signalSubMenu->insertItem("Mimic",this,SLOT(loadSignal(int)));
+  signalSubMenu->setItemParameter(menuID, i);
+
+  utilMenu->insertItem(tr("&Signals"), signalSubMenu);
+>>>>>>> refactor
 }
 
 /*int MainWindow::createPatchClampMenuItem (const std::string & text,

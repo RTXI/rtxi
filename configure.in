@@ -1,8 +1,9 @@
 AC_INIT([RTXI],[trunk],[help@rtxi.org],rtxi)
 
 AM_CONFIG_HEADER(include/rtxi_config.h)
-AM_INIT_AUTOMAKE(foreign)
+AM_INIT_AUTOMAKE([foreign])
 AM_PATH_CPPUNIT
+AM_SILENT_RULES([yes])
 
 AC_PROG_LIBTOOL
 AC_PROG_CC
@@ -156,32 +157,18 @@ scripts/rtxi_comedi
 scripts/rtxi_plugin_config
 testsuite/Makefile
 plugins/Makefile
-plugins/amplifier_control/am_2400_commander/Makefile
-plugins/amplifier_control/axon_axopatch1d_commander/Makefile
-plugins/amplifier_control/axon_axopatch200_commander/Makefile
-plugins/amplifier_control/axon_multiclamp700_commander/Makefile
 plugins/analogy_device/Makefile
-plugins/clamp_protocol/Makefile
 plugins/comedi_device/Makefile
 plugins/comedilib_device/Makefile
 plugins/connector/Makefile
 plugins/data_recorder/Makefile
 plugins/dynamo_model_loader/Makefile
-plugins/FIRwindow/Makefile
-plugins/IIRfilter/Makefile
-plugins/membrane_test/Makefile
-plugins/mimic/Makefile
 plugins/model_loader/Makefile
-plugins/neuron/Makefile
-plugins/noisegen/Makefile
 plugins/ni_device/Makefile
 plugins/oscilloscope/Makefile
 plugins/performance_measurement/Makefile
-plugins/siggen/Makefile
-plugins/synch/Makefile
 plugins/system_control/Makefile
 plugins/userprefs/Makefile
-plugins/wave_maker/Makefile
 ])
 
 dnl Generate config.status and launch it

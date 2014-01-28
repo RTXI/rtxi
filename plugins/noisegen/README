@@ -1,8 +1,0 @@
-RTXI v1.3 Installing Modules
-
-In the terminal (In Ubuntu, Applications > Accessories > Terminal) :
-
-$ cd MODULE_DIR
-$ sudo make install
-
-RTXI v1.3 requires a call to createGUI(var, num_vars) in the module constructor. If you are using an older version of RTXI, you should comment out or delete this line.
