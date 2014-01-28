@@ -204,7 +204,6 @@ void MainWindow::createMenus() {
 	helpMenu->addAction(acomedi);
 }
 
-<<<<<<< HEAD
 void MainWindow::createActions() {
 	load = new QAction(tr("&Load Workspace"), this);
 	load->setShortcuts(QKeySequence::Open);
@@ -235,10 +234,10 @@ void MainWindow::createActions() {
 
 	acomedi = new QAction(tr("About &COMEDI"),this);
 	connect(acomedi, SIGNAL(triggered()), this, SLOT(aboutComedi));
-=======
-void
-MainWindow::updateUtilModules()
-{
+}
+
+	void
+MainWindow::updateUtilModules(){
   QSettings userprefs;
   userprefs.setPath("RTXI.org", "RTXI", QSettings::User);
 
@@ -278,7 +277,6 @@ MainWindow::updateUtilModules()
   signalSubMenu->setItemParameter(menuID, i);
 
   utilMenu->insertItem(tr("&Signals"), signalSubMenu);
->>>>>>> refactor
 }
 
 /*int MainWindow::createPatchClampMenuItem (const std::string & text,
