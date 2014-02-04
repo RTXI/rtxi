@@ -24,7 +24,7 @@ echo "Checking for dependencies..."
 
 sudo apt-get update
 sudo apt-get upgrade
-sudo apt-get install automake libtool autoconf autotools-dev build-essential qt3-dev-tools libboost-dev libboost-program-options-dev libgsl0-dev bison flex libncurses5-dev libqwt5-qt3-dev
+sudo apt-get install automake libtool autoconf autotools-dev build-essential qt3-dev-tools libboost-dev libboost-program-options-dev libgsl0-dev bison flex libncurses5-dev libqwt5-qt3-dev devscripts debhelper dh-kpatches
 
 if [ $? -eq 0 ]; then
 	echo "----->Dependencies installed."
