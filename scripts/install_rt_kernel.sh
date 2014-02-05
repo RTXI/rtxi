@@ -71,7 +71,7 @@ fi
 
 # Configure kernel
 echo -e "${red}----->Configuring kernel${NC}"
-cd $linux_tree
+make oldconfig
 
 #sed -i 's/CONFIG_XENOMAI=n/CONFIG_XENOMAI=y/' .config
 
@@ -129,7 +129,7 @@ fi
 
 # Setting up user permissions
 echo -e "${red}----->Setting up user groups${NC}"
-sudo add user xenomai
+sudo adduser xenomai
 sudo adduser `whoami` xenomai
 sudo update-grub
 
