@@ -20,10 +20,7 @@
 #!/bin/bash
 
 # Download source
-
-echo "----->Cloning RTXI repository."
-git clone https://github.com/RTXI/rtxi.git
-cd rtxi
+cd ../
 
 # Installing HDF5
 echo "----->Checking for HDF5"
@@ -59,7 +56,7 @@ echo "----->Please select your configuration:"
 read -n 1 kernel
 
 if [ $kernel -eq "1" ]; then
-	./configure --enable-xenomai --enable-analogy
+	./configure --enable-xenomai --enable-ni #--enable-analogy
 elif [ $kernel -eq "2" ]; then
 	./configure --enable-rtai --enable-comedi
 elif [ $kernel -eq "3" ]; then
