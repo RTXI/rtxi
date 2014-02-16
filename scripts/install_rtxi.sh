@@ -19,7 +19,6 @@
 
 #!/bin/bash
 
-# Download source
 cd ../
 
 # Installing HDF5

@@ -31,7 +31,7 @@ export xenomai_version=2.5.5.2
 export xenomai_root=`pwd`/xenomai-$xenomai_version
 
 export build_root=`pwd`/build
-mkdir $build_root
+#mkdir $build_root
 
 if [ $? -eq 0 ]; then
 	echo -e "${red}----->Environment configuration complete${NC}"
@@ -42,12 +42,12 @@ fi
 
 # Download essentials
 echo -e "${red}----->Downloading Xenomai${NC}"
-wget http://download.gna.org/xenomai/stable/xenomai-$xenomai_version.tar.bz2
-tar xf xenomai-$xenomai_version.tar.bz2
+#wget http://download.gna.org/xenomai/stable/xenomai-$xenomai_version.tar.bz2
+#tar xf xenomai-$xenomai_version.tar.bz2
 
 echo -e "${red}----->Downloading Linux kernel${NC}"
-wget http://www.kernel.org/pub/linux/kernel/v2.6/linux-$linux_version.tar.bz2
-tar xf linux-$linux_version.tar.bz2
+#wget http://www.kernel.org/pub/linux/kernel/v2.6/linux-$linux_version.tar.bz2
+#tar xf linux-$linux_version.tar.bz2
 
 if [ $? -eq 0 ]; then
 	echo -e "${red}----->Downloads complete${NC}"
@@ -55,12 +55,12 @@ else
 	echo -e "${red}----->Downloads failed${NC}"
 	exit
 fi
-exit
+
 # Patch kernel
 echo -e "${red}----->Patching kernel${NC}"
 cd $linux_tree
-cp -vi /boot/config-`uname -r` $linux_tree/.config
-$xenomai_root/scripts/prepare-kernel.sh --arch=x86 --adeos=$xenomai_root/ksrc/arch/x86/patches/adeos-ipipe-2.6.32.20-x86-2.7-03.patch --linux=$linux_tree
+#cp -vi /boot/config-`uname -r` $linux_tree/.config
+#$xenomai_root/scripts/prepare-kernel.sh --arch=x86 --adeos=$xenomai_root/ksrc/arch/x86/patches/adeos-ipipe-2.6.32.20-x86-2.7-03.patch --linux=$linux_tree
 
 if [ $? -eq 0 ]; then
 	echo -e "${red}----->Patching complete${NC}"
@@ -71,7 +71,7 @@ fi
 
 # Configure kernel
 echo -e "${red}----->Configuring kernel${NC}"
-make oldconfig
+#make oldconfig
 
 #sed -i 's/CONFIG_XENOMAI=n/CONFIG_XENOMAI=y/' .config
 
