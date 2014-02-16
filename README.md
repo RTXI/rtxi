@@ -10,3 +10,7 @@ At the heart of RTXI is a dynamic framework allowing for easy creation and use o
 To get started, please refer to the <a href="https://github.com/RTXI/rtxi/wiki">wiki</a>. If you encounter any trouble or have any questions, post them to the <a href="https://github.com/RTXI/rtxi/issues">issues section</a> and we'll help get you started.
 
 To see who/how RTXI is being used around the world and to stay up-to-date, please visit our <a href="http://www.rtxi.org">website</a>.
+
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/RTXI/rtxi/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+
