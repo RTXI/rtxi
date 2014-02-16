@@ -22,7 +22,7 @@
 # Install dynamo
 echo "Installing DYNAMO utility..."
 
-sudo apt-get install mlton
+sudo yum install mlton
 cd ../dynamo
 mllex dl.lex
 mlyacc dl.grm

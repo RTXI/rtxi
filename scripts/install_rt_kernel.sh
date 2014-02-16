@@ -55,7 +55,7 @@ else
 	echo -e "${red}----->Downloads failed${NC}"
 	exit
 fi
-
+exit
 # Patch kernel
 echo -e "${red}----->Patching kernel${NC}"
 cd $linux_tree

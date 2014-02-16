@@ -22,9 +22,10 @@
 # Check for compilation dependencies
 echo "Checking for dependencies..."
 
-sudo apt-get update
-sudo apt-get upgrade
-sudo apt-get install automake libtool autoconf autotools-dev build-essential qt3-dev-tools libboost-dev libboost-program-options-dev libgsl0-dev bison flex libncurses5-dev libqwt5-qt3-dev devscripts debhelper dh-kpatches
+sudo yum update
+sudo yum upgrade
+sudo yum groupinstall “Development Tools”
+sudo yum install automake libtool autoconf boost-devel bison flex ncurses-devel.x86_64 qwt-devel.x86_64 gsl-devel.x86_64 boost-program-options.x86_64 qt qt-devel
 
 if [ $? -eq 0 ]; then
 	echo "----->Dependencies installed."
@@ -33,4 +34,4 @@ else
 	exit
 fi
 
-sudo ln -s /usr/lib/libqwt-qt3.so.5 /usr/lib/libqwt.so
+sudo ln -s /usr/lib/libqwt-qt4.so.5 /usr/lib/libqwt.so

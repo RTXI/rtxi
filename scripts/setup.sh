@@ -20,8 +20,10 @@
 # Check for compilation dependencies
 echo "Checking for dependencies..."
 
-sudo apt-get update -q=2
-sudo apt-get install automake libtool autoconf autotools-dev build-essential qt4-dev-tools libboost-dev libboost-program-options-dev libgsl0-dev bison flex libncurses5-dev libqwt5-qt4-dev libqt4-gui libqt4-core libqt4-dev
+sudo yum update
+sudo yum upgrade
+sudo yum groupinstall “Development Tools”
+sudo yum install automake libtool autoconf boost-devel bison flex ncurses-devel.x86_64 qwt-devel.x86_64 gsl-devel.x86_64 boost-program-options.x86_64 qt qt-devel
 
 if [ $? -eq 0 ]; then
 	echo "----->Dependencies installed."
@@ -30,12 +32,12 @@ else
 	exit
 fi
 
-sudo ln -s /usr/lib/libqwt-qt4.so.5 /usr/lib/libqwt.so
+sudo ln -s /usr/lib/libqwt-qt3.so.5 /usr/lib/libqwt.so
 
 # Installing HDF5
 echo "----->Checking for HDF5"
 
-if [ -f "/usr/include/hdf5.h" ]; then
+if [ -a "/usr/include/hdf5.h" ]; then
 	echo "----->HDF5 already installed."
 else
 	echo "----->Installing HDF5..."
@@ -47,7 +49,7 @@ else
 	sudo make install
 	cd ../../
 	if [ $? -eq 0 ]; then
-			echo "----->HDF5 installed."
+		echo "----->HDF5 installed."
 	else
 		echo "----->HDF5 installation failed."
 		exit
@@ -71,7 +73,7 @@ if [ $kernel -eq "1" ]; then
 elif [ $kernel -eq "2" ]; then
 	./configure --enable-rtai --enable-analogy
 elif [ $kernel -eq "3" ]; then
-	./configure --enable-xenomai --enable-analogy
+	./configure --enable-xenomai --enable-analogy --disable-rtai
 elif [ $kernel -eq "4" ]; then
 	./configure --disable-xenomai --enable-posix --enable-analogy --disable-comedi
 else
@@ -98,8 +100,8 @@ else
 	echo "----->RTXI installation failed."
 	exit
 fi
-
 echo "----->Putting things into place."
+
 sudo cp libtool /usr/local/lib/rtxi/
 sudo cp rtxi.conf /etc/
 sudo cp /usr/xenomai/sbin/analogy_config /usr/sbin/
