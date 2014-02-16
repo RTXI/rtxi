@@ -42,11 +42,11 @@ fi
 
 # Download essentials
 echo -e "${red}----->Downloading Linux kernel${NC}"
-#wget http://www.kernel.org/pub/linux/kernel/v2.6/linux-$linux_version.tar.bz2
+wget http://www.kernel.org/pub/linux/kernel/v2.6/linux-$linux_version.tar.bz2
 tar xf linux-$linux_version.tar.bz2
 
 echo -e "${red}----->Downloading Xenomai${NC}"
-#wget http://download.gna.org/xenomai/stable/xenomai-$xenomai_version.tar.bz2
+wget http://download.gna.org/xenomai/stable/xenomai-$xenomai_version.tar.bz2
 tar xf xenomai-$xenomai_version.tar.bz2
 
 if [ $? -eq 0 ]; then
