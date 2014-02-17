@@ -62,6 +62,8 @@ cd $linux_tree
 cp -vi /boot/config-`uname -r` $linux_tree/.config
 cp ../patch/kernel_config .config
 $xenomai_root/scripts/prepare-kernel.sh --arch=x86 --adeos=../patch/adeos-ipipe-2.6.32.20-x86-2.7-03.patch --linux=$linux_tree
+make oldconfig
+make menuconfig
 
 if [ $? -eq 0 ]; then
 	echo -e "${red}----->Patching complete${NC}"
@@ -72,29 +74,30 @@ fi
 
 # Compile kernel
 echo -e "${red}----->Compiling kernel${NC}"
-sed -i 4s/.*/EXTRAVERSION=.2-linux-"$linux_version"-xenomai-"$xenomai_version"/ Makefile
-exit
-export CONCURRENCY_LEVEL=7
-make
+cd $linux_tree
+sed -i 4s/.*/EXTRAVERSION=.20-linux-"$linux_version"-xenomai-"$xenomai_version"/ Makefile
+make dep
+make bzImage
 make modules
-make modules_install
 
 if [ $? -eq 0 ]; then
-	echo -e "${red}----->Environment configuration complete.${NC}"
+	echo -e "${red}----->Kernel compilation complete.${NC}"
 else
-	echo -e "${red}----->Environment configuration failed.${NC}"
+	echo -e "${red}----->Kernel compilation failed.${NC}"
 	exit
 fi
 
 # Install compiled kernel
 echo -e "${red}----->Installing compiled kernel${NC}"
-cd ..
-sudo cp arch/x86_64/boot/bzImage /boot/vmlinuz-linux-$linux_version-xenomai-$xenomai_version
-sudo cp System.map /boot/System.map-linux-$linux_version-xenomai-$xenomai_version
+cd $linux_tree
+su
+cp arch/x86/boot/bzImage /boot/vmlinuz-linux-$linux_version-xenomai-$xenomai_version
+#cp System.map /boot/System.map-linux-$linux_version-xenomai-$xenomai_version
+make modules_install
 
 # Update
 echo -e "${red}----->Updating boot loader about the new kernel${NC}"
-sudo new-kernel-pkg -v --mkinitrd --depmod --install linux-$linux_version-xenomai-$xenomai_version
+#sudo new-kernel-pkg -v --mkinitrd --depmod --install linux-$linux_version-xenomai-$xenomai_version
 
 if [ $? -eq 0 ]; then
 	echo -e "${red}----->Boot loader update complete${NC}"
