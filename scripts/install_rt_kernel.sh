@@ -76,7 +76,6 @@ fi
 echo -e "${red}----->Compiling kernel${NC}"
 cd $linux_tree
 sed -i 4s/.*/EXTRAVERSION=.20-linux-"$linux_version"-xenomai-"$xenomai_version"/ Makefile
-make dep
 make bzImage
 make modules
 
@@ -90,14 +89,21 @@ fi
 # Install compiled kernel
 echo -e "${red}----->Installing compiled kernel${NC}"
 cd $linux_tree
-su
-cp arch/x86/boot/bzImage /boot/vmlinuz-linux-$linux_version-xenomai-$xenomai_version
-#cp System.map /boot/System.map-linux-$linux_version-xenomai-$xenomai_version
-make modules_install
+sudo cp arch/x86/boot/bzImage /boot/vmlinuz-$linux_version-linux-$linux_version-xenomai-$xenomai_version
+sudo make modules_install
+
+if [ $? -eq 0 ]; then
+	echo -e "${red}----->Kernel installation complete${NC}"
+else
+	echo -e "${red}----->Kernel installation failed${NC}"
+	exit
+fi
 
 # Update
 echo -e "${red}----->Updating boot loader about the new kernel${NC}"
-#sudo new-kernel-pkg -v --mkinitrd --depmod --install linux-$linux_version-xenomai-$xenomai_version
+cd $linux_tree
+dracut "initramfs-$linux_version-linux-$linux_version-xenomai-$xenomai_version.img" $linux_version-linux-$linux_version-xenomai-$xenomai_version
+sudo mv initramfs-$linux_version-linux-$linux_version-xenomai-$xenomai_version.img /boot/
 
 if [ $? -eq 0 ]; then
 	echo -e "${red}----->Boot loader update complete${NC}"
@@ -132,5 +138,5 @@ else
 fi
 
 # Restart
-echo -e "${red}----->Restarting system${NC}"
-sudo reboot now
+echo -e "${red}----->Kernel patch complete.${NC}"
+echo -e "${red}----->Reboot to boot into RT kernel.${NC}"
