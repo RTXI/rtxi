@@ -236,12 +236,15 @@ void MainWindow::createActions() {
 	connect(acomedi, SIGNAL(triggered()), this, SLOT(aboutComedi));
 }
 
-	void
-MainWindow::updateUtilModules(){
+void MainWindow::updateUtilModules(){
   QSettings userprefs;
-  userprefs.setPath("RTXI.org", "RTXI", QSettings::User);
+  userprefs.setPath(QSettings::NativeFormat, QSettings::UserScope, "RTXI");
+  userprefs.beginGroup("/utilFileList");
+  QStringList entries = userprefs.childKeys();
+  userprefs.endGroup();
 
-  QStringList entries = userprefs.entryList("/utilFileList");
+  //QStringList entries = userprefs.entryList("/utilFileList");
+  
   int numUtilFiles = entries.size();
 
   int i = 0;
