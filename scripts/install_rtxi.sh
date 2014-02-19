@@ -66,7 +66,22 @@ else
 fi
 
 sudo make -C ./
+
+if [ $? -eq 0 ]; then
+	echo "----->RTXI compilation successful."
+else
+	echo "----->RTXI compilation failed."
+	exit
+fi
+
 sudo make install -C ./
+
+if [ $? -eq 0 ]; then
+	echo "----->RTXI intallation successful."
+else
+	echo "----->RTXI installation failed."
+	exit
+fi
 
 echo "----->Putting things into place."
 sudo cp libtool /usr/local/lib/rtxi/
