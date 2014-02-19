@@ -32,7 +32,7 @@ else
 	tar xf hdf5-1.8.4.tar.bz2
 	cd hdf5-1.8.4
 	./configure --prefix=/usr
-	sudo make
+	make
 	sudo make install
 	cd ../../
 	if [ $? -eq 0 ]; then
@@ -65,7 +65,7 @@ else
 	exit 1
 fi
 
-sudo make -C ./
+make -C ./
 
 if [ $? -eq 0 ]; then
 	echo "----->RTXI compilation successful."
