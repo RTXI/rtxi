@@ -1,3 +1,0 @@
-If you are trying to compile from a CVS checkout, you can create the
-configure script by running "autoreconf -i" in this directory.
-
