@@ -128,6 +128,7 @@ fi
 
 # Setting up user permissions
 echo -e "${red}----->Setting up user/group${NC}"
+sudo groupadd xenomai
 sudo usermod -a -G xenomai `whoami`
 
 if [ $? -eq 0 ]; then
