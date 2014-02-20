@@ -31,7 +31,10 @@
 #include <debug.h>
 #include <main_window.h>
 #include <plugin.h>
-//#include <rtdk.h>
+
+#ifdef __XENO__
+#include <rtdk.h>
+#endif
 
 static pid_t parentThread;
 
