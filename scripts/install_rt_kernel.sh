@@ -22,6 +22,14 @@
 red='\e[0;31m'
 NC='\e[0m'
 
+if [[ $(lsb_release --id) == *Ubuntu* ]]
+then
+	OS="ubuntu"
+elif [[ $(lsb_release --id) == *Scientific* ]]
+then
+	OS="scientific"
+fi
+
 # Export environment variables
 echo -e "${red}----->Setting up variables${NC}"
 export linux_version=2.6.32.20
@@ -74,10 +82,17 @@ fi
 
 # Compile kernel
 echo -e "${red}----->Compiling kernel${NC}"
+if [[ $OS == 'ubuntu' ]]
+then
 cd $linux_tree
-sed -i 4s/.*/EXTRAVERSION=.20-linux-"$linux_version"-xenomai-"$xenomai_version"/ Makefile
+export CONCURRENCY_LEVEL=7
+fakeroot make-kpkg --initrd --append-to-version=-xenomai-$xenomai_version kernel-image kernel-headers modules
+elif [[ $OS == 'scientific' ]]
+cd $linux_tree
+sed -i 4s/.*/EXTRAVERSION=.20-xenomai-"$xenomai_version"/ Makefile
 make bzImage
 make modules
+fi
 
 if [ $? -eq 0 ]; then
 	echo -e "${red}----->Kernel compilation complete.${NC}"
@@ -88,9 +103,17 @@ fi
 
 # Install compiled kernel
 echo -e "${red}----->Installing compiled kernel${NC}"
+if [[ $OS == 'ubuntu' ]]
+then
 cd $linux_tree
-sudo cp arch/x86/boot/bzImage /boot/vmlinuz-$linux_version-linux-$linux_version-xenomai-$xenomai_version
+sudo dpkg -i linux-image-*.deb
+sudo dpkg -i linux-headers*.deb
+elif [[ $OS == 'scientific' ]]
+then
+cd $linux_tree
+sudo cp arch/x86/boot/bzImage /boot/vmlinuz-$linux_version-xenomai-$xenomai_version
 sudo make modules_install
+fi
 
 if [ $? -eq 0 ]; then
 	echo -e "${red}----->Kernel installation complete${NC}"
@@ -101,9 +124,17 @@ fi
 
 # Update
 echo -e "${red}----->Updating boot loader about the new kernel${NC}"
+if [[ $OS == 'ubuntu' ]]
+then
 cd $linux_tree
-dracut "initramfs-$linux_version-linux-$linux_version-xenomai-$xenomai_version.img" $linux_version-linux-$linux_version-xenomai-$xenomai_version
-sudo mv initramfs-$linux_version-linux-$linux_version-xenomai-$xenomai_version.img /boot/
+sudo update-initramfs -c -k 2.6.32.20-xenomai-$xenomai_version
+sudo update-grub
+elif [[ $OS == 'scientific' ]]
+then
+cd $linux_tree
+dracut "initramfs-$linux_version-xenomai-$xenomai_version.img" $linux_version-xenomai-$xenomai_version
+sudo mv initramfs-$linux_version-xenomai-$xenomai_version.img /boot/
+fi
 
 if [ $? -eq 0 ]; then
 	echo -e "${red}----->Boot loader update complete${NC}"

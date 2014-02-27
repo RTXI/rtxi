@@ -22,12 +22,23 @@
 # Install dynamo
 echo "Installing DYNAMO utility..."
 
+if [[ $(lsb_release --id) == *Ubuntu* ]]
+then
+sudo apt-get install mlton
+cd ../dynamo
+mllex dl.lex
+mlyacc dl.grm
+mlton dynamo.mlb
+sudo cp dynamo /usr/bin/
+elif [[ $(lsb_release --id) == *Scientific* ]]
+then
 sudo yum install mlton
 cd ../dynamo
 mllex dl.lex
 mlyacc dl.grm
 mlton dynamo.mlb
 sudo cp dynamo /usr/bin/
+fi
 
 if [ $? -eq 0 ]; then
 	echo "----->DYNAMO translation utility installed."
