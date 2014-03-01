@@ -88,6 +88,7 @@ cd $linux_tree
 export CONCURRENCY_LEVEL=7
 fakeroot make-kpkg --initrd --append-to-version=-xenomai-$xenomai_version kernel-image kernel-headers modules
 elif [[ $OS == 'scientific' ]]
+then
 cd $linux_tree
 sed -i 4s/.*/EXTRAVERSION=.20-xenomai-"$xenomai_version"/ Makefile
 make bzImage
