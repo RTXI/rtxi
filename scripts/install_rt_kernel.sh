@@ -32,7 +32,7 @@ fi
 
 # Export environment variables
 echo -e "${red}----->Setting up variables${NC}"
-export linux_version=2.6.32.20
+export linux_version=3.8.13
 export linux_tree=`pwd`/linux-$linux_version
 
 export xenomai_version=2.6.3
@@ -50,7 +50,7 @@ fi
 
 # Download essentials
 echo -e "${red}----->Downloading Linux kernel${NC}"
-wget http://www.kernel.org/pub/linux/kernel/v2.6/linux-$linux_version.tar.bz2
+wget https://www.kernel.org/pub/linux/kernel/v3.x/linux-$linux_version.tar.bz2
 tar xf linux-$linux_version.tar.bz2
 
 echo -e "${red}----->Downloading Xenomai${NC}"
@@ -69,7 +69,7 @@ echo -e "${red}----->Patching kernel${NC}"
 cd $linux_tree
 cp -vi /boot/config-`uname -r` $linux_tree/.config
 cp ../patch/kernel_config .config
-$xenomai_root/scripts/prepare-kernel.sh --arch=x86 --adeos=../patch/adeos-ipipe-2.6.32.20-x86-2.7-03.patch --linux=$linux_tree
+$xenomai_root/scripts/prepare-kernel.sh --arch=x86 --adeos=$xenomai_root/ksrc/arch/x86/patches/ipipe-core-3.8.13-x86-4.patch --linux=$linux_tree
 make oldconfig
 make menuconfig
 
