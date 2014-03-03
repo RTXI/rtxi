@@ -90,7 +90,6 @@ fakeroot make-kpkg --initrd --append-to-version=-xenomai-$xenomai_version kernel
 elif [[ $OS == 'scientific' ]]
 then
 cd $linux_tree
-sed -i 4s/.*/EXTRAVERSION=.20-xenomai-"$xenomai_version"/ Makefile
 make bzImage
 make modules
 fi
@@ -128,7 +127,7 @@ echo -e "${red}----->Updating boot loader about the new kernel${NC}"
 if [[ $OS == 'ubuntu' ]]
 then
 cd $linux_tree
-sudo update-initramfs -c -k 2.6.32.20-xenomai-$xenomai_version
+sudo update-initramfs -c -k $linux_version-xenomai-$xenomai_version
 sudo update-grub
 elif [[ $OS == 'scientific' ]]
 then
