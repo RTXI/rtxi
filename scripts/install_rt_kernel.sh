@@ -90,6 +90,7 @@ fakeroot make-kpkg --initrd --append-to-version=-xenomai-$xenomai_version kernel
 elif [[ $OS == 'scientific' ]]
 then
 cd $linux_tree
+sed -i 4s/.*/EXTRAVERSION=-xenomai-"$xenomai_version"/ Makefile
 make bzImage
 make modules
 fi
@@ -132,7 +133,7 @@ sudo update-grub
 elif [[ $OS == 'scientific' ]]
 then
 cd $linux_tree
-dracut "initramfs-$linux_version-xenomai-$xenomai_version.img" $linux_version-xenomai-$xenomai_version
+sudo dracut "initramfs-$linux_version-xenomai-$xenomai_version.img" $linux_version-xenomai-$xenomai_version
 sudo mv initramfs-$linux_version-xenomai-$xenomai_version.img /boot/
 fi
 
