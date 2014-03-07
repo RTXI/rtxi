@@ -49,10 +49,10 @@ echo "----->Starting RTXI installation..."
 
 echo "----->Kernel configuration..."
 echo "1. Xenomai+Analogy"
-echo "2. RTAI+Comedi"
+echo "2. RTAI+COMEDI"
 echo "3. POSIX (Non-RT)+Analogy"
-echo "----->Please select your configuration:"
-read -n 1 kernel
+echo "----->Please select your configuration and then press enter:"
+read kernel
 
 if [ $kernel -eq "1" ]; then
 	./configure --enable-xenomai --enable-analogy
