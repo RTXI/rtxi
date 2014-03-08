@@ -19,20 +19,16 @@
 #include <debug.h>
 #include <daq.h>
 #include <math.h>
-#include <qcheckbox.h>
-#include <qcombobox.h>
-#include <qgroupbox.h>
-#include <qhbox.h>
-#include <qlabel.h>
-#include <qlayout.h>
-#include <qlineedit.h>
-#include <qpushbutton.h>
-#include <qspinbox.h>
-#include <qtabwidget.h>
+#include <QLayout>
+#include <QLabel>
+#include <QLineEdit>
+#include <QWidget>
+#include <QtGui>
+#include <QWhatsThis>
+#include <QPushButton>
 #include <rt.h>
 #include <system_control.h>
 #include <system_control_panel.h>
-#include <qwhatsthis.h>
 
 struct find_daq_t {
     int index;

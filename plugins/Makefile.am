@@ -6,12 +6,12 @@ SUBDIRS = \
 	analogy_device \
 	comedi_device \
 	comedilib_device \
-	dynamo_model_loader \
-	model_loader \
-	ni_device \
-	performance_measurement \
-	system_control \
-	userprefs \
+	#ni_device \
+	#system_control \
+	#userprefs \
+	#performance_measurement \
 	#connector \
 	#data_recorder \
-	#oscilloscope
+	#oscilloscope \
+	#dynamo_model_loader \
+	#model_loader
