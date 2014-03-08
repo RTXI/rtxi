@@ -9,9 +9,9 @@ SUBDIRS = \
 	ni_device \
 	performance_measurement \
 	system_control \
+	model_loader \
 	#userprefs \
 	#connector \
 	#data_recorder \
 	#oscilloscope \
-	#dynamo_model_loader \
-	#model_loader
+	#dynamo_model_loader

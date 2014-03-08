@@ -71,8 +71,7 @@ class MainWindow : public QMainWindow
 			* Clears the File menu.
 			*/
 
-		void
-				clearFileMenu(void);
+		void clearFileMenu(void);
 
 		/*!
 			* Add an item to the Modules menu.
@@ -84,8 +83,7 @@ class MainWindow : public QMainWindow
 			* \return The index of the new menu item.
 			*/
 
-		int createModuleMenuItem(const std::string &label, const QObject *handler,
-						const char *slot);
+		int createModuleMenuItem(const std::string &label, const QObject *handler, const char *slot);
 
 		/*!
 			* Sets the parameter value of a menu item in the Modules menu.
@@ -94,22 +92,19 @@ class MainWindow : public QMainWindow
 			* \param parameter The parameter value to set.
 			*/
 
-		void
-				setModuleMenuItemParameter(int menuid, int parameter);
+		void setModuleMenuItemParameter(int menuid, int parameter);
 
 		/*!
 			* Insert a line separator into the Modules menu.
 			*/
 
-		int
-				insertModuleMenuSeparator();
+		int	insertModuleMenuSeparator();
 
 		/*!
 			* Clears the Modules menu.
 			*/
 
-		void
-				clearModuleMenu(void);
+		void clearModuleMenu(void);
 
 		/*!
 			* Change the text associated with the Modules menu item.

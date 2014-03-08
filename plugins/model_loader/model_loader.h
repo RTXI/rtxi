@@ -20,11 +20,10 @@
 #define MODEL_LOADER_H
 
 #include <plugin.h>
-#include <qobject.h>
+#include <QObject>
 
 class ModelLoader : public QObject, public Plugin::Object
 {
-
     Q_OBJECT
 
 public:
@@ -43,8 +42,6 @@ private:
 
     int menuID;
     void updateRecentModules(QString, int);
-
 };
-
 
 #endif /* MODEL_LOADER_H */

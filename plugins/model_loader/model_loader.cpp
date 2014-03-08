@@ -19,33 +19,26 @@
 #include <debug.h>
 #include <main_window.h>
 #include <model_loader.h>
-#include <qfiledialog.h>
-#include <qsettings.h>
+#include <QFileDialog>
+#include <QSettings>
 #include <algorithm>
 
 extern "C" Plugin::Object *
-createRTXIPlugin(void *)
-{
+createRTXIPlugin(void *) {
   return new ModelLoader();
 }
 
-ModelLoader::ModelLoader(void)
-{
+ModelLoader::ModelLoader(void) {
 menuID = MainWindow::getInstance()->createModuleMenuItem("Load User Module",this,SLOT(load(void)));
-
 }
 
-ModelLoader::~ModelLoader(void)
-{
+ModelLoader::~ModelLoader(void) {
   MainWindow::getInstance()->removeModuleMenuItem(menuID);
 }
 
-void
-ModelLoader::load(void)
-{
+void ModelLoader::load(void) {
   QString plugin_dir = QString(EXEC_PREFIX) + QString("/lib/rtxi/");
-  QString filename = QFileDialog::getOpenFileName(plugin_dir,
-      "Plugins (*.so);;All (*.*)", MainWindow::getInstance());
+  QString filename = QFileDialog::getOpenFileName(0, tr("Load plugin"), plugin_dir, tr("Plugins (*.so);;All (*.*)"));
 
   if (filename.isNull() || filename.isEmpty())
     return;
@@ -57,21 +50,27 @@ ModelLoader::load(void)
 
   // load QSettings
   QSettings userprefs;
-  userprefs.setPath("RTXI.org", "RTXI", QSettings::UserScope);
+  //userprefs.setPath("RTXI.org", "RTXI", QSettings::UserScope);
+  userprefs.setPath(QSettings::NativeFormat, QSettings::UserScope, "RTXI");
 
-  int oldestmodule = userprefs.readNumEntry("/recentFileList/start", 0);
+	int oldestmodule = userprefs.value("/recentFileList/start", 0).toInt();
+  //int oldestmodule = userprefs.readNumEntry("/recentFileList/start", 0);
   if (oldestmodule == 0)
-    userprefs.writeEntry("/recentFileList/start", 0);
-  int num_module = userprefs.readNumEntry("/recentFileList/num", 0);
+    userprefs.setValue("/recentFileList/start", 0);
 
-  QStringList entries = userprefs.entryList("/recentFileList");
+  int num_module = userprefs.value("/recentFileList/num", 0).toInt();
+  userprefs.beginGroup("/recentFileList");
+  QStringList entries = userprefs.childKeys();
+  userprefs.endGroup();
+
   int numRecentFiles = entries.size();
   QString listmodule;
+
   bool doesnotexist = true;
 
   for (int i = 0; i < numRecentFiles; ++i)
     {
-      listmodule = userprefs.readEntry("/recentFileList/" + entries[i]);
+      listmodule = userprefs.value("/recentFileList/" + entries[i]).toString();
       if (filename == listmodule)
         doesnotexist = false;
     }
@@ -80,20 +79,20 @@ ModelLoader::load(void)
     {
       if (num_module == 10)
         {
-          userprefs.writeEntry("/recentFileList/" + QString::number(
+          userprefs.setValue("/recentFileList/" + QString::number(
               oldestmodule), filename);
           index = oldestmodule;
           oldestmodule++;
           if (oldestmodule == 10)
             oldestmodule = 0;
-          userprefs.writeEntry("/recentFileList/start", oldestmodule);
+          userprefs.setValue("/recentFileList/start", oldestmodule);
         }
       else
         {
-          userprefs.writeEntry("/recentFileList/" + QString::number(
+          userprefs.setValue("/recentFileList/" + QString::number(
               num_module++), filename);
           index = num_module;
-          userprefs.writeEntry("/recentFileList/num", num_module);
+          userprefs.setValue("/recentFileList/num", num_module);
         }
       updateRecentModules(filename, index);
 
@@ -105,8 +104,10 @@ void
 ModelLoader::updateRecentModules(QString filename, int index)
 {
   QSettings userprefs;
-  userprefs.setPath("RTXI.org", "RTXI", QSettings::UserScope);
-  QStringList entries = userprefs.entryList("/recentFileList");
+  userprefs.setPath(QSettings::NativeFormat, QSettings::UserScope, "RTXI");
+  userprefs.beginGroup("/recentFileList");
+  QStringList entries = userprefs.childKeys();
+  userprefs.endGroup();
   int numRecentFiles = entries.size();
 
   // remove list and re-add them all
@@ -116,27 +117,22 @@ ModelLoader::updateRecentModules(QString filename, int index)
     }
   QString listmodule;
   QString text;
-  for (int i = 0; i < std::min(numRecentFiles - 2, 10); ++i)
-    {
-      listmodule = userprefs.readEntry("/recentFileList/" + entries[i]);
+  for (int i = 0; i < std::min(numRecentFiles - 2, 10); ++i) {
+      listmodule = userprefs.value("/recentFileList/" + entries[i]).toString();
       if (i == index)
         text = tr("&%1 %2").arg(i).arg(filename);
       else
         text = tr("&%1 %2").arg(i).arg(listmodule);
-      menuID = MainWindow::getInstance()->createModuleMenuItem(text,this,SLOT(load_recent(int)));
+      menuID = MainWindow::getInstance()->createModuleMenuItem(text.toStdString(),this,SLOT(load_recent(int)));
       MainWindow::getInstance()->changeModuleMenuItem(menuID, text);
       MainWindow::getInstance()->setModuleMenuItemParameter(menuID, i);
     }
-
 }
 
-void
-ModelLoader::load_recent(int i)
-{
+void ModelLoader::load_recent(int i) {
   QSettings userprefs;
-  userprefs.setPath("RTXI.org", "RTXI", QSettings::UserScope);
-  QString filename = userprefs.readEntry("/recentFileList/"
-      + QString::number(i));
+  userprefs.setPath(QSettings::NativeFormat, QSettings::UserScope, "RTXI");
+  QString filename = userprefs.value("/recentFileList/" + QString::number(i)).toString();
   Plugin::Manager::getInstance()->load(filename.toLatin1());
 }
 
