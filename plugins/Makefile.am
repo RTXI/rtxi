@@ -8,7 +8,7 @@ SUBDIRS = \
 	comedilib_device \
 	ni_device \
 	performance_measurement \
-	#system_control \
+	system_control \
 	#userprefs \
 	#connector \
 	#data_recorder \
