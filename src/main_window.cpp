@@ -218,22 +218,22 @@ void MainWindow::createActions() {
 	quit = new QAction(tr("&Quit"), this);
 	quit->setShortcuts(QKeySequence::Quit);
 	quit->setStatusTip(tr("Quit RTXI"));
-	connect(quit, SIGNAL(triggered()), this, SLOT(qApp->closeAllWindows()));
+	connect(quit, SIGNAL(triggered()), qApp, SLOT(closeAllWindows()));
 
 	artxi = new QAction(tr("About &RTXI"),this);
-	connect(artxi, SIGNAL(triggered()), this, SLOT(about));
+	connect(artxi, SIGNAL(triggered()), this, SLOT(about()));
 
 	aqt = new QAction(tr("About &Qt"),this);
-	connect(aqt, SIGNAL(triggered()), this, SLOT(aboutQt));
+	connect(aqt, SIGNAL(triggered()), this, SLOT(aboutQt()));
 
 	axeno = new QAction(tr("About &Xenomai"),this);
-	connect(axeno, SIGNAL(triggered()), this, SLOT(aboutXeno));
+	connect(axeno, SIGNAL(triggered()), this, SLOT(aboutXeno()));
 
 	adaq = new QAction(tr("About &DAQ"),this);
-	connect(adaq, SIGNAL(triggered()), this, SLOT(aboutDAQ));
+	connect(adaq, SIGNAL(triggered()), this, SLOT(aboutDAQ()));
 
 	acomedi = new QAction(tr("About &COMEDI"),this);
-	connect(acomedi, SIGNAL(triggered()), this, SLOT(aboutComedi));
+	connect(acomedi, SIGNAL(triggered()), this, SLOT(aboutComedi()));
 }
 
 /*void MainWindow::updateUtilModules(){
