@@ -21,70 +21,60 @@
  * is destructed. So all Reset, Apply, and Cancel buttons all close the panel.
  */
 
-#include <qhbox.h>
-#include <qhbuttongroup.h>
-#include <qvbuttongroup.h>
-#include <qlabel.h>
-#include <qlayout.h>
-#include <qlineedit.h>
-#include <qpushbutton.h>
-#include <qfiledialog.h>
+#include <QtGui>
+#include <QFileDialog>
 #include <debug.h>
 #include <main_window.h>
 #include <userprefs.h>
 
-UserPrefs::Panel::Panel(QWidget *parent) :
-  QWidget(parent, 0, Qt::WStyle_NormalBorder | Qt::WA_DeleteOnClose)
-{
-
+UserPrefs::Panel::Panel(QWidget *parent) : QWidget(parent) {
+	setAttribute(Qt::WA_DeleteOnClose);
   QBoxLayout *layout = new QVBoxLayout(this);
 
   setWindowTitle("RTXI User Preferences");
 
   // load QSettings
   QSettings userprefs;
-  userprefs.setPath("RTXI.org", "RTXI", QSettings::UserScope);
+  userprefs.setPath(QSettings::NativeFormat, QSettings::UserScope, "RTXI");
 
   // create GUI elements and set text
-  QVButtonGroup *dirGroup;
-  dirGroup = new QVButtonGroup("Default Directories", this);
+  QButtonGroup *dirGroup;
+  dirGroup = new QButtonGroup(this);
 
-  QHBox *hbox;
-  hbox = new QHBox(dirGroup);
+  QWidget *hbox;
+  hbox = new QWidget(dirGroup);
   (void) (new QLabel("Default settings directory:", hbox))->setFixedWidth(250);
   settingsDirEdit = new QLineEdit(hbox);
   settingsDirEdit->setFixedWidth(200);
-  settingsDirEdit->setText(
-      userprefs.readEntry("/dirs/setfiles", getenv("HOME")));
+  settingsDirEdit->setText(userprefs.value("/dirs/setfiles", getenv("HOME")).toString());
   QPushButton *chooseSettingsDirButton = new QPushButton("Browse", hbox);
   QObject::connect(chooseSettingsDirButton,SIGNAL(clicked(void)),this,SLOT(chooseSettingsDir(void)));
 
-  hbox = new QHBox(dirGroup);
+  hbox = new QWidget(dirGroup);
   (void) (new QLabel("Default DYNAMO models directory:", hbox))->setFixedWidth(
       250);
   dynamoDirEdit = new QLineEdit(hbox);
-  dynamoDirEdit->setText(userprefs.readEntry("/dirs/dynamomodels", getenv(
-      "HOME")));
+  dynamoDirEdit->setText(userprefs.value("/dirs/dynamomodels", getenv("HOME")).toString());
   QPushButton *chooseDynamoDirButton = new QPushButton("Browse", hbox);
   QObject::connect(chooseDynamoDirButton,SIGNAL(clicked(void)),this,SLOT(chooseDynamoDir(void)));
 
-  hbox = new QHBox(dirGroup);
+  hbox = new QWidget(dirGroup);
   (void) (new QLabel("Default HDF5 data directory:", hbox))->setFixedWidth(250);
   dataDirEdit = new QLineEdit(hbox);
-  dataDirEdit->setText(userprefs.readEntry("/dirs/data", getenv("HOME")));
+  dataDirEdit->setText(userprefs.value("/dirs/data", getenv("HOME")).toString());
   QPushButton *chooseDataDirButton = new QPushButton("Browse", hbox);
   QObject::connect(chooseDataDirButton,SIGNAL(clicked(void)),this,SLOT(chooseDataDir(void)));
 
   layout->addWidget(dirGroup);
 
-  hbox = new QHBox(this);
+  hbox = new QWidget(this);
   (void) (new QLabel("HDF Data Recorder Buffer Size (MB):", hbox))->setFixedWidth(250);
   HDFBufferEdit = new QLineEdit(hbox);
   HDFBufferEdit->setText(QString::number(userprefs.readNumEntry("/system/HDFbuffer", 10)));
 
   layout->addWidget(hbox);
 
-  hbox = new QHBox(this);
+  hbox = new QWidget(this);
 
   QPushButton *resetButton = new QPushButton("Reset and Close", hbox);
   QObject::connect(resetButton,SIGNAL(clicked(void)),this,SLOT(reset(void)));
@@ -121,12 +111,12 @@ UserPrefs::Panel::reset(void)
 void
 UserPrefs::Panel::apply(void)
 {
-  userprefs.writeEntry("/dirs/setfiles", settingsDirEdit->text());
-  userprefs.writeEntry("/dirs/dynamomodels", dynamoDirEdit->text());
-  userprefs.writeEntry("/dirs/data", dataDirEdit->text());
+  userprefs.setValue("/dirs/setfiles", settingsDirEdit->text());
+  userprefs.setValue("/dirs/dynamomodels", dynamoDirEdit->text());
+  userprefs.setValue("/dirs/data", dataDirEdit->text());
   bool ok;
   QString buffer = HDFBufferEdit->text();
-  userprefs.writeEntry("/system/HDFbuffer", buffer.toInt(&ok));
+  userprefs.setValue("/system/HDFbuffer", buffer.toInt(&ok));
 
   this->close();
 
@@ -141,8 +131,8 @@ UserPrefs::Panel::cancel(void)
 void
 UserPrefs::Panel::chooseSettingsDir(void)
 {
-  QString dir_name = QFileDialog::getExistingDirectory(userprefs.readEntry(
-      "/dirs/setfiles", getenv("HOME")), MainWindow::getInstance(),
+  QString dir_name = QFileDialog::getExistingDirectory(userprefs.value(
+      "/dirs/setfiles", getenv("HOME")).toString(), MainWindow::getInstance(),
       "get existing directory",
       "Choose a default directory for settings files", TRUE);
   settingsDirEdit->setText(dir_name);
@@ -151,8 +141,8 @@ UserPrefs::Panel::chooseSettingsDir(void)
 void
 UserPrefs::Panel::chooseDynamoDir(void)
 {
-  QString dir_name = QFileDialog::getExistingDirectory(userprefs.readEntry(
-      "/dirs/setfiles", getenv("HOME")), MainWindow::getInstance(),
+  QString dir_name = QFileDialog::getExistingDirectory(userprefs.value(
+      "/dirs/setfiles", getenv("HOME")).toString(), MainWindow::getInstance(),
       "get existing directory", "Choose a default directory for DYNAMO models",
       TRUE);
   dynamoDirEdit->setText(dir_name);
@@ -161,8 +151,8 @@ UserPrefs::Panel::chooseDynamoDir(void)
 void
 UserPrefs::Panel::chooseDataDir(void)
 {
-  QString dir_name = QFileDialog::getExistingDirectory(userprefs.readEntry(
-      "/dirs/data", getenv("HOME")), MainWindow::getInstance(),
+  QString dir_name = QFileDialog::getExistingDirectory(userprefs.value(
+      "/dirs/data", getenv("HOME")).toString(), MainWindow::getInstance(),
       "get existing directory",
       "Choose a default directory for HDF5 data files", TRUE);
   dataDirEdit->setText(dir_name);

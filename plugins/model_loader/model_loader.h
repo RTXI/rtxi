@@ -21,26 +21,24 @@
 
 #include <plugin.h>
 #include <QObject>
+#include <QAction>
 
 class ModelLoader : public QObject, public Plugin::Object
 {
     Q_OBJECT
 
 public:
-
     ModelLoader(void);
     virtual ~ModelLoader(void);
 
 public slots:
-
     void load(void);
     void load_recent(int);
-
     //void load_setting(int);
 
 private:
-
-    int menuID;
+  	//int menuID;
+    QAction* action;
     void updateRecentModules(QString, int);
 };
 

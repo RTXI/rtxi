@@ -83,7 +83,7 @@ class MainWindow : public QMainWindow
 			* \return The index of the new menu item.
 			*/
 
-		int createModuleMenuItem(const std::string &label, const QObject *handler, const char *slot);
+		QAction* createModuleMenuItem(const QString & text, const QObject *handler, const char *slot);
 
 		/*!
 			* Sets the parameter value of a menu item in the Modules menu.
@@ -92,7 +92,7 @@ class MainWindow : public QMainWindow
 			* \param parameter The parameter value to set.
 			*/
 
-		void setModuleMenuItemParameter(int menuid, int parameter);
+		void setModuleMenuItemParameter(QAction *action, int parameter);
 
 		/*!
 			* Insert a line separator into the Modules menu.
@@ -113,8 +113,7 @@ class MainWindow : public QMainWindow
 			* \param text The next text to assign to that menu item.
 			*/
 
-		void
-				changeModuleMenuItem(int id, QString text);
+		void changeModuleMenuItem(QAction *action, QString text);
 
 		/*!
 			* Remove an item from the Modules menu.
@@ -122,8 +121,7 @@ class MainWindow : public QMainWindow
 			* \param index The index of the item to be removed.
 			*/
 
-		void
-				removeModuleMenuItem(int index);
+		void removeModuleMenuItem(QAction *action);
 
 		/*!
 			* Remove an item from the Modules menu.
@@ -131,8 +129,7 @@ class MainWindow : public QMainWindow
 			* \param index The position of the item to be removed.
 			*/
 
-		void
-				removeModuleMenuItemAt(int index);
+		void removeModuleMenuItemAt(int index);
 
 		/*!
 			* Add an item to the Utilities menu.
@@ -165,16 +162,14 @@ class MainWindow : public QMainWindow
 			* \param text The next text to assign to that menu item.
 			*/
 
-		void
-				changeUtilMenuItem(int id, QString text);
+		void changeUtilMenuItem(int id, QString text);
 
 		/*!
 			* Remove an item from the Utilities menu.
 			*
 			* \param index The index of the item to be removed.
 			*/
-		void
-				removeUtilMenuItem(int index);
+		void removeUtilMenuItem(int index);
 
 		/*!
 			* Add an item to the Utilities->Patch Clamp menu.
@@ -185,9 +180,7 @@ class MainWindow : public QMainWindow
 			* \return The index of the new menu item.
 			*/
 
-		int
-				createPatchClampMenuItem(const std::string &label, const QObject *handler,
-								const char *slot);
+		int createPatchClampMenuItem(const std::string &label, const QObject *handler, const char *slot);
 
 		/*!
 			* Add an item to the System menu.
@@ -198,9 +191,7 @@ class MainWindow : public QMainWindow
 			* \return The index of the new menu item.
 			*/
 
-		int
-				createSystemMenuItem(const std::string &label, const QObject *handler,
-								const char *slot);
+		int createSystemMenuItem(const std::string &label, const QObject *handler, const char *slot);
 
 		/*!
 			* Insert a line separator into the System menu.
@@ -215,6 +206,7 @@ class MainWindow : public QMainWindow
 			*/
 
 		void removeSystemMenuItem (int index);
+
 		private slots:
 		void about(void);
 		void aboutQt(void);

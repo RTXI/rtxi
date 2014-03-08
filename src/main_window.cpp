@@ -27,8 +27,7 @@
 #include <mutex.h>
 #include <plugin.h>
 
-//MainWindow::MainWindow (void):QMainWindow (NULL, NULL, Qt::WType_TopLevel) {
-MainWindow::MainWindow (void){ //:QMainWindow (NULL, NULL) {
+MainWindow::MainWindow (void){
 
 	QWidget *centralWidget = new QWidget(this);
 	setCentralWidget(centralWidget);
@@ -66,7 +65,6 @@ MainWindow::MainWindow (void){ //:QMainWindow (NULL, NULL) {
 
 	//fileMenu->insertSeparator();
 	//fileMenu->addAction ("&Quit", qApp, SLOT (closeAllWindows ()), QKeySequence (Qt::CTRL + Qt::Key_Q));
-	//fileMenu->setWhatsThis(id, "Quits the Application");
 
 	//menuBar()->addMenu("&File", fileMenu);
 	//fileMenu->insertSeparator();
@@ -127,44 +125,42 @@ void MainWindow::setFileMenuItemParameter(int menuid, int parameter) {
 	//fileMenu->setItemParameter(menuid, parameter);
 }
 
-// VISITTWO
-void MainWindow::clearFileMenu (void) {
-
+void MainWindow::clearFileMenu(void) {
 	// don't clear the entire menu b/c Load & Save Workspace and Quit are created by
 	// main_window.cpp, not while a module is loading
-	fileMenu->clear ();
+	/*fileMenu->clear();
 	int id;
-	//id = fileMenu->insertItem ("&Load Workspace", this, SLOT (loadSettings ()), QKeySequence (Qt::CTRL + Qt::Key_L));
-	//fileMenu->setWhatsThis (id, "Load Workspace settings file");
-	//id = fileMenu->insertItem ("&Save Workspace", this, SLOT (saveSettings ()), QKeySequence (Qt::CTRL + Qt::Key_S));
-	//fileMenu->setWhatsThis (id, "Save Workspace settings file");
-	//fileMenu->insertSeparator ();
-	//id = fileMenu->insertItem ("&Quit", qApp, SLOT (closeAllWindows ()), QKeySequence (Qt::CTRL + Qt::Key_Q));
-	//fileMenu->setWhatsThis (id, "Quits the Application");
-	//fileMenu->insertSeparator ();
+	id = fileMenu->insertItem ("&Load Workspace", this, SLOT (loadSettings ()), QKeySequence (Qt::CTRL + Qt::Key_L));
+	fileMenu->setWhatsThis (id, "Load Workspace settings file");
+	id = fileMenu->insertItem ("&Save Workspace", this, SLOT (saveSettings ()), QKeySequence (Qt::CTRL + Qt::Key_S));
+	fileMenu->setWhatsThis (id, "Save Workspace settings file");
+	fileMenu->addSeparator();
+	id = fileMenu->insertItem ("&Quit", qApp, SLOT (closeAllWindows ()), QKeySequence (Qt::CTRL + Qt::Key_Q));
+	fileMenu->setWhatsThis (id, "Quits the Application");
+	fileMenu->addSeparator();*/
 }
 
 int MainWindow::insertModuleMenuSeparator (void) {
-	//return moduleMenu->insertSeparator();
+	//return moduleMenu->addSeparator();
 }
 
-/*int MainWindow::createModuleMenuItem (const std::string & text, const QObject * receiver, const char *member) {
-	return moduleMenu->addAction (text, receiver, member);
-	}*/
+QAction* MainWindow::createModuleMenuItem(const QString &text, const QObject *receiver, const char *member) {
+	return moduleMenu->addAction(text, receiver, member);
+}
 
-void MainWindow::setModuleMenuItemParameter (int menuid, int parameter) {
-	//moduleMenu->setItemParameter (menuid, parameter);
+void MainWindow::setModuleMenuItemParameter (QAction *action, int parameter) {
+	action->setData(parameter);//moduleMenu->setItemParameter (menuid, parameter);
 }
 
 void MainWindow::clearModuleMenu (void) {
-	//moduleMenu->clear ();
+	moduleMenu->clear();
 }
 
-void MainWindow::changeModuleMenuItem (int id, QString text) {
-	//moduleMenu->changeItem (id, text);
+void MainWindow::changeModuleMenuItem (QAction *action, QString text) {
+	action->setText(text);//changeItem (id, text);
 }
 
-void MainWindow::removeModuleMenuItem (int id) {
+void MainWindow::removeModuleMenuItem (QAction *action) {
 	//moduleMenu->removeItem (id);
 }
 
@@ -172,17 +168,16 @@ void MainWindow::removeModuleMenuItemAt (int id) {
 	//moduleMenu->removeItemAt (id);
 }
 
-/*int MainWindow::createUtilMenuItem (const std::string & text,
-	const QObject * receiver, const char *member) {
-	return utilMenu->addAction (text, receiver, member);
-	}*/
+int MainWindow::createUtilMenuItem (const std::string & text, const QObject * receiver, const char *member) {
+	//return utilMenu->addAction (text, receiver, member);
+}
 
-/*void MainWindow::setUtilMenuItemParameter (int menuid, int parameter) {
-	utilMenu->setItemParameter (menuid, parameter);
-	}*/
+void MainWindow::setUtilMenuItemParameter (int menuid, int parameter) {
+	//utilMenu->setItemParameter (menuid, parameter);
+}
 
 void MainWindow::clearUtilMenu (void) {
-	//utilMenu->clear ();
+	utilMenu->clear ();
 }
 
 void MainWindow::changeUtilMenuItem (int id, QString text) {
@@ -207,7 +202,6 @@ void MainWindow::createModuleMenu() {
 
 void MainWindow::createUtilMenu() {
 	utilMenu = menuBar()->addMenu(tr("&Utilities"));
-
 	filtersSubMenu = utilMenu->addMenu(tr("&Filters"));
 	signalsSubMenu = utilMenu->addMenu(tr("&Signal Generators"));
 	patchClampSubMenu = utilMenu->addMenu(tr("&Patch Clamp"));
@@ -249,7 +243,6 @@ void MainWindow::createFileActions() {
 }
 
 void MainWindow::createModuleActions() {
-
 }
 
 void MainWindow::createUtilActions() {
@@ -325,13 +318,12 @@ void MainWindow::updateUtilModules(){
   utilMenu->insertItem(tr("&Signals"), signalSubMenu);*/
 }
 
-/*int MainWindow::createPatchClampMenuItem (const std::string & text,
-	const QObject * receiver, const char *member) {
-	return patchClampSubMenu->addAction(text, receiver, member);
-	}*/
+int MainWindow::createPatchClampMenuItem (const std::string & text, const QObject * receiver, const char *member) {
+	//return patchClampSubMenu->addAction(text, receiver, member);
+}
 
 int MainWindow::insertSystemMenuSeparator (void) {
-	//return systemMenu->insertSeparator();
+	//return systemMenu->addSeparator();
 }
 
 /*int MainWindow::createSystemMenuItem (const std::string & text,
@@ -538,8 +530,7 @@ void MainWindow::loadUtil(int i) {
 		Plugin::Manager::getInstance()->load(text);*/
 }
 
-void
-MainWindow::loadFilter(int i) {
+void MainWindow::loadFilter(int i) {
 	QSettings userprefs;
 	userprefs.setPath (QSettings::NativeFormat, QSettings::UserScope, "RTXI");
 	/*QString filename = userprefs.readEntry ("/utilFileList/filter"+ QString::number (i));
@@ -548,8 +539,7 @@ MainWindow::loadFilter(int i) {
 		Plugin::Manager::getInstance()->load(text);*/
 }
 
-void
-MainWindow::loadSignal(int i) {
+void MainWindow::loadSignal(int i) {
 	QSettings userprefs;
 	userprefs.setPath (QSettings::NativeFormat, QSettings::UserScope, "RTXI");
 	/*QString filename = userprefs.readEntry ("/utilFileList/sig" + QString::number (i));
@@ -575,7 +565,7 @@ void MainWindow::windowsMenuAboutToShow (void) {
 		//windowsMenu->setItemEnabled (tileID, false);
 	}
 
-	//windowsMenu->insertSeparator ();
+	windowsMenu->addSeparator ();
 	QWidgetList windows = ws->windowList ();
 	/*for (size_t i = 0; i < windows.count (); ++i) {
 		int id = windowsMenu->insertItem (windows.at (i)->caption (), this,
