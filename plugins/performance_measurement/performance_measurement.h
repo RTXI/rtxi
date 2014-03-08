@@ -19,16 +19,17 @@
 #ifndef PERFORMANCE_MEASUREMENT_H
 #define PERFORMANCE_MEASUREMENT_H
 
-#include <qwidget.h>
 #include "../include/runningstat.h"
 
 #include <plugin.h>
 #include <rt.h>
 #include <workspace.h>
 
-#include <qfile.h>
-#include <qfiledialog.h>
-#include <qmessagebox.h>
+#include <QWidget>
+#include <QTextStream>
+#include <QFile>
+#include <QFileDialog>
+#include <QMessageBox>
 
 class QLineEdit;
 
