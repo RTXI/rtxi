@@ -249,15 +249,12 @@ class MainWindow : public QMainWindow
 		QMenu *moduleMenu;
 		QMenu *utilMenu;
 		QMenu *patchClampSubMenu;
+		QMenu *filtersSubMenu;
+		QMenu *signalsSubMenu;
 		QMenu *systemMenu;
 		QMenu *windowsMenu;
 		QMenu *helpMenu;
 
-		void updateUtilModules();
-		void createMenus();
-		void createActions();
-
-		QActionGroup *patchGroup;
 		QAction *load;
 		QAction *save;
 		QAction *quit;
@@ -266,6 +263,22 @@ class MainWindow : public QMainWindow
 		QAction *axeno;
 		QAction *adaq;
 		QAction *acomedi;
+
+		void updateUtilModules();
+		
+		void createFileMenu();
+		void createModuleMenu();
+		void createUtilMenu();
+		void createSystemMenu();
+		void createWindowsMenu();
+		void createHelpMenu();
+
+		void createFileActions();
+		void createModuleActions();
+		void createUtilActions();
+		void createSystemActions();
+		void createWindowsActions();
+		void createHelpActions();
 };
 
 #endif /* MAIN_WINDOW_H */

@@ -37,8 +37,23 @@ MainWindow::MainWindow (void){ //:QMainWindow (NULL, NULL) {
 	setWindowTitle("RTXI - Real-time eXperimental Interface");
 
 	/* Initialize Menus */
-	createActions();
-	createMenus();
+	createFileActions();
+	createFileMenu();
+
+	createModuleActions();
+	createModuleMenu();
+
+	createUtilActions();
+	createUtilMenu();
+
+	createSystemActions();
+	createSystemMenu();
+
+	createWindowsActions();
+	createWindowsMenu();
+
+	createHelpActions();
+	createHelpMenu();
 
 	/* Insert Menu Items */
 	//fileMenu = menuBar()->addMenu(tr("&File"));	//new QMenu(this);
@@ -178,24 +193,36 @@ void MainWindow::removeUtilMenuItem (int id) {
 	//utilMenu->removeItem(id);
 }
 
-void MainWindow::createMenus() {
+void MainWindow::createFileMenu() {
 	fileMenu = menuBar()->addMenu(tr("&File"));
 	fileMenu->addAction(load);
 	fileMenu->addAction(save);
 	fileMenu->addSeparator();
 	fileMenu->addAction(quit);
+}
 
+void MainWindow::createModuleMenu() {
 	moduleMenu = menuBar()->addMenu(tr("&Modules"));
+}
 
+void MainWindow::createUtilMenu() {
 	utilMenu = menuBar()->addMenu(tr("&Utilities"));
 
+	filtersSubMenu = utilMenu->addMenu(tr("&Filters"));
+	signalsSubMenu = utilMenu->addMenu(tr("&Signal Generators"));
 	patchClampSubMenu = utilMenu->addMenu(tr("&Patch Clamp"));
+}
 
+void MainWindow::createSystemMenu() {
 	systemMenu = menuBar()->addMenu(tr("&System"));
+}
 
+void MainWindow::createWindowsMenu() {
 	windowsMenu = menuBar()->addMenu(tr("&Windows"));
 	//windowsMenu->setCheckable(true);
+}
 
+void MainWindow::createHelpMenu() {
 	helpMenu = menuBar()->addMenu(tr("&Help"));
 	helpMenu->addAction(artxi);
 	helpMenu->addAction(aqt);
@@ -204,7 +231,7 @@ void MainWindow::createMenus() {
 	helpMenu->addAction(acomedi);
 }
 
-void MainWindow::createActions() {
+void MainWindow::createFileActions() {
 	load = new QAction(tr("&Load Workspace"), this);
 	load->setShortcuts(QKeySequence::Open);
 	load->setStatusTip(tr("Load a saved workspace"));
@@ -219,7 +246,25 @@ void MainWindow::createActions() {
 	quit->setShortcuts(QKeySequence::Quit);
 	quit->setStatusTip(tr("Quit RTXI"));
 	connect(quit, SIGNAL(triggered()), qApp, SLOT(closeAllWindows()));
+}
 
+void MainWindow::createModuleActions() {
+
+}
+
+void MainWindow::createUtilActions() {
+
+}
+
+void MainWindow::createSystemActions() {
+
+}
+
+void MainWindow::createWindowsActions() {
+
+}
+
+void MainWindow::createHelpActions() {
 	artxi = new QAction(tr("About &RTXI"),this);
 	connect(artxi, SIGNAL(triggered()), this, SLOT(about()));
 
@@ -236,18 +281,16 @@ void MainWindow::createActions() {
 	connect(acomedi, SIGNAL(triggered()), this, SLOT(aboutComedi()));
 }
 
-/*void MainWindow::updateUtilModules(){
+void MainWindow::updateUtilModules(){
   QSettings userprefs;
   userprefs.setPath(QSettings::NativeFormat, QSettings::UserScope, "RTXI");
   userprefs.beginGroup("/utilFileList");
   QStringList entries = userprefs.childKeys();
   userprefs.endGroup();
-
-  //QStringList entries = userprefs.entryList("/utilFileList");
   
   int numUtilFiles = entries.size();
 
- 	int i = 0;
+ 	/*int i = 0;
   int menuID = utilMenu->insertItem("Model HH Neuron",this,SLOT(loadUtil(int)));
   setUtilMenuItemParameter(menuID, i);
   i++;
@@ -279,8 +322,8 @@ void MainWindow::createActions() {
   menuID = signalSubMenu->insertItem("Mimic",this,SLOT(loadSignal(int)));
   signalSubMenu->setItemParameter(menuID, i);
 
-  utilMenu->insertItem(tr("&Signals"), signalSubMenu);
-}*/
+  utilMenu->insertItem(tr("&Signals"), signalSubMenu);*/
+}
 
 /*int MainWindow::createPatchClampMenuItem (const std::string & text,
 	const QObject * receiver, const char *member) {
@@ -397,7 +440,7 @@ void MainWindow::aboutComedi(void) {
 void MainWindow::loadSettings (void) {
 	QSettings userprefs;
 	userprefs.setPath (QSettings::NativeFormat, QSettings::UserScope, "RTXI");
-	//QString settingsDir = userprefs.readEntry ("/dirs/setfiles", getenv ("HOME"));
+	QString settingsDir = userprefs.value("/dirs/setfiles", getenv("HOME")).toString();
 
 	QString filename = QFileDialog::getOpenFileName(this,
 			tr("Load saved workspace"), "/home/", tr("Settings (*.set)"));
@@ -409,7 +452,7 @@ void MainWindow::loadSettings (void) {
 void MainWindow::saveSettings(void) {
 	QSettings userprefs;
 	userprefs.setPath (QSettings::NativeFormat, QSettings::UserScope, "RTXI");
-	//QString settingsDir = userprefs.readEntry ("/dirs/setfiles", getenv ("HOME"));
+	QString settingsDir = userprefs.value("/dirs/setfiles", getenv("HOME")).toString();
 
 	QString filename = QFileDialog::getSaveFileName(this,
 			tr("Save current workspace"), "/home/", tr("Settings (*.set)"));
@@ -428,11 +471,11 @@ void MainWindow::saveSettings(void) {
 	}
 }
 
-void MainWindow::updateUtilModules () {
+/*void MainWindow::updateUtilModules () {
 	QSettings userprefs;
 	userprefs.setPath (QSettings::NativeFormat, QSettings::UserScope, "RTXI");
 
-	/*QStringList entries = userprefs.entryList ("/utilFileList");
+	QStringList entries = userprefs.entryList ("/utilFileList");
 		int numUtilFiles = entries.size ();
 
 		for (int i = 0; i < numUtilFiles; i++) {
@@ -483,10 +526,10 @@ void MainWindow::updateUtilModules () {
 		menuID = signalSubMenu->insertItem("Mimic", this, SLOT (loadSignal (int)));
 		signalSubMenu->setItemParameter(menuID, i);
 
-		utilMenu->insertItem(tr ("&Signals"), signalSubMenu);*/
-}
+		utilMenu->insertItem(tr ("&Signals"), signalSubMenu);
+}*/
 
-void MainWindow::loadUtil (int i) {
+void MainWindow::loadUtil(int i) {
 	QSettings userprefs;
 	userprefs.setPath (QSettings::NativeFormat, QSettings::UserScope, "RTXI");
 	/*QString filename = userprefs.readEntry ("/utilFileList/util" + QString::number (i));
@@ -496,7 +539,7 @@ void MainWindow::loadUtil (int i) {
 }
 
 void
-MainWindow::loadFilter (int i) {
+MainWindow::loadFilter(int i) {
 	QSettings userprefs;
 	userprefs.setPath (QSettings::NativeFormat, QSettings::UserScope, "RTXI");
 	/*QString filename = userprefs.readEntry ("/utilFileList/filter"+ QString::number (i));
@@ -506,7 +549,7 @@ MainWindow::loadFilter (int i) {
 }
 
 void
-MainWindow::loadSignal (int i) {
+MainWindow::loadSignal(int i) {
 	QSettings userprefs;
 	userprefs.setPath (QSettings::NativeFormat, QSettings::UserScope, "RTXI");
 	/*QString filename = userprefs.readEntry ("/utilFileList/sig" + QString::number (i));
