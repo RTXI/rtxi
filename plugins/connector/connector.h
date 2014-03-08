@@ -23,8 +23,15 @@
 #include <fifo.h>
 #include <io.h>
 #include <plugin.h>
-#include <qwidget.h>
+#include <QWidget>
 #include <vector>
+#include <QComboBox>
+#include <QGroupBox>
+#include <QLabel>
+#include <QLayout>
+#include <QListWidget>
+#include <QPushButton>
+#include <QWhatsThis>
 
 class QComboBox;
 class QListBox;

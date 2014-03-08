@@ -375,10 +375,10 @@ DataRecorder::Channel::~Channel(void) {
 }
 
 DataRecorder::Panel::Panel(QWidget *parent, size_t buffersize) :
-	QWidget(parent, 0, Qt::WStyle_NormalBorder | Qt::WDestructiveClose),
+	QWidget(parent, 0, Qt::WStyle_NormalBorder | Qt::WA_DeleteOnClose),
 			RT::Thread(RT::Thread::MinimumPriority), fifo(buffersize), recording(
 					false) {
-        setCaption(QString::number(getID()) + " Data Recorder");
+        setWindowTitle(QString::number(getID()) + " Data Recorder");
 	QWhatsThis::add(
 			this,
 			"<p><b>Data Recorder:</b><br>The Data Recorder writes data to an HDF5 file format "
@@ -708,7 +708,7 @@ void DataRecorder::Panel::buildChannelList(void) {
 
 void DataRecorder::Panel::changeDataFile(void) {
 	QFileDialog fileDialog(this, NULL, true);
-	fileDialog.setCaption("Select Data File");
+	fileDialog.setWindowTitle("Select Data File");
 	QSettings userprefs;
 	userprefs.setPath("RTXI.org", "RTXI", QSettings::User);
     fileDialog.setDir(userprefs.readEntry("/dirs/data", getenv("HOME")));

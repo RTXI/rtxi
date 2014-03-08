@@ -75,7 +75,7 @@ namespace
 Oscilloscope::Properties::Properties(Oscilloscope::Panel *parent) :
   QDialog(MainWindow::getInstance()), panel(parent)
 {
-  setCaption(QString::number(parent->getID()) + " Oscilloscope Properties");
+  setWindowTitle(QString::number(parent->getID()) + " Oscilloscope Properties");
 
   QBoxLayout *layout = new QVBoxLayout(this);
 
@@ -1140,10 +1140,10 @@ Oscilloscope::Properties::updateDownsampleRate(int r)
 }
 
 Oscilloscope::Panel::Panel(QWidget *parent) :
-  Scope(parent, Qt::WDestructiveClose), RT::Thread(0), fifo(10 * 1048576)
+  Scope(parent, Qt::WA_DeleteOnClose), RT::Thread(0), fifo(10 * 1048576)
 {
 
-  setCaption(QString::number(getID()) + " Oscilloscope");
+  setWindowTitle(QString::number(getID()) + " Oscilloscope");
   QWhatsThis::add(
       this,
       "<p><b>Oscilloscope:</b><br>The Oscilloscope allows you to plot any signal "

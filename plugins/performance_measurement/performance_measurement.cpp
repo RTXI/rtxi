@@ -44,14 +44,14 @@ static Workspace::variable_t vars[] = {
 static size_t num_vars = sizeof( vars ) / sizeof( Workspace::variable_t ); // Required variable (number of variables)
 
 PerformanceMeasurement::Panel::Panel(QWidget *parent)
-  : QWidget(parent, 0, Qt::WStyle_NormalBorder | Qt::WDestructiveClose),
+  : QWidget(parent, 0, Qt::WStyle_NormalBorder | Qt::WA_DeleteOnClose),
     Workspace::Instance( "Performance Measuremnt", vars, num_vars ), state( INIT1),
     duration( 0 ), lastRead( 0 ), timestep( 0 ), maxDuration( 0 ), maxTimestep( 0 ), jitter( 0 )
 {
   QHBox *hbox;
   QBoxLayout *layout = new QVBoxLayout(this);
 
-  setCaption("Real-time Benchmarks");
+  setWindowTitle("Real-time Benchmarks");
 
   hbox = new QHBox(this);
   layout->addWidget(hbox);

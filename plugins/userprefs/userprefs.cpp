@@ -34,12 +34,12 @@
 #include <userprefs.h>
 
 UserPrefs::Panel::Panel(QWidget *parent) :
-  QWidget(parent, 0, Qt::WStyle_NormalBorder | Qt::WDestructiveClose)
+  QWidget(parent, 0, Qt::WStyle_NormalBorder | Qt::WA_DeleteOnClose)
 {
 
   QBoxLayout *layout = new QVBoxLayout(this);
 
-  setCaption("RTXI User Preferences");
+  setWindowTitle("RTXI User Preferences");
 
   // load QSettings
   QSettings userprefs;

@@ -34,7 +34,7 @@ MainWindow::MainWindow (void){ //:QMainWindow (NULL, NULL) {
 	setCentralWidget(centralWidget);
 
 	/* Initialize Window Settings */
-	//setCaption ("RTXI - Real-time eXperimental Interface");
+	setWindowTitle("RTXI - Real-time eXperimental Interface");
 
 	/* Initialize Menus */
 	createActions();
@@ -62,7 +62,7 @@ MainWindow::MainWindow (void){ //:QMainWindow (NULL, NULL) {
 	//utilMenu = new QMenu (this);
 	//menuBar()->addMenu("&Utilities", utilMenu);
 
-	updateUtilModules ();
+	//updateUtilModules ();
 
 	//systemMenu = new QMenu (this);
 	//menuBar()->addMenu("&System", systemMenu);
@@ -194,7 +194,7 @@ void MainWindow::createMenus() {
 	systemMenu = menuBar()->addMenu(tr("&System"));
 
 	windowsMenu = menuBar()->addMenu(tr("&Windows"));
-	//windowsMenu->setCheckable (true);
+	//windowsMenu->setCheckable(true);
 
 	helpMenu = menuBar()->addMenu(tr("&Help"));
 	helpMenu->addAction(artxi);
@@ -236,7 +236,7 @@ void MainWindow::createActions() {
 	connect(acomedi, SIGNAL(triggered()), this, SLOT(aboutComedi));
 }
 
-void MainWindow::updateUtilModules(){
+/*void MainWindow::updateUtilModules(){
   QSettings userprefs;
   userprefs.setPath(QSettings::NativeFormat, QSettings::UserScope, "RTXI");
   userprefs.beginGroup("/utilFileList");
@@ -247,7 +247,7 @@ void MainWindow::updateUtilModules(){
   
   int numUtilFiles = entries.size();
 
-  int i = 0;
+ 	int i = 0;
   int menuID = utilMenu->insertItem("Model HH Neuron",this,SLOT(loadUtil(int)));
   setUtilMenuItemParameter(menuID, i);
   i++;
@@ -280,24 +280,24 @@ void MainWindow::updateUtilModules(){
   signalSubMenu->setItemParameter(menuID, i);
 
   utilMenu->insertItem(tr("&Signals"), signalSubMenu);
-}
+}*/
 
 /*int MainWindow::createPatchClampMenuItem (const std::string & text,
 	const QObject * receiver, const char *member) {
-	return patchClampSubMenu->addAction (text, receiver, member);
+	return patchClampSubMenu->addAction(text, receiver, member);
 	}*/
 
 int MainWindow::insertSystemMenuSeparator (void) {
-	//return systemMenu->insertSeparator ();
+	//return systemMenu->insertSeparator();
 }
 
 /*int MainWindow::createSystemMenuItem (const std::string & text,
 	const QObject * receiver, const char *member){
-	return systemMenu->addAction (text, receiver, member);
+	return systemMenu->addAction(text, receiver, member);
 	}*/
 
 void MainWindow::removeSystemMenuItem (int id) {
-	//systemMenu->removeItem (id);
+	//systemMenu->removeItem(id);
 }
 
 void MainWindow::about(void) {
@@ -311,11 +311,11 @@ void MainWindow::aboutQt (void) {
 }
 
 void MainWindow::aboutXeno(void) {
-	printf("hello from xenomai\n");
+	printf("Xenomai version:\n");
 }
 
 void MainWindow::aboutDAQ(void) {
-	printf("hello from DAQ land\n");
+	printf("DAQ model: \n");
 }
 
 void MainWindow::aboutComedi(void) {

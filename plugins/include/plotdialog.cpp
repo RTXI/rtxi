@@ -8,7 +8,7 @@ PlotDialog::PlotDialog(QWidget *parent, QString name, double* xData,
     double* yData, int size) :
   QDialog(parent, name, TRUE)
 {
-  setCaption(name);
+  setWindowTitle(name);
   setModal(true);
   QVBoxLayout *layout = new QVBoxLayout(this); // overall GUI layout
 

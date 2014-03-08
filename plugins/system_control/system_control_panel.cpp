@@ -52,8 +52,8 @@ static void buildDAQDeviceList(DAQ::Device *dev,void *arg) {
 }
 
 SystemControlPanel::SystemControlPanel(QWidget *parent)
-    : QWidget(parent,NULL,Qt::WStyle_NormalBorder | Qt::WDestructiveClose) {
-    setCaption("System Control Panel");
+    : QWidget(parent,NULL,Qt::WStyle_NormalBorder | Qt::WA_DeleteOnClose) {
+    setWindowTitle("System Control Panel");
     QWhatsThis::add(
            this,
            "<p><b>System Control Panel:</b><br>This control panel allows you to configure "

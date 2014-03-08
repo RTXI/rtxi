@@ -60,8 +60,7 @@ void DefaultGUILineEdit::redden(void) {
 DefaultGUIModel::DefaultGUIModel(std::string name, DefaultGUIModel::variable_t *var, size_t size):
 	QWidget(MainWindow::getInstance()->centralWidget()), Workspace::Instance(name, var, size), myname(name) {
 
-		// VISITTWO
-		//setCaption(QString::number(getID()) + " " + QString::fromStdString(name));
+		setWindowTitle(QString::number(getID()) + " " + QString::fromStdString(name));
 		QTimer *timer = new QTimer(this);
 		timer->start(1000);
 		QObject::connect(timer,SIGNAL(timeout(void)),this,SLOT(refresh(void)));
@@ -291,9 +290,8 @@ void DefaultGUIModel::setEvent(const QString &name, double &ref) {
 			update(UNPAUSE);
 	}
 
-// VISITTWO
 void DefaultGUIModel::doDeferred(const Settings::Object::State &) {
-	//setCaption(QString::number(getID()) + " " + QString::fromStdString(myname));
+	setWindowTitle(QString::number(getID()) + " " + QString::fromStdString(myname));
 }
 
 void DefaultGUIModel::doLoad(const Settings::Object::State &s) {
