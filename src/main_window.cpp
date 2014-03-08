@@ -368,11 +368,11 @@ void MainWindow::aboutComedi(void) {
 	("sudo comedi_calibrate --reset --dump --calibrate --results --verbose /dev/comedi0");
 	DEBUG_MSG
 	("RTXI is about to calibrate DAQ card for COMEDI driver%s\n",
-	cmd.ascii ());
+	cmd.toAscii ());
 	rt_printf ("calibrating DAQ card...\n");
 	notice.exec ();
 
-	status = CmdLine::getInstance ()->execute (cmd.ascii ());
+	status = CmdLine::getInstance ()->execute (cmd.toAscii ());
 
 	if (status != 0) {
 	ERROR_MSG ("RTXI COMEDI calibration error\n");

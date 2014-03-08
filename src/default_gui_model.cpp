@@ -206,7 +206,7 @@ void DefaultGUIModel::modify(void) {
 		if (i->second.type & COMMENT) {
 			QByteArray textData = i->second.edit->text().toLatin1();
 			const char *text = textData.constData();
-			//Workspace::Instance::setComment(i->second.index, i->second.edit->text().latin1());
+			//Workspace::Instance::setComment(i->second.index, i->second.edit->text().toLatin1());
 			Workspace::Instance::setComment(i->second.index, text);
 		}
 
@@ -230,7 +230,7 @@ void DefaultGUIModel::setComment(const QString &name, QString comment) {
 		n->second.edit->setText(comment);
 		QByteArray textData = comment.toLatin1();
 		const char *text = textData.constData();
-		//Workspace::Instance::setComment(n->second.index, comment.latin1());
+		//Workspace::Instance::setComment(n->second.index, comment.toLatin1());
 		Workspace::Instance::setComment(n->second.index, text);
 	}
 }

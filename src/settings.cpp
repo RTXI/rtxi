@@ -157,7 +157,7 @@ void Settings::Object::State::xml(const QDomElement &e1) {
 		// VISITTWO
 		/*for(QDomElement e2 = e1.firstChild().toElement();!e2.isNull();e2 = e2.nextSibling().toElement()) {
 				if(e2.tagName().upper() == "PARAM" && e2.attribute("name") != QString::null)
-				paramMap[e2.attribute("name")] = e2.text().latin1();
+				paramMap[e2.attribute("name")] = e2.text().toLatin1();
 				else if(e2.tagName().upper() == "OBJECT" && e2.attribute("name") != QString::null)
 				stateMap[e2.attribute("name")].xml(e2);
 				}*/
@@ -212,7 +212,7 @@ int Settings::Manager::load(const QString &filename) {
 		int errorLine, errorColumn;
 
 		/*if (!doc.setContent(&file,false,&errorMsg,&errorLine,&errorColumn)) {
-				ERROR_MSG("Settings::Manager::load : %s:%d:%d: %s\n",filename.toStdString().c_str(),errorLine,errorColumn,errorMsg.latin1());
+				ERROR_MSG("Settings::Manager::load : %s:%d:%d: %s\n",filename.toStdString().c_str(),errorLine,errorColumn,errorMsg.toLatin1());
 				return -EINVAL;
 		}*/
 

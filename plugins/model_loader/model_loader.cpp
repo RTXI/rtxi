@@ -53,7 +53,7 @@ ModelLoader::load(void)
   if (filename.startsWith(plugin_dir))
     filename.remove(0, plugin_dir.length());
 
-  Plugin::Manager::getInstance()->load(filename.latin1());
+  Plugin::Manager::getInstance()->load(filename.toLatin1());
 
   // load QSettings
   QSettings userprefs;
@@ -137,6 +137,6 @@ ModelLoader::load_recent(int i)
   userprefs.setPath("RTXI.org", "RTXI", QSettings::User);
   QString filename = userprefs.readEntry("/recentFileList/"
       + QString::number(i));
-  Plugin::Manager::getInstance()->load(filename.latin1());
+  Plugin::Manager::getInstance()->load(filename.toLatin1());
 }
 

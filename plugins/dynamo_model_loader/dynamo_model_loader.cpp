@@ -42,7 +42,7 @@ DynamoModelLoader::DynamoModelLoader(void) {
 	menuID = MainWindow::getInstance()->createModuleMenuItem("Load DYNAMO Model",this,SLOT(load_dialog(void)));
 
 	model_makefile_path = QString(MODEL_MAKEFILE_PATH);
-	DEBUG_MSG("model_makefile_path = %s\n", model_makefile_path.ascii());
+	DEBUG_MSG("model_makefile_path = %s\n", model_makefile_path.toAscii());
 	DEBUG_MSG("DynamoModelLoader::DynamoModelLoader : finished\n");
 
 	MainWindow::getInstance()->insertModuleMenuSeparator();
@@ -113,15 +113,15 @@ void DynamoModelLoader::load(char *srcpath) {
 
 	QString module_name = QString("%1%2") .arg(model_name) .arg(MODEL_SUFFIX);
 
-	DEBUG_MSG("about to compile model with command %s\n", cmd.ascii());
-	status = CmdLine::getInstance()->execute(cmd.ascii());
+	DEBUG_MSG("about to compile model with command %s\n", cmd.toAscii());
+	status = CmdLine::getInstance()->execute(cmd.toAscii());
 
 	if (status != 0) {
 		ERROR_MSG("build process error\n");
 		return;
 	}
 
-	Plugin::Manager::getInstance()->load(module_name.latin1());
+	Plugin::Manager::getInstance()->load(module_name.toLatin1());
 
 	if (path != NULL)
 		free(path);
@@ -138,7 +138,7 @@ void DynamoModelLoader::load_dialog(void) {
 	//QString file_name = QFileDialog::getOpenFileName(QString::null,"Dynamo Models (*" MODEL_SOURCE_SUFFIX \
 						      ");;All (*.*)",MainWindow::getInstance());
 
-	load((char *) file_name.latin1());
+	load((char *) file_name.toLatin1());
 }
 
 
@@ -146,15 +146,15 @@ void DynamoModelLoader::load_recent(int i) {
 	QSettings userprefs;
 	userprefs.setPath("RTXI.org", "RTXI", QSettings::User);
 	QString filename = userprefs.readEntry("/recentFileList/"+QString::number(i));
-	Plugin::Manager::getInstance()->load(filename.latin1());
+	Plugin::Manager::getInstance()->load(filename.toLatin1());
 }
 
 void DynamoModelLoader::load_setting(int i) {
 	QSettings userprefs;
 	userprefs.setPath("RTXI.org", "RTXI", QSettings::User);
 	QString filename = userprefs.readEntry("/recentSettingsList/"+QString::number(i));
-	printf("Loading settings file: %s\n",filename.latin1());
-	Settings::Manager::getInstance()->load(filename.latin1());
+	printf("Loading settings file: %s\n",filename.toLatin1());
+	Settings::Manager::getInstance()->load(filename.toLatin1());
 }
 
 static Mutex mutex;
