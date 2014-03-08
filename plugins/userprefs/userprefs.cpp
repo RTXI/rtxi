@@ -43,7 +43,7 @@ UserPrefs::Panel::Panel(QWidget *parent) :
 
   // load QSettings
   QSettings userprefs;
-  userprefs.setPath("RTXI.org", "RTXI", QSettings::User);
+  userprefs.setPath("RTXI.org", "RTXI", QSettings::UserScope);
 
   // create GUI elements and set text
   QVButtonGroup *dirGroup;

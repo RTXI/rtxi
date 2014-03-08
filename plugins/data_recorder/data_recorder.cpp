@@ -710,7 +710,7 @@ void DataRecorder::Panel::changeDataFile(void) {
 	QFileDialog fileDialog(this, NULL, true);
 	fileDialog.setWindowTitle("Select Data File");
 	QSettings userprefs;
-	userprefs.setPath("RTXI.org", "RTXI", QSettings::User);
+	userprefs.setPath("RTXI.org", "RTXI", QSettings::UserScope);
     fileDialog.setDir(userprefs.readEntry("/dirs/data", getenv("HOME")));
 	fileDialog.setMode(QFileDialog::AnyFile);
 
@@ -1337,7 +1337,7 @@ extern "C" Plugin::Object *createRTXIPlugin(void *) {
 DataRecorder::Plugin::Plugin(void) {
         // get the HDF data recorder buffer size from user preference
         QSettings userprefs;
-        userprefs.setPath("RTXI.org", "RTXI", QSettings::User);
+        userprefs.setPath("RTXI.org", "RTXI", QSettings::UserScope);
 
         buffersize = userprefs.readNumEntry("/system/HDFbuffer", 10)*1048576;
         menuID = MainWindow::getInstance()->createSystemMenuItem("HDF Data Recorder",this,SLOT(createDataRecorderPanel(void)));

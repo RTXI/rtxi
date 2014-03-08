@@ -57,7 +57,7 @@ ModelLoader::load(void)
 
   // load QSettings
   QSettings userprefs;
-  userprefs.setPath("RTXI.org", "RTXI", QSettings::User);
+  userprefs.setPath("RTXI.org", "RTXI", QSettings::UserScope);
 
   int oldestmodule = userprefs.readNumEntry("/recentFileList/start", 0);
   if (oldestmodule == 0)
@@ -105,7 +105,7 @@ void
 ModelLoader::updateRecentModules(QString filename, int index)
 {
   QSettings userprefs;
-  userprefs.setPath("RTXI.org", "RTXI", QSettings::User);
+  userprefs.setPath("RTXI.org", "RTXI", QSettings::UserScope);
   QStringList entries = userprefs.entryList("/recentFileList");
   int numRecentFiles = entries.size();
 
@@ -134,7 +134,7 @@ void
 ModelLoader::load_recent(int i)
 {
   QSettings userprefs;
-  userprefs.setPath("RTXI.org", "RTXI", QSettings::User);
+  userprefs.setPath("RTXI.org", "RTXI", QSettings::UserScope);
   QString filename = userprefs.readEntry("/recentFileList/"
       + QString::number(i));
   Plugin::Manager::getInstance()->load(filename.toLatin1());
