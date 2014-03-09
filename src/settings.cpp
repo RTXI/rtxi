@@ -154,12 +154,12 @@ void Settings::Object::State::xml(const QDomElement &e1) {
 	}
 	id = e1.attribute("id","0").toULong();
 
-	for(QDomElement e2 = e1.firstChild().toElement(); !e2.isNull(); e2 = e2.nextSibling().toElement()) {
-		if(e2.tagName().toUpper() == "PARAM" && e2.attribute("name") != QString::null)
-			paramMap[e2.attribute("name")] = e2.text().toLatin1();
-		else if(e2.tagName().toUpper() == "OBJECT" && e2.attribute("name") != QString::null)
-			stateMap[e2.attribute("name")].xml(e2);
-	}
+	//for(QDomElement e2 = e1.firstChild().toElement(); !e2.isNull(); e2 = e2.nextSibling().toElement()) {
+		//if(e2.tagName().toUpper() == "PARAM" && e2.attribute("name") != QString::null)
+			//paramMap[e2.attribute("name")] = e2.text().toLatin1();
+		//else if(e2.tagName().toUpper() == "OBJECT" && e2.attribute("name") != QString::null)
+			//stateMap[e2.attribute("name")].xml(e2);
+	//}
 }
 
 Settings::Object::State Settings::Object::save(void) const {
@@ -210,7 +210,7 @@ int Settings::Manager::load(const QString &filename) {
 	int errorLine, errorColumn;
 
 	if (!doc.setContent(&file,false,&errorMsg,&errorLine,&errorColumn)) {
-		ERROR_MSG("Settings::Manager::load : %s:%d:%d: %s\n",filename.toStdString().c_str(),errorLine,errorColumn,errorMsg.toLatin1());
+		ERROR_MSG("Settings::Manager::load : %s:%d:%d: %s\n", filename.toStdString().c_str(), errorLine, errorColumn, errorMsg.toStdString().c_str());
 		return -EINVAL;
 	}
 
