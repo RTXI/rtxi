@@ -9,9 +9,9 @@ SUBDIRS = \
 	system_control \
 	model_loader \
 	data_recorder \
-	#connector \
-	#userprefs \
-	#oscilloscope \
-	#dynamo_model_loader \
-	#comedi_device \
-	#comedilib_device 
+	connector \
+	userprefs \
+	oscilloscope \
+	dynamo_model_loader \
+	comedi_device \
+	comedilib_device 
