@@ -10,7 +10,7 @@ SUBDIRS = \
 	performance_measurement \
 	system_control \
 	model_loader \
-	#userprefs \
+	userprefs \
 	#connector \
 	#data_recorder \
 	#oscilloscope \
