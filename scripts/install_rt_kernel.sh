@@ -107,11 +107,13 @@ echo -e "${red}----->Installing compiled kernel${NC}"
 if [[ $OS == 'ubuntu' ]]
 then
 cd $linux_tree
+cd ..
 sudo dpkg -i linux-image-*.deb
 sudo dpkg -i linux-headers*.deb
 elif [[ $OS == 'scientific' ]]
 then
 cd $linux_tree
+cd ..
 sudo cp arch/x86/boot/bzImage /boot/vmlinuz-$linux_version-xenomai-$xenomai_version
 sudo make modules_install
 fi
