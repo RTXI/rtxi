@@ -396,11 +396,11 @@ DataRecorder::Panel::Panel(QWidget *parent, size_t buffersize) :
 		(new QLabel("Type:", hbox))->setFixedWidth(75);
 		typeList = new QComboBox(hbox);
 		typeList->setFixedWidth(150);
-		typeList->insertItem("Input");
-		typeList->insertItem("Output");
-		typeList->insertItem("Parameter");
-		typeList->insertItem("State");
-		typeList->insertItem("Event");
+		typeList->addItem("Input");
+		typeList->addItem("Output");
+		typeList->addItem("Parameter");
+		typeList->addItem("State");
+		typeList->addItem("Event");
 		QObject::connect(typeList,SIGNAL(activated(int)),this,SLOT(buildChannelList(void)));
 
 		hbox = new QHBox(vbox);
@@ -483,7 +483,7 @@ DataRecorder::Panel::Panel(QWidget *parent, size_t buffersize) :
 		IO::Connector::getInstance()->foreachBlock(buildBlockPtrList, &blockPtrList);
 		for (std::vector<IO::Block *>::const_iterator i = blockPtrList.begin(),
 				end = blockPtrList.end(); i != end; ++i)
-			blockList->insertItem((*i)->getName() + " " + QString::number(
+			blockList->addItem((*i)->getName() + " " + QString::number(
 						(*i)->getID()));
 
 		// Build initial channel list
@@ -540,7 +540,7 @@ void DataRecorder::Panel::receiveEvent(const Event::Object *event) {
 
 		IO::Block *block = reinterpret_cast<IO::Block *> (event->getParam("block"));
 		blockPtrList.push_back(block);
-		blockList->insertItem(block->getName() + " " + QString::number(block->getID()));
+		blockList->addItem(block->getName() + " " + QString::number(block->getID()));
 		if (blockList->count() == 1)
 			buildChannelList();
 
@@ -672,14 +672,15 @@ void DataRecorder::Panel::buildChannelList(void) {
 	}
 
 	for (size_t i = 0; i < block->getCount(type); ++i)
-		channelList->insertItem(block->getName(type, i));
+		channelList->addItem(block->getName(type, i));
 }
 
 void DataRecorder::Panel::changeDataFile(void) {
 	QFileDialog fileDialog(this, NULL, true);
 	fileDialog.setWindowTitle("Select Data File");
 	QSettings userprefs;
-	userprefs.setPath("RTXI.org", "RTXI", QSettings::UserScope);
+  userprefs.setPath(QSettings::NativeFormat, QSettings::UserScope, "RTXI");
+	//userprefs.setPath("RTXI.org", "RTXI", QSettings::UserScope);
 	fileDialog.setDir(userprefs.readEntry("/dirs/data", getenv("HOME")));
 	fileDialog.setMode(QFileDialog::AnyFile);
 
@@ -741,7 +742,7 @@ void DataRecorder::Panel::insertChannel(void) {
 
 	InsertChannelEvent event(recording, channels, channels.end(), *channel);
 	if (!RT::System::getInstance()->postEvent(&event))
-		selectionBox->insertItem(channel->name);
+		selectionBox->addItem(channel->name);
 }
 
 void DataRecorder::Panel::removeChannel(void) {
@@ -834,7 +835,7 @@ void DataRecorder::Panel::doDeferred(const Settings::Object::State &s) {
 					channel->index).c_str());
 
 		channels.insert(channels.end(), *channel);
-		selectionBox->insertItem(channel->name);
+		selectionBox->addItem(channel->name);
 	}
 }
 
@@ -1306,9 +1307,11 @@ extern "C" Plugin::Object *createRTXIPlugin(void *) {
 DataRecorder::Plugin::Plugin(void) {
 	// get the HDF data recorder buffer size from user preference
 	QSettings userprefs;
-	userprefs.setPath("RTXI.org", "RTXI", QSettings::UserScope);
+	//userprefs.setPath("RTXI.org", "RTXI", QSettings::UserScope);
+	//buffersize = userprefs.readNumEntry("/system/HDFbuffer", 10)*1048576;
+  userprefs.setPath(QSettings::NativeFormat, QSettings::UserScope, "RTXI");
+	buffersize = (userprefs.value("/system/HDFbuffer", 10).toInt())*1048576;
 
-	buffersize = userprefs.readNumEntry("/system/HDFbuffer", 10)*1048576;
 	menuID = MainWindow::getInstance()->createSystemMenuItem("HDF Data Recorder",this,SLOT(createDataRecorderPanel(void)));
 }
 
