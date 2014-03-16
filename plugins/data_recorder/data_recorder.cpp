@@ -25,7 +25,7 @@
 
 #include <QtGui>
 #include <QFileDialog>
-#include <QCustomEvent>
+#include <QEvent>
 
 #define QFileExistsEvent            (QEvent::User+0)
 #define QNoFileOpenEvent            (QEvent::User+1)
@@ -774,7 +774,7 @@ void DataRecorder::Panel::updateDownsampleRate(int r) {
 	downsample_rate = r;
 }
 
-void DataRecorder::Panel::customEvent(QCustomEvent *e) {
+void DataRecorder::Panel::customEvent(QEvent *e) {
 	if (e->type() == QFileExistsEvent) {
 		FileExistsEventData *data =
 			reinterpret_cast<FileExistsEventData *> (e->data());
@@ -964,7 +964,7 @@ void DataRecorder::Panel::processData(void) {
 		} else if (token.type == START) {
 
 			if (state == CLOSED) {
-				QCustomEvent *event = new QCustomEvent(QNoFileOpenEvent);
+				QEvent *event = new QEvent(QNoFileOpenEvent);
 				QApplication::postEvent(this, event);
 			} else if (state == OPENED) {
 				startRecording(token.time);
@@ -1031,7 +1031,7 @@ int DataRecorder::Panel::openFile(QString &filename) {
 #endif
 
 	if (QFile::exists(filename)) {
-		QCustomEvent *event = new QCustomEvent(QFileExistsEvent);
+		QEvent *event = new QEvent(QFileExistsEvent);
 		FileExistsEventData data;
 
 		event->setData(&data);
@@ -1083,7 +1083,7 @@ int DataRecorder::Panel::openFile(QString &filename) {
 		}
 	}
 
-	QCustomEvent *event = new QCustomEvent(QSetFileNameEditEvent);
+	QEvent *event = new QEvent(QSetFileNameEditEvent);
 	SetFileNameEditEventData data;
 
 	event->setData(&data);
@@ -1107,7 +1107,7 @@ void DataRecorder::Panel::closeFile(bool shutdown) {
 	H5Fclose(file.id);
 
 	if (!shutdown) {
-		QCustomEvent *event = new QCustomEvent(QSetFileNameEditEvent);
+		QEvent *event = new QEvent(QSetFileNameEditEvent);
 		SetFileNameEditEventData data;
 
 		event->setData(&data);
@@ -1250,7 +1250,7 @@ int DataRecorder::Panel::startRecording(long long timestamp) {
 
 	file.idx = 0;
 
-	QCustomEvent *event = new QCustomEvent(QDisableGroupsEvent);
+	QEvent *event = new QEvent(QDisableGroupsEvent);
 	QApplication::postEvent(this, event);
 
 	return 0;
@@ -1294,7 +1294,7 @@ void DataRecorder::Panel::stopRecording(long long timestamp, bool shutdown) {
 	}
 
 	if (!shutdown) {
-		QCustomEvent *event = new QCustomEvent(QEnableGroupsEvent);
+		QEvent *event = new QEvent(QEnableGroupsEvent);
 		QApplication::postEvent(this, event);
 	}
 }
@@ -1333,7 +1333,7 @@ void DataRecorder::Plugin::doDeferred(const Settings::Object::State &s) {
 	size_t i = 0;
 	for (std::list<Panel *>::iterator j = panelList.begin(), end =
 			panelList.end(); j != end; ++j)
-		(*j)->deferred(s.loadState(QString::number(i++)));
+		(*j)->deferred(s.loadState(QString::number(i++).toStdString()));
 }
 
 void DataRecorder::Plugin::doLoad(const Settings::Object::State &s) {
@@ -1341,7 +1341,7 @@ void DataRecorder::Plugin::doLoad(const Settings::Object::State &s) {
 
 		Panel *panel = new Panel(MainWindow::getInstance()->centralWidget(), buffersize);
 		panelList.push_back(panel);
-		panel->load(s.loadState(QString::number(i)));
+		panel->load(s.loadState(QString::number(i).toStdString()));
 	}
 }
 
@@ -1350,7 +1350,7 @@ void DataRecorder::Plugin::doSave(Settings::Object::State &s) const {
 	size_t n = 0;
 	for (std::list<Panel *>::const_iterator i = panelList.begin(), end =
 			panelList.end(); i != end; ++i)
-		s.saveState(QString::number(n++), (*i)->save());
+		s.saveState(QString::number(n++).toStdString(), (*i)->save());
 }
 
 static Mutex mutex;

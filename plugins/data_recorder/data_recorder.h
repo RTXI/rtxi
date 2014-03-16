@@ -24,10 +24,10 @@
 #include <mutex.h>
 #include <plugin.h>
 #include <workspace.h>
-#include <qobject.h>
-#include <qwidget.h>
+#include <QObject>
+#include <QWidget>
+#include <QEvent>
 #include <vector>
-
 #include <hdf5.h>
 #include <hdf5_hl.h>
 
@@ -115,7 +115,7 @@ namespace DataRecorder {
 
     protected:
 
-        void customEvent(QCustomEvent *);
+        void customEvent(QEvent *);
 
         virtual void doDeferred(const Settings::Object::State &);
         virtual void doLoad(const Settings::Object::State &);
