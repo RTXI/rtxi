@@ -87,14 +87,6 @@ endif
 	@echo ' <OBJECT component="plugin" library="connector.so" id="8" />'		>> $@
 	@echo ' <OBJECT component="plugin" library="performance_measurement.so" id="9" />'>> $@
 	@echo ' <OBJECT component="plugin" library="userprefs.so" id="10" />'>> $@
-	@echo ' <OBJECT component="plugin" library="membrane_test.so" id="11" />'>> $@
-if BUILD_CLAMPPROTOCOL
-	@echo ' <OBJECT component="plugin" library="clamp_protocol.so" id="16" />'>> $@
-endif
-	@echo ' <OBJECT component="plugin" library="am_2400_commander.so" id="12" />'>> $@
-	@echo ' <OBJECT component="plugin" library="axon_axopatch1d_commander.so" id="13" />'>> $@
-	@echo ' <OBJECT component="plugin" library="axon_axopatch200_commander.so" id="14" />'>> $@
-	@echo ' <OBJECT component="plugin" library="axon_multiclamp700_commander.so" id="15" />'>> $@
 	@echo '</RTXI>'									>> $@
 
 Makefile.dynamo_compile:  
