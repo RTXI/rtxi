@@ -446,20 +446,20 @@ DataRecorder::Panel::Panel(QWidget *parent, size_t buffersize) :
 		fileSizeLbl->setText("File Size (kb):");
 		fileSize = new QLabel(hbox);
 		fileSize->setText("No data recorded.");
-		fileSize->setAlignment(AlignLeft | AlignVCenter);
+		fileSize->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
 
 		trialNumLbl = new QLabel(hbox);
 		trialNumLbl->setText("Trial:");
-		trialNumLbl->setAlignment(AlignRight | AlignVCenter);
+		trialNumLbl->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
 		trialNum = new QLabel(hbox);
 		trialNum->setText("0");
-		trialNum->setAlignment(AlignLeft | AlignVCenter);
+		trialNum->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
 
 		trialLengthLbl = new QLabel(hbox);
 		trialLengthLbl->setText("Trial Length (s):");
 		trialLength = new QLabel(hbox);
 		trialLength->setText("No data recorded.");
-		trialLength->setAlignment(AlignLeft | AlignVCenter);
+		trialLength->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
 
 		hbox = new QHBox(this);
 		layout->addWidget(hbox);
@@ -471,7 +471,7 @@ DataRecorder::Panel::Panel(QWidget *parent, size_t buffersize) :
 		recordStatus = new QLabel(hbox);
 		recordStatus->setText("Waiting...");
 		recordStatus->setFrameStyle(QFrame::Panel | QFrame::Sunken);
-		recordStatus->setAlignment(AlignHCenter | AlignVCenter);
+		recordStatus->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
 
 		QPushButton *closeButton = new QPushButton("Close", hbox);
 		QObject::connect(closeButton,SIGNAL(clicked(void)),this,SLOT(close(void)));
@@ -481,10 +481,9 @@ DataRecorder::Panel::Panel(QWidget *parent, size_t buffersize) :
 
 		// Build initial block list
 		IO::Connector::getInstance()->foreachBlock(buildBlockPtrList, &blockPtrList);
-		for (std::vector<IO::Block *>::const_iterator i = blockPtrList.begin(),
-				end = blockPtrList.end(); i != end; ++i)
-			blockList->addItem((*i)->getName() + " " + QString::number(
-						(*i)->getID()));
+		for (std::vector<IO::Block *>::const_iterator i = blockPtrList.begin(), end = blockPtrList.end(); i != end; ++i)
+			blockList->addItem(QString::fromStdString((*i)->getName()) + " " +
+					QString::number((*i)->getID()));
 
 		// Build initial channel list
 		buildChannelList();
@@ -540,17 +539,17 @@ void DataRecorder::Panel::receiveEvent(const Event::Object *event) {
 
 		IO::Block *block = reinterpret_cast<IO::Block *> (event->getParam("block"));
 		blockPtrList.push_back(block);
-		blockList->addItem(block->getName() + " " + QString::number(block->getID()));
+		blockList->addItem(QString::fromStdString(block->getName()) + " " + QString::number(block->getID()));
 		if (blockList->count() == 1)
 			buildChannelList();
 
 	} else if (event->getName() == Event::IO_BLOCK_REMOVE_EVENT) {
 		IO::Block *block = reinterpret_cast<IO::Block *> (event->getParam(
 					"block"));
-		QString name = block->getName() + " " + QString::number(block->getID());
+		QString name = QString::fromStdString(block->getName()) + " " + QString::number(block->getID());
 
 		int n = 0;
-		for (; n < blockList->count() && blockList->text(n) != name; ++n)
+		for (; n < blockList->count() && blockList->itemText(n) != name; ++n)
 			;
 		if (n < blockList->count())
 			blockList->removeItem(n);
@@ -647,9 +646,9 @@ void DataRecorder::Panel::buildChannelList(void) {
 	if (!blockList->count())
 		return;
 
-	IO::Block *block = blockPtrList[blockList->currentItem()];
+	IO::Block *block = blockPtrList[blockList->currentIndex()];
 	IO::flags_t type;
-	switch (typeList->currentItem()) {
+	switch (typeList->currentIndex()) {
 		case 0:
 			type = Workspace::INPUT;
 			break;
@@ -667,7 +666,7 @@ void DataRecorder::Panel::buildChannelList(void) {
 			break;
 		default:
 			ERROR_MSG("DataRecorder::Panel::buildChannelList : invalid type selection\n");
-			typeList->setCurrentItem(0);
+			typeList->setCurrentIndex(0);
 			type = Workspace::INPUT;
 	}
 
@@ -680,9 +679,8 @@ void DataRecorder::Panel::changeDataFile(void) {
 	fileDialog.setWindowTitle("Select Data File");
 	QSettings userprefs;
   userprefs.setPath(QSettings::NativeFormat, QSettings::UserScope, "RTXI");
-	//userprefs.setPath("RTXI.org", "RTXI", QSettings::UserScope);
-	fileDialog.setDir(userprefs.readEntry("/dirs/data", getenv("HOME")));
-	fileDialog.setMode(QFileDialog::AnyFile);
+	fileDialog.setDirectory(userprefs.value("/dirs/data", getenv("HOME")).toString());
+	fileDialog.setFileMode(QFileDialog::AnyFile);
 
 	QStringList filterList;
 	filterList.push_back("HDF5 files (*.h5)");
@@ -691,17 +689,21 @@ void DataRecorder::Panel::changeDataFile(void) {
 
 	fileDialog.exec();
 
-	if (fileDialog.selectedFile() == "/" || fileDialog.selectedFile().isNull()
-			|| fileDialog.selectedFile().isEmpty())
+	QStringList files = fileDialog->selectedFiles();
+	QString filename;
+	if(!files.isEmpty() || files[0] != NULL || files[0] != "/" )
+		filename = files[0];
+
+	/*if (fileDialog.selectedFile() == "/" || fileDialog.selectedFile().isNull() || fileDialog.selectedFile().isEmpty())
 		return;
 
-	QString filename = fileDialog.selectedFile();
+	QString filename = fileDialog.selectedFile();*/
 
-	if (!filename.lower().endsWith(QString(".h5")))
+	if (!filename.toLower().endsWith(QString(".h5")))
 		filename += ".h5";
 
 	// write this directory to the user prefs as most recently used
-	userprefs.writeEntry("/dirs/data", fileDialog.dirPath());
+	userprefs.setValue("/dirs/data", fileDialog.directory().path());
 
 	OpenFileEvent event(filename, fifo);
 	RT::System::getInstance()->postEvent(&event);
@@ -712,8 +714,8 @@ void DataRecorder::Panel::insertChannel(void) {
 		return;
 
 	Channel *channel = new Channel();
-	channel->block = blockPtrList[blockList->currentItem()];
-	switch (typeList->currentItem()) {
+	channel->block = blockPtrList[blockList->currentIndex()];
+	switch (typeList->currentIndex()) {
 		case 0:
 			channel->type = Workspace::INPUT;
 			break;
@@ -731,10 +733,10 @@ void DataRecorder::Panel::insertChannel(void) {
 			break;
 		default:
 			ERROR_MSG("DataRecorder::Panel::insertChannel : invalid type selection\n");
-			typeList->setCurrentItem(0);
+			typeList->setCurrentIndex(0);
 			channel->type = Workspace::INPUT;
 	}
-	channel->index = channelList->currentItem();
+	channel->index = channelList->currentIndex();
 
 	channel->name.sprintf("%s %ld : %s", channel->block->getName().c_str(),
 			channel->block->getID(), channel->block->getName(channel->type,
@@ -1008,8 +1010,8 @@ void DataRecorder::Panel::processData(void) {
 						H5T_IEEE_F64LE);
 
 				QString parameter_name = QString::number(block->getID()) + " "
-					+ block->getName() + " : " + block->getName(
-							Workspace::PARAMETER, data.index);
+					+ QString::fromStdString(block->getName()) + " : " + QString::fromStdString(block->getName(
+							Workspace::PARAMETER, data.index));
 
 				hid_t data = H5PTopen(file.pdata, parameter_name.toLatin1());
 				H5PTappend(data, 1, &param);
@@ -1193,8 +1195,8 @@ int DataRecorder::Panel::startRecording(long long timestamp) {
 		IO::Block *block = i->block;
 		for (size_t j = 0; j < block->getCount(Workspace::PARAMETER); ++j) {
 			QString parameter_name = QString::number(block->getID()) + " "
-				+ block->getName() + " : " + block->getName(
-						Workspace::PARAMETER, j);
+				+ QString::fromStdString(block->getName()) + " : " + QString::fromStdString(block->getName(
+						Workspace::PARAMETER, j));
 			data = H5PTcreate_fl(file.pdata, parameter_name.toLatin1(),
 					param_type, sizeof(param_hdf_t), -1);
 			struct param_hdf_t value = { 0, block->getValue(
@@ -1204,8 +1206,8 @@ int DataRecorder::Panel::startRecording(long long timestamp) {
 		}
 		for (size_t j = 0; j < block->getCount(Workspace::COMMENT); ++j) {
 			QString comment_name = QString::number(block->getID()) + " "
-				+ block->getName() + " : " + block->getName(
-						Workspace::COMMENT, j);
+				+ QString::fromStdString(block->getName()) + " : " + QString::fromStdString(block->getName(
+						Workspace::COMMENT, j));
 			hsize_t
 				dims =
 				dynamic_cast<Workspace::Instance *> (block)->getValueString(
