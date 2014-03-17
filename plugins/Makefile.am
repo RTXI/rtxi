@@ -8,10 +8,10 @@ SUBDIRS = \
 	performance_measurement \
 	system_control \
 	model_loader \
-	data_recorder \
-	connector \
-	userprefs \
-	oscilloscope \
-	dynamo_model_loader \
 	comedi_device \
 	comedilib_device 
+#dynamo_model_loader 
+#data_recorder \
+#connector \
+#userprefs \
+#oscilloscope
