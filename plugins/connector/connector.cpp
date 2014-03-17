@@ -28,8 +28,8 @@ struct block_list_info_t {
 
 static void buildBlockList(IO::Block *block,void *arg) {
 	block_list_info_t *info = static_cast<block_list_info_t *>(arg);
-	info->blockList0->addItem(QString::fromStdString(block->getName())+QString(" ")+QString::number(block->getID()));
-	info->blockList1->addItem(QString::fromStdString(block->getName())+QString(" ")+QString::number(block->getID()));
+	info->blockList0->addItem(QString::fromStdString(block->getName())+" "+QString::number(block->getID()));
+	info->blockList1->addItem(QString::fromStdString(block->getName())+" "+QString::number(block->getID()));
 	info->blocks->push_back(block);
 }
 
@@ -104,8 +104,8 @@ Connector::Panel::Panel(QWidget *parent) : QWidget(parent) {
 
 		IO::Connector::getInstance()->foreachConnection(&buildConnectionList,&links);
 		for(size_t i = 0, iend = links.size();i < iend;++i) {
-			connectionBox->addItem(QString::number(links[i].src->getID())+" "+links[i].src->getName()+" : "+QString::number(links[i].src_idx)+" "+links[i].src->getName(IO::OUTPUT,links[i].src_idx)+" ==> "+
-					QString::number(links[i].dest->getID())+" "+links[i].dest->getName()+" : "+QString::number(links[i].dest_idx)+" "+links[i].dest->getName(IO::INPUT,links[i].dest_idx));
+			connectionBox->addItem(QString::number(links[i].src->getID())+" "+QString::fromStdString(links[i].src->getName())+" : "+QString::number(links[i].src_idx)+" "+QString::fromStdString(links[i].src->getName(IO::OUTPUT,links[i].src_idx))+" ==> "+
+					QString::number(links[i].dest->getID())+" "+QString::fromStdString(links[i].dest->getName())+" : "+QString::number(links[i].dest_idx)+" "+QString::fromStdString(links[i].dest->getName(IO::INPUT,links[i].dest_idx)));
 		}
 	}
 
@@ -117,8 +117,8 @@ void Connector::Panel::receiveEvent(const Event::Object *event) {
 	if(event->getName() == Event::IO_BLOCK_INSERT_EVENT) {
 		IO::Block *block = reinterpret_cast<IO::Block *>(event->getParam("block"));
 
-		inputBlock->addItem(block->getName()+QString(" ")+QString::number(block->getID()));
-		outputBlock->addItem(block->getName()+QString(" ")+QString::number(block->getID()));
+		inputBlock->addItem(QString::fromStdString(block->getName())+QString(" ")+QString::number(block->getID()));
+		outputBlock->addItem(QString::fromStdString(block->getName())+QString(" ")+QString::number(block->getID()));
 		blocks.push_back(block);
 
 		if(blocks.size() == 1) {
@@ -154,20 +154,20 @@ void Connector::Panel::receiveEvent(const Event::Object *event) {
 		IO::Block *dest = reinterpret_cast<IO::Block *>(event->getParam("dest"));
 		size_t dest_idx = *reinterpret_cast<size_t *>(event->getParam("dest_num"));
 
-		connectionBox->addItem(QString::number(src->getID())+" "+src->getName()+" : "+
-				QString::number(src_idx)+" "+src->getName(IO::OUTPUT,src_idx)+" ==> "+
-				QString::number(dest->getID())+" "+dest->getName()+" : "+
-				QString::number(dest_idx)+" "+dest->getName(IO::INPUT,dest_idx));
+		connectionBox->addItem(QString::number(src->getID())+" "+QString::fromStdString(src->getName())+" : "+
+				QString::number(src_idx)+" "+QString::fromStdString(src->getName(IO::OUTPUT,src_idx))+" ==> "+
+				QString::number(dest->getID())+" "+QString::fromStdString(dest->getName())+" : "+
+				QString::number(dest_idx)+" "+QString::fromStdString(dest->getName(IO::INPUT,dest_idx)));
 	} else if(event->getName() == Event::IO_LINK_REMOVE_EVENT) {
 		IO::Block *src = reinterpret_cast<IO::Block *>(event->getParam("src"));
 		size_t src_idx = *reinterpret_cast<size_t *>(event->getParam("src_num"));
 		IO::Block *dest = reinterpret_cast<IO::Block *>(event->getParam("dest"));
 		size_t dest_idx = *reinterpret_cast<size_t *>(event->getParam("dest_num"));
 
-		QString link_name = QString::number(src->getID())+" "+src->getName()+" : "+	
-			QString::number(src_idx)+" "+src->getName(IO::OUTPUT,src_idx)+" ==> "+
-			QString::number(dest->getID())+" "+dest->getName()+" : "+
-			QString::number(dest_idx)+" "+dest->getName(IO::INPUT,dest_idx);
+		QString link_name = QString::number(src->getID())+" "+QString::fromStdString(src->getName())+" : "+	
+			QString::number(src_idx)+" "+QString::fromStdString(src->getName(IO::OUTPUT,src_idx))+" ==> "+
+			QString::number(dest->getID())+" "+QString::fromStdString(dest->getName())+" : "+
+			QString::number(dest_idx)+" "+QString::fromStdString(dest->getName(IO::INPUT,dest_idx));
 
 		size_t index;
 		for(index=0;index < connectionBox->count() && connectionBox->text(index) != link_name;++index);
