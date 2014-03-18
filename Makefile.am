@@ -42,7 +42,7 @@ ChangeLog:
 
 rtxi.conf: 
 	@echo "Generating rtxi.conf..."
-	@echo '<RTXI class="settings" version="1.31" >'						> $@
+	@echo '<RTXI class="settings" version="2.0" >'						> $@
 	@echo ' <OBJECT component="rt" id="0" >'					>> $@
 	@echo '  <PARAM name="Period" >1e+06</PARAM>'					>> $@
 	@echo ' </OBJECT>'								>> $@
