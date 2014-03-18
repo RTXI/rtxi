@@ -14,7 +14,7 @@
 	 You should have received a copy of the GNU General Public License
 	 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-*/
+ */
 
 #include <QApplication>
 #include <iostream>
@@ -50,7 +50,7 @@ int main(int argc,char *argv[]) {
 	int retval = 0;
 
 	/* Initialize rtdk */
-	//rt_print_auto_init(1);
+	rt_print_auto_init(1);
 
 	/* Try to Exit Cleanly on Signals */
 	parentThread = getpid();
