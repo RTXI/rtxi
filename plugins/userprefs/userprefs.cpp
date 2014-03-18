@@ -21,11 +21,11 @@
  * is destructed. So all Reset, Apply, and Cancel buttons all close the panel.
  */
 
-#include <QtGui>
-#include <QFileDialog>
 #include <debug.h>
 #include <main_window.h>
 #include <userprefs.h>
+#include <QtGui>
+#include <QFileDialog>
 
 UserPrefs::Panel::Panel(QWidget *parent) : QWidget(parent) {
 	setAttribute(Qt::WA_DeleteOnClose);
@@ -38,8 +38,8 @@ UserPrefs::Panel::Panel(QWidget *parent) : QWidget(parent) {
   userprefs.setPath(QSettings::NativeFormat, QSettings::UserScope, "RTXI");
 
   // create GUI elements and set text
-  QButtonGroup *dirGroup;
-  dirGroup = new QButtonGroup(this);
+  QGroupBox *dirGroup;
+  dirGroup = new QGroupBox();
 
   QWidget *hbox;
   hbox = new QWidget(dirGroup);
@@ -117,23 +117,23 @@ void UserPrefs::Panel::cancel(void) {
 }
 
 void UserPrefs::Panel::chooseSettingsDir(void) {
-  QString dir_name = QFileDialog::getExistingDirectory(userprefs.value(
-      "/dirs/setfiles", getenv("HOME")).toString(), MainWindow::getInstance(),
-      "get existing directory", "Choose a default directory for settings files", TRUE);
+  QString dir_name = QFileDialog::getExistingDirectory(this, tr("Choose default directory for settings files"), 
+  		userprefs.value("/dirs/setfiles", getenv("HOME")).toString(),
+  		QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
   settingsDirEdit->setText(dir_name);
 }
 
 void UserPrefs::Panel::chooseDynamoDir(void) {
-  QString dir_name = QFileDialog::getExistingDirectory(userprefs.value(
-      "/dirs/setfiles", getenv("HOME")).toString(), MainWindow::getInstance(),
-      "get existing directory", "Choose a default directory for DYNAMO models", TRUE);
+  QString dir_name = QFileDialog::getExistingDirectory(this, tr("Choose default directory for DYNAMO models"), 
+  		userprefs.value("/dirs/setfiles", getenv("HOME")).toString(),
+  		QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
   dynamoDirEdit->setText(dir_name);
 }
 
 void UserPrefs::Panel::chooseDataDir(void) {
-  QString dir_name = QFileDialog::getExistingDirectory(userprefs.value(
-      "/dirs/data", getenv("HOME")).toString(), MainWindow::getInstance(),
-      "get existing directory", "Choose a default directory for HDF5 data files", TRUE);
+  QString dir_name = QFileDialog::getExistingDirectory(this, tr("Choose default directory for HDF5 data files"), 
+  		userprefs.value("/dirs/setfiles", getenv("HOME")).toString(),
+  		QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
   dataDirEdit->setText(dir_name);
 }
 
@@ -142,7 +142,7 @@ extern "C" Plugin::Object * createRTXIPlugin(void *) {
 }
 
 UserPrefs::Prefs::Prefs(void) : panel(0) {
-	menuID = MainWindow::getInstance()->createSystemMenuItem("Preferences",this,SLOT(createPrefsPanel(void)));
+	MainWindow::getInstance()->createSystemMenuItem("Preferences",this,SLOT(createPrefsPanel(void)));
 }
 
 UserPrefs::Prefs::~Prefs(void) {

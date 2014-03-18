@@ -14,7 +14,7 @@
 	 You should have received a copy of the GNU General Public License
 	 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-*/
+ */
 
 #include <QLabel>
 #include <QLayout>
@@ -41,8 +41,7 @@ static size_t num_vars = sizeof( vars ) / sizeof( Workspace::variable_t ); // Re
 PerformanceMeasurement::Panel::Panel(QWidget *parent)
 	: QWidget(parent),
 	Workspace::Instance( "Performance Measuremnt", vars, num_vars ), state( INIT1),
-	duration( 0 ), lastRead( 0 ), timestep( 0 ), maxDuration( 0 ), maxTimestep( 0 ), jitter( 0 )
-{
+	duration( 0 ), lastRead( 0 ), timestep( 0 ), maxDuration( 0 ), maxTimestep( 0 ), jitter( 0 ) {
 	QWidget::setAttribute(Qt::WA_DeleteOnClose);
 	QWidget *hbox = new QWidget;
 	QBoxLayout *layout = new QVBoxLayout(this);
@@ -188,14 +187,11 @@ createRTXIPlugin(void *)
 	return PerformanceMeasurement::Plugin::getInstance();
 }
 
-PerformanceMeasurement::Plugin::Plugin(void) :
-	panel(0)
-{
-	menuID = MainWindow::getInstance()->createSystemMenuItem("Real-time Benchmarks",this,SLOT(createPerformanceMeasurementPanel(void)));
+PerformanceMeasurement::Plugin::Plugin(void) : panel(0) {
+	MainWindow::getInstance()->createSystemMenuItem("Real-time Benchmarks",this,SLOT(createPerformanceMeasurementPanel(void)));
 }
 
-PerformanceMeasurement::Plugin::~Plugin(void)
-{
+PerformanceMeasurement::Plugin::~Plugin(void) {
 	MainWindow::getInstance()->removeSystemMenuItem(menuID);
 	if (panel)
 		delete panel;
@@ -203,9 +199,8 @@ PerformanceMeasurement::Plugin::~Plugin(void)
 	panel = 0;
 }
 
-	void
-PerformanceMeasurement::Plugin::createPerformanceMeasurementPanel(void)
-{
+void
+PerformanceMeasurement::Plugin::createPerformanceMeasurementPanel(void) {
 	if (!panel)
 		panel = new Panel(MainWindow::getInstance()->centralWidget());
 	panel->show();
@@ -214,9 +209,7 @@ PerformanceMeasurement::Plugin::createPerformanceMeasurementPanel(void)
 static Mutex mutex;
 PerformanceMeasurement::Plugin *PerformanceMeasurement::Plugin::instance = 0;
 
-	PerformanceMeasurement::Plugin *
-PerformanceMeasurement::Plugin::getInstance(void)
-{
+PerformanceMeasurement::Plugin * PerformanceMeasurement::Plugin::getInstance(void) {
 	if (instance)
 		return instance;
 

@@ -27,7 +27,7 @@ extern "C" Plugin::Object *createRTXIPlugin(void *) {
 }
 
 SystemControl::SystemControl(void) {
-    menuID = MainWindow::getInstance()->createSystemMenuItem("Control Panel",this,SLOT(createControlPanel(void)));
+    MainWindow::getInstance()->createSystemMenuItem("Control Panel",this,SLOT(createControlPanel(void)));
 }
 
 SystemControl::~SystemControl(void) {

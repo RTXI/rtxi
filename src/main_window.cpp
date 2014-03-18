@@ -167,7 +167,7 @@ void MainWindow::removeModuleMenuItemAt (int id) {
 	//moduleMenu->removeItemAt (id);
 }
 
-int MainWindow::createUtilMenuItem (const std::string & text, const QObject * receiver, const char *member) {
+QAction* MainWindow::createUtilMenuItem(const QString &text, const QObject * receiver, const char *member) {
 	//return utilMenu->addAction (text, receiver, member);
 }
 
@@ -317,7 +317,7 @@ void MainWindow::updateUtilModules(){
   utilMenu->insertItem(tr("&Signals"), signalSubMenu);*/
 }
 
-int MainWindow::createPatchClampMenuItem (const std::string & text, const QObject * receiver, const char *member) {
+QAction* MainWindow::createPatchClampMenuItem (const QString &text, const QObject *receiver, const char *member) {
 	//return patchClampSubMenu->addAction(text, receiver, member);
 }
 
@@ -325,10 +325,9 @@ int MainWindow::insertSystemMenuSeparator (void) {
 	//return systemMenu->addSeparator();
 }
 
-/*int MainWindow::createSystemMenuItem (const std::string & text,
-	const QObject * receiver, const char *member){
+QAction* MainWindow::createSystemMenuItem (const QString &text, const QObject *receiver, const char *member) {
 	return systemMenu->addAction(text, receiver, member);
-	}*/
+}
 
 void MainWindow::removeSystemMenuItem (int id) {
 	//systemMenu->removeItem(id);

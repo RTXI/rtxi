@@ -140,7 +140,7 @@ class MainWindow : public QMainWindow
 			* \return The index of the new menu item.
 			*/
 
-		int createUtilMenuItem(const std::string &label, const QObject *handler,
+		QAction* createUtilMenuItem(const QString &label, const QObject *handler,
 						const char *slot);
 
 		/*!
@@ -180,7 +180,7 @@ class MainWindow : public QMainWindow
 			* \return The index of the new menu item.
 			*/
 
-		int createPatchClampMenuItem(const std::string &label, const QObject *handler, const char *slot);
+		QAction* createPatchClampMenuItem(const QString &label, const QObject *handler, const char *slot);
 
 		/*!
 			* Add an item to the System menu.
@@ -191,7 +191,7 @@ class MainWindow : public QMainWindow
 			* \return The index of the new menu item.
 			*/
 
-		int createSystemMenuItem(const std::string &label, const QObject *handler, const char *slot);
+		QAction* createSystemMenuItem(const QString &label, const QObject *handler, const char *slot);
 
 		/*!
 			* Insert a line separator into the System menu.
