@@ -47,13 +47,16 @@ DefaultGUILineEdit::~DefaultGUILineEdit(void) {
 }
 
 void DefaultGUILineEdit::blacken(void) {
-	setPaletteForegroundColor(Qt::black);
+	palette.setBrush(this->foregroundRole(), Qt::black);
+	this->setPalette(palette);
 	setModified(false);
 }
 
 void DefaultGUILineEdit::redden(void) {
-	if(isModified())
-		setPaletteForegroundColor(Qt::red);
+	if(isModified()) {
+		palette.setBrush(this->foregroundRole(), Qt::red);
+		this->setPalette(palette);
+	}
 }
 
 DefaultGUIModel::DefaultGUIModel(std::string name, DefaultGUIModel::variable_t *var, size_t size):
@@ -120,7 +123,8 @@ void DefaultGUIModel::createGUI(DefaultGUIModel::variable_t *var, int size) {
 				param.str_value = new QString;
 			} else if (var[i].flags & STATE) {
 				param.edit->setReadOnly(true);
-				param.edit->setPaletteForegroundColor(Qt::darkGray);
+				palette.setBrush(param.edit->foregroundRole(), Qt::darkGray);
+				param.edit->setPalette(palette);
 				param.type = STATE;
 				param.index = nstate++;
 			} else if (var[i].flags & EVENT) {
@@ -131,14 +135,21 @@ void DefaultGUIModel::createGUI(DefaultGUIModel::variable_t *var, int size) {
 				param.type = COMMENT;
 				param.index = ncomment++;
 			}
-			parameter[var[i].name] = param;
+			parameter[QString::fromStdString(var[i].name)] = param;
 		}
 	}
 
 	QWidget *hbox1 = new QWidget;
-	QPushButton *pauseButton = new QPushButton;
-	QPushButton *modifyButton = new QPushButton;
-	QPushButton *unloadButton = new QPushButton;
+
+	pauseButton = new QPushButton("Pause", this);
+	pauseButton->setCheckable(true);
+	QObject::connect(pauseButton,SIGNAL(toggled(bool)),this,SLOT(pause(bool)));
+
+	modifyButton = new QPushButton("Modify", this);
+	QObject::connect(modifyButton,SIGNAL(clicked(void)),this,SLOT(modify(void)));
+
+	unloadButton = new QPushButton("Unload", this);;
+	QObject::connect(unloadButton,SIGNAL(clicked(void)),this,SLOT(exit(void)));
 
 	QHBoxLayout *qhboxlayout = new QHBoxLayout;
 	qhboxlayout->addWidget(pauseButton);
@@ -146,17 +157,10 @@ void DefaultGUIModel::createGUI(DefaultGUIModel::variable_t *var, int size) {
 	qhboxlayout->addWidget(unloadButton);
 	hbox1->setLayout(qhboxlayout);
 
-	QHBox *hbox1 = new QHBox(this);
-
-	pauseButton->setCheckable(true);
-	pauseButton = new QPushButton("Pause", hbox1);
-	QObject::connect(pauseButton,SIGNAL(toggled(bool)),this,SLOT(pause(bool)));
-
-	QPushButton *modifyButton = new QPushButton("Modify", hbox1);
-	QObject::connect(modifyButton,SIGNAL(clicked(void)),this,SLOT(modify(void)));
-
-	QPushButton *unloadButton = new QPushButton("Unload", hbox1);
-	QObject::connect(unloadButton,SIGNAL(clicked(void)),this,SLOT(exit(void)));
+	//QHBoxLayout *hbox1 = new QHBoxLayout();
+	//pauseButton = new QPushButton("Pause", hbox1);
+	//QPushButton *modifyButton = new QPushButton("Modify", hbox1);
+	//QPushButton *unloadButton = new QPushButton("Unload", hbox1);
 
 	layout->addWidget(hbox1);
 	show();
@@ -179,7 +183,8 @@ void DefaultGUIModel::refresh(void) {
 	for (std::map<QString, param_t>::iterator i = parameter.begin(); i!= parameter.end(); ++i) {
 		if (i->second.type & (STATE | EVENT)) {
 			i->second.edit->setText(QString::number(getValue(i->second.type, i->second.index)));
-			i->second.edit->setPaletteForegroundColor(Qt::darkGray);
+			palette.setBrush(i->second.edit->foregroundRole(), Qt::darkGray);
+			i->second.edit->setPalette(palette);
 		} else if ((i->second.type & PARAMETER) && !i->second.edit->isModified()
 				&& i->second.edit->text() != *i->second.str_value) {
 			i->second.edit->setText(*i->second.str_value);

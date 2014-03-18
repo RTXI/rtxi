@@ -32,7 +32,7 @@
 #include <main_window.h>
 #include <plugin.h>
 
-#ifdef __XENO__
+#ifdef _RTUTILS_H
 #include <rtdk.h>
 #endif
 
@@ -50,7 +50,9 @@ int main(int argc,char *argv[]) {
 	int retval = 0;
 
 	/* Initialize rtdk */
+	#ifdef _RTUTILS_H
 	rt_print_auto_init(1);
+	#endif
 
 	/* Try to Exit Cleanly on Signals */
 	parentThread = getpid();

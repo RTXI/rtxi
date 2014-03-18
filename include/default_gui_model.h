@@ -36,23 +36,20 @@ class DefaultGUILineEdit : public QLineEdit {
 	Q_OBJECT
 
 	public:
-
 		DefaultGUILineEdit(QWidget *);
 		~DefaultGUILineEdit(void);
-
 		void blacken(void);
+		QPalette palette;
 
 		public slots:
-
 			void redden(void);
-
 }; // class DefaultGUILineEdit
 
 /*!
  * A class that provides a simplified C++ interface for model creation.
  */
-class DefaultGUIModel : public QWidget, public RT::Thread, public Plugin::Object, public Workspace::Instance, public Event::Handler
-{
+class DefaultGUIModel : public QWidget, public RT::Thread, public Plugin::Object,
+	public Workspace::Instance, public Event::Handler {
 
 	Q_OBJECT
 
@@ -156,10 +153,13 @@ class DefaultGUIModel : public QWidget, public RT::Thread, public Plugin::Object
 		 *
 		 * \sa DefaultGUIModel::update_flags_t
 		 */
-		void
-			createGUI(DefaultGUIModel::variable_t *var, int size);
+		void createGUI(DefaultGUIModel::variable_t *var, int size);
 
+		// Default buttons
 		QPushButton *pauseButton;
+		QPushButton *modifyButton;
+		QPushButton *unloadButton;
+
 		struct param_t {
 			QLabel *label;
 			DefaultGUILineEdit *edit;
@@ -168,7 +168,7 @@ class DefaultGUIModel : public QWidget, public RT::Thread, public Plugin::Object
 			QString *str_value;
 		};
 		std::map<QString,param_t> parameter;
-
+		QPalette palette;
 
 		public slots:
 
