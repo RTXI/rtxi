@@ -14,7 +14,7 @@
 	 You should have received a copy of the GNU General Public License
 	 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-*/
+ */
 
 #include <QTableWidget>
 #include <QWidget>
@@ -46,15 +46,14 @@ DefaultGUILineEdit::DefaultGUILineEdit(QWidget *parent):QLineEdit(parent) {
 DefaultGUILineEdit::~DefaultGUILineEdit(void) {
 }
 
-// VISITTWO
 void DefaultGUILineEdit::blacken(void) {
-	//setPaletteForegroundColor(Qt::black);
+	setPaletteForegroundColor(Qt::black);
 	setModified(false);
 }
 
 void DefaultGUILineEdit::redden(void) {
-	//if(isModified())
-	//setPaletteForegroundColor(Qt::red);
+	if(isModified())
+		setPaletteForegroundColor(Qt::red);
 }
 
 DefaultGUIModel::DefaultGUIModel(std::string name, DefaultGUIModel::variable_t *var, size_t size):
@@ -100,9 +99,8 @@ void DefaultGUIModel::createGUI(DefaultGUIModel::variable_t *var, int size) {
 			param.edit = new DefaultGUILineEdit(viewport);
 			scrollLayout->addWidget(param.edit, parameter.size(), 1);
 
-			// VISITTWO
-			/*QToolTip::add(param.label, var[i].description);
-				QToolTip::add(param.edit, var[i].description);*/
+			param.label->setToolTip(QString::fromStdString(var[i].description));
+			param.edit->setToolTip(QString::fromStdString(var[i].description));
 
 			if (var[i].flags & PARAMETER) {
 				if (var[i].flags & DOUBLE) {
@@ -122,7 +120,7 @@ void DefaultGUIModel::createGUI(DefaultGUIModel::variable_t *var, int size) {
 				param.str_value = new QString;
 			} else if (var[i].flags & STATE) {
 				param.edit->setReadOnly(true);
-				//param.edit->setPaletteForegroundColor(Qt::darkGray);
+				param.edit->setPaletteForegroundColor(Qt::darkGray);
 				param.type = STATE;
 				param.index = nstate++;
 			} else if (var[i].flags & EVENT) {
@@ -133,9 +131,7 @@ void DefaultGUIModel::createGUI(DefaultGUIModel::variable_t *var, int size) {
 				param.type = COMMENT;
 				param.index = ncomment++;
 			}
-
-			// VISITTWO
-			//parameter[var[i].name] = param;
+			parameter[var[i].name] = param;
 		}
 	}
 
@@ -150,16 +146,19 @@ void DefaultGUIModel::createGUI(DefaultGUIModel::variable_t *var, int size) {
 	qhboxlayout->addWidget(unloadButton);
 	hbox1->setLayout(qhboxlayout);
 
-	//QHBox *hbox1 = new QHBox(this);
-	pauseButton->setCheckable(true);
-	//pauseButton = new QPushButton("Pause", hbox1);
-	QObject::connect(pauseButton,SIGNAL(toggled(bool)),this,SLOT(pause(bool)));
-	//QPushButton *modifyButton = new QPushButton("Modify", hbox1);
-	QObject::connect(modifyButton,SIGNAL(clicked(void)),this,SLOT(modify(void)));
-	//QPushButton *unloadButton = new QPushButton("Unload", hbox1);
-	QObject::connect(unloadButton,SIGNAL(clicked(void)),this,SLOT(exit(void)));
-	//layout->addWidget(hbox1);
+	QHBox *hbox1 = new QHBox(this);
 
+	pauseButton->setCheckable(true);
+	pauseButton = new QPushButton("Pause", hbox1);
+	QObject::connect(pauseButton,SIGNAL(toggled(bool)),this,SLOT(pause(bool)));
+
+	QPushButton *modifyButton = new QPushButton("Modify", hbox1);
+	QObject::connect(modifyButton,SIGNAL(clicked(void)),this,SLOT(modify(void)));
+
+	QPushButton *unloadButton = new QPushButton("Unload", hbox1);
+	QObject::connect(unloadButton,SIGNAL(clicked(void)),this,SLOT(exit(void)));
+
+	layout->addWidget(hbox1);
 	show();
 }
 
@@ -176,12 +175,11 @@ void DefaultGUIModel::exit(void) {
 	Plugin::Manager::getInstance()->unload(this);
 }
 
-// VISITTWO
 void DefaultGUIModel::refresh(void) {
 	for (std::map<QString, param_t>::iterator i = parameter.begin(); i!= parameter.end(); ++i) {
 		if (i->second.type & (STATE | EVENT)) {
 			i->second.edit->setText(QString::number(getValue(i->second.type, i->second.index)));
-			//i->second.edit->setPaletteForegroundColor(Qt::darkGray);
+			i->second.edit->setPaletteForegroundColor(Qt::darkGray);
 		} else if ((i->second.type & PARAMETER) && !i->second.edit->isModified()
 				&& i->second.edit->text() != *i->second.str_value) {
 			i->second.edit->setText(*i->second.str_value);
@@ -195,9 +193,7 @@ void DefaultGUIModel::refresh(void) {
 
 void DefaultGUIModel::modify(void) {
 	bool active = getActive();
-
 	setActive(false);
-
 	// Ensure that the realtime thread isn't in the middle of executing DefaultGUIModel::execute()
 	SyncEvent event;
 	RT::System::getInstance()->postEvent(&event);
@@ -279,16 +275,16 @@ void DefaultGUIModel::setEvent(const QString &name, double &ref) {
 	}
 }
 
-	void DefaultGUIModel::pause(bool p) {
-		if (pauseButton->isChecked() != p)
-			pauseButton->setDown(p);
+void DefaultGUIModel::pause(bool p) {
+	if (pauseButton->isChecked() != p)
+		pauseButton->setDown(p);
 
-		setActive(!p);
-		if (p)
-			update(PAUSE);
-		else
-			update(UNPAUSE);
-	}
+	setActive(!p);
+	if (p)
+		update(PAUSE);
+	else
+		update(UNPAUSE);
+}
 
 void DefaultGUIModel::doDeferred(const Settings::Object::State &) {
 	setWindowTitle(QString::number(getID()) + " " + QString::fromStdString(myname));

@@ -46,7 +46,7 @@ Connector::Panel::Panel(QWidget *parent) : QWidget(parent) {
 				"button immediately makes a connection active or inactive in real-time. Current connections "
 				"are listed in the \"Connections\" box.</p>");
 
-		QGridLayout *layout = new QGridLayout(this,2,3);
+		QGridLayout *layout = new QGridLayout();//this,2,3);
 
 		QGroupBox *gbox0 = new QGroupBox("Output Block",this);
 		layout->addWidget(gbox0,0,0);
