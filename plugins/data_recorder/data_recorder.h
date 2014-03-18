@@ -24,12 +24,12 @@
 #include <mutex.h>
 #include <plugin.h>
 #include <workspace.h>
-#include <QObject>
-#include <QWidget>
-#include <QEvent>
 #include <vector>
 #include <hdf5.h>
 #include <hdf5_hl.h>
+#include <QObject>
+#include <QWidget>
+#include <QEvent>
 
 class QComboBox;
 class QGroupBox;

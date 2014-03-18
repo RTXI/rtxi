@@ -286,7 +286,7 @@ void DataRecorder::stopRecording(void) {
 
 void DataRecorder::openFile(const QString& filename) {
 	Event::Object event(Event::OPEN_FILE_EVENT);
-	event.setParam("filename", const_cast<char *> (filename.toLatin1()));
+	event.setParam("filename", const_cast<char *> (filename.toLocal8Bit().data()));//toLatin3()));
 
 	if (RT::OS::isRealtime())
 		Event::Manager::getInstance()->postEventRT(&event);
