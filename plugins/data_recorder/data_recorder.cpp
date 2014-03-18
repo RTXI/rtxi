@@ -1314,7 +1314,7 @@ DataRecorder::Plugin::Plugin(void) {
   userprefs.setPath(QSettings::NativeFormat, QSettings::UserScope, "RTXI");
 	buffersize = (userprefs.value("/system/HDFbuffer", 10).toInt())*1048576;
 
-	menuID = MainWindow::getInstance()->createSystemMenuItem("HDF Data Recorder",this,SLOT(createDataRecorderPanel(void)));
+	MainWindow::getInstance()->createSystemMenuItem("HDF Data Recorder",this,SLOT(createDataRecorderPanel(void)));
 }
 
 DataRecorder::Plugin::~Plugin(void) {

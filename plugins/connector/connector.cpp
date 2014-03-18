@@ -186,7 +186,7 @@ void Connector::Panel::buildInputChannelList(void) {
 	IO::Block *block = blocks[inputBlock->currentIndex()];
 
 	for(size_t i = 0;i < block->getCount(IO::INPUT);++i)
-		inputChannel->addItem(block->getName(IO::INPUT,i));
+		inputChannel->addItem(QString::fromStdString(block->getName(IO::INPUT,i)));
 
 	updateConnectionButton();
 }
@@ -199,7 +199,7 @@ void Connector::Panel::buildOutputChannelList(void) {
 	IO::Block *block = blocks[outputBlock->currentIndex()];
 
 	for(size_t i = 0;i < block->getCount(IO::OUTPUT);++i)
-		outputChannel->addItem(block->getName(IO::OUTPUT,i));
+		outputChannel->addItem(QString::fromStdString(block->getName(IO::OUTPUT,i)));
 
 	updateConnectionButton();
 }
@@ -300,10 +300,9 @@ extern "C" Plugin::Object *createRTXIPlugin(void *) {
 	return Connector::Plugin::getInstance();
 }
 
-Connector::Plugin::Plugin(void)
-	: panel(0) {
-		menuID = MainWindow::getInstance()->createSystemMenuItem("Connector",this,SLOT(showConnectorPanel(void)));
-	}
+Connector::Plugin::Plugin(void) : panel(0) {
+	MainWindow::getInstance()->createSystemMenuItem("Connector",this,SLOT(showConnectorPanel(void)));
+}
 
 Connector::Plugin::~Plugin(void) {
 	MainWindow::getInstance()->removeSystemMenuItem(menuID);

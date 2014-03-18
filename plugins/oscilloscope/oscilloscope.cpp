@@ -1421,53 +1421,39 @@ Oscilloscope::Panel::doSave(Settings::Object::State &s) const
     }
 }
 
-extern "C" Plugin::Object *
-createRTXIPlugin(void *)
-{
+extern "C" Plugin::Object * createRTXIPlugin(void *) {
   return Oscilloscope::Plugin::getInstance();
 }
 
-Oscilloscope::Plugin::Plugin(void)
-{
-menuID = MainWindow::getInstance()->createSystemMenuItem("Oscilloscope",this,SLOT(createOscilloscopePanel(void)));
-
+Oscilloscope::Plugin::Plugin(void) {
+	MainWindow::getInstance()->createSystemMenuItem("Oscilloscope",this,SLOT(createOscilloscopePanel(void)));
 }
 
-Oscilloscope::Plugin::~Plugin(void)
-{
+Oscilloscope::Plugin::~Plugin(void) {
   MainWindow::getInstance()->removeSystemMenuItem(menuID);
   while (panelList.size())
     delete panelList.front();
   instance = 0;
 }
 
-void
-Oscilloscope::Plugin::createOscilloscopePanel(void)
-{
+void Oscilloscope::Plugin::createOscilloscopePanel(void) {
   Panel *panel = new Panel(MainWindow::getInstance()->centralWidget());
   panelList.push_back(panel);
 }
 
-void
-Oscilloscope::Plugin::removeOscilloscopePanel(Oscilloscope::Panel *panel)
-{
+void Oscilloscope::Plugin::removeOscilloscopePanel(Oscilloscope::Panel *panel) {
   panelList.remove(panel);
 }
 
-void
-Oscilloscope::Plugin::doDeferred(const Settings::Object::State &s)
-{
+void Oscilloscope::Plugin::doDeferred(const Settings::Object::State &s) {
   size_t i = 0;
   for (std::list<Panel *>::iterator j = panelList.begin(), end =
       panelList.end(); j != end; ++j)
     (*j)->deferred(s.loadState(QString::number(i++)));
 }
 
-void
-Oscilloscope::Plugin::doLoad(const Settings::Object::State &s)
-{
-  for (size_t i = 0; i < static_cast<size_t> (s.loadInteger("Num Panels")); ++i)
-    {
+void Oscilloscope::Plugin::doLoad(const Settings::Object::State &s) {
+  for (size_t i = 0; i < static_cast<size_t> (s.loadInteger("Num Panels")); ++i) {
       Panel *panel = new Panel(MainWindow::getInstance()->centralWidget());
       panelList.push_back(panel);
       panel->load(s.loadState(QString::number(i)));
