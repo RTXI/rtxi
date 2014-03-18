@@ -99,7 +99,6 @@ void UserPrefs::Panel::reset(void) {
   dynamoDirEdit->setText(getenv("HOME"));
   dataDirEdit->setText(getenv("HOME"));
   HDFBufferEdit->setText(QString::number(10));
-
   apply();
 }
 
@@ -119,7 +118,7 @@ void UserPrefs::Panel::cancel(void) {
 
 void UserPrefs::Panel::chooseSettingsDir(void) {
   QString dir_name = QFileDialog::getExistingDirectory(userprefs.value(
-      MainWindow::getInstance(), "/dirs/setfiles", getenv("HOME")).toString(),
+      "/dirs/setfiles", getenv("HOME")).toString(), MainWindow::getInstance(),
       "get existing directory", "Choose a default directory for settings files", TRUE);
   settingsDirEdit->setText(dir_name);
 }
