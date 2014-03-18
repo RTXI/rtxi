@@ -116,10 +116,9 @@ MainWindow::MainWindow (void){
 MainWindow::~MainWindow (void) {
 }
 
-// OUT
-/*int MainWindow::createFileMenuItem(const std::string &text, const QObject *receiver, const char *member) {
+QAction* MainWindow::createFileMenuItem(const QString &text, const QObject *receiver, const char *member) {
 	return fileMenu->addAction(text, receiver, member);
-	}*/
+}
 
 void MainWindow::setFileMenuItemParameter(int menuid, int parameter) {
 	//fileMenu->setItemParameter(menuid, parameter);

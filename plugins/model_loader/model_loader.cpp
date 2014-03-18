@@ -28,7 +28,6 @@ extern "C" Plugin::Object * createRTXIPlugin(void *) {
 }
 
 ModelLoader::ModelLoader(void) {
-	printf("In here\n");
 	//menuID = MainWindow::getInstance()->createModuleMenuItem("Load User Module", this, SLOT(load(void)));
 	action = MainWindow::getInstance()->createModuleMenuItem("Load User Module", this, SLOT(load(void)));
 }

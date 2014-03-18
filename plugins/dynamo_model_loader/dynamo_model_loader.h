@@ -20,21 +20,18 @@
 #define DYNAMO_MODEL_LOADER_H
 
 #include <plugin.h>
-#include <qobject.h>
-#include <qstring.h>
+#include <QObject>
+#include <QString>
+#include <QAction>
 
-class DynamoModelLoader : public QObject, public Plugin::Object
-{
-
+class DynamoModelLoader : public QObject, public Plugin::Object {
     Q_OBJECT
 
 public:
 
     DynamoModelLoader(void);
     virtual ~DynamoModelLoader(void);
-
     static DynamoModelLoader *getInstance(void);
-
     void load (char *path);
 
 public slots:
@@ -48,10 +45,8 @@ public slots:
 private:
 
     int menuID;
-
     QString model_makefile_path;
     static DynamoModelLoader *instance;
-
 };
 
 #endif /* DYNAMO_MODEL_LOADER_H */

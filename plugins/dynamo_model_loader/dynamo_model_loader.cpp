@@ -26,7 +26,7 @@
 #include <main_window.h>
 #include <dynamo_model_loader.h>
 
-#define _GNU_SOURCE
+//#define _GNU_SOURCE
 #define MODEL_MAKEFILE_PATH    "/usr/local/share/rtxi/Makefile.dynamo_compile"
 #define MAKE_CMD_PREFIX        "make -f "
 #define MODEL_SOURCE_SUFFIX    ".dynamo"
@@ -38,7 +38,8 @@ extern "C" Plugin::Object *createRTXIPlugin(void *) {
 
 DynamoModelLoader::DynamoModelLoader(void) {
 	DEBUG_MSG("DynamoModelLoader::DynamoModelLoader : starting\n");
-	menuID = MainWindow::getInstance()->createModuleMenuItem("Load DYNAMO Model",this,SLOT(load_dialog(void)));
+  MainWindow::getInstance()->createModuleMenuItem("Load DYNAMO Model",this,SLOT(load_dialog(void)));
+	//menuID = MainWindow::getInstance()->createModuleMenuItem("Load DYNAMO Model",this,SLOT(load_dialog(void)));
 
 	model_makefile_path = QString(MODEL_MAKEFILE_PATH);
 	DEBUG_MSG("model_makefile_path = %s\n", model_makefile_path.toAscii());
@@ -58,8 +59,10 @@ DynamoModelLoader::DynamoModelLoader(void) {
 	for (int i = 0; i < std::min(numRecentFiles-2,10); ++i) {
 		listmodule = userprefs.value("/recentFileList/" + entries[i]).toString();
 		text = tr("&%1 %2").arg(i).arg(listmodule);
-		menuID = MainWindow::getInstance()->createModuleMenuItem(text,this,SLOT(load_recent(int)));
-		MainWindow::getInstance()->setModuleMenuItemParameter(menuID, i);
+		MainWindow::getInstance()->createModuleMenuItem(text,this,SLOT(load_recent(int)));
+		//menuID = MainWindow::getInstance()->createModuleMenuItem(text,this,SLOT(load_recent(int)));
+		// TODO
+		//MainWindow::getInstance()->setModuleMenuItemParameter(menuID, i);
 	}
 
 	// add recently used settings files to the menu
@@ -70,14 +73,17 @@ DynamoModelLoader::DynamoModelLoader(void) {
 	for (int i = 0; i < std::min(numRecentFiles,10); ++i) {
 		listmodule = userprefs.value("/recentSettingsList/" + entries[i]).toString();
 		text = tr("&%1 %2").arg(i).arg(listmodule);
-		menuID = MainWindow::getInstance()->createFileMenuItem(text.toStdString(),this,SLOT(load_setting(int)));
-		MainWindow::getInstance()->setFileMenuItemParameter(menuID, i);
+	  MainWindow::getInstance()->createFileMenuItem(text,this,SLOT(load_setting(int)));
+		//menuID = MainWindow::getInstance()->createFileMenuItem(text.toStdString(),this,SLOT(load_setting(int)));
+		// TODO
+		//MainWindow::getInstance()->setFileMenuItemParameter(menuID, i);
 	}
 
 }
 
 DynamoModelLoader::~DynamoModelLoader(void) {
-	MainWindow::getInstance()->removeModuleMenuItem(menuID);
+		// TODO
+	//MainWindow::getInstance()->removeModuleMenuItem(menuID);
 }
 
 /* Set and retrieve the name of the model make file. */

@@ -56,7 +56,7 @@ class MainWindow : public QMainWindow
 			* \return The index of the new menu item.
 			*/
 
-		int createFileMenuItem(const std::string &label, const QObject *handler, const char *slot);
+		QAction* createFileMenuItem(const QString &label, const QObject *handler, const char *slot);
 
 		/*!
 			* Sets the parameter value of a menu item in the File menu.
