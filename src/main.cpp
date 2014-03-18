@@ -17,6 +17,7 @@
  */
 
 #include <QApplication>
+#include <QtGui>
 #include <iostream>
 #include <cstdlib>
 #include <dirent.h>
@@ -87,13 +88,11 @@ int main(int argc,char *argv[]) {
 	MainWindow::getInstance()->showMaximized();
 
 	CmdLine::getInstance();
-
 	RT::System::getInstance();
 	IO::Connector::getInstance();
 
 	/* Bootstrap the System */
 	Settings::Manager::getInstance()->load(QString::fromStdString(config_file));
-
 	retval = app->exec();
 
 	Plugin::Manager::getInstance()->unloadAll();

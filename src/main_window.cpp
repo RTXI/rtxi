@@ -27,10 +27,10 @@
 #include <mutex.h>
 #include <plugin.h>
 
-MainWindow::MainWindow (void){
+MainWindow::MainWindow (void) : QMainWindow(NULL, Qt::Window) {
 
-	QWidget *centralWidget = new QWidget(this);
-	setCentralWidget(centralWidget);
+	/*QWidget *centralWidget = new QWidget(this);
+	setCentralWidget(centralWidget);*/
 
 	/* Initialize Window Settings */
 	setWindowTitle("RTXI - Real-time eXperimental Interface");

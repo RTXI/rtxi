@@ -26,6 +26,7 @@
 #include <QWhatsThis>
 #include <QScrollArea>
 #include <QTimer>
+#include <QtGui>
 #include <default_gui_model.h>
 #include <main_window.h>
 #include <iostream>
@@ -61,7 +62,6 @@ void DefaultGUILineEdit::redden(void) {
 
 DefaultGUIModel::DefaultGUIModel(std::string name, DefaultGUIModel::variable_t *var, size_t size):
 	QWidget(MainWindow::getInstance()->centralWidget()), Workspace::Instance(name, var, size), myname(name) {
-
 		setWindowTitle(QString::number(getID()) + " " + QString::fromStdString(name));
 		QTimer *timer = new QTimer(this);
 		timer->start(1000);

@@ -39,13 +39,10 @@ struct param_hdf_t {
 };
 
 namespace {
-
 	void buildBlockPtrList(IO::Block *block, void *arg) {
-		std::vector<IO::Block *> *list =
-			reinterpret_cast<std::vector<IO::Block *> *> (arg);
+		std::vector<IO::Block *> *list = reinterpret_cast<std::vector<IO::Block *> *> (arg);
 		list->push_back(block);
-	}
-	;
+	};
 
 	struct FileExistsEventData {
 		QString filename;
@@ -59,124 +56,86 @@ namespace {
 	};
 
 	class InsertChannelEvent: public RT::Event {
-
 		public:
-
-			InsertChannelEvent(bool &, RT::List<DataRecorder::Channel> &, RT::List<
-					DataRecorder::Channel>::iterator, DataRecorder::Channel &);
+			InsertChannelEvent(bool &, RT::List<DataRecorder::Channel> &, RT::List< DataRecorder::Channel>::iterator, DataRecorder::Channel &);
 			~InsertChannelEvent(void);
-
 			int callback(void);
 
 		private:
-
 			bool &recording;
 			RT::List<DataRecorder::Channel> &channels;
 			RT::List<DataRecorder::Channel>::iterator end;
 			DataRecorder::Channel &channel;
-
 	}; // class InsertChannelEvent
 
 	class RemoveChannelEvent: public RT::Event {
-
 		public:
-
-			RemoveChannelEvent(bool &, RT::List<DataRecorder::Channel> &,
-					DataRecorder::Channel &);
+			RemoveChannelEvent(bool &, RT::List<DataRecorder::Channel> &,	DataRecorder::Channel &);
 			~RemoveChannelEvent(void);
-
 			int callback(void);
 
 		private:
-
 			bool &recording;
 			RT::List<DataRecorder::Channel> &channels;
 			DataRecorder::Channel &channel;
-
 	}; // class RemoveChannelEvent
 
 	class OpenFileEvent: public RT::Event {
-
 		public:
-
 			OpenFileEvent(QString &, Fifo &);
 			~OpenFileEvent(void);
-
 			int callback(void);
 
 		private:
-
 			QString &filename;
 			Fifo &fifo;
-
 	}; // class OpenFileEvent
 
 	class StartRecordingEvent: public RT::Event {
-
 		public:
-
 			StartRecordingEvent(bool &, Fifo &);
 			~StartRecordingEvent(void);
-
 			int callback(void);
 
 		private:
-
 			bool &recording;
 			Fifo &fifo;
 
 	}; // class StartRecordingEvent
 
 	class StopRecordingEvent: public RT::Event {
-
 		public:
-
 			StopRecordingEvent(bool &, Fifo &);
 			~StopRecordingEvent(void);
-
 			int callback(void);
 
 		private:
-
 			bool &recording;
 			Fifo &fifo;
-
 	}; //class StopRecordingEvent
 
 	class AsyncDataEvent: public RT::Event {
-
 		public:
-
 			AsyncDataEvent(const double *, size_t, Fifo &);
 			~AsyncDataEvent(void);
-
 			int callback(void);
 
 		private:
-
 			const double *data;
 			size_t size;
 			Fifo &fifo;
-
 	}; // class AsyncDataEvent
 
 	class DoneEvent: public RT::Event {
-
 		public:
-
 			DoneEvent(Fifo &);
 			~DoneEvent(void);
-
 			int callback(void);
 
 		private:
-
 			Fifo &fifo;
-
 	}; // class DoneEvent
-
-}
-; // namespace
+}; // namespace
 
 InsertChannelEvent::InsertChannelEvent(bool &r,
 		RT::List<DataRecorder::Channel> & l,
@@ -211,9 +170,8 @@ int RemoveChannelEvent::callback(void) {
 	return 0;
 }
 
-OpenFileEvent::OpenFileEvent(QString &n, Fifo &f) :
-	filename(n), fifo(f) {
-	}
+OpenFileEvent::OpenFileEvent(QString &n, Fifo &f) : filename(n), fifo(f) {
+}
 
 OpenFileEvent::~OpenFileEvent(void) {
 }
@@ -231,9 +189,8 @@ int OpenFileEvent::callback(void) {
 	return 0;
 }
 
-StartRecordingEvent::StartRecordingEvent(bool &r, Fifo &f) :
-	recording(r), fifo(f) {
-	}
+StartRecordingEvent::StartRecordingEvent(bool &r, Fifo &f) : recording(r), fifo(f) {
+}
 
 StartRecordingEvent::~StartRecordingEvent(void) {
 }
@@ -252,9 +209,8 @@ int StartRecordingEvent::callback(void) {
 	return 0;
 }
 
-StopRecordingEvent::StopRecordingEvent(bool &r, Fifo &f) :
-	recording(r), fifo(f) {
-	}
+StopRecordingEvent::StopRecordingEvent(bool &r, Fifo &f) : recording(r), fifo(f) {
+}
 
 StopRecordingEvent::~StopRecordingEvent(void) {
 }
@@ -273,9 +229,8 @@ int StopRecordingEvent::callback(void) {
 	return 0;
 }
 
-AsyncDataEvent::AsyncDataEvent(const double *d, size_t s, Fifo &f) :
-	data(d), size(s), fifo(f) {
-	}
+AsyncDataEvent::AsyncDataEvent(const double *d, size_t s, Fifo &f) : data(d), size(s), fifo(f) {
+}
 
 AsyncDataEvent::~AsyncDataEvent(void) {
 }
@@ -293,9 +248,8 @@ int AsyncDataEvent::callback(void) {
 	return 1;
 }
 
-DoneEvent::DoneEvent(Fifo &f) :
-	fifo(f) {
-	}
+DoneEvent::DoneEvent(Fifo &f) : fifo(f) {
+}
 
 DoneEvent::~DoneEvent(void) {
 }
@@ -373,26 +327,26 @@ DataRecorder::Panel::Panel(QWidget *parent, size_t buffersize) :
 				"so that you can reconstruct your data correctly. The current recording status of "
 				"the Data Recorder is shown at the bottom.</p>");
 
-		QHBox *hbox;
-		QVBox *vbox;
+		QHBoxLayout *hbox;
+		QVBoxLayout *vbox;
 
 		QBoxLayout *layout = new QVBoxLayout(this);
 		layout->setMargin(5);
 
-		channelBox = new QHGroupBox("Channel Selection", this);
-		channelBox->setInsideMargin(5);
+		channelBox = new QHGroupBox("Channel Selection");//, this);
+		//channelBox->setInsideMargin(5);
 		layout->addWidget(channelBox);
 
-		vbox = new QVBox(channelBox);
-		vbox->setMaximumHeight(125);
+		vbox = new QVBoxLayout(channelBox);
+		//vbox->setMaximumHeight(125);
 
-		hbox = new QHBox(vbox);
+		hbox = new QHBoxLayout(vbox);
 		(new QLabel("Block:", hbox))->setFixedWidth(75);
 		blockList = new QComboBox(hbox);
 		blockList->setFixedWidth(150);
 		QObject::connect(blockList,SIGNAL(activated(int)), this, SLOT(buildChannelList(void)));
 
-		hbox = new QHBox(vbox);
+		hbox = new QHBoxLayout(vbox);
 		(new QLabel("Type:", hbox))->setFixedWidth(75);
 		typeList = new QComboBox(hbox);
 		typeList->setFixedWidth(150);
@@ -403,13 +357,13 @@ DataRecorder::Panel::Panel(QWidget *parent, size_t buffersize) :
 		typeList->addItem("Event");
 		QObject::connect(typeList,SIGNAL(activated(int)),this,SLOT(buildChannelList(void)));
 
-		hbox = new QHBox(vbox);
+		hbox = new QHBoxLayout(vbox);
 		(new QLabel("Channel:", hbox))->setFixedWidth(75);
 		channelList = new QComboBox(hbox);
 		channelList->setFixedWidth(150);
 
 		vbox = new QVBox(channelBox);
-		vbox->setMaximumHeight(100);
+		//vbox->setMaximumHeight(100);
 
 		QPushButton *rButton = new QPushButton(">", vbox);
 		rButton->setFixedWidth(rButton->height());
@@ -421,27 +375,27 @@ DataRecorder::Panel::Panel(QWidget *parent, size_t buffersize) :
 		selectionBox = new QListBox(channelBox);
 
 		sampleBox = new QVGroupBox("Sample Control", this);
-		sampleBox->setInsideMargin(5);
+		//sampleBox->setInsideMargin(5);
 		layout->addWidget(sampleBox);
 
-		hbox = new QHBox(sampleBox);
+		hbox = new QHBoxLayout(sampleBox);
 		(new QLabel("Downsampling Rate:", hbox))->setFixedWidth(150);
-		downsampleSpin = new QSpinBox(1, 1000, 1, hbox);
+		dyoutownsampleSpin = new QSpinBox(1, 1000, 1, hbox);
 		QObject::connect(downsampleSpin,SIGNAL(valueChanged(int)),this,SLOT(updateDownsampleRate(int)));
 
 		fileBox = new QVGroupBox("File Control", this);
-		fileBox->setInsideMargin(5);
+		//fileBox->setInsideMargin(5);
 		layout->addWidget(fileBox);
 
-		vbox = new QVBox(fileBox);
-		hbox = new QHBox(vbox);
+		vbox = new QVBoxLayout(fileBox);
+		hbox = new QHBoxLayout(vbox);
 		hbox->setSpacing(2);
 		(new QLabel("Filename:", hbox))->setFixedWidth(60);
 		fileNameEdit = new QLineEdit(hbox);
 		fileNameEdit->setReadOnly(true);
 		QPushButton *fileChangeButton = new QPushButton("Choose File", hbox);
 		QObject::connect(fileChangeButton,SIGNAL(clicked(void)),this,SLOT(changeDataFile(void)));
-		hbox = new QHBox(vbox);
+		hbox = new QHBoxLayout(vbox);
 		fileSizeLbl = new QLabel(hbox);
 		fileSizeLbl->setText("File Size (kb):");
 		fileSize = new QLabel(hbox);
@@ -461,7 +415,7 @@ DataRecorder::Panel::Panel(QWidget *parent, size_t buffersize) :
 		trialLength->setText("No data recorded.");
 		trialLength->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
 
-		hbox = new QHBox(this);
+		hbox = new QHBoxLayout(this);
 		layout->addWidget(hbox);
 
 		startRecordButton = new QPushButton("Start Recording", hbox);
@@ -678,7 +632,7 @@ void DataRecorder::Panel::changeDataFile(void) {
 	QFileDialog fileDialog(this, NULL, true);
 	fileDialog.setWindowTitle("Select Data File");
 	QSettings userprefs;
-  userprefs.setPath(QSettings::NativeFormat, QSettings::UserScope, "RTXI");
+	userprefs.setPath(QSettings::NativeFormat, QSettings::UserScope, "RTXI");
 	fileDialog.setDirectory(userprefs.value("/dirs/data", getenv("HOME")).toString());
 	fileDialog.setFileMode(QFileDialog::AnyFile);
 
@@ -697,7 +651,7 @@ void DataRecorder::Panel::changeDataFile(void) {
 	/*if (fileDialog.selectedFile() == "/" || fileDialog.selectedFile().isNull() || fileDialog.selectedFile().isEmpty())
 		return;
 
-	QString filename = fileDialog.selectedFile();*/
+		QString filename = fileDialog.selectedFile();*/
 
 	if (!filename.toLower().endsWith(QString(".h5")))
 		filename += ".h5";
@@ -821,9 +775,7 @@ void DataRecorder::Panel::doDeferred(const Settings::Object::State &s) {
 		std::ostringstream str;
 		str << i;
 
-		block
-			= dynamic_cast<IO::Block *> (Settings::Manager::getInstance()->getObject(
-						s.loadInteger(str.str() + " ID")));
+		block	= dynamic_cast<IO::Block *> (Settings::Manager::getInstance()->getObject(s.loadInteger(str.str() + " ID")));
 		if (!block)
 			continue;
 
@@ -869,8 +821,7 @@ void DataRecorder::Panel::doSave(Settings::Object::State &s) const {
 
 	s.saveInteger("Num Channels", channels.size());
 	size_t n = 0;
-	for (RT::List<Channel>::const_iterator i = channels.begin(), end =
-			channels.end(); i != end; ++i) {
+	for (RT::List<Channel>::const_iterator i = channels.begin(), end = channels.end(); i != end; ++i) {
 		std::ostringstream str;
 		str << n++;
 
@@ -1011,7 +962,7 @@ void DataRecorder::Panel::processData(void) {
 
 				QString parameter_name = QString::number(block->getID()) + " "
 					+ QString::fromStdString(block->getName()) + " : " + QString::fromStdString(block->getName(
-							Workspace::PARAMETER, data.index));
+								Workspace::PARAMETER, data.index));
 
 				hid_t data = H5PTopen(file.pdata, parameter_name.toLatin1());
 				H5PTappend(data, 1, &param);
@@ -1196,7 +1147,7 @@ int DataRecorder::Panel::startRecording(long long timestamp) {
 		for (size_t j = 0; j < block->getCount(Workspace::PARAMETER); ++j) {
 			QString parameter_name = QString::number(block->getID()) + " "
 				+ QString::fromStdString(block->getName()) + " : " + QString::fromStdString(block->getName(
-						Workspace::PARAMETER, j));
+							Workspace::PARAMETER, j));
 			data = H5PTcreate_fl(file.pdata, parameter_name.toLatin1(),
 					param_type, sizeof(param_hdf_t), -1);
 			struct param_hdf_t value = { 0, block->getValue(
@@ -1207,7 +1158,7 @@ int DataRecorder::Panel::startRecording(long long timestamp) {
 		for (size_t j = 0; j < block->getCount(Workspace::COMMENT); ++j) {
 			QString comment_name = QString::number(block->getID()) + " "
 				+ QString::fromStdString(block->getName()) + " : " + QString::fromStdString(block->getName(
-						Workspace::COMMENT, j));
+							Workspace::COMMENT, j));
 			hsize_t
 				dims =
 				dynamic_cast<Workspace::Instance *> (block)->getValueString(
@@ -1311,7 +1262,7 @@ DataRecorder::Plugin::Plugin(void) {
 	QSettings userprefs;
 	//userprefs.setPath("RTXI.org", "RTXI", QSettings::UserScope);
 	//buffersize = userprefs.readNumEntry("/system/HDFbuffer", 10)*1048576;
-  userprefs.setPath(QSettings::NativeFormat, QSettings::UserScope, "RTXI");
+	userprefs.setPath(QSettings::NativeFormat, QSettings::UserScope, "RTXI");
 	buffersize = (userprefs.value("/system/HDFbuffer", 10).toInt())*1048576;
 
 	MainWindow::getInstance()->createSystemMenuItem("HDF Data Recorder",this,SLOT(createDataRecorderPanel(void)));
