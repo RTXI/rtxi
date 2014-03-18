@@ -70,7 +70,7 @@ UserPrefs::Panel::Panel(QWidget *parent) : QWidget(parent) {
   hbox = new QWidget(this);
   (void) (new QLabel("HDF Data Recorder Buffer Size (MB):", hbox))->setFixedWidth(250);
   HDFBufferEdit = new QLineEdit(hbox);
-  HDFBufferEdit->setText(QString::number(userprefs.readNumEntry("/system/HDFbuffer", 10)));
+  HDFBufferEdit->setText(QString::number(userprefs.value("/system/HDFbuffer", 10).toInt()));
 
   layout->addWidget(hbox);
 
@@ -86,20 +86,15 @@ UserPrefs::Panel::Panel(QWidget *parent) : QWidget(parent) {
   QObject::connect(cancelButton,SIGNAL(clicked(void)),this,SLOT(cancel(void)));
 
   layout->addWidget(hbox);
-
   show();
-
   //setActive(true);
 }
 
-UserPrefs::Panel::~Panel(void)
-{
+UserPrefs::Panel::~Panel(void) {
   Prefs::getInstance()->panel = 0;
 }
 
-void
-UserPrefs::Panel::reset(void)
-{
+void UserPrefs::Panel::reset(void) {
   settingsDirEdit->setText(getenv("HOME"));
   dynamoDirEdit->setText(getenv("HOME"));
   dataDirEdit->setText(getenv("HOME"));
@@ -108,70 +103,50 @@ UserPrefs::Panel::reset(void)
   apply();
 }
 
-void
-UserPrefs::Panel::apply(void)
-{
+void UserPrefs::Panel::apply(void) {
   userprefs.setValue("/dirs/setfiles", settingsDirEdit->text());
   userprefs.setValue("/dirs/dynamomodels", dynamoDirEdit->text());
   userprefs.setValue("/dirs/data", dataDirEdit->text());
   bool ok;
   QString buffer = HDFBufferEdit->text();
   userprefs.setValue("/system/HDFbuffer", buffer.toInt(&ok));
-
-  this->close();
-
-}
-
-void
-UserPrefs::Panel::cancel(void)
-{
   this->close();
 }
 
-void
-UserPrefs::Panel::chooseSettingsDir(void)
-{
+void UserPrefs::Panel::cancel(void) {
+  this->close();
+}
+
+void UserPrefs::Panel::chooseSettingsDir(void) {
   QString dir_name = QFileDialog::getExistingDirectory(userprefs.value(
-      "/dirs/setfiles", getenv("HOME")).toString(), MainWindow::getInstance(),
-      "get existing directory",
-      "Choose a default directory for settings files", TRUE);
+      MainWindow::getInstance(), "/dirs/setfiles", getenv("HOME")).toString(),
+      "get existing directory", "Choose a default directory for settings files", TRUE);
   settingsDirEdit->setText(dir_name);
 }
 
-void
-UserPrefs::Panel::chooseDynamoDir(void)
-{
+void UserPrefs::Panel::chooseDynamoDir(void) {
   QString dir_name = QFileDialog::getExistingDirectory(userprefs.value(
       "/dirs/setfiles", getenv("HOME")).toString(), MainWindow::getInstance(),
-      "get existing directory", "Choose a default directory for DYNAMO models",
-      TRUE);
+      "get existing directory", "Choose a default directory for DYNAMO models", TRUE);
   dynamoDirEdit->setText(dir_name);
 }
 
-void
-UserPrefs::Panel::chooseDataDir(void)
-{
+void UserPrefs::Panel::chooseDataDir(void) {
   QString dir_name = QFileDialog::getExistingDirectory(userprefs.value(
       "/dirs/data", getenv("HOME")).toString(), MainWindow::getInstance(),
-      "get existing directory",
-      "Choose a default directory for HDF5 data files", TRUE);
+      "get existing directory", "Choose a default directory for HDF5 data files", TRUE);
   dataDirEdit->setText(dir_name);
 }
 
-extern "C" Plugin::Object *
-createRTXIPlugin(void *)
-{
+extern "C" Plugin::Object * createRTXIPlugin(void *) {
   return UserPrefs::Prefs::getInstance();
 }
 
-UserPrefs::Prefs::Prefs(void) :
-  panel(0)
-{
-menuID = MainWindow::getInstance()->createSystemMenuItem("Preferences",this,SLOT(createPrefsPanel(void)));
+UserPrefs::Prefs::Prefs(void) : panel(0) {
+	menuID = MainWindow::getInstance()->createSystemMenuItem("Preferences",this,SLOT(createPrefsPanel(void)));
 }
 
-UserPrefs::Prefs::~Prefs(void)
-{
+UserPrefs::Prefs::~Prefs(void) {
   MainWindow::getInstance()->removeSystemMenuItem(menuID);
   if (panel)
     delete panel;
@@ -179,9 +154,7 @@ UserPrefs::Prefs::~Prefs(void)
   panel = 0;
 }
 
-void
-UserPrefs::Prefs::createPrefsPanel(void)
-{
+void UserPrefs::Prefs::createPrefsPanel(void) {
   if (!panel)
     panel = new Panel(MainWindow::getInstance()->centralWidget());
   panel->show();
@@ -191,8 +164,7 @@ static Mutex mutex;
 UserPrefs::Prefs *UserPrefs::Prefs::instance = 0;
 
 UserPrefs::Prefs *
-UserPrefs::Prefs::getInstance(void)
-{
+UserPrefs::Prefs::getInstance(void) {
   if (instance)
     return instance;
 

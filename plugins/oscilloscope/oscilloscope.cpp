@@ -17,59 +17,32 @@
  */
 
 #include "oscilloscope.h"
-
 #include <debug.h>
 #include <main_window.h>
-#include <qcheckbox.h>
-#include <qcombobox.h>
-#include <qcursor.h>
-#include <qgroupbox.h>
-#include <qhbox.h>
-#include <qhbuttongroup.h>
-#include <qlabel.h>
-#include <qlayout.h>
-#include <qlineedit.h>
-#include <qpainter.h>
-#include <qpen.h>
-#include <qpopupmenu.h>
-#include <qpushbutton.h>
-#include <qradiobutton.h>
-#include <qspinbox.h>
-#include <qtabwidget.h>
-#include <qtimer.h>
-#include <qvalidator.h>
 #include <rt.h>
 #include <workspace.h>
-#include <qwhatsthis.h>
 #include <cmath>
 #include <sstream>
+#include <QtGui>
+#include <QTimer>
+#include <QPainter>
 
-namespace
-{
-
-  class SyncEvent : public RT::Event
-  {
-
+namespace {
+  class SyncEvent : public RT::Event {
   public:
 
-    int
-    callback(void)
-    {
+    int callback(void) {
       return 0;
-    }
-    ;
-
+    };
   }; // class SyncEvent
 
-  struct channel_info
-  {
+  struct channel_info {
     QString name;
     IO::Block *block;
     IO::flags_t type;
     size_t index;
     double previous; // stores previous value for trigger and downsample buffer
   };
-
 } // namespace
 
 Oscilloscope::Properties::Properties(Oscilloscope::Panel *parent) :

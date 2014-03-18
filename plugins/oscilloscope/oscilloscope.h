@@ -20,15 +20,14 @@
 #define OSCILLOSCOPE_H
 
 #include "scope.h"
-
 #include <event.h>
 #include <fifo.h>
 #include <io.h>
 #include <mutex.h>
 #include <plugin.h>
-#include <qdialog.h>
 #include <rt.h>
 #include <settings.h>
+#include <QDialog>
 
 class QButtonGroup;
 class QCheckBox;
@@ -40,11 +39,8 @@ class QSpinBox;
 class QTabWidget;
 
 namespace Oscilloscope {
-
     class Panel;
-
     class Properties : public QDialog, public Event::Handler {
-
         Q_OBJECT
 
         friend class Panel;
@@ -84,7 +80,6 @@ namespace Oscilloscope {
         void showAdvancedTab(void);
         void showChannelTab(void);
         void showDisplayTab(void);
-
 
         size_t downsample_rate;
 
@@ -198,9 +193,6 @@ namespace Oscilloscope {
         std::vector<IO::Block *> blocks;
         size_t counter;
         size_t downsample_rate;
-
     }; // class Panel
-
 }; // class Oscilloscope
-
 #endif // OSCILLOSCOPE_H

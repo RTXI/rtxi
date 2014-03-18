@@ -671,7 +671,7 @@ void DataRecorder::Panel::buildChannelList(void) {
 	}
 
 	for (size_t i = 0; i < block->getCount(type); ++i)
-		channelList->addItem(block->getName(type, i));
+		channelList->addItem(QString::fromStdString(block->getName(type, i)));
 }
 
 void DataRecorder::Panel::changeDataFile(void) {

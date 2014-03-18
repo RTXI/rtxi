@@ -10,8 +10,8 @@ SUBDIRS = \
 	model_loader \
 	comedi_device \
 	comedilib_device \
-	dynamo_model_loader
-#data_recorder 
+	dynamo_model_loader \
+	userprefs 
+#data_recorder \
 #connector \ #t
-#userprefs \ #t
 #oscilloscope #wrf
