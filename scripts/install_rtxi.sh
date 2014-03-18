@@ -59,7 +59,7 @@ if [ $kernel -eq "1" ]; then
 elif [ $kernel -eq "2" ]; then
 	./configure --enable-rtai --enable-comedi
 elif [ $kernel -eq "3" ]; then
-	./configure --enable-posix --enable-analogy
+	./configure --enable-posix --enable-analogy --disable-comedi
 else
 	echo "Invalid configuration."
 	exit 1
