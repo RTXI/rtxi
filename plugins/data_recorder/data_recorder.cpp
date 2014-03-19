@@ -16,16 +16,16 @@
 
 */
 
+#include <QtGui>
+#include <QFileDialog>
+#include <QEvent>
+
 #include <compiler.h>
 #include <debug.h>
 #include <main_window.h>
 #include <sstream>
 #include <workspace.h>
 #include <data_recorder.h>
-
-#include <QtGui>
-#include <QFileDialog>
-#include <QEvent>
 
 #define QFileExistsEvent            (QEvent::User+0)
 #define QNoFileOpenEvent            (QEvent::User+1)

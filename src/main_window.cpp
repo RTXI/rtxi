@@ -334,9 +334,8 @@ void MainWindow::removeSystemMenuItem (int id) {
 }
 
 void MainWindow::about(void) {
-	QMessageBox::about (this, "About RTXI", "Version " + QString (VERSION)
-			+
-			"\n\nReleased under the GPLv3.\nSee www.rtxi.org for details.");
+	QMessageBox::about (this, "About RTXI", "Version " + QString(VERSION)
+			+	"\n\nReleased under the GPLv3.\nSee www.rtxi.org for details.");
 }
 
 void MainWindow::aboutQt (void) {
