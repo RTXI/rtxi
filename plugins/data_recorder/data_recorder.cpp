@@ -217,15 +217,11 @@ StopRecordingEvent::~StopRecordingEvent(void) {
 
 int StopRecordingEvent::callback(void) {
 	DataRecorder::data_token_t token;
-
 	recording = false;
-
 	token.type = DataRecorder::STOP;
 	token.size = 0;
 	token.time = RT::OS::getTime();
-
 	fifo.write(&token, sizeof(token));
-
 	return 0;
 }
 
@@ -333,22 +329,22 @@ DataRecorder::Panel::Panel(QWidget *parent, size_t buffersize) :
 		QBoxLayout *layout = new QVBoxLayout(this);
 		layout->setMargin(5);
 
-		channelBox = new QHGroupBox("Channel Selection");//, this);
+		channelBox = new QGroupBox(tr("Channel Selection"));//, this);
 		//channelBox->setInsideMargin(5);
 		layout->addWidget(channelBox);
 
 		vbox = new QVBoxLayout(channelBox);
 		//vbox->setMaximumHeight(125);
 
-		hbox = new QHBoxLayout(vbox);
-		(new QLabel("Block:", hbox))->setFixedWidth(75);
-		blockList = new QComboBox(hbox);
+		hbox = new QHBoxLayout(this);
+		(new QLabel("Block:"))->setFixedWidth(75);
+		blockList = new QComboBox(this);
 		blockList->setFixedWidth(150);
 		QObject::connect(blockList,SIGNAL(activated(int)), this, SLOT(buildChannelList(void)));
 
-		hbox = new QHBoxLayout(vbox);
-		(new QLabel("Type:", hbox))->setFixedWidth(75);
-		typeList = new QComboBox(hbox);
+		hbox = new QHBoxLayout(this);
+		(new QLabel("Type:"))->setFixedWidth(75);
+		typeList = new QComboBox(this);
 		typeList->setFixedWidth(150);
 		typeList->addItem("Input");
 		typeList->addItem("Output");
@@ -357,81 +353,89 @@ DataRecorder::Panel::Panel(QWidget *parent, size_t buffersize) :
 		typeList->addItem("Event");
 		QObject::connect(typeList,SIGNAL(activated(int)),this,SLOT(buildChannelList(void)));
 
-		hbox = new QHBoxLayout(vbox);
-		(new QLabel("Channel:", hbox))->setFixedWidth(75);
-		channelList = new QComboBox(hbox);
+		hbox = new QHBoxLayout(this);
+		(new QLabel("Channel:"))->setFixedWidth(75);
+		channelList = new QComboBox(this);
 		channelList->setFixedWidth(150);
 
-		vbox = new QVBox(channelBox);
+		//vbox = new QVBox(channelBox);
 		//vbox->setMaximumHeight(100);
 
-		QPushButton *rButton = new QPushButton(">", vbox);
+		QPushButton *rButton = new QPushButton(">");
 		rButton->setFixedWidth(rButton->height());
 		QObject::connect(rButton,SIGNAL(pressed(void)),this,SLOT(insertChannel(void)));
-		QPushButton *lButton = new QPushButton("<", vbox);
+		QPushButton *lButton = new QPushButton("<");
 		lButton->setFixedWidth(lButton->height());
 		QObject::connect(lButton,SIGNAL(pressed(void)),this,SLOT(removeChannel(void)));
 
-		selectionBox = new QListBox(channelBox);
+		selectionBox = new QListWidget(this);
 
-		sampleBox = new QVGroupBox("Sample Control", this);
+		sampleBox = new QGroupBox(tr("Sample Control"));//, this);
 		//sampleBox->setInsideMargin(5);
 		layout->addWidget(sampleBox);
 
 		hbox = new QHBoxLayout(sampleBox);
-		(new QLabel("Downsampling Rate:", hbox))->setFixedWidth(150);
-		dyoutownsampleSpin = new QSpinBox(1, 1000, 1, hbox);
+		(new QLabel("Downsampling Rate:"))->setFixedWidth(150);
+		downsampleSpin = new QSpinBox(this);
 		QObject::connect(downsampleSpin,SIGNAL(valueChanged(int)),this,SLOT(updateDownsampleRate(int)));
 
-		fileBox = new QVGroupBox("File Control", this);
+		fileBox = new QGroupBox(tr("File Control"));//, this);
 		//fileBox->setInsideMargin(5);
 		layout->addWidget(fileBox);
 
-		vbox = new QVBoxLayout(fileBox);
-		hbox = new QHBoxLayout(vbox);
+		vbox = new QVBoxLayout(this);
+		hbox = new QHBoxLayout(this);
 		hbox->setSpacing(2);
-		(new QLabel("Filename:", hbox))->setFixedWidth(60);
-		fileNameEdit = new QLineEdit(hbox);
+		(new QLabel("Filename:"))->setFixedWidth(60);
+		fileNameEdit = new QLineEdit(this);
 		fileNameEdit->setReadOnly(true);
-		QPushButton *fileChangeButton = new QPushButton("Choose File", hbox);
+		QPushButton *fileChangeButton = new QPushButton("Choose File");
 		QObject::connect(fileChangeButton,SIGNAL(clicked(void)),this,SLOT(changeDataFile(void)));
-		hbox = new QHBoxLayout(vbox);
-		fileSizeLbl = new QLabel(hbox);
+		hbox = new QHBoxLayout(this);
+		fileSizeLbl = new QLabel(this);
 		fileSizeLbl->setText("File Size (kb):");
-		fileSize = new QLabel(hbox);
+		fileSize = new QLabel(this);
 		fileSize->setText("No data recorded.");
 		fileSize->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
 
-		trialNumLbl = new QLabel(hbox);
+		trialNumLbl = new QLabel(this);
 		trialNumLbl->setText("Trial:");
 		trialNumLbl->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-		trialNum = new QLabel(hbox);
+		trialNum = new QLabel(this);
 		trialNum->setText("0");
 		trialNum->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
 
-		trialLengthLbl = new QLabel(hbox);
+		trialLengthLbl = new QLabel(this);
 		trialLengthLbl->setText("Trial Length (s):");
-		trialLength = new QLabel(hbox);
+		trialLength = new QLabel(this);
 		trialLength->setText("No data recorded.");
 		trialLength->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
 
-		hbox = new QHBoxLayout(this);
-		layout->addWidget(hbox);
+		hbox = new QHBoxLayout;
+		// TODO
+		//layout->addWidget(hbox);
 
-		startRecordButton = new QPushButton("Start Recording", hbox);
+		startRecordButton = new QPushButton("Start Recording");
 		QObject::connect(startRecordButton,SIGNAL(clicked(void)),this,SLOT(startRecordClicked(void)));
-		stopRecordButton = new QPushButton("Stop Recording", hbox);
+		stopRecordButton = new QPushButton("Stop Recording");
 		QObject::connect(stopRecordButton,SIGNAL(clicked(void)),this,SLOT(stopRecordClicked(void)));
-		recordStatus = new QLabel(hbox);
+		recordStatus = new QLabel(this);
 		recordStatus->setText("Waiting...");
 		recordStatus->setFrameStyle(QFrame::Panel | QFrame::Sunken);
 		recordStatus->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
 
-		QPushButton *closeButton = new QPushButton("Close", hbox);
+		QPushButton *closeButton = new QPushButton("Close");
 		QObject::connect(closeButton,SIGNAL(clicked(void)),this,SLOT(close(void)));
 
 		resize(550, 260);
 		show();
+
+		// Register custom QEvents
+		QEvent::registerEventType(QFileExistsEvent);
+		QEvent::registerEventType(QNoFileOpenEvent);
+		QEvent::registerEventType(QSetFileNameEditEvent);
+		QEvent::registerEventType(QDisableGroupsEvent);
+		QEvent::registerEventType(QEnableGroupsEvent);
 
 		// Build initial block list
 		IO::Connector::getInstance()->foreachBlock(buildBlockPtrList, &blockPtrList);
@@ -629,21 +633,27 @@ void DataRecorder::Panel::buildChannelList(void) {
 }
 
 void DataRecorder::Panel::changeDataFile(void) {
-	QFileDialog fileDialog(this, NULL, true);
+
+	QFileDialog fileDialog(this);
+	fileDialog.setFileMode(QFileDialog::AnyFile);
 	fileDialog.setWindowTitle("Select Data File");
+
 	QSettings userprefs;
 	userprefs.setPath(QSettings::NativeFormat, QSettings::UserScope, "RTXI");
 	fileDialog.setDirectory(userprefs.value("/dirs/data", getenv("HOME")).toString());
-	fileDialog.setFileMode(QFileDialog::AnyFile);
 
 	QStringList filterList;
 	filterList.push_back("HDF5 files (*.h5)");
 	filterList.push_back("All files (*.*)");
 	fileDialog.setFilters(filterList);
 
-	fileDialog.exec();
+	fileDialog.selectNameFilter("HDF5 files (*.h5)");
 
-	QStringList files = fileDialog->selectedFiles();
+	QStringList files;
+	if(fileDialog.exec())
+		files = fileDialog.selectedFiles(); 
+
+	//QStringList files = fileDialog->selectedFiles();
 	QString filename;
 	if(!files.isEmpty() || files[0] != NULL || files[0] != "/" )
 		filename = files[0];
@@ -707,10 +717,10 @@ void DataRecorder::Panel::removeChannel(void) {
 
 	for (RT::List<Channel>::iterator i = channels.begin(), end = channels.end(); i
 			!= end; ++i)
-		if (i->name == selectionBox->currentText()) {
+		if (i->name == selectionBox->selectedItems().first()->text()) {
 			RemoveChannelEvent event(recording, channels, *i);
 			if (!RT::System::getInstance()->postEvent(&event))
-				selectionBox->removeItem(selectionBox->currentItem());
+				selectionBox->takeItem(selectionBox->row(selectionBox->selectedItems().first()));
 			break;
 		}
 }
@@ -733,8 +743,7 @@ void DataRecorder::Panel::updateDownsampleRate(int r) {
 
 void DataRecorder::Panel::customEvent(QEvent *e) {
 	if (e->type() == QFileExistsEvent) {
-		FileExistsEventData *data =
-			reinterpret_cast<FileExistsEventData *> (e->data());
+		FileExistsEventData *data = reinterpret_cast<FileExistsEventData *> (e);
 		data->response = QMessageBox::information(this, "File exists",
 				"The file \"" + data->filename + "\" already exists.",
 				"Append", "Overwrite", "Cancel", 0, 2);
@@ -742,14 +751,12 @@ void DataRecorder::Panel::customEvent(QEvent *e) {
 		recordStatus->setText("Waiting...");
 	} else if (e->type() == QNoFileOpenEvent) {
 		QMessageBox::critical(
-				this,
-				"Failed to start recording.",
+				this, "Failed to start recording.",
 				"No file has been opened for writing so recording could not be started.",
 				QMessageBox::Ok, QMessageBox::NoButton);
 		recordStatus->setText("Waiting...");
 	} else if (e->type() == QSetFileNameEditEvent) {
-		SetFileNameEditEventData *data =
-			reinterpret_cast<SetFileNameEditEventData *> (e->data());
+		SetFileNameEditEventData *data = reinterpret_cast<SetFileNameEditEventData *> (e);
 		fileNameEdit->setText(data->filename);
 		recordStatus->setText("Ready.");
 		data->done.wakeAll();
@@ -762,8 +769,7 @@ void DataRecorder::Panel::customEvent(QEvent *e) {
 		sampleBox->setEnabled(true);
 		recordStatus->setText("Done.");
 		fileSize->setNum(int(QFile(fileNameEdit->text()).size()) / 1024);
-		trialLength->setNum(double(RT::System::getInstance()->getPeriod()
-					* 1e-9 * fixedcount));
+		trialLength->setNum(double(RT::System::getInstance()->getPeriod()*1e-9* fixedcount));
 		count = 0;
 	}
 }
@@ -918,7 +924,7 @@ void DataRecorder::Panel::processData(void) {
 		} else if (token.type == START) {
 
 			if (state == CLOSED) {
-				QEvent *event = new QEvent(QNoFileOpenEvent);
+				QEvent *event = new QEvent(static_cast<QEvent::Type>QNoFileOpenEvent);
 				QApplication::postEvent(this, event);
 			} else if (state == OPENED) {
 				startRecording(token.time);
@@ -985,14 +991,15 @@ int DataRecorder::Panel::openFile(QString &filename) {
 #endif
 
 	if (QFile::exists(filename)) {
-		QEvent *event = new QEvent(QFileExistsEvent);
+		QEvent *event = new QEvent(static_cast<QEvent::Type>QFileExistsEvent);
 		FileExistsEventData data;
 
-		event->setData(&data);
-		data.filename = filename;
+		//VISITTWO
+		//event->setData(&data);
+		//data.filename = filename;
 
 		QApplication::postEvent(this, event);
-		data.done.wait();
+		//data.done.wait();
 
 		if (data.response == 0) { // append
 			file.id = H5Fopen(filename.toLatin1(), H5F_ACC_RDWR, H5P_DEFAULT);
@@ -1032,20 +1039,19 @@ int DataRecorder::Panel::openFile(QString &filename) {
 			error_msg[error_size] = 0;
 			H5Eclear(file.id);
 
-			ERROR_MSG("DataRecorder::Panel::processData : failed to open \"%s\" for writing with error : %s\n",filename.toLatin1(),error_msg);
+			ERROR_MSG("DataRecorder::Panel::processData : failed to open \"%s\" for writing with error : %s\n",filename.toStdString().c_str(),error_msg);
 			return -1;
 		}
 	}
 
-	QEvent *event = new QEvent(QSetFileNameEditEvent);
+	QEvent *event = new QEvent(static_cast<QEvent::Type>QSetFileNameEditEvent);
 	SetFileNameEditEventData data;
 
-	event->setData(&data);
-	data.filename = filename;
+	//event->setData(&data);
+	//data.filename = filename;
 
 	QApplication::postEvent(this, event);
-	data.done.wait();
-
+	//data.done.wait();
 	return 0;
 }
 
@@ -1061,14 +1067,14 @@ void DataRecorder::Panel::closeFile(bool shutdown) {
 	H5Fclose(file.id);
 
 	if (!shutdown) {
-		QEvent *event = new QEvent(QSetFileNameEditEvent);
+		QEvent *event = new QEvent(static_cast<QEvent::Type>QSetFileNameEditEvent);
 		SetFileNameEditEventData data;
 
-		event->setData(&data);
-		data.filename = "";
+		//event->setData(&data);
+		//data.filename = "";
 
 		QApplication::postEvent(this, event);
-		data.done.wait();
+		//data.done.wait();
 	}
 }
 
@@ -1204,7 +1210,7 @@ int DataRecorder::Panel::startRecording(long long timestamp) {
 
 	file.idx = 0;
 
-	QEvent *event = new QEvent(QDisableGroupsEvent);
+	QEvent *event = new QEvent(static_cast<QEvent::Type>QDisableGroupsEvent);
 	QApplication::postEvent(this, event);
 
 	return 0;
@@ -1248,7 +1254,7 @@ void DataRecorder::Panel::stopRecording(long long timestamp, bool shutdown) {
 	}
 
 	if (!shutdown) {
-		QEvent *event = new QEvent(QEnableGroupsEvent);
+		QEvent *event = new QEvent(static_cast<QEvent::Type>QEnableGroupsEvent);
 		QApplication::postEvent(this, event);
 	}
 }

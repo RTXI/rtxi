@@ -138,17 +138,16 @@ void Plugin::Manager::customEvent(QEvent *e) {
 		if (e->type() == CloseEvent) {
 				Mutex::Locker lock(&mutex);
 
-				// VISITTWO
-				//Object *plugin = static_cast<Plugin::Object *>(e->data());
+				Object *plugin = reinterpret_cast<Plugin::Object *>(e);//->data());
 
 				Event::Object event(Event::PLUGIN_REMOVE_EVENT);
-				//event.setParam("plugin",plugin);
+				event.setParam("plugin",plugin);
 				Event::Manager::getInstance()->postEvent(&event);
 
-				//void *handle = plugin->handle;
-				//adelete plugin;
-				//if(handle)
-				//dlclose(handle);
+				void *handle = plugin->handle;
+				delete plugin;
+				if(handle)
+				dlclose(handle);
 		}
 }
 

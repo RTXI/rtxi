@@ -30,14 +30,7 @@
 #include <QObject>
 #include <QWidget>
 #include <QEvent>
-
-class QComboBox;
-class QGroupBox;
-class QLineEdit;
-class QListBox;
-class QPushButton;
-class QSpinBox;
-class QLabel;
+#include <QtGui>
 
 namespace DataRecorder {
 	enum data_type_t {
@@ -140,7 +133,7 @@ namespace DataRecorder {
 			QComboBox *channelList;
 			QComboBox *typeList;
 			QGroupBox *channelBox;
-			QListBox *selectionBox;
+			QListWidget *selectionBox;
 			QLabel *recordStatus;
 
 			QGroupBox *sampleBox;
