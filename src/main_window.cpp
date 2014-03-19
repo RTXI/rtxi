@@ -29,8 +29,8 @@
 
 MainWindow::MainWindow (void) : QMainWindow(NULL, Qt::Window) {
 
-	/*QWidget *centralWidget = new QWidget(this);
-	setCentralWidget(centralWidget);*/
+	QWidget *centralWidget = new QWidget(this);
+	setCentralWidget(centralWidget);
 
 	/* Initialize Window Settings */
 	setWindowTitle("RTXI - Real-time eXperimental Interface");
@@ -85,8 +85,7 @@ MainWindow::MainWindow (void) : QMainWindow(NULL, Qt::Window) {
 
 	//windowsMenu = new QMenu (this);
 	//windowsMenu->setCheckable (true);
-	//QObject::connect (windowsMenu, SIGNAL (aboutToShow (void)), this,
-	//	    SLOT (windowsMenuAboutToShow (void)));
+	//QObject::connect (windowsMenu, SIGNAL (aboutToShow (void)), this, SLOT (windowsMenuAboutToShow (void)));
 
 	//menuBar()->addMenu("&Windows", windowsMenu);
 	//menuBar ()->insertSeparator ();
@@ -105,12 +104,12 @@ MainWindow::MainWindow (void) : QMainWindow(NULL, Qt::Window) {
 
 	//helpMenu->insertItem ("About &Qt", this, SLOT (aboutQt ()));
 	//helpMenu->setWhatsThis(id,"Opens a Window Containing Information About the Qt Widget Toolkit");
-	//
+	
 	//menuBar()->addMenu("&Help", helpMenu);
 
 	/* Create and Initialize the Workspace */
-	//setCentralWidget(new QWorkspace(this, NULL));
-	//((QWorkspace *)centralWidget())->setScrollBarsEnabled(true);
+	setCentralWidget(new QWorkspace(this));
+	((QWorkspace *)centralWidget)->setScrollBarsEnabled(true);
 }
 
 MainWindow::~MainWindow (void) {
@@ -128,15 +127,15 @@ void MainWindow::clearFileMenu(void) {
 	// don't clear the entire menu b/c Load & Save Workspace and Quit are created by
 	// main_window.cpp, not while a module is loading
 	/*fileMenu->clear();
-	int id;
-	id = fileMenu->insertItem ("&Load Workspace", this, SLOT (loadSettings ()), QKeySequence (Qt::CTRL + Qt::Key_L));
-	fileMenu->setWhatsThis (id, "Load Workspace settings file");
-	id = fileMenu->insertItem ("&Save Workspace", this, SLOT (saveSettings ()), QKeySequence (Qt::CTRL + Qt::Key_S));
-	fileMenu->setWhatsThis (id, "Save Workspace settings file");
-	fileMenu->addSeparator();
-	id = fileMenu->insertItem ("&Quit", qApp, SLOT (closeAllWindows ()), QKeySequence (Qt::CTRL + Qt::Key_Q));
-	fileMenu->setWhatsThis (id, "Quits the Application");
-	fileMenu->addSeparator();*/
+		int id;
+		id = fileMenu->insertItem ("&Load Workspace", this, SLOT (loadSettings ()), QKeySequence (Qt::CTRL + Qt::Key_L));
+		fileMenu->setWhatsThis (id, "Load Workspace settings file");
+		id = fileMenu->insertItem ("&Save Workspace", this, SLOT (saveSettings ()), QKeySequence (Qt::CTRL + Qt::Key_S));
+		fileMenu->setWhatsThis (id, "Save Workspace settings file");
+		fileMenu->addSeparator();
+		id = fileMenu->insertItem ("&Quit", qApp, SLOT (closeAllWindows ()), QKeySequence (Qt::CTRL + Qt::Key_Q));
+		fileMenu->setWhatsThis (id, "Quits the Application");
+		fileMenu->addSeparator();*/
 }
 
 int MainWindow::insertModuleMenuSeparator (void) {
@@ -274,47 +273,47 @@ void MainWindow::createHelpActions() {
 }
 
 void MainWindow::updateUtilModules(){
-  QSettings userprefs;
-  userprefs.setPath(QSettings::NativeFormat, QSettings::UserScope, "RTXI");
-  userprefs.beginGroup("/utilFileList");
-  QStringList entries = userprefs.childKeys();
-  userprefs.endGroup();
-  
-  int numUtilFiles = entries.size();
+	QSettings userprefs;
+	userprefs.setPath(QSettings::NativeFormat, QSettings::UserScope, "RTXI");
+	userprefs.beginGroup("/utilFileList");
+	QStringList entries = userprefs.childKeys();
+	userprefs.endGroup();
 
- 	/*int i = 0;
-  int menuID = utilMenu->insertItem("Model HH Neuron",this,SLOT(loadUtil(int)));
-  setUtilMenuItemParameter(menuID, i);
-  i++;
-  menuID = utilMenu->insertItem("Synchronize Modules",this,SLOT(loadUtil(int)));
-  setUtilMenuItemParameter(menuID, i);
+	int numUtilFiles = entries.size();
 
-  QPopupMenu *filterSubMenu = new QPopupMenu(this);
-  i = 0;
-  menuID = filterSubMenu->insertItem("FIR Filter (Window Method)",this,SLOT(loadFilter(int)));
-  filterSubMenu->setItemParameter(menuID, i);
-  i++;
-  menuID = filterSubMenu->insertItem("IIR Filter",this,SLOT(loadFilter(int)));
-  filterSubMenu->setItemParameter(menuID, i);
+	/*int i = 0;
+		int menuID = utilMenu->insertItem("Model HH Neuron",this,SLOT(loadUtil(int)));
+		setUtilMenuItemParameter(menuID, i);
+		i++;
+		menuID = utilMenu->insertItem("Synchronize Modules",this,SLOT(loadUtil(int)));
+		setUtilMenuItemParameter(menuID, i);
 
-  utilMenu->insertItem(tr("&Filters"), filterSubMenu);
+		QPopupMenu *filterSubMenu = new QPopupMenu(this);
+		i = 0;
+		menuID = filterSubMenu->insertItem("FIR Filter (Window Method)",this,SLOT(loadFilter(int)));
+		filterSubMenu->setItemParameter(menuID, i);
+		i++;
+		menuID = filterSubMenu->insertItem("IIR Filter",this,SLOT(loadFilter(int)));
+		filterSubMenu->setItemParameter(menuID, i);
 
-  QPopupMenu *signalSubMenu = new QPopupMenu(this);
+		utilMenu->insertItem(tr("&Filters"), filterSubMenu);
 
-  i = 0;
-  menuID = signalSubMenu->insertItem("Signal Generator",this,SLOT(loadSignal(int)));
-  signalSubMenu->setItemParameter(menuID, i);
-  i++;
-  menuID = signalSubMenu->insertItem("Noise Generator",this,SLOT(loadSignal(int)));
-  signalSubMenu->setItemParameter(menuID, i);
-  i++;
-  menuID = signalSubMenu->insertItem("Wave Maker",this,SLOT(loadSignal(int)));
-  signalSubMenu->setItemParameter(menuID, i);
-  i++;
-  menuID = signalSubMenu->insertItem("Mimic",this,SLOT(loadSignal(int)));
-  signalSubMenu->setItemParameter(menuID, i);
+		QPopupMenu *signalSubMenu = new QPopupMenu(this);
 
-  utilMenu->insertItem(tr("&Signals"), signalSubMenu);*/
+		i = 0;
+		menuID = signalSubMenu->insertItem("Signal Generator",this,SLOT(loadSignal(int)));
+		signalSubMenu->setItemParameter(menuID, i);
+		i++;
+		menuID = signalSubMenu->insertItem("Noise Generator",this,SLOT(loadSignal(int)));
+		signalSubMenu->setItemParameter(menuID, i);
+		i++;
+		menuID = signalSubMenu->insertItem("Wave Maker",this,SLOT(loadSignal(int)));
+		signalSubMenu->setItemParameter(menuID, i);
+		i++;
+		menuID = signalSubMenu->insertItem("Mimic",this,SLOT(loadSignal(int)));
+		signalSubMenu->setItemParameter(menuID, i);
+
+		utilMenu->insertItem(tr("&Signals"), signalSubMenu);*/
 }
 
 QAction* MainWindow::createPatchClampMenuItem (const QString &text, const QObject *receiver, const char *member) {
@@ -339,15 +338,17 @@ void MainWindow::about(void) {
 }
 
 void MainWindow::aboutQt (void) {
-	QMessageBox::aboutQt (this);
+	QMessageBox::aboutQt(this);
 }
 
 void MainWindow::aboutXeno(void) {
-	printf("Xenomai version:\n");
+	QMessageBox::about (this, "About Xenomai", "Version " + QString(system("xeno-config --version"))
+			+	"\n\nReleased under the GPLv3.\nSee www.rtxi.org for details.");
 }
 
 void MainWindow::aboutDAQ(void) {
-	printf("DAQ model: \n");
+	QMessageBox::about (this, "About RTXI", "Version " + QString(system("lspci | awk '{print $7}'"))
+			+	"\n\nReleased under the GPLv3.\nSee www.rtxi.org for details.");
 }
 
 void MainWindow::aboutComedi(void) {
@@ -465,58 +466,58 @@ void MainWindow::saveSettings(void) {
 	userprefs.setPath (QSettings::NativeFormat, QSettings::UserScope, "RTXI");
 
 	QStringList entries = userprefs.entryList ("/utilFileList");
-		int numUtilFiles = entries.size ();
+	int numUtilFiles = entries.size ();
 
-		for (int i = 0; i < numUtilFiles; i++) {
-		userprefs.removeEntry ("/utilFileList/util" + QString::number (i));
-		userprefs.removeEntry ("/utilFileList/filter" + QString::number (i));
-		userprefs.removeEntry ("/utilFileList/sig" + QString::number (i));
-		}
-		userprefs.writeEntry ("/utilFileList/util" + QString::number (0), "neuron.so");
-		userprefs.writeEntry ("/utilFileList/util" + QString::number (1), "synch.so");
+	for (int i = 0; i < numUtilFiles; i++) {
+	userprefs.removeEntry ("/utilFileList/util" + QString::number (i));
+	userprefs.removeEntry ("/utilFileList/filter" + QString::number (i));
+	userprefs.removeEntry ("/utilFileList/sig" + QString::number (i));
+	}
+	userprefs.writeEntry ("/utilFileList/util" + QString::number (0), "neuron.so");
+	userprefs.writeEntry ("/utilFileList/util" + QString::number (1), "synch.so");
 
-		userprefs.writeEntry ("/utilFileList/filter" + QString::number (0), "FIRwindow.so");
-		userprefs.writeEntry ("/utilFileList/filter" + QString::number (1), "IIRfilter.so");
+	userprefs.writeEntry ("/utilFileList/filter" + QString::number (0), "FIRwindow.so");
+	userprefs.writeEntry ("/utilFileList/filter" + QString::number (1), "IIRfilter.so");
 
-		userprefs.writeEntry ("/utilFileList/sig" + QString::number (0), "siggen.so");
-		userprefs.writeEntry ("/utilFileList/sig" + QString::number (1), "noisegen.so");
-		userprefs.writeEntry ("/utilFileList/sig" + QString::number (2), "wave_maker.so");
-		userprefs.writeEntry ("/utilFileList/sig" + QString::number (3), "mimic.so");
+	userprefs.writeEntry ("/utilFileList/sig" + QString::number (0), "siggen.so");
+	userprefs.writeEntry ("/utilFileList/sig" + QString::number (1), "noisegen.so");
+	userprefs.writeEntry ("/utilFileList/sig" + QString::number (2), "wave_maker.so");
+	userprefs.writeEntry ("/utilFileList/sig" + QString::number (3), "mimic.so");
 
-		int i = 0;
-		int menuID = utilMenu->insertItem("Model HH Neuron", this, SLOT (loadUtil (int)));
-		setUtilMenuItemParameter(menuID, i);
-		i++;
-		menuID = utilMenu->insertItem("Synchronize Modules", this, SLOT (loadUtil (int)));
-		setUtilMenuItemParameter(menuID, i);
+	int i = 0;
+	int menuID = utilMenu->insertItem("Model HH Neuron", this, SLOT (loadUtil (int)));
+	setUtilMenuItemParameter(menuID, i);
+	i++;
+	menuID = utilMenu->insertItem("Synchronize Modules", this, SLOT (loadUtil (int)));
+	setUtilMenuItemParameter(menuID, i);
 
-		QMenu *filterSubMenu = new QMenu(this);
-		i = 0;
-		menuID = filterSubMenu->insertItem("FIR Filter (Window Method)", this, SLOT (loadFilter (int)));
-		filterSubMenu->setItemParameter(menuID, i);
-		i++;
-		menuID = filterSubMenu->insertItem("IIR Filter", this, SLOT (loadFilter (int)));
-		filterSubMenu->setItemParameter(menuID, i);
+	QMenu *filterSubMenu = new QMenu(this);
+	i = 0;
+	menuID = filterSubMenu->insertItem("FIR Filter (Window Method)", this, SLOT (loadFilter (int)));
+	filterSubMenu->setItemParameter(menuID, i);
+	i++;
+	menuID = filterSubMenu->insertItem("IIR Filter", this, SLOT (loadFilter (int)));
+	filterSubMenu->setItemParameter(menuID, i);
 
-		utilMenu->insertItem(tr("&Filters"), filterSubMenu);
+	utilMenu->insertItem(tr("&Filters"), filterSubMenu);
 
-		QMenu *signalSubMenu = new QMenu(this);
+	QMenu *signalSubMenu = new QMenu(this);
 
-		i = 0;
-		menuID = signalSubMenu->insertItem("Signal Generator", this, SLOT (loadSignal (int)));
-		signalSubMenu->setItemParameter(menuID, i);
-		i++;
-		menuID = signalSubMenu->insertItem("Noise Generator", this, SLOT (loadSignal (int)));
-		signalSubMenu->setItemParameter(menuID, i);
-		i++;
-		menuID = signalSubMenu->insertItem("Wave Maker", this, SLOT (loadSignal (int)));
-		signalSubMenu->setItemParameter(menuID, i);
-		i++;
-		menuID = signalSubMenu->insertItem("Mimic", this, SLOT (loadSignal (int)));
-		signalSubMenu->setItemParameter(menuID, i);
+	i = 0;
+	menuID = signalSubMenu->insertItem("Signal Generator", this, SLOT (loadSignal (int)));
+	signalSubMenu->setItemParameter(menuID, i);
+	i++;
+	menuID = signalSubMenu->insertItem("Noise Generator", this, SLOT (loadSignal (int)));
+	signalSubMenu->setItemParameter(menuID, i);
+	i++;
+	menuID = signalSubMenu->insertItem("Wave Maker", this, SLOT (loadSignal (int)));
+	signalSubMenu->setItemParameter(menuID, i);
+	i++;
+	menuID = signalSubMenu->insertItem("Mimic", this, SLOT (loadSignal (int)));
+	signalSubMenu->setItemParameter(menuID, i);
 
-		utilMenu->insertItem(tr ("&Signals"), signalSubMenu);
-}*/
+	utilMenu->insertItem(tr ("&Signals"), signalSubMenu);
+	}*/
 
 void MainWindow::loadUtil(int i) {
 	QSettings userprefs;
@@ -550,8 +551,7 @@ void MainWindow::windowsMenuAboutToShow (void) {
 
 	QWorkspace *ws = dynamic_cast < QWorkspace * >(centralWidget ());
 	if (!ws) {
-		ERROR_MSG
-			("MainWindow::windowsMenuAboutToShow : centralWidget() not a QWorkspace?\n");
+		ERROR_MSG("MainWindow::windowsMenuAboutToShow : centralWidget() not a QWorkspace?\n");
 		return;
 	}
 
@@ -590,19 +590,19 @@ void MainWindow::windowsMenuActivated (int id) {
 static Mutex mutex;
 MainWindow * MainWindow::instance = 0;
 
-	MainWindow * MainWindow::getInstance (void) {
-		if (instance)
-			return instance;
-
-		/*************************************************************************
-		 * Seems like alot of hoops to jump through, but static allocation isn't *
-		 *   thread-safe. So effort must be taken to ensure mutual exclusion.    *
-		 *************************************************************************/
-
-		Mutex::Locker lock (&::mutex);
-		if (!instance) {
-			static MainWindow mainwindow;
-			instance = &mainwindow;
-		}
+MainWindow * MainWindow::getInstance (void) {
+	if (instance)
 		return instance;
+
+	/*************************************************************************
+	 * Seems like alot of hoops to jump through, but static allocation isn't *
+	 *   thread-safe. So effort must be taken to ensure mutual exclusion.    *
+	 *************************************************************************/
+
+	Mutex::Locker lock (&::mutex);
+	if (!instance) {
+		static MainWindow mainwindow;
+		instance = &mainwindow;
 	}
+	return instance;
+}

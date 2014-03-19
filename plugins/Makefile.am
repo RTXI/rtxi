@@ -13,5 +13,5 @@ SUBDIRS = \
 	dynamo_model_loader \
 	userprefs \
 	connector \
-	data_recorder \
-	oscilloscope
+	data_recorder
+#oscilloscope
