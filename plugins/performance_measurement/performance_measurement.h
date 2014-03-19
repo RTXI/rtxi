@@ -19,70 +19,46 @@
 #ifndef PERFORMANCE_MEASUREMENT_H
 #define PERFORMANCE_MEASUREMENT_H
 
-#include "../include/runningstat.h"
-
-#include <plugin.h>
-#include <rt.h>
-#include <workspace.h>
-
 #include <QWidget>
 #include <QTextStream>
 #include <QFile>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QtGui>
 
-class QLineEdit;
+#include <plugin.h>
+#include <rt.h>
+#include <workspace.h>
+#include "../include/runningstat.h"
 
-namespace PerformanceMeasurement
-{
-
+namespace PerformanceMeasurement {
   class Panel;
-
-  class Plugin : public QObject, public ::Plugin::Object
-  {
+  class Plugin : public QObject, public ::Plugin::Object {
 
     Q_OBJECT
-
     friend class Panel;
 
   public:
-
-    static Plugin *
-    getInstance(void);
+    static Plugin * getInstance(void);
 
 public slots:
-
   void createPerformanceMeasurementPanel(void);
-
   private:
-
     Plugin(void);
     ~Plugin(void);
-    Plugin(const Plugin &)
-    {
-    }
-    ;
-    Plugin &
-    operator=(const Plugin &)
-    {
-      return *getInstance();
-    }
-    ;
+    Plugin(const Plugin &){};
+    Plugin & operator=(const Plugin &)
+    {return *getInstance();};
 
     static Plugin *instance;
-
     int menuID;
     Panel *panel;
-
   }; // class Plugin
 
-  class Panel : public QWidget, public RT::Device, public Workspace::Instance
-  {
-
+  class Panel : public QWidget, public RT::Device, public Workspace::Instance {
   Q_OBJECT
 
   public:
-
     Panel(QWidget *);
     virtual
     ~Panel(void);
@@ -90,14 +66,12 @@ public slots:
     /*!
      * Measures the real-time period of the system
      */
-    void
-    read(void);
+    void read(void);
 
     /*!
      * Measures the computation time for loaded modules
      */
-    void
-    write(void);
+    void write(void);
 
   public slots:
 
@@ -109,15 +83,17 @@ public slots:
     /*!
      * Updates the GUI with the latest values
      */
-    void
-    update(void);
+    void update(void);
 
   private:
 
-    enum
-    {
+    enum {
       INIT1, INIT2, EXEC,
     } state;
+
+		QGroupBox *gridBox;
+		QString labelText;
+		QLabel *label;
 
     double duration;
     double lastRead;
@@ -137,8 +113,5 @@ public slots:
     QFile dataFile;
     QTextStream stream;
   }; // class Panel
-
-}
-; // namespace PerformanceMeasurement
-
+}; // namespace PerformanceMeasurement
 #endif /* PERFORMANCE_MEASUREMENT_H */

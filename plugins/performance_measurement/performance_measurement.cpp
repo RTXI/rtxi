@@ -40,92 +40,57 @@ static size_t num_vars = sizeof( vars ) / sizeof( Workspace::variable_t ); // Re
 
 PerformanceMeasurement::Panel::Panel(QWidget *parent)
 	: QWidget(parent),
-	Workspace::Instance( "Performance Measuremnt", vars, num_vars ), state( INIT1),
-	duration( 0 ), lastRead( 0 ), timestep( 0 ), maxDuration( 0 ), maxTimestep( 0 ), jitter( 0 ) {
+	Workspace::Instance("Performance Measuremnt", vars, num_vars), state(INIT1), duration(0),
+	lastRead(0), timestep(0), maxDuration(0), maxTimestep(0), jitter(0) {
+		
 		QWidget::setAttribute(Qt::WA_DeleteOnClose);
-		QWidget *hbox = new QWidget;
-		QBoxLayout *layout = new QVBoxLayout(this);
-
+		QFormLayout *layout = new QFormLayout;
 		setWindowTitle("Real-time Benchmarks");
 
-		hbox = new QWidget(this);
-		layout->addWidget(hbox);
-		QChar mu = QChar(0x3BC);
-		QString suffix = QString("s)");
+		gridBox = new QGroupBox();
 
-		QString labeltext = "Computation Time (";
-		labeltext.append(mu);
-		labeltext.append(suffix);
-		(void) (new QLabel(labeltext, hbox))->setFixedWidth(175);
-		durationEdit = new QLineEdit(hbox);
+		QString suffix = QString("s)").prepend(QChar(0x3BC));
 
-		hbox = new QWidget(this);
-		layout->addWidget(hbox);
-		labeltext = "Peak Computation Time (";
-		labeltext.append(mu);
-		labeltext.append(suffix);
-		(void) (new QLabel(labeltext, hbox))->setFixedWidth(175);
-		maxDurationEdit = new QLineEdit(hbox);
+		durationEdit = new QLineEdit(gridBox);
+		layout->addRow(new QLabel(tr("Computation Time (").append(suffix)), durationEdit);
+		maxDurationEdit = new QLineEdit(gridBox);
+		layout->addRow(new QLabel(tr("Peak Computation Time (").append(suffix)), maxDurationEdit);
+		timestepEdit = new QLineEdit(gridBox);
+		layout->addRow(new QLabel(tr("Real-time Period (").append(suffix)), timestepEdit);
+		maxTimestepEdit = new QLineEdit(gridBox);
+		layout->addRow(new QLabel(tr("Peak Real-time Period (").append(suffix)), maxTimestepEdit);
+		timestepJitterEdit = new QLineEdit(gridBox);
+		layout->addRow(new QLabel(tr("Real-time Jitter (").append(suffix)), timestepJitterEdit);
 
-		hbox = new QWidget(this);
-		layout->addWidget(hbox);
-		labeltext = "Real-time Period (";
-		labeltext.append(mu);
-		labeltext.append(suffix);
-		(void) (new QLabel(labeltext, hbox))->setFixedWidth(175);
-		timestepEdit = new QLineEdit(hbox);
-
-		hbox = new QWidget(this);
-		layout->addWidget(hbox);
-		labeltext = "Peak Real-time Period (";
-		labeltext.append(mu);
-		labeltext.append(suffix);
-		(void) (new QLabel(labeltext, hbox))->setFixedWidth(175);
-		maxTimestepEdit = new QLineEdit(hbox);
-		setToolTip("The worst case time step");
-
-		hbox = new QWidget(this);
-		layout->addWidget(hbox);
-		labeltext = "Real-time Jitter (";
-		labeltext.append(mu);
-		labeltext.append(suffix);
-		(void) (new QLabel(labeltext, hbox))->setFixedWidth(175);
-		timestepJitterEdit = new QLineEdit(hbox);
-		setToolTip("The variance in the real-time period");
-
-		hbox = new QWidget(this);
-		layout->addWidget(hbox);
 		QPushButton *resetButton = new QPushButton("Reset", this);
 		layout->addWidget(resetButton);
 		QObject::connect(resetButton,SIGNAL(clicked(void)),this,SLOT(reset(void)));
+
+		setLayout(layout);
 
 		QTimer *timer = new QTimer(this);
 		timer->start(500);
 		QObject::connect(timer,SIGNAL(timeout(void)),this,SLOT(update(void)));
 
 		// Connect states to workspace
-		setData( Workspace::STATE, 0, &duration );
-		setData( Workspace::STATE, 1, &maxDuration );
-		setData( Workspace::STATE, 2, &timestep );
-		setData( Workspace::STATE, 3, &maxTimestep );
-		setData( Workspace::STATE, 4, &jitter );
+		setData(Workspace::STATE, 0, &duration);
+		setData(Workspace::STATE, 1, &maxDuration);
+		setData(Workspace::STATE, 2, &timestep);
+		setData(Workspace::STATE, 3, &maxTimestep);
+		setData(Workspace::STATE, 4, &jitter);
 
 		setActive(true);
 		saveStats = false;
 	}
 
-PerformanceMeasurement::Panel::~Panel(void)
-{
+PerformanceMeasurement::Panel::~Panel(void) {
 	Plugin::getInstance()->panel = 0;
 }
 
-	void
-PerformanceMeasurement::Panel::read(void)
-{
+void PerformanceMeasurement::Panel::read(void) {
 	long long now = RT::OS::getTime();
 
-	switch (state)
-	{
+	switch (state) {
 		case EXEC:
 			if (maxTimestep < now - lastRead)
 				maxTimestep = now - lastRead;
@@ -144,13 +109,10 @@ PerformanceMeasurement::Panel::read(void)
 	jitter = timestepStat.var();
 }
 
-	void
-PerformanceMeasurement::Panel::write(void)
-{
+void PerformanceMeasurement::Panel::write(void) {
 	long long now = RT::OS::getTime();
 
-	switch (state)
-	{
+	switch (state) {
 		case EXEC:
 			if (maxDuration < now - lastRead)
 				maxDuration = now - lastRead;
@@ -164,16 +126,12 @@ PerformanceMeasurement::Panel::write(void)
 	}
 }
 
-	void
-PerformanceMeasurement::Panel::reset(void)
-{
+void PerformanceMeasurement::Panel::reset(void) {
 	state = INIT1;
 	timestepStat.clear();
 }
 
-	void
-PerformanceMeasurement::Panel::update(void)
-{
+void PerformanceMeasurement::Panel::update(void) {
 	durationEdit->setText(QString::number(duration * 1e-3));
 	maxDurationEdit->setText(QString::number(maxDuration * 1e-3));
 	timestepEdit->setText(QString::number(timestep * 1e-3));
@@ -181,9 +139,7 @@ PerformanceMeasurement::Panel::update(void)
 	timestepJitterEdit->setText(QString::number(jitter * 1e-3));
 }
 
-	extern "C" Plugin::Object *
-createRTXIPlugin(void *)
-{
+extern "C" Plugin::Object * createRTXIPlugin(void *) {
 	return PerformanceMeasurement::Plugin::getInstance();
 }
 
