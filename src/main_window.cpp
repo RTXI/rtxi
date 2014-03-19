@@ -17,6 +17,7 @@
 */
 
 #include <QtGui>
+
 #include <cmdline.h>
 #include <debug.h>
 #include <algorithm>

@@ -44,10 +44,8 @@ PerformanceMeasurement::Panel::Panel(QWidget *parent) : QWidget(parent),
 
 		QWidget::setAttribute(Qt::WA_DeleteOnClose);
 		QFormLayout *layout = new QFormLayout;
-		setWindowTitle("Real-time Benchmarks");
 
 		gridBox = new QGroupBox();
-
 		QString suffix = QString("s)").prepend(QChar(0x3BC));
 
 		durationEdit = new QLineEdit(gridBox);
@@ -66,6 +64,7 @@ PerformanceMeasurement::Panel::Panel(QWidget *parent) : QWidget(parent),
 		QObject::connect(resetButton,SIGNAL(clicked(void)),this,SLOT(reset(void)));
 
 		setLayout(layout);
+		setWindowTitle(tr("Real-time Benchmarks"));
 
 		QTimer *timer = new QTimer(this);
 		timer->start(500);
