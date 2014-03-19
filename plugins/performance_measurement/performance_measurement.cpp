@@ -14,7 +14,7 @@
 	 You should have received a copy of the GNU General Public License
 	 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
- */
+*/
 
 #include <QLabel>
 #include <QLayout>
@@ -42,77 +42,77 @@ PerformanceMeasurement::Panel::Panel(QWidget *parent)
 	: QWidget(parent),
 	Workspace::Instance( "Performance Measuremnt", vars, num_vars ), state( INIT1),
 	duration( 0 ), lastRead( 0 ), timestep( 0 ), maxDuration( 0 ), maxTimestep( 0 ), jitter( 0 ) {
-	QWidget::setAttribute(Qt::WA_DeleteOnClose);
-	QWidget *hbox = new QWidget;
-	QBoxLayout *layout = new QVBoxLayout(this);
+		QWidget::setAttribute(Qt::WA_DeleteOnClose);
+		QWidget *hbox = new QWidget;
+		QBoxLayout *layout = new QVBoxLayout(this);
 
-	setWindowTitle("Real-time Benchmarks");
+		setWindowTitle("Real-time Benchmarks");
 
-	hbox = new QWidget(this);
-	layout->addWidget(hbox);
-	QChar mu = QChar(0x3BC);
-	QString suffix = QString("s)");
+		hbox = new QWidget(this);
+		layout->addWidget(hbox);
+		QChar mu = QChar(0x3BC);
+		QString suffix = QString("s)");
 
-	QString labeltext = "Computation Time (";
-	labeltext.append(mu);
-	labeltext.append(suffix);
-	(void) (new QLabel(labeltext, hbox))->setFixedWidth(175);
-	durationEdit = new QLineEdit(hbox);
+		QString labeltext = "Computation Time (";
+		labeltext.append(mu);
+		labeltext.append(suffix);
+		(void) (new QLabel(labeltext, hbox))->setFixedWidth(175);
+		durationEdit = new QLineEdit(hbox);
 
-	hbox = new QWidget(this);
-	layout->addWidget(hbox);
-	labeltext = "Peak Computation Time (";
-	labeltext.append(mu);
-	labeltext.append(suffix);
-	(void) (new QLabel(labeltext, hbox))->setFixedWidth(175);
-	maxDurationEdit = new QLineEdit(hbox);
+		hbox = new QWidget(this);
+		layout->addWidget(hbox);
+		labeltext = "Peak Computation Time (";
+		labeltext.append(mu);
+		labeltext.append(suffix);
+		(void) (new QLabel(labeltext, hbox))->setFixedWidth(175);
+		maxDurationEdit = new QLineEdit(hbox);
 
-	hbox = new QWidget(this);
-	layout->addWidget(hbox);
-	labeltext = "Real-time Period (";
-	labeltext.append(mu);
-	labeltext.append(suffix);
-	(void) (new QLabel(labeltext, hbox))->setFixedWidth(175);
-	timestepEdit = new QLineEdit(hbox);
+		hbox = new QWidget(this);
+		layout->addWidget(hbox);
+		labeltext = "Real-time Period (";
+		labeltext.append(mu);
+		labeltext.append(suffix);
+		(void) (new QLabel(labeltext, hbox))->setFixedWidth(175);
+		timestepEdit = new QLineEdit(hbox);
 
-	hbox = new QWidget(this);
-	layout->addWidget(hbox);
-	labeltext = "Peak Real-time Period (";
-	labeltext.append(mu);
-	labeltext.append(suffix);
-	(void) (new QLabel(labeltext, hbox))->setFixedWidth(175);
-	maxTimestepEdit = new QLineEdit(hbox);
-	setToolTip("The worst case time step");
+		hbox = new QWidget(this);
+		layout->addWidget(hbox);
+		labeltext = "Peak Real-time Period (";
+		labeltext.append(mu);
+		labeltext.append(suffix);
+		(void) (new QLabel(labeltext, hbox))->setFixedWidth(175);
+		maxTimestepEdit = new QLineEdit(hbox);
+		setToolTip("The worst case time step");
 
-	hbox = new QWidget(this);
-	layout->addWidget(hbox);
-	labeltext = "Real-time Jitter (";
-	labeltext.append(mu);
-	labeltext.append(suffix);
-	(void) (new QLabel(labeltext, hbox))->setFixedWidth(175);
-	timestepJitterEdit = new QLineEdit(hbox);
-	setToolTip("The variance in the real-time period");
+		hbox = new QWidget(this);
+		layout->addWidget(hbox);
+		labeltext = "Real-time Jitter (";
+		labeltext.append(mu);
+		labeltext.append(suffix);
+		(void) (new QLabel(labeltext, hbox))->setFixedWidth(175);
+		timestepJitterEdit = new QLineEdit(hbox);
+		setToolTip("The variance in the real-time period");
 
-	hbox = new QWidget(this);
-	layout->addWidget(hbox);
-	QPushButton *resetButton = new QPushButton("Reset", this);
-	layout->addWidget(resetButton);
-	QObject::connect(resetButton,SIGNAL(clicked(void)),this,SLOT(reset(void)));
+		hbox = new QWidget(this);
+		layout->addWidget(hbox);
+		QPushButton *resetButton = new QPushButton("Reset", this);
+		layout->addWidget(resetButton);
+		QObject::connect(resetButton,SIGNAL(clicked(void)),this,SLOT(reset(void)));
 
-	QTimer *timer = new QTimer(this);
-	timer->start(500);
-	QObject::connect(timer,SIGNAL(timeout(void)),this,SLOT(update(void)));
+		QTimer *timer = new QTimer(this);
+		timer->start(500);
+		QObject::connect(timer,SIGNAL(timeout(void)),this,SLOT(update(void)));
 
-	// Connect states to workspace
-	setData( Workspace::STATE, 0, &duration );
-	setData( Workspace::STATE, 1, &maxDuration );
-	setData( Workspace::STATE, 2, &timestep );
-	setData( Workspace::STATE, 3, &maxTimestep );
-	setData( Workspace::STATE, 4, &jitter );
+		// Connect states to workspace
+		setData( Workspace::STATE, 0, &duration );
+		setData( Workspace::STATE, 1, &maxDuration );
+		setData( Workspace::STATE, 2, &timestep );
+		setData( Workspace::STATE, 3, &maxTimestep );
+		setData( Workspace::STATE, 4, &jitter );
 
-	setActive(true);
-	saveStats = false;
-}
+		setActive(true);
+		saveStats = false;
+	}
 
 PerformanceMeasurement::Panel::~Panel(void)
 {

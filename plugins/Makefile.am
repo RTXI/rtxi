@@ -12,6 +12,6 @@ SUBDIRS = \
 	comedilib_device \
 	dynamo_model_loader \
 	userprefs \
-	connector
-#data_recorder 
-#oscilloscope #wrf
+	connector \
+	data_recorder \
+	oscilloscope
