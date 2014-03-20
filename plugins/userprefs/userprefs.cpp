@@ -110,8 +110,6 @@ UserPrefs::Panel::Panel(QWidget *parent) : QWidget(parent) {
 
   // Attach layout to widget
   setLayout(layout);
-
-  // Set title of widget
   setWindowTitle("User Preferences");
   show();
 }

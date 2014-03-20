@@ -44,28 +44,44 @@ PerformanceMeasurement::Panel::Panel(QWidget *parent) : QWidget(parent),
 
 		QWidget::setAttribute(Qt::WA_DeleteOnClose);
 
-		// Create child widget and layout
-		// Only need one for this module
-		gridBox = new QGroupBox;
-		QFormLayout *layout = new QFormLayout;
+		QVBoxLayout *mainLayout = new QVBoxLayout;
 		QString suffix = QString("s)").prepend(QChar(0x3BC));
 
+		// Create child widget and layout
+		gridBox = new QGroupBox;
+		QGridLayout *layout = new QGridLayout;
+
 		durationEdit = new QLineEdit(gridBox);
-		layout->addRow(new QLabel(tr("Computation Time (").append(suffix)), durationEdit);
+		layout->addWidget(new QLabel(tr("Computation Time (").append(suffix)), 1, 0);
+		layout->addWidget(durationEdit, 1, 1);
+
 		maxDurationEdit = new QLineEdit(gridBox);
-		layout->addRow(new QLabel(tr("Peak Computation Time (").append(suffix)), maxDurationEdit);
+		layout->addWidget(new QLabel(tr("Peak Computation Time (").append(suffix)), 2, 0);
+		layout->addWidget(maxDurationEdit, 2, 1);
+
 		timestepEdit = new QLineEdit(gridBox);
-		layout->addRow(new QLabel(tr("Real-time Period (").append(suffix)), timestepEdit);
+		layout->addWidget(new QLabel(tr("Real-time Period (").append(suffix)), 3, 0);
+		layout->addWidget(timestepEdit, 3, 1);
+
 		maxTimestepEdit = new QLineEdit(gridBox);
-		layout->addRow(new QLabel(tr("Peak Real-time Period (").append(suffix)), maxTimestepEdit);
+		layout->addWidget(new QLabel(tr("Peak Real-time Period (").append(suffix)), 4, 0);
+		layout->addWidget(maxTimestepEdit, 4, 1);
+
 		timestepJitterEdit = new QLineEdit(gridBox);
-		layout->addRow(new QLabel(tr("Real-time Jitter (").append(suffix)), timestepJitterEdit);
+		layout->addWidget(new QLabel(tr("Real-time Jitter (").append(suffix)), 5, 0);
+		layout->addWidget(timestepJitterEdit, 5, 1);
 
 		QPushButton *resetButton = new QPushButton("Reset", this);
-		layout->addWidget(resetButton);
+		layout->addWidget(resetButton, 6, 1);
 		QObject::connect(resetButton,SIGNAL(clicked(void)),this,SLOT(reset(void)));
 
-		setLayout(layout);
+		gridBox->setLayout(layout);
+
+		// Attach child widget to parent widget
+		mainLayout->addWidget(gridBox);
+
+		// Attach layout to Widget
+		setLayout(mainLayout);
 		setWindowTitle(tr("Real-time Benchmarks"));
 		show();
 
