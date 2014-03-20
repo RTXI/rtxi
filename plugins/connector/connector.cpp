@@ -118,7 +118,7 @@ Connector::Panel::Panel(QWidget *parent) : QWidget(parent) {
 	// Attach layout to widget
 	setLayout(layout);
 	setWindowTitle("Connector Panel");
-	//show();
+	show();
 
 	block_list_info_t info = {inputBlock, outputBlock, &blocks};
 	IO::Connector::getInstance()->foreachBlock(::buildBlockList,&info);
