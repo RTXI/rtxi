@@ -36,7 +36,7 @@ static Workspace::variable_t vars[] = {
 	{ "RT Jitter (ns)", "", Workspace::STATE, },
 };
 
-static size_t num_vars = sizeof( vars ) / sizeof( Workspace::variable_t ); // Required variable (number of variables)
+static size_t num_vars = sizeof(vars) / sizeof(Workspace::variable_t); // Required variable (number of variables)
 
 PerformanceMeasurement::Panel::Panel(QWidget *parent) : QWidget(parent),
 	Workspace::Instance("Performance Measuremnt", vars, num_vars), state(INIT1), duration(0),
