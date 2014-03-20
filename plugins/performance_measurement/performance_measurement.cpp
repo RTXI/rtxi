@@ -44,44 +44,44 @@ PerformanceMeasurement::Panel::Panel(QWidget *parent) : QWidget(parent),
 
 		QWidget::setAttribute(Qt::WA_DeleteOnClose);
 
-		QVBoxLayout *mainLayout = new QVBoxLayout;
+		QVBoxLayout *layout = new QVBoxLayout;
 		QString suffix = QString("s)").prepend(QChar(0x3BC));
 
-		// Create child widget and layout
+		// Create child widget and gridLayout
 		gridBox = new QGroupBox;
-		QGridLayout *layout = new QGridLayout;
+		QGridLayout *gridLayout = new QGridLayout;
 
 		durationEdit = new QLineEdit(gridBox);
-		layout->addWidget(new QLabel(tr("Computation Time (").append(suffix)), 1, 0);
-		layout->addWidget(durationEdit, 1, 1);
+		gridLayout->addWidget(new QLabel(tr("Computation Time (").append(suffix)), 1, 0);
+		gridLayout->addWidget(durationEdit, 1, 1);
 
 		maxDurationEdit = new QLineEdit(gridBox);
-		layout->addWidget(new QLabel(tr("Peak Computation Time (").append(suffix)), 2, 0);
-		layout->addWidget(maxDurationEdit, 2, 1);
+		gridLayout->addWidget(new QLabel(tr("Peak Computation Time (").append(suffix)), 2, 0);
+		gridLayout->addWidget(maxDurationEdit, 2, 1);
 
 		timestepEdit = new QLineEdit(gridBox);
-		layout->addWidget(new QLabel(tr("Real-time Period (").append(suffix)), 3, 0);
-		layout->addWidget(timestepEdit, 3, 1);
+		gridLayout->addWidget(new QLabel(tr("Real-time Period (").append(suffix)), 3, 0);
+		gridLayout->addWidget(timestepEdit, 3, 1);
 
 		maxTimestepEdit = new QLineEdit(gridBox);
-		layout->addWidget(new QLabel(tr("Peak Real-time Period (").append(suffix)), 4, 0);
-		layout->addWidget(maxTimestepEdit, 4, 1);
+		gridLayout->addWidget(new QLabel(tr("Peak Real-time Period (").append(suffix)), 4, 0);
+		gridLayout->addWidget(maxTimestepEdit, 4, 1);
 
 		timestepJitterEdit = new QLineEdit(gridBox);
-		layout->addWidget(new QLabel(tr("Real-time Jitter (").append(suffix)), 5, 0);
-		layout->addWidget(timestepJitterEdit, 5, 1);
+		gridLayout->addWidget(new QLabel(tr("Real-time Jitter (").append(suffix)), 5, 0);
+		gridLayout->addWidget(timestepJitterEdit, 5, 1);
 
 		QPushButton *resetButton = new QPushButton("Reset", this);
-		layout->addWidget(resetButton, 6, 1);
+		gridLayout->addWidget(resetButton, 6, 1);
 		QObject::connect(resetButton,SIGNAL(clicked(void)),this,SLOT(reset(void)));
 
-		gridBox->setLayout(layout);
+		gridBox->setLayout(gridLayout);
 
 		// Attach child widget to parent widget
-		mainLayout->addWidget(gridBox);
+		layout->addWidget(gridBox);
 
-		// Attach layout to Widget
-		setLayout(mainLayout);
+		// Attach gridLayout to Widget
+		setLayout(layout);
 		setWindowTitle(tr("Real-time Benchmarks"));
 		show();
 

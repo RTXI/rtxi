@@ -36,10 +36,10 @@ namespace Connector {
 			~Panel(void);
 			void receiveEvent(const Event::Object *);
 
-			private slots:
-				void buildInputChannelList(void);
+		private slots:
+			void buildInputChannelList(void);
 			void buildOutputChannelList(void);
-			void highlightConnectionBox(const QString &);
+			void highlightConnectionBox(QListWidgetItem *);
 			void toggleConnection(bool);
 			void updateConnectionButton(void);
 
@@ -53,6 +53,10 @@ namespace Connector {
 				size_t dest_idx;
 			};
 
+			QGroupBox *connectionGroup;
+			QGroupBox *buttonGroup;
+			QGroupBox *outputGroup;
+			QGroupBox *inputGroup;
 			QComboBox *inputBlock;
 			QComboBox *inputChannel;
 			QComboBox *outputBlock;
