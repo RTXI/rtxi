@@ -43,9 +43,11 @@ PerformanceMeasurement::Panel::Panel(QWidget *parent) : QWidget(parent),
 	lastRead(0), timestep(0), maxDuration(0), maxTimestep(0), jitter(0) {
 
 		QWidget::setAttribute(Qt::WA_DeleteOnClose);
-		QFormLayout *layout = new QFormLayout;
 
-		gridBox = new QGroupBox();
+		// Create child widget and layout
+		// Only need one for this module
+		gridBox = new QGroupBox;
+		QFormLayout *layout = new QFormLayout;
 		QString suffix = QString("s)").prepend(QChar(0x3BC));
 
 		durationEdit = new QLineEdit(gridBox);
@@ -65,6 +67,7 @@ PerformanceMeasurement::Panel::Panel(QWidget *parent) : QWidget(parent),
 
 		setLayout(layout);
 		setWindowTitle(tr("Real-time Benchmarks"));
+		show();
 
 		QTimer *timer = new QTimer(this);
 		timer->start(500);
@@ -79,7 +82,7 @@ PerformanceMeasurement::Panel::Panel(QWidget *parent) : QWidget(parent),
 
 		setActive(true);
 		saveStats = false;
-	}
+}
 
 PerformanceMeasurement::Panel::~Panel(void) {
 	Plugin::getInstance()->panel = 0;

@@ -28,66 +28,92 @@
 #include <QFileDialog>
 
 UserPrefs::Panel::Panel(QWidget *parent) : QWidget(parent) {
+
 	setAttribute(Qt::WA_DeleteOnClose);
-  QBoxLayout *layout = new QVBoxLayout(this);
 
-  setWindowTitle("RTXI User Preferences");
+	// Preferences structure
+	QSettings userprefs;
+	userprefs.setPath(QSettings::NativeFormat, QSettings::UserScope, "RTXI");
 
-  // load QSettings
-  QSettings userprefs;
-  userprefs.setPath(QSettings::NativeFormat, QSettings::UserScope, "RTXI");
+	// Main layout
+	QVBoxLayout *layout = new QVBoxLayout;
 
-  // create GUI elements and set text
-  QGroupBox *dirGroup;
-  dirGroup = new QGroupBox();
+	// Create child widget and layout
+  dirGroup = new QGroupBox;
+	QGridLayout *dirLayout = new QGridLayout;
 
-  QWidget *hbox;
-  hbox = new QWidget(dirGroup);
-  (void) (new QLabel("Default settings directory:", hbox))->setFixedWidth(250);
-  settingsDirEdit = new QLineEdit(hbox);
-  settingsDirEdit->setFixedWidth(200);
+	// Create elements for directory paths
+  settingsDirEdit = new QLineEdit(dirGroup);
   settingsDirEdit->setText(userprefs.value("/dirs/setfiles", getenv("HOME")).toString());
-  QPushButton *chooseSettingsDirButton = new QPushButton("Browse", hbox);
+  dirLayout->addWidget(new QLabel(tr("Default settings directory:")), 1, 0);
+  dirLayout->addWidget(settingsDirEdit, 1, 1);
+  QPushButton *chooseSettingsDirButton = new QPushButton("Browse", this);
+  dirLayout->addWidget(chooseSettingsDirButton, 1, 2);
   QObject::connect(chooseSettingsDirButton,SIGNAL(clicked(void)),this,SLOT(chooseSettingsDir(void)));
 
-  hbox = new QWidget(dirGroup);
-  (void) (new QLabel("Default DYNAMO models directory:", hbox))->setFixedWidth(
-      250);
-  dynamoDirEdit = new QLineEdit(hbox);
+  dynamoDirEdit = new QLineEdit(dirGroup);
   dynamoDirEdit->setText(userprefs.value("/dirs/dynamomodels", getenv("HOME")).toString());
-  QPushButton *chooseDynamoDirButton = new QPushButton("Browse", hbox);
+	dirLayout->addWidget(new QLabel(tr("Default DYNAMO models directory:")), 2, 0);
+	dirLayout->addWidget(dynamoDirEdit, 2, 1);
+  QPushButton *chooseDynamoDirButton = new QPushButton("Browse", this);
+  dirLayout->addWidget(chooseDynamoDirButton, 2, 2);
   QObject::connect(chooseDynamoDirButton,SIGNAL(clicked(void)),this,SLOT(chooseDynamoDir(void)));
 
-  hbox = new QWidget(dirGroup);
-  (void) (new QLabel("Default HDF5 data directory:", hbox))->setFixedWidth(250);
-  dataDirEdit = new QLineEdit(hbox);
+  dataDirEdit = new QLineEdit(dirGroup);
   dataDirEdit->setText(userprefs.value("/dirs/data", getenv("HOME")).toString());
-  QPushButton *chooseDataDirButton = new QPushButton("Browse", hbox);
+	dirLayout->addWidget(new QLabel(tr("Default HDF5 data directory:")), 3, 0);
+	dirLayout->addWidget(dataDirEdit, 3, 1);
+  QPushButton *chooseDataDirButton = new QPushButton("Browse", this);
+  dirLayout->addWidget(chooseDataDirButton, 3, 2);
   QObject::connect(chooseDataDirButton,SIGNAL(clicked(void)),this,SLOT(chooseDataDir(void)));
 
-  layout->addWidget(dirGroup);
+	// Attach layout to group
+	dirGroup->setLayout(dirLayout);
 
-  hbox = new QWidget(this);
-  (void) (new QLabel("HDF Data Recorder Buffer Size (MB):", hbox))->setFixedWidth(250);
-  HDFBufferEdit = new QLineEdit(hbox);
+	// Create new child widget and layout
+	HDF = new QGroupBox;
+	QGridLayout *hdfLayout = new QGridLayout;
+
+	// Create elements for child widget
+  HDFBufferEdit = new QLineEdit(HDF);
+	hdfLayout->addWidget(new QLabel(tr("HDF Data Recorder Buffer Size (MB):")), 1, 0);
+	hdfLayout->addWidget(HDFBufferEdit, 1, 1);
   HDFBufferEdit->setText(QString::number(userprefs.value("/system/HDFbuffer", 10).toInt()));
 
-  layout->addWidget(hbox);
+	// Attach child to parent
+	HDF->setLayout(hdfLayout);
 
-  hbox = new QWidget(this);
+	// Create new child widget
+  buttons = new QGroupBox;
+	QHBoxLayout *buttonLayout = new QHBoxLayout;
 
-  QPushButton *resetButton = new QPushButton("Reset and Close", hbox);
+	// Create elements for child widget
+  QPushButton *resetButton = new QPushButton("Reset and Close");
   QObject::connect(resetButton,SIGNAL(clicked(void)),this,SLOT(reset(void)));
-
-  QPushButton *applyButton = new QPushButton("Save and Close", hbox);
+  QPushButton *applyButton = new QPushButton("Save and Close");
   QObject::connect(applyButton,SIGNAL(clicked(void)),this,SLOT(apply(void)));
-
-  QPushButton *cancelButton = new QPushButton("Close without Saving", hbox);
+  QPushButton *cancelButton = new QPushButton("Close without Saving");
   QObject::connect(cancelButton,SIGNAL(clicked(void)),this,SLOT(cancel(void)));
 
-  layout->addWidget(hbox);
+	// Assign elements to layout in child widget
+	buttonLayout->addWidget(resetButton);
+	buttonLayout->addWidget(applyButton);
+	buttonLayout->addWidget(cancelButton);
+
+	// Assign layout to child widget
+	buttons->setLayout(buttonLayout);
+
+	// Attach child widget to parent widget
+	layout->addWidget(dirGroup);
+	layout->addWidget(HDF);
+  layout->addWidget(buttons);
+
+  // Attach layout to widget
+  setLayout(layout);
+
+  // Set title of widget
+  setWindowTitle("User Preferences");
   show();
-  //setActive(true);
 }
 
 UserPrefs::Panel::~Panel(void) {
