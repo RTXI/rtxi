@@ -129,6 +129,13 @@ namespace DataRecorder {
 
 			bool recording;
 
+			QGroupBox *channelGroup;
+			QGroupBox *sampleGroup;
+			QGroupBox *fileGroup;
+			QGroupBox *buttonGroup;
+			QGroupBox *arrowGroup;
+			QGroupBox *listGroup;
+
 			QComboBox *blockList;
 			QComboBox *channelList;
 			QComboBox *typeList;
@@ -139,7 +146,6 @@ namespace DataRecorder {
 			QGroupBox *sampleBox;
 			QSpinBox *downsampleSpin;
 
-			QGroupBox *fileBox;
 			QLineEdit *fileNameEdit;
 			QLineEdit *fileFormatEdit;
 			QLabel *fileSizeLbl;

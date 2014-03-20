@@ -309,8 +309,9 @@ DataRecorder::Channel::~Channel(void) {
 
 DataRecorder::Panel::Panel(QWidget *parent, size_t buffersize) :
 	QWidget(parent), RT::Thread(RT::Thread::MinimumPriority), fifo(buffersize), recording(false) {
+
 		setAttribute(Qt::WA_DeleteOnClose);
-		setWindowTitle(QString::number(getID()) + " Data Recorder");
+
 		setWhatsThis(
 				"<p><b>Data Recorder:</b><br>The Data Recorder writes data to an HDF5 file format "
 				"All available signals for saving to file are automatically detected. Currently "
@@ -323,29 +324,22 @@ DataRecorder::Panel::Panel(QWidget *parent, size_t buffersize) :
 				"so that you can reconstruct your data correctly. The current recording status of "
 				"the Data Recorder is shown at the bottom.</p>");
 
-		QHBoxLayout *hbox;
-		QVBoxLayout *vbox;
+		// Create main layout
+		QGridLayout *layout = new QGridLayout;
 
-		QBoxLayout *layout = new QVBoxLayout(this);
-		layout->setMargin(5);
+		// Create child widget and layout for channel selection
+		channelGroup = new QGroupBox(tr("Channel Selection"));
+		QVBoxLayout *channelLayout = new QVBoxLayout;
 
-		channelBox = new QGroupBox(tr("Channel Selection"));//, this);
-		//channelBox->setInsideMargin(5);
-		layout->addWidget(channelBox);
-
-		vbox = new QVBoxLayout(channelBox);
-		//vbox->setMaximumHeight(125);
-
-		hbox = new QHBoxLayout(this);
-		(new QLabel("Block:"))->setFixedWidth(75);
-		blockList = new QComboBox(this);
-		blockList->setFixedWidth(150);
+		// Create elements for channel box
+		channelLayout->addWidget(new QLabel(tr("Block:")));
+		blockList = new QComboBox;
+		channelLayout->addWidget(blockList);
 		QObject::connect(blockList,SIGNAL(activated(int)), this, SLOT(buildChannelList(void)));
 
-		hbox = new QHBoxLayout(this);
-		(new QLabel("Type:"))->setFixedWidth(75);
-		typeList = new QComboBox(this);
-		typeList->setFixedWidth(150);
+		channelLayout->addWidget(new QLabel(tr("Type:")));
+		typeList = new QComboBox;
+		channelLayout->addWidget(typeList);
 		typeList->addItem("Input");
 		typeList->addItem("Output");
 		typeList->addItem("Parameter");
@@ -353,35 +347,70 @@ DataRecorder::Panel::Panel(QWidget *parent, size_t buffersize) :
 		typeList->addItem("Event");
 		QObject::connect(typeList,SIGNAL(activated(int)),this,SLOT(buildChannelList(void)));
 
-		hbox = new QHBoxLayout(this);
-		(new QLabel("Channel:"))->setFixedWidth(75);
-		channelList = new QComboBox(this);
-		channelList->setFixedWidth(150);
+		channelLayout->addWidget(new QLabel(tr("Channel:")));
+		channelList = new QComboBox;
+		channelLayout->addWidget(channelList);
 
-		//vbox = new QVBox(channelBox);
-		//vbox->setMaximumHeight(100);
+		// Attach layout to child widget
+		channelGroup->setLayout(channelLayout);
 
+		// Create child widget and layout
+		arrowGroup = new QGroupBox("On/Off");
+		QVBoxLayout *arrowLayout = new QVBoxLayout;
+
+		// Create elements for arrow
 		QPushButton *rButton = new QPushButton(">");
-		rButton->setFixedWidth(rButton->height());
+		arrowLayout->addWidget(rButton);
 		QObject::connect(rButton,SIGNAL(pressed(void)),this,SLOT(insertChannel(void)));
 		QPushButton *lButton = new QPushButton("<");
-		lButton->setFixedWidth(lButton->height());
+		arrowLayout->addWidget(lButton);
 		QObject::connect(lButton,SIGNAL(pressed(void)),this,SLOT(removeChannel(void)));
 
-		selectionBox = new QListWidget(this);
+		// Attach layout to child
+		arrowGroup->setLayout(arrowLayout);
 
-		sampleBox = new QGroupBox(tr("Sample Control"));//, this);
-		//sampleBox->setInsideMargin(5);
-		layout->addWidget(sampleBox);
+		// Create child widget and layout
+		sampleGroup = new QGroupBox(tr("Sample Control"));
+		QHBoxLayout *sampleLayout = new QHBoxLayout;
 
-		hbox = new QHBoxLayout(sampleBox);
-		(new QLabel("Downsampling Rate:"))->setFixedWidth(150);
+		// create elements for sample box
+		sampleLayout->addWidget(new QLabel(tr("Downsampling Rate:")));
 		downsampleSpin = new QSpinBox(this);
+		sampleLayout->addWidget(downsampleSpin);
 		QObject::connect(downsampleSpin,SIGNAL(valueChanged(int)),this,SLOT(updateDownsampleRate(int)));
 
-		fileBox = new QGroupBox(tr("File Control"));//, this);
-		//fileBox->setInsideMargin(5);
-		layout->addWidget(fileBox);
+		// Attach layout to child widget
+		sampleGroup->setLayout(sampleLayout);
+
+		// Create child widget and layout for file control
+		fileGroup = new QGroupBox(tr("File Control"));
+		QHBoxLayout *fileLayout = new QHBoxLayout;
+
+		// Create elements for file control
+		fileLayout->addWidget(new QLabel(tr("File Control")));
+		fileNameEdit = new QLineEdit;
+		fileNameEdit->setReadOnly(true);
+		fileLayout->addWidget(fileNameEdit);
+		QPushButton *fileChangeButton = new QPushButton("Choose File");
+		fileLayout->addWidget(fileChangeButton);
+		QObject::connect(fileChangeButton,SIGNAL(clicked(void)),this,SLOT(changeDataFile(void)));
+
+		// Attach layout to child
+		fileGroup->setLayout(fileLayout);
+
+		// Create child widget and layout
+		listGroup = new QGroupBox(tr("Currently Recording"));
+		QVBoxLayout *listLayout = new QVBoxLayout;
+
+		// Create elements for box
+		selectionBox = new QListWidget;
+		listLayout->addWidget(selectionBox);
+
+		// Attach layout to child
+		listGroup->setLayout(listLayout);
+
+		/*
+		selectionBox = new QListWidget(this);
 
 		vbox = new QVBoxLayout(this);
 		hbox = new QHBoxLayout(this);
@@ -389,8 +418,6 @@ DataRecorder::Panel::Panel(QWidget *parent, size_t buffersize) :
 		(new QLabel("Filename:"))->setFixedWidth(60);
 		fileNameEdit = new QLineEdit(this);
 		fileNameEdit->setReadOnly(true);
-		QPushButton *fileChangeButton = new QPushButton("Choose File");
-		QObject::connect(fileChangeButton,SIGNAL(clicked(void)),this,SLOT(changeDataFile(void)));
 		hbox = new QHBoxLayout(this);
 		fileSizeLbl = new QLabel(this);
 		fileSizeLbl->setText("File Size (kb):");
@@ -412,7 +439,6 @@ DataRecorder::Panel::Panel(QWidget *parent, size_t buffersize) :
 		trialLength->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
 
 		hbox = new QHBoxLayout;
-		// TODO
 		//layout->addWidget(hbox);
 
 		startRecordButton = new QPushButton("Start Recording");
@@ -425,9 +451,18 @@ DataRecorder::Panel::Panel(QWidget *parent, size_t buffersize) :
 		recordStatus->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
 
 		QPushButton *closeButton = new QPushButton("Close");
-		QObject::connect(closeButton,SIGNAL(clicked(void)),this,SLOT(close(void)));
+		QObject::connect(closeButton,SIGNAL(clicked(void)),this,SLOT(close(void)));*/
 
-		resize(550, 260);
+		// Attach child widgets to parent
+		layout->addWidget(channelGroup, 1, 0, 1, 1);
+		layout->addWidget(arrowGroup, 1, 1, 1, 1);
+		layout->addWidget(sampleGroup, 2, 0, 1, 1);
+		layout->addWidget(fileGroup, 2, 1, 1, 3);
+		layout->addWidget(listGroup, 1, 2, 1, 2);
+
+		//resize(550, 260);
+		setLayout(layout);
+		setWindowTitle(QString::number(getID()) + " Data Recorder");
 		show();
 
 		// Register custom QEvents
