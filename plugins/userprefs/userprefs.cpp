@@ -21,15 +21,22 @@
  * is destructed. So all Reset, Apply, and Cancel buttons all close the panel.
  */
 
+#include <QtGui>
+#include <QFileDialog>
+#include <QMdiSubWindow>
+
 #include <debug.h>
 #include <main_window.h>
 #include <userprefs.h>
-#include <QtGui>
-#include <QFileDialog>
 
 UserPrefs::Panel::Panel(QWidget *parent) : QWidget(parent) {
 
 	setAttribute(Qt::WA_DeleteOnClose);
+
+	// Make Mdi
+	QMdiSubWindow *subWindow = new QMdiSubWindow;
+	subWindow->setFixedSize(500,300);
+	MainWindow::getInstance()->createMdi(subWindow);
 
 	// Preferences structure
 	QSettings userprefs;
@@ -111,6 +118,9 @@ UserPrefs::Panel::Panel(QWidget *parent) : QWidget(parent) {
   // Attach layout to widget
   setLayout(layout);
   setWindowTitle("User Preferences");
+
+	// Set layout to Mdi
+	subWindow->setWidget(this);
   show();
 }
 

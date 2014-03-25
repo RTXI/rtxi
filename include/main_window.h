@@ -21,14 +21,15 @@
 
 #include <QMainWindow>
 #include <QAction>
+#include <QMdiArea>
+#include <QMdiSubWindow>
 
 class QMenu;
 
 /*!
 	* The primary graphical object in the program.
 	*/
-class MainWindow : public QMainWindow
-{
+class MainWindow : public QMainWindow {
 
 		Q_OBJECT
 
@@ -193,36 +194,31 @@ class MainWindow : public QMainWindow
 
 		QAction* createSystemMenuItem(const QString &label, const QObject *handler, const char *slot);
 
-		/*!
-			* Insert a line separator into the System menu.
-			*/
-
+		/* Insert a line separator into the System menu. */
 		int insertSystemMenuSeparator();
 
-		/*!
-			* Remove an item from the System menu.
-			*
-			* \param index The index of the item to be removed.
-			*/
-
+		/* REmove item from system menu */
 		void removeSystemMenuItem (int index);
 
+		/* Create a window for the widget in the main window */
+		void createMdi(QMdiSubWindow *);
+
 		private slots:
-		void about(void);
-		void aboutQt(void);
-		void aboutXeno(void);
-		void aboutDAQ(void);
-		void aboutComedi(void);
+			void about(void);
+			void aboutQt(void);
+			void aboutXeno(void);
+			void aboutDAQ(void);
+			void aboutComedi(void);
 
-		void loadSettings(void);
-		void saveSettings(void);
+			void loadSettings(void);
+			void saveSettings(void);
 
-		void windowsMenuAboutToShow(void);
-		void windowsMenuActivated(int);
+			void windowsMenuAboutToShow(void);
+			void windowsMenuActivated(int);
 
-		void loadUtil(int);
-		void loadSignal(int);
-		void loadFilter(int);
+			void loadUtil(int);
+			void loadSignal(int);
+			void loadFilter(int);
 
 		private:
 
@@ -236,6 +232,7 @@ class MainWindow : public QMainWindow
 		MainWindow &operator = (const MainWindow &) {return *getInstance();};
 
 		static MainWindow *instance;
+		QMdiArea *mdiArea;
 
 		QMenu *fileMenu;
 		QMenu *moduleMenu;

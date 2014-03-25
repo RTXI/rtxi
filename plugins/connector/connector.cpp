@@ -16,6 +16,8 @@
 
 */
 
+#include <QMdiSubWindow>
+
 #include <connector.h>
 #include <main_window.h>
 #include <mutex.h>
@@ -44,6 +46,11 @@ Connector::Panel::Panel(QWidget *parent) : QWidget(parent) {
 			"The arrow button is a toggle button that turns connections on and off. Clicking the toggle "
 			"button immediately makes a connection active or inactive in real-time. Current connections "
 			"are listed in the \"Connections\" box.</p>");
+
+	// Make Mdi
+	QMdiSubWindow *subWindow = new QMdiSubWindow;
+	subWindow->setFixedSize(300,400);
+	MainWindow::getInstance()->createMdi(subWindow);
 
 	// Create main layout
 	QGridLayout *layout = new QGridLayout;
@@ -118,6 +125,9 @@ Connector::Panel::Panel(QWidget *parent) : QWidget(parent) {
 	// Attach layout to widget
 	setLayout(layout);
 	setWindowTitle("Connector Panel");
+
+	// Set layout to Mdi
+	subWindow->setWidget(this);
 	show();
 
 	block_list_info_t info = {inputBlock, outputBlock, &blocks};

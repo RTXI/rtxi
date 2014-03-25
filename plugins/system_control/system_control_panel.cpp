@@ -440,8 +440,7 @@ void SystemControlPanel::createThreadTab(void) {
 }
 
 void SystemControlPanel::displayChannelTab(void) {
-	DAQ::Device *dev;
-	{
+	DAQ::Device *dev; {
 		printf("coming from 15\n");
 		struct find_daq_t info = {deviceList->currentIndex(), 0, };
 		DAQ::Manager::getInstance()->foreachDevice(findDAQDevice,&info);

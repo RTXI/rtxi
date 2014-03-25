@@ -324,6 +324,11 @@ DataRecorder::Panel::Panel(QWidget *parent, size_t buffersize) :
 				"so that you can reconstruct your data correctly. The current recording status of "
 				"the Data Recorder is shown at the bottom.</p>");
 
+		// Make Mdi
+		QMdiSubWindow *subWindow = new QMdiSubWindow;
+		subWindow->setFixedSize(500,300);
+		MainWindow::getInstance()->createMdi(subWindow);
+
 		// Create main layout
 		QGridLayout *layout = new QGridLayout;
 
@@ -460,9 +465,11 @@ DataRecorder::Panel::Panel(QWidget *parent, size_t buffersize) :
 		layout->addWidget(fileGroup, 2, 1, 1, 3);
 		layout->addWidget(listGroup, 1, 2, 1, 2);
 
-		//resize(550, 260);
 		setLayout(layout);
 		setWindowTitle(QString::number(getID()) + " Data Recorder");
+
+		// Set layout to Mdi
+		subWindow->setWidget(this);
 		show();
 
 		// Register custom QEvents

@@ -31,6 +31,9 @@
 
 MainWindow::MainWindow (void) : QMainWindow(NULL, Qt::Window) {
 
+	mdiArea = new QMdiArea;
+	setCentralWidget(mdiArea);
+
 	//QWidget *centralWidget = new QWidget(this);
 	//setCentralWidget(centralWidget);
 
@@ -255,6 +258,10 @@ void MainWindow::createSystemActions() {
 
 void MainWindow::createWindowsActions() {
 
+}
+
+void MainWindow::createMdi(QMdiSubWindow *subWindow){
+	mdiArea->addSubWindow(subWindow);
 }
 
 void MainWindow::createHelpActions() {

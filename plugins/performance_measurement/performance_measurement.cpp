@@ -23,6 +23,7 @@
 #include <QTimer>
 #include <QtGui>
 #include <QToolTip>
+#include <QMdiSubWindow>
 
 #include <debug.h>
 #include <main_window.h>
@@ -44,6 +45,12 @@ PerformanceMeasurement::Panel::Panel(QWidget *parent) : QWidget(parent),
 
 		QWidget::setAttribute(Qt::WA_DeleteOnClose);
 
+		// Make Mdi
+		QMdiSubWindow *subWindow = new QMdiSubWindow;
+		subWindow->setFixedSize(310,200);
+		MainWindow::getInstance()->createMdi(subWindow);
+
+		// Create main layout
 		QVBoxLayout *layout = new QVBoxLayout;
 		QString suffix = QString("s)").prepend(QChar(0x3BC));
 
@@ -88,6 +95,9 @@ PerformanceMeasurement::Panel::Panel(QWidget *parent) : QWidget(parent),
 		// Attach gridLayout to Widget
 		setLayout(layout);
 		setWindowTitle(tr("Real-time Benchmarks"));
+
+		// Set layout to Mdi
+		subWindow->setWidget(this);
 		show();
 
 		QTimer *timer = new QTimer(this);
