@@ -26,6 +26,7 @@
 #include <vector>
 #include <QWidget>
 #include <QtGui>
+#include <QMdiArea>
 
 namespace Connector {
 	class Panel : public QWidget, Event::Handler {

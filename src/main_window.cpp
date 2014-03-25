@@ -17,6 +17,7 @@
 */
 
 #include <QtGui>
+#include <QMdiArea>
 
 #include <cmdline.h>
 #include <debug.h>
@@ -30,8 +31,8 @@
 
 MainWindow::MainWindow (void) : QMainWindow(NULL, Qt::Window) {
 
-	QWidget *centralWidget = new QWidget(this);
-	setCentralWidget(centralWidget);
+	//QWidget *centralWidget = new QWidget(this);
+	//setCentralWidget(centralWidget);
 
 	/* Initialize Window Settings */
 	setWindowTitle("RTXI - Real-time eXperimental Interface");
@@ -109,8 +110,8 @@ MainWindow::MainWindow (void) : QMainWindow(NULL, Qt::Window) {
 	//menuBar()->addMenu("&Help", helpMenu);
 
 	/* Create and Initialize the Workspace */
-	setCentralWidget(new QWorkspace(this));
-	((QWorkspace *)centralWidget)->setScrollBarsEnabled(true);
+	//setCentralWidget(new QWorkspace(this));
+	//((QWorkspace *)centralWidget)->setScrollBarsEnabled(true);
 }
 
 MainWindow::~MainWindow (void) {
