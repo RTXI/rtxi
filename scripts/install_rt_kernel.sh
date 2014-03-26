@@ -116,6 +116,8 @@ cd $linux_tree
 cd ..
 sudo cp arch/x86/boot/bzImage /boot/vmlinuz-$linux_version-xenomai-$xenomai_version
 sudo make modules_install
+cd $linux_tree
+sudo cp -r * /lib/modules/$linux_version-xenomai-$xenomai_version/build/.
 fi
 
 if [ $? -eq 0 ]; then
