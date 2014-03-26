@@ -19,27 +19,19 @@
 #ifndef SYSTEM_CONTROL_PANEL_H
 #define SYSTEM_CONTROL_PANEL_H
 
-#include <event.h>
-#include <qwidget.h>
+#include <QtGui>
 
-class QComboBox;
-class QLineEdit;
-class QPushButton;
-class QSpinBox;
-class QTabWidget;
-class QWidget;
+#include <event.h>
 
 class SystemControlPanel : public QWidget, public Event::Handler {
 
 	Q_OBJECT
 
 	public:
-
 		SystemControlPanel(QWidget *); 
 		virtual ~SystemControlPanel(void);
 
-		public slots:
-
+	public slots:
 		void apply(void);
 		void okay(void); 
 		void display(void);
@@ -48,23 +40,21 @@ class SystemControlPanel : public QWidget, public Event::Handler {
 		void updatePeriod(void);
 
 	private:
-
 		void __display(void);
 		void applyChannelTab(void);
 		void applyThreadTab(void);
 		void createChannelTab(void);
 		void createThreadTab(void);
-		void displayChannelTab(void);
-		void displayThreadTab(void);
+		void displayChannelInfo(void);
+		void displayThreadInfo(void);
 		void receiveEvent(const Event::Object *);
 
-		QTabWidget *tabWidget;
-		QWidget *channelTab;
-		QWidget *threadTab;
+		QGroupBox *deviceGroup;
+		QGroupBox *analogGroup;
+		QGroupBox *digitalGroup;
+		QGroupBox *buttonGroup;
 
-		/* Channel Tab Items */
 		QComboBox *deviceList;
-
 		QComboBox *analogChannelList;
 		QComboBox *analogRangeList;
 		QComboBox *analogReferenceList;
@@ -83,7 +73,6 @@ class SystemControlPanel : public QWidget, public Event::Handler {
 		QComboBox *digitalSubdeviceList;
 		QPushButton *digitalActiveButton;    
 
-		/* Thread Tab Items */
 		bool rateUpdate;
 		QComboBox *freqUnitList;
 		QComboBox *periodUnitList;
