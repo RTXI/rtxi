@@ -26,7 +26,7 @@ if [[ $(lsb_release --id) == *Ubuntu* ]]
 then
 sudo apt-get update
 sudo apt-get upgrade
-sudo apt-get install autotools-dev automake
+sudo apt-get install autotools-dev automake libtool
 sudo apt-get install kernel-package
 sudo apt-get install fakeroot build-essential crash kexec-tools makedumpfile kernel-wedge
 sudo apt-get build-dep linux
