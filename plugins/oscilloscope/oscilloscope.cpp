@@ -369,7 +369,7 @@ Oscilloscope::Properties::applyChannelTab(void)
 		{
 			panel->setChannelScale(i, scale);
 			panel->setChannelLabel(i, info->name + " "
-					+ scaleList->currentText().simplifyWhiteSpace());
+					+ scaleList->currentText().simplified());
 		}
 		panel->setChannelOffset(i, offsetEdit->text().toDouble() * pow(10, -3
 					* offsetList->currentIndex()));
@@ -1306,7 +1306,7 @@ Oscilloscope::Panel::doDeferred(const Settings::Object::State &s)
 
 		std::list<Scope::Channel>::iterator chan =
 			insertChannel(info->name, s.loadDouble(str.str() + " scale"),
-					s.loadDouble(str.str() + " offset"), QPen(QColor(s.loadString(str.str() + " pen color")), s.loadInteger(str.str()
+					s.loadDouble(str.str() + " offset"), QPen(QColor(QString::fromStdString(s.loadString(str.str() + " pen color"))), s.loadInteger(str.str()
 							+ " pen width"), static_cast<Qt::PenStyle> (s.loadInteger(str.str() + " pen style"))), info);
 
 		setChannelLabel(chan, info->name + " " + properties->
@@ -1338,9 +1338,7 @@ Oscilloscope::Panel::doLoad(const Settings::Object::State &s)
 	parentWidget()->move(s.loadInteger("X"), s.loadInteger("Y"));
 }
 
-void
-Oscilloscope::Panel::doSave(Settings::Object::State &s) const
-{
+void Oscilloscope::Panel::doSave(Settings::Object::State &s) const {
 	s.saveInteger("Size", getDataSize());
 	s.saveInteger("DivX", getDivX());
 	s.saveInteger("DivY", getDivY());
