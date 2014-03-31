@@ -83,6 +83,8 @@ namespace Oscilloscope {
 
         size_t downsample_rate;
 
+				QGroupBox *buttonGroup;
+
         Panel *panel;
 
         QTabWidget *tabWidget;
