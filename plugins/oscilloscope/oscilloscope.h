@@ -19,6 +19,9 @@
 #ifndef OSCILLOSCOPE_H
 #define OSCILLOSCOPE_H
 
+#include <QDialog>
+#include <QtGui>
+
 #include "scope.h"
 #include <event.h>
 #include <fifo.h>
@@ -27,16 +30,7 @@
 #include <plugin.h>
 #include <rt.h>
 #include <settings.h>
-#include <QDialog>
 
-class QButtonGroup;
-class QCheckBox;
-class QComboBox;
-class QGroupBox;
-class QLineEdit;
-class QPushButton;
-class QSpinBox;
-class QTabWidget;
 
 namespace Oscilloscope {
     class Panel;
@@ -86,6 +80,7 @@ namespace Oscilloscope {
 				QGroupBox *buttonGroup;
 				QGroupBox *channelGroup;
 				QGroupBox *displayGroup;
+				QGroupBox *graphicGroup;
 
         Panel *panel;
 

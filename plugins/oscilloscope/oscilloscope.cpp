@@ -48,36 +48,37 @@ namespace {
 
 Oscilloscope::Properties::Properties(Oscilloscope::Panel *parent) : QDialog(MainWindow::getInstance()), panel(parent) {
 
-	QBoxLayout *layout = new QVBoxLayout;
-
 	// Create tab widget
 	tabWidget = new QTabWidget;
+	QBoxLayout *layout = new QVBoxLayout;
 	layout->addWidget(tabWidget);
 	QObject::connect(tabWidget,SIGNAL(currentChanged(QWidget *)),this,SLOT(showTab(void)));
 
-	/*QHBox *hbox = new QHBox(this);
-		layout->addWidget(hbox);*/
-
+	// Create child layout for buttons
 	buttonGroup = new QGroupBox;
 	QHBoxLayout *buttonLayout = new QHBoxLayout;
 
 	QPushButton *applyButton = new QPushButton("Apply");
 	QObject::connect(applyButton,SIGNAL(clicked(void)),this,SLOT(apply(void)));
 	buttonLayout->addWidget(applyButton);
+
 	QPushButton *okayButton = new QPushButton("Okay");
 	QObject::connect(okayButton,SIGNAL(clicked(void)),this,SLOT(okay(void)));
 	buttonLayout->addWidget(okayButton);
+
 	QPushButton *cancelButton = new QPushButton("Cancel");
 	QObject::connect(cancelButton,SIGNAL(clicked(void)),this,SLOT(close(void)));
 	buttonLayout->addWidget(cancelButton);
 
-	createChannelTab();
-	//createDisplayTab();
-	//createAdvancedTab();
-	
+	buttonGroup->setLayout(buttonLayout);
+
 	layout->addWidget(buttonGroup);
 	setLayout(layout);
 	setWindowTitle(QString::number(parent->getID()) + " Oscilloscope Properties");
+
+	createChannelTab();
+	//createDisplayTab();
+	//createAdvancedTab();
 }
 
 Oscilloscope::Properties::~Properties(void)
@@ -693,18 +694,14 @@ void Oscilloscope::Properties::createChannelTab(void) {
 
 	displayGroup->setLayout(displayLayout);
 
-	/*
+	// Graphic properties
+	graphicGroup = new QGroupBox(tr("Display Properties"));
+	QVBoxLayout *graphicLayout = new QVBoxLayout;
 
-	lineBox = new QGroupBox("Line Properties", channelTab);
-	layout->addWidget(lineBox);
-
-	QBoxLayout *lineLayout = new QVBoxLayout(lineBox);
-	lineLayout->setMargin(15);
-
-	QHBox *hbox3 = new QHBox(lineBox);
-	lineLayout->addWidget(hbox3);
-	(new QLabel("   Color: ", hbox3))->setFixedWidth(125);
-	colorList = new QComboBox(hbox3);
+	// Create elements for graphic
+	graphicLayout->addWidget(new QLabel(tr("   Color: ")));
+	colorList = new QComboBox;
+	graphicLayout->addWidget(colorList);
 	QPixmap tmp(25, 25);
 	tmp.fill(Qt::red);
 	colorList->addItem(tmp, " Red");
@@ -721,10 +718,9 @@ void Oscilloscope::Properties::createChannelTab(void) {
 	tmp.fill(Qt::black);
 	colorList->addItem(tmp, " Black");
 
-	QHBox *hbox4 = new QHBox(lineBox);
-	lineLayout->addWidget(hbox4);
-	(new QLabel("   Width: ", hbox4))->setFixedWidth(125);
-	widthList = new QComboBox(hbox4);
+	graphicLayout->addWidget(new QLabel(tr("   Width: ")));
+	widthList = new QComboBox;
+	graphicLayout->addWidget(widthList);
 	tmp.fill(Qt::white);
 	QPainter painter(&tmp);
 	for (int i = 1; i < 6; i++) {
@@ -733,10 +729,9 @@ void Oscilloscope::Properties::createChannelTab(void) {
 		widthList->addItem(tmp, QString::number(i) + QString(" Pixels"));
 	}
 
-	QHBox *hbox5 = new QHBox(lineBox);
-	lineLayout->addWidget(hbox5);
-	(new QLabel("   Style: ", hbox5))->setFixedWidth(125);
-	styleList = new QComboBox(hbox5);
+	graphicLayout->addWidget(new QLabel(tr("   Style: ")));
+	styleList = new QComboBox;
+	graphicLayout->addWidget(styleList);
 	tmp.fill(Qt::white);
 	painter.setPen(QPen(Qt::black, 3, Qt::SolidLine));
 	painter.drawLine(0, 12, 25, 12);
@@ -756,13 +751,16 @@ void Oscilloscope::Properties::createChannelTab(void) {
 	tmp.fill(Qt::white);
 	painter.setPen(QPen(Qt::black, 3, Qt::DashDotDotLine));
 	painter.drawLine(0, 12, 25, 12);
-	styleList->addItem(tmp, QString(" Dash Dot Dot"));*/
+	styleList->addItem(tmp, QString(" Dash Dot Dot"));
+
+	graphicGroup->setLayout(graphicLayout);
 
 	layout->addWidget(channelGroup);
 	layout->addWidget(displayGroup);
+	layout->addWidget(graphicGroup);
+	channelTab->setLayout(layout);
 
 	tabWidget->addTab(channelTab, tr("Channel"));
-	setLayout(layout);
 	buildChannelList();
 }
 
