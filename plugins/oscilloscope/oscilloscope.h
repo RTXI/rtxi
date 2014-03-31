@@ -84,6 +84,8 @@ namespace Oscilloscope {
         size_t downsample_rate;
 
 				QGroupBox *buttonGroup;
+				QGroupBox *channelGroup;
+				QGroupBox *displayGroup;
 
         Panel *panel;
 

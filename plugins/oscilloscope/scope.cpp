@@ -21,6 +21,7 @@
 #include <QTimer>
 
 #include "scope.h"
+#include <rt.h>
 #include <debug.h>
 #include <cmath>
 #include <stdlib.h>
@@ -55,32 +56,21 @@ QString Scope::Channel::getLabel(void) const {
 
 Scope::Scope(QWidget *parent,Qt::WFlags flags) : QWidget(parent) {
 
-	setAttribute(Qt::WA_DeleteOnClose);
 	setAttribute(Qt::WA_NoBackground);
 	//setAttribute(Qt::NoSystemBackground);
 	//setBackgroundMode(Qt::NoBackground);
 
 	setMinimumSize(16,9);
-
-	// deprecated in Qt4
-	//background.setOptimization(QPixmap::BestOptim);
-	//foreground.setOptimization(QPixmap::BestOptim);
-
 	isPaused = false;
 	drawZero = true;
 	divX = 10;
 	divY = 8;
-
 	data_idx = 0;
 	data_size = 100;
-
 	hScl = 10.0;
 	period = 1.0;
-
 	dtLabel = "10ms";
-
 	refresh = 250;
-
 	triggering = false;
 	triggerHolding = false;
 	triggerDirection = NONE;
@@ -89,7 +79,7 @@ Scope::Scope(QWidget *parent,Qt::WFlags flags) : QWidget(parent) {
 	triggerLast = (size_t)(-1);
 	triggerChannel = channels.end();
 
-	timer = new QTimer(this);
+	timer = new QTimer;
 	QObject::connect(timer,SIGNAL(timeout(void)),this,SLOT(timeoutEvent(void)));
 	timer->start(refresh);
 }
@@ -99,8 +89,6 @@ Scope::~Scope(void) {}
 bool Scope::paused(void) const {
 	return isPaused;
 }
-
-#include <rt.h>
 
 void Scope::timeoutEvent(void) {
 	if(!triggering)
@@ -353,7 +341,7 @@ void Scope::setChannelLabel(std::list<Channel>::iterator channel,const QString &
 
 void Scope::paintEvent(QPaintEvent *e) {
 	// VISITTWO
-	//bitBlt(this,e->rect().topLeft(),&foreground,e->rect(),Qt::CopyROP);
+	//QPainter::drawPixmap(this,e->rect().topLeft(),&foreground,e->rect()),Qt::CopyROP);
 }
 
 void Scope::resizeEvent(QResizeEvent *) {
