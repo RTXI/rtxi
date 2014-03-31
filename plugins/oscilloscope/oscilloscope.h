@@ -36,27 +36,20 @@ namespace Oscilloscope {
     class Panel;
     class Properties : public QDialog, public Event::Handler {
         Q_OBJECT
-
         friend class Panel;
-
     public:
-
         Properties(Panel *);
         ~Properties(void);
-
         void receiveEvent(const ::Event::Object *);
 
     public slots:
-
         void updateDownsampleRate(int);
 
 
     protected:
-
         void closeEvent(QCloseEvent *);
 
     private slots:
-
         void activateChannel(bool);
         void apply(void);
         void buildChannelList(void);
@@ -77,14 +70,16 @@ namespace Oscilloscope {
 
         size_t downsample_rate;
 
+        QTabWidget *tabWidget;
+
 				QGroupBox *buttonGroup;
 				QGroupBox *channelGroup;
 				QGroupBox *displayGroup;
 				QGroupBox *graphicGroup;
+				QGroupBox *timeGroup;
+				QGroupBox *triggerGroup;
 
         Panel *panel;
-
-        QTabWidget *tabWidget;
 
         QSpinBox *divXSpin;
         QSpinBox *divYSpin;
@@ -117,21 +112,16 @@ namespace Oscilloscope {
     }; // class Properties
 
     class Plugin : public QObject, public ::Plugin::Object, public RT::Thread {
-
         Q_OBJECT
-
         friend class Panel;
 
     public:
-
         static Plugin *getInstance(void);
 
     public slots:
-
         void createOscilloscopePanel(void);
 
     protected:
-
         virtual void doDeferred(const Settings::Object::State &);
         virtual void doLoad(const Settings::Object::State &);
         virtual void doSave(Settings::Object::State &) const;
@@ -142,51 +132,37 @@ namespace Oscilloscope {
         ~Plugin(void);
         Plugin(const Plugin &) {};
         Plugin &operator=(const Plugin &) { return *getInstance(); };
-
         static Plugin *instance;
-
         void removeOscilloscopePanel(Panel *);
-
         int menuID;
         std::list<Panel *> panelList;
 
     }; // Plugin
 
     class Panel : public Scope, public RT::Thread, public virtual Settings::Object {
-
         Q_OBJECT
-
         friend class Properties;
-
     public:
-
         Panel(QWidget *);
         virtual ~Panel(void);
-
         void execute(void);
-
         bool setInactiveSync(void);
         void flushFifo(void);
         void adjustDataSize(void);
-
         void doDeferred(const Settings::Object::State &);
         void doLoad(const Settings::Object::State &);
         void doSave(Settings::Object::State &) const;
 
     public slots:
-
         void showProperties(void);
         void timeoutEvent(void);
 
     protected:
-
         void mouseDoubleClickEvent(QMouseEvent *);
         void mousePressEvent(QMouseEvent *);
 
     private:
-
         void updateDownsampleRate(int);
-
         Fifo fifo;
         Properties *properties;
         std::vector<IO::Block *> blocks;
