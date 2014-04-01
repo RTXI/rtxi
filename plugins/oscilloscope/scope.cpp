@@ -57,8 +57,6 @@ QString Scope::Channel::getLabel(void) const {
 Scope::Scope(QWidget *parent,Qt::WFlags flags) : QWidget(parent) {
 
 	setAttribute(Qt::WA_NoBackground);
-	//setAttribute(Qt::NoSystemBackground);
-	//setBackgroundMode(Qt::NoBackground);
 
 	setMinimumSize(16,9);
 	isPaused = false;
@@ -108,20 +106,15 @@ std::list<Scope::Channel>::iterator Scope::insertChannel(QString label,double sc
 	channel.pen = pen;
 	channel.info = info;
 	channel.data.resize(data_size,0.0);
-
 	channels.push_back(channel);
-
 	refreshBackground();
-
 	return --channels.end();
 }
 
 void *Scope::removeChannel(std::list<Scope::Channel>::iterator channel) {
 	void *info = channel->info;
 	channels.erase(channel);
-
 	refreshBackground();
-
 	return info;
 }
 
@@ -249,7 +242,6 @@ void Scope::setTrigger(trig_t direction,double threshold,std::list<Channel>::ite
 	if(triggerChannel != channel || triggerThreshold != threshold) {
 		triggerChannel = channel;
 		triggerThreshold = threshold;
-
 		refreshBackground();
 	}
 
@@ -340,7 +332,8 @@ void Scope::setChannelLabel(std::list<Channel>::iterator channel,const QString &
 }
 
 void Scope::paintEvent(QPaintEvent *e) {
-	// VISITTWO
+	QPainter painter;
+	painter.drawPixmap(e->rect(),foreground);
 	//QPainter::drawPixmap(this,e->rect().topLeft(),&foreground,e->rect()),Qt::CopyROP);
 }
 
@@ -354,7 +347,6 @@ void Scope::drawBackground(void) {
 	int zero = static_cast<int>(round(height()/2.0));
 
 	background = background.copy(0, 0, width(), height());
-	//background.resize(width(),height());
 
 	background.fill(Qt::white);
 

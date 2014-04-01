@@ -96,8 +96,6 @@ namespace Oscilloscope {
         QComboBox *styleList;
         QComboBox *typeList;
         QComboBox *widthList;
-        QGroupBox *displayBox;
-        QGroupBox *lineBox;
         QLineEdit *offsetEdit;
         QPushButton *activateButton;
 
