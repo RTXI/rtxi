@@ -50,7 +50,7 @@ Oscilloscope::Properties::Properties(Oscilloscope::Panel *parent) : QDialog(Main
 
 	// Create tab widget
 	tabWidget = new QTabWidget;
-	QBoxLayout *layout = new QVBoxLayout;
+	QGridLayout *layout = new QGridLayout;
 	layout->addWidget(tabWidget);
 	QObject::connect(tabWidget,SIGNAL(currentChanged(QWidget *)),this,SLOT(showTab(void)));
 
@@ -69,13 +69,13 @@ Oscilloscope::Properties::Properties(Oscilloscope::Panel *parent) : QDialog(Main
 
 	buttonGroup->setLayout(buttonLayout);
 
+	createChannelTab();
+	createDisplayTab();
+	createAdvancedTab();
+
 	layout->addWidget(buttonGroup);
 	setLayout(layout);
 	setWindowTitle(QString::number(parent->getID()) + " Oscilloscope Properties");
-
-	createChannelTab();
-	createDisplayTab();
-	//createAdvancedTab();
 }
 
 Oscilloscope::Properties::~Properties(void)
@@ -126,8 +126,7 @@ void Oscilloscope::Properties::receiveEvent(const ::Event::Object *event) {
 						}
 
 						struct channel_info
-							*info =
-							reinterpret_cast<struct channel_info *> (i->getInfo());
+							*info = reinterpret_cast<struct channel_info *> (i->getInfo());
 
 						std::list<Scope::Channel>::iterator chan = i++;
 
@@ -172,8 +171,8 @@ void Oscilloscope::Properties::closeEvent(QCloseEvent *e) {
 
 void Oscilloscope::Properties::activateChannel(bool active) {
 	bool enable = active && blockList->count() && channelList->count();
-	displayBox->setEnabled(enable);
-	lineBox->setEnabled(enable);
+	//displayBox->setEnabled(enable);
+	//lineBox->setEnabled(enable);
 }
 
 void Oscilloscope::Properties::apply(void) {
@@ -453,59 +452,67 @@ void Oscilloscope::Properties::applyDisplayTab(void) {
 	showDisplayTab();
 }
 
-/*void Oscilloscope::Properties::createAdvancedTab(void) {
-
-	QWidget *advancedTab = new QWidget(tabWidget);
-	tabWidget->addTab(advancedTab, "Advanced");
+void Oscilloscope::Properties::createAdvancedTab(void) {
 
 	setWhatsThis("<p><b>Oscilloscope: Advanced Options</b><br>"
-	"The Oscilloscope automatically computes the necessary buffer size based on "
-	"the number of horizontal divisions displayed, the scale of time axis, "
-	"and the current real-time period of the system. You may choose to "
-	"downsample the oscilloscope using a sample-and-hold method.</p>");
-	QBoxLayout *layout = new QVBoxLayout(advancedTab);
+			"The Oscilloscope automatically computes the necessary buffer size based on "
+			"the number of horizontal divisions displayed, the scale of time axis, "
+			"and the current real-time period of the system. You may choose to "
+			"downsample the oscilloscope using a sample-and-hold method.</p>");
 
-	QGroupBox *resBox = new QGroupBox("Data Properties", advancedTab);
-	layout->addWidget(resBox);
+	// Make parent widget and layout
+	QWidget *advancedTab = new QWidget;
+	QBoxLayout *layout = new QVBoxLayout;
 
-	QBoxLayout *resLayout = new QVBoxLayout(resBox);
-	resLayout->setMargin(15);
+	// Res child widgets and layout
+	resGroup = new QGroupBox(tr("Data Properties"));
+	QVBoxLayout *resLayout = new QVBoxLayout;
 
-	QHBox *hbox0 = new QHBox(resBox);
-	resLayout->addWidget(hbox0);
-	(new QLabel("Downsampling Rate: ", hbox0))->setFixedWidth(130);
-	rateSpin = new QSpinBox(1, 2, 1, hbox0);
+	// Create elements for resampling box
+	resLayout->addWidget(new QLabel("Downsampling Rate: "));
+	rateSpin = new QSpinBox;
+	resLayout->addWidget(rateSpin);
 	rateSpin->setValue(panel->downsample_rate);
 	QObject::connect(rateSpin,SIGNAL(valueChanged(int)),this,SLOT(updateDownsampleRate(int)));
 	rateSpin->setEnabled(true);
+	rateSpin->setRange(1,2);
+	rateSpin->setValue(1);
 
-	QHBox *hbox1 = new QHBox(resBox);
-	resLayout->addWidget(hbox1);
-	(new QLabel("Data Buffer Size: ", hbox1))->setFixedWidth(130);
-	sizeEdit = new QLineEdit(hbox1);
+	resLayout->addWidget(new QLabel(tr("Data Buffer Size: ")));
+	sizeEdit = new QLineEdit;
+	resLayout->addWidget(sizeEdit);
 	sizeEdit->setText(QString::number(panel->getDataSize()));
 	sizeEdit->setEnabled(false);
 
-	QGroupBox *gridBox = new QGroupBox("Grid Properties", advancedTab);
-	layout->addWidget(gridBox);
+	// Setup layout
+	resGroup->setLayout(resLayout);
 
-	QBoxLayout *gridLayout = new QVBoxLayout(gridBox);
-	gridLayout->setMargin(15);
+	// Grid child widgets and layout
+	gridGroup = new QGroupBox(tr("Grid Properties"));
+	QBoxLayout *gridLayout = new QVBoxLayout;
 
-	QHBox *hbox2 = new QHBox(gridBox);
-	gridLayout->addWidget(hbox2);
-	(new QLabel("  X Divisions: ", hbox2))->setFixedWidth(125);
-	divXSpin = new QSpinBox(hbox2);
-	divXSpin->setMinValue(1);
-	divXSpin->setMaxValue(25);
+	// Create elements for grid box
+	gridLayout->addWidget(new QLabel("  X Divisions: "));
+	divXSpin = new QSpinBox;
+	gridLayout->addWidget(divXSpin);
+	divXSpin->setRange(1,25);
+	divXSpin->setValue(8);
 
-	QHBox *hbox3 = new QHBox(gridBox);
-	gridLayout->addWidget(hbox3);
-	(new QLabel("  Y Divisions: ", hbox3))->setFixedWidth(125);
-	divYSpin = new QSpinBox(hbox3);
-	divYSpin->setMinValue(1);
-	divYSpin->setMaxValue(25);
-	}*/
+	gridLayout->addWidget(new QLabel("  Y Divisions: "));
+	divYSpin = new QSpinBox;
+	gridLayout->addWidget(divYSpin);
+	divYSpin->setRange(1,25);
+	divYSpin->setValue(10);
+
+	// Attach layout
+	gridGroup->setLayout(gridLayout);
+
+	layout->addWidget(resGroup);
+	layout->addWidget(gridGroup);
+	advancedTab->setLayout(layout);
+
+	tabWidget->addTab(advancedTab, "Advanced");
+}
 
 struct block_list_info_t {
 	QComboBox *blockList;
@@ -836,8 +843,9 @@ void Oscilloscope::Properties::createDisplayTab(void) {
 
 	timeLayout->addWidget(new QLabel("Screen Refresh:"));
 	refreshSpin = new QSpinBox;
-	refreshSpin->setMinimum(10);
-	refreshSpin->setMaximum(10000);
+	timeLayout->addWidget(refreshSpin);
+	refreshSpin->setRange(10,10000);
+	refreshSpin->setValue(250);
 
 	timeGroup->setLayout(timeLayout);
 
@@ -846,9 +854,17 @@ void Oscilloscope::Properties::createDisplayTab(void) {
 	QVBoxLayout *triggerLayout = new QVBoxLayout;
 
 	triggerLayout->addWidget(new QLabel(tr("Trigger:")));
-	triggerLayout->addWidget(new QRadioButton("Off", this), Scope::NONE);
-	triggerLayout->addWidget(new QRadioButton("+", this), Scope::POS);
-	triggerLayout->addWidget(new QRadioButton("-", this), Scope::NEG);
+	trigGroup = new QButtonGroup;
+
+	QRadioButton *off = new QRadioButton(tr("Off"));
+	trigGroup->addButton(off, Scope::NONE);
+	triggerLayout->addWidget(off);
+	QRadioButton *plus = new QRadioButton(tr("+"));
+	trigGroup->addButton(plus, Scope::POS);
+	triggerLayout->addWidget(plus);
+	QRadioButton *minus = new QRadioButton(tr("-"));
+	trigGroup->addButton(minus, Scope::NEG);
+	triggerLayout->addWidget(minus);
 
 	triggerLayout->addWidget(new QLabel(tr("Trigger Channel:")));
 	trigChanList = new QComboBox;
@@ -881,7 +897,10 @@ void Oscilloscope::Properties::createDisplayTab(void) {
 	trigHoldoffList->addItem("ns");
 
 	triggerGroup->setLayout(triggerLayout);
+
+	layout->addWidget(timeGroup);
 	layout->addWidget(triggerGroup);
+
 	displayTab->setLayout(layout);
 	tabWidget->addTab(displayTab, tr("Display"));
 }
@@ -983,26 +1002,25 @@ void Oscilloscope::Properties::showChannelTab(void) {
 	}
 
 	activateButton->setCheckable(found);
-	/*displayBox->setEnabled(found);
-		lineBox->setEnabled(found);
-		if (!found) {
+	//displayBox->setEnabled(found);
+	//lineBox->setEnabled(found);
+	if (!found) {
 		scaleList->setCurrentIndex(3);
 		offsetEdit->setText(QString::number(0));
 		offsetList->setCurrentIndex(0);
 		colorList->setCurrentIndex(0);
 		widthList->setCurrentIndex(0);
 		styleList->setCurrentIndex(0);
-		}*/
+	}
 }
 
 void Oscilloscope::Properties::showDisplayTab(void) {
 	timeList->setCurrentIndex(static_cast<int> (round(3 * log10(1/panel->getDivT()) + 11)));
 	refreshSpin->setValue(panel->getRefresh());
 
-	//VISITTWO
-	//static_cast<QRadioButton *> (trigGroup->id(panel->getTriggerDirection()))->setChecked(true);
+	// Find current trigger value and update gui
+	static_cast<QRadioButton *>(trigGroup->button(static_cast<int>(panel->getTriggerDirection())))->setChecked(true);
 
-	//QString name;
 	trigChanList->clear();
 	for (std::list<Scope::Channel>::iterator i = panel->getChannelsBegin(), end =	panel->getChannelsEnd(); i != end; ++i) {
 		trigChanList->addItem(i->getLabel());
@@ -1037,7 +1055,6 @@ void Oscilloscope::Properties::showDisplayTab(void) {
 void Oscilloscope::Properties::updateDownsampleRate(int r) {
 	downsample_rate = r;
 	panel->updateDownsampleRate(downsample_rate);
-
 }
 
 Oscilloscope::Panel::Panel(QWidget *parent) :	Scope(parent), RT::Thread(0), fifo(10 * 1048576) {

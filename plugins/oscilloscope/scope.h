@@ -1,166 +1,164 @@
 /*
- Copyright (C) 2011 Georgia Institute of Technology, University of Utah, Weill Cornell Medical College
+	 Copyright (C) 2011 Georgia Institute of Technology, University of Utah, Weill Cornell Medical College
 
- This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
+	 This program is free software: you can redistribute it and/or modify
+	 it under the terms of the GNU General Public License as published by
+	 the Free Software Foundation, either version 3 of the License, or
+	 (at your option) any later version.
 
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
+	 This program is distributed in the hope that it will be useful,
+	 but WITHOUT ANY WARRANTY; without even the implied warranty of
+	 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	 GNU General Public License for more details.
 
- You should have received a copy of the GNU General Public License
- along with this program.  If not, see <http://www.gnu.org/licenses/>.
+	 You should have received a copy of the GNU General Public License
+	 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
- */
+*/
 
 #ifndef SCOPE_H
 #define SCOPE_H
 
-#include <qevent.h>
-#include <qpen.h>
-#include <qpixmap.h>
-#include <qwidget.h>
+#include <QEvent>
+#include <QPen>
+#include <QPixmap>
+#include <QtGui>
+#include <QWidget>
 
 #include <list>
 #include <vector>
 
-class QPainter;
-class QTimer;
-
 class Scope : public QWidget {
 
-    Q_OBJECT
+	Q_OBJECT
 
-public:
+	public:
 
-    class Channel {
+		class Channel {
 
-        friend class Scope;
+			friend class Scope;
 
-    public:
+			public:
 
-        Channel(void);
-        virtual ~Channel(void);
+			Channel(void);
+			virtual ~Channel(void);
 
-        void *getInfo(void);
-        const void *getInfo(void) const;
+			void *getInfo(void);
+			const void *getInfo(void) const;
 
-        double getScale(void) const;
-        double getOffset(void) const;
-        QPen getPen(void) const;
-        QString getLabel(void) const;
+			double getScale(void) const;
+			double getOffset(void) const;
+			QPen getPen(void) const;
+			QString getLabel(void) const;
 
-    private:
+			private:
 
-        QPen pen;
-        QString label;
-        double scale;
-        double offset;
-        std::vector<double> prevdata;
-        std::vector<double> data;
-        void *info;
+			QPen pen;
+			QString label;
+			double scale;
+			double offset;
+			std::vector<double> prevdata;
+			std::vector<double> data;
+			void *info;
 
-    }; // class Channel
+		}; // class Channel
 
-    enum trig_t{
-        NONE,
-        POS,
-        NEG,
-    };
+		enum trig_t{
+			NONE,
+			POS,
+			NEG,
+		};
 
-    Scope(QWidget *,Qt::WFlags =0);
-    virtual ~Scope(void);
+		Scope(QWidget *,Qt::WFlags =0);
+		virtual ~Scope(void);
 
-    bool paused(void) const;
+		bool paused(void) const;
 
-    std::list<Channel>::iterator insertChannel(QString,double,double,const QPen &,void *);
-    void *removeChannel(std::list<Channel>::iterator);
-    size_t getChannelCount(void) const;
-    std::list<Channel>::iterator getChannelsBegin(void);
-    std::list<Channel>::iterator getChannelsEnd(void);
+		std::list<Channel>::iterator insertChannel(QString,double,double,const QPen &,void *);
+		void *removeChannel(std::list<Channel>::iterator);
+		size_t getChannelCount(void) const;
+		std::list<Channel>::iterator getChannelsBegin(void);
+		std::list<Channel>::iterator getChannelsEnd(void);
 
-    std::list<Channel>::const_iterator getChannelsBegin(void) const;
-    std::list<Channel>::const_iterator getChannelsEnd(void) const;
+		std::list<Channel>::const_iterator getChannelsBegin(void) const;
+		std::list<Channel>::const_iterator getChannelsEnd(void) const;
 
-    void clearData(void);
-    void setData(double *,size_t);
-    size_t getDataSize(void) const;
-    void setDataSize(size_t);
+		void clearData(void);
+		void setData(double *,size_t);
+		size_t getDataSize(void) const;
+		void setDataSize(size_t);
 
-    trig_t getTriggerDirection(void);
-    double getTriggerThreshold(void);
-    std::list<Channel>::iterator getTriggerChannel(void);
-    bool getTriggerHolding(void);
-    double getTriggerHoldoff(void);
-    void setTrigger(trig_t,double,std::list<Channel>::iterator,bool,double);
+		trig_t getTriggerDirection(void);
+		double getTriggerThreshold(void);
+		std::list<Channel>::iterator getTriggerChannel(void);
+		bool getTriggerHolding(void);
+		double getTriggerHoldoff(void);
+		void setTrigger(trig_t,double,std::list<Channel>::iterator,bool,double);
 
-    double getDivT(void) const;
-    void setDivT(double);
+		double getDivT(void) const;
+		void setDivT(double);
 
-    void setPeriod(double);
+		void setPeriod(double);
 
-    size_t getDivX(void) const;
-    size_t getDivY(void) const;
-    void setDivXY(size_t,size_t);
+		size_t getDivX(void) const;
+		size_t getDivY(void) const;
+		void setDivXY(size_t,size_t);
 
-    size_t getRefresh(void) const;
-    void setRefresh(size_t);
+		size_t getRefresh(void) const;
+		void setRefresh(size_t);
 
-    void setChannelScale(std::list<Channel>::iterator,double);
-    void setChannelOffset(std::list<Channel>::iterator,double);
-    void setChannelPen(std::list<Channel>::iterator,const QPen &);
-    void setChannelLabel(std::list<Channel>::iterator,const QString &);
+		void setChannelScale(std::list<Channel>::iterator,double);
+		void setChannelOffset(std::list<Channel>::iterator,double);
+		void setChannelPen(std::list<Channel>::iterator,const QPen &);
+		void setChannelLabel(std::list<Channel>::iterator,const QString &);
 
-public slots:
+		public slots:
 
-    void timeoutEvent(void);
-    void togglePause(void);
+			void timeoutEvent(void);
+		void togglePause(void);
 
-protected:
+	protected:
 
-    void paintEvent(QPaintEvent *);
-    void resizeEvent(QResizeEvent *);
+		void paintEvent(QPaintEvent *);
+		void resizeEvent(QResizeEvent *);
 
-private:
+	private:
 
-    void drawBackground(void);
-    QRect drawForeground(void);
+		void drawBackground(void);
+		QRect drawForeground(void);
 
-    void positionLabels(QPainter &);
+		void positionLabels(QPainter &);
 
-    void refreshBackground(void);
+		void refreshBackground(void);
 
-    bool drawZero;
-    size_t divX;
-    size_t divY;
+		bool drawZero;
+		size_t divX;
+		size_t divY;
 
-    size_t data_idx;
-    size_t data_size;
+		size_t data_idx;
+		size_t data_size;
 
-    double hScl;        // horizontal scale for time (ms)
-    double period;      // real-time period of system (ms)
+		double hScl;        // horizontal scale for time (ms)
+		double period;      // real-time period of system (ms)
 
-    size_t refresh;
+		size_t refresh;
 
-    bool triggering;
-    bool triggerHolding;
-    trig_t triggerDirection;
-    double triggerThreshold;
-    double triggerHoldoff;
-    std::list<size_t> triggerQueue;
-    std::list<Channel>::iterator triggerChannel;
-    size_t triggerLast;
+		bool triggering;
+		bool triggerHolding;
+		trig_t triggerDirection;
+		double triggerThreshold;
+		double triggerHoldoff;
+		std::list<size_t> triggerQueue;
+		std::list<Channel>::iterator triggerChannel;
+		size_t triggerLast;
 
-    bool isPaused;
-    QPixmap background;
-    QPixmap foreground;
-    QRect drawRect;
-    QTimer *timer;
-    QString dtLabel;
-    std::list<Channel> channels;
+		bool isPaused;
+		QPixmap background;
+		QPixmap foreground;
+		QRect drawRect;
+		QTimer *timer;
+		QString dtLabel;
+		std::list<Channel> channels;
 
 }; // class Scope
 

@@ -78,6 +78,8 @@ namespace Oscilloscope {
 				QGroupBox *graphicGroup;
 				QGroupBox *timeGroup;
 				QGroupBox *triggerGroup;
+				QGroupBox *resGroup;
+				QGroupBox *gridGroup;
 
         Panel *panel;
 
