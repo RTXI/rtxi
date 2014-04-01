@@ -54,6 +54,8 @@ namespace Connector {
 				size_t dest_idx;
 			};
 
+			QMdiSubWindow *subWindow;
+
 			QGroupBox *connectionGroup;
 			QGroupBox *buttonGroup;
 			QGroupBox *outputGroup;

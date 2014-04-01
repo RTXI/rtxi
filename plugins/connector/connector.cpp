@@ -48,8 +48,9 @@ Connector::Panel::Panel(QWidget *parent) : QWidget(parent) {
 			"are listed in the \"Connections\" box.</p>");
 
 	// Make Mdi
-	QMdiSubWindow *subWindow = new QMdiSubWindow;
+	subWindow = new QMdiSubWindow;
 	subWindow->setFixedSize(300,400);
+	subWindow->setAttribute(Qt::WA_DeleteOnClose);
 	MainWindow::getInstance()->createMdi(subWindow);
 
 	// Create main layout
