@@ -34,6 +34,7 @@ class SystemControlPanel : public QWidget, public Event::Handler {
 	public slots:
 		void apply(void);
 		void okay(void); 
+		void goodbye(void);
 		void display(void);
 		void updateDevice(void);
 		void updateFreq(void);
@@ -53,6 +54,8 @@ class SystemControlPanel : public QWidget, public Event::Handler {
 		QGroupBox *analogGroup;
 		QGroupBox *digitalGroup;
 		QGroupBox *buttonGroup;
+
+		QMdiSubWindow *subWindow;
 
 		QComboBox *deviceList;
 		QComboBox *analogChannelList;

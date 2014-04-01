@@ -70,8 +70,9 @@ SystemControlPanel::SystemControlPanel(QWidget *parent) : QWidget(parent) {
 	rateUpdate = false;
 
 	// Make Mdi
-	QMdiSubWindow *subWindow = new QMdiSubWindow;
+	subWindow = new QMdiSubWindow;
 	subWindow->setFixedSize(500,450);
+	subWindow->setAttribute(Qt::WA_DeleteOnClose);
 	MainWindow::getInstance()->createMdi(subWindow);
 
 	// Create main layout
@@ -243,11 +244,8 @@ SystemControlPanel::SystemControlPanel(QWidget *parent) : QWidget(parent) {
 	QPushButton *applyButton = new QPushButton("Apply");
 	QObject::connect(applyButton,SIGNAL(clicked(void)),this,SLOT(apply(void)));
 	buttonLayout->addWidget(applyButton);
-	QPushButton *okayButton = new QPushButton("Okay");
-	QObject::connect(okayButton,SIGNAL(clicked(void)),this,SLOT(okay(void)));
-	buttonLayout->addWidget(okayButton);
 	QPushButton *cancelButton = new QPushButton("Cancel");
-	QObject::connect(cancelButton,SIGNAL(clicked(void)),this,SLOT(close(void)));
+	QObject::connect(cancelButton,SIGNAL(clicked(void)),this,SLOT(goodbye(void)));
 	buttonLayout->addWidget(cancelButton);
 
 	// Assign layout to child widget
@@ -281,9 +279,8 @@ void SystemControlPanel::apply(void) {
 	display();
 }
 
-void SystemControlPanel::okay(void) {
-	apply();
-	close();
+void SystemControlPanel::goodbye(void) {
+	subWindow->close();
 }
 
 void SystemControlPanel::updateDevice(void) {
