@@ -178,14 +178,11 @@ OpenFileEvent::~OpenFileEvent(void) {
 
 int OpenFileEvent::callback(void) {
 	DataRecorder::data_token_t token;
-
 	token.type = DataRecorder::OPEN;
 	token.size = filename.length() + 1;
 	token.time = RT::OS::getTime();
-
 	fifo.write(&token, sizeof(token));
 	fifo.write(filename.toLatin1(), token.size);
-
 	return 0;
 }
 
@@ -197,15 +194,11 @@ StartRecordingEvent::~StartRecordingEvent(void) {
 
 int StartRecordingEvent::callback(void) {
 	DataRecorder::data_token_t token;
-
 	recording = true;
-
 	token.type = DataRecorder::START;
 	token.size = 0;
 	token.time = RT::OS::getTime();
-
 	fifo.write(&token, sizeof(token));
-
 	return 0;
 }
 
@@ -233,14 +226,11 @@ AsyncDataEvent::~AsyncDataEvent(void) {
 
 int AsyncDataEvent::callback(void) {
 	DataRecorder::data_token_t token;
-
 	token.type = DataRecorder::ASYNC;
 	token.size = size * sizeof(double);
 	token.time = RT::OS::getTime();
-
 	fifo.write(&token, sizeof(token));
 	fifo.write(data, token.size);
-
 	return 1;
 }
 
@@ -252,19 +242,15 @@ DoneEvent::~DoneEvent(void) {
 
 int DoneEvent::callback(void) {
 	DataRecorder::data_token_t token;
-
 	token.type = DataRecorder::DONE;
 	token.size = 0;
 	token.time = RT::OS::getTime();
-
 	fifo.write(&token, sizeof(token));
-
 	return 0;
 }
 
 void DataRecorder::startRecording(void) {
 	Event::Object event(Event::START_RECORDING_EVENT);
-
 	if (RT::OS::isRealtime())
 		Event::Manager::getInstance()->postEventRT(&event);
 	else
@@ -273,7 +259,6 @@ void DataRecorder::startRecording(void) {
 
 void DataRecorder::stopRecording(void) {
 	Event::Object event(Event::STOP_RECORDING_EVENT);
-
 	if (RT::OS::isRealtime())
 		Event::Manager::getInstance()->postEventRT(&event);
 	else
@@ -283,7 +268,6 @@ void DataRecorder::stopRecording(void) {
 void DataRecorder::openFile(const QString& filename) {
 	Event::Object event(Event::OPEN_FILE_EVENT);
 	event.setParam("filename", const_cast<char *> (filename.toLocal8Bit().data()));//toLatin3()));
-
 	if (RT::OS::isRealtime())
 		Event::Manager::getInstance()->postEventRT(&event);
 	else
@@ -294,7 +278,6 @@ void DataRecorder::postAsyncData(const double *data, size_t size) {
 	Event::Object event(Event::ASYNC_DATA_EVENT);
 	event.setParam("data", const_cast<double *> (data));
 	event.setParam("size", &size);
-
 	if (RT::OS::isRealtime())
 		Event::Manager::getInstance()->postEventRT(&event);
 	else
@@ -325,8 +308,9 @@ DataRecorder::Panel::Panel(QWidget *parent, size_t buffersize) :
 				"the Data Recorder is shown at the bottom.</p>");
 
 		// Make Mdi
-		QMdiSubWindow *subWindow = new QMdiSubWindow;
-		subWindow->setFixedSize(500,300);
+		subWindow = new QMdiSubWindow;
+		subWindow->setFixedSize(500,450);
+		subWindow->setAttribute(Qt::WA_DeleteOnClose);
 		MainWindow::getInstance()->createMdi(subWindow);
 
 		// Create main layout
@@ -359,30 +343,43 @@ DataRecorder::Panel::Panel(QWidget *parent, size_t buffersize) :
 		// Attach layout to child widget
 		channelGroup->setLayout(channelLayout);
 
-		// Create child widget and layout
-		arrowGroup = new QGroupBox("On/Off");
-		QVBoxLayout *arrowLayout = new QVBoxLayout;
-
 		// Create elements for arrow
-		QPushButton *rButton = new QPushButton(">");
-		arrowLayout->addWidget(rButton);
+		QPushButton *rButton = new QPushButton("Add");
+		channelLayout->addWidget(rButton);
 		QObject::connect(rButton,SIGNAL(pressed(void)),this,SLOT(insertChannel(void)));
-		QPushButton *lButton = new QPushButton("<");
-		arrowLayout->addWidget(lButton);
+		QPushButton *lButton = new QPushButton("Remove");
+		channelLayout->addWidget(lButton);
 		QObject::connect(lButton,SIGNAL(pressed(void)),this,SLOT(removeChannel(void)));
-
-		// Attach layout to child
-		arrowGroup->setLayout(arrowLayout);
 
 		// Create child widget and layout
 		sampleGroup = new QGroupBox(tr("Sample Control"));
 		QHBoxLayout *sampleLayout = new QHBoxLayout;
 
 		// create elements for sample box
-		sampleLayout->addWidget(new QLabel(tr("Downsampling Rate:")));
-		downsampleSpin = new QSpinBox(this);
-		sampleLayout->addWidget(downsampleSpin);
-		QObject::connect(downsampleSpin,SIGNAL(valueChanged(int)),this,SLOT(updateDownsampleRate(int)));
+		trialNumLbl = new QLabel;
+		trialNumLbl->setText("Trial:");
+		trialNumLbl->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+		sampleLayout->addWidget(trialNumLbl);
+		trialNum = new QLabel;
+		trialNum->setText("0");
+		trialNum->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+		sampleLayout->addWidget(trialNum);
+
+		fileSizeLbl = new QLabel;
+		fileSizeLbl->setText("File Size (kb):");
+		sampleLayout->addWidget(fileSizeLbl);
+		fileSize = new QLabel;
+		fileSize->setText("No data recorded.");
+		sampleLayout->addWidget(fileSize);
+		fileSize->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+
+		trialLengthLbl = new QLabel;
+		trialLengthLbl->setText("Trial Length (s):");
+		sampleLayout->addWidget(trialLengthLbl);
+		trialLength = new QLabel;
+		trialLength->setText("No data recorded.");
+		trialLength->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+		sampleLayout->addWidget(trialLength);
 
 		// Attach layout to child widget
 		sampleGroup->setLayout(sampleLayout);
@@ -392,13 +389,20 @@ DataRecorder::Panel::Panel(QWidget *parent, size_t buffersize) :
 		QHBoxLayout *fileLayout = new QHBoxLayout;
 
 		// Create elements for file control
-		fileLayout->addWidget(new QLabel(tr("File Control")));
+		fileLayout->addWidget(new QLabel(tr("File Name")));
 		fileNameEdit = new QLineEdit;
 		fileNameEdit->setReadOnly(true);
 		fileLayout->addWidget(fileNameEdit);
 		QPushButton *fileChangeButton = new QPushButton("Choose File");
 		fileLayout->addWidget(fileChangeButton);
 		QObject::connect(fileChangeButton,SIGNAL(clicked(void)),this,SLOT(changeDataFile(void)));
+
+		fileLayout->addWidget(new QLabel(tr("Downsample \nRate:")));
+		downsampleSpin = new QSpinBox(this);
+		downsampleSpin->setMinimum(1);
+		downsampleSpin->setMaximum(2);
+		fileLayout->addWidget(downsampleSpin);
+		QObject::connect(downsampleSpin,SIGNAL(valueChanged(int)),this,SLOT(updateDownsampleRate(int)));
 
 		// Attach layout to child
 		fileGroup->setLayout(fileLayout);
@@ -414,56 +418,35 @@ DataRecorder::Panel::Panel(QWidget *parent, size_t buffersize) :
 		// Attach layout to child
 		listGroup->setLayout(listLayout);
 
-		/*
-		selectionBox = new QListWidget(this);
+		// Creat child widget and layout for buttons
+		buttonGroup = new QGroupBox;
+		QHBoxLayout *buttonLayout = new QHBoxLayout;
 
-		vbox = new QVBoxLayout(this);
-		hbox = new QHBoxLayout(this);
-		hbox->setSpacing(2);
-		(new QLabel("Filename:"))->setFixedWidth(60);
-		fileNameEdit = new QLineEdit(this);
-		fileNameEdit->setReadOnly(true);
-		hbox = new QHBoxLayout(this);
-		fileSizeLbl = new QLabel(this);
-		fileSizeLbl->setText("File Size (kb):");
-		fileSize = new QLabel(this);
-		fileSize->setText("No data recorded.");
-		fileSize->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
-
-		trialNumLbl = new QLabel(this);
-		trialNumLbl->setText("Trial:");
-		trialNumLbl->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-		trialNum = new QLabel(this);
-		trialNum->setText("0");
-		trialNum->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
-
-		trialLengthLbl = new QLabel(this);
-		trialLengthLbl->setText("Trial Length (s):");
-		trialLength = new QLabel(this);
-		trialLength->setText("No data recorded.");
-		trialLength->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
-
-		hbox = new QHBoxLayout;
-		//layout->addWidget(hbox);
-
+		// Create elements for box
 		startRecordButton = new QPushButton("Start Recording");
 		QObject::connect(startRecordButton,SIGNAL(clicked(void)),this,SLOT(startRecordClicked(void)));
+		buttonLayout->addWidget(startRecordButton);
 		stopRecordButton = new QPushButton("Stop Recording");
 		QObject::connect(stopRecordButton,SIGNAL(clicked(void)),this,SLOT(stopRecordClicked(void)));
-		recordStatus = new QLabel(this);
-		recordStatus->setText("Waiting...");
+		buttonLayout->addWidget(stopRecordButton);
+		QPushButton *closeButton = new QPushButton("Close");
+		QObject::connect(closeButton,SIGNAL(clicked(void)),this,SLOT(goodbye(void)));
+		buttonLayout->addWidget(closeButton);
+		recordStatus = new QLabel;
+		buttonLayout->addWidget(recordStatus);
+		recordStatus->setText("Not Recording");
 		recordStatus->setFrameStyle(QFrame::Panel | QFrame::Sunken);
 		recordStatus->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
 
-		QPushButton *closeButton = new QPushButton("Close");
-		QObject::connect(closeButton,SIGNAL(clicked(void)),this,SLOT(close(void)));*/
+		// Attach layout to group
+		buttonGroup->setLayout(buttonLayout);
 
 		// Attach child widgets to parent
-		layout->addWidget(channelGroup, 1, 0, 1, 1);
-		layout->addWidget(arrowGroup, 1, 1, 1, 1);
-		layout->addWidget(sampleGroup, 2, 0, 1, 1);
-		layout->addWidget(fileGroup, 2, 1, 1, 3);
-		layout->addWidget(listGroup, 1, 2, 1, 2);
+		layout->addWidget(channelGroup, 0, 0, 2, 2);
+		layout->addWidget(listGroup, 0, 2, 2, 4);
+		layout->addWidget(fileGroup, 3, 0, 1, 6);
+		layout->addWidget(sampleGroup, 4, 0, 1, 6);
+		layout->addWidget(buttonGroup, 5, 0, 1, 6);
 
 		setLayout(layout);
 		setWindowTitle(QString::number(getID()) + " Data Recorder");
@@ -490,7 +473,6 @@ DataRecorder::Panel::Panel(QWidget *parent, size_t buffersize) :
 
 		// Launch Recording Thread
 		pthread_create(&thread, 0, bounce, this);
-
 		counter = 0;
 		downsample_rate = 1;
 		prev_input = 0.0;
@@ -500,18 +482,19 @@ DataRecorder::Panel::Panel(QWidget *parent, size_t buffersize) :
 
 DataRecorder::Panel::~Panel(void) {
 	Plugin::getInstance()->removeDataRecorderPanel(this);
-
 	setActive(false);
-
 	DoneEvent event(fifo);
 	while (RT::System::getInstance()->postEvent(&event))
 		;
 
 	pthread_join(thread, 0);
-
 	for (RT::List<Channel>::iterator i = channels.begin(), end = channels.end(); i
 			!= end;)
 		delete &*(i++);
+}
+
+void DataRecorder::Panel::goodbye(void) {
+	subWindow->close();
 }
 
 void DataRecorder::Panel::execute(void) {
@@ -536,7 +519,6 @@ void DataRecorder::Panel::execute(void) {
 
 void DataRecorder::Panel::receiveEvent(const Event::Object *event) {
 	if (event->getName() == Event::IO_BLOCK_INSERT_EVENT) {
-
 		IO::Block *block = reinterpret_cast<IO::Block *> (event->getParam("block"));
 		blockPtrList.push_back(block);
 		blockList->addItem(QString::fromStdString(block->getName()) + " " + QString::number(block->getID()));
@@ -581,60 +563,44 @@ void DataRecorder::Panel::receiveEvent(const Event::Object *event) {
 void DataRecorder::Panel::receiveEventRT(const Event::Object *event) {
 	if (event->getName() == Event::OPEN_FILE_EVENT) {
 		QString filename = QString(reinterpret_cast<char*> (event->getParam("filename")));
-
 		data_token_t token;
-
 		token.type = DataRecorder::OPEN;
 		token.size = filename.length() + 1;
 		token.time = RT::OS::getTime();
-
 		fifo.write(&token, sizeof(token));
 		fifo.write(filename.toLatin1(), token.size);
 	} else if (event->getName() == Event::START_RECORDING_EVENT) {
 		data_token_t token;
-
 		recording = true;
-
 		token.type = DataRecorder::START;
 		token.size = 0;
 		token.time = RT::OS::getTime();
-
 		fifo.write(&token, sizeof(token));
 	} else if (event->getName() == Event::STOP_RECORDING_EVENT) {
 		data_token_t token;
-
 		recording = false;
-
 		token.type = DataRecorder::STOP;
 		token.size = 0;
 		token.time = RT::OS::getTime();
-
 		fifo.write(&token, sizeof(token));
 	} else if (event->getName() == Event::ASYNC_DATA_EVENT) {
 		size_t size = *reinterpret_cast<size_t *> (event->getParam("size"));
-
 		data_token_t token;
-
 		token.type = DataRecorder::ASYNC;
 		token.size = size * sizeof(double);
 		token.time = RT::OS::getTime();
-
 		fifo.write(&token, sizeof(token));
 		fifo.write(event->getParam("data"), token.size);
 	} else if (event->getName() == Event::WORKSPACE_PARAMETER_CHANGE_EVENT) {
 		data_token_t token;
-
 		token.type = DataRecorder::PARAM;
 		token.size = sizeof(param_change_t);
 		token.time = RT::OS::getTime();
-
 		param_change_t data;
-		data.id = reinterpret_cast<Settings::Object::ID> (event->getParam(
-					"object"));
+		data.id = reinterpret_cast<Settings::Object::ID> (event->getParam("object"));
 		data.index = reinterpret_cast<size_t> (event->getParam("index"));
 		data.step = file.idx;
 		data.value = *reinterpret_cast<double *> (event->getParam("value"));
-
 		fifo.write(&token, sizeof(token));
 		fifo.write(&data, sizeof(data));
 	}
@@ -695,15 +661,11 @@ void DataRecorder::Panel::changeDataFile(void) {
 	if(fileDialog.exec())
 		files = fileDialog.selectedFiles(); 
 
-	//QStringList files = fileDialog->selectedFiles();
 	QString filename;
-	if(!files.isEmpty() || files[0] != NULL || files[0] != "/" )
-		filename = files[0];
-
-	/*if (fileDialog.selectedFile() == "/" || fileDialog.selectedFile().isNull() || fileDialog.selectedFile().isEmpty())
+	if(files.isEmpty() || files[0] == NULL || files[0] == "/" )
 		return;
-
-		QString filename = fileDialog.selectedFile();*/
+	else
+		filename = files[0];
 
 	if (!filename.toLower().endsWith(QString(".h5")))
 		filename += ".h5";
@@ -786,17 +748,17 @@ void DataRecorder::Panel::updateDownsampleRate(int r) {
 void DataRecorder::Panel::customEvent(QEvent *e) {
 	if (e->type() == QFileExistsEvent) {
 		FileExistsEventData *data = reinterpret_cast<FileExistsEventData *> (e);
-		data->response = QMessageBox::information(this, "File exists",
-				"The file \"" + data->filename + "\" already exists.",
+		data->response = QMessageBox::question(this, "File exists",
+				"The file already exists. What would you like to do?",
 				"Append", "Overwrite", "Cancel", 0, 2);
 		data->done.wakeAll();
-		recordStatus->setText("Waiting...");
+		recordStatus->setText("Not Recording");
 	} else if (e->type() == QNoFileOpenEvent) {
 		QMessageBox::critical(
 				this, "Failed to start recording.",
 				"No file has been opened for writing so recording could not be started.",
 				QMessageBox::Ok, QMessageBox::NoButton);
-		recordStatus->setText("Waiting...");
+		recordStatus->setText("Not Recording");
 	} else if (e->type() == QSetFileNameEditEvent) {
 		SetFileNameEditEventData *data = reinterpret_cast<SetFileNameEditEventData *> (e);
 		fileNameEdit->setText(data->filename);
@@ -828,13 +790,11 @@ void DataRecorder::Panel::doDeferred(const Settings::Object::State &s) {
 			continue;
 
 		channel = new Channel();
-
 		channel->block = block;
 		channel->type = s.loadInteger(str.str() + " type");
 		channel->index = s.loadInteger(str.str() + " index");
 		channel->name.sprintf("%s %ld : %s", channel->block->getName().c_str(),
-				channel->block->getID(), channel->block->getName(channel->type,
-					channel->index).c_str());
+				channel->block->getID(), channel->block->getName(channel->type,	channel->index).c_str());
 
 		channels.insert(channels.end(), *channel);
 		selectionBox->addItem(channel->name);
@@ -848,7 +808,6 @@ void DataRecorder::Panel::doLoad(const Settings::Object::State &s) {
 		showMinimized();
 
 	downsampleSpin->setValue(s.loadInteger("Downsample"));
-
 	resize(s.loadInteger("W"), s.loadInteger("H"));
 	parentWidget()->move(s.loadInteger("X"), s.loadInteger("Y"));
 }
@@ -1019,11 +978,12 @@ void DataRecorder::Panel::processData(void) {
 				H5Tclose(param_type);
 			}
 		}
-
 	}
 }
 
 int DataRecorder::Panel::openFile(QString &filename) {
+
+	QMutex mutex;
 
 #ifdef DEBUG
 	if(!pthread_equal(pthread_self(),thread)) {
@@ -1033,15 +993,15 @@ int DataRecorder::Panel::openFile(QString &filename) {
 #endif
 
 	if (QFile::exists(filename)) {
+		mutex.lock();
 		QEvent *event = new QEvent(static_cast<QEvent::Type>QFileExistsEvent);
 		FileExistsEventData data;
 
-		//VISITTWO
 		//event->setData(&data);
-		//data.filename = filename;
+		data.filename = filename;
 
 		QApplication::postEvent(this, event);
-		//data.done.wait();
+		data.done.wait(&mutex);
 
 		if (data.response == 0) { // append
 			file.id = H5Fopen(filename.toLatin1(), H5F_ACC_RDWR, H5P_DEFAULT);
@@ -1086,18 +1046,23 @@ int DataRecorder::Panel::openFile(QString &filename) {
 		}
 	}
 
+	mutex.unlock();
+
+	mutex.lock();
 	QEvent *event = new QEvent(static_cast<QEvent::Type>QSetFileNameEditEvent);
 	SetFileNameEditEventData data;
-
 	//event->setData(&data);
-	//data.filename = filename;
+	data.filename = filename;
 
 	QApplication::postEvent(this, event);
-	//data.done.wait();
+	data.done.wait(&mutex);
+	mutex.unlock();
 	return 0;
 }
 
 void DataRecorder::Panel::closeFile(bool shutdown) {
+
+	QMutex mutex;
 
 #ifdef DEBUG
 	if(!pthread_equal(pthread_self(),thread)) {
@@ -1109,14 +1074,15 @@ void DataRecorder::Panel::closeFile(bool shutdown) {
 	H5Fclose(file.id);
 
 	if (!shutdown) {
+		mutex.lock();
 		QEvent *event = new QEvent(static_cast<QEvent::Type>QSetFileNameEditEvent);
 		SetFileNameEditEventData data;
-
 		//event->setData(&data);
-		//data.filename = "";
+		data.filename = "";
 
 		QApplication::postEvent(this, event);
-		//data.done.wait();
+		data.done.wait(&mutex);
+		mutex.unlock();
 	}
 }
 
@@ -1308,8 +1274,6 @@ extern "C" Plugin::Object *createRTXIPlugin(void *) {
 DataRecorder::Plugin::Plugin(void) {
 	// get the HDF data recorder buffer size from user preference
 	QSettings userprefs;
-	//userprefs.setPath("RTXI.org", "RTXI", QSettings::UserScope);
-	//buffersize = userprefs.readNumEntry("/system/HDFbuffer", 10)*1048576;
 	userprefs.setPath(QSettings::NativeFormat, QSettings::UserScope, "RTXI");
 	buffersize = (userprefs.value("/system/HDFbuffer", 10).toInt())*1048576;
 

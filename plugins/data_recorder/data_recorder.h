@@ -87,16 +87,17 @@ namespace DataRecorder {
 			void receiveEvent(const Event::Object *);
 			void receiveEventRT(const Event::Object *);
 
-			public slots:
+		public slots:
 			void startRecordClicked(void);
 			void stopRecordClicked(void);
 			void updateDownsampleRate(int);
 
-			private slots:
+		private slots:
 			void buildChannelList(void);
 			void changeDataFile(void);
 			void insertChannel(void);
 			void removeChannel(void);
+			void goodbye(void);
 
 		protected:
 			void customEvent(QEvent *);
@@ -129,11 +130,12 @@ namespace DataRecorder {
 
 			bool recording;
 
+			QMdiSubWindow *subWindow;
+
 			QGroupBox *channelGroup;
 			QGroupBox *sampleGroup;
 			QGroupBox *fileGroup;
 			QGroupBox *buttonGroup;
-			QGroupBox *arrowGroup;
 			QGroupBox *listGroup;
 
 			QComboBox *blockList;
