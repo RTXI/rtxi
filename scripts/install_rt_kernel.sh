@@ -22,6 +22,11 @@
 red='\e[0;31m'
 NC='\e[0m'
 
+if ! id | grep -q root; then
+  echo "Must run script as root; try again with sudo ./install_rt_kernel.sh"
+	exit
+fi
+
 if [[ $(lsb_release --id) == *Ubuntu* ]]
 then
 	OS="ubuntu"
@@ -33,12 +38,15 @@ fi
 # Export environment variables
 echo -e "${red}----->Setting up variables${NC}"
 export linux_version=3.8.13
-export linux_tree=`pwd`/linux-$linux_version
+export linux_tree=/opt/linux-$linux_version
 
 export xenomai_version=2.6.3
-export xenomai_root=`pwd`/xenomai-$xenomai_version
+export xenomai_root=/opt/xenomai-$xenomai_version
 
-export build_root=`pwd`/build
+export scripts_dir=`pwd`
+
+export build_root=/opt/build
+
 mkdir $build_root
 
 if [ $? -eq 0 ]; then
@@ -50,6 +58,7 @@ fi
 
 # Download essentials
 echo -e "${red}----->Downloading Linux kernel${NC}"
+cd /opt
 wget https://www.kernel.org/pub/linux/kernel/v3.x/linux-$linux_version.tar.bz2
 tar xf linux-$linux_version.tar.bz2
 
@@ -68,7 +77,7 @@ fi
 echo -e "${red}----->Patching kernel${NC}"
 cd $linux_tree
 cp -vi /boot/config-`uname -r` $linux_tree/.config
-cp ../patch/kernel_config .config
+cp $scripts_dir/patch/kernel_config .config
 $xenomai_root/scripts/prepare-kernel.sh --arch=x86 --adeos=$xenomai_root/ksrc/arch/x86/patches/ipipe-core-3.8.13-x86-4.patch --linux=$linux_tree
 make oldconfig
 make menuconfig
@@ -106,18 +115,14 @@ fi
 echo -e "${red}----->Installing compiled kernel${NC}"
 if [[ $OS == 'ubuntu' ]]
 then
-cd $linux_tree
-cd ..
+cd /opt
 sudo dpkg -i linux-image-*.deb
 sudo dpkg -i linux-headers*.deb
 elif [[ $OS == 'scientific' ]]
 then
 cd $linux_tree
-cd ..
 sudo cp arch/x86/boot/bzImage /boot/vmlinuz-$linux_version-xenomai-$xenomai_version
 sudo make modules_install
-cd $linux_tree
-sudo cp -r * /lib/modules/$linux_version-xenomai-$xenomai_version/build/.
 fi
 
 if [ $? -eq 0 ]; then
