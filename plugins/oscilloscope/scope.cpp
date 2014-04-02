@@ -25,6 +25,7 @@
 #include <debug.h>
 #include <cmath>
 #include <stdlib.h>
+#include <main_window.h>
 
 Scope::Channel::Channel(void) {}
 
@@ -58,6 +59,11 @@ Scope::Scope(QWidget *parent,Qt::WFlags flags) : QWidget(parent) {
 
 	setAttribute(Qt::WA_NoBackground);
 
+		// Make Mdi
+		QMdiSubWindow *subWindow = new QMdiSubWindow;
+		subWindow->setFixedSize(500,300);
+		MainWindow::getInstance()->createMdi(subWindow);
+
 	setMinimumSize(16,9);
 	isPaused = false;
 	drawZero = true;
@@ -76,6 +82,8 @@ Scope::Scope(QWidget *parent,Qt::WFlags flags) : QWidget(parent) {
 	triggerHoldoff = 5.0;
 	triggerLast = (size_t)(-1);
 	triggerChannel = channels.end();
+
+	subWindow->setWidget(this);
 
 	timer = new QTimer;
 	QObject::connect(timer,SIGNAL(timeout(void)),this,SLOT(timeoutEvent(void)));
@@ -332,7 +340,7 @@ void Scope::setChannelLabel(std::list<Channel>::iterator channel,const QString &
 }
 
 void Scope::paintEvent(QPaintEvent *e) {
-	QPainter painter;
+	QPainter painter(&foreground);
 	painter.drawPixmap(e->rect(),foreground);
 	//QPainter::drawPixmap(this,e->rect().topLeft(),&foreground,e->rect()),Qt::CopyROP);
 }
@@ -347,9 +355,7 @@ void Scope::drawBackground(void) {
 	int zero = static_cast<int>(round(height()/2.0));
 
 	background = background.copy(0, 0, width(), height());
-
 	background.fill(Qt::white);
-
 	QPainter painter(&background);
 
 	if(drawZero) {
