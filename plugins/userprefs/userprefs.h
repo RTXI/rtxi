@@ -58,8 +58,8 @@ namespace UserPrefs {
 
   public:
     Panel(QWidget *);
-    virtual
-    ~Panel(void);
+    virtual ~Panel(void);
+    QLabel *status;
 
   public slots:
     void apply(void); // save and close

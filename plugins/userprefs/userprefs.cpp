@@ -95,17 +95,22 @@ UserPrefs::Panel::Panel(QWidget *parent) : QWidget(parent) {
 	QHBoxLayout *buttonLayout = new QHBoxLayout;
 
 	// Create elements for child widget
-  QPushButton *resetButton = new QPushButton("Reset and Close");
+  QPushButton *resetButton = new QPushButton("Reset");
   QObject::connect(resetButton,SIGNAL(clicked(void)),this,SLOT(reset(void)));
-  QPushButton *applyButton = new QPushButton("Save and Close");
+  QPushButton *applyButton = new QPushButton("Save");
   QObject::connect(applyButton,SIGNAL(clicked(void)),this,SLOT(apply(void)));
-  QPushButton *cancelButton = new QPushButton("Close without Saving");
+  QPushButton *cancelButton = new QPushButton("Close");
   QObject::connect(cancelButton,SIGNAL(clicked(void)),this,SLOT(cancel(void)));
+  status = new QLabel;
+  status->setText("Defaults \nloaded");
+  status->setFrameStyle(QFrame::Panel | QFrame::Sunken);
+  status->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
 
 	// Assign elements to layout in child widget
 	buttonLayout->addWidget(resetButton);
 	buttonLayout->addWidget(applyButton);
 	buttonLayout->addWidget(cancelButton);
+	buttonLayout->addWidget(status);
 
 	// Assign layout to child widget
 	buttons->setLayout(buttonLayout);
@@ -133,7 +138,13 @@ void UserPrefs::Panel::reset(void) {
   dynamoDirEdit->setText(getenv("HOME"));
   dataDirEdit->setText(getenv("HOME"));
   HDFBufferEdit->setText(QString::number(10));
-  apply();
+  userprefs.setValue("/dirs/setfiles", settingsDirEdit->text());
+  userprefs.setValue("/dirs/dynamomodels", dynamoDirEdit->text());
+  userprefs.setValue("/dirs/data", dataDirEdit->text());
+  bool ok;
+  QString buffer = HDFBufferEdit->text();
+  userprefs.setValue("/system/HDFbuffer", buffer.toInt(&ok));
+  status->setText("Preferences \nreset");
 }
 
 void UserPrefs::Panel::apply(void) {
@@ -143,7 +154,7 @@ void UserPrefs::Panel::apply(void) {
   bool ok;
   QString buffer = HDFBufferEdit->text();
   userprefs.setValue("/system/HDFbuffer", buffer.toInt(&ok));
-  subWindow->close();
+  status->setText("Preferences \napplied");
 }
 
 void UserPrefs::Panel::cancel(void) {

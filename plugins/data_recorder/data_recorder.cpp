@@ -434,7 +434,7 @@ DataRecorder::Panel::Panel(QWidget *parent, size_t buffersize) :
 		buttonLayout->addWidget(closeButton);
 		recordStatus = new QLabel;
 		buttonLayout->addWidget(recordStatus);
-		recordStatus->setText("Not Recording");
+		recordStatus->setText("Not recording");
 		recordStatus->setFrameStyle(QFrame::Panel | QFrame::Sunken);
 		recordStatus->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
 
