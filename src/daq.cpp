@@ -38,7 +38,6 @@ DAQ::Driver::~Driver(void) {
 
 void DAQ::Manager::foreachDevice(void (*callback)(DAQ::Device *,void *),void *param) {
 	Mutex::Locker lock(&mutex);
-	printf("%d\n", deviceList.size());
 	for (std::list<Device *>::iterator i = deviceList.begin(); i != deviceList.end(); ++i)
 		callback(*i,param);
 }

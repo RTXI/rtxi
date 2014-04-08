@@ -90,7 +90,6 @@ void MainWindow::clearFileMenu(void) {
 }
 
 QAction* MainWindow::createModuleMenuItem(const QString &text, const QObject *receiver, const char *member) {
-	printf("in the module create item func\n");
 	return moduleMenu->addAction(text, receiver, member);
 }
 
