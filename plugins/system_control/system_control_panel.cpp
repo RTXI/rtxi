@@ -93,6 +93,7 @@ SystemControlPanel::SystemControlPanel(QWidget *parent) : QWidget(parent) {
 	deviceLayout->addWidget(new QLabel(tr("Frequency:")), 1, 0);
 	freqEdit = new QLineEdit;
 	deviceLayout->addWidget(freqEdit, 1, 1);
+	freqEdit->setText("1000");
 	QObject::connect(freqEdit,SIGNAL(textChanged(const QString &)),this,SLOT(updatePeriod(void)));
 	freqUnitList = new QComboBox;
 	freqUnitList->setFixedWidth(50);
@@ -114,6 +115,7 @@ SystemControlPanel::SystemControlPanel(QWidget *parent) : QWidget(parent) {
 	periodUnitList->addItem("us");
 	periodUnitList->addItem("ns");
 	QObject::connect(periodUnitList,SIGNAL(activated(int)),this,SLOT(updateFreq(void)));
+	updatePeriod();
 
 	// Assign layout to child widget
 	deviceGroup->setLayout(deviceLayout);
@@ -378,6 +380,7 @@ void SystemControlPanel::applyChannelTab(void) {
 	double a_zerooffset = analogZeroOffsetEdit->text().toDouble()*pow(10,-3*(analogUnitPrefixList2->currentIndex()-8));
 
 	dev->setChannelActive(a_type,a_chan,analogActiveButton->isChecked());
+	printf("here1\n");
 	dev->setAnalogCalibrationActive(a_type,a_chan,analogCalibrationButton->isChecked());
 	dev->setAnalogGain(a_type,a_chan,a_gain);
 	dev->setAnalogZeroOffset(a_type,a_chan,a_zerooffset);
@@ -386,13 +389,16 @@ void SystemControlPanel::applyChannelTab(void) {
 	dev->setAnalogUnits(a_type,a_chan,analogUnitList->currentIndex());
 	dev->setAnalogCalibrationActive(a_type,a_chan,analogCalibrationButton->isChecked());
 
+	printf("here2\n");
 	DAQ::index_t d_chan = digitalChannelList->currentIndex();
 	DAQ::type_t d_type = static_cast<DAQ::type_t>(digitalSubdeviceList->currentIndex()+2);
 	DAQ::direction_t d_dir = static_cast<DAQ::direction_t>(digitalDirectionList->currentIndex());
 
+	printf("here3\n");
 	dev->setChannelActive(d_type,d_chan,digitalActiveButton->isChecked());
 	if(d_type == DAQ::DIO)
 		dev->setDigitalDirection(d_chan,d_dir);
+	printf("here4\n");
 }
 
 void SystemControlPanel::applyThreadTab(void) {

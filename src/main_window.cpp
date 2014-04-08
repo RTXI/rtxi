@@ -120,12 +120,17 @@ MainWindow::MainWindow (void) : QMainWindow(NULL, Qt::Window) {
 MainWindow::~MainWindow (void) {
 }
 
+QAction* MainWindow::insertModuleMenuSeparator (void) {
+	return moduleMenu->addSeparator();
+}
+
 QAction* MainWindow::createFileMenuItem(const QString &text, const QObject *receiver, const char *member) {
 	return fileMenu->addAction(text, receiver, member);
 }
 
-void MainWindow::setFileMenuItemParameter(int menuid, int parameter) {
-	//fileMenu->setItemParameter(menuid, parameter);
+void MainWindow::setFileMenuItemParameter(QAction *action, int parameter) {
+	action->setData(parameter);
+	//fileMenu->setData(menuid, parameter);
 }
 
 void MainWindow::clearFileMenu(void) {
@@ -141,10 +146,6 @@ void MainWindow::clearFileMenu(void) {
 		id = fileMenu->insertItem ("&Quit", qApp, SLOT (closeAllWindows ()), QKeySequence (Qt::CTRL + Qt::Key_Q));
 		fileMenu->setWhatsThis (id, "Quits the Application");
 		fileMenu->addSeparator();*/
-}
-
-int MainWindow::insertModuleMenuSeparator (void) {
-	//return moduleMenu->addSeparator();
 }
 
 QAction* MainWindow::createModuleMenuItem(const QString &text, const QObject *receiver, const char *member) {
@@ -175,7 +176,8 @@ QAction* MainWindow::createUtilMenuItem(const QString &text, const QObject * rec
 	//return utilMenu->addAction (text, receiver, member);
 }
 
-void MainWindow::setUtilMenuItemParameter (int menuid, int parameter) {
+void MainWindow::setUtilMenuItemParameter (QAction *action, int parameter) {
+	action->setData(parameter);
 	//utilMenu->setItemParameter (menuid, parameter);
 }
 
@@ -216,7 +218,6 @@ void MainWindow::createSystemMenu() {
 
 void MainWindow::createWindowsMenu() {
 	windowsMenu = menuBar()->addMenu(tr("&Windows"));
-	//windowsMenu->setCheckable(true);
 }
 
 void MainWindow::createHelpMenu() {
@@ -237,10 +238,10 @@ void MainWindow::createFileActions() {
 	save = new QAction(tr("&Save Workspace"), this);
 	save->setShortcuts(QKeySequence::Save);
 	save->setStatusTip(tr("Save current workspace"));
-	connect(load, SIGNAL(triggered()), this, SLOT(loadSettings()));
+	connect(save, SIGNAL(triggered()), this, SLOT(saveSettings()));
 
 	quit = new QAction(tr("&Quit"), this);
-	quit->setShortcuts(QKeySequence::Quit);
+	quit->setShortcut(tr("Ctrl+Q"));
 	quit->setStatusTip(tr("Quit RTXI"));
 	connect(quit, SIGNAL(triggered()), qApp, SLOT(closeAllWindows()));
 }
@@ -329,16 +330,13 @@ QAction* MainWindow::createPatchClampMenuItem (const QString &text, const QObjec
 	//return patchClampSubMenu->addAction(text, receiver, member);
 }
 
-int MainWindow::insertSystemMenuSeparator (void) {
-	//return systemMenu->addSeparator();
-}
-
 QAction* MainWindow::createSystemMenuItem (const QString &text, const QObject *receiver, const char *member) {
 	return systemMenu->addAction(text, receiver, member);
 }
 
-void MainWindow::removeSystemMenuItem (int id) {
-	//systemMenu->removeItem(id);
+// VISIT TWO
+void MainWindow::removeSystemMenuItem (QAction *removeMe) {
+	//systemMenu->removeAction(actionList[0]);
 }
 
 void MainWindow::about(void) {
@@ -564,21 +562,20 @@ void MainWindow::windowsMenuAboutToShow (void) {
 		return;
 	}
 
-	//int cascadeID = windowsMenu->insertItem ("&Cascade", ws, SLOT (cascade (void)));
-	//int tileID = windowsMenu->insertItem ("&Tile", ws, SLOT (tile (void)));
-	if (ws->windowList ().isEmpty ()) {
-		//windowsMenu->setItemEnabled (cascadeID, false);
-		//windowsMenu->setItemEnabled (tileID, false);
-	}
+	windowsMenu->addAction("&Cascade", ws, SLOT(cascade(void)));
+	windowsMenu->addAction("&Tile", ws, SLOT(tile(void)));
+	/*if(ws->windowList().isEmpty()) {
+		windowsMenu->setVisible(true);
+		windowsMenu->setVisible(true);
+	}*/
 
-	windowsMenu->addSeparator ();
-	QWidgetList windows = ws->windowList ();
-	/*for (size_t i = 0; i < windows.count (); ++i) {
-		int id = windowsMenu->insertItem (windows.at (i)->caption (), this,
-		SLOT (windowsMenuActivated (int)));
-		windowsMenu->setItemParameter (id, i);
-		windowsMenu->setItemChecked (id, ws->activeWindow () == windows.at (i));
-		}*/
+	windowsMenu->addSeparator();
+	QWidgetList windows = ws->windowList();
+	/*for (size_t i = 0; i < windows.count(); ++i) {
+		windowsMenu->addAction(windows.at(i)->caption(),this,SLOT(windowsMenuActivated(int)));
+		action->setData(i);
+		windowsMenu->setItemChecked(id, ws->activeWindow() == windows.at(i));
+	}*/
 }
 
 void MainWindow::windowsMenuActivated (int id) {

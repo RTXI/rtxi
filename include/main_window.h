@@ -66,13 +66,15 @@ class MainWindow : public QMainWindow {
 			* \param parameter The parameter value to set.
 			*/
 
-		void setFileMenuItemParameter(int menuid, int parameter);
+		void setFileMenuItemParameter(QAction *action, int parameter);
 
 		/*!
 			* Clears the File menu.
 			*/
 
 		void clearFileMenu(void);
+
+		QAction* insertModuleMenuSeparator(void);
 
 		/*!
 			* Add an item to the Modules menu.
@@ -94,12 +96,6 @@ class MainWindow : public QMainWindow {
 			*/
 
 		void setModuleMenuItemParameter(QAction *action, int parameter);
-
-		/*!
-			* Insert a line separator into the Modules menu.
-			*/
-
-		int	insertModuleMenuSeparator();
 
 		/*!
 			* Clears the Modules menu.
@@ -148,7 +144,7 @@ class MainWindow : public QMainWindow {
 			* Sets the parameter value of a menu item in the Utilities menu.
 			*/
 
-		void setUtilMenuItemParameter(int, int);
+		void setUtilMenuItemParameter(QAction*, int);
 
 		/*!
 			* Clears the Utilities menu.
@@ -194,11 +190,8 @@ class MainWindow : public QMainWindow {
 
 		QAction* createSystemMenuItem(const QString &label, const QObject *handler, const char *slot);
 
-		/* Insert a line separator into the System menu. */
-		int insertSystemMenuSeparator();
-
 		/* REmove item from system menu */
-		void removeSystemMenuItem (int index);
+		void removeSystemMenuItem(QAction *);
 
 		/* Create a window for the widget in the main window */
 		void createMdi(QMdiSubWindow *);

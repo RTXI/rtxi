@@ -180,7 +180,7 @@ PerformanceMeasurement::Plugin::Plugin(void) : panel(0) {
 }
 
 PerformanceMeasurement::Plugin::~Plugin(void) {
-	MainWindow::getInstance()->removeSystemMenuItem(menuID);
+	//MainWindow::getInstance()->removeSystemMenuItem(menuID);
 	if (panel)
 		delete panel;
 	instance = 0;
