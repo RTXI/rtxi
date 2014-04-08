@@ -88,30 +88,6 @@ MainWindow::MainWindow (void) : QMainWindow(NULL, Qt::Window) {
 	//patchClampSubMenu = new QMenu (this);
 	//utilMenu->insertItem (tr ("&Patch Clamp"), patchClampSubMenu);
 
-	//windowsMenu = new QMenu (this);
-	//windowsMenu->setCheckable (true);
-	//QObject::connect (windowsMenu, SIGNAL (aboutToShow (void)), this, SLOT (windowsMenuAboutToShow (void)));
-
-	//menuBar()->addMenu("&Windows", windowsMenu);
-	//menuBar ()->insertSeparator ();
-	//QMenu *helpMenu = new QMenu (this);
-
-	//helpMenu->insertItem ("What's &This", this, SLOT (whatsThis ()),
-	//QKeySequence (Qt::SHIFT + Qt::Key_F1));
-	//helpMenu->insertSeparator ();
-	//helpMenu->setWhatsThis(id, "Allows you to click on any module to get a description of it");
-
-	//helpMenu->insertItem ("&About RTXI", this, SLOT (about ()));
-	//helpMenu->setWhatsThis(id,"Opens a Window Containing Information About RTXI");
-
-	//helpMenu->insertItem ("About &COMEDI", this, SLOT (aboutComedi ()));
-	//helpMenu->setWhatsThis(id,"Opens a Window Containing Information About COMEDI");
-
-	//helpMenu->insertItem ("About &Qt", this, SLOT (aboutQt ()));
-	//helpMenu->setWhatsThis(id,"Opens a Window Containing Information About the Qt Widget Toolkit");
-	
-	//menuBar()->addMenu("&Help", helpMenu);
-
 	/* Create and Initialize the Workspace */
 	//setCentralWidget(new QWorkspace(this));
 	//((QWorkspace *)centralWidget)->setScrollBarsEnabled(true);
@@ -153,7 +129,7 @@ QAction* MainWindow::createModuleMenuItem(const QString &text, const QObject *re
 }
 
 void MainWindow::setModuleMenuItemParameter (QAction *action, int parameter) {
-	action->setData(parameter);//moduleMenu->setItemParameter (menuid, parameter);
+	action->setData(parameter); //moduleMenu->setItemParameter (menuid, parameter);
 }
 
 void MainWindow::clearModuleMenu (void) {
@@ -218,6 +194,7 @@ void MainWindow::createSystemMenu() {
 
 void MainWindow::createWindowsMenu() {
 	windowsMenu = menuBar()->addMenu(tr("&Windows"));
+	connect(windowsMenu,SIGNAL(aboutToShow (void)),this,SLOT(windowsMenuAboutToShow(void)));
 }
 
 void MainWindow::createHelpMenu() {
@@ -554,43 +531,43 @@ void MainWindow::loadSignal(int i) {
 }
 
 void MainWindow::windowsMenuAboutToShow (void) {
+
+	// Clear previous entries
 	windowsMenu->clear ();
 
-	QWorkspace *ws = dynamic_cast < QWorkspace * >(centralWidget ());
-	if (!ws) {
-		ERROR_MSG("MainWindow::windowsMenuAboutToShow : centralWidget() not a QWorkspace?\n");
+	// Add default options
+	windowsMenu->addAction(tr("Cascade"),mdiArea,SLOT(cascadeSubWindows()));
+	windowsMenu->addAction(tr("Tile"),mdiArea,SLOT(tileSubWindows()));
+	windowsMenu->addSeparator();
+
+	// Get list of open subwindows in Mdi Area
+	QList<QMdiSubWindow *> subWindows = mdiArea->subWindowList();
+
+	// Make sure it isn't empty
+	if(subWindows.isEmpty()){
 		return;
 	}
 
-	windowsMenu->addAction("&Cascade", ws, SLOT(cascade(void)));
-	windowsMenu->addAction("&Tile", ws, SLOT(tile(void)));
-	/*if(ws->windowList().isEmpty()) {
-		windowsMenu->setVisible(true);
-		windowsMenu->setVisible(true);
-	}*/
-
-	windowsMenu->addSeparator();
-	QWidgetList windows = ws->windowList();
-	/*for (size_t i = 0; i < windows.count(); ++i) {
-		windowsMenu->addAction(windows.at(i)->caption(),this,SLOT(windowsMenuActivated(int)));
-		action->setData(i);
-		windowsMenu->setItemChecked(id, ws->activeWindow() == windows.at(i));
-	}*/
+	// Create windows list based off of what's open
+	// VISIT TWO
+	for(int i = 0; i < subWindows.size(); i++){
+		QMdiSubWindow *child = subWindows.at(i);
+		windowsMenu->addAction(child->widget()->windowTitle(),this,SLOT(windowsMenuActivated(int)));
+	}
 }
 
-void MainWindow::windowsMenuActivated (int id) {
-	QWorkspace *ws = dynamic_cast < QWorkspace * >(centralWidget ());
-	if (!ws) {
-		ERROR_MSG
-			("MainWindow::windowsMenuActivated : centralWidget() not a QWorkspace?\n");
+void MainWindow::windowsMenuActivated(int id) {
+
+	// Get list of open subwindows in Mdi Area
+	QList<QMdiSubWindow *> subWindows = mdiArea->subWindowList();
+
+	// Make sure it isn't empty
+	if(subWindows.isEmpty()){
 		return;
 	}
 
-	QWidget *w = ws->windowList ().at (id);
-	if (w) {
-		w->showNormal ();
-		w->setFocus ();
-	}
+	// Set active selected window
+	mdiArea->setActiveSubWindow(subWindows.at(id));
 }
 
 static Mutex mutex;
