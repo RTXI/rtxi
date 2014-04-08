@@ -78,8 +78,7 @@ Oscilloscope::Properties::Properties(Oscilloscope::Panel *parent) : QDialog(Main
 	setWindowTitle(QString::number(parent->getID()) + " Oscilloscope Properties");
 }
 
-Oscilloscope::Properties::~Properties(void)
-{
+Oscilloscope::Properties::~Properties(void) {
 }
 
 void Oscilloscope::Properties::receiveEvent(const ::Event::Object *event) {
@@ -845,7 +844,7 @@ void Oscilloscope::Properties::createDisplayTab(void) {
 
 	// Trigger box
 	triggerGroup = new QGroupBox(tr("Trigger Properties"));
-	QVBoxLayout *triggerLayout = new QVBoxLayout;
+	QHBoxLayout *triggerLayout = new QHBoxLayout;
 
 	triggerLayout->addWidget(new QLabel(tr("Trigger:")));
 	trigGroup = new QButtonGroup;
@@ -1051,7 +1050,14 @@ void Oscilloscope::Properties::updateDownsampleRate(int r) {
 
 Oscilloscope::Panel::Panel(QWidget *parent) :	Scope(parent), RT::Thread(0), fifo(10 * 1048576) {
 
+	// Setup widget attribute
 	setAttribute(Qt::WA_DeleteOnClose);
+
+	// Make Mdi
+	subWindow = new QMdiSubWindow;
+	subWindow->setMinimumSize(800,500);
+	subWindow->setAttribute(Qt::WA_DeleteOnClose);
+	MainWindow::getInstance()->createMdi(subWindow);
 
 	setWhatsThis("<p><b>Oscilloscope:</b><br>The Oscilloscope allows you to plot any signal "
 			"in your workspace in real-time, including signals from your DAQ card and those "
@@ -1067,17 +1073,50 @@ Oscilloscope::Panel::Panel(QWidget *parent) :	Scope(parent), RT::Thread(0), fifo
 	adjustDataSize();
 	properties = new Properties(this);
 
-	QTimer *otimer = new QTimer;
-	QObject::connect(otimer,SIGNAL(timeout(void)),this,SLOT(timeoutEvent(void)));
-	otimer->start(25);
+	// Create parent widget and layout
+	scopeGroup = new QGroupBox;
+	QGridLayout *layout = new QGridLayout;
 
-	resize(800,450);
+	// Create plot group and layout
+	QHBoxLayout *scopeLayout = new QHBoxLayout;
+
+	// Add to layout
+	scopeGroup->setLayout(scopeLayout);
+
+	// Create group and layout for buttons
+	bttnGroup = new QGroupBox;
+	QHBoxLayout *bttnLayout = new QHBoxLayout;
+
+	// Create buttons
+	pauseButton = new QPushButton("Pause");
+	pauseButton->setCheckable(true);
+	QObject::connect(pauseButton,SIGNAL(clicked()),this,SLOT(togglePause()));
+	bttnLayout->addWidget(pauseButton);
+	settingsButton = new QPushButton("Settings");
+	QObject::connect(settingsButton,SIGNAL(clicked()),this,SLOT(showProperties()));
+	bttnLayout->addWidget(settingsButton);
+
+	// Attach to layout
+	bttnGroup->setLayout(bttnLayout);
+
+	// Set things up to show
+	layout->addWidget(scopeGroup, 1, 0, 6, 6);
+	layout->addWidget(bttnGroup, 7, 5, 1, 1);
+
+	// Show stuff
+	setLayout(layout);
+	subWindow->setWidget(this);
+	show();
+
+	resize(800,500);
 	counter = 0;
 	downsample_rate = 1;
 	setActive(true);
-
 	setWindowTitle(QString::number(getID()) + " Oscilloscope");
-	show();
+
+	QTimer *otimer = new QTimer;
+	QObject::connect(otimer,SIGNAL(timeout(void)),this,SLOT(timeoutEvent(void)));
+	otimer->start(25);
 }
 
 Oscilloscope::Panel::~Panel(void) {
@@ -1199,17 +1238,16 @@ void Oscilloscope::Panel::mouseDoubleClickEvent(QMouseEvent *e) {
 
 /*
  * Set up mouse events for right click press
+ void Oscilloscope::Panel::mousePressEvent(QMouseEvent *e) {
+ if (e->button() == Qt::RightButton) {
+ QMenu menu(this);
+ menu.addAction("Pause",this,SLOT(togglePause(void)),paused());
+ menu.addAction("Properties",this,SLOT(showProperties(void)));
+ menu.setMouseTracking(true);
+ menu.exec(QCursor::pos());
+ }
+ }
  */
-void Oscilloscope::Panel::mousePressEvent(QMouseEvent *e) {
-	if (e->button() == Qt::RightButton) {
-		QMenu menu(this);
-		menu.addAction("Pause",this,SLOT(togglePause(void)),paused());
-		menu.addAction("Properties",this,SLOT(showProperties(void)));
-		menu.addAction("Exit",this,SLOT(close(void)));
-		menu.setMouseTracking(true);
-		menu.exec(QCursor::pos());
-	}
-}
 
 void Oscilloscope::Panel::doDeferred(const Settings::Object::State &s) {
 	bool active = setInactiveSync();

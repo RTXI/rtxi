@@ -55,15 +55,9 @@ QString Scope::Channel::getLabel(void) const {
 	return label;
 }
 
-Scope::Scope(QWidget *parent,Qt::WFlags flags) : QWidget(parent) {
+Scope::Scope(QWidget *parent) : QWidget(parent) {
 
-	setAttribute(Qt::WA_NoBackground);
-
-		// Make Mdi
-		QMdiSubWindow *subWindow = new QMdiSubWindow;
-		subWindow->setFixedSize(500,300);
-		MainWindow::getInstance()->createMdi(subWindow);
-
+	// Initialize vars
 	setMinimumSize(16,9);
 	isPaused = false;
 	drawZero = true;
@@ -82,8 +76,6 @@ Scope::Scope(QWidget *parent,Qt::WFlags flags) : QWidget(parent) {
 	triggerHoldoff = 5.0;
 	triggerLast = (size_t)(-1);
 	triggerChannel = channels.end();
-
-	subWindow->setWidget(this);
 
 	timer = new QTimer;
 	QObject::connect(timer,SIGNAL(timeout(void)),this,SLOT(timeoutEvent(void)));

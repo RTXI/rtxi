@@ -33,7 +33,7 @@ class SystemControlPanel : public QWidget, public Event::Handler {
 
 	public slots:
 		void apply(void);
-		void okay(void); 
+		//void okay(void); 
 		void goodbye(void);
 		void display(void);
 		void updateDevice(void);

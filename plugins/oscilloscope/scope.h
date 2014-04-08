@@ -31,28 +31,22 @@
 class Scope : public QWidget {
 
 	Q_OBJECT
-
 	public:
 
 		class Channel {
-
 			friend class Scope;
 
 			public:
-
 			Channel(void);
 			virtual ~Channel(void);
-
 			void *getInfo(void);
 			const void *getInfo(void) const;
-
 			double getScale(void) const;
 			double getOffset(void) const;
 			QPen getPen(void) const;
 			QString getLabel(void) const;
 
 			private:
-
 			QPen pen;
 			QString label;
 			double scale;
@@ -60,7 +54,6 @@ class Scope : public QWidget {
 			std::vector<double> prevdata;
 			std::vector<double> data;
 			void *info;
-
 		}; // class Channel
 
 		enum trig_t{
@@ -69,11 +62,9 @@ class Scope : public QWidget {
 			NEG,
 		};
 
-		Scope(QWidget *,Qt::WFlags =0);
+		Scope(QWidget *);
 		virtual ~Scope(void);
-
 		bool paused(void) const;
-
 		std::list<Channel>::iterator insertChannel(QString,double,double,const QPen &,void *);
 		void *removeChannel(std::list<Channel>::iterator);
 		size_t getChannelCount(void) const;
@@ -99,7 +90,6 @@ class Scope : public QWidget {
 		void setDivT(double);
 
 		void setPeriod(double);
-
 		size_t getDivX(void) const;
 		size_t getDivY(void) const;
 		void setDivXY(size_t,size_t);
@@ -112,35 +102,28 @@ class Scope : public QWidget {
 		void setChannelPen(std::list<Channel>::iterator,const QPen &);
 		void setChannelLabel(std::list<Channel>::iterator,const QString &);
 
-		public slots:
-
-			void timeoutEvent(void);
+	public slots:
+		void timeoutEvent(void);
 		void togglePause(void);
 
 	protected:
-
 		void paintEvent(QPaintEvent *);
 		void resizeEvent(QResizeEvent *);
 
 	private:
-
 		void drawBackground(void);
 		QRect drawForeground(void);
 
 		void positionLabels(QPainter &);
-
 		void refreshBackground(void);
 
 		bool drawZero;
 		size_t divX;
 		size_t divY;
-
 		size_t data_idx;
 		size_t data_size;
-
 		double hScl;        // horizontal scale for time (ms)
 		double period;      // real-time period of system (ms)
-
 		size_t refresh;
 
 		bool triggering;
@@ -159,7 +142,6 @@ class Scope : public QWidget {
 		QTimer *timer;
 		QString dtLabel;
 		std::list<Channel> channels;
-
 }; // class Scope
 
 #endif // SCOPE_H
