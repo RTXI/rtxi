@@ -34,7 +34,7 @@ UserPrefs::Panel::Panel(QWidget *parent) : QWidget(parent) {
 	setAttribute(Qt::WA_DeleteOnClose);
 
 	// Make Mdi
-	QMdiSubWindow *subWindow = new QMdiSubWindow;
+	subWindow = new QMdiSubWindow;
 	subWindow->setFixedSize(500,300);
 	MainWindow::getInstance()->createMdi(subWindow);
 
@@ -143,11 +143,11 @@ void UserPrefs::Panel::apply(void) {
   bool ok;
   QString buffer = HDFBufferEdit->text();
   userprefs.setValue("/system/HDFbuffer", buffer.toInt(&ok));
-  this->close();
+  subWindow->close();
 }
 
 void UserPrefs::Panel::cancel(void) {
-  this->close();
+	subWindow->close();
 }
 
 void UserPrefs::Panel::chooseSettingsDir(void) {

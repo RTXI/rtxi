@@ -27,7 +27,6 @@
 namespace UserPrefs {
 
   class Panel;
-
   class Prefs : public QObject, public ::Plugin::Object {
 
     Q_OBJECT
@@ -37,8 +36,8 @@ namespace UserPrefs {
   public:
    static Prefs *getInstance(void);
 
-public slots:
-  void createPrefsPanel(void);
+	public slots:
+  	void createPrefsPanel(void);
 
   private:
     Prefs(void);
@@ -72,6 +71,7 @@ public slots:
     void chooseDataDir(void);
 
   private:
+		QMdiSubWindow *subWindow;
     int menuID;
     QSettings userprefs;
 
