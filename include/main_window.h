@@ -256,11 +256,6 @@ class MainWindow : public QMainWindow {
 		void createHelpMenu();
 
 		void createFileActions();
-		void createModuleActions();
-		void createUtilActions();
-		void createSystemActions();
-		void createWindowsActions();
 		void createHelpActions();
 };
-
 #endif /* MAIN_WINDOW_H */

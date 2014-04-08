@@ -39,7 +39,6 @@ extern "C" Plugin::Object *createRTXIPlugin(void *) {
 DynamoModelLoader::DynamoModelLoader(void) {
 	DEBUG_MSG("DynamoModelLoader::DynamoModelLoader : starting\n");
   MainWindow::getInstance()->createModuleMenuItem("Load DYNAMO Model",this,SLOT(load_dialog(void)));
-	//menuID = MainWindow::getInstance()->createModuleMenuItem("Load DYNAMO Model",this,SLOT(load_dialog(void)));
 
 	model_makefile_path = QString(MODEL_MAKEFILE_PATH);
 	DEBUG_MSG("model_makefile_path = %s\n", model_makefile_path.toAscii());
@@ -61,7 +60,7 @@ DynamoModelLoader::DynamoModelLoader(void) {
 		text = tr("&%1 %2").arg(i).arg(listmodule);
 		MainWindow::getInstance()->createModuleMenuItem(text,this,SLOT(load_recent(int)));
 		//menuID = MainWindow::getInstance()->createModuleMenuItem(text,this,SLOT(load_recent(int)));
-		// TODO
+		// VISIT TWO
 		//MainWindow::getInstance()->setModuleMenuItemParameter(menuID, i);
 	}
 
@@ -75,14 +74,14 @@ DynamoModelLoader::DynamoModelLoader(void) {
 		text = tr("&%1 %2").arg(i).arg(listmodule);
 	  MainWindow::getInstance()->createFileMenuItem(text,this,SLOT(load_setting(int)));
 		//menuID = MainWindow::getInstance()->createFileMenuItem(text.toStdString(),this,SLOT(load_setting(int)));
-		// TODO
+		// VISIT TWO
 		//MainWindow::getInstance()->setFileMenuItemParameter(menuID, i);
 	}
 
 }
 
 DynamoModelLoader::~DynamoModelLoader(void) {
-		// TODO
+	// VISIT TWO
 	//MainWindow::getInstance()->removeModuleMenuItem(menuID);
 }
 

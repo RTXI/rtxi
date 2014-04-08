@@ -28,7 +28,6 @@ extern "C" Plugin::Object * createRTXIPlugin(void *) {
 }
 
 ModelLoader::ModelLoader(void) {
-	//menuID = MainWindow::getInstance()->createModuleMenuItem("Load User Module", this, SLOT(load(void)));
 	action = MainWindow::getInstance()->createModuleMenuItem("Load User Module", this, SLOT(load(void)));
 }
 
@@ -53,7 +52,6 @@ void ModelLoader::load(void) {
 	userprefs.setPath(QSettings::NativeFormat, QSettings::UserScope, "RTXI");
 
 	int oldestmodule = userprefs.value("/recentFileList/start", 0).toInt();
-	//int oldestmodule = userprefs.readNumEntry("/recentFileList/start", 0);
 	if (oldestmodule == 0)
 		userprefs.setValue("/recentFileList/start", 0);
 
@@ -102,6 +100,7 @@ void ModelLoader::updateRecentModules(QString filename, int index) {
 	int numRecentFiles = entries.size();
 
 	// remove list and re-add them all
+	// VISIT TWO
 	for (int i = 3; i < std::min(numRecentFiles - 2, 10) + 3; ++i) {
 		MainWindow::getInstance()->removeModuleMenuItemAt(3);
 	}

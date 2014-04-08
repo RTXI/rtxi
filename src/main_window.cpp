@@ -34,9 +34,6 @@ MainWindow::MainWindow (void) : QMainWindow(NULL, Qt::Window) {
 	mdiArea = new QMdiArea;
 	setCentralWidget(mdiArea);
 
-	//QWidget *centralWidget = new QWidget(this);
-	//setCentralWidget(centralWidget);
-
 	/* Initialize Window Settings */
 	setWindowTitle("RTXI - Real-time eXperimental Interface");
 
@@ -44,53 +41,21 @@ MainWindow::MainWindow (void) : QMainWindow(NULL, Qt::Window) {
 	createFileActions();
 	createFileMenu();
 
-	createModuleActions();
 	createModuleMenu();
 
-	createUtilActions();
 	createUtilMenu();
 
-	createSystemActions();
 	createSystemMenu();
 
-	createWindowsActions();
 	createWindowsMenu();
 
 	createHelpActions();
 	createHelpMenu();
 
-	/* Insert Menu Items */
-	//fileMenu = menuBar()->addMenu(tr("&File"));	//new QMenu(this);
-
-	//fileMenu->addAction ("&Load Workspace", this, SLOT(loadSettings()), QKeySequence(Qt::CTRL + Qt::Key_L));
-	//fileMenu->setWhatsThis("Load Workspace settings file");
-
-	//fileMenu->addAction("&Save Workspace", this, SLOT (saveSettings ()), QKeySequence (Qt::CTRL + Qt::Key_S));
-	//fileMenu->setWhatsThis(id,"Save Workspace settings file");
-
-	//fileMenu->insertSeparator();
-	//fileMenu->addAction ("&Quit", qApp, SLOT (closeAllWindows ()), QKeySequence (Qt::CTRL + Qt::Key_Q));
-
-	//menuBar()->addMenu("&File", fileMenu);
-	//fileMenu->insertSeparator();
-
-	//moduleMenu = new QMenu (this);
-	//menuBar()->addMenu("&Modules", moduleMenu);
-
-	//utilMenu = new QMenu (this);
-	//menuBar()->addMenu("&Utilities", utilMenu);
-
 	//updateUtilModules ();
-
-	//systemMenu = new QMenu (this);
-	//menuBar()->addMenu("&System", systemMenu);
 
 	//patchClampSubMenu = new QMenu (this);
 	//utilMenu->insertItem (tr ("&Patch Clamp"), patchClampSubMenu);
-
-	/* Create and Initialize the Workspace */
-	//setCentralWidget(new QWorkspace(this));
-	//((QWorkspace *)centralWidget)->setScrollBarsEnabled(true);
 }
 
 MainWindow::~MainWindow (void) {
@@ -125,6 +90,7 @@ void MainWindow::clearFileMenu(void) {
 }
 
 QAction* MainWindow::createModuleMenuItem(const QString &text, const QObject *receiver, const char *member) {
+	printf("in the module create item func\n");
 	return moduleMenu->addAction(text, receiver, member);
 }
 
@@ -223,20 +189,6 @@ void MainWindow::createFileActions() {
 	connect(quit, SIGNAL(triggered()), qApp, SLOT(closeAllWindows()));
 }
 
-void MainWindow::createModuleActions() {
-}
-
-void MainWindow::createUtilActions() {
-
-}
-
-void MainWindow::createSystemActions() {
-
-}
-
-void MainWindow::createWindowsActions() {
-
-}
 
 void MainWindow::createMdi(QMdiSubWindow *subWindow){
 	mdiArea->addSubWindow(subWindow);

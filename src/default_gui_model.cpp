@@ -139,29 +139,26 @@ void DefaultGUIModel::createGUI(DefaultGUIModel::variable_t *var, int size) {
 		}
 	}
 
+	// Create parent widget and layout
 	QWidget *hbox1 = new QWidget;
+	QHBoxLayout *qhboxlayout = new QHBoxLayout;
 
+	// Create elements
 	pauseButton = new QPushButton("Pause", this);
 	pauseButton->setCheckable(true);
 	QObject::connect(pauseButton,SIGNAL(toggled(bool)),this,SLOT(pause(bool)));
+	qhboxlayout->addWidget(pauseButton);
 
 	modifyButton = new QPushButton("Modify", this);
 	QObject::connect(modifyButton,SIGNAL(clicked(void)),this,SLOT(modify(void)));
+	qhboxlayout->addWidget(modifyButton);
 
 	unloadButton = new QPushButton("Unload", this);;
 	QObject::connect(unloadButton,SIGNAL(clicked(void)),this,SLOT(exit(void)));
-
-	QHBoxLayout *qhboxlayout = new QHBoxLayout;
-	qhboxlayout->addWidget(pauseButton);
-	qhboxlayout->addWidget(modifyButton);
 	qhboxlayout->addWidget(unloadButton);
+
+	// Show stuff
 	hbox1->setLayout(qhboxlayout);
-
-	//QHBoxLayout *hbox1 = new QHBoxLayout();
-	//pauseButton = new QPushButton("Pause", hbox1);
-	//QPushButton *modifyButton = new QPushButton("Modify", hbox1);
-	//QPushButton *unloadButton = new QPushButton("Unload", hbox1);
-
 	layout->addWidget(hbox1);
 	show();
 }
