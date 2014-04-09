@@ -27,6 +27,7 @@
 #include <QScrollArea>
 #include <QTimer>
 #include <QtGui>
+
 #include <default_gui_model.h>
 #include <main_window.h>
 #include <iostream>
@@ -90,7 +91,6 @@ void DefaultGUIModel::createGUI(DefaultGUIModel::variable_t *var, int size) {
 	QWidget *viewport = new QWidget(sv->viewport());
 	sv->setWidget(viewport);
 	QGridLayout *scrollLayout = new QGridLayout(viewport);
-	//QGridLayout *scrollLayout = new QGridLayout(viewport, 1, 2);
 
 	size_t nstate = 0, nparam = 0, nevent = 0, ncomment = 0;
 	for (size_t i = 0; i < size; i++) {
@@ -144,16 +144,16 @@ void DefaultGUIModel::createGUI(DefaultGUIModel::variable_t *var, int size) {
 	QHBoxLayout *qhboxlayout = new QHBoxLayout;
 
 	// Create elements
-	pauseButton = new QPushButton("Pause", this);
+	pauseButton = new QPushButton("Pause");
 	pauseButton->setCheckable(true);
 	QObject::connect(pauseButton,SIGNAL(toggled(bool)),this,SLOT(pause(bool)));
 	qhboxlayout->addWidget(pauseButton);
 
-	modifyButton = new QPushButton("Modify", this);
+	modifyButton = new QPushButton("Modify");
 	QObject::connect(modifyButton,SIGNAL(clicked(void)),this,SLOT(modify(void)));
 	qhboxlayout->addWidget(modifyButton);
 
-	unloadButton = new QPushButton("Unload", this);;
+	unloadButton = new QPushButton("Unload");
 	QObject::connect(unloadButton,SIGNAL(clicked(void)),this,SLOT(exit(void)));
 	qhboxlayout->addWidget(unloadButton);
 
