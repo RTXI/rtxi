@@ -39,7 +39,7 @@ struct find_daq_t {
 };
 
 static void findDAQDevice(DAQ::Device *dev,void *arg) {
-	printf("in find daqdevice\n");
+	printf("Finding DAQs...\n");
 	struct find_daq_t *info = static_cast<struct find_daq_t *>(arg);
 	if(!info->index)
 		info->device = dev;
@@ -47,12 +47,12 @@ static void findDAQDevice(DAQ::Device *dev,void *arg) {
 }
 
 static void buildDAQDeviceList(DAQ::Device *dev,void *arg) {
-	printf("in build list\n");
+	printf("Building list...\n");
 	QComboBox *deviceList = static_cast<QComboBox *>(arg);
-	printf("device list size is %d\n", deviceList->count());
-	printf("list is %s\n", dev->getName().c_str());
+	printf("Device list size: %d\n", deviceList->count());
+	printf("Device name:  %s\n", dev->getName().c_str());
 	deviceList->addItem(QString::fromStdString(dev->getName()));
-	printf("device list size is %d\n", deviceList->count());
+	printf("Device list size: %d\n", deviceList->count());
 }
 
 SystemControlPanel::SystemControlPanel(QWidget *parent) : QWidget(parent) {
@@ -76,7 +76,7 @@ SystemControlPanel::SystemControlPanel(QWidget *parent) : QWidget(parent) {
 
 	// Make Mdi
 	subWindow = new QMdiSubWindow;
-	subWindow->setFixedSize(500,450);
+	subWindow->setFixedSize(400,400);
 	subWindow->setAttribute(Qt::WA_DeleteOnClose);
 	subWindow->setWindowFlags(Qt::CustomizeWindowHint);
 	subWindow->setWindowFlags(Qt::WindowCloseButtonHint);
@@ -292,8 +292,43 @@ SystemControlPanel::~SystemControlPanel(void) {
 }
 
 void SystemControlPanel::apply(void) {
-	applyChannelTab();
-	applyThreadTab();
+
+	// Apply channel settings
+	printf("Applying channel settings...\n");
+	DAQ::Device *dev;
+	{
+		struct find_daq_t info = { deviceList->currentIndex(), 0, };
+		DAQ::Manager::getInstance()->foreachDevice(findDAQDevice, &info);
+		dev = info.device;
+	}
+
+	DAQ::index_t a_chan = analogChannelList->currentIndex();
+	DAQ::type_t a_type = static_cast<DAQ::type_t>(analogSubdeviceList->currentIndex());
+	double a_gain = analogGainEdit->text().toDouble()*pow(10,-3*(analogUnitPrefixList->currentIndex()-8));
+	double a_zerooffset = analogZeroOffsetEdit->text().toDouble()*pow(10,-3*(analogUnitPrefixList2->currentIndex()-8));
+
+	dev->setChannelActive(a_type,a_chan,analogActiveButton->isChecked());
+	dev->setAnalogCalibrationActive(a_type,a_chan,analogCalibrationButton->isChecked());
+	dev->setAnalogGain(a_type,a_chan,a_gain);
+	dev->setAnalogZeroOffset(a_type,a_chan,a_zerooffset);
+	dev->setAnalogRange(a_type,a_chan,analogRangeList->currentIndex());
+	dev->setAnalogReference(a_type,a_chan,analogReferenceList->currentIndex());
+	dev->setAnalogUnits(a_type,a_chan,analogUnitList->currentIndex());
+	dev->setAnalogCalibrationActive(a_type,a_chan,analogCalibrationButton->isChecked());
+
+	DAQ::index_t d_chan = digitalChannelList->currentIndex();
+	DAQ::type_t d_type = static_cast<DAQ::type_t>(digitalSubdeviceList->currentIndex()+2);
+	DAQ::direction_t d_dir = static_cast<DAQ::direction_t>(digitalDirectionList->currentIndex());
+
+	dev->setChannelActive(d_type,d_chan,digitalActiveButton->isChecked());
+	if(d_type == DAQ::DIO)
+		dev->setDigitalDirection(d_chan,d_dir);
+
+	// Apply thread settings
+	printf("Applying thread settings...\n");
+	double period = periodEdit->text().toDouble();
+	period *= pow(10,3*(3-periodUnitList->currentIndex()));
+	RT::System::getInstance()->setPeriod(static_cast<long long>(period));
 	display();
 }
 
@@ -306,7 +341,6 @@ void SystemControlPanel::updateDevice(void) {
 	DAQ::type_t type;
 	{
 		struct find_daq_t info = { deviceList->currentIndex(), 0, };
-		printf("number is %d\n", deviceList->currentIndex());
 		DAQ::Manager::getInstance()->foreachDevice(findDAQDevice,&info);
 		dev = info.device;
 	}
@@ -379,56 +413,12 @@ void SystemControlPanel::updatePeriod(void) {
 }
 
 void SystemControlPanel::display(void) {
-	displayChannelInfo();
-	displayThreadInfo();
-}
 
-void SystemControlPanel::applyChannelTab(void) {
-	printf("in applychanneltab\n");
-	DAQ::Device *dev;
-	{
-		struct find_daq_t info = { deviceList->currentIndex(), 0, };
-		printf("number is %d\n", deviceList->currentIndex());
-		DAQ::Manager::getInstance()->foreachDevice(findDAQDevice,&info);
-		dev = info.device;
-	}
-
-	DAQ::index_t a_chan = analogChannelList->currentIndex();
-	DAQ::type_t a_type = static_cast<DAQ::type_t>(analogSubdeviceList->currentIndex());
-	double a_gain = analogGainEdit->text().toDouble()*pow(10,-3*(analogUnitPrefixList->currentIndex()-8));
-	double a_zerooffset = analogZeroOffsetEdit->text().toDouble()*pow(10,-3*(analogUnitPrefixList2->currentIndex()-8));
-
-	dev->setChannelActive(a_type,a_chan,analogActiveButton->isChecked());
-	dev->setAnalogCalibrationActive(a_type,a_chan,analogCalibrationButton->isChecked());
-	dev->setAnalogGain(a_type,a_chan,a_gain);
-	dev->setAnalogZeroOffset(a_type,a_chan,a_zerooffset);
-	dev->setAnalogRange(a_type,a_chan,analogRangeList->currentIndex());
-	dev->setAnalogReference(a_type,a_chan,analogReferenceList->currentIndex());
-	dev->setAnalogUnits(a_type,a_chan,analogUnitList->currentIndex());
-	dev->setAnalogCalibrationActive(a_type,a_chan,analogCalibrationButton->isChecked());
-
-	DAQ::index_t d_chan = digitalChannelList->currentIndex();
-	DAQ::type_t d_type = static_cast<DAQ::type_t>(digitalSubdeviceList->currentIndex()+2);
-	DAQ::direction_t d_dir = static_cast<DAQ::direction_t>(digitalDirectionList->currentIndex());
-
-	dev->setChannelActive(d_type,d_chan,digitalActiveButton->isChecked());
-	if(d_type == DAQ::DIO)
-		dev->setDigitalDirection(d_chan,d_dir);
-}
-
-void SystemControlPanel::applyThreadTab(void) {
-	printf("in applythreadtab\n");
-	double period = periodEdit->text().toDouble();
-	period *= pow(10,3*(3-periodUnitList->currentIndex()));
-	RT::System::getInstance()->setPeriod(static_cast<long long>(period));
-}
-
-void SystemControlPanel::displayChannelInfo(void) {
-	printf("in displaychannelinfo\n");
+	// Display channel info
+	printf("Displaying channel info...\n");
 	DAQ::Device *dev;
 	{
 		struct find_daq_t info = {deviceList->currentIndex(), 0, };
-		printf("number is %d\n", deviceList->currentIndex());
 		DAQ::Manager::getInstance()->foreachDevice(findDAQDevice,&info);
 		dev = info.device;
 	}
@@ -557,10 +547,9 @@ void SystemControlPanel::displayChannelInfo(void) {
 		} else
 			digitalDirectionList->setEnabled(false);
 	}
-}
 
-void SystemControlPanel::displayThreadInfo(void) {
-	printf("displaythreadinfo\n");
+	// Display thread info
+	printf("Displaying thread info...\n");
 	int i = 3;
 	long long tmp = RT::System::getInstance()->getPeriod();
 	while((tmp >= 1000)&&(i)) {
@@ -574,7 +563,7 @@ void SystemControlPanel::displayThreadInfo(void) {
 
 void SystemControlPanel::receiveEvent(const Event::Object *event) {
 	if(event->getName() == Event::RT_POSTPERIOD_EVENT) {
-		displayThreadInfo();
+		display();
 	}
 
 	if(event->getName() == Event::SETTINGS_OBJECT_INSERT_EVENT ||

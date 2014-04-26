@@ -14,7 +14,7 @@
 	 You should have received a copy of the GNU General Public License
 	 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
- */
+*/
 
 #ifndef SYSTEM_CONTROL_PANEL_H
 #define SYSTEM_CONTROL_PANEL_H
@@ -33,7 +33,6 @@ class SystemControlPanel : public QWidget, public Event::Handler {
 
 	public slots:
 		void apply(void);
-		//void okay(void); 
 		void goodbye(void);
 		void display(void);
 		void updateDevice(void);
@@ -42,12 +41,6 @@ class SystemControlPanel : public QWidget, public Event::Handler {
 
 	private:
 		void __display(void);
-		void applyChannelTab(void);
-		void applyThreadTab(void);
-		void createChannelTab(void);
-		void createThreadTab(void);
-		void displayChannelInfo(void);
-		void displayThreadInfo(void);
 		void receiveEvent(const Event::Object *);
 
 		QGroupBox *deviceGroup;
