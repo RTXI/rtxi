@@ -39,6 +39,7 @@ struct find_daq_t {
 };
 
 static void findDAQDevice(DAQ::Device *dev,void *arg) {
+	printf("in find daq\n");
 	struct find_daq_t *info = static_cast<struct find_daq_t *>(arg);
 	if(!info->index)
 		info->device = dev;
