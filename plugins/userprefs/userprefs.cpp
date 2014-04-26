@@ -36,6 +36,8 @@ UserPrefs::Panel::Panel(QWidget *parent) : QWidget(parent) {
 	// Make Mdi
 	subWindow = new QMdiSubWindow;
 	subWindow->setFixedSize(500,300);
+	subWindow->setWindowFlags(Qt::CustomizeWindowHint);
+	subWindow->setWindowFlags(Qt::WindowCloseButtonHint);
 	MainWindow::getInstance()->createMdi(subWindow);
 
 	// Preferences structure

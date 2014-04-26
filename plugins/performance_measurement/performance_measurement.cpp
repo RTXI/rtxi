@@ -48,6 +48,8 @@ PerformanceMeasurement::Panel::Panel(QWidget *parent) : QWidget(parent),
 		// Make Mdi
 		QMdiSubWindow *subWindow = new QMdiSubWindow;
 		subWindow->setFixedSize(310,200);
+		subWindow->setWindowFlags(Qt::CustomizeWindowHint);
+		subWindow->setWindowFlags(Qt::WindowCloseButtonHint);
 		MainWindow::getInstance()->createMdi(subWindow);
 
 		// Create main layout

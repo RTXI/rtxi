@@ -51,6 +51,8 @@ Connector::Panel::Panel(QWidget *parent) : QWidget(parent) {
 	subWindow = new QMdiSubWindow;
 	subWindow->setFixedSize(300,400);
 	subWindow->setAttribute(Qt::WA_DeleteOnClose);
+	subWindow->setWindowFlags(Qt::CustomizeWindowHint);
+	subWindow->setWindowFlags(Qt::WindowCloseButtonHint);
 	MainWindow::getInstance()->createMdi(subWindow);
 
 	// Create main layout

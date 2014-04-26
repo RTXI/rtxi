@@ -311,6 +311,8 @@ DataRecorder::Panel::Panel(QWidget *parent, size_t buffersize) :
 		subWindow = new QMdiSubWindow;
 		subWindow->setMinimumSize(500,450);
 		subWindow->setAttribute(Qt::WA_DeleteOnClose);
+		subWindow->setWindowFlags(Qt::CustomizeWindowHint);
+		subWindow->setWindowFlags(Qt::WindowCloseButtonHint);
 		MainWindow::getInstance()->createMdi(subWindow);
 
 		// Create main layout

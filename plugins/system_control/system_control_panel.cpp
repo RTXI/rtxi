@@ -47,6 +47,7 @@ static void findDAQDevice(DAQ::Device *dev,void *arg) {
 
 static void buildDAQDeviceList(DAQ::Device *dev,void *arg) {
 	QComboBox *deviceList = static_cast<QComboBox *>(arg);
+	printf("list is %s\n", dev->getName().c_str());
 	deviceList->addItem(QString::fromStdString(dev->getName()));
 }
 
@@ -73,6 +74,8 @@ SystemControlPanel::SystemControlPanel(QWidget *parent) : QWidget(parent) {
 	subWindow = new QMdiSubWindow;
 	subWindow->setFixedSize(500,450);
 	subWindow->setAttribute(Qt::WA_DeleteOnClose);
+	subWindow->setWindowFlags(Qt::CustomizeWindowHint);
+	subWindow->setWindowFlags(Qt::WindowCloseButtonHint);
 	MainWindow::getInstance()->createMdi(subWindow);
 
 	// Create main layout
@@ -84,6 +87,7 @@ SystemControlPanel::SystemControlPanel(QWidget *parent) : QWidget(parent) {
 
 	// Create elements for device block
 	deviceLayout->addWidget(new QLabel(tr("Device:")), 0, 0);
+
 	deviceList = new QComboBox;
 	deviceLayout->addWidget(deviceList, 0, 1, 1, 5);
 	DAQ::Manager::getInstance()->foreachDevice(buildDAQDeviceList,deviceList);
@@ -173,6 +177,8 @@ SystemControlPanel::SystemControlPanel(QWidget *parent) : QWidget(parent) {
 	analogUnitPrefixList->addItem("zepto-");
 	analogUnitPrefixList->addItem("yocto-");
 	analogLayout->addWidget(analogUnitPrefixList, 3, 2);
+	int default_index = analogUnitPrefixList->findText("");
+	analogUnitPrefixList->setCurrentIndex(default_index);
 
 	analogUnitList = new QComboBox;
 	analogLayout->addWidget(new QLabel(tr(" / Volt\n")), 3, 4);
@@ -202,6 +208,8 @@ SystemControlPanel::SystemControlPanel(QWidget *parent) : QWidget(parent) {
 	analogUnitPrefixList2->addItem("zepto-");
 	analogUnitPrefixList2->addItem("yocto-");
 	analogLayout->addWidget(analogUnitPrefixList2, 4, 2);
+	default_index = analogUnitPrefixList2->findText("");
+	analogUnitPrefixList2->setCurrentIndex(default_index);
 	analogLayout->addWidget(new QLabel(tr(" Volt/Amps\n")), 4, 4);
 
 	// Assign layout to child widget
@@ -265,10 +273,9 @@ SystemControlPanel::SystemControlPanel(QWidget *parent) : QWidget(parent) {
 
 	// Set layout to Mdi
 	subWindow->setWidget(this);
-	show();
 
-	// Write to DAQ
 	updateDevice();
+	show();
 }
 
 SystemControlPanel::~SystemControlPanel(void) {
@@ -287,8 +294,7 @@ void SystemControlPanel::goodbye(void) {
 
 void SystemControlPanel::updateDevice(void) {
 	DAQ::Device *dev;
-	DAQ::type_t type;
-	{
+	DAQ::type_t type; {
 		struct find_daq_t info = { deviceList->currentIndex(), 0, };
 		DAQ::Manager::getInstance()->foreachDevice(findDAQDevice,&info);
 		dev = info.device;
@@ -380,7 +386,6 @@ void SystemControlPanel::applyChannelTab(void) {
 	double a_zerooffset = analogZeroOffsetEdit->text().toDouble()*pow(10,-3*(analogUnitPrefixList2->currentIndex()-8));
 
 	dev->setChannelActive(a_type,a_chan,analogActiveButton->isChecked());
-	printf("here1\n");
 	dev->setAnalogCalibrationActive(a_type,a_chan,analogCalibrationButton->isChecked());
 	dev->setAnalogGain(a_type,a_chan,a_gain);
 	dev->setAnalogZeroOffset(a_type,a_chan,a_zerooffset);
@@ -389,16 +394,13 @@ void SystemControlPanel::applyChannelTab(void) {
 	dev->setAnalogUnits(a_type,a_chan,analogUnitList->currentIndex());
 	dev->setAnalogCalibrationActive(a_type,a_chan,analogCalibrationButton->isChecked());
 
-	printf("here2\n");
 	DAQ::index_t d_chan = digitalChannelList->currentIndex();
 	DAQ::type_t d_type = static_cast<DAQ::type_t>(digitalSubdeviceList->currentIndex()+2);
 	DAQ::direction_t d_dir = static_cast<DAQ::direction_t>(digitalDirectionList->currentIndex());
 
-	printf("here3\n");
 	dev->setChannelActive(d_type,d_chan,digitalActiveButton->isChecked());
 	if(d_type == DAQ::DIO)
 		dev->setDigitalDirection(d_chan,d_dir);
-	printf("here4\n");
 }
 
 void SystemControlPanel::applyThreadTab(void) {
