@@ -71,7 +71,6 @@ namespace Oscilloscope {
 		QGroupBox *buttonGroup;
 		QGroupBox *channelGroup;
 		QGroupBox *displayGroup;
-		QGroupBox *graphicGroup;
 		QGroupBox *timeGroup;
 		QGroupBox *triggerGroup;
 		QGroupBox *resGroup;
