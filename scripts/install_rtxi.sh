@@ -59,7 +59,7 @@ if [ $kernel -eq "1" ]; then
 elif [ $kernel -eq "2" ]; then
 	./configure --enable-rtai --enable-comedi
 elif [ $kernel -eq "3" ]; then
-	./configure --enable-posix --disable-analogy --disable-comedi
+	./configure --enable-posix --disable-analogy --disable-comedi --enable-ni
 else
 	echo "Invalid configuration."
 	exit 1
@@ -90,11 +90,8 @@ sudo cp /usr/xenomai/sbin/analogy_config /usr/sbin/
 sudo cp ./scripts/rtxi_load_analogy /etc/init.d/
 sudo update-rc.d rtxi_load_analogy defaults
 
-echo "----->Loading device."
-./scripts/rtxi_load_analogy
-
 if [ $? -eq 0 ]; then
-	echo "----->RTXI intallation successful."
+	echo "----->RTXI intallation successful. Please reboot."
 else
 	echo "----->RTXI installation failed."
 	exit
