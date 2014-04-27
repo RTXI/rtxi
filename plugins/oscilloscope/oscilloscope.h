@@ -57,13 +57,10 @@ namespace Oscilloscope {
 		void showTab(void);
 
 		private:
-		void applyAdvancedTab(void);
 		void applyChannelTab(void);
 		void applyDisplayTab(void);
-		void createAdvancedTab(void);
 		void createChannelTab(void);
 		void createDisplayTab(void);
-		void showAdvancedTab(void);
 		void showChannelTab(void);
 		void showDisplayTab(void);
 
