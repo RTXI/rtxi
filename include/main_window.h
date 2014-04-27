@@ -199,9 +199,6 @@ class MainWindow : public QMainWindow {
 		private slots:
 			void about(void);
 			void aboutQt(void);
-			void aboutXeno(void);
-			void aboutDAQ(void);
-			void aboutComedi(void);
 
 			void loadSettings(void);
 			void saveSettings(void);
@@ -242,9 +239,6 @@ class MainWindow : public QMainWindow {
 		QAction *quit;
 		QAction *artxi;
 		QAction *aqt;
-		QAction *axeno;
-		QAction *adaq;
-		QAction *acomedi;
 
 		void updateUtilModules();
 		

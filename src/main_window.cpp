@@ -166,9 +166,6 @@ void MainWindow::createHelpMenu() {
 	helpMenu = menuBar()->addMenu(tr("&Help"));
 	helpMenu->addAction(artxi);
 	helpMenu->addAction(aqt);
-	helpMenu->addAction(axeno);
-	helpMenu->addAction(adaq);
-	helpMenu->addAction(acomedi);
 }
 
 void MainWindow::createFileActions() {
@@ -199,15 +196,6 @@ void MainWindow::createHelpActions() {
 
 	aqt = new QAction(tr("About &Qt"),this);
 	connect(aqt, SIGNAL(triggered()), this, SLOT(aboutQt()));
-
-	axeno = new QAction(tr("About &Xenomai"),this);
-	connect(axeno, SIGNAL(triggered()), this, SLOT(aboutXeno()));
-
-	adaq = new QAction(tr("About &DAQ"),this);
-	connect(adaq, SIGNAL(triggered()), this, SLOT(aboutDAQ()));
-
-	acomedi = new QAction(tr("About &COMEDI"),this);
-	connect(acomedi, SIGNAL(triggered()), this, SLOT(aboutComedi()));
 }
 
 void MainWindow::updateUtilModules(){
@@ -274,92 +262,6 @@ void MainWindow::about(void) {
 
 void MainWindow::aboutQt (void) {
 	QMessageBox::aboutQt(this);
-}
-
-void MainWindow::aboutXeno(void) {
-	QMessageBox::about (this, "About Xenomai", "Version " + QString(system("xeno-config --version"))
-			+	"\n\nReleased under the GPLv3.\nSee www.rtxi.org for details.");
-}
-
-void MainWindow::aboutDAQ(void) {
-	QMessageBox::about (this, "About RTXI", "Version " + QString(system("lspci | awk '{print $7}'"))
-			+	"\n\nReleased under the GPLv3.\nSee www.rtxi.org for details.");
-}
-
-void MainWindow::aboutComedi(void) {
-	QString text;
-	QStringList lines;
-	QFile file ("/proc/comedi");
-	bool DAQdetected = false;
-	/*if (file.open (IO_ReadOnly)) {
-		text = "COMEDI is an open source library that provides access to DAQ"
-		" cards from\na variety of manufacturers. You are currently using ";
-		QTextStream stream (&file);
-		QString line;
-		QString comediversion = stream.readLine ();
-		comediversion.replace ("comedi", "COMEDI");
-		line = stream.readLine ();
-		line = stream.readLine ();
-		if (line == "no devices") {
-		line = "No DAQ cards were detected.";
-		text = text + comediversion + ".";
-		} else {
-		line = "/dev/comedi" + line.trimmed();//stripWhiteSpace ();
-		DAQdetected = true;
-		text = text + comediversion
-		+ ".\n\nThe following DAQ cards were detected on your system:"
-		"\n\nDevice name   Driver name      Board name   # Subdevices";
-		}
-		lines += line;
-		} else {
-		text = "COMEDI does not seem to be installed correctly on your system.";
-		}
-		QString cmd;
-		int status;
-		QMessageBox notice ("RTXI COMEDI Calibration",
-		"RTXI will attempt to calibrate your DAQ device on /dev/comedi0. Please wait for the results.\n",
-		QMessageBox::Information,
-		QMessageBox::Ok | QMessageBox::Default,
-		QMessageBox::NoButton, QMessageBox::NoButton, this);
-	//notice.setModal(false);
-	if (DAQdetected) {
-	switch (QMessageBox::information (this, "About COMEDI", QString (text)
-	+ "\n\n" + lines.join ("\n")
-	+
-	"\n\nDo you want to calibrate your DAQ card?",
-	QMessageBox::Yes, QMessageBox::No,
-	QMessageBox::NoButton)) {
-	case QMessageBox::Yes:
-	cmd
-	=
-	QString
-	("sudo comedi_calibrate --reset --dump --calibrate --results --verbose /dev/comedi0");
-	DEBUG_MSG
-	("RTXI is about to calibrate DAQ card for COMEDI driver%s\n",
-	cmd.toAscii ());
-	rt_printf ("calibrating DAQ card...\n");
-	notice.exec ();
-
-	status = CmdLine::getInstance ()->execute (cmd.toAscii ());
-
-	if (status != 0) {
-	ERROR_MSG ("RTXI COMEDI calibration error\n");
-	notice.close ();
-	QMessageBox::information (this, "RTXI COMEDI Calibration",
-	"RTXI failed to calibrate your DAQ device on /dev/comedi0.\n");
-	} else {
-	notice.close ();
-	QMessageBox::information (this, "RTXI COMEDI Calibration",
-	"RTXI successfully calibrated your DAQ device on /dev/comedi0.\n");
-	}
-	case QMessageBox::No:
-	default:		// just for sanity
-	break;
-	}
-	} else {
-	QMessageBox::information (this, "About COMEDI", QString (text) + "\n\n"
-	+ lines.join ("\n"), QMessageBox::Ok);
-	}*/
 }
 
 void MainWindow::loadSettings (void) {
@@ -499,8 +401,9 @@ void MainWindow::windowsMenuAboutToShow (void) {
 		return;
 	}
 
-	// Create windows list based off of what's open
 	// VISIT TWO
+	// NEED TO LINK WINDOWS TO SOME TRIGGER TO SWITCH TO ACTIVE
+	// Create windows list based off of what's open
 	for(int i = 0; i < subWindows.size(); i++){
 		QMdiSubWindow *child = subWindows.at(i);
 		windowsMenu->addAction(child->widget()->windowTitle(),this,SLOT(windowsMenuActivated(int)));
