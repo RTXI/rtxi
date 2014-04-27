@@ -698,7 +698,7 @@ void Oscilloscope::Properties::createDisplayTab(void) {
 
 	// Parent widget and layout
 	QWidget *displayTab = new QWidget;
-	QBoxLayout *layout = new QVBoxLayout(displayTab);
+	QVBoxLayout *layout = new QVBoxLayout(displayTab);
 
 	// Create child elements
 	timeGroup = new QGroupBox(tr("Time Properties"));
