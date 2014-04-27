@@ -59,7 +59,7 @@ if [ $kernel -eq "1" ]; then
 elif [ $kernel -eq "2" ]; then
 	./configure --enable-rtai --enable-comedi
 elif [ $kernel -eq "3" ]; then
-	./configure --enable-posix --disable-analogy --disable-comedi --enable-ni
+	./configure --enable-posix --disable-analogy --disable-comedi
 else
 	echo "Invalid configuration."
 	exit 1
@@ -91,7 +91,7 @@ sudo cp ./scripts/rtxi_load_analogy /etc/init.d/
 sudo update-rc.d rtxi_load_analogy defaults
 
 if [ $? -eq 0 ]; then
-	echo "----->RTXI intallation successful. Please reboot."
+	echo "----->RTXI intallation successful. Reboot may be required."
 else
 	echo "----->RTXI installation failed."
 	exit
@@ -99,3 +99,5 @@ fi
 
 echo "----->type '"sudo rtxi"' to begin"
 echo "----->Happy Sciencing!"
+echo "----->Please email help@rtxi.org with any questions/help requests."
+echo "----->Script developed/last modified by Yogi Patel <yapatel@gatech.edu> on May 2014."
