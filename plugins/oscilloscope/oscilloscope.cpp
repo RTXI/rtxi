@@ -455,7 +455,7 @@ void Oscilloscope::Properties::createChannelTab(void) {
 
 	// Make parent widget and layout
 	QWidget *channelTab = new QWidget;
-	QBoxLayout *layout = new QVBoxLayout;
+	QVBoxLayout *layout = new QVBoxLayout;
 
 	// Create child widgets and layouts
 	channelGroup = new QGroupBox(tr("Channel Selection"));
@@ -472,6 +472,7 @@ void Oscilloscope::Properties::createChannelTab(void) {
 
 	typeList = new QComboBox;
 	channelLayout->addWidget(typeList);
+	typeList->setFixedWidth(150);
 	typeList->addItem("Input");
 	typeList->addItem("Output");
 	typeList->addItem("Parameter");
@@ -497,7 +498,7 @@ void Oscilloscope::Properties::createChannelTab(void) {
 	QGridLayout *displayLayout = new QGridLayout;
 
 	// Create elements for display box
-	displayLayout->addWidget(new QLabel(tr("   Scale: ")), 0, 0, 1, 1);
+	displayLayout->addWidget(new QLabel(tr("   Scale: ")), 0, 0);
 	scaleList = new QComboBox;
 	displayLayout->addWidget(scaleList, 0, 1, 1, 1);
 	QFont scaleListFont("DejaVu Sans Mono");
@@ -608,18 +609,17 @@ void Oscilloscope::Properties::createChannelTab(void) {
 	scaleList->addItem("  1   fV/div");
 
 	// Offset items
-	displayLayout->addWidget(new QLabel(tr("   Offset: ")), 0, 2);
+	displayLayout->addWidget(new QLabel(tr("   Offset: ")), 0, 2, 1, 1);
 	offsetEdit = new QLineEdit;
 	offsetEdit->setValidator(new QDoubleValidator(offsetEdit));
-	displayLayout->addWidget(offsetEdit, 0, 3);
+	displayLayout->addWidget(offsetEdit, 0, 3, 1, 1);
 	offsetList = new QComboBox;
-	displayLayout->addWidget(offsetList, 0, 4);
+	displayLayout->addWidget(offsetList, 0, 4, 1, 1);
 	offsetList->addItem("V");
 	offsetList->addItem("mV");
 	offsetList->addItem("uV");
 	offsetList->addItem("nV");
 	offsetList->addItem("pV");
-
 
 	// Create elements for graphic
 	displayLayout->addWidget(new QLabel(tr("   Color: ")), 1, 0, 1, 1);
