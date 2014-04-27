@@ -36,6 +36,6 @@ protected:
 
 private:
 
-    std::list<AnalogyDevice *> deviceList;
+    std::list<AnalogyDevice *> devices;
 
 };

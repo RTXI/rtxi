@@ -178,7 +178,7 @@ int RT::System::setPeriod(long long period) {
 
 void RT::System::foreachDevice(void (*callback)(RT::Device *,void *),void *param) {
 	Mutex::Locker lock(&deviceMutex);
-	for (List<Device>::iterator i = deviceList.begin(); i != deviceList.end(); ++i)
+	for (List<Device>::iterator i = devices.begin(); i != devices.end(); ++i)
 		callback(&*i,param);
 }
 
@@ -210,7 +210,7 @@ void RT::System::insertDevice(RT::Device *device) {
 	event.setParam("device",device);
 	::Event::Manager::getInstance()->postEvent(&event);
 
-	deviceList.insert(deviceList.end(),*device);
+	devices.insert(devices.end(),*device);
 }
 
 void RT::System::removeDevice(RT::Device *device) {
@@ -225,7 +225,7 @@ void RT::System::removeDevice(RT::Device *device) {
 	event.setParam("device",device);
 	::Event::Manager::getInstance()->postEvent(&event);
 
-	deviceList.remove(*device);
+	devices.remove(*device);
 }
 
 void RT::System::insertThread(RT::Thread *thread) {
@@ -276,8 +276,8 @@ void RT::System::execute(void) {
 	Event *event = 0;
 	List<Device>::iterator iDevice;
 	List<Thread>::iterator iThread;
-	List<Device>::iterator deviceListBegin = deviceList.begin();
-	List<Device>::iterator deviceListEnd   = deviceList.end();
+	List<Device>::iterator devicesBegin = devices.begin();
+	List<Device>::iterator devicesEnd   = devices.end();
 	List<Thread>::iterator threadListBegin = threadList.begin();
 	List<Thread>::iterator threadListEnd   = threadList.end();
 
@@ -289,13 +289,13 @@ void RT::System::execute(void) {
 	while (!finished) {
 		RT::OS::sleepTimestep(task);
 
-		for (iDevice = deviceListBegin; iDevice != deviceListEnd; ++iDevice)
+		for (iDevice = devicesBegin; iDevice != devicesEnd; ++iDevice)
 			if (iDevice->getActive()) iDevice->read();
 
 		for (iThread = threadListBegin; iThread != threadListEnd; ++iThread)
 			if (iThread->getActive()) iThread->execute();
 
-		for (iDevice = deviceListBegin; iDevice != deviceListEnd; ++iDevice)
+		for (iDevice = devicesBegin; iDevice != devicesEnd; ++iDevice)
 			if (iDevice->getActive()) iDevice->write();
 
 		if (eventFifo.read(&event,sizeof(RT::Event *),false)) {
@@ -304,7 +304,7 @@ void RT::System::execute(void) {
 			} while (eventFifo.read(&event,sizeof(RT::Event *),false));
 
 			event = 0;
-			deviceListBegin = deviceList.begin();
+			devicesBegin = devices.begin();
 			threadListBegin = threadList.begin();
 		}
 	}

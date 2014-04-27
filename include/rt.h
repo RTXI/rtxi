@@ -437,7 +437,7 @@ namespace RT {
 		RT::OS::Task task;
 		long long period;
 
-		List<RT::Device> deviceList;
+		List<RT::Device> devices;
 		List<RT::Thread> threadList;
 
 		Fifo eventFifo;

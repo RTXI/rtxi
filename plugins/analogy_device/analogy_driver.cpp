@@ -26,7 +26,7 @@ extern "C" Plugin::Object *createRTXIPlugin(void)
 }
 
 AnalogyDriver::~AnalogyDriver(void) {
-    for(std::list<AnalogyDevice *>::iterator i = deviceList.begin();i != deviceList.end();++i)
+    for(std::list<AnalogyDevice *>::iterator i = devices.begin();i != devices.end();++i)
         delete *i;
 }
 
@@ -143,7 +143,7 @@ DAQ::Device *AnalogyDriver::createDevice(const std::list<std::string> &args) {
     }
 
     AnalogyDevice *dev = new AnalogyDevice(&dsc,name,channel,count[0]+count[1]+2*count[2]);
-    deviceList.push_back(dev);
+    devices.push_back(dev);
     return dev;
  
     return 0;
@@ -160,9 +160,9 @@ void AnalogyDriver::doLoad(const Settings::Object::State &s) {
 }
 
 void AnalogyDriver::doSave(Settings::Object::State &s) const {
-    s.saveInteger("Num Devices",deviceList.size());
+    s.saveInteger("Num Devices",devices.size());
     size_t n = 0;
-    for(std::list<AnalogyDevice *>::const_iterator i = deviceList.begin(),end = deviceList.end();i != end; ++i) {
+    for(std::list<AnalogyDevice *>::const_iterator i = devices.begin(),end = devices.end();i != end; ++i) {
         std::ostringstream str;
         str << n++;
         s.saveString(str.str(),(*i)->getName());

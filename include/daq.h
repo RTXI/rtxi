@@ -120,7 +120,7 @@ namespace DAQ {
 		void unregisterDriver(const std::string &);
 
 		Mutex mutex;
-		std::list<Device *> deviceList;
+		std::list<Device *> devices;
 		std::map<std::string,Driver *> driverMap;
 
 	}; // class Manager

@@ -21,7 +21,9 @@
 
 DAQ::Device::Device(std::string name,IO::channel_t *chan,size_t size)
 	: IO::Block(name,chan,size) {
+		printf("\nin construcotr of device..\n");
 		DAQ::Manager::getInstance()->insertDevice(this);
+		printf("device constructed...\n");
 }
 
 DAQ::Device::~Device(void) {
@@ -37,12 +39,14 @@ DAQ::Driver::~Driver(void) {
 }
 
 void DAQ::Manager::foreachDevice(void (*callback)(DAQ::Device *,void *),void *param) {
+	printf("\ncalling you from foreachDevice...\n");
 	Mutex::Locker lock(&mutex);
-	for (std::list<Device *>::iterator i = deviceList.begin(); i != deviceList.end(); ++i)
+	for (std::list<Device *>::iterator i = devices.begin(); i != devices.end(); ++i)
 		callback(*i,param);
 }
 
 DAQ::Device *DAQ::Manager::loadDevice(const std::string &name,const std::list<std::string> &args) {
+	printf("\nin loadDevice...\n");
 	Mutex::Locker lock(&mutex);
 
 	if (driverMap.find(name) == driverMap.end()) {
@@ -55,6 +59,7 @@ DAQ::Device *DAQ::Manager::loadDevice(const std::string &name,const std::list<st
 }
 
 void DAQ::Manager::insertDevice(DAQ::Device *device) {
+	printf("\nin insertDevice...\n");
 	if (!device) {
 		ERROR_MSG("DAQ::Manager::insertDevice : invalid device\n");
 		return;
@@ -62,25 +67,29 @@ void DAQ::Manager::insertDevice(DAQ::Device *device) {
 
 	Mutex::Locker lock(&mutex);
 
-	if (std::find(deviceList.begin(),deviceList.end(),device) != deviceList.end()) {
+	if (std::find(devices.begin(),devices.end(),device) != devices.end()) {
 		ERROR_MSG("DAQ::Device::insertDevice : device already present\n");
 		return;
 	}
 
-	deviceList.push_back(device);
+	printf("adding device to devliceList in daq.cpp\n");
+	devices.push_back(device);
 }
 
 void DAQ::Manager::removeDevice(DAQ::Device *device) {
+	printf("\nin removeDevice...\n");
 	if (!device) {
 		ERROR_MSG("DAQ::Manager::removeDevice : invalid device\n");
 		return;
 	}
 
 	Mutex::Locker lock(&mutex);
-	deviceList.remove(device);
+	printf("removing device from devices in daq.cpp\n");
+	devices.remove(device);
 }
 
 void DAQ::Manager::registerDriver(Driver *driver,const std::string &name) {
+	printf("\nin registerDriver...\n");
 	if (!driver) {
 		ERROR_MSG("DAQ::Manager::registerDriver : invalid driver\n");
 		return;
@@ -92,6 +101,7 @@ void DAQ::Manager::registerDriver(Driver *driver,const std::string &name) {
 		return;
 	}
 	driverMap[name] = driver;
+	printf("registering driver name %s\n", name.c_str());
 }
 
 void DAQ::Manager::unregisterDriver(const std::string &name) {
