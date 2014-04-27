@@ -21,7 +21,7 @@
 
 DAQ::Device::Device(std::string name,IO::channel_t *chan,size_t size)
 	: IO::Block(name,chan,size) {
-		printf("\nin construcotr of device..\n");
+		printf("\nin construcotr of device with name %s\n", name.c_str());
 		DAQ::Manager::getInstance()->insertDevice(this);
 		printf("device constructed...\n");
 }
@@ -41,8 +41,10 @@ DAQ::Driver::~Driver(void) {
 void DAQ::Manager::foreachDevice(void (*callback)(DAQ::Device *,void *),void *param) {
 	printf("\ncalling you from foreachDevice...\n");
 	Mutex::Locker lock(&mutex);
-	for (std::list<Device *>::iterator i = devices.begin(); i != devices.end(); ++i)
+	printf("\ncalling you again from foreachDevice...\n");
+	for (std::list<Device *>::iterator i = devices.begin(); i != devices.end(); ++i) {
 		callback(*i,param);
+	}
 }
 
 DAQ::Device *DAQ::Manager::loadDevice(const std::string &name,const std::list<std::string> &args) {

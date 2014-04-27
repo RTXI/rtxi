@@ -31,7 +31,7 @@ SystemControl::SystemControl(void) {
 }
 
 SystemControl::~SystemControl(void) {
-    //MainWindow::getInstance()->removeSystemMenuItem(QString("Control Panel"));
+    //MainWindow::getInstance()->removeSystemMenuItem(menuID);
     while(panelList.size())
         delete panelList.front();
     instance = 0;
