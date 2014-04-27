@@ -19,11 +19,9 @@
 #include <daq.h>
 #include <algorithm>
 
-DAQ::Device::Device(std::string name,IO::channel_t *chan,size_t size)
-	: IO::Block(name,chan,size) {
+DAQ::Device::Device(std::string name,IO::channel_t *chan,size_t size)	: IO::Block(name,chan,size) {
 		printf("\nIn construcotr of device with name %s\n", name.c_str());
 		DAQ::Manager::getInstance()->insertDevice(this);
-		printf("Device constructed...\n");
 }
 
 DAQ::Device::~Device(void) {
@@ -97,7 +95,6 @@ void DAQ::Manager::registerDriver(Driver *driver,const std::string &name) {
 		return;
 	}
 	driverMap[name] = driver;
-	printf("Driver registered: %s\n", name.c_str());
 }
 
 void DAQ::Manager::unregisterDriver(const std::string &name) {
