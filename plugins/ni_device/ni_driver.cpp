@@ -31,7 +31,7 @@ extern "C" Plugin::Object *createRTXIPlugin(void)
 }
 
 NIDriver::~NIDriver(void) {
-    for(std::list<NIDevice *>::iterator i = deviceList.begin();i != deviceList.end();++i)
+    for(std::list<NIDevice *>::iterator i = devices.begin();i != devices.end();++i)
         delete *i;
 }
 
@@ -135,7 +135,7 @@ DAQ::Device *NIDriver::createDevice(const std::list<std::string> &args) {
     }
 
     NIDevice *device = new NIDevice(channels,num_channels,args.front().c_str(),device_info,pci_info.bar,sizeof(pci_info.bar)/sizeof(pci_info.bar[0]));
-    deviceList.push_back(device);
+    devices.push_back(device);
     return device;
 }
 
@@ -150,9 +150,9 @@ void NIDriver::doLoad(const Settings::Object::State &s) {
 }
 
 void NIDriver::doSave(Settings::Object::State &s) const {
-    s.saveInteger("Num Devices",deviceList.size());
+    s.saveInteger("Num Devices",devices.size());
     size_t n = 0;
-    for(std::list<NIDevice *>::const_iterator i = deviceList.begin(),end = deviceList.end();i != end; ++i) {
+    for(std::list<NIDevice *>::const_iterator i = devices.begin(),end = devices.end();i != end; ++i) {
         std::ostringstream str;
         str << n++;
         s.saveString(str.str(),(*i)->getDeviceName());

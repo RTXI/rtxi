@@ -36,6 +36,6 @@ protected:
 
 private:
 
-    std::list<ComediDevice *> deviceList;
+    std::list<ComediDevice *> devices;
 
 };

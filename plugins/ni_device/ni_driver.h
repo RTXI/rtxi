@@ -39,7 +39,7 @@ protected:
 
 private:
 
-    std::list<NIDevice *> deviceList;
+    std::list<NIDevice *> devices;
 
 };
 
