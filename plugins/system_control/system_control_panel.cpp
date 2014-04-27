@@ -49,10 +49,7 @@ static void findDAQDevice(DAQ::Device *dev,void *arg) {
 static void buildDAQDeviceList(DAQ::Device *dev,void *arg) {
 	printf("\nBuilding list...\n");
 	QComboBox *deviceList = static_cast<QComboBox *>(arg);
-	printf("Device list size: %d\n", deviceList->count());
-	printf("Device name:  %s\n", dev->getName().c_str());
 	deviceList->addItem(QString::fromStdString(dev->getName()));
-	printf("Device list size: %d\n", deviceList->count());
 }
 
 SystemControlPanel::SystemControlPanel(QWidget *parent) : QWidget(parent) {
@@ -306,22 +303,24 @@ void SystemControlPanel::apply(void) {
 	double a_gain = analogGainEdit->text().toDouble()*pow(10,-3*(analogUnitPrefixList->currentIndex()-8));
 	double a_zerooffset = analogZeroOffsetEdit->text().toDouble()*pow(10,-3*(analogUnitPrefixList2->currentIndex()-8));
 
-	dev->setChannelActive(a_type,a_chan,analogActiveButton->isChecked());
-	dev->setAnalogCalibrationActive(a_type,a_chan,analogCalibrationButton->isChecked());
-	dev->setAnalogGain(a_type,a_chan,a_gain);
-	dev->setAnalogZeroOffset(a_type,a_chan,a_zerooffset);
-	dev->setAnalogRange(a_type,a_chan,analogRangeList->currentIndex());
-	dev->setAnalogReference(a_type,a_chan,analogReferenceList->currentIndex());
-	dev->setAnalogUnits(a_type,a_chan,analogUnitList->currentIndex());
-	dev->setAnalogCalibrationActive(a_type,a_chan,analogCalibrationButton->isChecked());
+	if(dev){
+		dev->setChannelActive(a_type,a_chan,analogActiveButton->isChecked());
+		dev->setAnalogCalibrationActive(a_type,a_chan,analogCalibrationButton->isChecked());
+		dev->setAnalogGain(a_type,a_chan,a_gain);
+		dev->setAnalogZeroOffset(a_type,a_chan,a_zerooffset);
+		dev->setAnalogRange(a_type,a_chan,analogRangeList->currentIndex());
+		dev->setAnalogReference(a_type,a_chan,analogReferenceList->currentIndex());
+		dev->setAnalogUnits(a_type,a_chan,analogUnitList->currentIndex());
+		dev->setAnalogCalibrationActive(a_type,a_chan,analogCalibrationButton->isChecked());
 
-	DAQ::index_t d_chan = digitalChannelList->currentIndex();
-	DAQ::type_t d_type = static_cast<DAQ::type_t>(digitalSubdeviceList->currentIndex()+2);
-	DAQ::direction_t d_dir = static_cast<DAQ::direction_t>(digitalDirectionList->currentIndex());
+		DAQ::index_t d_chan = digitalChannelList->currentIndex();
+		DAQ::type_t d_type = static_cast<DAQ::type_t>(digitalSubdeviceList->currentIndex()+2);
+		DAQ::direction_t d_dir = static_cast<DAQ::direction_t>(digitalDirectionList->currentIndex());
 
-	dev->setChannelActive(d_type,d_chan,digitalActiveButton->isChecked());
-	if(d_type == DAQ::DIO)
-		dev->setDigitalDirection(d_chan,d_dir);
+		dev->setChannelActive(d_type,d_chan,digitalActiveButton->isChecked());
+		if(d_type == DAQ::DIO)
+			dev->setDigitalDirection(d_chan,d_dir);
+		}
 
 	// Apply thread settings
 	double period = periodEdit->text().toDouble();

@@ -75,4 +75,5 @@ class SystemControlPanel : public QWidget, public Event::Handler {
 		QLineEdit *freqEdit;
 		QLineEdit *periodEdit;
 };
+
 #endif /* SYSTEM_CONTROL_PANEL_H */
