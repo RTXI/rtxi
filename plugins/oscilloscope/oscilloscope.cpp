@@ -681,7 +681,6 @@ void Oscilloscope::Properties::createChannelTab(void) {
 
 	layout->addWidget(channelGroup);
 	layout->addWidget(displayGroup);
-	layout->addWidget(graphicGroup);
 	channelTab->setLayout(layout);
 
 	tabWidget->addTab(channelTab, tr("Channel"));
