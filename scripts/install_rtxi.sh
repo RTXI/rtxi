@@ -90,6 +90,7 @@ sudo cp /usr/xenomai/sbin/analogy_config /usr/sbin/
 sudo cp ./scripts/rtxi_load_analogy /etc/init.d/
 sudo update-rc.d rtxi_load_analogy defaults
 
+echo ""
 if [ $? -eq 0 ]; then
 	echo "----->RTXI intallation successful. Reboot may be required."
 else
@@ -97,7 +98,6 @@ else
 	exit
 fi
 
-echo "----->type '"sudo rtxi"' to begin"
-echo "----->Happy Sciencing!"
+echo "----->Type '"sudo rtxi"' to start RTXI. Happy Sciencing!"
 echo "----->Please email help@rtxi.org with any questions/help requests."
 echo "----->Script developed/last modified by Yogi Patel <yapatel@gatech.edu> on May 2014."
