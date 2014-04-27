@@ -39,7 +39,7 @@ struct find_daq_t {
 };
 
 static void findDAQDevice(DAQ::Device *dev,void *arg) {
-	printf("Finding DAQs...\n");
+	printf("\nFinding DAQs...\n");
 	struct find_daq_t *info = static_cast<struct find_daq_t *>(arg);
 	if(!info->index)
 		info->device = dev;
@@ -47,7 +47,7 @@ static void findDAQDevice(DAQ::Device *dev,void *arg) {
 }
 
 static void buildDAQDeviceList(DAQ::Device *dev,void *arg) {
-	printf("Building list...\n");
+	printf("\nBuilding list...\n");
 	QComboBox *deviceList = static_cast<QComboBox *>(arg);
 	printf("Device list size: %d\n", deviceList->count());
 	printf("Device name:  %s\n", dev->getName().c_str());
@@ -294,12 +294,17 @@ SystemControlPanel::~SystemControlPanel(void) {
 void SystemControlPanel::apply(void) {
 
 	// Apply channel settings
-	printf("Applying channel settings...\n");
+	printf("\nApplying channel settings...\n");
 	DAQ::Device *dev;
 	{
+		printf("in device structure of apply...\n");
+		printf("value is %d\n", deviceList->currentIndex());
 		struct find_daq_t info = { deviceList->currentIndex(), 0, };
+		printf("checking after struct \n");
 		DAQ::Manager::getInstance()->foreachDevice(findDAQDevice, &info);
+		printf("checking after daq manager call foreach\n");
 		dev = info.device;
+		printf("checking after device info\n");
 	}
 
 	DAQ::index_t a_chan = analogChannelList->currentIndex();
@@ -325,7 +330,7 @@ void SystemControlPanel::apply(void) {
 		dev->setDigitalDirection(d_chan,d_dir);
 
 	// Apply thread settings
-	printf("Applying thread settings...\n");
+	printf("\nApplying thread settings...\n");
 	double period = periodEdit->text().toDouble();
 	period *= pow(10,3*(3-periodUnitList->currentIndex()));
 	RT::System::getInstance()->setPeriod(static_cast<long long>(period));
@@ -337,9 +342,12 @@ void SystemControlPanel::goodbye(void) {
 }
 
 void SystemControlPanel::updateDevice(void) {
+	printf("\nUpdating device...\n");
 	DAQ::Device *dev;
 	DAQ::type_t type;
 	{
+		printf("in device structure of updateDevice...\n");
+		printf("value is %d\n", deviceList->currentIndex());
 		struct find_daq_t info = { deviceList->currentIndex(), 0, };
 		DAQ::Manager::getInstance()->foreachDevice(findDAQDevice,&info);
 		dev = info.device;
@@ -415,9 +423,11 @@ void SystemControlPanel::updatePeriod(void) {
 void SystemControlPanel::display(void) {
 
 	// Display channel info
-	printf("Displaying channel info...\n");
+	printf("\nDisplaying channel info...\n");
 	DAQ::Device *dev;
 	{
+		printf("in device structure of display...\n");
+		printf("value is %d\n", deviceList->currentIndex());
 		struct find_daq_t info = {deviceList->currentIndex(), 0, };
 		DAQ::Manager::getInstance()->foreachDevice(findDAQDevice,&info);
 		dev = info.device;
@@ -549,7 +559,7 @@ void SystemControlPanel::display(void) {
 	}
 
 	// Display thread info
-	printf("Displaying thread info...\n");
+	printf("\nDisplaying thread info...\n");
 	int i = 3;
 	long long tmp = RT::System::getInstance()->getPeriod();
 	while((tmp >= 1000)&&(i)) {
