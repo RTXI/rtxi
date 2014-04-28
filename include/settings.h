@@ -186,11 +186,11 @@ namespace Settings {
         /*!
          *
          */
-        int load(const QString &);
+        int load(const std::string &);
         /*!
          *
          */
-        int save(const QString &filename);
+        int save(const std::string &);
 
     private:
 

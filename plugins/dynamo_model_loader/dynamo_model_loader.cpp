@@ -159,8 +159,7 @@ void DynamoModelLoader::load_setting(int i) {
 	QSettings userprefs;
 	userprefs.setPath(QSettings::NativeFormat, QSettings::UserScope, "RTXI");
 	QString filename = userprefs.value("/recentSettingsList/"+QString::number(i)).toString();
-	printf("Loading settings file: %s\n",filename.toStdString().c_str());
-	Settings::Manager::getInstance()->load(filename.toLatin1());
+	Settings::Manager::getInstance()->load(filename.toStdString());
 }
 
 static Mutex mutex;

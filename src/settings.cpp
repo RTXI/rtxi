@@ -198,10 +198,10 @@ void Settings::Manager::foreachObject(void (*callback)(Object *,void *),void *pa
 		callback(*i,param);
 }
 
-int Settings::Manager::load(const QString &filename) {
-	QFile file(filename);
+int Settings::Manager::load(const std::string &filename) {
+	QFile file(QString::fromStdString(filename));
 	if (!file.open(QIODevice::ReadOnly)) {
-		ERROR_MSG("Settings::Manager::load : failed to open %s for reading\n",filename.toStdString().c_str());
+		ERROR_MSG("Settings::Manager::load : failed to open %s for reading\n", filename.c_str());
 		return -EPERM;
 	}
 
@@ -210,7 +210,7 @@ int Settings::Manager::load(const QString &filename) {
 	int errorLine, errorColumn;
 
 	if (!doc.setContent(&file,false,&errorMsg,&errorLine,&errorColumn)) {
-		ERROR_MSG("Settings::Manager::load : %s:%d:%d: %s\n", filename.toStdString().c_str(), errorLine, errorColumn, errorMsg.toStdString().c_str());
+		ERROR_MSG("Settings::Manager::load : %s:%d:%d: %s\n", filename.c_str(), errorLine, errorColumn, errorMsg.toStdString().c_str());
 		return -EINVAL;
 	}
 
@@ -263,7 +263,7 @@ int Settings::Manager::load(const QString &filename) {
 
 	// create QSettings
 	QSettings userprefs;
-	userprefs.setPath (QSettings::NativeFormat, QSettings::UserScope, "RTXI");
+	userprefs.setPath(QSettings::NativeFormat, QSettings::UserScope, "RTXI");
 
 	int oldestsetting = userprefs.value("/recentSettingsList/start").toInt();
 	int num_settings = userprefs.value("/recentSettingsList/num").toInt();
@@ -277,7 +277,7 @@ int Settings::Manager::load(const QString &filename) {
 
 	for (int i = 0; i < numRecentFiles; ++i) {
 		listsetting = userprefs.value("/recentSettingsList/" + entries[i]).toString();
-		if (filename == listsetting)
+		if (QString::fromStdString(filename) == listsetting)
 			doesnotexist = false;
 	}
 
@@ -286,14 +286,14 @@ int Settings::Manager::load(const QString &filename) {
 
 	if (doesnotexist) {
 		if (num_settings == 10) {
-			userprefs.setValue("/recentSettingsList/" + QString::number(oldestsetting), filename);
+			userprefs.setValue("/recentSettingsList/" + QString::number(oldestsetting), QVariant(QString::fromStdString(filename)));
 			oldestsetting++;
 			if (oldestsetting == 10)
 				oldestsetting = 0;
 			userprefs.setValue("/recentSettingsList/start", oldestsetting);
 		}
 		else {
-			userprefs.setValue("/recentSettingsList/" + QString::number(num_settings++), filename);
+			userprefs.setValue("/recentSettingsList/" + QString::number(num_settings++), QVariant(QString::fromStdString(filename)));
 			userprefs.setValue("/recentSettingsList/num", num_settings);
 		}
 	}
@@ -310,7 +310,7 @@ static void saveState(Plugin::Object *plugin,void *param) {
 	doc->documentElement().appendChild(e);
 }
 
-int Settings::Manager::save(const QString &filename) {
+int Settings::Manager::save(const std::string &filename) {
 	QDomDocument doc;
 	QDomElement e;
 
@@ -341,9 +341,9 @@ int Settings::Manager::save(const QString &filename) {
 	 */
 	Plugin::Manager::getInstance()->foreachPlugin(saveState,&doc);
 
-	QFile file(filename);
+	QFile file(QString::fromStdString(filename));
 	if (!file.open(QIODevice::WriteOnly)) {
-		ERROR_MSG("Settings::Manager::save : failed to open %s for writing\n",filename.toStdString().c_str());
+		ERROR_MSG("Settings::Manager::save : failed to open %s for writing\n",filename.c_str());
 		return -EPERM;
 	}
 
@@ -366,7 +366,7 @@ int Settings::Manager::save(const QString &filename) {
 
 	for (int i = 0; i < numRecentFiles; ++i) {
 		listsetting = userprefs.value("/recentSettingsList/" + entries[i]).toString();
-		if (filename == listsetting)
+		if (QString::fromStdString(filename) == listsetting)
 			doesnotexist = false;
 	}
 
@@ -375,14 +375,14 @@ int Settings::Manager::save(const QString &filename) {
 
 	if (doesnotexist) {
 		if (num_settings == 10) {
-			userprefs.setValue("/recentSettingsList/" + QString::number(oldestsetting), filename);
+			userprefs.setValue("/recentSettingsList/" + QString::number(oldestsetting), QVariant(QString::fromStdString(filename)));
 			oldestsetting++;
 			if (oldestsetting == 11)
 				oldestsetting = 1;
 			userprefs.setValue("/recentSettingsList/start", oldestsetting);
 		}
 		else {
-			userprefs.setValue("/recentSettingsList/" + QString::number(num_settings++), filename);
+			userprefs.setValue("/recentSettingsList/" + QString::number(num_settings++), QVariant(QString::fromStdString(filename)));
 			userprefs.setValue("/recentSettingsList/num", num_settings);
 		}
 	}

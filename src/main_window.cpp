@@ -273,7 +273,7 @@ void MainWindow::loadSettings (void) {
 			tr("Load saved workspace"), "/home/", tr("Settings (*.set)"));
 
 	if (filename != "/")
-		Settings::Manager::getInstance()->load(filename);
+		Settings::Manager::getInstance()->load(filename.toStdString());
 }
 
 void MainWindow::saveSettings(void) {
@@ -294,7 +294,7 @@ void MainWindow::saveSettings(void) {
 			DEBUG_MSG ("MainWindow::saveSettings : canceled overwrite\n");
 			return;
 		}
-		Settings::Manager::getInstance()->save(filename);
+		Settings::Manager::getInstance()->save(filename.toStdString());
 	}
 }
 

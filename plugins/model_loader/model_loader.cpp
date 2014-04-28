@@ -73,8 +73,7 @@ void ModelLoader::load(void) {
 	int index;
 	if (doesnotexist) {
 		if (num_module == 10)	{
-			userprefs.setValue("/recentFileList/" + QString::number(
-						oldestmodule), filename);
+			userprefs.setValue("/recentFileList/" + QString::number(oldestmodule), filename);
 			index = oldestmodule;
 			oldestmodule++;
 			if (oldestmodule == 10)
@@ -82,8 +81,7 @@ void ModelLoader::load(void) {
 			userprefs.setValue("/recentFileList/start", oldestmodule);
 		}
 		else {
-			userprefs.setValue("/recentFileList/" + QString::number(
-						num_module++), filename);
+			userprefs.setValue("/recentFileList/" + QString::number(num_module++), filename);
 			index = num_module;
 			userprefs.setValue("/recentFileList/num", num_module);
 		}
