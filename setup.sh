@@ -20,9 +20,28 @@
 # Check for compilation dependencies
 echo "Checking for dependencies..."
 
+ARCH=$(uname -m)
+if [ $ARCH == "x86_64" ]; then ARCH="amd64"; fi
+
+wget http://archive.ubuntu.com/ubuntu/pool/main/q/qwt/qwt_5.2.0.orig.tar.gz
+tar xf qwt_5.2.0.orig.tar.gz
+
+wget http://mirrors.kernel.org/ubuntu/pool/main/q/qwt/libqwt5-qt3_5.2.0-1build1_amd64.deb
+wget http://mirrors.kernel.org/ubuntu/pool/main/q/qwt/libqwt5-qt3-dev_5.2.0-1build1_amd64.deb
+
+cd qwt-5.2.0/qwt
+qmake-qt3
+make
+sudo make install
+cd ../../
+
 sudo apt-get update
 sudo apt-get upgrade
-sudo apt-get install automake libtool autoconf autotools-dev build-essential qt3-dev-tools libboost-dev libboost-program-options-dev libgsl0-dev bison flex libncurses5-dev libqwt5-qt3-dev
+sudo apt-get install g++ gcc automake libtool autoconf autotools-dev build-essential qt3-dev-tools libboost-dev libboost-program-options-dev libgsl0-dev bison flex libncurses5-dev
+
+sudo dpkg -i libqwt5-qt3_5.2.0-1build1_$ARCH.deb
+sudo dpkg -i libqwt5-qt3-dev_5.2.0-1build1_$ARCH.deb
+
 
 if [ $? -eq 0 ]; then
 	echo "----->Dependencies installed."
