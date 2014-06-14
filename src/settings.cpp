@@ -199,6 +199,7 @@ void Settings::Manager::foreachObject(void (*callback)(Object *,void *),void *pa
 }
 
 int Settings::Manager::load(const std::string &filename) {
+	// Open the rtxi.conf file
 	QFile file(QString::fromStdString(filename));
 	if (!file.open(QIODevice::ReadOnly)) {
 		ERROR_MSG("Settings::Manager::load : failed to open %s for reading\n", filename.c_str());
@@ -216,21 +217,30 @@ int Settings::Manager::load(const std::string &filename) {
 
 	QDomElement e1 = doc.documentElement();
 
+	QDomNode n = e1.firstChild();
+	while(!n.isNull()) {
+		QDomElement e = n.toElement(); // try to convert the node to an element.
+		if(!e.isNull()) {
+			printf("str2: %s\n", qPrintable(e.tagName()));
+		}
+		n = n.nextSibling();
+	}
+
 	if (e1.tagName() != "RTXI" || e1.attribute("class") != "settings") {
 		ERROR_MSG("Settings::Manager::load : invalid document element\n");
 		return -EINVAL;
 	}
 
-	/*
-	 * Return RTXI to a startup like state.
-	 */
-
+	// Return RTXI to a startup like state.
 	Plugin::Manager::getInstance()->unloadAll();
 	MainWindow::getInstance()->clearFileMenu();
 	MainWindow::getInstance()->clearModuleMenu();
 
+	// Reading in the period for the system
 	long long period = RT::System::getInstance()->getPeriod();
-	RT::System::getInstance()->setPeriod(1000000);
+	printf("Getting period %lld \n",period);
+	RT::System::getInstance()->setPeriod(1000000); // ns equivalent to 1ms (1kHz)
+	printf("Setting period %lld \n",RT::System::getInstance()->getPeriod());
 
 	Object::State s;
 	Plugin::Object *plugin;
@@ -247,6 +257,8 @@ int Settings::Manager::load(const std::string &filename) {
 			}
 		} else if (e2.attribute("component") == "rt") {
 			period = strtoll(s.loadString("Period").c_str(),0,10);
+			printf("string is %s \n", s.loadString("Period").c_str());
+			printf("in period %lld \n",period);
 			// Legacy case, period is stored as a double in scientific notation
 			if (period < 1000)
 				period = s.loadDouble("Period");
