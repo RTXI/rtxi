@@ -154,12 +154,13 @@ void Settings::Object::State::xml(const QDomElement &e1) {
 	}
 	id = e1.attribute("id","0").toULong();
 
-	//for(QDomElement e2 = e1.firstChild().toElement(); !e2.isNull(); e2 = e2.nextSibling().toElement()) {
-		//if(e2.tagName().toUpper() == "PARAM" && e2.attribute("name") != QString::null)
-			//paramMap[e2.attribute("name")] = e2.text().toLatin1();
-		//else if(e2.tagName().toUpper() == "OBJECT" && e2.attribute("name") != QString::null)
-			//stateMap[e2.attribute("name")].xml(e2);
-	//}
+	// Load XML map into memory
+	for(QDomElement e2 = e1.firstChild().toElement(); !e2.isNull(); e2 = e2.nextSibling().toElement()) {
+		if(e2.tagName().toUpper() == "PARAM" && e2.attribute("name") != QString::null)
+			paramMap[e2.attribute("name").toStdString()] = e2.text().toStdString();
+		else if(e2.tagName().toUpper() == "OBJECT" && e2.attribute("name") != QString::null)
+			stateMap[e2.attribute("name").toStdString()].xml(e2);
+	}
 }
 
 Settings::Object::State Settings::Object::save(void) const {
@@ -217,14 +218,15 @@ int Settings::Manager::load(const std::string &filename) {
 
 	QDomElement e1 = doc.documentElement();
 
-	QDomNode n = e1.firstChild();
-	while(!n.isNull()) {
+	// Test code - XML parsing
+	/*QDomNode n = e1.firstChild();
+		while(!n.isNull()) {
 		QDomElement e = n.toElement(); // try to convert the node to an element.
 		if(!e.isNull()) {
-			printf("str2: %s\n", qPrintable(e.tagName()));
+		printf("str2: %s\n", qPrintable(e.attribute("component")));
 		}
 		n = n.nextSibling();
-	}
+		}*/
 
 	if (e1.tagName() != "RTXI" || e1.attribute("class") != "settings") {
 		ERROR_MSG("Settings::Manager::load : invalid document element\n");
@@ -238,9 +240,7 @@ int Settings::Manager::load(const std::string &filename) {
 
 	// Reading in the period for the system
 	long long period = RT::System::getInstance()->getPeriod();
-	printf("Getting period %lld \n",period);
 	RT::System::getInstance()->setPeriod(1000000); // ns equivalent to 1ms (1kHz)
-	printf("Setting period %lld \n",RT::System::getInstance()->getPeriod());
 
 	Object::State s;
 	Plugin::Object *plugin;
@@ -249,20 +249,22 @@ int Settings::Manager::load(const std::string &filename) {
 		if (e2.tagName() != "OBJECT" || e2.attribute("component") == QString::null) continue;
 
 		s.xml(e2);
+		// Load plugin info
 		if (e2.attribute("component") == "plugin") {
 			if ((plugin = Plugin::Manager::getInstance()->load(e2.attribute("library")))) {
 				defer_t defer = { plugin, s };
 				deferList.push_back(defer);
 				plugin->load(s);
 			}
-		} else if (e2.attribute("component") == "rt") {
+		}
+		// Load RT info
+		else if (e2.attribute("component") == "rt") {
 			period = strtoll(s.loadString("Period").c_str(),0,10);
-			printf("string is %s \n", s.loadString("Period").c_str());
-			printf("in period %lld \n",period);
 			// Legacy case, period is stored as a double in scientific notation
 			if (period < 1000)
 				period = s.loadDouble("Period");
-		} else if (e2.attribute("component") == "io") {
+		} // Load IO info
+		else if (e2.attribute("component") == "io") {
 			defer_t defer = { IO::Connector::getInstance(), s };
 			deferList.push_back(defer);
 		}

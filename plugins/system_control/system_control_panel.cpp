@@ -39,7 +39,6 @@ struct find_daq_t {
 };
 
 static void findDAQDevice(DAQ::Device *dev,void *arg) {
-	printf("\nFinding DAQs...\n");
 	struct find_daq_t *info = static_cast<struct find_daq_t *>(arg);
 	if(!info->index)
 		info->device = dev;
@@ -47,7 +46,6 @@ static void findDAQDevice(DAQ::Device *dev,void *arg) {
 }
 
 static void buildDAQDeviceList(DAQ::Device *dev,void *arg) {
-	printf("\nBuilding list...\n");
 	QComboBox *deviceList = static_cast<QComboBox *>(arg);
 	deviceList->addItem(QString::fromStdString(dev->getName()));
 }

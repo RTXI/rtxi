@@ -20,7 +20,6 @@
 #include <algorithm>
 
 DAQ::Device::Device(std::string name,IO::channel_t *chan,size_t size)	: IO::Block(name,chan,size) {
-		printf("\nIn construcotr of device with name %s\n", name.c_str());
 		DAQ::Manager::getInstance()->insertDevice(this);
 }
 
@@ -68,7 +67,6 @@ void DAQ::Manager::insertDevice(DAQ::Device *device) {
 		return;
 	}
 
-	printf("Adding device\n");
 	devices.push_back(device);
 }
 
@@ -79,7 +77,6 @@ void DAQ::Manager::removeDevice(DAQ::Device *device) {
 	}
 
 	Mutex::Locker lock(&mutex);
-	printf("Removing device\n");
 	devices.remove(device);
 }
 
