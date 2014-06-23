@@ -49,7 +49,7 @@ Connector::Panel::Panel(QWidget *parent) : QWidget(parent) {
 
 	// Make Mdi
 	subWindow = new QMdiSubWindow;
-	subWindow->setFixedSize(300,400);
+	subWindow->setFixedSize(500,400);
 	subWindow->setAttribute(Qt::WA_DeleteOnClose);
 	subWindow->setWindowFlags(Qt::CustomizeWindowHint);
 	subWindow->setWindowFlags(Qt::WindowCloseButtonHint);
@@ -59,7 +59,7 @@ Connector::Panel::Panel(QWidget *parent) : QWidget(parent) {
 	QGridLayout *layout = new QGridLayout;
 
 	// Create child widget and layout for output block
-	outputGroup = new QGroupBox(tr("Input Block"));
+	outputGroup = new QGroupBox(tr("Output Block"));
 	QVBoxLayout *outputLayout = new QVBoxLayout;
 
 	// Create elements for output
@@ -90,7 +90,7 @@ Connector::Panel::Panel(QWidget *parent) : QWidget(parent) {
 	buttonGroup->setLayout(buttonLayout);
 
 	// Create child widget and layout for input block
-	inputGroup = new QGroupBox(tr("Output Block"));
+	inputGroup = new QGroupBox(tr("Input Block"));
 	QVBoxLayout *inputLayout = new QVBoxLayout;
 
 	// Create elements for output
@@ -227,6 +227,7 @@ void Connector::Panel::buildInputChannelList(void) {
 	for(size_t i = 0;i < block->getCount(IO::INPUT);++i)
 		inputChannel->addItem(QString::fromStdString(block->getName(IO::INPUT,i)));
 
+	inputChannel->setCurrentIndex(0);
 	updateConnectionButton();
 }
 
@@ -240,6 +241,7 @@ void Connector::Panel::buildOutputChannelList(void) {
 	for(size_t i = 0;i < block->getCount(IO::OUTPUT);++i)
 		outputChannel->addItem(QString::fromStdString(block->getName(IO::OUTPUT,i)));
 
+	outputChannel->setCurrentIndex(0);
 	updateConnectionButton();
 }
 
@@ -300,10 +302,14 @@ void Connector::Panel::highlightConnectionBox(QListWidgetItem * item) {
 }
 
 void Connector::Panel::toggleConnection(bool on) {
+	printf("in the toggleconection\n");
+
 	IO::Block *src = blocks[outputBlock->currentIndex()];
 	IO::Block *dest = blocks[inputBlock->currentIndex()];
 	size_t src_num = outputChannel->currentIndex();
 	size_t dest_num = inputChannel->currentIndex();
+
+	printf("in toggle %zu %zu \n", src_num, dest_num);
 
 	if(IO::Connector::getInstance()->connected(src,src_num,dest,dest_num) == on)
 		return;
@@ -319,6 +325,8 @@ void Connector::Panel::updateConnectionButton(void) {
 	IO::Block *dest = blocks[inputBlock->currentIndex()];
 	size_t src_num = outputChannel->currentIndex();
 	size_t dest_num = inputChannel->currentIndex();
+
+	printf("in update %zu %zu \n", src_num, dest_num);
 
 	connectionButton->setChecked(IO::Connector::getInstance()->connected(src,src_num,dest,dest_num));
 }
