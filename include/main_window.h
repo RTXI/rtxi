@@ -190,9 +190,6 @@ class MainWindow : public QMainWindow {
 
 		QAction* createSystemMenuItem(const QString &label, const QObject *handler, const char *slot);
 
-		/* REmove item from system menu */
-		void removeSystemMenuItem(QAction *);
-
 		/* Create a window for the widget in the main window */
 		void createMdi(QMdiSubWindow *);
 
@@ -241,7 +238,6 @@ class MainWindow : public QMainWindow {
 		QAction *aqt;
 
 		void updateUtilModules();
-		
 		void createFileMenu();
 		void createModuleMenu();
 		void createUtilMenu();

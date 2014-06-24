@@ -14,7 +14,7 @@
 	 You should have received a copy of the GNU General Public License
 	 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-*/
+ */
 
 #include <QtGui>
 #include <QMdiArea>
@@ -31,6 +31,7 @@
 
 MainWindow::MainWindow (void) : QMainWindow(NULL, Qt::Window) {
 
+	// Make central RTXI parent widget
 	mdiArea = new QMdiArea;
 	setCentralWidget(mdiArea);
 
@@ -41,21 +42,23 @@ MainWindow::MainWindow (void) : QMainWindow(NULL, Qt::Window) {
 	createFileActions();
 	createFileMenu();
 
+	/* Initialize Module Menu */
 	createModuleMenu();
 
+	/* Initialize Utilities menu */
 	createUtilMenu();
 
+	/* Initialize System Menu */
 	createSystemMenu();
 
+	/* Initialize Windows Menu */
 	createWindowsMenu();
 
+	/* Initialize Help Menu */
 	createHelpActions();
 	createHelpMenu();
 
-	//updateUtilModules ();
-
-	//patchClampSubMenu = new QMenu (this);
-	//utilMenu->insertItem (tr ("&Patch Clamp"), patchClampSubMenu);
+	updateUtilModules();
 }
 
 MainWindow::~MainWindow (void) {
@@ -75,18 +78,12 @@ void MainWindow::setFileMenuItemParameter(QAction *action, int parameter) {
 }
 
 void MainWindow::clearFileMenu(void) {
-	// don't clear the entire menu b/c Load & Save Workspace and Quit are created by
-	// main_window.cpp, not while a module is loading
-	/*fileMenu->clear();
-		int id;
-		id = fileMenu->insertItem ("&Load Workspace", this, SLOT (loadSettings ()), QKeySequence (Qt::CTRL + Qt::Key_L));
-		fileMenu->setWhatsThis (id, "Load Workspace settings file");
-		id = fileMenu->insertItem ("&Save Workspace", this, SLOT (saveSettings ()), QKeySequence (Qt::CTRL + Qt::Key_S));
-		fileMenu->setWhatsThis (id, "Save Workspace settings file");
-		fileMenu->addSeparator();
-		id = fileMenu->insertItem ("&Quit", qApp, SLOT (closeAllWindows ()), QKeySequence (Qt::CTRL + Qt::Key_Q));
-		fileMenu->setWhatsThis (id, "Quits the Application");
-		fileMenu->addSeparator();*/
+	/*
+	 *don't clear the entire menu b/c Load & Save Workspace and Quit are created by
+	 * main_window.cpp, not while a module is loading
+	 */
+
+	//fileMenu->clear();
 }
 
 QAction* MainWindow::createModuleMenuItem(const QString &text, const QObject *receiver, const char *member) {
@@ -150,7 +147,6 @@ void MainWindow::createUtilMenu() {
 	utilMenu = menuBar()->addMenu(tr("&Utilities"));
 	filtersSubMenu = utilMenu->addMenu(tr("&Filters"));
 	signalsSubMenu = utilMenu->addMenu(tr("&Signal Generators"));
-	patchClampSubMenu = utilMenu->addMenu(tr("&Patch Clamp"));
 }
 
 void MainWindow::createSystemMenu() {
@@ -242,17 +238,8 @@ void MainWindow::updateUtilModules(){
 		utilMenu->insertItem(tr("&Signals"), signalSubMenu);*/
 }
 
-QAction* MainWindow::createPatchClampMenuItem (const QString &text, const QObject *receiver, const char *member) {
-	//return patchClampSubMenu->addAction(text, receiver, member);
-}
-
 QAction* MainWindow::createSystemMenuItem (const QString &text, const QObject *receiver, const char *member) {
 	return systemMenu->addAction(text, receiver, member);
-}
-
-// VISIT TWO
-void MainWindow::removeSystemMenuItem (QAction *removeMe) {
-	//systemMenu->removeAction(actionList[0]);
 }
 
 void MainWindow::about(void) {

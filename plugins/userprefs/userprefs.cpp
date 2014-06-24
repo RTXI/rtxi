@@ -193,7 +193,6 @@ UserPrefs::Prefs::Prefs(void) : panel(0) {
 }
 
 UserPrefs::Prefs::~Prefs(void) {
-  //MainWindow::getInstance()->removeSystemMenuItem(QString("Preferences"));
   if (panel)
     delete panel;
   instance = 0;

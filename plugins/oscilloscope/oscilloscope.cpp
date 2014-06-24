@@ -1313,7 +1313,6 @@ Oscilloscope::Plugin::Plugin(void) {
 }
 
 Oscilloscope::Plugin::~Plugin(void) {
-	//MainWindow::getInstance()->removeSystemMenuItem(QString("Oscilloscope"));
 	while (panelList.size())
 		delete panelList.front();
 	instance = 0;

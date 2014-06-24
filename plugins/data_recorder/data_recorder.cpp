@@ -1283,7 +1283,6 @@ DataRecorder::Plugin::Plugin(void) {
 }
 
 DataRecorder::Plugin::~Plugin(void) {
-	//MainWindow::getInstance()->removeSystemMenuItem(QString("HDF Data Recorder"));
 	while (panelList.size())
 		delete panelList.front();
 	instance = 0;

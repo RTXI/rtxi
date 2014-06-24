@@ -353,7 +353,6 @@ Connector::Plugin::Plugin(void) : panel(0) {
 }
 
 Connector::Plugin::~Plugin(void) {
-	//MainWindow::getInstance()->removeSystemMenuItem(QString("Connector"));
 	if(panel)
 		delete panel;
 	instance = 0;
