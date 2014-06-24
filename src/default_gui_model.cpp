@@ -87,7 +87,7 @@ void DefaultGUIModel::createGUI(DefaultGUIModel::variable_t *var, int size) {
 	QWidget::setAttribute(Qt::WA_DeleteOnClose);
 
 	// Make Mdi
-	QMdiSubWindow *subWindow = new QMdiSubWindow;
+	subWindow = new QMdiSubWindow;
 	//subWindow->setFixedSize(400,200);
 	subWindow->setWindowFlags(Qt::CustomizeWindowHint);
 	subWindow->setWindowFlags(Qt::WindowCloseButtonHint);
@@ -188,6 +188,7 @@ void DefaultGUIModel::exit(void) {
 
 	update(EXIT);
 	Plugin::Manager::getInstance()->unload(this);
+	subWindow->close();
 }
 
 void DefaultGUIModel::refresh(void) {

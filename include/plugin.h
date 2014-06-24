@@ -25,7 +25,7 @@
 #include <string>
 #include <sys/types.h>
 #include <QObject>
-#include <QEvent>
+#include <QtGui>
 
 //! Classes associated with the loading/unloading of binaries at run-time.
 /*!
@@ -35,8 +35,21 @@ namespace Plugin {
 
     class Object;
 
-    /*!
-     * Provides mechanisms for the loading and unloading of a Plugin::Object
+    static const QEvent::Type CloseEvent = QEvent::User;
+
+		/*!
+			* Qt Events are no longer tied to data type
+			* so we have to subclass QEvent to include data
+			*/
+    class RTXIEvent : public QEvent {
+
+			public:
+				RTXIEvent() : QEvent((QEvent::Type) CloseEvent) {}
+				void *data;
+		};
+
+		/*!
+		 * Provides mechanisms for the loading and unloading of a Plugin::Object
      */
     class Manager : public QObject {
 
@@ -63,12 +76,14 @@ namespace Plugin {
          * \sa Plugin::Object
          */
         Object *load(const QString &library);
+
         /*!
          * Function for unloading a single Plugin::Object in the system.
          *
          * \param object The plugin object to be unloaded.
          */
         void unload(Object *object);
+
         /*!
          * Function for unloading all Plugin::Object's in the system.
          */
@@ -110,7 +125,7 @@ namespace Plugin {
         void insertPlugin(Object *);
         void removePlugin(Object *);
 
-        static const QEvent::Type CloseEvent = QEvent::User;
+        //static const QEvent::Type CloseEvent = QEvent::User;
 
         Mutex mutex;
         std::list<Object *> pluginList;
