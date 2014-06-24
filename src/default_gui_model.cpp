@@ -182,7 +182,7 @@ void DefaultGUIModel::update(DefaultGUIModel::update_flags_t) {
 
 void DefaultGUIModel::exit(void) {
 	// Ensure that the realtime thread isn't in the middle of executing DefaultGUIModel::execute()
-	setActive( false );
+	setActive(false);
 	SyncEvent event;
 	RT::System::getInstance()->postEvent(&event);
 

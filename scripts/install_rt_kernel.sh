@@ -95,7 +95,7 @@ if [[ $OS == 'ubuntu' ]]
 then
 cd $linux_tree
 export CONCURRENCY_LEVEL=7
-fakeroot make-kpkg --initrd --append-to-version=-xenomai-$xenomai_version kernel-image kernel-headers modules
+sudo fakeroot make-kpkg --initrd --append-to-version=-xenomai-$xenomai_version kernel-image kernel-headers modules
 elif [[ $OS == 'scientific' ]]
 then
 cd $linux_tree
