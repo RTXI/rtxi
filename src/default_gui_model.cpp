@@ -14,7 +14,7 @@
 	 You should have received a copy of the GNU General Public License
 	 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-*/
+ */
 
 #include <QTableWidget>
 #include <QWidget>
@@ -95,7 +95,7 @@ void DefaultGUIModel::createGUI(DefaultGUIModel::variable_t *var, int size) {
 
 	// Create main layout
 	QVBoxLayout *layout = new QVBoxLayout;
-	
+
 	// Create child widget and gridLayout
 	gridBox = new QGroupBox;
 	QGridLayout *gridLayout = new QGridLayout;
