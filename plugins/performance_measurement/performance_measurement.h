@@ -29,7 +29,7 @@
 #include <plugin.h>
 #include <rt.h>
 #include <workspace.h>
-#include "../include/runningstat.h"
+#include <runningstat.h>
 
 namespace PerformanceMeasurement {
   class Panel;

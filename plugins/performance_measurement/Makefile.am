@@ -4,6 +4,8 @@ MAINTAINERCLEANFILES = Makefile.in
 
 include $(top_srcdir)/Makefile.buildvars
 
+rtxi_includes = /usr/local/lib/rtxi_includes
+
 pkglib_LTLIBRARIES = performance_measurement.la
 
 performance_measurement_la_LDFLAGS = -module -avoid-version
@@ -11,9 +13,9 @@ performance_measurement_la_LDFLAGS = -module -avoid-version
 performance_measurement_la_SOURCES = \
 		performance_measurement.h \
 		performance_measurement.cpp\
-		../include/runningstat.h\
-		../include/runningstat.cpp
-		
+		$(rtxi_includes)/runningstat.h\
+	  $(rtxi_includes)/runningstat.cpp
+	
 nodist_performance_measurement_la_SOURCES = \
 		moc_performance_measurement.cpp
 

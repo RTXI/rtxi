@@ -43,6 +43,9 @@ else
 	fi
 fi
 
+# Install rtxi_includes
+sudo cp -r rtxi_includes /usr/local/lib/.
+
 # Start configuring - by default configured to run on non-RT kernel
 echo "----->Starting RTXI installation..."
 ./autogen.sh
