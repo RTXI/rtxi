@@ -56,6 +56,12 @@ class DefaultGUIModel : public QWidget, public RT::Thread, public Plugin::Object
 
 	public:
 
+		/*
+		 * Getter function go allow customization of 
+		 * user interface
+		 */
+		QGridLayout * getLayout(void) {return layout;};
+
 		/*!
 		 * Flag that marks a variable as an input.
 		 *
@@ -195,6 +201,8 @@ class DefaultGUIModel : public QWidget, public RT::Thread, public Plugin::Object
 		virtual void pause(bool);
 
 	protected:
+
+		QGridLayout *layout;
 
 		/*!
 		 * Get the value of the parameter in the GUI, and update the value

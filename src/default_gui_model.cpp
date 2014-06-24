@@ -94,7 +94,7 @@ void DefaultGUIModel::createGUI(DefaultGUIModel::variable_t *var, int size) {
 	MainWindow::getInstance()->createMdi(subWindow);
 
 	// Create main layout
-	QVBoxLayout *layout = new QVBoxLayout;
+	layout = new QGridLayout;
 
 	// Create child widget and gridLayout
 	gridBox = new QGroupBox;
@@ -155,7 +155,7 @@ void DefaultGUIModel::createGUI(DefaultGUIModel::variable_t *var, int size) {
 	pauseButton = new QPushButton("Pause", this);
 	pauseButton->setCheckable(true);
 	QObject::connect(pauseButton,SIGNAL(toggled(bool)),this,SLOT(pause(bool)));
-	buttonLayout->addWidget(pauseButton);//qhboxlayout->addWidget(pauseButton);
+	buttonLayout->addWidget(pauseButton);
 
 	modifyButton = new QPushButton("Modify", this);
 	QObject::connect(modifyButton,SIGNAL(clicked(void)),this,SLOT(modify(void)));
@@ -168,8 +168,8 @@ void DefaultGUIModel::createGUI(DefaultGUIModel::variable_t *var, int size) {
 	// Add layout to box
 	gridBox->setLayout(gridLayout);
 	buttonGroup->setLayout(buttonLayout);
-	layout->addWidget(gridBox);
-	layout->addWidget(buttonGroup);
+	layout->addWidget(gridBox, 1, 0);
+	layout->addWidget(buttonGroup, 2, 0);
 
 	// Set layout to Mdi and show
 	setLayout(layout);
