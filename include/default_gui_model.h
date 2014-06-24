@@ -21,6 +21,7 @@
 
 #include <QLineEdit>
 #include <QAbstractButton>
+#include <QtGui>
 #include <event.h>
 #include <map>
 #include <mutex.h>
@@ -259,6 +260,9 @@ class DefaultGUIModel : public QWidget, public RT::Thread, public Plugin::Object
 
 		bool periodEventPaused;
 		mutable QString junk;
+
+		QGroupBox *gridBox;
+		QGroupBox *buttonGroup;
 
 		std::string myname;
 

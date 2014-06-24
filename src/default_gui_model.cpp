@@ -14,7 +14,7 @@
 	 You should have received a copy of the GNU General Public License
 	 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
- */
+*/
 
 #include <QTableWidget>
 #include <QWidget>
@@ -27,6 +27,7 @@
 #include <QScrollArea>
 #include <QTimer>
 #include <QtGui>
+#include <QMdiSubWindow>
 
 #include <default_gui_model.h>
 #include <main_window.h>
@@ -82,25 +83,32 @@ DefaultGUIModel::~DefaultGUIModel(void) {
 }
 
 void DefaultGUIModel::createGUI(DefaultGUIModel::variable_t *var, int size) {
-	QBoxLayout *layout = new QVBoxLayout(this);
 
-	QScrollArea *sv = new QScrollArea(this);
-	sv->setWidgetResizable(true);
-	layout->addWidget(sv);
+	QWidget::setAttribute(Qt::WA_DeleteOnClose);
 
-	QWidget *viewport = new QWidget(sv->viewport());
-	sv->setWidget(viewport);
-	QGridLayout *scrollLayout = new QGridLayout(viewport);
+	// Make Mdi
+	QMdiSubWindow *subWindow = new QMdiSubWindow;
+	//subWindow->setFixedSize(400,200);
+	subWindow->setWindowFlags(Qt::CustomizeWindowHint);
+	subWindow->setWindowFlags(Qt::WindowCloseButtonHint);
+	MainWindow::getInstance()->createMdi(subWindow);
+
+	// Create main layout
+	QVBoxLayout *layout = new QVBoxLayout;
+	
+	// Create child widget and gridLayout
+	gridBox = new QGroupBox;
+	QGridLayout *gridLayout = new QGridLayout;
 
 	size_t nstate = 0, nparam = 0, nevent = 0, ncomment = 0;
 	for (size_t i = 0; i < size; i++) {
 		if (var[i].flags & (PARAMETER | STATE | EVENT | COMMENT)) {
 			param_t param;
 
-			param.label = new QLabel(QString::fromStdString(var[i].name), viewport);
-			scrollLayout->addWidget(param.label, parameter.size(), 0);
-			param.edit = new DefaultGUILineEdit(viewport);
-			scrollLayout->addWidget(param.edit, parameter.size(), 1);
+			param.label = new QLabel(QString::fromStdString(var[i].name), gridBox);
+			gridLayout->addWidget(param.label, parameter.size(), 0);
+			param.edit = new DefaultGUILineEdit(gridBox);
+			gridLayout->addWidget(param.edit, parameter.size(), 1);
 
 			param.label->setToolTip(QString::fromStdString(var[i].description));
 			param.edit->setToolTip(QString::fromStdString(var[i].description));
@@ -139,27 +147,33 @@ void DefaultGUIModel::createGUI(DefaultGUIModel::variable_t *var, int size) {
 		}
 	}
 
-	// Create parent widget and layout
-	QWidget *hbox1 = new QWidget;
-	QHBoxLayout *qhboxlayout = new QHBoxLayout;
+	// Create child widget
+	buttonGroup = new QGroupBox;
+	QHBoxLayout *buttonLayout = new QHBoxLayout;
 
 	// Create elements
-	pauseButton = new QPushButton("Pause");
+	pauseButton = new QPushButton("Pause", this);
 	pauseButton->setCheckable(true);
 	QObject::connect(pauseButton,SIGNAL(toggled(bool)),this,SLOT(pause(bool)));
-	qhboxlayout->addWidget(pauseButton);
+	buttonLayout->addWidget(pauseButton);//qhboxlayout->addWidget(pauseButton);
 
-	modifyButton = new QPushButton("Modify");
+	modifyButton = new QPushButton("Modify", this);
 	QObject::connect(modifyButton,SIGNAL(clicked(void)),this,SLOT(modify(void)));
-	qhboxlayout->addWidget(modifyButton);
+	buttonLayout->addWidget(modifyButton);
 
-	unloadButton = new QPushButton("Unload");
+	unloadButton = new QPushButton("Unload", this);
 	QObject::connect(unloadButton,SIGNAL(clicked(void)),this,SLOT(exit(void)));
-	qhboxlayout->addWidget(unloadButton);
+	buttonLayout->addWidget(unloadButton);
 
-	// Show stuff
-	hbox1->setLayout(qhboxlayout);
-	layout->addWidget(hbox1);
+	// Add layout to box
+	gridBox->setLayout(gridLayout);
+	buttonGroup->setLayout(buttonLayout);
+	layout->addWidget(gridBox);
+	layout->addWidget(buttonGroup);
+
+	// Set layout to Mdi and show
+	setLayout(layout);
+	subWindow->setWidget(this);
 	show();
 }
 
