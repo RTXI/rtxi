@@ -48,7 +48,7 @@ echo "----->Starting RTXI installation..."
 ./autogen.sh
 
 echo "----->Kernel configuration..."
-echo "1. Xenomai+Analogy"
+echo "1. Xenomai+Analogy (RT)"
 echo "2. POSIX (Non-RT)"
 echo "----->Please select your configuration and then press enter:"
 read kernel
