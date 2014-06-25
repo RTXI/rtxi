@@ -190,7 +190,6 @@ void RT::System::foreachThread(void (*callback)(RT::Thread *,void *),void *param
 
 int RT::System::postEvent(RT::Event *event,bool blocking) {
 	eventFifo.write(&event,sizeof(RT::Event *));
-
 	if (blocking) {
 		event->wait();
 		return event->retval;
