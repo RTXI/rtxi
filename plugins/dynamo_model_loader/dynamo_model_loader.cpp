@@ -59,7 +59,6 @@ DynamoModelLoader::DynamoModelLoader(void) {
 		listmodule = userprefs.value("/recentFileList/" + entries[i]).toString();
 		text = tr("&%1 %2").arg(i).arg(listmodule);
 		MainWindow::getInstance()->createModuleMenuItem(text,this,SLOT(load_recent(int)));
-		//menuID = MainWindow::getInstance()->createModuleMenuItem(text,this,SLOT(load_recent(int)));
 		// VISIT TWO
 		//MainWindow::getInstance()->setModuleMenuItemParameter(menuID, i);
 	}

@@ -137,6 +137,7 @@ void MainWindow::createFileMenu() {
 	fileMenu->addAction(save);
 	fileMenu->addSeparator();
 	fileMenu->addAction(quit);
+	fileMenu->addSeparator();
 }
 
 void MainWindow::createModuleMenu() {
