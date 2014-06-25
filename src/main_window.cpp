@@ -393,7 +393,7 @@ void MainWindow::windowsMenuAboutToShow(void) {
 	for(int i = 0; i < subWindows.size(); i++){
 		QMdiSubWindow *child = subWindows.at(i);
 		QAction *item = new QAction(child->widget()->windowTitle(), this);
-		connect(item, SIGNAL(transmit(int)), this, SLOT(windowsMenuActivated(int)));
+		//connect(item, SIGNAL(transmit(int)), this, SLOT(windowsMenuActivated(int)));
 		windowsMenu->addAction(item);
 	}
 }

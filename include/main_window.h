@@ -209,9 +209,6 @@ class MainWindow : public QMainWindow {
 			void loadSignal(int);
 			void loadFilter(int);
 
-			signals:
-			void transmit(int);
-
 		private:
 
 		/****************************************************************
