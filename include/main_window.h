@@ -23,6 +23,8 @@
 #include <QAction>
 #include <QMdiArea>
 #include <QMdiSubWindow>
+#include <QtGui>
+#include <QObject>
 
 class QMenu;
 
@@ -207,12 +209,15 @@ class MainWindow : public QMainWindow {
 			void loadSignal(int);
 			void loadFilter(int);
 
+			signals:
+			void transmit(int);
+
 		private:
 
 		/****************************************************************
-			* The constructor, destrutos, and assignment operator are made *
-			*   private to control instantiation of the class.             *
-			****************************************************************/
+		 * The constructor, destrutos, and assignment operator are made *
+		 *   private to control instantiation of the class.             *
+		 ****************************************************************/
 
 		MainWindow(void);
 		MainWindow(const MainWindow &) {};

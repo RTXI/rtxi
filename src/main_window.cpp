@@ -99,7 +99,7 @@ void MainWindow::clearModuleMenu (void) {
 }
 
 void MainWindow::changeModuleMenuItem (QAction *action, QString text) {
-	action->setText(text);//changeItem (id, text);
+	action->setText(text);
 }
 
 void MainWindow::removeModuleMenuItem (QAction *action) {
@@ -370,10 +370,10 @@ void MainWindow::loadSignal(int i) {
 		Plugin::Manager::getInstance()->load(text);*/
 }
 
-void MainWindow::windowsMenuAboutToShow (void) {
+void MainWindow::windowsMenuAboutToShow(void) {
 
 	// Clear previous entries
-	windowsMenu->clear ();
+	windowsMenu->clear();
 
 	// Add default options
 	windowsMenu->addAction(tr("Cascade"),mdiArea,SLOT(cascadeSubWindows()));
@@ -389,11 +389,12 @@ void MainWindow::windowsMenuAboutToShow (void) {
 	}
 
 	// VISIT TWO
-	// NEED TO LINK WINDOWS TO SOME TRIGGER TO SWITCH TO ACTIVE
 	// Create windows list based off of what's open
 	for(int i = 0; i < subWindows.size(); i++){
 		QMdiSubWindow *child = subWindows.at(i);
-		windowsMenu->addAction(child->widget()->windowTitle(),this,SLOT(windowsMenuActivated(int)));
+		QAction *item = new QAction(child->widget()->windowTitle(), this);
+		connect(item, SIGNAL(transmit(int)), this, SLOT(windowsMenuActivated(int)));
+		windowsMenu->addAction(item);
 	}
 }
 
