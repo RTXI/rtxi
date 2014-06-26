@@ -72,7 +72,6 @@ DynamoModelLoader::DynamoModelLoader(void) {
 		listmodule = userprefs.value("/recentSettingsList/" + entries[i]).toString();
 		text = tr("&%1 %2").arg(i).arg(listmodule);
 	  MainWindow::getInstance()->createFileMenuItem(text,this,SLOT(load_setting(int)));
-		//menuID = MainWindow::getInstance()->createFileMenuItem(text.toStdString(),this,SLOT(load_setting(int)));
 		// VISIT TWO
 		//MainWindow::getInstance()->setFileMenuItemParameter(menuID, i);
 	}

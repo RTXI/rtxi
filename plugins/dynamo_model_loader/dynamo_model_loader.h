@@ -42,6 +42,10 @@ public slots:
      void load_recent(int);
      void load_setting(int);
 
+signals:
+
+		 void load_emit(int);
+
 private:
 
     int menuID;
