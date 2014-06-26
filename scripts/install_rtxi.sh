@@ -47,7 +47,7 @@ fi
 # Installing Qwt
 echo "----->Checking for Qwt"
 
-if [ -f "/usr/local/lib/qwt/includes/qwt.h" ]; then
+if [ -f "/usr/local/lib/qwt/include/qwt.h" ]; then
 	echo "----->Qwt already installed."
 else
 	echo "----->Installing Qwt..."
