@@ -28,7 +28,7 @@
 #include <list>
 #include <vector>
 
-class Scope : public QWidget {
+class Scope : public QWidget, public QwtPlot {
 
 	Q_OBJECT
 	public:

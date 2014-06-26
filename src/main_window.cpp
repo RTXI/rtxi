@@ -103,6 +103,9 @@ void MainWindow::changeModuleMenuItem (QAction *action, QString text) {
 }
 
 void MainWindow::removeModuleMenuItem (QAction *action) {
+	QList<QAction *> actionList = moduleMenu->actions();
+	if(!actionList.empty())
+		moduleMenu->removeAction(action);
 	//moduleMenu->removeItem (id);
 }
 

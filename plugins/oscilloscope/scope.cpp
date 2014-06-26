@@ -82,7 +82,8 @@ Scope::Scope(QWidget *parent) : QWidget(parent) {
 	timer->start(refresh);
 }
 
-Scope::~Scope(void) {}
+Scope::~Scope(void) {
+}
 
 bool Scope::paused(void) const {
 	return isPaused;

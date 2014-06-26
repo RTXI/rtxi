@@ -22,7 +22,7 @@
 #include <execinfo.h>
 #include <stdio.h>
 
-//#include <rtdk.h>
+#include <rtdk.h>
 
 //! Prints a backtrace to standard error.
 static inline void PRINT_BACKTRACE(void) {

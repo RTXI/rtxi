@@ -46,7 +46,7 @@ DAQ::Device *DAQ::Manager::loadDevice(const std::string &name,const std::list<st
 	Mutex::Locker lock(&mutex);
 
 	if (driverMap.find(name) == driverMap.end()) {
-		ERROR_MSG("DAQ::Manager::loadDevice : driver %s does not exist\n",name.c_str());
+		ERROR_MSG("DAQ::Manager::loadDevice : Driver %s does not exist\n",name.c_str());
 		return 0;
 	}
 
@@ -56,14 +56,14 @@ DAQ::Device *DAQ::Manager::loadDevice(const std::string &name,const std::list<st
 
 void DAQ::Manager::insertDevice(DAQ::Device *device) {
 	if (!device) {
-		ERROR_MSG("DAQ::Manager::insertDevice : invalid device\n");
+		ERROR_MSG("DAQ::Manager::insertDevice : Invalid device\n");
 		return;
 	}
 
 	Mutex::Locker lock(&mutex);
 
 	if (std::find(devices.begin(),devices.end(),device) != devices.end()) {
-		ERROR_MSG("DAQ::Device::insertDevice : device already present\n");
+		ERROR_MSG("DAQ::Device::insertDevice : Device already present\n");
 		return;
 	}
 
@@ -72,7 +72,7 @@ void DAQ::Manager::insertDevice(DAQ::Device *device) {
 
 void DAQ::Manager::removeDevice(DAQ::Device *device) {
 	if (!device) {
-		ERROR_MSG("DAQ::Manager::removeDevice : invalid device\n");
+		ERROR_MSG("DAQ::Manager::removeDevice : Invalid device\n");
 		return;
 	}
 
@@ -82,13 +82,13 @@ void DAQ::Manager::removeDevice(DAQ::Device *device) {
 
 void DAQ::Manager::registerDriver(Driver *driver,const std::string &name) {
 	if (!driver) {
-		ERROR_MSG("DAQ::Manager::registerDriver : invalid driver\n");
+		ERROR_MSG("DAQ::Manager::registerDriver : Invalid driver\n");
 		return;
 	}
 	Mutex::Locker lock(&mutex);
 
 	if (driverMap.find(name) != driverMap.end()) {
-		ERROR_MSG("DAQ::Manager::registerDriver : driver already registered\n");
+		ERROR_MSG("DAQ::Manager::registerDriver : Driver already registered\n");
 		return;
 	}
 	driverMap[name] = driver;
@@ -98,7 +98,7 @@ void DAQ::Manager::unregisterDriver(const std::string &name) {
 	Mutex::Locker lock(&mutex);
 
 	if (driverMap.find(name) == driverMap.end()) {
-		ERROR_MSG("DAQ::Manager::unregisterDriver : driver not registered\n");
+		ERROR_MSG("DAQ::Manager::unregisterDriver : Driver not registered\n");
 		return;
 	}
 	driverMap.erase(name);
