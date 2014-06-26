@@ -23,7 +23,6 @@
 #include <QtGui>
 #include <QWidget>
 
-#include "scope.h"
 #include <event.h>
 #include <fifo.h>
 #include <io.h>
@@ -31,6 +30,8 @@
 #include <plugin.h>
 #include <rt.h>
 #include <settings.h>
+
+#include "scope.h"
 
 namespace Oscilloscope {
 	class Panel;
@@ -155,7 +156,6 @@ namespace Oscilloscope {
 
 		protected:
 		void mouseDoubleClickEvent(QMouseEvent *);
-		//void mousePressEvent(QMouseEvent *);
 
 		private:
 		QMdiSubWindow *subWindow;
@@ -164,6 +164,9 @@ namespace Oscilloscope {
 
 		QPushButton *pauseButton;
 		QPushButton *settingsButton;
+
+		// Scope display
+		Scope *d_plot;
 
 		void updateDownsampleRate(int);
 		Fifo fifo;

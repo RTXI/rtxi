@@ -25,10 +25,27 @@
 #include <QtGui>
 #include <QWidget>
 
+#include <qwt_scale_engine.h>
+#include <qwt_plot_grid.h>
+#include <qwt_plot_layout.h>
+#include <qwt_plot_canvas.h>
+#include <qwt_plot_marker.h>
+#include <qwt_plot_curve.h>
+#include <qwt_plot_directpainter.h>
+#include <qwt_plot.h>
+#include <qwt_curve_fitter.h>
+#include <qwt_painter.h>
+#include <qwt_system_clock.h>
+#include <qwt_interval.h>
+
 #include <list>
 #include <vector>
 
-class Scope : public QWidget, public QwtPlot {
+class QwtPlotCurve;
+class QwtPlotMarker;
+class QwtPlotDirectPainter;
+
+class Scope : public QwtPlot {
 
 	Q_OBJECT
 	public:
@@ -62,7 +79,7 @@ class Scope : public QWidget, public QwtPlot {
 			NEG,
 		};
 
-		Scope(QWidget *);
+		Scope(QWidget  * = NULL);
 		virtual ~Scope(void);
 		bool paused(void) const;
 		std::list<Channel>::iterator insertChannel(QString,double,double,const QPen &,void *);
@@ -134,6 +151,12 @@ class Scope : public QWidget, public QwtPlot {
 		std::list<size_t> triggerQueue;
 		std::list<Channel>::iterator triggerChannel;
 		size_t triggerLast;
+
+		// Scope painter
+		QwtPlotMarker *d_origin;
+		QwtPlotCurve *d_curve;
+		int d_paintedPoints;
+		QwtPlotDirectPainter *d_directPainter;
 
 		bool isPaused;
 		QPixmap background;

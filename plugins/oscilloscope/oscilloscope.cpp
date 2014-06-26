@@ -20,6 +20,7 @@
 #include <QTimer>
 #include <QPainter>
 #include <QMdiSubWindow>
+#include <QEvent>
 
 #include "oscilloscope.h"
 #include <debug.h>
@@ -1031,17 +1032,19 @@ Oscilloscope::Panel::Panel(QWidget *parent) :	Scope(parent), RT::Thread(0), fifo
 	adjustDataSize();
 	properties = new Properties(this);
 
-	// Create parent widget and layout
+	// Create parent widget and layout for scope
 	scopeGroup = new QGroupBox;
 	QGridLayout *layout = new QGridLayout;
 
 	// Create plot group and layout
 	QHBoxLayout *scopeLayout = new QHBoxLayout;
+	d_plot = new Scope(this);
+	scopeLayout->addWidget(d_plot);
 
 	// Add to layout
 	scopeGroup->setLayout(scopeLayout);
 
-	// Create group and layout for buttons
+	// Create group and layout for buttons at bottom of scope
 	bttnGroup = new QGroupBox;
 	QHBoxLayout *bttnLayout = new QHBoxLayout;
 

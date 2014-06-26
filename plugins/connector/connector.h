@@ -19,14 +19,15 @@
 #ifndef CONNECTOR_H
 #define CONNECTOR_H
 
+#include <QWidget>
+#include <QtGui>
+#include <QMdiArea>
+
 #include <event.h>
 #include <fifo.h>
 #include <io.h>
 #include <plugin.h>
 #include <vector>
-#include <QWidget>
-#include <QtGui>
-#include <QMdiArea>
 
 namespace Connector {
 	class Panel : public QWidget, Event::Handler {
