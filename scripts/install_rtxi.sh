@@ -19,6 +19,7 @@
 
 #!/bin/bash
 
+# Start at top
 cd ../
 
 # Installing HDF5
@@ -39,6 +40,27 @@ else
 			echo "----->HDF5 installed."
 	else
 		echo "----->HDF5 installation failed."
+		exit
+	fi
+fi
+
+# Installing Qwt
+echo "----->Checking for Qwt"
+
+if [ -f "/usr/local/lib/qwt/includes/qwt.h" ]; then
+	echo "----->Qwt already installed."
+else
+	echo "----->Installing Qwt..."
+	cd qwt
+	tar xf qwt-6.1.0.tar.bz2
+	cd qwt-6.1.0
+	make
+	sudo make install
+	cd ../../
+	if [ $? -eq 0 ]; then
+			echo "----->Qwt installed."
+	else
+		echo "----->Qwt installation failed."
 		exit
 	fi
 fi
