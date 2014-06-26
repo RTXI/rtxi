@@ -54,6 +54,7 @@ else
 	cd qwt
 	tar xf qwt-6.1.0.tar.bz2
 	cd qwt-6.1.0
+	qmake qwt.pro
 	make
 	sudo make install
 	cd ../../
