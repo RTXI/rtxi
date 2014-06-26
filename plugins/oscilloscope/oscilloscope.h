@@ -34,10 +34,13 @@
 #include "scope.h"
 
 namespace Oscilloscope {
+	
 	class Panel;
+
 	class Properties : public QDialog, public Event::Handler {
 		Q_OBJECT
-			friend class Panel;
+		
+		friend class Panel;
 
 		public:
 		Properties(Panel *);
@@ -104,18 +107,18 @@ namespace Oscilloscope {
 		QCheckBox *trigHoldingCheck;
 		QLineEdit *trigHoldoffEdit;
 		QComboBox *trigHoldoffList;
-
-	}; // class Properties
+	}; // Properties
 
 	class Plugin : public QObject, public ::Plugin::Object, public RT::Thread {
 		Q_OBJECT
-			friend class Panel;
+
+		friend class Panel;
 
 		public:
 		static Plugin *getInstance(void);
 
 		public slots:
-			void createOscilloscopePanel(void);
+		void createOscilloscopePanel(void);
 
 		protected:
 		virtual void doDeferred(const Settings::Object::State &);
@@ -132,12 +135,12 @@ namespace Oscilloscope {
 		void removeOscilloscopePanel(Panel *);
 		int menuID;
 		std::list<Panel *> panelList;
-
 	}; // Plugin
 
 	class Panel : public Scope, public RT::Thread, public virtual Settings::Object {
 		Q_OBJECT
-			friend class Properties;
+
+		friend class Properties;
 
 		public:
 		Panel(QWidget *);
@@ -151,7 +154,7 @@ namespace Oscilloscope {
 		void doSave(Settings::Object::State &) const;
 
 		public slots:
-			void showProperties(void);
+		void showProperties(void);
 		void timeoutEvent(void);
 
 		protected:
@@ -174,6 +177,7 @@ namespace Oscilloscope {
 		std::vector<IO::Block *> blocks;
 		size_t counter;
 		size_t downsample_rate;
-	}; // class Panel
-}; // class Oscilloscope
+	}; // Panel
+}; // Oscilloscope
+
 #endif // OSCILLOSCOPE_H

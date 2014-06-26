@@ -1,6 +1,6 @@
 ACLOCAL_AMFLAGS ?= -I $(top_srcdir)/m4
 
-QT_CXXFLAGS = -I/usr/include/qt4 -I/usr/include/qt4/QtCore/ -I/usr/include/qt4/QtGui/ -I/usr/include/qt4/QtXml/ -I/usr/local/lib/rtxi_includes/ -I/usr/local/lib/qwt/include/
+QT_CXXFLAGS = -I/usr/include/qt4 -I/usr/local/lib/qwt -I/usr/include/qt4/QtCore/ -I/usr/include/qt4/QtGui/ -I/usr/include/qt4/QtXml/ -I/usr/local/lib/rtxi_includes/ -I/usr/local/lib/qwt/include/
 QT_LIBS     = -L/usr/lib/qt4/ -L/usr/local/lib/qwt/lib/ -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_XML_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_SHARED -lQtGui -lQtCore -lQt3Support -lQtXml -lqwt
 MOC					= /usr/bin/moc
 UIC 				= /usr/bin/uic
