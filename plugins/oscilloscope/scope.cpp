@@ -60,12 +60,14 @@ Scope::Scope(QWidget *parent) : QwtPlot(parent) {
 	// Initialize director
 	d_directPainter = new QwtPlotDirectPainter();
 	setAutoReplot(false);
-	setCanvas(new Scope::Canvas());
-	plotLayout()->setAlignCanvasToScales(true);
+	setCanvas(new Canvas());
+	plotLayout()->setAlignCanvasToScales(false);
+	enableAxis(yLeft,false);
+	enableAxis(xBottom,false);
 
 	// Setup grid
 	QwtPlotGrid *grid = new QwtPlotGrid();
-	grid->setPen(Qt::gray, 0.0, Qt::DotLine);
+	grid->setPen(Qt::black, 0.0, Qt::DotLine);
 	grid->enableX(true);
 	grid->enableY(true);
 	grid->attach(this);
@@ -107,6 +109,9 @@ bool Scope::paused(void) const {
 void Scope::timeoutEvent(void) {
 	if(!triggering)
 		update(drawForeground());
+}
+
+void Scope::captureScope(void) {
 }
 
 void Scope::togglePause(void) {

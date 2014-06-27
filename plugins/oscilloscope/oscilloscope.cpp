@@ -1091,11 +1091,11 @@ Oscilloscope::Panel::Panel(QWidget *parent) :	Scope(parent), RT::Thread(0), fifo
 	properties = new Properties(this);
 
 	// Create parent widget and layout for scope
-	scopeGroup = new QGroupBox;
-	QGridLayout *layout = new QGridLayout;
+	scopeGroup = new QGroupBox(this);
+	QVBoxLayout *layout = new QVBoxLayout;
 
 	// Create plot group and layout
-	QHBoxLayout *scopeLayout = new QHBoxLayout;
+	QHBoxLayout *scopeLayout = new QHBoxLayout(this);
 	d_plot = new Scope(this);
 	scopeLayout->addWidget(d_plot);
 
@@ -1104,9 +1104,12 @@ Oscilloscope::Panel::Panel(QWidget *parent) :	Scope(parent), RT::Thread(0), fifo
 
 	// Create group and layout for buttons at bottom of scope
 	bttnGroup = new QGroupBox;
-	QHBoxLayout *bttnLayout = new QHBoxLayout;
+	QHBoxLayout *bttnLayout = new QHBoxLayout(this);
 
 	// Create buttons
+	captureButton = new QPushButton("Capture");
+	QObject::connect(captureButton,SIGNAL(clicked()),this,SLOT(captureScope()));
+	bttnLayout->addWidget(captureButton);
 	pauseButton = new QPushButton("Pause");
 	pauseButton->setCheckable(true);
 	QObject::connect(pauseButton,SIGNAL(clicked()),this,SLOT(togglePause()));
@@ -1119,8 +1122,8 @@ Oscilloscope::Panel::Panel(QWidget *parent) :	Scope(parent), RT::Thread(0), fifo
 	bttnGroup->setLayout(bttnLayout);
 
 	// Set things up to show
-	layout->addWidget(scopeGroup, 1, 0, 6, 6);
-	layout->addWidget(bttnGroup, 7, 5, 1, 1);
+	layout->addWidget(scopeGroup, 10);
+	layout->addWidget(bttnGroup, 1);
 
 	// Show stuff
 	setLayout(layout);

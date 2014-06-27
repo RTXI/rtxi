@@ -165,6 +165,7 @@ namespace Oscilloscope {
 		QGroupBox *scopeGroup;
 		QGroupBox *bttnGroup;
 
+		QPushButton *captureButton;
 		QPushButton *pauseButton;
 		QPushButton *settingsButton;
 
