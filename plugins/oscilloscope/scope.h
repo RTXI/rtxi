@@ -33,6 +33,7 @@
 #include <qwt_plot_curve.h>
 #include <qwt_plot_directpainter.h>
 #include <qwt_plot.h>
+#include <qwt.h>
 #include <qwt_curve_fitter.h>
 #include <qwt_painter.h>
 #include <qwt_system_clock.h>
@@ -48,6 +49,7 @@ class QwtPlotDirectPainter;
 class Scope : public QwtPlot {
 
 	Q_OBJECT
+
 	public:
 
 		class Channel {
@@ -73,14 +75,65 @@ class Scope : public QwtPlot {
 			void *info;
 		}; // class Channel
 
+		class Canvas : public QwtPlotCanvas {
+
+			public:
+				Canvas(QwtPlot *plot = NULL) : QwtPlotCanvas(plot) {
+
+					// The backing store is important, when working with widget
+					// overlays ( f.e rubberbands for zooming ).
+					// Here we don't have them and the internal
+					// backing store of QWidget is good enough.
+					setPaintAttribute(QwtPlotCanvas::BackingStore, false);
+
+					if(QwtPainter::isX11GraphicsSystem()) {
+#if QT_VERSION < 0x050000
+						// Even if not liked by the Qt development, Qt::WA_PaintOutsidePaintEvent
+						// works on X11. This has a nice effect on the performance.
+						setAttribute( Qt::WA_PaintOutsidePaintEvent, true );
+#endif
+
+						// Disabling the backing store of Qt improves the performance
+						// for the direct painter even more, but the canvas becomes
+						// a native window of the window system, receiving paint events
+						// for resize and expose operations. Those might be expensive
+						// when there are many points and the backing store of
+						// the canvas is disabled. So in this application
+						// we better don't both backing stores.
+						if(testPaintAttribute(QwtPlotCanvas::BackingStore)) {
+							setAttribute(Qt::WA_PaintOnScreen, true);
+							setAttribute(Qt::WA_NoSystemBackground, true);
+						}
+					}
+					setupPalette();
+				}
+
+			private:
+				void setupPalette()	{
+					QPalette pal = palette();
+
+#if QT_VERSION >= 0x040400
+					QLinearGradient gradient;
+					gradient.setCoordinateMode(QGradient::StretchToDeviceMode);
+					gradient.setColorAt(1.0, QColor(Qt::white));
+					pal.setBrush(QPalette::Window, QBrush(gradient));
+#else
+					pal.setBrush(QPalette::Window, QBrush(color));
+#endif
+					pal.setColor(QPalette::WindowText, Qt::green);
+					setPalette(pal);
+				}
+		};
+
 		enum trig_t{
 			NONE,
 			POS,
 			NEG,
 		};
 
-		Scope(QWidget  * = NULL);
+		Scope(QWidget * = NULL);
 		virtual ~Scope(void);
+
 		bool paused(void) const;
 		std::list<Channel>::iterator insertChannel(QString,double,double,const QPen &,void *);
 		void *removeChannel(std::list<Channel>::iterator);
@@ -119,9 +172,10 @@ class Scope : public QwtPlot {
 		void setChannelPen(std::list<Channel>::iterator,const QPen &);
 		void setChannelLabel(std::list<Channel>::iterator,const QString &);
 
-	public slots:
-		void timeoutEvent(void);
+		public slots:
+			void timeoutEvent(void);
 		void togglePause(void);
+		void captureScope(void);
 
 	protected:
 		void paintEvent(QPaintEvent *);
@@ -152,11 +206,13 @@ class Scope : public QwtPlot {
 		std::list<Channel>::iterator triggerChannel;
 		size_t triggerLast;
 
-		// Scope painter
+		// Scope primary paint element
+		QwtPlotDirectPainter *d_directPainter;
+
+		// Scope painter elements
 		QwtPlotMarker *d_origin;
 		QwtPlotCurve *d_curve;
 		int d_paintedPoints;
-		QwtPlotDirectPainter *d_directPainter;
 
 		bool isPaused;
 		QPixmap background;

@@ -57,6 +57,9 @@ else
 	qmake qwt.pro
 	make
 	sudo make install
+	sudo cp /usr/local/lib/qwt/lib/libqwt.so.6.1.0 /usr/lib/.
+	sudo ln -sf /usr/lib/libqwt.so.6.1.0 /usr/lib/libqwt.so
+	sudo ldconfig
 	cd ../../
 	if [ $? -eq 0 ]; then
 			echo "----->Qwt installed."
@@ -112,6 +115,7 @@ sudo cp rtxi.conf /etc/
 sudo cp /usr/xenomai/sbin/analogy_config /usr/sbin/
 sudo cp ./scripts/rtxi_load_analogy /etc/init.d/
 sudo update-rc.d rtxi_load_analogy defaults
+sudo ldconfig
 
 echo ""
 if [ $? -eq 0 ]; then

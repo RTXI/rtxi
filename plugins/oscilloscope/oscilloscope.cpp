@@ -22,13 +22,14 @@
 #include <QMdiSubWindow>
 #include <QEvent>
 
-#include "oscilloscope.h"
 #include <debug.h>
 #include <main_window.h>
 #include <rt.h>
 #include <workspace.h>
 #include <cmath>
 #include <sstream>
+
+#include "oscilloscope.h"
 
 namespace {
 	class SyncEvent : public RT::Event {
@@ -46,6 +47,60 @@ namespace {
 		double previous; // stores previous value for trigger and downsample buffer
 	};
 } // namespace
+
+
+////////// #Plugin
+
+
+extern "C" Plugin::Object * createRTXIPlugin(void *) {
+	return Oscilloscope::Plugin::getInstance();
+}
+
+Oscilloscope::Plugin::Plugin(void) {
+	MainWindow::getInstance()->createSystemMenuItem("Oscilloscope",this,SLOT(createOscilloscopePanel(void)));
+}
+
+Oscilloscope::Plugin::~Plugin(void) {
+	while (panelList.size())
+		delete panelList.front();
+	instance = 0;
+}
+
+void Oscilloscope::Plugin::createOscilloscopePanel(void) {
+	Panel *panel = new Panel(MainWindow::getInstance()->centralWidget());
+	panelList.push_back(panel);
+}
+
+void Oscilloscope::Plugin::removeOscilloscopePanel(Oscilloscope::Panel *panel) {
+	panelList.remove(panel);
+}
+
+void Oscilloscope::Plugin::doDeferred(const Settings::Object::State &s) {
+	size_t i = 0;
+	for (std::list<Panel *>::iterator j = panelList.begin(), end =
+			panelList.end(); j != end; ++j)
+		(*j)->deferred(s.loadState(QString::number(i++).toStdString()));
+}
+
+void Oscilloscope::Plugin::doLoad(const Settings::Object::State &s) {
+	for (size_t i = 0; i < static_cast<size_t> (s.loadInteger("Num Panels")); ++i) {
+		Panel *panel = new Panel(MainWindow::getInstance()->centralWidget());
+		panelList.push_back(panel);
+		panel->load(s.loadState(QString::number(i).toStdString()));
+	}
+}
+
+void Oscilloscope::Plugin::doSave(Settings::Object::State &s) const {
+	s.saveInteger("Num Panels", panelList.size());
+	size_t n = 0;
+	for (std::list<Panel *>::const_iterator i = panelList.begin(), end =
+			panelList.end(); i != end; ++i)
+		s.saveState(QString::number(n++).toStdString(), (*i)->save());
+}
+
+
+////////// #Properties
+
 
 Oscilloscope::Properties::Properties(Oscilloscope::Panel *parent) : QDialog(MainWindow::getInstance()), panel(parent) {
 
@@ -195,8 +250,7 @@ void Oscilloscope::Properties::buildChannelList(void) {
 
 	IO::Block *block = panel->blocks[blockList->currentIndex()];
 	IO::flags_t type;
-	switch (typeList->currentIndex())
-	{
+	switch (typeList->currentIndex()) {
 		case 0:
 			type = Workspace::INPUT;
 			break;
@@ -1007,6 +1061,10 @@ void Oscilloscope::Properties::updateDownsampleRate(int r) {
 	panel->updateDownsampleRate(downsample_rate);
 }
 
+
+////////// #Panel
+
+
 Oscilloscope::Panel::Panel(QWidget *parent) :	Scope(parent), RT::Thread(0), fifo(10 * 1048576) {
 
 	// Setup widget attribute
@@ -1033,11 +1091,11 @@ Oscilloscope::Panel::Panel(QWidget *parent) :	Scope(parent), RT::Thread(0), fifo
 	properties = new Properties(this);
 
 	// Create parent widget and layout for scope
-	scopeGroup = new QGroupBox;
-	QGridLayout *layout = new QGridLayout;
+	scopeGroup = new QGroupBox(this);
+	QVBoxLayout *layout = new QVBoxLayout;
 
 	// Create plot group and layout
-	QHBoxLayout *scopeLayout = new QHBoxLayout;
+	QHBoxLayout *scopeLayout = new QHBoxLayout(this);
 	d_plot = new Scope(this);
 	scopeLayout->addWidget(d_plot);
 
@@ -1046,9 +1104,12 @@ Oscilloscope::Panel::Panel(QWidget *parent) :	Scope(parent), RT::Thread(0), fifo
 
 	// Create group and layout for buttons at bottom of scope
 	bttnGroup = new QGroupBox;
-	QHBoxLayout *bttnLayout = new QHBoxLayout;
+	QHBoxLayout *bttnLayout = new QHBoxLayout(this);
 
 	// Create buttons
+	captureButton = new QPushButton("Capture");
+	QObject::connect(captureButton,SIGNAL(clicked()),this,SLOT(captureScope()));
+	bttnLayout->addWidget(captureButton);
 	pauseButton = new QPushButton("Pause");
 	pauseButton->setCheckable(true);
 	QObject::connect(pauseButton,SIGNAL(clicked()),this,SLOT(togglePause()));
@@ -1061,8 +1122,8 @@ Oscilloscope::Panel::Panel(QWidget *parent) :	Scope(parent), RT::Thread(0), fifo
 	bttnGroup->setLayout(bttnLayout);
 
 	// Set things up to show
-	layout->addWidget(scopeGroup, 1, 0, 6, 6);
-	layout->addWidget(bttnGroup, 7, 5, 1, 1);
+	layout->addWidget(scopeGroup, 10);
+	layout->addWidget(bttnGroup, 1);
 
 	// Show stuff
 	setLayout(layout);
@@ -1158,8 +1219,8 @@ bool Oscilloscope::Panel::setInactiveSync(void) {
 }
 
 void Oscilloscope::Panel::flushFifo(void) {
-	char junk;
-	while (fifo.read(&junk, sizeof(junk), false))
+	char yogi;
+	while (fifo.read(&yogi, sizeof(yogi), false))
 		;
 }
 
@@ -1196,19 +1257,6 @@ void Oscilloscope::Panel::mouseDoubleClickEvent(QMouseEvent *e) {
 		properties->showDisplayTab();
 	}
 }
-
-/*
- * Set up mouse events for right click press
- void Oscilloscope::Panel::mousePressEvent(QMouseEvent *e) {
- if (e->button() == Qt::RightButton) {
- QMenu menu(this);
- menu.addAction("Pause",this,SLOT(togglePause(void)),paused());
- menu.addAction("Properties",this,SLOT(showProperties(void)));
- menu.setMouseTracking(true);
- menu.exec(QCursor::pos());
- }
- }
- */
 
 void Oscilloscope::Panel::doDeferred(const Settings::Object::State &s) {
 	bool active = setInactiveSync();
@@ -1305,52 +1353,6 @@ void Oscilloscope::Panel::doSave(Settings::Object::State &s) const {
 		s.saveInteger(str.str() + " pen style", pen.style());
 		s.saveInteger(str.str() + " pen width", pen.width());
 	}
-}
-
-extern "C" Plugin::Object * createRTXIPlugin(void *) {
-	return Oscilloscope::Plugin::getInstance();
-}
-
-Oscilloscope::Plugin::Plugin(void) {
-	MainWindow::getInstance()->createSystemMenuItem("Oscilloscope",this,SLOT(createOscilloscopePanel(void)));
-}
-
-Oscilloscope::Plugin::~Plugin(void) {
-	while (panelList.size())
-		delete panelList.front();
-	instance = 0;
-}
-
-void Oscilloscope::Plugin::createOscilloscopePanel(void) {
-	Panel *panel = new Panel(MainWindow::getInstance()->centralWidget());
-	panelList.push_back(panel);
-}
-
-void Oscilloscope::Plugin::removeOscilloscopePanel(Oscilloscope::Panel *panel) {
-	panelList.remove(panel);
-}
-
-void Oscilloscope::Plugin::doDeferred(const Settings::Object::State &s) {
-	size_t i = 0;
-	for (std::list<Panel *>::iterator j = panelList.begin(), end =
-			panelList.end(); j != end; ++j)
-		(*j)->deferred(s.loadState(QString::number(i++).toStdString()));
-}
-
-void Oscilloscope::Plugin::doLoad(const Settings::Object::State &s) {
-	for (size_t i = 0; i < static_cast<size_t> (s.loadInteger("Num Panels")); ++i) {
-		Panel *panel = new Panel(MainWindow::getInstance()->centralWidget());
-		panelList.push_back(panel);
-		panel->load(s.loadState(QString::number(i).toStdString()));
-	}
-}
-
-void Oscilloscope::Plugin::doSave(Settings::Object::State &s) const {
-	s.saveInteger("Num Panels", panelList.size());
-	size_t n = 0;
-	for (std::list<Panel *>::const_iterator i = panelList.begin(), end =
-			panelList.end(); i != end; ++i)
-		s.saveState(QString::number(n++).toStdString(), (*i)->save());
 }
 
 static Mutex mutex;
