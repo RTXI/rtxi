@@ -6,7 +6,7 @@ include $(top_srcdir)/Makefile.buildvars
 
 pkglib_LTLIBRARIES = oscilloscope.la
 
-oscilloscope_la_LDFLAGS = -module -avoid-version
+oscilloscope_la_LDFLAGS = -module -avoid-version -lqwt
 
 oscilloscope_la_SOURCES = \
 		oscilloscope.h \
