@@ -25,6 +25,7 @@ cd ../
 sudo make uninstall
 sudo make clean
 sudo rm -rf /usr/local/lib/rtxi
+sudo rm -rf /usr/local/lib/qwt
 
 if [ $? -eq 0 ]; then
 	echo "----->RTXI intallation successful. Reboot may be required."

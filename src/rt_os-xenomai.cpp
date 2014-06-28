@@ -93,11 +93,11 @@ void RT::OS::deleteTask(RT::OS::Task task) {
 	rt_task_delete(&t->task);
 }
 
-	bool RT::OS::isRealtime(void) {
-		if (init_rt && pthread_getspecific(is_rt_key))
-			return true;
-		return false;
-	}
+bool RT::OS::isRealtime(void) {
+	if (init_rt && pthread_getspecific(is_rt_key))
+		return true;
+	return false;
+}
 
 long long RT::OS::getTime(void) {
 	return rt_timer_tsc2ns(rt_timer_tsc());

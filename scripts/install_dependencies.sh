@@ -50,8 +50,6 @@ fi
 # Install qwt
 echo "Installing widget library..."
 
-#sudo ln -s /usr/lib/libqwt-qt4.so.5 /usr/lib/libqwt.so
-
 if [ $? -eq 0 ]; then
 	echo "----->Dependencies installed."
 else
