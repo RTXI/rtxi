@@ -11,6 +11,4 @@ To get started, please refer to the <a href="https://github.com/RTXI/rtxi/wiki">
 
 To see who/how RTXI is being used around the world and to stay up-to-date, please visit our <a href="http://www.rtxi.org">website</a>.
 
-
-[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/RTXI/rtxi/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
-
+<a href="github.com/RTXI/rtxi/issues">Submit a bug report or a new feature request</a>
