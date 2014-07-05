@@ -88,6 +88,7 @@ void DefaultGUIModel::createGUI(DefaultGUIModel::variable_t *var, int size) {
 
 	// Make Mdi
 	subWindow = new QMdiSubWindow;
+	// VISIT TWO
 	//subWindow->setFixedSize(400,200);
 	subWindow->setWindowFlags(Qt::CustomizeWindowHint);
 	subWindow->setWindowFlags(Qt::WindowCloseButtonHint);
@@ -168,8 +169,10 @@ void DefaultGUIModel::createGUI(DefaultGUIModel::variable_t *var, int size) {
 	// Add layout to box
 	gridBox->setLayout(gridLayout);
 	buttonGroup->setLayout(buttonLayout);
+	// Keep one row of space above for users to place in grid
 	layout->addWidget(gridBox, 1, 0);
-	layout->addWidget(buttonGroup, 2, 0);
+	// Attempt to put these at the bottom at all times
+	layout->addWidget(buttonGroup, 10, 0);
 
 	// Set layout to Mdi and show
 	setLayout(layout);
@@ -219,6 +222,7 @@ void DefaultGUIModel::modify(void) {
 		if (i->second.type & COMMENT) {
 			QByteArray textData = i->second.edit->text().toLatin1();
 			const char *text = textData.constData();
+			// VISIT TWO
 			//Workspace::Instance::setComment(i->second.index, i->second.edit->text().toLatin1());
 			Workspace::Instance::setComment(i->second.index, text);
 		}
@@ -243,6 +247,7 @@ void DefaultGUIModel::setComment(const QString &name, QString comment) {
 		n->second.edit->setText(comment);
 		QByteArray textData = comment.toLatin1();
 		const char *text = textData.constData();
+		// VISIT TWO
 		//Workspace::Instance::setComment(n->second.index, comment.toLatin1());
 		Workspace::Instance::setComment(n->second.index, text);
 	}
