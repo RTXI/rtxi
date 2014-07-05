@@ -82,7 +82,7 @@ Connector::Panel::Panel(QWidget *parent) : QWidget(parent) {
 
 	// Create elements for button
 	connectionButton = new QPushButton("Connect");
-	connectionButton->isCheckable();
+	connectionButton->setCheckable(true);
 	buttonLayout->addWidget(connectionButton);
 	QObject::connect(connectionButton,SIGNAL(toggled(bool)),this,SLOT(toggleConnection(bool)));
 
@@ -302,14 +302,10 @@ void Connector::Panel::highlightConnectionBox(QListWidgetItem * item) {
 }
 
 void Connector::Panel::toggleConnection(bool on) {
-	printf("in the toggleconection\n");
-
 	IO::Block *src = blocks[outputBlock->currentIndex()];
 	IO::Block *dest = blocks[inputBlock->currentIndex()];
 	size_t src_num = outputChannel->currentIndex();
 	size_t dest_num = inputChannel->currentIndex();
-
-	printf("in toggle %zu %zu \n", src_num, dest_num);
 
 	if(IO::Connector::getInstance()->connected(src,src_num,dest,dest_num) == on)
 		return;
@@ -325,8 +321,6 @@ void Connector::Panel::updateConnectionButton(void) {
 	IO::Block *dest = blocks[inputBlock->currentIndex()];
 	size_t src_num = outputChannel->currentIndex();
 	size_t dest_num = inputChannel->currentIndex();
-
-	printf("in update %zu %zu \n", src_num, dest_num);
 
 	connectionButton->setChecked(IO::Connector::getInstance()->connected(src,src_num,dest,dest_num));
 }
