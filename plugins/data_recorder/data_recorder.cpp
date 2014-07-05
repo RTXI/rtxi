@@ -649,7 +649,7 @@ void DataRecorder::Panel::changeDataFile(void) {
 	fileDialog.setWindowTitle("Select Data File");
 
 	QSettings userprefs;
-	userprefs.setPath(QSettings::NativeFormat, QSettings::UserScope, "RTXI");
+	userprefs.setPath(QSettings::NativeFormat, QSettings::SystemScope, "/usr/local/share/rtxi/");
 	fileDialog.setDirectory(userprefs.value("/dirs/data", getenv("HOME")).toString());
 
 	QStringList filterList;
@@ -748,8 +748,11 @@ void DataRecorder::Panel::updateDownsampleRate(int r) {
 }
 
 void DataRecorder::Panel::customEvent(QEvent *e) {
+	printf("in customevent\n");
 	if (e->type() == QFileExistsEvent) {
+		printf("hit1\n");
 		FileExistsEventData *data = reinterpret_cast<FileExistsEventData *> (e);
+		printf("hit1b\n");
 		data->response = QMessageBox::question(this, "File exists",
 				"The file already exists. What would you like to do?",
 				"Append", "Overwrite", "Cancel", 0, 2);
@@ -758,14 +761,19 @@ void DataRecorder::Panel::customEvent(QEvent *e) {
 	} else if (e->type() == QNoFileOpenEvent) {
 		QMessageBox::critical(
 				this, "Failed to start recording.",
-				"No file has been opened for writing so recording could not be started.",
+				"Please specify a file to write data to.",
 				QMessageBox::Ok, QMessageBox::NoButton);
 		recordStatus->setText("Not Recording");
 	} else if (e->type() == QSetFileNameEditEvent) {
+		printf("hit3\n");
 		SetFileNameEditEventData *data = reinterpret_cast<SetFileNameEditEventData *> (e);
+		printf("hit3a %s\n",data->filename.toStdString().c_str());
 		fileNameEdit->setText(data->filename);
+		printf("hit3b\n");
 		recordStatus->setText("Ready.");
+		printf("hit3c\n");
 		data->done.wakeAll();
+		printf("hitd\n");
 	} else if (e->type() == QDisableGroupsEvent) {
 		channelBox->setEnabled(false);
 		sampleBox->setEnabled(false);
@@ -1276,7 +1284,7 @@ extern "C" Plugin::Object *createRTXIPlugin(void *) {
 DataRecorder::Plugin::Plugin(void) {
 	// get the HDF data recorder buffer size from user preference
 	QSettings userprefs;
-	userprefs.setPath(QSettings::NativeFormat, QSettings::UserScope, "RTXI");
+	userprefs.setPath(QSettings::NativeFormat, QSettings::SystemScope, "/usr/local/share/rtxi/");
 	buffersize = (userprefs.value("/system/HDFbuffer", 10).toInt())*1048576;
 
 	MainWindow::getInstance()->createSystemMenuItem("HDF Data Recorder",this,SLOT(createDataRecorderPanel(void)));

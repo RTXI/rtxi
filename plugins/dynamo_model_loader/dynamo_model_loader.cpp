@@ -48,7 +48,7 @@ DynamoModelLoader::DynamoModelLoader(void) {
 
 	// add recently used modules to the menu
 	QSettings userprefs;
-	userprefs.setPath(QSettings::NativeFormat, QSettings::UserScope, "RTXI");
+	userprefs.setPath(QSettings::NativeFormat, QSettings::SystemScope, "/usr/local/share/rtxi/");
 	userprefs.beginGroup("/recentFileList");
 	QStringList entries = userprefs.childKeys();
 	userprefs.endGroup();
@@ -135,7 +135,7 @@ void DynamoModelLoader::load(char* srcpath) {
 
 void DynamoModelLoader::load_dialog(void) {
 	QSettings userprefs;
-	userprefs.setPath(QSettings::NativeFormat, QSettings::UserScope, "RTXI");
+	userprefs.setPath(QSettings::NativeFormat, QSettings::SystemScope, "/usr/local/share/rtxi/");
 	//QString settingsDir = userprefs.readEntry("/dirs/dynamomodels", getenv("HOME"));
 
 	QString file_name = QFileDialog::getOpenFileName(MainWindow::getInstance(), userprefs.value("/dirs/dynamomodels", getenv("HOME")).toString(),
@@ -148,14 +148,14 @@ void DynamoModelLoader::load_dialog(void) {
 
 void DynamoModelLoader::load_recent(int i) {
 	QSettings userprefs;
-	userprefs.setPath(QSettings::NativeFormat, QSettings::UserScope, "RTXI");
+	userprefs.setPath(QSettings::NativeFormat, QSettings::SystemScope, "/usr/local/share/rtxi/");
 	QString filename = userprefs.value("/recentFileList/"+QString::number(i)).toString();
 	Plugin::Manager::getInstance()->load(filename.toLatin1());
 }
 
 void DynamoModelLoader::load_setting(int i) {
 	QSettings userprefs;
-	userprefs.setPath(QSettings::NativeFormat, QSettings::UserScope, "RTXI");
+	userprefs.setPath(QSettings::NativeFormat, QSettings::SystemScope, "/usr/local/share/rtxi/");
 	QString filename = userprefs.value("/recentSettingsList/"+QString::number(i)).toString();
 	Settings::Manager::getInstance()->load(filename.toStdString());
 }
