@@ -88,10 +88,10 @@ void DefaultGUIModel::createGUI(DefaultGUIModel::variable_t *var, int size) {
 
 	// Make Mdi
 	subWindow = new QMdiSubWindow;
-	// VISIT TWO
-	//subWindow->setFixedSize(400,200);
 	subWindow->setWindowFlags(Qt::CustomizeWindowHint);
 	subWindow->setWindowFlags(Qt::WindowCloseButtonHint);
+	subWindow->setOption(QMdiSubWindow::RubberBandResize, true);
+	subWindow->setOption(QMdiSubWindow::RubberBandMove, true);
 	MainWindow::getInstance()->createMdi(subWindow);
 
 	// Create main layout
@@ -182,6 +182,10 @@ void DefaultGUIModel::createGUI(DefaultGUIModel::variable_t *var, int size) {
 
 void DefaultGUIModel::update(DefaultGUIModel::update_flags_t) {
 }
+
+// VISIT TWO
+// USE THS TO REMOVE NEED FOR UNLOAD BUTTON
+// void QWidget::closeEvent(QCloseEvent *e) {}
 
 void DefaultGUIModel::exit(void) {
 	// Ensure that the realtime thread isn't in the middle of executing DefaultGUIModel::execute()
