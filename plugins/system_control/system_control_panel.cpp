@@ -257,7 +257,7 @@ SystemControlPanel::SystemControlPanel(QWidget *parent) : QWidget(parent) {
 	QPushButton *applyButton = new QPushButton("Apply");
 	QObject::connect(applyButton,SIGNAL(clicked(void)),this,SLOT(apply(void)));
 	buttonLayout->addWidget(applyButton);
-	QPushButton *cancelButton = new QPushButton("Cancel");
+	QPushButton *cancelButton = new QPushButton("Close");
 	QObject::connect(cancelButton,SIGNAL(clicked(void)),this,SLOT(goodbye(void)));
 	buttonLayout->addWidget(cancelButton);
 
