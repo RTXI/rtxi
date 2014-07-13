@@ -1,4 +1,4 @@
-#include <qwt/qwt_plot_printfilter.h>
+#include <qwt_plot_printfilter.h>
 
 class RTXIPrintFilter : public QwtPlotPrintFilter
 {

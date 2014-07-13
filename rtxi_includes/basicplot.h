@@ -6,9 +6,9 @@
 #define _BASICPLOT_H_ 1
 
 #include "scrollzoomer.h"
-#include <qwt-qt4/qwt_scale_widget.h>
-#include <qwt-qt4/qwt_scale_draw.h>
-#include <qwt-qt4/qwt_plot.h>
+#include <qwt_scale_widget.h>
+#include <qwt_scale_draw.h>
+#include <qwt_plot.h>
 
 class Zoomer : public ScrollZoomer
 {

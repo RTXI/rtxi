@@ -169,8 +169,10 @@ void DefaultGUIModel::createGUI(DefaultGUIModel::variable_t *var, int size) {
 	// Add layout to box
 	gridBox->setLayout(gridLayout);
 	buttonGroup->setLayout(buttonLayout);
+
 	// Keep one row of space above for users to place in grid
 	layout->addWidget(gridBox, 1, 0);
+
 	// Attempt to put these at the bottom at all times
 	layout->addWidget(buttonGroup, 10, 0);
 
