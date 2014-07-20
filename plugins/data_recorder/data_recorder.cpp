@@ -20,6 +20,7 @@
 #include <QFileDialog>
 #include <QEvent>
 
+#include <unistd.h>
 #include <compiler.h>
 #include <debug.h>
 #include <main_window.h>
