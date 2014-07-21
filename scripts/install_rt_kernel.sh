@@ -117,7 +117,7 @@ if [[ $OS == 'ubuntu' ]]
 then
 cd /opt
 sudo dpkg -i linux-image-*.deb
-sudo dpkg -i linux-headers*.deb
+sudo dpkg -i linux-headers-*.deb
 elif [[ $OS == 'scientific' ]]
 then
 cd $linux_tree
