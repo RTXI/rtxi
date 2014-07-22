@@ -1,7 +1,7 @@
 AC_INIT([RTXI],[2.0],[help@rtxi.org],rtxi)
 
 AM_CONFIG_HEADER(include/rtxi_config.h)
-AM_INIT_AUTOMAKE([foreign], [subdir-objects])
+AM_INIT_AUTOMAKE([foreign])
 AM_PATH_CPPUNIT
 AM_SILENT_RULES([yes])
 
