@@ -28,7 +28,7 @@ extern "C" Plugin::Object * createRTXIPlugin(void *) {
 }
 
 ModelLoader::ModelLoader(void) {
-	action = MainWindow::getInstance()->createModuleMenuItem("Load User Module", this, SLOT(load(void)));
+	action = MainWindow::getInstance()->createModuleMenuItem("Load Plugin", this, SLOT(load(void)));
 }
 
 ModelLoader::~ModelLoader(void) {
