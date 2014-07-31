@@ -50,8 +50,6 @@ namespace {
 
 
 ////////// #Plugin
-
-
 extern "C" Plugin::Object * createRTXIPlugin(void *) {
 	return Oscilloscope::Plugin::getInstance();
 }
@@ -100,8 +98,6 @@ void Oscilloscope::Plugin::doSave(Settings::Object::State &s) const {
 
 
 ////////// #Properties
-
-
 Oscilloscope::Properties::Properties(Oscilloscope::Panel *parent) : QDialog(MainWindow::getInstance()), panel(parent) {
 
 	// Create tab widget
@@ -1063,8 +1059,6 @@ void Oscilloscope::Properties::updateDownsampleRate(int r) {
 
 
 ////////// #Panel
-
-
 Oscilloscope::Panel::Panel(QWidget *parent) :	Scope(parent), RT::Thread(0), fifo(10 * 1048576) {
 
 	// Setup widget attribute
