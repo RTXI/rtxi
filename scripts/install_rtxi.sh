@@ -28,56 +28,6 @@ QWT=${DEPS}/qwt
 # Start at top
 cd ${DEPS}
 
-# Installing HDF5
-echo "----->Checking for HDF5"
-
-if [ -f "/usr/include/hdf5.h" ]; then
-	echo "----->HDF5 already installed."
-else
-	echo "----->Installing HDF5..."
-	cd ${HDF}
-	tar xf hdf5-1.8.4.tar.bz2
-	cd hdf5-1.8.4
-	./configure --prefix=/usr
-	make -j2
-	sudo make install
-	cd ${ROOT}
-	if [ $? -eq 0 ]; then
-			echo "----->HDF5 installed."
-	else
-		echo "----->HDF5 installation failed."
-		exit
-	fi
-fi
-
-# Installing Qwt
-echo "----->Checking for Qwt"
-
-if [ -f "/usr/local/lib/qwt/include/qwt.h" ]; then
-	echo "----->Qwt already installed."
-else
-	echo "----->Installing Qwt..."
-	cd ${QWT}
-	tar xf qwt-6.1.0.tar.bz2
-	cd qwt-6.1.0
-	qmake qwt.pro
-	make
-	sudo make install
-	sudo cp /usr/local/lib/qwt/lib/libqwt.so.6.1.0 /usr/lib/.
-	sudo ln -sf /usr/lib/libqwt.so.6.1.0 /usr/lib/libqwt.so
-	sudo ldconfig
-	cd ${ROOT}
-	if [ $? -eq 0 ]; then
-		echo "----->Qwt installed."
-	else
-		echo "----->Qwt installation failed."
-	exit
-	fi
-fi
-
-# Install rtxi_includes
-sudo rsync -a ${DEPS}/rtxi_includes /usr/local/lib/.
-
 # Start configuring - by default configured to run on non-RT kernel
 echo "----->Starting RTXI installation..."
 ./autogen.sh
