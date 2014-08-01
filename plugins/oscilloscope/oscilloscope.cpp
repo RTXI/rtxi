@@ -14,7 +14,7 @@
 	 You should have received a copy of the GNU General Public License
 	 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-*/
+ */
 
 #include <QtGui>
 #include <QTimer>
@@ -352,8 +352,7 @@ void Oscilloscope::Properties::applyChannelTab(void) {
 
 			bool active = panel->setInactiveSync();
 
-			i = panel->insertChannel(info->name + " 2 V/div", 2.0, 0.0, QPen(
-						Qt::red, 1, Qt::SolidLine), info);
+			i = panel->insertChannel(info->name + " 2 V/div", 2.0, 0.0, QPen(Qt::red, 1, Qt::SolidLine), info);
 
 			panel->flushFifo();
 			panel->setActive(active);
@@ -443,7 +442,7 @@ void Oscilloscope::Properties::applyChannelTab(void) {
 			 if(&*i == panel->trigChan)
 			 panel->trigLine->setPoints(0,panel->val2pix(panel->trigThresh,*i),
 			 width(),panel->val2pix(panel->trigThresh,*i));
-			 */
+		 */
 	}
 	showChannelTab();
 }

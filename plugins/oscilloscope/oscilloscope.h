@@ -14,7 +14,7 @@
 	 You should have received a copy of the GNU General Public License
 	 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-*/
+ */
 
 #ifndef OSCILLOSCOPE_H
 #define OSCILLOSCOPE_H
@@ -34,13 +34,13 @@
 #include "scope.h"
 
 namespace Oscilloscope {
-	
+
 	class Panel;
 
 	class Properties : public QDialog, public Event::Handler {
 		Q_OBJECT
-		
-		friend class Panel;
+
+			friend class Panel;
 
 		public:
 		Properties(Panel *);
@@ -112,13 +112,13 @@ namespace Oscilloscope {
 	class Plugin : public QObject, public ::Plugin::Object, public RT::Thread {
 		Q_OBJECT
 
-		friend class Panel;
+			friend class Panel;
 
 		public:
 		static Plugin *getInstance(void);
 
 		public slots:
-		void createOscilloscopePanel(void);
+			void createOscilloscopePanel(void);
 
 		protected:
 		virtual void doDeferred(const Settings::Object::State &);
@@ -140,7 +140,7 @@ namespace Oscilloscope {
 	class Panel : public Scope, public RT::Thread, public virtual Settings::Object {
 		Q_OBJECT
 
-		friend class Properties;
+			friend class Properties;
 
 		public:
 		Panel(QWidget *);
@@ -154,7 +154,7 @@ namespace Oscilloscope {
 		void doSave(Settings::Object::State &) const;
 
 		public slots:
-		void showProperties(void);
+			void showProperties(void);
 		void timeoutEvent(void);
 
 		protected:

@@ -14,7 +14,7 @@
 	 You should have received a copy of the GNU General Public License
 	 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-*/
+ */
 
 #include <QPainter>
 #include <QTimer>
@@ -118,9 +118,10 @@ void Scope::togglePause(void) {
 	isPaused = !isPaused;
 }
 
+// Insert selected channel into active list of channels
 std::list<Scope::Channel>::iterator Scope::insertChannel(QString label,double scale,double offset,const QPen &pen,void *info) {
-	struct Channel channel;
 
+	struct Channel channel;
 	channel.label = label;
 	channel.scale = scale;
 	channel.offset = offset;
