@@ -60,10 +60,13 @@ Scope::Scope(QWidget *parent) : QwtPlot(parent) {
 	// Initialize director
 	d_directPainter = new QwtPlotDirectPainter();
 	setAutoReplot(false);
-	setCanvas(new Canvas());
-	plotLayout()->setAlignCanvasToScales(false);
-	enableAxis(yLeft,false);
-	enableAxis(xBottom,false);
+
+	// NOT SURE WHY THIS IS SCALING DOWN
+	// Set scope canvas
+	//setCanvas(new Canvas());
+	//plotLayout()->setAlignCanvasToScales(false);
+	//enableAxis(yLeft,false);
+	//enableAxis(xBottom,false);
 
 	// Setup grid
 	QwtPlotGrid *grid = new QwtPlotGrid();

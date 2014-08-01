@@ -159,12 +159,16 @@ namespace Oscilloscope {
 
 		protected:
 		void mouseDoubleClickEvent(QMouseEvent *);
+		void mousePressEvent(QMouseEvent *);
 
 		private:
 		QMdiSubWindow *subWindow;
+
+		// Group and layout information
 		QGroupBox *scopeGroup;
 		QGroupBox *bttnGroup;
 
+		// Buttons
 		QPushButton *captureButton;
 		QPushButton *pauseButton;
 		QPushButton *settingsButton;

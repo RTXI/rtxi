@@ -1084,19 +1084,19 @@ Oscilloscope::Panel::Panel(QWidget *parent) :	Scope(parent), RT::Thread(0), fifo
 	properties = new Properties(this);
 
 	// Create parent widget and layout for scope
-	scopeGroup = new QGroupBox(this);
-	QVBoxLayout *layout = new QVBoxLayout;
+	//QVBoxLayout *layout = new QVBoxLayout;
 
 	// Create plot group and layout
-	QHBoxLayout *scopeLayout = new QHBoxLayout(this);
-	d_plot = new Scope(this);
-	scopeLayout->addWidget(d_plot);
+	//scopeGroup = new QGroupBox(this);
+	//QHBoxLayout *scopeLayout = new QHBoxLayout(this);
+	//d_plot = new Scope(this);
+	//scopeLayout->addWidget(d_plot);
 
 	// Add to layout
-	scopeGroup->setLayout(scopeLayout);
+	//scopeGroup->setLayout(scopeLayout);
 
 	// Create group and layout for buttons at bottom of scope
-	bttnGroup = new QGroupBox;
+	/*bttnGroup = new QGroupBox(this);
 	QHBoxLayout *bttnLayout = new QHBoxLayout(this);
 
 	// Create buttons
@@ -1115,15 +1115,15 @@ Oscilloscope::Panel::Panel(QWidget *parent) :	Scope(parent), RT::Thread(0), fifo
 	bttnGroup->setLayout(bttnLayout);
 
 	// Set things up to show
-	layout->addWidget(scopeGroup, 10);
-	layout->addWidget(bttnGroup, 1);
+	//layout->addWidget(scopeGroup, 10);
+	layout->addWidget(bttnGroup, 11);*/
 
 	// Show stuff
-	setLayout(layout);
+	//setLayout(layout);
 	subWindow->setWidget(this);
 	show();
 
-	resize(800,500);
+	//resize(800,500);
 	counter = 0;
 	downsample_rate = 1;
 	setActive(true);
@@ -1236,6 +1236,18 @@ void Oscilloscope::Panel::timeoutEvent(void) {
 		double data[size];
 		if (fifo.read(data, sizeof(data)))
 			setData(data, size);
+	}
+}
+
+void Oscilloscope::Panel::mousePressEvent(QMouseEvent *e) {
+	if (e->button() == Qt::RightButton) {
+		/*QMenu settingsMenu = new QMenu(this);
+		settingsMenu.setItemChecked(menu.insertItem("Pause",this,SLOT(togglePause(void))),paused());
+		settingsMenu.insertItem("Properties",this,SLOT(showProperties(void)));
+		settingsMenu.insertSeparator();
+		settingsMenu.insertItem("Exit",this,SLOT(close(void)));
+		settingsMenu.setMouseTracking(true);
+		settingsMenu.exec(QCursor::pos());*/
 	}
 }
 
