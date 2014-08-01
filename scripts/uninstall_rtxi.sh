@@ -19,7 +19,11 @@
 
 #!/bin/bash
 
-cd ../
+# Directories
+DIR=$PWD
+ROOT=${DIR}/..
+
+cd ${ROOT}
 
 # Uninstall rtxi
 sudo make uninstall
@@ -33,7 +37,3 @@ else
 	echo "----->RTXI installation failed."
 	exit
 fi
-
-echo "----->Type '"sudo rtxi"' to start RTXI. Happy Sciencing!"
-echo "----->Please email help@rtxi.org with any questions/help requests."
-echo "----->Script developed/last modified by Yogi Patel <yapatel@gatech.edu> on May 2014."
