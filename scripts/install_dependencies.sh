@@ -20,10 +20,12 @@
 #!/bin/bash
 
 # Directories
-ROOT=../
-DEPS=../deps
+DIR=$PWD
+ROOT=${DIR}/../
+DEPS=${ROOT}/deps
 HDF=${DEPS}/hdf
 QWT=${DEPS}/qwt
+DYN=${DEPS}/dynamo
 
 # Check for compilation dependencies
 echo "Checking for dependencies..."
@@ -69,7 +71,6 @@ else
 	./configure --prefix=/usr
 	make -j2
 	sudo make install
-	cd ${ROOT}
 	if [ $? -eq 0 ]; then
 			echo "----->HDF5 installed."
 	else
@@ -94,7 +95,6 @@ else
 	sudo cp /usr/local/lib/qwt/lib/libqwt.so.6.1.0 /usr/lib/.
 	sudo ln -sf /usr/lib/libqwt.so.6.1.0 /usr/lib/libqwt.so
 	sudo ldconfig
-	cd ${ROOT}
 	if [ $? -eq 0 ]; then
 		echo "----->Qwt installed."
 	else
@@ -109,4 +109,21 @@ if [ $? -eq 0 ]; then
 	echo "----->rtxi_includes synced."
 else
 	echo "----->rtxi_includes sync failed."
-exit
+	exit
+fi
+
+# Install dynamo
+echo "Installing DYNAMO utility..."
+
+sudo apt-get install mlton
+cd ${DYN}
+mllex dl.lex
+mlyacc dl.grm
+mlton dynamo.mlb
+sudo cp dynamo /usr/bin/
+if [ $? -eq 0 ]; then
+	echo "----->DYNAMO translation utility installed."
+else
+	echo "----->DYNAMO translation utility installation failed."
+	exit
+fi
