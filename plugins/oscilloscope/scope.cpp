@@ -61,18 +61,19 @@ Scope::Scope(QWidget *parent) : QwtPlot(parent) {
 	d_directPainter = new QwtPlotDirectPainter();
 	setAutoReplot(false);
 
-	// NOT SURE WHY THIS IS SCALING DOWN
 	// Set scope canvas
-	//setCanvas(new Canvas());
-	//plotLayout()->setAlignCanvasToScales(false);
-	//enableAxis(yLeft,false);
-	//enableAxis(xBottom,false);
+	setCanvas(new Canvas());
+	plotLayout()->setAlignCanvasToScales(true);
+	enableAxis(yLeft,false);
+	enableAxis(xBottom,false);
 
 	// Setup grid
 	QwtPlotGrid *grid = new QwtPlotGrid();
 	grid->setPen(Qt::black, 0.0, Qt::DotLine);
 	grid->enableX(true);
+	grid->enableXMin(true);
 	grid->enableY(true);
+	grid->enableYMin(true);
 	grid->attach(this);
 
 	// Initialize vars
@@ -101,6 +102,7 @@ Scope::Scope(QWidget *parent) : QwtPlot(parent) {
 	timer->start(refresh);
 }
 
+// Kill me
 Scope::~Scope(void) {
 	delete d_directPainter;
 }
@@ -110,8 +112,8 @@ bool Scope::paused(void) const {
 }
 
 void Scope::timeoutEvent(void) {
-	if(!triggering)
-		update(drawForeground());
+	//if(!triggering)
+		//update(drawForeground());
 }
 
 void Scope::captureScope(void) {
@@ -121,9 +123,8 @@ void Scope::togglePause(void) {
 	isPaused = !isPaused;
 }
 
-// Insert selected channel into active list of channels
+// Inser user specified channel into active list of channels
 std::list<Scope::Channel>::iterator Scope::insertChannel(QString label,double scale,double offset,const QPen &pen,void *info) {
-
 	struct Channel channel;
 	channel.label = label;
 	channel.scale = scale;
@@ -132,14 +133,15 @@ std::list<Scope::Channel>::iterator Scope::insertChannel(QString label,double sc
 	channel.info = info;
 	channel.data.resize(data_size,0.0);
 	channels.push_back(channel);
-	refreshBackground();
+	//refreshBackground();
 	return --channels.end();
 }
 
+// Remove user specified channel from active channels list
 void *Scope::removeChannel(std::list<Scope::Channel>::iterator channel) {
 	void *info = channel->info;
 	channels.erase(channel);
-	refreshBackground();
+	//refreshBackground();
 	return info;
 }
 
@@ -198,8 +200,8 @@ void Scope::setData(double data[],size_t size) {
 			triggerLast = triggerQueue.front();
 			triggerQueue.pop_front();
 
-			if(!triggerHolding)
-				foreground = background;
+			//if(!triggerHolding)
+			//foreground = background;
 
 			QPainterPath path;
 			QPainter painter(&foreground);
@@ -267,7 +269,7 @@ void Scope::setTrigger(trig_t direction,double threshold,std::list<Channel>::ite
 	if(triggerChannel != channel || triggerThreshold != threshold) {
 		triggerChannel = channel;
 		triggerThreshold = threshold;
-		refreshBackground();
+		//refreshBackground();
 	}
 
 	if(triggerDirection != direction) {
@@ -279,7 +281,7 @@ void Scope::setTrigger(trig_t direction,double threshold,std::list<Channel>::ite
 			triggering = true;
 			timer->stop();
 
-			foreground = background;
+	//		foreground = background;
 			update();
 		}
 		triggerDirection = direction;
@@ -302,7 +304,7 @@ void Scope::setDivT(double divT) {
 	else
 		dtLabel = QString::number(divT*1e6)+"ns";
 
-	refreshBackground();
+	//refreshBackground();
 }
 
 void Scope::setPeriod(double p) {
@@ -315,18 +317,6 @@ size_t Scope::getDivX(void) const {
 
 size_t Scope::getDivY(void) const {
 	return divY;
-}
-
-void Scope::setDivXY(size_t dx,size_t dy) {
-	divX = dx;
-	divY = dy;
-
-	drawBackground();
-	if(triggering)
-		foreground = background;
-	else
-		drawForeground();
-	update();
 }
 
 size_t Scope::getRefresh(void) const {
@@ -348,126 +338,10 @@ void Scope::setChannelOffset(std::list<Channel>::iterator channel,double offset)
 
 void Scope::setChannelPen(std::list<Channel>::iterator channel,const QPen &pen) {
 	channel->pen = pen;
-	refreshBackground();
+	//refreshBackground();
 }
 
 void Scope::setChannelLabel(std::list<Channel>::iterator channel,const QString &label) {
 	channel->label = label;
-	refreshBackground();
-}
-
-void Scope::paintEvent(QPaintEvent *e) {
-	QPainter painter(&foreground);
-	painter.drawPixmap(e->rect(),foreground);
-	//QPainter::drawPixmap(this,e->rect().topLeft(),&foreground,e->rect()),Qt::CopyROP);
-}
-
-void Scope::resizeEvent(QResizeEvent *) {
-	refreshBackground();
-}
-
-void Scope::drawBackground(void) {
-	int xDiv = static_cast<int>(round(1.0*width()/divX));
-	int yDiv = static_cast<int>(round(1.0*height()/divY));
-	int zero = static_cast<int>(round(height()/2.0));
-
-	background = background.copy(0, 0, width(), height());
-	background.fill(Qt::white);
-	QPainter painter(&background);
-
-	if(drawZero) {
-		painter.setPen(QPen(Qt::black,3,Qt::DashDotLine));
-		painter.drawLine(0,zero,width(),zero);
-	}
-
-	painter.setPen(QPen(Qt::black,1,Qt::DotLine));
-	for(int i=yDiv;i<height()-yDiv/2;i+=yDiv)
-		if(!drawZero || abs(i-zero) >= yDiv/3)
-			painter.drawLine(0,i,width(),i);
-	for(int i=xDiv;i<width()-xDiv/2;i+=xDiv)
-		painter.drawLine(i,0,i,height());
-
-	positionLabels(painter);
-
-	if(triggerChannel != channels.end()) {
-		painter.setPen(QPen(Qt::yellow,2,Qt::DashLine));
-		double scale = height()/(triggerChannel->scale*divY);
-		double offset = triggerChannel->offset;
-		int thresh = round(height()/2-scale*(triggerThreshold+offset));
-		painter.drawLine(0,thresh,width(),thresh);
-	}
-}
-
-QRect Scope::drawForeground(void) {
-	foreground = background;
-	QPainterPath path;
-	QPainter painter(&foreground);
-
-	int x, y;
-	int miny = height(), maxy = 0;
-	double scale;
-	for(std::list<Channel>::iterator i = channels.begin(), iend = channels.end();i != iend;++i) {
-		scale = height()/(i->scale*divY);
-		painter.setPen(i->getPen());
-		x = 0;
-		y = round(height()/2-scale*(i->data[(data_idx)%i->data.size()]+i->offset));
-		if(y < miny) miny = y;
-		if(y > maxy) maxy = y;
-		path.moveTo(x,y);
-		for(size_t j = 1;j<i->data.size();++j) {
-			x = round(((j*period)*width())/(hScl*divX));
-			y = round(height()/2-scale*(i->data[(data_idx+j)%i->data.size()]+i->offset));
-			if(y < miny) miny = y;
-			if(y > maxy) maxy = y;
-			path.lineTo(x,y);
-			painter.drawPath(path);
-			if(x >= width()) break;
-		}
-	}
-
-	QRect newDrawRect;
-	if(miny <= maxy)
-		newDrawRect.setRect(0,miny-1,width(),maxy-miny+2);
-	QRect redrawRect = newDrawRect.unite(drawRect);
-	drawRect = newDrawRect;
-
-	return redrawRect;
-}
-
-void Scope::positionLabels(QPainter &painter) {
-	QRect bound;
-
-	if(getChannelCount()) {
-		int maxh = 1, maxw = 1;
-		for(std::list<Channel>::iterator i = channels.begin(),end = channels.end();i != end;++i) {
-			bound = painter.boundingRect(rect(),0,i->label);
-			if(maxw < bound.width()+25) maxw = bound.width()+25;
-			if(maxh < bound.height()) maxh = bound.height();
-		}
-
-		size_t cols = (width()-painter.boundingRect(rect(),0,dtLabel).width()-25)/maxw;
-
-		size_t col = 0, row = 0;
-		for(std::list<Channel>::iterator i = channels.begin(),end = channels.end();i != end;++i) {
-			painter.setPen(i->getPen());
-			painter.drawText(col*maxw,static_cast<int>(floor(height()-(row+1)*1.5*maxh)),i->label);
-			if(++col >= cols) {
-				++row;
-				col = 0;
-			}
-		}
-	}
-
-	bound = painter.boundingRect(rect(),0,dtLabel);
-	painter.setPen(QPen(Qt::black,1,Qt::SolidLine));
-	painter.drawText(static_cast<int>(floor(width()-bound.width()-10)),static_cast<int>(floor(height()-1.5*bound.height())),dtLabel);
-}
-
-void Scope::refreshBackground(void) {
-	drawBackground();
-	if(triggering)
-		foreground = background;
-	else
-		drawForeground();
-	update();    
+	//refreshBackground();
 }

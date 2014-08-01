@@ -162,7 +162,7 @@ class Scope : public QwtPlot {
 		void setPeriod(double);
 		size_t getDivX(void) const;
 		size_t getDivY(void) const;
-		void setDivXY(size_t,size_t);
+		//void setDivXY(size_t,size_t);
 
 		size_t getRefresh(void) const;
 		void setRefresh(size_t);
@@ -173,20 +173,20 @@ class Scope : public QwtPlot {
 		void setChannelLabel(std::list<Channel>::iterator,const QString &);
 
 		public slots:
-			void timeoutEvent(void);
+		void timeoutEvent(void);
 		void togglePause(void);
 		void captureScope(void);
 
 	protected:
-		void paintEvent(QPaintEvent *);
-		void resizeEvent(QResizeEvent *);
+		//void paintEvent(QPaintEvent *);
+		//void resizeEvent(QResizeEvent *);
 
 	private:
 		void drawBackground(void);
-		QRect drawForeground(void);
+		//QRect drawForeground(void);
 
 		void positionLabels(QPainter &);
-		void refreshBackground(void);
+		//void refreshBackground(void);
 
 		bool drawZero;
 		size_t divX;
@@ -215,7 +215,7 @@ class Scope : public QwtPlot {
 		int d_paintedPoints;
 
 		bool isPaused;
-		QPixmap background;
+		//QPixmap background;
 		QPixmap foreground;
 		QRect drawRect;
 		QTimer *timer;

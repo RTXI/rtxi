@@ -16,6 +16,14 @@
 
  */
 
+
+/* 
+  This class creates and controls the drawing parameters
+	A control panel is instantiated for all the active channels/modules
+	and user selection is enabled to change color, style, width and other 
+	oscilloscope properties.
+ */
+
 #include <QtGui>
 #include <QTimer>
 #include <QPainter>
@@ -479,7 +487,7 @@ void Oscilloscope::Properties::applyDisplayTab(void) {
 
 	panel->setTrigger(trigDirection, trigThreshold, trigChannel, trigHolding, trigHoldoff);
 
-	panel->setDivXY(divXSpin->value(), divYSpin->value());
+	//panel->setDivXY(divXSpin->value(), divYSpin->value());
 	panel->adjustDataSize();
 
 	showDisplayTab();
@@ -1058,14 +1066,14 @@ void Oscilloscope::Properties::updateDownsampleRate(int r) {
 
 
 ////////// #Panel
-Oscilloscope::Panel::Panel(QWidget *parent) :	Scope(parent), RT::Thread(0), fifo(10 * 1048576) {
+Oscilloscope::Panel::Panel(QWidget *parent) : Scope(parent),	RT::Thread(0), fifo(10 * 1048576) {
 
 	// Setup widget attribute
 	setAttribute(Qt::WA_DeleteOnClose);
 
 	// Make Mdi
 	subWindow = new QMdiSubWindow;
-	subWindow->setMinimumSize(800,500);
+	subWindow->setMinimumSize(800,400);
 	subWindow->setAttribute(Qt::WA_DeleteOnClose);
 	MainWindow::getInstance()->createMdi(subWindow);
 
@@ -1083,20 +1091,8 @@ Oscilloscope::Panel::Panel(QWidget *parent) :	Scope(parent), RT::Thread(0), fifo
 	adjustDataSize();
 	properties = new Properties(this);
 
-	// Create parent widget and layout for scope
-	//QVBoxLayout *layout = new QVBoxLayout;
-
-	// Create plot group and layout
-	//scopeGroup = new QGroupBox(this);
-	//QHBoxLayout *scopeLayout = new QHBoxLayout(this);
-	//d_plot = new Scope(this);
-	//scopeLayout->addWidget(d_plot);
-
-	// Add to layout
-	//scopeGroup->setLayout(scopeLayout);
-
 	// Create group and layout for buttons at bottom of scope
-	/*bttnGroup = new QGroupBox(this);
+	bttnGroup = new QGroupBox(this);
 	QHBoxLayout *bttnLayout = new QHBoxLayout(this);
 
 	// Create buttons
@@ -1114,12 +1110,7 @@ Oscilloscope::Panel::Panel(QWidget *parent) :	Scope(parent), RT::Thread(0), fifo
 	// Attach to layout
 	bttnGroup->setLayout(bttnLayout);
 
-	// Set things up to show
-	//layout->addWidget(scopeGroup, 10);
-	layout->addWidget(bttnGroup, 11);*/
-
 	// Show stuff
-	//setLayout(layout);
 	subWindow->setWidget(this);
 	show();
 
@@ -1239,18 +1230,6 @@ void Oscilloscope::Panel::timeoutEvent(void) {
 	}
 }
 
-void Oscilloscope::Panel::mousePressEvent(QMouseEvent *e) {
-	if (e->button() == Qt::RightButton) {
-		/*QMenu settingsMenu = new QMenu(this);
-		settingsMenu.setItemChecked(menu.insertItem("Pause",this,SLOT(togglePause(void))),paused());
-		settingsMenu.insertItem("Properties",this,SLOT(showProperties(void)));
-		settingsMenu.insertSeparator();
-		settingsMenu.insertItem("Exit",this,SLOT(close(void)));
-		settingsMenu.setMouseTracking(true);
-		settingsMenu.exec(QCursor::pos());*/
-	}
-}
-
 void Oscilloscope::Panel::mouseDoubleClickEvent(QMouseEvent *e) {
 	if (e->button() == Qt::LeftButton && getTriggerChannel() != getChannelsEnd()) {
 		double scale = height() / (getTriggerChannel()->getScale() * getDivY());
@@ -1298,7 +1277,7 @@ void Oscilloscope::Panel::doDeferred(const Settings::Object::State &s) {
 
 void Oscilloscope::Panel::doLoad(const Settings::Object::State &s) {
 	setDataSize(s.loadInteger("Size"));
-	setDivXY(s.loadInteger("DivX"), s.loadInteger("DivY"));
+	//setDivXY(s.loadInteger("DivX"), s.loadInteger("DivY"));
 	setDivT(s.loadDouble("DivT"));
 
 	if (s.loadInteger("Maximized"))

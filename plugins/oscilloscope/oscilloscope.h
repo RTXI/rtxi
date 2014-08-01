@@ -154,27 +154,22 @@ namespace Oscilloscope {
 		void doSave(Settings::Object::State &) const;
 
 		public slots:
-			void showProperties(void);
+		void showProperties(void);
 		void timeoutEvent(void);
 
 		protected:
 		void mouseDoubleClickEvent(QMouseEvent *);
-		void mousePressEvent(QMouseEvent *);
 
 		private:
 		QMdiSubWindow *subWindow;
 
 		// Group and layout information
-		QGroupBox *scopeGroup;
 		QGroupBox *bttnGroup;
 
 		// Buttons
 		QPushButton *captureButton;
 		QPushButton *pauseButton;
 		QPushButton *settingsButton;
-
-		// Scope display
-		Scope *d_plot;
 
 		void updateDownsampleRate(int);
 		Fifo fifo;
