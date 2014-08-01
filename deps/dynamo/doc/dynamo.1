@@ -1,0 +1,79 @@
+.\"                                      Hey, EMACS: -*- nroff -*-
+.\" First parameter, NAME, should be all caps
+.\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
+.\" other parameters are allowed: see man(7), man(1)
+.TH DYNAMO 1 "February 1, 2005"
+.\" Please adjust this date whenever revising the manpage.
+.\"
+.\" Some roff macros, for reference:
+.\" .nh        disable hyphenation
+.\" .hy        enable hyphenation
+.\" .ad l      left justify
+.\" .ad b      justify to both left and right margins
+.\" .nf        disable filling
+.\" .fi        enable filling
+.\" .br        insert line break
+.\" .sp <n>    insert n+1 empty lines
+.\" for manpage-specific macros, see man(7)
+.SH NAME
+dynamo \- Dynamo translator
+.SH SYNOPSIS
+.B dynamo
+.RI [options]
+.RB system.dynamo [...]
+.br
+.SH DESCRIPTION
+This manual page documents briefly the
+.B  nds
+command.
+.PP
+
+
+
+
+.SH EXAMPLES
+
+
+To have Dynamo translate file 
+.I morris-lecar.dynamo
+to RTXI code:
+
+.P
+	dynamo --rtxi  morris-lecar.dynamo
+.P
+
+
+.SH OPTIONS
+A summary of options is included below. For a complete description,
+see the
+.IR "Dynamo Reference Manual".
+
+.TP
+.B \-h, \-\-help
+Show a short message that briefly describes the options.
+.TP
+.B \-\-version, \-\-release 
+Show version information.
+.TP
+.B \-o [FILE],  \-\-output[=FILE]
+Set the prefix of the output file(s).
+.TP
+.B  \-e [FILE],  \-\-error\-output[=FILE]
+Redirect error messages to file.
+.TP
+.B  \-\-eqdfg[=FILE]
+Output the equation DFG to file.
+.TP
+.B  \-r [FILE],  \-\-mrci[=FILE]
+Output MRCI model description to file.
+.TP
+.B  \-x [FILE],  \-\-rtxi[=FILE]
+Output RTXI model description to file.
+
+.SH AUTHOR
+This manual page was written by Ivan Raikov <raikov@cc.gatech.edu>.
+
+.SH SEE ALSO
+.br
+The  full documentation for Dynamo is maintained as a Texinfo manual. See
+.IR "Dynamo Reference Manual" 

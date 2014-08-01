@@ -1,0 +1,12 @@
+SYSTEM cosine;
+
+EXTERNAL OUTPUT Vout;
+
+STATE V = 1.0;
+
+TIME t;
+
+AT TIME t:
+
+d(V) = sin(t);
+Vout = V;

@@ -1,0 +1,23 @@
+SYSTEM test10;
+
+PARAMETER  C_m  = 1.0    "uF/cm^2";
+
+STATE v = 1.0;
+
+STATE alpha_m = 0.0;
+STATE beta_m = 1.0;
+
+STATE FUNCTION x;
+
+TIME t;
+
+AT TIME t:
+
+x = alpha_m + 1/beta_m;
+
+d(v) = exp(x);
+
+q(alpha_m) = sin(beta_m) + alpha_m;
+
+q(beta_m) = beta_m + C_m;
+

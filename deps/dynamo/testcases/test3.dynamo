@@ -1,0 +1,24 @@
+//basic discrete state checking
+
+SYSTEM test1;
+
+DISCRETE STATE dstate = (up, down);
+
+STATE V = -65.0, v = 1.0;
+
+STATE FUNCTION beta_m;
+
+TIME t;
+
+AT TIME t:
+
+
+s(dstate) = CONDITION [
+	  (v > 3.1) => up;
+	  DEFAULT => down;
+	  ];
+
+d(V) = exp(beta_m);
+
+beta_m = 3 * V;
+d(v) = exp (beta_m);
