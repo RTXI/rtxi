@@ -26,7 +26,7 @@ HDF=${DEPS}/hdf
 QWT=${DEPS}/qwt
 
 # Start at top
-cd ${DEPS}
+cd ${ROOT}
 
 # Start configuring - by default configured to run on non-RT kernel
 echo "----->Starting RTXI installation..."
