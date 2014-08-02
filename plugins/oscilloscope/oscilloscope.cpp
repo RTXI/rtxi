@@ -104,7 +104,6 @@ void Oscilloscope::Plugin::doSave(Settings::Object::State &s) const {
 		s.saveState(QString::number(n++).toStdString(), (*i)->save());
 }
 
-
 ////////// #Properties
 Oscilloscope::Properties::Properties(Oscilloscope::Panel *parent) : QDialog(MainWindow::getInstance()), panel(parent) {
 
@@ -127,11 +126,14 @@ Oscilloscope::Properties::Properties(Oscilloscope::Panel *parent) : QDialog(Main
 	QObject::connect(cancelButton,SIGNAL(clicked(void)),this,SLOT(close(void)));
 	buttonLayout->addWidget(cancelButton);
 
+	// Setupt layout
 	buttonGroup->setLayout(buttonLayout);
 
+	// Create two tabs
 	createChannelTab();
 	createDisplayTab();
 
+	// Set main widget properties
 	layout->addWidget(buttonGroup);
 	setLayout(layout);
 	setWindowTitle(QString::number(parent->getID()) + " Oscilloscope Properties");
@@ -1064,7 +1066,6 @@ void Oscilloscope::Properties::updateDownsampleRate(int r) {
 	panel->updateDownsampleRate(downsample_rate);
 }
 
-
 ////////// #Panel
 Oscilloscope::Panel::Panel(QWidget *parent) : Scope(parent),	RT::Thread(0), fifo(10 * 1048576) {
 
@@ -1096,9 +1097,6 @@ Oscilloscope::Panel::Panel(QWidget *parent) : Scope(parent),	RT::Thread(0), fifo
 	QHBoxLayout *bttnLayout = new QHBoxLayout(this);
 
 	// Create buttons
-	captureButton = new QPushButton("Capture");
-	QObject::connect(captureButton,SIGNAL(clicked()),this,SLOT(captureScope()));
-	bttnLayout->addWidget(captureButton);
 	pauseButton = new QPushButton("Pause");
 	pauseButton->setCheckable(true);
 	QObject::connect(pauseButton,SIGNAL(clicked()),this,SLOT(togglePause()));
@@ -1114,7 +1112,7 @@ Oscilloscope::Panel::Panel(QWidget *parent) : Scope(parent),	RT::Thread(0), fifo
 	subWindow->setWidget(this);
 	show();
 
-	//resize(800,500);
+	// Initialize vars
 	counter = 0;
 	downsample_rate = 1;
 	setActive(true);
@@ -1138,7 +1136,6 @@ void Oscilloscope::Panel::updateDownsampleRate(int r) {
 }
 
 void Oscilloscope::Panel::execute(void) {
-	//void *buffer;
 	size_t nchans = getChannelCount();
 
 	if (nchans) {
@@ -1316,9 +1313,7 @@ void Oscilloscope::Panel::doSave(Settings::Object::State &s) const {
 
 	s.saveInteger("Num Channels", getChannelCount());
 	size_t n = 0;
-	for (std::list<Channel>::const_iterator i = getChannelsBegin(), end =
-			getChannelsEnd(); i != end; ++i)
-	{
+	for (std::list<Channel>::const_iterator i = getChannelsBegin(), end = getChannelsEnd(); i != end; ++i) {
 		std::ostringstream str;
 		str << n++;
 

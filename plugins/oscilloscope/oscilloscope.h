@@ -32,6 +32,7 @@
 #include <settings.h>
 
 #include "scope.h"
+#include "wheelbox.h"
 
 namespace Oscilloscope {
 
@@ -48,13 +49,13 @@ namespace Oscilloscope {
 		void receiveEvent(const ::Event::Object *);
 
 		public slots:
-			void updateDownsampleRate(int);
+		void updateDownsampleRate(int);
 
 		protected:
 		void closeEvent(QCloseEvent *);
 
 		private slots:
-			void activateChannel(bool);
+		void activateChannel(bool);
 		void apply(void);
 		void buildChannelList(void);
 		void okay(void);
@@ -167,9 +168,9 @@ namespace Oscilloscope {
 		QGroupBox *bttnGroup;
 
 		// Buttons
-		QPushButton *captureButton;
 		QPushButton *pauseButton;
 		QPushButton *settingsButton;
+		WheelBox *refreshWheel;
 
 		void updateDownsampleRate(int);
 		Fifo fifo;

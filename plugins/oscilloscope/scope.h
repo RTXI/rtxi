@@ -175,7 +175,6 @@ class Scope : public QwtPlot {
 		public slots:
 		void timeoutEvent(void);
 		void togglePause(void);
-		void captureScope(void);
 
 	protected:
 		//void paintEvent(QPaintEvent *);

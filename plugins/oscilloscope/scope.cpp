@@ -77,7 +77,7 @@ Scope::Scope(QWidget *parent) : QwtPlot(parent) {
 	grid->attach(this);
 
 	// Initialize vars
-	setMinimumSize(16,9);
+	//setMinimumSize(16,9);
 	isPaused = false;
 	drawZero = true;
 	divX = 10;
@@ -116,10 +116,8 @@ void Scope::timeoutEvent(void) {
 		//update(drawForeground());
 }
 
-void Scope::captureScope(void) {
-}
-
 void Scope::togglePause(void) {
+	printf("Pause called\n");
 	isPaused = !isPaused;
 }
 
@@ -172,9 +170,12 @@ void Scope::clearData(void) {
 }
 
 void Scope::setData(double data[],size_t size) {
-	if(isPaused)
+	if(isPaused){
+		printf("paused now\n");
 		return;
+}
 
+	printf("not paused\n");
 	if(size < getChannelCount()) {
 		ERROR_MSG("Scope::setData() : data size mismatch detected\n");
 		return;
