@@ -15,7 +15,7 @@ oscilloscope_la_SOURCES = \
 		scope.cpp 
 nodist_oscilloscope_la_SOURCES = \
 		moc_oscilloscope.cpp \
-		moc_scope.cpp \
+		moc_scope.cpp 
 
 # MOC Rule - builds meta-object files as needed
 moc_%.cpp: %.h

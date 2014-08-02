@@ -32,7 +32,6 @@
 #include <settings.h>
 
 #include "scope.h"
-#include "wheelbox.h"
 
 namespace Oscilloscope {
 
@@ -170,7 +169,6 @@ namespace Oscilloscope {
 		// Buttons
 		QPushButton *pauseButton;
 		QPushButton *settingsButton;
-		WheelBox *refreshWheel;
 
 		void updateDownsampleRate(int);
 		Fifo fifo;
