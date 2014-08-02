@@ -230,6 +230,7 @@ void Oscilloscope::Properties::closeEvent(QCloseEvent *e) {
 }
 
 void Oscilloscope::Properties::activateChannel(bool active) {
+	printf("activate clicked\n");
 	bool enable = active && blockList->count() && channelList->count();
 }
 
@@ -258,10 +259,10 @@ void Oscilloscope::Properties::buildChannelList(void) {
 	IO::flags_t type;
 	switch (typeList->currentIndex()) {
 		case 0:
-			type = Workspace::INPUT;
+			type = Workspace::OUTPUT;
 			break;
 		case 1:
-			type = Workspace::OUTPUT;
+			type = Workspace::INPUT;
 			break;
 		case 2:
 			type = Workspace::PARAMETER;
@@ -306,10 +307,10 @@ void Oscilloscope::Properties::applyChannelTab(void) {
 	IO::flags_t type;
 	switch (typeList->currentIndex()) {
 		case 0:
-			type = Workspace::INPUT;
+			type = Workspace::OUTPUT;
 			break;
 		case 1:
-			type = Workspace::OUTPUT;
+			type = Workspace::INPUT;
 			break;
 		case 2:
 			type = Workspace::PARAMETER;
@@ -923,7 +924,7 @@ void Oscilloscope::Properties::showChannelTab(void) {
 	IO::flags_t type;
 	switch (typeList->currentIndex()) {
 		case 0:
-			type = Workspace::INPUT;
+			type = Workspace::OUTPUT;
 			break;
 		case 1:
 			type = Workspace::OUTPUT;
@@ -937,7 +938,7 @@ void Oscilloscope::Properties::showChannelTab(void) {
 		default:
 			ERROR_MSG("Oscilloscope::Properties::showChannelTab : invalid type\n");
 			typeList->setCurrentIndex(0);
-			type = Workspace::INPUT;
+			type = Workspace::OUTPUT;
 	}
 
 	bool found = false;
@@ -1074,7 +1075,7 @@ Oscilloscope::Panel::Panel(QWidget *parent) : Scope(parent),	RT::Thread(0), fifo
 
 	// Make Mdi
 	subWindow = new QMdiSubWindow;
-	subWindow->setMinimumSize(800,400);
+	subWindow->setMinimumSize(800,500);
 	subWindow->setAttribute(Qt::WA_DeleteOnClose);
 	MainWindow::getInstance()->createMdi(subWindow);
 
@@ -1092,21 +1093,191 @@ Oscilloscope::Panel::Panel(QWidget *parent) : Scope(parent),	RT::Thread(0), fifo
 	adjustDataSize();
 	properties = new Properties(this);
 
+	layout = new QGridLayout;
+
+	// Create scope group
+	scopeGroup = new QGroupBox(this);
+	QHBoxLayout *scopeLayout = new QHBoxLayout(this);
+
+	// Create scope
+	scopeWindow = new Scope(this);
+
+	// Attach scope to layout
+	scopeLayout->addWidget(scopeWindow);
+
 	// Create group and layout for buttons at bottom of scope
-	bttnGroup = new QGroupBox(this);
-	QHBoxLayout *bttnLayout = new QHBoxLayout(this);
+	bttnGroup = new QGroupBox(tr("Settings"));
+	QGridLayout *bttnLayout = new QGridLayout(this);
+
+	// Create Channel box
+	bttnLayout->addWidget(new QLabel(tr("Channel:")), 0, 0);
+	blocksList = new QComboBox;
+	blocksList->setFixedWidth(100);
+	block_list_info_t info = {blocksList, &this->blocks};
+	IO::Connector::getInstance()->foreachBlock(::buildBlockList, &info);
+	QObject::connect(blocksList,SIGNAL(activated(int)),this,SLOT(buildChannelList(void)));
+	bttnLayout->addWidget(blocksList, 0, 1);
+
+	// Create Type box
+	typesList = new QComboBox;
+	typesList->setFixedWidth(100);
+	typesList->addItem("Input");
+	typesList->addItem("Output");
+	typesList->addItem("Parameter");
+	typesList->addItem("State");
+	QObject::connect(typesList,SIGNAL(activated(int)),this,SLOT(buildChannelList(void)));
+	bttnLayout->addWidget(typesList, 0, 2);
+
+	// Create Channels box
+	channelsList = new QComboBox;
+	channelsList->setFixedWidth(100);
+	QObject::connect(channelsList,SIGNAL(activated(int)),this,SLOT(showTab(void)));
+	bttnLayout->addWidget(channelsList, 0, 3);
+
+	// Create elements for display box
+	bttnLayout->addWidget(new QLabel(tr("   Scale: ")), 0, 4);
+	scalesList = new QComboBox;
+	scalesList->setFixedWidth(100);
+	bttnLayout->addWidget(scalesList, 0, 5);
+	QFont scalesListFont("DejaVu Sans Mono");
+	scalesList->setFont(scalesListFont);
+	scalesList->addItem(" 10    V/div"); // 0  case 0
+	scalesList->addItem("  5    V/div"); // 1  case 1
+	scalesList->addItem("  2.5  V/div");	// 2  case 2
+	scalesList->addItem("  2    V/div"); // 3  case 3
+	scalesList->addItem("  1    V/div"); // 4  case 0
+	scalesList->addItem("500   mV/div"); // 5  case 1
+	scalesList->addItem("250   mV/div"); // 6  case 2
+	scalesList->addItem("200   mV/div"); // 7  case 3
+	scalesList->addItem("100   mV/div"); // 8  case 0
+	scalesList->addItem(" 50   mV/div"); // 9  case 1
+	scalesList->addItem(" 25   mV/div");
+	scalesList->addItem(" 20   mV/div");
+	scalesList->addItem(" 10   mV/div");
+	scalesList->addItem("  5   mV/div");
+	scalesList->addItem("  2.5 mV/div");
+	scalesList->addItem("  2   mV/div");
+	scalesList->addItem("  1   mV/div");
+	QChar mu = QChar(0x3BC);
+	QString suffix = QString("V/div");
+	QString text = QString("500   ");
+	text.append(mu);
+	text.append(suffix);
+	scalesList->addItem(text);
+	text = QString("250   ");
+	text.append(mu);
+	text.append(suffix);
+	scalesList->addItem(text);
+	text = QString("200   ");
+	text.append(mu);
+	text.append(suffix);
+	scalesList->addItem(text);
+	text = QString("100   ");
+	text.append(mu);
+	text.append(suffix);
+	scalesList->addItem(text);
+	text = QString(" 50   ");
+	text.append(mu);
+	text.append(suffix);
+	scalesList->addItem(text);
+	text = QString(" 25   ");
+	text.append(mu);
+	text.append(suffix);
+	scalesList->addItem(text);
+	text = QString(" 20   ");
+	text.append(mu);
+	text.append(suffix);
+	scalesList->addItem(text);
+	text = QString(" 10   ");
+	text.append(mu);
+	text.append(suffix);
+	scalesList->addItem(text);
+	text = QString("  5   ");
+	text.append(mu);
+	text.append(suffix);
+	scalesList->addItem(text);
+	text = QString("  2.5 ");
+	text.append(mu);
+	text.append(suffix);
+	scalesList->addItem(text);
+	text = QString("  2   ");
+	text.append(mu);
+	text.append(suffix);
+	scalesList->addItem(text);
+	text = QString("  1   ");
+	text.append(mu);
+	text.append(suffix);
+	scalesList->addItem(text);
+
+	scalesList->addItem("500   nV/div");
+	scalesList->addItem("250   nV/div");
+	scalesList->addItem("200   nV/div");
+	scalesList->addItem("100   nV/div");
+	scalesList->addItem(" 50   nV/div");
+	scalesList->addItem(" 25   nV/div");
+	scalesList->addItem(" 20   nV/div");
+	scalesList->addItem(" 10   nV/div");
+	scalesList->addItem("  5   nV/div");
+	scalesList->addItem("  2.5 nV/div");
+	scalesList->addItem("  2   nV/div");
+	scalesList->addItem("  1   nV/div");
+	scalesList->addItem("500   pV/div");
+	scalesList->addItem("250   pV/div");
+	scalesList->addItem("200   pV/div");
+	scalesList->addItem("100   pV/div");
+	scalesList->addItem(" 50   pV/div");
+	scalesList->addItem(" 25   pV/div");
+	scalesList->addItem(" 20   pV/div");
+	scalesList->addItem(" 10   pV/div");
+	scalesList->addItem("  5   pV/div");
+	scalesList->addItem("  2.5 pV/div");
+	scalesList->addItem("  2   pV/div");
+	scalesList->addItem("  1   pV/div");
+	scalesList->addItem("500   fV/div");
+	scalesList->addItem("250   fV/div");
+	scalesList->addItem("200   fV/div");
+	scalesList->addItem("100   fV/div");
+	scalesList->addItem(" 50   fV/div");
+	scalesList->addItem(" 25   fV/div");
+	scalesList->addItem(" 20   fV/div");
+	scalesList->addItem(" 10   fV/div");
+	scalesList->addItem("  5   fV/div");
+	scalesList->addItem("  2.5 fV/div");
+	scalesList->addItem("  2   fV/div");
+	scalesList->addItem("  1   fV/div");
+
+	// Activate button
+	activateButton = new QPushButton("Active");
+	activateButton->setCheckable(true);
+	activateButton->setFixedWidth(55);
+	QObject::connect(activateButton,SIGNAL(toggled(bool)),this,SLOT(activateChannel(bool)));
+	bttnLayout->addWidget(activateButton, 0, 6);
 
 	// Create buttons
 	pauseButton = new QPushButton("Pause");
 	pauseButton->setCheckable(true);
+	pauseButton->setFixedWidth(75);
 	QObject::connect(pauseButton,SIGNAL(clicked()),this,SLOT(togglePause()));
-	bttnLayout->addWidget(pauseButton);
+	bttnLayout->addWidget(pauseButton, 5, 4);
+	applyButton = new QPushButton("Apply");
+	applyButton->setFixedWidth(75);
+	QObject::connect(applyButton,SIGNAL(clicked(void)),this,SLOT(apply(void)));
+	bttnLayout->addWidget(applyButton, 5, 5);
 	settingsButton = new QPushButton("Settings");
+	settingsButton->setFixedWidth(75);
 	QObject::connect(settingsButton,SIGNAL(clicked()),this,SLOT(showProperties()));
-	bttnLayout->addWidget(settingsButton);
+	bttnLayout->addWidget(settingsButton, 5, 6);
 
 	// Attach to layout
+	scopeGroup->setLayout(scopeLayout);
 	bttnGroup->setLayout(bttnLayout);
+	
+	// Setup main layout
+	layout->addWidget(scopeGroup, 0, 0, 9, 16);
+	layout->addWidget(bttnGroup, 9, 0, 2, 16);
+
+	// Set
+	setLayout(layout);
 
 	// Show stuff
 	subWindow->setWidget(this);

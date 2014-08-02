@@ -57,13 +57,14 @@ QString Scope::Channel::getLabel(void) const {
 
 Scope::Scope(QWidget *parent) : QwtPlot(parent) {
 
+	printf("being called\n");
 	// Initialize director
 	d_directPainter = new QwtPlotDirectPainter();
 	setAutoReplot(false);
 
 	// Set scope canvas
 	setCanvas(new Canvas());
-	plotLayout()->setAlignCanvasToScales(true);
+  plotLayout()->setAlignCanvasToScales(true);
 	enableAxis(yLeft,false);
 	enableAxis(xBottom,false);
 
@@ -121,8 +122,9 @@ void Scope::togglePause(void) {
 	isPaused = !isPaused;
 }
 
-// Inser user specified channel into active list of channels
+// Insert user specified channel into active list of channels
 std::list<Scope::Channel>::iterator Scope::insertChannel(QString label,double scale,double offset,const QPen &pen,void *info) {
+	printf("inserting into list %d\n", channels.size());
 	struct Channel channel;
 	channel.label = label;
 	channel.scale = scale;

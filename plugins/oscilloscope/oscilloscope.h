@@ -137,7 +137,7 @@ namespace Oscilloscope {
 		std::list<Panel *> panelList;
 	}; // Plugin
 
-	class Panel : public Scope, public RT::Thread, public virtual Settings::Object {
+	class Panel : public Scope, public RT::Thread, public virtual Settings::Object, public Event::Handler {
 		Q_OBJECT
 
 			friend class Properties;
@@ -164,11 +164,29 @@ namespace Oscilloscope {
 		QMdiSubWindow *subWindow;
 
 		// Group and layout information
+		QGridLayout *layout;
+		QGroupBox *scopeGroup;
 		QGroupBox *bttnGroup;
+
+		// Scope element
+		Scope *scopeWindow;
+
+		// Lists
+		QComboBox *blocksList;
+		QComboBox *typesList;
+		QComboBox *channelsList;
+		QComboBox *colorsList;
+		QComboBox *offsetsList;
+		QComboBox *scalesList;
+		QComboBox *stylesList;
+		QComboBox *widthsList;
+		QLineEdit *offsetsEdit;
 
 		// Buttons
 		QPushButton *pauseButton;
 		QPushButton *settingsButton;
+		QPushButton *applyButton;
+		QPushButton *activateButton;
 
 		void updateDownsampleRate(int);
 		Fifo fifo;

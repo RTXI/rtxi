@@ -146,7 +146,7 @@ SystemControlPanel::SystemControlPanel(QWidget *parent) : QWidget(parent) {
 
 	analogCalibrationButton = new QPushButton("Calibrate");
 	analogCalibrationButton->setCheckable(true);
-	analogLayout->addWidget(analogCalibrationButton, 1, 4);
+	//analogLayout->addWidget(analogCalibrationButton, 1, 4);
 
 	analogLayout->addWidget(new QLabel(tr("Range:")), 2, 0, 1, 1);
 	analogRangeList = new QComboBox;
@@ -210,10 +210,10 @@ SystemControlPanel::SystemControlPanel(QWidget *parent) : QWidget(parent) {
 	analogUnitPrefixList2->addItem("atto-");
 	analogUnitPrefixList2->addItem("zepto-");
 	analogUnitPrefixList2->addItem("yocto-");
-	analogLayout->addWidget(analogUnitPrefixList2, 4, 2, 1, 2);
+	analogLayout->addWidget(analogUnitPrefixList2, 4, 2, 1, 1);
 	default_index = analogUnitPrefixList2->findText("");
 	analogUnitPrefixList2->setCurrentIndex(default_index);
-	analogLayout->addWidget(new QLabel(tr(" Volt/Amps")), 4, 4);
+	analogLayout->addWidget(new QLabel(tr(" Volt/Amps")), 4, 3);
 
 	// Assign layout to child widget
 	analogGroup->setLayout(analogLayout);
