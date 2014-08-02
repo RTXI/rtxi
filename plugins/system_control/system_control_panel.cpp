@@ -352,7 +352,6 @@ void SystemControlPanel::updateDevice(void) {
 	}
 
 	type = static_cast<DAQ::type_t>(digitalSubdeviceList->currentIndex()+DAQ::DIO);
-	type = static_cast<DAQ::type_t>(2);
 	for(size_t i=0;i<dev->getChannelCount(type);++i) {
 		digitalChannelList->addItem(QString::number(i));
 	}
