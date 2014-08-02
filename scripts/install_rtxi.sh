@@ -19,58 +19,14 @@
 
 #!/bin/bash
 
+# Directories
+ROOT=../
+DEPS=../deps/
+HDF=${DEPS}/hdf
+QWT=${DEPS}/qwt
+
 # Start at top
-cd ../
-
-# Installing HDF5
-echo "----->Checking for HDF5"
-
-if [ -f "/usr/include/hdf5.h" ]; then
-	echo "----->HDF5 already installed."
-else
-	echo "----->Installing HDF5..."
-	cd hdf
-	tar xf hdf5-1.8.4.tar.bz2
-	cd hdf5-1.8.4
-	./configure --prefix=/usr
-	make
-	sudo make install
-	cd ../../
-	if [ $? -eq 0 ]; then
-			echo "----->HDF5 installed."
-	else
-		echo "----->HDF5 installation failed."
-		exit
-	fi
-fi
-
-# Installing Qwt
-echo "----->Checking for Qwt"
-
-if [ -f "/usr/local/lib/qwt/include/qwt.h" ]; then
-	echo "----->Qwt already installed."
-else
-	echo "----->Installing Qwt..."
-	cd qwt
-	tar xf qwt-6.1.0.tar.bz2
-	cd qwt-6.1.0
-	qmake qwt.pro
-	make
-	sudo make install
-	sudo cp /usr/local/lib/qwt/lib/libqwt.so.6.1.0 /usr/lib/.
-	sudo ln -sf /usr/lib/libqwt.so.6.1.0 /usr/lib/libqwt.so
-	sudo ldconfig
-	cd ../../
-	if [ $? -eq 0 ]; then
-			echo "----->Qwt installed."
-	else
-		echo "----->Qwt installation failed."
-		exit
-	fi
-fi
-
-# Install rtxi_includes
-sudo cp -r rtxi_includes /usr/local/lib/.
+cd ${ROOT}
 
 # Start configuring - by default configured to run on non-RT kernel
 echo "----->Starting RTXI installation..."
@@ -91,7 +47,7 @@ else
 	exit 1
 fi
 
-make -C ./
+make -j2 -C ./
 
 if [ $? -eq 0 ]; then
 	echo "----->RTXI compilation successful."

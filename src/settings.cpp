@@ -277,7 +277,7 @@ int Settings::Manager::load(const std::string &filename) {
 
 	// create QSettings
 	QSettings userprefs;
-	userprefs.setPath(QSettings::NativeFormat, QSettings::UserScope, "RTXI");
+	userprefs.setPath(QSettings::NativeFormat, QSettings::SystemScope, "/usr/local/share/rtxi/");
 
 	int oldestsetting = userprefs.value("/recentSettingsList/start").toInt();
 	int num_settings = userprefs.value("/recentSettingsList/num").toInt();
@@ -366,7 +366,7 @@ int Settings::Manager::save(const std::string &filename) {
 
 	// create QSettings
 	QSettings userprefs;
-	userprefs.setPath (QSettings::NativeFormat, QSettings::UserScope, "RTXI");
+	userprefs.setPath (QSettings::NativeFormat, QSettings::SystemScope, "/usr/local/share/rtxi/");
 
 	int oldestsetting = userprefs.value("/recentSettingsList/start").toInt();
 	int num_settings = userprefs.value("/recentSettingsList/num").toInt();

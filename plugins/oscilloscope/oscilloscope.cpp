@@ -14,7 +14,15 @@
 	 You should have received a copy of the GNU General Public License
 	 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-*/
+ */
+
+
+/* 
+  This class creates and controls the drawing parameters
+	A control panel is instantiated for all the active channels/modules
+	and user selection is enabled to change color, style, width and other 
+	oscilloscope properties.
+ */
 
 #include <QtGui>
 #include <QTimer>
@@ -50,8 +58,6 @@ namespace {
 
 
 ////////// #Plugin
-
-
 extern "C" Plugin::Object * createRTXIPlugin(void *) {
 	return Oscilloscope::Plugin::getInstance();
 }
@@ -98,10 +104,7 @@ void Oscilloscope::Plugin::doSave(Settings::Object::State &s) const {
 		s.saveState(QString::number(n++).toStdString(), (*i)->save());
 }
 
-
 ////////// #Properties
-
-
 Oscilloscope::Properties::Properties(Oscilloscope::Panel *parent) : QDialog(MainWindow::getInstance()), panel(parent) {
 
 	// Create tab widget
@@ -123,11 +126,14 @@ Oscilloscope::Properties::Properties(Oscilloscope::Panel *parent) : QDialog(Main
 	QObject::connect(cancelButton,SIGNAL(clicked(void)),this,SLOT(close(void)));
 	buttonLayout->addWidget(cancelButton);
 
+	// Setupt layout
 	buttonGroup->setLayout(buttonLayout);
 
+	// Create two tabs
 	createChannelTab();
 	createDisplayTab();
 
+	// Set main widget properties
 	layout->addWidget(buttonGroup);
 	setLayout(layout);
 	setWindowTitle(QString::number(parent->getID()) + " Oscilloscope Properties");
@@ -356,8 +362,7 @@ void Oscilloscope::Properties::applyChannelTab(void) {
 
 			bool active = panel->setInactiveSync();
 
-			i = panel->insertChannel(info->name + " 2 V/div", 2.0, 0.0, QPen(
-						Qt::red, 1, Qt::SolidLine), info);
+			i = panel->insertChannel(info->name + " 2 V/div", 2.0, 0.0, QPen(Qt::red, 1, Qt::SolidLine), info);
 
 			panel->flushFifo();
 			panel->setActive(active);
@@ -447,7 +452,7 @@ void Oscilloscope::Properties::applyChannelTab(void) {
 			 if(&*i == panel->trigChan)
 			 panel->trigLine->setPoints(0,panel->val2pix(panel->trigThresh,*i),
 			 width(),panel->val2pix(panel->trigThresh,*i));
-			 */
+		 */
 	}
 	showChannelTab();
 }
@@ -484,7 +489,7 @@ void Oscilloscope::Properties::applyDisplayTab(void) {
 
 	panel->setTrigger(trigDirection, trigThreshold, trigChannel, trigHolding, trigHoldoff);
 
-	panel->setDivXY(divXSpin->value(), divYSpin->value());
+	//panel->setDivXY(divXSpin->value(), divYSpin->value());
 	panel->adjustDataSize();
 
 	showDisplayTab();
@@ -1061,18 +1066,15 @@ void Oscilloscope::Properties::updateDownsampleRate(int r) {
 	panel->updateDownsampleRate(downsample_rate);
 }
 
-
 ////////// #Panel
-
-
-Oscilloscope::Panel::Panel(QWidget *parent) :	Scope(parent), RT::Thread(0), fifo(10 * 1048576) {
+Oscilloscope::Panel::Panel(QWidget *parent) : Scope(parent),	RT::Thread(0), fifo(10 * 1048576) {
 
 	// Setup widget attribute
 	setAttribute(Qt::WA_DeleteOnClose);
 
 	// Make Mdi
 	subWindow = new QMdiSubWindow;
-	subWindow->setMinimumSize(800,500);
+	subWindow->setMinimumSize(800,400);
 	subWindow->setAttribute(Qt::WA_DeleteOnClose);
 	MainWindow::getInstance()->createMdi(subWindow);
 
@@ -1090,26 +1092,11 @@ Oscilloscope::Panel::Panel(QWidget *parent) :	Scope(parent), RT::Thread(0), fifo
 	adjustDataSize();
 	properties = new Properties(this);
 
-	// Create parent widget and layout for scope
-	scopeGroup = new QGroupBox(this);
-	QVBoxLayout *layout = new QVBoxLayout;
-
-	// Create plot group and layout
-	QHBoxLayout *scopeLayout = new QHBoxLayout(this);
-	d_plot = new Scope(this);
-	scopeLayout->addWidget(d_plot);
-
-	// Add to layout
-	scopeGroup->setLayout(scopeLayout);
-
 	// Create group and layout for buttons at bottom of scope
-	bttnGroup = new QGroupBox;
+	bttnGroup = new QGroupBox(this);
 	QHBoxLayout *bttnLayout = new QHBoxLayout(this);
 
 	// Create buttons
-	captureButton = new QPushButton("Capture");
-	QObject::connect(captureButton,SIGNAL(clicked()),this,SLOT(captureScope()));
-	bttnLayout->addWidget(captureButton);
 	pauseButton = new QPushButton("Pause");
 	pauseButton->setCheckable(true);
 	QObject::connect(pauseButton,SIGNAL(clicked()),this,SLOT(togglePause()));
@@ -1121,16 +1108,11 @@ Oscilloscope::Panel::Panel(QWidget *parent) :	Scope(parent), RT::Thread(0), fifo
 	// Attach to layout
 	bttnGroup->setLayout(bttnLayout);
 
-	// Set things up to show
-	layout->addWidget(scopeGroup, 10);
-	layout->addWidget(bttnGroup, 1);
-
 	// Show stuff
-	setLayout(layout);
 	subWindow->setWidget(this);
 	show();
 
-	resize(800,500);
+	// Initialize vars
 	counter = 0;
 	downsample_rate = 1;
 	setActive(true);
@@ -1154,7 +1136,6 @@ void Oscilloscope::Panel::updateDownsampleRate(int r) {
 }
 
 void Oscilloscope::Panel::execute(void) {
-	//void *buffer;
 	size_t nchans = getChannelCount();
 
 	if (nchans) {
@@ -1293,7 +1274,7 @@ void Oscilloscope::Panel::doDeferred(const Settings::Object::State &s) {
 
 void Oscilloscope::Panel::doLoad(const Settings::Object::State &s) {
 	setDataSize(s.loadInteger("Size"));
-	setDivXY(s.loadInteger("DivX"), s.loadInteger("DivY"));
+	//setDivXY(s.loadInteger("DivX"), s.loadInteger("DivY"));
 	setDivT(s.loadDouble("DivT"));
 
 	if (s.loadInteger("Maximized"))
@@ -1332,9 +1313,7 @@ void Oscilloscope::Panel::doSave(Settings::Object::State &s) const {
 
 	s.saveInteger("Num Channels", getChannelCount());
 	size_t n = 0;
-	for (std::list<Channel>::const_iterator i = getChannelsBegin(), end =
-			getChannelsEnd(); i != end; ++i)
-	{
+	for (std::list<Channel>::const_iterator i = getChannelsBegin(), end = getChannelsEnd(); i != end; ++i) {
 		std::ostringstream str;
 		str << n++;
 

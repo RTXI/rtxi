@@ -42,7 +42,7 @@ UserPrefs::Panel::Panel(QWidget *parent) : QWidget(parent) {
 
 	// Preferences structure
 	QSettings userprefs;
-	userprefs.setPath(QSettings::NativeFormat, QSettings::UserScope, "RTXI");
+	userprefs.setPath(QSettings::NativeFormat, QSettings::SystemScope, "/usr/local/share/rtxi/");
 
 	// Main layout
 	QVBoxLayout *layout = new QVBoxLayout;

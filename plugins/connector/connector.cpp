@@ -59,7 +59,7 @@ Connector::Panel::Panel(QWidget *parent) : QWidget(parent) {
 	QGridLayout *layout = new QGridLayout;
 
 	// Create child widget and layout for output block
-	outputGroup = new QGroupBox(tr("Output Block"));
+	outputGroup = new QGroupBox(tr("Source"));
 	QVBoxLayout *outputLayout = new QVBoxLayout;
 
 	// Create elements for output
@@ -90,7 +90,7 @@ Connector::Panel::Panel(QWidget *parent) : QWidget(parent) {
 	buttonGroup->setLayout(buttonLayout);
 
 	// Create child widget and layout for input block
-	inputGroup = new QGroupBox(tr("Input Block"));
+	inputGroup = new QGroupBox(tr("Destination"));
 	QVBoxLayout *inputLayout = new QVBoxLayout;
 
 	// Create elements for output

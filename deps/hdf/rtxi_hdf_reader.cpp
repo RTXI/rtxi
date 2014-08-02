@@ -19,6 +19,7 @@
 #include <cstdlib>
 #include <errno.h>
 #include <getopt.h>
+#include <unistd.h>
 
 #include <hdf5.h>
 #include <hdf5_hl.h>

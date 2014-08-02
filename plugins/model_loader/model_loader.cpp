@@ -28,7 +28,7 @@ extern "C" Plugin::Object * createRTXIPlugin(void *) {
 }
 
 ModelLoader::ModelLoader(void) {
-	action = MainWindow::getInstance()->createModuleMenuItem("Load User Module", this, SLOT(load(void)));
+	action = MainWindow::getInstance()->createModuleMenuItem("Load Plugin", this, SLOT(load(void)));
 }
 
 ModelLoader::~ModelLoader(void) {
@@ -49,7 +49,7 @@ void ModelLoader::load(void) {
 
 	// load QSettings
 	QSettings userprefs;
-	userprefs.setPath(QSettings::NativeFormat, QSettings::UserScope, "RTXI");
+	userprefs.setPath(QSettings::NativeFormat, QSettings::SystemScope, "/usr/local/share/rtxi");
 
 	int oldestmodule = userprefs.value("/recentFileList/start", 0).toInt();
 	if (oldestmodule == 0)
@@ -91,7 +91,7 @@ void ModelLoader::load(void) {
 
 void ModelLoader::updateRecentModules(QString filename, int index) {
 	QSettings userprefs;
-	userprefs.setPath(QSettings::NativeFormat, QSettings::UserScope, "RTXI");
+	userprefs.setPath(QSettings::NativeFormat, QSettings::SystemScope, "/usr/local/share/rtxi/");
 	userprefs.beginGroup("/recentFileList");
 	QStringList entries = userprefs.childKeys();
 	userprefs.endGroup();
@@ -119,7 +119,7 @@ void ModelLoader::updateRecentModules(QString filename, int index) {
 
 void ModelLoader::load_recent(int i) {
 	QSettings userprefs;
-	userprefs.setPath(QSettings::NativeFormat, QSettings::UserScope, "RTXI");
+	userprefs.setPath(QSettings::NativeFormat, QSettings::SystemScope, "/usr/local/share/rtxi/");
 	QString filename = userprefs.value("/recentFileList/" + QString::number(i)).toString();
 	Plugin::Manager::getInstance()->load(filename.toLatin1());
 }

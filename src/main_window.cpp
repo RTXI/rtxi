@@ -52,7 +52,7 @@ MainWindow::MainWindow (void) : QMainWindow(NULL, Qt::Window) {
 	createSystemMenu();
 
 	/* Initialize Windows Menu */
-	createWindowsMenu();
+	//createWindowsMenu();
 
 	/* Initialize Help Menu */
 	createHelpActions();
@@ -149,8 +149,8 @@ void MainWindow::createModuleMenu() {
 
 void MainWindow::createUtilMenu() {
 	utilMenu = menuBar()->addMenu(tr("&Utilities"));
-	filtersSubMenu = utilMenu->addMenu(tr("&Filters"));
-	signalsSubMenu = utilMenu->addMenu(tr("&Signal Generators"));
+	//filtersSubMenu = utilMenu->addMenu(tr("&Filters"));
+	//signalsSubMenu = utilMenu->addMenu(tr("&Signal Generators"));
 }
 
 void MainWindow::createSystemMenu() {
@@ -158,8 +158,8 @@ void MainWindow::createSystemMenu() {
 }
 
 void MainWindow::createWindowsMenu() {
-	windowsMenu = menuBar()->addMenu(tr("&Windows"));
-	connect(windowsMenu,SIGNAL(aboutToShow (void)),this,SLOT(windowsMenuAboutToShow(void)));
+	//windowsMenu = menuBar()->addMenu(tr("&Windows"));
+	//connect(windowsMenu,SIGNAL(aboutToShow (void)),this,SLOT(windowsMenuAboutToShow(void)));
 }
 
 void MainWindow::createHelpMenu() {
@@ -200,7 +200,7 @@ void MainWindow::createHelpActions() {
 
 void MainWindow::updateUtilModules(){
 	QSettings userprefs;
-	userprefs.setPath(QSettings::NativeFormat, QSettings::UserScope, "RTXI");
+	userprefs.setPath(QSettings::NativeFormat, QSettings::SystemScope, "/usr/local/share/rtxi/");
 	userprefs.beginGroup("/utilFileList");
 	QStringList entries = userprefs.childKeys();
 	userprefs.endGroup();
@@ -257,7 +257,7 @@ void MainWindow::aboutQt (void) {
 
 void MainWindow::loadSettings (void) {
 	QSettings userprefs;
-	userprefs.setPath (QSettings::NativeFormat, QSettings::UserScope, "RTXI");
+	userprefs.setPath (QSettings::NativeFormat, QSettings::SystemScope, "/usr/local/share/rtxi/");
 	QString settingsDir = userprefs.value("/dirs/setfiles", getenv("HOME")).toString();
 
 	QString filename = QFileDialog::getOpenFileName(this,
@@ -269,7 +269,7 @@ void MainWindow::loadSettings (void) {
 
 void MainWindow::saveSettings(void) {
 	QSettings userprefs;
-	userprefs.setPath (QSettings::NativeFormat, QSettings::UserScope, "RTXI");
+	userprefs.setPath (QSettings::NativeFormat, QSettings::SystemScope, "/usr/local/share/rtxi/");
 	QString settingsDir = userprefs.value("/dirs/setfiles", getenv("HOME")).toString();
 
 	QString filename = QFileDialog::getSaveFileName(this,
@@ -291,7 +291,7 @@ void MainWindow::saveSettings(void) {
 
 /*void MainWindow::updateUtilModules () {
 	QSettings userprefs;
-	userprefs.setPath (QSettings::NativeFormat, QSettings::UserScope, "RTXI");
+	userprefs.setPath (QSettings::NativeFormat, QSettings::SystemScope, "/usr/local/share/rtxi/");
 
 	QStringList entries = userprefs.entryList ("/utilFileList");
 	int numUtilFiles = entries.size ();
@@ -349,7 +349,7 @@ void MainWindow::saveSettings(void) {
 
 void MainWindow::loadUtil(int i) {
 	QSettings userprefs;
-	userprefs.setPath (QSettings::NativeFormat, QSettings::UserScope, "RTXI");
+	userprefs.setPath (QSettings::NativeFormat, QSettings::SystemScope, "/usr/local/share/rtxi/");
 	/*QString filename = userprefs.readEntry ("/utilFileList/util" + QString::number (i));
 		QByteArray textData = filename.toLatin1();
 		const char *text = textData.constData();
@@ -358,7 +358,7 @@ void MainWindow::loadUtil(int i) {
 
 void MainWindow::loadFilter(int i) {
 	QSettings userprefs;
-	userprefs.setPath (QSettings::NativeFormat, QSettings::UserScope, "RTXI");
+	userprefs.setPath (QSettings::NativeFormat, QSettings::SystemScope, "/usr/local/share/rtxi/");
 	/*QString filename = userprefs.readEntry ("/utilFileList/filter"+ QString::number (i));
 		QByteArray textData = filename.toLatin1();
 		const char *text = textData.constData();
@@ -367,7 +367,7 @@ void MainWindow::loadFilter(int i) {
 
 void MainWindow::loadSignal(int i) {
 	QSettings userprefs;
-	userprefs.setPath (QSettings::NativeFormat, QSettings::UserScope, "RTXI");
+	userprefs.setPath (QSettings::NativeFormat, QSettings::SystemScope, "/usr/local/share/rtxi/");
 	/*QString filename = userprefs.readEntry ("/utilFileList/sig" + QString::number (i));
 		QByteArray textData = filename.toLatin1();
 		const char *text = textData.constData();

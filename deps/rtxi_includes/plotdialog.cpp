@@ -1,7 +1,7 @@
 #include "plotdialog.h"
 #include <qpushbutton.h>
-#include <qwt-qt4/qwt_plot.h>
-#include <qwt-qt4/qwt_plot_curve.h>
+#include <qwt_plot.h>
+#include <qwt_plot_curve.h>
 #include <qlayout.h>
 
 PlotDialog::PlotDialog(QWidget *parent, QString name, double* xData,

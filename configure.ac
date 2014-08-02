@@ -149,7 +149,6 @@ LIBS=
 dnl Create makefiles and other configuration files
 AC_CONFIG_FILES([
 Makefile
-hdf/Makefile
 rtxi/Makefile
 scripts/Makefile
 scripts/init_rtxi
@@ -169,6 +168,7 @@ plugins/oscilloscope/Makefile
 plugins/performance_measurement/Makefile
 plugins/system_control/Makefile
 plugins/userprefs/Makefile
+deps/hdf/Makefile
 ])
 
 dnl Generate config.status and launch it

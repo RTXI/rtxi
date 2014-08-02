@@ -5,6 +5,7 @@
 *.so
 *.swp
 *~
+compile
 
 #Ignore user specific rtxi files
 rtxi.conf
@@ -20,6 +21,7 @@ rtxi/rtxi
 scripts/init_rtxi
 scripts/rtxi_comedi
 scripts/rtxi_plugin_config
+deps
 
 #Ignore qt generated mocs
 moc_*

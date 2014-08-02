@@ -19,6 +19,14 @@
 
 #!/bin/bash
 
+# Directories
+DIR=$PWD
+ROOT=${DIR}/../
+DEPS=${ROOT}/deps
+HDF=${DEPS}/hdf
+QWT=${DEPS}/qwt
+DYN=${DEPS}/dynamo
+
 # Check for compilation dependencies
 echo "Checking for dependencies..."
 
@@ -47,12 +55,75 @@ else
 	exit
 fi
 
-# Install qwt
-echo "Installing widget library..."
+# Start at top
+cd ${DEPS}
 
-if [ $? -eq 0 ]; then
-	echo "----->Dependencies installed."
+# Installing HDF5
+echo "----->Checking for HDF5"
+
+if [ -f "/usr/include/hdf5.h" ]; then
+	echo "----->HDF5 already installed."
 else
-	echo "----->Dependency installation failed."
+	echo "----->Installing HDF5..."
+	cd ${HDF}
+	tar xf hdf5-1.8.4.tar.bz2
+	cd hdf5-1.8.4
+	./configure --prefix=/usr
+	make -j2
+	sudo make install
+	if [ $? -eq 0 ]; then
+			echo "----->HDF5 installed."
+	else
+		echo "----->HDF5 installation failed."
+		exit
+	fi
+fi
+
+# Installing Qwt
+echo "----->Checking for Qwt"
+
+if [ -f "/usr/local/lib/qwt/include/qwt.h" ]; then
+	echo "----->Qwt already installed."
+else
+	echo "----->Installing Qwt..."
+	cd ${QWT}
+	tar xf qwt-6.1.0.tar.bz2
+	cd qwt-6.1.0
+	qmake qwt.pro
+	make -j2
+	sudo make install
+	sudo cp /usr/local/lib/qwt/lib/libqwt.so.6.1.0 /usr/lib/.
+	sudo ln -sf /usr/lib/libqwt.so.6.1.0 /usr/lib/libqwt.so
+	sudo ldconfig
+	if [ $? -eq 0 ]; then
+		echo "----->Qwt installed."
+	else
+		echo "----->Qwt installation failed."
+	exit
+	fi
+fi
+
+# Install rtxi_includes
+sudo rsync -a ${DEPS}/rtxi_includes /usr/local/lib/.
+if [ $? -eq 0 ]; then
+	echo "----->rtxi_includes synced."
+else
+	echo "----->rtxi_includes sync failed."
+	exit
+fi
+
+# Install dynamo
+echo "Installing DYNAMO utility..."
+
+sudo apt-get install mlton
+cd ${DYN}
+mllex dl.lex
+mlyacc dl.grm
+mlton dynamo.mlb
+sudo cp dynamo /usr/bin/
+if [ $? -eq 0 ]; then
+	echo "----->DYNAMO translation utility installed."
+else
+	echo "----->DYNAMO translation utility installation failed."
 	exit
 fi

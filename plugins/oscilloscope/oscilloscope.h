@@ -14,7 +14,7 @@
 	 You should have received a copy of the GNU General Public License
 	 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-*/
+ */
 
 #ifndef OSCILLOSCOPE_H
 #define OSCILLOSCOPE_H
@@ -32,15 +32,16 @@
 #include <settings.h>
 
 #include "scope.h"
+#include "wheelbox.h"
 
 namespace Oscilloscope {
-	
+
 	class Panel;
 
 	class Properties : public QDialog, public Event::Handler {
 		Q_OBJECT
-		
-		friend class Panel;
+
+			friend class Panel;
 
 		public:
 		Properties(Panel *);
@@ -48,13 +49,13 @@ namespace Oscilloscope {
 		void receiveEvent(const ::Event::Object *);
 
 		public slots:
-			void updateDownsampleRate(int);
+		void updateDownsampleRate(int);
 
 		protected:
 		void closeEvent(QCloseEvent *);
 
 		private slots:
-			void activateChannel(bool);
+		void activateChannel(bool);
 		void apply(void);
 		void buildChannelList(void);
 		void okay(void);
@@ -112,13 +113,13 @@ namespace Oscilloscope {
 	class Plugin : public QObject, public ::Plugin::Object, public RT::Thread {
 		Q_OBJECT
 
-		friend class Panel;
+			friend class Panel;
 
 		public:
 		static Plugin *getInstance(void);
 
 		public slots:
-		void createOscilloscopePanel(void);
+			void createOscilloscopePanel(void);
 
 		protected:
 		virtual void doDeferred(const Settings::Object::State &);
@@ -140,7 +141,7 @@ namespace Oscilloscope {
 	class Panel : public Scope, public RT::Thread, public virtual Settings::Object {
 		Q_OBJECT
 
-		friend class Properties;
+			friend class Properties;
 
 		public:
 		Panel(QWidget *);
@@ -162,15 +163,14 @@ namespace Oscilloscope {
 
 		private:
 		QMdiSubWindow *subWindow;
-		QGroupBox *scopeGroup;
+
+		// Group and layout information
 		QGroupBox *bttnGroup;
 
-		QPushButton *captureButton;
+		// Buttons
 		QPushButton *pauseButton;
 		QPushButton *settingsButton;
-
-		// Scope display
-		Scope *d_plot;
+		WheelBox *refreshWheel;
 
 		void updateDownsampleRate(int);
 		Fifo fifo;
