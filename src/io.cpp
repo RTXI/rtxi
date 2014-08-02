@@ -42,6 +42,8 @@ IO::Block::Block(std::string n,IO::channel_t *channel,size_t size):name(n) {
 	inputs = std::vector<struct input_t>(num_inputs);
 	outputs = std::vector<struct output_t>(num_outputs);
 
+	printf("size is %d\n", (int)size);
+
 	size_t in = 0, out = 0;
 	for (size_t i = 0; i < size; ++i)
 		if (channel[i].flags & INPUT) {

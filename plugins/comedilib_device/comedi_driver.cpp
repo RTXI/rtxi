@@ -116,10 +116,10 @@ DAQ::Device *ComediDriver::createDevice(const std::list<std::string> &args) {
 void ComediDriver::doLoad(const Settings::Object::State &s) {
     for(size_t i = 0, end = s.loadInteger("Num Devices");i < end;++i) {
         std::list<std::string> args;
-        args.push_back(s.loadString(QString::number(i)));
+        args.push_back(s.loadString(QString::number(i).toStdString()));
         DAQ::Device *device = createDevice(args);
         if(device)
-            device->load(s.loadState(QString::number(i)));
+            device->load(s.loadState(QString::number(i).toStdString()));
     }
 }
 

@@ -224,7 +224,6 @@ void Connector::Panel::buildInputChannelList(void) {
 
 	IO::Block *block = blocks[inputBlock->currentIndex()];
 
-	printf("output size: %d \n", (int)block->getCount(IO::OUTPUT));
 	printf("input size: %d \n", (int)block->getCount(IO::INPUT));
 
 	for(size_t i = 0;i < block->getCount(IO::INPUT);++i)
@@ -240,6 +239,7 @@ void Connector::Panel::buildOutputChannelList(void) {
 		return;
 
 	IO::Block *block = blocks[outputBlock->currentIndex()];
+	printf("output size: %d \n", (int)block->getCount(IO::OUTPUT));
 
 	for(size_t i = 0;i < block->getCount(IO::OUTPUT);++i)
 		outputChannel->addItem(QString::fromStdString(block->getName(IO::OUTPUT,i)));
