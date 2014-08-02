@@ -43,10 +43,12 @@ AnalogyDevice::AnalogyDevice(a4l_desc_t *d,std::string name,IO::channel_t *chan,
 				idx_ai  = i; 
 			else if (((sbinfo->flags & A4L_SUBD_TYPES) == A4L_SUBD_AO) && (idx_ao < 0))
 				idx_ao  = i; 
-			else if (((sbinfo->flags & A4L_SUBD_TYPES) == A4L_SUBD_DIO) && (idx_dio < 0))
+			else if (((sbinfo->flags & A4L_SUBD_TYPES) == A4L_SUBD_DIO) && (idx_dio < 0)) {
 				idx_dio  = i; 
+			}
 		}
 
+		// Get info about AI subdevice
 		err = a4l_get_subdinfo(&dsc, idx_ai, &sbinfo);
 		if((err == 0) && ((sbinfo->flags & A4L_SUBD_TYPES) == A4L_SUBD_AI)) {
 			subdevice[AI].id = idx_ai;
@@ -79,6 +81,7 @@ AnalogyDevice::AnalogyDevice(a4l_desc_t *d,std::string name,IO::channel_t *chan,
 			subdevice[AI].chan = NULL;
 		}
 
+		// Get info about AO subdevice
 		err = a4l_get_subdinfo(&dsc, idx_ao, &sbinfo);
 		if((err == 0) && ((sbinfo->flags & A4L_SUBD_TYPES) == A4L_SUBD_AO)) {
 			subdevice[AO].id = idx_ao;
@@ -111,6 +114,7 @@ AnalogyDevice::AnalogyDevice(a4l_desc_t *d,std::string name,IO::channel_t *chan,
 			subdevice[AO].chan = NULL;
 		}
 
+		// Get info about DIO subdevice
 		err = a4l_get_subdinfo(&dsc, idx_dio, &sbinfo);
 		if((err == 0) && ((sbinfo->flags & A4L_SUBD_TYPES) == A4L_SUBD_DIO)) {
 			subdevice[DIO].id = idx_dio;
@@ -137,7 +141,6 @@ AnalogyDevice::~AnalogyDevice(void) {
 	if(subdevice[AI].chan) delete[] subdevice[AI].chan;
 	if(subdevice[AO].chan) delete[] subdevice[AO].chan;
 	if(subdevice[DIO].chan) delete[] subdevice[DIO].chan;
-	// TODO Not sure if it's the best test, but should work
 	if(dsc.sbdata) a4l_close(&dsc);
 }
 

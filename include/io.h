@@ -284,11 +284,11 @@ namespace IO {
 		static void disconnect(Block *,size_t,Block *,size_t);
 
 		/*************************************************************
-		 * junk exists because "double &output(size_t n)" has to     *
+		 * yogi exists because "double &output(size_t n)" has to     *
 		 *   return a reference to something if n >= outputs.size(). *
 		 *************************************************************/
 
-		static double junk;
+		static double yogi;
 
 		struct link_t {
 			Block *block;
