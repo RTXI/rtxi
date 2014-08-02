@@ -219,7 +219,7 @@ SystemControlPanel::SystemControlPanel(QWidget *parent) : QWidget(parent) {
 	analogGroup->setLayout(analogLayout);
 
 	// Create child widget and layout for digital block
-	digitalGroup = new QGroupBox(tr("Digital Channels"));
+	digitalGroup = new QGroupBox(tr("Digital I/O"));
 	QGridLayout *digitalLayout = new QGridLayout;
 
 	// Create elements for digital block
@@ -236,7 +236,6 @@ SystemControlPanel::SystemControlPanel(QWidget *parent) : QWidget(parent) {
 	QObject::connect(digitalChannelList,SIGNAL(activated(int)),this,SLOT(display(void)));
 	digitalLayout->addWidget(digitalChannelList, 1, 2, 1, 1);
 
-	//digitalLayout->addWidget(new QLabel(tr("Direction:")), 2, 0);
 	digitalDirectionList = new QComboBox;
 	digitalDirectionList->addItem("Input");
 	digitalDirectionList->addItem("Output");
@@ -277,6 +276,7 @@ SystemControlPanel::SystemControlPanel(QWidget *parent) : QWidget(parent) {
 	// Set layout to Mdi
 	subWindow->setWidget(this);
 
+	// Updates settings for device and builds lists of channels
 	updateDevice();
 	display();
 	show();
@@ -315,6 +315,7 @@ void SystemControlPanel::apply(void) {
 		DAQ::type_t d_type = static_cast<DAQ::type_t>(digitalSubdeviceList->currentIndex()+2);
 		DAQ::direction_t d_dir = static_cast<DAQ::direction_t>(digitalDirectionList->currentIndex());
 
+		// Write digital channel configuration to DAQ
 		dev->setChannelActive(d_type,d_chan,digitalActiveButton->isChecked());
 		if(d_type == DAQ::DIO)
 			dev->setDigitalDirection(d_chan,d_dir);
@@ -342,15 +343,19 @@ void SystemControlPanel::updateDevice(void) {
 
 	analogChannelList->clear();
 	digitalChannelList->clear();
-	if(!dev) return;
+	if(!dev)
+		return;
 
 	type = static_cast<DAQ::type_t>(analogSubdeviceList->currentIndex());
-	for(size_t i=0;i<dev->getChannelCount(type);++i)
+	for(size_t i=0;i<dev->getChannelCount(type);++i) {
 		analogChannelList->addItem(QString::number(i));
+	}
 
 	type = static_cast<DAQ::type_t>(digitalSubdeviceList->currentIndex()+DAQ::DIO);
-	for(size_t i=0;i<dev->getChannelCount(type);++i)
+	type = static_cast<DAQ::type_t>(2);
+	for(size_t i=0;i<dev->getChannelCount(type);++i) {
 		digitalChannelList->addItem(QString::number(i));
+	}
 
 	display();
 }
@@ -417,6 +422,8 @@ void SystemControlPanel::display(void) {
 		dev = info.device;
 	}
 
+	// Check to make sure DAQ is of the right type
+	// if not, disable functions, else set
 	if(!dev) {
 		deviceList->setEnabled(false);
 		analogSubdeviceList->setEnabled(false);

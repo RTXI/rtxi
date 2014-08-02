@@ -39,7 +39,7 @@ sudo apt-get install kernel-package
 sudo apt-get install fakeroot build-essential crash kexec-tools makedumpfile kernel-wedge
 sudo apt-get build-dep linux
 sudo apt-get install git-core libncurses5 libncurses5-dev libelf-dev asciidoc binutils-dev
-sudo apt-get install qt4-dev-tools libqt4-dev
+sudo apt-get install qt4-dev-tools libqt4-dev libqt4-opengl-dev
 elif [[ $(lsb_release --id) == *Scientific* ]]
 then
 sudo yum update
