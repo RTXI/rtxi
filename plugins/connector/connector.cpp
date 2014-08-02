@@ -143,7 +143,7 @@ Connector::Panel::Panel(QWidget *parent) : QWidget(parent) {
 
 	IO::Connector::getInstance()->foreachConnection(&buildConnectionList,&links);
 	for(size_t i = 0, iend = links.size();i < iend;++i) {
-		connectionBox->addItem(QString::number(links[i].src->getID())+" "+QString::fromStdString(links[i].src->getName())+" : "+QString::number(links[i].src_idx)+" "+QString::fromStdString(links[i].src->getName(IO::OUTPUT,links[i].src_idx))+" ==> "+
+		connectionBox->addItem(QString::number(links[i].src->getID())+" "+QString::fromStdString(links[i].src->getName())+" : "+QString::number(links[i].src_idx)+" "+QString::fromStdString(links[i].src->getName(IO::OUTPUT,links[i].src_idx))+" ---> "+
 				QString::number(links[i].dest->getID())+" "+QString::fromStdString(links[i].dest->getName())+" : "+QString::number(links[i].dest_idx)+" "+QString::fromStdString(links[i].dest->getName(IO::INPUT,links[i].dest_idx)));
 	}
 }
@@ -223,6 +223,9 @@ void Connector::Panel::buildInputChannelList(void) {
 		return;
 
 	IO::Block *block = blocks[inputBlock->currentIndex()];
+
+	printf("output size: %d \n", (int)block->getCount(IO::OUTPUT));
+	printf("input size: %d \n", (int)block->getCount(IO::INPUT));
 
 	for(size_t i = 0;i < block->getCount(IO::INPUT);++i)
 		inputChannel->addItem(QString::fromStdString(block->getName(IO::INPUT,i)));

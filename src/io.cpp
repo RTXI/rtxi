@@ -119,7 +119,7 @@ double IO::Block::output(size_t n) const {
 	return outputs[n].value;
 }
 
-double IO::Block::junk = 0.0;
+double IO::Block::yogi = 0.0;
 
 double &IO::Block::output(size_t n) {
 
@@ -129,7 +129,7 @@ double &IO::Block::output(size_t n) {
 	 *********************************************************/
 
 	if (unlikely(n >= outputs.size()))
-		return junk = 0.0;
+		return yogi = 0.0;
 	return outputs[n].value;
 }
 
