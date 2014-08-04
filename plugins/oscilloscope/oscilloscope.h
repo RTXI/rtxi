@@ -167,9 +167,27 @@ namespace Oscilloscope {
 		QGridLayout *layout;
 		QGroupBox *scopeGroup;
 		QGroupBox *bttnGroup;
+		QGroupBox *scopeBttnGroup;
+		QGroupBox *triggerBttnGroup;
+		QGroupBox *setBttnGroup;
 
 		// Scope element
 		Scope *scopeWindow;
+
+		// Properties
+		QSpinBox *divsXSpin;
+		QSpinBox *divsYSpin;
+		QSpinBox *ratesSpin;
+		QLineEdit *sizesEdit;
+		QButtonGroup *trigsGroup;
+		QComboBox *timesList;
+		QComboBox *trigsChanList;
+		QComboBox *trigsThreshList;
+		QSpinBox *refreshsSpin;
+		QLineEdit *trigsThreshEdit;
+		QCheckBox *trigsHoldingCheck;
+		QLineEdit *trigsHoldoffEdit;
+		QComboBox *trigsHoldoffList;
 
 		// Lists
 		QComboBox *blocksList;

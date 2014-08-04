@@ -1075,7 +1075,7 @@ Oscilloscope::Panel::Panel(QWidget *parent) : Scope(parent),	RT::Thread(0), fifo
 
 	// Make Mdi
 	subWindow = new QMdiSubWindow;
-	subWindow->setMinimumSize(800,500);
+	subWindow->setMinimumSize(800,700);
 	subWindow->setAttribute(Qt::WA_DeleteOnClose);
 	MainWindow::getInstance()->createMdi(subWindow);
 
@@ -1106,44 +1106,39 @@ Oscilloscope::Panel::Panel(QWidget *parent) : Scope(parent),	RT::Thread(0), fifo
 	scopeLayout->addWidget(scopeWindow);
 
 	// Create group and layout for buttons at bottom of scope
-	bttnGroup = new QGroupBox(tr("Settings"));
+	bttnGroup = new QGroupBox(tr("Channel Settings"));
 	QGridLayout *bttnLayout = new QGridLayout(this);
 
 	// Create Channel box
 	QLabel *channelLabel = new QLabel(tr("Channel:"));
 	channelLabel->setAlignment(Qt::AlignCenter | Qt::AlignLeft);
-	channelLabel->setFixedWidth(55);
 	bttnLayout->addWidget(channelLabel, 0, 0);
 	blocksList = new QComboBox;
 	block_list_info_t info = {blocksList, &this->blocks};
 	IO::Connector::getInstance()->foreachBlock(::buildBlockList, &info);
 	QObject::connect(blocksList,SIGNAL(activated(int)),this,SLOT(buildChannelList(void)));
-	bttnLayout->addWidget(blocksList, 0, 1);
+	bttnLayout->addWidget(blocksList, 0, 1, 1, 2);
 
 	// Create Type box
 	typesList = new QComboBox;
-	typesList->setFixedWidth(90);
 	typesList->addItem("Input");
 	typesList->addItem("Output");
 	typesList->addItem("Parameter");
 	typesList->addItem("State");
 	QObject::connect(typesList,SIGNAL(activated(int)),this,SLOT(buildChannelList(void)));
-	bttnLayout->addWidget(typesList, 0, 3);
+	bttnLayout->addWidget(typesList, 0, 3, 1, 2);
 
 	// Create Channels box
 	channelsList = new QComboBox;
-	channelsList->setFixedWidth(100);
 	QObject::connect(channelsList,SIGNAL(activated(int)),this,SLOT(showTab(void)));
-	bttnLayout->addWidget(channelsList, 0, 4);
+	bttnLayout->addWidget(channelsList, 0, 5, 1, 3);
 
 	// Create elements for display box
 	QLabel *scaleLabel = new QLabel(tr("Scale:"));
-	scaleLabel->setFixedWidth(75);
-	scaleLabel->setAlignment(Qt::AlignCenter | Qt::AlignRight);
-	bttnLayout->addWidget(scaleLabel, 0, 5);
+	scaleLabel->setAlignment(Qt::AlignVCenter | Qt::AlignRight);
+	bttnLayout->addWidget(scaleLabel, 0, 8, 1, 1);
 	scalesList = new QComboBox;
-	scalesList->setFixedWidth(100);
-	bttnLayout->addWidget(scalesList, 0, 6);
+	bttnLayout->addWidget(scalesList, 0, 9, 1, 1);
 	QFont scalesListFont("DejaVu Sans Mono");
 	scalesList->setFont(scalesListFont);
 	scalesList->addItem("10 V/div"); // 0  case 0
@@ -1253,16 +1248,14 @@ Oscilloscope::Panel::Panel(QWidget *parent) : Scope(parent),	RT::Thread(0), fifo
 
 	// Offset items
 	QLabel *offsetLabel = new QLabel(tr("Offset:"));
-	offsetLabel->setFixedWidth(75);
 	offsetLabel->setAlignment(Qt::AlignCenter | Qt::AlignRight);
-	bttnLayout->addWidget(offsetLabel, 0, 7);
+	bttnLayout->addWidget(offsetLabel, 0, 10, 1, 1);
 	offsetsEdit = new QLineEdit;
-	offsetsEdit->setFixedWidth(50);
 	offsetsEdit->setValidator(new QDoubleValidator(offsetsEdit));
-	bttnLayout->addWidget(offsetsEdit, 0, 8);
+	bttnLayout->addWidget(offsetsEdit, 0, 11, 1, 1);
 	offsetsList = new QComboBox;
-	offsetsList->setFixedWidth(50);
-	bttnLayout->addWidget(offsetsList, 0, 9);
+	offsetsList->setFixedWidth(40);
+	bttnLayout->addWidget(offsetsList, 0, 12, 1, 1);
 	offsetsList->addItem("V");
 	offsetsList->addItem("mV");
 	offsetsList->addItem("uV");
@@ -1272,32 +1265,248 @@ Oscilloscope::Panel::Panel(QWidget *parent) : Scope(parent),	RT::Thread(0), fifo
 	// Activate button
 	activateButton = new QPushButton("Active");
 	activateButton->setCheckable(true);
-	activateButton->setFixedWidth(55);
 	QObject::connect(activateButton,SIGNAL(toggled(bool)),this,SLOT(activateChannel(bool)));
-	bttnLayout->addWidget(activateButton, 0, 10);
+	bttnLayout->addWidget(activateButton, 1, 9, 1, 2);
+
+	// Create elements for graphic
+	bttnLayout->addWidget(new QLabel(tr("Color:")), 1, 0, Qt::AlignVCenter| Qt::AlignRight);
+	colorsList = new QComboBox;
+	bttnLayout->addWidget(colorsList, 1, 1, 1, 2);
+	QPixmap tmp(25, 25);
+	tmp.fill(Qt::red);
+	colorsList->addItem(tmp, " Red");
+	tmp.fill(Qt::yellow);
+	colorsList->addItem(tmp, " Yellow");
+	tmp.fill(Qt::green);
+	colorsList->addItem(tmp, " Green");
+	tmp.fill(Qt::blue);
+	colorsList->addItem(tmp, " Blue");
+	tmp.fill(Qt::magenta);
+	colorsList->addItem(tmp, " Magenta");
+	tmp.fill(Qt::cyan);
+	colorsList->addItem(tmp, " Cyan");
+	tmp.fill(Qt::black);
+	colorsList->addItem(tmp, " Black");
+
+	QLabel *widthLabel = new QLabel(tr("Width:"));
+	widthLabel->setAlignment(Qt::AlignCenter | Qt::AlignLeft);
+	bttnLayout->addWidget(widthLabel, 1, 3);
+	widthsList = new QComboBox;
+	bttnLayout->addWidget(widthsList, 1, 4, 1, 2);
+	tmp.fill(Qt::white);
+	QPainter painter(&tmp);
+	for (int i = 1; i < 6; i++) {
+		painter.setPen(QPen(Qt::black, i));
+		painter.drawLine(0, 12, 25, 12);
+		widthsList->addItem(tmp, QString::number(i) + QString(" Pixels"));
+	}
+
+	// Create styles list
+	QLabel *styleLabel = new QLabel(tr("Style:"));
+	bttnLayout->addWidget(styleLabel, 1, 6);
+	styleLabel->setAlignment(Qt::AlignCenter | Qt::AlignLeft);
+	stylesList = new QComboBox;
+	bttnLayout->addWidget(stylesList, 1, 7, 1, 2);
+	tmp.fill(Qt::white);
+	painter.setPen(QPen(Qt::black, 3, Qt::SolidLine));
+	painter.drawLine(0, 12, 25, 12);
+	stylesList->addItem(tmp, QString(" Solid"));
+	tmp.fill(Qt::white);
+	painter.setPen(QPen(Qt::black, 3, Qt::DashLine));
+	painter.drawLine(0, 12, 25, 12);
+	stylesList->addItem(tmp, QString(" Dash"));
+	tmp.fill(Qt::white);
+	painter.setPen(QPen(Qt::black, 3, Qt::DotLine));
+	painter.drawLine(0, 12, 25, 12);
+	stylesList->addItem(tmp, QString(" Dot"));
+	tmp.fill(Qt::white);
+	painter.setPen(QPen(Qt::black, 3, Qt::DashDotLine));
+	painter.drawLine(0, 12, 25, 12);
+	stylesList->addItem(tmp, QString(" Dash Dot"));
+	tmp.fill(Qt::white);
+	painter.setPen(QPen(Qt::black, 3, Qt::DashDotDotLine));
+	painter.drawLine(0, 12, 25, 12);
+	stylesList->addItem(tmp, QString(" Dash Dot Dot"));
+
+	// Scope properties 
+	scopeBttnGroup = new QGroupBox(tr("Scope Configuration"));
+	QGridLayout *scopeBttnsLayout = new QGridLayout(this);
+
+	// Create elements for time settings
+	scopeBttnsLayout->addWidget(new QLabel("Time/Div:"), 2, 0);
+	timesList = new QComboBox;
+	scopeBttnsLayout->addWidget(timesList, 2, 1, 1, 1);
+	QFont timeListFont("DejaVu Sans Mono");
+	timesList->setFont(timeListFont);
+	timesList->addItem("5 s/div");
+	timesList->addItem("2 s/div");
+	timesList->addItem("1 s/div");
+	timesList->addItem("500 ms/div");
+	timesList->addItem("200 ms/div");
+	timesList->addItem("100 ms/div");
+	timesList->addItem("50 ms/div");
+	timesList->addItem("20 ms/div");
+	timesList->addItem("10 ms/div");
+	timesList->addItem("5 ms/div");
+	timesList->addItem("2 ms/div");
+	timesList->addItem("1 ms/div");
+	QString tsuffix = QString("s/div");
+	text = QString("500 ");
+	text.append(mu);
+	text.append(tsuffix);
+	timesList->addItem(text);
+	text = QString("200 ");
+	text.append(mu);
+	text.append(tsuffix);
+	timesList->addItem(text);
+	text = QString("100 ");
+	text.append(mu);
+	text.append(tsuffix);
+	timesList->addItem(text);
+	text = QString("50 ");
+	text.append(mu);
+	text.append(tsuffix);
+	timesList->addItem(text);
+	text = QString("20 ");
+	text.append(mu);
+	text.append(tsuffix);
+	timesList->addItem(text);
+	text = QString("10 ");
+	text.append(mu);
+	text.append(tsuffix);
+	timesList->addItem(text);
+	text = QString("5 ");
+	text.append(mu);
+	text.append(tsuffix);
+	timesList->addItem(text);
+	text = QString("2 ");
+	text.append(mu);
+	text.append(tsuffix);
+	timesList->addItem(text);
+	text = QString("1 ");
+	text.append(mu);
+	text.append(tsuffix);
+	timesList->addItem(text);
+
+	QLabel *refreshLabel = new QLabel(tr("Refresh\nRate:"));
+	refreshLabel->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
+	scopeBttnsLayout->addWidget(refreshLabel, 2, 6);
+	refreshsSpin = new QSpinBox;
+	scopeBttnsLayout->addWidget(refreshsSpin, 2, 7);
+	refreshsSpin->setRange(10,10000);
+	refreshsSpin->setValue(250);
+
+	scopeBttnsLayout->addWidget(new QLabel("X Divs:"), 2, 2);
+	divsXSpin = new QSpinBox;
+	scopeBttnsLayout->addWidget(divsXSpin, 2, 3);
+	divsXSpin->setRange(1,25);
+	divsXSpin->setValue(8);
+
+	scopeBttnsLayout->addWidget(new QLabel("Y Divs:"), 2, 4);
+	divsYSpin = new QSpinBox;
+	scopeBttnsLayout->addWidget(divsYSpin, 2, 5);
+	divsYSpin->setRange(1,25);
+	divsYSpin->setValue(10);
+
+	QLabel *downsampleLabel = new QLabel(tr("Downsample\nRate:"));
+	downsampleLabel->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
+	scopeBttnsLayout->addWidget(downsampleLabel, 2, 8);
+	ratesSpin = new QSpinBox;
+	ratesSpin->setFixedWidth(40);
+	scopeBttnsLayout->addWidget(ratesSpin, 2, 9);
+	ratesSpin->setValue(downsample_rate);
+	QObject::connect(ratesSpin,SIGNAL(valueChanged(int)),this,SLOT(updateDownsampleRate(int)));
+	ratesSpin->setEnabled(true);
+	ratesSpin->setRange(1,2);
+	ratesSpin->setValue(1);
+
+	QLabel *bufferLabel = new QLabel(tr("Data Buffer\nSize (MB):"));
+	bufferLabel->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
+	scopeBttnsLayout->addWidget(bufferLabel, 2, 10);
+	sizesEdit = new QLineEdit;
+	scopeBttnsLayout->addWidget(sizesEdit, 2, 11);
+	sizesEdit->setText(QString::number(getDataSize()));
+	sizesEdit->setEnabled(false);
+
+	// Trigger properties 
+	triggerBttnGroup = new QGroupBox(tr("Trigger Settings"));
+	QGridLayout *triggerBttnsLayout = new QGridLayout(this);
+
+	// Trigger box
+	triggerBttnsLayout->addWidget(new QLabel(tr("Trigger:")), 0, 0);
+	trigsGroup = new QButtonGroup;
+
+	QRadioButton *off = new QRadioButton(tr("Off"));
+	trigsGroup->addButton(off, Scope::NONE);
+	triggerBttnsLayout->addWidget(off, 0, 1);
+	QRadioButton *plus = new QRadioButton(tr("+"));
+	trigsGroup->addButton(plus, Scope::POS);
+	triggerBttnsLayout->addWidget(plus, 0, 2);
+	QRadioButton *minus = new QRadioButton(tr("-"));
+	trigsGroup->addButton(minus, Scope::NEG);
+	triggerBttnsLayout->addWidget(minus, 0, 3);
+
+	triggerBttnsLayout->addWidget(new QLabel(tr("Channel:")), 0, 4);
+	trigsChanList = new QComboBox;
+	triggerBttnsLayout->addWidget(trigsChanList, 0, 5, 1, 2);
+
+	triggerBttnsLayout->addWidget(new QLabel(tr("Threshold:")), 0, 7);
+	trigsThreshEdit = new QLineEdit;
+	trigsThreshEdit->setFixedWidth(50);
+	triggerBttnsLayout->addWidget(trigsThreshEdit, 0, 8);
+	trigsThreshEdit->setValidator(new QDoubleValidator(trigsThreshEdit));
+	trigsThreshList = new QComboBox;
+	triggerBttnsLayout->addWidget(trigsThreshList, 0, 9);
+	trigsThreshList->addItem("V");
+	trigsThreshList->addItem("mV");
+	trigsThreshList->addItem("uV");
+	trigsThreshList->addItem("nV");
+	trigsThreshList->addItem("pV");
+
+	triggerBttnsLayout->addWidget(new QLabel(tr("Holding:")), 0, 10);
+	trigsHoldingCheck = new QCheckBox;
+	triggerBttnsLayout->addWidget(trigsHoldingCheck, 0, 11);
+
+	triggerBttnsLayout->addWidget(new QLabel(tr("Holdoff:")), 0, 12);
+	trigsHoldoffEdit = new QLineEdit;
+	trigsHoldoffEdit->setFixedWidth(50);
+	triggerBttnsLayout->addWidget(trigsHoldoffEdit, 0, 13);
+	trigsHoldoffEdit->setValidator(new QDoubleValidator(trigsHoldoffEdit));
+	trigsHoldoffList = new QComboBox;
+	triggerBttnsLayout->addWidget(trigsHoldoffList, 0, 14) ;
+	trigsHoldoffList->addItem("ms");
+	trigsHoldoffList->addItem("us");
+	trigsHoldoffList->addItem("ns");
+
+	// Trigger properties 
+	setBttnGroup = new QGroupBox(this);
+	QGridLayout *setBttnsLayout = new QGridLayout(this);
 
 	// Create buttons
 	pauseButton = new QPushButton("Pause");
 	pauseButton->setCheckable(true);
-	pauseButton->setFixedWidth(75);
 	QObject::connect(pauseButton,SIGNAL(clicked()),this,SLOT(togglePause()));
-	bttnLayout->addWidget(pauseButton, 5, 4);
+	setBttnsLayout->addWidget(pauseButton, 2, 11);
 	applyButton = new QPushButton("Apply");
-	applyButton->setFixedWidth(75);
 	QObject::connect(applyButton,SIGNAL(clicked(void)),this,SLOT(apply(void)));
-	bttnLayout->addWidget(applyButton, 5, 5);
-	settingsButton = new QPushButton("Settings");
-	settingsButton->setFixedWidth(75);
+	setBttnsLayout->addWidget(applyButton, 2, 12);
+	settingsButton = new QPushButton("Screenshot");
 	QObject::connect(settingsButton,SIGNAL(clicked()),this,SLOT(showProperties()));
-	bttnLayout->addWidget(settingsButton, 5, 6);
+	setBttnsLayout->addWidget(settingsButton, 2, 10);
 
 	// Attach to layout
 	scopeGroup->setLayout(scopeLayout);
 	bttnGroup->setLayout(bttnLayout);
+	scopeBttnGroup->setLayout(scopeBttnsLayout);
+	triggerBttnGroup->setLayout(triggerBttnsLayout);
+	setBttnGroup->setLayout(setBttnsLayout);
 	
 	// Setup main layout
 	layout->addWidget(scopeGroup, 0, 0, 9, 16);
 	layout->addWidget(bttnGroup, 9, 0, 2, 16);
+	layout->addWidget(scopeBttnGroup, 11, 0, 1, 16);
+	layout->addWidget(triggerBttnGroup, 13, 0, 1, 16);
+	layout->addWidget(setBttnGroup, 14, 0, 1, 16);
 
 	// Set
 	setLayout(layout);
@@ -1330,6 +1539,7 @@ void Oscilloscope::Panel::updateDownsampleRate(int r) {
 }
 
 void Oscilloscope::Panel::execute(void) {
+	//printf("in execute\n");
 	size_t nchans = getChannelCount();
 
 	if (nchans) {

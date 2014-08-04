@@ -78,7 +78,6 @@ Scope::Scope(QWidget *parent) : QwtPlot(parent) {
 	grid->attach(this);
 
 	// Initialize vars
-	//setMinimumSize(16,9);
 	isPaused = false;
 	drawZero = true;
 	divX = 10;
@@ -109,6 +108,7 @@ Scope::~Scope(void) {
 }
 
 bool Scope::paused(void) const {
+	printf("ispaused? %d\n");
 	return isPaused;
 }
 
@@ -118,7 +118,7 @@ void Scope::timeoutEvent(void) {
 }
 
 void Scope::togglePause(void) {
-	printf("Pause called\n");
+	printf("pause called\n");
 	isPaused = !isPaused;
 }
 
@@ -173,9 +173,8 @@ void Scope::clearData(void) {
 
 void Scope::setData(double data[],size_t size) {
 	if(isPaused){
-		printf("paused now\n");
 		return;
-}
+	}
 
 	printf("not paused\n");
 	if(size < getChannelCount()) {
