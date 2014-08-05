@@ -57,7 +57,6 @@ QString Scope::Channel::getLabel(void) const {
 
 Scope::Scope(QWidget *parent) : QwtPlot(parent) {
 
-	printf("being called\n");
 	// Initialize director
 	d_directPainter = new QwtPlotDirectPainter();
 	setAutoReplot(false);
@@ -176,7 +175,6 @@ void Scope::setData(double data[],size_t size) {
 		return;
 	}
 
-	printf("not paused\n");
 	if(size < getChannelCount()) {
 		ERROR_MSG("Scope::setData() : data size mismatch detected\n");
 		return;

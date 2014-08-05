@@ -56,7 +56,6 @@ namespace Oscilloscope {
 		private slots:
 		void activateChannel(bool);
 		void apply(void);
-		void buildChannelList(void);
 		void okay(void);
 		void showTab(void);
 
@@ -65,8 +64,6 @@ namespace Oscilloscope {
 		void applyDisplayTab(void);
 		void createChannelTab(void);
 		void createDisplayTab(void);
-		void showChannelTab(void);
-		void showDisplayTab(void);
 
 		size_t downsample_rate;
 
@@ -160,6 +157,12 @@ namespace Oscilloscope {
 		protected:
 		void mouseDoubleClickEvent(QMouseEvent *);
 
+		private slots:
+		void showChannelTab(void);
+		void showDisplayTab(void);
+		void buildChannelList(void);
+		void screenshot(void);
+
 		private:
 		QMdiSubWindow *subWindow;
 
@@ -205,6 +208,12 @@ namespace Oscilloscope {
 		QPushButton *settingsButton;
 		QPushButton *applyButton;
 		QPushButton *activateButton;
+
+		QSpinBox *refreshSpin;
+		QSpinBox *divXSpin;
+		QSpinBox *divYSpin;
+		QSpinBox *rateSpin;
+		QLineEdit *sizeEdit;
 
 		void updateDownsampleRate(int);
 		Fifo fifo;

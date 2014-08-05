@@ -123,7 +123,7 @@ class Scope : public QwtPlot {
 					pal.setColor(QPalette::WindowText, Qt::green);
 					setPalette(pal);
 				}
-		};
+		}; // class Canvas
 
 		enum trig_t{
 			NONE,
