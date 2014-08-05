@@ -11,11 +11,14 @@ oscilloscope_la_LDFLAGS = -module -avoid-version -lqwt
 oscilloscope_la_SOURCES = \
 		oscilloscope.h \
 		scope .h \
+		panel.h \
 		oscilloscope.cpp \
-		scope.cpp 
+		scope.cpp \
+		panel.cpp 
 nodist_oscilloscope_la_SOURCES = \
 		moc_oscilloscope.cpp \
-		moc_scope.cpp 
+		moc_scope.cpp \
+		moc_panel.cpp
 
 # MOC Rule - builds meta-object files as needed
 moc_%.cpp: %.h

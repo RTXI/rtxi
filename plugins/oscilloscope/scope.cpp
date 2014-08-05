@@ -27,34 +27,43 @@
 
 #include "scope.h"
 
+// Constructor for a channel
 Scope::Channel::Channel(void) {}
 
+// Destructor for a channel
 Scope::Channel::~Channel(void) {}
 
+// Returns channel information
 void *Scope::Channel::getInfo(void) {
 	return info;
 }
 
+// Return read-only version of channel information
 const void *Scope::Channel::getInfo(void) const {
 	return info;
 }
 
+// Returns channel pen
 QPen Scope::Channel::getPen(void) const {
 	return pen;
 }
 
+// Returns channel scale
 double Scope::Channel::getScale(void) const {
 	return scale;
 }
 
+// Returns channel offset
 double Scope::Channel::getOffset(void) const {
 	return offset;
 }
 
+// Returns channel label
 QString Scope::Channel::getLabel(void) const {
 	return label;
 }
 
+// Scope constructor; inherits from QwtPlot
 Scope::Scope(QWidget *parent) : QwtPlot(parent) {
 
 	// Initialize director
@@ -106,22 +115,24 @@ Scope::~Scope(void) {
 	delete d_directPainter;
 }
 
+// Returns pause status of scope
 bool Scope::paused(void) const {
-	printf("ispaused? %d\n");
 	return isPaused;
 }
 
-void Scope::timeoutEvent(void) {
-	//if(!triggering)
-		//update(drawForeground());
-}
-
+// Pause toggle slot
 void Scope::togglePause(void) {
 	printf("pause called\n");
 	isPaused = !isPaused;
 }
 
-// Insert user specified channel into active list of channels
+// Timeout event slot
+void Scope::timeoutEvent(void) {
+	//if(!triggering)
+		//update(drawForeground());
+}
+
+// Insert user specified channel into active list of channels with specified settings
 std::list<Scope::Channel>::iterator Scope::insertChannel(QString label,double scale,double offset,const QPen &pen,void *info) {
 	printf("inserting into list %d\n", channels.size());
 	struct Channel channel;
@@ -144,22 +155,27 @@ void *Scope::removeChannel(std::list<Scope::Channel>::iterator channel) {
 	return info;
 }
 
+// Returns count of number of active channels
 size_t Scope::getChannelCount(void) const {
 	return channels.size();
 }
 
+// Returns beginning of channels list
 std::list<Scope::Channel>::iterator Scope::getChannelsBegin(void) {
 	return channels.begin();
 }
 
+// Returns end of channels list
 std::list<Scope::Channel>::iterator Scope::getChannelsEnd(void) {
 	return channels.end();
 }
 
+// Returns read-only pointer to beginning of channel list
 std::list<Scope::Channel>::const_iterator Scope::getChannelsBegin(void) const {
 	return channels.begin();
 }
 
+// Returns read-only pointer to end of channels list
 std::list<Scope::Channel>::const_iterator Scope::getChannelsEnd(void) const {
 	return channels.end();
 }

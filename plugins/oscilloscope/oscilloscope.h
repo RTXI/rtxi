@@ -16,12 +16,16 @@
 
  */
 
+/*
+	 Oscilloscope namespace. The namespace works with 
+	 both Scope and Panel classes to instantiate an oscilloscope
+	 plugin.
+ */
+
 #ifndef OSCILLOSCOPE_H
 #define OSCILLOSCOPE_H
 
-#include <QDialog>
 #include <QtGui>
-#include <QWidget>
 
 #include <event.h>
 #include <fifo.h>
@@ -31,80 +35,15 @@
 #include <rt.h>
 #include <settings.h>
 
-#include "scope.h"
-
 namespace Oscilloscope {
 
 	class Panel;
+	class Scope;
 
-	class Properties : public QDialog, public Event::Handler {
-		Q_OBJECT
-
-			friend class Panel;
-
-		public:
-		Properties(Panel *);
-		~Properties(void);
-		void receiveEvent(const ::Event::Object *);
-
-		public slots:
-		void updateDownsampleRate(int);
-
-		protected:
-		void closeEvent(QCloseEvent *);
-
-		private slots:
-		void activateChannel(bool);
-		void apply(void);
-		void okay(void);
-		void showTab(void);
-
-		private:
-		void applyChannelTab(void);
-		void applyDisplayTab(void);
-		void createChannelTab(void);
-		void createDisplayTab(void);
-
-		size_t downsample_rate;
-
-		QTabWidget *tabWidget;
-
-		QGroupBox *buttonGroup;
-		QGroupBox *channelGroup;
-		QGroupBox *displayGroup;
-		QGroupBox *timeGroup;
-		QGroupBox *triggerGroup;
-		QGroupBox *resGroup;
-		QGroupBox *gridGroup;
-
-		Panel *panel;
-
-		QSpinBox *divXSpin;
-		QSpinBox *divYSpin;
-		QSpinBox *rateSpin;
-		QLineEdit *sizeEdit;
-
-		QComboBox *blockList;
-		QComboBox *channelList;
-		QComboBox *colorList;
-		QComboBox *offsetList;
-		QComboBox *scaleList;
-		QComboBox *styleList;
-		QComboBox *typeList;
-		QComboBox *widthList;
-		QLineEdit *offsetEdit;
-		QPushButton *activateButton;
-
-		QButtonGroup *trigGroup;
-		QComboBox *timeList;
-		QComboBox *trigChanList;
-		QComboBox *trigThreshList;
-		QSpinBox *refreshSpin;
-		QLineEdit *trigThreshEdit;
-		QCheckBox *trigHoldingCheck;
-		QLineEdit *trigHoldoffEdit;
-		QComboBox *trigHoldoffList;
-	}; // Properties
+	struct oscope{
+		Panel *panelElement;
+		Scope *scopeElement;
+	}; // oscope
 
 	class Plugin : public QObject, public ::Plugin::Object, public RT::Thread {
 		Q_OBJECT
@@ -131,97 +70,10 @@ namespace Oscilloscope {
 		static Plugin *instance;
 		void removeOscilloscopePanel(Panel *);
 		int menuID;
-		std::list<Panel *> panelList;
+
+		// List to maintain multiple scopes
+		std::list<oscope *> scopeList;
 	}; // Plugin
-
-	class Panel : public Scope, public RT::Thread, public virtual Settings::Object, public Event::Handler {
-		Q_OBJECT
-
-			friend class Properties;
-
-		public:
-		Panel(QWidget *);
-		virtual ~Panel(void);
-		void execute(void);
-		bool setInactiveSync(void);
-		void flushFifo(void);
-		void adjustDataSize(void);
-		void doDeferred(const Settings::Object::State &);
-		void doLoad(const Settings::Object::State &);
-		void doSave(Settings::Object::State &) const;
-
-		public slots:
-		void showProperties(void);
-		void timeoutEvent(void);
-
-		protected:
-		void mouseDoubleClickEvent(QMouseEvent *);
-
-		private slots:
-		void showChannelTab(void);
-		void showDisplayTab(void);
-		void buildChannelList(void);
-		void screenshot(void);
-
-		private:
-		QMdiSubWindow *subWindow;
-
-		// Group and layout information
-		QGridLayout *layout;
-		QGroupBox *scopeGroup;
-		QGroupBox *bttnGroup;
-		QGroupBox *scopeBttnGroup;
-		QGroupBox *triggerBttnGroup;
-		QGroupBox *setBttnGroup;
-
-		// Scope element
-		Scope *scopeWindow;
-
-		// Properties
-		QSpinBox *divsXSpin;
-		QSpinBox *divsYSpin;
-		QSpinBox *ratesSpin;
-		QLineEdit *sizesEdit;
-		QButtonGroup *trigsGroup;
-		QComboBox *timesList;
-		QComboBox *trigsChanList;
-		QComboBox *trigsThreshList;
-		QSpinBox *refreshsSpin;
-		QLineEdit *trigsThreshEdit;
-		QCheckBox *trigsHoldingCheck;
-		QLineEdit *trigsHoldoffEdit;
-		QComboBox *trigsHoldoffList;
-
-		// Lists
-		QComboBox *blocksList;
-		QComboBox *typesList;
-		QComboBox *channelsList;
-		QComboBox *colorsList;
-		QComboBox *offsetsList;
-		QComboBox *scalesList;
-		QComboBox *stylesList;
-		QComboBox *widthsList;
-		QLineEdit *offsetsEdit;
-
-		// Buttons
-		QPushButton *pauseButton;
-		QPushButton *settingsButton;
-		QPushButton *applyButton;
-		QPushButton *activateButton;
-
-		QSpinBox *refreshSpin;
-		QSpinBox *divXSpin;
-		QSpinBox *divYSpin;
-		QSpinBox *rateSpin;
-		QLineEdit *sizeEdit;
-
-		void updateDownsampleRate(int);
-		Fifo fifo;
-		Properties *properties;
-		std::vector<IO::Block *> blocks;
-		size_t counter;
-		size_t downsample_rate;
-	}; // Panel
 }; // Oscilloscope
 
 #endif // OSCILLOSCOPE_H

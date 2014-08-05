@@ -25,10 +25,6 @@
  */
 
 #include <QtGui>
-#include <QTimer>
-#include <QPainter>
-#include <QMdiSubWindow>
-#include <QEvent>
 
 #include <qwt_plot_renderer.h>
 
@@ -47,7 +43,7 @@ namespace {
 			int callback(void) {
 				return 0;
 			};
-	}; // class SyncEvent
+	}; // SyncEvent
 
 	struct channel_info {
 		QString name;
@@ -55,7 +51,7 @@ namespace {
 		IO::flags_t type;
 		size_t index;
 		double previous; // stores previous value for trigger and downsample buffer
-	};
+	}; // channel_info
 } // namespace
 
 
@@ -64,50 +60,53 @@ extern "C" Plugin::Object * createRTXIPlugin(void *) {
 	return Oscilloscope::Plugin::getInstance();
 }
 
+// Create and insert scope into menu
 Oscilloscope::Plugin::Plugin(void) {
 	MainWindow::getInstance()->createSystemMenuItem("Oscilloscope",this,SLOT(createOscilloscopePanel(void)));
 }
 
+// Kill me
 Oscilloscope::Plugin::~Plugin(void) {
-	while (panelList.size())
-		delete panelList.front();
+	while (scopeList.size())
+		delete scopeList.front();
 	instance = 0;
 }
 
+// Create settings panel for oscilloscope(s)
 void Oscilloscope::Plugin::createOscilloscopePanel(void) {
 	Panel *panel = new Panel(MainWindow::getInstance()->centralWidget());
-	panelList.push_back(panel);
+	scopeList.push_back(panel);
 }
 
 void Oscilloscope::Plugin::removeOscilloscopePanel(Oscilloscope::Panel *panel) {
-	panelList.remove(panel);
+	scopeList.remove(panel);
 }
 
 void Oscilloscope::Plugin::doDeferred(const Settings::Object::State &s) {
 	size_t i = 0;
-	for (std::list<Panel *>::iterator j = panelList.begin(), end =
-			panelList.end(); j != end; ++j)
+	for (std::list<Panel *>::iterator j = scopeList.begin(), end =
+			scopeList.end(); j != end; ++j)
 		(*j)->deferred(s.loadState(QString::number(i++).toStdString()));
 }
 
 void Oscilloscope::Plugin::doLoad(const Settings::Object::State &s) {
 	for (size_t i = 0; i < static_cast<size_t> (s.loadInteger("Num Panels")); ++i) {
 		Panel *panel = new Panel(MainWindow::getInstance()->centralWidget());
-		panelList.push_back(panel);
+		scopeList.push_back(panel);
 		panel->load(s.loadState(QString::number(i).toStdString()));
 	}
 }
 
 void Oscilloscope::Plugin::doSave(Settings::Object::State &s) const {
-	s.saveInteger("Num Panels", panelList.size());
+	s.saveInteger("Num Panels", scopeList.size());
 	size_t n = 0;
-	for (std::list<Panel *>::const_iterator i = panelList.begin(), end =
-			panelList.end(); i != end; ++i)
+	for (std::list<Panel *>::const_iterator i = scopeList.begin(), end =
+			scopeList.end(); i != end; ++i)
 		s.saveState(QString::number(n++).toStdString(), (*i)->save());
 }
 
 ////////// #Properties
-Oscilloscope::Properties::Properties(Oscilloscope::Panel *parent) : QDialog(MainWindow::getInstance()), panel(parent) {
+/*Oscilloscope::Properties::Properties(Oscilloscope::Panel *parent) : QDialog(MainWindow::getInstance()), panel(parent) {
 
 	// Create tab widget
 	tabWidget = new QTabWidget;
@@ -451,16 +450,16 @@ void Oscilloscope::Properties::applyChannelTab(void) {
 		//i->label.setColor(i->getPen().color());
 		//for(std::vector<QCanvasLine>::iterator j = i->lines.begin(),end = i->lines.end();j != end;++j)
 		//    j->setPen(info->pen);
-
+*/
 		/*
 			 if(&*i == panel->trigChan)
 			 panel->trigLine->setPoints(0,panel->val2pix(panel->trigThresh,*i),
 			 width(),panel->val2pix(panel->trigThresh,*i));
 		 */
-	}
+	//}
 	//showChannelTab();
-}
-
+//}
+/*
 void Oscilloscope::Properties::applyDisplayTab(void) {
 	panel->setRefresh(refreshSpin->value());
 
@@ -1071,12 +1070,9 @@ void Oscilloscope::Properties::updateDownsampleRate(int r) {
 	downsample_rate = r;
 	panel->updateDownsampleRate(downsample_rate);
 }
-
+*/
 ////////// #Panel
 Oscilloscope::Panel::Panel(QWidget *parent) : Scope(parent),	RT::Thread(0), fifo(10 * 1048576) {
-
-	// Setup widget attribute
-	setAttribute(Qt::WA_DeleteOnClose);
 
 	// Make Mdi
 	subWindow = new QMdiSubWindow;
@@ -1096,7 +1092,7 @@ Oscilloscope::Panel::Panel(QWidget *parent) : Scope(parent),	RT::Thread(0), fifo
 			"allows you to start and stop real-time plotting.</p>");
 
 	adjustDataSize();
-	properties = new Properties(this);
+	//properties = new Properties(this);
 
 	layout = new QGridLayout;
 

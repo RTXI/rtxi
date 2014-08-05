@@ -16,14 +16,20 @@
 
  */
 
+/*
+	 This class instantiates a single scope instance.
+	 This includes the painting director, the canvass,
+	 and the functions necessary for modifying those
+	 scopes. Multiple scope objects can be instantiated,
+	 and each instance will have it's own set of settings
+	 that can be edited with the Panel class.
+ */
+
 #ifndef SCOPE_H
 #define SCOPE_H
 
 #include <QEvent>
-#include <QPen>
-#include <QPixmap>
 #include <QtGui>
-#include <QWidget>
 
 #include <qwt_scale_engine.h>
 #include <qwt_plot_grid.h>
@@ -73,7 +79,7 @@ class Scope : public QwtPlot {
 			std::vector<double> prevdata;
 			std::vector<double> data;
 			void *info;
-		}; // class Channel
+		}; // Channel
 
 		class Canvas : public QwtPlotCanvas {
 
@@ -123,7 +129,7 @@ class Scope : public QwtPlot {
 					pal.setColor(QPalette::WindowText, Qt::green);
 					setPalette(pal);
 				}
-		}; // class Canvas
+		}; // Canvas
 
 		enum trig_t{
 			NONE,
@@ -167,6 +173,8 @@ class Scope : public QwtPlot {
 		size_t getRefresh(void) const;
 		void setRefresh(size_t);
 
+		void receiveEvent(const ::Event::Object *);
+
 		void setChannelScale(std::list<Channel>::iterator,double);
 		void setChannelOffset(std::list<Channel>::iterator,double);
 		void setChannelPen(std::list<Channel>::iterator,const QPen &);
@@ -174,18 +182,22 @@ class Scope : public QwtPlot {
 
 		public slots:
 		void timeoutEvent(void);
+		void updateDownsampleRate(int);
 		void togglePause(void);
+
+		private slots:
+		void activateChannel(bool);
+		void apply(void);
+		void okay(void);
+		void showTab(void);
 
 	protected:
 		//void paintEvent(QPaintEvent *);
 		//void resizeEvent(QResizeEvent *);
+		//void closeEvent(QCloseEvent *);
 
 	private:
-		void drawBackground(void);
-		//QRect drawForeground(void);
-
 		void positionLabels(QPainter &);
-		//void refreshBackground(void);
 
 		bool drawZero;
 		size_t divX;
@@ -214,12 +226,55 @@ class Scope : public QwtPlot {
 		int d_paintedPoints;
 
 		bool isPaused;
-		//QPixmap background;
-		QPixmap foreground;
 		QRect drawRect;
 		QTimer *timer;
 		QString dtLabel;
 		std::list<Channel> channels;
-}; // class Scope
+
+		void applyChannelTab(void);
+		void applyDisplayTab(void);
+		void createChannelTab(void);
+		void createDisplayTab(void);
+
+		size_t downsample_rate;
+
+		QTabWidget *tabWidget;
+
+		QGroupBox *buttonGroup;
+		QGroupBox *channelGroup;
+		QGroupBox *displayGroup;
+		QGroupBox *timeGroup;
+		QGroupBox *triggerGroup;
+		QGroupBox *resGroup;
+		QGroupBox *gridGroup;
+
+		Panel *panel;
+
+		QSpinBox *divXSpin;
+		QSpinBox *divYSpin;
+		QSpinBox *rateSpin;
+		QLineEdit *sizeEdit;
+
+		QComboBox *blockList;
+		QComboBox *channelList;
+		QComboBox *colorList;
+		QComboBox *offsetList;
+		QComboBox *scaleList;
+		QComboBox *styleList;
+		QComboBox *typeList;
+		QComboBox *widthList;
+		QLineEdit *offsetEdit;
+		QPushButton *activateButton;
+
+		QButtonGroup *trigGroup;
+		QComboBox *timeList;
+		QComboBox *trigChanList;
+		QComboBox *trigThreshList;
+		QSpinBox *refreshSpin;
+		QLineEdit *trigThreshEdit;
+		QCheckBox *trigHoldingCheck;
+		QLineEdit *trigHoldoffEdit;
+		QComboBox *trigHoldoffList;
+}; // Scope
 
 #endif // SCOPE_H
