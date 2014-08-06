@@ -72,29 +72,6 @@ namespace Oscilloscope {
 			std::list<Panel *> panelList;
 	}; // Plugin
 
-	class SpinBox : public QSpinBox {
-		public:
-			SpinBox(int min, int max, int step, QWidget *parent):
-				QSpinBox(parent) {
-					setRange(min, max);
-					setSingleStep(step);
-				}
-	}; // Spinbox
-
-	class CheckBox : public QCheckBox {
-		public:
-			CheckBox(const QString &title, QWidget *parent):
-				QCheckBox(title, parent) {};
-
-			void setChecked(bool checked) {
-				setCheckState(checked ? Qt::Checked : Qt::Unchecked);
-			}
-
-			bool isChecked() const {
-				return checkState() == Qt::Checked;
-			}
-	}; // Checkbox
-
 	class Panel : public QTabWidget, public RT::Thread, public virtual Settings::Object, public Event::Handler {
 
 		Q_OBJECT
@@ -135,8 +112,8 @@ namespace Oscilloscope {
 		// apply changes made in tabs
 		void applyChannelTab(void);
 		void applyDisplayTab(void);
-		void createChannelTab(void);
-		void createDisplayTab(void);
+		QWidget *createChannelTab(QWidget *parent);
+		QWidget *createDisplayTab(QWidget *parent);
 
 		// Group and layout information
 		QGridLayout *layout;

@@ -508,609 +508,18 @@ static void buildBlockList(IO::Block *block, void *arg) {
 	info->blocks->push_back(block);
 }
 
-/*void Oscilloscope::Properties::createChannelTab(void) {
+QWidget * Oscilloscope::Panel::createChannelTab(QWidget *parent) {
 
 	setWhatsThis("<p><b>Oscilloscope: Channel Options</b><br>"
 	"Use the dropdown boxes to select the signal streams you want to plot from "
 	"any loaded modules or your DAQ device. You may change the plotting scale for "
 	"the signal, apply a DC offset, and change the color and style of the line.</p>");
 
-// Make parent widget and layout
-QWidget *channelTab = new QWidget;
-QVBoxLayout *layout = new QVBoxLayout;
-
-// Create child widgets and layouts
-channelGroup = new QGroupBox(tr("Channel Selection"));
-QHBoxLayout *channelLayout = new QHBoxLayout;
-
-// Create elements for channel box
-channelLayout->addWidget(new QLabel(tr("Channel:")));
-blockList = new QComboBox;
-blockList->setFixedWidth(150);
-channelLayout->addWidget(blockList);
-block_list_info_t info = { blockList, &panel->blocks };
-IO::Connector::getInstance()->foreachBlock(::buildBlockList, &info);
-//QObject::connect(blockList,SIGNAL(activated(int)),this,SLOT(buildChannelList(void)));
-
-typeList = new QComboBox;
-channelLayout->addWidget(typeList);
-typeList->setFixedWidth(150);
-typeList->addItem("Input");
-typeList->addItem("Output");
-typeList->addItem("Parameter");
-typeList->addItem("State");
-//QObject::connect(typeList,SIGNAL(activated(int)),this,SLOT(buildChannelList(void)));
-
-channelList = new QComboBox;
-channelLayout->addWidget(channelList);
-channelList->setFixedWidth(150);
-//QObject::connect(channelList,SIGNAL(activated(int)),this,SLOT(showChannelTab(void)));
-
-// Activate button
-activateButton = new QPushButton("Active");
-channelLayout->addWidget(activateButton);
-activateButton->setCheckable(true);
-activateButton->setFixedWidth(55);
-QObject::connect(activateButton,SIGNAL(toggled(bool)),this,SLOT(activateChannel(bool)));
-
-channelGroup->setLayout(channelLayout);
-
-// Display child widget and layout
-displayGroup = new QGroupBox(tr("Display Properties"));
-QGridLayout *displayLayout = new QGridLayout;
-
-// Create elements for display box
-displayLayout->addWidget(new QLabel(tr("Scale:")), 0, 0);
-scaleList = new QComboBox;
-displayLayout->addWidget(scaleList, 0, 1, 1, 1);
-QFont scaleListFont("DejaVu Sans Mono");
-scaleList->setFont(scaleListFont);
-scaleList->addItem("10 V/div"); // 0  case 0
-scaleList->addItem("5 V/div"); // 1  case 1
-scaleList->addItem("2.5 V/div");	// 2  case 2
-scaleList->addItem("2 V/div"); // 3  case 3
-scaleList->addItem("1 V/div"); // 4  case 0
-scaleList->addItem("500 mV/div"); // 5  case 1
-scaleList->addItem("250 mV/div"); // 6  case 2
-scaleList->addItem("200 mV/div"); // 7  case 3
-scaleList->addItem("100 mV/div"); // 8  case 0
-scaleList->addItem("50 mV/div"); // 9  case 1
-scaleList->addItem("25 mV/div");
-scaleList->addItem("20 mV/div");
-scaleList->addItem("10 mV/div");
-scaleList->addItem("5 mV/div");
-scaleList->addItem("2.5 mV/div");
-scaleList->addItem("2 mV/div");
-scaleList->addItem("1 mV/div");
-QChar mu = QChar(0x3BC);
-QString suffix = QString("V/div");
-QString text = QString("500 ");
-text.append(mu);
-text.append(suffix);
-scaleList->addItem(text);
-text = QString("250 ");
-text.append(mu);
-text.append(suffix);
-scaleList->addItem(text);
-text = QString("200 ");
-text.append(mu);
-text.append(suffix);
-scaleList->addItem(text);
-text = QString("100 ");
-text.append(mu);
-text.append(suffix);
-scaleList->addItem(text);
-text = QString("50 ");
-text.append(mu);
-text.append(suffix);
-scaleList->addItem(text);
-text = QString("25 ");
-text.append(mu);
-text.append(suffix);
-scaleList->addItem(text);
-text = QString("20 ");
-text.append(mu);
-text.append(suffix);
-scaleList->addItem(text);
-text = QString("10 ");
-text.append(mu);
-text.append(suffix);
-scaleList->addItem(text);
-text = QString("5 ");
-text.append(mu);
-text.append(suffix);
-scaleList->addItem(text);
-text = QString("2.5 ");
-text.append(mu);
-text.append(suffix);
-scaleList->addItem(text);
-text = QString("2 ");
-text.append(mu);
-text.append(suffix);
-scaleList->addItem(text);
-text = QString("1 ");
-text.append(mu);
-text.append(suffix);
-scaleList->addItem(text);
-
-scaleList->addItem("500 nV/div");
-scaleList->addItem("250 nV/div");
-scaleList->addItem("200 nV/div");
-scaleList->addItem("100 nV/div");
-scaleList->addItem("50 nV/div");
-scaleList->addItem("25 nV/div");
-scaleList->addItem("20 nV/div");
-scaleList->addItem("10 nV/div");
-scaleList->addItem("5 nV/div");
-scaleList->addItem("2.5 nV/div");
-scaleList->addItem("2 nV/div");
-scaleList->addItem("1 nV/div");
-scaleList->addItem("500 pV/div");
-scaleList->addItem("250 pV/div");
-scaleList->addItem("200 pV/div");
-scaleList->addItem("100 pV/div");
-scaleList->addItem("50 pV/div");
-scaleList->addItem("25 pV/div");
-scaleList->addItem("20 pV/div");
-scaleList->addItem("10 pV/div");
-scaleList->addItem("5 pV/div");
-scaleList->addItem("2.5 pV/div");
-scaleList->addItem("2 pV/div");
-scaleList->addItem("1 pV/div");
-scaleList->addItem("500 fV/div");
-scaleList->addItem("250 fV/div");
-scaleList->addItem("200 fV/div");
-scaleList->addItem("100 fV/div");
-scaleList->addItem("50 fV/div");
-scaleList->addItem("25 fV/div");
-scaleList->addItem("20 fV/div");
-scaleList->addItem("10 fV/div");
-scaleList->addItem("5 fV/div");
-scaleList->addItem("2.5 fV/div");
-scaleList->addItem("2 fV/div");
-scaleList->addItem("1 fV/div");
-
-// Offset items
-displayLayout->addWidget(new QLabel(tr("Offset:")), 0, 2, 1, 1);
-offsetEdit = new QLineEdit;
-offsetEdit->setValidator(new QDoubleValidator(offsetEdit));
-displayLayout->addWidget(offsetEdit, 0, 3, 1, 1);
-offsetList = new QComboBox;
-displayLayout->addWidget(offsetList, 0, 4, 1, 1);
-offsetList->addItem("V");
-offsetList->addItem("mV");
-offsetList->addItem("uV");
-offsetList->addItem("nV");
-offsetList->addItem("pV");
-
-// Create elements for graphic
-displayLayout->addWidget(new QLabel(tr("   Color: ")), 1, 0, 1, 1);
-colorList = new QComboBox;
-colorList->setFixedWidth(80);
-displayLayout->addWidget(colorList, 1, 1, 1, 1);
-QPixmap tmp(25, 25);
-tmp.fill(Qt::red);
-colorList->addItem(tmp, " Red");
-tmp.fill(Qt::yellow);
-colorList->addItem(tmp, " Yellow");
-tmp.fill(Qt::green);
-colorList->addItem(tmp, " Green");
-tmp.fill(Qt::blue);
-colorList->addItem(tmp, " Blue");
-tmp.fill(Qt::magenta);
-colorList->addItem(tmp, " Magenta");
-tmp.fill(Qt::cyan);
-colorList->addItem(tmp, " Cyan");
-tmp.fill(Qt::black);
-colorList->addItem(tmp, " Black");
-
-displayLayout->addWidget(new QLabel(tr("   Width: ")), 1, 2, 1, 1);
-widthList = new QComboBox;
-displayLayout->addWidget(widthList, 1, 3, 1, 1);
-tmp.fill(Qt::white);
-QPainter painter(&tmp);
-for (int i = 1; i < 6; i++) {
-	painter.setPen(QPen(Qt::black, i));
-	painter.drawLine(0, 12, 25, 12);
-	widthList->addItem(tmp, QString::number(i) + QString(" Pixels"));
-}
-
-displayLayout->addWidget(new QLabel(tr("   Style: ")), 1, 4, 1, 1);
-styleList = new QComboBox;
-displayLayout->addWidget(styleList, 1, 5, 1, 1);
-tmp.fill(Qt::white);
-painter.setPen(QPen(Qt::black, 3, Qt::SolidLine));
-painter.drawLine(0, 12, 25, 12);
-styleList->addItem(tmp, QString(" Solid"));
-tmp.fill(Qt::white);
-painter.setPen(QPen(Qt::black, 3, Qt::DashLine));
-painter.drawLine(0, 12, 25, 12);
-styleList->addItem(tmp, QString(" Dash"));
-tmp.fill(Qt::white);
-painter.setPen(QPen(Qt::black, 3, Qt::DotLine));
-painter.drawLine(0, 12, 25, 12);
-styleList->addItem(tmp, QString(" Dot"));
-tmp.fill(Qt::white);
-painter.setPen(QPen(Qt::black, 3, Qt::DashDotLine));
-painter.drawLine(0, 12, 25, 12);
-styleList->addItem(tmp, QString(" Dash Dot"));
-tmp.fill(Qt::white);
-painter.setPen(QPen(Qt::black, 3, Qt::DashDotDotLine));
-painter.drawLine(0, 12, 25, 12);
-styleList->addItem(tmp, QString(" Dash Dot Dot"));
-
-displayGroup->setLayout(displayLayout);
-
-layout->addWidget(channelGroup);
-layout->addWidget(displayGroup);
-channelTab->setLayout(layout);
-
-tabWidget->addTab(channelTab, tr("Channel"));
-//buildChannelList();
-}
-
-void Oscilloscope::Properties::createDisplayTab(void) {
-
-	setWhatsThis("<p><b>Oscilloscope: Display Options</b><br>"
-			"Use the dropdown box to select the time scale for the Oscilloscope. This "
-			"scaling is applied to all signals plotted in the same window. You may also "
-			"set a trigger on any signal that is currently plotted in the window. A yellow "
-			"line will appear at the trigger threshold.</p>");
-
-	// Parent widget and layout
-	QWidget *displayTab = new QWidget;
-	QVBoxLayout *layout = new QVBoxLayout(displayTab);
-
-	// Create child elements
-	timeGroup = new QGroupBox(tr("Time Properties"));
-	QGridLayout *timeLayout = new QGridLayout;
-
-	// Create elements for child
-	QChar mu = QChar(0x3BC);
-	timeLayout->addWidget(new QLabel("Time Scale:"), 0, 0, 1, 1);
-	timeList = new QComboBox;
-	timeLayout->addWidget(timeList, 0, 1, 1, 1);
-	QFont timeListFont("DejaVu Sans Mono");
-	timeList->setFont(timeListFont);
-	timeList->addItem("5 s/div");
-	timeList->addItem("2 s/div");
-	timeList->addItem("1 s/div");
-	timeList->addItem("500 ms/div");
-	timeList->addItem("200 ms/div");
-	timeList->addItem("100 ms/div");
-	timeList->addItem("50 ms/div");
-	timeList->addItem("20 ms/div");
-	timeList->addItem("10 ms/div");
-	timeList->addItem("5 ms/div");
-	timeList->addItem("2 ms/div");
-	timeList->addItem("1 ms/div");
-	QString suffix = QString("s/div");
-	QString text = QString("500 ");
-	text.append(mu);
-	text.append(suffix);
-	timeList->addItem(text);
-	text = QString("200 ");
-	text.append(mu);
-	text.append(suffix);
-	timeList->addItem(text);
-	text = QString("100 ");
-	text.append(mu);
-	text.append(suffix);
-	timeList->addItem(text);
-	text = QString("50 ");
-	text.append(mu);
-	text.append(suffix);
-	timeList->addItem(text);
-	text = QString("20 ");
-	text.append(mu);
-	text.append(suffix);
-	timeList->addItem(text);
-	text = QString("10 ");
-	text.append(mu);
-	text.append(suffix);
-	timeList->addItem(text);
-	text = QString("5 ");
-	text.append(mu);
-	text.append(suffix);
-	timeList->addItem(text);
-	text = QString("2 ");
-	text.append(mu);
-	text.append(suffix);
-	timeList->addItem(text);
-	text = QString("1 ");
-	text.append(mu);
-	text.append(suffix);
-	timeList->addItem(text);
-
-	timeLayout->addWidget(new QLabel("Screen Refresh:"), 0, 2, 1, 1);
-	refreshSpin = new QSpinBox;
-	refreshSpin->setFixedWidth(70);
-	timeLayout->addWidget(refreshSpin, 0, 3, 1, 1);
-	refreshSpin->setRange(10,10000);
-	refreshSpin->setValue(250);
-
-	timeLayout->addWidget(new QLabel("  X Divisions: "), 1, 0, 1, 1);
-	divXSpin = new QSpinBox;
-	divXSpin->setFixedWidth(70);
-	timeLayout->addWidget(divXSpin, 1, 1, 1, 1);
-	divXSpin->setRange(1,25);
-	divXSpin->setValue(8);
-
-	timeLayout->addWidget(new QLabel("  Y Divisions: "), 1, 2, 1, 1);
-	divYSpin = new QSpinBox;
-	divYSpin->setFixedWidth(70);
-	timeLayout->addWidget(divYSpin, 1, 3, 1, 1);
-	divYSpin->setRange(1,25);
-	divYSpin->setValue(10);
-
-	timeLayout->addWidget(new QLabel("Downsampling Rate: "), 2, 0, 1, 1);
-	rateSpin = new QSpinBox;
-	rateSpin->setFixedWidth(70);
-	timeLayout->addWidget(rateSpin, 2, 1, 1, 1);
-	rateSpin->setValue(panel->downsample_rate);
-	QObject::connect(rateSpin,SIGNAL(valueChanged(int)),this,SLOT(updateDownsampleRate(int)));
-	rateSpin->setEnabled(true);
-	rateSpin->setRange(1,2);
-	rateSpin->setValue(1);
-
-	timeLayout->addWidget(new QLabel(tr("Data Buffer Size: ")), 2, 2, 1, 1);
-	sizeEdit = new QLineEdit;
-	sizeEdit->setFixedWidth(70);
-	timeLayout->addWidget(sizeEdit, 2, 3, 1, 1);
-	sizeEdit->setText(QString::number(panel->getDataSize()));
-	sizeEdit->setEnabled(false);
-
-	timeGroup->setLayout(timeLayout);
-
-	// Trigger box
-	triggerGroup = new QGroupBox(tr("Trigger Properties"));
-	QGridLayout *triggerLayout = new QGridLayout;
-
-	triggerLayout->addWidget(new QLabel(tr("Trigger:")), 0, 0, 1, 1);
-	trigGroup = new QButtonGroup;
-
-	QRadioButton *off = new QRadioButton(tr("Off"));
-	trigGroup->addButton(off, Scope::NONE);
-	triggerLayout->addWidget(off, 0, 1, 1, 1);
-	QRadioButton *plus = new QRadioButton(tr("+"));
-	trigGroup->addButton(plus, Scope::POS);
-	triggerLayout->addWidget(plus, 0, 2, 1, 1);
-	QRadioButton *minus = new QRadioButton(tr("-"));
-	trigGroup->addButton(minus, Scope::NEG);
-	triggerLayout->addWidget(minus, 0, 3, 1, 1);
-
-	triggerLayout->addWidget(new QLabel(tr("Channel:")), 1, 0, 1, 1);
-	trigChanList = new QComboBox;
-	triggerLayout->addWidget(trigChanList, 1, 1, 1, 1);
-
-	triggerLayout->addWidget(new QLabel(tr("Threshold:")), 1, 2, 1, 1);
-	trigThreshEdit = new QLineEdit;
-	trigThreshEdit->setFixedWidth(50);
-	triggerLayout->addWidget(trigThreshEdit, 1, 3, 1, 1);
-	trigThreshEdit->setValidator(new QDoubleValidator(trigThreshEdit));
-	trigThreshList = new QComboBox;
-	triggerLayout->addWidget(trigThreshList, 1, 4, 1, 1);
-	trigThreshList->addItem("V");
-	trigThreshList->addItem("mV");
-	trigThreshList->addItem("uV");
-	trigThreshList->addItem("nV");
-	trigThreshList->addItem("pV");
-
-	triggerLayout->addWidget(new QLabel(tr("Holding:")), 2, 0, 1, 1);
-	trigHoldingCheck = new QCheckBox;
-	triggerLayout->addWidget(trigHoldingCheck, 2, 1, 1, 1);
-
-	triggerLayout->addWidget(new QLabel(tr("Holdoff:")), 2, 2, 1, 1);
-	trigHoldoffEdit = new QLineEdit;
-	trigHoldoffEdit->setFixedWidth(50);
-	triggerLayout->addWidget(trigHoldoffEdit, 2, 3, 1, 1);
-	trigHoldoffEdit->setValidator(new QDoubleValidator(trigHoldoffEdit));
-	trigHoldoffList = new QComboBox;
-	triggerLayout->addWidget(trigHoldoffList, 2, 4, 1, 1);
-	trigHoldoffList->addItem("ms");
-	trigHoldoffList->addItem("us");
-	trigHoldoffList->addItem("ns");
-
-	triggerGroup->setLayout(triggerLayout);
-
-	layout->addWidget(timeGroup);
-	layout->addWidget(triggerGroup);
-
-	displayTab->setLayout(layout);
-	tabWidget->addTab(displayTab, tr("Display"));
-}*/
-
-// Aggregates all channel information to show for configuration
-void Oscilloscope::Panel::showChannelTab(void) {
-
-	IO::flags_t type;
-	switch (typesList->currentIndex()) {
-		case 0:
-			type = Workspace::OUTPUT;
-			break;
-		case 1:
-			type = Workspace::OUTPUT;
-			break;
-		case 2:
-			type = Workspace::PARAMETER;
-			break;
-		case 3:
-			type = Workspace::STATE;
-			break;
-		default:
-			ERROR_MSG("Oscilloscope::Properties::showChannelTab : invalid type\n");
-			typesList->setCurrentIndex(0);
-			type = Workspace::OUTPUT;
-	}
-
-	bool found = false;
-
-	for (std::list<Scope::Channel>::iterator i = scopeWindow->getChannelsBegin(), end = scopeWindow->getChannelsEnd(); i != end; ++i) {
-		struct channel_info *info =
-			reinterpret_cast<struct channel_info *> (i->getInfo());
-		if (!info)
-			continue;
-		if (info->block && info->block == blocks[blocksList->currentIndex()]
-				&& info->type == type && info->index == static_cast<size_t> (channelsList->currentIndex())) {
-			found = true;
-
-			scalesList->setCurrentIndex(static_cast<int> (round(4 * (log10(1/i->getScale()) + 1))));
-
-			double offset = i->getOffset();
-			int offsetUnits = 0;
-			if (offset)
-				while (fabs(offset) < 1) {
-					offset *= 1000;
-					offsetUnits++;
-				}
-			offsetsEdit->setText(QString::number(offset));
-			offsetsList->setCurrentIndex(offsetUnits);
-
-			if (i->getPen().color() == Qt::red)
-				colorsList->setCurrentIndex(0);
-			else if (i->getPen().color() == Qt::yellow)
-				colorsList->setCurrentIndex(1);
-			else if (i->getPen().color() == Qt::green)
-				colorsList->setCurrentIndex(2);
-			else if (i->getPen().color() == Qt::blue)
-				colorsList->setCurrentIndex(3);
-			else if (i->getPen().color() == Qt::magenta)
-				colorsList->setCurrentIndex(4);
-			else if (i->getPen().color() == Qt::cyan)
-				colorsList->setCurrentIndex(5);
-			else if (i->getPen().color() == Qt::black)
-				colorsList->setCurrentIndex(6);
-			else {
-				ERROR_MSG("Oscilloscope::Properties::displayChannelTab : invalid color selection\n");
-				colorsList->setCurrentIndex(0);
-			}
-
-			switch (i->getPen().style()) {
-				case Qt::SolidLine:
-					stylesList->setCurrentIndex(0);
-					break;
-				case Qt::DashLine:
-					stylesList->setCurrentIndex(1);
-					break;
-				case Qt::DotLine:
-					stylesList->setCurrentIndex(2);
-					break;
-				case Qt::DashDotLine:
-					stylesList->setCurrentIndex(3);
-					break;
-				case Qt::DashDotDotLine:
-					stylesList->setCurrentIndex(4);
-					break;
-				default:
-					ERROR_MSG("Oscilloscope::Properties::displayChannelTab : invalid style selection\n");
-					stylesList->setCurrentIndex(0);
-			}
-			break;
-		}
-	}
-
-	activateButton->setCheckable(found);
-	if (!found) {
-		scalesList->setCurrentIndex(3);
-		offsetsEdit->setText(QString::number(0));
-		offsetsList->setCurrentIndex(0);
-		colorsList->setCurrentIndex(0);
-		widthsList->setCurrentIndex(0);
-		stylesList->setCurrentIndex(0);
-	}
-}
-
-void Oscilloscope::Panel::showDisplayTab(void) {
-	printf("in here now\n");
-	timesList->setCurrentIndex(static_cast<int> (round(3 * log10(1/scopeWindow->getDivT()) + 11)));
-	refreshSpin->setValue(scopeWindow->getRefresh());
-
-	// Find current trigger value and update gui
-	static_cast<QRadioButton *>(trigsGroup->button(static_cast<int>(scopeWindow->getTriggerDirection())))->setChecked(true);
-
-	trigsChanList->clear();
-	for (std::list<Scope::Channel>::iterator i = scopeWindow->getChannelsBegin(), end =	scopeWindow->getChannelsEnd(); i != end; ++i) {
-		trigsChanList->addItem(i->getLabel());
-		if (i == scopeWindow->getTriggerChannel())
-			trigsChanList->setCurrentIndex(trigsChanList->count() - 1);
-	}
-	trigsChanList->addItem("<None>");
-	if (scopeWindow->getTriggerChannel() == scopeWindow->getChannelsEnd())
-		trigsChanList->setCurrentIndex(trigsChanList->count() - 1);
-
-	int trigThreshUnits = 0;
-	double trigThresh = scopeWindow->getTriggerThreshold();
-	if (trigThresh != 0.0)
-		while (fabs(trigThresh) < 1) {
-			trigThresh *= 1000;
-			++trigThreshUnits;
-		}
-	trigsThreshList->setCurrentIndex(trigThreshUnits);
-	trigsThreshEdit->setText(QString::number(trigThresh));
-	trigsHoldingCheck->setChecked(scopeWindow->getTriggerHolding());
-	int trigHoldoffUnits = 0;
-	double trigHoldoff = scopeWindow->getTriggerHoldoff();
-	if (trigHoldoff != 0.0)
-		while (fabs(trigHoldoff) < 1)	{
-			trigHoldoff *= 1000;
-			++trigHoldoffUnits;
-		}
-	trigsHoldoffList->setCurrentIndex(trigHoldoffUnits);
-	trigsHoldoffEdit->setText(QString::number(trigHoldoff));
-
-	//rateSpin->setValue(panel->rate);
-	sizeEdit->setText(QString::number(scopeWindow->getDataSize()));
-
-	divXSpin->setValue(scopeWindow->getDivX());
-	divYSpin->setValue(scopeWindow->getDivY());
-}
-
-/*void Oscilloscope::Properties::updateDownsampleRate(int r) {
-	downsample_rate = r;
-	panel->updateDownsampleRate(downsample_rate);
-	}*/
-
-////////// #Panel
-Oscilloscope::Panel::Panel(QWidget *parent) :	QTabWidget(parent), RT::Thread(0), fifo(10 * 1048576) {
-
-	// Set default attribute
-	setAttribute(Qt::WA_DeleteOnClose);
-
-	// Make Mdi
-	subWindow = new QMdiSubWindow;
-	subWindow->setMinimumSize(800,500);
-	subWindow->setAttribute(Qt::WA_DeleteOnClose);
-	MainWindow::getInstance()->createMdi(subWindow);
-
-	setWhatsThis("<p><b>Oscilloscope:</b><br>The Oscilloscope allows you to plot any signal "
-			"in your workspace in real-time, including signals from your DAQ card and those "
-			"generated by user modules. Multiple signals are overlaid in the window and "
-			"different line colors and styles can be selected. When a signal is added, a legend "
-			"automatically appears in the bottom of the window. Multiple oscilloscopes can "
-			"be instantiated to give you multiple data windows. To select signals for plotting, "
-			"use the right-click context \"Properties\" menu item. After selecting a signal, you must "
-			"click the \"Active\" button for it to appear in the window. To change signal settings, "
-			"you must click the \"Apply\" button. The right-click context \"Pause\" menu item "
-			"allows you to start and stop real-time plotting.</p>");
-
-	adjustDataSize();
-
-	// Create main layout
-	layout = new QGridLayout;
-
-	// Create scope group
-	scopeGroup = new QGroupBox(this);
-	QHBoxLayout *scopeLayout = new QHBoxLayout(this);
-
-	// Create scope
-	scopeWindow = new Scope(this);
-
-	// Attach scope to layout
-	scopeLayout->addWidget(scopeWindow);
+	QWidget *page = new QWidget(parent);
 
 	// Create group and layout for buttons at bottom of scope
 	bttnGroup = new QGroupBox(tr("Channel Settings"));
-	QGridLayout *bttnLayout = new QGridLayout(this);
+	QGridLayout *bttnLayout = new QGridLayout;
 
 	// Create Channel box
 	QLabel *channelLabel = new QLabel(tr("Channel:"));
@@ -1331,9 +740,26 @@ Oscilloscope::Panel::Panel(QWidget *parent) :	QTabWidget(parent), RT::Thread(0),
 	painter.drawLine(0, 12, 25, 12);
 	stylesList->addItem(tmp, QString(" Dash Dot Dot"));
 
+	bttnGroup->setLayout(bttnLayout);
+
+	layout->addWidget(bttnGroup, 9, 0, 2, 16);
+
+	return page;
+}
+
+QWidget *Oscilloscope::Panel::createDisplayTab(QWidget *parent) {
+
+	setWhatsThis("<p><b>Oscilloscope: Display Options</b><br>"
+			"Use the dropdown box to select the time scale for the Oscilloscope. This "
+			"scaling is applied to all signals plotted in the same window. You may also "
+			"set a trigger on any signal that is currently plotted in the window. A yellow "
+			"line will appear at the trigger threshold.</p>");
+
+	QWidget *page = new QWidget(parent);
+
 	// Scope properties 
 	scopeBttnGroup = new QGroupBox(tr("Scope Configuration"));
-	QGridLayout *scopeBttnsLayout = new QGridLayout(this);
+	QGridLayout *scopeBttnsLayout = new QGridLayout;
 
 	// Create elements for time settings
 	scopeBttnsLayout->addWidget(new QLabel("Time/Div:"), 2, 0);
@@ -1354,7 +780,8 @@ Oscilloscope::Panel::Panel(QWidget *parent) :	QTabWidget(parent), RT::Thread(0),
 	timesList->addItem("2 ms/div");
 	timesList->addItem("1 ms/div");
 	QString tsuffix = QString("s/div");
-	text = QString("500 ");
+	QString text = QString("500 ");
+	QChar mu = QChar(0x3BC);
 	text.append(mu);
 	text.append(tsuffix);
 	timesList->addItem(text);
@@ -1497,19 +924,215 @@ Oscilloscope::Panel::Panel(QWidget *parent) :	QTabWidget(parent), RT::Thread(0),
 	QObject::connect(settingsButton,SIGNAL(clicked()),this,SLOT(screenshot()));
 	setBttnsLayout->addWidget(settingsButton, 2, 10);
 
-	// Attach to layout
-	scopeGroup->setLayout(scopeLayout);
-	bttnGroup->setLayout(bttnLayout);
 	scopeBttnGroup->setLayout(scopeBttnsLayout);
 	triggerBttnGroup->setLayout(triggerBttnsLayout);
 	setBttnGroup->setLayout(setBttnsLayout);
 
-	// Setup main layout
-	layout->addWidget(scopeGroup, 0, 0, 9, 16);
-	layout->addWidget(bttnGroup, 9, 0, 2, 16);
 	layout->addWidget(scopeBttnGroup, 11, 0, 1, 16);
 	layout->addWidget(triggerBttnGroup, 13, 0, 1, 16);
 	layout->addWidget(setBttnGroup, 14, 0, 1, 16);
+
+	return page;
+}
+
+// Aggregates all channel information to show for configuration
+void Oscilloscope::Panel::showChannelTab(void) {
+
+	IO::flags_t type;
+	switch (typesList->currentIndex()) {
+		case 0:
+			type = Workspace::OUTPUT;
+			break;
+		case 1:
+			type = Workspace::OUTPUT;
+			break;
+		case 2:
+			type = Workspace::PARAMETER;
+			break;
+		case 3:
+			type = Workspace::STATE;
+			break;
+		default:
+			ERROR_MSG("Oscilloscope::Properties::showChannelTab : invalid type\n");
+			typesList->setCurrentIndex(0);
+			type = Workspace::OUTPUT;
+	}
+
+	bool found = false;
+
+	for (std::list<Scope::Channel>::iterator i = scopeWindow->getChannelsBegin(), end = scopeWindow->getChannelsEnd(); i != end; ++i) {
+		struct channel_info *info =
+			reinterpret_cast<struct channel_info *> (i->getInfo());
+		if (!info)
+			continue;
+		if (info->block && info->block == blocks[blocksList->currentIndex()]
+				&& info->type == type && info->index == static_cast<size_t> (channelsList->currentIndex())) {
+			found = true;
+
+			scalesList->setCurrentIndex(static_cast<int> (round(4 * (log10(1/i->getScale()) + 1))));
+
+			double offset = i->getOffset();
+			int offsetUnits = 0;
+			if (offset)
+				while (fabs(offset) < 1) {
+					offset *= 1000;
+					offsetUnits++;
+				}
+			offsetsEdit->setText(QString::number(offset));
+			offsetsList->setCurrentIndex(offsetUnits);
+
+			if (i->getPen().color() == Qt::red)
+				colorsList->setCurrentIndex(0);
+			else if (i->getPen().color() == Qt::yellow)
+				colorsList->setCurrentIndex(1);
+			else if (i->getPen().color() == Qt::green)
+				colorsList->setCurrentIndex(2);
+			else if (i->getPen().color() == Qt::blue)
+				colorsList->setCurrentIndex(3);
+			else if (i->getPen().color() == Qt::magenta)
+				colorsList->setCurrentIndex(4);
+			else if (i->getPen().color() == Qt::cyan)
+				colorsList->setCurrentIndex(5);
+			else if (i->getPen().color() == Qt::black)
+				colorsList->setCurrentIndex(6);
+			else {
+				ERROR_MSG("Oscilloscope::Properties::displayChannelTab : invalid color selection\n");
+				colorsList->setCurrentIndex(0);
+			}
+
+			switch (i->getPen().style()) {
+				case Qt::SolidLine:
+					stylesList->setCurrentIndex(0);
+					break;
+				case Qt::DashLine:
+					stylesList->setCurrentIndex(1);
+					break;
+				case Qt::DotLine:
+					stylesList->setCurrentIndex(2);
+					break;
+				case Qt::DashDotLine:
+					stylesList->setCurrentIndex(3);
+					break;
+				case Qt::DashDotDotLine:
+					stylesList->setCurrentIndex(4);
+					break;
+				default:
+					ERROR_MSG("Oscilloscope::Properties::displayChannelTab : invalid style selection\n");
+					stylesList->setCurrentIndex(0);
+			}
+			break;
+		}
+	}
+
+	activateButton->setCheckable(found);
+	if (!found) {
+		scalesList->setCurrentIndex(3);
+		offsetsEdit->setText(QString::number(0));
+		offsetsList->setCurrentIndex(0);
+		colorsList->setCurrentIndex(0);
+		widthsList->setCurrentIndex(0);
+		stylesList->setCurrentIndex(0);
+	}
+}
+
+void Oscilloscope::Panel::showDisplayTab(void) {
+	printf("in here now\n");
+	timesList->setCurrentIndex(static_cast<int> (round(3 * log10(1/scopeWindow->getDivT()) + 11)));
+	refreshSpin->setValue(scopeWindow->getRefresh());
+
+	// Find current trigger value and update gui
+	static_cast<QRadioButton *>(trigsGroup->button(static_cast<int>(scopeWindow->getTriggerDirection())))->setChecked(true);
+
+	trigsChanList->clear();
+	for (std::list<Scope::Channel>::iterator i = scopeWindow->getChannelsBegin(), end =	scopeWindow->getChannelsEnd(); i != end; ++i) {
+		trigsChanList->addItem(i->getLabel());
+		if (i == scopeWindow->getTriggerChannel())
+			trigsChanList->setCurrentIndex(trigsChanList->count() - 1);
+	}
+	trigsChanList->addItem("<None>");
+	if (scopeWindow->getTriggerChannel() == scopeWindow->getChannelsEnd())
+		trigsChanList->setCurrentIndex(trigsChanList->count() - 1);
+
+	int trigThreshUnits = 0;
+	double trigThresh = scopeWindow->getTriggerThreshold();
+	if (trigThresh != 0.0)
+		while (fabs(trigThresh) < 1) {
+			trigThresh *= 1000;
+			++trigThreshUnits;
+		}
+	trigsThreshList->setCurrentIndex(trigThreshUnits);
+	trigsThreshEdit->setText(QString::number(trigThresh));
+	trigsHoldingCheck->setChecked(scopeWindow->getTriggerHolding());
+	int trigHoldoffUnits = 0;
+	double trigHoldoff = scopeWindow->getTriggerHoldoff();
+	if (trigHoldoff != 0.0)
+		while (fabs(trigHoldoff) < 1)	{
+			trigHoldoff *= 1000;
+			++trigHoldoffUnits;
+		}
+	trigsHoldoffList->setCurrentIndex(trigHoldoffUnits);
+	trigsHoldoffEdit->setText(QString::number(trigHoldoff));
+
+	//rateSpin->setValue(panel->rate);
+	sizeEdit->setText(QString::number(scopeWindow->getDataSize()));
+
+	divXSpin->setValue(scopeWindow->getDivX());
+	divYSpin->setValue(scopeWindow->getDivY());
+}
+
+/*void Oscilloscope::Properties::updateDownsampleRate(int r) {
+	downsample_rate = r;
+	panel->updateDownsampleRate(downsample_rate);
+	}*/
+
+////////// #Panel
+Oscilloscope::Panel::Panel(QWidget *parent) :	QTabWidget(parent), RT::Thread(0), fifo(10 * 1048576) {
+
+	// Set default attribute
+	setAttribute(Qt::WA_DeleteOnClose);
+
+	// Make Mdi
+	subWindow = new QMdiSubWindow;
+	subWindow->setMinimumSize(800,500);
+	subWindow->setAttribute(Qt::WA_DeleteOnClose);
+	MainWindow::getInstance()->createMdi(subWindow);
+
+	setWhatsThis("<p><b>Oscilloscope:</b><br>The Oscilloscope allows you to plot any signal "
+			"in your workspace in real-time, including signals from your DAQ card and those "
+			"generated by user modules. Multiple signals are overlaid in the window and "
+			"different line colors and styles can be selected. When a signal is added, a legend "
+			"automatically appears in the bottom of the window. Multiple oscilloscopes can "
+			"be instantiated to give you multiple data windows. To select signals for plotting, "
+			"use the right-click context \"Properties\" menu item. After selecting a signal, you must "
+			"click the \"Active\" button for it to appear in the window. To change signal settings, "
+			"you must click the \"Apply\" button. The right-click context \"Pause\" menu item "
+			"allows you to start and stop real-time plotting.</p>");
+
+	adjustDataSize();
+
+	// Create main layout
+	layout = new QGridLayout;
+
+	// Create tabs
+	setTabPosition(QTabWidget::South);
+	addTab(createChannelTab(this), "Channel");
+	//addTab(createDisplayTab(this), "Display");
+
+	// Create scope group
+	scopeGroup = new QGroupBox(this);
+	QHBoxLayout *scopeLayout = new QHBoxLayout(this);
+
+	// Create scope
+	scopeWindow = new Scope(this);
+
+	// Attach scope to layout
+	scopeLayout->addWidget(scopeWindow);
+
+	// Attach to layout
+	scopeGroup->setLayout(scopeLayout);
+
+	// Setup main layout
+	layout->addWidget(scopeGroup, 0, 0, 9, 16);
 
 	// Set
 	setLayout(layout);
