@@ -72,7 +72,7 @@ namespace Oscilloscope {
 			std::list<Panel *> panelList;
 	}; // Plugin
 
-	class Panel : public QTabWidget, public RT::Thread, public virtual Settings::Object, public Event::Handler {
+	class Panel : public QWidget, public RT::Thread, public virtual Settings::Object, public Event::Handler {
 
 		Q_OBJECT
 
@@ -105,6 +105,9 @@ namespace Oscilloscope {
 		private:
 		QMdiSubWindow *subWindow;
 
+		// Tab Widget
+		QTabWidget *tabWidget;
+
 		// Create scope
 		Scope *scopeWindow;
 
@@ -116,11 +119,8 @@ namespace Oscilloscope {
 		QWidget *createDisplayTab(QWidget *parent);
 
 		// Group and layout information
-		QGridLayout *layout;
+		QVBoxLayout *layout;
 		QGroupBox *scopeGroup;
-		QGroupBox *bttnGroup;
-		QGroupBox *scopeBttnGroup;
-		QGroupBox *triggerBttnGroup;
 		QGroupBox *setBttnGroup;
 
 		// Properties
@@ -153,6 +153,7 @@ namespace Oscilloscope {
 		QPushButton *pauseButton;
 		QPushButton *settingsButton;
 		QPushButton *applyButton;
+		QPushButton *undoButton;
 		QPushButton *activateButton;
 
 		QSpinBox *refreshSpin;

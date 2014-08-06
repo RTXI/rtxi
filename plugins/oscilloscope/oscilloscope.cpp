@@ -234,7 +234,7 @@ void Oscilloscope::Properties::activateChannel(bool active) {
 	bool enable = active && blockList->count() && channelList->count();
 }
 
-void Oscilloscope::Properties::apply(void) {
+void Oscilloscope::Panel::apply(void) {
 	switch (tabWidget->currentIndex()) {
 		case 0:
 			applyChannelTab();
@@ -518,21 +518,20 @@ QWidget * Oscilloscope::Panel::createChannelTab(QWidget *parent) {
 	QWidget *page = new QWidget(parent);
 
 	// Create group and layout for buttons at bottom of scope
-	bttnGroup = new QGroupBox(tr("Channel Settings"));
-	QGridLayout *bttnLayout = new QGridLayout;
+	QGridLayout *bttnLayout = new QGridLayout(page);
 
 	// Create Channel box
-	QLabel *channelLabel = new QLabel(tr("Channel:"));
+	QLabel *channelLabel = new QLabel(tr("Channel:"),page);
 	channelLabel->setAlignment(Qt::AlignCenter | Qt::AlignLeft);
 	bttnLayout->addWidget(channelLabel, 0, 0);
-	blocksList = new QComboBox;
+	blocksList = new QComboBox(page);
 	block_list_info_t info = {blocksList, &this->blocks};
 	IO::Connector::getInstance()->foreachBlock(::buildBlockList, &info);
 	QObject::connect(blocksList,SIGNAL(activated(int)),this,SLOT(buildChannelList(void)));
 	bttnLayout->addWidget(blocksList, 0, 1, 1, 2);
 
 	// Create Type box
-	typesList = new QComboBox;
+	typesList = new QComboBox(page);
 	typesList->addItem("Input");
 	typesList->addItem("Output");
 	typesList->addItem("Parameter");
@@ -541,15 +540,15 @@ QWidget * Oscilloscope::Panel::createChannelTab(QWidget *parent) {
 	bttnLayout->addWidget(typesList, 0, 3, 1, 2);
 
 	// Create Channels box
-	channelsList = new QComboBox;
+	channelsList = new QComboBox(page);
 	QObject::connect(channelsList,SIGNAL(activated(int)),this,SLOT(showChannelTab(void)));
 	bttnLayout->addWidget(channelsList, 0, 5, 1, 3);
 
 	// Create elements for display box
-	QLabel *scaleLabel = new QLabel(tr("Scale:"));
+	QLabel *scaleLabel = new QLabel(tr("Scale:"),page);
 	scaleLabel->setAlignment(Qt::AlignVCenter | Qt::AlignRight);
 	bttnLayout->addWidget(scaleLabel, 0, 8, 1, 1);
-	scalesList = new QComboBox;
+	scalesList = new QComboBox(page);
 	bttnLayout->addWidget(scalesList, 0, 9, 1, 1);
 	QFont scalesListFont("DejaVu Sans Mono");
 	scalesList->setFont(scalesListFont);
@@ -659,13 +658,13 @@ QWidget * Oscilloscope::Panel::createChannelTab(QWidget *parent) {
 	scalesList->addItem("1 fV/div");
 
 	// Offset items
-	QLabel *offsetLabel = new QLabel(tr("Offset:"));
+	QLabel *offsetLabel = new QLabel(tr("Offset:"),page);
 	offsetLabel->setAlignment(Qt::AlignCenter | Qt::AlignRight);
 	bttnLayout->addWidget(offsetLabel, 0, 10, 1, 1);
-	offsetsEdit = new QLineEdit;
+	offsetsEdit = new QLineEdit(page);
 	offsetsEdit->setValidator(new QDoubleValidator(offsetsEdit));
 	bttnLayout->addWidget(offsetsEdit, 0, 11, 1, 1);
-	offsetsList = new QComboBox;
+	offsetsList = new QComboBox(page);
 	offsetsList->setFixedWidth(40);
 	bttnLayout->addWidget(offsetsList, 0, 12, 1, 1);
 	offsetsList->addItem("V");
@@ -675,14 +674,14 @@ QWidget * Oscilloscope::Panel::createChannelTab(QWidget *parent) {
 	offsetsList->addItem("pV");
 
 	// Activate button
-	activateButton = new QPushButton("Enable Channel");
+	activateButton = new QPushButton("Enable Channel",page);
 	activateButton->setCheckable(true);
 	QObject::connect(activateButton,SIGNAL(toggled(bool)),this,SLOT(activateChannel(bool)));
 	bttnLayout->addWidget(activateButton, 1, 9, 1, 4);
 
 	// Create elements for graphic
-	bttnLayout->addWidget(new QLabel(tr("Color:")), 1, 0, Qt::AlignVCenter| Qt::AlignRight);
-	colorsList = new QComboBox;
+	bttnLayout->addWidget(new QLabel(tr("Color:"),page), 1, 0, Qt::AlignVCenter| Qt::AlignRight);
+	colorsList = new QComboBox(page);
 	bttnLayout->addWidget(colorsList, 1, 1, 1, 2);
 	QPixmap tmp(25, 25);
 	tmp.fill(Qt::red);
@@ -700,10 +699,10 @@ QWidget * Oscilloscope::Panel::createChannelTab(QWidget *parent) {
 	tmp.fill(Qt::black);
 	colorsList->addItem(tmp, " Black");
 
-	QLabel *widthLabel = new QLabel(tr("Width:"));
+	QLabel *widthLabel = new QLabel(tr("Width:"),page);
 	widthLabel->setAlignment(Qt::AlignCenter | Qt::AlignLeft);
 	bttnLayout->addWidget(widthLabel, 1, 3);
-	widthsList = new QComboBox;
+	widthsList = new QComboBox(page);
 	bttnLayout->addWidget(widthsList, 1, 4, 1, 2);
 	tmp.fill(Qt::white);
 	QPainter painter(&tmp);
@@ -714,10 +713,10 @@ QWidget * Oscilloscope::Panel::createChannelTab(QWidget *parent) {
 	}
 
 	// Create styles list
-	QLabel *styleLabel = new QLabel(tr("Style:"));
+	QLabel *styleLabel = new QLabel(tr("Style:"),page);
 	bttnLayout->addWidget(styleLabel, 1, 6);
 	styleLabel->setAlignment(Qt::AlignCenter | Qt::AlignLeft);
-	stylesList = new QComboBox;
+	stylesList = new QComboBox(page);
 	bttnLayout->addWidget(stylesList, 1, 7, 1, 2);
 	tmp.fill(Qt::white);
 	painter.setPen(QPen(Qt::black, 3, Qt::SolidLine));
@@ -740,10 +739,6 @@ QWidget * Oscilloscope::Panel::createChannelTab(QWidget *parent) {
 	painter.drawLine(0, 12, 25, 12);
 	stylesList->addItem(tmp, QString(" Dash Dot Dot"));
 
-	bttnGroup->setLayout(bttnLayout);
-
-	layout->addWidget(bttnGroup, 9, 0, 2, 16);
-
 	return page;
 }
 
@@ -758,13 +753,12 @@ QWidget *Oscilloscope::Panel::createDisplayTab(QWidget *parent) {
 	QWidget *page = new QWidget(parent);
 
 	// Scope properties 
-	scopeBttnGroup = new QGroupBox(tr("Scope Configuration"));
-	QGridLayout *scopeBttnsLayout = new QGridLayout;
+	QGridLayout *displayTabLayout = new QGridLayout(page);
 
 	// Create elements for time settings
-	scopeBttnsLayout->addWidget(new QLabel("Time/Div:"), 2, 0);
-	timesList = new QComboBox;
-	scopeBttnsLayout->addWidget(timesList, 2, 1, 1, 1);
+	displayTabLayout->addWidget(new QLabel(tr("Time/Div:"),page), 0, 0, 1, 2, Qt::AlignVCenter | Qt::AlignRight);
+	timesList = new QComboBox(page);
+	displayTabLayout->addWidget(timesList, 0, 2, 1, 3, Qt::AlignVCenter | Qt::AlignLeft);
 	QFont timeListFont("DejaVu Sans Mono");
 	timesList->setFont(timeListFont);
 	timesList->addItem("5 s/div");
@@ -818,124 +812,97 @@ QWidget *Oscilloscope::Panel::createDisplayTab(QWidget *parent) {
 	text.append(tsuffix);
 	timesList->addItem(text);
 
-	QLabel *refreshLabel = new QLabel(tr("Refresh\nRate:"));
+	QLabel *refreshLabel = new QLabel(tr("Refresh:"),page);
 	refreshLabel->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
-	scopeBttnsLayout->addWidget(refreshLabel, 2, 6);
-	refreshsSpin = new QSpinBox;
-	scopeBttnsLayout->addWidget(refreshsSpin, 2, 7);
-	refreshsSpin->setRange(10,10000);
+	displayTabLayout->addWidget(refreshLabel, 0, 5, 1, 2);
+	refreshsSpin = new QSpinBox(page);
+	displayTabLayout->addWidget(refreshsSpin, 0, 7, 1, 2);
+	refreshsSpin->setRange(100,10000);
 	refreshsSpin->setValue(250);
 
-	scopeBttnsLayout->addWidget(new QLabel("X Divs:"), 2, 2);
-	divsXSpin = new QSpinBox;
-	scopeBttnsLayout->addWidget(divsXSpin, 2, 3);
+	displayTabLayout->addWidget(new QLabel(tr("X Divs:"),page), 0, 9);
+	divsXSpin = new QSpinBox(page);
+	displayTabLayout->addWidget(divsXSpin, 0, 10);
 	divsXSpin->setRange(1,25);
 	divsXSpin->setValue(8);
 
-	scopeBttnsLayout->addWidget(new QLabel("Y Divs:"), 2, 4);
-	divsYSpin = new QSpinBox;
-	scopeBttnsLayout->addWidget(divsYSpin, 2, 5);
+	displayTabLayout->addWidget(new QLabel(tr("Y Divs:"),page), 0, 11);
+	divsYSpin = new QSpinBox(page);
+	displayTabLayout->addWidget(divsYSpin, 0, 12);
 	divsYSpin->setRange(1,25);
 	divsYSpin->setValue(10);
 
-	QLabel *downsampleLabel = new QLabel(tr("Downsample\nRate:"));
+	QLabel *downsampleLabel = new QLabel(tr("Downsample:"),page);
 	downsampleLabel->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
-	scopeBttnsLayout->addWidget(downsampleLabel, 2, 8);
-	ratesSpin = new QSpinBox;
+	displayTabLayout->addWidget(downsampleLabel, 0, 13, 1, 2);
+	ratesSpin = new QSpinBox(page);
 	ratesSpin->setFixedWidth(40);
-	scopeBttnsLayout->addWidget(ratesSpin, 2, 9);
+	displayTabLayout->addWidget(ratesSpin, 0, 15);
 	ratesSpin->setValue(downsample_rate);
 	QObject::connect(ratesSpin,SIGNAL(valueChanged(int)),this,SLOT(updateDownsampleRate(int)));
 	ratesSpin->setEnabled(true);
 	ratesSpin->setRange(1,2);
 	ratesSpin->setValue(1);
 
-	QLabel *bufferLabel = new QLabel(tr("Data Buffer\nSize (MB):"));
-	bufferLabel->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
-	scopeBttnsLayout->addWidget(bufferLabel, 2, 10);
-	sizesEdit = new QLineEdit;
-	scopeBttnsLayout->addWidget(sizesEdit, 2, 11);
+	QLabel *bufferLabel = new QLabel(tr("Data Buffer\nSize (MB):"),page);
+	bufferLabel->setAlignment(Qt::AlignVCenter | Qt::AlignRight);
+	displayTabLayout->addWidget(bufferLabel, 0, 16, 1, 2);
+	sizesEdit = new QLineEdit(page);
+	displayTabLayout->addWidget(sizesEdit, 0, 18, 1, 1);
 	sizesEdit->setText(QString::number(scopeWindow->getDataSize()));
 	sizesEdit->setEnabled(false);
 
-	// Trigger properties 
-	triggerBttnGroup = new QGroupBox(tr("Trigger Settings"));
-	QGridLayout *triggerBttnsLayout = new QGridLayout(this);
-
 	// Trigger box
-	triggerBttnsLayout->addWidget(new QLabel(tr("Trigger:")), 0, 0);
-	trigsGroup = new QButtonGroup;
+	displayTabLayout->addWidget(new QLabel(tr("Trigger:"),page), 1, 0);
+	trigsGroup = new QButtonGroup(page);
 
-	QRadioButton *off = new QRadioButton(tr("Off"));
+	QRadioButton *off = new QRadioButton(tr("Off"),page);
 	trigsGroup->addButton(off, Scope::NONE);
-	triggerBttnsLayout->addWidget(off, 0, 1);
-	QRadioButton *plus = new QRadioButton(tr("+"));
+	displayTabLayout->addWidget(off, 1, 1);
+	QRadioButton *plus = new QRadioButton(tr("+"),page);
 	trigsGroup->addButton(plus, Scope::POS);
-	triggerBttnsLayout->addWidget(plus, 0, 2);
-	QRadioButton *minus = new QRadioButton(tr("-"));
+	displayTabLayout->addWidget(plus, 1, 2);
+	QRadioButton *minus = new QRadioButton(tr("-"),page);
 	trigsGroup->addButton(minus, Scope::NEG);
-	triggerBttnsLayout->addWidget(minus, 0, 3);
+	displayTabLayout->addWidget(minus, 1, 3);
 
-	triggerBttnsLayout->addWidget(new QLabel(tr("Channel:")), 0, 4);
-	trigsChanList = new QComboBox;
-	triggerBttnsLayout->addWidget(trigsChanList, 0, 5, 1, 2);
+	displayTabLayout->addWidget(new QLabel(tr("Channel:"),page), 1, 4, 1, 2);
+	trigsChanList = new QComboBox(page);
+	displayTabLayout->addWidget(trigsChanList, 1, 6, 1, 3);
 
-	triggerBttnsLayout->addWidget(new QLabel(tr("Threshold:")), 0, 7);
-	trigsThreshEdit = new QLineEdit;
+	displayTabLayout->addWidget(new QLabel(tr("Threshold:"),page), 1, 9, 1, 2, Qt::AlignVCenter | Qt::AlignRight);
+	trigsThreshEdit = new QLineEdit(page);
 	trigsThreshEdit->setFixedWidth(50);
-	triggerBttnsLayout->addWidget(trigsThreshEdit, 0, 8);
+	displayTabLayout->addWidget(trigsThreshEdit, 1, 11, 1, 1);
 	trigsThreshEdit->setValidator(new QDoubleValidator(trigsThreshEdit));
-	trigsThreshList = new QComboBox;
-	triggerBttnsLayout->addWidget(trigsThreshList, 0, 9);
+	trigsThreshList = new QComboBox(page);
+	displayTabLayout->addWidget(trigsThreshList, 1, 12);
 	trigsThreshList->addItem("V");
 	trigsThreshList->addItem("mV");
 	trigsThreshList->addItem("uV");
 	trigsThreshList->addItem("nV");
 	trigsThreshList->addItem("pV");
 
-	triggerBttnsLayout->addWidget(new QLabel(tr("Holding:")), 0, 10);
-	trigsHoldingCheck = new QCheckBox;
-	triggerBttnsLayout->addWidget(trigsHoldingCheck, 0, 11);
+	displayTabLayout->addWidget(new QLabel(tr("Holding:"), page), 1, 13, 1, 2, Qt::AlignVCenter | Qt::AlignRight);
+	trigsHoldingCheck = new QCheckBox(page);
+	displayTabLayout->addWidget(trigsHoldingCheck, 1, 15, 1, 1);
 
-	triggerBttnsLayout->addWidget(new QLabel(tr("Holdoff:")), 0, 12);
-	trigsHoldoffEdit = new QLineEdit;
+	displayTabLayout->addWidget(new QLabel(tr("Holdoff:"),page), 1, 16, 1, 1, Qt::AlignVCenter | Qt::AlignLeft);
+	trigsHoldoffEdit = new QLineEdit(page);
 	trigsHoldoffEdit->setFixedWidth(50);
-	triggerBttnsLayout->addWidget(trigsHoldoffEdit, 0, 13);
+	displayTabLayout->addWidget(trigsHoldoffEdit, 1, 17, 1, 1);
 	trigsHoldoffEdit->setValidator(new QDoubleValidator(trigsHoldoffEdit));
-	trigsHoldoffList = new QComboBox;
-	triggerBttnsLayout->addWidget(trigsHoldoffList, 0, 14) ;
+	trigsHoldoffList = new QComboBox(page);
+	displayTabLayout->addWidget(trigsHoldoffList, 1, 18, 1, 1);
 	trigsHoldoffList->addItem("ms");
 	trigsHoldoffList->addItem("us");
 	trigsHoldoffList->addItem("ns");
-
-	// Set buttons items
-	setBttnGroup = new QGroupBox(this);
-	QGridLayout *setBttnsLayout = new QGridLayout(this);
-
-	// Create buttons
-	pauseButton = new QPushButton("Pause");
-	pauseButton->setCheckable(true);
-	QObject::connect(pauseButton,SIGNAL(clicked()),this,SLOT(togglePause()));
-	setBttnsLayout->addWidget(pauseButton, 2, 11);
-	applyButton = new QPushButton("Apply");
-	QObject::connect(applyButton,SIGNAL(clicked(void)),this,SLOT(apply(void)));
-	setBttnsLayout->addWidget(applyButton, 2, 12);
-	settingsButton = new QPushButton("Screenshot");
-	QObject::connect(settingsButton,SIGNAL(clicked()),this,SLOT(screenshot()));
-	setBttnsLayout->addWidget(settingsButton, 2, 10);
-
-	scopeBttnGroup->setLayout(scopeBttnsLayout);
-	triggerBttnGroup->setLayout(triggerBttnsLayout);
-	setBttnGroup->setLayout(setBttnsLayout);
-
-	layout->addWidget(scopeBttnGroup, 11, 0, 1, 16);
-	layout->addWidget(triggerBttnGroup, 13, 0, 1, 16);
-	layout->addWidget(setBttnGroup, 14, 0, 1, 16);
 
 	return page;
 }
 
 // Aggregates all channel information to show for configuration
+// in the display tab
 void Oscilloscope::Panel::showChannelTab(void) {
 
 	IO::flags_t type;
@@ -1036,7 +1003,6 @@ void Oscilloscope::Panel::showChannelTab(void) {
 }
 
 void Oscilloscope::Panel::showDisplayTab(void) {
-	printf("in here now\n");
 	timesList->setCurrentIndex(static_cast<int> (round(3 * log10(1/scopeWindow->getDivT()) + 11)));
 	refreshSpin->setValue(scopeWindow->getRefresh());
 
@@ -1086,14 +1052,14 @@ void Oscilloscope::Panel::showDisplayTab(void) {
 	}*/
 
 ////////// #Panel
-Oscilloscope::Panel::Panel(QWidget *parent) :	QTabWidget(parent), RT::Thread(0), fifo(10 * 1048576) {
+Oscilloscope::Panel::Panel(QWidget *parent) :	QWidget(parent), RT::Thread(0), fifo(10 * 1048576) {
 
 	// Set default attribute
 	setAttribute(Qt::WA_DeleteOnClose);
 
 	// Make Mdi
 	subWindow = new QMdiSubWindow;
-	subWindow->setMinimumSize(800,500);
+	subWindow->setMinimumSize(900,600);
 	subWindow->setAttribute(Qt::WA_DeleteOnClose);
 	MainWindow::getInstance()->createMdi(subWindow);
 
@@ -1108,15 +1074,14 @@ Oscilloscope::Panel::Panel(QWidget *parent) :	QTabWidget(parent), RT::Thread(0),
 			"you must click the \"Apply\" button. The right-click context \"Pause\" menu item "
 			"allows you to start and stop real-time plotting.</p>");
 
+	// Create tab widget
+	tabWidget = new QTabWidget;
+	tabWidget->setFixedHeight(100);
+
 	adjustDataSize();
 
 	// Create main layout
-	layout = new QGridLayout;
-
-	// Create tabs
-	setTabPosition(QTabWidget::South);
-	addTab(createChannelTab(this), "Channel");
-	//addTab(createDisplayTab(this), "Display");
+	layout = new QVBoxLayout(this);
 
 	// Create scope group
 	scopeGroup = new QGroupBox(this);
@@ -1131,8 +1096,37 @@ Oscilloscope::Panel::Panel(QWidget *parent) :	QTabWidget(parent), RT::Thread(0),
 	// Attach to layout
 	scopeGroup->setLayout(scopeLayout);
 
+	// Create group
+	setBttnGroup = new QGroupBox(this);
+	QHBoxLayout *setBttnLayout = new QHBoxLayout(this);
+
+	// Creat buttons
+	pauseButton = new QPushButton("Pause");
+	pauseButton->setCheckable(true);
+	QObject::connect(pauseButton,SIGNAL(clicked()),this,SLOT(togglePause()));
+	setBttnLayout->addWidget(pauseButton);
+	applyButton = new QPushButton("Apply");
+	QObject::connect(applyButton,SIGNAL(clicked(void)),this,SLOT(apply(void)));
+	setBttnLayout->addWidget(applyButton);
+	undoButton = new QPushButton("Undo");
+	QObject::connect(applyButton,SIGNAL(clicked(void)),this,SLOT(undo(void)));
+	setBttnLayout->addWidget(undoButton);
+	settingsButton = new QPushButton("Screenshot");
+	QObject::connect(settingsButton,SIGNAL(clicked()),this,SLOT(screenshot()));
+	setBttnLayout->addWidget(settingsButton);
+
+	// Attach layout
+	setBttnGroup->setLayout(setBttnLayout);
+
+	// Create tabs
+	tabWidget->setTabPosition(QTabWidget::North);
+	tabWidget->addTab(createChannelTab(this), "Channel");
+	tabWidget->addTab(createDisplayTab(this), "Display");
+	
 	// Setup main layout
-	layout->addWidget(scopeGroup, 0, 0, 9, 16);
+	layout->addWidget(scopeGroup);
+	layout->addWidget(tabWidget);
+	layout->addWidget(setBttnGroup);
 
 	// Set
 	setLayout(layout);
@@ -1159,8 +1153,8 @@ Oscilloscope::Panel::~Panel(void) {
 		delete reinterpret_cast<struct channel_info *> (scopeWindow->removeChannel(scopeWindow->getChannelsBegin()));
 
 	// VISIT TWO
-	//Oscilloscope::Plugin::getInstance()->removeOscilloscopePanel(this);
-	//delete properties;
+	/*Oscilloscope::Plugin::getInstance()->removeOscilloscopePanel(this);
+	delete properties;*/
 }
 
 void Oscilloscope::Panel::updateDownsampleRate(int r) {
@@ -1249,7 +1243,6 @@ void Oscilloscope::Panel::adjustDataSize(void) {
 void Oscilloscope::Panel::showProperties(void) {
 	//properties->show();
 	//properties->raise();
-	//properties->move(mapToGlobal(rect().center()) - properties->rect().center());
 }
 
 void Oscilloscope::Panel::timeoutEvent(void) {
