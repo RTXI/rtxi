@@ -14,7 +14,7 @@
 	 You should have received a copy of the GNU General Public License
 	 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
- */
+*/
 
 #include <QtGui>
 
@@ -63,7 +63,7 @@ QString Scope::Channel::getLabel(void) const {
 }
 
 // Scope constructor; inherits from QwtPlot
-Scope::Scope(QWidget *parent) : QwtPlot(parent) {
+Scope::Scope(QWidget *parent) : QwtPlot(parent), d_interval(0.0, 10.0) {
 
 	// Initialize vars
 	isPaused = false;
@@ -103,6 +103,13 @@ Scope::Scope(QWidget *parent) : QwtPlot(parent) {
 	grid->enableYMin(true);
 	grid->attach(this);
 
+	// Setup axes
+	d_origin = new QwtPlotMarker();
+	d_origin->setLineStyle(QwtPlotMarker::Cross);
+	d_origin->setValue(d_interval.minValue() + d_interval.width()/2.0, 0.0);
+	d_origin->setLinePen(Qt::gray, 0.0, Qt::DashLine);
+	d_origin->attach(this);
+
 	// Timer controls refresh rate of scope
 	timer = new QTimer;
 	QObject::connect(timer,SIGNAL(timeout(void)),this,SLOT(timeoutEvent(void)));
@@ -121,8 +128,8 @@ bool Scope::paused(void) const {
 
 // Timeout event slot
 void Scope::timeoutEvent(void) {
-	//if(!triggering)
-	//update(drawForeground());
+	if(!triggering)
+		drawCurves();
 }
 
 // Insert user specified channel into active list of channels with specified settings
@@ -136,7 +143,6 @@ std::list<Scope::Channel>::iterator Scope::insertChannel(QString label,double sc
 	channel.info = info;
 	channel.data.resize(data_size,0.0);
 	channels.push_back(channel);
-	//refreshBackground();
 	return --channels.end();
 }
 
@@ -211,7 +217,8 @@ void Scope::setData(double data[],size_t size) {
 			triggerLast = triggerQueue.front();
 			triggerQueue.pop_front();
 
-			//if(!triggerHolding)
+			if(!triggerHolding)
+				drawCurves();
 			//foreground = background;
 
 			QPainterPath path;
@@ -228,6 +235,7 @@ void Scope::setData(double data[],size_t size) {
 				for(size_t j = 1;j<i->data.size();++j) {
 					x = round(((j*period)*width())/(hScl*divX));
 					y = round(height()/2-scale*(i->data[(data_idx+j)%data_size]+i->offset));
+				printf("x y in setdata are %zu %zu %j\n", x, y, j);
 					path.lineTo(x,y);
 					//painter.drawPath(path);
 					if(x >= width()) break;
@@ -360,4 +368,40 @@ void Scope::setChannelPen(std::list<Channel>::iterator channel,const QPen &pen) 
 void Scope::setChannelLabel(std::list<Channel>::iterator channel,const QString &label) {
 	channel->label = label;
 	//refreshBackground();
+}
+
+// Main function that draws data on the scope
+void Scope::drawCurves(void) {
+
+	int x, y;
+	int miny = height(), maxy = 0;
+	double scale;
+	for(std::list<Channel>::iterator i = channels.begin(), iend = channels.end();i != iend;++i) {
+		scale = height()/(i->scale*divY);
+		//painter.setPen(i->getPen());
+		x = 0;
+		y = round(height()/2-scale*(i->data[(data_idx)%i->data.size()]+i->offset));
+		if(y < miny) miny = y;
+		if(y > maxy) maxy = y;
+		//painter.moveTo(x,y);
+		for(size_t j = 1;j<i->data.size();++j) {
+			x = round(((j*period)*width())/(hScl*divX));
+			y = round(height()/2-scale*(i->data[(data_idx+j)%i->data.size()]+i->offset));
+			printf("x y are %d %d %d\n", x, y, j);
+			if(y < miny) miny = y;
+			if(y > maxy) maxy = y;
+			//painter.lineTo(x,y);
+			if(x >= width()) break;
+		}
+	}
+
+	printf("Done\n");
+
+	/*QRect newDrawRect;
+	if(miny <= maxy)
+		newDrawRect.setRect(0,miny-1,width(),maxy-miny+2);
+	QRect redrawRect = newDrawRect.unite(drawRect);
+	drawRect = newDrawRect;*/
+
+	//return redrawRect;
 }

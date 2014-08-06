@@ -47,6 +47,8 @@ namespace Oscilloscope {
 
 		Q_OBJECT
 
+			friend class Panel;
+
 		public:
 			static Plugin *getInstance(void);
 

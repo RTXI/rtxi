@@ -1004,7 +1004,7 @@ void Oscilloscope::Panel::showDisplayTab(void) {
 Oscilloscope::Panel::Panel(QWidget *parent) :	QWidget(parent), RT::Thread(0), fifo(10 * 1048576) {
 
 	// Set default attribute
-	setAttribute(Qt::WA_DeleteOnClose);
+	QWidget::setAttribute(Qt::WA_DeleteOnClose);
 
 	// Make Mdi
 	subWindow = new QMdiSubWindow;
@@ -1101,9 +1101,7 @@ Oscilloscope::Panel::~Panel(void) {
 	while (scopeWindow->getChannelsBegin() != scopeWindow->getChannelsEnd())
 		delete reinterpret_cast<struct channel_info *> (scopeWindow->removeChannel(scopeWindow->getChannelsBegin()));
 
-	// VISIT TWO
-	/*Oscilloscope::Plugin::getInstance()->removeOscilloscopePanel(this);
-		delete properties;*/
+	Oscilloscope::Plugin::getInstance()->removeOscilloscopePanel(this);
 }
 
 void Oscilloscope::Panel::updateDownsampleRate(int r) {
@@ -1147,7 +1145,6 @@ void Oscilloscope::Panel::execute(void) {
 					}
 				}
 				info->previous = value; // automatically buffers a single value
-				data[idx++] = value;
 			}
 
 			fifo.write(&token, sizeof(token));
@@ -1198,7 +1195,6 @@ void Oscilloscope::Panel::adjustDataSize(void) {
 
 void Oscilloscope::Panel::timeoutEvent(void) {
 	size_t size;
-
 	while (fifo.read(&size, sizeof(size), false)) {
 		double data[size];
 		if (fifo.read(data, sizeof(data)))

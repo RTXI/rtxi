@@ -187,10 +187,10 @@ class Scope : public QwtPlot {
 		void timeoutEvent(void);
 
 	protected:
-		//void paintEvent(QPaintEvent *);
 		//void resizeEvent(QResizeEvent *);
 
 	private:
+		void drawCurves(void);
 		void positionLabels(QPainter &);
 		bool drawZero;
 		size_t divX;
@@ -217,6 +217,7 @@ class Scope : public QwtPlot {
 		QwtPlotMarker *d_origin;
 		QwtPlotCurve *d_curve;
 		int d_paintedPoints;
+		QwtInterval d_interval;
 
 		QTimer *timer;
 		QString dtLabel;
