@@ -175,7 +175,8 @@ class Scope : public QwtPlot {
 	size_t getRefresh(void) const;
 	void setRefresh(size_t);
 
-	//void receiveEvent(const ::Event::Object *);
+	bool isPaused;
+	size_t downsample_rate;
 
 	void setChannelScale(std::list<Channel>::iterator,double);
 	void setChannelOffset(std::list<Channel>::iterator,double);
@@ -184,16 +185,10 @@ class Scope : public QwtPlot {
 
 	public slots:
 		void timeoutEvent(void);
-	//void updateDownsampleRate(int);
-	void togglePause(void);
-
-	private slots:
-		//void activateChannel(bool);
 
 	protected:
 		//void paintEvent(QPaintEvent *);
 		//void resizeEvent(QResizeEvent *);
-		//void closeEvent(QCloseEvent *);
 
 	private:
 		void positionLabels(QPainter &);
@@ -223,12 +218,9 @@ class Scope : public QwtPlot {
 		QwtPlotCurve *d_curve;
 		int d_paintedPoints;
 
-		bool isPaused;
 		QTimer *timer;
 		QString dtLabel;
 		std::list<Channel> channels;
-
-		size_t downsample_rate;
 }; // Scope
 
 #endif // SCOPE_H

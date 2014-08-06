@@ -119,12 +119,6 @@ bool Scope::paused(void) const {
 	return isPaused;
 }
 
-// Pause toggle slot
-void Scope::togglePause(void) {
-	printf("pause called\n");
-	isPaused = !isPaused;
-}
-
 // Timeout event slot
 void Scope::timeoutEvent(void) {
 	//if(!triggering)

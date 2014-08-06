@@ -88,10 +88,13 @@ namespace Oscilloscope {
 		//void doDeferred(const Settings::Object::State &);
 		//void doLoad(const Settings::Object::State &);
 		//void doSave(Settings::Object::State &) const;
+		void closeEvent(QCloseEvent *);
+		void receiveEvent(const ::Event::Object *);
 
 		public slots:
-			void showProperties(void);
 		void timeoutEvent(void);
+		void togglePause(void);
+		void updateDownsampleRate(int);
 
 		protected:
 		void mouseDoubleClickEvent(QMouseEvent *);
@@ -104,6 +107,7 @@ namespace Oscilloscope {
 		void undo(void);
 		void apply(void);
 		void showTab(void);
+		void activateChannel(bool);
 
 		private:
 		QMdiSubWindow *subWindow;
@@ -159,7 +163,6 @@ namespace Oscilloscope {
 		QPushButton *undoButton;
 		QPushButton *activateButton;
 
-		void updateDownsampleRate(int);
 		Fifo fifo;
 		std::vector<IO::Block *> blocks;
 		size_t counter;
