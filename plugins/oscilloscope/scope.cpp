@@ -16,8 +16,7 @@
 
  */
 
-#include <QPainter>
-#include <QTimer>
+#include <QtGui>
 
 #include <rt.h>
 #include <debug.h>
@@ -72,7 +71,7 @@ Scope::Scope(QWidget *parent) : QwtPlot(parent) {
 
 	// Set scope canvas
 	setCanvas(new Canvas());
-  plotLayout()->setAlignCanvasToScales(true);
+	plotLayout()->setAlignCanvasToScales(true);
 	enableAxis(yLeft,false);
 	enableAxis(xBottom,false);
 
@@ -129,7 +128,7 @@ void Scope::togglePause(void) {
 // Timeout event slot
 void Scope::timeoutEvent(void) {
 	//if(!triggering)
-		//update(drawForeground());
+	//update(drawForeground());
 }
 
 // Insert user specified channel into active list of channels with specified settings
@@ -180,12 +179,14 @@ std::list<Scope::Channel>::const_iterator Scope::getChannelsEnd(void) const {
 	return channels.end();
 }
 
+// Zeros data
 void Scope::clearData(void) {
 	for(std::list<Channel>::iterator i = channels.begin(), end = channels.end();i != end;++i)
 		for(size_t j = 0;j < data_size;++j)
 			i->data[j] = 0.0;
 }
 
+// Scales data based upon desired settings for the channel
 void Scope::setData(double data[],size_t size) {
 	if(isPaused){
 		return;
@@ -220,13 +221,13 @@ void Scope::setData(double data[],size_t size) {
 			//foreground = background;
 
 			QPainterPath path;
-			QPainter painter(&foreground);
+			//QPainter painter(&foreground);
 
 			size_t x, y;
 			double scale;
 			for(std::list<Channel>::iterator i = channels.begin(), iend = channels.end();i != iend;++i) {
 				scale = height()/(i->scale*divY);
-				painter.setPen(i->getPen());
+				//painter.setPen(i->getPen());
 				x = 0;
 				y = round(height()/2-scale*(i->data[data_idx]+i->offset));
 				path.moveTo(x,y);
@@ -234,7 +235,7 @@ void Scope::setData(double data[],size_t size) {
 					x = round(((j*period)*width())/(hScl*divX));
 					y = round(height()/2-scale*(i->data[(data_idx+j)%data_size]+i->offset));
 					path.lineTo(x,y);
-					painter.drawPath(path);
+					//painter.drawPath(path);
 					if(x >= width()) break;
 				}
 			}
@@ -243,6 +244,7 @@ void Scope::setData(double data[],size_t size) {
 	}
 }
 
+// Returns the data size
 size_t Scope::getDataSize(void) const {
 	return data_size;
 }
@@ -297,7 +299,7 @@ void Scope::setTrigger(trig_t direction,double threshold,std::list<Channel>::ite
 			triggering = true;
 			timer->stop();
 
-	//		foreground = background;
+			//		foreground = background;
 			update();
 		}
 		triggerDirection = direction;
