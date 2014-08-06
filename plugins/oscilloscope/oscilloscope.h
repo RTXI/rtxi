@@ -99,8 +99,11 @@ namespace Oscilloscope {
 		private slots:
 			void showChannelTab(void);
 		void showDisplayTab(void);
-		//void buildChannelList(void);
+		void buildChannelList(void);
 		void screenshot(void);
+		void undo(void);
+		void apply(void);
+		void showTab(void);
 
 		private:
 		QMdiSubWindow *subWindow;
@@ -155,21 +158,6 @@ namespace Oscilloscope {
 		QPushButton *applyButton;
 		QPushButton *undoButton;
 		QPushButton *activateButton;
-
-		QSpinBox *refreshSpin;
-		QSpinBox *divXSpin;
-		QSpinBox *divYSpin;
-		QSpinBox *rateSpin;
-		QLineEdit *sizeEdit;
-
-		// Groups for buttons
-		/*QGroupBox *buttonGroup;
-			QGroupBox *channelGroup;
-			QGroupBox *displayGroup;
-			QGroupBox *timeGroup;
-			QGroupBox *triggerGroup;
-			QGroupBox *resGroup;
-			QGroupBox *gridGroup;*/
 
 		void updateDownsampleRate(int);
 		Fifo fifo;

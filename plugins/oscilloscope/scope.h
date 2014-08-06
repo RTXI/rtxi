@@ -170,7 +170,7 @@ class Scope : public QwtPlot {
 	void setPeriod(double);
 	size_t getDivX(void) const;
 	size_t getDivY(void) const;
-	//void setDivXY(size_t,size_t);
+	void setDivXY(size_t,size_t);
 
 	size_t getRefresh(void) const;
 	void setRefresh(size_t);
@@ -189,9 +189,6 @@ class Scope : public QwtPlot {
 
 	private slots:
 		//void activateChannel(bool);
-		//void apply(void);
-		//void okay(void);
-		//void showTab(void);
 
 	protected:
 		//void paintEvent(QPaintEvent *);
@@ -227,7 +224,6 @@ class Scope : public QwtPlot {
 		int d_paintedPoints;
 
 		bool isPaused;
-		QRect drawRect;
 		QTimer *timer;
 		QString dtLabel;
 		std::list<Channel> channels;

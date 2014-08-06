@@ -65,25 +65,6 @@ QString Scope::Channel::getLabel(void) const {
 // Scope constructor; inherits from QwtPlot
 Scope::Scope(QWidget *parent) : QwtPlot(parent) {
 
-	// Initialize director
-	d_directPainter = new QwtPlotDirectPainter();
-	setAutoReplot(false);
-
-	// Set scope canvas
-	setCanvas(new Canvas());
-	plotLayout()->setAlignCanvasToScales(true);
-	enableAxis(yLeft,false);
-	enableAxis(xBottom,false);
-
-	// Setup grid
-	QwtPlotGrid *grid = new QwtPlotGrid();
-	grid->setPen(Qt::black, 0.0, Qt::DotLine);
-	grid->enableX(true);
-	grid->enableXMin(true);
-	grid->enableY(true);
-	grid->enableYMin(true);
-	grid->attach(this);
-
 	// Initialize vars
 	isPaused = false;
 	drawZero = true;
@@ -102,6 +83,25 @@ Scope::Scope(QWidget *parent) : QwtPlot(parent) {
 	triggerHoldoff = 5.0;
 	triggerLast = (size_t)(-1);
 	triggerChannel = channels.end();
+
+	// Initialize director
+	d_directPainter = new QwtPlotDirectPainter();
+	setAutoReplot(false);
+
+	// Set scope canvas
+	setCanvas(new Canvas());
+	plotLayout()->setAlignCanvasToScales(true);
+	enableAxis(yLeft,false);
+	enableAxis(xBottom,false);
+
+	// Setup grid
+	QwtPlotGrid *grid = new QwtPlotGrid();
+	grid->setPen(Qt::black, 0.0, Qt::DotLine);
+	grid->enableX(true);
+	grid->enableXMin(true);
+	grid->enableY(true);
+	grid->enableYMin(true);
+	grid->attach(this);
 
 	// Timer controls refresh rate of scope
 	timer = new QTimer;
@@ -308,6 +308,10 @@ void Scope::setTrigger(trig_t direction,double threshold,std::list<Channel>::ite
 
 double Scope::getDivT(void) const {
 	return hScl;
+}
+
+void Scope::setDivXY(size_t, size_t) {
+
 }
 
 void Scope::setDivT(double divT) {
