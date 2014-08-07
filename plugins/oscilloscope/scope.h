@@ -217,7 +217,8 @@ class Scope : public QwtPlot {
 		// Scope painter elements
 		QwtPlotMarker *d_origin;
 		int d_paintedPoints;
-		QwtInterval *d_interval;
+		QwtInterval *x_interval;
+		QwtInterval *y_interval;
 		QwtPlotGrid *grid;
 
 		QTimer *timer;

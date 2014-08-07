@@ -192,6 +192,12 @@ void Oscilloscope::Panel::closeEvent(QCloseEvent *e) {
 // Slot for enabling user specified channel
 void Oscilloscope::Panel::activateChannel(bool active) {
 	bool enable = active && blocksList->count() && channelsList->count();
+	scalesList->setEnabled(enable);
+	offsetsEdit->setEnabled(enable);;
+	offsetsList->setEnabled(enable);
+	colorsList->setEnabled(enable);
+	widthsList->setEnabled(enable);
+	stylesList->setEnabled(enable);
 }
 
 void Oscilloscope::Panel::apply(void) {
@@ -767,6 +773,7 @@ QWidget *Oscilloscope::Panel::createDisplayTab(QWidget *parent) {
 	text.append(mu);
 	text.append(tsuffix);
 	timesList->addItem(text);
+	timesList->setCurrentIndex(8);
 
 	QLabel *refreshLabel = new QLabel(tr("Refresh:"),page);
 	refreshLabel->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
@@ -779,14 +786,14 @@ QWidget *Oscilloscope::Panel::createDisplayTab(QWidget *parent) {
 	displayTabLayout->addWidget(new QLabel(tr("X Divs:"),page), 0, 9);
 	divsXSpin = new QSpinBox(page);
 	displayTabLayout->addWidget(divsXSpin, 0, 10);
-	divsXSpin->setRange(1,25);
-	divsXSpin->setValue(8);
+	divsXSpin->setRange(1,10);
+	divsXSpin->setValue(10);
 
 	displayTabLayout->addWidget(new QLabel(tr("Y Divs:"),page), 0, 11);
 	divsYSpin = new QSpinBox(page);
 	displayTabLayout->addWidget(divsYSpin, 0, 12);
-	divsYSpin->setRange(1,25);
-	divsYSpin->setValue(10);
+	divsYSpin->setRange(1,8);
+	divsYSpin->setValue(8);
 
 	QLabel *downsampleLabel = new QLabel(tr("Downsample:"),page);
 	downsampleLabel->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
@@ -948,8 +955,14 @@ void Oscilloscope::Panel::showChannelTab(void) {
 	}
 
 	activateButton->setChecked(found);
+	scalesList->setEnabled(found);
+	offsetsEdit->setEnabled(found);
+	offsetsList->setEnabled(found);
+	colorsList->setEnabled(found);
+	widthsList->setEnabled(found);
+	stylesList->setEnabled(found);
 	if (!found) {
-		scalesList->setCurrentIndex(3);
+		scalesList->setCurrentIndex(9);
 		offsetsEdit->setText(QString::number(0));
 		offsetsList->setCurrentIndex(0);
 		colorsList->setCurrentIndex(0);

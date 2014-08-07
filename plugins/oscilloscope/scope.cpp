@@ -24,6 +24,8 @@
 #include <stdlib.h>
 #include <main_window.h>
 
+#include <qwt_abstract_scale_draw.h>
+
 #include "scope.h"
 
 // Constructor for a channel
@@ -85,32 +87,34 @@ Scope::Scope(QWidget *parent) : QwtPlot(parent) {
 
 	// Initialize director
 	d_directPainter = new QwtPlotDirectPainter();
+	plotLayout()->setAlignCanvasToScales(true);
 	setAutoReplot(false);
 
 	// Set scope canvas
 	setCanvas(new Canvas());
-	enableAxis(yLeft,true);
-	enableAxis(xBottom,true);
-	d_interval = new QwtInterval(0.0, hScl*divX);
-	updateScopeLayout();
+	x_interval = new QwtInterval(-(hScl*divX)/2, (hScl*divX)/2);
+	y_interval = new QwtInterval(-(0.05*divY)/2, (0.05*divY)/2);
+	setAxisScale(QwtPlot::yLeft, y_interval->minValue(), y_interval->maxValue());
 
 	// Setup grid
 	grid = new QwtPlotGrid();
-	grid->setPen(Qt::gray, 0.0, Qt::DotLine);
-	grid->enableX(true);
-	grid->enableXMin(true);
-	grid->enableY(true);
-	grid->enableYMin(true);
-	QwtScaleDiv xScaleDiv = QwtScaleDiv(hScl*divX);
-	QwtScaleDiv yScaleDiv = QwtScaleDiv(hScl*divY);
+	grid->setPen(Qt::gray, 0, Qt::DotLine);
 	grid->attach(this);
 
-	// Setup axes
+	// Setup center cross
 	d_origin = new QwtPlotMarker();
 	d_origin->setLineStyle(QwtPlotMarker::Cross);
-	d_origin->setValue(0.0, (hScl*divX)/2.0);
-	d_origin->setLinePen(Qt::black, 1.0, Qt::SolidLine);
+	d_origin->setValue(0, 0);
+	d_origin->setLinePen(Qt::gray, 0, Qt::SolidLine);
 	d_origin->attach(this);
+
+	// Set division limits on the scope
+	setAxisMaxMajor(QwtPlot::xBottom, divX);
+	setAxisMaxMajor(QwtPlot::yLeft, divY);
+	enableAxis(QwtPlot::yLeft, false);
+	
+	// Update scope background/scales/axes
+	updateScopeLayout();
 
 	// Timer controls refresh rate of scope
 	timer = new QTimer;
@@ -138,19 +142,11 @@ void Scope::updateScopeLayout(void) {
 	// Keep scope scaled to widget
 	plotLayout()->setAlignCanvasToScales(true);
 
-	printf("divs are %d %d\n", divX, divY);
-
-	// Update d_interval with user time/div
-	d_interval->setInterval(0.0, hScl*divX);
-
-	// Update scale divisions
-	/*QwtScaleDiv xScaleDiv = axisScaleDiv(QwtPlot::xBottom);
-	QList<double> ticks = xScaleDiv.ticks(3);
-	xScaleDiv.setInterval(d_interval, ticks);
-	setAxisScaleDiv(QwtPlot::Botom, xScaleDiv)*/
+	// Update x_interval with user time/div
+	x_interval->setInterval(-(hScl*divX)/2, (hScl*divX)/2, QwtInterval::IncludeBorders);
 
 	// Update axes with updated windows
-	setAxisScale(QwtPlot::xBottom, d_interval->minValue(), d_interval->maxValue());
+	setAxisScale(QwtPlot::xBottom, x_interval->minValue(), x_interval->maxValue());
 	replot();
 }
 
@@ -251,7 +247,7 @@ void Scope::setData(double data[],size_t size) {
 			if(!triggerHolding)
 				drawCurves();
 
-			double x = 0, y = 0;
+			double x, y;
 			const double *xData;
 			const double *yData;
 			double scale;
@@ -336,7 +332,6 @@ double Scope::getDivT(void) const {
 	return hScl;
 }
 
-// 
 void Scope::setDivXY(size_t xdivs, size_t ydivs) {
 	divX = xdivs;
 	divY = ydivs;
@@ -402,11 +397,10 @@ void Scope::setChannelLabel(std::list<Channel>::iterator channel,const QString &
 	channel->label = label;
 }
 
-// Main function that draws data on the scope
+// Draw data on the scope
 void Scope::drawCurves(void) {
 
-	double x = 0, y = 0;
-	const double *xData, *yData;
+	double x, y;
 	int miny = height(), maxy = 0;
 	double scale;
 	for(std::list<Channel>::iterator i = channels.begin(), iend = channels.end();i != iend;++i) {
@@ -417,19 +411,17 @@ void Scope::drawCurves(void) {
 			miny = y;
 		if(y > maxy)
 			maxy = y;
-		for(size_t j = 1;j<i->data.size();++j) {
-			x = 5;//round(((j*period)*width())/(hScl*divX));
-			y = 5;//round(height()/2-scale*(i->data[(data_idx+j)%i->data.size()]+i->offset));
+		printf("maxy %d miny %d x %f y %f scale %f width %d hScl %f divX %zu divY %zu size %zu\n", maxy, miny, x, y, scale, width(), hScl, divX, divY, i->data.size());
+		for(size_t j = 1;j < i->data.size(); ++j) {
+			x = round(((j*period)*width())/(hScl*divX));
+			y = round(height()/2-scale*(i->data[(data_idx+j)%i->data.size()]+i->offset));
 			if(y < miny)
 				miny = y;
 			if(y > maxy)
 				maxy = y;
-			xData = &x;
-			yData = &y;
-			//printf("x and y are %f %f %zu\n", x, y, j);
-			i->curve->setRawSamples(xData, yData, sizeof(double *));
-			i->curve->attach(this);
-			d_directPainter->drawSeries(i->curve, 0, -1);
+			//i->curve->setRawSamples(xData, yData, sizeof(double *));
+			//i->curve->attach(this);
+			//d_directPainter->drawSeries(i->curve, 0, -1);
 			if(x >= width())
 				break;
 		}
