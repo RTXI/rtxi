@@ -66,10 +66,10 @@ else
 fi
 
 echo "----->Putting things into place."
-sudo cp libtool /usr/local/lib/rtxi/
-sudo cp rtxi.conf /etc/
-sudo cp /usr/xenomai/sbin/analogy_config /usr/sbin/
-sudo cp ./scripts/rtxi_load_analogy /etc/init.d/
+sudo cp -f libtool /usr/local/lib/rtxi/
+sudo cp -f rtxi.conf /etc/
+sudo cp -f /usr/xenomai/sbin/analogy_config /usr/sbin/
+sudo cp -f ./scripts/rtxi_load_analogy /etc/init.d/
 sudo update-rc.d rtxi_load_analogy defaults
 sudo ldconfig
 
