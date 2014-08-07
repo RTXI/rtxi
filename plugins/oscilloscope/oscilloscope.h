@@ -66,7 +66,6 @@ namespace Oscilloscope {
 			Plugin(const Plugin &) {};
 			Plugin &operator=(const Plugin &) { return *getInstance(); };
 			static Plugin *instance;
-			Scope scope_window;
 			void removeOscilloscopePanel(Panel *);
 			int menuID;
 
@@ -119,6 +118,9 @@ namespace Oscilloscope {
 
 		// Create scope
 		Scope *scopeWindow;
+
+		// Create curve element
+		QwtPlotCurve *curve;
 
 		// Functions to initialize and
 		// apply changes made in tabs

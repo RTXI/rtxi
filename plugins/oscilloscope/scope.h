@@ -74,12 +74,12 @@ class Scope : public QwtPlot {
 		QString getLabel(void) const;
 
 		private:
-		QPen pen;
 		QString label;
 		double scale;
 		double offset;
 		std::vector<double> prevdata;
 		std::vector<double> data;
+		QwtPlotCurve *curve;
 		void *info;
 	}; // Channel
 
@@ -143,7 +143,7 @@ class Scope : public QwtPlot {
 	virtual ~Scope(void);
 
 	bool paused(void) const;
-	std::list<Channel>::iterator insertChannel(QString,double,double,const QPen &,void *);
+	std::list<Channel>::iterator insertChannel(QString,double,double,const QPen &,QwtPlotCurve *,void *);
 	void *removeChannel(std::list<Channel>::iterator);
 	size_t getChannelCount(void) const;
 	std::list<Channel>::iterator getChannelsBegin(void);
@@ -183,16 +183,17 @@ class Scope : public QwtPlot {
 	void setChannelPen(std::list<Channel>::iterator,const QPen &);
 	void setChannelLabel(std::list<Channel>::iterator,const QString &);
 
+	void updateScopeLayout();
+
 	public slots:
 		void timeoutEvent(void);
 
 	protected:
-		//void resizeEvent(QResizeEvent *);
+		void resizeEvent(QResizeEvent *);
 
 	private:
 		void drawCurves(void);
 		void positionLabels(QPainter &);
-		bool drawZero;
 		size_t divX;
 		size_t divY;
 		size_t data_idx;
@@ -215,9 +216,9 @@ class Scope : public QwtPlot {
 
 		// Scope painter elements
 		QwtPlotMarker *d_origin;
-		QwtPlotCurve *d_curve;
 		int d_paintedPoints;
-		QwtInterval d_interval;
+		QwtInterval *d_interval;
+		QwtPlotGrid *grid;
 
 		QTimer *timer;
 		QString dtLabel;

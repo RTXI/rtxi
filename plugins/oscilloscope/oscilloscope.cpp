@@ -309,6 +309,7 @@ void Oscilloscope::Panel::applyChannelTab(void) {
 	else {
 		if (i == scopeWindow->getChannelsEnd()) {
 			info = new struct channel_info;
+			curve = new QwtPlotCurve;
 
 			info->block = block;
 			info->type = type;
@@ -319,7 +320,7 @@ void Oscilloscope::Panel::applyChannelTab(void) {
 
 			bool active = setInactiveSync();
 
-			i = scopeWindow->insertChannel(info->name + " 2 V/div", 2.0, 0.0, QPen(Qt::red, 1, Qt::SolidLine), info);
+			i = scopeWindow->insertChannel(info->name + " 2 V/div", 2.0, 0.0, QPen(Qt::red, 1, Qt::SolidLine), curve, info);
 
 			flushFifo();
 			setActive(active);
@@ -445,8 +446,10 @@ void Oscilloscope::Panel::applyDisplayTab(void) {
 	scopeWindow->setTrigger(trigDirection, trigThreshold, trigChannel, trigHolding, trigHoldoff);
 
 	scopeWindow->setDivXY(divsXSpin->value(), divsYSpin->value());
+
 	adjustDataSize();
 
+	scopeWindow->updateScopeLayout();
 	showDisplayTab();
 }
 

@@ -44,7 +44,7 @@ const void *Scope::Channel::getInfo(void) const {
 
 // Returns channel pen
 QPen Scope::Channel::getPen(void) const {
-	return pen;
+	return this->curve->pen();
 }
 
 // Returns channel scale
@@ -63,11 +63,10 @@ QString Scope::Channel::getLabel(void) const {
 }
 
 // Scope constructor; inherits from QwtPlot
-Scope::Scope(QWidget *parent) : QwtPlot(parent), d_interval(0.0, 10.0) {
+Scope::Scope(QWidget *parent) : QwtPlot(parent) {
 
 	// Initialize vars
 	isPaused = false;
-	drawZero = true;
 	divX = 10;
 	divY = 8;
 	data_idx = 0;
@@ -90,24 +89,27 @@ Scope::Scope(QWidget *parent) : QwtPlot(parent), d_interval(0.0, 10.0) {
 
 	// Set scope canvas
 	setCanvas(new Canvas());
-	plotLayout()->setAlignCanvasToScales(true);
-	enableAxis(yLeft,false);
-	enableAxis(xBottom,false);
+	enableAxis(yLeft,true);
+	enableAxis(xBottom,true);
+	d_interval = new QwtInterval(0.0, hScl*divX);
+	updateScopeLayout();
 
 	// Setup grid
-	QwtPlotGrid *grid = new QwtPlotGrid();
-	grid->setPen(Qt::black, 0.0, Qt::DotLine);
+	grid = new QwtPlotGrid();
+	grid->setPen(Qt::gray, 0.0, Qt::DotLine);
 	grid->enableX(true);
 	grid->enableXMin(true);
 	grid->enableY(true);
 	grid->enableYMin(true);
+	QwtScaleDiv xScaleDiv = QwtScaleDiv(hScl*divX);
+	QwtScaleDiv yScaleDiv = QwtScaleDiv(hScl*divY);
 	grid->attach(this);
 
 	// Setup axes
 	d_origin = new QwtPlotMarker();
 	d_origin->setLineStyle(QwtPlotMarker::Cross);
-	d_origin->setValue(d_interval.minValue() + d_interval.width()/2.0, 0.0);
-	d_origin->setLinePen(Qt::gray, 0.0, Qt::DashLine);
+	d_origin->setValue(0.0, (hScl*divX)/2.0);
+	d_origin->setLinePen(Qt::black, 1.0, Qt::SolidLine);
 	d_origin->attach(this);
 
 	// Timer controls refresh rate of scope
@@ -132,16 +134,40 @@ void Scope::timeoutEvent(void) {
 		drawCurves();
 }
 
+void Scope::updateScopeLayout(void) {
+	// Keep scope scaled to widget
+	plotLayout()->setAlignCanvasToScales(true);
+
+	printf("divs are %d %d\n", divX, divY);
+
+	// Update d_interval with user time/div
+	d_interval->setInterval(0.0, hScl*divX);
+
+	// Update scale divisions
+	/*QwtScaleDiv xScaleDiv = axisScaleDiv(QwtPlot::xBottom);
+	QList<double> ticks = xScaleDiv.ticks(3);
+	xScaleDiv.setInterval(d_interval, ticks);
+	setAxisScaleDiv(QwtPlot::Botom, xScaleDiv)*/
+
+	// Update axes with updated windows
+	setAxisScale(QwtPlot::xBottom, d_interval->minValue(), d_interval->maxValue());
+	replot();
+}
+
 // Insert user specified channel into active list of channels with specified settings
-std::list<Scope::Channel>::iterator Scope::insertChannel(QString label,double scale,double offset,const QPen &pen,void *info) {
-	printf("inserting into list %d\n", channels.size());
+std::list<Scope::Channel>::iterator Scope::insertChannel(QString label,double scale,double offset,const QPen &pen,QwtPlotCurve *curve,void *info) {
+	printf("inserting into list %zu\n", channels.size());
 	struct Channel channel;
 	channel.label = label;
 	channel.scale = scale;
 	channel.offset = offset;
-	channel.pen = pen;
 	channel.info = info;
 	channel.data.resize(data_size,0.0);
+	channel.curve = curve;
+	channel.curve->setPen(pen);
+	channel.curve->setStyle(QwtPlotCurve::Dots);
+	channel.curve->setRenderHint(QwtPlotItem::RenderAntialiased, true);
+	channel.curve->setPaintAttribute(QwtPlotCurve::ClipPolygons, false);
 	channels.push_back(channel);
 	return --channels.end();
 }
@@ -150,8 +176,13 @@ std::list<Scope::Channel>::iterator Scope::insertChannel(QString label,double sc
 void *Scope::removeChannel(std::list<Scope::Channel>::iterator channel) {
 	void *info = channel->info;
 	channels.erase(channel);
-	//refreshBackground();
 	return info;
+}
+
+// Resize event for scope
+void Scope::resizeEvent(QResizeEvent *event) {
+	d_directPainter->reset();
+	QwtPlot::resizeEvent(event);
 }
 
 // Returns count of number of active channels
@@ -219,29 +250,27 @@ void Scope::setData(double data[],size_t size) {
 
 			if(!triggerHolding)
 				drawCurves();
-			//foreground = background;
 
-			QPainterPath path;
-			//QPainter painter(&foreground);
-
-			size_t x, y;
+			double x = 0, y = 0;
+			const double *xData;
+			const double *yData;
 			double scale;
 			for(std::list<Channel>::iterator i = channels.begin(), iend = channels.end();i != iend;++i) {
 				scale = height()/(i->scale*divY);
-				//painter.setPen(i->getPen());
 				x = 0;
 				y = round(height()/2-scale*(i->data[data_idx]+i->offset));
-				path.moveTo(x,y);
 				for(size_t j = 1;j<i->data.size();++j) {
 					x = round(((j*period)*width())/(hScl*divX));
 					y = round(height()/2-scale*(i->data[(data_idx+j)%data_size]+i->offset));
-				printf("x y in setdata are %zu %zu %j\n", x, y, j);
-					path.lineTo(x,y);
-					//painter.drawPath(path);
+				printf("x y in setdata are %f %f %zu\n", x, y, j);
+					xData = &x;
+					yData = &y;
+					i->curve->setRawSamples(xData, yData, sizeof(double *));
+					i->curve->attach(this);
+					d_directPainter->drawSeries(i->curve, 0, 50);
 					if(x >= width()) break;
 				}
 			}
-			update();
 		}
 	}
 }
@@ -253,7 +282,6 @@ size_t Scope::getDataSize(void) const {
 
 void Scope::setDataSize(size_t size) {
 	for(std::list<Channel>::iterator i = channels.begin(), end = channels.end();i != end;++i) {
-		i->data.clear();
 		i->data.resize(size,0.0);
 	}
 	data_idx = 0;
@@ -289,7 +317,6 @@ void Scope::setTrigger(trig_t direction,double threshold,std::list<Channel>::ite
 	if(triggerChannel != channel || triggerThreshold != threshold) {
 		triggerChannel = channel;
 		triggerThreshold = threshold;
-		//refreshBackground();
 	}
 
 	if(triggerDirection != direction) {
@@ -300,9 +327,6 @@ void Scope::setTrigger(trig_t direction,double threshold,std::list<Channel>::ite
 		} else {
 			triggering = true;
 			timer->stop();
-
-			//		foreground = background;
-			update();
 		}
 		triggerDirection = direction;
 	}
@@ -312,10 +336,13 @@ double Scope::getDivT(void) const {
 	return hScl;
 }
 
-void Scope::setDivXY(size_t, size_t) {
-
+// 
+void Scope::setDivXY(size_t xdivs, size_t ydivs) {
+	divX = xdivs;
+	divY = ydivs;
 }
 
+// Set x divisions
 void Scope::setDivT(double divT) {
 	hScl = divT;
 	QChar mu = QChar(0x3BC);
@@ -327,81 +354,84 @@ void Scope::setDivT(double divT) {
 		dtLabel = QString::number(divT*1e3)+mu+"s";
 	else
 		dtLabel = QString::number(divT*1e6)+"ns";
-
-	//refreshBackground();
 }
 
+// Set period
 void Scope::setPeriod(double p) {
 	period = p;
 }
 
+// Get number of x divisions on scope
 size_t Scope::getDivX(void) const {
 	return divX;
 }
 
+// Get number of y divisions on scope
 size_t Scope::getDivY(void) const {
 	return divY;
 }
 
+// Get current refresh rate
 size_t Scope::getRefresh(void) const {
 	return refresh;
 }
 
+// Set new refresh rate
 void Scope::setRefresh(size_t r) {
 	refresh = r;
 	timer->setInterval(refresh);
 }
 
+// Set channel scale
 void Scope::setChannelScale(std::list<Channel>::iterator channel,double scale) {
 	channel->scale = scale;
 }
 
+// Set channel offset
 void Scope::setChannelOffset(std::list<Channel>::iterator channel,double offset) {
 	channel->offset = offset;
 }
 
+// Set pen for channel specified by user
 void Scope::setChannelPen(std::list<Channel>::iterator channel,const QPen &pen) {
-	channel->pen = pen;
-	//refreshBackground();
+	channel->curve->setPen(pen);
 }
 
+// Set channel label
 void Scope::setChannelLabel(std::list<Channel>::iterator channel,const QString &label) {
 	channel->label = label;
-	//refreshBackground();
 }
 
 // Main function that draws data on the scope
 void Scope::drawCurves(void) {
 
-	int x, y;
+	double x = 0, y = 0;
+	const double *xData, *yData;
 	int miny = height(), maxy = 0;
 	double scale;
 	for(std::list<Channel>::iterator i = channels.begin(), iend = channels.end();i != iend;++i) {
 		scale = height()/(i->scale*divY);
-		//painter.setPen(i->getPen());
 		x = 0;
 		y = round(height()/2-scale*(i->data[(data_idx)%i->data.size()]+i->offset));
-		if(y < miny) miny = y;
-		if(y > maxy) maxy = y;
-		//painter.moveTo(x,y);
+		if(y < miny)
+			miny = y;
+		if(y > maxy)
+			maxy = y;
 		for(size_t j = 1;j<i->data.size();++j) {
-			x = round(((j*period)*width())/(hScl*divX));
-			y = round(height()/2-scale*(i->data[(data_idx+j)%i->data.size()]+i->offset));
-			printf("x y are %d %d %d\n", x, y, j);
-			if(y < miny) miny = y;
-			if(y > maxy) maxy = y;
-			//painter.lineTo(x,y);
-			if(x >= width()) break;
+			x = 5;//round(((j*period)*width())/(hScl*divX));
+			y = 5;//round(height()/2-scale*(i->data[(data_idx+j)%i->data.size()]+i->offset));
+			if(y < miny)
+				miny = y;
+			if(y > maxy)
+				maxy = y;
+			xData = &x;
+			yData = &y;
+			//printf("x and y are %f %f %zu\n", x, y, j);
+			i->curve->setRawSamples(xData, yData, sizeof(double *));
+			i->curve->attach(this);
+			d_directPainter->drawSeries(i->curve, 0, -1);
+			if(x >= width())
+				break;
 		}
 	}
-
-	printf("Done\n");
-
-	/*QRect newDrawRect;
-	if(miny <= maxy)
-		newDrawRect.setRect(0,miny-1,width(),maxy-miny+2);
-	QRect redrawRect = newDrawRect.unite(drawRect);
-	drawRect = newDrawRect;*/
-
-	//return redrawRect;
 }
