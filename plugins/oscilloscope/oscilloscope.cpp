@@ -226,10 +226,10 @@ void Oscilloscope::Panel::buildChannelList(void) {
 	IO::flags_t type;
 	switch (typesList->currentIndex()) {
 		case 0:
-			type = Workspace::OUTPUT;
+			type = Workspace::INPUT;
 			break;
 		case 1:
-			type = Workspace::INPUT;
+			type = Workspace::OUTPUT;
 			break;
 		case 2:
 			type = Workspace::PARAMETER;
@@ -269,10 +269,10 @@ void Oscilloscope::Panel::applyChannelTab(void) {
 	IO::flags_t type;
 	switch (typesList->currentIndex()) {
 		case 0:
-			type = Workspace::OUTPUT;
+			type = Workspace::INPUT;
 			break;
 		case 1:
-			type = Workspace::INPUT;
+			type = Workspace::OUTPUT;
 			break;
 		case 2:
 			type = Workspace::PARAMETER;
@@ -315,7 +315,6 @@ void Oscilloscope::Panel::applyChannelTab(void) {
 	else {
 		if (i == scopeWindow->getChannelsEnd()) {
 			info = new struct channel_info;
-			curve = new QwtPlotCurve;
 
 			info->block = block;
 			info->type = type;
@@ -325,6 +324,7 @@ void Oscilloscope::Panel::applyChannelTab(void) {
 			info->name = QString::number(block->getID())+" "+QString::fromStdString(block->getName(type, channelsList->currentIndex()));
 
 			bool active = setInactiveSync();
+			QwtPlotCurve *curve = new QwtPlotCurve(info->name);
 
 			i = scopeWindow->insertChannel(info->name + " 2 V/div", 2.0, 0.0, QPen(Qt::red, 1, Qt::SolidLine), curve, info);
 
@@ -773,7 +773,6 @@ QWidget *Oscilloscope::Panel::createDisplayTab(QWidget *parent) {
 	text.append(mu);
 	text.append(tsuffix);
 	timesList->addItem(text);
-	timesList->setCurrentIndex(8);
 
 	QLabel *refreshLabel = new QLabel(tr("Refresh:"),page);
 	refreshLabel->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
@@ -1100,7 +1099,6 @@ Oscilloscope::Panel::Panel(QWidget *parent) :	QWidget(parent), RT::Thread(0), fi
 	buildChannelList();
 	showDisplayTab();
 	subWindow->setWidget(this);
-	show();
 
 	// Initialize vars
 	counter = 0;
@@ -1111,6 +1109,9 @@ Oscilloscope::Panel::Panel(QWidget *parent) :	QWidget(parent), RT::Thread(0), fi
 	QTimer *otimer = new QTimer;
 	QObject::connect(otimer,SIGNAL(timeout(void)),this,SLOT(timeoutEvent(void)));
 	otimer->start(25);
+
+	scopeWindow->updateScopeLayout();
+	show();
 }
 
 Oscilloscope::Panel::~Panel(void) {
@@ -1121,7 +1122,7 @@ Oscilloscope::Panel::~Panel(void) {
 }
 
 void Oscilloscope::Panel::updateDownsampleRate(int r) {
-	scopeWindow->downsample_rate = r;
+	downsample_rate = r;
 }
 
 void Oscilloscope::Panel::undo(void) {
@@ -1161,8 +1162,8 @@ void Oscilloscope::Panel::execute(void) {
 					}
 				}
 				info->previous = value; // automatically buffers a single value
+				data[idx++] = value;	// sample from DAQ
 			}
-
 			fifo.write(&token, sizeof(token));
 			fifo.write(data, sizeof(data));
 		}

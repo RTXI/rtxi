@@ -23,10 +23,13 @@
 #include <cmath>
 #include <stdlib.h>
 #include <main_window.h>
+#include <math.h>
 
 #include <qwt_abstract_scale_draw.h>
 
 #include "scope.h"
+
+#define _USE_MATH_DEFINES
 
 // Constructor for a channel
 Scope::Channel::Channel(void) {}
@@ -73,7 +76,7 @@ Scope::Scope(QWidget *parent) : QwtPlot(parent) {
 	divY = 8;
 	data_idx = 0;
 	data_size = 100;
-	hScl = 10.0;
+	hScl = 1.0;
 	period = 1.0;
 	dtLabel = "10ms";
 	refresh = 250;
@@ -84,6 +87,8 @@ Scope::Scope(QWidget *parent) : QwtPlot(parent) {
 	triggerHoldoff = 5.0;
 	triggerLast = (size_t)(-1);
 	triggerChannel = channels.end();
+  
+  srand (time(NULL));
 
 	// Initialize director
 	d_directPainter = new QwtPlotDirectPainter();
@@ -92,9 +97,6 @@ Scope::Scope(QWidget *parent) : QwtPlot(parent) {
 
 	// Set scope canvas
 	setCanvas(new Canvas());
-	x_interval = new QwtInterval(-(hScl*divX)/2, (hScl*divX)/2);
-	y_interval = new QwtInterval(-(0.05*divY)/2, (0.05*divY)/2);
-	setAxisScale(QwtPlot::yLeft, y_interval->minValue(), y_interval->maxValue());
 
 	// Setup grid
 	grid = new QwtPlotGrid();
@@ -104,15 +106,21 @@ Scope::Scope(QWidget *parent) : QwtPlot(parent) {
 	// Setup center cross
 	d_origin = new QwtPlotMarker();
 	d_origin->setLineStyle(QwtPlotMarker::Cross);
-	d_origin->setValue(0, 0);
 	d_origin->setLinePen(Qt::gray, 0, Qt::SolidLine);
 	d_origin->attach(this);
 
 	// Set division limits on the scope
 	setAxisMaxMajor(QwtPlot::xBottom, divX);
 	setAxisMaxMajor(QwtPlot::yLeft, divY);
-	//enableAxis(QwtPlot::yLeft, false);
-	
+
+	// Disable axes
+	enableAxis(QwtPlot::yLeft, false);
+	enableAxis(QwtPlot::xBottom, false);
+
+	// Disable autoscaling
+	setAxisAutoScale(QwtPlot::xBottom, false);
+	setAxisAutoScale(QwtPlot::yLeft, false);
+
 	// Update scope background/scales/axes
 	updateScopeLayout();
 
@@ -139,14 +147,11 @@ void Scope::timeoutEvent(void) {
 }
 
 void Scope::updateScopeLayout(void) {
-	// Keep scope scaled to widget
-	plotLayout()->setAlignCanvasToScales(true);
 
-	// Update x_interval with user time/div
-	x_interval->setInterval(-(hScl*divX)/2, (hScl*divX)/2, QwtInterval::IncludeBorders);
+	// Recenter cross
+	d_origin->setValue(axisInterval(QwtPlot::xBottom).maxValue()/2, axisInterval(QwtPlot::yLeft).maxValue()/2);
 
-	// Update axes with updated windows
-	setAxisScale(QwtPlot::xBottom, x_interval->minValue(), x_interval->maxValue());
+	// Update axes
 	replot();
 }
 
@@ -160,11 +165,10 @@ std::list<Scope::Channel>::iterator Scope::insertChannel(QString label,double sc
 	channel.data.resize(data_size,0.0);
 	channel.curve = curve;
 	channel.curve->setPen(pen);
-	channel.curve->setStyle(QwtPlotCurve::Lines);
-	//channel.curve->setRenderHint(QwtPlotItem::RenderAntialiased, true);
-	//channel.curve->setPaintAttribute(QwtPlotCurve::ClipPolygons, false);
+	channel.curve->setStyle(QwtPlotCurve::Dots);
+	channel.curve->setRenderHint(QwtPlotItem::RenderAntialiased, false);
+	channel.curve->attach(this);
 	channels.push_back(channel);
-	printf("inserting into list %zu\n", channels.size());
 	return --channels.end();
 }
 
@@ -215,7 +219,7 @@ void Scope::clearData(void) {
 
 // Scales data based upon desired settings for the channel
 void Scope::setData(double data[],size_t size) {
-	if(isPaused || getChannelCount() == 0)
+	if(isPaused)
 		return;
 
 	if(size < getChannelCount()) {
@@ -246,26 +250,23 @@ void Scope::setData(double data[],size_t size) {
 			if(!triggerHolding)
 				drawCurves();
 
-			/*double x, y;
-			const double *xData;
-			const double *yData;
-			double scale;
 			for(std::list<Channel>::iterator i = channels.begin(), iend = channels.end();i != iend;++i) {
-				scale = height()/(i->scale*divY);
-				x = 0;
-				y = round(height()/2-scale*(i->data[data_idx]+i->offset));
-				for(size_t j = 1;j<i->data.size();++j) {
-					x = round(((j*period)*width())/(hScl*divX));
-					y = round(height()/2-scale*(i->data[(data_idx+j)%data_size]+i->offset));
-				printf("x y in setdata are %f %f %zu\n", x, y, j);
-					xData = &x;
-					yData = &y;
-					i->curve->setRawSamples(xData, yData, sizeof(double *));
-					i->curve->attach(this);
-					d_directPainter->drawSeries(i->curve, 0, 50);
-					if(x >= width()) break;
+				std::vector<double> x (i->data.size());
+				std::vector<double> y (i->data.size());
+				double *x_loc = x.data();
+				double *y_loc = y.data();
+
+				// Get X and Y data for the channel
+				for(size_t j = 1; j < i->data.size(); ++j) {
+					*x_loc = ((j*period)*width())/(hScl*divX);
+					++x_loc;
+					*y_loc = i->data[(data_idx+j)%i->data.size()];
+					++y_loc;
 				}
-			}*/
+				// Plot
+				i->curve->setRawSamples(x.data(), y.data(), (int)i->data.size());
+				d_directPainter->drawSeries(i->curve, 0, y.size());
+			}
 		}
 	}
 }
@@ -401,50 +402,21 @@ void Scope::drawCurves(void) {
 	if(isPaused || getChannelCount() == 0)
 		return;
 
-	//int miny = height(), maxy = 0;
-	double scale;
 	for(std::list<Channel>::iterator i = channels.begin(), iend = channels.end();i != iend;++i) {
 		std::vector<double> x (i->data.size());
 		std::vector<double> y (i->data.size());
 		double *x_loc = x.data();
 		double *y_loc = y.data();
-
-		// Attach channel's curve to plot
-		i->curve->attach(this);
-
-		// Find scale for signal height based
-		scale = height()/(i->scale*divY);
 		
-		//x = 0;
-		//y = round(height()/2-scale*(i->data[(data_idx)%i->data.size()]+i->offset));
-		// Manual clippping // rewrite
-		/*if(y < miny)
-			miny = y;
-		if(y > maxy)
-			maxy = y;*/
-		
-		//printf("maxy %d miny %d x %f y %f scale %f width %d height %d hScl %f divX %zu divY %zu size %zu\n", maxy, miny, x, y, scale, width(), height(), hScl, divX, divY, i->data.size());
-
 		// Get X and Y data for the channel
 		for(size_t j = 1; j < i->data.size(); ++j) {
 			*x_loc = ((j*period)*width())/(hScl*divX);
 			++x_loc;
-			*y_loc = height()/2-scale*(i->data[(data_idx+j)%i->data.size()]+i->offset);
+			*y_loc = i->data[(data_idx+j)%i->data.size()]+500;
 			++y_loc;
-
-			// Manual clipping // rewrite
-			/*if(y < miny)
-				miny = y;
-			if(y > maxy)
-				maxy = y;*/
-
-			// Clipping x // rewrite
-			/*if(x >= width())
-				break;*/
 		}
 		// Plot
 		i->curve->setRawSamples(x.data(), y.data(), (int)i->data.size());
-		//d_directPainter->drawSeries(i->curve, 0, -1);
-		replot();
+		d_directPainter->drawSeries(i->curve, 0, y.size());
 	}
 }
