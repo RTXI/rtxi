@@ -111,7 +111,7 @@ Scope::Scope(QWidget *parent) : QwtPlot(parent) {
 	// Set division limits on the scope
 	setAxisMaxMajor(QwtPlot::xBottom, divX);
 	setAxisMaxMajor(QwtPlot::yLeft, divY);
-	enableAxis(QwtPlot::yLeft, false);
+	//enableAxis(QwtPlot::yLeft, false);
 	
 	// Update scope background/scales/axes
 	updateScopeLayout();
@@ -152,7 +152,6 @@ void Scope::updateScopeLayout(void) {
 
 // Insert user specified channel into active list of channels with specified settings
 std::list<Scope::Channel>::iterator Scope::insertChannel(QString label,double scale,double offset,const QPen &pen,QwtPlotCurve *curve,void *info) {
-	printf("inserting into list %zu\n", channels.size());
 	struct Channel channel;
 	channel.label = label;
 	channel.scale = scale;
@@ -161,10 +160,11 @@ std::list<Scope::Channel>::iterator Scope::insertChannel(QString label,double sc
 	channel.data.resize(data_size,0.0);
 	channel.curve = curve;
 	channel.curve->setPen(pen);
-	channel.curve->setStyle(QwtPlotCurve::Dots);
-	channel.curve->setRenderHint(QwtPlotItem::RenderAntialiased, true);
-	channel.curve->setPaintAttribute(QwtPlotCurve::ClipPolygons, false);
+	channel.curve->setStyle(QwtPlotCurve::Lines);
+	//channel.curve->setRenderHint(QwtPlotItem::RenderAntialiased, true);
+	//channel.curve->setPaintAttribute(QwtPlotCurve::ClipPolygons, false);
 	channels.push_back(channel);
+	printf("inserting into list %zu\n", channels.size());
 	return --channels.end();
 }
 
@@ -215,9 +215,8 @@ void Scope::clearData(void) {
 
 // Scales data based upon desired settings for the channel
 void Scope::setData(double data[],size_t size) {
-	if(isPaused){
+	if(isPaused || getChannelCount() == 0)
 		return;
-	}
 
 	if(size < getChannelCount()) {
 		ERROR_MSG("Scope::setData() : data size mismatch detected\n");
@@ -247,7 +246,7 @@ void Scope::setData(double data[],size_t size) {
 			if(!triggerHolding)
 				drawCurves();
 
-			double x, y;
+			/*double x, y;
 			const double *xData;
 			const double *yData;
 			double scale;
@@ -266,7 +265,7 @@ void Scope::setData(double data[],size_t size) {
 					d_directPainter->drawSeries(i->curve, 0, 50);
 					if(x >= width()) break;
 				}
-			}
+			}*/
 		}
 	}
 }
@@ -399,31 +398,53 @@ void Scope::setChannelLabel(std::list<Channel>::iterator channel,const QString &
 
 // Draw data on the scope
 void Scope::drawCurves(void) {
+	if(isPaused || getChannelCount() == 0)
+		return;
 
-	double x, y;
-	int miny = height(), maxy = 0;
+	//int miny = height(), maxy = 0;
 	double scale;
 	for(std::list<Channel>::iterator i = channels.begin(), iend = channels.end();i != iend;++i) {
+		std::vector<double> x (i->data.size());
+		std::vector<double> y (i->data.size());
+		double *x_loc = x.data();
+		double *y_loc = y.data();
+
+		// Attach channel's curve to plot
+		i->curve->attach(this);
+
+		// Find scale for signal height based
 		scale = height()/(i->scale*divY);
-		x = 0;
-		y = round(height()/2-scale*(i->data[(data_idx)%i->data.size()]+i->offset));
-		if(y < miny)
+		
+		//x = 0;
+		//y = round(height()/2-scale*(i->data[(data_idx)%i->data.size()]+i->offset));
+		// Manual clippping // rewrite
+		/*if(y < miny)
 			miny = y;
 		if(y > maxy)
-			maxy = y;
-		printf("maxy %d miny %d x %f y %f scale %f width %d hScl %f divX %zu divY %zu size %zu\n", maxy, miny, x, y, scale, width(), hScl, divX, divY, i->data.size());
-		for(size_t j = 1;j < i->data.size(); ++j) {
-			x = round(((j*period)*width())/(hScl*divX));
-			y = round(height()/2-scale*(i->data[(data_idx+j)%i->data.size()]+i->offset));
-			if(y < miny)
+			maxy = y;*/
+		
+		//printf("maxy %d miny %d x %f y %f scale %f width %d height %d hScl %f divX %zu divY %zu size %zu\n", maxy, miny, x, y, scale, width(), height(), hScl, divX, divY, i->data.size());
+
+		// Get X and Y data for the channel
+		for(size_t j = 1; j < i->data.size(); ++j) {
+			*x_loc = ((j*period)*width())/(hScl*divX);
+			++x_loc;
+			*y_loc = height()/2-scale*(i->data[(data_idx+j)%i->data.size()]+i->offset);
+			++y_loc;
+
+			// Manual clipping // rewrite
+			/*if(y < miny)
 				miny = y;
 			if(y > maxy)
-				maxy = y;
-			//i->curve->setRawSamples(xData, yData, sizeof(double *));
-			//i->curve->attach(this);
-			//d_directPainter->drawSeries(i->curve, 0, -1);
-			if(x >= width())
-				break;
+				maxy = y;*/
+
+			// Clipping x // rewrite
+			/*if(x >= width())
+				break;*/
 		}
+		// Plot
+		i->curve->setRawSamples(x.data(), y.data(), (int)i->data.size());
+		//d_directPainter->drawSeries(i->curve, 0, -1);
+		replot();
 	}
 }

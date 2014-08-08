@@ -87,27 +87,12 @@ class Scope : public QwtPlot {
 
 		public:
 			Canvas(QwtPlot *plot = NULL) : QwtPlotCanvas(plot) {
-
-				// The backing store is important, when working with widget
-				// overlays ( f.e rubberbands for zooming ).
-				// Here we don't have them and the internal
-				// backing store of QWidget is good enough.
 				setPaintAttribute(QwtPlotCanvas::BackingStore, false);
 
 				if(QwtPainter::isX11GraphicsSystem()) {
 #if QT_VERSION < 0x050000
-					// Even if not liked by the Qt development, Qt::WA_PaintOutsidePaintEvent
-					// works on X11. This has a nice effect on the performance.
 					setAttribute( Qt::WA_PaintOutsidePaintEvent, true );
 #endif
-
-					// Disabling the backing store of Qt improves the performance
-					// for the direct painter even more, but the canvas becomes
-					// a native window of the window system, receiving paint events
-					// for resize and expose operations. Those might be expensive
-					// when there are many points and the backing store of
-					// the canvas is disabled. So in this application
-					// we better don't both backing stores.
 					if(testPaintAttribute(QwtPlotCanvas::BackingStore)) {
 						setAttribute(Qt::WA_PaintOnScreen, true);
 						setAttribute(Qt::WA_NoSystemBackground, true);
@@ -193,7 +178,6 @@ class Scope : public QwtPlot {
 
 	private:
 		void drawCurves(void);
-		void positionLabels(QPainter &);
 		size_t divX;
 		size_t divY;
 		size_t data_idx;
