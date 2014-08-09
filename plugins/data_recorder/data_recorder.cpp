@@ -268,7 +268,7 @@ void DataRecorder::stopRecording(void) {
 
 void DataRecorder::openFile(const QString& filename) {
 	Event::Object event(Event::OPEN_FILE_EVENT);
-	event.setParam("filename", const_cast<char *> (filename.toLocal8Bit().data()));//toLatin3()));
+	event.setParam("filename", const_cast<char *> (filename.toLatin1().constData()));
 	if (RT::OS::isRealtime())
 		Event::Manager::getInstance()->postEventRT(&event);
 	else
@@ -749,11 +749,8 @@ void DataRecorder::Panel::updateDownsampleRate(int r) {
 }
 
 void DataRecorder::Panel::customEvent(QEvent *e) {
-	printf("in customevent\n");
 	if (e->type() == QFileExistsEvent) {
-		printf("hit1\n");
 		FileExistsEventData *data = reinterpret_cast<FileExistsEventData *> (e);
-		printf("hit1b\n");
 		data->response = QMessageBox::question(this, "File exists",
 				"The file already exists. What would you like to do?",
 				"Append", "Overwrite", "Cancel", 0, 2);
@@ -766,15 +763,10 @@ void DataRecorder::Panel::customEvent(QEvent *e) {
 				QMessageBox::Ok, QMessageBox::NoButton);
 		recordStatus->setText("Not Recording");
 	} else if (e->type() == QSetFileNameEditEvent) {
-		printf("hit3\n");
 		SetFileNameEditEventData *data = reinterpret_cast<SetFileNameEditEventData *> (e);
-		printf("hit3a %s\n",data->filename.toStdString().c_str());
 		fileNameEdit->setText(data->filename);
-		printf("hit3b\n");
 		recordStatus->setText("Ready.");
-		printf("hit3c\n");
 		data->done.wakeAll();
-		printf("hitd\n");
 	} else if (e->type() == QDisableGroupsEvent) {
 		channelBox->setEnabled(false);
 		sampleBox->setEnabled(false);
