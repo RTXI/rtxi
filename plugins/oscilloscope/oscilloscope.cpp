@@ -352,11 +352,9 @@ void Oscilloscope::Panel::applyChannelTab(void) {
 		}
 		if (scale != i->getScale()) {
 			scopeWindow->setChannelScale(i, scale);
-			scopeWindow->setChannelLabel(i, info->name + " "
-					+ scalesList->currentText().simplified());
+			scopeWindow->setChannelLabel(i, info->name + " " + scalesList->currentText().simplified());
 		}
-		scopeWindow->setChannelOffset(i, offsetsEdit->text().toDouble() * pow(10, -3
-					* offsetsList->currentIndex()));
+		scopeWindow->setChannelOffset(i, offsetsEdit->text().toDouble() * pow(10, -3 * offsetsList->currentIndex()));
 
 		QPen pen;
 		switch (colorsList->currentIndex()) {
@@ -417,6 +415,7 @@ void Oscilloscope::Panel::applyChannelTab(void) {
 			width(),scopeWindow->val2pix(scopeWindow->trigThresh,*i));*/
 
 	}
+	scopeWindow->updateScopeLayout();
 	showChannelTab();
 }
 
@@ -791,8 +790,8 @@ QWidget *Oscilloscope::Panel::createDisplayTab(QWidget *parent) {
 	displayTabLayout->addWidget(new QLabel(tr("Y Divs:"),page), 0, 11);
 	divsYSpin = new QSpinBox(page);
 	displayTabLayout->addWidget(divsYSpin, 0, 12);
-	divsYSpin->setRange(1,8);
-	divsYSpin->setValue(8);
+	divsYSpin->setRange(1,10);
+	divsYSpin->setValue(10);
 
 	QLabel *downsampleLabel = new QLabel(tr("Downsample:"),page);
 	downsampleLabel->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
@@ -961,7 +960,7 @@ void Oscilloscope::Panel::showChannelTab(void) {
 	widthsList->setEnabled(found);
 	stylesList->setEnabled(found);
 	if (!found) {
-		scalesList->setCurrentIndex(9);
+		scalesList->setCurrentIndex(3);
 		offsetsEdit->setText(QString::number(0));
 		offsetsList->setCurrentIndex(0);
 		colorsList->setCurrentIndex(0);

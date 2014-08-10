@@ -23,13 +23,10 @@
 #include <cmath>
 #include <stdlib.h>
 #include <main_window.h>
-#include <math.h>
 
 #include <qwt_abstract_scale_draw.h>
 
 #include "scope.h"
-
-#define _USE_MATH_DEFINES
 
 // Constructor for a channel
 Scope::Channel::Channel(void) {}
@@ -73,10 +70,10 @@ Scope::Scope(QWidget *parent) : QwtPlot(parent) {
 	// Initialize vars
 	isPaused = false;
 	divX = 10;
-	divY = 8;
+	divY = 10;
 	data_idx = 0;
 	data_size = 100;
-	hScl = 1.0;
+	hScl = 10.0;
 	period = 1.0;
 	dtLabel = "10ms";
 	refresh = 250;
@@ -88,8 +85,6 @@ Scope::Scope(QWidget *parent) : QwtPlot(parent) {
 	triggerLast = (size_t)(-1);
 	triggerChannel = channels.end();
   
-  srand (time(NULL));
-
 	// Initialize director
 	d_directPainter = new QwtPlotDirectPainter();
 	plotLayout()->setAlignCanvasToScales(true);
@@ -107,6 +102,7 @@ Scope::Scope(QWidget *parent) : QwtPlot(parent) {
 	d_origin = new QwtPlotMarker();
 	d_origin->setLineStyle(QwtPlotMarker::Cross);
 	d_origin->setLinePen(Qt::gray, 0, Qt::SolidLine);
+	d_origin->setValue(0,0);
 	d_origin->attach(this);
 
 	// Set division limits on the scope
@@ -114,12 +110,16 @@ Scope::Scope(QWidget *parent) : QwtPlot(parent) {
 	setAxisMaxMajor(QwtPlot::yLeft, divY);
 
 	// Disable axes
-	enableAxis(QwtPlot::yLeft, false);
-	enableAxis(QwtPlot::xBottom, false);
+	enableAxis(QwtPlot::yLeft, true);//false);
+	enableAxis(QwtPlot::xBottom, true);//false);
 
 	// Disable autoscaling
 	setAxisAutoScale(QwtPlot::xBottom, false);
 	setAxisAutoScale(QwtPlot::yLeft, false);
+
+	// Set y interval
+	y_interval.setInterval(-10, 10, QwtInterval::IncludeBorders);
+	setAxisScale(QwtPlot::yLeft, y_interval.minValue(), y_interval.maxValue());
 
 	// Update scope background/scales/axes
 	updateScopeLayout();
@@ -148,8 +148,9 @@ void Scope::timeoutEvent(void) {
 
 void Scope::updateScopeLayout(void) {
 
-	// Recenter cross
-	d_origin->setValue(axisInterval(QwtPlot::xBottom).maxValue()/2, axisInterval(QwtPlot::yLeft).maxValue()/2);
+	// Set x interval
+	x_interval.setInterval(-(hScl*divX)/2, (hScl*divX)/2, QwtInterval::IncludeBorders);
+	setAxisScale(QwtPlot::xBottom, x_interval.minValue(), x_interval.maxValue());
 
 	// Update axes
 	replot();
@@ -165,9 +166,8 @@ std::list<Scope::Channel>::iterator Scope::insertChannel(QString label,double sc
 	channel.data.resize(data_size,0.0);
 	channel.curve = curve;
 	channel.curve->setPen(pen);
-	channel.curve->setStyle(QwtPlotCurve::Dots);
+	channel.curve->setStyle(QwtPlotCurve::Lines);
 	channel.curve->setRenderHint(QwtPlotItem::RenderAntialiased, false);
-	channel.curve->attach(this);
 	channels.push_back(channel);
 	return --channels.end();
 }
@@ -407,16 +407,20 @@ void Scope::drawCurves(void) {
 		std::vector<double> y (i->data.size());
 		double *x_loc = x.data();
 		double *y_loc = y.data();
-		
+
+		double scale = height()/(i->scale*divY);
+		i->curve->setRawSamples(x.data(), y.data(), i->data.size());
+		i->curve->attach(this);
+
 		// Get X and Y data for the channel
 		for(size_t j = 1; j < i->data.size(); ++j) {
-			*x_loc = ((j*period)*width())/(hScl*divX);
-			*y_loc = i->data[(data_idx+j)%i->data.size()];
+			*x_loc = round((((j*period)*width())/(hScl*divX))/200);
+			*y_loc = round((height()/2-scale*(i->data[(data_idx+j)%i->data.size()]+i->offset))/100);
+			// Plot
 			++x_loc;
 			++y_loc;
 		}
-		// Plot
-		i->curve->setRawSamples(x.data(), y.data(), i->data.size());
-		d_directPainter->drawSeries(i->curve, 0, y.size());
+		d_directPainter->drawSeries(i->curve, 0, i->data.size());
+		replot();
 	}	
 }

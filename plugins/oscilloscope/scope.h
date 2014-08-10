@@ -202,6 +202,10 @@ class Scope : public QwtPlot {
 		QwtPlotMarker *d_origin;
 		QwtPlotGrid *grid;
 
+		int paintedPoints;
+		QwtInterval x_interval;
+		QwtInterval y_interval;
+
 		QTimer *timer;
 		QString dtLabel;
 		std::list<Channel> channels;
