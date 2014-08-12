@@ -33,13 +33,13 @@ echo "Checking for dependencies..."
 if [[ $(lsb_release --id) == *Ubuntu* ]]
 then
 sudo apt-get update
-sudo apt-get upgrade
-sudo apt-get install autotools-dev automake libtool
-sudo apt-get install kernel-package
-sudo apt-get install fakeroot build-essential crash kexec-tools makedumpfile kernel-wedge
-sudo apt-get build-dep linux
-sudo apt-get install git-core libncurses5 libncurses5-dev libelf-dev asciidoc binutils-dev
-sudo apt-get install qt4-dev-tools libqt4-dev libqt4-opengl-dev
+sudo apt-get -y upgrade
+sudo apt-get -y install autotools-dev automake libtool
+sudo apt-get -y install kernel-package
+sudo apt-get -y install fakeroot build-essential crash kexec-tools makedumpfile kernel-wedge
+sudo apt-get -y build-dep linux
+sudo apt-get -y install git-core libncurses5 libncurses5-dev libelf-dev asciidoc binutils-dev
+sudo apt-get -y install qt4-dev-tools libqt4-dev libqt4-opengl-dev
 elif [[ $(lsb_release --id) == *Scientific* ]]
 then
 sudo yum update
@@ -115,7 +115,7 @@ fi
 # Install dynamo
 echo "Installing DYNAMO utility..."
 
-sudo apt-get install mlton
+sudo apt-get -y install mlton
 cd ${DYN}
 mllex dl.lex
 mlyacc dl.grm
