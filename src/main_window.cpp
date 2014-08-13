@@ -263,9 +263,10 @@ void MainWindow::loadSettings (void) {
 	QString filename = QFileDialog::getOpenFileName(this,
 			tr("Load saved workspace"), "/home/", tr("Settings (*.set)"));
 
-	systemMenu->clear();
-	if (filename != "/")
+	if (QFile(filename).exists()) {
+		systemMenu->clear();
 		Settings::Manager::getInstance()->load(filename.toStdString());
+	}
 }
 
 void MainWindow::saveSettings(void) {
