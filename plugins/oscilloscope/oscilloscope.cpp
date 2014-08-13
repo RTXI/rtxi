@@ -185,8 +185,8 @@ void Oscilloscope::Panel::receiveEvent(const ::Event::Object *event) {
 }
 
 void Oscilloscope::Panel::closeEvent(QCloseEvent *e) {
-	e->ignore();
-	hide();
+	//e->ignore();
+	//hide();
 }
 
 // Slot for enabling user specified channel
@@ -1024,6 +1024,8 @@ Oscilloscope::Panel::Panel(QWidget *parent) :	QWidget(parent), RT::Thread(0), fi
 	subWindow = new QMdiSubWindow;
 	subWindow->setMinimumSize(900,600);
 	subWindow->setAttribute(Qt::WA_DeleteOnClose);
+	subWindow->setWindowFlags(Qt::CustomizeWindowHint);
+	subWindow->setWindowFlags(Qt::WindowCloseButtonHint);
 	MainWindow::getInstance()->createMdi(subWindow);
 
 	setWhatsThis("<p><b>Oscilloscope:</b><br>The Oscilloscope allows you to plot any signal "

@@ -296,12 +296,12 @@ void SystemControlPanel::apply(void) {
 		dev = info.device;
 	}
 
-	DAQ::index_t a_chan = analogChannelList->currentIndex();
-	DAQ::type_t a_type = static_cast<DAQ::type_t>(analogSubdeviceList->currentIndex());
-	double a_gain = analogGainEdit->text().toDouble()*pow(10,-3*(analogUnitPrefixList->currentIndex()-8));
-	double a_zerooffset = analogZeroOffsetEdit->text().toDouble()*pow(10,-3*(analogUnitPrefixList2->currentIndex()-8));
-
 	if(dev){
+		DAQ::index_t a_chan = analogChannelList->currentIndex();
+		DAQ::type_t a_type = static_cast<DAQ::type_t>(analogSubdeviceList->currentIndex());
+		double a_gain = analogGainEdit->text().toDouble()*pow(10,-3*(analogUnitPrefixList->currentIndex()-8));
+		double a_zerooffset = analogZeroOffsetEdit->text().toDouble()*pow(10,-3*(analogUnitPrefixList2->currentIndex()-8));
+
 		dev->setChannelActive(a_type,a_chan,analogActiveButton->isChecked());
 		dev->setAnalogCalibrationActive(a_type,a_chan,analogCalibrationButton->isChecked());
 		dev->setAnalogGain(a_type,a_chan,a_gain);
@@ -319,7 +319,7 @@ void SystemControlPanel::apply(void) {
 		dev->setChannelActive(d_type,d_chan,digitalActiveButton->isChecked());
 		if(d_type == DAQ::DIO)
 			dev->setDigitalDirection(d_chan,d_dir);
-		}
+	}
 
 	// Apply thread settings
 	double period = periodEdit->text().toDouble();
