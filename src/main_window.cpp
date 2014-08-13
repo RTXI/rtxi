@@ -277,7 +277,7 @@ void MainWindow::saveSettings(void) {
 	QString filename = QFileDialog::getSaveFileName(this,
 			tr("Save current workspace"), "/home/", tr("Settings (*.set)"));
 
-	if (filename != "/") {
+	if (!filename.isEmpty()) {
 		if (!filename.endsWith(".set"))
 			filename = filename+".set";
 		if (QFileInfo (filename).exists() && QMessageBox::warning(this,
