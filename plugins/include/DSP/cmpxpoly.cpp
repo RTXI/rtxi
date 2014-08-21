@@ -11,6 +11,7 @@
 #include "laguerre.h"
 #include "pause.h"
 #include "stdlib.h"
+#include <unistd.h>
 
 //======================================================
 //  default constructor

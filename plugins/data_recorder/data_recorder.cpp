@@ -44,6 +44,8 @@
 #include <workspace.h>
 #include <data_recorder.h>
 
+#include <unistd.h>
+
 #define QFileExistsEvent            (QEvent::User+0)
 #define QNoFileOpenEvent            (QEvent::User+1)
 #define QSetFileNameEditEvent       (QEvent::User+2)

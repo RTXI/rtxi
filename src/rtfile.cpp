@@ -21,6 +21,7 @@
 #include <rtfile.h>
 #include <string.h>
 #include <cstdlib>
+#include <unistd.h>
 
 RTFile::RTFile(void)
     : done(true), fd(-1), writing(false), fifo(1024*1024) {}
