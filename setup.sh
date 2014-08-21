@@ -31,8 +31,8 @@ if [ $(lsb_release -sc) == "trusty" ]; then
 		echo "Source list already updated"
 	else 
 		sudo cp /etc/apt/sources.list /etc/apt/sources.list.bak
-		sudo bash -c "echo \"\" > /etc/apt/sources.list"
-		sudo bash -c "echo \"\#\#\#Sources for qt3-dev-tools\" >> /etc/apt/sources.list"
+		sudo bash -c "echo \"\" >> /etc/apt/sources.list"
+		sudo bash -c "echo \"###Sources for qt3-dev-tools\" >> /etc/apt/sources.list"
 		sudo bash -c "echo \"deb http://cz.archive.ubuntu.com/ubuntu precise main\" >> /etc/apt/sources.list"
 		sudo bash -c "echo \"deb-src http://cz.archive.ubuntu.com/ubuntu precise main\" >> /etc/apt/sources.list"
 	fi
