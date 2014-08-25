@@ -9,15 +9,15 @@ BasicPlot::BasicPlot(QWidget *parent) :
 {
   setFrameStyle(QFrame::NoFrame);
   setLineWidth(0);
-  setCanvasLineWidth(2);
+  QFrame(canvas()).setLineWidth(2);
   plotLayout()->setAlignCanvasToScales(true);
   QwtPlotGrid *grid = new QwtPlotGrid;
-  grid->setMajPen(QPen(Qt::gray, 0, Qt::DotLine));
+  grid->setMajorPen(QPen(Qt::gray, 0, Qt::DotLine));
   grid->attach(this);
   setCanvasBackground(QColor(29, 100, 141)); // nice blue
 
   // enable zooming
-  Zoomer *zoomer = new Zoomer(canvas());
+  Zoomer *zoomer = new Zoomer(qobject_cast<QwtPlotCanvas *>(canvas()));
   zoomer->setRubberBandPen(QPen(Qt::white, 2, Qt::DotLine));
   zoomer->setTrackerPen(QPen(Qt::white));
   QObject::connect(this, SIGNAL(setNewBase(QwtScaleDiv*,QwtScaleDiv*)), zoomer,
@@ -32,7 +32,12 @@ BasicPlot::setAxes(double xmin, double xmax, double ymin, double ymax)
   setAxisScale(yLeft, ymin, ymax);
   replot();
   // set zoomer to new axes limits
-  emit setNewBase(axisScaleDiv(QwtPlot::xBottom), axisScaleDiv(QwtPlot::yLeft));
+  QwtScaleDiv * bottom = new QwtScaleDiv;
+  *bottom = axisScaleDiv(QwtPlot::xBottom);
+  QwtScaleDiv * left = new QwtScaleDiv;
+  *left = axisScaleDiv(QwtPlot::yLeft);
+//  emit setNewBase(&axisScaleDiv(QwtPlot::xBottom), &axisScaleDiv(QwtPlot::yLeft));
+  setNewBase(bottom, left);
 }
 
 QSize
