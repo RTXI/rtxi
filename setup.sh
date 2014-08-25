@@ -42,19 +42,6 @@ fi
 
 sudo apt-get install -y g++ gcc automake libtool autoconf autotools-dev build-essential libboost-dev libboost-program-options-dev libgsl0-dev bison flex libncurses5-dev qt3-dev-tools
 
-#if [ -f qwt_5.2.0.orig.tar.gz ]; then 
-#	echo "Qwt sources present."
-#else
-#	wget http://archive.ubuntu.com/ubuntu/pool/main/q/qwt/qwt_5.2.0.orig.tar.gz
-#	tar xf qwt_5.2.0.orig.tar.gz
-#fi
-
-#cd qwt-5.2.0/qwt
-#qmake-qt3
-#make
-#sudo make install
-#cd ../../
-
 wget http://mirrors.kernel.org/ubuntu/pool/main/q/qwt/libqwt5-qt3_5.2.0-1build1_$ARCH.deb
 wget http://mirrors.kernel.org/ubuntu/pool/main/q/qwt/libqwt5-qt3-dev_5.2.0-1build1_$ARCH.deb
 
