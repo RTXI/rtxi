@@ -26,7 +26,7 @@ if [ $ARCH == "x86_64" ]; then ARCH="amd64"; fi
 sudo apt-get update
 sudo apt-get upgrade
 
-if [ $(lsb_release -sc) == "trusty" ]; then
+if [ $(lsb_release -sc) == "trusty" ] || [ $(lsb_release -sc) == "precise" ]; then
 	if [ -f /etc/apt/sources.list.bak ]; then
 		echo "Source list already updated"
 	else 
