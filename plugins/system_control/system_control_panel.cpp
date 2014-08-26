@@ -156,7 +156,6 @@ SystemControlPanel::SystemControlPanel(QWidget *parent) : QWidget(parent) {
 
 	analogLayout->addWidget(new QLabel(tr("Scale:")), 3, 0);
 	analogGainEdit = new QLineEdit;
-	analogGainEdit->setText("1");
 	analogGainEdit->setAlignment(Qt::AlignRight);
 	analogLayout->addWidget(analogGainEdit, 3, 1);
 
