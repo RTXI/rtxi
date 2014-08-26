@@ -103,7 +103,7 @@ AnalogyDevice::AnalogyDevice(a4l_desc_t *d,std::string name,IO::channel_t *chan,
 					subdevice[AO].chan[i].active = false;
 					subdevice[AO].chan[i].analog.maxdata = (1<<chinfo->nb_bits)-1;
 					setAnalogGain(AO,i,1.0);
-					setAnalogZeroOffset(AI,i,0);
+					setAnalogZeroOffset(AO,i,0);
 					setAnalogRange(AO,i,0);
 					setAnalogReference(AO,i,0);
 					setAnalogUnits(AO,i,0);

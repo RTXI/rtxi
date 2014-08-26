@@ -179,8 +179,6 @@ SystemControlPanel::SystemControlPanel(QWidget *parent) : QWidget(parent) {
 	analogUnitPrefixList->addItem("zepto-");
 	analogUnitPrefixList->addItem("yocto-");
 	analogLayout->addWidget(analogUnitPrefixList, 3, 2);
-	int default_index = analogUnitPrefixList->findText("");
-	analogUnitPrefixList->setCurrentIndex(default_index);
 
 	analogUnitList = new QComboBox;
 	analogLayout->addWidget(analogUnitList, 3, 3);
@@ -192,6 +190,7 @@ SystemControlPanel::SystemControlPanel(QWidget *parent) : QWidget(parent) {
 	analogZeroOffsetEdit->setAlignment(Qt::AlignRight);
 	analogLayout->addWidget(analogZeroOffsetEdit, 4, 1);
 
+	// Prefixes for offset
 	analogUnitPrefixList2 = new QComboBox;
 	analogUnitPrefixList2->addItem("yotta-");
 	analogUnitPrefixList2->addItem("zetta-");
@@ -211,8 +210,6 @@ SystemControlPanel::SystemControlPanel(QWidget *parent) : QWidget(parent) {
 	analogUnitPrefixList2->addItem("zepto-");
 	analogUnitPrefixList2->addItem("yocto-");
 	analogLayout->addWidget(analogUnitPrefixList2, 4, 2, 1, 1);
-	default_index = analogUnitPrefixList2->findText("");
-	analogUnitPrefixList2->setCurrentIndex(default_index);
 	analogLayout->addWidget(new QLabel(tr(" Volt/Amps")), 4, 3);
 
 	// Assign layout to child widget
@@ -341,10 +338,11 @@ void SystemControlPanel::updateDevice(void) {
 		dev = info.device;
 	}
 
-	analogChannelList->clear();
-	digitalChannelList->clear();
 	if(!dev)
 		return;
+
+	analogChannelList->clear();
+	digitalChannelList->clear();
 
 	type = static_cast<DAQ::type_t>(analogSubdeviceList->currentIndex());
 	for(size_t i=0;i<dev->getChannelCount(type);++i) {
@@ -473,13 +471,13 @@ void SystemControlPanel::display(void) {
 		analogReferenceList->setCurrentIndex(dev->getAnalogReference(type,chan));
 		analogUnitList->setCurrentIndex(dev->getAnalogUnits(type,chan));
 
-		// Determine the Correct Prefix for analog gain
+		// Determine the correct prefix for analog gain
 		int i = 8;
 		double tmp;
 		bool sign = true;
-		if( dev->getAnalogGain(type,chan) < 0.0 )
+		if(dev->getAnalogGain(type,chan) < 0.0)
 			sign = false; // Negative value
-		tmp = fabs( dev->getAnalogGain(type,chan) );
+		tmp = fabs(dev->getAnalogGain(type,chan));
 		if(tmp != 0.0)
 			while(((tmp >= 1000)&&(i > 0))||((tmp < 1)&&(i < 16))) {
 				if(tmp >= 1000) {
@@ -496,16 +494,17 @@ void SystemControlPanel::display(void) {
 		else
 			analogGainEdit->setText(QString::number(-tmp));
 
+		// Set gain prefix to computed index
 		analogUnitPrefixList->setCurrentIndex(i);
 
-		// Determine the Correct Prefix for analog offset
+		// Determine the correct prefix for analog offset
 		i = 8;
 		sign = true;
-		if( dev->getAnalogZeroOffset(type,chan) < 0.0 )
+		if(dev->getAnalogZeroOffset(type,chan) < 0.0)
 			sign = false; // Negative value
-		tmp = fabs( dev->getAnalogZeroOffset(type,chan) );
+		tmp = fabs(dev->getAnalogZeroOffset(type,chan));
 		if(tmp != 0.0)
-			while(((tmp >= 1000)&&(i > 0))||((tmp < 1)&&(i < 16))) {
+			while(((tmp >= 1000) && (i > 0)) || ((tmp < 1) && (i < 16))) {
 				if(tmp >= 1000) {
 					tmp /= 1000;
 					i--;
@@ -515,10 +514,12 @@ void SystemControlPanel::display(void) {
 					i++;
 				}
 			}
-		if( sign )
+		if(sign)
 			analogZeroOffsetEdit->setText(QString::number(tmp));
 		else
 			analogZeroOffsetEdit->setText(QString::number(-tmp));
+
+		// Set offset prefix to computed index
 		analogUnitPrefixList2->setCurrentIndex(i);
 	}
 
