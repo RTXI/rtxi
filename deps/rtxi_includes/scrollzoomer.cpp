@@ -91,7 +91,7 @@ ScrollZoomer::rescale()
           yScale->setMinBorderDist(start, end);
 
           QwtPlotLayout *layout = plot()->plotLayout();
-          d_alignCanvasToScales = layout->alignCanvasToScales();
+          d_alignCanvasToScales = layout->alignCanvasToScale(0); //why, why, why
           layout->setAlignCanvasToScales(false);
 
           d_inZoom = true;
@@ -356,7 +356,7 @@ ScrollZoomer::updateScrollBars()
 
       sb->setPalette(plot()->palette());
 
-      const QwtScaleDiv *sd = plot()->axisScaleDiv(xAxis);
+      const QwtScaleDiv *sd = &plot()->axisScaleDiv(xAxis);
       sb->setInverted(sd->lowerBound() > sd->upperBound());
 
       sb->setBase(zoomBase().left(), zoomBase().right());
@@ -386,7 +386,7 @@ ScrollZoomer::updateScrollBars()
 
       sb->setPalette(plot()->palette());
 
-      const QwtScaleDiv *sd = plot()->axisScaleDiv(yAxis);
+      const QwtScaleDiv *sd = &plot()->axisScaleDiv(yAxis);
       sb->setInverted(sd->lowerBound() < sd->upperBound());
 
       sb->setBase(zoomBase().top(), zoomBase().bottom());
@@ -500,9 +500,11 @@ void
 ScrollZoomer::scrollBarMoved(Qt::Orientation o, double min, double)
 {
   if (o == Qt::Horizontal)
-    move(min, zoomRect().top());
+    move(QPoint(min, zoomRect().top()));
+//    move(min, zoomRect().top());
   else
-    move(zoomRect().left(), min);
+    move(QPoint(zoomRect().left(), min));
+//    move(zoomRect().left(), min);
 
   emit zoomed(zoomRect());
 }
