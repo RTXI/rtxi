@@ -30,8 +30,6 @@ DYN=${DEPS}/dynamo
 # Check for compilation dependencies
 echo "Checking for dependencies..."
 
-if [[ $(lsb_release --id) == *Ubuntu* ]]
-then
 sudo apt-get update
 sudo apt-get -y upgrade
 sudo apt-get -y install autotools-dev automake libtool
@@ -40,13 +38,6 @@ sudo apt-get -y install fakeroot build-essential crash kexec-tools makedumpfile 
 sudo apt-get -y build-dep linux
 sudo apt-get -y install git-core libncurses5 libncurses5-dev libelf-dev asciidoc binutils-dev libgsl0-dev
 sudo apt-get -y install qt4-dev-tools libqt4-dev libqt4-opengl-dev
-elif [[ $(lsb_release --id) == *Scientific* ]]
-then
-sudo yum update
-sudo yum upgrade
-sudo yum groupinstall “Development Tools”
-sudo yum install automake libtool autoconf boost-devel bison flex ncurses-devel.x86_64 qwt-devel.x86_64 gsl-devel.x86_64 boost-program-options.x86_64 qt qt-devel fakeroot crash rpmdevtools ncurses-devel
-fi
 
 if [ $? -eq 0 ]; then
 	echo "----->Dependencies installed."
