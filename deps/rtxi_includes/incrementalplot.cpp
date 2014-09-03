@@ -1,6 +1,3 @@
-//#include <qwt/qwt_plot.h>
-//#include <qwt/qwt_plot_canvas.h>
-//#include <qwt/qwt_plot_curve.h>
 #include <qwt_plot.h>
 #include <qwt_plot_canvas.h>
 #include <qwt_plot_curve.h>
@@ -123,11 +120,6 @@ IncrementalPlot::appendData(double *x, double *y, int size)
       symbol->setPen(QPen(c));
       symbol->setSize(QSize(6, 6));
 		d_curve->setSymbol(symbol);
-//      d_curve->setSymbol(QwtSymbol(QwtSymbol::Ellipse));
-//      d_curve->symbol()->setBrush(QBrush(c));
-//      d_curve->symbol()->setPen(QPen(c));
-//      d_curve->symbol()->setSize(QSize(6, 6));
-
       d_curve->attach(this);
     }
 
@@ -137,7 +129,6 @@ IncrementalPlot::appendData(double *x, double *y, int size)
 #warning better use QwtData
 #endif
 
-//  const bool cacheMode = qobject_cast<QwtPlotCurve *>(canvas())->testPaintAttribute(QwtPlotCurve::FilterPoints); //oooh, i'm stoopid
   const bool cacheMode = qobject_cast<QwtPlotCanvas *>(canvas())->testPaintAttribute(QwtPlotCanvas::BackingStore);
 
 #if QT_VERSION >= 0x040000 && defined(Q_WS_X11)
@@ -153,7 +144,6 @@ IncrementalPlot::appendData(double *x, double *y, int size)
   QwtScaleMap xMap = plotCanvas->plot()->canvasMap(d_curve->xAxis());
   QwtScaleMap yMap = plotCanvas->plot()->canvasMap(d_curve->yAxis());
   d_curve->drawSeries(&painter, xMap, yMap, (d_curve->paintRect(xMap, yMap)), d_curve->dataSize() - size, d_curve->dataSize() -1);
-//  d_curve->draw(d_curve->dataSize() - size, d_curve->dataSize() - 1);
   plotCanvas->setPaintAttribute(QwtPlotCanvas::BackingStore, cacheMode);
 
 #if QT_VERSION >= 0x040000 && defined(Q_WS_X11)
@@ -174,11 +164,7 @@ IncrementalPlot::appendData(double *x, double *y, int size, QwtSymbol::Style s)
       d_curve->setPaintAttribute(QwtPlotCurve::FilterPoints);
       const QColor &c = Qt::white;
       QwtSymbol *symbol = new QwtSymbol(s, QBrush(c), QPen(c), QSize(6,6));
-//		symbol->setBrush(c);
-//		symbol->setPen(c);
-//		symbol->setSize(6,6);//, QBrush(c), QPen(c), QSize(6,6));
 		d_curve->setSymbol(symbol);
-//		d_curve->setSymbol(QwtSymbol(s, QBrush(c), QPen(c), QSize(6, 6)));
       d_curve->attach(this);
     }
 
@@ -197,17 +183,12 @@ IncrementalPlot::appendData(double *x, double *y, int size, QwtSymbol::Style s)
   canvas()->setAttribute(Qt::WA_PaintOutsidePaintEvent, true);
 #endif
 
-//  qobject_cast<QwtPlotCanvas *>(canvas())->setPaintAttribute(QwtPlotCanvas::BackingStore, false);
-//  d_curve->draw(d_curve->dataSize() - size, d_curve->dataSize() - 1);
-//  qobject_cast<QwtPlotCanvas *>(canvas())->setPaintAttribute(QwtPlotCanvas::BackingStore, cacheMode);
-
   QwtPlotCanvas *plotCanvas = qobject_cast<QwtPlotCanvas *>(canvas());
   plotCanvas->setPaintAttribute(QwtPlotCanvas::BackingStore, false);
   QPainter painter;
   QwtScaleMap xMap = plotCanvas->plot()->canvasMap(d_curve->xAxis());
   QwtScaleMap yMap = plotCanvas->plot()->canvasMap(d_curve->yAxis());
   d_curve->drawSeries(&painter, xMap, yMap, (d_curve->paintRect(xMap, yMap)), d_curve->dataSize() - size, d_curve->dataSize() -1);
-//  d_curve->draw(d_curve->dataSize() - size, d_curve->dataSize() - 1);
   plotCanvas->setPaintAttribute(QwtPlotCanvas::BackingStore, cacheMode);
 
 #if QT_VERSION >= 0x040000 && defined(Q_WS_X11)
@@ -230,8 +211,6 @@ IncrementalPlot::appendLine(double *x, double *y, int size)
       const QColor &c = Qt::white;
 		QwtSymbol *symbol = new QwtSymbol(QwtSymbol::NoSymbol, QBrush(c), QPen(c), QSize(6, 6));
 		l_curve->setSymbol(symbol);
-//      l_curve->setSymbol(QwtSymbol(QwtSymbol::NoSymbol, QBrush(c), QPen(c), QSize(6, 6)));
-
       l_curve->attach(this);
     }
 
@@ -251,9 +230,6 @@ IncrementalPlot::appendLine(double *x, double *y, int size)
   canvas()->setAttribute(Qt::WA_PaintOutsidePaintEvent, true);
 #endif
 
-//  qobject_cast<QwtPlotCanvas *>(canvas())->setPaintAttribute(QwtPlotCanvas::BackingStore, false);
-//  l_curve->draw(l_curve->dataSize() - size, l_curve->dataSize() - 1);
-//  qobject_cast<QwtPlotCanvas *>(canvas())->setPaintAttribute(QwtPlotCanvas::BackingStore, cacheMode);
   QwtPlotCanvas *plotCanvas = qobject_cast<QwtPlotCanvas *>(canvas());
   plotCanvas->setPaintAttribute(QwtPlotCanvas::BackingStore, false);
   QPainter painter;
@@ -290,8 +266,6 @@ IncrementalPlot::nextSymbol()
   if (n > 14)
     n = 0;
 
-//  QwtSymbol *symbol = new QwtSymbol((QwtSymbol::Style) n, QBrush(Qt::white), QPen(Qt::white), QSize(6, 6));
-//  d_curve->setSymbol(symbol);
   d_curve->setSymbol(new QwtSymbol((QwtSymbol::Style) n, QBrush(Qt::white), QPen(Qt::white), QSize(6, 6)));
 }
 

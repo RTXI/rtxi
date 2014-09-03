@@ -54,12 +54,12 @@ class ScatterPlot : public IncrementalPlot {
     virtual ~ScatterPlot(){};//    virtual QSize sizeHint() const;
 
   signals:
-    //	void setNewBase(QwtScaleDiv * xscalediv, QwtScaleDiv * yscalediv);
+    void setNewBase(QwtScaleDiv * xscalediv, QwtScaleDiv * yscalediv);
 
   public slots:
     void clear();
-    //void setAxes(double xmin, double xmax, double ymin, double ymax);
-    //Zoomer *zoomer;
+    void setAxes(double xmin, double xmax, double ymin, double ymax);
+    Zoomer *zoomer;
 
   private slots:
     void appendPoint(double x, double y);
