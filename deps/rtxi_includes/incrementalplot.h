@@ -8,7 +8,7 @@
 #define _INCREMENTALPLOT_H_ 1
 
 #include "basicplot.h"
-#include <qwt_array.h>
+//#include <qwt_array.h>
 #include <qwt_plot.h>
 #include <qwt_symbol.h>
 

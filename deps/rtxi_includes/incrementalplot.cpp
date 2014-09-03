@@ -1,6 +1,9 @@
-#include <qwt/qwt_plot.h>
-#include <qwt/qwt_plot_canvas.h>
-#include <qwt/qwt_plot_curve.h>
+//#include <qwt/qwt_plot.h>
+//#include <qwt/qwt_plot_canvas.h>
+//#include <qwt/qwt_plot_curve.h>
+#include <qwt_plot.h>
+#include <qwt_plot_canvas.h>
+#include <qwt_plot_curve.h>
 #include "incrementalplot.h"
 #if QT_VERSION >= 0x040000
 #include <qpaintengine.h>
@@ -113,22 +116,29 @@ IncrementalPlot::appendData(double *x, double *y, int size)
     {
       d_curve = new QwtPlotCurve("Data");
       d_curve->setStyle(QwtPlotCurve::NoCurve);
-      d_curve->setPaintAttribute(QwtPlotCurve::PaintFiltered);
+      d_curve->setPaintAttribute(QwtPlotCurve::FilterPoints, true);
       const QColor &c = Qt::white;
-      d_curve->setSymbol(QwtSymbol(QwtSymbol::Ellipse, QBrush(c), QPen(c),
-          QSize(6, 6)));
+		QwtSymbol *symbol = new QwtSymbol(QwtSymbol::Ellipse);
+      symbol->setBrush(QBrush(c));
+      symbol->setPen(QPen(c));
+      symbol->setSize(QSize(6, 6));
+		d_curve->setSymbol(symbol);
+//      d_curve->setSymbol(QwtSymbol(QwtSymbol::Ellipse));
+//      d_curve->symbol()->setBrush(QBrush(c));
+//      d_curve->symbol()->setPen(QPen(c));
+//      d_curve->symbol()->setSize(QSize(6, 6));
 
       d_curve->attach(this);
     }
 
   d_data->append(x, y, size);
-  d_curve->setRawData(d_data->x(), d_data->y(), d_data->count());
+  d_curve->setRawSamples(d_data->x(), d_data->y(), d_data->count());
 #ifdef __GNUC__
 #warning better use QwtData
 #endif
 
-  const bool cacheMode = canvas()->testPaintAttribute(
-      QwtPlotCanvas::PaintCached);
+//  const bool cacheMode = qobject_cast<QwtPlotCurve *>(canvas())->testPaintAttribute(QwtPlotCurve::FilterPoints); //oooh, i'm stoopid
+  const bool cacheMode = qobject_cast<QwtPlotCanvas *>(canvas())->testPaintAttribute(QwtPlotCanvas::BackingStore);
 
 #if QT_VERSION >= 0x040000 && defined(Q_WS_X11)
   // Even if not recommended by TrollTech, Qt::WA_PaintOutsidePaintEvent
@@ -137,9 +147,14 @@ IncrementalPlot::appendData(double *x, double *y, int size)
   canvas()->setAttribute(Qt::WA_PaintOutsidePaintEvent, true);
 #endif
 
-  canvas()->setPaintAttribute(QwtPlotCanvas::PaintCached, false);
-  d_curve->draw(d_curve->dataSize() - size, d_curve->dataSize() - 1);
-  canvas()->setPaintAttribute(QwtPlotCanvas::PaintCached, cacheMode);
+  QwtPlotCanvas *plotCanvas = qobject_cast<QwtPlotCanvas *>(canvas());
+  plotCanvas->setPaintAttribute(QwtPlotCanvas::BackingStore, false);
+  QPainter painter;
+  QwtScaleMap xMap = plotCanvas->plot()->canvasMap(d_curve->xAxis());
+  QwtScaleMap yMap = plotCanvas->plot()->canvasMap(d_curve->yAxis());
+  d_curve->drawSeries(&painter, xMap, yMap, (d_curve->paintRect(xMap, yMap)), d_curve->dataSize() - size, d_curve->dataSize() -1);
+//  d_curve->draw(d_curve->dataSize() - size, d_curve->dataSize() - 1);
+  plotCanvas->setPaintAttribute(QwtPlotCanvas::BackingStore, cacheMode);
 
 #if QT_VERSION >= 0x040000 && defined(Q_WS_X11)
   canvas()->setAttribute(Qt::WA_PaintOutsidePaintEvent, false);
@@ -156,20 +171,24 @@ IncrementalPlot::appendData(double *x, double *y, int size, QwtSymbol::Style s)
     {
       d_curve = new QwtPlotCurve("Data");
       d_curve->setStyle(QwtPlotCurve::NoCurve);
-      d_curve->setPaintAttribute(QwtPlotCurve::PaintFiltered);
+      d_curve->setPaintAttribute(QwtPlotCurve::FilterPoints);
       const QColor &c = Qt::white;
-      d_curve->setSymbol(QwtSymbol(s, QBrush(c), QPen(c), QSize(6, 6)));
+      QwtSymbol *symbol = new QwtSymbol(s, QBrush(c), QPen(c), QSize(6,6));
+//		symbol->setBrush(c);
+//		symbol->setPen(c);
+//		symbol->setSize(6,6);//, QBrush(c), QPen(c), QSize(6,6));
+		d_curve->setSymbol(symbol);
+//		d_curve->setSymbol(QwtSymbol(s, QBrush(c), QPen(c), QSize(6, 6)));
       d_curve->attach(this);
     }
 
   d_data->append(x, y, size);
-  d_curve->setRawData(d_data->x(), d_data->y(), d_data->count());
+  d_curve->setRawSamples(d_data->x(), d_data->y(), d_data->count());
 #ifdef __GNUC__
 #warning better use QwtData
 #endif
 
-  const bool cacheMode = canvas()->testPaintAttribute(
-      QwtPlotCanvas::PaintCached);
+  const bool cacheMode = qobject_cast<QwtPlotCanvas *>(canvas())->testPaintAttribute(QwtPlotCanvas::BackingStore);
 
 #if QT_VERSION >= 0x040000 && defined(Q_WS_X11)
   // Even if not recommended by TrollTech, Qt::WA_PaintOutsidePaintEvent
@@ -178,9 +197,18 @@ IncrementalPlot::appendData(double *x, double *y, int size, QwtSymbol::Style s)
   canvas()->setAttribute(Qt::WA_PaintOutsidePaintEvent, true);
 #endif
 
-  canvas()->setPaintAttribute(QwtPlotCanvas::PaintCached, false);
-  d_curve->draw(d_curve->dataSize() - size, d_curve->dataSize() - 1);
-  canvas()->setPaintAttribute(QwtPlotCanvas::PaintCached, cacheMode);
+//  qobject_cast<QwtPlotCanvas *>(canvas())->setPaintAttribute(QwtPlotCanvas::BackingStore, false);
+//  d_curve->draw(d_curve->dataSize() - size, d_curve->dataSize() - 1);
+//  qobject_cast<QwtPlotCanvas *>(canvas())->setPaintAttribute(QwtPlotCanvas::BackingStore, cacheMode);
+
+  QwtPlotCanvas *plotCanvas = qobject_cast<QwtPlotCanvas *>(canvas());
+  plotCanvas->setPaintAttribute(QwtPlotCanvas::BackingStore, false);
+  QPainter painter;
+  QwtScaleMap xMap = plotCanvas->plot()->canvasMap(d_curve->xAxis());
+  QwtScaleMap yMap = plotCanvas->plot()->canvasMap(d_curve->yAxis());
+  d_curve->drawSeries(&painter, xMap, yMap, (d_curve->paintRect(xMap, yMap)), d_curve->dataSize() - size, d_curve->dataSize() -1);
+//  d_curve->draw(d_curve->dataSize() - size, d_curve->dataSize() - 1);
+  plotCanvas->setPaintAttribute(QwtPlotCanvas::BackingStore, cacheMode);
 
 #if QT_VERSION >= 0x040000 && defined(Q_WS_X11)
   canvas()->setAttribute(Qt::WA_PaintOutsidePaintEvent, false);
@@ -197,23 +225,24 @@ IncrementalPlot::appendLine(double *x, double *y, int size)
     {
       l_curve = new QwtPlotCurve("Line");
       l_curve->setStyle(QwtPlotCurve::Lines);
-      l_curve->setPaintAttribute(QwtPlotCurve::PaintFiltered);
+      l_curve->setPaintAttribute(QwtPlotCurve::FilterPoints);
       l_curve->setPen(QColor(Qt::white));
       const QColor &c = Qt::white;
-      l_curve->setSymbol(QwtSymbol(QwtSymbol::NoSymbol, QBrush(c), QPen(c),
-          QSize(6, 6)));
+		QwtSymbol *symbol = new QwtSymbol(QwtSymbol::NoSymbol, QBrush(c), QPen(c), QSize(6, 6));
+		l_curve->setSymbol(symbol);
+//      l_curve->setSymbol(QwtSymbol(QwtSymbol::NoSymbol, QBrush(c), QPen(c), QSize(6, 6)));
 
       l_curve->attach(this);
     }
 
   l_data->append(x, y, size);
-  l_curve->setRawData(l_data->x(), l_data->y(), l_data->count());
+  l_curve->setRawSamples(l_data->x(), l_data->y(), l_data->count());
 #ifdef __GNUC__
 #warning better use QwtData
 #endif
 
-  const bool cacheMode = canvas()->testPaintAttribute(
-      QwtPlotCanvas::PaintCached);
+  const bool cacheMode = qobject_cast<QwtPlotCanvas *>(canvas())->testPaintAttribute(
+      QwtPlotCanvas::BackingStore);
 
 #if QT_VERSION >= 0x040000 && defined(Q_WS_X11)
   // Even if not recommended by TrollTech, Qt::WA_PaintOutsidePaintEvent
@@ -222,9 +251,17 @@ IncrementalPlot::appendLine(double *x, double *y, int size)
   canvas()->setAttribute(Qt::WA_PaintOutsidePaintEvent, true);
 #endif
 
-  canvas()->setPaintAttribute(QwtPlotCanvas::PaintCached, false);
-  l_curve->draw(l_curve->dataSize() - size, l_curve->dataSize() - 1);
-  canvas()->setPaintAttribute(QwtPlotCanvas::PaintCached, cacheMode);
+//  qobject_cast<QwtPlotCanvas *>(canvas())->setPaintAttribute(QwtPlotCanvas::BackingStore, false);
+//  l_curve->draw(l_curve->dataSize() - size, l_curve->dataSize() - 1);
+//  qobject_cast<QwtPlotCanvas *>(canvas())->setPaintAttribute(QwtPlotCanvas::BackingStore, cacheMode);
+  QwtPlotCanvas *plotCanvas = qobject_cast<QwtPlotCanvas *>(canvas());
+  plotCanvas->setPaintAttribute(QwtPlotCanvas::BackingStore, false);
+  QPainter painter;
+  QwtScaleMap xMap = plotCanvas->plot()->canvasMap(l_curve->xAxis());
+  QwtScaleMap yMap = plotCanvas->plot()->canvasMap(l_curve->yAxis());
+  l_curve->drawSeries(&painter, xMap, yMap, (l_curve->paintRect(xMap, yMap)), l_curve->dataSize() - size, l_curve->dataSize() -1);
+  plotCanvas->setPaintAttribute(QwtPlotCanvas::BackingStore, cacheMode);
+
 
 #if QT_VERSION >= 0x040000 && defined(Q_WS_X11)
   canvas()->setAttribute(Qt::WA_PaintOutsidePaintEvent, false);
@@ -249,10 +286,12 @@ IncrementalPlot::removeData()
 void
 IncrementalPlot::nextSymbol()
 {
-  int n = d_curve->symbol().style() + 1;
+  int n = d_curve->symbol()->style() + 1;
   if (n > 14)
     n = 0;
-  d_curve->setSymbol(QwtSymbol((QwtSymbol::Style) n, QBrush(Qt::white), QPen(
-      Qt::white), QSize(6, 6)));
+
+//  QwtSymbol *symbol = new QwtSymbol((QwtSymbol::Style) n, QBrush(Qt::white), QPen(Qt::white), QSize(6, 6));
+//  d_curve->setSymbol(symbol);
+  d_curve->setSymbol(new QwtSymbol((QwtSymbol::Style) n, QBrush(Qt::white), QPen(Qt::white), QSize(6, 6)));
 }
 
