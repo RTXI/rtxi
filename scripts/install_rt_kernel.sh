@@ -48,6 +48,8 @@ export scripts_dir=`pwd`
 export build_root=/opt/build
 
 rm -rf $build_root
+rm -rf $linux_tree
+rm -rf $xenomai_root
 mkdir $build_root
 
 if [ $? -eq 0 ]; then
@@ -60,11 +62,11 @@ fi
 # Download essentials
 echo -e "${red}----->Downloading Linux kernel${NC}"
 cd /opt
-wget --no-check-certificate -r https://www.kernel.org/pub/linux/kernel/v3.x/linux-$linux_version.tar.bz2
+wget --no-check-certificate https://www.kernel.org/pub/linux/kernel/v3.x/linux-$linux_version.tar.bz2
 tar xf linux-$linux_version.tar.bz2
 
 echo -e "${red}----->Downloading Xenomai${NC}"
-wget --no-check-certificate -r http://download.gna.org/xenomai/stable/xenomai-$xenomai_version.tar.bz2
+wget --no-check-certificate http://download.gna.org/xenomai/stable/xenomai-$xenomai_version.tar.bz2
 tar xf xenomai-$xenomai_version.tar.bz2
 
 if [ $? -eq 0 ]; then
@@ -79,7 +81,7 @@ echo -e "${red}----->Patching kernel${NC}"
 cd $linux_tree
 cp -vi /boot/config-`uname -r` $linux_tree/.config
 $xenomai_root/scripts/prepare-kernel.sh --arch=x86 --adeos=$xenomai_root/ksrc/arch/x86/patches/ipipe-core-3.8.13-x86-4.patch --linux=$linux_tree
-make silentoldconfig
+yes "" | make oldconfig
 make menuconfig
 
 if [ $? -eq 0 ]; then
@@ -94,7 +96,7 @@ echo -e "${red}----->Compiling kernel${NC}"
 if [[ $OS == 'ubuntu' ]]
 then
 cd $linux_tree
-export CONCURRENCY_LEVEL=7
+export CONCURRENCY1_LEVEL=7
 sudo fakeroot make-kpkg --initrd --append-to-version=-xenomai-$xenomai_version kernel-image kernel-headers modules
 elif [[ $OS == 'scientific' ]]
 then
