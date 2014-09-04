@@ -47,6 +47,7 @@ export scripts_dir=`pwd`
 
 export build_root=/opt/build
 
+rm -rf $build_root
 mkdir $build_root
 
 if [ $? -eq 0 ]; then
@@ -59,11 +60,11 @@ fi
 # Download essentials
 echo -e "${red}----->Downloading Linux kernel${NC}"
 cd /opt
-wget https://www.kernel.org/pub/linux/kernel/v3.x/linux-$linux_version.tar.bz2
+wget --no-check-certificate -r https://www.kernel.org/pub/linux/kernel/v3.x/linux-$linux_version.tar.bz2
 tar xf linux-$linux_version.tar.bz2
 
 echo -e "${red}----->Downloading Xenomai${NC}"
-wget http://download.gna.org/xenomai/stable/xenomai-$xenomai_version.tar.bz2
+wget --no-check-certificate -r http://download.gna.org/xenomai/stable/xenomai-$xenomai_version.tar.bz2
 tar xf xenomai-$xenomai_version.tar.bz2
 
 if [ $? -eq 0 ]; then
