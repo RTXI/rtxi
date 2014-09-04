@@ -23,6 +23,6 @@ NC='\e[0m'
 echo -e "${red}----->Running latency test under load. Please wait (approx 10 minutes)${NC}"
 
 # Run latency test under dynamic load
-stress --cpu 2 --timeout 600 & sudo /usr/xenomai/bin/./latency -T 600
+stress --cpu 2 --io 1 --vm 1 --hdd 1 --timeout 600 & sudo /usr/xenomai/bin/./latency -T 600
 
 exit 0
