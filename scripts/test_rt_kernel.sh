@@ -8,19 +8,19 @@
 #
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+#
+# Created by Yogi Patel <yapatel@gatech.edu> 2014.1.31
 #
 
 #!/bin/bash
 
-red='\e[0;31m'
-NC='\e[0m'
-
-echo -e "${red}----->Running latency test under load. Please wait (approx 10 minutes)${NC}"
+echo "----->Running latency test under load. Please wait (approx 10 minutes)"
+echo "----->Do not interrupt."
 
 # Run latency test under dynamic load
 stress --cpu 2 --io 1 --vm 1 --hdd 1 --timeout 600 & sudo /usr/xenomai/bin/./latency -T 600
