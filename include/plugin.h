@@ -1,20 +1,21 @@
 /*
- Copyright (C) 2011 Georgia Institute of Technology, University of Utah, Weill Cornell Medical College
+	 The Real-Time eXperiment Interface (RTXI)
+	 Copyright (C) 2011 Georgia Institute of Technology, University of Utah, Weill Cornell Medical College
 
- This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
+	 This program is free software: you can redistribute it and/or modify
+	 it under the terms of the GNU General Public License as published by
+	 the Free Software Foundation, either version 3 of the License, or
+	 (at your option) any later version.
 
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
+	 This program is distributed in the hope that it will be useful,
+	 but WITHOUT ANY WARRANTY; without even the implied warranty of
+	 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	 GNU General Public License for more details.
 
- You should have received a copy of the GNU General Public License
- along with this program.  If not, see <http://www.gnu.org/licenses/>.
+	 You should have received a copy of the GNU General Public License
+	 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
- */
+*/
 
 #ifndef PLUGIN_H
 #define PLUGIN_H
@@ -33,138 +34,138 @@
  */
 namespace Plugin {
 
-    class Object;
+	class Object;
 
-    static const QEvent::Type CloseEvent = QEvent::User;
+	static const QEvent::Type CloseEvent = QEvent::User;
+
+	/*!
+	 * Qt Events are no longer tied to data type
+	 * so we have to subclass QEvent to include data
+	 */
+	class RTXIEvent : public QEvent {
+
+		public:
+			RTXIEvent() : QEvent((QEvent::Type) CloseEvent) {}
+			void *data;
+	};
+
+	/*!
+	 * Provides mechanisms for the loading and unloading of a Plugin::Object
+	 */
+	class Manager : public QObject {
+
+		Q_OBJECT
+
+			friend class Object;
+
+		public:
 
 		/*!
-			* Qt Events are no longer tied to data type
-			* so we have to subclass QEvent to include data
-			*/
-    class RTXIEvent : public QEvent {
-
-			public:
-				RTXIEvent() : QEvent((QEvent::Type) CloseEvent) {}
-				void *data;
-		};
+		 * Manager is a Singleton, which means that there can only be one instance.
+		 *   This function returns a pointer to that single instance.
+		 *
+		 * \return The instance of Manager.
+		 */
+		static Manager *getInstance(void);
 
 		/*!
-		 * Provides mechanisms for the loading and unloading of a Plugin::Object
-     */
-    class Manager : public QObject {
+		 * Function for loading a Plugin::Object from a shared library file.
+		 *
+		 * \param library The file name of a shared library.
+		 * \return A pointer to the newly created Plugin::Object.
+		 *
+		 * \sa Plugin::Object
+		 */
+		Object *load(const QString &library);
 
-        Q_OBJECT
+		/*!
+		 * Function for unloading a single Plugin::Object in the system.
+		 *
+		 * \param object The plugin object to be unloaded.
+		 */
+		void unload(Object *object);
 
-        friend class Object;
+		/*!
+		 * Function for unloading all Plugin::Object's in the system.
+		 */
+		void unloadAll(void);
 
-    public:
+		/*!
+		 * Loop through each Plugin and execute a callback.
+		 * The callback takes two parameters, a Plugin pointer and param,
+		 *   the second parameter to foreachPlugin.
+		 *
+		 * \param callback The callback function.
+		 * \param param A parameter to the callback function.
+		 *
+		 * \sa Plugin::Object
+		 */
+		void foreachPlugin(void (*callback)(Plugin::Object *,void *),void *param);
 
-        /*!
-         * Manager is a Singleton, which means that there can only be one instance.
-         *   This function returns a pointer to that single instance.
-         *
-         * \return The instance of Manager.
-         */
-        static Manager *getInstance(void);
+		public slots:
 
-        /*!
-         * Function for loading a Plugin::Object from a shared library file.
-         *
-         * \param library The file name of a shared library.
-         * \return A pointer to the newly created Plugin::Object.
-         *
-         * \sa Plugin::Object
-         */
-        Object *load(const QString &library);
+			/*!
+			 *
+			 */
+			void customEvent(QEvent *);
 
-        /*!
-         * Function for unloading a single Plugin::Object in the system.
-         *
-         * \param object The plugin object to be unloaded.
-         */
-        void unload(Object *object);
+		private:
 
-        /*!
-         * Function for unloading all Plugin::Object's in the system.
-         */
-        void unloadAll(void);
+		/*****************************************************************
+		 * The constructor, destructor, and assignment operator are made *
+		 *   private to control instantiation of the class.              *
+		 *****************************************************************/
 
-        /*!
-         * Loop through each Plugin and execute a callback.
-         * The callback takes two parameters, a Plugin pointer and param,
-         *   the second parameter to foreachPlugin.
-         *
-         * \param callback The callback function.
-         * \param param A parameter to the callback function.
-         *
-         * \sa Plugin::Object
-         */
-        void foreachPlugin(void (*callback)(Plugin::Object *,void *),void *param);
+		Manager(void) : mutex(Mutex::RECURSIVE) {};
+		~Manager(void) {};
+		Manager(const Manager &) {};
+		Manager &operator=(const Manager &) { return *getInstance(); };
 
-    public slots:
+		static Manager *instance;
 
-        /*!
-         *
-         */
-        void customEvent(QEvent *);
+		void insertPlugin(Object *);
+		void removePlugin(Object *);
 
-    private:
+		//static const QEvent::Type CloseEvent = QEvent::User;
 
-        /*****************************************************************
-         * The constructor, destructor, and assignment operator are made *
-         *   private to control instantiation of the class.              *
-         *****************************************************************/
+		Mutex mutex;
+		std::list<Object *> pluginList;
 
-        Manager(void) : mutex(Mutex::RECURSIVE) {};
-        ~Manager(void) {};
-        Manager(const Manager &) {};
-        Manager &operator=(const Manager &) { return *getInstance(); };
+	}; // class Manager
 
-        static Manager *instance;
+	/*!
+	 * Provides interface for objects that are loaded from external binaries.
+	 */
+	class Object : public virtual Settings::Object {
 
-        void insertPlugin(Object *);
-        void removePlugin(Object *);
+		friend class Manager;
 
-        //static const QEvent::Type CloseEvent = QEvent::User;
+		public:
 
-        Mutex mutex;
-        std::list<Object *> pluginList;
+		Object(void);
+		virtual ~Object(void);
 
-    }; // class Manager
+		/*!
+		 * Get the name of the library from which the object was loaded.
+		 *
+		 * \return The library file the object from which the object was created.
+		 */
+		std::string getLibrary(void) const;
 
-    /*!
-     * Provides interface for objects that are loaded from external binaries.
-     */
-    class Object : public virtual Settings::Object {
+		/*!
+		 * A mechanism which an object can use to unload itself. Should only be
+		 *   called from within the GUI thread.
+		 */
+		void unload(void);
 
-        friend class Manager;
+		private:
 
-    public:
+		static const u_int32_t MAGIC_NUMBER = 0xCA24CB3F;
+		u_int32_t magic_number;
+		std::string library;
+		void *handle;
 
-        Object(void);
-        virtual ~Object(void);
-
-        /*!
-         * Get the name of the library from which the object was loaded.
-         *
-         * \return The library file the object from which the object was created.
-         */
-        std::string getLibrary(void) const;
-
-        /*!
-         * A mechanism which an object can use to unload itself. Should only be
-         *   called from within the GUI thread.
-         */
-        void unload(void);
-
-    private:
-
-        static const u_int32_t MAGIC_NUMBER = 0xCA24CB3F;
-        u_int32_t magic_number;
-        std::string library;
-        void *handle;
-
-    }; // class Object
+	}; // class Object
 
 }; // namespace Plugin
 

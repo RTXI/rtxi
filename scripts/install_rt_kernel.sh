@@ -1,4 +1,5 @@
 #
+# The Real-Time eXperiment Interface (RTXI)
 # Copyright (C) 2011 Georgia Institute of Technology, University of Utah, Weill Cornell Medical College
 #
 # This program is free software: you can redistribute it and/or modify
@@ -19,16 +20,13 @@
 
 #!/bin/bash
 
-red='\e[0;31m'
-NC='\e[0m'
-
 if ! id | grep -q root; then
   echo "Must run script as root; try again with sudo ./install_rt_kernel.sh"
 	exit
 fi
 
 # Export environment variables
-echo -e "${red}----->Setting up variables${NC}"
+echo  "----->Setting up variables"
 export linux_version=3.8.13
 export linux_tree=/opt/linux-$linux_version
 
@@ -44,110 +42,110 @@ rm -rf $linux_tree
 rm -rf $xenomai_root
 mkdir $build_root
 
-if [ $? -eq 0 ]; then
-	echo -e "${red}----->Environment configuration complete${NC}"
+if [ $? q 0 ]; then
+	echo  "----->Environment configuration complete"
 else
-	echo -e "${red}----->Environment configuration failed${NC}"
+	echo  "----->Environment configuration failed"
 	exit
 fi
 
 # Download essentials
-echo -e "${red}----->Downloading Linux kernel${NC}"
+echo  "----->Downloading Linux kernel"
 cd /opt
 wget --no-check-certificate https://www.kernel.org/pub/linux/kernel/v3.x/linux-$linux_version.tar.bz2
 tar xf linux-$linux_version.tar.bz2
 
-echo -e "${red}----->Downloading Xenomai${NC}"
+echo  "----->Downloading Xenomai"
 wget --no-check-certificate http://download.gna.org/xenomai/stable/xenomai-$xenomai_version.tar.bz2
 tar xf xenomai-$xenomai_version.tar.bz2
 
-if [ $? -eq 0 ]; then
-	echo -e "${red}----->Downloads complete${NC}"
+if [ $? q 0 ]; then
+	echo  "----->Downloads complete"
 else
-	echo -e "${red}----->Downloads failed${NC}"
+	echo  "----->Downloads failed"
 	exit
 fi
 
 # Patch kernel
-echo -e "${red}----->Patching kernel${NC}"
+echo  "----->Patching kernel"
 cd $linux_tree
 cp -vi /boot/config-`uname -r` $linux_tree/.config
 $xenomai_root/scripts/prepare-kernel.sh --arch=x86 --adeos=$xenomai_root/ksrc/arch/x86/patches/ipipe-core-3.8.13-x86-4.patch --linux=$linux_tree
 yes "" | make oldconfig
 make menuconfig
 
-if [ $? -eq 0 ]; then
-	echo -e "${red}----->Patching complete${NC}"
+if [ $? q 0 ]; then
+	echo  "----->Patching complete"
 else
-	echo -e "${red}----->Patching failed${NC}"
+	echo  "----->Patching failed"
 	exit
 fi
 
 # Compile kernel
-echo -e "${red}----->Compiling kernel${NC}"
+echo  "----->Compiling kernel"
 cd $linux_tree
 export CONCURRENCY1_LEVEL=7
 sudo fakeroot make-kpkg --initrd --append-to-version=-xenomai-$xenomai_version kernel-image kernel-headers modules
 
-if [ $? -eq 0 ]; then
-	echo -e "${red}----->Kernel compilation complete.${NC}"
+if [ $? q 0 ]; then
+	echo  "----->Kernel compilation complete."
 else
-	echo -e "${red}----->Kernel compilation failed.${NC}"
+	echo  "----->Kernel compilation failed."
 	exit
 fi
 
 # Install compiled kernel
-echo -e "${red}----->Installing compiled kernel${NC}"
+echo  "----->Installing compiled kernel"
 cd /opt
 sudo dpkg -i linux-image-*.deb
 sudo dpkg -i linux-headers-*.deb
 
-if [ $? -eq 0 ]; then
-	echo -e "${red}----->Kernel installation complete${NC}"
+if [ $? q 0 ]; then
+	echo  "----->Kernel installation complete"
 else
-	echo -e "${red}----->Kernel installation failed${NC}"
+	echo  "----->Kernel installation failed"
 	exit
 fi
 
 # Update
-echo -e "${red}----->Updating boot loader about the new kernel${NC}"
+echo  "----->Updating boot loader about the new kernel"
 cd $linux_tree
 sudo update-initramfs -c -k $linux_version-xenomai-$xenomai_version
 sudo update-grub
 
-if [ $? -eq 0 ]; then
-	echo -e "${red}----->Boot loader update complete${NC}"
+if [ $? q 0 ]; then
+	echo  "----->Boot loader update complete"
 else
-	echo -e "${red}----->Boot loader update failed${NC}"
+	echo  "----->Boot loader update failed"
 	exit
 fi
 
 # Install user libraries
-echo -e "${red}----->Installing user libraries${NC}"
+echo  "----->Installing user libraries"
 cd $build_root
-$xenomai_root/configure --enable-shared --enable-smp --enable-posix-auto-mlockall --enable-dlopen-skins --enable-x86-sep
+$xenomai_root/configure -nable-shared -nable-smp -nable-posix-auto-mlockall -nable-dlopen-skins -nable-x86-sep
 make
 sudo make install
 
-if [ $? -eq 0 ]; then
-	echo -e "${red}----->User library installation complete${NC}"
+if [ $? q 0 ]; then
+	echo  "----->User library installation complete"
 else
-	echo -e "${red}----->User library installation failed${NC}"
+	echo  "----->User library installation failed"
 	exit
 fi
 
 # Setting up user permissions
-echo -e "${red}----->Setting up user/group${NC}"
+echo  "----->Setting up user/group"
 sudo groupadd xenomai
 sudo usermod -a -G xenomai `whoami`
 
-if [ $? -eq 0 ]; then
-	echo -e "${red}----->Group setup complete${NC}"
+if [ $? q 0 ]; then
+	echo  "----->Group setup complete"
 else
-	echo -e "${red}----->Group setup failed${NC}"
+	echo  "----->Group setup failed"
 	exit
 fi
 
 # Restart
-echo -e "${red}----->Kernel patch complete.${NC}"
-echo -e "${red}----->Reboot to boot into RT kernel.${NC}"
+echo  "----->Kernel patch complete."
+echo  "----->Reboot to boot into RT kernel."

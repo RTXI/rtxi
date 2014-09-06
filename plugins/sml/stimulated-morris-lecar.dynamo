@@ -1,4 +1,6 @@
 /*
+ 	 The Real-Time eXperiment Interface (RTXI)
+
    The demo Morris-Lecar model.  One of the outputs is the voltage.
    This allows it to "do something" on the benchtop.  The other output
    is a synaptic current to a cell.  The inputs are from two cells (of

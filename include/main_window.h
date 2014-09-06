@@ -1,18 +1,19 @@
 /*
-			Copyright (C) 2011 Georgia Institute of Technology, University of Utah, Weill Cornell Medical College
+	 The Real-Time eXperiment Interface (RTXI)
+	 Copyright (C) 2011 Georgia Institute of Technology, University of Utah, Weill Cornell Medical College
 
-			This program is free software: you can redistribute it and/or modify
-			it under the terms of the GNU General Public License as published by
-			the Free Software Foundation, either version 3 of the License, or
-			(at your option) any later version.
+	 This program is free software: you can redistribute it and/or modify
+	 it under the terms of the GNU General Public License as published by
+	 the Free Software Foundation, either version 3 of the License, or
+	 (at your option) any later version.
 
-			This program is distributed in the hope that it will be useful,
-			but WITHOUT ANY WARRANTY; without even the implied warranty of
-			MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-			GNU General Public License for more details.
+	 This program is distributed in the hope that it will be useful,
+	 but WITHOUT ANY WARRANTY; without even the implied warranty of
+	 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	 GNU General Public License for more details.
 
-			You should have received a copy of the GNU General Public License
-			along with this program.  If not, see <http://www.gnu.org/licenses/>.
+	 You should have received a copy of the GNU General Public License
+	 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
@@ -29,225 +30,225 @@
 class QMenu;
 
 /*!
-	* The primary graphical object in the program.
-	*/
+ * The primary graphical object in the program.
+ */
 class MainWindow : public QMainWindow {
 
-		Q_OBJECT
+	Q_OBJECT
 
-				friend class QApplication;
+		friend class QApplication;
 
-		public:
+	public:
 
-		virtual ~MainWindow(void);
+	virtual ~MainWindow(void);
 
-		/*!
-			* MainWindow is a Singleton, which means that there can only be one
-			*   instance. This function returns a pointer to that single instance.
-			*
-			* \return The instance of MainWindow.
-			*/
+	/*!
+	 * MainWindow is a Singleton, which means that there can only be one
+	 *   instance. This function returns a pointer to that single instance.
+	 *
+	 * \return The instance of MainWindow.
+	 */
 
-		static MainWindow *getInstance(void);
+	static MainWindow *getInstance(void);
 
-		/*!
-			* Add an item to the File menu.
-			*
-			* \param label The text that will appear in the menu.
-			* \param handler The object that will handle signals from the menu.
-			* \param slot The slot in the handler that the signal will activate.
-			* \return The index of the new menu item.
-			*/
+	/*!
+	 * Add an item to the File menu.
+	 *
+	 * \param label The text that will appear in the menu.
+	 * \param handler The object that will handle signals from the menu.
+	 * \param slot The slot in the handler that the signal will activate.
+	 * \return The index of the new menu item.
+	 */
 
-		QAction* createFileMenuItem(const QString &label, const QObject *handler, const char *slot);
+	QAction* createFileMenuItem(const QString &label, const QObject *handler, const char *slot);
 
-		/*!
-			* Sets the parameter value of a menu item in the File menu.
-			*
-			* \param menuid The index of the item to be removed.
-			* \param parameter The parameter value to set.
-			*/
+	/*!
+	 * Sets the parameter value of a menu item in the File menu.
+	 *
+	 * \param menuid The index of the item to be removed.
+	 * \param parameter The parameter value to set.
+	 */
 
-		void setFileMenuItemParameter(QAction *action, int parameter);
+	void setFileMenuItemParameter(QAction *action, int parameter);
 
-		/*!
-			* Clears the File menu.
-			*/
+	/*!
+	 * Clears the File menu.
+	 */
 
-		void clearFileMenu(void);
+	void clearFileMenu(void);
 
-		QAction* insertModuleMenuSeparator(void);
+	QAction* insertModuleMenuSeparator(void);
 
-		/*!
-			* Add an item to the Modules menu.
-			*
-			* \param label The text that will appear in the menu.
-			*
-			* \param handler The object that will handle signals from the menu.
-			* \param slot The slot in the handler that the signal will activate.
-			* \return The index of the new menu item.
-			*/
+	/*!
+	 * Add an item to the Modules menu.
+	 *
+	 * \param label The text that will appear in the menu.
+	 *
+	 * \param handler The object that will handle signals from the menu.
+	 * \param slot The slot in the handler that the signal will activate.
+	 * \return The index of the new menu item.
+	 */
 
-		QAction* createModuleMenuItem(const QString & text, const QObject *handler, const char *slot);
+	QAction* createModuleMenuItem(const QString & text, const QObject *handler, const char *slot);
 
-		/*!
-			* Sets the parameter value of a menu item in the Modules menu.
-			*
-			* \param menuid The index of the item to be removed.
-			* \param parameter The parameter value to set.
-			*/
+	/*!
+	 * Sets the parameter value of a menu item in the Modules menu.
+	 *
+	 * \param menuid The index of the item to be removed.
+	 * \param parameter The parameter value to set.
+	 */
 
-		void setModuleMenuItemParameter(QAction *action, int parameter);
+	void setModuleMenuItemParameter(QAction *action, int parameter);
 
-		/*!
-			* Clears the Modules menu.
-			*/
+	/*!
+	 * Clears the Modules menu.
+	 */
 
-		void clearModuleMenu(void);
+	void clearModuleMenu(void);
 
-		/*!
-			* Change the text associated with the Modules menu item.
-			*
-			* \param id The index of the item to change.
-			* \param text The next text to assign to that menu item.
-			*/
+	/*!
+	 * Change the text associated with the Modules menu item.
+	 *
+	 * \param id The index of the item to change.
+	 * \param text The next text to assign to that menu item.
+	 */
 
-		void changeModuleMenuItem(QAction *action, QString text);
+	void changeModuleMenuItem(QAction *action, QString text);
 
-		/*!
-			* Remove an item from the Modules menu.
-			*
-			* \param index The index of the item to be removed.
-			*/
+	/*!
+	 * Remove an item from the Modules menu.
+	 *
+	 * \param index The index of the item to be removed.
+	 */
 
-		void removeModuleMenuItem(QAction *action);
+	void removeModuleMenuItem(QAction *action);
 
-		/*!
-			* Remove an item from the Modules menu.
-			*
-			* \param index The position of the item to be removed.
-			*/
+	/*!
+	 * Remove an item from the Modules menu.
+	 *
+	 * \param index The position of the item to be removed.
+	 */
 
-		void removeModuleMenuItemAt(int index);
+	void removeModuleMenuItemAt(int index);
 
-		/*!
-			* Add an item to the Utilities menu.
-			*
-			* \param label The text that will appear in the menu.
-			* \param handler The object that will handle signals from the menu.
-			* \param slot The slot in the handler that the signal will activate.
-			* \return The index of the new menu item.
-			*/
+	/*!
+	 * Add an item to the Utilities menu.
+	 *
+	 * \param label The text that will appear in the menu.
+	 * \param handler The object that will handle signals from the menu.
+	 * \param slot The slot in the handler that the signal will activate.
+	 * \return The index of the new menu item.
+	 */
 
-		QAction* createUtilMenuItem(const QString &label, const QObject *handler,
-						const char *slot);
+	QAction* createUtilMenuItem(const QString &label, const QObject *handler,
+			const char *slot);
 
-		/*!
-			* Sets the parameter value of a menu item in the Utilities menu.
-			*/
+	/*!
+	 * Sets the parameter value of a menu item in the Utilities menu.
+	 */
 
-		void setUtilMenuItemParameter(QAction*, int);
+	void setUtilMenuItemParameter(QAction*, int);
 
-		/*!
-			* Clears the Utilities menu.
-			*/
+	/*!
+	 * Clears the Utilities menu.
+	 */
 
-		void clearUtilMenu(void);
+	void clearUtilMenu(void);
 
-		/*!
-			* Change the text associated with the Utilities menu item.
-			*
-			* \param id The index of the item to change.
-			* \param text The next text to assign to that menu item.
-			*/
+	/*!
+	 * Change the text associated with the Utilities menu item.
+	 *
+	 * \param id The index of the item to change.
+	 * \param text The next text to assign to that menu item.
+	 */
 
-		void changeUtilMenuItem(int id, QString text);
+	void changeUtilMenuItem(int id, QString text);
 
-		/*!
-			* Remove an item from the Utilities menu.
-			*
-			* \param index The index of the item to be removed.
-			*/
-		void removeUtilMenuItem(int index);
+	/*!
+	 * Remove an item from the Utilities menu.
+	 *
+	 * \param index The index of the item to be removed.
+	 */
+	void removeUtilMenuItem(int index);
 
-		/*!
-			* Add an item to the Utilities->Patch Clamp menu.
-			*
-			* \param label The text that will appear in the menu.
-			* \param handler The object that will handle signals from the menu.
-			* \param slot The slot in the handler that the signal will activate.
-			* \return The index of the new menu item.
-			*/
+	/*!
+	 * Add an item to the Utilities->Patch Clamp menu.
+	 *
+	 * \param label The text that will appear in the menu.
+	 * \param handler The object that will handle signals from the menu.
+	 * \param slot The slot in the handler that the signal will activate.
+	 * \return The index of the new menu item.
+	 */
 
-		QAction* createPatchClampMenuItem(const QString &label, const QObject *handler, const char *slot);
+	QAction* createPatchClampMenuItem(const QString &label, const QObject *handler, const char *slot);
 
-		/*!
-			* Add an item to the System menu.
-			*
-			* \param label The text that will appear in the menu.
-			* \param handler The object that will handle signals from the menu.
-			* \param slot The slot in the handler that the signal will activate.
-			* \return The index of the new menu item.
-			*/
+	/*!
+	 * Add an item to the System menu.
+	 *
+	 * \param label The text that will appear in the menu.
+	 * \param handler The object that will handle signals from the menu.
+	 * \param slot The slot in the handler that the signal will activate.
+	 * \return The index of the new menu item.
+	 */
 
-		QAction* createSystemMenuItem(const QString &label, const QObject *handler, const char *slot);
+	QAction* createSystemMenuItem(const QString &label, const QObject *handler, const char *slot);
 
-		/* Create a window for the widget in the main window */
-		void createMdi(QMdiSubWindow *);
+	/* Create a window for the widget in the main window */
+	void createMdi(QMdiSubWindow *);
 
-		private slots:
-			void about(void);
-			void aboutQt(void);
+	private slots:
+		void about(void);
+	void aboutQt(void);
 
-			void loadSettings(void);
-			void saveSettings(void);
+	void loadSettings(void);
+	void saveSettings(void);
 
-			void windowsMenuAboutToShow(void);
-			void windowsMenuActivated(int);
+	void windowsMenuAboutToShow(void);
+	void windowsMenuActivated(int);
 
-			void loadUtil(int);
-			void loadSignal(int);
-			void loadFilter(int);
+	void loadUtil(int);
+	void loadSignal(int);
+	void loadFilter(int);
 
-		private:
+	private:
 
-		/****************************************************************
-		 * The constructor, destrutos, and assignment operator are made *
-		 *   private to control instantiation of the class.             *
-		 ****************************************************************/
+	/****************************************************************
+	 * The constructor, destrutos, and assignment operator are made *
+	 *   private to control instantiation of the class.             *
+	 ****************************************************************/
 
-		MainWindow(void);
-		MainWindow(const MainWindow &) {};
-		MainWindow &operator = (const MainWindow &) {return *getInstance();};
+	MainWindow(void);
+	MainWindow(const MainWindow &) {};
+	MainWindow &operator = (const MainWindow &) {return *getInstance();};
 
-		static MainWindow *instance;
-		QMdiArea *mdiArea;
+	static MainWindow *instance;
+	QMdiArea *mdiArea;
 
-		QMenu *fileMenu;
-		QMenu *moduleMenu;
-		QMenu *utilMenu;
-		QMenu *patchClampSubMenu;
-		QMenu *filtersSubMenu;
-		QMenu *signalsSubMenu;
-		QMenu *systemMenu;
-		QMenu *windowsMenu;
-		QMenu *helpMenu;
+	QMenu *fileMenu;
+	QMenu *moduleMenu;
+	QMenu *utilMenu;
+	QMenu *patchClampSubMenu;
+	QMenu *filtersSubMenu;
+	QMenu *signalsSubMenu;
+	QMenu *systemMenu;
+	QMenu *windowsMenu;
+	QMenu *helpMenu;
 
-		QAction *load;
-		QAction *save;
-		QAction *quit;
-		QAction *artxi;
-		QAction *aqt;
+	QAction *load;
+	QAction *save;
+	QAction *quit;
+	QAction *artxi;
+	QAction *aqt;
 
-		void updateUtilModules();
-		void createFileMenu();
-		void createModuleMenu();
-		void createUtilMenu();
-		void createSystemMenu();
-		void createWindowsMenu();
-		void createHelpMenu();
+	void updateUtilModules();
+	void createFileMenu();
+	void createModuleMenu();
+	void createUtilMenu();
+	void createSystemMenu();
+	void createWindowsMenu();
+	void createHelpMenu();
 
-		void createFileActions();
-		void createHelpActions();
+	void createFileActions();
+	void createHelpActions();
 };
 #endif /* MAIN_WINDOW_H */

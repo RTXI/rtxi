@@ -1,20 +1,21 @@
 /*
- Copyright (C) 2011 Georgia Institute of Technology, University of Utah, Weill Cornell Medical College
+	 The Real-Time eXperiment Interface (RTXI)
+	 Copyright (C) 2011 Georgia Institute of Technology, University of Utah, Weill Cornell Medical College
 
- This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
+	 This program is free software: you can redistribute it and/or modify
+	 it under the terms of the GNU General Public License as published by
+	 the Free Software Foundation, either version 3 of the License, or
+	 (at your option) any later version.
 
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
+	 This program is distributed in the hope that it will be useful,
+	 but WITHOUT ANY WARRANTY; without even the implied warranty of
+	 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	 GNU General Public License for more details.
 
- You should have received a copy of the GNU General Public License
- along with this program.  If not, see <http://www.gnu.org/licenses/>.
+	 You should have received a copy of the GNU General Public License
+	 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
- */
+*/
 
 #ifndef SYSTEM_CONTROL_H
 #define SYSTEM_CONTROL_H
@@ -26,31 +27,31 @@
 class SystemControl : public QObject, public Plugin::Object
 {
 
-    Q_OBJECT
+	Q_OBJECT
 
-    friend class SystemControlPanel;
+		friend class SystemControlPanel;
 
-public:
+	public:
 
-    static SystemControl *getInstance(void);
+	static SystemControl *getInstance(void);
 
-public slots:
+	public slots:
 
-    void createControlPanel(void);
+		void createControlPanel(void);
 
-private:
+	private:
 
-    SystemControl(void);
-    ~SystemControl(void);
-    SystemControl(const SystemControl &) {};
-    SystemControl &operator=(const SystemControl &) { return *getInstance(); };
+	SystemControl(void);
+	~SystemControl(void);
+	SystemControl(const SystemControl &) {};
+	SystemControl &operator=(const SystemControl &) { return *getInstance(); };
 
-    static SystemControl *instance;
+	static SystemControl *instance;
 
-    void removeControlPanel(SystemControlPanel *);
+	void removeControlPanel(SystemControlPanel *);
 
-    int menuID;
-    std::list<SystemControlPanel *> panelList;
+	int menuID;
+	std::list<SystemControlPanel *> panelList;
 
 };
 
