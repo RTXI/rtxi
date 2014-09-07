@@ -36,6 +36,7 @@ export xenomai_root=/opt/xenomai-$xenomai_version
 export scripts_dir=`pwd`
 
 export build_root=/opt/build
+export opt=/opt
 
 rm -rf $build_root
 rm -rf $linux_tree
@@ -51,7 +52,7 @@ fi
 
 # Download essentials
 echo  "----->Downloading Linux kernel"
-cd /opt
+cd $opt
 wget --no-check-certificate https://www.kernel.org/pub/linux/kernel/v3.x/linux-$linux_version.tar.bz2
 tar xf linux-$linux_version.tar.bz2
 
@@ -85,7 +86,7 @@ fi
 echo  "----->Compiling kernel"
 cd $linux_tree
 export CONCURRENCY_LEVEL=$(grep -c ^processor /proc/cpuinfo)
-sudo fakeroot make-kpkg --initrd --append-to-version=-xenomai-$xenomai_version kernel-image kernel-headers modules
+fakeroot make-kpkg --initrd --append-to-version=-xenomai-$xenomai_version kernel-image kernel-headers modules
 
 if [ $? -eq 0 ]; then
 	echo  "----->Kernel compilation complete."
@@ -96,7 +97,7 @@ fi
 
 # Install compiled kernel
 echo  "----->Installing compiled kernel"
-cd /opt
+cd $opt
 sudo dpkg -i linux-image-*.deb
 sudo dpkg -i linux-headers-*.deb
 
