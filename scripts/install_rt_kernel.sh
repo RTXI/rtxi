@@ -123,7 +123,7 @@ fi
 # Install user libraries
 echo  "----->Installing user libraries"
 cd $build_root
-$xenomai_root/configure -nable-shared -nable-smp -nable-posix-auto-mlockall -nable-dlopen-skins -nable-x86-sep
+$xenomai_root/configure --enable-shared --enable-smp --enable-posix-auto-mlockall --enable-dlopen-skins --enable-x86-sep
 make
 sudo make install
 
