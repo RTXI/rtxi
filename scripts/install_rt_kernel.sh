@@ -84,7 +84,7 @@ fi
 # Compile kernel
 echo  "----->Compiling kernel"
 cd $linux_tree
-export CONCURRENCY1_LEVEL=7
+export CONCURRENCY_LEVEL=$(grep -c ^processor /proc/cpuinfo)
 sudo fakeroot make-kpkg --initrd --append-to-version=-xenomai-$xenomai_version kernel-image kernel-headers modules
 
 if [ $? -eq 0 ]; then
