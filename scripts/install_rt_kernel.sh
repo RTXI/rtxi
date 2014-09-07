@@ -20,7 +20,7 @@
 
 #!/bin/bash
 
-if ! id | grep --eq root; then
+if ! id | grep -q root; then
   echo "Must run script as root; try again with sudo ./install_rt_kernel.sh"
 	exit
 fi
