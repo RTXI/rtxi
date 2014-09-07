@@ -20,7 +20,7 @@
 
 #!/bin/bash
 
-if ! id | grep -q root; then
+if ! id | grep --eq root; then
   echo "Must run script as root; try again with sudo ./install_rt_kernel.sh"
 	exit
 fi
@@ -42,7 +42,7 @@ rm -rf $linux_tree
 rm -rf $xenomai_root
 mkdir $build_root
 
-if [ $? q 0 ]; then
+if [ $? -eq 0 ]; then
 	echo  "----->Environment configuration complete"
 else
 	echo  "----->Environment configuration failed"
@@ -59,7 +59,7 @@ echo  "----->Downloading Xenomai"
 wget --no-check-certificate http://download.gna.org/xenomai/stable/xenomai-$xenomai_version.tar.bz2
 tar xf xenomai-$xenomai_version.tar.bz2
 
-if [ $? q 0 ]; then
+if [ $? -eq 0 ]; then
 	echo  "----->Downloads complete"
 else
 	echo  "----->Downloads failed"
@@ -74,7 +74,7 @@ $xenomai_root/scripts/prepare-kernel.sh --arch=x86 --adeos=$xenomai_root/ksrc/ar
 yes "" | make oldconfig
 make menuconfig
 
-if [ $? q 0 ]; then
+if [ $? -eq 0 ]; then
 	echo  "----->Patching complete"
 else
 	echo  "----->Patching failed"
@@ -87,7 +87,7 @@ cd $linux_tree
 export CONCURRENCY1_LEVEL=7
 sudo fakeroot make-kpkg --initrd --append-to-version=-xenomai-$xenomai_version kernel-image kernel-headers modules
 
-if [ $? q 0 ]; then
+if [ $? -eq 0 ]; then
 	echo  "----->Kernel compilation complete."
 else
 	echo  "----->Kernel compilation failed."
@@ -100,7 +100,7 @@ cd /opt
 sudo dpkg -i linux-image-*.deb
 sudo dpkg -i linux-headers-*.deb
 
-if [ $? q 0 ]; then
+if [ $? -eq 0 ]; then
 	echo  "----->Kernel installation complete"
 else
 	echo  "----->Kernel installation failed"
@@ -113,7 +113,7 @@ cd $linux_tree
 sudo update-initramfs -c -k $linux_version-xenomai-$xenomai_version
 sudo update-grub
 
-if [ $? q 0 ]; then
+if [ $? -eq 0 ]; then
 	echo  "----->Boot loader update complete"
 else
 	echo  "----->Boot loader update failed"
@@ -127,7 +127,7 @@ $xenomai_root/configure -nable-shared -nable-smp -nable-posix-auto-mlockall -nab
 make
 sudo make install
 
-if [ $? q 0 ]; then
+if [ $? -eq 0 ]; then
 	echo  "----->User library installation complete"
 else
 	echo  "----->User library installation failed"
@@ -139,7 +139,7 @@ echo  "----->Setting up user/group"
 sudo groupadd xenomai
 sudo usermod -a -G xenomai `whoami`
 
-if [ $? q 0 ]; then
+if [ $? -eq 0 ]; then
 	echo  "----->Group setup complete"
 else
 	echo  "----->Group setup failed"
