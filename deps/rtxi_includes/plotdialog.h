@@ -1,20 +1,12 @@
 #include "basicplot.h"
 #include <qdialog.h>
 
-class PlotDialog : public QDialog
-{
+class PlotDialog : public QDialog {
+	Q_OBJECT
 
-Q_OBJECT
+	public:
+		PlotDialog(QWidget *parent, QString name, double* xData, double* yData, int size);
 
-public:
-
-  PlotDialog(QWidget *parent, QString name, double* xData, double* yData,
-      int size);
-
-signals:
-
-  void
-  setPlotRange(double newminx, double newmaxx, double newminy, double newmaxy);
-
+	signals:
+		void setPlotRange(double newminx, double newmaxx, double newminy, double newmaxy);
 };
-

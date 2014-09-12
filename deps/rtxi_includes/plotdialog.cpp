@@ -4,36 +4,28 @@
 #include <qwt_plot_curve.h>
 #include <qlayout.h>
 
-PlotDialog::PlotDialog(QWidget *parent, QString name, double* xData,
-    double* yData, int size) :
-  QDialog(parent, name, TRUE)
+PlotDialog::PlotDialog(QWidget *parent, QString name, double* xData, double* yData, int size) : QDialog(parent) 
 {
-  setWindowTitle(name);
-  setModal(true);
-  QVBoxLayout *layout = new QVBoxLayout(this); // overall GUI layout
+	setWindowTitle(name);
+	setModal(true);
+	QVBoxLayout *layout = new QVBoxLayout(this); // overall GUI layout
 
-  BasicPlot *gPlot = new BasicPlot(this);
-  //QPushButton *closeBttn;
-  //  closeBttn = new QPushButton( "Close", this );
-  //  closeBttn->setMaximumWidth(100);
+	BasicPlot *gPlot = new BasicPlot(this);
+	//QPushButton *closeBttn;
+	//  closeBttn = new QPushButton( "Close", this );
+	//  closeBttn->setMaximumWidth(100);
 
-  layout->addWidget(gPlot);
-  //  layout->addWidget(closeBttn);
+	layout->addWidget(gPlot);
+	//  layout->addWidget(closeBttn);
 
-  //QObject::connect(closeBttn,SIGNAL(clicked()),this,SLOT(accept()) );
-  QObject::connect(this, SIGNAL(setPlotRange(double,double,double,double)),
-      gPlot, SLOT(setAxes(double,double,double,double)));
+	//QObject::connect(closeBttn,SIGNAL(clicked()),this,SLOT(accept()) );
+	QObject::connect(this, SIGNAL(setPlotRange(double,double,double,double)), gPlot, SLOT(setAxes(double,double,double,double)));
 
-  QwtPlotCurve *gCurve = new QwtPlotCurve("Curve 1");
-  gCurve->setData(xData, yData, size);
-  gCurve->attach(gPlot);
-  gCurve->setPen(QColor(Qt::white));
-  gPlot->replot();
+	QwtPlotCurve *gCurve = new QwtPlotCurve("Curve 1");
+	gCurve->setSamples(xData, yData, size);
+	gCurve->attach(gPlot);
+	gCurve->setPen(QColor(Qt::white));
+	gPlot->replot();
 
-  emit setPlotRange(gPlot->axisScaleDiv(QwtPlot::xBottom)->lowerBound(),
-      gPlot->axisScaleDiv(QwtPlot::xBottom)->upperBound(), gPlot->axisScaleDiv(
-          QwtPlot::yLeft)->lowerBound(),
-      gPlot->axisScaleDiv(QwtPlot::yLeft)->upperBound());
-
-}
-
+	emit setPlotRange(gPlot->axisScaleDiv(QwtPlot::xBottom).lowerBound(), gPlot->axisScaleDiv(QwtPlot::xBottom).upperBound(), gPlot->axisScaleDiv(QwtPlot::yLeft).lowerBound(), gPlot->axisScaleDiv(QwtPlot::yLeft).upperBound());
+};
