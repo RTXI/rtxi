@@ -11,21 +11,14 @@
 #include <qwt_plot.h>
 #include <qwt_compat.h>
 
-class Zoomer : public ScrollZoomer
-{
+class Zoomer : public ScrollZoomer {
 
 Q_OBJECT
 
 public:
-  Zoomer(QwtPlotCanvas *canvas) :
-    ScrollZoomer(canvas)
-  {
-  }
-  ;
+  Zoomer(QwtPlotCanvas *canvas) : ScrollZoomer(canvas) {};
 
-  virtual void
-  rescale()
-  {
+  virtual void rescale() {
     QwtScaleWidget *scaleWidget = plot()->axisWidget(yAxis());
     QwtScaleDraw *sd = scaleWidget->scaleDraw();
 /*
@@ -40,14 +33,11 @@ public:
     minExtent = sd->extent(scaleWidget->font());
     sd->setMinimumExtent(minExtent);
     ScrollZoomer::rescale();
-  }
-  ;
+  };
 
 public slots:
 
-  void
-  setNewBase(QwtScaleDiv * xscalediv, QwtScaleDiv * yscalediv)
-  {
+  void setNewBase(QwtScaleDiv * xscalediv, QwtScaleDiv * yscalediv) {
     setMaxStackDepth(-1);
     double rleft = xscalediv->lowerBound();
     double rtop = yscalediv->upperBound();
@@ -55,39 +45,27 @@ public slots:
     double rwidth = xscalediv->upperBound() - xscalediv->lowerBound();
     QwtDoubleRect boundRect(rleft, rtop, rwidth, rheight);
     setZoomBase(boundRect);
-  }
-  ;
-
+  };
 };
 
-class BasicPlot : public QwtPlot
-{
+class BasicPlot : public QwtPlot {
 Q_OBJECT
 
 public:
 
   BasicPlot(QWidget *parent);
-  virtual
-  ~BasicPlot()
-  {
-  }
-  ;
+  virtual ~BasicPlot() {};
   virtual QSize
   sizeHint() const;
   Zoomer *zoomer;
 
 signals:
-
-  void
-  setNewBase(QwtScaleDiv * xscalediv, QwtScaleDiv * yscalediv);
+  void setNewBase(QwtScaleDiv * xscalediv, QwtScaleDiv * yscalediv);
 
 public slots:
-
-  void
-  setAxes(double xmin, double xmax, double ymin, double ymax);
+  void setAxes(double xmin, double xmax, double ymin, double ymax);
 
 private:
-
 };
 
 #endif // _BasicPlot_H_

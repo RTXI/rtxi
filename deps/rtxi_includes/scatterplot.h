@@ -51,7 +51,7 @@ class ScatterPlot : public IncrementalPlot {
 
   public:
     ScatterPlot(QWidget *parent);
-    virtual ~ScatterPlot(){};//    virtual QSize sizeHint() const;
+    virtual ~ScatterPlot() {};//    virtual QSize sizeHint() const;
 
   signals:
     void setNewBase(QwtScaleDiv * xscalediv, QwtScaleDiv * yscalediv);

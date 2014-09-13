@@ -19,8 +19,7 @@ public:
   {
   }
 
-  ~ScrollData()
-  {
+  ~ScrollData() {
     delete scrollBar;
   }
 
@@ -37,23 +36,19 @@ ScrollZoomer::ScrollZoomer(QwtPlotCanvas *canvas) :
   QwtPlotZoomer(canvas), d_cornerWidget(NULL), d_hScrollData(NULL),
       d_vScrollData(NULL), d_inZoom(false), d_alignCanvasToScales(false)
 {
-  if (!canvas)
-    return;
+  if (!canvas) return;
 
   d_hScrollData = new ScrollData;
   d_vScrollData = new ScrollData;
 }
 
-ScrollZoomer::~ScrollZoomer()
-{
+ScrollZoomer::~ScrollZoomer() {
   delete d_cornerWidget;
   delete d_vScrollData;
   delete d_hScrollData;
 }
 
-void
-ScrollZoomer::rescale()
-{
+void ScrollZoomer::rescale() {
   QwtScaleWidget *xScale = plot()->axisWidget(xAxis());
   QwtScaleWidget *yScale = plot()->axisWidget(yAxis());
 
@@ -102,11 +97,8 @@ ScrollZoomer::rescale()
   updateScrollBars();
 }
 
-ScrollBar *
-ScrollZoomer::scrollBar(Qt::Orientation o)
-{
-  ScrollBar *&sb = (o == Qt::Vertical) ? d_vScrollData->scrollBar
-      : d_hScrollData->scrollBar;
+ScrollBar *ScrollZoomer::scrollBar(Qt::Orientation o) {
+  ScrollBar *&sb = (o == Qt::Vertical) ? d_vScrollData->scrollBar : d_hScrollData->scrollBar;
 
   if (sb == NULL)
     {
@@ -118,21 +110,16 @@ ScrollZoomer::scrollBar(Qt::Orientation o)
   return sb;
 }
 
-ScrollBar *
-ScrollZoomer::horizontalScrollBar() const
-{
+ScrollBar *ScrollZoomer::horizontalScrollBar() const {
   return d_hScrollData->scrollBar;
 }
 
-ScrollBar *
-ScrollZoomer::verticalScrollBar() const
-{
+ScrollBar * ScrollZoomer::verticalScrollBar() const {
   return d_vScrollData->scrollBar;
 }
 
 #if QT_VERSION < 0x040000
-void
-ScrollZoomer::setHScrollBarMode(QScrollView::ScrollBarMode mode)
+void ScrollZoomer::setHScrollBarMode(QScrollView::ScrollBarMode mode)
 #else
 void ScrollZoomer::setHScrollBarMode(Qt::ScrollBarPolicy mode)
 #endif
@@ -145,9 +132,8 @@ void ScrollZoomer::setHScrollBarMode(Qt::ScrollBarPolicy mode)
 }
 
 #if QT_VERSION < 0x040000
-void
-ScrollZoomer::setVScrollBarMode(QScrollView::ScrollBarMode mode)
-#else
+void ScrollZoomer::setVScrollBarMode(QScrollView::ScrollBarMode mode)
+#else 
 void ScrollZoomer::setVScrollBarMode(Qt::ScrollBarPolicy mode)
 #endif
 {
@@ -178,8 +164,7 @@ Qt::ScrollBarPolicy ScrollZoomer::vScrollBarMode() const
   return d_vScrollData->mode;
 }
 
-void
-ScrollZoomer::setHScrollBarPosition(ScrollBarPosition pos)
+void ScrollZoomer::setHScrollBarPosition(ScrollBarPosition pos)
 {
   if (d_hScrollData->position != pos)
     {
@@ -188,8 +173,7 @@ ScrollZoomer::setHScrollBarPosition(ScrollBarPosition pos)
     }
 }
 
-void
-ScrollZoomer::setVScrollBarPosition(ScrollBarPosition pos)
+void ScrollZoomer::setVScrollBarPosition(ScrollBarPosition pos)
 {
   if (d_vScrollData->position != pos)
     {
@@ -210,8 +194,7 @@ ScrollZoomer::vScrollBarPosition() const
   return d_vScrollData->position;
 }
 
-void
-ScrollZoomer::setCornerWidget(QWidget *w)
+void ScrollZoomer::setCornerWidget(QWidget *w)
 {
   if (w != d_cornerWidget)
     {
@@ -233,14 +216,12 @@ ScrollZoomer::setCornerWidget(QWidget *w)
     }
 }
 
-QWidget *
-ScrollZoomer::cornerWidget() const
+QWidget *ScrollZoomer::cornerWidget() const
 {
   return d_cornerWidget;
 }
 
-bool
-ScrollZoomer::eventFilter(QObject *o, QEvent *e)
+bool ScrollZoomer::eventFilter(QObject *o, QEvent *e)
 {
   if (o == canvas())
     {
@@ -276,8 +257,7 @@ ScrollZoomer::eventFilter(QObject *o, QEvent *e)
   return QwtPlotZoomer::eventFilter(o, e);
 }
 
-bool
-ScrollZoomer::needScrollBar(Qt::Orientation o) const
+bool ScrollZoomer::needScrollBar(Qt::Orientation o) const
 {
 #if QT_VERSION < 0x040000
   QScrollView::ScrollBarMode mode;
@@ -330,11 +310,8 @@ ScrollZoomer::needScrollBar(Qt::Orientation o) const
   return needed;
 }
 
-void
-ScrollZoomer::updateScrollBars()
-{
-  if (!canvas())
-    return;
+void ScrollZoomer::updateScrollBars() {
+  if (!canvas()) return;
 
   const int xAxis = QwtPlotZoomer::xAxis();
   const int yAxis = QwtPlotZoomer::yAxis();
@@ -431,16 +408,12 @@ ScrollZoomer::updateScrollBars()
   plot()->updateLayout();
 }
 
-void
-ScrollZoomer::layoutScrollBars(const QRect &rect)
-{
+void ScrollZoomer::layoutScrollBars(const QRect &rect) {
   int hPos = xAxis();
-  if (hScrollBarPosition() == OppositeToScale)
-    hPos = oppositeAxis(hPos);
+  if (hScrollBarPosition() == OppositeToScale) hPos = oppositeAxis(hPos);
 
   int vPos = yAxis();
-  if (vScrollBarPosition() == OppositeToScale)
-    vPos = oppositeAxis(vPos);
+  if (vScrollBarPosition() == OppositeToScale) vPos = oppositeAxis(vPos);
 
   ScrollBar *hScrollBar = horizontalScrollBar();
   ScrollBar *vScrollBar = verticalScrollBar();
@@ -496,22 +469,16 @@ ScrollZoomer::layoutScrollBars(const QRect &rect)
     }
 }
 
-void
-ScrollZoomer::scrollBarMoved(Qt::Orientation o, double min, double)
-{
-  if (o == Qt::Horizontal)
-    move(QPoint(min, zoomRect().top()));
+void ScrollZoomer::scrollBarMoved(Qt::Orientation o, double min, double) {
+  if (o == Qt::Horizontal) move(QPoint(min, zoomRect().top()));
 //    move(min, zoomRect().top());
-  else
-    move(QPoint(zoomRect().left(), min));
+  else move(QPoint(zoomRect().left(), min));
 //    move(zoomRect().left(), min);
 
   emit zoomed(zoomRect());
 }
 
-int
-ScrollZoomer::oppositeAxis(int axis) const
-{
+int ScrollZoomer::oppositeAxis(int axis) const {
   switch (axis)
     {
   case QwtPlot::xBottom:

@@ -16,29 +16,23 @@
 class ScrollData;
 class ScrollBar;
 
-class ScrollZoomer : public QwtPlotZoomer
-{
+class ScrollZoomer : public QwtPlotZoomer {
 Q_OBJECT
+
 public:
-  enum ScrollBarPosition
-  {
+  enum ScrollBarPosition {
     AttachedToScale, OppositeToScale
   };
 
   ScrollZoomer(QwtPlotCanvas *);
-  virtual
-  ~ScrollZoomer();
+  virtual ~ScrollZoomer();
 
-  ScrollBar *
-  horizontalScrollBar() const;
-  ScrollBar *
-  verticalScrollBar() const;
+  ScrollBar * horizontalScrollBar() const;
+  ScrollBar * verticalScrollBar() const;
 
 #if QT_VERSION < 0x040000
-  void
-  setHScrollBarMode(QScrollView::ScrollBarMode);
-  void
-  setVScrollBarMode(QScrollView::ScrollBarMode);
+  void setHScrollBarMode(QScrollView::ScrollBarMode);
+  void setVScrollBarMode(QScrollView::ScrollBarMode);
 
   QScrollView::ScrollBarMode
   vScrollBarMode() const;
@@ -52,10 +46,8 @@ public:
   Qt::ScrollBarPolicy hScrollBarMode () const;
 #endif
 
-  void
-  setHScrollBarPosition(ScrollBarPosition);
-  void
-  setVScrollBarPosition(ScrollBarPosition);
+  void setHScrollBarPosition(ScrollBarPosition);
+  void setVScrollBarPosition(ScrollBarPosition);
 
   ScrollBarPosition
   hScrollBarPosition() const;
@@ -64,32 +56,21 @@ public:
 
   QWidget*
   cornerWidget() const;
-  virtual void
-  setCornerWidget(QWidget *);
-
-  virtual bool
-  eventFilter(QObject *, QEvent *);
-
-  virtual void
-  rescale();
+  virtual void setCornerWidget(QWidget *);
+  virtual bool eventFilter(QObject *, QEvent *);
+  virtual void rescale();
 
 protected:
-  virtual ScrollBar *
-  scrollBar(Qt::Orientation);
-  virtual void
-  updateScrollBars();
-  virtual void
-  layoutScrollBars(const QRect &);
+  virtual ScrollBar * scrollBar(Qt::Orientation);
+  virtual void updateScrollBars();
+  virtual void layoutScrollBars(const QRect &);
 
 private slots:
-  void
-  scrollBarMoved(Qt::Orientation o, double min, double max);
+  void scrollBarMoved(Qt::Orientation o, double min, double max);
 
 private:
-  bool
-  needScrollBar(Qt::Orientation) const;
-  int
-  oppositeAxis(int) const;
+  bool needScrollBar(Qt::Orientation) const;
+  int oppositeAxis(int) const;
 
   QWidget *d_cornerWidget;
 
