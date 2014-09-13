@@ -405,20 +405,26 @@ void AnalogyDevice::read(void) {
 	for(size_t i=0;i < subdevice[AI].count;++i)
 		if(subdevice[AI].chan[i].active) {
 			channel = &subdevice[AI].chan[i].analog;
-			// Get anaolgy reference 
+
+			// Get analogy reference 
 			switch (channel->reference) {
 				case 0: ref = A4L_CHAN_AREF_GROUND; break;
 				case 1: ref = A4L_CHAN_AREF_COMMON; break;
 				case 2: ref = A4L_CHAN_AREF_DIFF; break;
 				case 3: ref = A4L_CHAN_AREF_OTHER; break;
 			}
+
 			// Get channel size
 			a4l_get_chinfo(&dsc, subdevice[AI].id, i, &chinfo);
 			size = a4l_sizeof_chan(chinfo);
-			// Read 1 data sample
+
+			// Read 1 data sample via synchronous acq
 			sample = 0;
-			err = a4l_sync_read(&dsc, subdevice[AI].id, PACK(i,channel->range,ref),
-					0, &sample, size);
+			err = a4l_sync_read(&dsc, subdevice[AI].id, PACK(i,channel->range,ref),	0, &sample, size);
+
+			// Read via asynchronous acq
+			//err = a4l_async_read(&dsc, &sample, size, 1);
+
 			output(i) = channel->gain*channel->conv*(sample-channel->offset)+channel->zerooffset;
 		}
 
