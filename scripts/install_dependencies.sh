@@ -97,6 +97,7 @@ fi
 
 # Install rtxi_includes
 sudo rsync -a ${DEPS}/rtxi_includes /usr/local/lib/.
+find ../plugins/. -name "*.h" -exec cp -t /usr/local/lib/rtxi_includes/ {} +
 if [ $? -eq 0 ]; then
 	echo "----->rtxi_includes synced."
 else
