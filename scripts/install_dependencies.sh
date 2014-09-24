@@ -97,13 +97,13 @@ fi
 
 # Install rtxi_includes
 sudo rsync -a ${DEPS}/rtxi_includes /usr/local/lib/.
-find ../plugins/. -name "*.h" -exec cp -t /usr/local/lib/rtxi_includes/ {} +
 if [ $? -eq 0 ]; then
 	echo "----->rtxi_includes synced."
 else
 	echo "----->rtxi_includes sync failed."
 	exit
 fi
+find ../plugins/. -name "*.h" -exec cp -t /usr/local/lib/rtxi_includes/ {} +
 
 # Install dynamo
 echo "Installing DYNAMO utility..."
