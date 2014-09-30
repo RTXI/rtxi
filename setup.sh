@@ -24,20 +24,17 @@ ARCH=$(uname -m)
 if [ $ARCH == "x86_64" ]; then ARCH="amd64"; fi
 
 sudo apt-get update
-sudo apt-get upgrade
+sudo apt-get -y upgrade
 
-if [ $(lsb_release -sc) == "trusty" ] || [ $(lsb_release -sc) == "precise" ]; then
-	if [ -f /etc/apt/sources.list.bak ]; then
-		echo "Source list already updated"
-	else 
-		sudo cp /etc/apt/sources.list /etc/apt/sources.list.bak
-		sudo bash -c "echo \"\" >> /etc/apt/sources.list"
-		sudo bash -c "echo \"###Sources for qt3-dev-tools\" >> 
-			/etc/apt/sources.list"
-		sudo bash -c "echo \"deb http://cz.archive.ubuntu.com/ubuntu precise main\" >> /etc/apt/sources.list"
-		sudo bash -c "echo \"deb-src http://cz.archive.ubuntu.com/ubuntu precise main\" >> /etc/apt/sources.list"
-	fi
+# The qt3 libraries are not available by default in Ubuntu 14.04 or Debian 7.6. 
+if [ $(lsb_release -sc) == "trusty" ] || [ $(lsb_release -sc) == "wheezy" ]; then
+   
+   sudo add-apt-repository 'deb http://cz.archive.ubuntu.com/ubuntu precise main'
+   sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 40976EAF437D05B5 #this may backfire
 	sudo apt-get update
+   sudo apt-get install -y qt3-dev-tools
+   sudo add-apt-repository 'deb http://cz.archive.ubuntu.com/ubuntu precise main' -r
+   sudo apt-get update
 fi
 
 sudo apt-get install -y g++ gcc automake libtool autoconf autotools-dev build-essential libboost-dev libboost-program-options-dev libgsl0-dev bison flex libncurses5-dev qt3-dev-tools
@@ -55,7 +52,7 @@ else
 	exit
 fi
 
-sudo ln -s /usr/lib/libqwt-qt3.so.5 /usr/lib/libqwt.so
+sudo ln -s /usr/lib/libqwt-qt3.so.5.2.0 /usr/lib/libqwt.so
 
 # Installing HDF5
 echo "----->Checking for HDF5"
