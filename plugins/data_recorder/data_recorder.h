@@ -63,7 +63,19 @@ namespace DataRecorder {
 	void openFile(const QString &);
 	void postAsyncData(const double *,size_t);
 
-	class Channel : public RT::List<Channel>::Node {
+	class CustomEvent : public QEvent {
+      public:
+//         CustomEvent(QEvent::Type, void *);
+         CustomEvent(QEvent::Type);
+         virtual ~CustomEvent(void) {};
+         void setData(void *data);
+         void * getData(void);
+
+      private:
+         void *data;
+   };
+   
+   class Channel : public RT::List<Channel>::Node {
 
 		friend class Panel;
 
@@ -142,11 +154,9 @@ namespace DataRecorder {
 			QComboBox *blockList;
 			QComboBox *channelList;
 			QComboBox *typeList;
-			QGroupBox *channelBox;
 			QListWidget *selectionBox;
 			QLabel *recordStatus;
 
-			QGroupBox *sampleBox;
 			QSpinBox *downsampleSpin;
 
 			QLineEdit *fileNameEdit;

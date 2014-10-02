@@ -35,6 +35,8 @@
 #define QDisableGroupsEvent         (QEvent::User+3)
 #define QEnableGroupsEvent          (QEvent::User+4)
 
+#include <iostream>
+
 struct param_hdf_t {
 	long long index;
 	double value;
@@ -250,6 +252,21 @@ int DoneEvent::callback(void) {
 	fifo.write(&token, sizeof(token));
 	return 0;
 }
+
+
+DataRecorder::CustomEvent::CustomEvent(QEvent::Type type) : QEvent(type) {
+   data = 0;
+}
+
+void DataRecorder::CustomEvent::setData(void *ptr) {
+   data = ptr;
+}
+
+
+void * DataRecorder::CustomEvent::getData(void) {
+   return data;
+}
+
 
 void DataRecorder::startRecording(void) {
 	Event::Object event(Event::START_RECORDING_EVENT);
@@ -750,8 +767,11 @@ void DataRecorder::Panel::updateDownsampleRate(int r) {
 }
 
 void DataRecorder::Panel::customEvent(QEvent *e) {
+
+
 	if (e->type() == QFileExistsEvent) {
-		FileExistsEventData *data = reinterpret_cast<FileExistsEventData *> (e);
+      CustomEvent * event = static_cast<CustomEvent *>(e);
+		FileExistsEventData *data = reinterpret_cast<FileExistsEventData *> (event->getData());
 		data->response = QMessageBox::question(this, "File exists",
 				"The file already exists. What would you like to do?",
 				"Append", "Overwrite", "Cancel", 0, 2);
@@ -764,22 +784,24 @@ void DataRecorder::Panel::customEvent(QEvent *e) {
 				QMessageBox::Ok, QMessageBox::NoButton);
 		recordStatus->setText("Not Recording");
 	} else if (e->type() == QSetFileNameEditEvent) {
-		SetFileNameEditEventData *data = reinterpret_cast<SetFileNameEditEventData *> (e);
+      CustomEvent * event = static_cast<CustomEvent *>(e);
+		SetFileNameEditEventData *data = reinterpret_cast<SetFileNameEditEventData *> (event->getData());
 		fileNameEdit->setText(data->filename);
 		recordStatus->setText("Ready.");
 		data->done.wakeAll();
 	} else if (e->type() == QDisableGroupsEvent) {
-		channelBox->setEnabled(false);
-		sampleBox->setEnabled(false);
+		channelGroup->setEnabled(false);
+		sampleGroup->setEnabled(false);
 		recordStatus->setText("Recording...");
 	} else if (e->type() == QEnableGroupsEvent) {
-		channelBox->setEnabled(true);
-		sampleBox->setEnabled(true);
+		channelGroup->setEnabled(true);
+		sampleGroup->setEnabled(true);
 		recordStatus->setText("Done.");
 		fileSize->setNum(int(QFile(fileNameEdit->text()).size()) / 1024);
 		trialLength->setNum(double(RT::System::getInstance()->getPeriod()*1e-9* fixedcount));
 		count = 0;
 	}
+
 }
 
 void DataRecorder::Panel::doDeferred(const Settings::Object::State &s) {
@@ -998,10 +1020,11 @@ int DataRecorder::Panel::openFile(QString &filename) {
 
 	if (QFile::exists(filename)) {
 		mutex.lock();
-		QEvent *event = new QEvent(static_cast<QEvent::Type>QFileExistsEvent);
+//		QEvent *event = new QEvent(static_cast<QEvent::Type>QFileExistsEvent);
+		CustomEvent *event = new CustomEvent(static_cast<QEvent::Type>QFileExistsEvent);
 		FileExistsEventData data;
 
-		//event->setData(&data);
+		event->setData(static_cast<void *>(&data));
 		data.filename = filename;
 
 		QApplication::postEvent(this, event);
@@ -1053,10 +1076,11 @@ int DataRecorder::Panel::openFile(QString &filename) {
 	mutex.unlock();
 
 	mutex.lock();
-	QEvent *event = new QEvent(static_cast<QEvent::Type>QSetFileNameEditEvent);
+//	QEvent *event = new QEvent(static_cast<QEvent::Type>QSetFileNameEditEvent);
+	CustomEvent *event = new CustomEvent(static_cast<QEvent::Type>QSetFileNameEditEvent);
 	SetFileNameEditEventData data;
-	//event->setData(&data);
 	data.filename = filename;
+	event->setData(static_cast<void*>(&data));
 
 	QApplication::postEvent(this, event);
 	data.done.wait(&mutex);
