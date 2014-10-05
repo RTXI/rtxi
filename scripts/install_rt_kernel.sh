@@ -27,10 +27,10 @@ fi
 
 # Export environment variables
 echo  "----->Setting up variables"
-export linux_version=3.8.13
+export linux_version=3.14.17
 export linux_tree=/opt/linux-$linux_version
 
-export xenomai_version=2.6.3
+export xenomai_version=2.6.4
 export xenomai_root=/opt/xenomai-$xenomai_version
 
 export scripts_dir=`pwd`
@@ -53,8 +53,8 @@ fi
 # Download essentials
 echo  "----->Downloading Linux kernel"
 cd $opt
-wget --no-check-certificate https://www.kernel.org/pub/linux/kernel/v3.x/linux-$linux_version.tar.bz2
-tar xf linux-$linux_version.tar.bz2
+wget --no-check-certificate https://www.kernel.org/pub/linux/kernel/v3.x/linux-$linux_version.tar.gz
+tar xf linux-$linux_version.tar.gz
 
 echo  "----->Downloading Xenomai"
 wget --no-check-certificate http://download.gna.org/xenomai/stable/xenomai-$xenomai_version.tar.bz2
@@ -71,7 +71,9 @@ fi
 echo  "----->Patching kernel"
 cd $linux_tree
 cp -vi /boot/config-`uname -r` $linux_tree/.config
-$xenomai_root/scripts/prepare-kernel.sh --arch=x86 --adeos=$xenomai_root/ksrc/arch/x86/patches/ipipe-core-3.8.13-x86-4.patch --linux=$linux_tree
+$xenomai_root/wget --no-check-certificate http://download.gna.org/adeos/patches/v3.x/x86/ipipe-core-$linux_version*.patch
+
+$xenomai_root/scripts/prepare-kernel.sh --arch=x86 --adeos=$xenomai_root/ksrc/arch/x86/patches/ipipe-core-$linux_version*.patch --linux=$linux_tree
 yes "" | make oldconfig
 make menuconfig
 
