@@ -29,7 +29,8 @@ RunningStat::push(double x)
     {
       m_newM = m_oldM + (x - m_oldM) / m_n;
       //m_newS = m_oldS + (x-m_oldM)*(x-m_newM);
-      m_newS = m_oldS + (m_n - 1) * (x - m_oldM) * (x - m_oldM) / m_n;
+      //m_newS = m_oldS + (m_n - 1) * (x - m_oldM) * (x - m_oldM) / m_n;
+		m_newS = (m_oldS*(m_n-1)/m_n) + (x-m_newM)*(x-m_newM)/(m_n-1); 
       m_oldM = m_newM;
       m_oldS = m_newS;
     }
