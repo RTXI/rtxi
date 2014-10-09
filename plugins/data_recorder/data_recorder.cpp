@@ -752,6 +752,7 @@ void DataRecorder::Panel::removeChannel(void) {
 
 void DataRecorder::Panel::startRecordClicked(void) {
 	count = 0;
+	startRecordButton->setEnabled(true);
 	StartRecordingEvent event(recording, fifo);
 	RT::System::getInstance()->postEvent(&event);
 }
@@ -790,10 +791,12 @@ void DataRecorder::Panel::customEvent(QEvent *e) {
 		recordStatus->setText("Ready.");
 		data->done.wakeAll();
 	} else if (e->type() == QDisableGroupsEvent) {
+		startRecordButton->setEnabled(false);
 		channelGroup->setEnabled(false);
 		sampleGroup->setEnabled(false);
 		recordStatus->setText("Recording...");
 	} else if (e->type() == QEnableGroupsEvent) {
+		startRecordButton->setEnabled(true);
 		channelGroup->setEnabled(true);
 		sampleGroup->setEnabled(true);
 		recordStatus->setText("Done.");
