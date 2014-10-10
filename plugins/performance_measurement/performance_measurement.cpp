@@ -34,7 +34,7 @@ static Workspace::variable_t vars[] = {
 	{ "Comp Time (ns)", "", Workspace::STATE, },
 	{ "Peak Comp Time (ns)", "", Workspace::STATE, }, 
 	{ "Real-time Period (ns)", "", Workspace::STATE, },
-	{ "Peak RT Jitter (ns)", "", Workspace::STATE, },
+	{ "Peak RT Period (ns)", "", Workspace::STATE, },
 	{ "RT Jitter (ns)", "", Workspace::STATE, },
 };
 
@@ -130,7 +130,7 @@ void PerformanceMeasurement::Panel::read(void) {
 		case EXEC:
 			if (maxTimestep < now - lastRead)
 				maxTimestep = now - lastRead;
-			timestep = 0.9 * timestep + 0.1 * (now - lastRead);
+			timestep = now - lastRead;
 			timestepStat.push(timestep);
 			break;
 		case INIT2:
@@ -152,7 +152,7 @@ void PerformanceMeasurement::Panel::write(void) {
 		case EXEC:
 			if (maxDuration < now - lastRead)
 				maxDuration = now - lastRead;
-			duration = 0.9 * duration + 0.1 * (now - lastRead);
+			duration = now - lastRead;
 			break;
 		case INIT2:
 			duration = maxDuration = now - lastRead;
