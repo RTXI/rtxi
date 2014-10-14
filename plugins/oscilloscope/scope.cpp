@@ -103,24 +103,16 @@ Scope::Scope(QWidget *parent) : QwtPlot(parent) {
 	d_origin = new QwtPlotMarker();
 	d_origin->setLineStyle(QwtPlotMarker::Cross);
 	d_origin->setLinePen(Qt::gray, 0, Qt::SolidLine);
-	d_origin->setValue(0,0);
+	d_origin->setValue((hScl*divX)/2,0);
 	d_origin->attach(this);
 
 	// Set division limits on the scope
 	setAxisMaxMajor(QwtPlot::xBottom, divX);
 	setAxisMaxMajor(QwtPlot::yLeft, divY);
 
-	// Disable axes
-	enableAxis(QwtPlot::yLeft, true);//false);
-	enableAxis(QwtPlot::xBottom, true);//false);
-
-	// Disable autoscaling
-	setAxisAutoScale(QwtPlot::xBottom, false);
-	setAxisAutoScale(QwtPlot::yLeft, false);
-
-	// Set y interval
-	y_interval.setInterval(-10, 10, QwtInterval::IncludeBorders);
-	setAxisScale(QwtPlot::yLeft, y_interval.minValue(), y_interval.maxValue());
+	// Enable axes DISABLE WHEN DONE DEBUGGING
+	enableAxis(QwtPlot::yLeft, true);
+	enableAxis(QwtPlot::xBottom, true);
 
 	// Update scope background/scales/axes
 	updateScopeLayout();
@@ -150,8 +142,15 @@ void Scope::timeoutEvent(void) {
 void Scope::updateScopeLayout(void) {
 
 	// Set x interval
-	x_interval.setInterval(-(hScl*divX)/2, (hScl*divX)/2, QwtInterval::IncludeBorders);
+	x_interval.setInterval(0, hScl*divX, QwtInterval::IncludeBorders);
 	setAxisScale(QwtPlot::xBottom, x_interval.minValue(), x_interval.maxValue());
+
+	// Set y interval
+	y_interval.setInterval(-10, 10, QwtInterval::IncludeBorders);
+	setAxisScale(QwtPlot::yLeft, y_interval.minValue(), y_interval.maxValue());
+
+	// Update cross hair
+	d_origin->setValue((hScl*divX)/2,0);
 
 	// Update axes
 	replot();
@@ -214,8 +213,7 @@ std::list<Scope::Channel>::const_iterator Scope::getChannelsEnd(void) const {
 // Zeros data
 void Scope::clearData(void) {
 	for(std::list<Channel>::iterator i = channels.begin(), end = channels.end();i != end;++i)
-		for(size_t j = 0;j < data_size;++j)
-			i->data[j] = 0.0;
+		i->data.assign(data_size, 0);
 }
 
 // Scales data based upon desired settings for the channel
@@ -380,7 +378,7 @@ void Scope::setRefresh(size_t r) {
 
 // Set channel scale
 void Scope::setChannelScale(std::list<Channel>::iterator channel,double scale) {
-	channel->scale = scale;
+	channel->scale = QwtPlot::axisInterval(QwtPlot::yLeft).maxValue()/(scale*divY);
 }
 
 // Set channel offset
@@ -409,19 +407,18 @@ void Scope::drawCurves(void) {
 		double *x_loc = x.data();
 		double *y_loc = y.data();
 
-		double scale = height()/(i->scale*divY);
-		i->curve->setRawSamples(x.data(), y.data(), i->data.size());
-		i->curve->attach(this);
-
 		// Get X and Y data for the channel
 		for(size_t j = 1; j < i->data.size(); ++j) {
-			*x_loc = round((((j*period)*width())/(hScl*divX))/200);
-			*y_loc = round((height()/2-scale*(i->data[(data_idx+j)%i->data.size()]+i->offset))/100);
+			*x_loc = j; //round((((j*period)*width())/(hScl*divX))/200);
+			*y_loc = i->scale*i->data[(data_idx+j)%i->data.size()]+i->offset; //round((height()/2-(i->scale)*(i->data[(data_idx+j)%i->data.size()]+i->offset))/100);
 			// Plot
 			++x_loc;
 			++y_loc;
+			printf("value is %zu %f %f\n", j, x.at(j), y.at(j));
 		}
+		i->curve->setRawSamples(x.data(), y.data(), i->data.size());
+		i->curve->attach(this);
 		d_directPainter->drawSeries(i->curve, 0, i->data.size());
 		replot();
-	}	
+	}
 }
