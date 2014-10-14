@@ -168,6 +168,7 @@ std::list<Scope::Channel>::iterator Scope::insertChannel(QString label,double sc
 	channel.curve->setPen(pen);
 	channel.curve->setStyle(QwtPlotCurve::Lines);
 	channel.curve->setRenderHint(QwtPlotItem::RenderAntialiased, false);
+	channel.curve->attach(this);
 	channels.push_back(channel);
 	return --channels.end();
 }
@@ -409,16 +410,14 @@ void Scope::drawCurves(void) {
 
 		// Get X and Y data for the channel
 		for(size_t j = 1; j < i->data.size(); ++j) {
-			*x_loc = j; //round((((j*period)*width())/(hScl*divX))/200);
-			*y_loc = i->scale*i->data[(data_idx+j)%i->data.size()]+i->offset; //round((height()/2-(i->scale)*(i->data[(data_idx+j)%i->data.size()]+i->offset))/100);
-			// Plot
+			*x_loc = (((j*period)*width())/(hScl*divX));
+			*y_loc = (i->data[(data_idx+j)%i->data.size()]+i->offset);
 			++x_loc;
 			++y_loc;
-			printf("value is %zu %f %f\n", j, x.at(j), y.at(j));
 		}
-		i->curve->setRawSamples(x.data(), y.data(), i->data.size());
-		i->curve->attach(this);
-		d_directPainter->drawSeries(i->curve, 0, i->data.size());
-		replot();
+		// Append data to curve
+		i->curve->setSamples(x.data(), y.data(), i->data.size()); // not optimal - revisit
 	}
+	// Update plot
+	replot();
 }
