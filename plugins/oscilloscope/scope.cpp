@@ -256,7 +256,7 @@ void Scope::setData(double data[],size_t size) {
 				double *x_loc = x.data();
 				double *y_loc = y.data();
 
-				// Get X and Y data for the channel
+				// Scale data to pixel coordinates
 				for(size_t j = 0; j < i->data.size(); ++j) {
 					*x_loc = ((j*period)*width())/(hScl*divX);
 					*y_loc = i->data[(data_idx+j)%i->data.size()];
@@ -407,7 +407,7 @@ void Scope::drawCurves(void) {
 		double *x_loc = x.data();
 		double *y_loc = y.data();
 
-		// Get X and Y data for the channel
+		// Scale data to pixel coordinates
 		for(size_t j = 0; j < i->data.size(); ++j) {
 			*x_loc = (((j*period)*width())/(hScl*divX));
 			*y_loc = (i->data[(data_idx+j)%i->data.size()]+i->offset);
