@@ -257,7 +257,7 @@ void Scope::setData(double data[],size_t size) {
 				double *y_loc = y.data();
 
 				// Get X and Y data for the channel
-				for(size_t j = 1; j < i->data.size(); ++j) {
+				for(size_t j = 0; j < i->data.size(); ++j) {
 					*x_loc = ((j*period)*width())/(hScl*divX);
 					*y_loc = i->data[(data_idx+j)%i->data.size()];
 					++x_loc;
@@ -265,7 +265,6 @@ void Scope::setData(double data[],size_t size) {
 				}
 				// Plot
 				i->curve->setRawSamples(x.data(), y.data(), (int)i->data.size());
-				d_directPainter->drawSeries(i->curve, 0, y.size());
 			}
 		}
 	}
@@ -409,7 +408,7 @@ void Scope::drawCurves(void) {
 		double *y_loc = y.data();
 
 		// Get X and Y data for the channel
-		for(size_t j = 1; j < i->data.size(); ++j) {
+		for(size_t j = 0; j < i->data.size(); ++j) {
 			*x_loc = (((j*period)*width())/(hScl*divX));
 			*y_loc = (i->data[(data_idx+j)%i->data.size()]+i->offset);
 			++x_loc;
