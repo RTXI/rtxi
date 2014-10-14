@@ -34,7 +34,7 @@ double RunningStat::mean() const {
 }
 
 double RunningStat::var() const {
-  return ((m_n > 1) ? m_newS / (m_n) : 0.0);
+  return ((m_n > 1) ? m_newS / 1000 : 0.0);
 }
 
 double RunningStat::std() const {
