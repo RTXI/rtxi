@@ -142,7 +142,7 @@ void PerformanceMeasurement::Panel::read(void) {
 			state = INIT2;
 	}
 	lastRead = now;
-	jitter = timestepStat.var();
+	jitter = timestepStat.std();
 }
 
 void PerformanceMeasurement::Panel::write(void) {
