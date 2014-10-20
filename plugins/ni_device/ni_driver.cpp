@@ -24,6 +24,7 @@
 #include <fcntl.h>
 #include <fstream>
 #include <sstream>
+#include <unistd.h>
 
 extern "C" Plugin::Object *createRTXIPlugin(void)
 {

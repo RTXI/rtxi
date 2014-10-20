@@ -19,6 +19,7 @@
 #ifndef DATA_RECORDER_H
 #define DATA_RECORDER_H
 
+#include <atomic_fifo.h>
 #include <event.h>
 #include <io.h>
 #include <mutex.h>
@@ -27,6 +28,7 @@
 #include <qobject.h>
 #include <qwidget.h>
 #include <vector>
+#include <time.h>
 
 #include <hdf5.h>
 #include <hdf5_hl.h>
@@ -139,7 +141,12 @@ namespace DataRecorder {
         long long fixedcount;
 
         pthread_t thread;
-        Fifo fifo;
+        //Fifo fifo;
+        AtomicFifo fifo;
+        data_token_t _token;
+        bool tokenRetrieved;
+
+        struct timespec sleep;
 
         struct file_t {
             hid_t id;

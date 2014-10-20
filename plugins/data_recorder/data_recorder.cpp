@@ -118,7 +118,7 @@ class OpenFileEvent: public RT::Event {
 
 public:
 
-	OpenFileEvent(QString &, Fifo &);
+	OpenFileEvent(QString &, AtomicFifo &);
 	~OpenFileEvent(void);
 
 	int callback(void);
@@ -126,7 +126,7 @@ public:
 private:
 
 	QString &filename;
-	Fifo &fifo;
+	AtomicFifo &fifo;
 
 }; // class OpenFileEvent
 
@@ -134,7 +134,7 @@ class StartRecordingEvent: public RT::Event {
 
 public:
 
-	StartRecordingEvent(bool &, Fifo &);
+	StartRecordingEvent(bool &, AtomicFifo &);
 	~StartRecordingEvent(void);
 
 	int callback(void);
@@ -142,7 +142,7 @@ public:
 private:
 
 	bool &recording;
-	Fifo &fifo;
+	AtomicFifo &fifo;
 
 }; // class StartRecordingEvent
 
@@ -150,7 +150,7 @@ class StopRecordingEvent: public RT::Event {
 
 public:
 
-	StopRecordingEvent(bool &, Fifo &);
+	StopRecordingEvent(bool &, AtomicFifo &);
 	~StopRecordingEvent(void);
 
 	int callback(void);
@@ -158,7 +158,7 @@ public:
 private:
 
 	bool &recording;
-	Fifo &fifo;
+	AtomicFifo &fifo;
 
 }; //class StopRecordingEvent
 
@@ -166,7 +166,7 @@ class AsyncDataEvent: public RT::Event {
 
 public:
 
-	AsyncDataEvent(const double *, size_t, Fifo &);
+	AsyncDataEvent(const double *, size_t, AtomicFifo &);
 	~AsyncDataEvent(void);
 
 	int callback(void);
@@ -175,7 +175,7 @@ private:
 
 	const double *data;
 	size_t size;
-	Fifo &fifo;
+	AtomicFifo &fifo;
 
 }; // class AsyncDataEvent
 
@@ -183,14 +183,14 @@ class DoneEvent: public RT::Event {
 
 public:
 
-	DoneEvent(Fifo &);
+	DoneEvent(AtomicFifo &);
 	~DoneEvent(void);
 
 	int callback(void);
 
 private:
 
-	Fifo &fifo;
+	AtomicFifo &fifo;
 
 }; // class DoneEvent
 
@@ -230,7 +230,7 @@ int RemoveChannelEvent::callback(void) {
 	return 0;
 }
 
-OpenFileEvent::OpenFileEvent(QString &n, Fifo &f) :
+OpenFileEvent::OpenFileEvent(QString &n, AtomicFifo &f) :
 	filename(n), fifo(f) {
 }
 
@@ -250,7 +250,7 @@ int OpenFileEvent::callback(void) {
 	return 0;
 }
 
-StartRecordingEvent::StartRecordingEvent(bool &r, Fifo &f) :
+StartRecordingEvent::StartRecordingEvent(bool &r, AtomicFifo &f) :
 	recording(r), fifo(f) {
 }
 
@@ -271,7 +271,7 @@ int StartRecordingEvent::callback(void) {
 	return 0;
 }
 
-StopRecordingEvent::StopRecordingEvent(bool &r, Fifo &f) :
+StopRecordingEvent::StopRecordingEvent(bool &r, AtomicFifo &f) :
 	recording(r), fifo(f) {
 }
 
@@ -292,7 +292,7 @@ int StopRecordingEvent::callback(void) {
 	return 0;
 }
 
-AsyncDataEvent::AsyncDataEvent(const double *d, size_t s, Fifo &f) :
+AsyncDataEvent::AsyncDataEvent(const double *d, size_t s, AtomicFifo &f) :
 	data(d), size(s), fifo(f) {
 }
 
@@ -312,7 +312,7 @@ int AsyncDataEvent::callback(void) {
 	return 1;
 }
 
-DoneEvent::DoneEvent(Fifo &f) :
+DoneEvent::DoneEvent(AtomicFifo &f) :
 	fifo(f) {
 }
 
@@ -510,6 +510,14 @@ DataRecorder::Panel::Panel(QWidget *parent, size_t buffersize) :
 	// Build initial channel list
 	buildChannelList();
 
+    // Calculate recording thread sleep time
+    sleep.tv_sec = 0;
+    sleep.tv_nsec = RT::System::getInstance()->getPeriod();
+
+    // Check if FIFO is truly atomic for hardware architecture
+    if( !fifo.isLockFree() )
+        ERROR_MSG("DataRecorder::Panel: WARNING: Atomic FIFO is not lock free\n");
+
 	// Launch Recording Thread
 	pthread_create(&thread, 0, bounce, this);
 
@@ -609,7 +617,8 @@ void DataRecorder::Panel::receiveEvent(const Event::Object *event) {
 				*reinterpret_cast<size_t *> (event->getParam("size")), fifo);
 		RT::System::getInstance()->postEvent(&e);
 
-	}
+	} else if( event->getName() == Event::RT_POSTPERIOD_EVENT )
+        sleep.tv_nsec = RT::System::getInstance()->getPeriod(); // Update recording thread sleep time
 }
 
 void DataRecorder::Panel::receiveEventRT(const Event::Object *event) {
@@ -671,7 +680,8 @@ void DataRecorder::Panel::receiveEventRT(const Event::Object *event) {
 
 		fifo.write(&token, sizeof(token));
 		fifo.write(&data, sizeof(data));
-	}
+	} else if( event->getName() == Event::RT_POSTPERIOD_EVENT )
+        sleep.tv_nsec = RT::System::getInstance()->getPeriod(); // Update recording thread sleep time
 }
 
 void DataRecorder::Panel::buildChannelList(void) {
@@ -922,38 +932,47 @@ void DataRecorder::Panel::processData(void) {
 		CLOSED, OPENED, RECORD,
 	} state = CLOSED;
 
-	data_token_t token;
+    tokenRetrieved = false;
 
 	for (;;) {
 
-		fifo.read(&token, sizeof(token));
+        if( !tokenRetrieved ) {
+            if( fifo.read(&_token, sizeof(_token)) ) // Returns true if data was available and retrieved
+                tokenRetrieved = true;
+            else { // Sleep loop then restart if no token was retrieved
+                nanosleep(&sleep, NULL); // Sleep thread for half the thread period;
+                continue;
+            }
+        }
 
-		if (token.type == SYNC) {
+		if (_token.type == SYNC) {
 
 			if (state == RECORD) {
-				double data[token.size / sizeof(double)];
-				fifo.read(data, token.size);
+				double data[_token.size / sizeof(double)];
+				if(!fifo.read(data, _token.size))
+                    continue; // Restart loop if data is not available
+                
 				H5PTappend(file.cdata, 1, data);
 
 				++file.idx;
 			}
 
-		} else if (token.type == ASYNC) {
+		} else if (_token.type == ASYNC) {
 
 			if (state == RECORD) {
 
-				double data[token.size / sizeof(double)];
-				fifo.read(data, token.size);
+				double data[_token.size / sizeof(double)];
+				if(!fifo.read(data, _token.size))
+                    continue; // Restart loop if data is not available
 
-				if (data) {
-					hsize_t array_size[] = { token.size / sizeof(double) };
+					hsize_t array_size[] = { _token.size / sizeof(double) };
 					hid_t array_space = H5Screate_simple(1, array_size,
 							array_size);
 					hid_t array_type = H5Tarray_create(H5T_IEEE_F64LE, 1,
 							array_size);
 
 					QString data_name = QString::number(
-							static_cast<unsigned long long> (token.time));
+							static_cast<unsigned long long> (_token.time));
 
 					hid_t adata = H5Dcreate(file.adata, data_name.latin1(),
 							array_type, array_space, H5P_DEFAULT, H5P_DEFAULT,
@@ -964,19 +983,19 @@ void DataRecorder::Panel::processData(void) {
 					H5Dclose(adata);
 					H5Tclose(array_type);
 					H5Sclose(array_space);
-				}
-			}
+            }
 
-		} else if (token.type == OPEN) {
+		} else if (_token.type == OPEN) {
 
 			if (state == RECORD)
-				stopRecording(token.time);
+				stopRecording(_token.time);
 
 			if (state != CLOSED)
 				closeFile();
 
-			char filename_string[token.size];
-			fifo.read(filename_string, token.size);
+			char filename_string[_token.size];
+			if(!fifo.read(filename_string, _token.size))
+                continue; // Restart loop if data is not available
 			QString filename = filename_string;
 
 			if (openFile(filename))
@@ -984,7 +1003,7 @@ void DataRecorder::Panel::processData(void) {
 			else
 				state = OPENED;
 
-		} else if (token.type == CLOSE) {
+		} else if (_token.type == CLOSE) {
 
 			if (state == RECORD)
 				stopRecording(RT::OS::getTime());
@@ -994,35 +1013,36 @@ void DataRecorder::Panel::processData(void) {
 
 			state = CLOSED;
 
-		} else if (token.type == START) {
+		} else if (_token.type == START) {
 
 			if (state == CLOSED) {
 				QCustomEvent *event = new QCustomEvent(QNoFileOpenEvent);
 				QApplication::postEvent(this, event);
 			} else if (state == OPENED) {
-				startRecording(token.time);
+				startRecording(_token.time);
 				state = RECORD;
 			}
 
-		} else if (token.type == STOP) {
+		} else if (_token.type == STOP) {
 
 			if (state == RECORD) {
-				stopRecording(token.time);
+				stopRecording(_token.time);
 				state = OPENED;
 			}
 
-		} else if (token.type == DONE) {
+		} else if (_token.type == DONE) {
 
 			if (state == RECORD)
-				stopRecording(token.time, true);
+				stopRecording(_token.time, true);
 
 			if (state != CLOSED)
 				closeFile(true);
 
 			break;
-		} else if (token.type == PARAM) {
+		} else if (_token.type == PARAM) {
 			param_change_t data;
-			fifo.read(&data, sizeof(data));
+			if(!fifo.read(&data, sizeof(data)))
+                continue; // Restart loop if data is not available
 
 			IO::Block
 					*block =
@@ -1051,6 +1071,7 @@ void DataRecorder::Panel::processData(void) {
 			}
 		}
 
+        tokenRetrieved = false;
 	}
 }
 

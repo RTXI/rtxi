@@ -19,6 +19,7 @@
 #include <errno.h>
 #include <rt.h>
 #include <sstream>
+#include <unistd.h>
 
 #include <ni_device.h>
 
