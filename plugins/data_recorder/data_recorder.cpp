@@ -1,21 +1,20 @@
 /*
- 	 The Real-Time eXperiment Interface (RTXI)
-	 Copyright (C) 2011 Georgia Institute of Technology, University of Utah, Weill Cornell Medical College
+ Copyright (C) 2011 Georgia Institute of Technology, University of Utah, Weill Cornell Medical College
 
-	 This program is free software: you can redistribute it and/or modify
-	 it under the terms of the GNU General Public License as published by
-	 the Free Software Foundation, either version 3 of the License, or
-	 (at your option) any later version.
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
 
-	 This program is distributed in the hope that it will be useful,
-	 but WITHOUT ANY WARRANTY; without even the implied warranty of
-	 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	 GNU General Public License for more details.
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
 
-	 You should have received a copy of the GNU General Public License
-	 along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-*/
+ */
 
 #include <QtGui>
 #include <QFileDialog>
@@ -35,8 +34,6 @@
 #define QDisableGroupsEvent         (QEvent::User+3)
 #define QEnableGroupsEvent          (QEvent::User+4)
 
-#include <iostream>
-
 struct param_hdf_t {
 	long long index;
 	double value;
@@ -48,104 +45,142 @@ namespace {
 		list->push_back(block);
 	};
 
-	struct FileExistsEventData {
-		QString filename;
-		int response;
-		QWaitCondition done;
-	};
+struct FileExistsEventData {
+	QString filename;
+	int response;
+	QWaitCondition done;
+};
 
-	struct SetFileNameEditEventData {
-		QString filename;
-		QWaitCondition done;
-	};
+struct SetFileNameEditEventData {
+	QString filename;
+	QWaitCondition done;
+};
 
-	class InsertChannelEvent: public RT::Event {
-		public:
-			InsertChannelEvent(bool &, RT::List<DataRecorder::Channel> &, RT::List< DataRecorder::Channel>::iterator, DataRecorder::Channel &);
-			~InsertChannelEvent(void);
-			int callback(void);
+class InsertChannelEvent: public RT::Event {
 
-		private:
-			bool &recording;
-			RT::List<DataRecorder::Channel> &channels;
-			RT::List<DataRecorder::Channel>::iterator end;
-			DataRecorder::Channel &channel;
-	}; // class InsertChannelEvent
+public:
 
-	class RemoveChannelEvent: public RT::Event {
-		public:
-			RemoveChannelEvent(bool &, RT::List<DataRecorder::Channel> &,	DataRecorder::Channel &);
-			~RemoveChannelEvent(void);
-			int callback(void);
+	InsertChannelEvent(bool &, RT::List<DataRecorder::Channel> &, RT::List<
+			DataRecorder::Channel>::iterator, DataRecorder::Channel &);
+	~InsertChannelEvent(void);
 
-		private:
-			bool &recording;
-			RT::List<DataRecorder::Channel> &channels;
-			DataRecorder::Channel &channel;
-	}; // class RemoveChannelEvent
+	int callback(void);
 
-	class OpenFileEvent: public RT::Event {
-		public:
-			OpenFileEvent(QString &, Fifo &);
-			~OpenFileEvent(void);
-			int callback(void);
+private:
 
-		private:
-			QString &filename;
-			Fifo &fifo;
-	}; // class OpenFileEvent
+	bool &recording;
+	RT::List<DataRecorder::Channel> &channels;
+	RT::List<DataRecorder::Channel>::iterator end;
+	DataRecorder::Channel &channel;
 
-	class StartRecordingEvent: public RT::Event {
-		public:
-			StartRecordingEvent(bool &, Fifo &);
-			~StartRecordingEvent(void);
-			int callback(void);
+}; // class InsertChannelEvent
 
-		private:
-			bool &recording;
-			Fifo &fifo;
+class RemoveChannelEvent: public RT::Event {
 
-	}; // class StartRecordingEvent
+public:
 
-	class StopRecordingEvent: public RT::Event {
-		public:
-			StopRecordingEvent(bool &, Fifo &);
-			~StopRecordingEvent(void);
-			int callback(void);
+	RemoveChannelEvent(bool &, RT::List<DataRecorder::Channel> &,
+			DataRecorder::Channel &);
+	~RemoveChannelEvent(void);
 
-		private:
-			bool &recording;
-			Fifo &fifo;
-	}; //class StopRecordingEvent
+	int callback(void);
 
-	class AsyncDataEvent: public RT::Event {
-		public:
-			AsyncDataEvent(const double *, size_t, Fifo &);
-			~AsyncDataEvent(void);
-			int callback(void);
+private:
 
-		private:
-			const double *data;
-			size_t size;
-			Fifo &fifo;
-	}; // class AsyncDataEvent
+	bool &recording;
+	RT::List<DataRecorder::Channel> &channels;
+	DataRecorder::Channel &channel;
 
-	class DoneEvent: public RT::Event {
-		public:
-			DoneEvent(Fifo &);
-			~DoneEvent(void);
-			int callback(void);
+}; // class RemoveChannelEvent
 
-		private:
-			Fifo &fifo;
-	}; // class DoneEvent
-}; // namespace
+class OpenFileEvent: public RT::Event {
+
+public:
+
+	OpenFileEvent(QString &, AtomicFifo &);
+	~OpenFileEvent(void);
+
+	int callback(void);
+
+private:
+
+	QString &filename;
+	AtomicFifo &fifo;
+
+}; // class OpenFileEvent
+
+class StartRecordingEvent: public RT::Event {
+
+public:
+
+	StartRecordingEvent(bool &, AtomicFifo &);
+	~StartRecordingEvent(void);
+
+	int callback(void);
+
+private:
+
+	bool &recording;
+	AtomicFifo &fifo;
+
+}; // class StartRecordingEvent
+
+class StopRecordingEvent: public RT::Event {
+
+public:
+
+	StopRecordingEvent(bool &, AtomicFifo &);
+	~StopRecordingEvent(void);
+
+	int callback(void);
+
+private:
+
+	bool &recording;
+	AtomicFifo &fifo;
+
+}; //class StopRecordingEvent
+
+class AsyncDataEvent: public RT::Event {
+
+public:
+
+	AsyncDataEvent(const double *, size_t, AtomicFifo &);
+	~AsyncDataEvent(void);
+
+	int callback(void);
+
+private:
+
+	const double *data;
+	size_t size;
+	AtomicFifo &fifo;
+
+}; // class AsyncDataEvent
+
+class DoneEvent: public RT::Event {
+
+public:
+
+	DoneEvent(AtomicFifo &);
+	~DoneEvent(void);
+
+	int callback(void);
+
+private:
+
+	AtomicFifo &fifo;
+
+}; // class DoneEvent
+
+}
+; // namespace
 
 InsertChannelEvent::InsertChannelEvent(bool &r,
 		RT::List<DataRecorder::Channel> & l,
 		RT::List<DataRecorder::Channel>::iterator e, DataRecorder::Channel &c) :
 	recording(r), channels(l), end(e), channel(c) {
-	}
+}
 
 InsertChannelEvent::~InsertChannelEvent(void) {
 }
@@ -161,7 +196,7 @@ int InsertChannelEvent::callback(void) {
 RemoveChannelEvent::RemoveChannelEvent(bool &r,
 		RT::List<DataRecorder::Channel> & l, DataRecorder::Channel &c) :
 	recording(r), channels(l), channel(c) {
-	}
+}
 
 RemoveChannelEvent::~RemoveChannelEvent(void) {
 }
@@ -174,7 +209,8 @@ int RemoveChannelEvent::callback(void) {
 	return 0;
 }
 
-OpenFileEvent::OpenFileEvent(QString &n, Fifo &f) : filename(n), fifo(f) {
+OpenFileEvent::OpenFileEvent(QString &n, AtomicFifo &f) :
+	filename(n), fifo(f) {
 }
 
 OpenFileEvent::~OpenFileEvent(void) {
@@ -182,15 +218,18 @@ OpenFileEvent::~OpenFileEvent(void) {
 
 int OpenFileEvent::callback(void) {
 	DataRecorder::data_token_t token;
+
 	token.type = DataRecorder::OPEN;
 	token.size = filename.length() + 1;
 	token.time = RT::OS::getTime();
+
 	fifo.write(&token, sizeof(token));
 	fifo.write(filename.toLatin1(), token.size);
 	return 0;
 }
 
-StartRecordingEvent::StartRecordingEvent(bool &r, Fifo &f) : recording(r), fifo(f) {
+StartRecordingEvent::StartRecordingEvent(bool &r, AtomicFifo &f) :
+	recording(r), fifo(f) {
 }
 
 StartRecordingEvent::~StartRecordingEvent(void) {
@@ -198,15 +237,20 @@ StartRecordingEvent::~StartRecordingEvent(void) {
 
 int StartRecordingEvent::callback(void) {
 	DataRecorder::data_token_t token;
+
 	recording = true;
+
 	token.type = DataRecorder::START;
 	token.size = 0;
 	token.time = RT::OS::getTime();
+
 	fifo.write(&token, sizeof(token));
+
 	return 0;
 }
 
-StopRecordingEvent::StopRecordingEvent(bool &r, Fifo &f) : recording(r), fifo(f) {
+StopRecordingEvent::StopRecordingEvent(bool &r, AtomicFifo &f) :
+	recording(r), fifo(f) {
 }
 
 StopRecordingEvent::~StopRecordingEvent(void) {
@@ -214,15 +258,20 @@ StopRecordingEvent::~StopRecordingEvent(void) {
 
 int StopRecordingEvent::callback(void) {
 	DataRecorder::data_token_t token;
+
 	recording = false;
+
 	token.type = DataRecorder::STOP;
 	token.size = 0;
 	token.time = RT::OS::getTime();
+
 	fifo.write(&token, sizeof(token));
+
 	return 0;
 }
 
-AsyncDataEvent::AsyncDataEvent(const double *d, size_t s, Fifo &f) : data(d), size(s), fifo(f) {
+AsyncDataEvent::AsyncDataEvent(const double *d, size_t s, AtomicFifo &f) :
+	data(d), size(s), fifo(f) {
 }
 
 AsyncDataEvent::~AsyncDataEvent(void) {
@@ -230,15 +279,19 @@ AsyncDataEvent::~AsyncDataEvent(void) {
 
 int AsyncDataEvent::callback(void) {
 	DataRecorder::data_token_t token;
+
 	token.type = DataRecorder::ASYNC;
 	token.size = size * sizeof(double);
 	token.time = RT::OS::getTime();
+
 	fifo.write(&token, sizeof(token));
 	fifo.write(data, token.size);
+
 	return 1;
 }
 
-DoneEvent::DoneEvent(Fifo &f) : fifo(f) {
+DoneEvent::DoneEvent(AtomicFifo &f) :
+	fifo(f) {
 }
 
 DoneEvent::~DoneEvent(void) {
@@ -246,10 +299,13 @@ DoneEvent::~DoneEvent(void) {
 
 int DoneEvent::callback(void) {
 	DataRecorder::data_token_t token;
+
 	token.type = DataRecorder::DONE;
 	token.size = 0;
 	token.time = RT::OS::getTime();
+
 	fifo.write(&token, sizeof(token));
+
 	return 0;
 }
 
@@ -270,6 +326,7 @@ void * DataRecorder::CustomEvent::getData(void) {
 
 void DataRecorder::startRecording(void) {
 	Event::Object event(Event::START_RECORDING_EVENT);
+
 	if (RT::OS::isRealtime())
 		Event::Manager::getInstance()->postEventRT(&event);
 	else
@@ -278,6 +335,7 @@ void DataRecorder::startRecording(void) {
 
 void DataRecorder::stopRecording(void) {
 	Event::Object event(Event::STOP_RECORDING_EVENT);
+
 	if (RT::OS::isRealtime())
 		Event::Manager::getInstance()->postEventRT(&event);
 	else
@@ -297,6 +355,7 @@ void DataRecorder::postAsyncData(const double *data, size_t size) {
 	Event::Object event(Event::ASYNC_DATA_EVENT);
 	event.setParam("data", const_cast<double *> (data));
 	event.setParam("size", &size);
+
 	if (RT::OS::isRealtime())
 		Event::Manager::getInstance()->postEventRT(&event);
 	else
@@ -503,12 +562,15 @@ DataRecorder::Panel::Panel(QWidget *parent, size_t buffersize) :
 
 DataRecorder::Panel::~Panel(void) {
 	Plugin::getInstance()->removeDataRecorderPanel(this);
+
 	setActive(false);
+
 	DoneEvent event(fifo);
 	while (RT::System::getInstance()->postEvent(&event))
 		;
 
 	pthread_join(thread, 0);
+
 	for (RT::List<Channel>::iterator i = channels.begin(), end = channels.end(); i
 			!= end;)
 		delete &*(i++);
@@ -540,13 +602,16 @@ void DataRecorder::Panel::execute(void) {
 
 void DataRecorder::Panel::receiveEvent(const Event::Object *event) {
 	if (event->getName() == Event::IO_BLOCK_INSERT_EVENT) {
+
 		IO::Block *block = reinterpret_cast<IO::Block *> (event->getParam("block"));
+
 		blockPtrList.push_back(block);
 		blockList->addItem(QString::fromStdString(block->getName()) + " " + QString::number(block->getID()));
 		if (blockList->count() == 1)
 			buildChannelList();
 
 	} else if (event->getName() == Event::IO_BLOCK_REMOVE_EVENT) {
+
 		IO::Block *block = reinterpret_cast<IO::Block *> (event->getParam(
 					"block"));
 		QString name = QString::fromStdString(block->getName()) + " " + QString::number(block->getID());
@@ -565,66 +630,91 @@ void DataRecorder::Panel::receiveEvent(const Event::Object *event) {
 					i->block = 0;
 
 	} else if (event->getName() == Event::OPEN_FILE_EVENT) {
+            
 		QString filename(reinterpret_cast<char*> (event->getParam("filename")));
 		OpenFileEvent e(filename, fifo);
 		RT::System::getInstance()->postEvent(&e);
+
 	} else if (event->getName() == Event::START_RECORDING_EVENT) {
+
 		StartRecordingEvent e(recording, fifo);
 		RT::System::getInstance()->postEvent(&e);
+
 	} else if (event->getName() == Event::STOP_RECORDING_EVENT) {
+
 		StopRecordingEvent e(recording, fifo);
 		RT::System::getInstance()->postEvent(&e);
+
 	} else if (event->getName() == Event::ASYNC_DATA_EVENT) {
+
 		AsyncDataEvent e(reinterpret_cast<double *> (event->getParam("data")),
 				*reinterpret_cast<size_t *> (event->getParam("size")), fifo);
 		RT::System::getInstance()->postEvent(&e);
-	}
+
+	} else if( event->getName() == Event::RT_POSTPERIOD_EVENT )
+        sleep.tv_nsec = RT::System::getInstance()->getPeriod(); // Update recording thread sleep time
 }
 
 void DataRecorder::Panel::receiveEventRT(const Event::Object *event) {
 	if (event->getName() == Event::OPEN_FILE_EVENT) {
 		QString filename = QString(reinterpret_cast<char*> (event->getParam("filename")));
+            
 		data_token_t token;
+            
 		token.type = DataRecorder::OPEN;
 		token.size = filename.length() + 1;
 		token.time = RT::OS::getTime();
+
 		fifo.write(&token, sizeof(token));
 		fifo.write(filename.toLatin1(), token.size);
 	} else if (event->getName() == Event::START_RECORDING_EVENT) {
 		data_token_t token;
+
 		recording = true;
+
 		token.type = DataRecorder::START;
 		token.size = 0;
 		token.time = RT::OS::getTime();
+
 		fifo.write(&token, sizeof(token));
 	} else if (event->getName() == Event::STOP_RECORDING_EVENT) {
 		data_token_t token;
+
 		recording = false;
+
 		token.type = DataRecorder::STOP;
 		token.size = 0;
 		token.time = RT::OS::getTime();
+
 		fifo.write(&token, sizeof(token));
 	} else if (event->getName() == Event::ASYNC_DATA_EVENT) {
 		size_t size = *reinterpret_cast<size_t *> (event->getParam("size"));
+
 		data_token_t token;
+
 		token.type = DataRecorder::ASYNC;
 		token.size = size * sizeof(double);
 		token.time = RT::OS::getTime();
+
 		fifo.write(&token, sizeof(token));
 		fifo.write(event->getParam("data"), token.size);
 	} else if (event->getName() == Event::WORKSPACE_PARAMETER_CHANGE_EVENT) {
 		data_token_t token;
+
 		token.type = DataRecorder::PARAM;
 		token.size = sizeof(param_change_t);
 		token.time = RT::OS::getTime();
+
 		param_change_t data;
 		data.id = reinterpret_cast<Settings::Object::ID> (event->getParam("object"));
 		data.index = reinterpret_cast<size_t> (event->getParam("index"));
 		data.step = file.idx;
 		data.value = *reinterpret_cast<double *> (event->getParam("value"));
+
 		fifo.write(&token, sizeof(token));
 		fifo.write(&data, sizeof(data));
-	}
+	} else if( event->getName() == Event::RT_POSTPERIOD_EVENT )
+        sleep.tv_nsec = RT::System::getInstance()->getPeriod(); // Update recording thread sleep time
 }
 
 void DataRecorder::Panel::buildChannelList(void) {
@@ -819,6 +909,7 @@ void DataRecorder::Panel::doDeferred(const Settings::Object::State &s) {
 			continue;
 
 		channel = new Channel();
+
 		channel->block = block;
 		channel->type = s.loadInteger(str.str() + " type");
 		channel->index = s.loadInteger(str.str() + " index");
@@ -837,6 +928,7 @@ void DataRecorder::Panel::doLoad(const Settings::Object::State &s) {
 		showMinimized();
 
 	downsampleSpin->setValue(s.loadInteger("Downsample"));
+
 	resize(s.loadInteger("W"), s.loadInteger("H"));
 	parentWidget()->move(s.loadInteger("X"), s.loadInteger("Y"));
 }
@@ -881,15 +973,25 @@ void DataRecorder::Panel::processData(void) {
 
 	data_token_t token;
 
+    tokenRetrieved = false;
 	for (;;) {
 
-		fifo.read(&token, sizeof(token));
+        if( !tokenRetrieved ) {
+            if( fifo.read(&_token, sizeof(_token)) ) // Returns true if data was available and retrieved
+                tokenRetrieved = true;
+            else { // Sleep loop then restart if no token was retrieved
+                nanosleep(&sleep, NULL); // Sleep thread for half the thread period;
+                continue;
+            }
+        }
 
 		if (token.type == SYNC) {
 
 			if (state == RECORD) {
-				double data[token.size / sizeof(double)];
-				fifo.read(data, token.size);
+				double data[_token.size / sizeof(double)];
+				if(!fifo.read(data, _token.size))
+                    continue; // Restart loop if data is not available
+                
 				H5PTappend(file.cdata, 1, data);
 
 				++file.idx;
@@ -899,8 +1001,9 @@ void DataRecorder::Panel::processData(void) {
 
 			if (state == RECORD) {
 
-				double data[token.size / sizeof(double)];
-				fifo.read(data, token.size);
+				double data[_token.size / sizeof(double)];
+				if(!fifo.read(data, _token.size))
+                    continue; // Restart loop if data is not available
 
 				if (data) {
 					hsize_t array_size[] = { token.size / sizeof(double) };
@@ -933,7 +1036,8 @@ void DataRecorder::Panel::processData(void) {
 				closeFile();
 
 			char filename_string[token.size];
-			fifo.read(filename_string, token.size);
+			if(!fifo.read(filename_string, _token.size))
+                continue; // Restart loop if data is not available
 			QString filename = filename_string;
 
 			if (openFile(filename))
@@ -979,12 +1083,13 @@ void DataRecorder::Panel::processData(void) {
 			break;
 		} else if (token.type == PARAM) {
 			param_change_t data;
-			fifo.read(&data, sizeof(data));
+			if(!fifo.read(&data, sizeof(data)))
+                continue; // Restart loop if data is not available
 
 			IO::Block
-				*block =
-				dynamic_cast<IO::Block *> (Settings::Manager::getInstance()->getObject(
-							data.id));
+					*block =
+							dynamic_cast<IO::Block *> (Settings::Manager::getInstance()->getObject(
+									data.id));
 
 			if (block && state == RECORD) {
 				param_hdf_t param = { data.step, data.value, };
@@ -1007,12 +1112,14 @@ void DataRecorder::Panel::processData(void) {
 				H5Tclose(param_type);
 			}
 		}
+
+        tokenRetrieved = false;
 	}
 }
 
 int DataRecorder::Panel::openFile(QString &filename) {
 
-	QMutex mutex;
+//	QMutex mutex;
 
 #ifdef DEBUG
 	if(!pthread_equal(pthread_self(),thread)) {
@@ -1022,7 +1129,7 @@ int DataRecorder::Panel::openFile(QString &filename) {
 #endif
 
 	if (QFile::exists(filename)) {
-		mutex.lock();
+//		mutex.lock();
 //		QEvent *event = new QEvent(static_cast<QEvent::Type>QFileExistsEvent);
 		CustomEvent *event = new CustomEvent(static_cast<QEvent::Type>QFileExistsEvent);
 		FileExistsEventData data;
@@ -1031,7 +1138,8 @@ int DataRecorder::Panel::openFile(QString &filename) {
 		data.filename = filename;
 
 		QApplication::postEvent(this, event);
-		data.done.wait(&mutex);
+//		data.done.wait(&mutex);
+		data.done.wait();
 
 		if (data.response == 0) { // append
 			file.id = H5Fopen(filename.toLatin1(), H5F_ACC_RDWR, H5P_DEFAULT);
@@ -1076,24 +1184,26 @@ int DataRecorder::Panel::openFile(QString &filename) {
 		}
 	}
 
-	mutex.unlock();
+//	mutex.unlock();
 
-	mutex.lock();
+//	mutex.lock();
 //	QEvent *event = new QEvent(static_cast<QEvent::Type>QSetFileNameEditEvent);
 	CustomEvent *event = new CustomEvent(static_cast<QEvent::Type>QSetFileNameEditEvent);
 	SetFileNameEditEventData data;
+
 	data.filename = filename;
 	event->setData(static_cast<void*>(&data));
 
 	QApplication::postEvent(this, event);
-	data.done.wait(&mutex);
-	mutex.unlock();
+	data.done.wait();
+//	data.done.wait(&mutex);
+//	mutex.unlock();
 	return 0;
 }
 
 void DataRecorder::Panel::closeFile(bool shutdown) {
 
-	QMutex mutex;
+//	QMutex mutex;
 
 #ifdef DEBUG
 	if(!pthread_equal(pthread_self(),thread)) {
@@ -1105,15 +1215,16 @@ void DataRecorder::Panel::closeFile(bool shutdown) {
 	H5Fclose(file.id);
 
 	if (!shutdown) {
-		mutex.lock();
+//		mutex.lock();
 		QEvent *event = new QEvent(static_cast<QEvent::Type>QSetFileNameEditEvent);
 		SetFileNameEditEventData data;
 		//event->setData(&data);
 		data.filename = "";
 
 		QApplication::postEvent(this, event);
-		data.done.wait(&mutex);
-		mutex.unlock();
+		data.done.wait();
+//		data.done.wait(&mutex);
+//		mutex.unlock();
 	}
 }
 
@@ -1312,6 +1423,7 @@ DataRecorder::Plugin::Plugin(void) {
 }
 
 DataRecorder::Plugin::~Plugin(void) {
+//	MainWindow::getInstance()->removeSystemMenuItem(menuID);
 	while (panelList.size())
 		delete panelList.front();
 	instance = 0;

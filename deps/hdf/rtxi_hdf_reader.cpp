@@ -26,6 +26,7 @@
 
 #include <sstream>
 #include <string>
+#include <unistd.h>
 
 struct options {
     int info;

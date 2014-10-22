@@ -9,9 +9,10 @@ bin_PROGRAMS = rtxi
 LIBS = -rdynamic
 
 pkginclude_HEADERS = \
-    $(top_srcdir)/include/cmdline.h \
+		$(top_srcdir)/include/atomic_fifo.h \
+      $(top_srcdir)/include/cmdline.h \
 		$(top_srcdir)/include/compiler.h \
-    $(top_srcdir)/include/daq.h \
+      $(top_srcdir)/include/daq.h \
 		$(top_srcdir)/include/default_gui_model.h \
 		$(top_srcdir)/include/debug.h \
 		$(top_srcdir)/include/event.h \
@@ -28,6 +29,7 @@ pkginclude_HEADERS = \
 		$(top_srcdir)/include/workspace.h 
 
 rtxi_SOURCES = \
+		$(top_srcdir)/src/atomic_fifo.cpp \
 		$(top_srcdir)/src/cmdline.cpp \
 		$(top_srcdir)/src/daq.cpp \
 		$(top_srcdir)/src/default_gui_model.cpp \

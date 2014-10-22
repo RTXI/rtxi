@@ -15,5 +15,5 @@ if DEBUG
   AM_CXXFLAGS += -W -g
   AM_CPPFLAGS += -DDEBUG
 else
-  AM_CXXFLAGS += -O2
+  AM_CXXFLAGS += -O3 -std=c++11
 endif

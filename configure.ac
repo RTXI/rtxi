@@ -26,6 +26,8 @@ AC_SUBST(HDF_LIBS)
 
 rtos=""
 
+AX_BOOST_BASE([1.54],,[AC_MSG_ERROR([libboost version 1.54 or great is required])])
+
 AC_CHECK_RTAI
 AC_ARG_ENABLE(xenomai,
   [  --enable-xenomai        build the Xenomai interface],
