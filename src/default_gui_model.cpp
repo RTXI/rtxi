@@ -180,7 +180,8 @@ void DefaultGUIModel::createGUI(DefaultGUIModel::variable_t *var, int size) {
 	// Set layout to Mdi and show
 	setLayout(layout);
 	subWindow->setWidget(this);
-	show();
+	subWindow->show();
+	subWindow->adjustSize();
 }
 
 void DefaultGUIModel::update(DefaultGUIModel::update_flags_t) {
