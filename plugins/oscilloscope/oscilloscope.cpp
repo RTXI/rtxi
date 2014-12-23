@@ -1046,7 +1046,7 @@ Oscilloscope::Panel::Panel(QWidget *parent) :	QWidget(parent), RT::Thread(0), fi
 	QObject::connect(tabWidget,SIGNAL(currentChanged(QWidget *)),this,SLOT(showTab(void)));
 
 	// Create main layout
-	layout = new QVBoxLayout(this);
+	layout = new QVBoxLayout;
 
 	// Create scope group
 	scopeGroup = new QGroupBox(this);
