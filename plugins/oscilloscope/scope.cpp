@@ -14,7 +14,7 @@
 
 	 You should have received a copy of the GNU General Public License
 	 along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+	 */
 
 #include <QtGui>
 
@@ -103,15 +103,22 @@ Scope::Scope(QWidget *parent) : QwtPlot(parent) {
 	setAxisMaxMajor(QwtPlot::yLeft, divY);
 
 	// Disable axes
-	enableAxis(QwtPlot::yLeft, true);
-	enableAxis(QwtPlot::xBottom, true);
+	enableAxis(QwtPlot::yLeft, false);
+	enableAxis(QwtPlot::xBottom, false);
 
-	// Set y interval
-	setAxisScale(QwtPlot::yLeft, -1, 1);
+	// Statically set y interval
+	setAxisScale(QwtPlot::yLeft, -1.0, 1.0);
+	setAxisScale(QwtPlot::xBottom, 0.0, 1000.0);
 
 	// Disable autoscaling
 	setAxisAutoScale(QwtPlot::yLeft, false);
 	setAxisAutoScale(QwtPlot::xBottom, false);
+
+	// Setup scaling map
+	scaleMapY = new QwtScaleMap();
+	scaleMapY->setPaintInterval(-1.0, 1.0);
+	scaleMapX = new QwtScaleMap();
+	scaleMapX->setPaintInterval(0.0, 1000.0);
 
 	// Update scope background/scales/axes
 	updateScopeLayout();
@@ -318,10 +325,10 @@ double Scope::getDivT(void) const {
 	return hScl;
 }
 
-void Scope::setDivXY(size_t xdivs, size_t ydivs) {
+/*void Scope::setDivXY(size_t xdivs, size_t ydivs) {
 	divX = xdivs;
 	divY = ydivs;
-}
+}*/
 
 // Set x divisions
 void Scope::setDivT(double divT) {
@@ -389,15 +396,20 @@ void Scope::drawCurves(void) {
 		return;
 
 	for(std::list<Channel>::iterator i = channels.begin(), iend = channels.end();i != iend;++i) {
+		// Set data for channel
 		std::vector<double> x (i->data.size());
 		std::vector<double> y (i->data.size());
 		double *x_loc = x.data();
 		double *y_loc = y.data();
 
+		// Set scale map for channel
+		scaleMapX->setScaleInterval(0, hScl*divX);
+		scaleMapY->setScaleInterval(-i->scale*divY/2, i->scale*divY/2);
+
 		// Scale data to pixel coordinates
 		for(size_t j = 0; j < i->data.size(); ++j) {
-			*x_loc = (j*period)*width();
-			*y_loc = (i->data[(data_idx+j)%i->data.size()]+i->offset);
+			*x_loc = scaleMapX->transform(j*period);
+			*y_loc = scaleMapY->transform(i->data[(data_idx+j)%i->data.size()]+i->offset);
 			++x_loc;
 			++y_loc;
 		}

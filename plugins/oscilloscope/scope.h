@@ -156,7 +156,7 @@ class Scope : public QwtPlot {
 	void setPeriod(double);
 	size_t getDivX(void) const;
 	size_t getDivY(void) const;
-	void setDivXY(size_t,size_t);
+	//void setDivXY(size_t,size_t);
 
 	size_t getRefresh(void) const;
 	void setRefresh(size_t);
@@ -179,6 +179,7 @@ class Scope : public QwtPlot {
 	private:
 		void drawCurves(void);
 		void incrementInterval();
+
 		size_t divX;
 		size_t divY;
 		size_t data_idx;
@@ -201,6 +202,10 @@ class Scope : public QwtPlot {
 
 		// Scope painter elements
 		QwtPlotGrid *grid;
+
+		// Scaling engine
+		QwtScaleMap *scaleMapY;
+		QwtScaleMap *scaleMapX;
 
 		QTimer *timer;
 		QString dtLabel;

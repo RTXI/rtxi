@@ -448,7 +448,7 @@ void Oscilloscope::Panel::applyDisplayTab(void) {
 
 	scopeWindow->setTrigger(trigDirection, trigThreshold, trigChannel, trigHolding, trigHoldoff);
 
-	scopeWindow->setDivXY(divsXSpin->value(), divsYSpin->value());
+	//scopeWindow->setDivXY(divsXSpin->value(), divsYSpin->value());
 
 	adjustDataSize();
 
@@ -779,35 +779,35 @@ QWidget *Oscilloscope::Panel::createDisplayTab(QWidget *parent) {
 	refreshsSpin->setRange(100,10000);
 	refreshsSpin->setValue(250);
 
-	displayTabLayout->addWidget(new QLabel(tr("X Divs:"),page), 0, 9);
+	/*displayTabLayout->addWidget(new QLabel(tr("X Divs:"),page), 0, 9);
 	divsXSpin = new QSpinBox(page);
 	displayTabLayout->addWidget(divsXSpin, 0, 10);
 	divsXSpin->setRange(1,10);
-	divsXSpin->setValue(10);
+	divsXSpin->setValue(10);*/
 
-	displayTabLayout->addWidget(new QLabel(tr("Y Divs:"),page), 0, 11);
+	/*displayTabLayout->addWidget(new QLabel(tr("Y Divs:"),page), 0, 11);
 	divsYSpin = new QSpinBox(page);
 	displayTabLayout->addWidget(divsYSpin, 0, 12);
 	divsYSpin->setRange(1,10);
-	divsYSpin->setValue(10);
+	divsYSpin->setValue(10);*/
 
 	QLabel *downsampleLabel = new QLabel(tr("Downsample:"),page);
 	downsampleLabel->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
-	displayTabLayout->addWidget(downsampleLabel, 0, 13, 1, 2);
+	displayTabLayout->addWidget(downsampleLabel, 0, 9, 1, 2);
 	ratesSpin = new QSpinBox(page);
 	ratesSpin->setFixedWidth(40);
-	displayTabLayout->addWidget(ratesSpin, 0, 15);
+	displayTabLayout->addWidget(ratesSpin, 0, 11, 1, 1);
 	ratesSpin->setValue(downsample_rate);
 	QObject::connect(ratesSpin,SIGNAL(valueChanged(int)),this,SLOT(updateDownsampleRate(int)));
 	ratesSpin->setEnabled(true);
 	ratesSpin->setRange(1,2);
 	ratesSpin->setValue(1);
 
-	QLabel *bufferLabel = new QLabel(tr("Data Buffer\nSize (MB):"),page);
+	QLabel *bufferLabel = new QLabel(tr("Data Buffer Size (MB):"),page);
 	bufferLabel->setAlignment(Qt::AlignVCenter | Qt::AlignRight);
-	displayTabLayout->addWidget(bufferLabel, 0, 16, 1, 2);
+	displayTabLayout->addWidget(bufferLabel, 0, 12, 1, 3);
 	sizesEdit = new QLineEdit(page);
-	displayTabLayout->addWidget(sizesEdit, 0, 18, 1, 1);
+	displayTabLayout->addWidget(sizesEdit, 0, 16, 1, 2);
 	sizesEdit->setText(QString::number(scopeWindow->getDataSize()));
 	sizesEdit->setEnabled(false);
 
@@ -1008,8 +1008,8 @@ void Oscilloscope::Panel::showDisplayTab(void) {
 	//rateSpin->setValue(panel->rate);
 	sizesEdit->setText(QString::number(scopeWindow->getDataSize()));
 
-	divsXSpin->setValue(scopeWindow->getDivX());
-	divsYSpin->setValue(scopeWindow->getDivY());
+	//divsXSpin->setValue(scopeWindow->getDivX());
+	//divsYSpin->setValue(scopeWindow->getDivY());
 }
 
 ////////// #Panel
@@ -1070,9 +1070,9 @@ Oscilloscope::Panel::Panel(QWidget *parent) :	QWidget(parent), RT::Thread(0), fi
 	applyButton = new QPushButton("Apply");
 	QObject::connect(applyButton,SIGNAL(clicked(void)),this,SLOT(apply(void)));
 	setBttnLayout->addWidget(applyButton);
-	undoButton = new QPushButton("Undo");
+	/*undoButton = new QPushButton("Undo");
 	QObject::connect(applyButton,SIGNAL(clicked(void)),this,SLOT(undo(void)));
-	setBttnLayout->addWidget(undoButton);
+	setBttnLayout->addWidget(undoButton);*/
 	settingsButton = new QPushButton("Screenshot");
 	QObject::connect(settingsButton,SIGNAL(clicked()),this,SLOT(screenshot()));
 	setBttnLayout->addWidget(settingsButton);
@@ -1124,8 +1124,8 @@ void Oscilloscope::Panel::updateDownsampleRate(int r) {
 	downsample_rate = r;
 }
 
-void Oscilloscope::Panel::undo(void) {
-}
+/*void Oscilloscope::Panel::undo(void) {
+}*/
 
 void Oscilloscope::Panel::execute(void) {
 	size_t nchans = scopeWindow->getChannelCount();

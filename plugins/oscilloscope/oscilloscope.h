@@ -106,7 +106,7 @@ namespace Oscilloscope {
 		void showDisplayTab(void);
 		void buildChannelList(void);
 		void screenshot(void);
-		void undo(void);
+		//void undo(void);
 		void apply(void);
 		void showTab(void);
 		void activateChannel(bool);
@@ -136,8 +136,8 @@ namespace Oscilloscope {
 		QGroupBox *setBttnGroup;
 
 		// Properties
-		QSpinBox *divsXSpin;
-		QSpinBox *divsYSpin;
+		//QSpinBox *divsXSpin;
+		//QSpinBox *divsYSpin;
 		QSpinBox *ratesSpin;
 		QLineEdit *sizesEdit;
 		QButtonGroup *trigsGroup;
@@ -165,7 +165,7 @@ namespace Oscilloscope {
 		QPushButton *pauseButton;
 		QPushButton *settingsButton;
 		QPushButton *applyButton;
-		QPushButton *undoButton;
+		//QPushButton *undoButton;
 		QPushButton *activateButton;
 
 		Fifo fifo;
