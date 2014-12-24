@@ -448,8 +448,6 @@ void Oscilloscope::Panel::applyDisplayTab(void) {
 
 	scopeWindow->setTrigger(trigDirection, trigThreshold, trigChannel, trigHolding, trigHoldoff);
 
-	//scopeWindow->setDivXY(divsXSpin->value(), divsYSpin->value());
-
 	adjustDataSize();
 
 	scopeWindow->updateScopeLayout();
@@ -779,18 +777,6 @@ QWidget *Oscilloscope::Panel::createDisplayTab(QWidget *parent) {
 	refreshsSpin->setRange(100,10000);
 	refreshsSpin->setValue(250);
 
-	/*displayTabLayout->addWidget(new QLabel(tr("X Divs:"),page), 0, 9);
-	divsXSpin = new QSpinBox(page);
-	displayTabLayout->addWidget(divsXSpin, 0, 10);
-	divsXSpin->setRange(1,10);
-	divsXSpin->setValue(10);*/
-
-	/*displayTabLayout->addWidget(new QLabel(tr("Y Divs:"),page), 0, 11);
-	divsYSpin = new QSpinBox(page);
-	displayTabLayout->addWidget(divsYSpin, 0, 12);
-	divsYSpin->setRange(1,10);
-	divsYSpin->setValue(10);*/
-
 	QLabel *downsampleLabel = new QLabel(tr("Downsample:"),page);
 	downsampleLabel->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
 	displayTabLayout->addWidget(downsampleLabel, 0, 9, 1, 2);
@@ -1005,11 +991,7 @@ void Oscilloscope::Panel::showDisplayTab(void) {
 	trigsHoldoffList->setCurrentIndex(trigHoldoffUnits);
 	trigsHoldoffEdit->setText(QString::number(trigHoldoff));
 
-	//rateSpin->setValue(panel->rate);
 	sizesEdit->setText(QString::number(scopeWindow->getDataSize()));
-
-	//divsXSpin->setValue(scopeWindow->getDivX());
-	//divsYSpin->setValue(scopeWindow->getDivY());
 }
 
 ////////// #Panel
@@ -1070,9 +1052,6 @@ Oscilloscope::Panel::Panel(QWidget *parent) :	QWidget(parent), RT::Thread(0), fi
 	applyButton = new QPushButton("Apply");
 	QObject::connect(applyButton,SIGNAL(clicked(void)),this,SLOT(apply(void)));
 	setBttnLayout->addWidget(applyButton);
-	/*undoButton = new QPushButton("Undo");
-	QObject::connect(applyButton,SIGNAL(clicked(void)),this,SLOT(undo(void)));
-	setBttnLayout->addWidget(undoButton);*/
 	settingsButton = new QPushButton("Screenshot");
 	QObject::connect(settingsButton,SIGNAL(clicked()),this,SLOT(screenshot()));
 	setBttnLayout->addWidget(settingsButton);
@@ -1123,9 +1102,6 @@ Oscilloscope::Panel::~Panel(void) {
 void Oscilloscope::Panel::updateDownsampleRate(int r) {
 	downsample_rate = r;
 }
-
-/*void Oscilloscope::Panel::undo(void) {
-}*/
 
 void Oscilloscope::Panel::execute(void) {
 	size_t nchans = scopeWindow->getChannelCount();

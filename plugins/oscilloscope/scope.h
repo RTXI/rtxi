@@ -1,5 +1,5 @@
 /*
- 	 The Real-Time eXperiment Interface (RTXI)
+	 The Real-Time eXperiment Interface (RTXI)
 	 Copyright (C) 2011 Georgia Institute of Technology, University of Utah, Weill Cornell Medical College
 
 	 This program is free software: you can redistribute it and/or modify
@@ -15,7 +15,7 @@
 	 You should have received a copy of the GNU General Public License
 	 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
- */
+*/
 
 /*
 	 This class instantiates a single scope instance.
@@ -24,7 +24,7 @@
 	 scopes. Multiple scope objects can be instantiated,
 	 and each instance will have it's own set of settings
 	 that can be edited with the Panel class.
- */
+	 */
 
 #ifndef SCOPE_H
 #define SCOPE_H
@@ -156,7 +156,6 @@ class Scope : public QwtPlot {
 	void setPeriod(double);
 	size_t getDivX(void) const;
 	size_t getDivY(void) const;
-	//void setDivXY(size_t,size_t);
 
 	size_t getRefresh(void) const;
 	void setRefresh(size_t);
@@ -174,42 +173,42 @@ class Scope : public QwtPlot {
 		void timeoutEvent(void);
 
 	protected:
-		void resizeEvent(QResizeEvent *);
+	void resizeEvent(QResizeEvent *);
 
 	private:
-		void drawCurves(void);
-		void incrementInterval();
+	void drawCurves(void);
+	void incrementInterval();
 
-		size_t divX;
-		size_t divY;
-		size_t data_idx;
-		size_t data_size;
-		double hScl;        // horizontal scale for time (ms)
-		double period;      // real-time period of system (ms)
-		size_t refresh;
+	size_t divX;
+	size_t divY;
+	size_t data_idx;
+	size_t data_size;
+	double hScl;        // horizontal scale for time (ms)
+	double period;      // real-time period of system (ms)
+	size_t refresh;
 
-		bool triggering;
-		bool triggerHolding;
-		trig_t triggerDirection;
-		double triggerThreshold;
-		double triggerHoldoff;
-		std::list<size_t> triggerQueue;
-		std::list<Channel>::iterator triggerChannel;
-		size_t triggerLast;
+	bool triggering;
+	bool triggerHolding;
+	trig_t triggerDirection;
+	double triggerThreshold;
+	double triggerHoldoff;
+	std::list<size_t> triggerQueue;
+	std::list<Channel>::iterator triggerChannel;
+	size_t triggerLast;
 
-		// Scope primary paint element
-		QwtPlotDirectPainter *d_directPainter;
+	// Scope primary paint element
+	QwtPlotDirectPainter *d_directPainter;
 
-		// Scope painter elements
-		QwtPlotGrid *grid;
+	// Scope painter elements
+	QwtPlotGrid *grid;
 
-		// Scaling engine
-		QwtScaleMap *scaleMapY;
-		QwtScaleMap *scaleMapX;
+	// Scaling engine
+	QwtScaleMap *scaleMapY;
+	QwtScaleMap *scaleMapX;
 
-		QTimer *timer;
-		QString dtLabel;
-		std::list<Channel> channels;
+	QTimer *timer;
+	QString dtLabel;
+	std::list<Channel> channels;
 }; // Scope
 
 #endif // SCOPE_H

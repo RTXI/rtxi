@@ -325,11 +325,6 @@ double Scope::getDivT(void) const {
 	return hScl;
 }
 
-/*void Scope::setDivXY(size_t xdivs, size_t ydivs) {
-	divX = xdivs;
-	divY = ydivs;
-}*/
-
 // Set x divisions
 void Scope::setDivT(double divT) {
 	hScl = divT;
