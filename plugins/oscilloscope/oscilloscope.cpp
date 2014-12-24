@@ -1,5 +1,5 @@
 /*
- 	 The Real-Time eXperiment Interface (RTXI)
+	 The Real-Time eXperiment Interface (RTXI)
 	 Copyright (C) 2011 Georgia Institute of Technology, University of Utah, Weill Cornell Medical College
 
 	 This program is free software: you can redistribute it and/or modify
@@ -14,9 +14,7 @@
 
 	 You should have received a copy of the GNU General Public License
 	 along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
 */
-
 
 /* 
 	 This class creates and controls the drawing parameters
@@ -349,7 +347,7 @@ void Oscilloscope::Panel::applyChannelTab(void) {
 				break;
 			default:
 				ERROR_MSG("Oscilloscope::Panel::applyChannelTab : invalid scale selection\n");
-				scale = 2.0;
+				scale = 1.0;
 		}
 		if (scale != i->getScale()) {
 			scopeWindow->setChannelScale(i, scale);
@@ -414,7 +412,6 @@ void Oscilloscope::Panel::applyChannelTab(void) {
 		/*if(&*i == trigChan)
 			trigLine->setPoints(0,panel->val2pix(trigThresh,*i),
 			width(),scopeWindow->val2pix(scopeWindow->trigThresh,*i));*/
-
 	}
 	scopeWindow->updateScopeLayout();
 	showChannelTab();
@@ -961,7 +958,7 @@ void Oscilloscope::Panel::showChannelTab(void) {
 	widthsList->setEnabled(found);
 	stylesList->setEnabled(found);
 	if (!found) {
-		scalesList->setCurrentIndex(4);
+		scalesList->setCurrentIndex(7);
 		offsetsEdit->setText(QString::number(0));
 		offsetsList->setCurrentIndex(0);
 		colorsList->setCurrentIndex(0);
@@ -1023,7 +1020,7 @@ Oscilloscope::Panel::Panel(QWidget *parent) :	QWidget(parent), RT::Thread(0), fi
 
 	// Make Mdi
 	subWindow = new QMdiSubWindow;
-	subWindow->setMinimumSize(900,600);
+	subWindow->setFixedSize(848,625);
 	subWindow->setAttribute(Qt::WA_DeleteOnClose);
 	subWindow->setWindowFlags(Qt::CustomizeWindowHint);
 	subWindow->setWindowFlags(Qt::WindowCloseButtonHint);

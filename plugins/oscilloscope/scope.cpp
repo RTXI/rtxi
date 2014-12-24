@@ -1,5 +1,5 @@
 /*
- 	 The Real-Time eXperiment Interface (RTXI)
+	 The Real-Time eXperiment Interface (RTXI)
 	 Copyright (C) 2011 Georgia Institute of Technology, University of Utah, Weill Cornell Medical College
 
 	 This program is free software: you can redistribute it and/or modify
@@ -14,7 +14,6 @@
 
 	 You should have received a copy of the GNU General Public License
 	 along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
 */
 
 #include <QtGui>
@@ -74,9 +73,9 @@ Scope::Scope(QWidget *parent) : QwtPlot(parent) {
 	divY = 10;
 	data_idx = 0;
 	data_size = 100;
-	hScl = 10.0;
+	hScl = 1.0;
 	period = 1.0;
-	dtLabel = "10ms";
+	dtLabel = "1ms";
 	refresh = 250;
 	triggering = false;
 	triggerHolding = false;
@@ -85,7 +84,7 @@ Scope::Scope(QWidget *parent) : QwtPlot(parent) {
 	triggerHoldoff = 5.0;
 	triggerLast = (size_t)(-1);
 	triggerChannel = channels.end();
-  
+
 	// Initialize director
 	d_directPainter = new QwtPlotDirectPainter();
 	plotLayout()->setAlignCanvasToScales(true);
@@ -99,20 +98,20 @@ Scope::Scope(QWidget *parent) : QwtPlot(parent) {
 	grid->setPen(Qt::gray, 0, Qt::DotLine);
 	grid->attach(this);
 
-	// Setup center cross
-	d_origin = new QwtPlotMarker();
-	d_origin->setLineStyle(QwtPlotMarker::Cross);
-	d_origin->setLinePen(Qt::gray, 0, Qt::SolidLine);
-	d_origin->setValue((hScl*divX)/2,0);
-	d_origin->attach(this);
-
 	// Set division limits on the scope
 	setAxisMaxMajor(QwtPlot::xBottom, divX);
 	setAxisMaxMajor(QwtPlot::yLeft, divY);
 
-	// Enable axes DISABLE WHEN DONE DEBUGGING
+	// Disable axes
 	enableAxis(QwtPlot::yLeft, true);
 	enableAxis(QwtPlot::xBottom, true);
+
+	// Set y interval
+	setAxisScale(QwtPlot::yLeft, -1, 1);
+
+	// Disable autoscaling
+	setAxisAutoScale(QwtPlot::yLeft, false);
+	setAxisAutoScale(QwtPlot::xBottom, false);
 
 	// Update scope background/scales/axes
 	updateScopeLayout();
@@ -139,20 +138,8 @@ void Scope::timeoutEvent(void) {
 		drawCurves();
 }
 
+// Update axes
 void Scope::updateScopeLayout(void) {
-
-	// Set x interval
-	x_interval.setInterval(0, hScl*divX, QwtInterval::IncludeBorders);
-	setAxisScale(QwtPlot::xBottom, x_interval.minValue(), x_interval.maxValue());
-
-	// Set y interval
-	y_interval.setInterval(-10, 10, QwtInterval::IncludeBorders);
-	setAxisScale(QwtPlot::yLeft, y_interval.minValue(), y_interval.maxValue());
-
-	// Update cross hair
-	d_origin->setValue((hScl*divX)/2,0);
-
-	// Update axes
 	replot();
 }
 
@@ -258,13 +245,13 @@ void Scope::setData(double data[],size_t size) {
 
 				// Scale data to pixel coordinates
 				for(size_t j = 0; j < i->data.size(); ++j) {
-					*x_loc = ((j*period)*width())/(hScl*divX);
+					*x_loc = (j*period)*width();
 					*y_loc = i->data[(data_idx+j)%i->data.size()];
 					++x_loc;
 					++y_loc;
 				}
 				// Plot
-				i->curve->setRawSamples(x.data(), y.data(), (int)i->data.size());
+				i->curve->setSamples(x.data(), y.data(), i->data.size());
 			}
 		}
 	}
@@ -378,7 +365,7 @@ void Scope::setRefresh(size_t r) {
 
 // Set channel scale
 void Scope::setChannelScale(std::list<Channel>::iterator channel,double scale) {
-	channel->scale = QwtPlot::axisInterval(QwtPlot::yLeft).maxValue()*2/(scale*divY);
+	channel->scale = scale;
 }
 
 // Set channel offset
@@ -409,14 +396,17 @@ void Scope::drawCurves(void) {
 
 		// Scale data to pixel coordinates
 		for(size_t j = 0; j < i->data.size(); ++j) {
-			*x_loc = (((j*period)*width())/(hScl*divX));
-			*y_loc = i->scale*(i->data[(data_idx+j)%i->data.size()]+i->offset);
+			*x_loc = (j*period)*width();
+			*y_loc = (i->data[(data_idx+j)%i->data.size()]+i->offset);
 			++x_loc;
 			++y_loc;
 		}
 		// Append data to curve
-		i->curve->setSamples(x.data(), y.data(), i->data.size()); // not optimal - revisit
+		// Makes deep copy - which is not optimal
+		// TODO: change to pointer based method
+		i->curve->setSamples(x.data(), y.data(), i->data.size());
 	}
+
 	// Update plot
 	replot();
 }

@@ -200,12 +200,7 @@ class Scope : public QwtPlot {
 		QwtPlotDirectPainter *d_directPainter;
 
 		// Scope painter elements
-		QwtPlotMarker *d_origin;
 		QwtPlotGrid *grid;
-
-		int paintedPoints;
-		QwtInterval x_interval;
-		QwtInterval y_interval;
 
 		QTimer *timer;
 		QString dtLabel;
