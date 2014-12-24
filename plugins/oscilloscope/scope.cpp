@@ -378,7 +378,7 @@ void Scope::setRefresh(size_t r) {
 
 // Set channel scale
 void Scope::setChannelScale(std::list<Channel>::iterator channel,double scale) {
-	channel->scale = QwtPlot::axisInterval(QwtPlot::yLeft).maxValue()/(scale*divY);
+	channel->scale = QwtPlot::axisInterval(QwtPlot::yLeft).maxValue()*2/(scale*divY);
 }
 
 // Set channel offset
@@ -410,7 +410,7 @@ void Scope::drawCurves(void) {
 		// Scale data to pixel coordinates
 		for(size_t j = 0; j < i->data.size(); ++j) {
 			*x_loc = (((j*period)*width())/(hScl*divX));
-			*y_loc = (i->data[(data_idx+j)%i->data.size()]+i->offset);
+			*y_loc = i->scale*(i->data[(data_idx+j)%i->data.size()]+i->offset);
 			++x_loc;
 			++y_loc;
 		}

@@ -327,7 +327,7 @@ void Oscilloscope::Panel::applyChannelTab(void) {
 			bool active = setInactiveSync();
 			QwtPlotCurve *curve = new QwtPlotCurve(info->name);
 
-			i = scopeWindow->insertChannel(info->name + " 2 V/div", 2.0, 0.0, QPen(Qt::red, 1, Qt::SolidLine), curve, info);
+			i = scopeWindow->insertChannel(info->name + " 1 V/div", 2.0, 0.0, QPen(Qt::red, 1, Qt::SolidLine), curve, info);
 
 			flushFifo();
 			setActive(active);
@@ -961,7 +961,7 @@ void Oscilloscope::Panel::showChannelTab(void) {
 	widthsList->setEnabled(found);
 	stylesList->setEnabled(found);
 	if (!found) {
-		scalesList->setCurrentIndex(3);
+		scalesList->setCurrentIndex(4);
 		offsetsEdit->setText(QString::number(0));
 		offsetsList->setCurrentIndex(0);
 		colorsList->setCurrentIndex(0);
