@@ -48,7 +48,7 @@ int RT::OS::initiate(void) {
 	setrlimit(RLIMIT_MEMLOCK,&rlim);
 
 	if (mlockall(MCL_CURRENT | MCL_FUTURE)) {
-		ERROR_MSG("RTOS:RTAI::initiate : failed to lock memory.\n");
+		ERROR_MSG("RTOS:Xenomai::initiate : failed to lock memory.\n");
 		return -EPERM;
 	}
 
