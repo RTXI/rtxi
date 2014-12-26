@@ -3,6 +3,6 @@ Type=Application
 Name=RTXI
 Exec=sudo rtxi
 MimeType=image/x-mydata;
-Icon=/usr/local/lib/rtxi/icon.png
+Icon=/usr/local/lib/rtxi/RTXI-icon.png
 Terminal=true
 Comment=The Real-Time eXperiment Interface
