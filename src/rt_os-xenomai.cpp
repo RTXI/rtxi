@@ -24,6 +24,13 @@
 #include <sys/resource.h>
 #include <native/task.h>
 #include <native/timer.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <signal.h>
+#include <getopt.h>
+#include <execinfo.h>
+#include <unistd.h>
 
 typedef struct {
 	long long period;
@@ -32,6 +39,35 @@ typedef struct {
 
 static bool init_rt = false;
 static pthread_key_t is_rt_key;
+
+static const char *sigdebug_reasons[] = {
+    [SIGDEBUG_UNDEFINED] = "undefined",
+    [SIGDEBUG_MIGRATE_SIGNAL] = "received signal",
+    [SIGDEBUG_MIGRATE_SYSCALL] = "invoked syscall",
+    [SIGDEBUG_MIGRATE_FAULT] = "triggered fault",
+    [SIGDEBUG_MIGRATE_PRIOINV] = "affected by priority inversion",
+    [SIGDEBUG_NOMLOCK] = "missing mlockall",
+    [SIGDEBUG_WATCHDOG] = "runaway thread",
+};
+ 
+/* Backtrace when we drop out of real-time */
+void rt_switch_warning(int sig, siginfo_t *si, void *context) {
+		const char fmt[] = "\nMode switch (reason: %s). Backtrace:\n";
+    unsigned int reason = si->si_value.sival_int;
+    static char buffer[256];
+    void *bt[200];
+    int nentries;
+
+    if(reason > SIGDEBUG_WATCHDOG)
+    	reason = SIGDEBUG_UNDEFINED;
+
+		/* Dump a backtrace of the frame which caused the switch to
+			 secondary mode: */
+		nentries = snprintf(buffer, sizeof(buffer), fmt, sigdebug_reasons[reason]);
+		nentries = write(STDERR_FILENO, buffer, nentries);
+		nentries = backtrace(bt,sizeof(bt) / sizeof(bt[0]));
+		backtrace_symbols_fd(bt,nentries,fileno(stdout));
+}
 
 int RT::OS::initiate(void) {
 	rt_timer_set_mode(TM_ONESHOT);
@@ -66,6 +102,12 @@ int RT::OS::createTask(RT::OS::Task *task,void *(*entry)(void *),void *arg,int p
 	int retval = 0;
 	xenomai_task_t *t = new xenomai_task_t;
 	int priority = 99;
+
+	struct sigaction sa;
+	sigemptyset(&sa.sa_mask);
+	sa.sa_sigaction = rt_switch_warning;
+	sa.sa_flags = SA_SIGINFO;
+	sigaction(SIGDEBUG, &sa, NULL);
 
 	// Invert priority, default prio=0 but max priority for xenomai task is 99
 	if ((prio >=0) && (prio <=99))
