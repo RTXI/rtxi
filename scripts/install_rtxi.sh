@@ -48,7 +48,7 @@ else
 	exit 1
 fi
 
-make -j2 -C ./
+make -sj2 -C ./
 
 if [ $? -eq 0 ]; then
 	echo "----->RTXI compilation successful."
