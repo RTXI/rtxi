@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=RTXI
+Exec=sudo rtxi
+MimeType=image/x-mydata;
+Icon=/usr/local/lib/rtxi/logo.png
+Terminal=true
+Comment=The Real-Time eXperiment Interface
