@@ -311,7 +311,6 @@ int DoneEvent::callback(void) {
 	return 0;
 }
 
-
 DataRecorder::CustomEvent::CustomEvent(QEvent::Type type) : QEvent(type) {
    data = 0;
 }
@@ -320,11 +319,9 @@ void DataRecorder::CustomEvent::setData(void *ptr) {
    data = ptr;
 }
 
-
 void * DataRecorder::CustomEvent::getData(void) {
    return data;
 }
-
 
 void DataRecorder::startRecording(void) {
 	Event::Object event(Event::START_RECORDING_EVENT);
@@ -608,8 +605,7 @@ void DataRecorder::Panel::receiveEvent(const Event::Object *event) {
 
 	} else if (event->getName() == Event::IO_BLOCK_REMOVE_EVENT) {
 
-		IO::Block *block = reinterpret_cast<IO::Block *> (event->getParam(
-					"block"));
+		IO::Block *block = reinterpret_cast<IO::Block *> (event->getParam("block"));
 		QString name = QString::fromStdString(block->getName()) + " " + QString::number(block->getID());
 
 		int n = 0;

@@ -272,9 +272,8 @@ class DefaultGUIModel : public QWidget, public RT::Thread, public Plugin::Object
 
 			QGroupBox *gridBox;
 			QGroupBox *buttonGroup;
-			QMdiSubWindow *subWindow;
-
 			std::string myname;
+			QMdiSubWindow *subWindow;
 
 	}; // class DefaultGUIModel
 
