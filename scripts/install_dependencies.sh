@@ -61,7 +61,7 @@ else
 	tar xf hdf5-1.8.4.tar.bz2
 	cd hdf5-1.8.4
 	./configure --prefix=/usr
-	make -j2
+	make -sj2
 	sudo make install
 	if [ $? -eq 0 ]; then
 			echo "----->HDF5 installed."
@@ -82,7 +82,7 @@ else
 	tar xf qwt-6.1.0.tar.bz2
 	cd qwt-6.1.0
 	qmake qwt.pro
-	make -j2
+	make -sj2
 	sudo make install
 	sudo cp /usr/local/lib/qwt/lib/libqwt.so.6.1.0 /usr/lib/.
 	sudo ln -sf /usr/lib/libqwt.so.6.1.0 /usr/lib/libqwt.so

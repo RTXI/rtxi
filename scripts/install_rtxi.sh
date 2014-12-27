@@ -48,7 +48,7 @@ else
 	exit 1
 fi
 
-make -j2 -C ./
+make -sj2 -C ./
 
 if [ $? -eq 0 ]; then
 	echo "----->RTXI compilation successful."
@@ -68,6 +68,10 @@ fi
 
 echo "----->Putting things into place."
 sudo cp -f libtool /usr/local/lib/rtxi/
+sudo cp -f scripts/RTXI-icon.png /usr/local/lib/rtxi/
+sudo cp -f scripts/rtxi.desktop /usr/share/applications/
+sudo cp -f /usr/share/applications/rtxi.desktop ~/Desktop/
+sudo chmod +x ~/Desktop/rtxi.desktop
 sudo cp -f rtxi.conf /etc/
 sudo cp -f /usr/xenomai/sbin/analogy_config /usr/sbin/
 sudo cp -f ./scripts/rtxi_load_analogy /etc/init.d/

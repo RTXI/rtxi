@@ -1,5 +1,5 @@
 /*
- 	 The Real-Time eXperiment Interface (RTXI)
+	 The Real-Time eXperiment Interface (RTXI)
 	 Copyright (C) 2011 Georgia Institute of Technology, University of Utah, Weill Cornell Medical College
 
 	 This program is free software: you can redistribute it and/or modify
@@ -15,12 +15,13 @@
 	 You should have received a copy of the GNU General Public License
 	 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-*/
+ */
 
 #include <debug.h>
 #include <event.h>
 #include <mutex.h>
 #include <rt.h>
+#include <native/task.h>
 
 namespace {
 	class SetThreadActive:public RT::Event {
@@ -266,8 +267,13 @@ void RT::System::removeThread(RT::Thread *thread) {
 }
 
 void *RT::System::bounce(void *param) {
+
+	// Warning when Xenomai switches to seconday mode
+	rt_task_set_mode(0, T_WARNSW, NULL);
+
 	RT::System *that = reinterpret_cast<RT::System *>(param);
-	if (that) that->execute();
+	if (that)
+		that->execute();
 	return 0;
 }
 
