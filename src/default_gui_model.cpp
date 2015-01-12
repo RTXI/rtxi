@@ -66,6 +66,7 @@ void DefaultGUILineEdit::redden(void) {
 DefaultGUIModel::DefaultGUIModel(std::string name, DefaultGUIModel::variable_t *var, size_t size):
 	QWidget(MainWindow::getInstance()->centralWidget()), Workspace::Instance(name, var, size), myname(name) {
 		setWindowTitle(QString::number(getID()) + " " + QString::fromStdString(name));
+
 		QTimer *timer = new QTimer(this);
 		timer->start(1000);
 		QObject::connect(timer,SIGNAL(timeout(void)),this,SLOT(refresh(void)));
@@ -89,6 +90,7 @@ void DefaultGUIModel::createGUI(DefaultGUIModel::variable_t *var, int size) {
 
 	// Make Mdi
 	subWindow = new QMdiSubWindow;
+	subWindow->setWindowIcon(QIcon("/usr/local/lib/rtxi/RTXI-widget-icon.png"));
 	subWindow->setWindowFlags(Qt::CustomizeWindowHint);
 	subWindow->setWindowFlags(Qt::WindowCloseButtonHint);
 	subWindow->setOption(QMdiSubWindow::RubberBandResize, true);

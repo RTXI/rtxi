@@ -69,6 +69,8 @@ fi
 echo "----->Putting things into place."
 sudo cp -f libtool /usr/local/lib/rtxi/
 sudo cp -f scripts/RTXI-icon.svg /usr/local/lib/rtxi/
+sudo cp -f scripts/RTXI-widget-icon.png /usr/local/lib/rtxi
+sudo cp -f scripts/Trolltech.conf ~/.config/ # makes the GUI look all nice and pretty
 sudo cp -f scripts/rtxi.desktop /usr/share/applications/
 # sudo cp -f /usr/share/applications/rtxi.desktop ~/Desktop/  The user is root, so this is pointless.
 # sudo chmod +x ~/Desktop/rtxi.desktop

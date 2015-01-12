@@ -38,6 +38,7 @@ MainWindow::MainWindow (void) : QMainWindow(NULL, Qt::Window) {
 
 	/* Initialize Window Settings */
 	setWindowTitle("RTXI - Real-time eXperimental Interface");
+	setWindowIcon(QIcon("/usr/local/lib/rtxi/RTXI-icon.png"));
 
 	/* Initialize Menus */
 	createFileActions();
@@ -115,7 +116,7 @@ void MainWindow::removeModuleMenuItemAt (int id) {
 }
 
 QAction* MainWindow::createUtilMenuItem(const QString &text, const QObject * receiver, const char *member) {
-	//return utilMenu->addAction (text, receiver, member);
+	return utilMenu->addAction (text, receiver, member);
 }
 
 void MainWindow::setUtilMenuItemParameter (QAction *action, int parameter) {

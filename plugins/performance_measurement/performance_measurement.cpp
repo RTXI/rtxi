@@ -47,6 +47,7 @@ PerformanceMeasurement::Panel::Panel(QWidget *parent) : QWidget(parent),
 
 		// Make Mdi
 		QMdiSubWindow *subWindow = new QMdiSubWindow;
+	   subWindow->setWindowIcon(QIcon("/usr/local/lib/rtxi/RTXI-widget-icon.png"));
 		subWindow->setAttribute(Qt::WA_DeleteOnClose);
 		subWindow->setWindowFlags(Qt::CustomizeWindowHint);
 		subWindow->setWindowFlags(Qt::WindowCloseButtonHint);

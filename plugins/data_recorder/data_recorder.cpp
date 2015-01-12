@@ -60,118 +60,118 @@ struct SetFileNameEditEventData {
 
 class InsertChannelEvent: public RT::Event {
 
-public:
+	public:
 
-	InsertChannelEvent(bool &, RT::List<DataRecorder::Channel> &, RT::List<
-			DataRecorder::Channel>::iterator, DataRecorder::Channel &);
-	~InsertChannelEvent(void);
+		InsertChannelEvent(bool &, RT::List<DataRecorder::Channel> &, RT::List<
+				DataRecorder::Channel>::iterator, DataRecorder::Channel &);
+		~InsertChannelEvent(void);
 
-	int callback(void);
+		int callback(void);
 
-private:
+	private:
 
-	bool &recording;
-	RT::List<DataRecorder::Channel> &channels;
-	RT::List<DataRecorder::Channel>::iterator end;
-	DataRecorder::Channel &channel;
+		bool &recording;
+		RT::List<DataRecorder::Channel> &channels;
+		RT::List<DataRecorder::Channel>::iterator end;
+		DataRecorder::Channel &channel;
 
 }; // class InsertChannelEvent
 
 class RemoveChannelEvent: public RT::Event {
 
-public:
+	public:
 
-	RemoveChannelEvent(bool &, RT::List<DataRecorder::Channel> &,
-			DataRecorder::Channel &);
-	~RemoveChannelEvent(void);
+		RemoveChannelEvent(bool &, RT::List<DataRecorder::Channel> &,
+				DataRecorder::Channel &);
+		~RemoveChannelEvent(void);
 
-	int callback(void);
+		int callback(void);
 
-private:
+	private:
 
-	bool &recording;
-	RT::List<DataRecorder::Channel> &channels;
-	DataRecorder::Channel &channel;
+		bool &recording;
+		RT::List<DataRecorder::Channel> &channels;
+		DataRecorder::Channel &channel;
 
 }; // class RemoveChannelEvent
 
 class OpenFileEvent: public RT::Event {
 
-public:
+	public:
 
-	OpenFileEvent(QString &, AtomicFifo &);
-	~OpenFileEvent(void);
+		OpenFileEvent(QString &, AtomicFifo &);
+		~OpenFileEvent(void);
 
-	int callback(void);
+		int callback(void);
 
-private:
+	private:
 
-	QString &filename;
-	AtomicFifo &fifo;
+		QString &filename;
+		AtomicFifo &fifo;
 
 }; // class OpenFileEvent
 
 class StartRecordingEvent: public RT::Event {
 
-public:
+	public:
 
-	StartRecordingEvent(bool &, AtomicFifo &);
-	~StartRecordingEvent(void);
+		StartRecordingEvent(bool &, AtomicFifo &);
+		~StartRecordingEvent(void);
 
-	int callback(void);
+		int callback(void);
 
-private:
+	private:
 
-	bool &recording;
-	AtomicFifo &fifo;
+		bool &recording;
+		AtomicFifo &fifo;
 
 }; // class StartRecordingEvent
 
 class StopRecordingEvent: public RT::Event {
 
-public:
+	public:
 
-	StopRecordingEvent(bool &, AtomicFifo &);
-	~StopRecordingEvent(void);
+		StopRecordingEvent(bool &, AtomicFifo &);
+		~StopRecordingEvent(void);
 
-	int callback(void);
+		int callback(void);
 
-private:
+	private:
 
-	bool &recording;
-	AtomicFifo &fifo;
+		bool &recording;
+		AtomicFifo &fifo;
 
 }; //class StopRecordingEvent
 
 class AsyncDataEvent: public RT::Event {
 
-public:
+	public:
 
-	AsyncDataEvent(const double *, size_t, AtomicFifo &);
-	~AsyncDataEvent(void);
+		AsyncDataEvent(const double *, size_t, AtomicFifo &);
+		~AsyncDataEvent(void);
 
-	int callback(void);
+		int callback(void);
 
-private:
+	private:
 
-	const double *data;
-	size_t size;
-	AtomicFifo &fifo;
+		const double *data;
+		size_t size;
+		AtomicFifo &fifo;
 
 }; // class AsyncDataEvent
 
 class DoneEvent: public RT::Event {
 
-public:
+	public:
 
-	DoneEvent(AtomicFifo &);
-	~DoneEvent(void);
+		DoneEvent(AtomicFifo &);
+		~DoneEvent(void);
 
-	int callback(void);
+		int callback(void);
 
-private:
+	private:
 
-	AtomicFifo &fifo;
+		AtomicFifo &fifo;
 
 }; // class DoneEvent
 
@@ -238,6 +238,7 @@ StartRecordingEvent::~StartRecordingEvent(void) {
 }
 
 int StartRecordingEvent::callback(void) {
+//std::cout<<"This is the start token..."<<std::endl;
 	DataRecorder::data_token_t token;
 
 	recording = true;
@@ -386,6 +387,7 @@ DataRecorder::Panel::Panel(QWidget *parent, size_t buffersize) :
 
 		// Make Mdi
 		subWindow = new QMdiSubWindow;
+		subWindow->setWindowIcon(QIcon("/usr/local/lib/rtxi/RTXI-widget-icon.png"));
 		subWindow->setFixedSize(500,450);
 		subWindow->setAttribute(Qt::WA_DeleteOnClose);
 		subWindow->setWindowFlags(Qt::CustomizeWindowHint);
@@ -425,10 +427,10 @@ DataRecorder::Panel::Panel(QWidget *parent, size_t buffersize) :
 		// Create elements for arrow
 		QPushButton *rButton = new QPushButton("Add");
 		channelLayout->addWidget(rButton);
-		QObject::connect(rButton,SIGNAL(pressed(void)),this,SLOT(insertChannel(void)));
+		QObject::connect(rButton,SIGNAL(released(void)),this,SLOT(insertChannel(void)));
 		QPushButton *lButton = new QPushButton("Remove");
 		channelLayout->addWidget(lButton);
-		QObject::connect(lButton,SIGNAL(pressed(void)),this,SLOT(removeChannel(void)));
+		QObject::connect(lButton,SIGNAL(released(void)),this,SLOT(removeChannel(void)));
 
 		// Create child widget and layout
 		sampleGroup = new QGroupBox(tr("Sample Control"));
@@ -474,7 +476,7 @@ DataRecorder::Panel::Panel(QWidget *parent, size_t buffersize) :
 		fileLayout->addWidget(fileNameEdit);
 		QPushButton *fileChangeButton = new QPushButton("Choose File");
 		fileLayout->addWidget(fileChangeButton);
-		QObject::connect(fileChangeButton,SIGNAL(clicked(void)),this,SLOT(changeDataFile(void)));
+		QObject::connect(fileChangeButton,SIGNAL(released(void)),this,SLOT(changeDataFile(void)));
 
 		fileLayout->addWidget(new QLabel(tr("Downsample \nRate:")));
 		downsampleSpin = new QSpinBox(this);
@@ -503,13 +505,13 @@ DataRecorder::Panel::Panel(QWidget *parent, size_t buffersize) :
 
 		// Create elements for box
 		startRecordButton = new QPushButton("Start Recording");
-		QObject::connect(startRecordButton,SIGNAL(clicked(void)),this,SLOT(startRecordClicked(void)));
+		QObject::connect(startRecordButton,SIGNAL(released(void)),this,SLOT(startRecordClicked(void)));
 		buttonLayout->addWidget(startRecordButton);
 		stopRecordButton = new QPushButton("Stop Recording");
-		QObject::connect(stopRecordButton,SIGNAL(clicked(void)),this,SLOT(stopRecordClicked(void)));
+		QObject::connect(stopRecordButton,SIGNAL(released(void)),this,SLOT(stopRecordClicked(void)));
 		buttonLayout->addWidget(stopRecordButton);
 		QPushButton *closeButton = new QPushButton("Close");
-		QObject::connect(closeButton,SIGNAL(clicked(void)),this,SLOT(goodbye(void)));
+		QObject::connect(closeButton,SIGNAL(released(void)),this,SLOT(goodbye(void)));
 		buttonLayout->addWidget(closeButton);
 		recordStatus = new QLabel;
 		buttonLayout->addWidget(recordStatus);
@@ -833,14 +835,14 @@ void DataRecorder::Panel::removeChannel(void) {
 }
 
 void DataRecorder::Panel::startRecordClicked(void) {
+//std::cout<<"Start recording clicked"<<std::endl;
 	count = 0;
-	startRecordButton->setEnabled(true);
 	StartRecordingEvent event(recording, fifo);
-
 	RT::System::getInstance()->postEvent(&event);
 }
 
 void DataRecorder::Panel::stopRecordClicked(void) {
+//std::cout<<"Stop recording clicked"<<std::endl;
 	fixedcount = count;
 	StopRecordingEvent event(recording, fifo);
 	RT::System::getInstance()->postEvent(&event);
@@ -874,6 +876,7 @@ void DataRecorder::Panel::customEvent(QEvent *e) {
 		recordStatus->setText("Ready.");
 		data->done.wakeAll();
 	} else if (e->type() == QDisableGroupsEvent) {
+//std::cout<<"Processing disableGroupsEvent"<<std::endl;
 		startRecordButton->setEnabled(false);
 		channelGroup->setEnabled(false);
 		sampleGroup->setEnabled(false);
@@ -1219,6 +1222,7 @@ void DataRecorder::Panel::closeFile(bool shutdown) {
 }
 
 int DataRecorder::Panel::startRecording(long long timestamp) {
+//std::cout<<"Starting DataRecorder::Panel::startRecording"<<std::endl;
 
 #ifdef DEBUG
 	if(!pthread_equal(pthread_self(),thread)) {

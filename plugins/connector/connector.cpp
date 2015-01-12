@@ -50,6 +50,7 @@ Connector::Panel::Panel(QWidget *parent) : QWidget(parent) {
 
 	// Make Mdi
 	subWindow = new QMdiSubWindow;
+   subWindow->setWindowIcon(QIcon("/usr/local/lib/rtxi/RTXI-widget-icon.png"));
 	subWindow->setFixedSize(500,400);
 	subWindow->setAttribute(Qt::WA_DeleteOnClose);
 	subWindow->setWindowFlags(Qt::CustomizeWindowHint);
