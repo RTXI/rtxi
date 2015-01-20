@@ -59,30 +59,30 @@ PerformanceMeasurement::Panel::Panel(QWidget *parent) : QWidget(parent),
 		QString suffix = QString("s)").prepend(QChar(0x3BC));
 
 		// Create child widget and gridLayout
-		gridBox = new QGroupBox;
+//		gridBox = new QGroupBox;
 		QGridLayout *gridLayout = new QGridLayout;
 
-		durationEdit = new QLineEdit(gridBox);
+		durationEdit = new QLineEdit(subWindow);
 		durationEdit->setReadOnly(true);
 		gridLayout->addWidget(new QLabel(tr("Computation Time (").append(suffix)), 1, 0);
 		gridLayout->addWidget(durationEdit, 1, 1);
 
-		maxDurationEdit = new QLineEdit(gridBox);
+		maxDurationEdit = new QLineEdit(subWindow);
 		maxDurationEdit->setReadOnly(true);
 		gridLayout->addWidget(new QLabel(tr("Peak Computation Time (").append(suffix)), 2, 0);
 		gridLayout->addWidget(maxDurationEdit, 2, 1);
 
-		timestepEdit = new QLineEdit(gridBox);
+		timestepEdit = new QLineEdit(subWindow);
 		timestepEdit->setReadOnly(true);
 		gridLayout->addWidget(new QLabel(tr("Real-time Period (").append(suffix)), 3, 0);
 		gridLayout->addWidget(timestepEdit, 3, 1);
 
-		maxTimestepEdit = new QLineEdit(gridBox);
+		maxTimestepEdit = new QLineEdit(subWindow);
 		maxTimestepEdit->setReadOnly(true);
 		gridLayout->addWidget(new QLabel(tr("Peak Real-time Period (").append(suffix)), 4, 0);
 		gridLayout->addWidget(maxTimestepEdit, 4, 1);
 
-		timestepJitterEdit = new QLineEdit(gridBox);
+		timestepJitterEdit = new QLineEdit(subWindow);
 		timestepJitterEdit->setReadOnly(true);
 		gridLayout->addWidget(new QLabel(tr("Real-time Jitter (").append(suffix)), 5, 0);
 		gridLayout->addWidget(timestepJitterEdit, 5, 1);
@@ -91,10 +91,11 @@ PerformanceMeasurement::Panel::Panel(QWidget *parent) : QWidget(parent),
 		gridLayout->addWidget(resetButton, 6, 1);
 		QObject::connect(resetButton,SIGNAL(clicked(void)),this,SLOT(reset(void)));
 
-		gridBox->setLayout(gridLayout);
+//		gridBox->setLayout(gridLayout);
 
 		// Attach child widget to parent widget
-		layout->addWidget(gridBox);
+//		layout->addWidget(gridBox);
+		layout->addLayout(gridLayout);
 
 		// Attach gridLayout to Widget
 		setLayout(layout);

@@ -92,7 +92,7 @@ namespace PerformanceMeasurement {
 				INIT1, INIT2, EXEC,
 			} state;
 
-			QGroupBox *gridBox;
+//			QGroupBox *gridBox;
 			QString labelText;
 			QLabel *label;
 
