@@ -89,13 +89,13 @@ echo "----->Please select your configuration:"
 read -n 1 kernel
 
 if [ $kernel -eq "1" ]; then
-	./configure --enable-comedi --enable-rtai
+	./configure --enable-comedi --enable-rtai --with-Qt-dir=/usr/share/qt3
 elif [ $kernel -eq "2" ]; then
-	./configure --enable-rtai --enable-analogy
+	./configure --enable-rtai --enable-analogy --with-Qt-dir=/usr/share/qt3
 elif [ $kernel -eq "3" ]; then
-	./configure --enable-xenomai --enable-analogy
+	./configure --enable-xenomai --enable-analogy --with-Qt-dir=/usr/share/qt3
 elif [ $kernel -eq "4" ]; then
-	./configure --disable-xenomai --enable-posix --enable-analogy --disable-comedi
+	./configure --disable-xenomai --enable-posix --enable-analogy --disable-comedi --with-Qt-dir=/usr/share/qt3
 else
 	echo "Invalid configuration."
 	exit 1
