@@ -23,9 +23,15 @@
 echo "----->Running latency test under load. Please wait (approx 10 minutes)"
 echo "----->Do not interrupt."
 
-bash -c "echo 0 > /proc/xenomai/latency"
+# Calibrate Xenomai to not show negative latencies
+sudo bash -c "echo 0 > /proc/xenomai/latency"
 
 # Run latency test under dynamic load
-stress --cpu 2 --io 1 --vm 1 --hdd 1 --timeout 600 & /usr/xenomai/bin/./latency -T 600
+stress --cpu 2 --vm 1 --hdd 1 --timeout 1800 & sudo /usr/xenomai/bin/./latency -s -h -T 1800 -g histdata.txt
+
+# Check if R is installed
+hash Rscript 2>/dev/null || { echo >&2 "R is needed for me to plot stats.\nYou can always do that yourself, too."; exit 0; }
+
+Rscript analyzeHistdata.r
 
 exit 0
