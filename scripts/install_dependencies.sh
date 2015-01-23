@@ -35,9 +35,9 @@ sudo apt-get update
 sudo apt-get -y upgrade
 sudo apt-get -y install autotools-dev automake libtool
 sudo apt-get -y install kernel-package
-sudo apt-get -y install fakeroot build-essential crash kexec-tools makedumpfile kernel-wedge
+sudo apt-get -y install fakeroot crash kexec-tools makedumpfile kernel-wedge
 sudo apt-get -y build-dep linux
-sudo apt-get -y install git-core libncurses5 libncurses5-dev libelf-dev binutils-dev libgsl0-dev vim stress libboost-all-dev
+sudo apt-get -y install git-core libncurses5 libncurses5-dev libelf-dev binutils-dev libgsl0-dev vim stress libboost-dev
 sudo apt-get -y install qt4-dev-tools libqt4-dev libqt4-opengl-dev
 
 if [ $? -eq 0 ]; then
