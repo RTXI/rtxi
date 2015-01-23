@@ -56,11 +56,11 @@ fi
 # Download essentials
 echo  "----->Downloading Linux kernel"
 cd $opt
-#wget --no-check-certificate https://www.kernel.org/pub/linux/kernel/v3.x/linux-$linux_version.tar.bz2
+wget --no-check-certificate https://www.kernel.org/pub/linux/kernel/v3.x/linux-$linux_version.tar.bz2
 tar xf linux-$linux_version.tar.bz2
 
 echo  "----->Downloading Xenomai"
-#wget --no-check-certificate http://download.gna.org/xenomai/stable/xenomai-$xenomai_version.tar.bz2
+wget --no-check-certificate http://download.gna.org/xenomai/stable/xenomai-$xenomai_version.tar.bz2
 tar xf xenomai-$xenomai_version.tar.bz2
 
 if [ $? -eq 0 ]; then
