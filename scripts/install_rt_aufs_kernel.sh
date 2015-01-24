@@ -77,20 +77,19 @@ git clone git://git.code.sf.net/p/aufs/aufs3-standalone aufs-$aufs_version
 cd $aufs_root
 git checkout origin/aufs$aufs_version
 cd $linux_tree
-patch -p1 < $aufs_root/aufs3-kbuild.patch
-patch -p1 < $aufs_root/aufs3-base.patch
-patch -p1 < $aufs_root/aufs3-mmap.patch
+patch -p1 < $aufs_root/aufs3-kbuild.patch && \
+patch -p1 < $aufs_root/aufs3-base.patch && \
+patch -p1 < $aufs_root/aufs3-mmap.patch && \
 patch -p1 < $aufs_root/aufs3-standalone.patch
-cd $linux_tree
 cp -r $aufs_root/Documentation $linux_tree
 cp -r $aufs_root/fs $linux_tree
 cp $aufs_root/include/uapi/linux/aufs_type.h $linux_tree/include/uapi/linux/
-cp $aufs_root/include/linux/aufs_type.h $linux_tree/include/linux/
+cp $aufs_root/include/uapi/linux/aufs_type.h $linux_tree/include/linux/
 
 echo  "----->Patching xenomai onto kernel"
 cd $linux_tree
 cp -vi /boot/config-`uname -r` $linux_tree/.config
-$xenomai_root/scripts/prepare-kernel.sh --arch=x86 --adeos=$xenomai_root/ksrc/arch/x86/patches/ipipe-core-3.8.13-x86-4.patch --linux=$linux_tree
+$xenomai_root/scripts/prepare-kernel.sh --arch=x86 --adeos=$xenomai_root/ksrc/arch/x86/patches/ipipe-core-$linux_version-x86-*.patch --linux=$linux_tree
 yes "" | make oldconfig
 make xconfig
 
@@ -105,7 +104,7 @@ fi
 echo  "----->Compiling kernel"
 cd $linux_tree
 export CONCURRENCY_LEVEL=$(grep -c ^processor /proc/cpuinfo)
-fakeroot make-kpkg --initrd --append-to-version=-xenomai-$xenomai_version-aufs kernel-image kernel-headers modules
+fakeroot make-kpkg --initrd --append-to-version=-xenomai-$xenomai_version-aufs --revision 1.0 kernel-image kernel-headers modules
 
 if [ $? -eq 0 ]; then
 	echo  "----->Kernel compilation complete."
