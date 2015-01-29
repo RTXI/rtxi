@@ -76,8 +76,13 @@ sudo cp -f scripts/rtxi.desktop /usr/share/applications/
 # sudo chmod +x ~/Desktop/rtxi.desktop
 sudo cp -f rtxi.conf /etc/
 sudo cp -f /usr/xenomai/sbin/analogy_config /usr/sbin/
-sudo cp -f ./scripts/rtxi_load_analogy /etc/init.d/
-sudo update-rc.d rtxi_load_analogy defaults
+
+if [ $(lsb_release -sc) == "jessie" ]; then
+	sudo cp -f .scripts/rtxi_load_analogy.service /etc/systemd/system/
+else
+	sudo cp -f ./scripts/rtxi_load_analogy /etc/init.d/
+	sudo update-rc.d rtxi_load_analogy defaults
+fi
 sudo ldconfig
 
 echo ""
