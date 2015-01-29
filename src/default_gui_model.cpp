@@ -188,6 +188,10 @@ void DefaultGUIModel::createGUI(DefaultGUIModel::variable_t *var, int size) {
 void DefaultGUIModel::update(DefaultGUIModel::update_flags_t) {
 }
 
+void DefaultGUIModel::resizeMe() {
+	subWindow->adjustSize();
+}
+
 void DefaultGUIModel::exit(void) {
 	// Ensure that the realtime thread isn't in the middle of executing DefaultGUIModel::execute()
 	setActive(false);

@@ -179,10 +179,14 @@ class DefaultGUIModel : public QWidget, public RT::Thread, public Plugin::Object
 			QPalette palette;
 
 			public slots:
-
-				/*!
-				 * Function that allows the object to safely delete and unload itself.
-				 */
+			
+			/*!
+			 * Function that resizes widgets to properly fit layouts after overloading
+			 */
+				void resizeMe();
+			/*!
+			 * Function that allows the object to safely delete and unload itself.
+			 */
 				virtual void exit(void);
 			/*!
 			 * Function that updates the GUI with new parameter values.
