@@ -183,7 +183,6 @@ void DefaultGUIModel::createGUI(DefaultGUIModel::variable_t *var, int size) {
 	setLayout(layout);
 	subWindow->setWidget(this);
 	subWindow->show();
-	subWindow->adjustSize();
 }
 
 void DefaultGUIModel::update(DefaultGUIModel::update_flags_t) {
@@ -215,7 +214,6 @@ void DefaultGUIModel::refresh(void) {
 		}
 	}
 	pauseButton->setChecked(!getActive());
-	subWindow->adjustSize();
 }
 
 void DefaultGUIModel::modify(void) {
@@ -229,8 +227,6 @@ void DefaultGUIModel::modify(void) {
 		if (i->second.type & COMMENT) {
 			QByteArray textData = i->second.edit->text().toLatin1();
 			const char *text = textData.constData();
-			// VISIT TWO
-			//Workspace::Instance::setComment(i->second.index, i->second.edit->text().toLatin1());
 			Workspace::Instance::setComment(i->second.index, text);
 		}
 
@@ -254,8 +250,6 @@ void DefaultGUIModel::setComment(const QString &name, QString comment) {
 		n->second.edit->setText(comment);
 		QByteArray textData = comment.toLatin1();
 		const char *text = textData.constData();
-		// VISIT TWO
-		//Workspace::Instance::setComment(n->second.index, comment.toLatin1());
 		Workspace::Instance::setComment(n->second.index, text);
 	}
 }

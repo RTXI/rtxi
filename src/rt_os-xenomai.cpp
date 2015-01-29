@@ -32,6 +32,8 @@
 #include <execinfo.h>
 #include <unistd.h>
 
+//#define DEBUG_RT
+
 typedef struct {
 	long long period;
 	RT_TASK task;
@@ -40,6 +42,7 @@ typedef struct {
 static bool init_rt = false;
 static pthread_key_t is_rt_key;
 
+#ifdef DEBUG_RT
 static const char *sigdebug_reasons[] = {
     [SIGDEBUG_UNDEFINED] = "undefined",
     [SIGDEBUG_MIGRATE_SIGNAL] = "received signal",
@@ -68,6 +71,7 @@ void rt_switch_warning(int sig, siginfo_t *si, void *context) {
 		nentries = backtrace(bt,sizeof(bt) / sizeof(bt[0]));
 		backtrace_symbols_fd(bt,nentries,fileno(stdout));
 }
+#endif
 
 int RT::OS::initiate(void) {
 	rt_timer_set_mode(TM_ONESHOT);
@@ -103,11 +107,13 @@ int RT::OS::createTask(RT::OS::Task *task,void *(*entry)(void *),void *arg,int p
 	xenomai_task_t *t = new xenomai_task_t;
 	int priority = 99;
 
+#ifdef DEBUG_RT
 	struct sigaction sa;
 	sigemptyset(&sa.sa_mask);
 	sa.sa_sigaction = rt_switch_warning;
 	sa.sa_flags = SA_SIGINFO;
 	sigaction(SIGDEBUG, &sa, NULL);
+#endif
 
 	// Invert priority, default prio=0 but max priority for xenomai task is 99
 	if ((prio >=0) && (prio <=99))
