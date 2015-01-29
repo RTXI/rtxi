@@ -1,0 +1,11 @@
+[Unit]
+Description=Load analogy_ni_pcimio at boot
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash -c "analogy_config analogy0 analogy_ni_pcimio"
+ExecStop=/bin/bash -c "analogy_config -r analogy0 analogy_ni_pcimio"
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
