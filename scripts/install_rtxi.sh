@@ -68,22 +68,22 @@ fi
 
 echo "----->Putting things into place."
 sudo cp -f libtool /usr/local/lib/rtxi/
-sudo cp -f scripts/RTXI-icon.svg /usr/local/lib/rtxi/
-sudo cp -f scripts/RTXI-widget-icon.png /usr/local/lib/rtxi
-sudo cp -f scripts/Trolltech.conf ~/.config/ # makes the GUI look all nice and pretty
-sudo cp -f scripts/rtxi.desktop /usr/share/applications/
-# sudo cp -f /usr/share/applications/rtxi.desktop ~/Desktop/  The user is root, so this is pointless.
-# sudo chmod +x ~/Desktop/rtxi.desktop
+sudo cp -f scripts/icons/RTXI-icon.svg /usr/local/lib/rtxi/
+sudo cp -f scripts/icons/RTXI-widget-icon.png /usr/local/lib/rtxi
+sudo cp -f scripts/icons/Trolltech.conf ~/.config/ # makes the GUI look all nice and pretty
+sudo cp -f scripts/icons/rtxi.desktop /usr/share/applications/
+sudo cp -f /usr/share/applications/rtxi.desktop ~/Desktop/
+sudo chmod +x ~/Desktop/rtxi.desktop
 sudo cp -f rtxi.conf /etc/
 sudo cp -f /usr/xenomai/sbin/analogy_config /usr/sbin/
 
 if [ $(lsb_release -sc) == "jessie" ]; then
 	echo "Load analogy driver with systemd"
-	sudo cp -f ./scripts/rtxi_load_analogy.service /etc/systemd/system/
+	sudo cp -f ./scripts/services/rtxi_load_analogy.service /etc/systemd/system/
 	sudo systemctl enable rtxi_load_analogy.service
 else
 	echo "Load analogy driver with sysvinit"
-	sudo cp -f ./scripts/rtxi_load_analogy /etc/init.d/
+	sudo cp -f ./scripts/services/rtxi_load_analogy /etc/init.d/
 	sudo update-rc.d rtxi_load_analogy defaults
 fi
 sudo ldconfig
