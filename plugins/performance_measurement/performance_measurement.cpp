@@ -99,7 +99,7 @@ PerformanceMeasurement::Panel::Panel(QWidget *parent) : QWidget(parent),
 
 		// Attach gridLayout to Widget
 		setLayout(layout);
-		setWindowTitle(QString::number(getID()) + tr(" Real-time Benchmarks"));
+		setWindowTitle(QString::number(getID()) + tr(" RT Benchmarks"));
 
 		// Set layout to Mdi
 		subWindow->setWidget(this);
