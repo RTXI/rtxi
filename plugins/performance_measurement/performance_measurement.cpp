@@ -181,7 +181,7 @@ extern "C" Plugin::Object * createRTXIPlugin(void *) {
 }
 
 PerformanceMeasurement::Plugin::Plugin(void) : panel(0) {
-	MainWindow::getInstance()->createSystemMenuItem("Real-time Benchmarks",this,SLOT(createPerformanceMeasurementPanel(void)));
+	MainWindow::getInstance()->createSystemMenuItem("RT Benchmarks",this,SLOT(createPerformanceMeasurementPanel(void)));
 }
 
 PerformanceMeasurement::Plugin::~Plugin(void) {
