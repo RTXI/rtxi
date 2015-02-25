@@ -27,7 +27,7 @@ echo "----->Do not interrupt."
 sudo bash -c "echo 0 > /proc/xenomai/latency"
 
 # Run latency test under dynamic load
-stress --cpu 2 --vm 1 --hdd 1 --timeout 1800 & sudo /usr/xenomai/bin/./latency -s -h -T 1800 -g histdata.txt
+stress --cpu 2 --vm 1 --hdd 1 --timeout 1800 & sudo /usr/xenomai/bin/./latency -s -B -h -T 1800 -g histdata.txt
 
 # Check if R is installed
 hash Rscript 2>/dev/null || { echo >&2 "R is needed for me to plot stats.\nYou can always do that yourself, too."; exit 0; }
