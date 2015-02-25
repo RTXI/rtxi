@@ -3,7 +3,6 @@
 options(warn=-1)
 
 data = read.table("histdata.txt", header=F, col.names=c("Latency", "Count"))
-data$Probability = data$Count / sum(data$Count)
 
 if(require(ggplot2)&&require(scales)) {
 	print("yay. you have ggplot")
@@ -19,6 +18,6 @@ if(require(ggplot2)&&require(scales)) {
 	print("Okay. I'll plot the histogram for you, but just know that it'll look better with ggplot")
 
 	png("histplot.png")
-	barplot(data$Probability, names.arg=data$Latency, xlab="latency (us)", ylab="P(latency)")
+	barplot(data$Count, names.arg=data$Latency, xlab="Latency (us)", ylab="Count", log="y")
 	dev.off()
 }
