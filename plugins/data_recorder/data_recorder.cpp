@@ -238,6 +238,7 @@ int OpenFileEvent::callback(void)
 	token.time = RT::OS::getTime();
 
 	fifo.write(&token, sizeof(token));
+	printf("calling before write to fifo\n");
 	fifo.write(filename.toLatin1(), token.size);
 	return 0;
 }
