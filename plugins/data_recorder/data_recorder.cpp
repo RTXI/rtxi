@@ -238,7 +238,6 @@ StartRecordingEvent::~StartRecordingEvent(void) {
 }
 
 int StartRecordingEvent::callback(void) {
-//std::cout<<"This is the start token..."<<std::endl;
 	DataRecorder::data_token_t token;
 
 	recording = true;
@@ -835,14 +834,22 @@ void DataRecorder::Panel::removeChannel(void) {
 }
 
 void DataRecorder::Panel::startRecordClicked(void) {
-//std::cout<<"Start recording clicked"<<std::endl;
+
+	if(fileNameEdit->text().isEmpty())
+	{
+		QMessageBox::critical(
+				this, "File not specified.",
+				"Please specify a file to write data to.",
+				QMessageBox::Ok, QMessageBox::NoButton);
+		return;
+	}
+
 	count = 0;
 	StartRecordingEvent event(recording, fifo);
 	RT::System::getInstance()->postEvent(&event);
 }
 
 void DataRecorder::Panel::stopRecordClicked(void) {
-//std::cout<<"Stop recording clicked"<<std::endl;
 	fixedcount = count;
 	StopRecordingEvent event(recording, fifo);
 	RT::System::getInstance()->postEvent(&event);
@@ -853,7 +860,6 @@ void DataRecorder::Panel::updateDownsampleRate(int r) {
 }
 
 void DataRecorder::Panel::customEvent(QEvent *e) {
-
 
 	if (e->type() == QFileExistsEvent) {
       CustomEvent * event = static_cast<CustomEvent *>(e);
@@ -876,7 +882,6 @@ void DataRecorder::Panel::customEvent(QEvent *e) {
 		recordStatus->setText("Ready.");
 		data->done.wakeAll();
 	} else if (e->type() == QDisableGroupsEvent) {
-//std::cout<<"Processing disableGroupsEvent"<<std::endl;
 		startRecordButton->setEnabled(false);
 		channelGroup->setEnabled(false);
 		sampleGroup->setEnabled(false);
@@ -890,7 +895,6 @@ void DataRecorder::Panel::customEvent(QEvent *e) {
 		trialLength->setNum(double(RT::System::getInstance()->getPeriod()*1e-9* fixedcount));
 		count = 0;
 	}
-
 }
 
 void DataRecorder::Panel::doDeferred(const Settings::Object::State &s) {
@@ -1222,7 +1226,6 @@ void DataRecorder::Panel::closeFile(bool shutdown) {
 }
 
 int DataRecorder::Panel::startRecording(long long timestamp) {
-//std::cout<<"Starting DataRecorder::Panel::startRecording"<<std::endl;
 
 #ifdef DEBUG
 	if(!pthread_equal(pthread_self(),thread)) {
