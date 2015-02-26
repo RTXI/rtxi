@@ -815,7 +815,6 @@ void DataRecorder::Panel::changeDataFile(void)
 	// write this directory to the user prefs as most recently used
 	userprefs.setValue("/dirs/data", fileDialog.directory().path());
 
-	printf("filename is %s\n", filename.toLatin1().constData());
 	OpenFileEvent event(filename, fifo);
 	RT::System::getInstance()->postEvent(&event);
 }
@@ -876,6 +875,7 @@ void DataRecorder::Panel::removeChannel(void)
 
 void DataRecorder::Panel::startRecordClicked(void)
 {
+	recordStatus->setText("Starting...");
 	if(fileNameEdit->text().isEmpty()) {
 		QMessageBox::critical(
 				this, "File not specified.",
@@ -891,6 +891,7 @@ void DataRecorder::Panel::startRecordClicked(void)
 
 void DataRecorder::Panel::stopRecordClicked(void)
 {
+	recordStatus->setText("Stopping...");
 	fixedcount = count;
 	StopRecordingEvent event(recording, fifo);
 	RT::System::getInstance()->postEvent(&event);
@@ -914,11 +915,9 @@ void DataRecorder::Panel::customEvent(QEvent *e)
 	} else if (e->type() == QSetFileNameEditEvent) {
 		CustomEvent * event = static_cast<CustomEvent *>(e);
 		SetFileNameEditEventData *data = reinterpret_cast<SetFileNameEditEventData *> (event->getData());
-		printf("value is %s\n",data->filename.toLatin1().constData());
 		fileNameEdit->setText(data->filename);
 		recordStatus->setText("Ready.");
 		data->done.wakeAll();
-		printf("all awake\n");
 	} else if (e->type() == QDisableGroupsEvent) {
 		startRecordButton->setEnabled(false);
 		channelGroup->setEnabled(false);
@@ -1069,7 +1068,6 @@ void DataRecorder::Panel::processData(void)
 			if(!fifo.read(filename_string, _token.size))
 				continue; // Restart loop if data is not available
 			QString filename = filename_string;
-			printf("Hello before %s\n", filename.toStdString().c_str());
 			if (openFile(filename))
 				state = CLOSED;
 			else
@@ -1077,8 +1075,10 @@ void DataRecorder::Panel::processData(void)
 		} else if (_token.type == CLOSE) {
 			if (state == RECORD)
 				stopRecording(RT::OS::getTime());
-			if (state != CLOSED)
+			if (state != CLOSED) 
+			{
 				closeFile();
+			}
 			state = CLOSED;
 		} else if (_token.type == START) {
 			if (state == OPENED) {
@@ -1135,7 +1135,6 @@ void DataRecorder::Panel::processData(void)
 int DataRecorder::Panel::openFile(QString &filename)
 {
 	QMutex mutex;
-	printf("in openfile\n");
 
 #ifdef DEBUG
 	if(!pthread_equal(pthread_self(),thread))
@@ -1213,8 +1212,6 @@ int DataRecorder::Panel::openFile(QString &filename)
 
 void DataRecorder::Panel::closeFile(bool shutdown)
 {
-	QMutex mutex;
-
 #ifdef DEBUG
 	if(!pthread_equal(pthread_self(),thread))
 	{
@@ -1224,11 +1221,13 @@ void DataRecorder::Panel::closeFile(bool shutdown)
 #endif
 
 	H5Fclose(file.id);
-
 	if (!shutdown) {
+		QMutex mutex;
 		mutex.lock();
-		QEvent *event = new QEvent(static_cast<QEvent::Type>QSetFileNameEditEvent);
+
+		CustomEvent *event = new CustomEvent(static_cast<QEvent::Type>QSetFileNameEditEvent);
 		SetFileNameEditEventData data;
+		event->setData(static_cast<void*>(&data));
 		data.filename = "";
 
 		QApplication::postEvent(this, event);
