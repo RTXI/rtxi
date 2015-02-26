@@ -69,7 +69,6 @@ void postAsyncData(const double *,size_t);
 class CustomEvent : public QEvent
 {
 public:
-//         CustomEvent(QEvent::Type, void *);
     CustomEvent(QEvent::Type);
     virtual ~CustomEvent(void) {};
     void setData(void *data);
@@ -138,7 +137,6 @@ private:
     long long fixedcount;
 
     pthread_t thread;
-    //Fifo fifo;
     AtomicFifo fifo;
     data_token_t _token;
     bool tokenRetrieved;
