@@ -23,9 +23,6 @@
 echo "----->Running latency test under load. Please wait (approx 30 minutes)"
 echo "----->Do not interrupt."
 
-# Calibrate Xenomai to not show negative latencies
-sudo bash -c "echo 0 > /proc/xenomai/latency"
-
 # Run latency test under dynamic load
 stress --cpu 2 --vm 1 --hdd 1 --timeout 1800 & sudo /usr/xenomai/bin/./latency -s -h -p 100 -T 1800 -g histdata.txt
 
