@@ -48,7 +48,7 @@ else
 	exit 1
 fi
 
-make -sj2 -C ./
+make -sj`nproc` -C ./
 
 if [ $? -eq 0 ]; then
 	echo "----->RTXI compilation successful."
@@ -68,12 +68,12 @@ fi
 
 echo "----->Putting things into place."
 sudo cp -f libtool /usr/local/lib/rtxi/
-sudo cp -f scripts/icons/RTXI-icon.svg /usr/local/lib/rtxi/
+sudo cp -f scripts/icons/RTXI-icon.png /usr/local/lib/rtxi/
 sudo cp -f scripts/icons/RTXI-widget-icon.png /usr/local/lib/rtxi
-sudo cp -f scripts/icons/Trolltech.conf ~/.config/ # makes the GUI look all nice and pretty
-sudo cp -f scripts/icons/rtxi.desktop /usr/share/applications/
-sudo cp -f /usr/share/applications/rtxi.desktop ~/Desktop/
-sudo chmod +x ~/Desktop/rtxi.desktop
+sudo cp -f scripts/icons/Trolltech.conf /root/.config/ # makes the GUI look all nice and pretty
+sudo cp -f scripts/rtxi.desktop /usr/share/applications/
+cp -f scripts/rtxi.desktop ~/Desktop/
+chmod +x ~/Desktop/rtxi.desktop
 sudo cp -f rtxi.conf /etc/
 sudo cp -f /usr/xenomai/sbin/analogy_config /usr/sbin/
 
@@ -82,7 +82,7 @@ if [ $(lsb_release -sc) == "jessie" ]; then
 	sudo cp -f ./scripts/services/rtxi_load_analogy.service /etc/systemd/system/
 	sudo systemctl enable rtxi_load_analogy.service
 else
-	echo "Load analogy driver with sysvinit"
+	echo "Load analogy driver with sysvinit/upstart"
 	sudo cp -f ./scripts/services/rtxi_load_analogy /etc/init.d/
 	sudo update-rc.d rtxi_load_analogy defaults
 fi

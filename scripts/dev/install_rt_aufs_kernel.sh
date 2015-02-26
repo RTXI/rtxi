@@ -104,7 +104,7 @@ fi
 echo  "----->Compiling kernel"
 cd $linux_tree
 export CONCURRENCY_LEVEL=$(grep -c ^processor /proc/cpuinfo)
-fakeroot make-kpkg --initrd --append-to-version=-xenomai-$xenomai_version-aufs --revision 1.0 kernel-image kernel-headers modules
+fakeroot make-kpkg --initrd --append-to-version=-xenomai-$xenomai_version-aufs --revision $(date +%Y%m%d) kernel-image kernel-headers modules
 
 if [ $? -eq 0 ]; then
 	echo  "----->Kernel compilation complete."
@@ -156,7 +156,7 @@ fi
 # Setting up user permissions
 echo  "----->Setting up user/group"
 sudo groupadd xenomai
-sudo usermod -a -G xenomai `whoami`
+sudo usermod -aG xenomai `whoami`
 
 if [ $? -eq 0 ]; then
 	echo  "----->Group setup complete"
