@@ -514,7 +514,7 @@ DataRecorder::Panel::Panel(QWidget *parent, size_t buffersize) :
 	fileLayout->addWidget(new QLabel(tr("Downsample \nRate:")));
 	downsampleSpin = new QSpinBox(this);
 	downsampleSpin->setMinimum(1);
-	downsampleSpin->setMaximum(2);
+	downsampleSpin->setMaximum(500);
 	fileLayout->addWidget(downsampleSpin);
 	QObject::connect(downsampleSpin,SIGNAL(valueChanged(int)),this,SLOT(updateDownsampleRate(int)));
 
