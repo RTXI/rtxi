@@ -38,7 +38,7 @@ AnalogyDevice::AnalogyDevice(a4l_desc_t *d,std::string name,IO::channel_t *chan,
 			if(err != 0) {
 				ERROR_MSG("AnalogyDriver: a4l_get_subd_info failed, wrong subdevice index %i (err=%d)\n",  i, err);
 			}
-			// Assign index; save just the first device if many
+			// Assign subdevice index; save just the first device if many
 			if (((sbinfo->flags & A4L_SUBD_TYPES) == A4L_SUBD_AI) && (idx_ai < 0))
 				idx_ai  = i; 
 			else if (((sbinfo->flags & A4L_SUBD_TYPES) == A4L_SUBD_AO) && (idx_ao < 0))
@@ -120,6 +120,7 @@ AnalogyDevice::AnalogyDevice(a4l_desc_t *d,std::string name,IO::channel_t *chan,
 			subdevice[DIO].id = idx_dio;
 			subdevice[DIO].active = 0;
 			subdevice[DIO].count = sbinfo->nb_chan;
+			printf("count is %d\n", sbinfo->nb_chan);
 			subdevice[DIO].chan = new channel_t[subdevice[DIO].count];
 			if(!subdevice[DIO].chan)
 				subdevice[DIO].count = 0;

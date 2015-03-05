@@ -164,7 +164,7 @@ namespace DAQ {
 			 * \param index The channel's index.
 			 * \param state The channel's new state.
 			 */
-			virtual int setChannelActive(type_t type ,index_t index,bool state)=0;        
+			virtual int setChannelActive(type_t type,index_t index,bool state)=0;        
 
 			/*!
 			 * Get the channel's active state of using its calibration.
