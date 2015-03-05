@@ -86,7 +86,7 @@ fi
 echo  "----->Compiling kernel"
 cd $linux_tree
 export CONCURRENCY_LEVEL=$(grep -c ^processor /proc/cpuinfo)
-fakeroot make-kpkg --initrd --append-to-version=-xenomai-$xenomai_version kernel-image kernel-headers modules
+fakeroot make-kpkg --initrd --append-to-version=-xenomai-$xenomai_version --revision $(date +%Y%m%d) kernel-image kernel-headers modules
 
 if [ $? -eq 0 ]; then
 	echo  "----->Kernel compilation complete."
