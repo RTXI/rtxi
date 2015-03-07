@@ -310,7 +310,7 @@ void SystemControlPanel::apply(void) {
 		dev->setAnalogCalibrationActive(a_type,a_chan,analogCalibrationButton->isChecked());
 
 		DAQ::index_t d_chan = digitalChannelList->currentIndex();
-		DAQ::type_t d_type = static_cast<DAQ::type_t>(digitalSubdeviceList->currentIndex()+2);
+		DAQ::type_t d_type = static_cast<DAQ::type_t>(digitalSubdeviceList->currentIndex()+DAQ::DIO);
 		DAQ::direction_t d_dir = static_cast<DAQ::direction_t>(digitalDirectionList->currentIndex());
 
 		// Write digital channel configuration to DAQ

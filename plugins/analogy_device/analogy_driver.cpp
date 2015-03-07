@@ -112,12 +112,12 @@ DAQ::Device *AnalogyDriver::createDevice(const std::list<std::string> &args) {
     }
     for(size_t i=count[0]+count[1];i<count[0]+count[1]+count[2];++i) {
         std::ostringstream name;
-        name << "Digital IO " << i-count[0]-count[1];
+        name << "Digital I/O " << i-count[0]-count[1];
         channel[i].name = name.str();
         channel[i].description = "";
         channel[i].flags = IO::OUTPUT;
     }
-    for(size_t i=count[0]+count[1]+count[2];i<count[0]+count[1]+2*count[2];++i) {
+    /*for(size_t i=count[0]+count[1]+count[2];i<count[0]+count[1]+2*count[2];++i) {
         std::ostringstream name;
         name << "Digital Input/Output " << i-count[0]-count[1]-count[2];
         channel[i].name = name.str();
@@ -137,7 +137,7 @@ DAQ::Device *AnalogyDriver::createDevice(const std::list<std::string> &args) {
         channel[i].name = name.str();
         channel[i].description = "";
         channel[i].flags = IO::INPUT;
-    }
+    }*/
 
     AnalogyDevice *dev = new AnalogyDevice(&dsc,name,channel,count[0]+count[1]+2*count[2]);
     devices.push_back(dev);
