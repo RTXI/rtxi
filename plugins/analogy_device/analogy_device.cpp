@@ -24,119 +24,121 @@
 using namespace DAQ;
 
 AnalogyDevice::AnalogyDevice(a4l_desc_t *d,std::string name,IO::channel_t *chan,size_t size) : DAQ::Device(name,chan,size), dsc(*d) {
-		int err = 0;
-		a4l_sbinfo_t *sbinfo;
-		a4l_chinfo_t *chinfo;
 
-		// We need to find each subdevice index manually since idx_*_subd often fails
-		// Go over all subdevices and save the indexes of the first AI, AO and DIO
-		int idx_ai  = -1; 
-		int idx_ao  = -1; 
-		int idx_dio = -1; 
-		for (int i=0; i < dsc.nb_subd; i++) {
-			err = a4l_get_subdinfo(&dsc, i, &sbinfo); 
-			if(err != 0) {
-				ERROR_MSG("AnalogyDriver: a4l_get_subd_info failed, wrong subdevice index %i (err=%d)\n",  i, err);
-			}
-			// Assign subdevice index; save just the first device if many
-			if (((sbinfo->flags & A4L_SUBD_TYPES) == A4L_SUBD_AI) && (idx_ai < 0))
-				idx_ai  = i; 
-			else if (((sbinfo->flags & A4L_SUBD_TYPES) == A4L_SUBD_AO) && (idx_ao < 0))
-				idx_ao  = i; 
-			else if (((sbinfo->flags & A4L_SUBD_TYPES) == A4L_SUBD_DIO) && (idx_dio < 0)) {
-				idx_dio  = i; 
-			}
-		}
+	int err = 0;
+	a4l_sbinfo_t *sbinfo;
+	a4l_chinfo_t *chinfo;
 
-		// Get info about AI subdevice
-		err = a4l_get_subdinfo(&dsc, idx_ai, &sbinfo);
-		if((err == 0) && ((sbinfo->flags & A4L_SUBD_TYPES) == A4L_SUBD_AI)) {
-			subdevice[AI].id = idx_ai;
-			subdevice[AI].active = 0;
-			subdevice[AI].count = sbinfo->nb_chan;
-			subdevice[AI].chan = new channel_t[subdevice[AI].count];
-			if(!subdevice[AI].chan)
-				subdevice[AI].count = 0;
-			else
-				for(size_t i=0;i<subdevice[AI].count;++i) {
-					err = a4l_get_chinfo(&dsc, idx_ai, i, &chinfo);
-					// Something went wrong
-					if(err < 0) {
-						subdevice[AI].active = 0;
-						subdevice[AI].count = 0;
-						delete[] subdevice[AI].chan;
-						break;
-					}
-					subdevice[AI].chan[i].active = false;
-					subdevice[AI].chan[i].analog.maxdata = (1<<chinfo->nb_bits)-1; 
-					setAnalogGain(AI,i,1.0);
-					setAnalogRange(AI,i,0);
-					setAnalogZeroOffset(AI,i,0);
-					setAnalogReference(AI,i,0);
-					setAnalogUnits(AI,i,0);
-				}
-		} else {
-			subdevice[AI].active = 0;
-			subdevice[AI].count = 0;
-			subdevice[AI].chan = NULL;
+	// We need to find each subdevice index manually since idx_*_subd often fails
+	// Go over all subdevices and save the indexes of the first AI, AO and DIO
+	int idx_ai  = -1; 
+	int idx_ao  = -1; 
+	int idx_dio = -1; 
+	for (int i=0; i < dsc.nb_subd; i++) {
+		err = a4l_get_subdinfo(&dsc, i, &sbinfo); 
+		if(err != 0) {
+			ERROR_MSG("AnalogyDriver: a4l_get_subd_info failed, wrong subdevice index %i (err=%d)\n",  i, err);
 		}
-
-		// Get info about AO subdevice
-		err = a4l_get_subdinfo(&dsc, idx_ao, &sbinfo);
-		if((err == 0) && ((sbinfo->flags & A4L_SUBD_TYPES) == A4L_SUBD_AO)) {
-			subdevice[AO].id = idx_ao;
-			subdevice[AO].active = 0;
-			subdevice[AO].count = sbinfo->nb_chan;
-			subdevice[AO].chan = new channel_t[subdevice[AO].count];
-			if(!subdevice[AO].chan)
-				subdevice[AO].count = 0;
-			else
-				for(size_t i=0;i<subdevice[AO].count;++i) {
-					err = a4l_get_chinfo(&dsc, idx_ao, i, &chinfo);
-					// Something went wrong
-					if(err < 0) {
-						subdevice[AO].active = 0;
-						subdevice[AO].count = 0;
-						delete[] subdevice[AO].chan;
-						break;
-					}
-					subdevice[AO].chan[i].active = false;
-					subdevice[AO].chan[i].analog.maxdata = (1<<chinfo->nb_bits)-1;
-					setAnalogGain(AO,i,1.0);
-					setAnalogZeroOffset(AO,i,0);
-					setAnalogRange(AO,i,0);
-					setAnalogReference(AO,i,0);
-					setAnalogUnits(AO,i,0);
-				}
-		} else {
-			subdevice[AO].active = 0;
-			subdevice[AO].count = 0;
-			subdevice[AO].chan = NULL;
+		// Assign subdevice index; save just the first device if many
+		if (((sbinfo->flags & A4L_SUBD_TYPES) == A4L_SUBD_AI) && (idx_ai < 0))
+			idx_ai  = i; 
+		else if (((sbinfo->flags & A4L_SUBD_TYPES) == A4L_SUBD_AO) && (idx_ao < 0))
+			idx_ao  = i; 
+		else if (((sbinfo->flags & A4L_SUBD_TYPES) == A4L_SUBD_DIO) && (idx_dio < 0)) {
+			idx_dio  = i; 
 		}
-
-		// Get info about DIO subdevice
-		err = a4l_get_subdinfo(&dsc, idx_dio, &sbinfo);
-		if((err == 0) && ((sbinfo->flags & A4L_SUBD_TYPES) == A4L_SUBD_DIO)) {
-			subdevice[DIO].id = idx_dio;
-			subdevice[DIO].active = 0;
-			subdevice[DIO].count = sbinfo->nb_chan;
-			printf("count is %d\n", sbinfo->nb_chan);
-			subdevice[DIO].chan = new channel_t[subdevice[DIO].count];
-			if(!subdevice[DIO].chan)
-				subdevice[DIO].count = 0;
-			else
-				for(size_t i=0;i<subdevice[DIO].count;++i) {
-					subdevice[DIO].chan[i].active = false;
-					subdevice[DIO].chan[i].digital.previous_value = 0;
-					setDigitalDirection(i,DAQ::INPUT);
-				}
-		} else {
-			subdevice[DIO].active = 0;
-			subdevice[DIO].count = 0;
-			subdevice[DIO].chan = NULL;
-		}
-		setActive(true);
 	}
+
+	// Get info about AI subdevice
+	err = a4l_get_subdinfo(&dsc, idx_ai, &sbinfo);
+	if((err == 0) && ((sbinfo->flags & A4L_SUBD_TYPES) == A4L_SUBD_AI)) {
+		subdevice[AI].id = idx_ai;
+		subdevice[AI].active = 0;
+		subdevice[AI].count = sbinfo->nb_chan;
+		subdevice[AI].chan = new channel_t[subdevice[AI].count];
+		if(!subdevice[AI].chan)
+			subdevice[AI].count = 0;
+		else
+			for(size_t i=0;i<subdevice[AI].count;++i) {
+				err = a4l_get_chinfo(&dsc, idx_ai, i, &chinfo);
+				// Something went wrong
+				if(err < 0) {
+					subdevice[AI].active = 0;
+					subdevice[AI].count = 0;
+					delete[] subdevice[AI].chan;
+					break;
+				}
+				subdevice[AI].chan[i].active = false;
+				subdevice[AI].chan[i].analog.maxdata = (1<<chinfo->nb_bits)-1; 
+				setAnalogGain(AI,i,1.0);
+				setAnalogRange(AI,i,0);
+				setAnalogZeroOffset(AI,i,0);
+				setAnalogReference(AI,i,0);
+				setAnalogUnits(AI,i,0);
+			}
+	} else {
+		subdevice[AI].active = 0;
+		subdevice[AI].count = 0;
+		subdevice[AI].chan = NULL;
+	}
+
+	// Get info about AO subdevice
+	err = a4l_get_subdinfo(&dsc, idx_ao, &sbinfo);
+	if((err == 0) && ((sbinfo->flags & A4L_SUBD_TYPES) == A4L_SUBD_AO)) {
+		subdevice[AO].id = idx_ao;
+		subdevice[AO].active = 0;
+		subdevice[AO].count = sbinfo->nb_chan;
+		subdevice[AO].chan = new channel_t[subdevice[AO].count];
+		if(!subdevice[AO].chan)
+			subdevice[AO].count = 0;
+		else
+			for(size_t i=0;i<subdevice[AO].count;++i) {
+				err = a4l_get_chinfo(&dsc, idx_ao, i, &chinfo);
+				// Something went wrong
+				if(err < 0) {
+					subdevice[AO].active = 0;
+					subdevice[AO].count = 0;
+					delete[] subdevice[AO].chan;
+					break;
+				}
+				subdevice[AO].chan[i].active = false;
+				subdevice[AO].chan[i].analog.maxdata = (1<<chinfo->nb_bits)-1;
+				setAnalogGain(AO,i,1.0);
+				setAnalogZeroOffset(AO,i,0);
+				setAnalogRange(AO,i,0);
+				setAnalogReference(AO,i,0);
+				setAnalogUnits(AO,i,0);
+			}
+	} else {
+		subdevice[AO].active = 0;
+		subdevice[AO].count = 0;
+		subdevice[AO].chan = NULL;
+	}
+
+	// Get info about DIO subdevice and set to INPUT as default
+	// Then add all Digital I/O to INPUT list for the
+	// IO class to handle
+	err = a4l_get_subdinfo(&dsc, idx_dio, &sbinfo);
+	if((err == 0) && ((sbinfo->flags & A4L_SUBD_TYPES) == A4L_SUBD_DIO)) {
+		subdevice[DIO].id = idx_dio;
+		subdevice[DIO].active = 0;
+		subdevice[DIO].count = sbinfo->nb_chan;
+		subdevice[DIO].chan = new channel_t[subdevice[DIO].count];
+		if(!subdevice[DIO].chan)
+			subdevice[DIO].count = 0;
+		else
+			for(size_t i=0;i<subdevice[DIO].count;++i) {
+				subdevice[DIO].chan[i].active = false;
+				subdevice[DIO].chan[i].digital.previous_value = 0;
+				setDigitalDirection(i,DAQ::INPUT);
+			}
+	} else {
+		subdevice[DIO].active = 0;
+		subdevice[DIO].count = 0;
+		subdevice[DIO].chan = NULL;
+	}
+	setActive(true);
+}
 
 AnalogyDevice::~AnalogyDevice(void) {
 	if(subdevice[AI].chan) delete[] subdevice[AI].chan;
@@ -391,6 +393,7 @@ int AnalogyDevice::setDigitalDirection(index_t channel,direction_t direction) {
 		return a4l_config_subd(&dsc, subdevice[DIO].id, A4L_INSN_CONFIG_DIO_OUTPUT, channel);
 	return 0;
 
+	printf("Something else\n");
 	return -EINVAL;
 }
 
@@ -475,6 +478,7 @@ void AnalogyDevice::write(void) {
 				// Get channel size
 				a4l_get_chinfo(&dsc, subdevice[AO].id, i, &chinfo);
 				size = a4l_sizeof_chan(chinfo);
+
 				// Write sample
 				err = a4l_sync_write(&dsc, subdevice[AO].id, PACK(i,channel->range,ref),
 						0, &sample, size);

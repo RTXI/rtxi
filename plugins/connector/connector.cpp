@@ -224,13 +224,11 @@ void Connector::Panel::buildInputChannelList(void) {
 	if(!inputBlock->count())
 		return;
 
+	// Get specific block
 	IO::Block *block = blocks[inputBlock->currentIndex()];
 
 	for(size_t i = 0;i < block->getCount(IO::INPUT);++i)
-	{
 		inputChannel->addItem(QString::fromStdString(block->getName(IO::INPUT,i)));
-		printf("Value is %d %s\n", (int)i, block->getName(IO::INPUT, i).c_str());
-	}
 
 	inputChannel->setCurrentIndex(0);
 	updateConnectionButton();
@@ -244,10 +242,7 @@ void Connector::Panel::buildOutputChannelList(void) {
 	IO::Block *block = blocks[outputBlock->currentIndex()];
 
 	for(size_t i = 0;i < block->getCount(IO::OUTPUT);++i)
-	{
 		outputChannel->addItem(QString::fromStdString(block->getName(IO::OUTPUT,i)));
-		printf("Value is %d %s\n", (int)i, block->getName(IO::OUTPUT, i).c_str());
-	}
 
 	outputChannel->setCurrentIndex(0);
 	updateConnectionButton();

@@ -57,12 +57,6 @@ DAQ::Device *ComediDriver::createDevice(const std::list<std::string> &args) {
     if((subd = comedi_find_subdevice_by_type(device,COMEDI_SUBD_DIO,0)) >= 0)
         count[2] = comedi_get_n_channels(device,subd);
 
-/*
-    if((subd = comedi_find_subdevice_by_type(device,COMEDI_SUBD_DI,0)) >= 0)
-        count[3] = comedi_get_n_channels(device,subd);
-    if((subd = comedi_find_subdevice_by_type(device,COMEDI_SUBD_DO,0)) >= 0)
-        count[4] = comedi_get_n_channels(device,subd);
-*/
     if(!(count[0]+count[1]+count[2]+count[3]+count[4])) {
         ERROR_MSG("ComediDriver::createDevice : no Comedi device configured on %s.\n",name.c_str());
         comedi_close(device);

@@ -42,7 +42,7 @@ DAQ::Device *AnalogyDriver::createDevice(const std::list<std::string> &args) {
         return 0;
     }
 
-	// Allocate a buffer so as to get more info (subd, chan, rng) 
+	// Allocate a buffer to get more info (subd, chan, rng) 
 	dsc.sbdata = malloc(dsc.sbsize);
 	if (dsc.sbdata == NULL) {
 		err = -ENOMEM;
@@ -85,11 +85,8 @@ DAQ::Device *AnalogyDriver::createDevice(const std::list<std::string> &args) {
     err = a4l_get_subdinfo(&dsc, idx_ao, &sbinfo); 
     if(err == 0)
         count[1] = sbinfo->nb_chan;
-
-    count[2] = count[3] = count[4] = 0;
-
     err = a4l_get_subdinfo(&dsc, idx_dio, &sbinfo); 
-    if(err != 0)
+    if(err == 0)
         count[2] = sbinfo->nb_chan;
 
     if(!(count[0]+count[1]+count[2]+count[3]+count[4])) {

@@ -28,7 +28,6 @@
 Mutex IO::Block::mutex = Mutex(Mutex::RECURSIVE);
 
 IO::Block::Block(std::string n,IO::channel_t *channel,size_t size):name(n) {
-	printf("Block is %s\n", name.c_str());
 	for (size_t i=0; i<inputs.size(); ++i)
 		while (inputs[i].links.size())
 			disconnect(inputs[i].links.front().block,inputs[i].links.front().channel,this,i);
@@ -42,8 +41,6 @@ IO::Block::Block(std::string n,IO::channel_t *channel,size_t size):name(n) {
 			num_inputs++;
 		else if (channel[i].flags & OUTPUT)
 			num_outputs++;
-
-	printf("Number I/O is %d %d\n", num_inputs, num_outputs);
 
 	inputs = std::vector<struct input_t>(num_inputs);
 	outputs = std::vector<struct output_t>(num_outputs);
