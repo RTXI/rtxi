@@ -49,7 +49,7 @@ signals:
 
 	private:
 
-		int menuID;
+		QAction *action;
 		QString model_makefile_path;
 		static DynamoModelLoader *instance;
 };

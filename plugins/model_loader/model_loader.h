@@ -35,10 +35,8 @@ class ModelLoader : public QObject, public Plugin::Object
 		public slots:
 			void load(void);
 		void load_recent(int);
-		//void load_setting(int);
 
 	private:
-		//int menuID;
 		QAction* action;
 		void updateRecentModules(QString, int);
 };

@@ -396,7 +396,6 @@ void MainWindow::windowsMenuAboutToShow(void) {
 		return;
 	}
 
-	// VISIT TWO
 	// Create windows list based off of what's open
 	for(int i = 0; i < subWindows.size(); i++){
 		QMdiSubWindow *child = subWindows.at(i);

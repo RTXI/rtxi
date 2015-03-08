@@ -98,8 +98,6 @@ void ModelLoader::updateRecentModules(QString filename, int index) {
 	userprefs.endGroup();
 	int numRecentFiles = entries.size();
 
-	// remove list and re-add them all
-	// VISIT TWO
 	for (int i = 3; i < std::min(numRecentFiles - 2, 10) + 3; ++i) {
 		MainWindow::getInstance()->removeModuleMenuItemAt(i);
 	}

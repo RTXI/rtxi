@@ -1,5 +1,5 @@
 /*
- 	 The Real-Time eXperiment Interface (RTXI)
+	 The Real-Time eXperiment Interface (RTXI)
 	 Copyright (C) 2011 Georgia Institute of Technology, University of Utah, Weill Cornell Medical College
 
 	 This program is free software: you can redistribute it and/or modify
@@ -15,7 +15,7 @@
 	 You should have received a copy of the GNU General Public License
 	 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
- */
+*/
 
 #include <debug.h>
 #include <stdlib.h>
@@ -39,7 +39,8 @@ extern "C" Plugin::Object *createRTXIPlugin(void *) {
 
 DynamoModelLoader::DynamoModelLoader(void) {
 	DEBUG_MSG("DynamoModelLoader::DynamoModelLoader : starting\n");
-  MainWindow::getInstance()->createModuleMenuItem("Load DYNAMO Model",this,SLOT(load_dialog(void)));
+
+	action = MainWindow::getInstance()->createModuleMenuItem("Load DYNAMO Model",this,SLOT(load_dialog(void)));
 
 	model_makefile_path = QString(MODEL_MAKEFILE_PATH);
 	DEBUG_MSG("model_makefile_path = %s\n", model_makefile_path.toAscii());
@@ -60,8 +61,6 @@ DynamoModelLoader::DynamoModelLoader(void) {
 		listmodule = userprefs.value("/recentFileList/" + entries[i]).toString();
 		text = tr("&%1 %2").arg(i).arg(listmodule);
 		MainWindow::getInstance()->createModuleMenuItem(text,this,SLOT(load_recent(int)));
-		// VISIT TWO
-		//MainWindow::getInstance()->setModuleMenuItemParameter(menuID, i);
 	}
 
 	// add recently used settings files to the menu
@@ -72,16 +71,12 @@ DynamoModelLoader::DynamoModelLoader(void) {
 	for (int i = 0; i < std::min(numRecentFiles,10); ++i) {
 		listmodule = userprefs.value("/recentSettingsList/" + entries[i]).toString();
 		text = tr("&%1 %2").arg(i).arg(listmodule);
-	  MainWindow::getInstance()->createFileMenuItem(text,this,SLOT(load_setting(int)));
-		// VISIT TWO
-		//MainWindow::getInstance()->setFileMenuItemParameter(menuID, i);
+		MainWindow::getInstance()->createFileMenuItem(text,this,SLOT(load_setting(int)));
 	}
-
 }
 
 DynamoModelLoader::~DynamoModelLoader(void) {
-	// VISIT TWO
-	//MainWindow::getInstance()->removeModuleMenuItem(menuID);
+	MainWindow::getInstance()->removeModuleMenuItem(action);
 }
 
 /* Set and retrieve the name of the model make file. */
@@ -137,12 +132,9 @@ void DynamoModelLoader::load(char* srcpath) {
 void DynamoModelLoader::load_dialog(void) {
 	QSettings userprefs;
 	userprefs.setPath(QSettings::NativeFormat, QSettings::SystemScope, "/usr/local/share/rtxi/");
-	//QString settingsDir = userprefs.readEntry("/dirs/dynamomodels", getenv("HOME"));
 
 	QString file_name = QFileDialog::getOpenFileName(MainWindow::getInstance(), userprefs.value("/dirs/dynamomodels", getenv("HOME")).toString(),
-			"Dynamo Models (*" MODEL_SOURCE_SUFFIX ");;All (*.*)"); //, MainWindow::getInstance());
-	/*QString file_name = QFileDialog::getOpenFileName(QString::null,"Dynamo Models (*" MODEL_SOURCE_SUFFIX \
-		");;All (*.*)",MainWindow::getInstance());*/
+			"Dynamo Models (*" MODEL_SOURCE_SUFFIX ");;All (*.*)");
 
 	load((char *) file_name.toStdString().c_str());
 }
