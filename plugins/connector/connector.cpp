@@ -231,7 +231,7 @@ void Connector::Panel::buildInputChannelList(void) {
 		inputChannel->addItem(QString::fromStdString(block->getName(IO::INPUT,i)));
 
 	inputChannel->setCurrentIndex(0);
-	updateConnectionButton();
+	//updateConnectionButton();
 }
 
 void Connector::Panel::buildOutputChannelList(void) {

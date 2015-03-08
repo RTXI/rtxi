@@ -388,12 +388,9 @@ int AnalogyDevice::setDigitalDirection(index_t channel,direction_t direction) {
 
 	if(direction == DAQ::INPUT)
 		return a4l_config_subd(&dsc, subdevice[DIO].id, A4L_INSN_CONFIG_DIO_INPUT, channel);
-	return 0;
-	if(direction == DAQ::OUTPUT)
+	else if(direction == DAQ::OUTPUT)
 		return a4l_config_subd(&dsc, subdevice[DIO].id, A4L_INSN_CONFIG_DIO_OUTPUT, channel);
-	return 0;
 
-	printf("Something else\n");
 	return -EINVAL;
 }
 
