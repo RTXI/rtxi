@@ -225,8 +225,6 @@ SystemControlPanel::SystemControlPanel(QWidget *parent) : QWidget(parent) {
 
 	digitalSubdeviceList = new QComboBox;
 	digitalSubdeviceList->addItem("I/O");
-	//digitalSubdeviceList->addItem("Input");
-	//digitalSubdeviceList->addItem("Output");
 	QObject::connect(digitalSubdeviceList,SIGNAL(activated(int)),this,SLOT(updateDevice(void)));
 	digitalLayout->addWidget(digitalSubdeviceList, 1, 1, 1, 1);
 
