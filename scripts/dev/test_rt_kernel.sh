@@ -1,4 +1,3 @@
-#
 # The Real-Time eXperiment Interface (RTXI)
 # Copyright (C) 2011 Georgia Institute of Technology, University of Utah, Weill Cornell Medical College
 #
@@ -16,19 +15,45 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 # Created by Yogi Patel <yapatel@gatech.edu> 2014.1.31
-#
 
 #!/bin/bash
 
-echo "----->Running latency test under load. Please wait (approx 30 minutes)"
+# Check to see if R and stress are installed
+echo "----->Checking for dependencies needed to run stress test."
+if ! $(dpkg-query -Wf'${db:Status-abbrev}' "stress" 2>/dev/null | grep -q '^i'); 
+	then sudo apt-get -y install stress
+fi
+if ! $(dpkg-query -Wf'${db:Status-abbrev}' "lshw" 2>/dev/null | grep -q '^i'); 
+	then sudo apt-get -y install lshw
+fi
+if ! $(dpkg-query -Wf'${db:Status-abbrev}' "r-base" 2>/dev/null | grep -q '^i'); 
+	then sudo apt-get -y install r-base
+fi
+echo ""
+
+echo "----->Running latency test under load. Please wait 30 minutes."
 echo "----->Do not interrupt."
+echo "----->If you do interrupt, stop stressing the system by running:"
+echo "      $ pkill stress"
+echo ""
+
+# Get system information
+DISTRO="$(lsb_release -is) $(lsb_release -rs)"
+HOSTNAME=`uname -n`
+RT_KERNEL=`uname -r`
+PROCESSOR=$(cat /proc/cpuinfo | grep "model name" | uniq | cut -d":" -f2 | sed 's/ \+/ /g' | sed -e 's/^\  *//' -e 's/\ *$//')
+GRAPHICS_CARD=$(lspci | grep VGA | uniq | cut -d":" -f3 | sed 's/ \+/ /g' | sed -e 's/^\  *//' -e 's/\ *$//')
+GRAPHICS_DRIVER=$(lshw -c display | grep "configuration: driver" | cut -d":" -f2 | cut -d"=" -f2 | cut -d" " -f1 | sed 's/ \+/ /g' | sed -e 's/^\  *//' -e 's/\ *$//')
+
+# Set up variables for run
+TIME=1800 # duration of run (s)
+RT_PERIOD=100
+RATE=$(expr 1000 / $RT_PERIOD) # Convert RT period to freq in kHz
 
 # Run latency test under dynamic load
-stress --cpu 2 --vm 1 --hdd 1 --timeout 1800 & sudo /usr/xenomai/bin/./latency -s -h -p 100 -T 1800 -g histdata.txt
+stress --cpu 2 --vm 1 --hdd 1 --timeout $TIME & 
+sudo /usr/xenomai/bin/./latency -s -h -p $RT_PERIOD -B 1 -H 500000 -T $TIME -g test_rt_histdata.txt | tee test_rt_kernel.log
 
-# Check if R is installed
-hash Rscript 2>/dev/null || { echo >&2 "R is needed for me to plot stats.\nYou can always do that yourself, too."; exit 0; }
-
-Rscript analyzeHistdata.r
+Rscript makeHistPlot.r "$DISTRO" "$HOSTNAME" "$RT_KERNEL" "$PROCESSOR" "$GRAPHICS_CARD" "$GRAPHICS_DRIVER" "$RATE"
 
 exit 0
