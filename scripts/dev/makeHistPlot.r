@@ -31,6 +31,7 @@ processor = as.character(args[4])
 graphics_card = as.character(args[5])
 graphics_driver = as.character(args[6])
 rate = as.integer(args[7]) # kHz
+daq = as.character(args[8])
 
 # Open file and get raw data
 data.raw = read.table("test_rt_histdata.txt", header=F, col.names=c("Latency", "Count"))
@@ -43,7 +44,7 @@ weird_sdev = sqrt( 1/sum(data.stats$Count) * sum(data.stats$Count*(data.stats$La
 data.summary = data.frame(Measure = c("Mean (μs)", "Std.Dev (μs)"), Value = c(weird_mean, weird_sdev))
 
 # System info passed from command line
-data.system = data.frame(Field = c("Operating System", "Host Name", "RT Kernel", "Processor", "Graphics Card", "Graphics Driver"), Info = c(os, hostname, rt_patch, processor, graphics_card, graphics_driver) )
+data.system = data.frame( Field = c("Operating System", "Host Name", "RT Kernel", "Processor", "Graphics Card", "Graphics Driver", "DAQ" ), Info = c(os, hostname, rt_patch, processor, graphics_card, graphics_driver, daq) )
 
 # Put stats into bin_size ns bins for histogram
 bin_size = 200 # bins are to make the histogram look better
@@ -112,7 +113,7 @@ plot.system = qplot(1:10, 1:10, geom = "blank") +
 	                  xmin=1, xmax=10, ymin=1, ymax=10)
 
 # Save plots to test_rt_plot.svg. Trying to save in other formats will cause you sadness. 
-svg("test_rt_plot.svg", width=12, height=9)
+svg("test_rt_plot.svg", width=12, height=10)
 grid.newpage()
 pushViewport(viewport(layout = grid.layout(4,6), width=1, height=1))
 print(plot.system, vp = viewport(layout.pos.row = 1, layout.pos.col = 1:6))

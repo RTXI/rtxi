@@ -44,6 +44,7 @@ RT_KERNEL=`uname -r`
 PROCESSOR=$(cat /proc/cpuinfo | grep "model name" | uniq | cut -d":" -f2 | sed 's/ \+/ /g' | sed -e 's/^\  *//' -e 's/\ *$//')
 GRAPHICS_CARD=$(lspci | grep VGA | uniq | cut -d":" -f3 | sed 's/ \+/ /g' | sed -e 's/^\  *//' -e 's/\ *$//')
 GRAPHICS_DRIVER=$(lshw -c display | grep "configuration: driver" | cut -d":" -f2 | cut -d"=" -f2 | cut -d" " -f1 | sed 's/ \+/ /g' | sed -e 's/^\  *//' -e 's/\ *$//')
+DAQ=$(lspci | grep National | cut -d":" -f3 | sed 's/ \+/ /g' | sed -e 's/^\  *//' -e 's/\ *$//')
 
 # Set up variables for run
 TIME=1800 # duration of run (s)
@@ -54,6 +55,6 @@ RATE=$(expr 1000 / $RT_PERIOD) # Convert RT period to freq in kHz
 stress --cpu 2 --vm 1 --hdd 1 --timeout $TIME & 
 sudo /usr/xenomai/bin/./latency -s -h -p $RT_PERIOD -B 1 -H 500000 -T $TIME -g test_rt_histdata.txt | tee test_rt_kernel.log
 
-Rscript makeHistPlot.r "$DISTRO" "$HOSTNAME" "$RT_KERNEL" "$PROCESSOR" "$GRAPHICS_CARD" "$GRAPHICS_DRIVER" "$RATE"
+Rscript makeHistPlot.r "$DISTRO" "$HOSTNAME" "$RT_KERNEL" "$PROCESSOR" "$GRAPHICS_CARD" "$GRAPHICS_DRIVER" "$RATE" "$DAQ"
 
 exit 0
