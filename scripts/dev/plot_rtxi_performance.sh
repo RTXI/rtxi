@@ -81,6 +81,7 @@ RT_KERNEL=`uname -r`
 PROCESSOR=$(cat /proc/cpuinfo | grep "model name" | uniq | cut -d":" -f2 | sed 's/ \+/ /g' | sed -e 's/^\  *//' -e 's/\ *$//')
 GRAPHICS_CARD=$(lspci | grep VGA | uniq | cut -d":" -f3 | sed 's/ \+/ /g' | sed -e 's/^\  *//' -e 's/\ *$//')
 GRAPHICS_DRIVER=$(lshw -c display | grep "configuration: driver" | cut -d":" -f2 | cut -d"=" -f2 | cut -d" " -f1 | sed 's/ \+/ /g' | sed -e 's/^\  *//' -e 's/\ *$//')
+DAQ=$(lspci | grep National | cut -d":" -f3 | sed 's/ \+/ /g' | sed -e 's/^\  *//' -e 's/\ *$//')
 
 # Set up variables for run
 RT_PERIOD=$(h5dump -d "/Trial$TRIAL_N/Period (ns)" $HDF_FILENAME |  grep "(0)" | cut -d":" -f2) # in ns
@@ -96,6 +97,6 @@ if [ "$CHANNEL1" == "" ]||[ "$CHANNEL2" == "" ]||[ "$CHANNEL3" == "" ]; then
 	exit 1
 fi
 
-Rscript makePerfPlot.r "$DISTRO" "$HOSTNAME" "$RT_KERNEL" "$PROCESSOR" "$GRAPHICS_CARD" "$GRAPHICS_DRIVER" "$RT_PERIOD" "$DOWNSAMPLE" "$CHANNEL1" "$CHANNEL2" "$CHANNEL3" "$TXT_FILENAME" "$PLOT_FILENAME"
+Rscript makePerfPlot.r "$DISTRO" "$HOSTNAME" "$RT_KERNEL" "$PROCESSOR" "$GRAPHICS_CARD" "$GRAPHICS_DRIVER" "$RT_PERIOD" "$DOWNSAMPLE" "$CHANNEL1" "$CHANNEL2" "$CHANNEL3" "$TXT_FILENAME" "$PLOT_FILENAME" "$DAQ"
 
 exit 0

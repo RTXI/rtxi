@@ -35,6 +35,7 @@ channel2 = as.character(args[10])
 channel3 = as.character(args[11])
 infile = as.character(args[12])
 outfile = as.character(args[13])
+daq = as.character(args[14])
 
 data.raw = read.table(infile)
 data.stats = data.frame(Time=seq(1, length(data.raw$V1))/(rt_frequency*1000/downsample)) # in s
@@ -83,7 +84,7 @@ data.stats$Period = data.stats$Period / 1000 # to us
 data.stats$Jitter = data.stats$Jitter / 1000 # to us
 
 # System info passed from command line
-data.system = data.frame(Field = c("Operating System", "Hostname", "RT Kernel", "Processor", "Graphics Card", "Graphics Driver", "RT Frequency (kHz)", "Downsampling"), Info = c(os, hostname, rt_kernel, processor, graphics_card, graphics_driver, rt_frequency, downsample) )
+data.system = data.frame(Field = c("Operating System", "Hostname", "RT Kernel", "Processor", "Graphics Card", "Graphics Driver", "DAQ", "RT Frequency (kHz)", "Downsampling"), Info = c(os, hostname, rt_kernel, processor, graphics_card, graphics_driver, daq, rt_frequency, downsample) )
 
 data.m = melt(data.stats, id.vars='Time')
 
