@@ -55,6 +55,6 @@ RATE=$(expr 1000 / $RT_PERIOD) # Convert RT period to freq in kHz
 stress --cpu 2 --vm 1 --hdd 1 --timeout $TIME & 
 sudo /usr/xenomai/bin/./latency -s -h -p $RT_PERIOD -B 1 -H 500000 -T $TIME -g test_rt_histdata.txt | tee test_rt_kernel.log
 
-Rscript makeHistPlot.r "$DISTRO" "$HOSTNAME" "$RT_KERNEL" "$PROCESSOR" "$GRAPHICS_CARD" "$GRAPHICS_DRIVER" "$RATE" "$DAQ"
+sudo Rscript makeHistPlot.r "$DISTRO" "$HOSTNAME" "$RT_KERNEL" "$PROCESSOR" "$GRAPHICS_CARD" "$GRAPHICS_DRIVER" "$RATE" "$DAQ"
 
 exit 0
