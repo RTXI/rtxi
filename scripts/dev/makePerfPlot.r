@@ -100,7 +100,7 @@ plot.system = qplot(1:2, 1:2, geom = "blank") +
                      xmin=1, xmax=2, ymin=1, ymax=2)
 
 plot.performance = ggplot(data.m, aes(x=Time, y=value, colour=variable)) +
-	geom_point(shape=16, alpha=.2, cex=1) + 
+	geom_point(shape=16, alpha=.2, cex=2) + 
 	facet_wrap( ~ variable, scales="free", ncol=1) + 
 	labs(x=xaxislabel, y=expression(paste("Time (", mu, "s)"))) + 
 	theme(axis.text=element_text(size=16), axis.title=element_text(size=16)) +
