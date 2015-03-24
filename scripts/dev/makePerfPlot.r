@@ -4,10 +4,10 @@ options(warn=-1)
 args = commandArgs(trailingOnly=T)
 
 if( !(require(ggplot2)&&require(reshape2)&&require(gridExtra)) ) {
-   message("I need some R packages installed. (ggplot2 and gridExtra)")
-   message(prompt="Want me to install them? (y/N)")
-   val <- scan("stdin", character(), n=1)
-   if ((val == "y")||(val == "Y")) {
+#   message("I need some R packages installed. (ggplot2 and gridExtra)")
+#   message(prompt="Want me to install them? (y/N)")
+#   val <- scan("stdin", character(), n=1)
+#   if ((val == "y")||(val == "Y")) {
       install.packages("ggplot2", repos="http://watson.nci.nih.gov/cran_mirror/")
       install.packages("reshape2", repos="http://watson.nci.nih.gov/cran_mirror/")
       install.packages("gridExtra", repos="http://watson.nci.nih.gov/cran_mirror/")
@@ -15,9 +15,9 @@ if( !(require(ggplot2)&&require(reshape2)&&require(gridExtra)) ) {
       require(ggplot2)
       require(reshape2)
 		require(gridExtra)
-   } else {
-      stop("Look, you need to install 'ggplot2', 'plyr', 'gridExtra', and 'scales' to do this.")
-   }
+#   } else {
+#      stop("Look, you need to install 'ggplot2', 'plyr', 'gridExtra', and 'scales' to do this.")
+#   }
 }
 
 # Headings for the plot. Edit them here. 
