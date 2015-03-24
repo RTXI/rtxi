@@ -47,13 +47,13 @@ GRAPHICS_DRIVER=$(sudo lshw -c display | grep "configuration: driver" | cut -d":
 DAQ=$(lspci | grep National | cut -d":" -f3 | sed 's/ \+/ /g' | sed -e 's/^\  *//' -e 's/\ *$//')
 
 # Set up variables for run
-TIME=10 # duration of run (s)
+TIME=1800 # duration of run (s)
 RT_PERIOD=100 # period in us
 RATE=$(expr 1000 / $RT_PERIOD) # Convert RT period to freq in kHz
 
 # Run latency test under dynamic load
 if [ -f test_rt_histdata.txt ]; then
-	echo 'test run already'
+	echo 'The test has been run already. Rename test_rt_histdata.txt or delete it. Then, run this script again.'
 else
 	stress --cpu 2 --vm 1 --hdd 1 --timeout $TIME & 
 	sudo /usr/xenomai/bin/./latency -s -h -p $RT_PERIOD -B 1 -H 500000 -T $TIME -g test_rt_histdata.txt | tee test_rt_kernel.log
