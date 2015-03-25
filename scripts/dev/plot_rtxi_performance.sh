@@ -30,6 +30,13 @@ if ! $(dpkg-query -Wf'${db:Status-abbrev}' "lshw" 2>/dev/null | grep -q '^i');
 fi
 echo ""
 
+# This can also be added to install_dependencies.sh, but this creates an issue
+#   when different users run the script. They all have their own local folders.
+if ! [ -d ~/.config/R ]; then
+   mkdir ~/.config/R
+   echo "R_LIBS_USER=\"~/.config/R\"" > ~/.Renviron
+fi
+
 # Get the filenames
 HDF_FILENAME=$1
 
@@ -97,6 +104,6 @@ if [ "$CHANNEL1" == "" ]||[ "$CHANNEL2" == "" ]||[ "$CHANNEL3" == "" ]; then
 	exit 1
 fi
 
-sudo Rscript makePerfPlot.r "$DISTRO" "$HOSTNAME" "$RT_KERNEL" "$PROCESSOR" "$GRAPHICS_CARD" "$GRAPHICS_DRIVER" "$RT_PERIOD" "$DOWNSAMPLE" "$CHANNEL1" "$CHANNEL2" "$CHANNEL3" "$TXT_FILENAME" "$PLOT_FILENAME" "$DAQ"
+Rscript makePerfPlot.r "$DISTRO" "$HOSTNAME" "$RT_KERNEL" "$PROCESSOR" "$GRAPHICS_CARD" "$GRAPHICS_DRIVER" "$RT_PERIOD" "$DOWNSAMPLE" "$CHANNEL1" "$CHANNEL2" "$CHANNEL3" "$TXT_FILENAME" "$PLOT_FILENAME" "$DAQ"
 
 exit 0

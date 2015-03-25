@@ -31,6 +31,17 @@ if ! $(dpkg-query -Wf'${db:Status-abbrev}' "r-base" 2>/dev/null | grep -q '^i');
 fi
 echo ""
 
+# Create local directory for installing R packages
+# This can also be added to install_dependencies.sh, but this creates an issue
+#   when different users run the script. They all have their own local folders.
+#
+# All of this will be unnecessary in the new live CD, which will have all these
+#   packages installed already. 
+if ! [ -d ~/.config/R ]; then
+   mkdir ~/.config/R
+   echo "R_LIBS_USER=\"~/.config/R\"" > ~/.Renviron
+fi
+
 echo "----->Running latency test under load. Please wait 30 minutes."
 echo "----->Do not interrupt."
 echo "----->If you do interrupt, stop stressing the system by running:"
@@ -59,6 +70,6 @@ else
 	sudo /usr/xenomai/bin/./latency -s -h -p $RT_PERIOD -B 1 -H 500000 -T $TIME -g test_rt_histdata.txt | tee test_rt_kernel.log
 fi
 
-sudo Rscript makeHistPlot.r "$DISTRO" "$HOSTNAME" "$RT_KERNEL" "$PROCESSOR" "$GRAPHICS_CARD" "$GRAPHICS_DRIVER" "$RATE" "$DAQ"
+Rscript makeHistPlot.r "$DISTRO" "$HOSTNAME" "$RT_KERNEL" "$PROCESSOR" "$GRAPHICS_CARD" "$GRAPHICS_DRIVER" "$RATE" "$DAQ"
 
 exit 0

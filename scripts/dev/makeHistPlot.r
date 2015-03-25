@@ -5,22 +5,15 @@ args = commandArgs(trailingOnly = T)
 
 # Check if needed packages are installed. Otherwise, exit. 
 if( !(require(ggplot2)&&require(scales)&&require(plyr)&&require(gridExtra)) ) {
-#   message("I need some R packages installed. (ggplot2, plyr, gridExtra, and scales)")
-#   message(prompt="Want me to install them? (y/N)")
-#   val <- scan("stdin", character(), n=1)
-#   if ((val == "y")||(val == "Y")) {
-      install.packages("ggplot2", repos="http://watson.nci.nih.gov/cran_mirror/")
-      install.packages("scales", repos="http://watson.nci.nih.gov/cran_mirror/")
-      install.packages("plyr", repos="http://watson.nci.nih.gov/cran_mirror/")
-      install.packages("gridExtra", repos="http://watson.nci.nih.gov/cran_mirror/")
+   install.packages("ggplot2", repos="http://watson.nci.nih.gov/cran_mirror/")
+   install.packages("scales", repos="http://watson.nci.nih.gov/cran_mirror/")
+   install.packages("plyr", repos="http://watson.nci.nih.gov/cran_mirror/")
+   install.packages("gridExtra", repos="http://watson.nci.nih.gov/cran_mirror/")
 
-      require(ggplot2)
-      require(scales)
-      require(plyr)
-      require(gridExtra)
- #  } else {
- #     stop("Look, you need to install 'ggplot2', 'plyr', 'gridExtra', and 'scales' to do this.")
- #  }
+   require(ggplot2)
+   require(scales)
+   require(plyr)
+   require(gridExtra)
 }
 
 # Set parameters passed to script from command line / bash script
