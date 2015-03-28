@@ -1,5 +1,5 @@
 /*
- 	 The Real-Time eXperiment Interface (RTXI)
+	 The Real-Time eXperiment Interface (RTXI)
 	 Copyright (C) 2011 Georgia Institute of Technology, University of Utah, Weill Cornell Medical College
 
 	 This program is free software: you can redistribute it and/or modify
@@ -15,7 +15,7 @@
 	 You should have received a copy of the GNU General Public License
 	 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-*/
+ */
 
 #include <QMdiSubWindow>
 
@@ -50,7 +50,7 @@ Connector::Panel::Panel(QWidget *parent) : QWidget(parent) {
 
 	// Make Mdi
 	subWindow = new QMdiSubWindow;
-   subWindow->setWindowIcon(QIcon("/usr/local/lib/rtxi/RTXI-widget-icon.png"));
+	subWindow->setWindowIcon(QIcon("/usr/local/lib/rtxi/RTXI-widget-icon.png"));
 	subWindow->setFixedSize(500,400);
 	subWindow->setAttribute(Qt::WA_DeleteOnClose);
 	subWindow->setWindowFlags(Qt::CustomizeWindowHint);
@@ -211,7 +211,7 @@ void Connector::Panel::receiveEvent(const Event::Object *event) {
 			QString::number(dest_idx)+" "+QString::fromStdString(dest->getName(IO::INPUT,dest_idx));
 
 		size_t index;
-		for(index=0;index < connectionBox->count() && connectionBox->currentItem()->text() != link_name;++index);
+		for(index=0; index < connectionBox->count() && connectionBox->item(index)->text() != link_name; ++index);
 		if(index >= connectionBox->count())
 			ERROR_MSG("Connector::Panel::receiveEvent : removing non-existant link.\n");
 		else
@@ -227,11 +227,12 @@ void Connector::Panel::buildInputChannelList(void) {
 	// Get specific block
 	IO::Block *block = blocks[inputBlock->currentIndex()];
 
+	// Get list of channels from specific block
 	for(size_t i = 0;i < block->getCount(IO::INPUT);++i)
 		inputChannel->addItem(QString::fromStdString(block->getName(IO::INPUT,i)));
 
 	inputChannel->setCurrentIndex(0);
-	//updateConnectionButton();
+	updateConnectionButton();
 }
 
 void Connector::Panel::buildOutputChannelList(void) {
@@ -239,8 +240,10 @@ void Connector::Panel::buildOutputChannelList(void) {
 	if(!outputBlock->count())
 		return;
 
+	// Get specific block
 	IO::Block *block = blocks[outputBlock->currentIndex()];
 
+	// Get list of channels from specific block
 	for(size_t i = 0;i < block->getCount(IO::OUTPUT);++i)
 		outputChannel->addItem(QString::fromStdString(block->getName(IO::OUTPUT,i)));
 
