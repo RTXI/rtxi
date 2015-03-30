@@ -15,7 +15,7 @@
 	 You should have received a copy of the GNU General Public License
 	 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
- */
+*/
 
 #include <QMdiSubWindow>
 
@@ -231,7 +231,6 @@ void Connector::Panel::buildInputChannelList(void) {
 	for(size_t i = 0;i < block->getCount(IO::INPUT);++i)
 		inputChannel->addItem(QString::fromStdString(block->getName(IO::INPUT,i)));
 
-	inputChannel->setCurrentIndex(0);
 	updateConnectionButton();
 }
 
@@ -247,7 +246,6 @@ void Connector::Panel::buildOutputChannelList(void) {
 	for(size_t i = 0;i < block->getCount(IO::OUTPUT);++i)
 		outputChannel->addItem(QString::fromStdString(block->getName(IO::OUTPUT,i)));
 
-	outputChannel->setCurrentIndex(0);
 	updateConnectionButton();
 }
 
@@ -305,6 +303,8 @@ void Connector::Panel::highlightConnectionBox(QListWidgetItem * item) {
 	inputBlock->setCurrentIndex(index);
 	buildInputChannelList();
 	inputChannel->setCurrentIndex(dest_idx);
+
+	updateConnectionButton();
 }
 
 void Connector::Panel::toggleConnection(bool on) {
@@ -323,12 +323,21 @@ void Connector::Panel::toggleConnection(bool on) {
 }
 
 void Connector::Panel::updateConnectionButton(void) {
-	IO::Block *src = blocks[outputBlock->currentIndex()];
-	IO::Block *dest = blocks[inputBlock->currentIndex()];
-	size_t src_num = outputChannel->currentIndex();
-	size_t dest_num = inputChannel->currentIndex();
 
-	connectionButton->setChecked(IO::Connector::getInstance()->connected(src,src_num,dest,dest_num));
+	if(!inputChannel->count() || !outputChannel->count())
+	{
+		connectionButton->setEnabled(false);
+	}
+	else
+	{
+		connectionButton->setEnabled(true);
+		IO::Block *src = blocks[outputBlock->currentIndex()];
+		IO::Block *dest = blocks[inputBlock->currentIndex()];
+		size_t src_num = outputChannel->currentIndex();
+		size_t dest_num = inputChannel->currentIndex();
+
+		connectionButton->setChecked(IO::Connector::getInstance()->connected(src,src_num,dest,dest_num));
+	}
 }
 
 void Connector::Panel::buildConnectionList(IO::Block *src,size_t src_num,IO::Block *dest,size_t dest_num,void *arg) {
