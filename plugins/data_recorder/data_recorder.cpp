@@ -223,6 +223,7 @@ int RemoveChannelEvent::callback(void)
 OpenFileEvent::OpenFileEvent(QString &n, AtomicFifo &f) :
 	filename(n), fifo(f)
 {
+	printf("Opening file...\n");
 }
 
 OpenFileEvent::~OpenFileEvent(void)
@@ -661,6 +662,7 @@ void DataRecorder::Panel::receiveEvent(const Event::Object *event)
 
 	} else if (event->getName() == Event::OPEN_FILE_EVENT) {
 
+		printf("Open file event recieved...\n");
 		QString filename(reinterpret_cast<char*> (event->getParam("filename")));
 		OpenFileEvent e(filename, fifo);
 		RT::System::getInstance()->postEvent(&e);
@@ -785,6 +787,7 @@ void DataRecorder::Panel::buildChannelList(void)
 
 void DataRecorder::Panel::changeDataFile(void)
 {
+	printf("\n\n\nCalled changeDataFile...\n");
 	QFileDialog fileDialog(this);
 	fileDialog.setFileMode(QFileDialog::AnyFile);
 	fileDialog.setWindowTitle("Select Data File");
@@ -815,8 +818,11 @@ void DataRecorder::Panel::changeDataFile(void)
 	// write this directory to the user prefs as most recently used
 	userprefs.setValue("/dirs/data", fileDialog.directory().path());
 
+	printf("Userprefs set...\n");
+
 	OpenFileEvent event(filename, fifo);
 	RT::System::getInstance()->postEvent(&event);
+	printf("Event posted...\n");
 }
 
 void DataRecorder::Panel::insertChannel(void)
@@ -875,7 +881,6 @@ void DataRecorder::Panel::removeChannel(void)
 
 void DataRecorder::Panel::startRecordClicked(void)
 {
-	recordStatus->setText("Starting...");
 	if(fileNameEdit->text().isEmpty()) {
 		QMessageBox::critical(
 				this, "File not specified.",
@@ -884,6 +889,7 @@ void DataRecorder::Panel::startRecordClicked(void)
 		return;
 	}
 
+	recordStatus->setText("Starting...");
 	count = 0;
 	StartRecordingEvent event(recording, fifo);
 	RT::System::getInstance()->postEvent(&event);
@@ -913,8 +919,10 @@ void DataRecorder::Panel::customEvent(QEvent *e)
 		data->done.wakeAll();
 		recordStatus->setText("Not Recording");
 	} else if (e->type() == QSetFileNameEditEvent) {
+		printf("Called customEvent...\n");
 		CustomEvent * event = static_cast<CustomEvent *>(e);
 		SetFileNameEditEventData *data = reinterpret_cast<SetFileNameEditEventData *> (event->getData());
+		printf("Filename is %s\n", data->filename.toStdString().c_str());
 		fileNameEdit->setText(data->filename);
 		recordStatus->setText("Ready.");
 		data->done.wakeAll();
@@ -1009,6 +1017,7 @@ void *DataRecorder::Panel::bounce(void *param)
 
 void DataRecorder::Panel::processData(void)
 {
+
 	enum {
 		CLOSED, OPENED, RECORD,
 	} state = CLOSED;
@@ -1028,31 +1037,24 @@ void DataRecorder::Panel::processData(void)
 				double data[_token.size / sizeof(double)];
 				if(!fifo.read(data, _token.size))
 					continue; // Restart loop if data is not available
-
 				H5PTappend(file.cdata, 1, data);
-
 				++file.idx;
 			}
 		} else if (_token.type == ASYNC) {
+			printf("ASYNC...\n");
 			if (state == RECORD) {
 				double data[_token.size / sizeof(double)];
 				if(!fifo.read(data, _token.size))
 					continue; // Restart loop if data is not available
 				if (data) {
 					hsize_t array_size[] = { _token.size / sizeof(double) };
-					hid_t array_space = H5Screate_simple(1, array_size,
-							array_size);
-					hid_t array_type = H5Tarray_create(H5T_IEEE_F64LE, 1,
-							array_size);
+					hid_t array_space = H5Screate_simple(1, array_size,	array_size);
+					hid_t array_type = H5Tarray_create(H5T_IEEE_F64LE, 1,	array_size);
 
-					QString data_name = QString::number(
-							static_cast<unsigned long long> (_token.time));
-
+					QString data_name = QString::number(static_cast<unsigned long long> (_token.time));
 					hid_t adata = H5Dcreate(file.adata, data_name.toLatin1().constData(),
-							array_type, array_space, H5P_DEFAULT, H5P_DEFAULT,
-							H5P_DEFAULT);
-					H5Dwrite(adata, array_type, H5S_ALL, H5S_ALL, H5P_DEFAULT,
-							data);
+							array_type, array_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+					H5Dwrite(adata, array_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
 
 					H5Dclose(adata);
 					H5Tclose(array_type);
@@ -1060,6 +1062,7 @@ void DataRecorder::Panel::processData(void)
 				}
 			}
 		} else if (_token.type == OPEN) {
+			printf("OPEN...\n");
 			if (state == RECORD)
 				stopRecording(_token.time);
 			if (state != CLOSED)
@@ -1068,11 +1071,13 @@ void DataRecorder::Panel::processData(void)
 			if(!fifo.read(filename_string, _token.size))
 				continue; // Restart loop if data is not available
 			QString filename = filename_string;
+			printf("Calling openFile from processData...\n");
 			if (openFile(filename))
 				state = CLOSED;
 			else
 				state = OPENED;
 		} else if (_token.type == CLOSE) {
+			printf("CLOSE...\n");
 			if (state == RECORD)
 				stopRecording(RT::OS::getTime());
 			if (state != CLOSED) 
@@ -1081,16 +1086,19 @@ void DataRecorder::Panel::processData(void)
 			}
 			state = CLOSED;
 		} else if (_token.type == START) {
+			printf("START...\n");
 			if (state == OPENED) {
 				startRecording(_token.time);
 				state = RECORD;
 			}
 		} else if (_token.type == STOP) {
+			printf("STOP...\n");
 			if (state == RECORD) {
 				stopRecording(_token.time);
 				state = OPENED;
 			}
 		} else if (_token.type == DONE) {
+			printf("DONE...\n");
 			if (state == RECORD)
 				stopRecording(_token.time, true);
 			if (state != CLOSED) {
@@ -1098,14 +1106,12 @@ void DataRecorder::Panel::processData(void)
 			}
 			break;
 		} else if (_token.type == PARAM) {
+			printf("PARAM...\n");
 			param_change_t data;
 			if(!fifo.read(&data, sizeof(data)))
 				continue; // Restart loop if data is not available
 
-			IO::Block
-				*block =
-				dynamic_cast<IO::Block *> (Settings::Manager::getInstance()->getObject(
-							data.id));
+			IO::Block	*block = dynamic_cast<IO::Block *> (Settings::Manager::getInstance()->getObject(data.id));
 
 			if (block && state == RECORD) {
 				param_hdf_t param = { data.step, data.value, };
@@ -1134,6 +1140,7 @@ void DataRecorder::Panel::processData(void)
 
 int DataRecorder::Panel::openFile(QString &filename)
 {
+	printf("in openFile...\n");
 	QMutex mutex;
 
 #ifdef DEBUG
@@ -1154,7 +1161,7 @@ int DataRecorder::Panel::openFile(QString &filename)
 
 		QApplication::postEvent(this, event);
 		data.done.wait(&mutex);
-
+printf("hit1\n");
 		if (data.response == 0) { // append
 			file.id = H5Fopen(filename.toLatin1().constData(), H5F_ACC_RDWR, H5P_DEFAULT);
 			size_t trial_num;
@@ -1170,10 +1177,12 @@ int DataRecorder::Panel::openFile(QString &filename)
 					H5Gclose(file.trial);
 			}
 			trialNum->setNum(int(trial_num)-1);
+printf("hit2\n");
 		} else if (data.response == 1) { //overwrite
 			file.id = H5Fcreate(filename.toLatin1().constData(), H5F_ACC_TRUNC, H5P_DEFAULT,
 					H5P_DEFAULT);
 			trialNum->setText("0");
+printf("hit3\n");
 		} else {
 			return -1;
 		}
@@ -1181,6 +1190,7 @@ int DataRecorder::Panel::openFile(QString &filename)
 		file.id = H5Fcreate(filename.toLatin1().constData(), H5F_ACC_TRUNC, H5P_DEFAULT,
 				H5P_DEFAULT);
 		trialNum->setText("0");
+printf("hit4\n");
 	}
 	if (file.id < 0) {
 		H5E_type_t error_type;
@@ -1191,16 +1201,16 @@ int DataRecorder::Panel::openFile(QString &filename)
 		error_msg[error_size] = 0;
 		H5Eclear(file.id);
 
+printf("hit5\n");
 		ERROR_MSG("DataRecorder::Panel::processData : failed to open \"%s\" for writing with error : %s\n",filename.toStdString().c_str(),error_msg);
 		return -1;
 	}
 
-	mutex.unlock();
-
-	mutex.lock();
+printf("hit6\n");
 	CustomEvent *event = new CustomEvent(static_cast<QEvent::Type>QSetFileNameEditEvent);
 	SetFileNameEditEventData data;
 
+	printf("data.filename at 1209 is %s\n", filename.toStdString().c_str());
 	data.filename = filename;
 	event->setData(static_cast<void*>(&data));
 
