@@ -63,18 +63,23 @@ plot.hist = ggplot(data = data.hist, aes(x=Latency, y=Count)) +
 		labels = trans_format("log10", math_format(10^.x)) ) + 
 	scale_x_continuous(
 		breaks = round(seq(min(data.hist$Latency), max(data.hist$Latency), by = max(data.hist$Latency)/10), 1) ) +
-	xlab(expression(paste("Latency (", mu, "s)"))) 
-
-plot.summary = qplot(1:10, 1:10, geom = "blank") + 
-	theme_bw() + 
-	theme(line = element_blank(), text = element_blank(), panel.grid.major = element_blank(), 
-	      panel.grid.minor = element_blank(), panel.border = element_blank(), 
-			panel.margin = element_blank() ) +
+	xlab(expression(paste("Latency (", mu, "s)"))) + 
    annotation_custom(grob = tableGrob(data.summary, core.just="left", show.colnames=F,
 	                                   row.just = "left", col.just = "left", 
 												  padding.h = unit(5,"mm"), 
                                       gpar.coretext = gpar(cex=1)), 
-	                  xmin=1, xmax=10, ymin=1, ymax=10)
+	                  xmin=.7*max(data.hist$Latency), xmax=max(data.hist$Latency), ymin=1, ymax=10)
+
+#plot.summary = qplot(1:10, 1:10, geom = "blank") + 
+#	theme_bw() + 
+#	theme(line = element_blank(), text = element_blank(), panel.grid.major = element_blank(), 
+#	      panel.grid.minor = element_blank(), panel.border = element_blank(), 
+#			panel.margin = element_blank() ) +
+#   annotation_custom(grob = tableGrob(data.summary, core.just="left", show.colnames=F,
+#	                                   row.just = "left", col.just = "left", 
+#												  padding.h = unit(5,"mm"), 
+#                                      gpar.coretext = gpar(cex=1)), 
+#	                  xmin=1, xmax=10, ymin=1, ymax=10)
 
 plot.system = qplot(1:10, 1:10, geom = "blank") + 
 	theme_bw() + 
@@ -92,6 +97,6 @@ svg("test_rt_plot.svg", width=11, height=8.5)
 grid.newpage()
 pushViewport(viewport(layout = grid.layout(5,8), width=1, height=1))
 print(plot.system, vp = viewport(layout.pos.row = 1:2, layout.pos.col = 1:8))
-print(plot.summary, vp = viewport(layout.pos.row = 3, layout.pos.col = 1:8))
-print(plot.hist, vp = viewport(layout.pos.row = 4:5, layout.pos.col = 1:8))
+#print(plot.summary, vp = viewport(layout.pos.row = 3, layout.pos.col = 1:8))
+print(plot.hist, vp = viewport(layout.pos.row = 3:5, layout.pos.col = 1:8))
 dev.off()
