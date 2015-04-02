@@ -55,25 +55,7 @@ for ( stats_idx in 1:length(data.stats$Latency) ) {
 }
 data.hist$Count = data.hist$Count + 1
 
-# Create function to show probability of losing RT as a function of RT period over 1 hr...
-# Plot p(stay in RT) from 1 kHz to 50 kHz
-#    P(no overrun | data) ^ (Frequency * 1 hr)
-min_rate = 1
-max_rate = 66.7
-data.prob_rt = data.frame("Frequency"=seq(min_rate, max_rate, .1))
-data.prob_rt = ddply(data.prob_rt, "Frequency", function(x) {
-	prob_rt =  (1 - sum( data.stats$Latency[data.stats$Latency > 1000/x$Frequency] * 
-	                     data.stats$Count[data.stats$Latency > 1000/x$Frequency] ) / 
-	                sum( data.stats$Latency * data.stats$Count )) ^ (x$Frequency * 1000 * 3600)
-	data.frame(ProbRT = prob_rt)
-})
-
 # Start making plots of everything. 
-plot.prob = ggplot(data = data.prob_rt, aes(x=Frequency, y=ProbRT)) + 
-	geom_point() + 
-	xlab("Frequency (kHz)") + ylab("P(Real-time over 1 hr)") + 
-	scale_x_continuous(limits = c(min_rate, max_rate)) + scale_y_continuous(limits = c(0, 1.2)) 
-
 plot.hist = ggplot(data = data.hist, aes(x=Latency, y=Count)) + 
 	geom_bar(stat="identity") + 
 	scale_y_log10(
@@ -106,11 +88,10 @@ plot.system = qplot(1:10, 1:10, geom = "blank") +
 	                  xmin=1, xmax=10, ymin=1, ymax=10)
 
 # Save plots to test_rt_plot.svg. Trying to save in other formats will cause you sadness. 
-svg("test_rt_plot.svg", width=12, height=10)
+svg("test_rt_plot.svg", width=11, height=8.5)
 grid.newpage()
-pushViewport(viewport(layout = grid.layout(4,6), width=1, height=1))
-print(plot.system, vp = viewport(layout.pos.row = 1, layout.pos.col = 1:6))
-print(plot.hist, vp = viewport(layout.pos.row = 2:4, layout.pos.col = 1:3))
-print(plot.prob, vp = viewport(layout.pos.row = 2:3, layout.pos.col = 4:6))
-print(plot.summary, vp = viewport(layout.pos.row = 4, layout.pos.col = 4:6))
+pushViewport(viewport(layout = grid.layout(5,8), width=1, height=1))
+print(plot.system, vp = viewport(layout.pos.row = 1:2, layout.pos.col = 1:8))
+print(plot.summary, vp = viewport(layout.pos.row = 3, layout.pos.col = 1:8))
+print(plot.hist, vp = viewport(layout.pos.row = 4:5, layout.pos.col = 1:8))
 dev.off()

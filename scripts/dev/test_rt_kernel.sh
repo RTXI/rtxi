@@ -48,6 +48,9 @@ echo "----->If you do interrupt, stop stressing the system by running:"
 echo "      $ pkill stress"
 echo ""
 
+echo "----->Please enter the frequency (in Hz) that you would like to test, then press enter."
+read SysFreq
+
 # Get system information
 DISTRO="$(lsb_release -is) $(lsb_release -rs)"
 HOSTNAME=`uname -n`
@@ -59,7 +62,7 @@ DAQ=$(lspci | grep National | cut -d":" -f3 | sed 's/ \+/ /g' | sed -e 's/^\  */
 
 # Set up variables for run
 TIME=1800 # duration of run (s)
-RT_PERIOD=100 # period in us
+RT_PERIOD=$(awk "BEGIN {print 1 / $SysFreq * 1e6}") # period in us
 RATE=$(expr 1000 / $RT_PERIOD) # Convert RT period to freq in kHz
 
 # Run latency test under dynamic load
