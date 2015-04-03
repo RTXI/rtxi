@@ -1,26 +1,27 @@
 #include <qwt_plot_printfilter.h>
 
-class RTXIPrintFilter : public QwtPlotPrintFilter
-{
+// This is deprecated in Qwt 6. The QwtPlotPrintFilter class no longer exists. 
 
-public:
+class RTXIPrintFilter : public QwtPlotPrintFilter {
 
-  QColor
-  color(const QColor &c, Item item) const
-  {
-    switch (item)
-      {
-    case Marker:
-      return Qt::black;
-    case MarkerSymbol:
-      return Qt::black;
-    case CurveSymbol:
-      return Qt::black;
-    case CanvasBackground:
-      return Qt::white;
-    default:
-      ;
-      }
-    return c;
-  }
+	public:
+		QColor color(const QColor &c, Item item) const {
+			switch (item) {
+			case Marker:
+				return Qt::black;
+	
+			case MarkerSymbol:
+				return Qt::black;
+		
+			case CurveSymbol:
+				return Qt::black;
+			
+			case CanvasBackground:
+				return Qt::white;
+			
+			default:
+				;
+			}
+			return c;
+		}
 };
