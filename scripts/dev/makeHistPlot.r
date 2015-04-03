@@ -41,8 +41,11 @@ data.system = data.frame( Field = c("Operating System", "Host Name", "RT Kernel"
 
 # Put stats into bin_size ns bins for histogram
 bin_size = 200 # bins are to make the histogram look better
+if ( (max(data.stats$Latency) - min(data.stats$Latency))/bin_size * 1000 > 100 ) {
+	bin_size = ( max(data.stats$Latency) - min(data.stats$Latency) ) * 1000 / 100
+}
 data.hist = data.frame( Latency = seq( 0, max(data.stats$Latency) * 
-                                       1000 + bin_size, bin_size ) ) / 1000
+                                       1000 + bin_size - 1, bin_size ) ) / 1000
 data.hist$Count = rep( 0, length(data.hist$Latency) )
 hist_idx = 1
 for ( stats_idx in 1:length(data.stats$Latency) ) {
@@ -51,9 +54,13 @@ for ( stats_idx in 1:length(data.stats$Latency) ) {
 	} else {
 		hist_idx = hist_idx + 1
 		data.hist$Count[hist_idx] = data.hist$Count[hist_idx] + data.stats$Count[stats_idx]
+#		print(hist_idx)
 	}
 }
-data.hist$Count = data.hist$Count + 1
+
+# Terminal output. For debugging. 
+#print(data.summary)
+#print(data.hist$Count)
 
 # Start making plots of everything. 
 plot.hist = ggplot(data = data.hist, aes(x=Latency, y=Count)) + 
@@ -66,9 +73,10 @@ plot.hist = ggplot(data = data.hist, aes(x=Latency, y=Count)) +
 	xlab(expression(paste("Latency (", mu, "s)"))) + 
    annotation_custom(grob = tableGrob(data.summary, core.just="left", show.colnames=F,
 	                                   row.just = "left", col.just = "left", 
-												  padding.h = unit(5,"mm"), 
                                       gpar.coretext = gpar(cex=1)), 
-	                  xmin=.7*max(data.hist$Latency), xmax=max(data.hist$Latency), ymin=1, ymax=10)
+	                  xmin=.8*max(data.hist$Latency), xmax=max(data.hist$Latency), 
+							ymin=-Inf, ymax=Inf)
+#							ymin=10^(-2)*(max(data.hist$Count)), ymax=Inf)
 
 #plot.summary = qplot(1:10, 1:10, geom = "blank") + 
 #	theme_bw() + 
@@ -92,7 +100,7 @@ plot.system = qplot(1:10, 1:10, geom = "blank") +
                                       gpar.coretext = gpar(cex=1)), 
 	                  xmin=1, xmax=10, ymin=1, ymax=10)
 
-# Save plots to test_rt_plot.svg. Trying to save in other formats will cause you sadness. 
+# Save plots to test_rt_plot.svg. It's an svg so they can appear scaled to window size for the website. 
 svg("test_rt_plot.svg", width=11, height=8.5)
 grid.newpage()
 pushViewport(viewport(layout = grid.layout(5,8), width=1, height=1))
