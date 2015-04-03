@@ -58,6 +58,8 @@ for ( stats_idx in 1:length(data.stats$Latency) ) {
 	}
 }
 
+data.hist$Count = data.hist$Count + 1
+
 # Terminal output. For debugging. 
 #print(data.summary)
 #print(data.hist$Count)
