@@ -22,40 +22,39 @@
 #include <math.h>
 #include <vector>
 
-class Generator
-{
-public:
-  // default constructor
-  Generator();
-  ~Generator();
-  // clear the waveform
-  void
-  clear();
-  // initialize waveform
-  void
-  init();
-  // get readout for continuous signal, repeating cycle
-  double
-  get();
-  // get readout for single cycle
-  double
-  getOne();
-  // get number of samples
-  int
-  numSamples() const;
-  // get current index for readout
-  int
-  getIndex() const;
-  // set index
-  void
-  setIndex(int value);
+class Generator {
+	
+	public:
+		// default constructor
+		Generator();
+		~Generator();
+		
+		// clear the waveform
+		void clear();
 
-protected:
-  std::vector<double> wave;
-  int index;
-  int numsamples;
-  double dt;
+		// initialize waveform
+		void init();
 
+		// get readout for continuous signal, repeating cycle
+		double get();
+
+		// get readout for single cycle
+		double getOne();
+
+		// get number of samples
+		int numSamples() const;
+
+		// get current index for readout
+		int getIndex() const;
+
+		// set index
+		void setIndex(int value);
+
+	protected:
+		std::vector<double> wave;
+		int index;
+		int numsamples;
+		double dt;
 };
 
 #endif /* GENERATOR_H_ */

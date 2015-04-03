@@ -23,38 +23,32 @@
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
 
-class GeneratorWNoise : public Generator
-{
+class GeneratorWNoise : public Generator {
 
-public:
+	public:
+		// default constructor
+		GeneratorWNoise();
+		GeneratorWNoise(double variance);
+		~GeneratorWNoise();
+		// initialize waveform
+		void init(double variance);
+		// get readout
+		double get();
+		// set the variance of the generator
+		void setVariance(double var);
 
-  // default constructor
-  GeneratorWNoise();
-  GeneratorWNoise(double variance);
-  ~GeneratorWNoise();
-  // initialize waveform
-  void
-  init(double variance);
-  // get readout
-  double
-  get();
-  // set the variance of the generator
-  void
-  setVariance(double var);
-
-protected:
-  double variance;
-  double s;
-  double u1;
-  double u2;
-  double v1;
-  double v2;
-  double x;
-  double y;
-  const gsl_rng_type * T;
-  gsl_rng * r;
-  gsl_rng * genstate;
-
+	protected:
+		double variance;
+		double s;
+		double u1;
+		double u2;
+		double v1;
+		double v2;
+		double x;
+		double y;
+		const gsl_rng_type * T;
+		gsl_rng * r;
+		gsl_rng * genstate;
 };
 
 #endif /* GEN_WHITENOISE_H_ */

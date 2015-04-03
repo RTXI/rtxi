@@ -21,25 +21,21 @@
 
 #include "generator.h"
 
-class GeneratorZap : public Generator
-{
+class GeneratorZap : public Generator {
 
-public:
-  // default constructor
-  GeneratorZap();
-  GeneratorZap(double freq, double freq2, double amplitude, double duration,
-      double dt);
-  ~GeneratorZap();
-  // initialize waveform
-  void
-  init(double freq, double freq2, double amplitude, double duration, double dt);
+	public:
+		// default constructor
+		GeneratorZap();
+		GeneratorZap(double freq, double freq2, double amplitude, double duration, double dt);
+		~GeneratorZap();
+		// initialize waveform
+		void init(double freq, double freq2, double amplitude, double duration, double dt);
 
-protected:
-  double freq; // Hz
-  double freq2;
-  double duration;
-  double amplitude;
-
+	protected:
+		double freq; // Hz
+		double freq2;
+		double duration;
+		double amplitude;
 };
 
 #endif /* GEN_ZAP_H_ */

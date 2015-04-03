@@ -21,23 +21,21 @@
 
 #include "generator.h"
 
-class GeneratorBiphase : public Generator
-{
+class GeneratorBiphase : public Generator {
 
-public:
-  // default constructor
-  GeneratorBiphase();
-  GeneratorBiphase(double delay, double width, double amplitude, double dt);
-  ~GeneratorBiphase();
-  // initialize waveform
-  void
-  init(double delay, double width, double amplitude, double dt);
+	public:
+		// default constructor
+		GeneratorBiphase();
+		GeneratorBiphase(double delay, double width, double amplitude, double dt);
+		~GeneratorBiphase();
 
-protected:
-  double width; // s
-  double amplitude;
-  double delay; // s
+		// initialize waveform
+		void init(double delay, double width, double amplitude, double dt);
 
+	protected:
+		double width; // s
+		double amplitude;
+		double delay; // s
 };
 
 #endif /* GEN_BIPHASE_H_ */

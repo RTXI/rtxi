@@ -20,59 +20,44 @@
 
 // default constructor
 
-GeneratorMono::GeneratorMono() :
-  delay(1), width(1), amplitude(1)
-{
-  dt = 1e-3;
-  numsamples = floor(delay / dt) + 2 * floor(width / dt) + 1;
-  wave.clear();
-  for (int i = 0; i < floor(delay / dt); i++)
-    {
-      wave.push_back(0); // initial delay
-    }
-  for (int i = 0; i < floor(width / dt); i++)
-    {
-      wave.push_back(amplitude); // positive part
-    }
-  numsamples = wave.size();
-  index = 0;
+GeneratorMono::GeneratorMono() : delay(1), width(1), amplitude(1) {
+	dt = 1e-3;
+	numsamples = floor(delay / dt) + 2 * floor(width / dt) + 1;
+	wave.clear();
+	for (int i = 0; i < floor(delay / dt); i++) {
+		wave.push_back(0); // initial delay
+	}
+	for (int i = 0; i < floor(width / dt); i++) {
+		wave.push_back(amplitude); // positive part
+	}
+	numsamples = wave.size();
+	index = 0;
 }
 
-GeneratorMono::GeneratorMono(double delay, double width, double amplitude,
-    double dt) :
-  Generator()
-{
-  numsamples = floor(delay / dt) + 2 * floor(width / dt) + 1;
-  wave.clear();
-  for (int i = 0; i < floor(delay / dt); i++)
-    {
-      wave.push_back(0); // initial delay
-    }
-  for (int i = 0; i < floor(width / dt); i++)
-    {
-      wave.push_back(amplitude); // positive part
-    }
-  numsamples = wave.size();
-  index = 0;
+GeneratorMono::GeneratorMono(double delay, double width, double amplitude, double dt) : Generator() {
+	numsamples = floor(delay / dt) + 2 * floor(width / dt) + 1;
+	wave.clear();
+	for (int i = 0; i < floor(delay / dt); i++) {
+		wave.push_back(0); // initial delay
+	}
+	for (int i = 0; i < floor(width / dt); i++) {
+		wave.push_back(amplitude); // positive part
+	}
+	numsamples = wave.size();
+	index = 0;
 }
 
-GeneratorMono::~GeneratorMono()
-{
-}
+GeneratorMono::~GeneratorMono() {}
 
-void
-GeneratorMono::init(double delay, double width, double amplitude, double dt)
-{
-  numsamples = floor(delay / dt) + 2 * floor(width / dt) + 1;
-  wave.clear();
-  for (int i = 0; i < floor(delay / dt); i++)
-    {
-      wave.push_back(0); // initial delay
-    }
-  for (int i = 0; i < floor(width / dt); i++)
-    {
-      wave.push_back(amplitude); // positive part
-    }
-  numsamples = wave.size();
-  index = 0;
+void GeneratorMono::init(double delay, double width, double amplitude, double dt) {
+	numsamples = floor(delay / dt) + 2 * floor(width / dt) + 1;
+	wave.clear();
+	for (int i = 0; i < floor(delay / dt); i++) {
+		wave.push_back(0); // initial delay
+	}
+	for (int i = 0; i < floor(width / dt); i++) {
+		wave.push_back(amplitude); // positive part
+	}
+	numsamples = wave.size();
+	index = 0;
 }
