@@ -4,21 +4,19 @@
 #include <qwt_plot_curve.h>
 #include <qlayout.h>
 
-PlotDialog::PlotDialog(QWidget *parent, QString name, double* xData, double* yData, int size) : QDialog(parent) 
-{
+PlotDialog::PlotDialog(QWidget *parent, QString name, double* xData, double* yData, int size) : QDialog(parent) {
 	setWindowTitle(name);
 	setModal(true);
 	QVBoxLayout *layout = new QVBoxLayout(this); // overall GUI layout
 
 	BasicPlot *gPlot = new BasicPlot(this);
-	//QPushButton *closeBttn;
-	//  closeBttn = new QPushButton( "Close", this );
-	//  closeBttn->setMaximumWidth(100);
+	QPushButton *closeBttn = new QPushButton( "Close", this );
+	closeBttn->setMaximumWidth(100);
 
 	layout->addWidget(gPlot);
-	//  layout->addWidget(closeBttn);
+	layout->addWidget(closeBttn);
 
-	//QObject::connect(closeBttn,SIGNAL(clicked()),this,SLOT(accept()) );
+	QObject::connect(closeBttn,SIGNAL(clicked()),this,SLOT(accept()) );
 	QObject::connect(this, SIGNAL(setPlotRange(double,double,double,double)), gPlot, SLOT(setAxes(double,double,double,double)));
 
 	QwtPlotCurve *gCurve = new QwtPlotCurve("Curve 1");

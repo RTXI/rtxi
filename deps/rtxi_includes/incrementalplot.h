@@ -15,50 +15,50 @@
 class QwtPlotCurve;
 
 class CurveData {
-  // A container class for growing data
-public:
-  CurveData();
+	// A container class for growing data
+	public:
+		CurveData();
 
-  void append(double *x, double *y, int count);
+		void append(double *x, double *y, int count);
 
-  int count() const;
-  int size() const;
-  const double * x() const;
-  const double * y() const;
+		int count() const;
+		int size() const;
+		const double * x() const;
+		const double * y() const;
 
-private:
-  int d_count;
-  QwtArray<double> d_x;
-  QwtArray<double> d_y;
+	private:
+		int d_count;
+		QwtArray<double> d_x;
+		QwtArray<double> d_y;
 };
 
 class IncrementalPlot : public BasicPlot {
-  Q_OBJECT
+	Q_OBJECT
 
-public:
-  IncrementalPlot(QWidget *parent = NULL);
-  virtual ~IncrementalPlot();
+	public:
+		IncrementalPlot(QWidget *parent = NULL);
+		virtual ~IncrementalPlot();
 
-  void appendData(double x, double y); // draws data point with default symbol style
-  void appendData(double x, double y, QwtSymbol::Style s); // draws data point with specified symbol style
-  void appendData(double *x, double *y, int size); // draws multiple data points
-  void appendData(double *x, double *y, int size, QwtSymbol::Style s);
+		void appendData(double x, double y); // draws data point with default symbol style
+		void appendData(double x, double y, QwtSymbol::Style s); // draws data point with specified symbol style
+		void appendData(double *x, double *y, int size); // draws multiple data points
+		void appendData(double *x, double *y, int size, QwtSymbol::Style s);
 
-  void removeData(); // clears all data and lines
-  const double * xData(); // returns data points (not points defining lines)
-  const double * yData();
-  const uint dataSize(); // returns number of data points
-  bool dataExists(); // returns whether plot contains data
-  void nextSymbol(); // sets symbol to the next QwtSymbol style
+		void removeData(); // clears all data and lines
+		const double * xData(); // returns data points (not points defining lines)
+		const double * yData();
+		const uint dataSize(); // returns number of data points
+		bool dataExists(); // returns whether plot contains data
+		void nextSymbol(); // sets symbol to the next QwtSymbol style
 
-public slots:
-  void appendLine(double *x, double *y, int size); // draws a line through given points
+	public slots:
+		void appendLine(double *x, double *y, int size); // draws a line through given points
 
-private:
-  CurveData *d_data; // holds data points
-  QwtPlotCurve *d_curve;
-  CurveData *l_data; // holds points defining lines
-  QwtPlotCurve *l_curve;
+	private:
+		CurveData *d_data; // holds data points
+		QwtPlotCurve *d_curve;
+		CurveData *l_data; // holds points defining lines
+		QwtPlotCurve *l_curve;
 };
 
 #endif // _INCREMENTALPLOT_H_
