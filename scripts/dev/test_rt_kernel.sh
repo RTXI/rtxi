@@ -69,7 +69,11 @@ RATE=$(expr 1000 / $RT_PERIOD) # Convert RT period to freq in kHz
 if [ -f test_rt_histdata.txt ]; then
 	echo 'The test has been run already. Rename test_rt_histdata.txt or delete it. Then, run this script again.'
 else
+	# Calibrate Xenomai to not show negative latencies
+	sudo bash -c "echo 0 > /proc/xenomai/latency"
+	# Run stress
 	stress --cpu 2 --vm 1 --hdd 1 --timeout $TIME & 
+	# Start testing
 	sudo /usr/xenomai/bin/./latency -s -h -p $RT_PERIOD -B 1 -H 500000 -T $TIME -g test_rt_histdata.txt | tee test_rt_kernel.log
 fi
 
