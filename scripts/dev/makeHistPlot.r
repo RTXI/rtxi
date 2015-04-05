@@ -37,7 +37,7 @@ weird_sdev = sqrt( 1/sum(data.stats$Count) * sum(data.stats$Count*(data.stats$La
 data.summary = data.frame(Measure = c("Mean (μs)", "Std.Dev (μs)"), Value = c(weird_mean, weird_sdev))
 
 # System info passed from command line
-data.system = data.frame( Field = c("Operating System", "Host Name", "RT Kernel", "Processor", "Graphics Card", "Graphics Driver", "DAQ" ), Info = c(os, hostname, rt_patch, processor, graphics_card, graphics_driver, daq) )
+data.system = data.frame( Field = c("Operating System", "Host Name", "RT Kernel", "Processor", "Graphics Card", "Graphics Driver", "Test Frequency (kHz)", "DAQ" ), Info = c(os, hostname, rt_patch, processor, graphics_card, graphics_driver, rate, daq) )
 
 # Put stats into bin_size ns bins for histogram
 bin_size = 200 # bins are to make the histogram look better
@@ -78,18 +78,6 @@ plot.hist = ggplot(data = data.hist, aes(x=Latency, y=Count)) +
                                       gpar.coretext = gpar(cex=1)), 
 	                  xmin=.8*max(data.hist$Latency), xmax=max(data.hist$Latency), 
 							ymin=-Inf, ymax=Inf)
-#							ymin=10^(-2)*(max(data.hist$Count)), ymax=Inf)
-
-#plot.summary = qplot(1:10, 1:10, geom = "blank") + 
-#	theme_bw() + 
-#	theme(line = element_blank(), text = element_blank(), panel.grid.major = element_blank(), 
-#	      panel.grid.minor = element_blank(), panel.border = element_blank(), 
-#			panel.margin = element_blank() ) +
-#   annotation_custom(grob = tableGrob(data.summary, core.just="left", show.colnames=F,
-#	                                   row.just = "left", col.just = "left", 
-#												  padding.h = unit(5,"mm"), 
-#                                      gpar.coretext = gpar(cex=1)), 
-#	                  xmin=1, xmax=10, ymin=1, ymax=10)
 
 plot.system = qplot(1:10, 1:10, geom = "blank") + 
 	theme_bw() + 
@@ -107,6 +95,5 @@ svg("test_rt_plot.svg", width=11, height=8.5)
 grid.newpage()
 pushViewport(viewport(layout = grid.layout(5,8), width=1, height=1))
 print(plot.system, vp = viewport(layout.pos.row = 1:2, layout.pos.col = 1:8))
-#print(plot.summary, vp = viewport(layout.pos.row = 3, layout.pos.col = 1:8))
 print(plot.hist, vp = viewport(layout.pos.row = 3:5, layout.pos.col = 1:8))
 dev.off()
