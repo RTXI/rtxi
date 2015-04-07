@@ -88,6 +88,11 @@ RT_KERNEL=`uname -r`
 PROCESSOR=$(cat /proc/cpuinfo | grep "model name" | uniq | cut -d":" -f2 | sed 's/ \+/ /g' | sed -e 's/^\  *//' -e 's/\ *$//')
 GRAPHICS_CARD=$(lspci | grep VGA | uniq | cut -d":" -f3 | sed 's/ \+/ /g' | sed -e 's/^\  *//' -e 's/\ *$//')
 GRAPHICS_DRIVER=$(sudo lshw -c display | grep "configuration: driver" | cut -d":" -f2 | cut -d"=" -f2 | cut -d" " -f1 | sed 's/ \+/ /g' | sed -e 's/^\  *//' -e 's/\ *$//')
+
+# For nouveau, sometimes, lshw doesn't show that it's loaded but lsmod does. 
+if [ $GRAPHICS_DRIVER == "" ]; then
+	GRAPHICS_DRIVER=$(lsmod | grep video | sed 's/  */ /g' | cut -d" " -f4)
+fi
 DAQ=$(lspci | grep National | cut -d":" -f3 | sed 's/ \+/ /g' | sed -e 's/^\  *//' -e 's/\ *$//')
 
 # Set up variables for run
