@@ -201,7 +201,6 @@ void Settings::Manager::foreachObject(void (*callback)(Object *,void *),void *pa
 }
 
 int Settings::Manager::load(const std::string &filename) {
-	// Open the rtxi.conf file
 	QFile file(QString::fromStdString(filename));
 	if (!file.open(QIODevice::ReadOnly)) {
 		ERROR_MSG("Settings::Manager::load : failed to open %s for reading\n", filename.c_str());

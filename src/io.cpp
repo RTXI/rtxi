@@ -119,7 +119,6 @@ double IO::Block::input(size_t n) const {
 double IO::Block::output(size_t n) const {
 	if (unlikely(n >= outputs.size()))
 		return 0.0;
-
 	return outputs[n].value;
 }
 
