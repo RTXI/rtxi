@@ -162,7 +162,7 @@ void MainWindow::createSystemMenu() {
 
 void MainWindow::createWindowsMenu() {
 	windowsMenu = menuBar()->addMenu(tr("&Windows"));
-	//connect(windowsMenu,SIGNAL(aboutToShow (void)),this,SLOT(windowsMenuAboutToShow(void)));
+	connect(windowsMenu,SIGNAL(aboutToShow (void)),this,SLOT(windowsMenuAboutToShow(void)));
 }
 
 void MainWindow::createHelpMenu() {
@@ -404,31 +404,28 @@ void MainWindow::windowsMenuAboutToShow(void) {
 	QList<QMdiSubWindow *> subWindows = mdiArea->subWindowList();
 
 	// Make sure it isn't empty
-	if(subWindows.isEmpty()){
+	if(subWindows.isEmpty())
 		return;
-	}
 
 	// Create windows list based off of what's open
 	for(int i = 0; i < subWindows.size(); i++){
-		QMdiSubWindow *child = subWindows.at(i);
-		QAction *item = new QAction(child->widget()->windowTitle(), this);
-		//connect(item, SIGNAL(transmit(int)), this, SLOT(windowsMenuActivated(int)));
+		QAction *item = new QAction(subWindows.at(i)->widget()->windowTitle(), this);
 		windowsMenu->addAction(item);
 	}
+	connect(windowsMenu, SIGNAL(triggered(QAction*)), this, SLOT(windowsMenuActivated(QAction*)));
 }
 
-void MainWindow::windowsMenuActivated(int id) {
+void MainWindow::windowsMenuActivated(QAction *id) {
 
 	// Get list of open subwindows in Mdi Area
 	QList<QMdiSubWindow *> subWindows = mdiArea->subWindowList();
 
 	// Make sure it isn't empty
-	if(subWindows.isEmpty()){
+	if(subWindows.isEmpty())
 		return;
-	}
 
 	// Set active selected window
-	mdiArea->setActiveSubWindow(subWindows.at(id));
+	//mdiArea->setActiveSubWindow(subWindows.indexOf(,1));
 }
 
 static Mutex mutex;

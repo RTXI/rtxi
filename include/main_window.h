@@ -205,7 +205,7 @@ class MainWindow : public QMainWindow {
 	void resetSettings(void);
 
 	void windowsMenuAboutToShow(void);
-	void windowsMenuActivated(int);
+	void windowsMenuActivated(QAction *);
 
 	void loadUtil(int);
 	void loadSignal(int);
