@@ -424,8 +424,9 @@ void MainWindow::windowsMenuActivated(QAction *id) {
 	if(subWindows.isEmpty())
 		return;
 
-	// Set active selected window
-	//mdiArea->setActiveSubWindow(subWindows.indexOf(,1));
+	for(size_t i = 0; i < subWindows.size(); i++)
+		if(subWindows.at(i)->widget()->windowTitle() == id->text())
+			mdiArea->setActiveSubWindow(subWindows.at(i));
 }
 
 static Mutex mutex;
