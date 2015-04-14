@@ -202,6 +202,7 @@ class MainWindow : public QMainWindow {
 
 	void loadSettings(void);
 	void saveSettings(void);
+	void resetSettings(void);
 
 	void windowsMenuAboutToShow(void);
 	void windowsMenuActivated(int);
@@ -236,6 +237,7 @@ class MainWindow : public QMainWindow {
 
 	QAction *load;
 	QAction *save;
+	QAction *reset;
 	QAction *quit;
 	QAction *artxi;
 	QAction *aqt;

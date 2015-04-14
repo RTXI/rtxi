@@ -140,6 +140,7 @@ void MainWindow::createFileMenu() {
 	fileMenu = menuBar()->addMenu(tr("&File"));
 	fileMenu->addAction(load);
 	fileMenu->addAction(save);
+	fileMenu->addAction(reset);
 	fileMenu->addSeparator();
 	fileMenu->addAction(quit);
 	fileMenu->addSeparator();
@@ -180,6 +181,10 @@ void MainWindow::createFileActions() {
 	save->setShortcuts(QKeySequence::Save);
 	save->setStatusTip(tr("Save current workspace"));
 	connect(save, SIGNAL(triggered()), this, SLOT(saveSettings()));
+
+	reset = new QAction(tr("&Reset Workspace"), this);
+	reset->setStatusTip(tr("Reset to default RTXI workspace"));
+	connect(reset, SIGNAL(triggered()), this, SLOT(resetSettings()));
 
 	quit = new QAction(tr("&Quit"), this);
 	quit->setShortcut(tr("Ctrl+Q"));
@@ -271,7 +276,8 @@ void MainWindow::loadSettings (void) {
 	}
 }
 
-void MainWindow::saveSettings(void) {
+void MainWindow::saveSettings(void)
+{
 	QSettings userprefs;
 	userprefs.setPath (QSettings::NativeFormat, QSettings::SystemScope, "/usr/local/share/rtxi/");
 	QString settingsDir = userprefs.value("/dirs/setfiles", getenv("HOME")).toString();
@@ -291,6 +297,12 @@ void MainWindow::saveSettings(void) {
 		}
 		Settings::Manager::getInstance()->save(filename.toStdString());
 	}
+}
+
+void MainWindow::resetSettings(void)
+{
+	mdiArea->closeAllSubWindows();
+	Settings::Manager::getInstance()->load("/etc/rtxi.conf");
 }
 
 /*void MainWindow::updateUtilModules () {
