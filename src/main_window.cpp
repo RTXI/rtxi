@@ -54,7 +54,7 @@ MainWindow::MainWindow (void) : QMainWindow(NULL, Qt::Window) {
 	createSystemMenu();
 
 	/* Initialize Windows Menu */
-	//createWindowsMenu();
+	createWindowsMenu();
 
 	/* Initialize Help Menu */
 	createHelpActions();
@@ -152,8 +152,8 @@ void MainWindow::createModuleMenu() {
 
 void MainWindow::createUtilMenu() {
 	utilMenu = menuBar()->addMenu(tr("&Utilities"));
-	//filtersSubMenu = utilMenu->addMenu(tr("&Filters"));
-	//signalsSubMenu = utilMenu->addMenu(tr("&Signal Generators"));
+	filtersSubMenu = utilMenu->addMenu(tr("&Filters"));
+	utilitiesSubMenu = utilMenu->addMenu(tr("&Signal Generators"));
 }
 
 void MainWindow::createSystemMenu() {
@@ -161,7 +161,7 @@ void MainWindow::createSystemMenu() {
 }
 
 void MainWindow::createWindowsMenu() {
-	//windowsMenu = menuBar()->addMenu(tr("&Windows"));
+	windowsMenu = menuBar()->addMenu(tr("&Windows"));
 	//connect(windowsMenu,SIGNAL(aboutToShow (void)),this,SLOT(windowsMenuAboutToShow(void)));
 }
 

@@ -228,9 +228,8 @@ class MainWindow : public QMainWindow {
 	QMenu *fileMenu;
 	QMenu *moduleMenu;
 	QMenu *utilMenu;
-	QMenu *patchClampSubMenu;
 	QMenu *filtersSubMenu;
-	QMenu *signalsSubMenu;
+	QMenu *utilitiesSubMenu;
 	QMenu *systemMenu;
 	QMenu *windowsMenu;
 	QMenu *helpMenu;
@@ -249,7 +248,6 @@ class MainWindow : public QMainWindow {
 	void createSystemMenu();
 	void createWindowsMenu();
 	void createHelpMenu();
-
 	void createFileActions();
 	void createHelpActions();
 };
