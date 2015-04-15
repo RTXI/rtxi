@@ -80,6 +80,7 @@ class MainWindow : public QMainWindow {
 	 * \return The index of the new menu item.
 	 */
 
+	QAction* createModuleMenuItem(const QString & text);
 	QAction* createModuleMenuItem(const QString & text, const QObject *handler, const char *slot);
 
 	/*!
@@ -197,6 +198,7 @@ class MainWindow : public QMainWindow {
 
 	void windowsMenuAboutToShow(void);
 	void windowsMenuActivated(QAction *);
+	void modulesMenuActivated(QAction *);
 
 	void loadUtil(int);
 	void loadSignal(int);

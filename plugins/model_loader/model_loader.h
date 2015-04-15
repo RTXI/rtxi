@@ -34,7 +34,6 @@ class ModelLoader : public QObject, public Plugin::Object
 
 		public slots:
 			void load(void);
-		void load_recent();
 
 	private:
 		QAction* action;

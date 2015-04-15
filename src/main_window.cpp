@@ -85,6 +85,10 @@ void MainWindow::clearFileMenu(void) {
 	fileMenu->addSeparator();
 }
 
+QAction* MainWindow::createModuleMenuItem(const QString &text) {
+	return moduleMenu->addAction(text);
+}
+
 QAction* MainWindow::createModuleMenuItem(const QString &text, const QObject *receiver, const char *member) {
 	return moduleMenu->addAction(text, receiver, member);
 }
@@ -105,7 +109,6 @@ void MainWindow::removeModuleMenuItem (QAction *action) {
 	QList<QAction *> actionList = moduleMenu->actions();
 	if(!actionList.empty())
 		moduleMenu->removeAction(action);
-	//moduleMenu->removeItem (id);
 }
 
 void MainWindow::removeModuleMenuItemAt (int id) {
@@ -145,6 +148,7 @@ void MainWindow::createFileMenu() {
 
 void MainWindow::createModuleMenu() {
 	moduleMenu = menuBar()->addMenu(tr("&Modules"));
+	connect(moduleMenu, SIGNAL(triggered(QAction*)), this, SLOT(modulesMenuActivated(QAction*)));
 }
 
 void MainWindow::createUtilMenu() {
@@ -420,9 +424,20 @@ void MainWindow::windowsMenuActivated(QAction *id) {
 	if(subWindows.isEmpty())
 		return;
 
-	for(size_t i = 0; i < subWindows.size(); i++)
+	for(uint16_t i = 0; i < subWindows.size(); i++)
 		if(subWindows.at(i)->widget()->windowTitle() == id->text())
 			mdiArea->setActiveSubWindow(subWindows.at(i));
+}
+
+void MainWindow::modulesMenuActivated(QAction *id) {
+	// Annoying but the best way to do it is to tie an action to the entire menu
+	// so we have to tell it to ignore the first two modules
+	if(id->text() == "Load Plugin" || id->text() == "Load DYNAMO Model")
+		return;
+
+	// Have to trim the first three characters before loading
+	// or else parser will include qstring formatting
+	Plugin::Manager::getInstance()->load(id->text().remove(0,3));
 }
 
 static Mutex mutex;

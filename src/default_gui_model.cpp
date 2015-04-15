@@ -103,7 +103,7 @@ void DefaultGUIModel::createGUI(DefaultGUIModel::variable_t *var, int size) {
 	QGridLayout *gridLayout = new QGridLayout;
 
 	size_t nstate = 0, nparam = 0, nevent = 0, ncomment = 0;
-	for (size_t i = 0; i < size; i++) {
+	for (uint16_t i = 0; i < size; i++) {
 		if (var[i].flags & (PARAMETER | STATE | EVENT | COMMENT)) {
 			param_t param;
 

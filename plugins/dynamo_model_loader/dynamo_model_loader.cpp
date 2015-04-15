@@ -60,7 +60,7 @@ DynamoModelLoader::DynamoModelLoader(void) {
 	for (int i = 0; i < std::min(numRecentFiles-2,10); ++i) {
 		listmodule = userprefs.value("/recentFileList/" + entries[i]).toString();
 		text = tr("&%1 %2").arg(i).arg(listmodule);
-		MainWindow::getInstance()->createModuleMenuItem(text,this,SLOT(load_recent()));
+		MainWindow::getInstance()->createModuleMenuItem(text);
 	}
 
 	// add recently used settings files to the menu
@@ -137,13 +137,6 @@ void DynamoModelLoader::load_dialog(void) {
 			"Dynamo Models (*" MODEL_SOURCE_SUFFIX ");;All (*.*)");
 
 	load((char *) file_name.toStdString().c_str());
-}
-
-void DynamoModelLoader::load_recent(){
-	QSettings userprefs;
-	userprefs.setPath(QSettings::NativeFormat, QSettings::SystemScope, "/usr/local/share/rtxi/");
-	QString filename = userprefs.value("/recentFileList/"+QString::number(0)).toString();
-	Plugin::Manager::getInstance()->load(filename.toLatin1());
 }
 
 void DynamoModelLoader::load_setting(){

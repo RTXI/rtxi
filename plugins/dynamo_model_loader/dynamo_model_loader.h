@@ -38,7 +38,6 @@ class DynamoModelLoader : public QObject, public Plugin::Object {
 			QString get_model_makefile_path (void) const;
 		int set_model_makefile_path (char *s);
 		void load_dialog(void);
-		void load_recent();
 		void load_setting();
 
 signals:
