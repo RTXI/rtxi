@@ -71,7 +71,7 @@ DynamoModelLoader::DynamoModelLoader(void) {
 	for (int i = 0; i < std::min(numRecentFiles,10); ++i) {
 		listmodule = userprefs.value("/recentSettingsList/" + entries[i]).toString();
 		text = tr("&%1 %2").arg(i).arg(listmodule);
-		MainWindow::getInstance()->createFileMenuItem(text,this,SLOT(load_setting()));
+		MainWindow::getInstance()->createFileMenuItem(text);
 	}
 }
 
@@ -137,13 +137,6 @@ void DynamoModelLoader::load_dialog(void) {
 			"Dynamo Models (*" MODEL_SOURCE_SUFFIX ");;All (*.*)");
 
 	load((char *) file_name.toStdString().c_str());
-}
-
-void DynamoModelLoader::load_setting(){
-	QSettings userprefs;
-	userprefs.setPath(QSettings::NativeFormat, QSettings::SystemScope, "/usr/local/share/rtxi/");
-	QString filename = userprefs.value("/recentSettingsList/"+QString::number(0)).toString();
-	Settings::Manager::getInstance()->load(filename.toStdString());
 }
 
 static Mutex mutex;

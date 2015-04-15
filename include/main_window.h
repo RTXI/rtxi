@@ -60,7 +60,7 @@ class MainWindow : public QMainWindow {
 	 * \return The index of the new menu item.
 	 */
 
-	QAction* createFileMenuItem(const QString &label, const QObject *handler, const char *slot);
+	QAction* createFileMenuItem(const QString &label);//, const QObject *handler, const char *slot);
 
 	/*!
 	 * Clears the File menu.
@@ -199,6 +199,7 @@ class MainWindow : public QMainWindow {
 	void windowsMenuAboutToShow(void);
 	void windowsMenuActivated(QAction *);
 	void modulesMenuActivated(QAction *);
+	void fileMenuActivated(QAction *);
 
 	void loadUtil(int);
 	void loadSignal(int);

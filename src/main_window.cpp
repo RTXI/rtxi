@@ -15,7 +15,7 @@
 	 You should have received a copy of the GNU General Public License
 	 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
- */
+*/
 
 #include <QtGui>
 #include <QMdiArea>
@@ -70,8 +70,8 @@ QAction* MainWindow::insertModuleMenuSeparator (void) {
 	return moduleMenu->addSeparator();
 }
 
-QAction* MainWindow::createFileMenuItem(const QString &text, const QObject *receiver, const char *member) {
-	return fileMenu->addAction(text, receiver, member);
+QAction* MainWindow::createFileMenuItem(const QString &text) {
+	return fileMenu->addAction(text);
 }
 
 void MainWindow::clearFileMenu(void) {
@@ -144,6 +144,7 @@ void MainWindow::createFileMenu() {
 	fileMenu->addSeparator();
 	fileMenu->addAction(quit);
 	fileMenu->addSeparator();
+	connect(fileMenu, SIGNAL(triggered(QAction*)), this, SLOT(fileMenuActivated(QAction*)));
 }
 
 void MainWindow::createModuleMenu() {
@@ -263,6 +264,7 @@ void MainWindow::aboutQt (void) {
 }
 
 void MainWindow::loadSettings (void) {
+
 	QSettings userprefs;
 	userprefs.setPath (QSettings::NativeFormat, QSettings::SystemScope, "/usr/local/share/rtxi/");
 	QString settingsDir = userprefs.value("/dirs/setfiles", getenv("HOME")).toString();
@@ -272,6 +274,7 @@ void MainWindow::loadSettings (void) {
 
 	if (QFile(filename).exists()) {
 		systemMenu->clear();
+		mdiArea->closeAllSubWindows();
 		Settings::Manager::getInstance()->load(filename.toStdString());
 	}
 }
@@ -432,12 +435,28 @@ void MainWindow::windowsMenuActivated(QAction *id) {
 void MainWindow::modulesMenuActivated(QAction *id) {
 	// Annoying but the best way to do it is to tie an action to the entire menu
 	// so we have to tell it to ignore the first two modules
-	if(id->text() == "Load Plugin" || id->text() == "Load DYNAMO Model")
+	if(id->text().contains("Load Plugin") ||
+			id->text().contains("Load DYNAMO Model"))
 		return;
 
 	// Have to trim the first three characters before loading
 	// or else parser will include qstring formatting
 	Plugin::Manager::getInstance()->load(id->text().remove(0,3));
+}
+
+void MainWindow::fileMenuActivated(QAction *id) {
+	// Annoying but the best way to do it is to tie an action to the entire menu
+	// so we have to tell it to ignore the first two modules
+	if(id->text().contains("Load Workspace") ||
+			id->text().contains("Save Workspace") ||
+			id->text().contains("Reset Workspace") ||
+			id->text().contains("Quit"))
+		return;
+
+	// Have to trim the first three characters before loading
+	// or else parser will include qstring formatting
+	mdiArea->closeAllSubWindows();
+	Settings::Manager::getInstance()->load(id->text().remove(0,3).toStdString());
 }
 
 static Mutex mutex;
