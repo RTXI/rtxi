@@ -29,26 +29,22 @@ class DynamoModelLoader : public QObject, public Plugin::Object {
 	Q_OBJECT
 
 	public:
-
 		DynamoModelLoader(void);
 		virtual ~DynamoModelLoader(void);
 		static DynamoModelLoader *getInstance(void);
 		void load (char *path);
 
 		public slots:
-
 			QString get_model_makefile_path (void) const;
 		int set_model_makefile_path (char *s);
 		void load_dialog(void);
-		void load_recent(int);
-		void load_setting(int);
+		void load_recent();
+		void load_setting();
 
 signals:
-
 		void load_emit(int);
 
 	private:
-
 		QAction *action;
 		QString model_makefile_path;
 		static DynamoModelLoader *instance;

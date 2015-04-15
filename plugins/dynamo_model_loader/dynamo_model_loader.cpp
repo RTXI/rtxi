@@ -15,7 +15,7 @@
 	 You should have received a copy of the GNU General Public License
 	 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-*/
+ */
 
 #include <debug.h>
 #include <stdlib.h>
@@ -60,7 +60,7 @@ DynamoModelLoader::DynamoModelLoader(void) {
 	for (int i = 0; i < std::min(numRecentFiles-2,10); ++i) {
 		listmodule = userprefs.value("/recentFileList/" + entries[i]).toString();
 		text = tr("&%1 %2").arg(i).arg(listmodule);
-		MainWindow::getInstance()->createModuleMenuItem(text,this,SLOT(load_recent(int)));
+		MainWindow::getInstance()->createModuleMenuItem(text,this,SLOT(load_recent()));
 	}
 
 	// add recently used settings files to the menu
@@ -71,7 +71,7 @@ DynamoModelLoader::DynamoModelLoader(void) {
 	for (int i = 0; i < std::min(numRecentFiles,10); ++i) {
 		listmodule = userprefs.value("/recentSettingsList/" + entries[i]).toString();
 		text = tr("&%1 %2").arg(i).arg(listmodule);
-		MainWindow::getInstance()->createFileMenuItem(text,this,SLOT(load_setting(int)));
+		MainWindow::getInstance()->createFileMenuItem(text,this,SLOT(load_setting()));
 	}
 }
 
@@ -139,17 +139,17 @@ void DynamoModelLoader::load_dialog(void) {
 	load((char *) file_name.toStdString().c_str());
 }
 
-void DynamoModelLoader::load_recent(int i) {
+void DynamoModelLoader::load_recent(){
 	QSettings userprefs;
 	userprefs.setPath(QSettings::NativeFormat, QSettings::SystemScope, "/usr/local/share/rtxi/");
-	QString filename = userprefs.value("/recentFileList/"+QString::number(i)).toString();
+	QString filename = userprefs.value("/recentFileList/"+QString::number(0)).toString();
 	Plugin::Manager::getInstance()->load(filename.toLatin1());
 }
 
-void DynamoModelLoader::load_setting(int i) {
+void DynamoModelLoader::load_setting(){
 	QSettings userprefs;
 	userprefs.setPath(QSettings::NativeFormat, QSettings::SystemScope, "/usr/local/share/rtxi/");
-	QString filename = userprefs.value("/recentSettingsList/"+QString::number(i)).toString();
+	QString filename = userprefs.value("/recentSettingsList/"+QString::number(0)).toString();
 	Settings::Manager::getInstance()->load(filename.toStdString());
 }
 

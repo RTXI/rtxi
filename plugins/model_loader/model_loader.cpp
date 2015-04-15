@@ -1,5 +1,5 @@
 /*
- 	 The Real-Time eXperiment Interface (RTXI)
+	 The Real-Time eXperiment Interface (RTXI)
 	 Copyright (C) 2011 Georgia Institute of Technology, University of Utah, Weill Cornell Medical College
 
 	 This program is free software: you can redistribute it and/or modify
@@ -15,7 +15,7 @@
 	 You should have received a copy of the GNU General Public License
 	 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-*/
+ */
 
 #include <debug.h>
 #include <main_window.h>
@@ -110,15 +110,15 @@ void ModelLoader::updateRecentModules(QString filename, int index) {
 			text = tr("&%1 %2").arg(i).arg(filename);
 		else
 			text = tr("&%1 %2").arg(i).arg(listmodule);
-		action = MainWindow::getInstance()->createModuleMenuItem(text, this, SLOT(load_recent(int)));
+		action = MainWindow::getInstance()->createModuleMenuItem(text, this, SLOT(load_recent()));
 		MainWindow::getInstance()->changeModuleMenuItem(action, text);
 		MainWindow::getInstance()->setModuleMenuItemParameter(action, i);
 	}
 }
 
-void ModelLoader::load_recent(int i) {
+void ModelLoader::load_recent(){
 	QSettings userprefs;
 	userprefs.setPath(QSettings::NativeFormat, QSettings::SystemScope, "/usr/local/share/rtxi/");
-	QString filename = userprefs.value("/recentFileList/" + QString::number(i)).toString();
+	QString filename = userprefs.value("/recentFileList/" + QString::number(0)).toString();
 	Plugin::Manager::getInstance()->load(filename.toLatin1());
 }

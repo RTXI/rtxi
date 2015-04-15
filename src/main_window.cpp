@@ -159,7 +159,7 @@ void MainWindow::createSystemMenu() {
 
 void MainWindow::createWindowsMenu() {
 	windowsMenu = menuBar()->addMenu(tr("&Windows"));
-	connect(windowsMenu,SIGNAL(aboutToShow (void)),this,SLOT(windowsMenuAboutToShow(void)));
+	connect(windowsMenu,SIGNAL(aboutToShow(void)),this,SLOT(windowsMenuAboutToShow(void)));
 }
 
 void MainWindow::createHelpMenu() {
