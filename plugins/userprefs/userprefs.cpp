@@ -40,6 +40,7 @@ UserPrefs::Panel::Panel(QWidget *parent) : QWidget(parent) {
 	subWindow->setFixedSize(500,300);
 	subWindow->setWindowFlags(Qt::CustomizeWindowHint);
 	subWindow->setWindowFlags(Qt::WindowCloseButtonHint);
+	subWindow->setAttribute(Qt::WA_DeleteOnClose);
 	MainWindow::getInstance()->createMdi(subWindow);
 
 	// Preferences structure

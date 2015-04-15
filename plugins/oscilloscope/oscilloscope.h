@@ -90,7 +90,7 @@ namespace Oscilloscope {
 		//void doDeferred(const Settings::Object::State &);
 		//void doLoad(const Settings::Object::State &);
 		//void doSave(Settings::Object::State &) const;
-		void closeEvent(QCloseEvent *);
+		//void closeEvent(QCloseEvent *);
 		void receiveEvent(const ::Event::Object *);
 
 		public slots:

@@ -183,11 +183,6 @@ void Oscilloscope::Panel::receiveEvent(const ::Event::Object *event) {
 	}
 }
 
-void Oscilloscope::Panel::closeEvent(QCloseEvent *e) {
-	//e->ignore();
-	//hide();
-}
-
 // Slot for enabling user specified channel
 void Oscilloscope::Panel::activateChannel(bool active) {
 	bool enable = active && blocksList->count() && channelsList->count();

@@ -86,8 +86,6 @@ DefaultGUIModel::~DefaultGUIModel(void) {
 
 void DefaultGUIModel::createGUI(DefaultGUIModel::variable_t *var, int size) {
 
-	QWidget::setAttribute(Qt::WA_DeleteOnClose);
-
 	// Make Mdi
 	subWindow = new QMdiSubWindow;
 	subWindow->setWindowIcon(QIcon("/usr/local/lib/rtxi/RTXI-widget-icon.png"));
@@ -181,6 +179,7 @@ void DefaultGUIModel::createGUI(DefaultGUIModel::variable_t *var, int size) {
 
 	// Set layout to Mdi and show
 	setLayout(layout);
+	subWindow->setAttribute(Qt::WA_DeleteOnClose);
 	subWindow->setWidget(this);
 	subWindow->show();
 }

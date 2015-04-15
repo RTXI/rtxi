@@ -192,7 +192,6 @@ void MainWindow::createFileActions() {
 	connect(quit, SIGNAL(triggered()), qApp, SLOT(closeAllWindows()));
 }
 
-
 void MainWindow::createMdi(QMdiSubWindow *subWindow){
 	mdiArea->addSubWindow(subWindow);
 }
@@ -401,7 +400,7 @@ void MainWindow::windowsMenuAboutToShow(void) {
 	windowsMenu->addSeparator();
 
 	// Get list of open subwindows in Mdi Area
-	QList<QMdiSubWindow *> subWindows = mdiArea->subWindowList();
+	subWindows = mdiArea->subWindowList();
 
 	// Make sure it isn't empty
 	if(subWindows.isEmpty())
@@ -418,7 +417,7 @@ void MainWindow::windowsMenuAboutToShow(void) {
 void MainWindow::windowsMenuActivated(QAction *id) {
 
 	// Get list of open subwindows in Mdi Area
-	QList<QMdiSubWindow *> subWindows = mdiArea->subWindowList();
+	subWindows = mdiArea->subWindowList();
 
 	// Make sure it isn't empty
 	if(subWindows.isEmpty())

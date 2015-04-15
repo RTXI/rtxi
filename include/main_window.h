@@ -224,6 +224,7 @@ class MainWindow : public QMainWindow {
 
 	static MainWindow *instance;
 	QMdiArea *mdiArea;
+	QList<QMdiSubWindow *> subWindows;
 
 	QMenu *fileMenu;
 	QMenu *moduleMenu;
