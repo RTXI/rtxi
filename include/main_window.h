@@ -63,15 +63,6 @@ class MainWindow : public QMainWindow {
 	QAction* createFileMenuItem(const QString &label, const QObject *handler, const char *slot);
 
 	/*!
-	 * Sets the parameter value of a menu item in the File menu.
-	 *
-	 * \param menuid The index of the item to be removed.
-	 * \param parameter The parameter value to set.
-	 */
-
-	void setFileMenuItemParameter(QAction *action, int parameter);
-
-	/*!
 	 * Clears the File menu.
 	 */
 

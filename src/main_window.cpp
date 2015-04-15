@@ -74,18 +74,15 @@ QAction* MainWindow::createFileMenuItem(const QString &text, const QObject *rece
 	return fileMenu->addAction(text, receiver, member);
 }
 
-void MainWindow::setFileMenuItemParameter(QAction *action, int parameter) {
-	action->setData(parameter);
-	//fileMenu->setData(menuid, parameter);
-}
-
 void MainWindow::clearFileMenu(void) {
-	/*
-	 *don't clear the entire menu b/c Load & Save Workspace and Quit are created by
-	 * main_window.cpp, not while a module is loading
-	 */
-
-	//fileMenu->clear();
+	// Clear but add back default actions
+	fileMenu->clear();
+	fileMenu->addAction(load);
+	fileMenu->addAction(save);
+	fileMenu->addAction(reset);
+	fileMenu->addSeparator();
+	fileMenu->addAction(quit);
+	fileMenu->addSeparator();
 }
 
 QAction* MainWindow::createModuleMenuItem(const QString &text, const QObject *receiver, const char *member) {
