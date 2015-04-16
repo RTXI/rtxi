@@ -304,6 +304,7 @@ void MainWindow::saveSettings(void)
 
 void MainWindow::resetSettings(void)
 {
+	systemMenu->clear();
 	mdiArea->closeAllSubWindows();
 	Settings::Manager::getInstance()->load("/etc/rtxi.conf");
 }
@@ -455,6 +456,7 @@ void MainWindow::fileMenuActivated(QAction *id) {
 
 	// Have to trim the first three characters before loading
 	// or else parser will include qstring formatting
+	systemMenu->clear();
 	mdiArea->closeAllSubWindows();
 	Settings::Manager::getInstance()->load(id->text().remove(0,3).toStdString());
 }
