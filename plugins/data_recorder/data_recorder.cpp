@@ -158,10 +158,12 @@ InsertChannelEvent::InsertChannelEvent(bool &r,
 		DataRecorder::Channel &c) :
 	recording(r), channels(l), end(e), channel(c)
 {
+	printf("\nInsertChannelEvent called.\n");
 }
 
 InsertChannelEvent::~InsertChannelEvent(void)
 {
+	printf("InsertChannelEvent destroyer called.\n");
 }
 
 int InsertChannelEvent::callback(void)
@@ -176,10 +178,12 @@ RemoveChannelEvent::RemoveChannelEvent(bool &r,
 		RT::List<DataRecorder::Channel> & l, DataRecorder::Channel &c) :
 	recording(r), channels(l), channel(c)
 {
+	printf("\nRemoveChannelEvent called.\n");
 }
 
 RemoveChannelEvent::~RemoveChannelEvent(void)
 {
+	printf("RemoveChannelEvent destroyer called.\n");
 }
 
 int RemoveChannelEvent::callback(void)
@@ -193,10 +197,12 @@ int RemoveChannelEvent::callback(void)
 OpenFileEvent::OpenFileEvent(QString &n, AtomicFifo &f) :
 	filename(n), fifo(f)
 {
+	printf("\nOpenFileEvent called\n");
 }
 
 OpenFileEvent::~OpenFileEvent(void)
 {
+	printf("OpenFileEvent destroyer called.\n");
 }
 
 int OpenFileEvent::callback(void)
@@ -213,10 +219,12 @@ int OpenFileEvent::callback(void)
 StartRecordingEvent::StartRecordingEvent(bool &r, AtomicFifo &f) :
 	recording(r), fifo(f)
 {
+	printf("\nStartRecordingEvent called.\n");
 }
 
 StartRecordingEvent::~StartRecordingEvent(void)
 {
+	printf("StartRecordingEvent destroyer called.\n");
 }
 
 int StartRecordingEvent::callback(void)
@@ -233,10 +241,12 @@ int StartRecordingEvent::callback(void)
 StopRecordingEvent::StopRecordingEvent(bool &r, AtomicFifo &f) :
 	recording(r), fifo(f)
 {
+	printf("\nStop recording event called.\n");
 }
 
 StopRecordingEvent::~StopRecordingEvent(void)
 {
+	printf("Stop recording event destroyer called.\n");
 }
 
 int StopRecordingEvent::callback(void)
@@ -408,12 +418,14 @@ DataRecorder::Panel::Panel(QWidget *parent, size_t buffersize) :
 	channelGroup->setLayout(channelLayout);
 
 	// Create elements for arrow
-	QPushButton *rButton = new QPushButton("Add");
+	rButton = new QPushButton("Add");
 	channelLayout->addWidget(rButton);
 	QObject::connect(rButton,SIGNAL(released(void)),this,SLOT(insertChannel(void)));
-	QPushButton *lButton = new QPushButton("Remove");
+	rButton->setEnabled(false);
+	lButton = new QPushButton("Remove");
 	channelLayout->addWidget(lButton);
 	QObject::connect(lButton,SIGNAL(released(void)),this,SLOT(removeChannel(void)));
+	lButton->setEnabled(false);
 
 	// Create child widget and layout
 	sampleGroup = new QGroupBox(tr("Sample Control"));
@@ -490,9 +502,11 @@ DataRecorder::Panel::Panel(QWidget *parent, size_t buffersize) :
 	startRecordButton = new QPushButton("Start Recording");
 	QObject::connect(startRecordButton,SIGNAL(released(void)),this,SLOT(startRecordClicked(void)));
 	buttonLayout->addWidget(startRecordButton);
+	startRecordButton->setEnabled(false);
 	stopRecordButton = new QPushButton("Stop Recording");
 	QObject::connect(stopRecordButton,SIGNAL(released(void)),this,SLOT(stopRecordClicked(void)));
 	buttonLayout->addWidget(stopRecordButton);
+	stopRecordButton->setEnabled(false);
 	QPushButton *closeButton = new QPushButton("Close");
 	QObject::connect(closeButton,SIGNAL(released(void)),this,SLOT(goodbye(void)));
 	buttonLayout->addWidget(closeButton);
@@ -584,6 +598,7 @@ void DataRecorder::Panel::execute(void)
 // Event handler
 void DataRecorder::Panel::receiveEvent(const Event::Object *event)
 {
+	printf("\nDataRecorder::Panel::receiveEvent RECEIVED --- %s\n", event->getName());
 	if (event->getName() == Event::IO_BLOCK_INSERT_EVENT) {
 		printf("Calling IO_BLOCK_INSERT_EVENT...\n");
 		IO::Block *block = reinterpret_cast<IO::Block *> (event->getParam("block"));
@@ -630,6 +645,7 @@ void DataRecorder::Panel::receiveEvent(const Event::Object *event)
 // RT Event Handler
 void DataRecorder::Panel::receiveEventRT(const Event::Object *event)
 {
+	printf("\nDataRecorder::Panel::receiveEventRT RECEIVED --- %s\n", event->getName());
 	if (event->getName() == Event::OPEN_FILE_EVENT) {
 		QString filename = QString(reinterpret_cast<char*> (event->getParam("filename")));
 		data_token_t token;
@@ -709,6 +725,11 @@ void DataRecorder::Panel::buildChannelList(void)
 
 	for (size_t i = 0; i < block->getCount(type); ++i)
 		channelList->addItem(QString::fromStdString(block->getName(type, i)));
+
+	if(channelList->count())
+		rButton->setEnabled(true);
+	else
+		rButton->setEnabled(false);
 }
 
 // Slot for changing data file
@@ -787,12 +808,23 @@ void DataRecorder::Panel::insertChannel(void)
 	InsertChannelEvent event(recording, channels, channels.end(), *channel);
 	if (!RT::System::getInstance()->postEvent(&event))
 		selectionBox->addItem(channel->name);
+
+	if(selectionBox->count())
+	{
+		startRecordButton->setEnabled(true);
+		lButton->setEnabled(true);
+	}
+	else
+	{
+		startRecordButton->setEnabled(false);
+		lButton->setEnabled(false);
+	}
 }
 
 // Remove channel from recorder list
 void DataRecorder::Panel::removeChannel(void)
 {
-	if (!selectionBox->count())
+	if(!selectionBox->count())
 		return;
 
 	for (RT::List<Channel>::iterator i = channels.begin(), end = channels.end(); i
@@ -803,6 +835,17 @@ void DataRecorder::Panel::removeChannel(void)
 				selectionBox->takeItem(selectionBox->row(selectionBox->selectedItems().first()));
 			break;
 		}
+
+	if(selectionBox->count())
+	{
+		startRecordButton->setEnabled(true);
+		lButton->setEnabled(true);
+	}
+	else
+	{
+		startRecordButton->setEnabled(false);
+		lButton->setEnabled(false);
+	}
 }
 
 // Start recording slot
@@ -817,18 +860,24 @@ void DataRecorder::Panel::startRecordClicked(void)
 	}
 
 	recordStatus->setText("Starting...");
+	stopRecordButton->setEnabled(true);
+	startRecordButton->setEnabled(false);
 	count = 0;
 	StartRecordingEvent event(recording, fifo);
 	RT::System::getInstance()->postEvent(&event);
+	printf("Posted StartRecordingEvent\n");
 }
 
 // Stop recording slot
 void DataRecorder::Panel::stopRecordClicked(void)
 {
 	recordStatus->setText("Stopping...");
+	stopRecordButton->setEnabled(false);
+	startRecordButton->setEnabled(true);
 	fixedcount = count;
 	StopRecordingEvent event(recording, fifo);
 	RT::System::getInstance()->postEvent(&event);
+	printf("Posted StopRecordingEvent\n");
 }
 
 // Update downsample rate
@@ -840,7 +889,9 @@ void DataRecorder::Panel::updateDownsampleRate(int r)
 // Custom event handler
 void DataRecorder::Panel::customEvent(QEvent *e)
 {
+	printf("\nDataRecorder::Panel::customEvent RECEIVED\n");
 	if (e->type() == QFileExistsEvent) {
+		printf("Handling QFileExistsEvent\n");
 		CustomEvent * event = static_cast<CustomEvent *>(e);
 		FileExistsEventData *data = reinterpret_cast<FileExistsEventData *> (event->getData());
 		data->response = QMessageBox::question(this, "File exists",
@@ -849,21 +900,24 @@ void DataRecorder::Panel::customEvent(QEvent *e)
 		data->done.wakeAll();
 		recordStatus->setText("Not Recording");
 	} else if (e->type() == QSetFileNameEditEvent) {
+		printf("Handling QSetFileNameEditEvent\n");
 		CustomEvent * event = static_cast<CustomEvent *>(e);
 		SetFileNameEditEventData *data = reinterpret_cast<SetFileNameEditEventData *> (event->getData());
 		fileNameEdit->setText(data->filename);
 		recordStatus->setText("Ready.");
 		data->done.wakeAll();
 	} else if (e->type() == QDisableGroupsEvent) {
+		printf("Handling QDisableGroupsEvent\n");
 		startRecordButton->setEnabled(false);
 		channelGroup->setEnabled(false);
 		sampleGroup->setEnabled(false);
 		recordStatus->setText("Recording...");
 	} else if (e->type() == QEnableGroupsEvent) {
+		printf("Handling QEnableGroupsEvent\n");
 		startRecordButton->setEnabled(true);
 		channelGroup->setEnabled(true);
 		sampleGroup->setEnabled(true);
-		recordStatus->setText("Done.");
+		recordStatus->setText("Ready.");
 		fileSize->setNum(int(QFile(fileNameEdit->text()).size()) / 1024);
 		trialLength->setNum(double(RT::System::getInstance()->getPeriod()*1e-9* fixedcount));
 		count = 0;

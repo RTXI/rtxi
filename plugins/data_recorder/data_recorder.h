@@ -164,6 +164,8 @@ private:
     QComboBox *typeList;
     QListWidget *selectionBox;
     QLabel *recordStatus;
+    QPushButton *rButton;
+    QPushButton *lButton;
 
     QSpinBox *downsampleSpin;
 
