@@ -14,12 +14,13 @@
 	 You should have received a copy of the GNU General Public License
 	 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
- */
+*/
 
 #include <QtGui>
 #include <QFileDialog>
 #include <QEvent>
 
+#include <daq.h>
 #include <unistd.h>
 #include <compiler.h>
 #include <debug.h>
@@ -40,6 +41,18 @@ struct param_hdf_t
 	long long index;
 	double value;
 };
+
+struct find_daq_t {
+	int index;
+	DAQ::Device *device;
+};
+
+static void findDAQDevice(DAQ::Device *dev,void *arg) {
+	struct find_daq_t *info = static_cast<struct find_daq_t *>(arg);
+	if(!info->index)
+		info->device = dev;
+	info->index--;
+}
 
 namespace
 {
@@ -604,8 +617,7 @@ void DataRecorder::Panel::receiveEvent(const Event::Object *event)
 		IO::Block *block = reinterpret_cast<IO::Block *> (event->getParam("block"));
 		blockPtrList.push_back(block);
 		blockList->addItem(QString::fromStdString(block->getName()) + " " + QString::number(block->getID()));
-		if (blockList->count() == 1)
-			buildChannelList();
+		buildChannelList();
 	} else if (event->getName() == Event::IO_BLOCK_REMOVE_EVENT) {
 		printf("Calling IO_BLOCK_REMOVE_EVENT...\n");
 		IO::Block *block = reinterpret_cast<IO::Block *> (event->getParam("block"));
@@ -615,11 +627,11 @@ void DataRecorder::Panel::receiveEvent(const Event::Object *event)
 		if (n < blockList->count())
 			blockList->removeItem(n);
 		blockPtrList.erase(blockPtrList.begin() + n);
-		for (RT::List<Channel>::iterator i = channels.begin(), end =
-				channels.end(); i != end; ++i)
+		for (RT::List<Channel>::iterator i = channels.begin(), end = channels.end(); i != end; ++i)
 			if (i->block == block)
 				if (recording)
 					i->block = 0;
+		buildChannelList();
 	} else if (event->getName() == Event::OPEN_FILE_EVENT) {
 		printf("Calling OPEN_FILE_EVENT...\n");
 		QString filename(reinterpret_cast<char*> (event->getParam("filename")));
@@ -637,9 +649,11 @@ void DataRecorder::Panel::receiveEvent(const Event::Object *event)
 		printf("Calling ASYNC_DATA_EVENT...\n");
 		AsyncDataEvent e(reinterpret_cast<double *> (event->getParam("data")),*reinterpret_cast<size_t *> (event->getParam("size")), fifo);
 		RT::System::getInstance()->postEvent(&e);
-	} else if( event->getName() == Event::RT_POSTPERIOD_EVENT )
+	} else if( event->getName() == Event::RT_POSTPERIOD_EVENT ) {
 		printf("Calling RT_POSTPERIOD_EVENT...\n");
 		sleep.tv_nsec = RT::System::getInstance()->getPeriod(); // Update recording thread sleep time
+		buildChannelList();
+	}
 }
 
 // RT Event Handler
@@ -699,7 +713,10 @@ void DataRecorder::Panel::buildChannelList(void)
 	if (!blockList->count())
 		return;
 
+	// Get block
 	IO::Block *block = blockPtrList[blockList->currentIndex()];
+
+	// Get type
 	IO::flags_t type;
 	switch (typeList->currentIndex()) {
 		case 0:
@@ -723,8 +740,30 @@ void DataRecorder::Panel::buildChannelList(void)
 			type = Workspace::INPUT;
 	}
 
-	for (size_t i = 0; i < block->getCount(type); ++i)
-		channelList->addItem(QString::fromStdString(block->getName(type, i)));
+	// Get channels
+	// Only add channel from DAQ if channel is enabled
+	if(blockList->currentText().contains("analogy"))
+	{
+		// Display channel info
+		DAQ::Device *dev;
+		{
+			struct find_daq_t info = {blockList->currentIndex(), 0,};
+			DAQ::Manager::getInstance()->foreachDevice(findDAQDevice,&info);
+			dev = info.device;
+		}
+		for (size_t i = 0; i < block->getCount(type); ++i)
+		{
+			DAQ::type_t chanType = static_cast<DAQ::type_t>(typeList->currentIndex());
+			DAQ::index_t chanNum = static_cast<DAQ::index_t>(i);
+			if(dev->getChannelActive(chanType,chanNum))
+				channelList->addItem(QString::fromStdString(block->getName(type, i)));
+		}
+	}
+	else
+	{
+		for (size_t i = 0; i < block->getCount(type); ++i)
+			channelList->addItem(QString::fromStdString(block->getName(type, i)));
+	}
 
 	if(channelList->count())
 		rButton->setEnabled(true);
