@@ -742,7 +742,7 @@ void DataRecorder::Panel::buildChannelList(void)
 
 	// Get channels
 	// Only add channel from DAQ if channel is enabled
-	if(blockList->currentText().contains("analogy"))
+	/*if(blockList->currentText().contains("analogy"))
 	{
 		// Display channel info
 		DAQ::Device *dev;
@@ -752,18 +752,14 @@ void DataRecorder::Panel::buildChannelList(void)
 			dev = info.device;
 		}
 		for (size_t i = 0; i < block->getCount(type); ++i)
-		{
-			DAQ::type_t chanType = static_cast<DAQ::type_t>(typeList->currentIndex());
-			DAQ::index_t chanNum = static_cast<DAQ::index_t>(i);
-			if(dev->getChannelActive(chanType,chanNum))
+			if(dev->getChannelActive(static_cast<DAQ::type_t>(type),static_cast<DAQ::index_t>(i)))
 				channelList->addItem(QString::fromStdString(block->getName(type, i)));
-		}
 	}
 	else
-	{
+	{*/
 		for (size_t i = 0; i < block->getCount(type); ++i)
 			channelList->addItem(QString::fromStdString(block->getName(type, i)));
-	}
+	//a}
 
 	if(channelList->count())
 		rButton->setEnabled(true);
