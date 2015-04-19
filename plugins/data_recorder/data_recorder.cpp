@@ -32,7 +32,7 @@
 #include <pthread.h>
 
 #define QFileExistsEvent            (QEvent::User+0)
-//#define QSetFileNameEditEvent       (QEvent::User+1)
+#define QSetFileNameEditEvent       (QEvent::User+1)
 #define QDisableGroupsEvent         (QEvent::User+2)
 #define QEnableGroupsEvent          (QEvent::User+3)
 
@@ -87,11 +87,11 @@ namespace
 		QWaitCondition done;
 	};
 
-	/*struct SetFileNameEditEventData
+	struct SetFileNameEditEventData
 	{
 		QString filename;
 		QWaitCondition done;
-	};*/
+	};
 
 	class InsertChannelEvent: public RT::Event
 	{
@@ -557,7 +557,7 @@ DataRecorder::Panel::Panel(QWidget *parent, size_t buffersize) :
 
 	// Register custom QEvents
 	QEvent::registerEventType(QFileExistsEvent);
-	//QEvent::registerEventType(QSetFileNameEditEvent);
+	QEvent::registerEventType(QSetFileNameEditEvent);
 	QEvent::registerEventType(QDisableGroupsEvent);
 	QEvent::registerEventType(QEnableGroupsEvent);
 
@@ -966,16 +966,16 @@ void DataRecorder::Panel::customEvent(QEvent *e)
 		data->done.wakeAll();
 		recordStatus->setText("Not Recording");
 	}
-	/*else if (e->type() == QSetFileNameEditEvent)
+	else if (e->type() == QSetFileNameEditEvent)
 	{
-		printf("Processing QSetFileNameEditEvent...\n");
+		//printf("Processing QSetFileNameEditEvent...\n");
 		CustomEvent * event = static_cast<CustomEvent *>(e);
 		SetFileNameEditEventData *data = reinterpret_cast<SetFileNameEditEventData *> (event->getData());
 		fileNameEdit->setText(data->filename);
 		recordStatus->setText("Ready.");
 		data->done.wakeAll();
-		printf("Done processing...\n");
-	}*/
+		//printf("Done processing...\n");
+	}
 	else if (e->type() == QDisableGroupsEvent) 
 	{
 		startRecordButton->setEnabled(false);
@@ -1264,10 +1264,10 @@ int DataRecorder::Panel::openFile(QString &filename)
 		return -1;
 	}
 
-	fileNameEdit->setText(filename);
-	recordStatus->setText("Ready.");
+	/*fileNameEdit->setText(filename);
+	recordStatus->setText("Ready.");*/
 
-	/*printf("Calling SetFileNameEditEvent...\n");
+	printf("Calling SetFileNameEditEvent...\n");
 	CustomEvent *event = new CustomEvent(static_cast<QEvent::Type>QSetFileNameEditEvent);
 	SetFileNameEditEventData data;
 	data.filename = filename;
@@ -1279,7 +1279,7 @@ int DataRecorder::Panel::openFile(QString &filename)
 	data.done.wait(&mutex);
 	printf("3. Waiting...\n");
 	mutex.unlock();
-	printf("4. returning 0...\n");*/
+	printf("4. returning 0...\n");
 	return 0;
 }
 
@@ -1295,8 +1295,7 @@ void DataRecorder::Panel::closeFile(bool shutdown)
 
 	H5Fclose(file.id);
 	if (!shutdown) {
-		fileNameEdit->setText("");
-		/*QMutex mutex;
+		QMutex mutex;
 		mutex.lock();
 
 		CustomEvent *event = new CustomEvent(static_cast<QEvent::Type>QSetFileNameEditEvent);
@@ -1306,7 +1305,7 @@ void DataRecorder::Panel::closeFile(bool shutdown)
 
 		QApplication::postEvent(this, event);
 		data.done.wait(&mutex);
-		mutex.unlock();*/
+		mutex.unlock();
 	}
 }
 
