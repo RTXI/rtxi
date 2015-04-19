@@ -1352,8 +1352,9 @@ int DataRecorder::Panel::startRecording(long long timestamp)
 		QString channel_name = "Channel " + QString::number(++count) + " Name";
 		hid_t data = H5Dcreate(file.sdata, channel_name.toLatin1().constData(), string_type,
 				scalar_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-		H5Dwrite(data, string_type, H5S_ALL, H5S_ALL, H5P_DEFAULT,
-				i->name.toLatin1().constData());
+		QByteArray latinName = i->name.toLatin1();
+		const char *nameData = latinName.constData();
+		H5Dwrite(data, string_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, nameData);
 		H5Dclose(data);
 	}
 
@@ -1363,8 +1364,7 @@ int DataRecorder::Panel::startRecording(long long timestamp)
 	if (channels.size()) {
 		hsize_t array_size[] = { channels.size() };
 		hid_t array_type = H5Tarray_create(H5T_IEEE_F64LE, 1, array_size);
-		file.cdata = H5PTcreate_fl(file.sdata, "Channel Data", array_type,
-				(hsize_t) 64, 1);
+		file.cdata = H5PTcreate_fl(file.sdata, "Channel Data", array_type, (hsize_t) 64, 1);
 		H5Tclose(array_type);
 	}
 
