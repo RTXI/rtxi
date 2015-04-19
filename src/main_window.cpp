@@ -64,6 +64,7 @@ MainWindow::MainWindow (void) : QMainWindow(NULL, Qt::Window) {
 }
 
 MainWindow::~MainWindow (void) {
+	delete mdiArea;
 }
 
 QAction* MainWindow::insertModuleMenuSeparator (void) {
