@@ -156,7 +156,6 @@ scripts/Makefile
 scripts/init_rtxi
 scripts/rtxi_comedi
 scripts/rtxi_plugin_config
-testsuite/Makefile
 plugins/Makefile
 plugins/analogy_device/Makefile
 plugins/comedi_device/Makefile

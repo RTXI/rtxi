@@ -919,17 +919,17 @@ void DataRecorder::Panel::removeChannel(void)
 // Start recording slot
 void DataRecorder::Panel::startRecordClicked(void)
 {
-	/*if(fileNameEdit->text().isEmpty()) {
+	if(fileNameEdit->text().isEmpty()) {
 		QMessageBox::critical(
 				this, "File not specified.",
 				"Please specify a file to write data to.",
 				QMessageBox::Ok, QMessageBox::NoButton);
 		return;
-	}*/
+	}
 
-	//recordStatus->setText("Starting...");
-	//stopRecordButton->setEnabled(true);
-	//startRecordButton->setEnabled(false);
+	recordStatus->setText("Starting...");
+	stopRecordButton->setEnabled(true);
+	startRecordButton->setEnabled(false);
 	count = 0;
 	StartRecordingEvent event(recording, fifo);
 	RT::System::getInstance()->postEvent(&event);
@@ -1352,27 +1352,23 @@ int DataRecorder::Panel::startRecording(long long timestamp)
 	H5Tset_size(string_type, string_size);
 	hid_t data;
 
-	printf("1 writing period...\n");
 	long long period = RT::System::getInstance()->getPeriod();
 	data = H5Dcreate(file.trial, "Period (ns)", H5T_STD_U64LE, scalar_space,
 			H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 	H5Dwrite(data, H5T_STD_U64LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &period);
 	H5Dclose(data);
 
-	printf("2 writing downsample...\n");
 	long long downsample = downsample_rate;
 	data = H5Dcreate(file.trial, "Downsampling Rate", H5T_STD_U64LE,
 			scalar_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 	H5Dwrite(data, H5T_STD_U64LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &downsample);
 	H5Dclose(data);
 
-	printf("3 writing time...\n");
 	data = H5Dcreate(file.trial, "Timestamp Start (ns)", H5T_STD_U64LE,
 			scalar_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 	H5Dwrite(data, H5T_STD_U64LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &timestamp);
 	H5Dclose(data);
 
-	printf("4 writing date...\n");
 	data = H5Dcreate(file.trial, "Date", string_type, scalar_space,
 			H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 	H5Dwrite(data, string_type, H5S_ALL, H5S_ALL, H5P_DEFAULT,
@@ -1424,7 +1420,6 @@ int DataRecorder::Panel::startRecording(long long timestamp)
 
 	H5Tclose(param_type);
 
-	printf("5 writing data...\n");
 	size_t count = 0;
 	for (RT::List<Channel>::iterator i = channels.begin(), end = channels.end(); i
 			!= end; ++i) {
@@ -1433,13 +1428,10 @@ int DataRecorder::Panel::startRecording(long long timestamp)
 				scalar_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 		QByteArray latinName = i->name.toLatin1();
 		const char *nameData = latinName.constData();
-		printf("writing to H5D...\n");
 		H5Dwrite(data, string_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, nameData);
-		printf("about to close...\n");
 		H5Dclose(data);
 	}
 
-	printf("done...\n");
 	H5Tclose(string_type);
 	H5Sclose(scalar_space);
 
