@@ -166,7 +166,6 @@ bool AnalogyDevice::getChannelActive(type_t type,index_t channel) const {
 	if(channel >= getChannelCount(type))
 		return false;
 
-	printf("getting active value is %d\n", subdevice[type].chan[channel].active);
 	return subdevice[type].chan[channel].active;    
 }
 
@@ -183,7 +182,6 @@ int AnalogyDevice::setChannelActive(type_t type,index_t channel,bool state) {
 		++subdevice[type].active;
 
 	subdevice[type].chan[channel].active = state;
-	printf("setting active value is %d\n", subdevice[type].chan[channel].active);
 	return 0;
 }
 
