@@ -250,10 +250,10 @@ SystemControlPanel::SystemControlPanel(QWidget *parent) : QWidget(parent) {
 
 	// Create elements for buttons
 	QPushButton *applyButton = new QPushButton("Apply");
-	QObject::connect(applyButton,SIGNAL(clicked(void)),this,SLOT(apply(void)));
+	QObject::connect(applyButton,SIGNAL(released(void)),this,SLOT(apply(void)));
 	buttonLayout->addWidget(applyButton);
 	QPushButton *cancelButton = new QPushButton("Close");
-	QObject::connect(cancelButton,SIGNAL(clicked(void)),this,SLOT(goodbye(void)));
+	QObject::connect(cancelButton,SIGNAL(released(void)),this,SLOT(goodbye(void)));
 	buttonLayout->addWidget(cancelButton);
 
 	// Assign layout to child widget

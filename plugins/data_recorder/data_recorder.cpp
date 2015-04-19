@@ -442,11 +442,11 @@ DataRecorder::Panel::Panel(QWidget *parent, size_t buffersize) :
 	// Create elements for arrow
 	rButton = new QPushButton("Add");
 	channelLayout->addWidget(rButton);
-	QObject::connect(rButton,SIGNAL(clicked(void)),this,SLOT(insertChannel(void)));
+	QObject::connect(rButton,SIGNAL(released(void)),this,SLOT(insertChannel(void)));
 	rButton->setEnabled(false);
 	lButton = new QPushButton("Remove");
 	channelLayout->addWidget(lButton);
-	QObject::connect(lButton,SIGNAL(clicked(void)),this,SLOT(removeChannel(void)));
+	QObject::connect(lButton,SIGNAL(released(void)),this,SLOT(removeChannel(void)));
 	lButton->setEnabled(false);
 
 	// Create child widget and layout
@@ -493,7 +493,7 @@ DataRecorder::Panel::Panel(QWidget *parent, size_t buffersize) :
 	fileLayout->addWidget(fileNameEdit);
 	QPushButton *fileChangeButton = new QPushButton("Choose File");
 	fileLayout->addWidget(fileChangeButton);
-	QObject::connect(fileChangeButton,SIGNAL(clicked(void)),this,SLOT(changeDataFile(void)));
+	QObject::connect(fileChangeButton,SIGNAL(released(void)),this,SLOT(changeDataFile(void)));
 
 	fileLayout->addWidget(new QLabel(tr("Downsample \nRate:")));
 	downsampleSpin = new QSpinBox(this);
@@ -522,15 +522,15 @@ DataRecorder::Panel::Panel(QWidget *parent, size_t buffersize) :
 
 	// Create elements for box
 	startRecordButton = new QPushButton("Start Recording");
-	QObject::connect(startRecordButton,SIGNAL(clicked(void)),this,SLOT(startRecordClicked(void)));
+	QObject::connect(startRecordButton,SIGNAL(released(void)),this,SLOT(startRecordClicked(void)));
 	buttonLayout->addWidget(startRecordButton);
 	startRecordButton->setEnabled(false);
 	stopRecordButton = new QPushButton("Stop Recording");
-	QObject::connect(stopRecordButton,SIGNAL(clicked(void)),this,SLOT(stopRecordClicked(void)));
+	QObject::connect(stopRecordButton,SIGNAL(released(void)),this,SLOT(stopRecordClicked(void)));
 	buttonLayout->addWidget(stopRecordButton);
 	stopRecordButton->setEnabled(false);
 	QPushButton *closeButton = new QPushButton("Close");
-	QObject::connect(closeButton,SIGNAL(clicked(void)),this,SLOT(goodbye(void)));
+	QObject::connect(closeButton,SIGNAL(released(void)),this,SLOT(goodbye(void)));
 	buttonLayout->addWidget(closeButton);
 	recordStatus = new QLabel;
 	buttonLayout->addWidget(recordStatus);

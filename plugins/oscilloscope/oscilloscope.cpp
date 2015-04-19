@@ -1043,13 +1043,13 @@ Oscilloscope::Panel::Panel(QWidget *parent) :	QWidget(parent), RT::Thread(0), fi
 	// Creat buttons
 	pauseButton = new QPushButton("Pause");
 	pauseButton->setCheckable(true);
-	QObject::connect(pauseButton,SIGNAL(clicked()),this,SLOT(togglePause()));
+	QObject::connect(pauseButton,SIGNAL(released(void)),this,SLOT(togglePause(void)));
 	setBttnLayout->addWidget(pauseButton);
 	applyButton = new QPushButton("Apply");
-	QObject::connect(applyButton,SIGNAL(clicked(void)),this,SLOT(apply(void)));
+	QObject::connect(applyButton,SIGNAL(released(void)),this,SLOT(apply(void)));
 	setBttnLayout->addWidget(applyButton);
 	settingsButton = new QPushButton("Screenshot");
-	QObject::connect(settingsButton,SIGNAL(clicked()),this,SLOT(screenshot()));
+	QObject::connect(settingsButton,SIGNAL(released(void)),this,SLOT(screenshot(void)));
 	setBttnLayout->addWidget(settingsButton);
 
 	// Attach layout

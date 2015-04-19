@@ -61,7 +61,7 @@ UserPrefs::Panel::Panel(QWidget *parent) : QWidget(parent) {
 	dirLayout->addWidget(settingsDirEdit, 1, 1);
 	QPushButton *chooseSettingsDirButton = new QPushButton("Browse", this);
 	dirLayout->addWidget(chooseSettingsDirButton, 1, 2);
-	QObject::connect(chooseSettingsDirButton,SIGNAL(clicked(void)),this,SLOT(chooseSettingsDir(void)));
+	QObject::connect(chooseSettingsDirButton,SIGNAL(released(void)),this,SLOT(chooseSettingsDir(void)));
 
 	dynamoDirEdit = new QLineEdit(dirGroup);
 	dynamoDirEdit->setText(userprefs.value("/dirs/dynamomodels", getenv("HOME")).toString());
@@ -69,7 +69,7 @@ UserPrefs::Panel::Panel(QWidget *parent) : QWidget(parent) {
 	dirLayout->addWidget(dynamoDirEdit, 2, 1);
 	QPushButton *chooseDynamoDirButton = new QPushButton("Browse", this);
 	dirLayout->addWidget(chooseDynamoDirButton, 2, 2);
-	QObject::connect(chooseDynamoDirButton,SIGNAL(clicked(void)),this,SLOT(chooseDynamoDir(void)));
+	QObject::connect(chooseDynamoDirButton,SIGNAL(released(void)),this,SLOT(chooseDynamoDir(void)));
 
 	dataDirEdit = new QLineEdit(dirGroup);
 	dataDirEdit->setText(userprefs.value("/dirs/data", getenv("HOME")).toString());
@@ -77,7 +77,7 @@ UserPrefs::Panel::Panel(QWidget *parent) : QWidget(parent) {
 	dirLayout->addWidget(dataDirEdit, 3, 1);
 	QPushButton *chooseDataDirButton = new QPushButton("Browse", this);
 	dirLayout->addWidget(chooseDataDirButton, 3, 2);
-	QObject::connect(chooseDataDirButton,SIGNAL(clicked(void)),this,SLOT(chooseDataDir(void)));
+	QObject::connect(chooseDataDirButton,SIGNAL(released(void)),this,SLOT(chooseDataDir(void)));
 
 	// Attach layout to group
 	dirGroup->setLayout(dirLayout);
@@ -101,11 +101,11 @@ UserPrefs::Panel::Panel(QWidget *parent) : QWidget(parent) {
 
 	// Create elements for child widget
 	QPushButton *resetButton = new QPushButton("Reset");
-	QObject::connect(resetButton,SIGNAL(clicked(void)),this,SLOT(reset(void)));
+	QObject::connect(resetButton,SIGNAL(released(void)),this,SLOT(reset(void)));
 	QPushButton *applyButton = new QPushButton("Save");
-	QObject::connect(applyButton,SIGNAL(clicked(void)),this,SLOT(apply(void)));
+	QObject::connect(applyButton,SIGNAL(released(void)),this,SLOT(apply(void)));
 	QPushButton *cancelButton = new QPushButton("Close");
-	QObject::connect(cancelButton,SIGNAL(clicked(void)),this,SLOT(cancel(void)));
+	QObject::connect(cancelButton,SIGNAL(released(void)),this,SLOT(cancel(void)));
 	status = new QLabel;
 	status->setText("Defaults \nloaded");
 	status->setFrameStyle(QFrame::Panel | QFrame::Sunken);

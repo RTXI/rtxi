@@ -89,7 +89,7 @@ PerformanceMeasurement::Panel::Panel(QWidget *parent) : QWidget(parent),
 
 		QPushButton *resetButton = new QPushButton("Reset", this);
 		gridLayout->addWidget(resetButton, 6, 1);
-		QObject::connect(resetButton,SIGNAL(clicked(void)),this,SLOT(reset(void)));
+		QObject::connect(resetButton,SIGNAL(released(void)),this,SLOT(reset(void)));
 
 //		gridBox->setLayout(gridLayout);
 
