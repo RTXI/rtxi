@@ -511,6 +511,7 @@ DataRecorder::Panel::Panel(QWidget *parent, size_t buffersize) :
 	// Create elements for box
 	selectionBox = new QListWidget;
 	listLayout->addWidget(selectionBox);
+	selectionBox->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
 	// Attach layout to child
 	listGroup->setLayout(listLayout);
@@ -897,7 +898,7 @@ void DataRecorder::Panel::insertChannel(void)
 // Remove channel from recorder list
 void DataRecorder::Panel::removeChannel(void)
 {
-	if(!selectionBox->count())
+	if(!selectionBox->count() || selectionBox->selectedItems().isEmpty())
 		return;
 
 	for (RT::List<Channel>::iterator i = channels.begin(), end = channels.end(); i
