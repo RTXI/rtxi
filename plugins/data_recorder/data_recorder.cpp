@@ -583,8 +583,8 @@ DataRecorder::Panel::~Panel(void)
 {
 	Plugin::getInstance()->removeDataRecorderPanel(this);
 	setActive(false);
-	DoneEvent event(fifo);
-	while (RT::System::getInstance()->postEvent(&event));
+	DoneEvent RTevent(fifo);
+	while (RT::System::getInstance()->postEvent(&RTevent));
 	pthread_join(thread, 0);
 	for (RT::List<Channel>::iterator i = channels.begin(), end = channels.end(); i!= end;)
 		delete &*(i++);
@@ -647,23 +647,23 @@ void DataRecorder::Panel::receiveEvent(const Event::Object *event)
 	else if (event->getName() == Event::OPEN_FILE_EVENT)
 	{
 		QString filename(reinterpret_cast<char*> (event->getParam("filename")));
-		OpenFileEvent e(filename, fifo);
-		RT::System::getInstance()->postEvent(&e);
+		OpenFileEvent RTevent(filename, fifo);
+		RT::System::getInstance()->postEvent(&RTevent);
 	}
 	else if (event->getName() == Event::START_RECORDING_EVENT)
 	{
-		StartRecordingEvent e(recording, fifo);
-		RT::System::getInstance()->postEvent(&e);
+		StartRecordingEvent RTevent(recording, fifo);
+		RT::System::getInstance()->postEvent(&RTevent);
 	}
 	else if (event->getName() == Event::STOP_RECORDING_EVENT)
 	{
-		StopRecordingEvent e(recording, fifo);
-		RT::System::getInstance()->postEvent(&e);
+		StopRecordingEvent RTevent(recording, fifo);
+		RT::System::getInstance()->postEvent(&RTevent);
 	}
 	else if (event->getName() == Event::ASYNC_DATA_EVENT)
 	{
-		AsyncDataEvent e(reinterpret_cast<double *> (event->getParam("data")),*reinterpret_cast<size_t *> (event->getParam("size")), fifo);
-		RT::System::getInstance()->postEvent(&e);
+		AsyncDataEvent RTevent(reinterpret_cast<double *> (event->getParam("data")),*reinterpret_cast<size_t *> (event->getParam("size")), fifo);
+		RT::System::getInstance()->postEvent(&RTevent);
 	}
 	else if( event->getName() == Event::RT_POSTPERIOD_EVENT )
 	{
@@ -834,8 +834,8 @@ void DataRecorder::Panel::changeDataFile(void)
 	userprefs.setValue("/dirs/data", fileDialog.directory().path());
 
 	// Post to event queue
-	OpenFileEvent event(filename, fifo);
-	RT::System::getInstance()->postEvent(&event);
+	OpenFileEvent RTevent(filename, fifo);
+	RT::System::getInstance()->postEvent(&RTevent);
 }
 
 // Insert channel to record into list
@@ -873,8 +873,8 @@ void DataRecorder::Panel::insertChannel(void)
 			channel->block->getID(), channel->block->getName(channel->type,
 				channel->index).c_str());
 
-	InsertChannelEvent event(recording, channels, channels.end(), *channel);
-	if (!RT::System::getInstance()->postEvent(&event))
+	InsertChannelEvent RTevent(recording, channels, channels.end(), *channel);
+	if (!RT::System::getInstance()->postEvent(&RTevent))
 		selectionBox->addItem(channel->name);
 
 	if(selectionBox->count())
@@ -898,8 +898,8 @@ void DataRecorder::Panel::removeChannel(void)
 	for (RT::List<Channel>::iterator i = channels.begin(), end = channels.end(); i
 			!= end; ++i)
 		if (i->name == selectionBox->selectedItems().first()->text()) {
-			RemoveChannelEvent event(recording, channels, *i);
-			if (!RT::System::getInstance()->postEvent(&event))
+			RemoveChannelEvent RTevent(recording, channels, *i);
+			if (!RT::System::getInstance()->postEvent(&RTevent))
 				selectionBox->takeItem(selectionBox->row(selectionBox->selectedItems().first()));
 			break;
 		}
@@ -921,29 +921,22 @@ void DataRecorder::Panel::startRecordClicked(void)
 {
 	if(fileNameEdit->text().isEmpty()) {
 		QMessageBox::critical(
-				this, "File not specified.",
+				this, "Data file not specified.",
 				"Please specify a file to write data to.",
 				QMessageBox::Ok, QMessageBox::NoButton);
 		return;
 	}
-
-	recordStatus->setText("Starting...");
-	stopRecordButton->setEnabled(true);
-	startRecordButton->setEnabled(false);
 	count = 0;
-	StartRecordingEvent event(recording, fifo);
-	RT::System::getInstance()->postEvent(&event);
+	StartRecordingEvent RTevent(recording, fifo);
+	RT::System::getInstance()->postEvent(&RTevent);
 }
 
 // Stop recording slot
 void DataRecorder::Panel::stopRecordClicked(void)
 {
-	recordStatus->setText("Stopping...");
-	stopRecordButton->setEnabled(false);
-	startRecordButton->setEnabled(true);
 	fixedcount = count;
-	StopRecordingEvent event(recording, fifo);
-	RT::System::getInstance()->postEvent(&event);
+	StopRecordingEvent RTevent(recording, fifo);
+	RT::System::getInstance()->postEvent(&RTevent);
 }
 
 // Update downsample rate
@@ -955,9 +948,10 @@ void DataRecorder::Panel::updateDownsampleRate(int r)
 // Custom event handler
 void DataRecorder::Panel::customEvent(QEvent *e)
 {
-	//qDebug() << e;
+	qDebug() << e;
 	if (e->type() == QFileExistsEvent)
 	{
+		printf("QFileExistsEvent\n");
 		CustomEvent * event = static_cast<CustomEvent *>(e);
 		FileExistsEventData *data = reinterpret_cast<FileExistsEventData *> (event->getData());
 		data->response = QMessageBox::question(this, "File exists",
@@ -968,24 +962,27 @@ void DataRecorder::Panel::customEvent(QEvent *e)
 	}
 	else if (e->type() == QSetFileNameEditEvent)
 	{
-		//printf("Processing QSetFileNameEditEvent...\n");
+		printf("QSetFileNameEditEvent\n");
 		CustomEvent * event = static_cast<CustomEvent *>(e);
 		SetFileNameEditEventData *data = reinterpret_cast<SetFileNameEditEventData *> (event->getData());
 		fileNameEdit->setText(data->filename);
 		recordStatus->setText("Ready.");
 		data->done.wakeAll();
-		//printf("Done processing...\n");
 	}
 	else if (e->type() == QDisableGroupsEvent) 
 	{
+		printf("QDisableGroupsEvent\n");
 		startRecordButton->setEnabled(false);
+		stopRecordButton->setEnabled(true);
 		channelGroup->setEnabled(false);
 		sampleGroup->setEnabled(false);
 		recordStatus->setText("Recording...");
 	}
 	else if (e->type() == QEnableGroupsEvent)
 	{
+		printf("QEnableGroupsEvent\n");
 		startRecordButton->setEnabled(true);
+		stopRecordButton->setEnabled(false);
 		channelGroup->setEnabled(true);
 		sampleGroup->setEnabled(true);
 		recordStatus->setText("Ready.");
