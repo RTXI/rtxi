@@ -36,7 +36,6 @@
 #define QDisableGroupsEvent         (QEvent::User+2)
 #define QEnableGroupsEvent          (QEvent::User+3)
 
-#define DEBUG 0
 struct param_hdf_t
 {
 	long long index;
@@ -629,9 +628,6 @@ void DataRecorder::Panel::execute(void)
 // Event handler
 void DataRecorder::Panel::receiveEvent(const Event::Object *event)
 {
-#ifdef DEBUG
-	qDebug() << event;
-#endif
 	if (event->getName() == Event::IO_BLOCK_INSERT_EVENT)
 	{
 		IO::Block *block = reinterpret_cast<IO::Block *> (event->getParam("block"));
@@ -964,10 +960,6 @@ void DataRecorder::Panel::updateDownsampleRate(int r)
 // Custom event handler
 void DataRecorder::Panel::customEvent(QEvent *e)
 {
-#ifdef DEBUG
-	qDebug() << e;
-#endif
-
 	if (e->type() == QFileExistsEvent)
 	{
 		mutex.lock();
