@@ -72,7 +72,7 @@ namespace DataRecorder
 			CustomEvent(QEvent::Type);
 			virtual ~CustomEvent(void) {};
 			void setData(void *data);
-			void * getData(void);
+			void *getData(void);
 
 		private:
 			void *data;
@@ -182,6 +182,7 @@ namespace DataRecorder
 
 			QPushButton *startRecordButton;
 			QPushButton *stopRecordButton;
+			QPushButton *closeButton;
 
 			RT::List<Channel> channels;
 			std::vector<IO::Block *> blockPtrList;

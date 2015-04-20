@@ -36,6 +36,7 @@
 #define QDisableGroupsEvent         (QEvent::User+2)
 #define QEnableGroupsEvent          (QEvent::User+3)
 
+#define DEBUG 0
 struct param_hdf_t
 {
 	long long index;
@@ -528,7 +529,7 @@ DataRecorder::Panel::Panel(QWidget *parent, size_t buffersize) :
 	QObject::connect(stopRecordButton,SIGNAL(released(void)),this,SLOT(stopRecordClicked(void)));
 	buttonLayout->addWidget(stopRecordButton);
 	stopRecordButton->setEnabled(false);
-	QPushButton *closeButton = new QPushButton("Close");
+	closeButton = new QPushButton("Close");
 	QObject::connect(closeButton,SIGNAL(released(void)),this,SLOT(goodbye(void)));
 	buttonLayout->addWidget(closeButton);
 	recordStatus = new QLabel;
@@ -564,6 +565,14 @@ DataRecorder::Panel::Panel(QWidget *parent, size_t buffersize) :
 	IO::Connector::getInstance()->foreachBlock(buildBlockPtrList, &blockPtrList);
 	for (std::vector<IO::Block *>::const_iterator i = blockPtrList.begin(), end = blockPtrList.end(); i != end; ++i)
 		blockList->addItem(QString::fromStdString((*i)->getName()) + " " + QString::number((*i)->getID()));
+
+	// Setup thread sleep 
+	sleep.tv_sec = 0;
+	sleep.tv_nsec = RT::System::getInstance()->getPeriod();
+
+	// Check if FIFO is truly atomic for hardware architecture
+	if(!fifo.isLockFree())
+		ERROR_MSG("DataRecorder::Panel: WARNING: Atomic FIFO is not lock free\n");
 
 	// Build initial channel list
 	buildChannelList();
@@ -620,7 +629,9 @@ void DataRecorder::Panel::execute(void)
 // Event handler
 void DataRecorder::Panel::receiveEvent(const Event::Object *event)
 {
-	//qDebug() << event;
+#ifdef DEBUG
+	qDebug() << event;
+#endif
 	if (event->getName() == Event::IO_BLOCK_INSERT_EVENT)
 	{
 		IO::Block *block = reinterpret_cast<IO::Block *> (event->getParam("block"));
@@ -953,10 +964,13 @@ void DataRecorder::Panel::updateDownsampleRate(int r)
 // Custom event handler
 void DataRecorder::Panel::customEvent(QEvent *e)
 {
+#ifdef DEBUG
 	qDebug() << e;
+#endif
+
 	if (e->type() == QFileExistsEvent)
 	{
-		printf("QFileExistsEvent\n");
+		mutex.lock();
 		CustomEvent * event = static_cast<CustomEvent *>(e);
 		FileExistsEventData *data = reinterpret_cast<FileExistsEventData *> (event->getData());
 		data->response = QMessageBox::question(this, "File exists",
@@ -964,30 +978,32 @@ void DataRecorder::Panel::customEvent(QEvent *e)
 				"Append", "Overwrite", "Cancel", 0, 2);
 		recordStatus->setText("Not Recording");
 		data->done.wakeAll();
+		mutex.unlock();
 	}
 	else if (e->type() == QSetFileNameEditEvent)
 	{
-		printf("QSetFileNameEditEvent\n");
+		mutex.lock();
 		CustomEvent * event = static_cast<CustomEvent *>(e);
 		SetFileNameEditEventData *data = reinterpret_cast<SetFileNameEditEventData *> (event->getData());
 		fileNameEdit->setText(data->filename);
-		data->done.wakeAll();
 		recordStatus->setText("Ready.");
+		data->done.wakeAll();
+		mutex.unlock();
 	}
 	else if (e->type() == QDisableGroupsEvent) 
 	{
-		printf("QDisableGroupsEvent\n");
 		startRecordButton->setEnabled(false);
 		stopRecordButton->setEnabled(true);
+		closeButton->setEnabled(false);
 		channelGroup->setEnabled(false);
 		sampleGroup->setEnabled(false);
 		recordStatus->setText("Recording...");
 	}
 	else if (e->type() == QEnableGroupsEvent)
 	{
-		printf("QEnableGroupsEvent\n");
 		startRecordButton->setEnabled(true);
 		stopRecordButton->setEnabled(false);
+		closeButton->setEnabled(true);
 		channelGroup->setEnabled(true);
 		sampleGroup->setEnabled(true);
 		recordStatus->setText("Ready.");
@@ -1063,7 +1079,9 @@ void *DataRecorder::Panel::bounce(void *param)
 {
 	Panel *that = reinterpret_cast<Panel *> (param);
 	if (that)
+	{
 		that->processData();
+	}
 	return 0;
 }
 
@@ -1076,7 +1094,8 @@ void DataRecorder::Panel::processData(void)
 	tokenRetrieved = false;
 	for (;;) {
 		if(!tokenRetrieved) {
-			if(fifo.read(&_token, sizeof(_token))) // Returns true if data was available and retrieved
+			// Returns true if data was available and retrieved
+			if(fifo.read(&_token, sizeof(_token))) 
 				tokenRetrieved = true;
 			else
 			{ 
@@ -1211,7 +1230,6 @@ int DataRecorder::Panel::openFile(QString &filename)
 #endif
 
 	if (QFile::exists(filename)) {
-		mutex.lock();
 		CustomEvent *event = new CustomEvent(static_cast<QEvent::Type>QFileExistsEvent);
 		FileExistsEventData data;
 
@@ -1220,7 +1238,6 @@ int DataRecorder::Panel::openFile(QString &filename)
 
 		QApplication::postEvent(this, event);
 		data.done.wait(&mutex);
-		mutex.unlock();
 		if (data.response == 0) { // append
 			file.id = H5Fopen(filename.toLatin1().constData(), H5F_ACC_RDWR, H5P_DEFAULT);
 			size_t trial_num;
@@ -1261,7 +1278,6 @@ int DataRecorder::Panel::openFile(QString &filename)
 		return -1;
 	}
 
-	mutex.lock();
 	CustomEvent *event = new CustomEvent(static_cast<QEvent::Type>QSetFileNameEditEvent);
 	SetFileNameEditEventData data;
 	data.filename = filename;
@@ -1269,7 +1285,7 @@ int DataRecorder::Panel::openFile(QString &filename)
 
 	QApplication::postEvent(this, event);
 	data.done.wait(&mutex);
-	mutex.unlock();
+
 	return 0;
 }
 
@@ -1285,16 +1301,13 @@ void DataRecorder::Panel::closeFile(bool shutdown)
 
 	H5Fclose(file.id);
 	if (!shutdown) {
-		mutex.lock();
-
 		CustomEvent *event = new CustomEvent(static_cast<QEvent::Type>QSetFileNameEditEvent);
 		SetFileNameEditEventData data;
-		event->setData(static_cast<void*>(&data));
 		data.filename = "";
+		event->setData(static_cast<void*>(&data));
 
 		QApplication::postEvent(this, event);
 		data.done.wait(&mutex);
-		mutex.unlock();
 	}
 }
 
@@ -1436,13 +1449,13 @@ int DataRecorder::Panel::startRecording(long long timestamp)
 
 void DataRecorder::Panel::stopRecording(long long timestamp, bool shutdown)
 {
-
 #ifdef DEBUG
 	if(!pthread_equal(pthread_self(),thread)) {
 		ERROR_MSG("DataRecorder::Panel::stopRecording : called by invalid thread\n");
 		PRINT_BACKTRACE();
 	}
 #endif
+
 	fixedcount = count;
 	hid_t scalar_space = H5Screate(H5S_SCALAR);
 	hid_t data = H5Dcreate(file.trial, "Timestamp Stop (ns)", H5T_STD_U64LE,
