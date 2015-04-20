@@ -906,7 +906,8 @@ void DataRecorder::Panel::removeChannel(void)
 		if (i->name == selectionBox->selectedItems().first()->text()) {
 			RemoveChannelEvent RTevent(recording, channels, *i);
 			if (!RT::System::getInstance()->postEvent(&RTevent))
-				selectionBox->takeItem(selectionBox->row(selectionBox->selectedItems().first()));
+				for(size_t list_idx = 0; list_idx < selectionBox->selectedItems().size(); list_idx++)
+					selectionBox->takeItem(selectionBox->row(selectionBox->selectedItems().at(list_idx)));
 			break;
 		}
 
