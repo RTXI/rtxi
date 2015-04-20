@@ -136,6 +136,8 @@ namespace DataRecorder
 			long long count;
 			long long fixedcount;
 
+			QMutex mutex;
+
 			pthread_t thread;
 			AtomicFifo fifo;
 			data_token_t _token;

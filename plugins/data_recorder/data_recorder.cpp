@@ -234,7 +234,6 @@ int OpenFileEvent::callback(void)
 {
 	DataRecorder::data_token_t token;
 	token.type = DataRecorder::OPEN;
-	//printf("Token set to OPEN in callback\n");
 	token.size = filename.length() + 1;
 	token.time = RT::OS::getTime();
 	fifo.write(&token, sizeof(token));
@@ -680,7 +679,6 @@ void DataRecorder::Panel::receiveEventRT(const Event::Object *event)
 		QString filename = QString(reinterpret_cast<char*> (event->getParam("filename")));
 		data_token_t token;
 		token.type = DataRecorder::OPEN;
-		//printf("Token set to OPEN in RT\n");
 		token.size = filename.length() + 1;
 		token.time = RT::OS::getTime();
 		fifo.write(&token, sizeof(token));
@@ -926,6 +924,10 @@ void DataRecorder::Panel::startRecordClicked(void)
 				QMessageBox::Ok, QMessageBox::NoButton);
 		return;
 	}
+
+	QEvent *event = new QEvent(static_cast<QEvent::Type>QDisableGroupsEvent);
+	QApplication::postEvent(this, event);
+
 	count = 0;
 	StartRecordingEvent RTevent(recording, fifo);
 	RT::System::getInstance()->postEvent(&RTevent);
@@ -934,6 +936,9 @@ void DataRecorder::Panel::startRecordClicked(void)
 // Stop recording slot
 void DataRecorder::Panel::stopRecordClicked(void)
 {
+	QEvent *event = new QEvent(static_cast<QEvent::Type>QEnableGroupsEvent);
+	QApplication::postEvent(this, event);
+
 	fixedcount = count;
 	StopRecordingEvent RTevent(recording, fifo);
 	RT::System::getInstance()->postEvent(&RTevent);
@@ -957,8 +962,8 @@ void DataRecorder::Panel::customEvent(QEvent *e)
 		data->response = QMessageBox::question(this, "File exists",
 				"The file already exists. What would you like to do?",
 				"Append", "Overwrite", "Cancel", 0, 2);
-		data->done.wakeAll();
 		recordStatus->setText("Not Recording");
+		data->done.wakeAll();
 	}
 	else if (e->type() == QSetFileNameEditEvent)
 	{
@@ -966,8 +971,8 @@ void DataRecorder::Panel::customEvent(QEvent *e)
 		CustomEvent * event = static_cast<CustomEvent *>(e);
 		SetFileNameEditEventData *data = reinterpret_cast<SetFileNameEditEventData *> (event->getData());
 		fileNameEdit->setText(data->filename);
-		recordStatus->setText("Ready.");
 		data->done.wakeAll();
+		recordStatus->setText("Ready.");
 	}
 	else if (e->type() == QDisableGroupsEvent) 
 	{
@@ -1117,7 +1122,6 @@ void DataRecorder::Panel::processData(void)
 		}
 		else if (_token.type == OPEN)
 		{
-			//printf("Token is OPEN\n");
 			if (state == RECORD)
 				stopRecording(_token.time);
 			if (state != CLOSED)
@@ -1130,7 +1134,6 @@ void DataRecorder::Panel::processData(void)
 				state = CLOSED;
 			else
 				state = OPENED;
-			//printf("STATE is %d %d\n", _token.type, state);
 		}
 		else if (_token.type == CLOSE)
 		{
@@ -1144,7 +1147,6 @@ void DataRecorder::Panel::processData(void)
 		{
 			if (state == OPENED)
 			{
-				//printf("Calling startRecording...\n");
 				startRecording(_token.time);
 				state = RECORD;
 			}
@@ -1200,9 +1202,6 @@ void DataRecorder::Panel::processData(void)
 
 int DataRecorder::Panel::openFile(QString &filename)
 {
-	//printf("openFile called...\n");
-	QMutex mutex;
-
 #ifdef DEBUG
 	if(!pthread_equal(pthread_self(),thread))
 	{
@@ -1221,6 +1220,7 @@ int DataRecorder::Panel::openFile(QString &filename)
 
 		QApplication::postEvent(this, event);
 		data.done.wait(&mutex);
+		mutex.unlock();
 		if (data.response == 0) { // append
 			file.id = H5Fopen(filename.toLatin1().constData(), H5F_ACC_RDWR, H5P_DEFAULT);
 			size_t trial_num;
@@ -1261,22 +1261,15 @@ int DataRecorder::Panel::openFile(QString &filename)
 		return -1;
 	}
 
-	/*fileNameEdit->setText(filename);
-	recordStatus->setText("Ready.");*/
-
-	printf("Calling SetFileNameEditEvent...\n");
+	mutex.lock();
 	CustomEvent *event = new CustomEvent(static_cast<QEvent::Type>QSetFileNameEditEvent);
 	SetFileNameEditEventData data;
 	data.filename = filename;
 	event->setData(static_cast<void*>(&data));
 
-	printf("1. Posting event...\n");
 	QApplication::postEvent(this, event);
-	printf("2. Done posting...\n");
 	data.done.wait(&mutex);
-	printf("3. Waiting...\n");
 	mutex.unlock();
-	printf("4. returning 0...\n");
 	return 0;
 }
 
@@ -1292,7 +1285,6 @@ void DataRecorder::Panel::closeFile(bool shutdown)
 
 	H5Fclose(file.id);
 	if (!shutdown) {
-		QMutex mutex;
 		mutex.lock();
 
 		CustomEvent *event = new CustomEvent(static_cast<QEvent::Type>QSetFileNameEditEvent);
@@ -1308,7 +1300,6 @@ void DataRecorder::Panel::closeFile(bool shutdown)
 
 int DataRecorder::Panel::startRecording(long long timestamp)
 {
-	//printf("startRecording called...\n");
 #ifdef DEBUG
 	if(!pthread_equal(pthread_self(),thread)) {
 		ERROR_MSG("DataRecorder::Panel::startRecording : called by invalid thread\n");
@@ -1440,9 +1431,6 @@ int DataRecorder::Panel::startRecording(long long timestamp)
 
 	file.idx = 0;
 
-	QEvent *event = new QEvent(static_cast<QEvent::Type>QDisableGroupsEvent);
-	QApplication::postEvent(this, event);
-
 	return 0;
 }
 
@@ -1484,10 +1472,10 @@ void DataRecorder::Panel::stopRecording(long long timestamp, bool shutdown)
 		sync();
 	}
 
-	if (!shutdown) {
+	/*if (!shutdown) {
 		QEvent *event = new QEvent(static_cast<QEvent::Type>QEnableGroupsEvent);
 		QApplication::postEvent(this, event);
-	}
+	}*/
 }
 
 extern "C" Plugin::Object *createRTXIPlugin(void *)
