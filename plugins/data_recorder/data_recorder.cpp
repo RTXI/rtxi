@@ -1479,11 +1479,6 @@ void DataRecorder::Panel::stopRecording(long long timestamp, bool shutdown)
 		DEBUG_MSG("DataRecorder::Panel::stopRecording : fsync failed, running sync\n");
 		sync();
 	}
-
-	/*if (!shutdown) {
-		QEvent *event = new QEvent(static_cast<QEvent::Type>QEnableGroupsEvent);
-		QApplication::postEvent(this, event);
-	}*/
 }
 
 extern "C" Plugin::Object *createRTXIPlugin(void *)
