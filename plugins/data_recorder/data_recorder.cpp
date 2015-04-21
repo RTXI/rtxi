@@ -511,7 +511,6 @@ DataRecorder::Panel::Panel(QWidget *parent, size_t buffersize) :
 	// Create elements for box
 	selectionBox = new QListWidget;
 	listLayout->addWidget(selectionBox);
-	selectionBox->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
 	// Attach layout to child
 	listGroup->setLayout(listLayout);
@@ -879,9 +878,12 @@ void DataRecorder::Panel::insertChannel(void)
 			channel->block->getID(), channel->block->getName(channel->type,
 				channel->index).c_str());
 
-	InsertChannelEvent RTevent(recording, channels, channels.end(), *channel);
-	if (!RT::System::getInstance()->postEvent(&RTevent))
-		selectionBox->addItem(channel->name);
+	if(selectionBox->findItems(QString(channel->name), Qt::MatchExactly).isEmpty())
+	{
+		InsertChannelEvent RTevent(recording, channels, channels.end(), *channel);
+		if (!RT::System::getInstance()->postEvent(&RTevent))
+			selectionBox->addItem(channel->name);
+	}
 
 	if(selectionBox->count())
 	{
@@ -901,13 +903,12 @@ void DataRecorder::Panel::removeChannel(void)
 	if(!selectionBox->count() || selectionBox->selectedItems().isEmpty())
 		return;
 
-	for (RT::List<Channel>::iterator i = channels.begin(), end = channels.end(); i
-			!= end; ++i)
-		if (i->name == selectionBox->selectedItems().first()->text()) {
+	for (RT::List<Channel>::iterator i = channels.begin(), end = channels.end(); i != end; ++i)
+		if (i->name == selectionBox->selectedItems().first()->text())
+		{
 			RemoveChannelEvent RTevent(recording, channels, *i);
 			if (!RT::System::getInstance()->postEvent(&RTevent))
-				for(size_t list_idx = 0; list_idx < selectionBox->selectedItems().size(); list_idx++)
-					selectionBox->takeItem(selectionBox->row(selectionBox->selectedItems().at(list_idx)));
+				selectionBox->takeItem(selectionBox->row(selectionBox->selectedItems().first()));
 			break;
 		}
 
