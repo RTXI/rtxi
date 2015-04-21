@@ -1095,7 +1095,7 @@ void DataRecorder::Panel::processData(void)
 			else
 			{ 
 				// Sleep loop then restart if no token was retrieved
-				nanosleep(&sleep, NULL); // Sleep thread for half the thread period;
+				nanosleep(&sleep, NULL);
 				continue;
 			}
 		}
