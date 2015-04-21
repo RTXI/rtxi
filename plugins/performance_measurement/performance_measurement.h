@@ -40,7 +40,7 @@ namespace PerformanceMeasurement {
 			friend class Panel;
 
 		public:
-		static Plugin * getInstance(void);
+		static Plugin *getInstance(void);
 
 		public slots:
 			void createPerformanceMeasurementPanel(void);
@@ -49,8 +49,9 @@ namespace PerformanceMeasurement {
 		~Plugin(void);
 		Plugin(const Plugin &){};
 		Plugin & operator=(const Plugin &)
-		{return *getInstance();};
-
+		{
+			return *getInstance();
+		};
 		static Plugin *instance;
 		int menuID;
 		Panel *panel;

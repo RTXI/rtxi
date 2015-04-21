@@ -87,7 +87,10 @@ namespace Connector {
 		Plugin(void);
 		~Plugin(void);
 		Plugin(const Plugin &) {};
-		Plugin &operator=(const Plugin &) { return *getInstance(); };
+		Plugin &operator=(const Plugin &)
+		{
+			return *getInstance();
+		};
 		static Plugin *instance;
 		int menuID;
 		Panel *panel;

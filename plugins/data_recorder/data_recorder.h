@@ -94,7 +94,6 @@ namespace DataRecorder
 
 	class Panel : public QWidget, virtual public Settings::Object, public Event::Handler, public Event::RTHandler, public RT::Thread
 	{
-
 		Q_OBJECT
 
 		public:
@@ -186,12 +185,10 @@ namespace DataRecorder
 
 			RT::List<Channel> channels;
 			std::vector<IO::Block *> blockPtrList;
-
 	}; // class Panel
 
 	class Plugin : public QObject, public ::Plugin::Object
 	{
-
 		Q_OBJECT
 
 			friend class Panel;
@@ -212,10 +209,10 @@ namespace DataRecorder
 		Plugin(void);
 		~Plugin(void);
 		Plugin(const Plugin &) {};
-		Plugin &operator=(const Plugin &) {
+		Plugin &operator=(const Plugin &)
+		{
 			return *getInstance();
 		};
-
 		static Plugin *instance;
 
 		void removeDataRecorderPanel(Panel *);
@@ -223,10 +220,7 @@ namespace DataRecorder
 		int menuID;
 		std::list<Panel *> panelList;
 		size_t buffersize;
-
-
 	}; // class Plugin
-
 }; // namespace DataRecorder
 
 #endif /* DATA_RECORDER_H */
