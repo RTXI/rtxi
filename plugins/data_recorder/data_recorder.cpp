@@ -889,11 +889,13 @@ void DataRecorder::Panel::insertChannel(void)
 	{
 		startRecordButton->setEnabled(true);
 		lButton->setEnabled(true);
+		Plugin::getInstance()->recStatus = true;
 	}
 	else
 	{
 		startRecordButton->setEnabled(false);
 		lButton->setEnabled(false);
+		Plugin::getInstance()->recStatus = false;
 	}
 }
 
@@ -916,11 +918,13 @@ void DataRecorder::Panel::removeChannel(void)
 	{
 		startRecordButton->setEnabled(true);
 		lButton->setEnabled(true);
+		Plugin::getInstance()->recStatus = true;
 	}
 	else
 	{
 		startRecordButton->setEnabled(false);
 		lButton->setEnabled(false);
+		Plugin::getInstance()->recStatus = false;
 	}
 }
 
@@ -1493,6 +1497,7 @@ DataRecorder::Plugin::Plugin(void)
 	userprefs.setPath(QSettings::NativeFormat, QSettings::SystemScope, "/usr/local/share/rtxi/");
 	buffersize = (userprefs.value("/system/HDFbuffer", 10).toInt())*1048576;
 	MainWindow::getInstance()->createSystemMenuItem("Data Recorder",this,SLOT(createDataRecorderPanel(void)));
+	recStatus = false;
 }
 
 DataRecorder::Plugin::~Plugin(void)

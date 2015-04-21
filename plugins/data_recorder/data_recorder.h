@@ -195,6 +195,7 @@ namespace DataRecorder
 
 		public:
 		static Plugin *getInstance(void);
+		bool recStatus;
 
 		public slots:
 			Panel *createDataRecorderPanel(void);
