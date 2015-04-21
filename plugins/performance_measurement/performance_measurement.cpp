@@ -59,7 +59,6 @@ PerformanceMeasurement::Panel::Panel(QWidget *parent) : QWidget(parent),
 		QString suffix = QString("s)").prepend(QChar(0x3BC));
 
 		// Create child widget and gridLayout
-//		gridBox = new QGroupBox;
 		QGridLayout *gridLayout = new QGridLayout;
 
 		durationEdit = new QLineEdit(subWindow);
@@ -91,10 +90,7 @@ PerformanceMeasurement::Panel::Panel(QWidget *parent) : QWidget(parent),
 		gridLayout->addWidget(resetButton, 6, 1);
 		QObject::connect(resetButton,SIGNAL(released(void)),this,SLOT(reset(void)));
 
-//		gridBox->setLayout(gridLayout);
-
 		// Attach child widget to parent widget
-//		layout->addWidget(gridBox);
 		layout->addLayout(gridLayout);
 
 		// Attach gridLayout to Widget
