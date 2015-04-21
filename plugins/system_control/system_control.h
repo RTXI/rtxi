@@ -52,7 +52,6 @@ class SystemControl : public QObject, public Plugin::Object
 
 	int menuID;
 	std::list<SystemControlPanel *> panelList;
-
 };
 
 #endif /* SYSTEM_CONTROL_H */

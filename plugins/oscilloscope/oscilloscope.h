@@ -65,7 +65,10 @@ namespace Oscilloscope {
 			Plugin(void);
 			~Plugin(void);
 			Plugin(const Plugin &) {};
-			Plugin &operator=(const Plugin &) { return *getInstance(); };
+			Plugin &operator=(const Plugin &)
+			{
+				return *getInstance();
+			};
 			static Plugin *instance;
 			void removeOscilloscopePanel(Panel *);
 			int menuID;
