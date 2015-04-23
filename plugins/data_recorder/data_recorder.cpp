@@ -939,7 +939,6 @@ void DataRecorder::Panel::startRecordClicked(void)
 		return;
 	}
 
-	count = 0;
 	StartRecordingEvent RTevent(recording, fifo);
 	RT::System::getInstance()->postEvent(&RTevent);
 }
@@ -947,7 +946,6 @@ void DataRecorder::Panel::startRecordClicked(void)
 // Stop recording slot
 void DataRecorder::Panel::stopRecordClicked(void)
 {
-	fixedcount = count;
 	StopRecordingEvent RTevent(recording, fifo);
 	RT::System::getInstance()->postEvent(&RTevent);
 }
@@ -1166,6 +1164,7 @@ void DataRecorder::Panel::processData(void)
 			{
 				startRecording(_token.time);
 				state = RECORD;
+				count = 0;
 				QEvent *event = new QEvent(static_cast<QEvent::Type>QDisableGroupsEvent);
 				QApplication::postEvent(this, event);
 			}
@@ -1176,6 +1175,7 @@ void DataRecorder::Panel::processData(void)
 			{
 				stopRecording(_token.time);
 				state = OPENED;
+				fixedcount = count;
 				QEvent *event = new QEvent(static_cast<QEvent::Type>QEnableGroupsEvent);
 				QApplication::postEvent(this, event);
 			}
