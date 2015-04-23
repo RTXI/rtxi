@@ -1379,7 +1379,7 @@ int DataRecorder::Panel::startRecording(long long timestamp)
 	//QByteArray nowDateTime = QDateTime::currentDateTime().toString(Qt::ISODate).toLatin1();
 	//const char *dateTimeData = nowDateTime.data();
 	H5Dwrite(data, string_type, H5S_ALL, H5S_ALL, H5P_DEFAULT,
-			QDateTime::currentDateTime().toString(Qt::ISODate).toStdString().c_str());
+			qPrintable(QDateTime::currentDateTime().toString(Qt::ISODate)));
 	H5Dclose(data);
 
 	hid_t param_type;
@@ -1414,13 +1414,8 @@ int DataRecorder::Panel::startRecording(long long timestamp)
 			data = H5Dcreate(file.pdata, comment_name.toLatin1().constData(), H5T_C_S1,
 					comment_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 			H5Dwrite(
-					data,
-					H5T_C_S1,
-					H5S_ALL,
-					H5S_ALL,
-					H5P_DEFAULT,
-					dynamic_cast<Workspace::Instance *> (block)->getValueString(
-						Workspace::COMMENT, j).c_str());
+					data, H5T_C_S1, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+					dynamic_cast<Workspace::Instance *> (block)->getValueString(Workspace::COMMENT, j).c_str());
 			H5Dclose(data);
 		}
 	}
@@ -1437,7 +1432,7 @@ int DataRecorder::Panel::startRecording(long long timestamp)
 
 		//QByteArray latinName = i->name.toLatin1();
 		//const char *nameData = latinName.data();
-		H5Dwrite(data, string_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, i->name.toStdString().c_str());
+		H5Dwrite(data, string_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, qPrintable(i->name));
 
 		H5Dclose(data);
 	}
