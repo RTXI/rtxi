@@ -885,11 +885,14 @@ void DataRecorder::Panel::insertChannel(void)
 			selectionBox->addItem(channel->name);
 	}
 
-	if(selectionBox->count() && !fileNameEdit->text().isEmpty())
+	if(selectionBox->count())
 	{
-		startRecordButton->setEnabled(true);
 		lButton->setEnabled(true);
-		Plugin::getInstance()->recStatus = true;
+		if(!fileNameEdit->text().isEmpty())
+		{
+			startRecordButton->setEnabled(true);
+			Plugin::getInstance()->recStatus = true;
+		}
 	}
 	else
 	{
@@ -1374,8 +1377,8 @@ int DataRecorder::Panel::startRecording(long long timestamp)
 	data = H5Dcreate(file.trial, "Date", string_type, scalar_space,
 			H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 	QByteArray nowDateTime = QDateTime::currentDateTime().toString(Qt::ISODate).toLatin1();
-	const char *dateTimeData = nowDateTime.constData();
-	H5Dwrite(data, string_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, &dateTimeData);
+	const char *dateTimeData = nowDateTime.data();
+	H5Dwrite(data, string_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, dateTimeData);
 	H5Dclose(data);
 
 	hid_t param_type;
@@ -1432,8 +1435,8 @@ int DataRecorder::Panel::startRecording(long long timestamp)
 				scalar_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
 		QByteArray latinName = i->name.toLatin1();
-		const char *nameData = latinName.constData();
-		H5Dwrite(data, string_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, &nameData);
+		const char *nameData = latinName.data();
+		H5Dwrite(data, string_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, nameData);
 
 		H5Dclose(data);
 	}
