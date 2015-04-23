@@ -1322,11 +1322,13 @@ int DataRecorder::Panel::startRecording(long long timestamp)
 	}
 #endif
 
+	printf("hit1\n");
 	size_t trial_num;
 	QString trial_name;
 
 	H5Eset_auto(H5E_DEFAULT, NULL, NULL);
 
+	printf("hit2\n");
 	for (trial_num = 1;; ++trial_num) {
 		trial_name = "/Trial" + QString::number(trial_num);
 		file.trial = H5Gopen(file.id, trial_name.toLatin1().constData(), H5P_DEFAULT);
@@ -1338,6 +1340,7 @@ int DataRecorder::Panel::startRecording(long long timestamp)
 			H5Gclose(file.trial);
 	}
 
+	printf("hit3\n");
 	trialNum->setNum(int(trial_num));
 	file.trial = H5Gcreate(file.id, trial_name.toLatin1().constData(), H5P_DEFAULT,
 			H5P_DEFAULT, H5P_DEFAULT);
@@ -1354,34 +1357,41 @@ int DataRecorder::Panel::startRecording(long long timestamp)
 	H5Tset_size(string_type, string_size);
 	hid_t data;
 
+	printf("hit4\n");
 	long long period = RT::System::getInstance()->getPeriod();
 	data = H5Dcreate(file.trial, "Period (ns)", H5T_STD_U64LE, scalar_space,
 			H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 	H5Dwrite(data, H5T_STD_U64LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &period);
 	H5Dclose(data);
 
+	printf("hit5\n");
 	long long downsample = downsample_rate;
 	data = H5Dcreate(file.trial, "Downsampling Rate", H5T_STD_U64LE,
 			scalar_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 	H5Dwrite(data, H5T_STD_U64LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &downsample);
 	H5Dclose(data);
 
+	printf("hit6\n");
 	data = H5Dcreate(file.trial, "Timestamp Start (ns)", H5T_STD_U64LE,
 			scalar_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 	H5Dwrite(data, H5T_STD_U64LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &timestamp);
 	H5Dclose(data);
 
+	printf("hit7\n");
 	data = H5Dcreate(file.trial, "Date", string_type, scalar_space,
 			H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-	H5Dwrite(data, string_type, H5S_ALL, H5S_ALL, H5P_DEFAULT,
-			QDateTime::currentDateTime().toString(Qt::ISODate).toLatin1().constData());
+	QByteArray nowDateTime = QDateTime::currentDateTime().toString(Qt::ISODate).toLatin1();
+	const char *dateTimeData = nowDateTime.constData();
+	H5Dwrite(data, string_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, &dateTimeData);
 	H5Dclose(data);
 
+	printf("hit8\n");
 	hid_t param_type;
 	param_type = H5Tcreate(H5T_COMPOUND, sizeof(param_hdf_t));
 	H5Tinsert(param_type, "index", HOFFSET(param_hdf_t,index), H5T_STD_I64LE);
 	H5Tinsert(param_type, "value", HOFFSET(param_hdf_t,value), H5T_IEEE_F64LE);
 
+	printf("hit9\n");
 	for (RT::List<Channel>::iterator i = channels.begin(), end = channels.end(); i
 			!= end; ++i) {
 		IO::Block *block = i->block;
@@ -1408,6 +1418,7 @@ int DataRecorder::Panel::startRecording(long long timestamp)
 			hid_t comment_space = H5Screate_simple(1, &dims, &dims);
 			data = H5Dcreate(file.pdata, comment_name.toLatin1().constData(), H5T_C_S1,
 					comment_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+	printf("hit10\n");
 			H5Dwrite(
 					data,
 					H5T_C_S1,
@@ -1421,6 +1432,7 @@ int DataRecorder::Panel::startRecording(long long timestamp)
 	}
 
 	H5Tclose(param_type);
+	printf("hit11\n");
 
 	size_t count = 0;
 	for (RT::List<Channel>::iterator i = channels.begin(), end = channels.end(); i
@@ -1434,6 +1446,7 @@ int DataRecorder::Panel::startRecording(long long timestamp)
 		H5Dclose(data);
 	}
 
+	printf("hit12\n");
 	H5Tclose(string_type);
 	H5Sclose(scalar_space);
 
@@ -1444,6 +1457,7 @@ int DataRecorder::Panel::startRecording(long long timestamp)
 		H5Tclose(array_type);
 	}
 
+	printf("hit13\n");
 	file.idx = 0;
 
 	return 0;
