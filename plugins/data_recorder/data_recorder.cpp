@@ -939,9 +939,6 @@ void DataRecorder::Panel::startRecordClicked(void)
 		return;
 	}
 
-	QEvent *event = new QEvent(static_cast<QEvent::Type>QDisableGroupsEvent);
-	QApplication::postEvent(this, event);
-
 	count = 0;
 	StartRecordingEvent RTevent(recording, fifo);
 	RT::System::getInstance()->postEvent(&RTevent);
@@ -950,9 +947,6 @@ void DataRecorder::Panel::startRecordClicked(void)
 // Stop recording slot
 void DataRecorder::Panel::stopRecordClicked(void)
 {
-	QEvent *event = new QEvent(static_cast<QEvent::Type>QEnableGroupsEvent);
-	QApplication::postEvent(this, event);
-
 	fixedcount = count;
 	StopRecordingEvent RTevent(recording, fifo);
 	RT::System::getInstance()->postEvent(&RTevent);
@@ -986,6 +980,11 @@ void DataRecorder::Panel::customEvent(QEvent *e)
 		SetFileNameEditEventData *data = reinterpret_cast<SetFileNameEditEventData *> (event->getData());
 		fileNameEdit->setText(data->filename);
 		recordStatus->setText("Ready.");
+		if(selectionBox->count())
+		{
+			startRecordButton->setEnabled(true);
+			Plugin::getInstance()->recStatus = true;
+		}
 		data->done.wakeAll();
 		mutex.unlock();
 	}
@@ -1167,6 +1166,8 @@ void DataRecorder::Panel::processData(void)
 			{
 				startRecording(_token.time);
 				state = RECORD;
+				QEvent *event = new QEvent(static_cast<QEvent::Type>QDisableGroupsEvent);
+				QApplication::postEvent(this, event);
 			}
 		}
 		else if (_token.type == STOP)
@@ -1175,6 +1176,8 @@ void DataRecorder::Panel::processData(void)
 			{
 				stopRecording(_token.time);
 				state = OPENED;
+				QEvent *event = new QEvent(static_cast<QEvent::Type>QEnableGroupsEvent);
+				QApplication::postEvent(this, event);
 			}
 		}
 		else if (_token.type == DONE)
