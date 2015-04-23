@@ -1435,14 +1435,22 @@ int DataRecorder::Panel::startRecording(long long timestamp)
 	printf("hit11\n");
 
 	size_t count = 0;
+	printf("size is %zu\n", channels.size());
 	for (RT::List<Channel>::iterator i = channels.begin(), end = channels.end(); i
 			!= end; ++i) {
+		printf("hit11-\n");
 		QString channel_name = "Channel " + QString::number(++count) + " Name";
+
+		printf("hit11a\n");
 		hid_t data = H5Dcreate(file.sdata, channel_name.toLatin1().constData(), string_type,
 				scalar_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+		printf("hit11b\n");
 		QByteArray latinName = i->name.toLatin1();
 		const char *nameData = latinName.constData();
-		H5Dwrite(data, string_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, nameData);
+		H5Dwrite(data, string_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, &nameData);
+
+		printf("hit11c\n");
 		H5Dclose(data);
 	}
 
