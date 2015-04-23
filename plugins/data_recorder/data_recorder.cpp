@@ -885,7 +885,7 @@ void DataRecorder::Panel::insertChannel(void)
 			selectionBox->addItem(channel->name);
 	}
 
-	if(selectionBox->count())
+	if(selectionBox->count() && !fileNameEdit->text().isEmpty())
 	{
 		startRecordButton->setEnabled(true);
 		lButton->setEnabled(true);
