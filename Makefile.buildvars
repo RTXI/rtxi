@@ -12,7 +12,7 @@ AM_LDFLAGS  = $(QT_LIBS) $(GSL_LIBS) $(RTOS_LDFLAGS)
 AM_CFLAGS = $(AM_CXXFLAGS)
 
 if DEBUG
-  AM_CXXFLAGS += -W -g
+  AM_CXXFLAGS += -W -g -O3 -std=c++11
   AM_CPPFLAGS += -DDEBUG
 else
   AM_CXXFLAGS += -O3 -std=c++11
