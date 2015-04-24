@@ -14,7 +14,7 @@
 	 You should have received a copy of the GNU General Public License
 	 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
- */
+*/
 
 #include <QtGui>
 #include <QFileDialog>
@@ -237,7 +237,7 @@ int OpenFileEvent::callback(void)
 	token.size = filename.length() + 1;
 	token.time = RT::OS::getTime();
 	fifo.write(&token, sizeof(token));
-	fifo.write(filename.toLatin1().constData(), token.size);
+	fifo.write(filename.toStdString().c_str(), token.size);
 	return 0;
 }
 
@@ -356,7 +356,7 @@ void DataRecorder::stopRecording(void)
 void DataRecorder::openFile(const QString& filename)
 {
 	Event::Object event(Event::OPEN_FILE_EVENT);
-	event.setParam("filename", const_cast<char *> (filename.toLatin1().constData()));
+	event.setParam("filename", const_cast<char *> (filename.toStdString().c_str()));
 	if (RT::OS::isRealtime())
 		Event::Manager::getInstance()->postEventRT(&event);
 	else
@@ -689,7 +689,7 @@ void DataRecorder::Panel::receiveEventRT(const Event::Object *event)
 		token.size = filename.length() + 1;
 		token.time = RT::OS::getTime();
 		fifo.write(&token, sizeof(token));
-		fifo.write(filename.toLatin1().constData(), token.size);
+		fifo.write(filename.toStdString().c_str(), token.size);
 	}
 	else if (event->getName() == Event::START_RECORDING_EVENT)
 	{
@@ -875,8 +875,7 @@ void DataRecorder::Panel::insertChannel(void)
 	channel->index = channelList->currentIndex();
 
 	channel->name.sprintf("%s %ld : %s", channel->block->getName().c_str(),
-			channel->block->getID(), channel->block->getName(channel->type,
-				channel->index).c_str());
+			channel->block->getID(), channel->block->getName(channel->type,	channel->index).c_str());
 
 	if(selectionBox->findItems(QString(channel->name), Qt::MatchExactly).isEmpty())
 	{
@@ -1128,7 +1127,7 @@ void DataRecorder::Panel::processData(void)
 					hid_t array_type = H5Tarray_create(H5T_IEEE_F64LE, 1,	array_size);
 
 					QString data_name = QString::number(static_cast<unsigned long long> (_token.time));
-					hid_t adata = H5Dcreate(file.adata, data_name.toLatin1().constData(),
+					hid_t adata = H5Dcreate(file.adata, data_name.toStdString().c_str(),
 							array_type, array_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 					H5Dwrite(adata, array_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
 
@@ -1214,7 +1213,7 @@ void DataRecorder::Panel::processData(void)
 					+ QString::fromStdString(block->getName()) + " : " + QString::fromStdString(block->getName(
 								Workspace::PARAMETER, data.index));
 
-				hid_t data = H5PTopen(file.pdata, parameter_name.toLatin1().constData());
+				hid_t data = H5PTopen(file.pdata, parameter_name.toStdString().c_str());
 				H5PTappend(data, 1, &param);
 				H5PTclose(data);
 				H5Tclose(param_type);
@@ -1244,13 +1243,13 @@ int DataRecorder::Panel::openFile(QString &filename)
 		QApplication::postEvent(this, event);
 		data.done.wait(&mutex);
 		if (data.response == 0) { // append
-			file.id = H5Fopen(filename.toLatin1().constData(), H5F_ACC_RDWR, H5P_DEFAULT);
+			file.id = H5Fopen(filename.toStdString().c_str(), H5F_ACC_RDWR, H5P_DEFAULT);
 			size_t trial_num;
 			QString trial_name;
 			H5Eset_auto(H5E_DEFAULT, NULL, NULL);
 			for (trial_num = 1;; ++trial_num) {
 				trial_name = "/Trial" + QString::number(trial_num);
-				file.trial = H5Gopen(file.id, trial_name.toLatin1().constData(), H5P_DEFAULT);
+				file.trial = H5Gopen(file.id, trial_name.toStdString().c_str(), H5P_DEFAULT);
 				if (file.trial < 0) {
 					H5Eclear(H5E_DEFAULT);
 					break;
@@ -1259,14 +1258,14 @@ int DataRecorder::Panel::openFile(QString &filename)
 			}
 			trialNum->setNum(int(trial_num)-1);
 		} else if (data.response == 1) { //overwrite
-			file.id = H5Fcreate(filename.toLatin1().constData(), H5F_ACC_TRUNC, H5P_DEFAULT,
+			file.id = H5Fcreate(filename.toStdString().c_str(), H5F_ACC_TRUNC, H5P_DEFAULT,
 					H5P_DEFAULT);
 			trialNum->setText("0");
 		} else {
 			return -1;
 		}
 	} else {
-		file.id = H5Fcreate(filename.toLatin1().constData(), H5F_ACC_TRUNC, H5P_DEFAULT,
+		file.id = H5Fcreate(filename.toStdString().c_str(), H5F_ACC_TRUNC, H5P_DEFAULT,
 				H5P_DEFAULT);
 		trialNum->setText("0");
 	}
@@ -1332,7 +1331,7 @@ int DataRecorder::Panel::startRecording(long long timestamp)
 
 	for (trial_num = 1;; ++trial_num) {
 		trial_name = "/Trial" + QString::number(trial_num);
-		file.trial = H5Gopen(file.id, trial_name.toLatin1().constData(), H5P_DEFAULT);
+		file.trial = H5Gopen(file.id, trial_name.toStdString().c_str(), H5P_DEFAULT);
 
 		if (file.trial < 0) {
 			H5Eclear(H5E_DEFAULT);
@@ -1342,7 +1341,7 @@ int DataRecorder::Panel::startRecording(long long timestamp)
 	}
 
 	trialNum->setNum(int(trial_num));
-	file.trial = H5Gcreate(file.id, trial_name.toLatin1().constData(), H5P_DEFAULT,
+	file.trial = H5Gcreate(file.id, trial_name.toStdString().c_str(), H5P_DEFAULT,
 			H5P_DEFAULT, H5P_DEFAULT);
 	file.pdata = H5Gcreate(file.trial, "Parameters", H5P_DEFAULT, H5P_DEFAULT,
 			H5P_DEFAULT);
@@ -1376,10 +1375,8 @@ int DataRecorder::Panel::startRecording(long long timestamp)
 
 	data = H5Dcreate(file.trial, "Date", string_type, scalar_space,
 			H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-	
-	printf("hit1\n");
-	H5Dwrite(data, string_type, H5S_ALL, H5S_ALL, H5P_DEFAULT,  QDateTime::currentDateTime().toString(Qt::ISODate).toLatin1().constData());
-	printf("hit2\n");
+
+	H5Dwrite(data, string_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, QDateTime::currentDateTime().toString(Qt::ISODate).toStdString().c_str());
 	H5Dclose(data);
 
 	hid_t param_type;
@@ -1387,34 +1384,27 @@ int DataRecorder::Panel::startRecording(long long timestamp)
 	H5Tinsert(param_type, "index", HOFFSET(param_hdf_t,index), H5T_STD_I64LE);
 	H5Tinsert(param_type, "value", HOFFSET(param_hdf_t,value), H5T_IEEE_F64LE);
 
-	for (RT::List<Channel>::iterator i = channels.begin(), end = channels.end(); i
-			!= end; ++i) {
+	for (RT::List<Channel>::iterator i = channels.begin(), end = channels.end(); i != end; ++i)
+	{
 		IO::Block *block = i->block;
-		for (size_t j = 0; j < block->getCount(Workspace::PARAMETER); ++j) {
+		for (size_t j = 0; j < block->getCount(Workspace::PARAMETER); ++j)
+		{
 			QString parameter_name = QString::number(block->getID()) + " "
-				+ QString::fromStdString(block->getName()) + " : " + QString::fromStdString(block->getName(
-							Workspace::PARAMETER, j));
-			data = H5PTcreate_fl(file.pdata, parameter_name.toLatin1().constData(),
-					param_type, sizeof(param_hdf_t), -1);
-			struct param_hdf_t value = { 0, block->getValue(
-					Workspace::PARAMETER, j),
-			};
+				+ QString::fromStdString(block->getName()) + " : " + QString::fromStdString(block->getName(Workspace::PARAMETER, j));
+			data = H5PTcreate_fl(file.pdata, parameter_name.toStdString().c_str(), param_type, sizeof(param_hdf_t), -1);
+			struct param_hdf_t value = { 0, block->getValue(Workspace::PARAMETER, j),};
 			H5PTappend(data, 1, &value);
 			H5PTclose(data);
 		}
-		for (size_t j = 0; j < block->getCount(Workspace::COMMENT); ++j) {
+		for (size_t j = 0; j < block->getCount(Workspace::COMMENT); ++j)
+		{
 			QString comment_name = QString::number(block->getID()) + " "
-				+ QString::fromStdString(block->getName()) + " : " + QString::fromStdString(block->getName(
-							Workspace::COMMENT, j));
-			hsize_t
-				dims =
-				dynamic_cast<Workspace::Instance *> (block)->getValueString(
-						Workspace::COMMENT, j).size() + 1;
+				+ QString::fromStdString(block->getName()) + " : " + QString::fromStdString(block->getName(Workspace::COMMENT, j));
+			hsize_t	dims = dynamic_cast<Workspace::Instance *> (block)->getValueString(Workspace::COMMENT, j).size() + 1;
 			hid_t comment_space = H5Screate_simple(1, &dims, &dims);
-			data = H5Dcreate(file.pdata, comment_name.toLatin1().constData(), H5T_C_S1,
+			data = H5Dcreate(file.pdata, comment_name.toStdString().c_str(), H5T_C_S1,
 					comment_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-			H5Dwrite(
-					data, H5T_C_S1, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+			H5Dwrite(data, H5T_C_S1, H5S_ALL, H5S_ALL, H5P_DEFAULT,
 					dynamic_cast<Workspace::Instance *> (block)->getValueString(Workspace::COMMENT, j).c_str());
 			H5Dclose(data);
 		}
@@ -1426,15 +1416,9 @@ int DataRecorder::Panel::startRecording(long long timestamp)
 	for (RT::List<Channel>::iterator i = channels.begin(), end = channels.end(); i != end; ++i)
 	{
 		QString channel_name = "Channel " + QString::number(++count) + " Name";
-
-		printf("hit3\n");
-		hid_t data = H5Dcreate(file.sdata, channel_name.toLatin1().constData(), string_type, 
+		hid_t data = H5Dcreate(file.sdata, channel_name.toStdString().c_str(), string_type, 
 				scalar_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-
-		printf("hit4\n");
-		H5Dwrite(data, string_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, i->name.toLatin1().constData());
-		printf("hit5\n");
-
+		H5Dwrite(data, string_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, i->name.toStdString().c_str());
 		H5Dclose(data);
 	}
 
