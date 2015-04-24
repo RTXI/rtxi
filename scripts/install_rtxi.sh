@@ -36,7 +36,7 @@ echo "----->Starting RTXI installation..."
 echo "----->Kernel configuration..."
 echo "1. Xenomai+Analogy (RT)"
 echo "2. POSIX (Non-RT)"
-echo "3. POSIX Debug"
+echo "3. POSIX (Non-RT) Debug"
 echo "----->Please select your configuration and then press enter:"
 read kernel
 
