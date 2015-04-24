@@ -14,7 +14,7 @@
 	 You should have received a copy of the GNU General Public License
 	 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-*/
+ */
 
 #include <QtGui>
 #include <QFileDialog>
@@ -1376,10 +1376,11 @@ int DataRecorder::Panel::startRecording(long long timestamp)
 
 	data = H5Dcreate(file.trial, "Date", string_type, scalar_space,
 			H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-	//QByteArray nowDateTime = QDateTime::currentDateTime().toString(Qt::ISODate).toLatin1();
-	//const char *dateTimeData = nowDateTime.data();
-	H5Dwrite(data, string_type, H5S_ALL, H5S_ALL, H5P_DEFAULT,
-			qPrintable(QDateTime::currentDateTime().toString(Qt::ISODate)));
+	QByteArray nowDateTime = QDateTime::currentDateTime().toString(Qt::ISODate).toLatin1();
+	const char *dateTimeData = nowDateTime.data();
+	printf("hit1\n");
+	H5Dwrite(data, string_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, dateTimeData);
+	printf("hit2\n");
 	H5Dclose(data);
 
 	hid_t param_type;
@@ -1427,12 +1428,18 @@ int DataRecorder::Panel::startRecording(long long timestamp)
 			!= end; ++i) {
 		QString channel_name = "Channel " + QString::number(++count) + " Name";
 
-		hid_t data = H5Dcreate(file.sdata, channel_name.toLatin1().constData(), string_type,
+		printf("hit3\n");
+		QByteArray channelNameLatin = channel_name.toLatin1();
+		const char *channelNameData = channelNameLatin.data();
+		hid_t data = H5Dcreate(file.sdata, channelNameData, string_type,
 				scalar_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
-		//QByteArray latinName = i->name.toLatin1();
-		//const char *nameData = latinName.data();
-		H5Dwrite(data, string_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, qPrintable(i->name));
+		printf("hit4\n");
+		QByteArray latinName = i->name.toLatin1();
+		const char *nameData = latinName.data();
+		printf("%s\n",latinName.data());
+		H5Dwrite(data, string_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, nameData);
+		printf("hit5\n");
 
 		H5Dclose(data);
 	}
@@ -1475,7 +1482,6 @@ void DataRecorder::Panel::stopRecording(long long timestamp, bool shutdown)
 	H5Dwrite(data, H5T_STD_U64LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &datalength);
 	H5Dclose(data);
 	H5Sclose(scalar_space);
-
 	H5PTclose(file.cdata);
 	H5Gclose(file.sdata);
 	H5Gclose(file.pdata);
