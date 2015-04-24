@@ -1376,10 +1376,9 @@ int DataRecorder::Panel::startRecording(long long timestamp)
 
 	data = H5Dcreate(file.trial, "Date", string_type, scalar_space,
 			H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-	QByteArray nowDateTime = QDateTime::currentDateTime().toString(Qt::ISODate).toLatin1();
-	const char *dateTimeData = nowDateTime.data();
+	
 	printf("hit1\n");
-	H5Dwrite(data, string_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, dateTimeData);
+	H5Dwrite(data, string_type, H5S_ALL, H5S_ALL, H5P_DEFAULT,  QDateTime::currentDateTime().toString(Qt::ISODate).toLatin1().constData());
 	printf("hit2\n");
 	H5Dclose(data);
 
@@ -1424,21 +1423,16 @@ int DataRecorder::Panel::startRecording(long long timestamp)
 	H5Tclose(param_type);
 
 	size_t count = 0;
-	for (RT::List<Channel>::iterator i = channels.begin(), end = channels.end(); i
-			!= end; ++i) {
+	for (RT::List<Channel>::iterator i = channels.begin(), end = channels.end(); i != end; ++i)
+	{
 		QString channel_name = "Channel " + QString::number(++count) + " Name";
 
 		printf("hit3\n");
-		QByteArray channelNameLatin = channel_name.toLatin1();
-		const char *channelNameData = channelNameLatin.data();
-		hid_t data = H5Dcreate(file.sdata, channelNameData, string_type,
+		hid_t data = H5Dcreate(file.sdata, channel_name.toLatin1().constData(), string_type, 
 				scalar_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
 		printf("hit4\n");
-		QByteArray latinName = i->name.toLatin1();
-		const char *nameData = latinName.data();
-		printf("%s\n",latinName.data());
-		H5Dwrite(data, string_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, nameData);
+		H5Dwrite(data, string_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, i->name.toLatin1().constData());
 		printf("hit5\n");
 
 		H5Dclose(data);
