@@ -43,7 +43,7 @@ DynamoModelLoader::DynamoModelLoader(void) {
 	action = MainWindow::getInstance()->createModuleMenuItem("Load DYNAMO Model",this,SLOT(load_dialog(void)));
 
 	model_makefile_path = QString(MODEL_MAKEFILE_PATH);
-	DEBUG_MSG("model_makefile_path = %s\n", model_makefile_path.toAscii());
+	DEBUG_MSG("model_makefile_path = %s\n", model_makefile_path.toLatin1().constData());
 	DEBUG_MSG("DynamoModelLoader::DynamoModelLoader : finished\n");
 
 	MainWindow::getInstance()->insertModuleMenuSeparator();
@@ -115,7 +115,7 @@ void DynamoModelLoader::load(char* srcpath) {
 
 	QString module_name = QString("%1%2") .arg(model_name) .arg(MODEL_SUFFIX);
 
-	DEBUG_MSG("about to compile model with command %s\n", cmd.toAscii());
+	DEBUG_MSG("about to compile model with command %s\n", cmd.toLatin1().constData());
 	status = CmdLine::getInstance()->execute(cmd.toStdString());
 
 	if (status != 0) {

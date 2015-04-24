@@ -36,6 +36,7 @@ echo "----->Starting RTXI installation..."
 echo "----->Kernel configuration..."
 echo "1. Xenomai+Analogy (RT)"
 echo "2. POSIX (Non-RT)"
+echo "3. POSIX Debug"
 echo "----->Please select your configuration and then press enter:"
 read kernel
 
@@ -43,6 +44,8 @@ if [ $kernel -eq "1" ]; then
 	./configure --enable-xenomai --enable-analogy
 elif [ $kernel -eq "2" ]; then
 	./configure --enable-posix --disable-analogy --disable-comedi
+elif [ $kernel -eq "3" ]; then
+	./configure --enable-posix --disable-analogy --disable-comedi --enable-debug
 else
 	echo "Invalid configuration."
 	exit 1
