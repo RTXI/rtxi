@@ -40,7 +40,7 @@ echo "----->Please select your configuration and then press enter:"
 read kernel
 
 if [ $kernel -eq "1" ]; then
-	./configure --enable-xenomai --enable-analogy --enable-debug
+	./configure --enable-xenomai --enable-analogy
 elif [ $kernel -eq "2" ]; then
 	./configure --enable-posix --disable-analogy --disable-comedi
 else
