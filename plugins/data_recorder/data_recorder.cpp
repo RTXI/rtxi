@@ -14,7 +14,7 @@
 	 You should have received a copy of the GNU General Public License
 	 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-*/
+ */
 
 #include <QtGui>
 #include <QFileDialog>
@@ -1330,14 +1330,17 @@ int DataRecorder::Panel::startRecording(long long timestamp)
 
 	H5Eset_auto(H5E_DEFAULT, NULL, NULL);
 
-	for (trial_num = 1;; ++trial_num) {
+	for (trial_num = 1;; ++trial_num)
+	{
 		trial_name = "/Trial" + QString::number(trial_num);
 		file.trial = H5Gopen(file.id, trial_name.toLatin1().constData(), H5P_DEFAULT);
 
-		if (file.trial < 0) {
+		if (file.trial < 0)
+		{
 			H5Eclear(H5E_DEFAULT);
 			break;
-		} else
+		}
+		else
 			H5Gclose(file.trial);
 	}
 
@@ -1376,18 +1379,14 @@ int DataRecorder::Panel::startRecording(long long timestamp)
 
 	data = H5Dcreate(file.trial, "Date", string_type,
 			scalar_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-	printf("hit0\n");
 	H5Dwrite(data, string_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, QDateTime::currentDateTime().toString(Qt::ISODate).toStdString().c_str());
-	printf("hit1\n");
 	H5Dclose(data);
-	printf("hit2\n");
 
 	hid_t param_type;
 	param_type = H5Tcreate(H5T_COMPOUND, sizeof(param_hdf_t));
 	H5Tinsert(param_type, "index", HOFFSET(param_hdf_t,index), H5T_STD_I64LE);
 	H5Tinsert(param_type, "value", HOFFSET(param_hdf_t,value), H5T_IEEE_F64LE);
 
-	printf("hit3\n");
 	for (RT::List<Channel>::iterator i = channels.begin(), end = channels.end(); i != end; ++i)
 	{
 		IO::Block *block = i->block;
@@ -1412,22 +1411,16 @@ int DataRecorder::Panel::startRecording(long long timestamp)
 		}
 	}
 
-	printf("hit4\n");
 	H5Tclose(param_type);
 
 	size_t count = 0;
 	for (RT::List<Channel>::iterator i = channels.begin(), end = channels.end(); i != end; ++i)
 	{
-		printf("hit5\n");
 		QString channel_name = "Channel " + QString::number(++count) + " Name";
-		printf("hit6\n");
 		hid_t data = H5Dcreate(file.sdata, channel_name.toLatin1().constData(), string_type, 
 				scalar_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-		printf("hit7\n");
 		H5Dwrite(data, string_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, i->name.toStdString().c_str());
-		printf("hit8\n");
 		H5Dclose(data);
-		printf("hit9\n");
 	}
 
 	H5Tclose(string_type);
