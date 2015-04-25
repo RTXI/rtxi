@@ -21,6 +21,7 @@
 #include <QEvent>
 
 #include <daq.h>
+#include <string>
 #include <unistd.h>
 #include <compiler.h>
 #include <debug.h>
@@ -1371,7 +1372,8 @@ int DataRecorder::Panel::startRecording(long long timestamp)
 
 	data = H5Dcreate(file.trial, "Date", string_type,
 			scalar_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-	const char *nowDateTime = QDateTime::currentDateTime().toString(Qt::ISODate).toStdString().c_str();
+	//QString tdNow = QDateTime::currentDateTime().toString(Qt::ISODate);
+	const char *nowDateTime = "test man"; //tdNow.toLatin1().constData();
 	H5Dwrite(data, string_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, (void *)nowDateTime);
 	H5Dclose(data);
 
@@ -1409,10 +1411,10 @@ int DataRecorder::Panel::startRecording(long long timestamp)
 	size_t count = 0;
 	for (RT::List<Channel>::iterator i = channels.begin(), end = channels.end(); i != end; ++i)
 	{
-		QString channel_name = "Channel " + QString::number(++count) + " Name";
-		hid_t data = H5Dcreate(file.sdata, channel_name.toLatin1().constData(), string_type, scalar_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-		const char *chan_name = i->name.toStdString().c_str();
-		H5Dwrite(data, string_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, (void *)chan_name);
+		std::string channel_name = "Channel " + std::to_string(++count) + " Name";
+		hid_t data = H5Dcreate(file.sdata, channel_name.c_str(), string_type, scalar_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+		const char *rec_chan_name = i->name.toLatin1().constData();
+		H5Dwrite(data, string_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, (void *)rec_chan_name);
 		H5Dclose(data);
 	}
 
