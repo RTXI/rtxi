@@ -875,8 +875,7 @@ void DataRecorder::Panel::insertChannel(void)
 	channel->index = channelList->currentIndex();
 
 	channel->name.sprintf("%s %ld : %s", channel->block->getName().c_str(),
-			channel->block->getID(), channel->block->getName(channel->type,
-				channel->index).c_str());
+			channel->block->getID(), channel->block->getName(channel->type, channel->index).c_str());
 
 	if(selectionBox->findItems(QString(channel->name), Qt::MatchExactly).isEmpty())
 	{
@@ -1345,18 +1344,14 @@ int DataRecorder::Panel::startRecording(long long timestamp)
 	}
 
 	trialNum->setNum(int(trial_num));
-	file.trial = H5Gcreate(file.id, trial_name.toLatin1().constData(), H5P_DEFAULT,
-			H5P_DEFAULT, H5P_DEFAULT);
-	file.pdata = H5Gcreate(file.trial, "Parameters", H5P_DEFAULT, H5P_DEFAULT,
-			H5P_DEFAULT);
-	file.adata = H5Gcreate(file.trial, "Asynchronous Data", H5P_DEFAULT,
-			H5P_DEFAULT, H5P_DEFAULT);
-	file.sdata = H5Gcreate(file.trial, "Synchronous Data", H5P_DEFAULT,
-			H5P_DEFAULT, H5P_DEFAULT);
+	file.trial = H5Gcreate(file.id, trial_name.toLatin1().constData(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+	file.pdata = H5Gcreate(file.trial, "Parameters", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+	file.adata = H5Gcreate(file.trial, "Asynchronous Data", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+	file.sdata = H5Gcreate(file.trial, "Synchronous Data", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
 	hid_t scalar_space = H5Screate(H5S_SCALAR);
 	hid_t string_type = H5Tcopy(H5T_C_S1);
-	size_t string_size = 1024;
+	size_t string_size = 512;
 	H5Tset_size(string_type, string_size);
 	hid_t data;
 
@@ -1417,9 +1412,9 @@ int DataRecorder::Panel::startRecording(long long timestamp)
 	for (RT::List<Channel>::iterator i = channels.begin(), end = channels.end(); i != end; ++i)
 	{
 		QString channel_name = "Channel " + QString::number(++count) + " Name";
-		hid_t data = H5Dcreate(file.sdata, channel_name.toLatin1().constData(), string_type, 
-				scalar_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-		H5Dwrite(data, string_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, i->name.toStdString().c_str());
+		hid_t data = H5Dcreate(file.sdata, channel_name.toLatin1().constData(), string_type, scalar_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+		const char *test = i->name.toLatin1().constData();
+		H5Dwrite(data, string_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, &test);
 		H5Dclose(data);
 	}
 
