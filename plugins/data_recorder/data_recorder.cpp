@@ -1349,7 +1349,7 @@ int DataRecorder::Panel::startRecording(long long timestamp)
 
 	hid_t scalar_space = H5Screate(H5S_SCALAR);
 	hid_t string_type = H5Tcopy(H5T_C_S1);
-	size_t string_size = 512;
+	size_t string_size = 1024;
 	H5Tset_size(string_type, string_size);
 	hid_t data;
 
@@ -1372,7 +1372,7 @@ int DataRecorder::Panel::startRecording(long long timestamp)
 
 	data = H5Dcreate(file.trial, "Date", string_type,
 			scalar_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-	std::string nowDateTime = std::string(QDateTime::currentDateTime().toString(Qt::ISODate).toLatin1().constData());
+	std::string nowDateTime = std::string(QDateTime::currentDateTime().toString(Qt::ISODate).toLatin1());
 	H5Dwrite(data, string_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, nowDateTime.c_str());
 	H5Dclose(data);
 
@@ -1410,13 +1410,16 @@ int DataRecorder::Panel::startRecording(long long timestamp)
 	size_t count = 0;
 	for (RT::List<Channel>::iterator i = channels.begin(), end = channels.end(); i != end; ++i)
 	{
-		std::string channel_name = "Channel " + std::to_string(++count) + " Name";
-		hid_t data = H5Dcreate(file.sdata, channel_name.c_str(), string_type, scalar_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-		std::string rec_chan_name = std::string(i->name.toLatin1().constData());
+		printf("starting...\n");
+		std::string rec_chan_name = std::to_string(++count) + ": " + i->name.toStdString();
+		hid_t data = H5Dcreate(file.sdata, rec_chan_name.c_str(), string_type, scalar_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+		printf("rec_chan_name: %s \ntime %s\n", rec_chan_name.c_str(), nowDateTime.c_str());
 		H5Dwrite(data, string_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, rec_chan_name.c_str());
+		printf("finished...\n");
 		H5Dclose(data);
 	}
 
+	printf("next\n\n");
 	H5Tclose(string_type);
 	H5Sclose(scalar_space);
 
