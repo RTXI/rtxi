@@ -1163,9 +1163,9 @@ void DataRecorder::Panel::processData(void)
 		{
 			if (state == OPENED)
 			{
+				count = 0;
 				startRecording(_token.time);
 				state = RECORD;
-				count = 0;
 				QEvent *event = new QEvent(static_cast<QEvent::Type>QDisableGroupsEvent);
 				QApplication::postEvent(this, event);
 			}
@@ -1371,7 +1371,8 @@ int DataRecorder::Panel::startRecording(long long timestamp)
 
 	data = H5Dcreate(file.trial, "Date", string_type,
 			scalar_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-	H5Dwrite(data, string_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, QDateTime::currentDateTime().toString(Qt::ISODate).toLatin1());
+	const char *nowDateTime = QDateTime::currentDateTime().toString(Qt::ISODate).toStdString().c_str();
+	H5Dwrite(data, string_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, (void *)nowDateTime);
 	H5Dclose(data);
 
 	hid_t param_type;
@@ -1410,7 +1411,8 @@ int DataRecorder::Panel::startRecording(long long timestamp)
 	{
 		QString channel_name = "Channel " + QString::number(++count) + " Name";
 		hid_t data = H5Dcreate(file.sdata, channel_name.toLatin1().constData(), string_type, scalar_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-		H5Dwrite(data, string_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, i->name.toLatin1());
+		const char *chan_name = i->name.toStdString().c_str();
+		H5Dwrite(data, string_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, (void *)chan_name);
 		H5Dclose(data);
 	}
 
