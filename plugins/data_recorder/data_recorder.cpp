@@ -56,12 +56,11 @@ static void findDAQDevice(DAQ::Device *dev,void *arg) {
 
 // Debug for event handling
 QDebug operator<<(QDebug str, const QEvent * ev) {
-	static int eventEnumIndex = QEvent::staticMetaObject
-		.indexOfEnumerator("Type");
+	static int eventEnumIndex = QEvent::staticMetaObject.indexOfEnumerator("Type");
 	str << "QEvent";
-	if (ev) {
-		QString name = QEvent::staticMetaObject
-			.enumerator(eventEnumIndex).valueToKey(ev->type());
+	if (ev)
+	{
+		QString name = QEvent::staticMetaObject.enumerator(eventEnumIndex).valueToKey(ev->type());
 		if (!name.isEmpty())
 			str << name; 
 		else
@@ -1210,8 +1209,8 @@ void DataRecorder::Panel::processData(void)
 						H5T_IEEE_F64LE);
 
 				QString parameter_name = QString::number(block->getID()) + " "
-					+ QString::fromStdString(block->getName()) + " : " + QString::fromStdString(block->getName(
-								Workspace::PARAMETER, data.index));
+					+ QString::fromStdString(block->getName()) + " : "
+					+ QString::fromStdString(block->getName(Workspace::PARAMETER, data.index));
 
 				hid_t data = H5PTopen(file.pdata, parameter_name.toLatin1().constData());
 				H5PTappend(data, 1, &param);
@@ -1258,15 +1257,13 @@ int DataRecorder::Panel::openFile(QString &filename)
 			}
 			trialNum->setNum(int(trial_num)-1);
 		} else if (data.response == 1) { //overwrite
-			file.id = H5Fcreate(filename.toLatin1().constData(), H5F_ACC_TRUNC, H5P_DEFAULT,
-					H5P_DEFAULT);
+			file.id = H5Fcreate(filename.toLatin1().constData(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 			trialNum->setText("0");
 		} else {
 			return -1;
 		}
 	} else {
-		file.id = H5Fcreate(filename.toLatin1().constData(), H5F_ACC_TRUNC, H5P_DEFAULT,
-				H5P_DEFAULT);
+		file.id = H5Fcreate(filename.toLatin1().constData(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 		trialNum->setText("0");
 	}
 	if (file.id < 0) {
@@ -1278,7 +1275,7 @@ int DataRecorder::Panel::openFile(QString &filename)
 		error_msg[error_size] = 0;
 		H5Eclear(file.id);
 
-		ERROR_MSG("DataRecorder::Panel::processData : failed to open \"%s\" for writing with error : %s\n",filename.toStdString().c_str(),error_msg);
+		ERROR_MSG("DataRecorder::Panel::processData : failed to open \"%s\" for writing with error : %s\n", filename.toStdString().c_str(),error_msg);
 		return -1;
 	}
 
@@ -1374,7 +1371,7 @@ int DataRecorder::Panel::startRecording(long long timestamp)
 
 	data = H5Dcreate(file.trial, "Date", string_type,
 			scalar_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-	H5Dwrite(data, string_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, QDateTime::currentDateTime().toString(Qt::ISODate).toStdString().c_str());
+	H5Dwrite(data, string_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, QDateTime::currentDateTime().toString(Qt::ISODate).toLatin1());
 	H5Dclose(data);
 
 	hid_t param_type;
@@ -1413,8 +1410,7 @@ int DataRecorder::Panel::startRecording(long long timestamp)
 	{
 		QString channel_name = "Channel " + QString::number(++count) + " Name";
 		hid_t data = H5Dcreate(file.sdata, channel_name.toLatin1().constData(), string_type, scalar_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-		const char *test = i->name.toLatin1().constData();
-		H5Dwrite(data, string_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, &test);
+		H5Dwrite(data, string_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, i->name.toLatin1());
 		H5Dclose(data);
 	}
 
