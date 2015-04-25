@@ -1372,9 +1372,8 @@ int DataRecorder::Panel::startRecording(long long timestamp)
 
 	data = H5Dcreate(file.trial, "Date", string_type,
 			scalar_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-	//QString tdNow = QDateTime::currentDateTime().toString(Qt::ISODate);
-	const char *nowDateTime = "test man"; //tdNow.toLatin1().constData();
-	H5Dwrite(data, string_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, (void *)nowDateTime);
+	std::string nowDateTime = std::string(QDateTime::currentDateTime().toString(Qt::ISODate).toLatin1().constData());
+	H5Dwrite(data, string_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, nowDateTime.c_str());
 	H5Dclose(data);
 
 	hid_t param_type;
@@ -1413,8 +1412,8 @@ int DataRecorder::Panel::startRecording(long long timestamp)
 	{
 		std::string channel_name = "Channel " + std::to_string(++count) + " Name";
 		hid_t data = H5Dcreate(file.sdata, channel_name.c_str(), string_type, scalar_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-		const char *rec_chan_name = i->name.toLatin1().constData();
-		H5Dwrite(data, string_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, (void *)rec_chan_name);
+		std::string rec_chan_name = std::string(i->name.toLatin1().constData());
+		H5Dwrite(data, string_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, rec_chan_name.c_str());
 		H5Dclose(data);
 	}
 
