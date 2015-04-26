@@ -1410,16 +1410,12 @@ int DataRecorder::Panel::startRecording(long long timestamp)
 	size_t count = 0;
 	for (RT::List<Channel>::iterator i = channels.begin(), end = channels.end(); i != end; ++i)
 	{
-		printf("starting...\n");
 		std::string rec_chan_name = std::to_string(++count) + ": " + i->name.toStdString();
 		hid_t data = H5Dcreate(file.sdata, rec_chan_name.c_str(), string_type, scalar_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-		printf("rec_chan_name: %s \ntime %s\n", rec_chan_name.c_str(), nowDateTime.c_str());
 		H5Dwrite(data, string_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, rec_chan_name.c_str());
-		printf("finished...\n");
 		H5Dclose(data);
 	}
 
-	printf("next\n\n");
 	H5Tclose(string_type);
 	H5Sclose(scalar_space);
 
