@@ -105,22 +105,17 @@ void Oscilloscope::Plugin::doSave(Settings::Object::State &s) const {
 
 void Oscilloscope::Panel::receiveEvent(const ::Event::Object *event) {
 	if (event->getName() == Event::IO_BLOCK_INSERT_EVENT) {
-		IO::Block *block =
-			reinterpret_cast<IO::Block *> (event->getParam("block"));
-
+		IO::Block *block = reinterpret_cast<IO::Block *> (event->getParam("block"));
 		if (block) {
 			// Update the list of blocks
 			blocksList->addItem(QString::fromStdString(block->getName())+" "+QString::number(block->getID()));
 			blocks.push_back(block);
-
 			if (blocksList->count() == 1)
 				buildChannelList();
 		}
 	}
 	else if (event->getName() == Event::IO_BLOCK_REMOVE_EVENT) {
-		IO::Block *block =
-			reinterpret_cast<IO::Block *> (event->getParam("block"));
-
+		IO::Block *block = reinterpret_cast<IO::Block *> (event->getParam("block"));
 		if (block) {
 			// Find the index of the block in the blocks vector
 			size_t index;
@@ -134,7 +129,6 @@ void Oscilloscope::Panel::receiveEvent(const ::Event::Object *event) {
 					struct channel_info *info = reinterpret_cast<struct channel_info *> (i->getInfo());
 					if (info->block == block)	{
 						found = true;
-
 						// If triggering on this channel disable triggering
 						if (i->getLabel()	== scopeWindow->getTriggerChannel()->getLabel()){
 							scopeWindow->setTrigger(Scope::NONE,
@@ -145,16 +139,12 @@ void Oscilloscope::Panel::receiveEvent(const ::Event::Object *event) {
 							showDisplayTab();
 						}
 
-						struct channel_info
-							*info = reinterpret_cast<struct channel_info *> (i->getInfo());
-
+						struct channel_info *info = reinterpret_cast<struct channel_info *> (i->getInfo());
 						std::list<Scope::Channel>::iterator chan = i++;
-
 						bool active = setInactiveSync();
 						scopeWindow->removeChannel(chan);
 						flushFifo();
 						setActive(active);
-
 						delete info;
 					}
 					else
@@ -398,14 +388,6 @@ void Oscilloscope::Panel::applyChannelTab(void) {
 				pen.setStyle(Qt::SolidLine);
 		}
 		scopeWindow->setChannelPen(i, pen);
-
-		//i->label.setColor(i->getPen().color());
-		//for(std::vector<QCanvasLine>::iterator j = i->lines.begin(),end = i->lines.end();j != end;++j)
-		//    j->setPen(info->pen);
-
-		/*if(&*i == trigChan)
-			trigLine->setPoints(0,panel->val2pix(trigThresh,*i),
-			width(),scopeWindow->val2pix(scopeWindow->trigThresh,*i));*/
 	}
 	scopeWindow->updateScopeLayout();
 	showChannelTab();

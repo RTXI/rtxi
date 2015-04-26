@@ -64,7 +64,6 @@ MainWindow::MainWindow (void) : QMainWindow(NULL, Qt::Window) {
 }
 
 MainWindow::~MainWindow (void) {
-	delete mdiArea;
 }
 
 QAction* MainWindow::insertModuleMenuSeparator (void) {
@@ -448,7 +447,7 @@ void MainWindow::modulesMenuActivated(QAction *id) {
 
 void MainWindow::fileMenuActivated(QAction *id) {
 	// Annoying but the best way to do it is to tie an action to the entire menu
-	// so we have to tell it to ignore the first two modules
+	// so we have to tell it to ignore the first three items
 	if(id->text().contains("Load Workspace") ||
 			id->text().contains("Save Workspace") ||
 			id->text().contains("Reset Workspace") ||
