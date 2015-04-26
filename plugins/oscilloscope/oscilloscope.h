@@ -1,5 +1,5 @@
 /*
- 	 The Real-Time eXperiment Interface (RTXI)
+	 The Real-Time eXperiment Interface (RTXI)
 	 Copyright (C) 2011 Georgia Institute of Technology, University of Utah, Weill Cornell Medical College
 
 	 This program is free software: you can redistribute it and/or modify
@@ -51,30 +51,30 @@ namespace Oscilloscope {
 			friend class Panel;
 
 		public:
-			static Plugin *getInstance(void);
+		static Plugin *getInstance(void);
 
-			public slots:
-				void createOscilloscopePanel(void);
+		public slots:
+			void createOscilloscopePanel(void);
 
 		protected:
-			virtual void doDeferred(const Settings::Object::State &);
-			virtual void doLoad(const Settings::Object::State &);
-			virtual void doSave(Settings::Object::State &) const;
+		virtual void doDeferred(const Settings::Object::State &);
+		virtual void doLoad(const Settings::Object::State &);
+		virtual void doSave(Settings::Object::State &) const;
 
 		private:
-			Plugin(void);
-			~Plugin(void);
-			Plugin(const Plugin &) {};
-			Plugin &operator=(const Plugin &)
-			{
-				return *getInstance();
-			};
-			static Plugin *instance;
-			void removeOscilloscopePanel(Panel *);
-			int menuID;
+		Plugin(void);
+		~Plugin(void);
+		Plugin(const Plugin &) {};
+		Plugin &operator=(const Plugin &)
+		{
+			return *getInstance();
+		};
+		static Plugin *instance;
+		void removeOscilloscopePanel(Panel *);
+		int menuID;
 
-			// List to maintain multiple scopes
-			std::list<Panel *> panelList;
+		// List to maintain multiple scopes
+		std::list<Panel *> panelList;
 	}; // Plugin
 
 	class Panel : public QWidget, public RT::Thread, public virtual Settings::Object, public Event::Handler {
@@ -90,14 +90,13 @@ namespace Oscilloscope {
 		bool setInactiveSync(void);
 		void flushFifo(void);
 		void adjustDataSize(void);
-		//void doDeferred(const Settings::Object::State &);
-		//void doLoad(const Settings::Object::State &);
-		//void doSave(Settings::Object::State &) const;
-		//void closeEvent(QCloseEvent *);
+		void doDeferred(const Settings::Object::State &);
+		void doLoad(const Settings::Object::State &);
+		void doSave(Settings::Object::State &) const;
 		void receiveEvent(const ::Event::Object *);
 
 		public slots:
-		void timeoutEvent(void);
+			void timeoutEvent(void);
 		void togglePause(void);
 		void updateDownsampleRate(int);
 
@@ -109,7 +108,6 @@ namespace Oscilloscope {
 		void showDisplayTab(void);
 		void buildChannelList(void);
 		void screenshot(void);
-		//void undo(void);
 		void apply(void);
 		void showTab(void);
 		void activateChannel(bool);

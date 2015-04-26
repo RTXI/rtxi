@@ -14,14 +14,14 @@
 
 	 You should have received a copy of the GNU General Public License
 	 along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 /* 
 	 This class creates and controls the drawing parameters
 	 A control panel is instantiated for all the active channels/modules
 	 and user selection is enabled to change color, style, width and other 
 	 oscilloscope properties.
-	 */
+ */
 
 #include <QtGui>
 #include <QWidget>
@@ -314,7 +314,6 @@ void Oscilloscope::Panel::applyChannelTab(void) {
 			info->type = type;
 			info->index = channelsList->currentIndex();
 			info->previous = 0.0;
-
 			info->name = QString::number(block->getID())+" "+QString::fromStdString(block->getName(type, channelsList->currentIndex()));
 
 			bool active = setInactiveSync();
@@ -997,7 +996,7 @@ Oscilloscope::Panel::Panel(QWidget *parent) :	QWidget(parent), RT::Thread(0), fi
 
 	// Make Mdi
 	subWindow = new QMdiSubWindow;
-   subWindow->setWindowIcon(QIcon("/usr/local/lib/rtxi/RTXI-widget-icon.png"));
+	subWindow->setWindowIcon(QIcon("/usr/local/lib/rtxi/RTXI-widget-icon.png"));
 	subWindow->setFixedSize(848,625);
 	subWindow->setAttribute(Qt::WA_DeleteOnClose);
 	subWindow->setWindowFlags(Qt::CustomizeWindowHint);
@@ -1201,99 +1200,95 @@ void Oscilloscope::Panel::mouseDoubleClickEvent(QMouseEvent *e) {
 	}
 }
 
-/*void Panel::doDeferred(const Settings::Object::State &s) {
+void Oscilloscope::Panel::doDeferred(const Settings::Object::State &s) {
 	bool active = setInactiveSync();
 
 	for (size_t i = 0, nchans = s.loadInteger("Num Channels"); i < nchans; ++i)	{
-	std::ostringstream str;
-	str << i;
+		std::ostringstream str;
+		str << i;
 
-	IO::Block
- *block = dynamic_cast<IO::Block *> (Settings::Manager::getInstance()->getObject(s.loadInteger(str.str() + " ID")));
- if (!block)
- continue;
+		IO::Block
+			*block = dynamic_cast<IO::Block *> (Settings::Manager::getInstance()->getObject(s.loadInteger(str.str() + " ID")));
+		if (!block)
+			continue;
 
- struct channel_info *info = new struct channel_info;
+		struct channel_info *info = new struct channel_info;
 
- info->block = block;
- info->type = s.loadInteger(str.str() + " type");
- info->index = s.loadInteger(str.str() + " index");
- info->name = QString::number(block->getID())+" "+QString::fromStdString(block->getName(info->type, info->index));
- info->previous = 0.0;
+		info->block = block;
+		info->type = s.loadInteger(str.str() + " type");
+		info->index = s.loadInteger(str.str() + " index");
+		info->name = QString::number(block->getID())+" "+QString::fromStdString(block->getName(info->type, info->index));
+		info->previous = 0.0;
 
- std::list<Scope::Channel>::iterator chan =
- insertChannel(info->name, s.loadDouble(str.str() + " scale"),
- s.loadDouble(str.str() + " offset"), QPen(QColor(QString::fromStdString(s.loadString(str.str() + " pen color"))), s.loadInteger(str.str()
- + " pen width"), static_cast<Qt::PenStyle> (s.loadInteger(str.str() + " pen style"))), info);
+		QwtPlotCurve *curve = new QwtPlotCurve(info->name);
 
- setChannelLabel(chan, info->name + " " + properties->scaleList->itemText(static_cast<int> (round(4 * (log10(1/chan->getScale()) + 1)))).simplified());
- }
+		std::list<Scope::Channel>::iterator chan = scopeWindow->insertChannel(info->name, s.loadDouble(str.str() + " scale"),
+				s.loadDouble(str.str() + " offset"), QPen(QColor(QString::fromStdString(s.loadString(str.str() + " pen color"))),
+					s.loadInteger(str.str() + " pen width"), Qt::PenStyle(s.loadInteger(str.str() + " pen style"))), curve, info);
 
- flushFifo();
- setActive(active);
- }
+		//scopeWindow->setChannelLabel(chan, info->name + " " + properties->scaleList->itemText(static_cast<int> (round(4 * (log10(1/chan->getScale()) + 1)))).simplified());
+	}
 
- void Panel::doLoad(const Settings::Object::State &s) {
- scopeWindow->setDataSize(s.loadInteger("Size"));
-//setDivXY(s.loadInteger("DivX"), s.loadInteger("DivY"));
-setDivT(s.loadDouble("DivT"));
-
-if (s.loadInteger("Maximized"))
-showMaximized();
-else if (s.loadInteger("Minimized"))
-showMinimized();
-
-if (paused() != s.loadInteger("Paused"))
-togglePause();
-
-setRefresh(s.loadInteger("Refresh"));
-
-resize(s.loadInteger("W"), s.loadInteger("H"));
-parentWidget()->move(s.loadInteger("X"), s.loadInteger("Y"));
+	flushFifo();
+	setActive(active);
 }
 
-void Panel::doSave(Settings::Object::State &s) const {
-s.saveInteger("Size", getDataSize());
-s.saveInteger("DivX", getDivX());
-s.saveInteger("DivY", getDivY());
-s.saveDouble("DivT", getDivT());
+void Oscilloscope::Panel::doLoad(const Settings::Object::State &s) {
+	scopeWindow->setDataSize(s.loadInteger("Size"));
+	scopeWindow->setDivT(s.loadDouble("DivT"));
 
-if (isMaximized())
-s.saveInteger("Maximized", 1);
-else if (isMinimized())
-s.saveInteger("Minimized", 1);
+	if (s.loadInteger("Maximized"))
+		scopeWindow->showMaximized();
+	else if (s.loadInteger("Minimized"))
+		scopeWindow->showMinimized();
 
-s.saveInteger("Paused", paused());
-s.saveInteger("Refresh", getRefresh());
+	if (scopeWindow->paused() != s.loadInteger("Paused"))
+		togglePause();
 
-QPoint pos = parentWidget()->pos();
-s.saveInteger("X", pos.x());
-s.saveInteger("Y", pos.y());
-s.saveInteger("W", width());
-s.saveInteger("H", height());
+	scopeWindow->setRefresh(s.loadInteger("Refresh"));
 
-s.saveInteger("Num Channels", getChannelCount());
-size_t n = 0;
-for (std::list<Channel>::const_iterator i = getChannelsBegin(), end = getChannelsEnd(); i != end; ++i) {
-	std::ostringstream str;
-	str << n++;
-
-	const struct channel_info *info =
-		reinterpret_cast<const struct channel_info *> (i->getInfo());
-
-	s.saveInteger(str.str() + " ID", info->block->getID());
-	s.saveInteger(str.str() + " type", info->type);
-	s.saveInteger(str.str() + " index", info->index);
-
-	s.saveDouble(str.str() + " scale", i->getScale());
-	s.saveDouble(str.str() + " offset", i->getOffset());
-
-	QPen pen = i->getPen();
-	s.saveString(str.str() + " pen color", pen.color().name().toStdString());
-	s.saveInteger(str.str() + " pen style", pen.style());
-	s.saveInteger(str.str() + " pen width", pen.width());
+	resize(s.loadInteger("W"), s.loadInteger("H"));
+	parentWidget()->move(s.loadInteger("X"), s.loadInteger("Y"));
 }
-}*/
+
+void Oscilloscope::Panel::doSave(Settings::Object::State &s) const {
+	s.saveInteger("Size", scopeWindow->getDataSize());
+	s.saveInteger("DivX", scopeWindow->getDivX());
+	s.saveInteger("DivY", scopeWindow->getDivY());
+	s.saveDouble("DivT", scopeWindow->getDivT());
+
+	if (isMaximized())
+		s.saveInteger("Maximized", 1);
+	else if (isMinimized())
+		s.saveInteger("Minimized", 1);
+
+	s.saveInteger("Paused", scopeWindow->paused());
+	s.saveInteger("Refresh", scopeWindow->getRefresh());
+
+	s.saveInteger("X", parentWidget()->pos().x());
+	s.saveInteger("Y", parentWidget()->pos().y());
+	s.saveInteger("W", width());
+	s.saveInteger("H", height());
+
+	s.saveInteger("Num Channels", scopeWindow->getChannelCount());
+	size_t n = 0;
+	for (std::list<Scope::Channel>::const_iterator i = scopeWindow->getChannelsBegin(), end = scopeWindow->getChannelsEnd(); i != end; ++i) {
+		std::ostringstream str;
+		str << n++;
+
+		const struct channel_info *info = reinterpret_cast<const struct channel_info *> (i->getInfo());
+		s.saveInteger(str.str() + " ID", info->block->getID());
+		s.saveInteger(str.str() + " type", info->type);
+		s.saveInteger(str.str() + " index", info->index);
+
+		s.saveDouble(str.str() + " scale", i->getScale());
+		s.saveDouble(str.str() + " offset", i->getOffset());
+
+		s.saveString(str.str() + " pen color", i->getPen().color().name().toStdString());
+		s.saveInteger(str.str() + " pen style", i->getPen().style());
+		s.saveInteger(str.str() + " pen width", i->getPen().width());
+	}
+}
 
 static Mutex mutex;
 Oscilloscope::Plugin *Oscilloscope::Plugin::instance = 0;
