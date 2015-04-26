@@ -1,4 +1,4 @@
-AC_INIT([RTXI],[2.0-rc1],[help@rtxi.org],rtxi)
+AC_INIT([RTXI],[2.0-rc2],[help@rtxi.org],rtxi)
 
 AM_CONFIG_HEADER(include/rtxi_config.h)
 AM_INIT_AUTOMAKE([foreign])
