@@ -23,7 +23,8 @@
 # Check to see if R and stress are installed
 echo "----->Checking for dependencies needed to generate plot."
 if ! $(dpkg-query -Wf'${db:Status-abbrev}' "r-base" 2>/dev/null | grep -q '^i'); 
-	then sudo apt-get -y install r-base
+	then sudo apt-get -y install r-base r-cran-ggplot2 r-cran-reshape2 \
+	                             r-cran-plyr r-cran-scales
 fi
 if ! $(dpkg-query -Wf'${db:Status-abbrev}' "lshw" 2>/dev/null | grep -q '^i'); 
 	then sudo apt-get -y install lshw
@@ -80,6 +81,8 @@ fi
 # Extract raw data from HDF file
 h5dump -d "/Trial$TRIAL_N/Synchronous Data/Channel Data" -y -w 36 -o $TXT_FILENAME $HDF_FILENAME
 sed -i "s/,//g" $TXT_FILENAME # take care of comma delimiting
+sed -i "s/\[//g" $TXT_FILENAME # formatting file...
+sed -i "s/\]//g" $TXT_FILENAME # 
 
 # Get system information to record in the plot
 DISTRO="$(lsb_release -is) $(lsb_release -rs)"
@@ -98,17 +101,28 @@ DAQ=$(lspci | grep National | cut -d":" -f3 | sed 's/ \+/ /g' | sed -e 's/^\  */
 # Set up variables for run
 RT_PERIOD=$(h5dump -d "/Trial$TRIAL_N/Period (ns)" $HDF_FILENAME |  grep "(0)" | cut -d":" -f2) # in ns
 DOWNSAMPLE=$(h5dump -d "/Trial$TRIAL_N/Downsampling Rate" $HDF_FILENAME |  grep "(0)" | cut -d":" -f2)
-CHANNEL1=$(h5dump -d "/Trial$TRIAL_N/Synchronous Data/Channel 1 Name" $HDF_FILENAME | grep "(0)" | cut -d":" -f3 | cut -d"(" -f1 | sed 's/ \+/ /g' | sed -e 's/^\  *//' -e 's/\ *$//')
-CHANNEL2=$(h5dump -d "/Trial$TRIAL_N/Synchronous Data/Channel 2 Name" $HDF_FILENAME | grep "(0)" | cut -d":" -f3 | cut -d"(" -f1 | sed 's/ \+/ /g' | sed -e 's/^\  *//' -e 's/\ *$//')
-CHANNEL3=$(h5dump -d "/Trial$TRIAL_N/Synchronous Data/Channel 3 Name" $HDF_FILENAME | grep "(0)" | cut -d":" -f3 | cut -d"(" -f1 | sed 's/ \+/ /g' | sed -e 's/^\  *//' -e 's/\ *$//')
+
+COMPTIME_CHANNEL=$(h5ls -r $HDF_FILENAME | grep -- "Comp\\\ Time" | cut -d"/" -f4 | cut -d":" -f1)
+RTPERIOD_CHANNEL=$(h5ls -r $HDF_FILENAME | grep -- "Real-time\\\ Period" | cut -d"/" -f4 | cut -d":" -f1)
+RTJITTER_CHANNEL=$(h5ls -r $HDF_FILENAME | grep -- "RT\\\ Jitter" | cut -d"/" -f4 | cut -d":" -f1)
+
+#CHANNEL1=$(h5dump -d "/Trial$TRIAL_N/Synchronous Data/Channel 1 Name" $HDF_FILENAME | grep "(0)" | cut -d":" -f3 | cut -d"(" -f1 | sed 's/ \+/ /g' | sed -e 's/^\  *//' -e 's/\ *$//')
+#CHANNEL2=$(h5dump -d "/Trial$TRIAL_N/Synchronous Data/Channel 2 Name" $HDF_FILENAME | grep "(0)" | cut -d":" -f3 | cut -d"(" -f1 | sed 's/ \+/ /g' | sed -e 's/^\  *//' -e 's/\ *$//')
+#CHANNEL3=$(h5dump -d "/Trial$TRIAL_N/Synchronous Data/Channel 3 Name" $HDF_FILENAME | grep "(0)" | cut -d":" -f3 | cut -d"(" -f1 | sed 's/ \+/ /g' | sed -e 's/^\  *//' -e 's/\ *$//')
 
 # Check that the channels exist. 
-CHANNEL_CHECK="Real-time Period Comp Time RT Jitter" # not used yet...
-if [ "$CHANNEL1" == "" ]||[ "$CHANNEL2" == "" ]||[ "$CHANNEL3" == "" ]; then
-	echo "Some channels cannot be read. Make sure you picked the right trial." 
+#CHANNEL_CHECK="Real-time Period Comp Time RT Jitter" # not used yet...
+#if [ "$CHANNEL1" == "" ]||[ "$CHANNEL2" == "" ]||[ "$CHANNEL3" == "" ]; then
+#	echo "Some channels cannot be read. Make sure you picked the right trial." 
+#	exit 1
+#fi
+
+if [ "$COMPTIME_CHANNEL" == "" ]||[ "$RTPERIOD_CHANNEL" == "" ]||[ "$RTJITTER_CHANNEL" == "" ]; then
+	echo "All the needed channels (Comp Time, Real-time Period, and RT Jitter), couldn't be found."
 	exit 1
 fi
 
-Rscript makePerfPlot.r "$DISTRO" "$HOSTNAME" "$RT_KERNEL" "$PROCESSOR" "$GRAPHICS_CARD" "$GRAPHICS_DRIVER" "$RT_PERIOD" "$DOWNSAMPLE" "$CHANNEL1" "$CHANNEL2" "$CHANNEL3" "$TXT_FILENAME" "$PLOT_FILENAME" "$DAQ"
-
+Rscript makePerfPlot.r "$DISTRO" "$HOSTNAME" "$RT_KERNEL" "$PROCESSOR" "$GRAPHICS_CARD" \
+                       "$GRAPHICS_DRIVER" "$RT_PERIOD" "$DOWNSAMPLE" "$COMPTIME_CHANNEL" \
+                       "$RTPERIOD_CHANNEL" "$RTJITTER_CHANNEL" "$TXT_FILENAME" "$PLOT_FILENAME" "$DAQ"
 exit 0
