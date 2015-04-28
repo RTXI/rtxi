@@ -101,9 +101,9 @@ DAQ=$(lspci | grep National | cut -d":" -f3 | sed 's/ \+/ /g' | sed -e 's/^\  */
 # Set up variables for run
 RT_PERIOD=$(h5dump -d "/Trial$TRIAL_N/Period (ns)" $HDF_FILENAME |  grep "(0)" | cut -d":" -f2) # in ns
 DOWNSAMPLE=$(h5dump -d "/Trial$TRIAL_N/Downsampling Rate" $HDF_FILENAME |  grep "(0)" | cut -d":" -f2)
-COMPTIME_CHANNEL=$(h5ls -r $HDF_FILENAME | grep -- "Comp\\\ Time" | cut -d"/" -f4 | cut -d":" -f1)
-RTPERIOD_CHANNEL=$(h5ls -r $HDF_FILENAME | grep -- "Real-time\\\ Period" | cut -d"/" -f4 | cut -d":" -f1)
-RTJITTER_CHANNEL=$(h5ls -r $HDF_FILENAME | grep -- "RT\\\ Jitter" | cut -d"/" -f4 | cut -d":" -f1)
+COMPTIME_CHANNEL=$(h5ls -r $HDF_FILENAME | grep "Trial"$TRIAL_N | grep -- "Comp\\\ Time" | cut -d"/" -f4 | cut -d":" -f1)
+RTPERIOD_CHANNEL=$(h5ls -r $HDF_FILENAME | grep "Trial"$TRIAL_N | grep -- "Real-time\\\ Period" | cut -d"/" -f4 | cut -d":" -f1)
+RTJITTER_CHANNEL=$(h5ls -r $HDF_FILENAME | grep "Trial"$TRIAL_N | grep -- "RT\\\ Jitter" | cut -d"/" -f4 | cut -d":" -f1)
 
 if [ "$COMPTIME_CHANNEL" == "" ]||[ "$RTPERIOD_CHANNEL" == "" ]||[ "$RTJITTER_CHANNEL" == "" ]; then
 	echo "All the needed channels (Comp Time, Real-time Period, and RT Jitter), couldn't be found."
