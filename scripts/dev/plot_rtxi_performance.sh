@@ -31,8 +31,8 @@ if ! $(dpkg-query -Wf'${db:Status-abbrev}' "lshw" 2>/dev/null | grep -q '^i');
 fi
 echo ""
 
-# This can also be added to install_dependencies.sh, but this creates an issue
-#   when different users run the script. They all have their own local folders.
+# This could be added to install_dependencies.sh, but that would create an issue
+# when different users run the script. They all have their own local folders.
 if ! [ -d ~/.config/R ]; then
    mkdir ~/.config/R
    echo "R_LIBS_USER=\"~/.config/R\"" > ~/.Renviron
@@ -101,21 +101,9 @@ DAQ=$(lspci | grep National | cut -d":" -f3 | sed 's/ \+/ /g' | sed -e 's/^\  */
 # Set up variables for run
 RT_PERIOD=$(h5dump -d "/Trial$TRIAL_N/Period (ns)" $HDF_FILENAME |  grep "(0)" | cut -d":" -f2) # in ns
 DOWNSAMPLE=$(h5dump -d "/Trial$TRIAL_N/Downsampling Rate" $HDF_FILENAME |  grep "(0)" | cut -d":" -f2)
-
 COMPTIME_CHANNEL=$(h5ls -r $HDF_FILENAME | grep -- "Comp\\\ Time" | cut -d"/" -f4 | cut -d":" -f1)
 RTPERIOD_CHANNEL=$(h5ls -r $HDF_FILENAME | grep -- "Real-time\\\ Period" | cut -d"/" -f4 | cut -d":" -f1)
 RTJITTER_CHANNEL=$(h5ls -r $HDF_FILENAME | grep -- "RT\\\ Jitter" | cut -d"/" -f4 | cut -d":" -f1)
-
-#CHANNEL1=$(h5dump -d "/Trial$TRIAL_N/Synchronous Data/Channel 1 Name" $HDF_FILENAME | grep "(0)" | cut -d":" -f3 | cut -d"(" -f1 | sed 's/ \+/ /g' | sed -e 's/^\  *//' -e 's/\ *$//')
-#CHANNEL2=$(h5dump -d "/Trial$TRIAL_N/Synchronous Data/Channel 2 Name" $HDF_FILENAME | grep "(0)" | cut -d":" -f3 | cut -d"(" -f1 | sed 's/ \+/ /g' | sed -e 's/^\  *//' -e 's/\ *$//')
-#CHANNEL3=$(h5dump -d "/Trial$TRIAL_N/Synchronous Data/Channel 3 Name" $HDF_FILENAME | grep "(0)" | cut -d":" -f3 | cut -d"(" -f1 | sed 's/ \+/ /g' | sed -e 's/^\  *//' -e 's/\ *$//')
-
-# Check that the channels exist. 
-#CHANNEL_CHECK="Real-time Period Comp Time RT Jitter" # not used yet...
-#if [ "$CHANNEL1" == "" ]||[ "$CHANNEL2" == "" ]||[ "$CHANNEL3" == "" ]; then
-#	echo "Some channels cannot be read. Make sure you picked the right trial." 
-#	exit 1
-#fi
 
 if [ "$COMPTIME_CHANNEL" == "" ]||[ "$RTPERIOD_CHANNEL" == "" ]||[ "$RTJITTER_CHANNEL" == "" ]; then
 	echo "All the needed channels (Comp Time, Real-time Period, and RT Jitter), couldn't be found."

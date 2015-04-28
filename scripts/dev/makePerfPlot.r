@@ -6,13 +6,13 @@ args = commandArgs(trailingOnly=T)
 # Check for dependencies and install if missing
 if( !(require(gridExtra)) ) {
    install.packages("gridExtra", repos="http://watson.nci.nih.gov/cran_mirror/")
-   require(gridExtra)
+   library(gridExtra)
 }
 
-require(ggplot2)
-require(reshape2)
-require(plyr)
-require(scales)
+library(ggplot2)
+library(reshape2)
+library(plyr)
+library(scales)
 
 # Headings for the plot. Edit them here. 
 os = as.character(args[1])
@@ -44,31 +44,6 @@ if (max(data.stats$Time) > 600) {
 } else {
 	xaxislabel = "Time (s)"
 }
-
-# messy, but needed to check which channel has which variable
-#if (channel1 == "Comp Time") {
-#	data.stats$CompTime = data.raw$V2
-#} else if (channel2 == "Comp Time") {
-#	data.stats$CompTime = data.raw$V3
-#} else if (channel3 == "Comp Time") {
-#	data.stats$CompTime = data.raw$V4
-#}
-# messy, but needed
-#if (channel1 == "Real-time Period") {
-#	data.stats$Period = data.raw$V2
-#} else if (channel2 == "Real-time Period") {
-#	data.stats$Period = data.raw$V3
-#} else if (channel3 == "Real-time Period") {
-#	data.stats$Period = data.raw$V4
-#}
-# messy, but needed
-#if (channel1 == "RT Jitter") {
-#	data.stats$Jitter = data.raw$V2
-#} else if (channel2 == "RT Jitter") {
-#	data.stats$Jitter = data.raw$V3
-#} else if (channel3 == "RT Jitter") {
-#	data.stats$Jitter = data.raw$V4
-#}
 
 data.stats$CompTime = data.raw[, comptime_channel]
 data.stats$Period = data.raw[, rtperiod_channel]
