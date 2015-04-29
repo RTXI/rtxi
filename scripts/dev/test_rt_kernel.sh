@@ -27,7 +27,8 @@ if ! $(dpkg-query -Wf'${db:Status-abbrev}' "lshw" 2>/dev/null | grep -q '^i');
 	then sudo apt-get -y install lshw
 fi
 if ! $(dpkg-query -Wf'${db:Status-abbrev}' "r-base" 2>/dev/null | grep -q '^i'); 
-	then sudo apt-get -y install r-base
+	then sudo apt-get -y install r-base r-cran-ggplot2 r-cran-reshape2 r-cran-plyr \
+	                             r-cran-scales
 fi
 echo ""
 

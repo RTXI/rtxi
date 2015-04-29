@@ -11,8 +11,6 @@ if( !(require(gridExtra)) ) {
 
 library(ggplot2)
 library(reshape2)
-library(plyr)
-library(scales)
 
 # Headings for the plot. Edit them here. 
 os = as.character(args[1])

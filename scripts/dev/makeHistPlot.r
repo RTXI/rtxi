@@ -4,17 +4,13 @@ options(warn=-1)
 args = commandArgs(trailingOnly = T)
 
 # Check if needed packages are installed. Otherwise, exit. 
-if( !(require(ggplot2)&&require(scales)&&require(plyr)&&require(gridExtra)) ) {
-   install.packages("ggplot2", repos="http://watson.nci.nih.gov/cran_mirror/")
-   install.packages("scales", repos="http://watson.nci.nih.gov/cran_mirror/")
-   install.packages("plyr", repos="http://watson.nci.nih.gov/cran_mirror/")
+if( !(require(gridExtra)) ) {
    install.packages("gridExtra", repos="http://watson.nci.nih.gov/cran_mirror/")
-
-   require(ggplot2)
-   require(scales)
-   require(plyr)
-   require(gridExtra)
+   library(gridExtra)
 }
+
+library(ggplot2)
+library(scales)
 
 # Set parameters passed to script from command line / bash script
 os = as.character(args[1])
