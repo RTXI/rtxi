@@ -409,10 +409,10 @@ void AnalogyDevice::read(void) {
 
 			// Get analogy reference 
 			switch (channel->reference) {
-				case 0: ref = A4L_CHAN_AREF_GROUND; break;
-				case 1: ref = A4L_CHAN_AREF_COMMON; break;
-				case 2: ref = A4L_CHAN_AREF_DIFF; break;
-				case 3: ref = A4L_CHAN_AREF_OTHER; break;
+				case 0: ref = 0x00; break; // GROUND
+				case 1: ref = 0x01; break; // COMMON
+				case 2: ref = 0x02; break; // DIFF
+				case 3: ref = 0x03; break; // OTHER
 			}
 
 			// Get channel size
