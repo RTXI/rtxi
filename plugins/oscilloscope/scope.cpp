@@ -169,6 +169,7 @@ std::list<Scope::Channel>::iterator Scope::insertChannel(QString label,double sc
 
 // Remove user specified channel from active channels list
 void *Scope::removeChannel(std::list<Scope::Channel>::iterator channel) {
+	channel->curve->detach();
 	void *info = channel->info;
 	channels.erase(channel);
 	return info;
@@ -390,7 +391,7 @@ void Scope::drawCurves(void) {
 	if(isPaused || getChannelCount() == 0)
 		return;
 
-	for(std::list<Channel>::iterator i = channels.begin(), iend = channels.end();i != iend;++i) {
+	for(std::list<Channel>::iterator i = channels.begin(), iend = channels.end(); i != iend;++i) {
 		// Set data for channel
 		std::vector<double> x (i->data.size());
 		std::vector<double> y (i->data.size());
