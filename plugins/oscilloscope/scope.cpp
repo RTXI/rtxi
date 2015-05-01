@@ -170,6 +170,7 @@ std::list<Scope::Channel>::iterator Scope::insertChannel(QString label,double sc
 // Remove user specified channel from active channels list
 void *Scope::removeChannel(std::list<Scope::Channel>::iterator channel) {
 	channel->curve->detach();
+	replot();
 	void *info = channel->info;
 	channels.erase(channel);
 	return info;
