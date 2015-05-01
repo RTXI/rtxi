@@ -130,14 +130,14 @@ void Oscilloscope::Panel::receiveEvent(const ::Event::Object *event) {
 					if (info->block == block)	{
 						found = true;
 						// If triggering on this channel disable triggering
-						if (i->getLabel()	== scopeWindow->getTriggerChannel()->getLabel()){
-							scopeWindow->setTrigger(Scope::NONE,
-									scopeWindow->getTriggerThreshold(),
-									scopeWindow->getChannelsEnd(),
-									scopeWindow->getTriggerHolding(),
-									scopeWindow->getTriggerHoldoff());
-							showDisplayTab();
-						}
+						if(trigsChanList->currentText() != "<None>")
+							if (i->getLabel()	== scopeWindow->getTriggerChannel()->getLabel())
+							{
+								scopeWindow->setTrigger(Scope::NONE, scopeWindow->getTriggerThreshold(),
+										scopeWindow->getChannelsEnd(), scopeWindow->getTriggerHolding(),
+										scopeWindow->getTriggerHoldoff());
+								showDisplayTab();
+							}
 
 						struct channel_info *info = reinterpret_cast<struct channel_info *> (i->getInfo());
 						std::list<Scope::Channel>::iterator chan = i++;
@@ -280,19 +280,21 @@ void Oscilloscope::Panel::applyChannelTab(void) {
 			break;
 	}
 
-	if (!activateButton->isChecked()) {
-		if (i != scopeWindow->getChannelsEnd()) {
+	if (!activateButton->isChecked())
+	{
+		if (i != scopeWindow->getChannelsEnd())
+		{
 			// If triggering on this channel disable triggering
-			if (i->getLabel() == scopeWindow->getTriggerChannel()->getLabel())
-				scopeWindow->setTrigger(Scope::NONE, scopeWindow->getTriggerThreshold(),
-						scopeWindow->getChannelsEnd(), scopeWindow->getTriggerHolding(),
-						scopeWindow->getTriggerHoldoff());
+			if(trigsChanList->currentText() != "<None>")
+				if (i->getLabel() == scopeWindow->getTriggerChannel()->getLabel())
+					scopeWindow->setTrigger(Scope::NONE, scopeWindow->getTriggerThreshold(),
+							scopeWindow->getChannelsEnd(), scopeWindow->getTriggerHolding(),
+							scopeWindow->getTriggerHoldoff());
 
 			bool active = setInactiveSync();
 			scopeWindow->removeChannel(i);
 			flushFifo();
 			setActive(active);
-
 			delete info;
 		}
 	}
