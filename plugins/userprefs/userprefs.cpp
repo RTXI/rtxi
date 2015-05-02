@@ -22,10 +22,6 @@
  * is destructed. So all Reset, Apply, and Cancel buttons all close the panel.
  */
 
-#include <QtGui>
-#include <QFileDialog>
-#include <QMdiSubWindow>
-
 #include <debug.h>
 #include <main_window.h>
 #include <userprefs.h>

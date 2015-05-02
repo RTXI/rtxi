@@ -23,10 +23,6 @@
 	 oscilloscope properties.
  */
 
-#include <QtGui>
-#include <QWidget>
-#include <QTabWidget>
-
 #include <qwt_plot_renderer.h>
 
 #include <debug.h>

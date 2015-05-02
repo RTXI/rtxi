@@ -16,15 +16,6 @@
 
  */
 
-#include <QLabel>
-#include <QLayout>
-#include <QLineEdit>
-#include <QPushButton>
-#include <QTimer>
-#include <QtGui>
-#include <QToolTip>
-#include <QMdiSubWindow>
-
 #include <debug.h>
 #include <main_window.h>
 #include <performance_measurement.h>

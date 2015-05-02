@@ -16,10 +16,6 @@
 
  */
 
-#include <QtGui>
-#include <QFileDialog>
-#include <QEvent>
-
 #include <daq.h>
 #include <string>
 #include <unistd.h>

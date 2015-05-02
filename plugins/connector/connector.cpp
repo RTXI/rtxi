@@ -17,8 +17,6 @@
 
 */
 
-#include <QMdiSubWindow>
-
 #include <connector.h>
 #include <main_window.h>
 #include <mutex.h>

@@ -17,15 +17,6 @@
 
 */
 
-#include <QLayout>
-#include <QLabel>
-#include <QLineEdit>
-#include <QWidget>
-#include <QtGui>
-#include <QWhatsThis>
-#include <QPushButton>
-#include <QMdiSubWindow>
-
 #include <debug.h>
 #include <daq.h>
 #include <math.h>
