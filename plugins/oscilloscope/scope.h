@@ -40,6 +40,7 @@
 #include <qwt_plot_curve.h>
 #include <qwt_plot_directpainter.h>
 #include <qwt_plot.h>
+#include <qwt_plot_legenditem.h>
 #include <qwt.h>
 #include <qwt_curve_fitter.h>
 #include <qwt_painter.h>
@@ -48,10 +49,6 @@
 
 #include <list>
 #include <vector>
-
-class QwtPlotCurve;
-class QwtPlotMarker;
-class QwtPlotDirectPainter;
 
 class Scope : public QwtPlot {
 
@@ -83,6 +80,17 @@ class Scope : public QwtPlot {
 		QwtPlotCurve *curve;
 		void *info;
 	}; // Channel
+
+	class LegendItem : public QwtPlotLegendItem {
+
+		public:
+			LegendItem()
+			{
+				setRenderHint(QwtPlotItem::RenderAntialiased);
+				QColor color(Qt::black);
+				setTextPen(color);
+			}
+	}; // LegendItem
 
 	class Canvas : public QwtPlotCanvas {
 
@@ -205,6 +213,9 @@ class Scope : public QwtPlot {
 	// Scaling engine
 	QwtScaleMap *scaleMapY;
 	QwtScaleMap *scaleMapX;
+
+	// Legend
+	LegendItem *legendItem;
 
 	QTimer *timer;
 	QString dtLabel;

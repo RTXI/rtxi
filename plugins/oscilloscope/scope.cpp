@@ -14,7 +14,7 @@
 
 	 You should have received a copy of the GNU General Public License
 	 along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+	 */
 
 #include <QtGui>
 
@@ -65,7 +65,7 @@ QString Scope::Channel::getLabel(void) const {
 }
 
 // Scope constructor; inherits from QwtPlot
-Scope::Scope(QWidget *parent) : QwtPlot(parent) {
+Scope::Scope(QWidget *parent) :	QwtPlot(parent), legendItem(NULL) {
 
 	// Initialize vars
 	isPaused = false;
@@ -119,6 +119,17 @@ Scope::Scope(QWidget *parent) : QwtPlot(parent) {
 	scaleMapY->setPaintInterval(-1.0, 1.0);
 	scaleMapX = new QwtScaleMap();
 	scaleMapX->setPaintInterval(0.0, 1000.0);
+
+	// Create and attach legend
+	legendItem = new LegendItem();
+	legendItem->attach(this);
+	legendItem->setMaxColumns(1);
+	legendItem->setAlignment(Qt::Alignment(Qt::AlignTop | Qt::AlignRight));
+	legendItem->setBorderRadius(8);
+	legendItem->setMargin(4);
+	legendItem->setSpacing(2);
+	legendItem->setItemMargin(0);
+	legendItem->setBackgroundBrush(QBrush(QColor(200,200,200)));
 
 	// Update scope background/scales/axes
 	updateScopeLayout();
@@ -267,7 +278,8 @@ void Scope::setData(double data[],size_t size) {
 }
 
 // Returns the data size
-size_t Scope::getDataSize(void) const {
+size_t Scope::getDataSize(void) const
+{
 	return data_size;
 }
 
