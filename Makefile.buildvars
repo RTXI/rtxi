@@ -2,7 +2,7 @@ ACLOCAL_AMFLAGS ?= -I $(top_srcdir)/m4
 
 QT_DEFINES = -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_XML_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_WIDGETS_LIB -DQT_SHARED
 QT_CXXFLAGS = -I. -I/usr/include/qt5 -I/usr/include/qt5/QtCore -I/usr/include/qt5/QtGui -I/usr/include/qt5/QtXml -I/usr/include/qt5/QtWidgets -I/usr/local/lib/rtxi_includes -I/usr/local/lib/qwt/include -I/usr/X11R6/include -I/usr/include/qwt
-QT_LIBS = -lQtGui -lQtCore -lGL -lpthread -lQtXml -lqwt -lQtWidgets
+QT_LIBS = -lQt5Gui -lQt5Core -lGL -lpthread -lQt5Xml -lqwt -lQt5Widgets
 MOC = /usr/bin/moc
 UIC = /usr/bin/uic
 
@@ -12,7 +12,7 @@ AM_LDFLAGS  = $(QT_LIBS) $(GSL_LIBS) $(RTOS_LDFLAGS)
 AM_CFLAGS = $(AM_CXXFLAGS)
 
 if DEBUG
-  AM_CXXFLAGS += -Wall -g -std=c++11
+  AM_CXXFLAGS += -Wall -g -std=c++11 -fPIC
   AM_CPPFLAGS += -DDEBUG
 else
   AM_CXXFLAGS += -w -O3 -std=c++11 -fPIC

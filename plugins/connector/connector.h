@@ -21,7 +21,7 @@
 #define CONNECTOR_H
 
 #include <QWidget>
-#include <QtGui>
+#include <QtWidgets>
 #include <QMdiArea>
 
 #include <event.h>

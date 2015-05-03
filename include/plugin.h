@@ -26,7 +26,7 @@
 #include <string>
 #include <sys/types.h>
 #include <QObject>
-#include <QtGui>
+#include <QtWidgets>
 
 //! Classes associated with the loading/unloading of binaries at run-time.
 /*!

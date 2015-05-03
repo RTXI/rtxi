@@ -20,7 +20,7 @@
 #ifndef SYSTEM_CONTROL_PANEL_H
 #define SYSTEM_CONTROL_PANEL_H
 
-#include <QtGui>
+#include <QtWidgets>
 
 #include <event.h>
 

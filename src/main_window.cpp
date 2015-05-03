@@ -17,9 +17,6 @@
 
 */
 
-#include <QtGui>
-#include <QMdiArea>
-
 #include <cmdline.h>
 #include <debug.h>
 #include <algorithm>

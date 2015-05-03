@@ -29,8 +29,7 @@
 #ifndef SCOPE_H
 #define SCOPE_H
 
-#include <QEvent>
-#include <QtGui>
+#include <QtWidgets>
 
 #include <qwt_scale_engine.h>
 #include <qwt_plot_grid.h>

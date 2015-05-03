@@ -22,7 +22,7 @@
 
 #include <QLineEdit>
 #include <QAbstractButton>
-#include <QtGui>
+#include <QtWidgets>
 #include <event.h>
 #include <map>
 #include <mutex.h>

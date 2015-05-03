@@ -16,7 +16,7 @@
 
  */
 
-#include <QtGui>
+#include <QtWidgets>
 #include <QFileDialog>
 #include <QEvent>
 
@@ -819,7 +819,7 @@ void DataRecorder::Panel::changeDataFile(void)
 	QStringList filterList;
 	filterList.push_back("HDF5 files (*.h5)");
 	filterList.push_back("All files (*.*)");
-	fileDialog.setFilters(filterList);
+	fileDialog.setNameFilters(filterList);
 	fileDialog.selectNameFilter("HDF5 files (*.h5)");
 
 	QStringList files;

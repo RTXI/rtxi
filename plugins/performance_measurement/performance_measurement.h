@@ -25,7 +25,7 @@
 #include <QFile>
 #include <QFileDialog>
 #include <QMessageBox>
-#include <QtGui>
+#include <QtWidgets>
 
 #include <plugin.h>
 #include <rt.h>

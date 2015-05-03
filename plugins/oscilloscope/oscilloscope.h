@@ -26,7 +26,7 @@
 #ifndef OSCILLOSCOPE_H
 #define OSCILLOSCOPE_H
 
-#include <QtGui>
+#include <QtWidgets>
 
 #include <event.h>
 #include <fifo.h>

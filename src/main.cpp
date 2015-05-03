@@ -18,7 +18,7 @@
  */
 
 #include <QApplication>
-#include <QtGui>
+#include <QtWidgets>
 
 #include <iostream>
 #include <cstdlib>

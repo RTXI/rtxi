@@ -20,7 +20,7 @@
 #ifndef USERPREFS_H
 #define USERPREFS_H
 
-#include <QtGui>
+#include <QtWidgets>
 
 #include <plugin.h>
 #include <rt.h>

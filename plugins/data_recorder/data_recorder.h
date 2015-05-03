@@ -30,10 +30,6 @@
 
 #include <hdf5.h>
 #include <hdf5_hl.h>
-#include <QObject>
-#include <QWidget>
-#include <QEvent>
-#include <QtGui>
 
 namespace DataRecorder
 {
