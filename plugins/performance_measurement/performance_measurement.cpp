@@ -93,7 +93,8 @@ PerformanceMeasurement::Panel::Panel(QWidget *parent) : QWidget(parent),
 		show();
 
 		QTimer *timer = new QTimer(this);
-		timer->start(500);
+		timer->setTimerType(Qt::VeryCoarseTimer);
+		timer->start(1000);
 		QObject::connect(timer,SIGNAL(timeout(void)),this,SLOT(update(void)));
 
 		// Connect states to workspace

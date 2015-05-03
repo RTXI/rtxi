@@ -134,6 +134,7 @@ Scope::Scope(QWidget *parent) :	QwtPlot(parent), legendItem(NULL) {
 
 	// Timer controls refresh rate of scope
 	timer = new QTimer;
+	timer->setTimerType(Qt::CoarseTimer);
 	QObject::connect(timer,SIGNAL(timeout(void)),this,SLOT(timeoutEvent(void)));
 	timer->start(refresh);
 }
