@@ -14,14 +14,14 @@
 
 	 You should have received a copy of the GNU General Public License
 	 along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+	 */
 
 /* 
 	 This class creates and controls the drawing parameters
 	 A control panel is instantiated for all the active channels/modules
 	 and user selection is enabled to change color, style, width and other 
 	 oscilloscope properties.
- */
+	 */
 
 #include <qwt_plot_renderer.h>
 
@@ -156,7 +156,7 @@ void Oscilloscope::Panel::receiveEvent(const ::Event::Object *event) {
 					blocksList->setCurrentIndex(0);
 					buildChannelList();
 				}
-				showTab();
+				showTab(0);
 			}
 			else
 				DEBUG_MSG("Oscilloscope::Panel::receiveEvent : removed block never inserted\n");
@@ -165,7 +165,7 @@ void Oscilloscope::Panel::receiveEvent(const ::Event::Object *event) {
 	else if (event->getName() == Event::RT_POSTPERIOD_EVENT) {
 		scopeWindow->setPeriod(RT::System::getInstance()->getPeriod() * 1e-6);
 		adjustDataSize();
-		showTab();
+		showTab(0);
 	}
 }
 
@@ -228,8 +228,8 @@ void Oscilloscope::Panel::buildChannelList(void) {
 	showChannelTab();
 }
 
-void Oscilloscope::Panel::showTab(void) {
-	switch (tabWidget->currentIndex()) {
+void Oscilloscope::Panel::showTab(int index) {
+	switch (index) {
 		case 0:
 			showChannelTab();
 			break;
@@ -297,18 +297,14 @@ void Oscilloscope::Panel::applyChannelTab(void) {
 	else {
 		if (i == scopeWindow->getChannelsEnd()) {
 			info = new struct channel_info;
-
 			info->block = block;
 			info->type = type;
 			info->index = channelsList->currentIndex();
 			info->previous = 0.0;
 			info->name = QString::number(block->getID())+" "+QString::fromStdString(block->getName(type, channelsList->currentIndex()));
-
 			bool active = setInactiveSync();
 			QwtPlotCurve *curve = new QwtPlotCurve(info->name);
-
-			i = scopeWindow->insertChannel(info->name + " 1 V/div", 2.0, 0.0, QPen(Qt::red, 1, Qt::SolidLine), curve, info);
-
+			i = scopeWindow->insertChannel(info->name + " 200 mV/div", 2.0, 0.0, QPen(Qt::red, 1, Qt::SolidLine), curve, info);
 			flushFifo();
 			setActive(active);
 		}
@@ -333,7 +329,7 @@ void Oscilloscope::Panel::applyChannelTab(void) {
 		}
 		if (scale != i->getScale()) {
 			scopeWindow->setChannelScale(i, scale);
-			scopeWindow->setChannelLabel(i, info->name + " " + scalesList->currentText().simplified());
+			scopeWindow->setChannelLabel(i, info->name + " - " + scalesList->currentText().simplified());
 		}
 		scopeWindow->setChannelOffset(i, offsetsEdit->text().toDouble() * pow(10, -3 * offsetsList->currentIndex()));
 
@@ -997,7 +993,7 @@ Oscilloscope::Panel::Panel(QWidget *parent) :	QWidget(parent), RT::Thread(0), fi
 	// Create tab widget
 	tabWidget = new QTabWidget;
 	tabWidget->setFixedHeight(100);
-	QObject::connect(tabWidget,SIGNAL(currentChanged(QWidget *)),this,SLOT(showTab(void)));
+	QObject::connect(tabWidget,SIGNAL(currentChanged(int)),this,SLOT(showTab(int)));
 
 	// Create main layout
 	layout = new QVBoxLayout;

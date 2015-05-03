@@ -109,7 +109,7 @@ namespace Oscilloscope {
 		void buildChannelList(void);
 		void screenshot(void);
 		void apply(void);
-		void showTab(void);
+		void showTab(int);
 		void activateChannel(bool);
 
 		private:

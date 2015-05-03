@@ -161,7 +161,7 @@ void Scope::updateScopeLayout(void) {
 }
 
 // Insert user specified channel into active list of channels with specified settings
-std::list<Scope::Channel>::iterator Scope::insertChannel(QString label,double scale,double offset,const QPen &pen,QwtPlotCurve *curve,void *info) {
+std::list<Scope::Channel>::iterator Scope::insertChannel(QString label, double scale, double offset, const QPen &pen, QwtPlotCurve *curve, void *info) {
 	struct Channel channel;
 	channel.label = label;
 	channel.scale = scale;
@@ -395,7 +395,7 @@ void Scope::setChannelPen(std::list<Channel>::iterator channel,const QPen &pen) 
 
 // Set channel label
 void Scope::setChannelLabel(std::list<Channel>::iterator channel,const QString &label) {
-	channel->label = label;
+	channel->curve->setTitle(label);
 }
 
 // Draw data on the scope
