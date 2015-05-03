@@ -36,6 +36,8 @@
 
 typedef struct {
 	long long period;
+	long long next_t;
+	long long wakeup;
 	RT_TASK task;
 } xenomai_task_t;
 
@@ -125,6 +127,8 @@ int RT::OS::createTask(RT::OS::Task *task,void *(*entry)(void *),void *arg,int p
 	}
 
 	t->period = -1;
+	t->next_t = -1;
+	t->wakeup = -1;
 
 	*task = t;
 	pthread_setspecific(is_rt_key,reinterpret_cast<const void *>(t));
@@ -154,10 +158,27 @@ long long RT::OS::getTime(void) {
 
 int RT::OS::setPeriod(RT::OS::Task task,long long period) {
 	xenomai_task_t *t = reinterpret_cast<xenomai_task_t *>(task);
-	t->period = period;
-	return rt_task_set_periodic(&t->task,TM_NOW,period);
+	
+	if(period/10 > 100000ll)
+		t->wakeup = rt_timer_ns2ticks(100000ll);
+	else
+		t->wakeup = rt_timer_ns2ticks(period/10);
+
+	t->period = rt_timer_ns2ticks(period);
+	t->next_t = rt_timer_read()+t->period;
+	rt_task_set_periodic(&t->task,TM_NOW,t->period);
+	return 0;
 }
 
 void RT::OS::sleepTimestep(RT::OS::Task task) {
-	rt_task_wait_period(0);
+	xenomai_task_t *t = reinterpret_cast<xenomai_task_t *>(task);
+	register RTIME sleep_time;
+	
+	rt_task_sleep_until(t->next_t-t->wakeup);
+
+	sleep_time = t->next_t-rt_timer_read();
+	if(sleep_time > 0)
+		rt_task_sleep(rt_timer_ticks2ns(sleep_time));
+
+	t->next_t += t->period;
 }
