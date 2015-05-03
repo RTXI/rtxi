@@ -91,7 +91,7 @@ QAction* MainWindow::createModuleMenuItem(const QString &text, const QObject *re
 }
 
 void MainWindow::setModuleMenuItemParameter (QAction *action, int parameter) {
-	action->setData(parameter); //moduleMenu->setItemParameter (menuid, parameter);
+	action->setData(parameter);
 }
 
 void MainWindow::clearModuleMenu (void) {
@@ -109,7 +109,6 @@ void MainWindow::removeModuleMenuItem (QAction *action) {
 }
 
 void MainWindow::removeModuleMenuItemAt (int id) {
-	//moduleMenu->removeItemAt (id);
 }
 
 QAction* MainWindow::createUtilMenuItem(const QString &text, const QObject * receiver, const char *member) {
@@ -118,7 +117,6 @@ QAction* MainWindow::createUtilMenuItem(const QString &text, const QObject * rec
 
 void MainWindow::setUtilMenuItemParameter (QAction *action, int parameter) {
 	action->setData(parameter);
-	//utilMenu->setItemParameter (menuid, parameter);
 }
 
 void MainWindow::clearUtilMenu (void) {
@@ -126,11 +124,9 @@ void MainWindow::clearUtilMenu (void) {
 }
 
 void MainWindow::changeUtilMenuItem (int id, QString text) {
-	//utilMenu->changeItem (id, text);
 }
 
 void MainWindow::removeUtilMenuItem (int id) {
-	//utilMenu->removeItem(id);
 }
 
 void MainWindow::createFileMenu() {
