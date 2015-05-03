@@ -38,7 +38,7 @@ sudo apt-get -y install kernel-package
 sudo apt-get -y install fakeroot crash kexec-tools makedumpfile kernel-wedge
 sudo apt-get -y build-dep linux
 sudo apt-get -y install git-core libncurses5 libncurses5-dev libelf-dev binutils-dev libgsl0-dev vim stress libboost-dev
-sudo apt-get -y install qt4-dev-tools libqt4-dev libqt4-opengl-dev
+sudo apt-get -y install libqt5svg5 libqt5opengl5 libqt5gui5 libqt5core5a libqt5xml5
 
 if [ $? -eq 0 ]; then
 	echo "----->Dependencies installed."
