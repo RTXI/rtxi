@@ -303,12 +303,9 @@ void Oscilloscope::Panel::applyChannelTab(void) {
 			info->index = channelsList->currentIndex();
 			info->previous = 0.0;
 			info->name = QString::number(block->getID())+" "+QString::fromStdString(block->getName(type, channelsList->currentIndex()));
-
 			bool active = setInactiveSync();
 			QwtPlotCurve *curve = new QwtPlotCurve(info->name);
-
-			i = scopeWindow->insertChannel(info->name + " 1 V/div", 2.0, 0.0, QPen(Qt::red, 1, Qt::SolidLine), curve, info);
-
+			i = scopeWindow->insertChannel(info->name + " 200 mV/div", 2.0, 0.0, QPen(Qt::red, 1, Qt::SolidLine), curve, info);
 			flushFifo();
 			setActive(active);
 		}
@@ -333,7 +330,7 @@ void Oscilloscope::Panel::applyChannelTab(void) {
 		}
 		if (scale != i->getScale()) {
 			scopeWindow->setChannelScale(i, scale);
-			scopeWindow->setChannelLabel(i, info->name + " " + scalesList->currentText().simplified());
+			scopeWindow->setChannelLabel(i, info->name + " - " + scalesList->currentText().simplified());
 		}
 		scopeWindow->setChannelOffset(i, offsetsEdit->text().toDouble() * pow(10, -3 * offsetsList->currentIndex()));
 

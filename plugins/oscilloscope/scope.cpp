@@ -127,7 +127,7 @@ Scope::Scope(QWidget *parent) :	QwtPlot(parent), legendItem(NULL) {
 	legendItem->setMargin(4);
 	legendItem->setSpacing(2);
 	legendItem->setItemMargin(0);
-	legendItem->setBackgroundBrush(QBrush(QColor(200,200,200)));
+	legendItem->setBackgroundBrush(QBrush(QColor(225,225,225)));
 
 	// Update scope background/scales/axes
 	updateScopeLayout();
@@ -394,7 +394,7 @@ void Scope::setChannelPen(std::list<Channel>::iterator channel,const QPen &pen) 
 
 // Set channel label
 void Scope::setChannelLabel(std::list<Channel>::iterator channel,const QString &label) {
-	channel->label = label;
+	channel->curve->setTitle(label);
 }
 
 // Draw data on the scope

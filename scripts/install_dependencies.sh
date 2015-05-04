@@ -27,6 +27,7 @@ DEPS=${ROOT}/deps
 HDF=${DEPS}/hdf
 QWT=${DEPS}/qwt
 DYN=${DEPS}/dynamo
+PLG=${ROOT}/plugins
 
 # Check for compilation dependencies
 echo "Checking for dependencies..."
@@ -103,7 +104,7 @@ else
 	echo "----->rtxi_includes sync failed."
 	exit
 fi
-find ../plugins/. -name "*.h" -exec cp -t /usr/local/lib/rtxi_includes/ {} +
+find ${PLG}/. -name "*.h" -exec cp -t /usr/local/lib/rtxi_includes/ {} +
 
 # Install dynamo
 echo "Installing DYNAMO utility..."
