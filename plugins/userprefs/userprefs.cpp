@@ -32,8 +32,8 @@ UserPrefs::Panel::Panel(QWidget *parent) : QWidget(parent) {
 
 	// Make Mdi
 	subWindow = new QMdiSubWindow;
-   subWindow->setWindowIcon(QIcon("/usr/local/lib/rtxi/RTXI-widget-icon.png"));
-	subWindow->setFixedSize(500,300);
+	subWindow->setWindowIcon(QIcon("/usr/local/lib/rtxi/RTXI-widget-icon.png"));
+	subWindow->setFixedSize(500,330);
 	subWindow->setWindowFlags(Qt::CustomizeWindowHint);
 	subWindow->setWindowFlags(Qt::WindowCloseButtonHint);
 	subWindow->setAttribute(Qt::WA_DeleteOnClose);
