@@ -824,7 +824,7 @@ void Oscilloscope::Panel::showChannelTab(void) {
 	IO::flags_t type;
 	switch (typesList->currentIndex()) {
 		case 0:
-			type = Workspace::OUTPUT;
+			type = Workspace::INPUT;
 			break;
 		case 1:
 			type = Workspace::OUTPUT;
