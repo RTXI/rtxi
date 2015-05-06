@@ -93,8 +93,10 @@ PerformanceMeasurement::Panel::Panel(QWidget *parent) : QWidget(parent),
 		show();
 
 		QTimer *timer = new QTimer(this);
-		timer->start(500);
+		timer->start(1000);
 		QObject::connect(timer,SIGNAL(timeout(void)),this,SLOT(update(void)));
+		resetMaxTimer = new QTimer(this);
+		QObject::connect(resetMaxTimer,SIGNAL(timeout(void)),this,SLOT(resetMaxTimeStep(void)));
 
 		// Connect states to workspace
 		setData(Workspace::STATE, 0, &duration);
@@ -139,7 +141,10 @@ void PerformanceMeasurement::Panel::write(void) {
 	switch (state) {
 		case EXEC:
 			if (maxDuration < now - lastRead)
+			{
 				maxDuration = now - lastRead;
+				resetMaxTimer->start(10000);				
+			}
 			duration = now - lastRead;
 			break;
 		case INIT2:
@@ -153,6 +158,10 @@ void PerformanceMeasurement::Panel::write(void) {
 void PerformanceMeasurement::Panel::reset(void) {
 	state = INIT1;
 	timestepStat.clear();
+}
+
+void PerformanceMeasurement::Panel::resetMaxTimeStep(void) {
+	maxTimestep = 0.0;
 }
 
 void PerformanceMeasurement::Panel::update(void) {

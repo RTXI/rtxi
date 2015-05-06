@@ -81,6 +81,7 @@ namespace PerformanceMeasurement {
 				 * Starts the statistics over
 				 */
 				void reset(void);
+				void resetMaxTimeStep(void);
 
 			/*!
 			 * Updates the GUI with the latest values
@@ -93,9 +94,9 @@ namespace PerformanceMeasurement {
 				INIT1, INIT2, EXEC,
 			} state;
 
-//			QGroupBox *gridBox;
 			QString labelText;
 			QLabel *label;
+			QTimer *resetMaxTimer;
 
 			double duration;
 			double lastRead;
