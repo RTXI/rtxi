@@ -70,13 +70,6 @@ if BUILD_ANALOGY
 	@echo '  <OBJECT id="13" name="0" />'						>> $@
 	@echo ' </OBJECT>'								>> $@
 endif
-if BUILD_NI
-	@echo ' <OBJECT component="plugin" library="ni_driver.so" id="2" >'		>> $@
-	@echo '  <PARAM name="0" >PCI::SCAN</PARAM>'					>> $@
-	@echo '  <PARAM name="Num Devices" >1</PARAM>'					>> $@
-	@echo '  <OBJECT id="14" name="0" />'						>> $@
-	@echo ' </OBJECT>'								>> $@
-endif
 	@echo ' <OBJECT component="plugin" library="model_loader.so" id="3" />'		>> $@
 	@echo ' <OBJECT component="plugin" library="dynamo_model_loader.so" id="4" />'	>> $@
 	@echo ' <OBJECT component="plugin" library="system_control.so" id="5" />'	>> $@
