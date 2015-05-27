@@ -14,14 +14,14 @@
 
 	 You should have received a copy of the GNU General Public License
 	 along with this program.  If not, see <http://www.gnu.org/licenses/>.
-	 */
+ */
 
 /* 
 	 This class creates and controls the drawing parameters
 	 A control panel is instantiated for all the active channels/modules
 	 and user selection is enabled to change color, style, width and other 
 	 oscilloscope properties.
-	 */
+ */
 
 #include <qwt_plot_renderer.h>
 
@@ -297,11 +297,13 @@ void Oscilloscope::Panel::applyChannelTab(void) {
 	else {
 		if (i == scopeWindow->getChannelsEnd()) {
 			info = new struct channel_info;
+
 			info->block = block;
 			info->type = type;
 			info->index = channelsList->currentIndex();
 			info->previous = 0.0;
 			info->name = QString::number(block->getID())+" "+QString::fromStdString(block->getName(type, channelsList->currentIndex()));
+
 			bool active = setInactiveSync();
 			QwtPlotCurve *curve = new QwtPlotCurve(info->name);
 			i = scopeWindow->insertChannel(info->name + " 200 mV/div", 2.0, 0.0, QPen(Qt::red, 1, Qt::SolidLine), curve, info);
@@ -823,7 +825,7 @@ void Oscilloscope::Panel::showChannelTab(void) {
 	IO::flags_t type;
 	switch (typesList->currentIndex()) {
 		case 0:
-			type = Workspace::OUTPUT;
+			type = Workspace::INPUT;
 			break;
 		case 1:
 			type = Workspace::OUTPUT;
@@ -1204,6 +1206,7 @@ void Oscilloscope::Panel::doDeferred(const Settings::Object::State &s) {
 					s.loadInteger(str.str() + " pen width"), Qt::PenStyle(s.loadInteger(str.str() + " pen style"))), curve, info);
 
 		//scopeWindow->setChannelLabel(chan, info->name + " " + properties->scaleList->itemText(static_cast<int> (round(4 * (log10(1/chan->getScale()) + 1)))).simplified());
+		//scopeWindow->setChannelLabel(chan, info->name + " - " + scalesList->itemText(static_cast<int> (round(4 * (log10(1/chan->getScale()) + 1)))).simplified());
 	}
 
 	flushFifo();

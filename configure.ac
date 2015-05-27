@@ -117,26 +117,6 @@ else
   AM_CONDITIONAL(BUILD_ANALOGY, false)
 fi
 
-AC_ARG_ENABLE(ni,
-  [  --enable-ni             build the ni driver],
-  [case "${enableval}" in
-    "" | y | ye | yes) ni=true;;
-    n | no) ni=false;;
-    *) AC_MSG_ERROR(bad value ${enableval} for --enable-ni);;
-  esac],
-  [ni=false])
-AM_CONDITIONAL(BUILD_NI, test x$ni = xtrue)
-
-AC_ARG_ENABLE(clampprotocol,
-  [  --enable-clampprotocol     build the clamp protocol module (default=enabled)],
-  [case "${enableval}" in
-    "" | y | ye | yes) clampprotocol=true ;;
-    n | no) clampprotocol=false ;;
-    *) AC_MSG_ERROR(bad value ${enableval} for --enable-clampprotocol) ;;
-  esac],
-  [clampprotocol=true])
-AM_CONDITIONAL(BUILD_CLAMPPROTOCOL, test x$clampprotocol = xtrue)
-
 dnl Clear build variables
 
 INCLUDES=
@@ -164,7 +144,6 @@ plugins/connector/Makefile
 plugins/data_recorder/Makefile
 plugins/dynamo_model_loader/Makefile
 plugins/model_loader/Makefile
-plugins/ni_device/Makefile
 plugins/oscilloscope/Makefile
 plugins/performance_measurement/Makefile
 plugins/system_control/Makefile

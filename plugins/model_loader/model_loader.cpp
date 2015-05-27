@@ -20,8 +20,6 @@
 #include <debug.h>
 #include <main_window.h>
 #include <model_loader.h>
-#include <QFileDialog>
-#include <QSettings>
 #include <algorithm>
 
 extern "C" Plugin::Object * createRTXIPlugin(void *) {
