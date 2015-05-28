@@ -218,6 +218,7 @@ SweptResponse::SweptResponse( FilterImplementation *filter_implem,
     delete reconst_output;
    }
  //if(Normalize_Enabled) NormalizeResponse();
+ delete[] output_tone;
  return;
 }
 //=======================================================
