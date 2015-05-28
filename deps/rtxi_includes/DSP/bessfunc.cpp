@@ -207,5 +207,8 @@ BesselTransFunc::BesselTransFunc( int order,
     }
   #endif
 
+  delete[] work_coeff;
+  delete[] denom_poly;
+
   return;
 }
