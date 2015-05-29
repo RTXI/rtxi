@@ -10,6 +10,8 @@ public:
   // constructor  
   PrimeFactorSet( int num_factors,
                   int *factors);
+  ~PrimeFactorSet(void);
+
 private:
   int Num_Factors;
   int Num_Distinct_Factors;
@@ -23,6 +25,8 @@ public:
   // constructor  
   OrderedFactorSet( int num_factors,
                     int *factors);
+  ~OrderedFactorSet( void );
+
 private:
   int Num_Factors;
   int *Factor_Vector;
