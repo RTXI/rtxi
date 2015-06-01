@@ -274,7 +274,8 @@ class DefaultGUIModel : public QWidget, public RT::Thread, public Plugin::Object
 			bool periodEventPaused;
 			mutable QString junk;
 
-			QGroupBox *gridBox;
+			QWidget *gridBox;
+//			QGroupBox *gridBox;
 			QGroupBox *buttonGroup;
 			std::string myname;
 			QMdiSubWindow *subWindow;
