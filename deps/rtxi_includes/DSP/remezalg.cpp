@@ -101,6 +101,11 @@ RemezAlgorithm::RemezAlgorithm( istream& uin,
  *fir_filter = new FirFilterDesign( filter_length, 
                                     FIR_SYM_EVEN_LEFT, 
                                     filter_coeffs);
+
+ delete[] extremal_freqs;
+// delete[] filter_coeffs; // something strange is going on here with memory. 
+// Is filter_coeffs pointing something persistent? -Ansel
+
  return;
 };
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++

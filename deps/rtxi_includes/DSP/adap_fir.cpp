@@ -48,6 +48,13 @@ AdaptiveFir::AdaptiveFir( int num_taps,
  return;
 }
 
+~AdaptiveFir::AdaptiveFir( void ) {
+	delete[] Tally_For_Avg;
+	delete[] Tally_For_Avg_2;
+	delete[] Sample_Transient;
+	delete[] Sample_Trans_2;
+}
+
 void AdaptiveFir::DumpAvgTransient( int decim_factor )
 {
   int samp_idx;

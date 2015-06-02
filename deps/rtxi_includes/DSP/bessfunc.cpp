@@ -207,5 +207,8 @@ BesselTransFunc::BesselTransFunc( int order,
     }
   #endif
 
+//  delete[] work_coeff; //Not sure about this one. Why does cppcheck throw an error with denom_poly but not work_coeff? -Ansel
+  delete[] denom_poly;
+
   return;
 }

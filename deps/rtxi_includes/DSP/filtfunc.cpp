@@ -213,8 +213,9 @@ void FilterTransFunc::FilterFrequencyResponse(void)
                      << ",  " << group_dly[i] << std::endl;
    }
  Response_File->close();
- delete []phase_resp;
- delete []mag_resp;
+ delete[] phase_resp;
+ delete[] mag_resp;
+ delete[] group_dly;
  return;
 }
 

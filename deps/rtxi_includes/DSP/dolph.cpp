@@ -59,6 +59,6 @@ void DolphChebyWindow::GenerateWindow(int length, double Alpha_Parm) {
 	}
 
 	NormalizeWindow();
-	delete freq_resp;
+	delete[] freq_resp;
 	return;
 }
