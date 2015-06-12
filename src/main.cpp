@@ -85,6 +85,7 @@ int main(int argc,char *argv[]) {
 	 ************************************************************/
 
 	/* Create GUI Objects */
+	QApplication::setDesktopSettingsAware(false);
 	QApplication *app = new QApplication(argc,argv);
 	app->connect(app,SIGNAL(lastWindowClosed()),app,SLOT(quit()));
 	MainWindow::getInstance()->showMaximized();
