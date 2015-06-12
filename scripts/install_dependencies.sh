@@ -68,7 +68,7 @@ cd ${DEPS}
 echo "----->Install gridExtra R package"
 
 if [ -d "/usr/local/lib/R/site-library" ]; then
-	echo "------>gridExtra already installed"
+	echo "----->gridExtra already installed"
 else
 	wget --no-check-certificate http://cran.r-project.org/src/contrib/gridExtra_0.9.1.tar.gz
 	tar xf gridExtra_0.9.1.tar.gz
