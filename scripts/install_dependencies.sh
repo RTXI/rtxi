@@ -20,7 +20,9 @@
 
 #!/bin/bash
 
-# Directories
+###############################################################################
+# Set directory variable for compilation
+###############################################################################
 DIR=$PWD
 ROOT=${DIR}/../
 DEPS=${ROOT}/deps
@@ -29,27 +31,55 @@ QWT=${DEPS}/qwt
 DYN=${DEPS}/dynamo
 PLG=${ROOT}/plugins
 
-# Check for compilation dependencies
-echo "Checking for dependencies..."
+###############################################################################
+# Check for all RTXI *.deb dependencies and install them. Includes:
+#  - Kernel tools
+#  - C/C++ compiler and debugger
+#  - Qt5, HDF, and Qwt6 libraries
+#  - R and some R packages
+###############################################################################
+echo "Checking dependencies..."
 
 sudo apt-get update
 sudo apt-get -y upgrade
-sudo apt-get -y install autotools-dev automake libtool
-sudo apt-get -y install kernel-package
-sudo apt-get -y install fakeroot crash kexec-tools makedumpfile kernel-wedge
+sudo apt-get -y install autotools-dev automake libtool kernel-package gcc g++ \
+                        gdb fakeroot crash kexec-tools makedumpfile \
+                        kernel-wedge libncurses5-dev libelf-dev binutils-dev \
+                        libgsl0-dev libboost-dev 
+sudo apt-get -y install git vim emacs lshw stress
+sudo apt-get -y install libqt5svg5-dev libqt5opengl5 libqt5gui5 libqt5core5a \
+                        libqt5xml5 qt5-default
+sudo apt-get -y install r-base r-cran-ggplot2 r-cran-reshape2 r-cran-hdf5 \
+                        r-cran-plyr r-cran-scales
+
 sudo apt-get -y build-dep linux
-sudo apt-get -y install git-core libncurses5 libncurses5-dev libelf-dev binutils-dev libgsl0-dev vim stress libboost-dev
-sudo apt-get -y install libqt5svg5 libqt5svg5-dev libqt5opengl5 libqt5gui5 libqt5core5a libqt5xml5 qt5-default
 
 if [ $? -eq 0 ]; then
-	echo "----->Dependencies installed."
+	echo "----->Package dependencies installed."
 else
-	echo "----->Dependency installation failed."
+	echo "----->Package dependency installation failed."
 	exit
 fi
 
 # Start at top
 cd ${DEPS}
+
+# gridExtra doesn't have a *.deb package yet, so install it manually.
+echo "----->Install gridExtra R package"
+
+if [ -d "/usr/local/lib/R/site-library" ]; then
+	echo "------>gridExtra already installed"
+else
+	wget --no-check-certificate http://cran.r-project.org/src/contrib/gridExtra_0.9.1.tar.gz
+	tar xf gridExtra_0.9.1.tar.gz
+	sudo R CMD INSTALL gridExtra
+	if [ $? -eq 0 ]; then
+			echo "----->gridExtra installed."
+	else
+		echo "----->gridExtra installation failed."
+		exit
+	fi
+fi
 
 # Installing HDF5
 echo "----->Checking for HDF5"
