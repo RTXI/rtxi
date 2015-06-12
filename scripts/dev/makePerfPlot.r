@@ -3,14 +3,11 @@
 options(warn=-1)
 args = commandArgs(trailingOnly=T)
 
-# Check for dependencies and install if missing
-if( !(require(gridExtra)) ) {
-   install.packages("gridExtra", repos="http://watson.nci.nih.gov/cran_mirror/")
-   library(gridExtra)
+# Check for dependencies and exit if missing
+if( !(require(gridExtra)&&require(reshape2)&&require(ggplot2)) ) {
+	message("I need to have gridExtra, reshape2, and ggplot2 installed.")
+	stop("Run the install_dependencies.sh script and try this again.")
 }
-
-library(ggplot2)
-library(reshape2)
 
 # Headings for the plot. Edit them here. 
 os = as.character(args[1])

@@ -20,24 +20,6 @@
 
 #!/bin/bash
 
-# Check to see if R and stress are installed
-echo "----->Checking for dependencies needed to generate plot."
-if ! $(dpkg-query -Wf'${db:Status-abbrev}' "r-base" 2>/dev/null | grep -q '^i'); 
-	then sudo apt-get -y install r-base r-cran-ggplot2 r-cran-reshape2 \
-	                             r-cran-plyr r-cran-scales
-fi
-if ! $(dpkg-query -Wf'${db:Status-abbrev}' "lshw" 2>/dev/null | grep -q '^i'); 
-	then sudo apt-get -y install lshw
-fi
-echo ""
-
-# This could be added to install_dependencies.sh, but that would create an issue
-# when different users run the script. They all have their own local folders.
-if ! [ -d ~/.config/R ]; then
-   mkdir ~/.config/R
-   echo "R_LIBS_USER=\"~/.config/R\"" > ~/.Renviron
-fi
-
 # Get the filenames
 HDF_FILENAME=$1
 
