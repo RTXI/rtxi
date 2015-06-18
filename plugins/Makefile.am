@@ -7,8 +7,6 @@ SUBDIRS = \
 	performance_measurement \
 	system_control \
 	model_loader \
-	comedi_device \
-	comedilib_device \
 	dynamo_model_loader \
 	userprefs \
 	connector \

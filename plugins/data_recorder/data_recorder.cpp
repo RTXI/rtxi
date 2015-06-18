@@ -387,7 +387,7 @@ DataRecorder::Panel::Panel(QWidget *parent, size_t buffersize) :
 			"<p><b>Data Recorder:</b><br>The Data Recorder writes data to an HDF5 file format "
 			"All available signals for saving to file are automatically detected. Currently "
 			"loaded user modules are listed in the \"Block\" drop-down box. Available DAQ cards "
-			"are listed here as /dev/comedi[#]. Use the \"Type\" and \"Channel\" drop-down boxes "
+			"are listed here as /proc/analogy/devices. Use the \"Type\" and \"Channel\" drop-down boxes "
 			"to select the signals that you want to save. Use the left and right arrow buttons to "
 			"add these signals to the file. You may select a downsampling rate that is applied "
 			"to the real-time period for execution (set in the System Control Panel). The real-time "
