@@ -35,6 +35,12 @@ sudo rm -rf /usr/local/lib/rtxi_includes
 sudo rm -rf /usr/local/include/rtxi
 sudo rm -rf /etc/rtxi.conf
 
+# Remove old qt/qwt installations
+if [ $(dpkg-query -W -f='${Status}' qt4-dev-tools 2>/dev/null | grep -c "ok installed") -eq 1 ];
+then
+sudo apt-get purge libqt4-* qt4-*
+fi
+
 if [ $? -eq 0 ]; then
 	echo "----->RTXI intallation successful. Reboot may be required."
 else
