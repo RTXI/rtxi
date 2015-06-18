@@ -32,6 +32,7 @@ sudo make clean
 sudo rm -rf /usr/local/lib/rtxi
 sudo rm -rf /usr/local/lib/qwt
 sudo rm -rf /usr/local/lib/rtxi_includes
+sudo rm -rf /usr/local/include/rtxi
 sudo rm -rf /etc/rtxi.conf
 
 if [ $? -eq 0 ]; then
