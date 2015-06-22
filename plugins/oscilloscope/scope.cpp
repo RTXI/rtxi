@@ -137,6 +137,7 @@ Scope::Scope(QWidget *parent) :	QwtPlot(parent), legendItem(NULL) {
 	timer->setTimerType(Qt::CoarseTimer);
 	QObject::connect(timer,SIGNAL(timeout(void)),this,SLOT(timeoutEvent(void)));
 	timer->start(refresh);
+	resize(sizeHint());
 }
 
 // Kill me

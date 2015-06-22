@@ -594,7 +594,7 @@ QWidget * Oscilloscope::Panel::createChannelTab(QWidget *parent) {
 	offsetsEdit->setValidator(new QDoubleValidator(offsetsEdit));
 	bttnLayout->addWidget(offsetsEdit, 0, 11, 1, 1);
 	offsetsList = new QComboBox(page);
-	offsetsList->setFixedWidth(40);
+//	offsetsList->setFixedWidth(40);
 	bttnLayout->addWidget(offsetsList, 0, 12, 1, 1);
 	offsetsList->addItem("V");
 	offsetsList->addItem("mV");
@@ -753,7 +753,7 @@ QWidget *Oscilloscope::Panel::createDisplayTab(QWidget *parent) {
 	downsampleLabel->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
 	displayTabLayout->addWidget(downsampleLabel, 0, 9, 1, 2);
 	ratesSpin = new QSpinBox(page);
-	ratesSpin->setFixedWidth(40);
+//	ratesSpin->setFixedWidth(40);
 	displayTabLayout->addWidget(ratesSpin, 0, 11, 1, 1);
 	ratesSpin->setValue(downsample_rate);
 	QObject::connect(ratesSpin,SIGNAL(valueChanged(int)),this,SLOT(updateDownsampleRate(int)));
@@ -789,7 +789,7 @@ QWidget *Oscilloscope::Panel::createDisplayTab(QWidget *parent) {
 
 	displayTabLayout->addWidget(new QLabel(tr("Threshold:"),page), 1, 9, 1, 2, Qt::AlignVCenter | Qt::AlignRight);
 	trigsThreshEdit = new QLineEdit(page);
-	trigsThreshEdit->setFixedWidth(50);
+//	trigsThreshEdit->setFixedWidth(50);
 	displayTabLayout->addWidget(trigsThreshEdit, 1, 11, 1, 1);
 	trigsThreshEdit->setValidator(new QDoubleValidator(trigsThreshEdit));
 	trigsThreshList = new QComboBox(page);
@@ -806,7 +806,7 @@ QWidget *Oscilloscope::Panel::createDisplayTab(QWidget *parent) {
 
 	displayTabLayout->addWidget(new QLabel(tr("Holdoff:"),page), 1, 16, 1, 1, Qt::AlignVCenter | Qt::AlignLeft);
 	trigsHoldoffEdit = new QLineEdit(page);
-	trigsHoldoffEdit->setFixedWidth(50);
+//	trigsHoldoffEdit->setFixedWidth(50);
 	displayTabLayout->addWidget(trigsHoldoffEdit, 1, 17, 1, 1);
 	trigsHoldoffEdit->setValidator(new QDoubleValidator(trigsHoldoffEdit));
 	trigsHoldoffList = new QComboBox(page);
@@ -975,10 +975,9 @@ Oscilloscope::Panel::Panel(QWidget *parent) :	QWidget(parent), RT::Thread(0), fi
 	// Make Mdi
 	subWindow = new QMdiSubWindow;
 	subWindow->setWindowIcon(QIcon("/usr/local/lib/rtxi/RTXI-widget-icon.png"));
-	subWindow->setFixedSize(848,625);
 	subWindow->setAttribute(Qt::WA_DeleteOnClose);
-	subWindow->setWindowFlags(Qt::CustomizeWindowHint);
-	subWindow->setWindowFlags(Qt::WindowCloseButtonHint);
+	subWindow->setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint | 
+	                          Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint);
 	MainWindow::getInstance()->createMdi(subWindow);
 
 	setWhatsThis("<p><b>Oscilloscope:</b><br>The Oscilloscope allows you to plot any signal "
@@ -994,8 +993,7 @@ Oscilloscope::Panel::Panel(QWidget *parent) :	QWidget(parent), RT::Thread(0), fi
 
 	// Create tab widget
 	tabWidget = new QTabWidget;
-	tabWidget->setFixedHeight(100);
-	QObject::connect(tabWidget,SIGNAL(currentChanged(int)),this,SLOT(showTab(int)));
+	tabWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 
 	// Create main layout
 	layout = new QVBoxLayout;
@@ -1050,6 +1048,9 @@ Oscilloscope::Panel::Panel(QWidget *parent) :	QWidget(parent), RT::Thread(0), fi
 	buildChannelList();
 	showDisplayTab();
 	subWindow->setWidget(this);
+//	subWindow->adjustSize();
+	subWindow->setMinimumSize(subWindow->minimumSizeHint().width(),500);
+	subWindow->resize(subWindow->minimumSizeHint().width(),625);
 
 	// Initialize vars
 	counter = 0;
