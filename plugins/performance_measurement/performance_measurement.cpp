@@ -40,9 +40,8 @@ PerformanceMeasurement::Panel::Panel(QWidget *parent) : QWidget(parent),
 		QMdiSubWindow *subWindow = new QMdiSubWindow;
 	   subWindow->setWindowIcon(QIcon("/usr/local/lib/rtxi/RTXI-widget-icon.png"));
 		subWindow->setAttribute(Qt::WA_DeleteOnClose);
-		subWindow->setWindowFlags(Qt::CustomizeWindowHint);
-		subWindow->setWindowFlags(Qt::WindowCloseButtonHint);
-		subWindow->setFixedSize(310,200);
+		subWindow->setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint | 
+		                          Qt::WindowMinimizeButtonHint);
 		MainWindow::getInstance()->createMdi(subWindow);
 
 		// Create main layout
@@ -90,6 +89,7 @@ PerformanceMeasurement::Panel::Panel(QWidget *parent) : QWidget(parent),
 
 		// Set layout to Mdi
 		subWindow->setWidget(this);
+		subWindow->setFixedSize(subWindow->minimumSizeHint());
 		show();
 
 		QTimer *timer = new QTimer(this);
@@ -162,7 +162,7 @@ void PerformanceMeasurement::Panel::reset(void) {
 }
 
 void PerformanceMeasurement::Panel::resetMaxTimeStep(void) {
-	maxTimestep = 0.0;
+	maxTimestep = timestep;
 }
 
 void PerformanceMeasurement::Panel::update(void) {
