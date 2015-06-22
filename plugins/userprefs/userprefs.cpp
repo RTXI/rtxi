@@ -33,9 +33,8 @@ UserPrefs::Panel::Panel(QWidget *parent) : QWidget(parent) {
 	// Make Mdi
 	subWindow = new QMdiSubWindow;
 	subWindow->setWindowIcon(QIcon("/usr/local/lib/rtxi/RTXI-widget-icon.png"));
-	subWindow->setFixedSize(500,330);
-	subWindow->setWindowFlags(Qt::CustomizeWindowHint);
-	subWindow->setWindowFlags(Qt::WindowCloseButtonHint);
+	subWindow->setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint | 
+	                          Qt::WindowMinimizeButtonHint);
 	subWindow->setAttribute(Qt::WA_DeleteOnClose);
 	MainWindow::getInstance()->createMdi(subWindow);
 
@@ -127,6 +126,7 @@ UserPrefs::Panel::Panel(QWidget *parent) : QWidget(parent) {
 
 	// Set layout to Mdi
 	subWindow->setWidget(this);
+	subWindow->setFixedSize(500,subWindow->sizeHint().height());
 	show();
 }
 
