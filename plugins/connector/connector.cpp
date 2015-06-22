@@ -49,10 +49,9 @@ Connector::Panel::Panel(QWidget *parent) : QWidget(parent) {
 	// Make Mdi
 	subWindow = new QMdiSubWindow;
 	subWindow->setWindowIcon(QIcon("/usr/local/lib/rtxi/RTXI-widget-icon.png"));
-	subWindow->setFixedSize(500,400);
 	subWindow->setAttribute(Qt::WA_DeleteOnClose);
-	subWindow->setWindowFlags(Qt::CustomizeWindowHint);
-	subWindow->setWindowFlags(Qt::WindowCloseButtonHint);
+	subWindow->setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint | 
+	                          Qt::WindowMinimizeButtonHint);
 	MainWindow::getInstance()->createMdi(subWindow);
 
 	// Create main layout
@@ -131,6 +130,7 @@ Connector::Panel::Panel(QWidget *parent) : QWidget(parent) {
 
 	// Set layout to Mdi
 	subWindow->setWidget(this);
+	subWindow->setFixedSize(500, subWindow->sizeHint().height());
 	show();
 
 	block_list_info_t info = {inputBlock, outputBlock, &blocks};
