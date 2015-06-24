@@ -66,8 +66,6 @@ SystemControlPanel::SystemControlPanel(QWidget *parent) : QWidget(parent) {
 	subWindow->setWindowIcon(QIcon("/usr/local/lib/rtxi/RTXI-widget-icon.png"));
 	subWindow->setFixedSize(400,425);
 	subWindow->setAttribute(Qt::WA_DeleteOnClose);
-	subWindow->setWindowFlags(Qt::CustomizeWindowHint);
-	subWindow->setWindowFlags(Qt::WindowCloseButtonHint);
 	MainWindow::getInstance()->createMdi(subWindow);
 
 	// Create main layout

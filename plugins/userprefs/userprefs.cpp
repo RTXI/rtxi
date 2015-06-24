@@ -33,9 +33,7 @@ UserPrefs::Panel::Panel(QWidget *parent) : QWidget(parent) {
 	// Make Mdi
 	subWindow = new QMdiSubWindow;
    subWindow->setWindowIcon(QIcon("/usr/local/lib/rtxi/RTXI-widget-icon.png"));
-	subWindow->setFixedSize(500,330);
-	subWindow->setWindowFlags(Qt::CustomizeWindowHint);
-	subWindow->setWindowFlags(Qt::WindowCloseButtonHint);
+	subWindow->setFixedSize(500,275);
 	subWindow->setAttribute(Qt::WA_DeleteOnClose);
 	MainWindow::getInstance()->createMdi(subWindow);
 
@@ -84,8 +82,8 @@ UserPrefs::Panel::Panel(QWidget *parent) : QWidget(parent) {
 
 	// Create elements for child widget
 	HDFBufferEdit = new QLineEdit(HDF);
-	hdfLayout->addWidget(new QLabel(tr("HDF Data Recorder Buffer Size (MB):")), 1, 0);
-	hdfLayout->addWidget(HDFBufferEdit, 1, 1);
+	hdfLayout->addWidget(new QLabel(tr("HDF Data Recorder Buffer Size (MB):")), 0, 0);
+	hdfLayout->addWidget(HDFBufferEdit, 0, 1);
 	HDFBufferEdit->setText(QString::number(userprefs.value("/system/HDFbuffer", 10).toInt()));
 
 	// Attach child to parent
