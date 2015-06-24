@@ -796,7 +796,7 @@ QWidget *Oscilloscope::Panel::createDisplayTab(QWidget *parent) {
 	displayTabLayout->addWidget(trigsThreshList, 1, 12);
 	trigsThreshList->addItem("V");
 	trigsThreshList->addItem("mV");
-	trigsThreshList->addItem("uV");
+	trigsThreshList->addItem(QString::fromUtf8("µV"));
 	trigsThreshList->addItem("nV");
 	trigsThreshList->addItem("pV");
 
@@ -812,7 +812,7 @@ QWidget *Oscilloscope::Panel::createDisplayTab(QWidget *parent) {
 	trigsHoldoffList = new QComboBox(page);
 	displayTabLayout->addWidget(trigsHoldoffList, 1, 18, 1, 1);
 	trigsHoldoffList->addItem("ms");
-	trigsHoldoffList->addItem("us");
+	trigsHoldoffList->addItem(QString::fromUtf8("µs"));
 	trigsHoldoffList->addItem("ns");
 
 	return page;
@@ -994,7 +994,7 @@ Oscilloscope::Panel::Panel(QWidget *parent) :	QWidget(parent), RT::Thread(0), fi
 	// Create tab widget
 	tabWidget = new QTabWidget;
 	tabWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-
+	
 	// Create main layout
 	layout = new QVBoxLayout;
 
@@ -1048,7 +1048,6 @@ Oscilloscope::Panel::Panel(QWidget *parent) :	QWidget(parent), RT::Thread(0), fi
 	buildChannelList();
 	showDisplayTab();
 	subWindow->setWidget(this);
-//	subWindow->adjustSize();
 	subWindow->setMinimumSize(subWindow->minimumSizeHint().width(),500);
 	subWindow->resize(subWindow->minimumSizeHint().width(),625);
 
