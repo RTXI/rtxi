@@ -432,13 +432,17 @@ void AnalogyDevice::read(void) {
 	// Create mask using only enabled digital channels
 	for(size_t i=0;i < subdevice[DIO].count;++i)
 		if(subdevice[DIO].chan[i].active && subdevice[DIO].chan[i].digital.direction == DAQ::INPUT)
+		{
+			printf("mask is %d %d \n", mask, i);
 			mask = (1<<i);
+			printf("mask is %d %d\n", mask, i);
+		}
 
 	// Read all data and output it according to channel activity
 	a4l_sync_dio(&dsc, subdevice[DIO].id, &mask, &data);
-	mask = 0;
 
 	// Read only enabled digital channels
+	mask = 0;
 	for(size_t i=0;i < subdevice[DIO].count;++i)
 		if(subdevice[DIO].chan[i].active && subdevice[DIO].chan[i].digital.direction == DAQ::INPUT) {
 			mask = (1<<i);
@@ -487,7 +491,7 @@ void AnalogyDevice::write(void) {
 
 	{
 		size_t offset = getChannelCount(AO);
-		int value;
+		int value = 0;
 		unsigned int data = 0, mask = 0;
 
 		for(size_t i=0;i < subdevice[DIO].count;++i) {
