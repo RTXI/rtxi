@@ -275,7 +275,6 @@ class DefaultGUIModel : public QWidget, public RT::Thread, public Plugin::Object
 			mutable QString junk;
 
 			QWidget *gridBox;
-//			QGroupBox *gridBox;
 			QGroupBox *buttonGroup;
 			std::string myname;
 			QMdiSubWindow *subWindow;
