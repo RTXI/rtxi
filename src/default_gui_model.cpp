@@ -91,9 +91,6 @@ void DefaultGUIModel::createGUI(DefaultGUIModel::variable_t *var, int size) {
 	// Make Mdi
 	subWindow = new QMdiSubWindow;
 	subWindow->setWindowIcon(QIcon("/usr/local/lib/rtxi/RTXI-widget-icon.png"));
-	subWindow->setWindowFlags(Qt::CustomizeWindowHint);
-	subWindow->setWindowFlags(Qt::WindowCloseButtonHint);
-	subWindow->setWindowFlags(Qt::WindowMinimizeButtonHint);
 	subWindow->setWindowFlags(Qt::SubWindow);
 	MainWindow::getInstance()->createMdi(subWindow);
 
@@ -105,7 +102,6 @@ void DefaultGUIModel::createGUI(DefaultGUIModel::variable_t *var, int size) {
 	gridBox = new QWidget;
 	gridArea->setWidget(gridBox);
 	gridArea->ensureWidgetVisible(gridBox, 0, 0);
-//	gridArea->setHorizontalScollBarPolicy(Qt::ScrollBarAlwaysOff);
 	gridArea->setWidgetResizable(true);
 	QGridLayout *gridLayout = new QGridLayout;
 
@@ -179,7 +175,6 @@ void DefaultGUIModel::createGUI(DefaultGUIModel::variable_t *var, int size) {
 	buttonGroup->setLayout(buttonLayout);
 
 	// Keep one row of space above for users to place in grid
-//	layout->addWidget(gridBox, 1, 0);
 	layout->addWidget(gridArea, 1, 0);
 
 	// Attempt to put these at the bottom at all times
