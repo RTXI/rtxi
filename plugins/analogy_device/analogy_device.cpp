@@ -423,17 +423,22 @@ void AnalogyDevice::read(void) {
 			sample = 0;
 			err = a4l_sync_read(&dsc, subdevice[AI].id, PACK(i,channel->range,ref),	0, &sample, size);
 
-			// Read via asynchronous acq
-			//err = a4l_async_read(&dsc, &sample, size, 1);
-
 			output(i) = channel->gain*channel->conv*(sample-channel->offset)+channel->zerooffset;
 		}
 
-	unsigned int data = 0, mask = 0xff;
 	size_t offset = getChannelCount(AI);
+	unsigned int data = 0, mask = 0;
+
+	// Create mask using only enabled digital channels
+	for(size_t i=0;i < subdevice[DIO].count;++i)
+		if(subdevice[DIO].chan[i].active && subdevice[DIO].chan[i].digital.direction == DAQ::INPUT)
+			mask = (1<<i);
 
 	// Read all data and output it according to channel activity
 	a4l_sync_dio(&dsc, subdevice[DIO].id, &mask, &data);
+	mask = 0;
+
+	// Read only enabled digital channels
 	for(size_t i=0;i < subdevice[DIO].count;++i)
 		if(subdevice[DIO].chan[i].active && subdevice[DIO].chan[i].digital.direction == DAQ::INPUT) {
 			mask = (1<<i);
@@ -456,9 +461,7 @@ void AnalogyDevice::write(void) {
 				channel = &subdevice[AO].chan[i].analog;
 				value = round(channel->gain*channel->conv*(input(i)-channel->zerooffset)+channel->offset);
 
-				/*
-				 * Prevent wrap around in the data units.
-				 */
+				// Prevent wrap around in the data units.
 				if(value > channel->maxdata)
 					value = channel->maxdata;
 				else if(value < 0.0)
@@ -485,20 +488,19 @@ void AnalogyDevice::write(void) {
 	{
 		size_t offset = getChannelCount(AO);
 		int value;
-		int data = 0, mask = 0;
+		unsigned int data = 0, mask = 0;
 
 		for(size_t i=0;i < subdevice[DIO].count;++i) {
 			value = input(i+offset) != 0.0; 
 			if(subdevice[DIO].chan[i].active && subdevice[DIO].chan[i].digital.direction == DAQ::OUTPUT && subdevice[DIO].chan[i].digital.previous_value != value) {
 				subdevice[DIO].chan[i].digital.previous_value = value;
-				data ^= (1<<i); // Toggle the i-th bit
-				mask |= (1<<i); // Set i-th bit for modification
+				data ^= (1<<i); // Toggle the i-th bit to enable/disable channel
+				mask |= (1<<i); // Set i-th bit for modification to set 0 or 1
 			}
 		}
 		// Write the data according to the mask
-		if (mask) {
+		if (mask)
 			a4l_sync_dio(&dsc, subdevice[DIO].id, &mask, &data);
-		}
 	}
 }
 
