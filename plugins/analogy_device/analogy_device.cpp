@@ -487,25 +487,21 @@ void AnalogyDevice::write(void) {
 
 	{
 		size_t offset = getChannelCount(AO);
-		int value;
+		int value = 0;
 		unsigned int data = 0, mask = 0;
 
 		// Create mask and data buffer with bits to be set
 		for(size_t i=0;i < subdevice[DIO].count;++i) {
 			value = input(i+offset) != 0.0; 
 			if(subdevice[DIO].chan[i].active && subdevice[DIO].chan[i].digital.direction == DAQ::OUTPUT && subdevice[DIO].chan[i].digital.previous_value != value) {
-				printf("i %d value %d\n", i, value);
 				subdevice[DIO].chan[i].digital.previous_value = value;
-				data |= (1<<i); // Toggle the i-th bit to enable/disable channel
-				mask |= (1<<i); // Set i-th bit for modification to set 0 or 1
+				data |= value == 0 ? (0<<i) : (1<<i); // Toggle the i-th bit for modification (set 0 or 1)
+				mask |= (1<<i); // Set i-th bit to specify channels to modify
 			}
 		}
 		// Write the data according to the mask
 		if (mask)
-		{
-			printf("writing mask %d and data %d\n", mask, data);
 			a4l_sync_dio(&dsc, subdevice[DIO].id, &mask, &data);
-		}
 	}
 }
 
