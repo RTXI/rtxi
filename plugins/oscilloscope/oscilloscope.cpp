@@ -760,7 +760,7 @@ QWidget *Oscilloscope::Panel::createDisplayTab(QWidget *parent) {
 	ratesSpin->setRange(1,2);
 	ratesSpin->setValue(1);
 
-	QLabel *bufferLabel = new QLabel(tr("Data Buffer Size (MB):"),page);
+	QLabel *bufferLabel = new QLabel(tr("Buffer Size (MB):"),page);
 	bufferLabel->setAlignment(Qt::AlignVCenter | Qt::AlignRight);
 	displayTabLayout->addWidget(bufferLabel, 0, 12, 1, 3);
 	sizesEdit = new QLineEdit(page);
@@ -769,7 +769,7 @@ QWidget *Oscilloscope::Panel::createDisplayTab(QWidget *parent) {
 	sizesEdit->setEnabled(false);
 
 	// Trigger box
-	displayTabLayout->addWidget(new QLabel(tr("Trigger:"),page), 1, 0);
+	displayTabLayout->addWidget(new QLabel(tr("Edge:"),page), 1, 0);
 	trigsGroup = new QButtonGroup(page);
 
 	QRadioButton *off = new QRadioButton(tr("Off"),page);
@@ -974,10 +974,10 @@ Oscilloscope::Panel::Panel(QWidget *parent) :	QWidget(parent), RT::Thread(0), fi
 	// Make Mdi
 	subWindow = new QMdiSubWindow;
 	subWindow->setWindowIcon(QIcon("/usr/local/lib/rtxi/RTXI-widget-icon.png"));
-	subWindow->setFixedSize(848,625);
+	subWindow->setMinimumSize(800, 600);
 	subWindow->setAttribute(Qt::WA_DeleteOnClose);
 	subWindow->setWindowFlags(Qt::CustomizeWindowHint);
-	subWindow->setWindowFlags(Qt::WindowCloseButtonHint);
+	subWindow->setWindowFlags(Qt::WindowCloseButtonHint | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint);
 	MainWindow::getInstance()->createMdi(subWindow);
 
 	setWhatsThis("<p><b>Oscilloscope:</b><br>The Oscilloscope allows you to plot any signal "
