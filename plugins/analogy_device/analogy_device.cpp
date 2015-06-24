@@ -439,7 +439,6 @@ void AnalogyDevice::read(void) {
 	a4l_sync_dio(&dsc, subdevice[DIO].id, &mask, &data);
 
 	// Read only enabled digital channels one by one with mask for each bit
-	mask = 0;
 	for(size_t i=0;i < subdevice[DIO].count;++i)
 		if(subdevice[DIO].chan[i].active && subdevice[DIO].chan[i].digital.direction == DAQ::INPUT) {
 			mask = (1<<i);
