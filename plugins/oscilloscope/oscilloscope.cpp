@@ -510,60 +510,6 @@ QWidget * Oscilloscope::Panel::createChannelTab(QWidget *parent) {
 	scalesList->addItem(QString::fromUtf8("2.5 µV/div"));
 	scalesList->addItem(QString::fromUtf8("2 µV/div"));
 	scalesList->addItem(QString::fromUtf8("1 µV/div"));
-	
-/*
-	QChar mu = QChar(0x3BC);
-	QString suffix = QString("V/div");
-	QString text = QString("500 ");
-	text.append(mu);
-	text.append(suffix);
-	scalesList->addItem(text);
-	text = QString("250 ");
-	text.append(mu);
-	text.append(suffix);
-	scalesList->addItem(text);
-	text = QString("200 ");
-	text.append(mu);
-	text.append(suffix);
-	scalesList->addItem(text);
-	text = QString("100 ");
-	text.append(mu);
-	text.append(suffix);
-	scalesList->addItem(text);
-	text = QString("50 ");
-	text.append(mu);
-	text.append(suffix);
-	scalesList->addItem(text);
-	text = QString("25 ");
-	text.append(mu);
-	text.append(suffix);
-	scalesList->addItem(text);
-	text = QString("20 ");
-	text.append(mu);
-	text.append(suffix);
-	scalesList->addItem(text);
-	text = QString("10 ");
-	text.append(mu);
-	text.append(suffix);
-	scalesList->addItem(text);
-	text = QString("5 ");
-	text.append(mu);
-	text.append(suffix);
-	scalesList->addItem(text);
-	text = QString("2.5 ");
-	text.append(mu);
-	text.append(suffix);
-	scalesList->addItem(text);
-	text = QString("2 ");
-	text.append(mu);
-	text.append(suffix);
-	scalesList->addItem(text);
-	text = QString("1 ");
-	text.append(mu);
-	text.append(suffix);
-	scalesList->addItem(text);
-*/
-
 	scalesList->addItem("500 nV/div");
 	scalesList->addItem("250 nV/div");
 	scalesList->addItem("200 nV/div");
@@ -613,7 +559,6 @@ QWidget * Oscilloscope::Panel::createChannelTab(QWidget *parent) {
 	bttnLayout->addWidget(offsetsList, 0, 12, 1, 1);
 	offsetsList->addItem("V");
 	offsetsList->addItem("mV");
-//	offsetsList->addItem("uV");
 	offsetsList->addItem(QString::fromUtf8("µV"));
 	offsetsList->addItem("nV");
 	offsetsList->addItem("pV");
@@ -727,47 +672,6 @@ QWidget *Oscilloscope::Panel::createDisplayTab(QWidget *parent) {
 	timesList->addItem(QString::fromUtf8("5 µs/div"));
 	timesList->addItem(QString::fromUtf8("2 µs/div"));
 	timesList->addItem(QString::fromUtf8("1 µs/div"));
-
-/*
-	QString tsuffix = QString("s/div");
-	QString text = QString("500 ");
-	QChar mu = QChar(0x3BC);
-	text.append(mu);
-	text.append(tsuffix);
-	timesList->addItem(text);
-	text = QString("200 ");
-	text.append(mu);
-	text.append(tsuffix);
-	timesList->addItem(text);
-	text = QString("100 ");
-	text.append(mu);
-	text.append(tsuffix);
-	timesList->addItem(text);
-	text = QString("50 ");
-	text.append(mu);
-	text.append(tsuffix);
-	timesList->addItem(text);
-	text = QString("20 ");
-	text.append(mu);
-	text.append(tsuffix);
-	timesList->addItem(text);
-	text = QString("10 ");
-	text.append(mu);
-	text.append(tsuffix);
-	timesList->addItem(text);
-	text = QString("5 ");
-	text.append(mu);
-	text.append(tsuffix);
-	timesList->addItem(text);
-	text = QString("2 ");
-	text.append(mu);
-	text.append(tsuffix);
-	timesList->addItem(text);
-	text = QString("1 ");
-	text.append(mu);
-	text.append(tsuffix);
-	timesList->addItem(text);
-*/
 
 	QLabel *refreshLabel = new QLabel(tr("Refresh:"),page);
 	refreshLabel->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
