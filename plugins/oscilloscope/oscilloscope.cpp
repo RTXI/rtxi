@@ -702,6 +702,17 @@ QWidget *Oscilloscope::Panel::createDisplayTab(QWidget *parent) {
 	timesList->addItem("5 ms/div");
 	timesList->addItem("2 ms/div");
 	timesList->addItem("1 ms/div");
+	timesList->addItem(QString::fromUtf8("500 µs/div"));
+	timesList->addItem(QString::fromUtf8("200 µs/div"));
+	timesList->addItem(QString::fromUtf8("100 µs/div"));
+	timesList->addItem(QString::fromUtf8("50 µs/div"));
+	timesList->addItem(QString::fromUtf8("20 µs/div"));
+	timesList->addItem(QString::fromUtf8("10 µs/div"));
+	timesList->addItem(QString::fromUtf8("5 µs/div"));
+	timesList->addItem(QString::fromUtf8("2 µs/div"));
+	timesList->addItem(QString::fromUtf8("1 µs/div"));
+
+/*
 	QString tsuffix = QString("s/div");
 	QString text = QString("500 ");
 	QChar mu = QChar(0x3BC);
@@ -740,6 +751,7 @@ QWidget *Oscilloscope::Panel::createDisplayTab(QWidget *parent) {
 	text.append(mu);
 	text.append(tsuffix);
 	timesList->addItem(text);
+*/
 
 	QLabel *refreshLabel = new QLabel(tr("Refresh:"),page);
 	refreshLabel->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
@@ -1205,6 +1217,7 @@ void Oscilloscope::Panel::doDeferred(const Settings::Object::State &s) {
 				s.loadDouble(str.str() + " offset"), QPen(QColor(QString::fromStdString(s.loadString(str.str() + " pen color"))),
 					s.loadInteger(str.str() + " pen width"), Qt::PenStyle(s.loadInteger(str.str() + " pen style"))), curve, info);
 
+		scopeWindow->setChannelLabel(chan, info->name + " - " + scalesList->itemText(static_cast<int> (round(4 * (log10(1/chan->getScale()) + 1)))).simplified());
 		//scopeWindow->setChannelLabel(chan, info->name + " " + properties->scaleList->itemText(static_cast<int> (round(4 * (log10(1/chan->getScale()) + 1)))).simplified());
 		//scopeWindow->setChannelLabel(chan, info->name + " - " + scalesList->itemText(static_cast<int> (round(4 * (log10(1/chan->getScale()) + 1)))).simplified());
 	}
