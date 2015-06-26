@@ -498,6 +498,20 @@ QWidget * Oscilloscope::Panel::createChannelTab(QWidget *parent) {
 	scalesList->addItem("2.5 mV/div");
 	scalesList->addItem("2 mV/div");
 	scalesList->addItem("1 mV/div");
+	scalesList->addItem(QString::fromUtf8("500 µV/div"));
+	scalesList->addItem(QString::fromUtf8("250 µV/div"));
+	scalesList->addItem(QString::fromUtf8("200 µV/div"));
+	scalesList->addItem(QString::fromUtf8("100 µV/div"));
+	scalesList->addItem(QString::fromUtf8("50 µV/div"));
+	scalesList->addItem(QString::fromUtf8("25 µV/div"));
+	scalesList->addItem(QString::fromUtf8("20 µV/div"));
+	scalesList->addItem(QString::fromUtf8("10 µV/div"));
+	scalesList->addItem(QString::fromUtf8("5 µV/div"));
+	scalesList->addItem(QString::fromUtf8("2.5 µV/div"));
+	scalesList->addItem(QString::fromUtf8("2 µV/div"));
+	scalesList->addItem(QString::fromUtf8("1 µV/div"));
+	
+/*
 	QChar mu = QChar(0x3BC);
 	QString suffix = QString("V/div");
 	QString text = QString("500 ");
@@ -548,6 +562,7 @@ QWidget * Oscilloscope::Panel::createChannelTab(QWidget *parent) {
 	text.append(mu);
 	text.append(suffix);
 	scalesList->addItem(text);
+*/
 
 	scalesList->addItem("500 nV/div");
 	scalesList->addItem("250 nV/div");
@@ -598,7 +613,8 @@ QWidget * Oscilloscope::Panel::createChannelTab(QWidget *parent) {
 	bttnLayout->addWidget(offsetsList, 0, 12, 1, 1);
 	offsetsList->addItem("V");
 	offsetsList->addItem("mV");
-	offsetsList->addItem("uV");
+//	offsetsList->addItem("uV");
+	offsetsList->addItem(QString::fromUtf8("µV"));
 	offsetsList->addItem("nV");
 	offsetsList->addItem("pV");
 
