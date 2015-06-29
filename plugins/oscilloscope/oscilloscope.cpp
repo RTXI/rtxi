@@ -967,7 +967,7 @@ Oscilloscope::Panel::Panel(QWidget *parent) :	QWidget(parent), RT::Thread(0), fi
 	layout = new QVBoxLayout;
 
 	// Create scope group
-	scopeGroup = new QGroupBox(this);
+	scopeGroup = new QWidget(this);
 	QHBoxLayout *scopeLayout = new QHBoxLayout(this);
 
 	// Create scope

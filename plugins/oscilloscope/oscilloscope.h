@@ -133,7 +133,7 @@ namespace Oscilloscope {
 
 		// Group and layout information
 		QVBoxLayout *layout;
-		QGroupBox *scopeGroup;
+		QWidget *scopeGroup;
 		QGroupBox *setBttnGroup;
 
 		// Properties
