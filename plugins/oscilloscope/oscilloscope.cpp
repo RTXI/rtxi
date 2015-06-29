@@ -450,35 +450,47 @@ QWidget * Oscilloscope::Panel::createChannelTab(QWidget *parent) {
 	QGridLayout *bttnLayout = new QGridLayout(page);
 
 	// Create Channel box
+	QHBoxLayout *channelBoxLayout = new QHBoxLayout;//(page);
 	QLabel *channelLabel = new QLabel(tr("Channel:"),page);
-	channelLabel->setAlignment(Qt::AlignCenter | Qt::AlignLeft);
-	bttnLayout->addWidget(channelLabel, 0, 0);
+	channelBoxLayout->addWidget(channelLabel);//, Qt::AlignLeft);
 	blocksList = new QComboBox(page);
+	blocksList->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+	blocksList->setSizeAdjustPolicy(QComboBox::AdjustToContents);
 	block_list_info_t info = {blocksList, &this->blocks};
 	IO::Connector::getInstance()->foreachBlock(::buildBlockList, &info);
 	QObject::connect(blocksList,SIGNAL(activated(int)),this,SLOT(buildChannelList(void)));
-	bttnLayout->addWidget(blocksList, 0, 1, 1, 2);
+	channelBoxLayout->addWidget(blocksList);
 
 	// Create Type box
 	typesList = new QComboBox(page);
+	typesList->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+	typesList->setSizeAdjustPolicy(QComboBox::AdjustToContents);
 	typesList->addItem("Input");
 	typesList->addItem("Output");
 	typesList->addItem("Parameter");
 	typesList->addItem("State");
 	QObject::connect(typesList,SIGNAL(activated(int)),this,SLOT(buildChannelList(void)));
-	bttnLayout->addWidget(typesList, 0, 3, 1, 2);
+	channelBoxLayout->addWidget(typesList);
 
 	// Create Channels box
 	channelsList = new QComboBox(page);
+	channelsList->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+	channelsList->setSizeAdjustPolicy(QComboBox::AdjustToContents);
 	QObject::connect(channelsList,SIGNAL(activated(int)),this,SLOT(showChannelTab(void)));
-	bttnLayout->addWidget(channelsList, 0, 5, 1, 3);
+	channelBoxLayout->addWidget(channelsList);
+	
+	//Add spacer to channelBoxLayout
+	channelBoxLayout->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
 
 	// Create elements for display box
+	QHBoxLayout *scaleBoxLayout = new QHBoxLayout;//(page);
+	scaleBoxLayout->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
 	QLabel *scaleLabel = new QLabel(tr("Scale:"),page);
-	scaleLabel->setAlignment(Qt::AlignVCenter | Qt::AlignRight);
-	bttnLayout->addWidget(scaleLabel, 0, 8, 1, 1);
+	scaleBoxLayout->addWidget(scaleLabel);//, Qt::AlignRight);
 	scalesList = new QComboBox(page);
-	bttnLayout->addWidget(scalesList, 0, 9, 1, 1);
+//	scalesList->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+//	scalesList->setSizeAdjustPolicy(QComboBox::AdjustToContents);
+	scaleBoxLayout->addWidget(scalesList);//, Qt::AlignRight);
 	QFont scalesListFont("DejaVu Sans Mono");
 	scalesList->setFont(scalesListFont);
 	scalesList->addItem("10 V/div"); // 0  case 0
@@ -549,30 +561,30 @@ QWidget * Oscilloscope::Panel::createChannelTab(QWidget *parent) {
 
 	// Offset items
 	QLabel *offsetLabel = new QLabel(tr("Offset:"),page);
-	offsetLabel->setAlignment(Qt::AlignCenter | Qt::AlignRight);
-	bttnLayout->addWidget(offsetLabel, 0, 10, 1, 1);
+	scaleBoxLayout->addWidget(offsetLabel);
 	offsetsEdit = new QLineEdit(page);
+	offsetsEdit->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Fixed); //offsetsEdit will not get bigger than sizeHint()
 	offsetsEdit->setValidator(new QDoubleValidator(offsetsEdit));
-	bttnLayout->addWidget(offsetsEdit, 0, 11, 1, 1);
+	scaleBoxLayout->addWidget(offsetsEdit);//, Qt::AlignRight);
 	offsetsList = new QComboBox(page);
-//	offsetsList->setFixedWidth(40);
-	bttnLayout->addWidget(offsetsList, 0, 12, 1, 1);
+//	offsetsList->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+//	offsetsList->setSizeAdjustPolicy(QComboBox::AdjustToContents);
+	scaleBoxLayout->addWidget(offsetsList);//, Qt::AlignRight);
 	offsetsList->addItem("V");
 	offsetsList->addItem("mV");
 	offsetsList->addItem(QString::fromUtf8("µV"));
 	offsetsList->addItem("nV");
 	offsetsList->addItem("pV");
 
-	// Activate button
-	activateButton = new QPushButton("Enable Channel",page);
-	activateButton->setCheckable(true);
-	QObject::connect(activateButton,SIGNAL(toggled(bool)),this,SLOT(activateChannel(bool)));
-	bttnLayout->addWidget(activateButton, 1, 9, 1, 4);
-
 	// Create elements for graphic
-	bttnLayout->addWidget(new QLabel(tr("Color:"),page), 1, 0, Qt::AlignVCenter| Qt::AlignRight);
+	QHBoxLayout *styleBoxLayout = new QHBoxLayout;//(page);
+	styleBoxLayout->setAlignment(Qt::AlignLeft);
+	QLabel *colorLabel = new QLabel(tr("Color:"), page);
+	styleBoxLayout->addWidget(colorLabel);
 	colorsList = new QComboBox(page);
-	bttnLayout->addWidget(colorsList, 1, 1, 1, 2);
+	colorsList->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+	colorsList->setSizeAdjustPolicy(QComboBox::AdjustToContents);
+	styleBoxLayout->addWidget(colorsList);
 	QPixmap tmp(25, 25);
 	tmp.fill(Qt::red);
 	colorsList->addItem(tmp, " Red");
@@ -590,10 +602,11 @@ QWidget * Oscilloscope::Panel::createChannelTab(QWidget *parent) {
 	colorsList->addItem(tmp, " Black");
 
 	QLabel *widthLabel = new QLabel(tr("Width:"),page);
-	widthLabel->setAlignment(Qt::AlignCenter | Qt::AlignLeft);
-	bttnLayout->addWidget(widthLabel, 1, 3);
+	styleBoxLayout->addWidget(widthLabel);
 	widthsList = new QComboBox(page);
-	bttnLayout->addWidget(widthsList, 1, 4, 1, 2);
+	widthsList->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+	widthsList->setSizeAdjustPolicy(QComboBox::AdjustToContents);
+	styleBoxLayout->addWidget(widthsList);
 	tmp.fill(Qt::white);
 	QPainter painter(&tmp);
 	for (int i = 1; i < 6; i++) {
@@ -604,10 +617,11 @@ QWidget * Oscilloscope::Panel::createChannelTab(QWidget *parent) {
 
 	// Create styles list
 	QLabel *styleLabel = new QLabel(tr("Style:"),page);
-	bttnLayout->addWidget(styleLabel, 1, 6);
-	styleLabel->setAlignment(Qt::AlignCenter | Qt::AlignLeft);
+	styleBoxLayout->addWidget(styleLabel);
 	stylesList = new QComboBox(page);
-	bttnLayout->addWidget(stylesList, 1, 7, 1, 2);
+	stylesList->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+	stylesList->setSizeAdjustPolicy(QComboBox::AdjustToContents);
+	styleBoxLayout->addWidget(stylesList);
 	tmp.fill(Qt::white);
 	painter.setPen(QPen(Qt::black, 3, Qt::SolidLine));
 	painter.drawLine(0, 12, 25, 12);
@@ -628,6 +642,28 @@ QWidget * Oscilloscope::Panel::createChannelTab(QWidget *parent) {
 	painter.setPen(QPen(Qt::black, 3, Qt::DashDotDotLine));
 	painter.drawLine(0, 12, 25, 12);
 	stylesList->addItem(tmp, QString(" Dash Dot Dot"));
+
+	// Add spacer item to the end 
+	styleBoxLayout->addStretch();
+
+	// Activate button
+	QHBoxLayout *activateButtonLayout = new QHBoxLayout;
+	activateButtonLayout->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
+	activateButton = new QPushButton("Enable Channel",page);
+	activateButtonLayout->addWidget(activateButton);
+	activateButton->setCheckable(true);
+	activateButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+	QObject::connect(activateButton, SIGNAL(toggled(bool)), this, SLOT(activateChannel(bool)));
+
+	// Add widgets and sub-layouts to bttnLayout. Also set column spacing. 
+	bttnLayout->addLayout(channelBoxLayout, 0, 0);
+	bttnLayout->addLayout(scaleBoxLayout, 0, 2);
+	bttnLayout->addLayout(styleBoxLayout, 1, 0);
+	bttnLayout->addLayout(activateButtonLayout, 1, 2);
+	bttnLayout->addItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum), 0, 1, 2, 1);
+	bttnLayout->setColumnStretch(0, 4);
+	bttnLayout->setColumnStretch(1, 1);
+	bttnLayout->setColumnStretch(2, 4);
 
 	return page;
 }
