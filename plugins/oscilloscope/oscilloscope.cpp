@@ -32,8 +32,6 @@
 #include <cmath>
 #include <sstream>
 
-#include <iostream> //Don't forget to delete this, Ansel.
-
 #include "oscilloscope.h"
 
 namespace {
@@ -452,16 +450,16 @@ QWidget * Oscilloscope::Panel::createChannelTab(QWidget *parent) {
 	QGridLayout *bttnLayout = new QGridLayout(page);
 
 	// Create Channel box
-	QHBoxLayout *row1 = new QHBoxLayout;//(page);
+	QHBoxLayout *row1Layout = new QHBoxLayout;//(page);
 	QLabel *channelLabel = new QLabel(tr("Channel:"),page);
-	row1->addWidget(channelLabel);//, Qt::AlignLeft);
+	row1Layout->addWidget(channelLabel);//, Qt::AlignLeft);
 	blocksList = new QComboBox(page);
 	blocksList->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 	blocksList->setSizeAdjustPolicy(QComboBox::AdjustToContents);
 	block_list_info_t info = {blocksList, &this->blocks};
 	IO::Connector::getInstance()->foreachBlock(::buildBlockList, &info);
 	QObject::connect(blocksList,SIGNAL(activated(int)),this,SLOT(buildChannelList(void)));
-	row1->addWidget(blocksList);
+	row1Layout->addWidget(blocksList);
 
 	// Create Type box
 	typesList = new QComboBox(page);
@@ -472,23 +470,23 @@ QWidget * Oscilloscope::Panel::createChannelTab(QWidget *parent) {
 	typesList->addItem("Parameter");
 	typesList->addItem("State");
 	QObject::connect(typesList,SIGNAL(activated(int)),this,SLOT(buildChannelList(void)));
-	row1->addWidget(typesList);
+	row1Layout->addWidget(typesList);
 
 	// Create Channels box
 	channelsList = new QComboBox(page);
 	channelsList->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 	channelsList->setSizeAdjustPolicy(QComboBox::AdjustToContents);
 	QObject::connect(channelsList,SIGNAL(activated(int)),this,SLOT(showChannelTab(void)));
-	row1->addWidget(channelsList);
+	row1Layout->addWidget(channelsList);
 
 	// Create elements for display box
-	row1->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
+	row1Layout->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
 	QLabel *scaleLabel = new QLabel(tr("Scale:"),page);
-	row1->addWidget(scaleLabel);//, Qt::AlignRight);
+	row1Layout->addWidget(scaleLabel);//, Qt::AlignRight);
 	scalesList = new QComboBox(page);
 //	scalesList->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 //	scalesList->setSizeAdjustPolicy(QComboBox::AdjustToContents);
-	row1->addWidget(scalesList);//, Qt::AlignRight);
+	row1Layout->addWidget(scalesList);//, Qt::AlignRight);
 	QFont scalesListFont("DejaVu Sans Mono");
 	scalesList->setFont(scalesListFont);
 	scalesList->addItem("10 V/div"); // 0  case 0
@@ -559,16 +557,15 @@ QWidget * Oscilloscope::Panel::createChannelTab(QWidget *parent) {
 
 	// Offset items
 	QLabel *offsetLabel = new QLabel(tr("Offset:"),page);
-	row1->addWidget(offsetLabel);
+	row1Layout->addWidget(offsetLabel);
 	offsetsEdit = new QLineEdit(page);
-//	offsetsEdit->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Fixed); //offsetsEdit will not get bigger than sizeHint()
 	offsetsEdit->setMaximumWidth(offsetsEdit->minimumSizeHint().width()*2);
 	offsetsEdit->setValidator(new QDoubleValidator(offsetsEdit));
-	row1->addWidget(offsetsEdit);//, Qt::AlignRight);
+	row1Layout->addWidget(offsetsEdit);//, Qt::AlignRight);
 	offsetsList = new QComboBox(page);
 //	offsetsList->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 //	offsetsList->setSizeAdjustPolicy(QComboBox::AdjustToContents);
-	row1->addWidget(offsetsList);//, Qt::AlignRight);
+	row1Layout->addWidget(offsetsList);//, Qt::AlignRight);
 	offsetsList->addItem("V");
 	offsetsList->addItem("mV");
 	offsetsList->addItem(QString::fromUtf8("µV"));
@@ -576,14 +573,14 @@ QWidget * Oscilloscope::Panel::createChannelTab(QWidget *parent) {
 	offsetsList->addItem("pV");
 
 	// Create elements for graphic
-	QHBoxLayout *row2 = new QHBoxLayout;//(page);
-	row2->setAlignment(Qt::AlignLeft);
+	QHBoxLayout *row2Layout = new QHBoxLayout;//(page);
+	row2Layout->setAlignment(Qt::AlignLeft);
 	QLabel *colorLabel = new QLabel(tr("Color:"), page);
-	row2->addWidget(colorLabel);
+	row2Layout->addWidget(colorLabel);
 	colorsList = new QComboBox(page);
 	colorsList->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 	colorsList->setSizeAdjustPolicy(QComboBox::AdjustToContents);
-	row2->addWidget(colorsList);
+	row2Layout->addWidget(colorsList);
 	QPixmap tmp(25, 25);
 	tmp.fill(Qt::red);
 	colorsList->addItem(tmp, " Red");
@@ -601,11 +598,11 @@ QWidget * Oscilloscope::Panel::createChannelTab(QWidget *parent) {
 	colorsList->addItem(tmp, " Black");
 
 	QLabel *widthLabel = new QLabel(tr("Width:"),page);
-	row2->addWidget(widthLabel);
+	row2Layout->addWidget(widthLabel);
 	widthsList = new QComboBox(page);
 	widthsList->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 	widthsList->setSizeAdjustPolicy(QComboBox::AdjustToContents);
-	row2->addWidget(widthsList);
+	row2Layout->addWidget(widthsList);
 	tmp.fill(Qt::white);
 	QPainter painter(&tmp);
 	for (int i = 1; i < 6; i++) {
@@ -616,11 +613,11 @@ QWidget * Oscilloscope::Panel::createChannelTab(QWidget *parent) {
 
 	// Create styles list
 	QLabel *styleLabel = new QLabel(tr("Style:"),page);
-	row2->addWidget(styleLabel);
+	row2Layout->addWidget(styleLabel);
 	stylesList = new QComboBox(page);
 	stylesList->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 	stylesList->setSizeAdjustPolicy(QComboBox::AdjustToContents);
-	row2->addWidget(stylesList);
+	row2Layout->addWidget(stylesList);
 	tmp.fill(Qt::white);
 	painter.setPen(QPen(Qt::black, 3, Qt::SolidLine));
 	painter.drawLine(0, 12, 25, 12);
@@ -643,26 +640,15 @@ QWidget * Oscilloscope::Panel::createChannelTab(QWidget *parent) {
 	stylesList->addItem(tmp, QString(" Dash Dot Dot"));
 
 	// Activate button
-	row2->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
+	row2Layout->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
 	activateButton = new QPushButton("Enable Channel",page);
-	row2->addWidget(activateButton);
+	row2Layout->addWidget(activateButton);
 	activateButton->setCheckable(true);
 	activateButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 	QObject::connect(activateButton, SIGNAL(toggled(bool)), this, SLOT(activateChannel(bool)));
 
-/*	// Add widgets and sub-layouts to bttnLayout. Also set column spacing. 
-	bttnLayout->addLayout(row1, 0, 0);
-	bttnLayout->addLayout(row1, 0, 2);
-	bttnLayout->addLayout(row2, 1, 0);
-	bttnLayout->addLayout(row2, 1, 2);
-	bttnLayout->addItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum), 0, 1, 2, 1);
-	bttnLayout->setColumnStretch(0, 4);
-	bttnLayout->setColumnStretch(1, 1);
-	bttnLayout->setColumnStretch(2, 4);
-*/	
-
-	bttnLayout->addLayout(row1, 0, 0);
-	bttnLayout->addLayout(row2, 1, 0);
+	bttnLayout->addLayout(row1Layout, 0, 0);
+	bttnLayout->addLayout(row2Layout, 1, 0);
 
 	return page;
 }
@@ -681,10 +667,10 @@ QWidget *Oscilloscope::Panel::createDisplayTab(QWidget *parent) {
 	QGridLayout *displayTabLayout = new QGridLayout(page);
 
 	// Create elements for time settings
-	QHBoxLayout *timesListLayout = new QHBoxLayout;
-	timesListLayout->addWidget(new QLabel(tr("Time/Div:"), page));
+	QHBoxLayout *row1Layout = new QHBoxLayout;
+	row1Layout->addWidget(new QLabel(tr("Time/Div:"), page));
 	timesList = new QComboBox(page);
-	timesListLayout->addWidget(timesList);
+	row1Layout->addWidget(timesList);
 	QFont timeListFont("DejaVu Sans Mono");
 	timesList->setFont(timeListFont);
 	timesList->addItem("5 s/div");
@@ -712,118 +698,89 @@ QWidget *Oscilloscope::Panel::createDisplayTab(QWidget *parent) {
 	timesList->setSizeAdjustPolicy(QComboBox::AdjustToContents);
 
 	QLabel *refreshLabel = new QLabel(tr("Refresh:"),page);
-	timesListLayout->addWidget(refreshLabel);
+	row1Layout->addWidget(refreshLabel);
 	refreshsSpin = new QSpinBox(page);
-	timesListLayout->addWidget(refreshsSpin);
+	row1Layout->addWidget(refreshsSpin);
 	refreshsSpin->setRange(100,10000);
 	refreshsSpin->setValue(250);
 
 	QLabel *downsampleLabel = new QLabel(tr("Downsample:"),page);
-	timesListLayout->addWidget(downsampleLabel);
+	row1Layout->addWidget(downsampleLabel);
 	ratesSpin = new QSpinBox(page);
-//	ratesSpin->setFixedWidth(40);
-	timesListLayout->addWidget(ratesSpin);
+	row1Layout->addWidget(ratesSpin);
 	ratesSpin->setValue(downsample_rate);
 	QObject::connect(ratesSpin,SIGNAL(valueChanged(int)),this,SLOT(updateDownsampleRate(int)));
 	ratesSpin->setEnabled(true);
 	ratesSpin->setRange(1,2);
 	ratesSpin->setValue(1);
 
-	timesListLayout->addStretch();
-
 	// Display box for Buffer bit. Push it to the right. 
-	QHBoxLayout *bufferLabelLayout = new QHBoxLayout;
-	bufferLabelLayout->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
+	row1Layout->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
 	QLabel *bufferLabel = new QLabel(tr("Buffer Size (MB):"),page);
-	bufferLabelLayout->addWidget(bufferLabel);
+	row1Layout->addWidget(bufferLabel);
 	sizesEdit = new QLineEdit(page);
 	sizesEdit->setMaximumWidth(sizesEdit->minimumSizeHint().width()*3);
 	sizesEdit->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Fixed); 
-	bufferLabelLayout->addWidget(sizesEdit);
+	row1Layout->addWidget(sizesEdit);
 	sizesEdit->setText(QString::number(scopeWindow->getDataSize()));
 	sizesEdit->setEnabled(false);
 
 	// Trigger box
-	QHBoxLayout *triggerBoxLayout = new QHBoxLayout;
-	triggerBoxLayout->addWidget(new QLabel(tr("Edge:"),page));
+	QHBoxLayout *row2Layout = new QHBoxLayout;
+	row2Layout->addWidget(new QLabel(tr("Edge:"),page));
 	trigsGroup = new QButtonGroup(page);
 
 	QRadioButton *off = new QRadioButton(tr("Off"),page);
 	trigsGroup->addButton(off, Scope::NONE);
-	triggerBoxLayout->addWidget(off);
+	row2Layout->addWidget(off);
 	QRadioButton *plus = new QRadioButton(tr("+"),page);
 	trigsGroup->addButton(plus, Scope::POS);
-	triggerBoxLayout->addWidget(plus);
+	row2Layout->addWidget(plus);
 	QRadioButton *minus = new QRadioButton(tr("-"),page);
 	trigsGroup->addButton(minus, Scope::NEG);
-	triggerBoxLayout->addWidget(minus);
+	row2Layout->addWidget(minus);
 
-//	displayTabLayout->addWidget(new QLabel(tr("Channel:"),page), 1, 4, 1, 2);
-	triggerBoxLayout->addWidget(new QLabel(tr("Channel:"),page));
+	row2Layout->addWidget(new QLabel(tr("Channel:"),page));
 	trigsChanList = new QComboBox(page);
 	trigsChanList->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 	trigsChanList->setSizeAdjustPolicy(QComboBox::AdjustToContents);
-	triggerBoxLayout->addWidget(trigsChanList);
+	row2Layout->addWidget(trigsChanList);
 
-	triggerBoxLayout->addWidget(new QLabel(tr("Threshold:"),page));
+	row2Layout->addWidget(new QLabel(tr("Threshold:"),page));
 	trigsThreshEdit = new QLineEdit(page);
 	trigsThreshEdit->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Fixed); 
-//	trigsThreshEdit->setFixedWidth(50);
 	trigsThreshEdit->setMaximumWidth(trigsThreshEdit->minimumSizeHint().width()*3);
-	triggerBoxLayout->addWidget(trigsThreshEdit);
+	row2Layout->addWidget(trigsThreshEdit);
 	trigsThreshEdit->setValidator(new QDoubleValidator(trigsThreshEdit));
 	trigsThreshList = new QComboBox(page);
 	trigsThreshList->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-	triggerBoxLayout->addWidget(trigsThreshList);
+	row2Layout->addWidget(trigsThreshList);
 	trigsThreshList->addItem("V");
 	trigsThreshList->addItem("mV");
 	trigsThreshList->addItem(QString::fromUtf8("µV"));
 	trigsThreshList->addItem("nV");
 	trigsThreshList->addItem("pV");
 	
-	triggerBoxLayout->addStretch();
-
-	QHBoxLayout *triggerHoldLayout = new QHBoxLayout;
-	triggerHoldLayout->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
-	triggerHoldLayout->addWidget(new QLabel(tr("Holding:"),page));
+	row2Layout->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
+	row2Layout->addWidget(new QLabel(tr("Holding:"),page));
 	trigsHoldingCheck = new QCheckBox(page);
-	triggerHoldLayout->addWidget(trigsHoldingCheck);
+	row2Layout->addWidget(trigsHoldingCheck);
 
-	triggerHoldLayout->addWidget(new QLabel(tr("Holdoff:"),page));
+	row2Layout->addWidget(new QLabel(tr("Holdoff:"),page));
 	trigsHoldoffEdit = new QLineEdit(page);
 	trigsHoldoffEdit->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Fixed); 
-	triggerHoldLayout->addWidget(trigsHoldoffEdit);
-//	trigsHoldoffEdit->setFixedWidth(50);
+	row2Layout->addWidget(trigsHoldoffEdit);
 	trigsHoldoffEdit->setMaximumWidth(trigsHoldoffEdit->minimumSizeHint().width()*3);
 	trigsHoldoffEdit->setValidator(new QDoubleValidator(trigsHoldoffEdit));
 	trigsHoldoffList = new QComboBox(page);
 	trigsHoldoffList->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-	triggerHoldLayout->addWidget(trigsHoldoffList);
+	row2Layout->addWidget(trigsHoldoffList);
 	trigsHoldoffList->addItem("ms");
 	trigsHoldoffList->addItem(QString::fromUtf8("µs"));
 	trigsHoldoffList->addItem("ns");
-
-	QHBoxLayout *row1 = new QHBoxLayout;
-	row1->addLayout(timesListLayout);
-//	row1->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
-	row1->addLayout(bufferLabelLayout);
-
-	QHBoxLayout *row2 = new QHBoxLayout;
-	row2->addLayout(triggerBoxLayout);
-//	row2->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
-	row2->addLayout(triggerHoldLayout);
-
-	displayTabLayout->addLayout(row1, 0, 0);
-	displayTabLayout->addLayout(row2, 1, 0);
-
-//	displayTabLayout->addLayout(timesListLayout, 0, 0);
-//	displayTabLayout->addLayout(bufferLabelLayout, 0, 2);
-//	displayTabLayout->addLayout(triggerBoxLayout, 1, 0);
-//	displayTabLayout->addLayout(triggerHoldLayout, 1, 2);
-//	displayTabLayout->addItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum), 0, 1, 2, 1);
-//	displayTabLayout->setColumnStretch(0, 4);
-//	displayTabLayout->setColumnStretch(1, 1);
-//	displayTabLayout->setColumnStretch(2, 4);
+	
+	displayTabLayout->addLayout(row1Layout, 0, 0);
+	displayTabLayout->addLayout(row2Layout, 1, 0);
 
 	return page;
 }
@@ -1061,7 +1018,6 @@ Oscilloscope::Panel::Panel(QWidget *parent) :	QWidget(parent), RT::Thread(0), fi
 	subWindow->setWidget(this);
 	subWindow->setMinimumSize(subWindow->minimumSizeHint().width(),500);
 	subWindow->resize(subWindow->minimumSizeHint().width(),600);
-std::cout<<subWindow->minimumSizeHint().width()<<std::endl;
 
 	// Initialize vars
 	counter = 0;
