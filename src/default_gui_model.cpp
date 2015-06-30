@@ -17,19 +17,6 @@
 
  */
 
-#include <QTableWidget>
-#include <QWidget>
-#include <QLabel>
-#include <QLayout>
-#include <QPushButton>
-#include <QToolTip>
-#include <QValidator>
-#include <QWhatsThis>
-#include <QScrollArea>
-#include <QTimer>
-#include <QtGui>
-#include <QMdiSubWindow>
-
 #include <default_gui_model.h>
 #include <main_window.h>
 #include <iostream>

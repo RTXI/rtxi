@@ -20,8 +20,6 @@
 #ifndef DEFAULT_GUI_MODEL_H
 #define DEFAULT_GUI_MODEL_H
 
-#include <QLineEdit>
-#include <QAbstractButton>
 #include <QtWidgets>
 #include <event.h>
 #include <map>
