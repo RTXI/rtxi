@@ -1016,8 +1016,8 @@ Oscilloscope::Panel::Panel(QWidget *parent) :	QWidget(parent), RT::Thread(0), fi
 	buildChannelList();
 	showDisplayTab();
 	subWindow->setWidget(this);
-	subWindow->setMinimumSize(subWindow->minimumSizeHint().width(),500);
-	subWindow->resize(subWindow->minimumSizeHint().width(),600);
+	subWindow->setMinimumSize(subWindow->minimumSizeHint().width(),450);
+	subWindow->resize(subWindow->minimumSizeHint().width()+50,600);
 
 	// Initialize vars
 	counter = 0;
