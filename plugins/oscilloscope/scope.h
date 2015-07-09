@@ -209,6 +209,7 @@ class Scope : public QwtPlot {
 
 	// Scope painter elements
 	QwtPlotGrid *grid;
+  QwtPlotMarker *origin;
 
 	// Scaling engine
 	QwtScaleMap *scaleMapY;
