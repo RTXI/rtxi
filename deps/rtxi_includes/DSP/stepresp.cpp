@@ -34,7 +34,8 @@ void StepResponse::GenerateResponse( void )
   {
   int resp_indx;
   double h_of_t, time, delta_t;
-  double u_of_t;
+//  double u_of_t; //Why is this uninitialized? -Ansel
+  double u_of_t = 0;
 
   Response_File = new ofstream("stp_anal.txt", ios::out);
 

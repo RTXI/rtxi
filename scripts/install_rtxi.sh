@@ -41,11 +41,11 @@ echo "----->Please select your configuration and then press enter:"
 read kernel
 
 if [ $kernel -eq "1" ]; then
-	./configure --enable-xenomai --enable-analogy --disable-comedi --disable-rtai --disable-debug
+	./configure --enable-xenomai --enable-analogy --disable-debug
 elif [ $kernel -eq "2" ]; then
-	./configure --enable-posix --disable-xenoami --disable-analogy --disable-comedi --disable-rtai --disable-debug
+	./configure --enable-posix --disable-debug
 elif [ $kernel -eq "3" ]; then
-	./configure --enable-posix --disable-xenomai --disable-analogy --disable-comedi --disable-rtai --enable-debug
+	./configure --enable-posix --enable-debug
 else
 	echo "Invalid configuration."
 	exit 1
@@ -73,7 +73,6 @@ echo "----->Putting things into place."
 sudo cp -f libtool /usr/local/lib/rtxi/
 sudo cp -f scripts/icons/RTXI-icon.png /usr/local/lib/rtxi/
 sudo cp -f scripts/icons/RTXI-widget-icon.png /usr/local/lib/rtxi
-sudo cp -f scripts/icons/Trolltech.conf ~/.config/
 sudo cp -f scripts/rtxi.desktop /usr/share/applications/
 cp -f scripts/rtxi.desktop ~/Desktop/
 chmod +x ~/Desktop/rtxi.desktop

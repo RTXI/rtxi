@@ -88,6 +88,10 @@ for( j=1; j<=num_poles; j++)
 	{
   a[j] = -a[j];
   }
+
+delete[] delta;
+delete[] big_a;
+
 return;
 }
 

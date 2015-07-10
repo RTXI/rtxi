@@ -49,32 +49,11 @@ rtxi.conf:
 	@echo ' <OBJECT component="io" id="1" >'					>> $@
 	@echo '  <PARAM name="Num Links" >0</PARAM>'					>> $@
 	@echo ' </OBJECT>'								>> $@
-if BUILD_COMEDI 
-	@echo ' <OBJECT component="plugin" library="comedi_driver.so" id="2" >'		>> $@
-	@echo '  <PARAM name="0" >/dev/comedi0</PARAM>'					>> $@
-	@echo '  <PARAM name="Num Devices" >1</PARAM>'					>> $@
-	@echo '  <OBJECT id="13" name="0" />'						>> $@
-	@echo ' </OBJECT>'								>> $@
-endif
-if BUILD_COMEDILIB 
-	@echo ' <OBJECT component="plugin" library="comedi_driver.so" id="2" >'		>> $@
-	@echo '  <PARAM name="0" >/dev/comedi0</PARAM>'					>> $@
-	@echo '  <PARAM name="Num Devices" >1</PARAM>'					>> $@
-	@echo '  <OBJECT id="13" name="0" />'						>> $@
-	@echo ' </OBJECT>'								>> $@
-endif
 if BUILD_ANALOGY 
 	@echo ' <OBJECT component="plugin" library="analogy_driver.so" id="2" >'		>> $@
 	@echo '  <PARAM name="0" >analogy0</PARAM>'					>> $@
 	@echo '  <PARAM name="Num Devices" >1</PARAM>'					>> $@
 	@echo '  <OBJECT id="13" name="0" />'						>> $@
-	@echo ' </OBJECT>'								>> $@
-endif
-if BUILD_NI
-	@echo ' <OBJECT component="plugin" library="ni_driver.so" id="2" >'		>> $@
-	@echo '  <PARAM name="0" >PCI::SCAN</PARAM>'					>> $@
-	@echo '  <PARAM name="Num Devices" >1</PARAM>'					>> $@
-	@echo '  <OBJECT id="14" name="0" />'						>> $@
 	@echo ' </OBJECT>'								>> $@
 endif
 	@echo ' <OBJECT component="plugin" library="model_loader.so" id="3" />'		>> $@

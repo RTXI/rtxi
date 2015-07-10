@@ -22,28 +22,13 @@
 
 # Directories
 DIR=$PWD
-ROOT=${DIR}/..
 
-cd ${ROOT}
+# Determine if remote-local results in a number > 0
+VAL=$(git rev-list HEAD...origin/qt5 --count)
 
-# Uninstall rtxi
-sudo make uninstall
-sudo make clean
-sudo rm -rf /usr/local/lib/rtxi
-sudo rm -rf /usr/local/lib/qwt
-sudo rm -rf /usr/local/lib/rtxi_includes
-sudo rm -rf /usr/local/include/rtxi
-sudo rm -rf /etc/rtxi.conf
-
-# Remove old qt/qwt installations
-if [ $(dpkg-query -W -f='${Status}' qt4-dev-tools 2>/dev/null | grep -c "ok installed") -eq 1 ];
-then
-sudo apt-get purge libqt4-* qt4-*
-fi
-
-if [ $? -eq 0 ]; then
-	echo "----->RTXI intallation successful. Reboot may be required."
-else
-	echo "----->RTXI installation failed."
+if [ $VAL -eq 0 ]; then
+	echo "----->RTXI up-to-date."
 	exit
+else
+	echo "----->RTXI update available."
 fi

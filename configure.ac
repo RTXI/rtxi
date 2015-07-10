@@ -1,4 +1,4 @@
-AC_INIT([RTXI],[2.0-rc3],[help@rtxi.org],rtxi)
+AC_INIT([RTXI],[2.1],[help@rtxi.org],rtxi)
 
 AM_CONFIG_HEADER(include/rtxi_config.h)
 AM_INIT_AUTOMAKE([foreign])
@@ -28,7 +28,6 @@ rtos=""
 
 AX_BOOST_BASE([1.54],,[AC_MSG_ERROR([libboost version 1.54 or great is required])])
 
-AC_CHECK_RTAI
 AC_ARG_ENABLE(xenomai,
   [  --enable-xenomai        build the Xenomai interface],
   [case "${enablecal}" in
@@ -46,13 +45,9 @@ AC_ARG_ENABLE(posix,
   esac],
   [])
 
-AM_CONDITIONAL(RTAI3, test x$rtos = xrtai3)
 AM_CONDITIONAL([XENOMAI],[test x$rtos = xxenomai])
 AM_CONDITIONAL([POSIX],[test x$rtos = xposix])
-if test x$rtos = xrtai3; then
-  RTOS_CPPFLAGS=$RTAI_CPPFLAGS
-  RTOS_LDFLAGS=$RTAI_LDFLAGS
-elif test x$rtos = xxenomai; then
+if test x$rtos = xxenomai; then
   if test -x /usr/xenomai/bin/xeno-config; then
     XENO_CONFIG='/usr/xenomai/bin/xeno-config'
   elif test -x /usr/bin/xeno-config; then
@@ -81,15 +76,6 @@ AC_ARG_ENABLE(debug,
   [debug=false])
 AM_CONDITIONAL(DEBUG, test x$debug = xtrue)
 
-AC_ARG_ENABLE(comedi,
-  [  --enable-comedi         build the comedi driver],
-  [case "${enableval}" in
-    "" | y | ye | yes) comedi=true;;
-    n | no) comedi=false;;
-    *) AC_MSG_ERROR(bad value ${enableval} for --enable-comedi);;
-  esac],
-[comedi=true])
-
 AC_ARG_ENABLE(analogy,
   [  --enable-analogy        build the analogy driver],
   [case "${enableval}" in
@@ -99,43 +85,11 @@ AC_ARG_ENABLE(analogy,
   esac],
   [analogy=true])  
 
-if test x$rtos = xrtai3; then
-  AM_CONDITIONAL(BUILD_COMEDI, test x$comedi = xtrue)
-  AM_CONDITIONAL(BUILD_COMEDILIB,false)
-  AM_CONDITIONAL(BUILD_ANALOGY, false)
-elif test x$rtos = xposix; then
-  AM_CONDITIONAL(BUILD_COMEDI,false)
-  AM_CONDITIONAL(BUILD_COMEDILIB, test x$comedi = xtrue)
+if test x$rtos = xposix; then
   AM_CONDITIONAL(BUILD_ANALOGY, false)
 elif test x$rtos = xxenomai; then
-  AM_CONDITIONAL(BUILD_COMEDI,false)
-  AM_CONDITIONAL(BUILD_COMEDILIB,false)
   AM_CONDITIONAL(BUILD_ANALOGY, test x$analogy = xtrue)
-else
-  AM_CONDITIONAL(BUILD_COMEDI,false)
-  AM_CONDITIONAL(BUILD_COMEDILIB,false)
-  AM_CONDITIONAL(BUILD_ANALOGY, false)
 fi
-
-AC_ARG_ENABLE(ni,
-  [  --enable-ni             build the ni driver],
-  [case "${enableval}" in
-    "" | y | ye | yes) ni=true;;
-    n | no) ni=false;;
-    *) AC_MSG_ERROR(bad value ${enableval} for --enable-ni);;
-  esac],
-  [ni=false])
-AM_CONDITIONAL(BUILD_NI, test x$ni = xtrue)
-
-AC_ARG_ENABLE(clampprotocol,
-  [  --enable-clampprotocol     build the clamp protocol module (default=enabled)],
-  [case "${enableval}" in
-    "" | y | ye | yes) clampprotocol=true ;;
-    n | no) clampprotocol=false ;;
-    *) AC_MSG_ERROR(bad value ${enableval} for --enable-clampprotocol) ;;
-  esac],
-  [clampprotocol=true])
-AM_CONDITIONAL(BUILD_CLAMPPROTOCOL, test x$clampprotocol = xtrue)
 
 dnl Clear build variables
 
@@ -153,18 +107,13 @@ AC_CONFIG_FILES([
 Makefile
 rtxi/Makefile
 scripts/Makefile
-scripts/init_rtxi
-scripts/rtxi_comedi
 scripts/rtxi_plugin_config
 plugins/Makefile
 plugins/analogy_device/Makefile
-plugins/comedi_device/Makefile
-plugins/comedilib_device/Makefile
 plugins/connector/Makefile
 plugins/data_recorder/Makefile
 plugins/dynamo_model_loader/Makefile
 plugins/model_loader/Makefile
-plugins/ni_device/Makefile
 plugins/oscilloscope/Makefile
 plugins/performance_measurement/Makefile
 plugins/system_control/Makefile

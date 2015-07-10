@@ -37,7 +37,7 @@ AnalogReconst::AnalogReconst( double samp_intvl,
 //===============================================
 AnalogReconst::~AnalogReconst( void )
 {
-delete Analog_Signal;
+delete[] Analog_Signal;
 }
 //-----------------------------------------------
 

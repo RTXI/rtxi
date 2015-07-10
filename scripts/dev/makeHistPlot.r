@@ -4,13 +4,10 @@ options(warn=-1)
 args = commandArgs(trailingOnly = T)
 
 # Check if needed packages are installed. Otherwise, exit. 
-if( !(require(gridExtra)) ) {
-   install.packages("gridExtra", repos="http://watson.nci.nih.gov/cran_mirror/")
-   library(gridExtra)
+if( !(require(ggplot2)&&require(scales)&&require(gridExtra)) ) {
+	message("I need to have gridExtra, scales, and ggplot2 installed.")
+	stop("Run the install_dependencies.sh script and try this again.")
 }
-
-library(ggplot2)
-library(scales)
 
 # Set parameters passed to script from command line / bash script
 os = as.character(args[1])

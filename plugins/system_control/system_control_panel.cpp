@@ -64,10 +64,9 @@ SystemControlPanel::SystemControlPanel(QWidget *parent) : QWidget(parent) {
 	// Make Mdi
 	subWindow = new QMdiSubWindow;
 	subWindow->setWindowIcon(QIcon("/usr/local/lib/rtxi/RTXI-widget-icon.png"));
-	subWindow->setFixedSize(400,400);
 	subWindow->setAttribute(Qt::WA_DeleteOnClose);
-	subWindow->setWindowFlags(Qt::CustomizeWindowHint);
-	subWindow->setWindowFlags(Qt::WindowCloseButtonHint);
+	subWindow->setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint | 
+	                          Qt::WindowMinimizeButtonHint);
 	MainWindow::getInstance()->createMdi(subWindow);
 
 	// Create main layout
@@ -262,6 +261,7 @@ SystemControlPanel::SystemControlPanel(QWidget *parent) : QWidget(parent) {
 
 	// Set layout to Mdi
 	subWindow->setWidget(this);
+	subWindow->setFixedSize(subWindow->minimumSizeHint());
 
 	// Updates settings for device and builds lists of channels
 	updateDevice();

@@ -191,6 +191,9 @@ class MainWindow : public QMainWindow {
 	private slots:
 		void about(void);
 	void aboutQt(void);
+	void openDocs(void);
+	void openSubIssue(void);
+	void updateCheck(void);
 
 	void loadSettings(void);
 	void saveSettings(void);
@@ -235,6 +238,11 @@ class MainWindow : public QMainWindow {
 	QAction *quit;
 	QAction *artxi;
 	QAction *aqt;
+	QAction *adocs;
+	QAction *sub_issue;
+	QAction *checkUpdate;
+
+	bool updateAvailable = false;
 
 	void updateUtilModules();
 	void createFileMenu();

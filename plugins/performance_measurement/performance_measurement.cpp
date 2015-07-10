@@ -40,9 +40,8 @@ PerformanceMeasurement::Panel::Panel(QWidget *parent) : QWidget(parent),
 		QMdiSubWindow *subWindow = new QMdiSubWindow;
 	   subWindow->setWindowIcon(QIcon("/usr/local/lib/rtxi/RTXI-widget-icon.png"));
 		subWindow->setAttribute(Qt::WA_DeleteOnClose);
-		subWindow->setWindowFlags(Qt::CustomizeWindowHint);
-		subWindow->setWindowFlags(Qt::WindowCloseButtonHint);
-		subWindow->setFixedSize(310,200);
+		subWindow->setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint | 
+		                          Qt::WindowMinimizeButtonHint);
 		MainWindow::getInstance()->createMdi(subWindow);
 
 		// Create main layout
@@ -90,12 +89,15 @@ PerformanceMeasurement::Panel::Panel(QWidget *parent) : QWidget(parent),
 
 		// Set layout to Mdi
 		subWindow->setWidget(this);
+		subWindow->setFixedSize(subWindow->minimumSizeHint());
 		show();
 
 		QTimer *timer = new QTimer(this);
 		timer->setTimerType(Qt::VeryCoarseTimer);
 		timer->start(1000);
 		QObject::connect(timer,SIGNAL(timeout(void)),this,SLOT(update(void)));
+		resetMaxTimer = new QTimer(this);
+		QObject::connect(resetMaxTimer,SIGNAL(timeout(void)),this,SLOT(resetMaxTimeStep(void)));
 
 		// Connect states to workspace
 		setData(Workspace::STATE, 0, &duration);
@@ -140,7 +142,10 @@ void PerformanceMeasurement::Panel::write(void) {
 	switch (state) {
 		case EXEC:
 			if (maxDuration < now - lastRead)
+			{
 				maxDuration = now - lastRead;
+				resetMaxTimer->start(10000);				
+			}
 			duration = now - lastRead;
 			break;
 		case INIT2:
@@ -154,6 +159,10 @@ void PerformanceMeasurement::Panel::write(void) {
 void PerformanceMeasurement::Panel::reset(void) {
 	state = INIT1;
 	timestepStat.clear();
+}
+
+void PerformanceMeasurement::Panel::resetMaxTimeStep(void) {
+	maxTimestep = timestep;
 }
 
 void PerformanceMeasurement::Panel::update(void) {

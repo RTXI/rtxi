@@ -18,31 +18,6 @@
 
 #!/bin/bash
 
-# Check to see if R and stress are installed
-echo "----->Checking for dependencies needed to run stress test."
-if ! $(dpkg-query -Wf'${db:Status-abbrev}' "stress" 2>/dev/null | grep -q '^i'); 
-	then sudo apt-get -y install stress
-fi
-if ! $(dpkg-query -Wf'${db:Status-abbrev}' "lshw" 2>/dev/null | grep -q '^i'); 
-	then sudo apt-get -y install lshw
-fi
-if ! $(dpkg-query -Wf'${db:Status-abbrev}' "r-base" 2>/dev/null | grep -q '^i'); 
-	then sudo apt-get -y install r-base r-cran-ggplot2 r-cran-reshape2 r-cran-plyr \
-	                             r-cran-scales
-fi
-echo ""
-
-# Create local directory for installing R packages
-# This can also be added to install_dependencies.sh, but this creates an issue
-#   when different users run the script. They all have their own local folders.
-#
-# All of this will be unnecessary in the new live CD, which will have all these
-#   packages installed already. 
-if ! [ -d ~/.config/R ]; then
-   mkdir ~/.config/R
-   echo "R_LIBS_USER=\"~/.config/R\"" > ~/.Renviron
-fi
-
 echo "----->Running latency test under load. Please wait 30 minutes."
 echo "----->Do not interrupt."
 echo "----->If you do interrupt, stop stressing the system by running:"
@@ -67,7 +42,7 @@ fi
 DAQ=$(lspci | grep National | cut -d":" -f3 | sed 's/ \+/ /g' | sed -e 's/^\  *//' -e 's/\ *$//')
 
 # Set up variables for run
-TIME=1800 # duration of run (s)
+TIME=10 # duration of run (s)
 RT_PERIOD=$(awk "BEGIN {print 1 / $SysFreq * 1e6}") # period in us
 RATE=$(expr 1000 / $RT_PERIOD) # Convert RT period to freq in kHz
 

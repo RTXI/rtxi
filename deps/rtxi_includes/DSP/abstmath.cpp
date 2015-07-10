@@ -62,6 +62,11 @@ PrimeFactorSet::PrimeFactorSet( int num_factors, int* factors )
   return;
 };
 
+PrimeFactorSet::~PrimeFactorSet(void) {
+	delete[] Factor_Vector;
+	delete[] Factor_Multiplicity;
+}
+
 //======================================================
 //  constructor
 
@@ -78,7 +83,11 @@ OrderedFactorSet::OrderedFactorSet( int num_factors,
     Factor_Vector[n] = factors[n];
   }
   return;
-};
+}i;
+
+OrderedFactorSet::~OrderedFactorSet(void) {
+	delete[] Factor_Vector;
+}
 
 PrimeFactorSet* PrimeFactorization( int number )
 {

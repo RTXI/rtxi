@@ -20,7 +20,9 @@
 
 #!/bin/bash
 
-# Directories
+###############################################################################
+# Set directory variable for compilation
+###############################################################################
 DIR=$PWD
 ROOT=${DIR}/../
 DEPS=${ROOT}/deps
@@ -29,22 +31,29 @@ QWT=${DEPS}/qwt
 DYN=${DEPS}/dynamo
 PLG=${ROOT}/plugins
 
-# Check for compilation dependencies
-echo "Checking for dependencies..."
+###############################################################################
+# Check for all RTXI *.deb dependencies and install them. Includes:
+#  - Kernel tools
+#  - C/C++ compiler and debugger
+#  - Qt5, HDF, and Qwt6 libraries
+#  - R and some R packages
+###############################################################################
+echo "Checking dependencies..."
 
 sudo apt-get update
 sudo apt-get -y upgrade
-sudo apt-get -y install autotools-dev automake libtool
-sudo apt-get -y install kernel-package
-sudo apt-get -y install fakeroot crash kexec-tools makedumpfile kernel-wedge
+sudo apt-get -y install autotools-dev automake libtool kernel-package gcc g++ \
+                        gdb fakeroot crash kexec-tools makedumpfile \
+                        kernel-wedge libncurses5-dev libelf-dev binutils-dev \
+                        libgsl0-dev libboost-dev git vim emacs lshw stress \
+                        libqt5svg5-dev libqt5opengl5 libqt5gui5 libqt5core5a \
+                        libqt5xml5 qt5-default
 sudo apt-get -y build-dep linux
-sudo apt-get -y install git-core libncurses5 libncurses5-dev libelf-dev binutils-dev libgsl0-dev vim stress libboost-dev
-sudo apt-get -y install libqt5svg5 libqt5svg5-dev libqt5opengl5 libqt5gui5 libqt5core5a libqt5xml5 qt5-default
 
 if [ $? -eq 0 ]; then
-	echo "----->Dependencies installed."
+	echo "----->Package dependencies installed."
 else
-	echo "----->Dependency installation failed."
+	echo "----->Package dependency installation failed."
 	exit
 fi
 

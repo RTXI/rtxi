@@ -162,8 +162,13 @@ void MainWindow::createWindowsMenu() {
 
 void MainWindow::createHelpMenu() {
 	helpMenu = menuBar()->addMenu(tr("&Help"));
+	helpMenu->addAction(checkUpdate);
+	helpMenu->addSeparator();
 	helpMenu->addAction(artxi);
 	helpMenu->addAction(aqt);
+	helpMenu->addSeparator();
+	helpMenu->addAction(adocs);
+	helpMenu->addAction(sub_issue);
 }
 
 void MainWindow::createFileActions() {
@@ -192,11 +197,20 @@ void MainWindow::createMdi(QMdiSubWindow *subWindow){
 }
 
 void MainWindow::createHelpActions() {
+	checkUpdate = new QAction(tr("Check for &Update"), this);
+	connect(checkUpdate, SIGNAL(triggered()), this, SLOT(updateCheck()));
+
 	artxi = new QAction(tr("About &RTXI"),this);
 	connect(artxi, SIGNAL(triggered()), this, SLOT(about()));
 
 	aqt = new QAction(tr("About &Qt"),this);
 	connect(aqt, SIGNAL(triggered()), this, SLOT(aboutQt()));
+
+	adocs = new QAction(tr("&Documentation"), this);
+	connect(adocs, SIGNAL(triggered()), this, SLOT(openDocs()));
+
+	sub_issue = new QAction(tr("&Submit Issue"), this);
+	connect(sub_issue, SIGNAL(triggered()), this, SLOT(openSubIssue()));
 }
 
 void MainWindow::updateUtilModules(){
@@ -254,6 +268,30 @@ void MainWindow::about(void) {
 
 void MainWindow::aboutQt (void) {
 	QMessageBox::aboutQt(this);
+}
+
+void MainWindow::openDocs(void) {
+	QDesktopServices::openUrl(QUrl("http://rtxi.org/docs/", QUrl::TolerantMode));
+}
+
+void MainWindow::openSubIssue(void) {
+	QDesktopServices::openUrl(QUrl("https://github.com/rtxi/rtxi/issues", QUrl::TolerantMode));
+}
+
+// TODO: Popup notification
+void MainWindow::updateCheck(void) {
+	FILE *pp;
+	pp = popen("./scripts/update_rtxi.sh","r");
+	if (pp != NULL) {
+		while (1) {
+			char *line;
+			char buf[1000];
+			line = fgets(buf, sizeof buf, pp);
+			if (line == NULL) break;
+			printf("%s", line);
+		}
+		pclose(pp);
+	}
 }
 
 void MainWindow::loadSettings (void) {

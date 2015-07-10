@@ -19,6 +19,7 @@ public:
                int tap_for_trans,
                int secondary_tap,
                int transient_len);
+  ~AdaptiveFir( void );
   void DumpAvgTransient( int decim_factor );
   void DumpTransient( int decim_factor );
   void DumpAvgTrajectory( double min_dist );

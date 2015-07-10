@@ -112,6 +112,13 @@ Scope::Scope(QWidget *parent) :	QwtPlot(parent), legendItem(NULL) {
 	setAxisAutoScale(QwtPlot::yLeft, false);
 	setAxisAutoScale(QwtPlot::xBottom, false);
 
+	// Set origin markers
+	origin = new QwtPlotMarker();
+	origin->setLineStyle(QwtPlotMarker::Cross);
+	origin->setValue(500.0, 0.0);
+	origin->setLinePen(Qt::gray, 2.0, Qt::DashLine);
+	origin->attach(this);
+
 	// Setup scaling map
 	scaleMapY = new QwtScaleMap();
 	scaleMapY->setPaintInterval(-1.0, 1.0);
@@ -137,6 +144,7 @@ Scope::Scope(QWidget *parent) :	QwtPlot(parent), legendItem(NULL) {
 	timer->setTimerType(Qt::CoarseTimer);
 	QObject::connect(timer,SIGNAL(timeout(void)),this,SLOT(timeoutEvent(void)));
 	timer->start(refresh);
+	resize(sizeHint());
 }
 
 // Kill me
@@ -246,6 +254,9 @@ void Scope::setData(double data[],size_t size) {
 
 	++data_idx %= data_size;
 
+	if(isPaused || getChannelCount() == 0)
+		return;
+
 	if(triggering && !triggerQueue.empty() && (data_idx+2)%data_size == triggerQueue.front()) {
 		if(triggerLast != (size_t)(-1) && (triggerQueue.front()+data_size-triggerLast)%data_size*period < triggerHoldoff)
 			triggerQueue.pop_front();
@@ -262,14 +273,20 @@ void Scope::setData(double data[],size_t size) {
 				double *x_loc = x.data();
 				double *y_loc = y.data();
 
+				// Set scale map for channel
+				scaleMapX->setScaleInterval(0, hScl*divX);
+				scaleMapY->setScaleInterval(-i->scale*divY/2, i->scale*divY/2);
+
 				// Scale data to pixel coordinates
 				for(size_t j = 0; j < i->data.size(); ++j) {
-					*x_loc = (j*period)*width();
-					*y_loc = i->data[(data_idx+j)%i->data.size()];
+					*x_loc = scaleMapX->transform(j*period);
+					*y_loc = scaleMapY->transform(i->data[(data_idx+j)%i->data.size()]+i->offset);
 					++x_loc;
 					++y_loc;
 				}
-				// Plot
+				// Append data to curve
+				// Makes deep copy - which is not optimal
+				// TODO: change to pointer based method
 				i->curve->setSamples(x.data(), y.data(), i->data.size());
 			}
 		}

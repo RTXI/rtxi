@@ -10,9 +10,9 @@ LIBS = -rdynamic
 
 pkginclude_HEADERS = \
 		$(top_srcdir)/include/atomic_fifo.h \
-      $(top_srcdir)/include/cmdline.h \
+		$(top_srcdir)/include/cmdline.h \
 		$(top_srcdir)/include/compiler.h \
-      $(top_srcdir)/include/daq.h \
+		$(top_srcdir)/include/daq.h \
 		$(top_srcdir)/include/default_gui_model.h \
 		$(top_srcdir)/include/debug.h \
 		$(top_srcdir)/include/event.h \
@@ -55,13 +55,8 @@ nodist_rtxi_SOURCES = \
 
 EXTRA_DIST = \
 		$(top_srcdir)/src/rt_os-posix.cpp \
-		$(top_srcdir)/src/rt_os-rtai3.cpp \
 		$(top_srcdir)/src/rt_os-xenomai.cpp
 
-if RTAI3
-rtxi_SOURCES += \
-		$(top_srcdir)/src/rt_os-rtai3.cpp
-endif
 if XENOMAI
 rtxi_SOURCES += \
 		$(top_srcdir)/src/rt_os-xenomai.cpp

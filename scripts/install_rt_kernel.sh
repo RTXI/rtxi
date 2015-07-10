@@ -70,9 +70,8 @@ fi
 # Patch kernel
 echo  "----->Patching kernel"
 cd $linux_tree
-cp -vi /boot/config-`uname -r` $linux_tree/.config
 $xenomai_root/scripts/prepare-kernel.sh --arch=x86 --adeos=$xenomai_root/ksrc/arch/x86/patches/ipipe-core-3.8.13-x86-4.patch --linux=$linux_tree
-yes "" | make oldconfig
+yes "" | make localmodconfig
 make menuconfig
 
 if [ $? -eq 0 ]; then

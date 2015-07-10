@@ -55,7 +55,6 @@ DefaultGUIModel::DefaultGUIModel(std::string name, DefaultGUIModel::variable_t *
 		setWindowTitle(QString::number(getID()) + " " + QString::fromStdString(name));
 
 		QTimer *timer = new QTimer(this);
-		timer->setTimerType(Qt::VeryCoarseTimer);
 		timer->start(1000);
 		QObject::connect(timer,SIGNAL(timeout(void)),this,SLOT(refresh(void)));
 	}
@@ -74,11 +73,13 @@ DefaultGUIModel::~DefaultGUIModel(void) {
 
 void DefaultGUIModel::createGUI(DefaultGUIModel::variable_t *var, int size) {
 
+	QWidget::setAttribute(Qt::WA_DeleteOnClose);
+
 	// Make Mdi
 	subWindow = new QMdiSubWindow;
 	subWindow->setWindowIcon(QIcon("/usr/local/lib/rtxi/RTXI-widget-icon.png"));
-	subWindow->setWindowFlags(Qt::CustomizeWindowHint);
-	subWindow->setWindowFlags(Qt::WindowCloseButtonHint);
+	subWindow->setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint | 
+	                          Qt::WindowMinimizeButtonHint);
 	subWindow->setOption(QMdiSubWindow::RubberBandResize, true);
 	subWindow->setOption(QMdiSubWindow::RubberBandMove, true);
 	MainWindow::getInstance()->createMdi(subWindow);
@@ -87,11 +88,15 @@ void DefaultGUIModel::createGUI(DefaultGUIModel::variable_t *var, int size) {
 	layout = new QGridLayout;
 
 	// Create child widget and gridLayout
-	gridBox = new QGroupBox;
+	QScrollArea *gridArea = new QScrollArea;
+	gridBox = new QWidget;
+	gridArea->setWidget(gridBox);
+	gridArea->ensureWidgetVisible(gridBox, 0, 0);
+	gridArea->setWidgetResizable(true);
 	QGridLayout *gridLayout = new QGridLayout;
 
 	size_t nstate = 0, nparam = 0, nevent = 0, ncomment = 0;
-	for (uint16_t i = 0; i < size; i++) {
+	for (size_t i = 0; i < size; i++) {
 		if (var[i].flags & (PARAMETER | STATE | EVENT | COMMENT)) {
 			param_t param;
 
@@ -160,14 +165,13 @@ void DefaultGUIModel::createGUI(DefaultGUIModel::variable_t *var, int size) {
 	buttonGroup->setLayout(buttonLayout);
 
 	// Keep one row of space above for users to place in grid
-	layout->addWidget(gridBox, 1, 0);
+	layout->addWidget(gridArea, 1, 0);
 
 	// Attempt to put these at the bottom at all times
 	layout->addWidget(buttonGroup, 10, 0);
 
 	// Set layout to Mdi and show
 	setLayout(layout);
-	subWindow->setAttribute(Qt::WA_DeleteOnClose);
 	subWindow->setWidget(this);
 	subWindow->show();
 }

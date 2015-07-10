@@ -58,7 +58,10 @@
        }
      Psd_Est[m] = samp_intvl*sum/scale_factor;
     }
+
   delete[] freq_seq;
+  delete[] windowed_seq;
+  delete[] pdgrm_dan;
   return;
  }
  
