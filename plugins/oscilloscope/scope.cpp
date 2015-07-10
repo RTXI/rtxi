@@ -112,6 +112,13 @@ Scope::Scope(QWidget *parent) :	QwtPlot(parent), legendItem(NULL) {
 	setAxisAutoScale(QwtPlot::yLeft, false);
 	setAxisAutoScale(QwtPlot::xBottom, false);
 
+	// Set origin markers
+	origin = new QwtPlotMarker();
+	origin->setLineStyle(QwtPlotMarker::Cross);
+	origin->setValue(500.0, 0.0);
+	origin->setLinePen(Qt::gray, 2.0, Qt::DashLine);
+	origin->attach(this);
+
 	// Setup scaling map
 	scaleMapY = new QwtScaleMap();
 	scaleMapY->setPaintInterval(-1.0, 1.0);
