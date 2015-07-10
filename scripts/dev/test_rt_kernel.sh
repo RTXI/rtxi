@@ -42,7 +42,7 @@ fi
 DAQ=$(lspci | grep National | cut -d":" -f3 | sed 's/ \+/ /g' | sed -e 's/^\  *//' -e 's/\ *$//')
 
 # Set up variables for run
-TIME=10 # duration of run (s)
+TIME=600 # duration of run (s)
 RT_PERIOD=$(awk "BEGIN {print 1 / $SysFreq * 1e6}") # period in us
 RATE=$(expr 1000 / $RT_PERIOD) # Convert RT period to freq in kHz
 
@@ -57,7 +57,5 @@ else
 	# Start testing
 	sudo /usr/xenomai/bin/./latency -s -h -p $RT_PERIOD -B 1 -H 500000 -T $TIME -g test_rt_histdata.txt | tee test_rt_kernel.log
 fi
-
-Rscript makeHistPlot.r "$DISTRO" "$HOSTNAME" "$RT_KERNEL" "$PROCESSOR" "$GRAPHICS_CARD" "$GRAPHICS_DRIVER" "$RATE" "$DAQ"
 
 exit 0
