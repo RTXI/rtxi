@@ -153,7 +153,7 @@ bool RT::OS::isRealtime(void) {
 }
 
 long long RT::OS::getTime(void) {
-	return rt_timer_tsc2ns(rt_timer_tsc());
+	return rt_timer_read();
 }
 
 int RT::OS::setPeriod(RT::OS::Task task,long long period) {
