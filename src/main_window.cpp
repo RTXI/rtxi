@@ -164,6 +164,9 @@ void MainWindow::createHelpMenu() {
 	helpMenu = menuBar()->addMenu(tr("&Help"));
 	helpMenu->addAction(artxi);
 	helpMenu->addAction(aqt);
+	helpMenu->addSeparator();
+	helpMenu->addAction(adocs);
+	helpMenu->addAction(sub_issue);
 }
 
 void MainWindow::createFileActions() {
@@ -197,6 +200,12 @@ void MainWindow::createHelpActions() {
 
 	aqt = new QAction(tr("About &Qt"),this);
 	connect(aqt, SIGNAL(triggered()), this, SLOT(aboutQt()));
+
+	adocs = new QAction(tr("&Documentation"), this);
+	connect(adocs, SIGNAL(triggered()), this, SLOT(openDocs()));
+
+	sub_issue = new QAction(tr("&Submit Issue"), this);
+	connect(sub_issue, SIGNAL(triggered()), this, SLOT(openSubIssue()));
 }
 
 void MainWindow::updateUtilModules(){
@@ -254,6 +263,14 @@ void MainWindow::about(void) {
 
 void MainWindow::aboutQt (void) {
 	QMessageBox::aboutQt(this);
+}
+
+void MainWindow::openDocs(void) {
+	QDesktopServices::openUrl(QUrl("http://rtxi.org/docs/", QUrl::TolerantMode));
+}
+
+void MainWindow::openSubIssue(void) {
+	QDesktopServices::openUrl(QUrl("https://github.com/rtxi/rtxi/issues", QUrl::TolerantMode));
 }
 
 void MainWindow::loadSettings (void) {
