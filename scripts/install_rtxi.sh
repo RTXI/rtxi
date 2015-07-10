@@ -25,6 +25,7 @@ ROOT=../
 DEPS=../deps/
 HDF=${DEPS}/hdf
 QWT=${DEPS}/qwt
+RTXI_LIB=/usr/local/lib/rtxi/
 
 # Start at top
 cd ${ROOT}
@@ -70,9 +71,10 @@ else
 fi
 
 echo "----->Putting things into place."
-sudo cp -f libtool /usr/local/lib/rtxi/
-sudo cp -f scripts/icons/RTXI-icon.png /usr/local/lib/rtxi/
-sudo cp -f scripts/icons/RTXI-widget-icon.png /usr/local/lib/rtxi
+sudo mkdir ${RTXI_LIB}
+sudo cp -f libtool ${RTXI_LIB}
+sudo cp -f scripts/icons/RTXI-icon.png ${RTXI_LIB}
+sudo cp -f scripts/icons/RTXI-widget-icon.png ${RTXI_LIB}
 sudo cp -f scripts/rtxi.desktop /usr/share/applications/
 cp -f scripts/rtxi.desktop ~/Desktop/
 chmod +x ~/Desktop/rtxi.desktop
