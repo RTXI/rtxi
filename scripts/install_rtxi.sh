@@ -22,8 +22,8 @@
 
 # Directories
 ROOT=../
-MODS=../../modules
-DEPS=../deps/
+MODS=${ROOT}/modules
+DEPS=${ROOT}/deps/
 HDF=${DEPS}/hdf
 QWT=${DEPS}/qwt
 RTXI_LIB=/usr/local/lib/rtxi/
@@ -93,6 +93,13 @@ else
 fi
 sudo ldconfig
 
+if [ $? -eq 0 ]; then
+	echo "----->Successfully placed files.."
+else
+	echo "----->Failed to place files."
+	exit
+fi
+
 echo "----->Installing basic modules."
 mkdir ${MODS}
 cd ${MODS}
@@ -105,6 +112,13 @@ git clone https://github.com/RTXI/signal-generator.git
 git clone https://github.com/RTXI/ttl-pulses.git
 git clone https://github.com/RTXI/wave-maker.git
 git clone https://github.com/RTXI/noise-generator.git
+
+for dir in ${MODS}/*; do
+	if [ -d "$dir" ]; then
+		make -C "$dir"
+		sudo make install -C "$dir"
+	fi
+done
 
 echo ""
 if [ $? -eq 0 ]; then
