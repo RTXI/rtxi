@@ -160,7 +160,7 @@ void MainWindow::createUtilMenu() {
 			signalsSubMenu->addAction(utilItem);
 		else if(libsDir.entryList().at(i).contains("ttl"))
 			signalsSubMenu->addAction(utilItem);
-		else if(libsDir.entryList().at(i).contains("wave"))
+		else if(libsDir.entryList().at(i).contains("maker"))
 			signalsSubMenu->addAction(utilItem);
 	}
 }
