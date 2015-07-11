@@ -131,6 +131,7 @@ void MainWindow::createUtilMenu() {
 	filtersSubMenu = utilMenu->addMenu(tr("&Filters"));
 	signalsSubMenu = utilMenu->addMenu(tr("&Signals"));
 	utilitiesSubMenu = utilMenu->addMenu(tr("&Utilities"));
+	connect(utilMenu, SIGNAL(triggered(QAction*)), this, SLOT(utilitiesMenuActivated(QAction*)));
 
 	QDir libsDir("/usr/local/lib/rtxi/");
 	if(!libsDir.exists())
@@ -140,9 +141,25 @@ void MainWindow::createUtilMenu() {
 	for(size_t i = 0; i < libsDir.entryList().size(); i++)
 	{
 		utilItem = new QAction(libsDir.entryList().at(i), this);
-		utilitiesSubMenu->addAction(utilItem);
+		if(libsDir.entryList().at(i).contains("analysis"))
+			utilitiesSubMenu->addAction(utilItem);
+		else if(libsDir.entryList().at(i).contains("sync"))
+			utilitiesSubMenu->addAction(utilItem);
+		else if(libsDir.entryList().at(i).contains("mimic"))
+			utilitiesSubMenu->addAction(utilItem);
+		else if(libsDir.entryList().at(i).contains("iir"))
+			filtersSubMenu->addAction(utilItem);
+		else if(libsDir.entryList().at(i).contains("fir"))
+			filtersSubMenu->addAction(utilItem);
+		else if(libsDir.entryList().at(i).contains("signal"))
+			signalsSubMenu->addAction(utilItem);
+		else if(libsDir.entryList().at(i).contains("noise"))
+			signalsSubMenu->addAction(utilItem);
+		else if(libsDir.entryList().at(i).contains("ttl"))
+			signalsSubMenu->addAction(utilItem);
+		else if(libsDir.entryList().at(i).contains("wave"))
+			signalsSubMenu->addAction(utilItem);
 	}
-	connect(utilMenu, SIGNAL(triggered(QAction*)), this, SLOT(utilitiesMenuActivated(QAction*)));
 }
 
 void MainWindow::createSystemMenu() {
