@@ -218,16 +218,6 @@ int Settings::Manager::load(const std::string &filename) {
 
 	QDomElement e1 = doc.documentElement();
 
-	// Test code - XML parsing
-	/*QDomNode n = e1.firstChild();
-		while(!n.isNull()) {
-		QDomElement e = n.toElement(); // try to convert the node to an element.
-		if(!e.isNull()) {
-		printf("str2: %s\n", qPrintable(e.attribute("component")));
-		}
-		n = n.nextSibling();
-		}*/
-
 	if (e1.tagName() != "RTXI" || e1.attribute("class") != "settings") {
 		ERROR_MSG("Settings::Manager::load : invalid document element\n");
 		return -EINVAL;

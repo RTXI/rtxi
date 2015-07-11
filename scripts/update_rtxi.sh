@@ -28,7 +28,8 @@ VAL=$(git rev-list HEAD...origin/qt5 --count)
 
 if [ $VAL -eq 0 ]; then
 	echo "----->RTXI up-to-date."
-	exit
+	exit 0
 else
 	echo "----->RTXI update available."
+	exit 1
 fi

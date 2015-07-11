@@ -56,6 +56,9 @@ MainWindow::MainWindow (void) : QMainWindow(NULL, Qt::Window) {
 	/* Initialize Help Menu */
 	createHelpActions();
 	createHelpMenu();
+
+	/* Check for updates */
+	updateCheck();
 }
 
 MainWindow::~MainWindow (void) {
@@ -173,7 +176,6 @@ void MainWindow::createWindowsMenu() {
 
 void MainWindow::createHelpMenu() {
 	helpMenu = menuBar()->addMenu(tr("&Help"));
-	helpMenu->addAction(checkUpdate);
 	helpMenu->addSeparator();
 	helpMenu->addAction(artxi);
 	helpMenu->addAction(aqt);
@@ -208,9 +210,6 @@ void MainWindow::createMdi(QMdiSubWindow *subWindow){
 }
 
 void MainWindow::createHelpActions() {
-	checkUpdate = new QAction(tr("Check for &Update"), this);
-	connect(checkUpdate, SIGNAL(triggered()), this, SLOT(updateCheck()));
-
 	artxi = new QAction(tr("About &RTXI"),this);
 	connect(artxi, SIGNAL(triggered()), this, SLOT(about()));
 
@@ -248,14 +247,13 @@ void MainWindow::openSubIssue(void) {
 // TODO: Popup notification
 void MainWindow::updateCheck(void) {
 	FILE *pp;
-	pp = popen("./scripts/update_rtxi.sh","r");
+	pp = popen("/usr/local/share/rtxi/update_rtxi.sh","r");
 	if (pp != NULL) {
 		while (1) {
-			char *line;
-			char buf[1000];
-			line = fgets(buf, sizeof buf, pp);
-			if (line == NULL) break;
-			printf("%s", line);
+			char *res;
+			char buf[1];
+			res = fgets(buf, sizeof buf, pp);
+			printf("%s", res);
 		}
 		pclose(pp);
 	}

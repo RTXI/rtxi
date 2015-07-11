@@ -77,13 +77,14 @@ sudo cp -f libtool ${RTXI_LIB}
 sudo cp -f scripts/icons/RTXI-icon.png ${RTXI_LIB}
 sudo cp -f scripts/icons/RTXI-widget-icon.png ${RTXI_LIB}
 sudo cp -f scripts/rtxi.desktop /usr/share/applications/
+sudo cp -f scripts/update_rtxi.sh /usr/local/share/rtxi/.
 cp -f scripts/rtxi.desktop ~/Desktop/
 chmod +x ~/Desktop/rtxi.desktop
 sudo cp -f rtxi.conf /etc/
 sudo cp -f /usr/xenomai/sbin/analogy_config /usr/sbin/
 
 if [ $(lsb_release -sc) == "jessie" ]; then
-	echo "----->PLoad analogy driver with systemd"
+	echo "----->Load analogy driver with systemd"
 	sudo cp -f ./scripts/services/rtxi_load_analogy.service /etc/systemd/system/
 	sudo systemctl enable rtxi_load_analogy.service
 else

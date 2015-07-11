@@ -150,7 +150,6 @@ class MainWindow : public QMainWindow {
 	void aboutQt(void);
 	void openDocs(void);
 	void openSubIssue(void);
-	void updateCheck(void);
 
 	void loadSettings(void);
 	void saveSettings(void);
@@ -195,11 +194,9 @@ class MainWindow : public QMainWindow {
 	QAction *aqt;
 	QAction *adocs;
 	QAction *sub_issue;
-	QAction *checkUpdate;
 	QAction *utilItem;
 
-	bool updateAvailable = false;
-
+	void updateCheck(void);
 	void createFileMenu();
 	void createModuleMenu();
 	void createUtilMenu();

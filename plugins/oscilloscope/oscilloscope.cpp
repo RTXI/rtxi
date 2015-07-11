@@ -306,7 +306,7 @@ void Oscilloscope::Panel::applyChannelTab(void) {
 
 			bool active = setInactiveSync();
 			QwtPlotCurve *curve = new QwtPlotCurve(info->name);
-			i = scopeWindow->insertChannel(info->name + " 200 mV/div", 2.0, 0.0, QPen(Qt::red, 1, Qt::SolidLine), curve, info);
+			i = scopeWindow->insertChannel(info->name + " 50 mV/div", 2.0, 0.0, QPen(Qt::red, 1, Qt::SolidLine), curve, info);
 			flushFifo();
 			setActive(active);
 		}
@@ -484,8 +484,6 @@ QWidget * Oscilloscope::Panel::createChannelTab(QWidget *parent) {
 	QLabel *scaleLabel = new QLabel(tr("Scale:"),page);
 	row1Layout->addWidget(scaleLabel);//, Qt::AlignRight);
 	scalesList = new QComboBox(page);
-//	scalesList->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-//	scalesList->setSizeAdjustPolicy(QComboBox::AdjustToContents);
 	row1Layout->addWidget(scalesList);//, Qt::AlignRight);
 	QFont scalesListFont("DejaVu Sans Mono");
 	scalesList->setFont(scalesListFont);
@@ -563,8 +561,6 @@ QWidget * Oscilloscope::Panel::createChannelTab(QWidget *parent) {
 	offsetsEdit->setValidator(new QDoubleValidator(offsetsEdit));
 	row1Layout->addWidget(offsetsEdit);//, Qt::AlignRight);
 	offsetsList = new QComboBox(page);
-//	offsetsList->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-//	offsetsList->setSizeAdjustPolicy(QComboBox::AdjustToContents);
 	row1Layout->addWidget(offsetsList);//, Qt::AlignRight);
 	offsetsList->addItem("V");
 	offsetsList->addItem("mV");
@@ -883,7 +879,7 @@ void Oscilloscope::Panel::showChannelTab(void) {
 	widthsList->setEnabled(found);
 	stylesList->setEnabled(found);
 	if (!found) {
-		scalesList->setCurrentIndex(7);
+		scalesList->setCurrentIndex(9);
 		offsetsEdit->setText(QString::number(0));
 		offsetsList->setCurrentIndex(0);
 		colorsList->setCurrentIndex(0);
@@ -1174,8 +1170,6 @@ void Oscilloscope::Panel::doDeferred(const Settings::Object::State &s) {
 					s.loadInteger(str.str() + " pen width"), Qt::PenStyle(s.loadInteger(str.str() + " pen style"))), curve, info);
 
 		scopeWindow->setChannelLabel(chan, info->name + " - " + scalesList->itemText(static_cast<int> (round(4 * (log10(1/chan->getScale()) + 1)))).simplified());
-		//scopeWindow->setChannelLabel(chan, info->name + " " + properties->scaleList->itemText(static_cast<int> (round(4 * (log10(1/chan->getScale()) + 1)))).simplified());
-		//scopeWindow->setChannelLabel(chan, info->name + " - " + scalesList->itemText(static_cast<int> (round(4 * (log10(1/chan->getScale()) + 1)))).simplified());
 	}
 
 	flushFifo();
