@@ -68,6 +68,10 @@ class MainWindow : public QMainWindow {
 
 	void clearFileMenu(void);
 
+
+	/*!
+	 * Insert separator
+	 */
 	QAction* insertModuleMenuSeparator(void);
 
 	/*!
@@ -116,14 +120,6 @@ class MainWindow : public QMainWindow {
 	void removeModuleMenuItem(QAction *action);
 
 	/*!
-	 * Remove an item from the Modules menu.
-	 *
-	 * \param index The position of the item to be removed.
-	 */
-
-	void removeModuleMenuItemAt(int index);
-
-	/*!
 	 * Add an item to the Utilities menu.
 	 *
 	 * \param label The text that will appear in the menu.
@@ -134,45 +130,6 @@ class MainWindow : public QMainWindow {
 
 	QAction* createUtilMenuItem(const QString &label, const QObject *handler,
 			const char *slot);
-
-	/*!
-	 * Sets the parameter value of a menu item in the Utilities menu.
-	 */
-
-	void setUtilMenuItemParameter(QAction*, int);
-
-	/*!
-	 * Clears the Utilities menu.
-	 */
-
-	void clearUtilMenu(void);
-
-	/*!
-	 * Change the text associated with the Utilities menu item.
-	 *
-	 * \param id The index of the item to change.
-	 * \param text The next text to assign to that menu item.
-	 */
-
-	void changeUtilMenuItem(int id, QString text);
-
-	/*!
-	 * Remove an item from the Utilities menu.
-	 *
-	 * \param index The index of the item to be removed.
-	 */
-	void removeUtilMenuItem(int index);
-
-	/*!
-	 * Add an item to the Utilities->Patch Clamp menu.
-	 *
-	 * \param label The text that will appear in the menu.
-	 * \param handler The object that will handle signals from the menu.
-	 * \param slot The slot in the handler that the signal will activate.
-	 * \return The index of the new menu item.
-	 */
-
-	QAction* createPatchClampMenuItem(const QString &label, const QObject *handler, const char *slot);
 
 	/*!
 	 * Add an item to the System menu.
@@ -203,10 +160,7 @@ class MainWindow : public QMainWindow {
 	void windowsMenuActivated(QAction *);
 	void modulesMenuActivated(QAction *);
 	void fileMenuActivated(QAction *);
-
-	void loadUtil(int);
-	void loadSignal(int);
-	void loadFilter(int);
+	void utilitiesMenuActivated(QAction *);
 
 	private:
 
@@ -227,6 +181,7 @@ class MainWindow : public QMainWindow {
 	QMenu *moduleMenu;
 	QMenu *utilMenu;
 	QMenu *filtersSubMenu;
+	QMenu *signalsSubMenu;
 	QMenu *utilitiesSubMenu;
 	QMenu *systemMenu;
 	QMenu *windowsMenu;
@@ -241,10 +196,10 @@ class MainWindow : public QMainWindow {
 	QAction *adocs;
 	QAction *sub_issue;
 	QAction *checkUpdate;
+	QAction *utilItem;
 
 	bool updateAvailable = false;
 
-	void updateUtilModules();
 	void createFileMenu();
 	void createModuleMenu();
 	void createUtilMenu();

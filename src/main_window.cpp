@@ -56,8 +56,6 @@ MainWindow::MainWindow (void) : QMainWindow(NULL, Qt::Window) {
 	/* Initialize Help Menu */
 	createHelpActions();
 	createHelpMenu();
-
-	updateUtilModules();
 }
 
 MainWindow::~MainWindow (void) {
@@ -108,25 +106,8 @@ void MainWindow::removeModuleMenuItem (QAction *action) {
 		moduleMenu->removeAction(action);
 }
 
-void MainWindow::removeModuleMenuItemAt (int id) {
-}
-
 QAction* MainWindow::createUtilMenuItem(const QString &text, const QObject * receiver, const char *member) {
 	return utilMenu->addAction (text, receiver, member);
-}
-
-void MainWindow::setUtilMenuItemParameter (QAction *action, int parameter) {
-	action->setData(parameter);
-}
-
-void MainWindow::clearUtilMenu (void) {
-	utilMenu->clear ();
-}
-
-void MainWindow::changeUtilMenuItem (int id, QString text) {
-}
-
-void MainWindow::removeUtilMenuItem (int id) {
 }
 
 void MainWindow::createFileMenu() {
@@ -148,7 +129,20 @@ void MainWindow::createModuleMenu() {
 void MainWindow::createUtilMenu() {
 	utilMenu = menuBar()->addMenu(tr("&Utilities"));
 	filtersSubMenu = utilMenu->addMenu(tr("&Filters"));
-	utilitiesSubMenu = utilMenu->addMenu(tr("&Signals"));
+	signalsSubMenu = utilMenu->addMenu(tr("&Signals"));
+	utilitiesSubMenu = utilMenu->addMenu(tr("&Utilities"));
+
+	QDir libsDir("/usr/local/lib/rtxi/");
+	if(!libsDir.exists())
+		return;
+
+	libsDir.setNameFilters(QStringList("*.so"));
+	for(size_t i = 0; i < libsDir.entryList().size(); i++)
+	{
+		utilItem = new QAction(libsDir.entryList().at(i), this);
+		utilitiesSubMenu->addAction(utilItem);
+	}
+	connect(utilMenu, SIGNAL(triggered(QAction*)), this, SLOT(utilitiesMenuActivated(QAction*)));
 }
 
 void MainWindow::createSystemMenu() {
@@ -211,50 +205,6 @@ void MainWindow::createHelpActions() {
 
 	sub_issue = new QAction(tr("&Submit Issue"), this);
 	connect(sub_issue, SIGNAL(triggered()), this, SLOT(openSubIssue()));
-}
-
-void MainWindow::updateUtilModules(){
-	QSettings userprefs;
-	userprefs.setPath(QSettings::NativeFormat, QSettings::SystemScope, "/usr/local/share/rtxi/");
-	userprefs.beginGroup("/utilFileList");
-	QStringList entries = userprefs.childKeys();
-	userprefs.endGroup();
-
-	int numUtilFiles = entries.size();
-
-	/*int i = 0;
-		int menuID = utilMenu->insertItem("Model HH Neuron",this,SLOT(loadUtil(int)));
-		setUtilMenuItemParameter(menuID, i);
-		i++;
-		menuID = utilMenu->insertItem("Synchronize Modules",this,SLOT(loadUtil(int)));
-		setUtilMenuItemParameter(menuID, i);
-
-		QPopupMenu *filterSubMenu = new QPopupMenu(this);
-		i = 0;
-		menuID = filterSubMenu->insertItem("FIR Filter (Window Method)",this,SLOT(loadFilter(int)));
-		filterSubMenu->setItemParameter(menuID, i);
-		i++;
-		menuID = filterSubMenu->insertItem("IIR Filter",this,SLOT(loadFilter(int)));
-		filterSubMenu->setItemParameter(menuID, i);
-
-		utilMenu->insertItem(tr("&Filters"), filterSubMenu);
-
-		QPopupMenu *signalSubMenu = new QPopupMenu(this);
-
-		i = 0;
-		menuID = signalSubMenu->insertItem("Signal Generator",this,SLOT(loadSignal(int)));
-		signalSubMenu->setItemParameter(menuID, i);
-		i++;
-		menuID = signalSubMenu->insertItem("Noise Generator",this,SLOT(loadSignal(int)));
-		signalSubMenu->setItemParameter(menuID, i);
-		i++;
-		menuID = signalSubMenu->insertItem("Wave Maker",this,SLOT(loadSignal(int)));
-		signalSubMenu->setItemParameter(menuID, i);
-		i++;
-		menuID = signalSubMenu->insertItem("Mimic",this,SLOT(loadSignal(int)));
-		signalSubMenu->setItemParameter(menuID, i);
-
-		utilMenu->insertItem(tr("&Signals"), signalSubMenu);*/
 }
 
 QAction* MainWindow::createSystemMenuItem (const QString &text, const QObject *receiver, const char *member) {
@@ -340,89 +290,8 @@ void MainWindow::resetSettings(void)
 	Settings::Manager::getInstance()->load("/etc/rtxi.conf");
 }
 
-/*void MainWindow::updateUtilModules () {
-	QSettings userprefs;
-	userprefs.setPath (QSettings::NativeFormat, QSettings::SystemScope, "/usr/local/share/rtxi/");
-
-	QStringList entries = userprefs.entryList ("/utilFileList");
-	int numUtilFiles = entries.size ();
-
-	for (int i = 0; i < numUtilFiles; i++) {
-	userprefs.removeEntry ("/utilFileList/util" + QString::number (i));
-	userprefs.removeEntry ("/utilFileList/filter" + QString::number (i));
-	userprefs.removeEntry ("/utilFileList/sig" + QString::number (i));
-	}
-	userprefs.writeEntry ("/utilFileList/util" + QString::number (0), "neuron.so");
-	userprefs.writeEntry ("/utilFileList/util" + QString::number (1), "synch.so");
-
-	userprefs.writeEntry ("/utilFileList/filter" + QString::number (0), "FIRwindow.so");
-	userprefs.writeEntry ("/utilFileList/filter" + QString::number (1), "IIRfilter.so");
-
-	userprefs.writeEntry ("/utilFileList/sig" + QString::number (0), "siggen.so");
-	userprefs.writeEntry ("/utilFileList/sig" + QString::number (1), "noisegen.so");
-	userprefs.writeEntry ("/utilFileList/sig" + QString::number (2), "wave_maker.so");
-	userprefs.writeEntry ("/utilFileList/sig" + QString::number (3), "mimic.so");
-
-	int i = 0;
-	int menuID = utilMenu->insertItem("Model HH Neuron", this, SLOT (loadUtil (int)));
-	setUtilMenuItemParameter(menuID, i);
-	i++;
-	menuID = utilMenu->insertItem("Synchronize Modules", this, SLOT (loadUtil (int)));
-	setUtilMenuItemParameter(menuID, i);
-
-	QMenu *filterSubMenu = new QMenu(this);
-	i = 0;
-	menuID = filterSubMenu->insertItem("FIR Filter (Window Method)", this, SLOT (loadFilter (int)));
-	filterSubMenu->setItemParameter(menuID, i);
-	i++;
-	menuID = filterSubMenu->insertItem("IIR Filter", this, SLOT (loadFilter (int)));
-	filterSubMenu->setItemParameter(menuID, i);
-
-	utilMenu->insertItem(tr("&Filters"), filterSubMenu);
-
-	QMenu *signalSubMenu = new QMenu(this);
-
-	i = 0;
-	menuID = signalSubMenu->insertItem("Signal Generator", this, SLOT (loadSignal (int)));
-	signalSubMenu->setItemParameter(menuID, i);
-	i++;
-	menuID = signalSubMenu->insertItem("Noise Generator", this, SLOT (loadSignal (int)));
-	signalSubMenu->setItemParameter(menuID, i);
-	i++;
-	menuID = signalSubMenu->insertItem("Wave Maker", this, SLOT (loadSignal (int)));
-	signalSubMenu->setItemParameter(menuID, i);
-	i++;
-	menuID = signalSubMenu->insertItem("Mimic", this, SLOT (loadSignal (int)));
-	signalSubMenu->setItemParameter(menuID, i);
-
-	utilMenu->insertItem(tr ("&Signals"), signalSubMenu);
-	}*/
-
-void MainWindow::loadUtil(int i) {
-	QSettings userprefs;
-	userprefs.setPath (QSettings::NativeFormat, QSettings::SystemScope, "/usr/local/share/rtxi/");
-	/*QString filename = userprefs.readEntry ("/utilFileList/util" + QString::number (i));
-		QByteArray textData = filename.toLatin1();
-		const char *text = textData.constData();
-		Plugin::Manager::getInstance()->load(text);*/
-}
-
-void MainWindow::loadFilter(int i) {
-	QSettings userprefs;
-	userprefs.setPath (QSettings::NativeFormat, QSettings::SystemScope, "/usr/local/share/rtxi/");
-	/*QString filename = userprefs.readEntry ("/utilFileList/filter"+ QString::number (i));
-		QByteArray textData = filename.toLatin1();
-		const char *text = textData.constData();
-		Plugin::Manager::getInstance()->load(text);*/
-}
-
-void MainWindow::loadSignal(int i) {
-	QSettings userprefs;
-	userprefs.setPath (QSettings::NativeFormat, QSettings::SystemScope, "/usr/local/share/rtxi/");
-	/*QString filename = userprefs.readEntry ("/utilFileList/sig" + QString::number (i));
-		QByteArray textData = filename.toLatin1();
-		const char *text = textData.constData();
-		Plugin::Manager::getInstance()->load(text);*/
+void MainWindow::utilitiesMenuActivated(QAction *id) {
+	Plugin::Manager::getInstance()->load(id->text());
 }
 
 void MainWindow::windowsMenuAboutToShow(void) {

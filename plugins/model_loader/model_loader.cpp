@@ -96,10 +96,6 @@ void ModelLoader::updateRecentModules(QString filename, int index) {
 	userprefs.endGroup();
 	int numRecentFiles = entries.size();
 
-	for (int i = 3; i < std::min(numRecentFiles - 2, 10) + 3; ++i) {
-		MainWindow::getInstance()->removeModuleMenuItemAt(i);
-	}
-
 	QString listmodule;
 	QString text;
 	for (int i = 0; i < std::min(numRecentFiles - 2, 10); ++i) {
