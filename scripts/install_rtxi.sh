@@ -22,6 +22,7 @@
 
 # Directories
 ROOT=../
+MODS=../../modules
 DEPS=../deps/
 HDF=${DEPS}/hdf
 QWT=${DEPS}/qwt
@@ -82,15 +83,28 @@ sudo cp -f rtxi.conf /etc/
 sudo cp -f /usr/xenomai/sbin/analogy_config /usr/sbin/
 
 if [ $(lsb_release -sc) == "jessie" ]; then
-	echo "Load analogy driver with systemd"
+	echo "----->PLoad analogy driver with systemd"
 	sudo cp -f ./scripts/services/rtxi_load_analogy.service /etc/systemd/system/
 	sudo systemctl enable rtxi_load_analogy.service
 else
-	echo "Load analogy driver with sysvinit/upstart"
+	echo "----->PLoad analogy driver with sysvinit/upstart"
 	sudo cp -f ./scripts/services/rtxi_load_analogy /etc/init.d/
 	sudo update-rc.d rtxi_load_analogy defaults
 fi
 sudo ldconfig
+
+echo "----->Installing basic modules."
+mkdir ${MODS}
+cd ${MODS}
+git clone https://github.com/RTXI/analysis-tools.git
+git clone https://github.com/RTXI/iir-filter.git
+git clone https://github.com/RTXI/fir-window.git
+git clone https://github.com/RTXI/sync.git
+git clone https://github.com/RTXI/mimic-signal.git
+git clone https://github.com/RTXI/signal-generator.git
+git clone https://github.com/RTXI/ttl-pulses.git
+git clone https://github.com/RTXI/wave-maker.git
+git clone https://github.com/RTXI/noise-generator.git
 
 echo ""
 if [ $? -eq 0 ]; then

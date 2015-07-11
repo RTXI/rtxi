@@ -148,7 +148,7 @@ void MainWindow::createModuleMenu() {
 void MainWindow::createUtilMenu() {
 	utilMenu = menuBar()->addMenu(tr("&Utilities"));
 	filtersSubMenu = utilMenu->addMenu(tr("&Filters"));
-	utilitiesSubMenu = utilMenu->addMenu(tr("&Signal Generators"));
+	utilitiesSubMenu = utilMenu->addMenu(tr("&Signals"));
 }
 
 void MainWindow::createSystemMenu() {
