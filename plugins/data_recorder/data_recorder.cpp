@@ -443,13 +443,17 @@ DataRecorder::Panel::Panel(QWidget *parent, size_t buffersize) :
 	QObject::connect(lButton,SIGNAL(released(void)),this,SLOT(removeChannel(void)));
 	lButton->setEnabled(false);
 
+	channelLayout->addWidget(new QLabel(tr("Trial Name:")));
+	trialNameEdit = new QLineEdit;
+	channelLayout->addWidget(trialNameEdit);
+
 	// Create child widget and layout
-	sampleGroup = new QGroupBox(tr("Sample Control"));
+	sampleGroup = new QGroupBox(tr("Trial Metadata"));
 	QHBoxLayout *sampleLayout = new QHBoxLayout;
 
 	// create elements for sample box
 	trialNumLbl = new QLabel;
-	trialNumLbl->setText("Trial:");
+	trialNumLbl->setText("Trial #:");
 	trialNumLbl->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
 	sampleLayout->addWidget(trialNumLbl);
 	trialNum = new QLabel;
@@ -461,7 +465,7 @@ DataRecorder::Panel::Panel(QWidget *parent, size_t buffersize) :
 	fileSizeLbl->setText("File Size (kb):");
 	sampleLayout->addWidget(fileSizeLbl);
 	fileSize = new QLabel;
-	fileSize->setText("No data recorded.");
+	fileSize->setText("No data recorded");
 	sampleLayout->addWidget(fileSize);
 	fileSize->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
 
@@ -469,7 +473,7 @@ DataRecorder::Panel::Panel(QWidget *parent, size_t buffersize) :
 	trialLengthLbl->setText("Trial Length (s):");
 	sampleLayout->addWidget(trialLengthLbl);
 	trialLength = new QLabel;
-	trialLength->setText("No data recorded.");
+	trialLength->setText("No data recorded");
 	trialLength->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
 	sampleLayout->addWidget(trialLength);
 
@@ -481,7 +485,7 @@ DataRecorder::Panel::Panel(QWidget *parent, size_t buffersize) :
 	QHBoxLayout *fileLayout = new QHBoxLayout;
 
 	// Create elements for file control
-	fileLayout->addWidget(new QLabel(tr("File Name")));
+	fileLayout->addWidget(new QLabel(tr("File Name:")));
 	fileNameEdit = new QLineEdit;
 	fileNameEdit->setReadOnly(true);
 	fileLayout->addWidget(fileNameEdit);
@@ -1368,8 +1372,12 @@ int DataRecorder::Panel::startRecording(long long timestamp)
 
 	data = H5Dcreate(file.trial, "Date", string_type,
 			scalar_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-	std::string nowDateTime = std::string(QDateTime::currentDateTime().toString(Qt::ISODate).toLatin1());
-	H5Dwrite(data, string_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, nowDateTime.c_str());
+	H5Dwrite(data, string_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, std::string(QDateTime::currentDateTime().toString(Qt::ISODate).toLatin1()).c_str());
+	H5Dclose(data);
+
+	data = H5Dcreate(file.trial, "Trial Name", string_type,
+			scalar_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+	H5Dwrite(data, string_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, std::string(trialNameEdit->text().toLatin1()).c_str());
 	H5Dclose(data);
 
 	hid_t param_type;

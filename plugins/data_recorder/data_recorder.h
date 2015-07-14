@@ -167,6 +167,7 @@ namespace DataRecorder
 			QSpinBox *downsampleSpin;
 
 			QLineEdit *fileNameEdit;
+			QLineEdit *trialNameEdit;
 			QLineEdit *fileFormatEdit;
 			QLabel *fileSizeLbl;
 			QLabel *fileSize;
