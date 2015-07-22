@@ -117,7 +117,7 @@ git clone https://github.com/RTXI/noise-generator.git
 for dir in ${MODS}/*; do
 	if [ -d "$dir" ]; then
 		make clean -C "$dir"
-		git pull
+		git -C "$dir" pull
 		make -C "$dir"
 		sudo make install -C "$dir"
 	fi
