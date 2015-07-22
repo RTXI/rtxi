@@ -1032,6 +1032,8 @@ void DataRecorder::Panel::doDeferred(const Settings::Object::State &s)
 
 		channels.insert(channels.end(), *channel);
 		selectionBox->addItem(channel->name);
+		if(selectionBox->count())
+			lButton->setEnabled(true);
 	}
 }
 
