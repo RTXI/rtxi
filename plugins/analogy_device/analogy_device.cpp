@@ -396,12 +396,13 @@ int AnalogyDevice::setDigitalDirection(index_t channel,direction_t direction) {
 
 // Acquire data
 void AnalogyDevice::read(void) {
-	lsampl_t sample;
-	analog_channel_t *channel;
+	lsampl_t sample = 0;
+	double value = 0;
 	int ref = 0;
 	int size = 0;
-	int err = -1;
+	analog_channel_t *channel;
 	a4l_chinfo_t *chinfo;
+	a4l_rnginfo_t *rnginfo;
 
 	for(size_t i=0;i < subdevice[AI].count;++i)
 		if(subdevice[AI].chan[i].active) {
@@ -415,16 +416,19 @@ void AnalogyDevice::read(void) {
 				case 3: ref = AREF_OTHER; break;
 			}
 
-			// Get channel size
+			// Get channel info
 			a4l_get_chinfo(&dsc, subdevice[AI].id, i, &chinfo);
+			a4l_get_rnginfo(&dsc, subdevice[AI].id, i, channel->range, &rnginfo);
 			size = a4l_sizeof_chan(chinfo);
 
 			// Read 1 data sample via synchronous acq
-			sample = 0;
-			err = a4l_sync_read(&dsc, subdevice[AI].id, PACK(i,channel->range,ref),	0, &sample, size);
+			a4l_sync_read(&dsc, subdevice[AI].id, PACK(i,channel->range,ref),	0, &sample, size);
+
+			// Convert to decimal via a4l
+			a4l_rawtod(chinfo, rnginfo, &value, &sample, 1);
 
 			// Gain, convert, and push into IO pipe
-			output(i) = channel->gain*channel->conv*(sample-channel->offset)+channel->zerooffset;
+			output(i) = value;
 		}
 
 	size_t offset = getChannelCount(AI);
@@ -453,7 +457,6 @@ void AnalogyDevice::write(void) {
 		analog_channel_t *channel;
 		int ref = 0;
 		int size = 0;
-		int err = -1;
 		a4l_chinfo_t *chinfo;
 
 		for(size_t i=0;i < subdevice[AO].count;++i)
@@ -480,7 +483,7 @@ void AnalogyDevice::write(void) {
 				size = a4l_sizeof_chan(chinfo);
 
 				// Write sample
-				err = a4l_sync_write(&dsc, subdevice[AO].id, PACK(i,channel->range,ref),
+				a4l_sync_write(&dsc, subdevice[AO].id, PACK(i,channel->range,ref),
 						0, &sample, size);
 			}
 	}
