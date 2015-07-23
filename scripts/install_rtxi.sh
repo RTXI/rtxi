@@ -47,7 +47,7 @@ if [ $kernel -eq "1" ]; then
 elif [ $kernel -eq "2" ]; then
 	./configure --enable-posix --disable-debug
 elif [ $kernel -eq "3" ]; then
-	./configure --enable-posix --enable-debug
+	./configure --enable-xenomai --enable-analogy --enable-debug
 else
 	echo "Invalid configuration."
 	exit 1
