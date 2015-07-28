@@ -37,17 +37,17 @@ echo "----->Starting RTXI installation..."
 
 echo "----->Kernel configuration..."
 echo "1. Xenomai+Analogy (RT)"
-echo "2. POSIX (Non-RT)"
-echo "3. POSIX (Non-RT) Debug"
+echo "2. Xenomai+Analogy (RT) Debug"
+echo "3. POSIX (Non-RT)"
 echo "----->Please select your configuration and then press enter:"
 read kernel
 
 if [ $kernel -eq "1" ]; then
 	./configure --enable-xenomai --enable-analogy --disable-debug
 elif [ $kernel -eq "2" ]; then
-	./configure --enable-posix --disable-debug
+	./configure --enable-xenomai --enable-analogy --enable-debug
 elif [ $kernel -eq "3" ]; then
-	./configure --enable-posix --enable-debug
+	./configure --enable-posix --disable-debug
 else
 	echo "Invalid configuration."
 	exit 1
@@ -117,7 +117,7 @@ git clone https://github.com/RTXI/noise-generator.git
 for dir in ${MODS}/*; do
 	if [ -d "$dir" ]; then
 		make clean -C "$dir"
-		git pull
+		git -C "$dir" pull
 		make -C "$dir"
 		sudo make install -C "$dir"
 	fi
