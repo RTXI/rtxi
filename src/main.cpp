@@ -156,9 +156,7 @@ static void signal_handler(int signum) {
 	if (getpid() != parentThread) return;
 
 	DEBUG_MSG("signal_handler : signal received\n");
-#ifdef DEBUG
 	PRINT_BACKTRACE();
-#endif // DEBUG
 
 	if (count++) _exit(-EFAULT);
 
