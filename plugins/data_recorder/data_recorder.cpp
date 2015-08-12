@@ -1045,7 +1045,6 @@ void DataRecorder::Panel::doLoad(const Settings::Object::State &s)
 		showMinimized();
 
 	downsampleSpin->setValue(s.loadInteger("Downsample"));
-	resize(s.loadInteger("W"), s.loadInteger("H"));
 	parentWidget()->move(s.loadInteger("X"), s.loadInteger("Y"));
 }
 
@@ -1059,8 +1058,6 @@ void DataRecorder::Panel::doSave(Settings::Object::State &s) const
 	QPoint pos = parentWidget()->pos();
 	s.saveInteger("X", pos.x());
 	s.saveInteger("Y", pos.y());
-	s.saveInteger("W", width());
-	s.saveInteger("H", height());
 
 	s.saveInteger("Downsample", downsampleSpin->value());
 	s.saveInteger("Num Channels", channels.size());

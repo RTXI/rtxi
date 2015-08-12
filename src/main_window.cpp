@@ -62,6 +62,7 @@ MainWindow::MainWindow (void) : QMainWindow(NULL, Qt::Window) {
 }
 
 MainWindow::~MainWindow (void) {
+	PRINT_BACKTRACE();
 }
 
 QAction* MainWindow::insertModuleMenuSeparator (void) {

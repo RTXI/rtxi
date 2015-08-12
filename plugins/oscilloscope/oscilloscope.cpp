@@ -1190,7 +1190,7 @@ void Oscilloscope::Panel::doLoad(const Settings::Object::State &s) {
 
 	scopeWindow->setRefresh(s.loadInteger("Refresh"));
 
-	resize(s.loadInteger("W"), s.loadInteger("H"));
+	subWindow->resize(s.loadInteger("W"), s.loadInteger("H"));
 	parentWidget()->move(s.loadInteger("X"), s.loadInteger("Y"));
 }
 
