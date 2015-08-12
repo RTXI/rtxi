@@ -428,7 +428,7 @@ void AnalogyDevice::read(void) {
 			a4l_rawtod(chinfo, rnginfo, &value, &sample, 1);
 
 			// Gain, convert, and push into IO pipe
-			output(i) = value;
+			output(i) = value * channel->gain;
 		}
 
 	size_t offset = getChannelCount(AI);
