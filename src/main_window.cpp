@@ -351,8 +351,7 @@ void MainWindow::windowsMenuActivated(QAction *id) {
 void MainWindow::modulesMenuActivated(QAction *id) {
 	// Annoying but the best way to do it is to tie an action to the entire menu
 	// so we have to tell it to ignore the first two modules
-	if(id->text().contains("Load Plugin") ||
-			id->text().contains("Load DYNAMO Model"))
+	if(id->text().contains("Load Plugin"))
 		return;
 
 	// Have to trim the first three characters before loading

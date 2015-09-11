@@ -112,7 +112,6 @@ plugins/Makefile
 plugins/analogy_device/Makefile
 plugins/connector/Makefile
 plugins/data_recorder/Makefile
-plugins/dynamo_model_loader/Makefile
 plugins/model_loader/Makefile
 plugins/oscilloscope/Makefile
 plugins/performance_measurement/Makefile

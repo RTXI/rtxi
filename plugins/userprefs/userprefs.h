@@ -82,7 +82,6 @@ namespace UserPrefs {
 			QGroupBox *buttons;
 
 			QLineEdit *settingsDirEdit; // directory for settings files
-			QLineEdit *dynamoDirEdit; // directory for DYNAMO files
 			QLineEdit *dataDirEdit; // directory of most recent data file
 			QLineEdit *HDFBufferEdit; // buffer size for HDF Data Recorder
 	}; // class Panel

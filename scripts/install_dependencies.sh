@@ -28,7 +28,6 @@ ROOT=${DIR}/../
 DEPS=${ROOT}/deps
 HDF=${DEPS}/hdf
 QWT=${DEPS}/qwt
-DYN=${DEPS}/dynamo
 PLG=${ROOT}/plugins
 
 ###############################################################################
@@ -114,19 +113,3 @@ else
 	exit
 fi
 find ${PLG}/. -name "*.h" -exec cp -t /usr/local/lib/rtxi_includes/ {} +
-
-# Install dynamo
-echo "Installing DYNAMO utility..."
-
-sudo apt-get -y install mlton
-cd ${DYN}
-mllex dl.lex
-mlyacc dl.grm
-mlton dynamo.mlb
-sudo cp dynamo /usr/bin/
-if [ $? -eq 0 ]; then
-	echo "----->DYNAMO translation utility installed."
-else
-	echo "----->DYNAMO translation utility installation failed."
-	exit
-fi

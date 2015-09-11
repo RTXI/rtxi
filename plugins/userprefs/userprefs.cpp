@@ -58,22 +58,6 @@ UserPrefs::Panel::Panel(QWidget *parent) : QWidget(parent) {
 	dirLayout->addWidget(chooseSettingsDirButton, 1, 2);
 	QObject::connect(chooseSettingsDirButton,SIGNAL(released(void)),this,SLOT(chooseSettingsDir(void)));
 
-	dynamoDirEdit = new QLineEdit(dirGroup);
-	dynamoDirEdit->setText(userprefs.value("/dirs/dynamomodels", getenv("HOME")).toString());
-	dirLayout->addWidget(new QLabel(tr("Default DYNAMO models directory:")), 2, 0);
-	dirLayout->addWidget(dynamoDirEdit, 2, 1);
-	QPushButton *chooseDynamoDirButton = new QPushButton("Browse", this);
-	dirLayout->addWidget(chooseDynamoDirButton, 2, 2);
-	QObject::connect(chooseDynamoDirButton,SIGNAL(released(void)),this,SLOT(chooseDynamoDir(void)));
-
-	dataDirEdit = new QLineEdit(dirGroup);
-	dataDirEdit->setText(userprefs.value("/dirs/data", getenv("HOME")).toString());
-	dirLayout->addWidget(new QLabel(tr("Default HDF5 data directory:")), 3, 0);
-	dirLayout->addWidget(dataDirEdit, 3, 1);
-	QPushButton *chooseDataDirButton = new QPushButton("Browse", this);
-	dirLayout->addWidget(chooseDataDirButton, 3, 2);
-	QObject::connect(chooseDataDirButton,SIGNAL(released(void)),this,SLOT(chooseDataDir(void)));
-
 	// Attach layout to group
 	dirGroup->setLayout(dirLayout);
 
@@ -136,11 +120,9 @@ UserPrefs::Panel::~Panel(void) {
 
 void UserPrefs::Panel::reset(void) {
 	settingsDirEdit->setText(getenv("HOME"));
-	dynamoDirEdit->setText(getenv("HOME"));
 	dataDirEdit->setText(getenv("HOME"));
 	HDFBufferEdit->setText(QString::number(10));
 	userprefs.setValue("/dirs/setfiles", settingsDirEdit->text());
-	userprefs.setValue("/dirs/dynamomodels", dynamoDirEdit->text());
 	userprefs.setValue("/dirs/data", dataDirEdit->text());
 	bool ok;
 	QString buffer = HDFBufferEdit->text();
@@ -150,7 +132,6 @@ void UserPrefs::Panel::reset(void) {
 
 void UserPrefs::Panel::apply(void) {
 	userprefs.setValue("/dirs/setfiles", settingsDirEdit->text());
-	userprefs.setValue("/dirs/dynamomodels", dynamoDirEdit->text());
 	userprefs.setValue("/dirs/data", dataDirEdit->text());
 	bool ok;
 	QString buffer = HDFBufferEdit->text();
@@ -167,13 +148,6 @@ void UserPrefs::Panel::chooseSettingsDir(void) {
 			userprefs.value("/dirs/setfiles", getenv("HOME")).toString(),
 			QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 	settingsDirEdit->setText(dir_name);
-}
-
-void UserPrefs::Panel::chooseDynamoDir(void) {
-	QString dir_name = QFileDialog::getExistingDirectory(this, tr("Choose default directory for DYNAMO models"), 
-			userprefs.value("/dirs/setfiles", getenv("HOME")).toString(),
-			QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
-	dynamoDirEdit->setText(dir_name);
 }
 
 void UserPrefs::Panel::chooseDataDir(void) {
