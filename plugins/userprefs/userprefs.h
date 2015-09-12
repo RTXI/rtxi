@@ -69,7 +69,6 @@ namespace UserPrefs {
 			void cancel(void); // close with saving
 
 			void chooseSettingsDir(void);
-			void chooseDynamoDir(void);
 			void chooseDataDir(void);
 
 		private:
