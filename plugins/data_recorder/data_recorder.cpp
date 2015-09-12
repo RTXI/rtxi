@@ -443,9 +443,9 @@ DataRecorder::Panel::Panel(QWidget *parent, size_t buffersize) :
 	QObject::connect(lButton,SIGNAL(released(void)),this,SLOT(removeChannel(void)));
 	lButton->setEnabled(false);
 
-	channelLayout->addWidget(new QLabel(tr("Trial Name:")));
-	trialNameEdit = new QLineEdit;
-	channelLayout->addWidget(trialNameEdit);
+	channelLayout->addWidget(new QLabel(tr("Time Stamp Note:")));
+	timeStampEdit = new QLineEdit;
+	channelLayout->addWidget(timeStampEdit);
 
 	// Create child widget and layout
 	sampleGroup = new QGroupBox(tr("Trial Metadata"));
@@ -1372,11 +1372,6 @@ int DataRecorder::Panel::startRecording(long long timestamp)
 	data = H5Dcreate(file.trial, "Date", string_type,
 			scalar_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 	H5Dwrite(data, string_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, std::string(QDateTime::currentDateTime().toString(Qt::ISODate).toLatin1()).c_str());
-	H5Dclose(data);
-
-	data = H5Dcreate(file.trial, "Trial Name", string_type,
-			scalar_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-	H5Dwrite(data, string_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, std::string(trialNameEdit->text().toLatin1()).c_str());
 	H5Dclose(data);
 
 	hid_t param_type;
