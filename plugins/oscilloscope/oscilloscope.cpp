@@ -450,9 +450,9 @@ QWidget * Oscilloscope::Panel::createChannelTab(QWidget *parent) {
 	QGridLayout *bttnLayout = new QGridLayout(page);
 
 	// Create Channel box
-	QHBoxLayout *row1Layout = new QHBoxLayout;//(page);
+	QHBoxLayout *row1Layout = new QHBoxLayout;
 	QLabel *channelLabel = new QLabel(tr("Channel:"),page);
-	row1Layout->addWidget(channelLabel);//, Qt::AlignLeft);
+	row1Layout->addWidget(channelLabel);
 	blocksList = new QComboBox(page);
 	blocksList->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 	blocksList->setSizeAdjustPolicy(QComboBox::AdjustToContents);
@@ -482,9 +482,9 @@ QWidget * Oscilloscope::Panel::createChannelTab(QWidget *parent) {
 	// Create elements for display box
 	row1Layout->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
 	QLabel *scaleLabel = new QLabel(tr("Scale:"),page);
-	row1Layout->addWidget(scaleLabel);//, Qt::AlignRight);
+	row1Layout->addWidget(scaleLabel);
 	scalesList = new QComboBox(page);
-	row1Layout->addWidget(scalesList);//, Qt::AlignRight);
+	row1Layout->addWidget(scalesList);
 	QFont scalesListFont("DejaVu Sans Mono");
 	scalesList->setFont(scalesListFont);
 	scalesList->addItem("10 V/div"); // 0  case 0
