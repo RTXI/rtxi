@@ -84,7 +84,7 @@ UserPrefs::Panel::Panel(QWidget *parent) : QWidget(parent) {
 	QPushButton *applyButton = new QPushButton("Save");
 	QObject::connect(applyButton,SIGNAL(released(void)),this,SLOT(apply(void)));
 	QPushButton *cancelButton = new QPushButton("Close");
-	QObject::connect(cancelButton,SIGNAL(released(void)),this,SLOT(cancel(void)));
+	QObject::connect(cancelButton,SIGNAL(released(void)),subWindow,SLOT(close(void)));
 	status = new QLabel;
 	status->setText("Defaults \nloaded");
 	status->setFrameStyle(QFrame::Panel | QFrame::Sunken);
@@ -137,10 +137,6 @@ void UserPrefs::Panel::apply(void) {
 	QString buffer = HDFBufferEdit->text();
 	userprefs.setValue("/system/HDFbuffer", buffer.toInt(&ok));
 	status->setText("Preferences \napplied");
-}
-
-void UserPrefs::Panel::cancel(void) {
-	subWindow->close();
 }
 
 void UserPrefs::Panel::chooseSettingsDir(void) {

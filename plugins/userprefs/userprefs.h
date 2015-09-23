@@ -66,7 +66,6 @@ namespace UserPrefs {
 			public slots:
 				void apply(void); // save and close
 			void reset(void); // reset to defaults
-			void cancel(void); // close with saving
 
 			void chooseSettingsDir(void);
 			void chooseDataDir(void);

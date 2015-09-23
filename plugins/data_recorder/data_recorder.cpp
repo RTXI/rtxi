@@ -528,7 +528,7 @@ DataRecorder::Panel::Panel(QWidget *parent, size_t buffersize) :
 	buttonLayout->addWidget(stopRecordButton);
 	stopRecordButton->setEnabled(false);
 	closeButton = new QPushButton("Close");
-	QObject::connect(closeButton,SIGNAL(released(void)),this,SLOT(goodbye(void)));
+	QObject::connect(closeButton,SIGNAL(released(void)),subWindow,SLOT(close()));
 	buttonLayout->addWidget(closeButton);
 	recordStatus = new QLabel;
 	buttonLayout->addWidget(recordStatus);
@@ -595,12 +595,6 @@ DataRecorder::Panel::~Panel(void)
 	pthread_join(thread, 0);
 	for (RT::List<Channel>::iterator i = channels.begin(), end = channels.end(); i!= end;)
 		delete &*(i++);
-}
-
-// Destroy subwindow
-void DataRecorder::Panel::goodbye(void)
-{
-	subWindow->close();
 }
 
 // Execute loop

@@ -110,7 +110,6 @@ namespace DataRecorder
 			void changeDataFile(void);
 			void insertChannel(void);
 			void removeChannel(void);
-			void goodbye(void);
 
 		protected:
 			void customEvent(QEvent *);

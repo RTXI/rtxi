@@ -243,7 +243,7 @@ SystemControlPanel::SystemControlPanel(QWidget *parent) : QWidget(parent) {
 	QObject::connect(applyButton,SIGNAL(released(void)),this,SLOT(apply(void)));
 	buttonLayout->addWidget(applyButton);
 	QPushButton *cancelButton = new QPushButton("Close");
-	QObject::connect(cancelButton,SIGNAL(released(void)),this,SLOT(goodbye(void)));
+	QObject::connect(cancelButton,SIGNAL(released(void)),subWindow,SLOT(close()));
 	buttonLayout->addWidget(cancelButton);
 
 	// Assign layout to child widget
@@ -313,10 +313,6 @@ void SystemControlPanel::apply(void) {
 	period *= pow(10,3*(3-periodUnitList->currentIndex()));
 	RT::System::getInstance()->setPeriod(static_cast<long long>(period));
 	display();
-}
-
-void SystemControlPanel::goodbye(void) {
-	subWindow->close();
 }
 
 void SystemControlPanel::updateDevice(void) {
