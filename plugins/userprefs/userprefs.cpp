@@ -52,11 +52,19 @@ UserPrefs::Panel::Panel(QWidget *parent) : QWidget(parent) {
 	// Create elements for directory paths
 	settingsDirEdit = new QLineEdit(dirGroup);
 	settingsDirEdit->setText(userprefs.value("/dirs/setfiles", getenv("HOME")).toString());
-	dirLayout->addWidget(new QLabel(tr("Default settings directory:")), 1, 0);
-	dirLayout->addWidget(settingsDirEdit, 1, 1);
+	dirLayout->addWidget(new QLabel(tr("Default settings directory:")), 0, 0, 1, 1);
+	dirLayout->addWidget(settingsDirEdit, 0, 1, 1, 1);
 	QPushButton *chooseSettingsDirButton = new QPushButton("Browse", this);
-	dirLayout->addWidget(chooseSettingsDirButton, 1, 2);
+	dirLayout->addWidget(chooseSettingsDirButton, 0, 2, 1, 2);
 	QObject::connect(chooseSettingsDirButton,SIGNAL(released(void)),this,SLOT(chooseSettingsDir(void)));
+
+	dataDirEdit = new QLineEdit(dirGroup);
+	dataDirEdit->setText(userprefs.value("/dirs/data", getenv("HOME")).toString());
+	dirLayout->addWidget(new QLabel(tr("Default HDF5 data directory:")), 1, 0, 1, 1);
+	dirLayout->addWidget(dataDirEdit, 1, 1, 1, 1);
+	QPushButton *chooseDataDirButton = new QPushButton("Browse", this);
+	dirLayout->addWidget(chooseDataDirButton, 1, 2, 1, 2);
+	QObject::connect(chooseDataDirButton,SIGNAL(released(void)),this,SLOT(chooseDataDir(void)));
 
 	// Attach layout to group
 	dirGroup->setLayout(dirLayout);
@@ -67,8 +75,8 @@ UserPrefs::Panel::Panel(QWidget *parent) : QWidget(parent) {
 
 	// Create elements for child widget
 	HDFBufferEdit = new QLineEdit(HDF);
-	hdfLayout->addWidget(new QLabel(tr("HDF Data Recorder Buffer Size (MB):")), 1, 0);
-	hdfLayout->addWidget(HDFBufferEdit, 1, 1);
+	hdfLayout->addWidget(new QLabel(tr("HDF Data Recorder Buffer Size (MB):")), 0, 0, 1, 1);
+	hdfLayout->addWidget(HDFBufferEdit, 0, 1, 1, 1);
 	HDFBufferEdit->setText(QString::number(userprefs.value("/system/HDFbuffer", 10).toInt()));
 
 	// Attach child to parent
