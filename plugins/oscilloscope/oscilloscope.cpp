@@ -392,6 +392,7 @@ void Oscilloscope::Panel::applyChannelTab(void) {
 void Oscilloscope::Panel::applyDisplayTab(void) {
 	scopeWindow->setRefresh(refreshsSpin->value());
 
+	// Update X divisions
 	double divT;
 	if (timesList->currentIndex() % 3 == 1)
 		divT = 2 * pow(10, 3 - timesList->currentIndex() / 3);
@@ -401,27 +402,30 @@ void Oscilloscope::Panel::applyDisplayTab(void) {
 		divT = 5 * pow(10, 3 - timesList->currentIndex() / 3);
 	scopeWindow->setDivT(divT);
 	scopeWindow->setPeriod(RT::System::getInstance()->getPeriod() * 1e-6);
-	adjustDataSize();
 
+	// Update Triggering
 	Scope::trig_t trigDirection = static_cast<Scope::trig_t> (trigsGroup->id(trigsGroup->checkedButton()));
-	double trigThreshold = trigsThreshEdit->text().toDouble() * pow(10, -3 * trigsThreshList->currentIndex());
 
-	std::list<Scope::Channel>::iterator trigChannel = scopeWindow->getChannelsEnd();
-	for (std::list<Scope::Channel>::iterator i = scopeWindow->getChannelsBegin(), end = scopeWindow->getChannelsEnd(); i != end; ++i)
-		if (i->getLabel() == trigsChanList->currentText()) {
-			trigChannel = i;
-			break;
-		}
-	if (trigChannel == scopeWindow->getChannelsEnd())
-		trigDirection = Scope::NONE;
+	if(trigDirection != Scope::NONE)
+	{
+		double trigThreshold = trigsThreshEdit->text().toDouble() * pow(10, -3 * trigsThreshList->currentIndex());
 
-	bool trigHolding = trigsHoldingCheck->isChecked();
-	double trigHoldoff = trigsHoldoffEdit->text().toDouble() * pow(10, -3 * trigsHoldoffList->currentIndex());
+		std::list<Scope::Channel>::iterator trigChannel = scopeWindow->getChannelsEnd();
+		for (std::list<Scope::Channel>::iterator i = scopeWindow->getChannelsBegin(), end = scopeWindow->getChannelsEnd(); i != end; ++i)
+			if (i->getLabel() == trigsChanList->currentText()) {
+				trigChannel = i;
+				break;
+			}
+		if (trigChannel == scopeWindow->getChannelsEnd())
+			trigDirection = Scope::NONE;
 
-	scopeWindow->setTrigger(trigDirection, trigThreshold, trigChannel, trigHolding, trigHoldoff);
+		bool trigHolding = trigsHoldingCheck->isChecked();
+		double trigHoldoff = trigsHoldoffEdit->text().toDouble() * pow(10, -3 * trigsHoldoffList->currentIndex());
+
+		scopeWindow->setTrigger(trigDirection, trigThreshold, trigChannel, trigHolding, trigHoldoff);
+	}
 
 	adjustDataSize();
-
 	scopeWindow->replot();
 	showDisplayTab();
 }
