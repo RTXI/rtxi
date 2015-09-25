@@ -402,28 +402,26 @@ void Oscilloscope::Panel::applyDisplayTab(void) {
 		divT = 5 * pow(10, 3 - timesList->currentIndex() / 3);
 	scopeWindow->setDivT(divT);
 	scopeWindow->setPeriod(RT::System::getInstance()->getPeriod() * 1e-6);
+	adjustDataSize();
 
 	// Update Triggering
 	Scope::trig_t trigDirection = static_cast<Scope::trig_t> (trigsGroup->id(trigsGroup->checkedButton()));
 
-	if(trigDirection != Scope::NONE)
-	{
-		double trigThreshold = trigsThreshEdit->text().toDouble() * pow(10, -3 * trigsThreshList->currentIndex());
+	double trigThreshold = trigsThreshEdit->text().toDouble() * pow(10, -3 * trigsThreshList->currentIndex());
 
-		std::list<Scope::Channel>::iterator trigChannel = scopeWindow->getChannelsEnd();
-		for (std::list<Scope::Channel>::iterator i = scopeWindow->getChannelsBegin(), end = scopeWindow->getChannelsEnd(); i != end; ++i)
-			if (i->getLabel() == trigsChanList->currentText()) {
-				trigChannel = i;
-				break;
-			}
-		if (trigChannel == scopeWindow->getChannelsEnd())
-			trigDirection = Scope::NONE;
+	std::list<Scope::Channel>::iterator trigChannel = scopeWindow->getChannelsEnd();
+	for (std::list<Scope::Channel>::iterator i = scopeWindow->getChannelsBegin(), end = scopeWindow->getChannelsEnd(); i != end; ++i)
+		if (i->getLabel() == trigsChanList->currentText()) {
+			trigChannel = i;
+			break;
+		}
+	if (trigChannel == scopeWindow->getChannelsEnd())
+		trigDirection = Scope::NONE;
 
-		bool trigHolding = trigsHoldingCheck->isChecked();
-		double trigHoldoff = trigsHoldoffEdit->text().toDouble() * pow(10, -3 * trigsHoldoffList->currentIndex());
+	bool trigHolding = trigsHoldingCheck->isChecked();
+	double trigHoldoff = trigsHoldoffEdit->text().toDouble() * pow(10, -3 * trigsHoldoffList->currentIndex());
 
-		scopeWindow->setTrigger(trigDirection, trigThreshold, trigChannel, trigHolding, trigHoldoff);
-	}
+	scopeWindow->setTrigger(trigDirection, trigThreshold, trigChannel, trigHolding, trigHoldoff);
 
 	adjustDataSize();
 	scopeWindow->replot();
@@ -760,7 +758,7 @@ QWidget *Oscilloscope::Panel::createDisplayTab(QWidget *parent) {
 	trigsThreshList->addItem(QString::fromUtf8("µV"));
 	trigsThreshList->addItem("nV");
 	trigsThreshList->addItem("pV");
-	
+
 	row2Layout->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
 	row2Layout->addWidget(new QLabel(tr("Holding:"),page));
 	trigsHoldingCheck = new QCheckBox(page);
@@ -778,7 +776,7 @@ QWidget *Oscilloscope::Panel::createDisplayTab(QWidget *parent) {
 	trigsHoldoffList->addItem("ms");
 	trigsHoldoffList->addItem(QString::fromUtf8("µs"));
 	trigsHoldoffList->addItem("ns");
-	
+
 	displayTabLayout->addLayout(row1Layout, 0, 0);
 	displayTabLayout->addLayout(row2Layout, 1, 0);
 
@@ -944,7 +942,7 @@ Oscilloscope::Panel::Panel(QWidget *parent) :	QWidget(parent), RT::Thread(0), fi
 	subWindow->setWindowIcon(QIcon("/usr/local/lib/rtxi/RTXI-widget-icon.png"));
 	subWindow->setAttribute(Qt::WA_DeleteOnClose);
 	subWindow->setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint | 
-	                          Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint);
+			Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint);
 	MainWindow::getInstance()->createMdi(subWindow);
 
 	setWhatsThis("<p><b>Oscilloscope:</b><br>The Oscilloscope allows you to plot any signal "
@@ -962,7 +960,7 @@ Oscilloscope::Panel::Panel(QWidget *parent) :	QWidget(parent), RT::Thread(0), fi
 	tabWidget = new QTabWidget;
 	tabWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 	QObject::connect(tabWidget,SIGNAL(currentChanged(int)),this,SLOT(showTab(int)));
-	
+
 	// Create main layout
 	layout = new QVBoxLayout;
 
@@ -1144,7 +1142,7 @@ void Oscilloscope::Panel::mouseDoubleClickEvent(QMouseEvent *e) {
 
 		scopeWindow->setTrigger(scopeWindow->getTriggerDirection(), threshold, scopeWindow->getTriggerChannel(), scopeWindow->getTriggerHolding(), scopeWindow->getTriggerHoldoff());
 		showDisplayTab();
-	}*/
+		}*/
 }
 
 void Oscilloscope::Panel::doDeferred(const Settings::Object::State &s) {

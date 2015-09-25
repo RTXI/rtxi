@@ -182,7 +182,6 @@ class Scope : public QwtPlot {
 
 	private:
 	void drawCurves(void);
-	void incrementInterval();
 
 	size_t divX;
 	size_t divY;
@@ -207,6 +206,7 @@ class Scope : public QwtPlot {
 	// Scope painter elements
 	QwtPlotGrid *grid;
   QwtPlotMarker *origin;
+  QwtPlotMarker *triggerLine;
 
 	// Scaling engine
 	QwtScaleMap *scaleMapY;

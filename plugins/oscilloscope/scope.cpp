@@ -14,7 +14,7 @@
 
 	 You should have received a copy of the GNU General Public License
 	 along with this program.  If not, see <http://www.gnu.org/licenses/>.
-	 */
+ */
 
 #include <rt.h>
 #include <debug.h>
@@ -77,7 +77,7 @@ Scope::Scope(QWidget *parent) :	QwtPlot(parent), legendItem(NULL) {
 	refresh = 250;
 	triggering = false;
 	triggerHolding = false;
-	triggerDirection = NONE;
+	triggerDirection = Scope::NONE;
 	triggerThreshold = 0.0;
 	triggerHoldoff = 5.0;
 	triggerLast = (size_t)(-1);
@@ -118,6 +118,11 @@ Scope::Scope(QWidget *parent) :	QwtPlot(parent), legendItem(NULL) {
 	origin->setValue(500.0, 0.0);
 	origin->setLinePen(Qt::gray, 2.0, Qt::DashLine);
 	origin->attach(this);
+
+	// Set origin markers
+	triggerLine = new QwtPlotMarker();
+	triggerLine->setLineStyle(QwtPlotMarker::HLine);
+	triggerLine->setLinePen(Qt::darkGreen, 1.0, Qt::SolidLine);
 
 	// Setup scaling map
 	scaleMapY = new QwtScaleMap();
@@ -305,17 +310,26 @@ void Scope::setTrigger(trig_t direction,double threshold,std::list<Channel>::ite
 	triggerHoldoff = holdoff;
 	triggerLast = (size_t)(-1);
 
-	if(triggerChannel != channel || triggerThreshold != threshold) {
+	if(triggerChannel != channel || triggerThreshold != threshold)
+	{
 		triggerChannel = channel;
 		triggerThreshold = threshold;
 	}
 
-	if(triggerDirection != direction) {
-		if(direction == NONE) {
+	// Update if direction has changed
+	if(triggerDirection != direction)
+	{
+		if(direction == Scope::NONE)
+		{
 			triggering = false;
 			timer->start(refresh);
 			triggerQueue.clear();
-		} else {
+			triggerLine->detach();
+		}
+		else 
+		{
+			triggerLine->setYValue(scaleMapY->transform(triggerThreshold));
+			triggerLine->attach(this);
 			triggering = true;
 			timer->stop();
 		}
@@ -399,6 +413,7 @@ void Scope::drawCurves(void) {
 		double *y_loc = y.data();
 
 		// Set scale map for channel
+		// TODO this should not happen each iteration, instead build into channel struct
 		scaleMapX->setScaleInterval(0, hScl*divX);
 		scaleMapY->setScaleInterval(-i->scale*divY/2, i->scale*divY/2);
 
