@@ -385,7 +385,7 @@ void Oscilloscope::Panel::applyChannelTab(void) {
 		}
 		scopeWindow->setChannelPen(i, pen);
 	}
-	scopeWindow->updateScopeLayout();
+	scopeWindow->replot();
 	showChannelTab();
 }
 
@@ -422,7 +422,7 @@ void Oscilloscope::Panel::applyDisplayTab(void) {
 
 	adjustDataSize();
 
-	scopeWindow->updateScopeLayout();
+	scopeWindow->replot();
 	showDisplayTab();
 }
 
@@ -1026,7 +1026,7 @@ Oscilloscope::Panel::Panel(QWidget *parent) :	QWidget(parent), RT::Thread(0), fi
 	QObject::connect(otimer,SIGNAL(timeout(void)),this,SLOT(timeoutEvent(void)));
 	otimer->start(25);
 
-	scopeWindow->updateScopeLayout();
+	scopeWindow->replot();
 	show();
 }
 

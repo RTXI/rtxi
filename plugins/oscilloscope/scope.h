@@ -174,8 +174,6 @@ class Scope : public QwtPlot {
 	void setChannelPen(std::list<Channel>::iterator,const QPen &);
 	void setChannelLabel(std::list<Channel>::iterator,const QString &);
 
-	void updateScopeLayout();
-
 	private slots:
 		void timeoutEvent(void);
 

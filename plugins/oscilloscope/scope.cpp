@@ -137,7 +137,7 @@ Scope::Scope(QWidget *parent) :	QwtPlot(parent), legendItem(NULL) {
 	legendItem->setBackgroundBrush(QBrush(QColor(225,225,225)));
 
 	// Update scope background/scales/axes
-	updateScopeLayout();
+	replot();
 
 	// Timer controls refresh rate of scope
 	timer = new QTimer;
@@ -161,11 +161,6 @@ bool Scope::paused(void) const {
 void Scope::timeoutEvent(void) {
 	if(!triggering)
 		drawCurves();
-}
-
-// Update axes
-void Scope::updateScopeLayout(void) {
-	replot();
 }
 
 // Insert user specified channel into active list of channels with specified settings
@@ -266,29 +261,6 @@ void Scope::setData(double data[],size_t size) {
 
 			if(!triggerHolding)
 				drawCurves();
-
-			for(std::list<Channel>::iterator i = channels.begin(), iend = channels.end();i != iend;++i) {
-				std::vector<double> x (i->data.size());
-				std::vector<double> y (i->data.size());
-				double *x_loc = x.data();
-				double *y_loc = y.data();
-
-				// Set scale map for channel
-				scaleMapX->setScaleInterval(0, hScl*divX);
-				scaleMapY->setScaleInterval(-i->scale*divY/2, i->scale*divY/2);
-
-				// Scale data to pixel coordinates
-				for(size_t j = 0; j < i->data.size(); ++j) {
-					*x_loc = scaleMapX->transform(j*period);
-					*y_loc = scaleMapY->transform(i->data[(data_idx+j)%i->data.size()]+i->offset);
-					++x_loc;
-					++y_loc;
-				}
-				// Append data to curve
-				// Makes deep copy - which is not optimal
-				// TODO: change to pointer based method
-				i->curve->setSamples(x.data(), y.data(), i->data.size());
-			}
 		}
 	}
 }
