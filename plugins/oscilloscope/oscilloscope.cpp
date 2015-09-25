@@ -1133,14 +1133,14 @@ void Oscilloscope::Panel::timeoutEvent(void) {
 }
 
 void Oscilloscope::Panel::mouseDoubleClickEvent(QMouseEvent *e) {
-	if (e->button() == Qt::LeftButton && scopeWindow->getTriggerChannel() != scopeWindow->getChannelsEnd()) {
+	/*if (e->button() == Qt::LeftButton && scopeWindow->getTriggerChannel() != scopeWindow->getChannelsEnd()) {
 		double scale = scopeWindow->QwtPlot::axisInterval(QwtPlot::yLeft).maxValue()/(scopeWindow->getTriggerChannel()->getScale()*scopeWindow->getDivY());
 		double offset = scopeWindow->getTriggerChannel()->getOffset();
 		double threshold = (height() / 2 - e->y()) / scale - offset;
 
 		scopeWindow->setTrigger(scopeWindow->getTriggerDirection(), threshold, scopeWindow->getTriggerChannel(), scopeWindow->getTriggerHolding(), scopeWindow->getTriggerHoldoff());
 		showDisplayTab();
-	}
+	}*/
 }
 
 void Oscilloscope::Panel::doDeferred(const Settings::Object::State &s) {
