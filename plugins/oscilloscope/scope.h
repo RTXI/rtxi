@@ -74,7 +74,6 @@ class Scope : public QwtPlot {
 		QString label;
 		double scale;
 		double offset;
-		std::vector<double> prevdata;
 		std::vector<double> data;
 		QwtPlotCurve *curve;
 		void *info;
@@ -180,7 +179,6 @@ class Scope : public QwtPlot {
 
 	private:
 	void drawCurves(void);
-
 	size_t divX;
 	size_t divY;
 	size_t data_idx;
@@ -188,7 +186,6 @@ class Scope : public QwtPlot {
 	double hScl;        // horizontal scale for time (ms)
 	double period;      // real-time period of system (ms)
 	size_t refresh;
-
 	bool triggering;
 	trig_t triggerDirection;
 	double triggerThreshold;

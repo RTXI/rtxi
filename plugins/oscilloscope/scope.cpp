@@ -214,14 +214,18 @@ std::list<Scope::Channel>::const_iterator Scope::getChannelsBegin(void) const {
 }
 
 // Returns read-only pointer to end of channels list
-std::list<Scope::Channel>::const_iterator Scope::getChannelsEnd(void) const {
+std::list<Scope::Channel>::const_iterator Scope::getChannelsEnd(void) const
+{
 	return channels.end();
 }
 
 // Zeros data
-void Scope::clearData(void) {
+void Scope::clearData(void)
+{
 	for(std::list<Channel>::iterator i = channels.begin(), end = channels.end();i != end;++i)
+	{
 		i->data.assign(data_size, 0);
+	}
 }
 
 // Scales data based upon desired settings for the channel
@@ -251,9 +255,6 @@ void Scope::setData(double data[],size_t size)
 
 	++data_idx %= data_size;
 
-	if(isPaused || getChannelCount() == 0)
-		return;
-
 	if(triggering && !triggerQueue.empty() && (data_idx+2)%data_size == triggerQueue.front())
 	{
 		triggerQueue.pop_front();
@@ -267,16 +268,17 @@ size_t Scope::getDataSize(void) const
 	return data_size;
 }
 
-void Scope::setDataSize(size_t size) {
-	for(std::list<Channel>::iterator i = channels.begin(), end = channels.end();i != end;++i) {
+void Scope::setDataSize(size_t size)
+{
+	for(std::list<Channel>::iterator i = channels.begin(), end = channels.end();i != end;++i)
 		i->data.resize(size,0.0);
-	}
 	data_idx = 0;
 	data_size = size;
 	triggerQueue.clear();
 }
 
-Scope::trig_t Scope::getTriggerDirection(void) {
+Scope::trig_t Scope::getTriggerDirection(void)
+{
 	return triggerDirection;
 }
 
@@ -380,9 +382,11 @@ void Scope::setChannelLabel(std::list<Channel>::iterator channel,const QString &
 
 // Draw data on the scope
 void Scope::drawCurves(void) {
-	if(isPaused || getChannelCount() == 0)
+	if(isPaused)
 		return;
 
+	// Set X scale map is same for all channels
+	scaleMapX->setScaleInterval(0, hScl*divX);
 	for(std::list<Channel>::iterator i = channels.begin(), iend = channels.end(); i != iend;++i) {
 		// Set data for channel
 		std::vector<double> x (i->data.size());
@@ -390,9 +394,8 @@ void Scope::drawCurves(void) {
 		double *x_loc = x.data();
 		double *y_loc = y.data();
 
-		// Set scale map for channel
+		// Set Y scale map for channel
 		// TODO this should not happen each iteration, instead build into channel struct
-		scaleMapX->setScaleInterval(0, hScl*divX);
 		scaleMapY->setScaleInterval(-i->scale*divY/2, i->scale*divY/2);
 
 		// Scale data to pixel coordinates
@@ -402,6 +405,7 @@ void Scope::drawCurves(void) {
 			++x_loc;
 			++y_loc;
 		}
+
 		// Append data to curve
 		// Makes deep copy - which is not optimal
 		// TODO: change to pointer based method
