@@ -22,8 +22,6 @@ pkginclude_HEADERS = \
 		$(top_srcdir)/include/mutex.h \
 		$(top_srcdir)/include/plugin.h \
 		$(top_srcdir)/include/rt.h \
-		$(top_srcdir)/include/rtfile.h \
-		$(top_srcdir)/include/rwlock.h \
 		$(top_srcdir)/include/sem.h \
 		$(top_srcdir)/include/settings.h \
 		$(top_srcdir)/include/workspace.h 
@@ -41,8 +39,6 @@ rtxi_SOURCES = \
 		$(top_srcdir)/src/mutex.cpp \
 		$(top_srcdir)/src/plugin.cpp \
 		$(top_srcdir)/src/rt.cpp \
-		$(top_srcdir)/src/rtfile.cpp \
-		$(top_srcdir)/src/rwlock.cpp \
 		$(top_srcdir)/src/sem.cpp \
 		$(top_srcdir)/src/settings.cpp \
 		$(top_srcdir)/src/workspace.cpp
