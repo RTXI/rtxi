@@ -92,7 +92,6 @@ namespace Connector {
 			return *getInstance();
 		};
 		static Plugin *instance;
-		int menuID;
 		Panel *panel;
 	}; // class Plugin
 }; // namespace Connector

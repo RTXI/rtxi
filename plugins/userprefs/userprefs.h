@@ -50,7 +50,6 @@ namespace UserPrefs {
 		};
 
 		static Prefs *instance;
-		int menuID;
 		Panel *panel;
 	}; // class Prefs
 
@@ -72,7 +71,6 @@ namespace UserPrefs {
 
 		private:
 			QMdiSubWindow *subWindow;
-			int menuID;
 			QSettings userprefs;
 
 			QGroupBox *dirGroup;

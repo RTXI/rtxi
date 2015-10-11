@@ -50,7 +50,6 @@ class SystemControl : public QObject, public Plugin::Object
 
 	void removeControlPanel(SystemControlPanel *);
 
-	int menuID;
 	std::list<SystemControlPanel *> panelList;
 };
 

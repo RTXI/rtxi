@@ -214,7 +214,6 @@ namespace DataRecorder
 
 		void removeDataRecorderPanel(Panel *);
 
-		int menuID;
 		std::list<Panel *> panelList;
 		size_t buffersize;
 	}; // class Plugin

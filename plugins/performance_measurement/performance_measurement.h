@@ -53,7 +53,6 @@ namespace PerformanceMeasurement {
 			return *getInstance();
 		};
 		static Plugin *instance;
-		int menuID;
 		Panel *panel;
 	}; // class Plugin
 
@@ -94,8 +93,6 @@ namespace PerformanceMeasurement {
 				INIT1, INIT2, EXEC,
 			} state;
 
-			QString labelText;
-			QLabel *label;
 			QTimer *resetMaxTimer;
 
 			double duration;
@@ -106,15 +103,12 @@ namespace PerformanceMeasurement {
 			double jitter;
 
 			RunningStat timestepStat;
-			bool saveStats;
 
 			QLineEdit *durationEdit;
 			QLineEdit *timestepEdit;
 			QLineEdit *maxDurationEdit;
 			QLineEdit *maxTimestepEdit;
 			QLineEdit *timestepJitterEdit;
-			QFile dataFile;
-			QTextStream stream;
 	}; // class Panel
 }; // namespace PerformanceMeasurement
 #endif /* PERFORMANCE_MEASUREMENT_H */

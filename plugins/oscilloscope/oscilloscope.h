@@ -71,7 +71,6 @@ namespace Oscilloscope {
 		};
 		static Plugin *instance;
 		void removeOscilloscopePanel(Panel *);
-		int menuID;
 
 		// List to maintain multiple scopes
 		std::list<Panel *> panelList;

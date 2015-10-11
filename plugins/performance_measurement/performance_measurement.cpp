@@ -105,7 +105,6 @@ PerformanceMeasurement::Panel::Panel(QWidget *parent) : QWidget(parent),
 		setData(Workspace::STATE, 4, &jitter);
 
 		setActive(true);
-		saveStats = false;
 }
 
 PerformanceMeasurement::Panel::~Panel(void) {
