@@ -119,11 +119,6 @@ Scope::Scope(QWidget *parent) :	QwtPlot(parent), legendItem(NULL) {
 	origin->setLinePen(Qt::gray, 2.0, Qt::DashLine);
 	origin->attach(this);
 
-	// Set origin markers
-	triggerLine = new QwtPlotMarker();
-	triggerLine->setLineStyle(QwtPlotMarker::HLine);
-	triggerLine->setLinePen(Qt::darkGreen, 1.0, Qt::SolidLine);
-
 	// Setup scaling map
 	scaleMapY = new QwtScaleMap();
 	scaleMapY->setPaintInterval(-1.0, 1.0);
@@ -232,22 +227,26 @@ void Scope::clearData(void) {
 }
 
 // Scales data based upon desired settings for the channel
-void Scope::setData(double data[],size_t size) {
+void Scope::setData(double data[],size_t size)
+{
 	if(isPaused)
 		return;
 
-	if(size < getChannelCount()) {
+	if(size < getChannelCount())
+	{
 		ERROR_MSG("Scope::setData() : data size mismatch detected\n");
 		return;
 	}
 
 	size_t index = 0;
-	for(std::list<Channel>::iterator i = channels.begin(), end = channels.end();i != end;++i) {
+	for(std::list<Channel>::iterator i = channels.begin(), end = channels.end();i != end;++i)
+	{
 		i->data[data_idx] = data[index++];
 
 		if(triggering && i == triggerChannel &&
 				((triggerDirection == POS && i->data[data_idx-1] < triggerThreshold && i->data[data_idx] > triggerThreshold) ||
-				 (triggerDirection == NEG && i->data[data_idx-1] > triggerThreshold && i->data[data_idx] < triggerThreshold))) {
+				 (triggerDirection == NEG && i->data[data_idx-1] > triggerThreshold && i->data[data_idx] < triggerThreshold)))
+		{
 			triggerQueue.push_back(data_idx);
 		}
 	}
@@ -257,15 +256,22 @@ void Scope::setData(double data[],size_t size) {
 	if(isPaused || getChannelCount() == 0)
 		return;
 
-	if(triggering && !triggerQueue.empty() && (data_idx+2)%data_size == triggerQueue.front()) {
-		if(triggerLast != (size_t)(-1) && (triggerQueue.front()+data_size-triggerLast)%data_size*period < triggerHoldoff)
-			triggerQueue.pop_front();
-		else {
+	if(triggering && !triggerQueue.empty() && (data_idx+2)%data_size == triggerQueue.front())
+	{
+		if(triggerHolding)
+		{
+			printf("%f\n",((triggerQueue.front()+data_size-triggerLast)%data_size*period));
+			if(triggerLast != (size_t)(-1) && (triggerQueue.front()+data_size-triggerLast)%data_size*period < triggerHoldoff)
+			{
+				printf("holdoff %f\n", triggerHoldoff);
+				triggerQueue.pop_front();
+			}
+		}
+		else
+		{
 			triggerLast = triggerQueue.front();
 			triggerQueue.pop_front();
-
-			if(!triggerHolding)
-				drawCurves();
+			drawCurves();
 		}
 	}
 }
@@ -324,12 +330,9 @@ void Scope::setTrigger(trig_t direction,double threshold,std::list<Channel>::ite
 			triggering = false;
 			timer->start(refresh);
 			triggerQueue.clear();
-			triggerLine->detach();
 		}
 		else 
 		{
-			triggerLine->setYValue(scaleMapY->transform(triggerThreshold));
-			triggerLine->attach(this);
 			triggering = true;
 			timer->stop();
 		}

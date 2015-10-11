@@ -101,7 +101,6 @@ namespace Oscilloscope {
 		void updateDownsampleRate(int);
 
 		protected:
-		void mouseDoubleClickEvent(QMouseEvent *);
 
 		private slots:
 			void showChannelTab(void);
