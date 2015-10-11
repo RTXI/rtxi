@@ -117,7 +117,6 @@ plugins/oscilloscope/Makefile
 plugins/performance_measurement/Makefile
 plugins/system_control/Makefile
 plugins/userprefs/Makefile
-deps/hdf/Makefile
 ])
 
 dnl Generate config.status and launch it
