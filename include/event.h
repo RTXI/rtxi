@@ -20,7 +20,6 @@
 #ifndef EVENT_H
 #define EVENT_H
 
-#include <fifo.h>
 #include <list>
 #include <map>
 #include <pthread.h>
