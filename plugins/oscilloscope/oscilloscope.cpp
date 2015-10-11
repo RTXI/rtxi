@@ -901,9 +901,6 @@ void Oscilloscope::Panel::showDisplayTab(void) {
 ////////// #Panel
 Oscilloscope::Panel::Panel(QWidget *parent) :	QWidget(parent), RT::Thread(0), fifo(10 * 1048576) {
 
-	// Set default attribute
-	QWidget::setAttribute(Qt::WA_DeleteOnClose);
-
 	// Make Mdi
 	subWindow = new QMdiSubWindow;
 	subWindow->setWindowIcon(QIcon("/usr/local/lib/rtxi/RTXI-widget-icon.png"));

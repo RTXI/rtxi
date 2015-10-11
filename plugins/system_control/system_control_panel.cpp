@@ -44,8 +44,6 @@ static void buildDAQDeviceList(DAQ::Device *dev,void *arg) {
 
 SystemControlPanel::SystemControlPanel(QWidget *parent) : QWidget(parent) {
 
-	QWidget::setAttribute(Qt::WA_DeleteOnClose);
-
 	setWhatsThis(
 			"<p><b>System Control Panel:</b><br>This control panel allows you to configure "
 			"the channels on your DAQ card. RTXI automatically detects the number and types "

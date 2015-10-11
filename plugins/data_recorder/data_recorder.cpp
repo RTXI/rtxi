@@ -381,8 +381,6 @@ DataRecorder::Channel::~Channel(void)
 DataRecorder::Panel::Panel(QWidget *parent, size_t buffersize) :
 	QWidget(parent), RT::Thread(RT::Thread::MinimumPriority), fifo(buffersize), recording(false)
 {
-	setAttribute(Qt::WA_DeleteOnClose);
-
 	setWhatsThis(
 			"<p><b>Data Recorder:</b><br>The Data Recorder writes data to an HDF5 file format "
 			"All available signals for saving to file are automatically detected. Currently "

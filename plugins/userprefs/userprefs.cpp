@@ -28,8 +28,6 @@
 
 UserPrefs::Panel::Panel(QWidget *parent) : QWidget(parent) {
 
-	setAttribute(Qt::WA_DeleteOnClose);
-
 	// Make Mdi
 	subWindow = new QMdiSubWindow;
 	subWindow->setWindowIcon(QIcon("/usr/local/lib/rtxi/RTXI-widget-icon.png"));

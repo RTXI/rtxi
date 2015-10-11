@@ -34,8 +34,6 @@ PerformanceMeasurement::Panel::Panel(QWidget *parent) : QWidget(parent),
 	Workspace::Instance("Performance Measurement", vars, num_vars), state(INIT1), duration(0),
 	lastRead(0), timestep(0), maxDuration(0), maxTimestep(0), jitter(0) {
 
-		QWidget::setAttribute(Qt::WA_DeleteOnClose);
-
 		// Make Mdi
 		QMdiSubWindow *subWindow = new QMdiSubWindow;
 	   subWindow->setWindowIcon(QIcon("/usr/local/lib/rtxi/RTXI-widget-icon.png"));
