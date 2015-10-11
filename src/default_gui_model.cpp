@@ -55,6 +55,7 @@ DefaultGUIModel::DefaultGUIModel(std::string name, DefaultGUIModel::variable_t *
 		setWindowTitle(QString::number(getID()) + " " + QString::fromStdString(name));
 
 		QTimer *timer = new QTimer(this);
+		timer->setTimerType(Qt::VeryCoarseTimer);
 		timer->start(1000);
 		QObject::connect(timer,SIGNAL(timeout(void)),this,SLOT(refresh(void)));
 	}
@@ -75,11 +76,11 @@ void DefaultGUIModel::createGUI(DefaultGUIModel::variable_t *var, int size) {
 
 	// Make Mdi
 	subWindow = new QMdiSubWindow;
+	subWindow->setAttribute(Qt::WA_DeleteOnClose);
 	subWindow->setWindowIcon(QIcon("/usr/local/lib/rtxi/RTXI-widget-icon.png"));
 	subWindow->setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint | Qt::WindowMinimizeButtonHint);
 	subWindow->setOption(QMdiSubWindow::RubberBandResize, true);
 	subWindow->setOption(QMdiSubWindow::RubberBandMove, true);
-	subWindow->setAttribute(Qt::WA_DeleteOnClose);
 	MainWindow::getInstance()->createMdi(subWindow);
 
 	// Create main layout
