@@ -29,7 +29,7 @@
 #include <QtWidgets>
 
 #include <event.h>
-#include <fifo.h>
+#include <atomic_fifo.h>
 #include <io.h>
 #include <mutex.h>
 #include <plugin.h>
@@ -161,7 +161,7 @@ namespace Oscilloscope {
 		QPushButton *applyButton;
 		QPushButton *activateButton;
 
-		Fifo fifo;
+		AtomicFifo fifo;
 		std::vector<IO::Block *> blocks;
 		size_t counter;
 		size_t downsample_rate;
