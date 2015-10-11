@@ -130,8 +130,7 @@ void Oscilloscope::Panel::receiveEvent(const ::Event::Object *event) {
 							if (i->getLabel()	== scopeWindow->getTriggerChannel()->getLabel())
 							{
 								scopeWindow->setTrigger(Scope::NONE, scopeWindow->getTriggerThreshold(),
-										scopeWindow->getChannelsEnd(), scopeWindow->getTriggerHolding(),
-										scopeWindow->getTriggerHoldoff());
+										scopeWindow->getChannelsEnd());
 								showDisplayTab();
 							}
 
@@ -284,8 +283,7 @@ void Oscilloscope::Panel::applyChannelTab(void) {
 			if(trigsChanList->currentText() != "<None>")
 				if (i->getLabel() == scopeWindow->getTriggerChannel()->getLabel())
 					scopeWindow->setTrigger(Scope::NONE, scopeWindow->getTriggerThreshold(),
-							scopeWindow->getChannelsEnd(), scopeWindow->getTriggerHolding(),
-							scopeWindow->getTriggerHoldoff());
+							scopeWindow->getChannelsEnd());
 
 			bool active = setInactiveSync();
 			scopeWindow->removeChannel(i);
@@ -418,10 +416,7 @@ void Oscilloscope::Panel::applyDisplayTab(void) {
 	if (trigChannel == scopeWindow->getChannelsEnd())
 		trigDirection = Scope::NONE;
 
-	bool trigHolding = trigsHoldingCheck->isChecked();
-	double trigHoldoff = trigsHoldoffEdit->text().toDouble() * pow(10, -3 * trigsHoldoffList->currentIndex());
-
-	scopeWindow->setTrigger(trigDirection, trigThreshold, trigChannel, trigHolding, trigHoldoff);
+	scopeWindow->setTrigger(trigDirection, trigThreshold, trigChannel);
 
 	adjustDataSize();
 	scopeWindow->replot();
@@ -759,24 +754,6 @@ QWidget *Oscilloscope::Panel::createDisplayTab(QWidget *parent) {
 	trigsThreshList->addItem("nV");
 	trigsThreshList->addItem("pV");
 
-	row2Layout->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
-	row2Layout->addWidget(new QLabel(tr("Holding:"),page));
-	trigsHoldingCheck = new QCheckBox(page);
-	row2Layout->addWidget(trigsHoldingCheck);
-
-	row2Layout->addWidget(new QLabel(tr("Holdoff:"),page));
-	trigsHoldoffEdit = new QLineEdit(page);
-	trigsHoldoffEdit->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Fixed); 
-	row2Layout->addWidget(trigsHoldoffEdit);
-	trigsHoldoffEdit->setMaximumWidth(trigsHoldoffEdit->minimumSizeHint().width()*3);
-	trigsHoldoffEdit->setValidator(new QDoubleValidator(trigsHoldoffEdit));
-	trigsHoldoffList = new QComboBox(page);
-	trigsHoldoffList->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-	row2Layout->addWidget(trigsHoldoffList);
-	trigsHoldoffList->addItem("ms");
-	trigsHoldoffList->addItem(QString::fromUtf8("µs"));
-	trigsHoldoffList->addItem("ns");
-
 	displayTabLayout->addLayout(row1Layout, 0, 0);
 	displayTabLayout->addLayout(row2Layout, 1, 0);
 
@@ -917,16 +894,6 @@ void Oscilloscope::Panel::showDisplayTab(void) {
 		}
 	trigsThreshList->setCurrentIndex(trigThreshUnits);
 	trigsThreshEdit->setText(QString::number(trigThresh));
-	trigsHoldingCheck->setChecked(scopeWindow->getTriggerHolding());
-	int trigHoldoffUnits = 0;
-	double trigHoldoff = scopeWindow->getTriggerHoldoff();
-	if (trigHoldoff != 0.0)
-		while (fabs(trigHoldoff) < 1)	{
-			trigHoldoff *= 1000;
-			++trigHoldoffUnits;
-		}
-	trigsHoldoffList->setCurrentIndex(trigHoldoffUnits);
-	trigsHoldoffEdit->setText(QString::number(trigHoldoff));
 
 	sizesEdit->setText(QString::number(scopeWindow->getDataSize()));
 }

@@ -153,9 +153,7 @@ class Scope : public QwtPlot {
 	trig_t getTriggerDirection(void);
 	double getTriggerThreshold(void);
 	std::list<Channel>::iterator getTriggerChannel(void);
-	bool getTriggerHolding(void);
-	double getTriggerHoldoff(void);
-	void setTrigger(trig_t,double,std::list<Channel>::iterator,bool,double);
+	void setTrigger(trig_t,double,std::list<Channel>::iterator);
 
 	double getDivT(void) const;
 	void setDivT(double);
@@ -192,10 +190,8 @@ class Scope : public QwtPlot {
 	size_t refresh;
 
 	bool triggering;
-	bool triggerHolding;
 	trig_t triggerDirection;
 	double triggerThreshold;
-	double triggerHoldoff;
 	std::list<size_t> triggerQueue;
 	std::list<Channel>::iterator triggerChannel;
 	size_t triggerLast;

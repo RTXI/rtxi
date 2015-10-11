@@ -144,9 +144,6 @@ namespace Oscilloscope {
 		QComboBox *trigsThreshList;
 		QSpinBox *refreshsSpin;
 		QLineEdit *trigsThreshEdit;
-		QCheckBox *trigsHoldingCheck;
-		QLineEdit *trigsHoldoffEdit;
-		QComboBox *trigsHoldoffList;
 
 		// Lists
 		QComboBox *blocksList;

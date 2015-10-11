@@ -76,10 +76,8 @@ Scope::Scope(QWidget *parent) :	QwtPlot(parent), legendItem(NULL) {
 	dtLabel = "1ms";
 	refresh = 250;
 	triggering = false;
-	triggerHolding = false;
 	triggerDirection = Scope::NONE;
 	triggerThreshold = 0.0;
-	triggerHoldoff = 5.0;
 	triggerLast = (size_t)(-1);
 	triggerChannel = channels.end();
 
@@ -258,21 +256,8 @@ void Scope::setData(double data[],size_t size)
 
 	if(triggering && !triggerQueue.empty() && (data_idx+2)%data_size == triggerQueue.front())
 	{
-		if(triggerHolding)
-		{
-			printf("%f\n",((triggerQueue.front()+data_size-triggerLast)%data_size*period));
-			if(triggerLast != (size_t)(-1) && (triggerQueue.front()+data_size-triggerLast)%data_size*period < triggerHoldoff)
-			{
-				printf("holdoff %f\n", triggerHoldoff);
-				triggerQueue.pop_front();
-			}
-		}
-		else
-		{
-			triggerLast = triggerQueue.front();
-			triggerQueue.pop_front();
-			drawCurves();
-		}
+		triggerQueue.pop_front();
+		drawCurves();
 	}
 }
 
@@ -303,17 +288,7 @@ std::list<Scope::Channel>::iterator Scope::getTriggerChannel(void) {
 	return triggerChannel;
 }
 
-bool Scope::getTriggerHolding(void) {
-	return triggerHolding;
-}
-
-double Scope::getTriggerHoldoff(void) {
-	return triggerHoldoff;
-}
-
-void Scope::setTrigger(trig_t direction,double threshold,std::list<Channel>::iterator channel,bool holding,double holdoff) {
-	triggerHolding = holding;
-	triggerHoldoff = holdoff;
+void Scope::setTrigger(trig_t direction,double threshold,std::list<Channel>::iterator channel) {
 	triggerLast = (size_t)(-1);
 
 	if(triggerChannel != channel || triggerThreshold != threshold)
