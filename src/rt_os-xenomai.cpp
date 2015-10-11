@@ -1,5 +1,5 @@
 /*
- 	 The Real-Time eXperiment Interface (RTXI)
+	 The Real-Time eXperiment Interface (RTXI)
 	 Copyright (C) 2011 Georgia Institute of Technology, University of Utah, Weill Cornell Medical College
 
 	 This program is free software: you can redistribute it and/or modify
@@ -15,7 +15,7 @@
 	 You should have received a copy of the GNU General Public License
 	 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-*/
+ */
 
 #include <debug.h>
 #include <pthread.h>
@@ -32,7 +32,7 @@
 #include <execinfo.h>
 #include <unistd.h>
 
-//#define DEBUG_RT
+#define DEBUG_RT
 
 typedef struct {
 	long long period;
@@ -42,36 +42,55 @@ typedef struct {
 static bool init_rt = false;
 static pthread_key_t is_rt_key;
 
-#ifdef DEBUG_RT
 static const char *sigdebug_reasons[] = {
-    [SIGDEBUG_UNDEFINED] = "undefined",
-    [SIGDEBUG_MIGRATE_SIGNAL] = "received signal",
-    [SIGDEBUG_MIGRATE_SYSCALL] = "invoked syscall",
-    [SIGDEBUG_MIGRATE_FAULT] = "triggered fault",
-    [SIGDEBUG_MIGRATE_PRIOINV] = "affected by priority inversion",
-    [SIGDEBUG_NOMLOCK] = "missing mlockall",
-    [SIGDEBUG_WATCHDOG] = "runaway thread",
+	[SIGDEBUG_UNDEFINED] = "latency: received SIGXCPU for unknown reason",
+	[SIGDEBUG_MIGRATE_SIGNAL] = "received signal",
+	[SIGDEBUG_MIGRATE_SYSCALL] = "invoked syscall",
+	[SIGDEBUG_MIGRATE_FAULT] = "triggered fault",
+	[SIGDEBUG_MIGRATE_PRIOINV] = "affected by priority inversion",
+	[SIGDEBUG_NOMLOCK] = "Xenomai: process memory not locked "
+		"(missing mlockall?)",
+	[SIGDEBUG_WATCHDOG] = "Xenomai: watchdog triggered "
+		"(period too short?)",
 };
- 
-/* Backtrace when we drop out of real-time */
-void rt_switch_warning(int sig, siginfo_t *si, void *context) {
-		const char fmt[] = "\nMode switch (reason: %s). Backtrace:\n";
-    unsigned int reason = si->si_value.sival_int;
-    static char buffer[256];
-    void *bt[200];
-    int nentries;
 
-    if(reason > SIGDEBUG_WATCHDOG)
-    	reason = SIGDEBUG_UNDEFINED;
+void sigdebug_handler(int sig, siginfo_t *si, void *context)
+{
+	const char fmt[] = "Mode switch (reason: %s), aborting. Backtrace:\n";
+	unsigned int reason = si->si_value.sival_int;
+	static char buffer[256];
+	static void *bt[200];
+	unsigned int n;
 
-		/* Dump a backtrace of the frame which caused the switch to
-			 secondary mode: */
-		nentries = snprintf(buffer, sizeof(buffer), fmt, sigdebug_reasons[reason]);
-		nentries = write(STDERR_FILENO, buffer, nentries);
-		nentries = backtrace(bt,sizeof(bt) / sizeof(bt[0]));
-		backtrace_symbols_fd(bt,nentries,fileno(stdout));
+	if (reason > SIGDEBUG_WATCHDOG)
+		reason = SIGDEBUG_UNDEFINED;
+
+	switch(reason) {
+		case SIGDEBUG_UNDEFINED:
+			n = snprintf(buffer, sizeof(buffer),
+					"%s\n", sigdebug_reasons[reason]);
+			write(STDERR_FILENO, buffer, n);
+		case SIGDEBUG_MIGRATE_SIGNAL:
+			n = snprintf(buffer, sizeof(buffer),
+					"%s\n", sigdebug_reasons[reason]);
+			write(STDERR_FILENO, buffer, n);
+		case SIGDEBUG_WATCHDOG:
+			/* These errors are lethal, something went really wrong. */
+			n = snprintf(buffer, sizeof(buffer),
+					"%s\n", sigdebug_reasons[reason]);
+			write(STDERR_FILENO, buffer, n);
+			exit(EXIT_FAILURE);
+	}
+
+	/* Retrieve the current backtrace, and decode it to stdout. */
+	n = snprintf(buffer, sizeof(buffer), fmt, sigdebug_reasons[reason]);
+	n = write(STDERR_FILENO, buffer, n);
+	n = backtrace(bt, sizeof(bt)/sizeof(bt[0]));
+	backtrace_symbols_fd(bt, n, STDERR_FILENO);
+
+	signal(sig, SIG_DFL);
+	kill(getpid(), sig);
 }
-#endif
 
 int RT::OS::initiate(void) {
 	rt_timer_set_mode(TM_ONESHOT);
@@ -107,13 +126,14 @@ int RT::OS::createTask(RT::OS::Task *task,void *(*entry)(void *),void *arg,int p
 	xenomai_task_t *t = new xenomai_task_t;
 	int priority = 99;
 
-#ifdef DEBUG_RT
 	struct sigaction sa;
 	sigemptyset(&sa.sa_mask);
-	sa.sa_sigaction = rt_switch_warning;
+	sa.sa_sigaction = sigdebug_handler;
 	sa.sa_flags = SA_SIGINFO;
 	sigaction(SIGDEBUG, &sa, NULL);
-#endif
+
+	// Wasn upon switches to secondary mode
+	rt_task_set_mode(0, T_WARNSW, NULL);
 
 	// Invert priority, default prio=0 but max priority for xenomai task is 99
 	if ((prio >=0) && (prio <=99))
