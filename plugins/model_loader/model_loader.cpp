@@ -28,6 +28,33 @@ extern "C" Plugin::Object * createRTXIPlugin(void *) {
 
 ModelLoader::ModelLoader(void) {
 	action = MainWindow::getInstance()->createModuleMenuItem("Load Plugin", this, SLOT(load(void)));
+
+	// Add recently used modules to the menu
+	MainWindow::getInstance()->insertModuleMenuSeparator();
+	QSettings userprefs;
+	userprefs.setPath(QSettings::NativeFormat, QSettings::SystemScope, "/usr/local/share/rtxi/");
+	userprefs.beginGroup("/recentFileList");
+	QStringList entries = userprefs.childKeys();
+	userprefs.endGroup();
+	int numRecentFiles = entries.size();
+	QString listmodule;
+	QString text;
+	for (int i = 0; i < std::min(numRecentFiles-2,10); ++i) {
+		listmodule = userprefs.value("/recentFileList/" + entries[i]).toString();
+		text = tr("&%1 %2").arg(i).arg(listmodule);
+		MainWindow::getInstance()->createModuleMenuItem(text);
+	}
+
+	// Add recently used settings files to the menu
+	userprefs.beginGroup("/recentSettingsList");
+	entries = userprefs.childKeys();
+	userprefs.endGroup();
+	numRecentFiles = entries.size()-1;
+	for (int i = 0; i < std::min(numRecentFiles,10); ++i) {
+		listmodule = userprefs.value("/recentSettingsList/" + entries[i]).toString();
+		text = tr("&%1 %2").arg(i).arg(listmodule);
+		MainWindow::getInstance()->createFileMenuItem(text);
+	}
 }
 
 ModelLoader::~ModelLoader(void) {
