@@ -260,14 +260,13 @@ void MainWindow::updateCheck(void) {
 	}
 }
 
-void MainWindow::loadSettings (void) {
-
+void MainWindow::loadSettings (void)
+{
 	QSettings userprefs;
 	userprefs.setPath (QSettings::NativeFormat, QSettings::SystemScope, "/usr/local/share/rtxi/");
-	QString settingsDir = userprefs.value("/dirs/setfiles", getenv("HOME")).toString();
 
 	QString filename = QFileDialog::getOpenFileName(this,
-			tr("Load saved workspace"), "/home/", tr("Settings (*.set)"));
+			tr("Load saved workspace"), userprefs.value("/dirs/setfiles", getenv("HOME")).toString(), tr("Settings (*.set)"));
 
 	if (QFile(filename).exists()) {
 		systemMenu->clear();
@@ -280,10 +279,9 @@ void MainWindow::saveSettings(void)
 {
 	QSettings userprefs;
 	userprefs.setPath (QSettings::NativeFormat, QSettings::SystemScope, "/usr/local/share/rtxi/");
-	QString settingsDir = userprefs.value("/dirs/setfiles", getenv("HOME")).toString();
 
 	QString filename = QFileDialog::getSaveFileName(this,
-			tr("Save current workspace"), "/home/", tr("Settings (*.set)"));
+			tr("Save current workspace"), userprefs.value("/dirs/setfiles", getenv("HOME")).toString(), tr("Settings (*.set)"));
 
 	if (!filename.isEmpty()) {
 		if (!filename.endsWith(".set"))

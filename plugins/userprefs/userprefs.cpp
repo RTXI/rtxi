@@ -154,7 +154,7 @@ void UserPrefs::Panel::chooseSettingsDir(void) {
 
 void UserPrefs::Panel::chooseDataDir(void) {
 	QString dir_name = QFileDialog::getExistingDirectory(this, tr("Choose default directory for HDF5 data files"), 
-			userprefs.value("/dirs/setfiles", getenv("HOME")).toString(),
+			userprefs.value("/dirs/data", getenv("HOME")).toString(),
 			QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 	dataDirEdit->setText(dir_name);
 }
