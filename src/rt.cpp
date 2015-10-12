@@ -21,9 +21,6 @@
 #include <event.h>
 #include <mutex.h>
 #include <rt.h>
-//#include <native/task.h>
-
-//#define DEBUG_RT
 
 namespace {
 	class SetThreadActive:public RT::Event {
@@ -269,11 +266,6 @@ void RT::System::removeThread(RT::Thread *thread) {
 }
 
 void *RT::System::bounce(void *param) {
-
-#ifdef DEBUG_RT
-	// Warning when Xenomai switches to seconday mode
-	rt_task_set_mode(0, T_WARNSW, NULL);
-#endif
 
 	RT::System *that = reinterpret_cast<RT::System *>(param);
 	if (that)

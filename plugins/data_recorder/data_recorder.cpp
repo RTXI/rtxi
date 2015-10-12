@@ -39,12 +39,14 @@ struct param_hdf_t
 	double value;
 };
 
-struct find_daq_t {
+struct find_daq_t
+{
 	int index;
 	DAQ::Device *device;
 };
 
-static void findDAQDevice(DAQ::Device *dev,void *arg) {
+static void findDAQDevice(DAQ::Device *dev,void *arg)
+{
 	struct find_daq_t *info = static_cast<struct find_daq_t *>(arg);
 	if(!info->index)
 		info->device = dev;
@@ -52,7 +54,8 @@ static void findDAQDevice(DAQ::Device *dev,void *arg) {
 }
 
 // Debug for event handling
-QDebug operator<<(QDebug str, const QEvent * ev) {
+QDebug operator<<(QDebug str, const QEvent * ev)
+{
 	static int eventEnumIndex = QEvent::staticMetaObject.indexOfEnumerator("Type");
 	str << "QEvent";
 	if (ev)
@@ -92,8 +95,8 @@ namespace
 	class InsertChannelEvent: public RT::Event
 	{
 		public:
-			InsertChannelEvent(bool &, RT::List<DataRecorder::Channel> &, RT::List<
-					DataRecorder::Channel>::iterator, DataRecorder::Channel &);
+			InsertChannelEvent(bool &, RT::List<DataRecorder::Channel> &,
+					RT::List<DataRecorder::Channel>::iterator, DataRecorder::Channel &);
 			~InsertChannelEvent(void);
 			int callback(void);
 
@@ -179,10 +182,8 @@ namespace
 	}; // class DoneEvent
 }; // namespace
 
-InsertChannelEvent::InsertChannelEvent(bool &r,
-		RT::List<DataRecorder::Channel> & l,
-		RT::List<DataRecorder::Channel>::iterator e,
-		DataRecorder::Channel &c) :
+InsertChannelEvent::InsertChannelEvent(bool &r, RT::List<DataRecorder::Channel> & l,
+		RT::List<DataRecorder::Channel>::iterator e, DataRecorder::Channel &c) :
 	recording(r), channels(l), end(e), channel(c)
 {
 }
@@ -199,8 +200,8 @@ int InsertChannelEvent::callback(void)
 	return 0;
 }
 
-RemoveChannelEvent::RemoveChannelEvent(bool &r,
-		RT::List<DataRecorder::Channel> & l, DataRecorder::Channel &c) :
+RemoveChannelEvent::RemoveChannelEvent(bool &r,	RT::List<DataRecorder::Channel> & l,
+		DataRecorder::Channel &c) :
 	recording(r), channels(l), channel(c)
 {
 }
@@ -1225,14 +1226,15 @@ int DataRecorder::Panel::openFile(QString &filename)
 #endif
 
 	if (QFile::exists(filename)) {
+		mutex.lock();
 		CustomEvent *event = new CustomEvent(static_cast<QEvent::Type>QFileExistsEvent);
 		FileExistsEventData data;
-
 		event->setData(static_cast<void *>(&data));
 		data.filename = filename;
-
 		QApplication::postEvent(this, event);
 		data.done.wait(&mutex);
+		mutex.unlock();
+
 		if (data.response == 0) { // append
 			file.id = H5Fopen(filename.toLatin1().constData(), H5F_ACC_RDWR, H5P_DEFAULT);
 			size_t trial_num;
@@ -1241,11 +1243,15 @@ int DataRecorder::Panel::openFile(QString &filename)
 			for (trial_num = 1;; ++trial_num) {
 				trial_name = "/Trial" + QString::number(trial_num);
 				file.trial = H5Gopen(file.id, trial_name.toLatin1().constData(), H5P_DEFAULT);
-				if (file.trial < 0) {
+				if (file.trial < 0)
+				{
 					H5Eclear(H5E_DEFAULT);
 					break;
-				} else
+				} 
+				else
+				{
 					H5Gclose(file.trial);
+				}
 			}
 			trialNum->setNum(int(trial_num)-1);
 		} else if (data.response == 1) { //overwrite
@@ -1271,13 +1277,14 @@ int DataRecorder::Panel::openFile(QString &filename)
 		return -1;
 	}
 
+	mutex.lock();
 	CustomEvent *event = new CustomEvent(static_cast<QEvent::Type>QSetFileNameEditEvent);
 	SetFileNameEditEventData data;
 	data.filename = filename;
 	event->setData(static_cast<void*>(&data));
-
 	QApplication::postEvent(this, event);
 	data.done.wait(&mutex);
+	mutex.unlock();
 
 	return 0;
 }
@@ -1294,13 +1301,14 @@ void DataRecorder::Panel::closeFile(bool shutdown)
 
 	H5Fclose(file.id);
 	if (!shutdown) {
+		mutex.lock();
 		CustomEvent *event = new CustomEvent(static_cast<QEvent::Type>QSetFileNameEditEvent);
 		SetFileNameEditEventData data;
 		data.filename = "";
 		event->setData(static_cast<void*>(&data));
-
 		QApplication::postEvent(this, event);
 		data.done.wait(&mutex);
+		mutex.unlock();
 	}
 }
 
@@ -1514,8 +1522,7 @@ void DataRecorder::Plugin::doSave(Settings::Object::State &s) const
 {
 	s.saveInteger("Num Panels", panelList.size());
 	size_t n = 0;
-	for (std::list<Panel *>::const_iterator i = panelList.begin(), end =
-			panelList.end(); i != end; ++i)
+	for (std::list<Panel *>::const_iterator i = panelList.begin(), end = panelList.end(); i != end; ++i)
 		s.saveState(QString::number(n++).toStdString(), (*i)->save());
 }
 

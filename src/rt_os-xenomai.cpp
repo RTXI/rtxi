@@ -42,6 +42,7 @@ typedef struct {
 static bool init_rt = false;
 static pthread_key_t is_rt_key;
 
+#ifdef DEBUG_RT
 static const char *sigdebug_reasons[] = {
 	[SIGDEBUG_UNDEFINED] = "latency: received SIGXCPU for unknown reason",
 	[SIGDEBUG_MIGRATE_SIGNAL] = "received signal",
@@ -91,6 +92,7 @@ void sigdebug_handler(int sig, siginfo_t *si, void *context)
 	signal(sig, SIG_DFL);
 	kill(getpid(), sig);
 }
+#endif
 
 int RT::OS::initiate(void) {
 	rt_timer_set_mode(TM_ONESHOT);
@@ -126,14 +128,16 @@ int RT::OS::createTask(RT::OS::Task *task,void *(*entry)(void *),void *arg,int p
 	xenomai_task_t *t = new xenomai_task_t;
 	int priority = 99;
 
+#ifdef DEBUG_RT
 	struct sigaction sa;
 	sigemptyset(&sa.sa_mask);
 	sa.sa_sigaction = sigdebug_handler;
 	sa.sa_flags = SA_SIGINFO;
 	sigaction(SIGDEBUG, &sa, NULL);
 
-	// Wasn upon switches to secondary mode
+	// Tell Xenomai to report mode issues
 	rt_task_set_mode(0, T_WARNSW, NULL);
+#endif
 
 	// Invert priority, default prio=0 but max priority for xenomai task is 99
 	if ((prio >=0) && (prio <=99))
