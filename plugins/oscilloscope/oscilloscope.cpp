@@ -1079,7 +1079,7 @@ bool Oscilloscope::Panel::setInactiveSync(void) {
 
 void Oscilloscope::Panel::flushFifo(void) {
 	char yogi;
-	while (fifo.read(&yogi, sizeof(yogi)))
+	while (fifo.read(&yogi, sizeof(yogi), false))
 		;
 }
 
@@ -1091,7 +1091,7 @@ void Oscilloscope::Panel::adjustDataSize(void) {
 
 void Oscilloscope::Panel::timeoutEvent(void) {
 	size_t size;
-	while (fifo.read(&size, sizeof(size))) {
+	while (fifo.read(&size, sizeof(size), false)) {
 		double data[size];
 		if (fifo.read(data, sizeof(data)))
 			scopeWindow->setData(data, size);
