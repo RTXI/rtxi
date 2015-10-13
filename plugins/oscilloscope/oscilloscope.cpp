@@ -130,7 +130,7 @@ void Oscilloscope::Panel::receiveEvent(const ::Event::Object *event) {
 							if (i->getLabel()	== scopeWindow->getTriggerChannel()->getLabel())
 							{
 								scopeWindow->setTrigger(Scope::NONE, scopeWindow->getTriggerThreshold(),
-										scopeWindow->getChannelsEnd());
+										scopeWindow->getChannelsEnd(), scopeWindow->getTriggerWindow());
 								showDisplayTab();
 							}
 
@@ -283,7 +283,7 @@ void Oscilloscope::Panel::applyChannelTab(void) {
 			if(trigsChanList->currentText() != "<None>")
 				if (i->getLabel() == scopeWindow->getTriggerChannel()->getLabel())
 					scopeWindow->setTrigger(Scope::NONE, scopeWindow->getTriggerThreshold(),
-							scopeWindow->getChannelsEnd());
+							scopeWindow->getChannelsEnd(), scopeWindow->getTriggerWindow());
 
 			bool active = setInactiveSync();
 			scopeWindow->removeChannel(i);
@@ -402,10 +402,14 @@ void Oscilloscope::Panel::applyDisplayTab(void) {
 	scopeWindow->setPeriod(RT::System::getInstance()->getPeriod() * 1e-6);
 	adjustDataSize();
 
-	// Update Triggering
+	// Update trigger direction
 	Scope::trig_t trigDirection = static_cast<Scope::trig_t> (trigsGroup->id(trigsGroup->checkedButton()));
 
+	// Update trigger threshold
 	double trigThreshold = trigsThreshEdit->text().toDouble() * pow(10, -3 * trigsThreshList->currentIndex());
+
+	// Update pre-trigger window for displaying
+	double trigWindow = trigWindowEdit->text().toDouble() * pow(10, -3 * trigWindowList->currentIndex());
 
 	std::list<Scope::Channel>::iterator trigChannel = scopeWindow->getChannelsEnd();
 	for (std::list<Scope::Channel>::iterator i = scopeWindow->getChannelsBegin(), end = scopeWindow->getChannelsEnd(); i != end; ++i)
@@ -416,14 +420,15 @@ void Oscilloscope::Panel::applyDisplayTab(void) {
 	if (trigChannel == scopeWindow->getChannelsEnd())
 		trigDirection = Scope::NONE;
 
-	scopeWindow->setTrigger(trigDirection, trigThreshold, trigChannel);
+	scopeWindow->setTrigger(trigDirection, trigThreshold, trigChannel, trigWindow);
 
 	adjustDataSize();
 	scopeWindow->replot();
 	showDisplayTab();
 }
 
-struct block_list_info_t {
+struct block_list_info_t
+{
 	QComboBox *blockList;
 	std::vector<IO::Block *> *blocks;
 };
@@ -753,6 +758,21 @@ QWidget *Oscilloscope::Panel::createDisplayTab(QWidget *parent) {
 	trigsThreshList->addItem(QString::fromUtf8("µV"));
 	trigsThreshList->addItem("nV");
 	trigsThreshList->addItem("pV");
+
+	row2Layout->addWidget(new QLabel(tr("Window:"),page));
+	trigWindowEdit = new QLineEdit(page);
+	trigWindowEdit->setText(QString::number(scopeWindow->getTriggerWindow()));
+	trigWindowEdit->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Fixed); 
+	trigWindowEdit->setMaximumWidth(trigWindowEdit->minimumSizeHint().width()*3);
+	trigWindowEdit->setValidator(new QDoubleValidator(trigWindowEdit));
+	row2Layout->addWidget(trigWindowEdit);
+	trigWindowList = new QComboBox(page);
+	trigWindowList->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+	row2Layout->addWidget(trigWindowList);
+	trigWindowList->addItem("s");
+	trigWindowList->addItem("ms");
+	trigWindowList->addItem(QString::fromUtf8("µs"));
+	trigWindowList->setCurrentIndex(0);
 
 	displayTabLayout->addLayout(row1Layout, 0, 0);
 	displayTabLayout->addLayout(row2Layout, 1, 0);

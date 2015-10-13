@@ -26,6 +26,8 @@
 
 #include "scope.h"
 
+#define fs 1/(period*1e-3)
+
 // Constructor for a channel
 Scope::Channel::Channel(void) {}
 
@@ -78,8 +80,8 @@ Scope::Scope(QWidget *parent) :	QwtPlot(parent), legendItem(NULL) {
 	triggering = false;
 	triggerDirection = Scope::NONE;
 	triggerThreshold = 0.0;
-	triggerLast = (size_t)(-1);
 	triggerChannel = channels.end();
+	triggerWindow = 0.0;
 
 	// Initialize director
 	d_directPainter = new QwtPlotDirectPainter();
@@ -249,7 +251,10 @@ void Scope::setData(double data[],size_t size)
 				((triggerDirection == POS && i->data[data_idx-1] < triggerThreshold && i->data[data_idx] > triggerThreshold) ||
 				 (triggerDirection == NEG && i->data[data_idx-1] > triggerThreshold && i->data[data_idx] < triggerThreshold)))
 		{
-			triggerQueue.push_back(data_idx);
+			if(data_idx > triggerWindow*fs)
+				triggerQueue.push_back(data_idx-(triggerWindow*fs));
+			else
+				triggerQueue.push_back(0);
 		}
 	}
 
@@ -286,12 +291,16 @@ double Scope::getTriggerThreshold(void) {
 	return triggerThreshold;
 }
 
+double Scope::getTriggerWindow(void)
+{
+	return triggerWindow;
+}
+
 std::list<Scope::Channel>::iterator Scope::getTriggerChannel(void) {
 	return triggerChannel;
 }
 
-void Scope::setTrigger(trig_t direction,double threshold,std::list<Channel>::iterator channel) {
-	triggerLast = (size_t)(-1);
+void Scope::setTrigger(trig_t direction,double threshold,std::list<Channel>::iterator channel, double window) {
 
 	if(triggerChannel != channel || triggerThreshold != threshold)
 	{
@@ -314,6 +323,7 @@ void Scope::setTrigger(trig_t direction,double threshold,std::list<Channel>::ite
 			timer->stop();
 		}
 		triggerDirection = direction;
+		triggerWindow = window;
 	}
 }
 

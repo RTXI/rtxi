@@ -151,8 +151,9 @@ class Scope : public QwtPlot {
 
 	trig_t getTriggerDirection(void);
 	double getTriggerThreshold(void);
+	double getTriggerWindow(void);
 	std::list<Channel>::iterator getTriggerChannel(void);
-	void setTrigger(trig_t,double,std::list<Channel>::iterator);
+	void setTrigger(trig_t,double,std::list<Channel>::iterator,double);
 
 	double getDivT(void) const;
 	void setDivT(double);
@@ -189,9 +190,9 @@ class Scope : public QwtPlot {
 	bool triggering;
 	trig_t triggerDirection;
 	double triggerThreshold;
+	double triggerWindow;
 	std::list<size_t> triggerQueue;
 	std::list<Channel>::iterator triggerChannel;
-	size_t triggerLast;
 
 	// Scope primary paint element
 	QwtPlotDirectPainter *d_directPainter;
