@@ -300,10 +300,10 @@ void RT::System::execute(void) {
 		for (iDevice = devicesBegin; iDevice != devicesEnd; ++iDevice)
 			if (iDevice->getActive()) iDevice->write();
 
-		if (eventFifo.read(&event,sizeof(RT::Event *))) {
+		if (eventFifo.read(&event,sizeof(RT::Event *),false)) {
 			do {
 				event->execute();
-			} while (eventFifo.read(&event,sizeof(RT::Event *)));
+			} while (eventFifo.read(&event,sizeof(RT::Event *),false));
 
 			event = 0;
 			devicesBegin = devices.begin();

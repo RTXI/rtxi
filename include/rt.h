@@ -20,7 +20,7 @@
 #ifndef RT_H
 #define RT_H
 
-#include <atomic_fifo.h>
+#include <fifo.h>
 #include <mutex.h>
 #include <pthread.h>
 #include <semaphore.h>
@@ -441,7 +441,7 @@ namespace RT {
 		List<RT::Device> devices;
 		List<RT::Thread> threadList;
 
-		AtomicFifo eventFifo;
+		Fifo eventFifo;
 
 	}; // class System
 

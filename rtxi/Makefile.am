@@ -16,6 +16,7 @@ pkginclude_HEADERS = \
 		$(top_srcdir)/include/default_gui_model.h \
 		$(top_srcdir)/include/debug.h \
 		$(top_srcdir)/include/event.h \
+		$(top_srcdir)/include/fifo.h \
 		$(top_srcdir)/include/io.h \
 		$(top_srcdir)/include/main_window.h \
 		$(top_srcdir)/include/mutex.h \
@@ -31,6 +32,7 @@ rtxi_SOURCES = \
 		$(top_srcdir)/src/daq.cpp \
 		$(top_srcdir)/src/default_gui_model.cpp \
 		$(top_srcdir)/src/event.cpp \
+		$(top_srcdir)/src/fifo.cpp \
 		$(top_srcdir)/src/io.cpp \
 		$(top_srcdir)/src/main.cpp \
 		$(top_srcdir)/src/main_window.cpp \

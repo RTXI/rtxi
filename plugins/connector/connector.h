@@ -25,6 +25,7 @@
 #include <QMdiArea>
 
 #include <event.h>
+#include <fifo.h>
 #include <io.h>
 #include <plugin.h>
 #include <vector>
