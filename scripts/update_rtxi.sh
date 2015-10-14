@@ -21,7 +21,7 @@
 #!/bin/bash
 
 # Directories
-DIR=$PWD
+cd $RTXI_GIT
 
 # Determine if remote-local results in a number > 0
 VAL=$(git rev-list HEAD...origin/qt5 --count)

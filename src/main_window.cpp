@@ -58,7 +58,7 @@ MainWindow::MainWindow (void) : QMainWindow(NULL, Qt::Window) {
 	createHelpMenu();
 
 	/* Check for updates */
-	//updateCheck();
+	updateCheck();
 }
 
 MainWindow::~MainWindow (void) {
@@ -245,10 +245,9 @@ void MainWindow::openSubIssue(void) {
 	QDesktopServices::openUrl(QUrl("https://github.com/rtxi/rtxi/issues", QUrl::TolerantMode));
 }
 
-// TODO: Popup notification
 void MainWindow::updateCheck(void) {
 	FILE *pp;
-	pp = popen("/usr/local/share/rtxi/update_rtxi.sh","r");
+	pp = popen("/home/yapatel/Dev/rtxi-dev/rtxi/scripts/update_rtxi.sh","r");
 	if (pp != NULL) {
 		while (1) {
 			char *res;
