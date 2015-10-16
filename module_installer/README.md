@@ -1,6 +1,6 @@
-# module-installer
+# Module Installer
 
-**Requirements:** libgit2-dev, libmarkdown2-dev, -lQt5Network
+**Requirements:** libgit2-dev, libmarkdown2-dev, -lQt5Network  
 **Limitations:** currently in alpha
 
 ![Module Installer GUI](module-installer.png)
