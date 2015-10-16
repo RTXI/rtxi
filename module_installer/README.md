@@ -14,5 +14,6 @@ The module can only keep track of modules installed in the above pre-defined dir
 Known bugs: 
 
  - READMEs don't get updated after installing/updating a module. 
+ - possible crashes when the "download/update" button is hit
 
 <!--end-->
