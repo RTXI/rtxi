@@ -5,6 +5,7 @@
 
 ![Module Installer GUI](module-installer.png)
 
+<!--start-->
 Download and install modules within RTXI. If RTXI is running as root, all modules will be downloaded and installed into `/usr/local/lib/rtxi_modules`, and if not, they will be found in `~/.config/rtxi/`.  
 
 The module can only keep track of modules installed in the above pre-defined directories.  
@@ -13,3 +14,5 @@ The module can only keep track of modules installed in the above pre-defined dir
 Known bugs: 
 
  - READMEs don't get updated after installing/updating a module. 
+
+<!--end-->
