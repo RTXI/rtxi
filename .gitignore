@@ -1,3 +1,9 @@
+# moc files
+moc_*
+
+# text edit backup files
+*.swp
+
 # Compiled Object files
 *.slo
 *.lo
