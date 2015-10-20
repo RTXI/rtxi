@@ -22,117 +22,121 @@
 #include <model_loader.h>
 #include <algorithm>
 
-extern "C" Plugin::Object * createRTXIPlugin(void *) {
-	return new ModelLoader();
+extern "C" Plugin::Object * createRTXIPlugin(void *)
+{
+    return new ModelLoader();
 }
 
-ModelLoader::ModelLoader(void) {
-	action = MainWindow::getInstance()->createModuleMenuItem("Load Plugin", this, SLOT(load(void)));
+ModelLoader::ModelLoader(void)
+{
+    action = MainWindow::getInstance()->createModuleMenuItem("Load Plugin", this, SLOT(load(void)));
 
-	// Add recently used modules to the menu
-	MainWindow::getInstance()->insertModuleMenuSeparator();
-	QSettings userprefs;
-	userprefs.setPath(QSettings::NativeFormat, QSettings::SystemScope, "/usr/local/share/rtxi/");
-	userprefs.beginGroup("/recentFileList");
-	QStringList entries = userprefs.childKeys();
-	userprefs.endGroup();
-	int numRecentFiles = entries.size();
-	QString listmodule;
-	QString text;
-	for (int i = 0; i < std::min(numRecentFiles-2,10); ++i) {
-		listmodule = userprefs.value("/recentFileList/" + entries[i]).toString();
-		text = tr("&%1 %2").arg(i).arg(listmodule);
-		MainWindow::getInstance()->createModuleMenuItem(text);
-	}
+    // Add recently used modules to the menu
+    MainWindow::getInstance()->insertModuleMenuSeparator();
+    QSettings userprefs;
+    userprefs.setPath(QSettings::NativeFormat, QSettings::SystemScope, "/usr/local/share/rtxi/");
+    userprefs.beginGroup("/recentFileList");
+    QStringList entries = userprefs.childKeys();
+    userprefs.endGroup();
+    int numRecentFiles = entries.size();
+    QString listmodule;
+    QString text;
+    for (int i = 0; i < std::min(numRecentFiles-2,10); ++i) {
+        listmodule = userprefs.value("/recentFileList/" + entries[i]).toString();
+        text = tr("&%1 %2").arg(i).arg(listmodule);
+        MainWindow::getInstance()->createModuleMenuItem(text);
+    }
 
-	// Add recently used settings files to the menu
-	userprefs.beginGroup("/recentSettingsList");
-	entries = userprefs.childKeys();
-	userprefs.endGroup();
-	numRecentFiles = entries.size()-1;
-	for (int i = 0; i < std::min(numRecentFiles,10); ++i) {
-		listmodule = userprefs.value("/recentSettingsList/" + entries[i]).toString();
-		text = tr("&%1 %2").arg(i).arg(listmodule);
-		MainWindow::getInstance()->createFileMenuItem(text);
-	}
+    // Add recently used settings files to the menu
+    userprefs.beginGroup("/recentSettingsList");
+    entries = userprefs.childKeys();
+    userprefs.endGroup();
+    numRecentFiles = entries.size()-1;
+    for (int i = 0; i < std::min(numRecentFiles,10); ++i) {
+        listmodule = userprefs.value("/recentSettingsList/" + entries[i]).toString();
+        text = tr("&%1 %2").arg(i).arg(listmodule);
+        MainWindow::getInstance()->createFileMenuItem(text);
+    }
 }
 
-ModelLoader::~ModelLoader(void) {
-	MainWindow::getInstance()->removeModuleMenuItem(action);
+ModelLoader::~ModelLoader(void)
+{
+    MainWindow::getInstance()->removeModuleMenuItem(action);
 }
 
-void ModelLoader::load(void) {
-	QString plugin_dir = QString(EXEC_PREFIX) + QString("/lib/rtxi/");
-	QString filename = QFileDialog::getOpenFileName(0, tr("Load plugin"), plugin_dir, tr("Plugins (*.so);;All (*.*)"));
+void ModelLoader::load(void)
+{
+    QString plugin_dir = QString(EXEC_PREFIX) + QString("/lib/rtxi/");
+    QString filename = QFileDialog::getOpenFileName(0, tr("Load plugin"), plugin_dir, tr("Plugins (*.so);;All (*.*)"));
 
-	if (filename.isNull() || filename.isEmpty())
-		return;
+    if (filename.isNull() || filename.isEmpty())
+        return;
 
-	if (filename.startsWith(plugin_dir))
-		filename.remove(0, plugin_dir.length());
+    if (filename.startsWith(plugin_dir))
+        filename.remove(0, plugin_dir.length());
 
-	Plugin::Manager::getInstance()->load(filename.toLatin1());
+    Plugin::Manager::getInstance()->load(filename.toLatin1());
 
-	// load QSettings
-	QSettings userprefs;
-	userprefs.setPath(QSettings::NativeFormat, QSettings::SystemScope, "/usr/local/share/rtxi");
+    // load QSettings
+    QSettings userprefs;
+    userprefs.setPath(QSettings::NativeFormat, QSettings::SystemScope, "/usr/local/share/rtxi");
 
-	int oldestmodule = userprefs.value("/recentFileList/start", 0).toInt();
-	if (oldestmodule == 0)
-		userprefs.setValue("/recentFileList/start", 0);
+    int oldestmodule = userprefs.value("/recentFileList/start", 0).toInt();
+    if (oldestmodule == 0)
+        userprefs.setValue("/recentFileList/start", 0);
 
-	int num_module = userprefs.value("/recentFileList/num", 0).toInt();
-	userprefs.beginGroup("/recentFileList");
-	QStringList entries = userprefs.childKeys();
-	userprefs.endGroup();
+    int num_module = userprefs.value("/recentFileList/num", 0).toInt();
+    userprefs.beginGroup("/recentFileList");
+    QStringList entries = userprefs.childKeys();
+    userprefs.endGroup();
 
-	int numRecentFiles = entries.size();
-	QString listmodule;
+    int numRecentFiles = entries.size();
+    QString listmodule;
 
-	bool doesnotexist = true;
+    bool doesnotexist = true;
 
-	for (int i = 0; i < numRecentFiles; ++i) {
-		listmodule = userprefs.value("/recentFileList/" + entries[i]).toString();
-		if (filename == listmodule)
-			doesnotexist = false;
-	}
-	int index;
-	if (doesnotexist) {
-		if (num_module == 10)	{
-			userprefs.setValue("/recentFileList/" + QString::number(oldestmodule), filename);
-			index = oldestmodule;
-			oldestmodule++;
-			if (oldestmodule == 10)
-				oldestmodule = 0;
-			userprefs.setValue("/recentFileList/start", oldestmodule);
-		}
-		else {
-			userprefs.setValue("/recentFileList/" + QString::number(num_module++), filename);
-			index = num_module;
-			userprefs.setValue("/recentFileList/num", num_module);
-		}
-		updateRecentModules(filename, index);
-	}
+    for (int i = 0; i < numRecentFiles; ++i) {
+        listmodule = userprefs.value("/recentFileList/" + entries[i]).toString();
+        if (filename == listmodule)
+            doesnotexist = false;
+    }
+    int index;
+    if (doesnotexist) {
+        if (num_module == 10)	{
+            userprefs.setValue("/recentFileList/" + QString::number(oldestmodule), filename);
+            index = oldestmodule;
+            oldestmodule++;
+            if (oldestmodule == 10)
+                oldestmodule = 0;
+            userprefs.setValue("/recentFileList/start", oldestmodule);
+        } else {
+            userprefs.setValue("/recentFileList/" + QString::number(num_module++), filename);
+            index = num_module;
+            userprefs.setValue("/recentFileList/num", num_module);
+        }
+        updateRecentModules(filename, index);
+    }
 }
 
-void ModelLoader::updateRecentModules(QString filename, int index) {
-	QSettings userprefs;
-	userprefs.setPath(QSettings::NativeFormat, QSettings::SystemScope, "/usr/local/share/rtxi/");
-	userprefs.beginGroup("/recentFileList");
-	QStringList entries = userprefs.childKeys();
-	userprefs.endGroup();
-	int numRecentFiles = entries.size();
+void ModelLoader::updateRecentModules(QString filename, int index)
+{
+    QSettings userprefs;
+    userprefs.setPath(QSettings::NativeFormat, QSettings::SystemScope, "/usr/local/share/rtxi/");
+    userprefs.beginGroup("/recentFileList");
+    QStringList entries = userprefs.childKeys();
+    userprefs.endGroup();
+    int numRecentFiles = entries.size();
 
-	QString listmodule;
-	QString text;
-	for (int i = 0; i < std::min(numRecentFiles - 2, 10); ++i) {
-		listmodule = userprefs.value("/recentFileList/" + entries[i]).toString();
-		if (i == index)
-			text = tr("&%1 %2").arg(i).arg(filename);
-		else
-			text = tr("&%1 %2").arg(i).arg(listmodule);
-		action = MainWindow::getInstance()->createModuleMenuItem(text);
-		MainWindow::getInstance()->changeModuleMenuItem(action, text);
-		MainWindow::getInstance()->setModuleMenuItemParameter(action, i);
-	}
+    QString listmodule;
+    QString text;
+    for (int i = 0; i < std::min(numRecentFiles - 2, 10); ++i) {
+        listmodule = userprefs.value("/recentFileList/" + entries[i]).toString();
+        if (i == index)
+            text = tr("&%1 %2").arg(i).arg(filename);
+        else
+            text = tr("&%1 %2").arg(i).arg(listmodule);
+        action = MainWindow::getInstance()->createModuleMenuItem(text);
+        MainWindow::getInstance()->changeModuleMenuItem(action, text);
+        MainWindow::getInstance()->setModuleMenuItemParameter(action, i);
+    }
 }

@@ -27,30 +27,32 @@
 class SystemControl : public QObject, public Plugin::Object
 {
 
-	Q_OBJECT
+    Q_OBJECT
 
-		friend class SystemControlPanel;
+    friend class SystemControlPanel;
 
-	public:
+public:
 
-	static SystemControl *getInstance(void);
+    static SystemControl *getInstance(void);
 
-	public slots:
+public slots:
 
-		void createControlPanel(void);
+    void createControlPanel(void);
 
-	private:
+private:
 
-	SystemControl(void);
-	~SystemControl(void);
-	SystemControl(const SystemControl &) {};
-	SystemControl &operator=(const SystemControl &) { return *getInstance(); };
+    SystemControl(void);
+    ~SystemControl(void);
+    SystemControl(const SystemControl &) {};
+    SystemControl &operator=(const SystemControl &) {
+        return *getInstance();
+    };
 
-	static SystemControl *instance;
+    static SystemControl *instance;
 
-	void removeControlPanel(SystemControlPanel *);
+    void removeControlPanel(SystemControlPanel *);
 
-	std::list<SystemControlPanel *> panelList;
+    std::list<SystemControlPanel *> panelList;
 };
 
 #endif /* SYSTEM_CONTROL_H */

@@ -18,7 +18,7 @@
  */
 
 /*
-	 Oscilloscope namespace. The namespace works with 
+	 Oscilloscope namespace. The namespace works with
 	 both Scope and Panel classes to instantiate an oscilloscope
 	 plugin.
  */
@@ -38,136 +38,138 @@
 
 #include "scope.h"
 
-namespace Oscilloscope {
+namespace Oscilloscope
+{
 
-	class SpinBox;
-	class CheckBox;
-	class Panel;
+class SpinBox;
+class CheckBox;
+class Panel;
 
-	class Plugin : public QObject, public ::Plugin::Object, public RT::Thread {
+class Plugin : public QObject, public ::Plugin::Object, public RT::Thread
+{
 
-		Q_OBJECT
+    Q_OBJECT
 
-			friend class Panel;
+    friend class Panel;
 
-		public:
-		static Plugin *getInstance(void);
+public:
+    static Plugin *getInstance(void);
 
-		public slots:
-			void createOscilloscopePanel(void);
+public slots:
+    void createOscilloscopePanel(void);
 
-		protected:
-		virtual void doDeferred(const Settings::Object::State &);
-		virtual void doLoad(const Settings::Object::State &);
-		virtual void doSave(Settings::Object::State &) const;
+protected:
+    virtual void doDeferred(const Settings::Object::State &);
+    virtual void doLoad(const Settings::Object::State &);
+    virtual void doSave(Settings::Object::State &) const;
 
-		private:
-		Plugin(void);
-		~Plugin(void);
-		Plugin(const Plugin &) {};
-		Plugin &operator=(const Plugin &)
-		{
-			return *getInstance();
-		};
-		static Plugin *instance;
-		void removeOscilloscopePanel(Panel *);
+private:
+    Plugin(void);
+    ~Plugin(void);
+    Plugin(const Plugin &) {};
+    Plugin &operator=(const Plugin &) {
+        return *getInstance();
+    };
+    static Plugin *instance;
+    void removeOscilloscopePanel(Panel *);
 
-		// List to maintain multiple scopes
-		std::list<Panel *> panelList;
-	}; // Plugin
+    // List to maintain multiple scopes
+    std::list<Panel *> panelList;
+}; // Plugin
 
-	class Panel : public QWidget, public RT::Thread, public virtual Settings::Object, public Event::Handler {
+class Panel : public QWidget, public RT::Thread, public virtual Settings::Object, public Event::Handler
+{
 
-		Q_OBJECT
+    Q_OBJECT
 
-			friend class Scope;
+    friend class Scope;
 
-		public:
-		Panel(QWidget * = NULL);
-		virtual ~Panel(void);
-		void execute(void);
-		bool setInactiveSync(void);
-		void flushFifo(void);
-		void adjustDataSize(void);
-		void doDeferred(const Settings::Object::State &);
-		void doLoad(const Settings::Object::State &);
-		void doSave(Settings::Object::State &) const;
-		void receiveEvent(const ::Event::Object *);
+public:
+    Panel(QWidget * = NULL);
+    virtual ~Panel(void);
+    void execute(void);
+    bool setInactiveSync(void);
+    void flushFifo(void);
+    void adjustDataSize(void);
+    void doDeferred(const Settings::Object::State &);
+    void doLoad(const Settings::Object::State &);
+    void doSave(Settings::Object::State &) const;
+    void receiveEvent(const ::Event::Object *);
 
-		public slots:
-			void timeoutEvent(void);
-		void togglePause(void);
-		void updateDownsampleRate(int);
+public slots:
+    void timeoutEvent(void);
+    void togglePause(void);
+    void updateDownsampleRate(int);
 
-		protected:
+protected:
 
-		private slots:
-			void showChannelTab(void);
-		void showDisplayTab(void);
-		void buildChannelList(void);
-		void screenshot(void);
-		void apply(void);
-		void showTab(int);
-		void activateChannel(bool);
+private slots:
+    void showChannelTab(void);
+    void showDisplayTab(void);
+    void buildChannelList(void);
+    void screenshot(void);
+    void apply(void);
+    void showTab(int);
+    void activateChannel(bool);
 
-		private:
-		QMdiSubWindow *subWindow;
+private:
+    QMdiSubWindow *subWindow;
 
-		// Tab Widget
-		QTabWidget *tabWidget;
+    // Tab Widget
+    QTabWidget *tabWidget;
 
-		// Create scope
-		Scope *scopeWindow;
+    // Create scope
+    Scope *scopeWindow;
 
-		// Create curve element
-		QwtPlotCurve *curve;
+    // Create curve element
+    QwtPlotCurve *curve;
 
-		// Functions to initialize and
-		// apply changes made in tabs
-		void applyChannelTab(void);
-		void applyDisplayTab(void);
-		QWidget *createChannelTab(QWidget *parent);
-		QWidget *createDisplayTab(QWidget *parent);
+    // Functions to initialize and
+    // apply changes made in tabs
+    void applyChannelTab(void);
+    void applyDisplayTab(void);
+    QWidget *createChannelTab(QWidget *parent);
+    QWidget *createDisplayTab(QWidget *parent);
 
-		// Group and layout information
-		QVBoxLayout *layout;
-		QWidget *scopeGroup;
-		QGroupBox *setBttnGroup;
+    // Group and layout information
+    QVBoxLayout *layout;
+    QWidget *scopeGroup;
+    QGroupBox *setBttnGroup;
 
-		// Properties
-		QSpinBox *ratesSpin;
-		QLineEdit *sizesEdit;
-		QButtonGroup *trigsGroup;
-		QComboBox *timesList;
-		QComboBox *trigsChanList;
-		QComboBox *trigsThreshList;
-		QSpinBox *refreshsSpin;
-		QLineEdit *trigsThreshEdit;
-		QLineEdit *trigWindowEdit;
-		QComboBox *trigWindowList;
+    // Properties
+    QSpinBox *ratesSpin;
+    QLineEdit *sizesEdit;
+    QButtonGroup *trigsGroup;
+    QComboBox *timesList;
+    QComboBox *trigsChanList;
+    QComboBox *trigsThreshList;
+    QSpinBox *refreshsSpin;
+    QLineEdit *trigsThreshEdit;
+    QLineEdit *trigWindowEdit;
+    QComboBox *trigWindowList;
 
-		// Lists
-		QComboBox *blocksList;
-		QComboBox *typesList;
-		QComboBox *channelsList;
-		QComboBox *colorsList;
-		QComboBox *offsetsList;
-		QComboBox *scalesList;
-		QComboBox *stylesList;
-		QComboBox *widthsList;
-		QLineEdit *offsetsEdit;
+    // Lists
+    QComboBox *blocksList;
+    QComboBox *typesList;
+    QComboBox *channelsList;
+    QComboBox *colorsList;
+    QComboBox *offsetsList;
+    QComboBox *scalesList;
+    QComboBox *stylesList;
+    QComboBox *widthsList;
+    QLineEdit *offsetsEdit;
 
-		// Buttons
-		QPushButton *pauseButton;
-		QPushButton *settingsButton;
-		QPushButton *applyButton;
-		QPushButton *activateButton;
+    // Buttons
+    QPushButton *pauseButton;
+    QPushButton *settingsButton;
+    QPushButton *applyButton;
+    QPushButton *activateButton;
 
-		Fifo fifo;
-		std::vector<IO::Block *> blocks;
-		size_t counter;
-		size_t downsample_rate;
-	}; // Panel
+    Fifo fifo;
+    std::vector<IO::Block *> blocks;
+    size_t counter;
+    size_t downsample_rate;
+}; // Panel
 }; // Oscilloscope
 
 #endif // OSCILLOSCOPE_H

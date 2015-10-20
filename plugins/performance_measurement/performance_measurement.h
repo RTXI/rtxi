@@ -32,83 +32,85 @@
 #include <workspace.h>
 #include <runningstat.h>
 
-namespace PerformanceMeasurement {
-	class Panel;
-	class Plugin : public QObject, public ::Plugin::Object {
+namespace PerformanceMeasurement
+{
+class Panel;
+class Plugin : public QObject, public ::Plugin::Object
+{
 
-		Q_OBJECT
-			friend class Panel;
+    Q_OBJECT
+    friend class Panel;
 
-		public:
-		static Plugin *getInstance(void);
+public:
+    static Plugin *getInstance(void);
 
-		public slots:
-			void createPerformanceMeasurementPanel(void);
-		private:
-		Plugin(void);
-		~Plugin(void);
-		Plugin(const Plugin &){};
-		Plugin & operator=(const Plugin &)
-		{
-			return *getInstance();
-		};
-		static Plugin *instance;
-		Panel *panel;
-	}; // class Plugin
+public slots:
+    void createPerformanceMeasurementPanel(void);
+private:
+    Plugin(void);
+    ~Plugin(void);
+    Plugin(const Plugin &) {};
+    Plugin & operator=(const Plugin &) {
+        return *getInstance();
+    };
+    static Plugin *instance;
+    Panel *panel;
+}; // class Plugin
 
-	class Panel : public QWidget, public RT::Device, public Workspace::Instance {
-		Q_OBJECT
+class Panel : public QWidget, public RT::Device, public Workspace::Instance
+{
+    Q_OBJECT
 
-		public:
-			Panel(QWidget *);
-			virtual
-				~Panel(void);
+public:
+    Panel(QWidget *);
+    virtual
+    ~Panel(void);
 
-			/*!
-			 * Measures the real-time period of the system
-			 */
-			void read(void);
+    /*!
+     * Measures the real-time period of the system
+     */
+    void read(void);
 
-			/*!
-			 * Measures the computation time for loaded modules
-			 */
-			void write(void);
+    /*!
+     * Measures the computation time for loaded modules
+     */
+    void write(void);
 
-			public slots:
+public slots:
 
-				/*!
-				 * Starts the statistics over
-				 */
-				void reset(void);
-				void resetMaxTimeStep(void);
+    /*!
+     * Starts the statistics over
+     */
+    void reset(void);
+    void resetMaxTimeStep(void);
 
-			/*!
-			 * Updates the GUI with the latest values
-			 */
-			void update(void);
+    /*!
+     * Updates the GUI with the latest values
+     */
+    void update(void);
 
-		private:
+private:
 
-			enum {
-				INIT1, INIT2, EXEC,
-			} state;
+    enum {
+        INIT1, INIT2, EXEC,
+    } state;
 
-			QTimer *resetMaxTimer;
+    QTimer *resetMaxTimer;
 
-			double duration;
-			double lastRead;
-			double timestep;
-			double maxDuration;
-			double maxTimestep;
-			double jitter;
+    double duration;
+    double lastRead;
+    double timestep;
+    double maxDuration;
+    double maxTimestep;
+    double jitter;
 
-			RunningStat timestepStat;
+    RunningStat timestepStat;
 
-			QLineEdit *durationEdit;
-			QLineEdit *timestepEdit;
-			QLineEdit *maxDurationEdit;
-			QLineEdit *maxTimestepEdit;
-			QLineEdit *timestepJitterEdit;
-	}; // class Panel
+    QLineEdit *durationEdit;
+    QLineEdit *timestepEdit;
+    QLineEdit *maxDurationEdit;
+    QLineEdit *maxTimestepEdit;
+    QLineEdit *timestepJitterEdit;
+}; // class Panel
 }; // namespace PerformanceMeasurement
 #endif /* PERFORMANCE_MEASUREMENT_H */

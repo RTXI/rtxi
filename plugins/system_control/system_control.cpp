@@ -23,44 +23,50 @@
 #include <system_control.h>
 #include <system_control_panel.h>
 
-extern "C" Plugin::Object *createRTXIPlugin(void *) {
-	return SystemControl::getInstance();
+extern "C" Plugin::Object *createRTXIPlugin(void *)
+{
+    return SystemControl::getInstance();
 }
 
-SystemControl::SystemControl(void) {
-	MainWindow::getInstance()->createSystemMenuItem("Control Panel",this,SLOT(createControlPanel(void)));
+SystemControl::SystemControl(void)
+{
+    MainWindow::getInstance()->createSystemMenuItem("Control Panel",this,SLOT(createControlPanel(void)));
 }
 
-SystemControl::~SystemControl(void) {
-	while(panelList.size())
-		delete panelList.front();
-	instance = 0;
+SystemControl::~SystemControl(void)
+{
+    while(panelList.size())
+        delete panelList.front();
+    instance = 0;
 }
 
-void SystemControl::createControlPanel(void) {
-	SystemControlPanel *panel = new SystemControlPanel(MainWindow::getInstance()->centralWidget());
-	panelList.push_back(panel);
+void SystemControl::createControlPanel(void)
+{
+    SystemControlPanel *panel = new SystemControlPanel(MainWindow::getInstance()->centralWidget());
+    panelList.push_back(panel);
 }
 
-void SystemControl::removeControlPanel(SystemControlPanel *panel) {
-	panelList.remove(panel);
+void SystemControl::removeControlPanel(SystemControlPanel *panel)
+{
+    panelList.remove(panel);
 }
 
 static Mutex mutex;
 SystemControl *SystemControl::instance = 0;
 
-SystemControl *SystemControl::getInstance(void) {
-	if(instance)
-		return instance;
+SystemControl *SystemControl::getInstance(void)
+{
+    if(instance)
+        return instance;
 
-	/*************************************************************************
-	 * Seems like alot of hoops to jump through, but allocation isn't        *
-	 *   thread-safe. So effort must be taken to ensure mutual exclusion.    *
-	 *************************************************************************/
+    /*************************************************************************
+     * Seems like alot of hoops to jump through, but allocation isn't        *
+     *   thread-safe. So effort must be taken to ensure mutual exclusion.    *
+     *************************************************************************/
 
-	Mutex::Locker lock(&::mutex);
-	if(!instance)
-		instance = new SystemControl();
+    Mutex::Locker lock(&::mutex);
+    if(!instance)
+        instance = new SystemControl();
 
-	return instance;
+    return instance;
 }
