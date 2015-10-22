@@ -1,3 +1,17 @@
+#!/bin/bash
+
+### BEGIN INIT INFO
+# Provides:          rtx
+# Required-Start:    $all 
+# Required-Stop:     $time
+# Should-Start:
+# Should-Stop:
+# Default-Start:     2 3 4 5
+# Default-Stop:
+# Short-Description: RTXI analogy startup activator
+# Description: This script connecting the analogy driver to the DAQ card on the startup
+### END INIT INFO
+
 #
 # The Real-Time eXperiment Interface (RTXI)
 # Copyright (C) 2011 Georgia Institute of Technology, University of Utah, Weill Cornell Medical College
