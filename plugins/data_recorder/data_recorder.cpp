@@ -445,6 +445,7 @@ DataRecorder::Panel::Panel(QWidget *parent, size_t buffersize) :
     stampLayout->addWidget(timeStampEdit);
     addTag = new QPushButton(tr("Tag"));
     stampLayout->addWidget(addTag);
+		QObject::connect(addTag,SIGNAL(released(void)),this,SLOT(addNewTag(void)));
 
     // Attach layout to child widget
     stampGroup->setLayout(stampLayout);
@@ -889,6 +890,17 @@ void DataRecorder::Panel::removeChannel(void)
     }
 }
 
+void DataRecorder::Panel::addNewTag(void)
+{
+	dataTag newTag;
+	newTag.tagTime = RT::OS::getTime();
+	newTag.tagText = timeStampEdit->text().toStdString().c_str();
+	printf("tag is %s\n", newTag.tagText);
+	dataTags.push_back(newTag);
+	timeStampEdit->clear();
+	recordStatus->setText("Tagged");
+}
+
 // Start recording slot
 void DataRecorder::Panel::startRecordClicked(void)
 {
@@ -1130,10 +1142,8 @@ void DataRecorder::Panel::processData(void)
 
                 hid_t param_type;
                 param_type = H5Tcreate(H5T_COMPOUND, sizeof(param_hdf_t));
-                H5Tinsert(param_type, "index", HOFFSET(param_hdf_t,index),
-                          H5T_STD_I64LE);
-                H5Tinsert(param_type, "value", HOFFSET(param_hdf_t,value),
-                          H5T_IEEE_F64LE);
+                H5Tinsert(param_type, "index", HOFFSET(param_hdf_t,index), H5T_STD_I64LE);
+                H5Tinsert(param_type, "value", HOFFSET(param_hdf_t,value), H5T_IEEE_F64LE);
 
                 QString parameter_name = QString::number(block->getID()) + " "
                                          + QString::fromStdString(block->getName()) + " : "
@@ -1360,25 +1370,49 @@ void DataRecorder::Panel::stopRecording(long long timestamp)
     }
 #endif
 
-    fixedcount = count;
+    // Write stop time to data file
     hid_t scalar_space = H5Screate(H5S_SCALAR);
     hid_t data = H5Dcreate(file.trial, "Timestamp Stop (ns)", H5T_STD_U64LE,
                            scalar_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     H5Dwrite(data, H5T_STD_U64LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &timestamp);
     H5Dclose(data);
 
+		// Write trial length to data file
+    fixedcount = count;
     long long period = RT::System::getInstance()->getPeriod();
     long long datalength = period * fixedcount;
     data = H5Dcreate(file.trial, "Trial Length (ns)", H5T_STD_U64LE,
                      scalar_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     H5Dwrite(data, H5T_STD_U64LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &datalength);
     H5Dclose(data);
+
+		// Write tags to data file
+    hid_t tag_type;
+    tag_type = H5Tcreate(H5T_COMPOUND, sizeof(param_hdf_t));
+    H5Tinsert(tag_type, "time", HOFFSET(dataTag,tagTime), H5T_STD_U64LE);
+    H5Tinsert(tag_type, "text", HOFFSET(dataTag,tagText), H5T_C_S1);
+    file.tdata = H5Gcreate(file.trial, "Tags", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    for(size_t i = 0; i<dataTags.size(); i++)
+		{
+			data = H5PTcreate_fl(file.tdata, "Tag", tag_type, sizeof(dataTag), -1);
+			dataTag tempTag = dataTags.back();
+			printf("tag is %s\n", dataTags.back().tagText);
+			printf("text is %s\n", tempTag.tagText);
+			dataTags.pop_back();
+			H5PTappend(data, 1, &tempTag);
+			H5PTclose(data);
+		}
+    H5Tclose(tag_type);
+
+		// Close all open structs
     H5Sclose(scalar_space);
     H5PTclose(file.cdata);
     H5Gclose(file.sdata);
     H5Gclose(file.pdata);
     H5Gclose(file.adata);
     H5Gclose(file.trial);
+    H5Gclose(file.tdata);
 
     H5Fflush(file.id, H5F_SCOPE_LOCAL);
     void *file_handle;

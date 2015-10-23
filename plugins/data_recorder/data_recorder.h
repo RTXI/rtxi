@@ -57,6 +57,11 @@ struct param_change_t {
     double value;
 };
 
+struct dataTag {
+	long long tagTime;
+	const char *tagText;
+};
+
 void startRecording(void);
 void stopRecording(void);
 void openFile(const QString &);
@@ -110,6 +115,7 @@ private slots:
     void changeDataFile(void);
     void insertChannel(void);
     void removeChannel(void);
+    void addNewTag(void);
 
 protected:
     void customEvent(QEvent *);
@@ -129,6 +135,7 @@ private:
     size_t downsample_rate;
     long long count;
     long long fixedcount;
+		std::vector<dataTag> dataTags;
 
     QMutex mutex;
 
@@ -141,7 +148,7 @@ private:
     struct file_t {
         hid_t id;
         hid_t trial;
-        hid_t adata, cdata, pdata, sdata;
+        hid_t adata, cdata, pdata, sdata, tdata;
         long long idx;
     } file;
 
