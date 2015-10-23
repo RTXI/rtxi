@@ -436,9 +436,18 @@ DataRecorder::Panel::Panel(QWidget *parent, size_t buffersize) :
     QObject::connect(lButton,SIGNAL(released(void)),this,SLOT(removeChannel(void)));
     lButton->setEnabled(false);
 
-    channelLayout->addWidget(new QLabel(tr("Time Stamp Note:")));
+		// Timestamp
+		stampGroup = new QGroupBox(tr("Tag Data"));
+		QHBoxLayout *stampLayout = new QHBoxLayout;
+
+		// Add timestamp elements
     timeStampEdit = new QLineEdit;
-    channelLayout->addWidget(timeStampEdit);
+    stampLayout->addWidget(timeStampEdit);
+    addTag = new QPushButton(tr("Tag"));
+    stampLayout->addWidget(addTag);
+
+    // Attach layout to child widget
+    stampGroup->setLayout(stampLayout);
 
     // Create child widget and layout
     sampleGroup = new QGroupBox(tr("Trial Metadata"));
@@ -533,11 +542,12 @@ DataRecorder::Panel::Panel(QWidget *parent, size_t buffersize) :
     buttonGroup->setLayout(buttonLayout);
 
     // Attach child widgets to parent
-    layout->addWidget(channelGroup, 0, 0, 2, 2);
-    layout->addWidget(listGroup, 0, 2, 2, 4);
-    layout->addWidget(fileGroup, 3, 0, 1, 6);
-    layout->addWidget(sampleGroup, 4, 0, 1, 6);
-    layout->addWidget(buttonGroup, 5, 0, 1, 6);
+    layout->addWidget(channelGroup, 0, 0, 1, 2);
+    layout->addWidget(listGroup, 0, 2, 1, 4);
+    layout->addWidget(stampGroup, 2, 0, 2, 6);
+    layout->addWidget(fileGroup, 4, 0, 1, 6);
+    layout->addWidget(sampleGroup, 5, 0, 1, 6);
+    layout->addWidget(buttonGroup, 6, 0, 1, 6);
 
     setLayout(layout);
     setWindowTitle(QString::number(getID()) + " Data Recorder");

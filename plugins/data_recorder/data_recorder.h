@@ -150,6 +150,7 @@ private:
     QMdiSubWindow *subWindow;
 
     QGroupBox *channelGroup;
+    QGroupBox *stampGroup;
     QGroupBox *sampleGroup;
     QGroupBox *fileGroup;
     QGroupBox *buttonGroup;
@@ -162,6 +163,7 @@ private:
     QLabel *recordStatus;
     QPushButton *rButton;
     QPushButton *lButton;
+    QPushButton *addTag;
 
     QSpinBox *downsampleSpin;
 
