@@ -20,34 +20,37 @@
 #include <mutex.h>
 #include <string>
 
-class CmdLine {
+class CmdLine
+{
 
-	public:
+public:
 
-		int execute(const std::string &);
+    int execute(const std::string &);
 
-		static CmdLine *getInstance(void);
+    static CmdLine *getInstance(void);
 
-	private:
+private:
 
-		/*****************************************************************
-		 * The constructor, destructor, and assignment operator are made *
-		 *   private to control instantiation of the class.              *
-		 *****************************************************************/
+    /*****************************************************************
+     * The constructor, destructor, and assignment operator are made *
+     *   private to control instantiation of the class.              *
+     *****************************************************************/
 
-		CmdLine(void);
-		~CmdLine(void);
-		CmdLine(const CmdLine &) {};
-		CmdLine &operator=(const CmdLine &) { return *getInstance(); };
+    CmdLine(void);
+    ~CmdLine(void);
+    CmdLine(const CmdLine &) {};
+    CmdLine &operator=(const CmdLine &) {
+        return *getInstance();
+    };
 
-		static CmdLine *instance;
+    static CmdLine *instance;
 
-		volatile bool done;
-		pid_t child;
+    volatile bool done;
+    pid_t child;
 
-		int fdm[2];
-		int fds[2];
+    int fdm[2];
+    int fds[2];
 
-		Mutex mutex;
+    Mutex mutex;
 
 }; // class CmdLine

@@ -1,3 +1,21 @@
+#
+# The Real-Time eXperiment Interface (RTXI)
+# Copyright (C) 2011 Georgia Institute of Technology, University of Utah, Weill Cornell Medical College
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+
 # this is to include the Autoconf scripts in subdir m4/
 ACLOCAL_AMFLAGS=-I m4
 
@@ -43,13 +61,11 @@ rtxi.conf:
 	@echo ' <OBJECT component="io" id="1" >'					>> $@
 	@echo '  <PARAM name="Num Links" >0</PARAM>'					>> $@
 	@echo ' </OBJECT>'								>> $@
-if BUILD_ANALOGY 
 	@echo ' <OBJECT component="plugin" library="analogy_driver.so" id="2" >'		>> $@
 	@echo '  <PARAM name="0" >analogy0</PARAM>'					>> $@
 	@echo '  <PARAM name="Num Devices" >1</PARAM>'					>> $@
 	@echo '  <OBJECT id="13" name="0" />'						>> $@
 	@echo ' </OBJECT>'								>> $@
-endif
 	@echo ' <OBJECT component="plugin" library="model_loader.so" id="3" />'		>> $@
 	@echo ' <OBJECT component="plugin" library="system_control.so" id="4" />'	>> $@
 	@echo ' <OBJECT component="plugin" library="oscilloscope.so" id="5" >'		>> $@

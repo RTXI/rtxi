@@ -22,20 +22,21 @@
 
 #include <unistd.h>
 
-class Semaphore {
+class Semaphore
+{
 
-	public:
+public:
 
-		Semaphore(size_t n =0);
-		~Semaphore(void);
+    Semaphore(size_t n =0);
+    ~Semaphore(void);
 
-		void down(void);
-		void up(void);
-		int value(void);
+    void down(void);
+    void up(void);
+    int value(void);
 
-	private:
+private:
 
-		int count;
+    int count;
 
 }; // class Semaphore
 

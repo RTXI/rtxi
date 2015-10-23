@@ -99,7 +99,7 @@ else
 	make -sj2
 	sudo make install
 	sudo cp -vf /usr/local/qwt-${QWT_VERSION}/lib/libqwt.so.6.1.2 /usr/lib/.
-	sudo ln -sf /usr/lib/libqwt-${QWT_VERSION} /usr/lib/libqwt.so
+	sudo ln -sf /usr/lib/libqwt.so.${QWT_VERSION} /usr/lib/libqwt.so
 	sudo ldconfig
 	if [ $? -eq 0 ]; then
 		echo "----->Qwt installed."

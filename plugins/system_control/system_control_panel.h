@@ -24,56 +24,57 @@
 
 #include <event.h>
 
-class SystemControlPanel : public QWidget, public Event::Handler {
+class SystemControlPanel : public QWidget, public Event::Handler
+{
 
-	Q_OBJECT
+    Q_OBJECT
 
-	public:
-		SystemControlPanel(QWidget *); 
-		virtual ~SystemControlPanel(void);
+public:
+    SystemControlPanel(QWidget *);
+    virtual ~SystemControlPanel(void);
 
-	public slots:
-		void apply(void);
-		void display(void);
-		void updateDevice(void);
-		void updateFreq(void);
-		void updatePeriod(void);
+public slots:
+    void apply(void);
+    void display(void);
+    void updateDevice(void);
+    void updateFreq(void);
+    void updatePeriod(void);
 
-	private:
-		void __display(void);
-		void receiveEvent(const Event::Object *);
+private:
+    void __display(void);
+    void receiveEvent(const Event::Object *);
 
-		QGroupBox *deviceGroup;
-		QGroupBox *analogGroup;
-		QGroupBox *digitalGroup;
-		QGroupBox *buttonGroup;
+    QGroupBox *deviceGroup;
+    QGroupBox *analogGroup;
+    QGroupBox *digitalGroup;
+    QGroupBox *buttonGroup;
 
-		QMdiSubWindow *subWindow;
+    QMdiSubWindow *subWindow;
 
-		QComboBox *deviceList;
-		QComboBox *analogChannelList;
-		QComboBox *analogRangeList;
-		QComboBox *analogReferenceList;
-		QComboBox *analogSubdeviceList;
-		QComboBox *analogUnitPrefixList;
-		QComboBox *analogUnitList;
-		QComboBox *analogUnitPrefixList2;
-		QComboBox *analogUnitList2;
-		QLineEdit *analogGainEdit;
-		QLineEdit *analogZeroOffsetEdit;
-		QPushButton *analogActiveButton;
-		QPushButton *analogCalibrationButton;
+    QComboBox *deviceList;
+    QComboBox *analogChannelList;
+    QComboBox *analogRangeList;
+    QComboBox *analogReferenceList;
+    QComboBox *analogSubdeviceList;
+    QComboBox *analogUnitPrefixList;
+    QComboBox *analogUnitList;
+    QComboBox *analogUnitPrefixList2;
+    QComboBox *analogUnitList2;
+    QLineEdit *analogGainEdit;
+    QLineEdit *analogZeroOffsetEdit;
+    QPushButton *analogActiveButton;
+    QPushButton *analogCalibrationButton;
 
-		QComboBox *digitalChannelList;
-		QComboBox *digitalDirectionList;
-		QComboBox *digitalSubdeviceList;
-		QPushButton *digitalActiveButton;    
+    QComboBox *digitalChannelList;
+    QComboBox *digitalDirectionList;
+    QComboBox *digitalSubdeviceList;
+    QPushButton *digitalActiveButton;
 
-		bool rateUpdate;
-		QComboBox *freqUnitList;
-		QComboBox *periodUnitList;
-		QLineEdit *freqEdit;
-		QLineEdit *periodEdit;
+    bool rateUpdate;
+    QComboBox *freqUnitList;
+    QComboBox *periodUnitList;
+    QLineEdit *freqEdit;
+    QLineEdit *periodEdit;
 };
 
 #endif /* SYSTEM_CONTROL_PANEL_H */

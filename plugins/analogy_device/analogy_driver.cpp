@@ -25,12 +25,14 @@ extern "C" Plugin::Object *createRTXIPlugin(void)
     return new AnalogyDriver();
 }
 
-AnalogyDriver::~AnalogyDriver(void) {
-    for(std::list<AnalogyDevice *>::iterator i = devices.begin();i != devices.end();++i)
+AnalogyDriver::~AnalogyDriver(void)
+{
+    for(std::list<AnalogyDevice *>::iterator i = devices.begin(); i != devices.end(); ++i)
         delete *i;
 }
 
-DAQ::Device *AnalogyDriver::createDevice(const std::list<std::string> &args) {
+DAQ::Device *AnalogyDriver::createDevice(const std::list<std::string> &args)
+{
     int err = 0;
     a4l_desc_t dsc;
     a4l_sbinfo_t *sbinfo;
@@ -42,28 +44,28 @@ DAQ::Device *AnalogyDriver::createDevice(const std::list<std::string> &args) {
         return 0;
     }
 
-	// Allocate a buffer to get more info (subd, chan, rng) 
-	dsc.sbdata = malloc(dsc.sbsize);
-	if (dsc.sbdata == NULL) {
-		err = -ENOMEM;
-		ERROR_MSG("AnalogyDriver: info buffer allocation failed\n");
+    // Allocate a buffer to get more info (subd, chan, rng)
+    dsc.sbdata = malloc(dsc.sbsize);
+    if (dsc.sbdata == NULL) {
+        err = -ENOMEM;
+        ERROR_MSG("AnalogyDriver: info buffer allocation failed\n");
         return 0;
-	}
+    }
 
-	// Get this data 
-	err = a4l_fill_desc(&dsc);
-	if (err < 0) {
-		ERROR_MSG("AnalogyDriver: a4l_fill_desc failed (err=%d)\nPlease run rtxi_load_analogy script in scripts directory.\n",	err);
+    // Get this data
+    err = a4l_fill_desc(&dsc);
+    if (err < 0) {
+        ERROR_MSG("AnalogyDriver: a4l_fill_desc failed (err=%d)\nPlease run rtxi_load_analogy script in scripts directory.\n",	err);
         return 0;
-	}
+    }
 
     // We need to find each subdevice index manually since idx_*_subd often fails
     // Go over all subdevices and save the indexes of the first AI, AO and DIO
-    int idx_ai  = -1; 
-    int idx_ao  = -1; 
-    int idx_dio = -1; 
+    int idx_ai  = -1;
+    int idx_ao  = -1;
+    int idx_dio = -1;
     for (int i=0; i < dsc.nb_subd; i++) {
-        err = a4l_get_subdinfo(&dsc, i, &sbinfo); 
+        err = a4l_get_subdinfo(&dsc, i, &sbinfo);
         if(err != 0) {
             ERROR_MSG("AnalogyDriver: a4l_get_subd_info failed, wrong subdevice index %i (err=%d)\n",
                       err, i);
@@ -71,21 +73,21 @@ DAQ::Device *AnalogyDriver::createDevice(const std::list<std::string> &args) {
         }
         // Assign index; save just the first device if many
         if (((sbinfo->flags & A4L_SUBD_TYPES )== A4L_SUBD_AI) && (idx_ai < 0))
-            idx_ai  = i; 
+            idx_ai  = i;
         else if (((sbinfo->flags & A4L_SUBD_TYPES) == A4L_SUBD_AO) && (idx_ao < 0))
-            idx_ao  = i; 
+            idx_ao  = i;
         else if (((sbinfo->flags & A4L_SUBD_TYPES) == A4L_SUBD_DIO) && (idx_dio < 0))
-            idx_dio  = i; 
+            idx_dio  = i;
     }
 
     size_t count[5] = { 0, 0, 0, 0, 0,};
-    err = a4l_get_subdinfo(&dsc, idx_ai, &sbinfo); 
+    err = a4l_get_subdinfo(&dsc, idx_ai, &sbinfo);
     if(err == 0)
         count[0] = sbinfo->nb_chan;
-    err = a4l_get_subdinfo(&dsc, idx_ao, &sbinfo); 
+    err = a4l_get_subdinfo(&dsc, idx_ao, &sbinfo);
     if(err == 0)
         count[1] = sbinfo->nb_chan;
-    err = a4l_get_subdinfo(&dsc, idx_dio, &sbinfo); 
+    err = a4l_get_subdinfo(&dsc, idx_dio, &sbinfo);
     if(err == 0)
         count[2] = sbinfo->nb_chan;
 
@@ -96,42 +98,42 @@ DAQ::Device *AnalogyDriver::createDevice(const std::list<std::string> &args) {
     }
 
     IO::channel_t channel[count[0]+count[1]+2*count[2]];
-    for(size_t i=0;i<count[0];++i) {
+    for(size_t i=0; i<count[0]; ++i) {
         std::ostringstream name;
         name << "Analog Input " << i;
         channel[i].name = name.str();
         channel[i].description = "";
         channel[i].flags = IO::OUTPUT;
     }
-    for(size_t i=count[0];i<count[0]+count[1];++i) {
+    for(size_t i=count[0]; i<count[0]+count[1]; ++i) {
         std::ostringstream name;
         name << "Analog Output " << i-count[0];
         channel[i].name = name.str();
         channel[i].description = "";
         channel[i].flags = IO::INPUT;
     }
-    for(size_t i=count[0]+count[1];i<count[0]+count[1]+count[2];++i) {
+    for(size_t i=count[0]+count[1]; i<count[0]+count[1]+count[2]; ++i) {
         std::ostringstream name;
         name << "Digital I/O " << i-count[0]-count[1];
         channel[i].name = name.str();
         channel[i].description = "";
         channel[i].flags = IO::OUTPUT;
     }
-    for(size_t i=count[0]+count[1]+count[2];i<count[0]+count[1]+2*count[2];++i) {
+    for(size_t i=count[0]+count[1]+count[2]; i<count[0]+count[1]+2*count[2]; ++i) {
         std::ostringstream name;
         name << "Digital I/O " << i-count[0]-count[1]-count[2];
         channel[i].name = name.str();
         channel[i].description = "";
         channel[i].flags = IO::INPUT;
     }
-    for(size_t i=count[0]+count[1]+2*count[2];i<count[0]+count[1]+2*count[2]+count[3];++i) {
+    for(size_t i=count[0]+count[1]+2*count[2]; i<count[0]+count[1]+2*count[2]+count[3]; ++i) {
         std::ostringstream name;
         name << "Digital Input " << i-count[0]-count[1]-2*count[2];
         channel[i].name = name.str();
         channel[i].description = "";
         channel[i].flags = IO::OUTPUT;
     }
-    for(size_t i=count[0]+count[1]+2*count[2]+count[3];i<count[0]+count[1]+2*count[2]+count[3]+count[4];++i) {
+    for(size_t i=count[0]+count[1]+2*count[2]+count[3]; i<count[0]+count[1]+2*count[2]+count[3]+count[4]; ++i) {
         std::ostringstream name;
         name << "Digital Output " << i-count[0]-count[1]-2*count[2]-count[3];
         channel[i].name = name.str();
@@ -142,12 +144,13 @@ DAQ::Device *AnalogyDriver::createDevice(const std::list<std::string> &args) {
     AnalogyDevice *dev = new AnalogyDevice(&dsc,name,channel,count[0]+count[1]+2*count[2]);
     devices.push_back(dev);
     return dev;
- 
+
     return 0;
 }
 
-void AnalogyDriver::doLoad(const Settings::Object::State &s) {
-    for(size_t i = 0, end = s.loadInteger("Num Devices");i < end;++i) {
+void AnalogyDriver::doLoad(const Settings::Object::State &s)
+{
+    for(size_t i = 0, end = s.loadInteger("Num Devices"); i < end; ++i) {
         std::list<std::string> args;
         args.push_back(s.loadString(QString::number(i).toStdString()));
         DAQ::Device *device = createDevice(args);
@@ -156,10 +159,11 @@ void AnalogyDriver::doLoad(const Settings::Object::State &s) {
     }
 }
 
-void AnalogyDriver::doSave(Settings::Object::State &s) const {
+void AnalogyDriver::doSave(Settings::Object::State &s) const
+{
     s.saveInteger("Num Devices",devices.size());
     size_t n = 0;
-    for(std::list<AnalogyDevice *>::const_iterator i = devices.begin(),end = devices.end();i != end; ++i) {
+    for(std::list<AnalogyDevice *>::const_iterator i = devices.begin(),end = devices.end(); i != end; ++i) {
         std::ostringstream str;
         str << n++;
         s.saveString(str.str(),(*i)->getName());

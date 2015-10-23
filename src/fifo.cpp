@@ -23,66 +23,70 @@
 
 #define AVAILABLE    ((size+wptr-rptr)%size)
 
-Fifo::Fifo(size_t s):rptr(0), wptr(0), size(s) {
-	data = new char[size];
+Fifo::Fifo(size_t s):rptr(0), wptr(0), size(s)
+{
+    data = new char[size];
 
-	pthread_mutex_init(&mutex,NULL);
-	pthread_cond_init(&data_available,NULL);
+    pthread_mutex_init(&mutex,NULL);
+    pthread_cond_init(&data_available,NULL);
 }
 
-Fifo::~Fifo(void) {
-	if (data) delete[] data;
+Fifo::~Fifo(void)
+{
+    if (data) delete[] data;
 
-	pthread_mutex_destroy(&mutex);
-	pthread_cond_destroy(&data_available);
+    pthread_mutex_destroy(&mutex);
+    pthread_cond_destroy(&data_available);
 }
 
-size_t Fifo::read(void *buffer,size_t n,bool blocking) {
-	// Acquire the data lock
-	if (blocking)
-		pthread_mutex_lock(&mutex);
-	else if (pthread_mutex_trylock(&mutex) != 0)
-		return 0;
+size_t Fifo::read(void *buffer,size_t n,bool blocking)
+{
+    // Acquire the data lock
+    if (blocking)
+        pthread_mutex_lock(&mutex);
+    else if (pthread_mutex_trylock(&mutex) != 0)
+        return 0;
 
-	// Check that enough data is available
-	if (AVAILABLE < n)
-		if (blocking) {
-			do {
-				pthread_cond_wait(&data_available,&mutex);
-			} while (AVAILABLE < n);
-		} else {
-			pthread_mutex_unlock(&mutex);
-			return 0;
-		}
+    // Check that enough data is available
+    if (AVAILABLE < n)
+        if (blocking) {
+            do {
+                pthread_cond_wait(&data_available,&mutex);
+            } while (AVAILABLE < n);
+        } else {
+            pthread_mutex_unlock(&mutex);
+            return 0;
+        }
 
-	// Copy the data from the fifo
-	if (size-rptr < n) {
-		size_t m = size-rptr;
-		memcpy(buffer,data+rptr,m);
-		memcpy(reinterpret_cast<char *>(buffer)+m,data,n-m);
-	} else
-		memcpy(buffer,data+rptr,n);
-	rptr = (rptr+n)%size;
+    // Copy the data from the fifo
+    if (size-rptr < n) {
+        size_t m = size-rptr;
+        memcpy(buffer,data+rptr,m);
+        memcpy(reinterpret_cast<char *>(buffer)+m,data,n-m);
+    } else
+        memcpy(buffer,data+rptr,n);
+    rptr = (rptr+n)%size;
 
-	pthread_mutex_unlock(&mutex);
-	return n;
+    pthread_mutex_unlock(&mutex);
+    return n;
 }
 
-size_t Fifo::write(const void *buffer,size_t n) {
-	if (n >= size-AVAILABLE) {
-		ERROR_MSG("Fifo::write : fifo full, data lost\n");
-		return 0;
-	}
+size_t Fifo::write(const void *buffer,size_t n)
+{
+    if (n >= size-AVAILABLE) {
+        ERROR_MSG("Fifo::write : fifo full, data lost\n");
+        return 0;
+    }
 
-	if (n > size-wptr) {
-		size_t m = size-wptr;
-		memcpy(data+wptr,buffer,m);
-		memcpy(data,reinterpret_cast<const char *>(buffer)+m,n-m);
-	} else
-		memcpy(data+wptr,buffer,n);
-	wptr = (wptr+n)%size;
+    if (n > size-wptr) {
+        size_t m = size-wptr;
+        memcpy(data+wptr,buffer,m);
+        memcpy(data,reinterpret_cast<const char *>(buffer)+m,n-m);
+    } else
+        memcpy(data+wptr,buffer,n);
+    wptr = (wptr+n)%size;
 
-	pthread_cond_signal(&data_available);
+    pthread_cond_signal(&data_available);
 
-	return n;
+    return n;
 }

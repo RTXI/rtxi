@@ -26,22 +26,22 @@
 class Fifo
 {
 
-	public:
+public:
 
-		Fifo(size_t);
-		~Fifo(void);
+    Fifo(size_t);
+    ~Fifo(void);
 
-		size_t read(void *,size_t,bool =true);
-		size_t write(const void *,size_t);
+    size_t read(void *,size_t,bool =true);
+    size_t write(const void *,size_t);
 
-	private:
+private:
 
-		char *data;
-		volatile int rptr;
-		volatile int wptr;
-		size_t size;
-		pthread_mutex_t mutex;
-		pthread_cond_t data_available;
+    char *data;
+    volatile int rptr;
+    volatile int wptr;
+    size_t size;
+    pthread_mutex_t mutex;
+    pthread_cond_t data_available;
 
 };
 

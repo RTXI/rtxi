@@ -25,61 +25,63 @@
 #include <plugin.h>
 #include <rt.h>
 
-namespace UserPrefs {
+namespace UserPrefs
+{
 
-	class Panel;
-	class Prefs : public QObject, public ::Plugin::Object {
+class Panel;
+class Prefs : public QObject, public ::Plugin::Object
+{
 
-		Q_OBJECT
+    Q_OBJECT
 
-			friend class Panel;
+    friend class Panel;
 
-		public:
-		static Prefs *getInstance(void);
+public:
+    static Prefs *getInstance(void);
 
-		public slots:
-			void createPrefsPanel(void);
+public slots:
+    void createPrefsPanel(void);
 
-		private:
-		Prefs(void);
-		~Prefs(void);
-		Prefs(const Prefs &){};
-		Prefs & operator=(const Prefs &)
-		{
-			return *getInstance();
-		};
+private:
+    Prefs(void);
+    ~Prefs(void);
+    Prefs(const Prefs &) {};
+    Prefs & operator=(const Prefs &) {
+        return *getInstance();
+    };
 
-		static Prefs *instance;
-		Panel *panel;
-	}; // class Prefs
+    static Prefs *instance;
+    Panel *panel;
+}; // class Prefs
 
-	class Panel : public QWidget {
+class Panel : public QWidget
+{
 
-		Q_OBJECT
+    Q_OBJECT
 
-		public:
-			Panel(QWidget *);
-			virtual ~Panel(void);
-			QLabel *status;
+public:
+    Panel(QWidget *);
+    virtual ~Panel(void);
+    QLabel *status;
 
-			public slots:
-				void apply(void); // save and close
-			void reset(void); // reset to defaults
+public slots:
+    void apply(void); // save and close
+    void reset(void); // reset to defaults
 
-			void chooseSettingsDir(void);
-			void chooseDataDir(void);
+    void chooseSettingsDir(void);
+    void chooseDataDir(void);
 
-		private:
-			QMdiSubWindow *subWindow;
-			QSettings userprefs;
+private:
+    QMdiSubWindow *subWindow;
+    QSettings userprefs;
 
-			QGroupBox *dirGroup;
-			QGroupBox *HDF;
-			QGroupBox *buttons;
+    QGroupBox *dirGroup;
+    QGroupBox *HDF;
+    QGroupBox *buttons;
 
-			QLineEdit *settingsDirEdit; // directory for settings files
-			QLineEdit *dataDirEdit; // directory of most recent data file
-			QLineEdit *HDFBufferEdit; // buffer size for HDF Data Recorder
-	}; // class Panel
+    QLineEdit *settingsDirEdit; // directory for settings files
+    QLineEdit *dataDirEdit; // directory of most recent data file
+    QLineEdit *HDFBufferEdit; // buffer size for HDF Data Recorder
+}; // class Panel
 }; // namespace USERPREFS
 #endif /* USERPREFS */

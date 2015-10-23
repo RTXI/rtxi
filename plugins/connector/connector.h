@@ -30,69 +30,71 @@
 #include <plugin.h>
 #include <vector>
 
-namespace Connector {
-	class Panel : public QWidget, Event::Handler {
-		Q_OBJECT
+namespace Connector
+{
+class Panel : public QWidget, Event::Handler
+{
+    Q_OBJECT
 
-		public:
-			Panel(QWidget *);
-			~Panel(void);
-			void receiveEvent(const Event::Object *);
+public:
+    Panel(QWidget *);
+    ~Panel(void);
+    void receiveEvent(const Event::Object *);
 
-		private slots:
-			void buildInputChannelList(void);
-			void buildOutputChannelList(void);
-			void highlightConnectionBox(QListWidgetItem *);
-			void toggleConnection(bool);
-			void updateConnectionButton(void);
+private slots:
+    void buildInputChannelList(void);
+    void buildOutputChannelList(void);
+    void highlightConnectionBox(QListWidgetItem *);
+    void toggleConnection(bool);
+    void updateConnectionButton(void);
 
-		private:
-			static void buildConnectionList(IO::Block *,size_t,IO::Block *,size_t,void *);
+private:
+    static void buildConnectionList(IO::Block *,size_t,IO::Block *,size_t,void *);
 
-			struct link_t {
-				IO::Block *src;
-				size_t src_idx;
-				IO::Block *dest;
-				size_t dest_idx;
-			};
+    struct link_t {
+        IO::Block *src;
+        size_t src_idx;
+        IO::Block *dest;
+        size_t dest_idx;
+    };
 
-			QMdiSubWindow *subWindow;
+    QMdiSubWindow *subWindow;
 
-			QGroupBox *connectionGroup;
-			QGroupBox *buttonGroup;
-			QGroupBox *outputGroup;
-			QGroupBox *inputGroup;
-			QComboBox *inputBlock;
-			QComboBox *inputChannel;
-			QComboBox *outputBlock;
-			QComboBox *outputChannel;
-			QListWidget *connectionBox;
-			QPushButton *connectionButton;
-			std::vector<IO::Block *> blocks;
-			std::vector<link_t> links;
-	}; // class Panel
+    QGroupBox *connectionGroup;
+    QGroupBox *buttonGroup;
+    QGroupBox *outputGroup;
+    QGroupBox *inputGroup;
+    QComboBox *inputBlock;
+    QComboBox *inputChannel;
+    QComboBox *outputBlock;
+    QComboBox *outputChannel;
+    QListWidget *connectionBox;
+    QPushButton *connectionButton;
+    std::vector<IO::Block *> blocks;
+    std::vector<link_t> links;
+}; // class Panel
 
-	class Plugin : public QObject, public ::Plugin::Object {
-		Q_OBJECT
-			friend class Panel;
+class Plugin : public QObject, public ::Plugin::Object
+{
+    Q_OBJECT
+    friend class Panel;
 
-		public:
-		static Plugin *getInstance(void);
+public:
+    static Plugin *getInstance(void);
 
-		public slots:
-			void showConnectorPanel(void);
+public slots:
+    void showConnectorPanel(void);
 
-		private:
-		void removeConnectorPanel(Panel *);
-		Plugin(void);
-		~Plugin(void);
-		Plugin(const Plugin &) {};
-		Plugin &operator=(const Plugin &)
-		{
-			return *getInstance();
-		};
-		static Plugin *instance;
-		Panel *panel;
-	}; // class Plugin
+private:
+    void removeConnectorPanel(Panel *);
+    Plugin(void);
+    ~Plugin(void);
+    Plugin(const Plugin &) {};
+    Plugin &operator=(const Plugin &) {
+        return *getInstance();
+    };
+    static Plugin *instance;
+    Panel *panel;
+}; // class Plugin
 }; // namespace Connector
 #endif // CONNECTOR_H
