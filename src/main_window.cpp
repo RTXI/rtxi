@@ -54,15 +54,9 @@ MainWindow::MainWindow (void) : QMainWindow(NULL, Qt::Window)
     /* Initialize Windows Menu */
     createWindowsMenu();
 
-<<<<<<< HEAD
-	/* Check for updates */
-	//updateCheck();
-}
-=======
     /* Initialize Help Menu */
     createHelpActions();
     createHelpMenu();
->>>>>>> 42fedd0880fdb6ead5c52f492d9bff575f6953ff
 
     /* Check for updates */
     //updateCheck();
