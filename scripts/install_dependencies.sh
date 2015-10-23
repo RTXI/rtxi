@@ -31,6 +31,11 @@ QWT=${DEPS}/qwt
 PLG=${ROOT}/plugins
 
 ###############################################################################
+# Some easy to use defines
+###############################################################################
+QWT_VERSION=6.1.2
+
+###############################################################################
 # Check for all RTXI *.deb dependencies and install them. Includes:
 #  - Kernel tools
 #  - C/C++ compiler and debugger
@@ -83,18 +88,18 @@ fi
 # Installing Qwt
 echo "----->Checking for Qwt"
 
-if [ -f "/usr/local/lib/qwt/include/qwt.h" ]; then
+if [ -f "/usr/local/qwt-${QWT_VERSION}/include/qwt.h" ]; then
 	echo "----->Qwt already installed."
 else
 	echo "----->Installing Qwt..."
 	cd ${QWT}
-	tar xf qwt-6.1.0.tar.bz2
-	cd qwt-6.1.0
+	tar xf qwt-${QWT_VERSION}.tar.bz2
+	cd qwt-${QWT_VERSION}
 	qmake qwt.pro
 	make -sj2
 	sudo make install
-	sudo cp /usr/local/lib/qwt/lib/libqwt.so.6.1.0 /usr/lib/.
-	sudo ln -sf /usr/lib/libqwt.so.6.1.0 /usr/lib/libqwt.so
+	sudo cp -vf /usr/local/qwt-${QWT_VERSION}/lib/libqwt.so.6.1.2 /usr/lib/.
+	sudo ln -sf /usr/lib/libqwt-${QWT_VERSION} /usr/lib/libqwt.so
 	sudo ldconfig
 	if [ $? -eq 0 ]; then
 		echo "----->Qwt installed."

@@ -58,7 +58,7 @@ MainWindow::MainWindow (void) : QMainWindow(NULL, Qt::Window) {
 	createHelpMenu();
 
 	/* Check for updates */
-	updateCheck();
+	//updateCheck();
 }
 
 MainWindow::~MainWindow (void) {

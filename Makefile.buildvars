@@ -1,17 +1,29 @@
 ACLOCAL_AMFLAGS ?= -I $(top_srcdir)/m4
 
+# Macros
+QWT_VERSION = 6.1.2
+VER=$(shell lsb_release -sr)
+
+# Dependencies
 QT_DEFINES =  -DQT_XML_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_WIDGETS_LIB -DQT_SVG_LIB -DQT_SHARED
-QT_CXXFLAGS = -I. -I/usr/include/qt5 -I/usr/include/qt5/QtCore -I/usr/include/qt5/QtGui\
-              -I/usr/include/qt5/QtSvg -I/usr/include/qt5/QtXml -I/usr/include/qt5/QtWidgets\
-              -I/usr/local/lib/rtxi_includes -I/usr/local/lib/qwt/include -I/usr/X11R6/include\
-              -I/usr/include/qwt
-QT_LIBS = -lQt5Gui -lQt5Core -lGL -lpthread -lQt5Xml -lQt5Svg -lqwt -lQt5Widgets
+QT_CXXFLAGS = -I/usr/include/x86_64-linux-gnu/qt5 \
+							-I/usr/include/x86_64-linux-gnu/qt5/QtCore \
+							-I/usr/include/x86_64-linux-gnu/qt5/QtGui \
+              -I/usr/include/x86_64-linux-gnu/qt5/QtSvg \
+              -I/usr/include/x86_64-linux-gnu/qt5/QtXml \
+              -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets \
+              -I/usr/X11R6/include \
+              -I/usr/local/qwt-$(QWT_VERSION) \
+              -I/usr/local/qwt-$(QWT_VERSION)/include \
+							-I/usr/local/lib/rtxi_includes
+QT_LIBS = -lQt5Gui -lQt5Core -lGL -lpthread -lQt5Xml -lQt5Svg -lQt5Widgets
+QWT_LIB = -lqwt
 MOC = /usr/bin/moc
 UIC = /usr/bin/uic
 
 AM_CPPFLAGS = -DEXEC_PREFIX=\"$(exec_prefix)\" -DPREFIX=\"$(prefix)\" $(QT_CXXFLAGS) $(RTOS_CPPFLAGS) 
 AM_CXXFLAGS = -pipe -Wall $(QT_CXXFLAGS)
-AM_LDFLAGS  = $(QT_LIBS) $(GSL_LIBS) $(RTOS_LDFLAGS) 
+AM_LDFLAGS  = $(QT_LIBS) $(QWT_LIB) $(GSL_LIBS) $(RTOS_LDFLAGS) 
 AM_CFLAGS = $(AM_CXXFLAGS)
 
 if DEBUG
