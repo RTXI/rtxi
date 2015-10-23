@@ -123,7 +123,7 @@ private:
     int openFile(QString &);
     void closeFile(bool =false);
     int startRecording(long long);
-    void stopRecording(long long,bool =false);
+    void stopRecording(long long);
     double prev_input;
     size_t counter;
     size_t downsample_rate;
@@ -191,7 +191,7 @@ class Plugin : public QObject, public ::Plugin::Object
 
 public:
     static Plugin *getInstance(void);
-    bool recStatus;
+    std::list<Panel *> panelList;
 
 public slots:
     Panel *createDataRecorderPanel(void);
@@ -213,7 +213,6 @@ private:
 
     void removeDataRecorderPanel(Panel *);
 
-    std::list<Panel *> panelList;
     size_t buffersize;
 }; // class Plugin
 }; // namespace DataRecorder

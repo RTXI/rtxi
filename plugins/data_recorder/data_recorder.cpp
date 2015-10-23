@@ -562,7 +562,7 @@ DataRecorder::Panel::Panel(QWidget *parent, size_t buffersize) :
     sleep.tv_sec = 0;
     sleep.tv_nsec = RT::System::getInstance()->getPeriod();
 
-    // Check if FIFO is truly atomic for hardware architecture
+    // Check if FIFO is truly atomic for hardware arcstartecture
     if(!fifo.isLockFree())
         ERROR_MSG("DataRecorder::Panel: WARNING: Atomic FIFO is not lock free\n");
 
@@ -849,12 +849,10 @@ void DataRecorder::Panel::insertChannel(void)
         lButton->setEnabled(true);
         if(!fileNameEdit->text().isEmpty()) {
             startRecordButton->setEnabled(true);
-            Plugin::getInstance()->recStatus = true;
         }
     } else {
         startRecordButton->setEnabled(false);
         lButton->setEnabled(false);
-        Plugin::getInstance()->recStatus = false;
     }
 }
 
@@ -875,11 +873,9 @@ void DataRecorder::Panel::removeChannel(void)
     if(selectionBox->count()) {
         startRecordButton->setEnabled(true);
         lButton->setEnabled(true);
-        Plugin::getInstance()->recStatus = true;
     } else {
         startRecordButton->setEnabled(false);
         lButton->setEnabled(false);
-        Plugin::getInstance()->recStatus = false;
     }
 }
 
@@ -932,7 +928,6 @@ void DataRecorder::Panel::customEvent(QEvent *e)
         recordStatus->setText("Ready.");
         if(selectionBox->count()) {
             startRecordButton->setEnabled(true);
-            Plugin::getInstance()->recStatus = true;
         }
         data->done.wakeAll();
         mutex.unlock();
@@ -1109,7 +1104,7 @@ void DataRecorder::Panel::processData(void)
             }
         } else if (_token.type == DONE) {
             if (state == RECORD)
-                stopRecording(_token.time, true);
+                stopRecording(_token.time);
             if (state != CLOSED)
                 closeFile(true);
             break;
@@ -1346,7 +1341,7 @@ int DataRecorder::Panel::startRecording(long long timestamp)
     return 0;
 }
 
-void DataRecorder::Panel::stopRecording(long long timestamp, bool shutdown)
+void DataRecorder::Panel::stopRecording(long long timestamp)
 {
 #ifdef DEBUG
     if(!pthread_equal(pthread_self(),thread)) {
@@ -1396,7 +1391,6 @@ DataRecorder::Plugin::Plugin(void)
     userprefs.setPath(QSettings::NativeFormat, QSettings::SystemScope, "/usr/local/share/rtxi/");
     buffersize = (userprefs.value("/system/HDFbuffer", 10).toInt())*1048576;
     MainWindow::getInstance()->createSystemMenuItem("Data Recorder",this,SLOT(createDataRecorderPanel(void)));
-    recStatus = false;
 }
 
 DataRecorder::Plugin::~Plugin(void)
