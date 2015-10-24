@@ -784,7 +784,7 @@ QWidget *Oscilloscope::Panel::createDisplayTab(QWidget *parent)
     trigWindowList->addItem("s");
     trigWindowList->addItem("ms");
     trigWindowList->addItem(QString::fromUtf8("µs"));
-    trigWindowList->setCurrentIndex(0);
+    trigWindowList->setCurrentIndex(1);
 
     displayTabLayout->addLayout(row1Layout, 0, 0);
     displayTabLayout->addLayout(row2Layout, 1, 0);

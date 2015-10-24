@@ -88,7 +88,7 @@ Scope::Scope(QWidget *parent) :	QwtPlot(parent), legendItem(NULL)
     triggerDirection = Scope::NONE;
     triggerThreshold = 0.0;
     triggerChannel = channels.end();
-    triggerWindow = 0.0;
+    triggerWindow = 10.0;
 
     // Initialize director
     d_directPainter = new QwtPlotDirectPainter();
@@ -266,8 +266,6 @@ void Scope::setData(double data[],size_t size)
                  (triggerDirection == NEG && i->data[data_idx-1] > triggerThreshold && i->data[data_idx] < triggerThreshold))) {
             if(data_idx > triggerWindow*fs)
                 triggerQueue.push_back(data_idx-(triggerWindow*fs));
-            else
-                triggerQueue.push_back(0);
         }
     }
 
@@ -316,7 +314,6 @@ std::list<Scope::Channel>::iterator Scope::getTriggerChannel(void)
 
 void Scope::setTrigger(trig_t direction,double threshold,std::list<Channel>::iterator channel, double window)
 {
-
     if(triggerChannel != channel || triggerThreshold != threshold) {
         triggerChannel = channel;
         triggerThreshold = threshold;
@@ -333,8 +330,8 @@ void Scope::setTrigger(trig_t direction,double threshold,std::list<Channel>::ite
             timer->stop();
         }
         triggerDirection = direction;
-        triggerWindow = window;
     }
+		triggerWindow = window;
 }
 
 double Scope::getDivT(void) const
