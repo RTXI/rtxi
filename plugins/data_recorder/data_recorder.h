@@ -31,8 +31,6 @@
 #include <hdf5.h>
 #include <hdf5_hl.h>
 
-#define TAG_SIZE 1024
-
 namespace DataRecorder
 {
 enum data_type_t {
@@ -57,11 +55,6 @@ struct param_change_t {
     size_t index;
     long long step;
     double value;
-};
-
-struct dataTag {
-	long long tagTime;
-	char *tagText[TAG_SIZE] = {"test"};
 };
 
 void startRecording(void);
@@ -137,7 +130,7 @@ private:
     size_t downsample_rate;
     long long count;
     long long fixedcount;
-		std::vector<dataTag> dataTags;
+		std::vector<std::string> dataTags;
 
     QMutex mutex;
 

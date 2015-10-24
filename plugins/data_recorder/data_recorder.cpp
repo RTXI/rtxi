@@ -33,6 +33,8 @@
 #define QDisableGroupsEvent         (QEvent::User+2)
 #define QEnableGroupsEvent          (QEvent::User+3)
 
+#define TAG_SIZE 1024
+
 struct param_hdf_t {
     long long index;
     double value;
@@ -892,10 +894,9 @@ void DataRecorder::Panel::removeChannel(void)
 
 void DataRecorder::Panel::addNewTag(void)
 {
-	dataTag newTag;
-	newTag.tagTime = RT::OS::getTime();
-	strncpy(newTag.tagText, timeStampEdit->text().toStdString().c_str(), sizeof(newTag.tagText)-1);
-	printf("tag is %s\n", newTag.tagText);
+	std::string newTag(std::to_string(RT::OS::getTime()));
+	newTag += ",";
+	newTag += timeStampEdit->text().toStdString();
 	dataTags.push_back(newTag);
 	timeStampEdit->clear();
 	recordStatus->setText("Tagged");
@@ -1387,38 +1388,28 @@ void DataRecorder::Panel::stopRecording(long long timestamp)
     H5Dclose(data);
 
 		// Write tags to data file
-    hid_t tag_type, filetype, memtype, space, dset;
+    hid_t tag_type, tag_space;
     herr_t status;
     hsize_t dims[1] = {1};
-    filetype = H5Tcopy(H5T_C_S1);
-    status = H5Tset_size(filetype, H5T_VARIABLE);
-    memtype = H5Tcopy(H5T_C_S1);
-    status = H5Tset_size(memtype, H5T_VARIABLE);
-    space = H5Screate_simple(1, dims, NULL);
-    file.tdata = H5Gcreate(file.trial, "Tags", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    dset = H5Dcreate(file.tdata, "Tag", filetype, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    status = H5Dwrite(dset, memtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, dataTags.back().tagText);
-    printf("error is %d\n", status);
+    tag_type = H5Tcreate(H5T_STRING, TAG_SIZE);
+    tag_space = H5Screate_simple(1, dims, NULL);
 
-    /*tag_type = H5Tcreate(H5T_COMPOUND, sizeof(param_hdf_t));
-    H5Tinsert(tag_type, "time", HOFFSET(dataTag,tagTime), H5T_STD_U64LE);
-    H5Tinsert(tag_type, "text", HOFFSET(dataTag,tagText), H5T_C_S1);
-    file.tdata = H5Gcreate(file.trial, "Tags", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+		// Create group for tags
+		file.tdata = H5Gcreate(file.trial, "Tags", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
-    for(size_t i = 0; i<dataTags.size(); i++)
+		// Iterate over vector (buffer) and put into data file
+		size_t i = 0;
+		for(std::vector<std::string>::iterator it = dataTags.begin(); it != dataTags.end(); ++it)
 		{
-			data = H5PTcreate_fl(file.tdata, "Tag", tag_type, sizeof(dataTag), -1);
-			dataTag tempTag = dataTags.back();
-			printf("tag is %s\n", dataTags.back().tagText);
-			printf("text is %s\n", tempTag.tagText);
-			dataTags.pop_back();
-			H5PTappend(data, 1, &tempTag);
-			H5PTclose(data);
-		}*/
-    H5Tclose(tag_type);
+			data = H5Dcreate(file.tdata, std::string("Tag " + std::to_string(i++)).c_str(), tag_type, tag_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+			status = H5Dwrite(data, tag_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, it->c_str());
+		}
+		dataTags.clear();
 
 		// Close all open structs
     H5Sclose(scalar_space);
+    H5Sclose(tag_space);
+    H5Tclose(tag_type);
     H5PTclose(file.cdata);
     H5Gclose(file.sdata);
     H5Gclose(file.pdata);
