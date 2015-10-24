@@ -894,7 +894,7 @@ void DataRecorder::Panel::addNewTag(void)
 {
 	dataTag newTag;
 	newTag.tagTime = RT::OS::getTime();
-	newTag.tagText = timeStampEdit->text().toStdString().c_str();
+	strncpy(newTag.tagText, timeStampEdit->text().toStdString().c_str(), sizeof(newTag.tagText)-1);
 	printf("tag is %s\n", newTag.tagText);
 	dataTags.push_back(newTag);
 	timeStampEdit->clear();
@@ -1387,8 +1387,20 @@ void DataRecorder::Panel::stopRecording(long long timestamp)
     H5Dclose(data);
 
 		// Write tags to data file
-    hid_t tag_type;
-    tag_type = H5Tcreate(H5T_COMPOUND, sizeof(param_hdf_t));
+    hid_t tag_type, filetype, memtype, space, dset;
+    herr_t status;
+    hsize_t dims[1] = {1};
+    filetype = H5Tcopy(H5T_C_S1);
+    status = H5Tset_size(filetype, H5T_VARIABLE);
+    memtype = H5Tcopy(H5T_C_S1);
+    status = H5Tset_size(memtype, H5T_VARIABLE);
+    space = H5Screate_simple(1, dims, NULL);
+    file.tdata = H5Gcreate(file.trial, "Tags", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    dset = H5Dcreate(file.tdata, "Tag", filetype, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    status = H5Dwrite(dset, memtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, dataTags.back().tagText);
+    printf("error is %d\n", status);
+
+    /*tag_type = H5Tcreate(H5T_COMPOUND, sizeof(param_hdf_t));
     H5Tinsert(tag_type, "time", HOFFSET(dataTag,tagTime), H5T_STD_U64LE);
     H5Tinsert(tag_type, "text", HOFFSET(dataTag,tagText), H5T_C_S1);
     file.tdata = H5Gcreate(file.trial, "Tags", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
@@ -1402,7 +1414,7 @@ void DataRecorder::Panel::stopRecording(long long timestamp)
 			dataTags.pop_back();
 			H5PTappend(data, 1, &tempTag);
 			H5PTclose(data);
-		}
+		}*/
     H5Tclose(tag_type);
 
 		// Close all open structs

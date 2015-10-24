@@ -31,6 +31,8 @@
 #include <hdf5.h>
 #include <hdf5_hl.h>
 
+#define TAG_SIZE 1024
+
 namespace DataRecorder
 {
 enum data_type_t {
@@ -59,7 +61,7 @@ struct param_change_t {
 
 struct dataTag {
 	long long tagTime;
-	const char *tagText;
+	char *tagText[TAG_SIZE] = {"test"};
 };
 
 void startRecording(void);
