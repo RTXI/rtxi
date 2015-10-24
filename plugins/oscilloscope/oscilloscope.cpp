@@ -397,6 +397,7 @@ void Oscilloscope::Panel::applyChannelTab(void)
 
 void Oscilloscope::Panel::applyDisplayTab(void)
 {
+		// Update refresh rate for oscillscope
     scopeWindow->setRefresh(refreshsSpin->value());
 
     // Update X divisions
