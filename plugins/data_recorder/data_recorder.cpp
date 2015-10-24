@@ -16,7 +16,6 @@
 
 */
 
-#include <daq.h>
 #include <string>
 #include <unistd.h>
 #include <compiler.h>
@@ -39,19 +38,6 @@ struct param_hdf_t {
     long long index;
     double value;
 };
-
-struct find_daq_t {
-    int index;
-    DAQ::Device *device;
-};
-
-static void findDAQDevice(DAQ::Device *dev,void *arg)
-{
-    struct find_daq_t *info = static_cast<struct find_daq_t *>(arg);
-    if(!info->index)
-        info->device = dev;
-    info->index--;
-}
 
 // Debug for event handling
 QDebug operator<<(QDebug str, const QEvent * ev)
@@ -748,31 +734,8 @@ void DataRecorder::Panel::buildChannelList(void)
         type = Workspace::INPUT;
     }
 
-    // Get channels
-    // Only add channel from DAQ if channel is enabled
-    /*if(blockList->currentText().contains("analogy"))
-    	{
-    // Display channel info
-    DAQ::Device *dev;
-    {
-    struct find_daq_t info = {blockList->currentIndex(), 0,};
-    DAQ::Manager::getInstance()->foreachDevice(findDAQDevice,&info);
-    dev = info.device;
-    }
-    for (size_t i = 0; i < block->getCount(type); ++i)
-    {
-    if(dev->getChannelActive(static_cast<DAQ::type_t>(type),static_cast<DAQ::index_t>(i)))
-    {
-    printf("Type %zu %zu Channel %d\n", type, static_cast<DAQ::type_t>(type), static_cast<DAQ::index_t>(i));
-    channelList->addItem(QString::fromStdString(block->getName(type, i)));
-    }
-    }
-    }
-    else
-    {*/
     for (size_t i = 0; i < block->getCount(type); ++i)
         channelList->addItem(QString::fromStdString(block->getName(type, i)));
-    //}
 
     if(channelList->count())
         rButton->setEnabled(true);
