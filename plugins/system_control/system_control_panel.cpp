@@ -277,7 +277,6 @@ SystemControlPanel::~SystemControlPanel(void)
 
 void SystemControlPanel::apply(void)
 {
-
     // Apply channel settings
     DAQ::Device *dev;
     {
@@ -384,7 +383,7 @@ void SystemControlPanel::updatePeriod(void)
     else
         rateUpdate = true;
 
-    /* Determine the Frequency */
+    // Determine the Frequency
     freq = freqEdit->text().toDouble();
     if(freqUnitList->currentIndex())
         freq *= 1000;
@@ -403,7 +402,6 @@ void SystemControlPanel::updatePeriod(void)
 
 void SystemControlPanel::display(void)
 {
-
     // Display channel info
     DAQ::Device *dev;
     {
@@ -439,6 +437,7 @@ void SystemControlPanel::display(void)
         DAQ::index_t chan = static_cast<DAQ::index_t>(analogChannelList->currentIndex());
 
         analogActiveButton->setEnabled(true);
+        analogChannelList->setEnabled(true);
         analogRangeList->setEnabled(true);
         analogReferenceList->setEnabled(true);
         analogGainEdit->setEnabled(true);
