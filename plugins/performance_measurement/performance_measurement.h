@@ -95,8 +95,6 @@ private:
         INIT1, INIT2, EXEC,
     } state;
 
-    QTimer *resetMaxTimer;
-
     double duration;
     double lastRead;
     double timestep;
