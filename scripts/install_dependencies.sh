@@ -1,3 +1,5 @@
+#!/bin/bash
+
 #
 # The Real-Time eXperiment Interface (RTXI)
 # Copyright (C) 2011 Georgia Institute of Technology, University of Utah, Weill Cornell Medical College
@@ -17,8 +19,6 @@
 #
 #	Created by Yogi Patel <yapatel@gatech.edu> 2014.1.31
 #
-
-#!/bin/bash
 
 ###############################################################################
 # Set directory variable for compilation
@@ -40,7 +40,6 @@ QWT_VERSION=6.1.2
 #  - Kernel tools
 #  - C/C++ compiler and debugger
 #  - Qt5, HDF, and Qwt6 libraries
-#  - R and some R packages
 ###############################################################################
 echo "Checking dependencies..."
 

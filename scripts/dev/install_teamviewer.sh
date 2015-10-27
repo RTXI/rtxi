@@ -1,3 +1,5 @@
+#! /bin/bash
+
 #
 # The Real-Time eXperiment Interface (RTXI)
 # Copyright (C) 2011 Georgia Institute of Technology, University of Utah, Weill Cornell Medical College
@@ -17,8 +19,6 @@
 #
 #	Created by Yogi Patel <yapatel@gatech.edu> 2014.1.31
 #
-
-#! /bin/bash
 
 sudo apt-get -y install gdebi # gdebi auto-installs dependencies
 
