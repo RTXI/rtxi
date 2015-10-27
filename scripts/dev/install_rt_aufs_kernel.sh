@@ -30,7 +30,7 @@ echo  "----->Setting up variables"
 export linux_version=3.8.13
 export linux_tree=/opt/linux-$linux_version
 
-export xenomai_version=2.6.3
+export xenomai_version=2.6.4
 export xenomai_root=/opt/xenomai-$xenomai_version
 
 export aufs_version=3.8
