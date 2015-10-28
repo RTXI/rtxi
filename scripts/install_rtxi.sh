@@ -101,24 +101,25 @@ else
 	exit
 fi
 
+# TEMPORARY WORKAROUND
 echo "----->Installing basic modules."
-mkdir -p ${MODS}
+sudo mkdir -p ${MODS}
 cd ${MODS}
-git clone https://github.com/RTXI/analysis-tools.git
-git clone https://github.com/RTXI/iir-filter.git
-git clone https://github.com/RTXI/fir-window.git
-git clone https://github.com/RTXI/sync.git
-git clone https://github.com/RTXI/mimic-signal.git
-git clone https://github.com/RTXI/signal-generator.git
-git clone https://github.com/RTXI/ttl-pulses.git
-git clone https://github.com/RTXI/wave-maker.git
-git clone https://github.com/RTXI/noise-generator.git
+sudo git clone https://github.com/RTXI/analysis-tools.git
+sudo git clone https://github.com/RTXI/iir-filter.git
+sudo git clone https://github.com/RTXI/fir-window.git
+sudo git clone https://github.com/RTXI/sync.git
+sudo git clone https://github.com/RTXI/mimic-signal.git
+sudo git clone https://github.com/RTXI/signal-generator.git
+sudo git clone https://github.com/RTXI/ttl-pulses.git
+sudo git clone https://github.com/RTXI/wave-maker.git
+sudo git clone https://github.com/RTXI/noise-generator.git
 
 for dir in ${MODS}/*; do
 	if [ -d "$dir" ]; then
-		make clean -C "$dir"
-		git -C "$dir" pull
-		make -C "$dir"
+		sudo make clean -C "$dir"
+		sudo git -C "$dir" pull
+		sudo make -C "$dir"
 		sudo make install -C "$dir"
 	fi
 done
