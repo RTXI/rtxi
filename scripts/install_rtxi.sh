@@ -22,7 +22,7 @@
 
 # Directories
 ROOT=../
-MODS=${ROOT}/modules
+MODS=/usr/local/lib/rtxi_modules/
 DEPS=${ROOT}/deps/
 HDF=${DEPS}/hdf
 QWT=${DEPS}/qwt
