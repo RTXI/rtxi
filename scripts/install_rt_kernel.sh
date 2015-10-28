@@ -27,15 +27,17 @@ fi
 
 # Export environment variables
 echo  "----->Setting up variables"
-export linux_version=3.8.13
+export linux_version=3.18.12
 export linux_tree=/opt/linux-$linux_version
 
-export xenomai_version=2.6.4
+export xenomai_version=3.0-rc6
 export xenomai_root=/opt/xenomai-$xenomai_version
+
+export patch_version=
 
 export scripts_dir=`pwd`
 
-export build_root=/opt/build
+export build_root=/opt/buildx3rc6
 export opt=/opt
 
 rm -rf $build_root
@@ -53,11 +55,11 @@ fi
 # Download essentials
 echo  "----->Downloading Linux kernel"
 cd $opt
-wget --no-check-certificate https://www.kernel.org/pub/linux/kernel/v3.x/linux-$linux_version.tar.bz2
-tar xf linux-$linux_version.tar.bz2
+#wget --no-check-certificate http://www.kernel.org/pub/linux/kernel/v3.x/linux-$linux_version.tar.gz
+tar xzf linux-$linux_version.tar.gz
 
 echo  "----->Downloading Xenomai"
-wget --no-check-certificate http://download.gna.org/xenomai/stable/xenomai-$xenomai_version.tar.bz2
+wget --no-check-certificate http://xenomai.org/downloads/xenomai/testing/latest/xenomai-3.0-rc6.tar.bz2
 tar xf xenomai-$xenomai_version.tar.bz2
 
 if [ $? -eq 0 ]; then
@@ -70,7 +72,7 @@ fi
 # Patch kernel
 echo  "----->Patching kernel"
 cd $linux_tree
-$xenomai_root/scripts/prepare-kernel.sh --arch=x86 --adeos=$xenomai_root/ksrc/arch/x86/patches/ipipe-core-3.8.13-x86-4.patch --linux=$linux_tree
+$xenomai_root/scripts/prepare-kernel.sh --arch=x86_64 --adeos=$xenomai_root/kernel/cobalt/arch/x86/patches/ipipe-core-3.18.12-x86-1.patch --linux=$linux_tree
 yes "" | make localmodconfig
 make menuconfig
 
@@ -123,7 +125,7 @@ fi
 # Install user libraries
 echo  "----->Installing user libraries"
 cd $build_root
-$xenomai_root/configure --enable-shared --enable-smp --enable-x86-sep
+$xenomai_root/configure --enable-pshared --enable-smp
 make -s
 sudo make install
 
