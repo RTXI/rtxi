@@ -31,6 +31,7 @@
 #include <settings.h>
 #include <sstream>
 #include <main_window.h>
+#include <rtxi_config.h>
 
 namespace
 {
@@ -340,7 +341,7 @@ int Settings::Manager::save(const std::string &filename)
 
     doc.appendChild(doc.createElement("RTXI"));
     doc.documentElement().setAttribute("class","settings");
-    doc.documentElement().setAttribute("version","2.0");
+    doc.documentElement().setAttribute("version",QString(VERSION));
 
     /*
      * Save RT System period
