@@ -72,7 +72,7 @@ else
 fi
 
 echo "----->Putting things into place."
-sudo mkdir ${RTXI_LIB}
+sudo mkdir -p ${RTXI_LIB}
 sudo cp -f libtool ${RTXI_LIB}
 sudo cp -f scripts/icons/RTXI-icon.png ${RTXI_LIB}
 sudo cp -f scripts/icons/RTXI-widget-icon.png ${RTXI_LIB}
@@ -102,7 +102,7 @@ else
 fi
 
 echo "----->Installing basic modules."
-mkdir ${MODS}
+mkdir -p ${MODS}
 cd ${MODS}
 git clone https://github.com/RTXI/analysis-tools.git
 git clone https://github.com/RTXI/iir-filter.git
