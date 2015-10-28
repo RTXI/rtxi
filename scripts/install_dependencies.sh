@@ -50,7 +50,7 @@ sudo apt-get -y install autotools-dev automake libtool kernel-package gcc g++ \
                         kernel-wedge libncurses5-dev libelf-dev binutils-dev \
                         libgsl0-dev libboost-dev git vim emacs lshw stress \
                         libqt5svg5-dev libqt5opengl5 libqt5gui5 libqt5core5a \
-                        libqt5xml5 qt5-default
+                        libqt5xml5 qt5-default libgit2-dev libmarkdown2-dev
 sudo apt-get -y build-dep linux
 
 if [ $? -eq 0 ]; then
