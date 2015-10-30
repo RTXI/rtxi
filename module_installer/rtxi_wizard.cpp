@@ -200,7 +200,7 @@ void RTXIWizard::cloneModule(void) {
 	}
 	
 	if (error) {
-		std::cout<<"git ERROR: something's fucked up somewhere..."<<std::endl;
+		std::cout<<"git ERROR"<<std::endl;
 	} else {
 
 		if (module->installed == false) {
@@ -377,15 +377,20 @@ void RTXIWizard::parseRepos(void) {
 
 void RTXIWizard::installFromString( std::string module_name ) {
 
-/*	
-	QByteArray temp = module->getCloneUrl().toString().toLatin1();
-	const char *url = temp.data();
-	QByteArray temp2 = module->getLocation().toString().toLatin1();
-	const char *path = temp2.data(); 
+	std::string cloneUrl = "https://github.com/rtxi/" + module_name;
+
+	std::string locationUrl;
+	if (getuid()) {
+		locationUrl = std::string(getenv("HOME")) +  "/.config/rtxi/" + module_name;
+	} else {
+		locationUrl = "/usr/local/lib/rtxi_modules/" + module_name;
+	}
+
+	const char *url = cloneUrl.c_str(); 
+	const char *path = locationUrl.c_str();
 
 	int error = 0;
-	if ( (QDir(module->getLocation().toString())).exists() ) {
-		std::cout<<"module already exists"<<std::endl;
+	if ( (QDir(QString::fromStdString(locationUrl))).exists() ) {
 		git_repository *repo = NULL;
 		git_remote *remote = NULL;
 
@@ -399,52 +404,36 @@ void RTXIWizard::installFromString( std::string module_name ) {
 		git_repository_free(repo);
 
 	} else {
-		std::cout<<"module does not already exist"<<std::endl;
 		git_repository *repo = NULL;
 		error = git_clone(&repo, url, path, NULL);
 		git_repository_free(repo);
 	}
 	
 	if (error) {
-		std::cout<<"git ERROR: something's fucked up somewhere..."<<std::endl;
+		std::cout<<"git ERROR"<<std::endl;
+		return;
+	} 
+
+	QString make_cmd = "/usr/bin/make -j2 -C " + QString::fromStdString(locationUrl);
+	QString make_install_cmd;
+	if (getuid()) make_install_cmd = "gksudo \"/usr/bin/make install -C" + QString::fromStdString(locationUrl) + "\"";
+	else make_install_cmd = "/usr/bin/make install -C" + QString::fromStdString(locationUrl);
+
+	QProcess *make = new QProcess();
+	QProcess *make_install = new QProcess();
+	make->start(make_cmd);
+
+	if (!make->waitForFinished()) {
+		std::cout<<"make -C "<<path<<" failed"<<std::endl;
 	} else {
-
-		if (module->installed == false) {
-			installedList->addItem(module->getName());
-			installedModules->append(module);
-			module->installed = true;
-
-			allModules->removeAt(module_idx);
-			moduleList->takeItem(module_idx);
+		make_install->start(make_install_cmd);
+		if (!make_install->waitForFinished()) {
+			std::cout<<"make install -C"<<path<<" failed..."<<std::endl;
+			std::cout<<"...despite make -C succeeding."<<std::endl;
 		}
-
-		QString make_cmd = "/usr/bin/make -j2 -C " + module->getLocation().toString();
-		QString make_install_cmd;
-		if (getuid()) make_install_cmd = "gksudo \"/usr/bin/make install -C" + module->getLocation().toString() + "\"";
-		else make_install_cmd = "/usr/bin/make install -C" + module->getLocation().toString();
-
-		QProcess *make = new QProcess();
-		QProcess *make_install = new QProcess();
-		make->start(make_cmd);
-
-		if (!make->waitForFinished()) {
-			std::cout<<"make -C "<<path<<" failed"<<std::endl;
-		} else {
-			make_install->start(make_install_cmd);
-			if (!make_install->waitForFinished()) {
-				std::cout<<"make install -C"<<path<<" failed..."<<std::endl;
-				std::cout<<"...despite make -C succeeding."<<std::endl;
-			}
-		}
-
-		make->close();
-		make_install->close();
-		
 	}
 
-	cloneButton->setEnabled(true);
-	moduleList->setDisabled(false);
-	installedList->setDisabled(false);
-*/
+	make->close();
+	make_install->close();
 
 }
