@@ -1,7 +1,7 @@
-# Module Installer
+### Module Installer
 
 **Requirements:** libgit2-dev, libmarkdown2-dev, -lQt5Network  
-**Limitations:** currently in alpha
+**Limitations:** testing  
 
 ![Module Installer GUI](module-installer.png)
 
@@ -10,10 +10,14 @@ Download and install modules within RTXI. If RTXI is running as root, all module
 
 The module can only keep track of modules installed in the above pre-defined directories.  
 
+<!--end-->
+
+To-do list:
+
+ - Add progress bar for cloning/installing/upgrading.  
+ - Notify users if updates are available for installed modules.  
 
 Known bugs: 
 
  - READMEs don't get updated after installing/updating a module. 
  - possible crashes when the "download/update" button is hit
-
-<!--end-->
