@@ -1,5 +1,4 @@
 #include <QtNetwork>
-#include <git2.h>
 #include <default_gui_model.h>
 
 #include "module_utils.h"
