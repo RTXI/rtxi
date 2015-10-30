@@ -174,7 +174,6 @@ void RTXIWizard::cloneModule(void) {
 
 	int error = 0;
 	if ( (QDir(module->getLocation().toString())).exists() ) {
-		std::cout<<"module already exists"<<std::endl;
 		git_repository *repo = NULL;
 		git_remote *remote = NULL;
 
@@ -194,7 +193,6 @@ void RTXIWizard::cloneModule(void) {
 		git_repository_free(repo);
 
 	} else {
-		std::cout<<"module does not already exist"<<std::endl;
 		git_repository *repo = NULL;
 //std::cout<<"before git_clone"<<std::endl;
 		error = git_clone(&repo, url, path, NULL);
