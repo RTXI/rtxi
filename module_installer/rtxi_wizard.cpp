@@ -35,7 +35,7 @@ void RTXIWizard::initParameters(void) {
 
 	git_threads_init();
 
-   repoList = new QList<RTXIModule*>;
+   allModules = new QList<RTXIModule*>;
    installedModules = new QList<RTXIModule*>;
 
    // syntax here only works in c++11
@@ -135,7 +135,7 @@ void RTXIWizard::cloneModule(void) {
 /*
 	if ( parent->text() == "Download and Install" ) {
 		module_idx = moduleList->currentRow();
-		module = repoList->at(module_idx);
+		module = allModules->at(module_idx);
 	} else if ( parent->text() == "Update" ) {
 		module_idx = installedList->currentRow();
 		module = installedModules->at(module_idx);
@@ -145,7 +145,7 @@ void RTXIWizard::cloneModule(void) {
 	switch(button_mode) {
 		case DOWNLOAD:
 			module_idx = moduleList->currentRow();
-			module = repoList->at(module_idx);
+			module = allModules->at(module_idx);
 			break;
 
 		case UPDATE:
@@ -162,14 +162,14 @@ void RTXIWizard::cloneModule(void) {
 	RTXIModule *module = nullptr;
 	if ( parent == moduleList ) {
 		module_idx = moduleList->currentRow();
-		module = repoList->at(module_idx);
+		module = allModules->at(module_idx);
 	} else if ( parent == installedList ) {
 		module_idx = installedList->currentRow();
 		module = installedModules->at(module_idx);
 	}
 */
 //	int module_idx = moduleList->currentRow();
-//	RTXIModule* module = repoList->at(module_idx);
+//	RTXIModule* module = allModules->at(module_idx);
 
 	QByteArray temp = module->getCloneUrl().toString().toLatin1();
 	const char *url = temp.data();
@@ -216,7 +216,7 @@ std::cout<<"before git_clone"<<std::endl;
 			installedModules->append(module);
 			module->installed = true;
 
-			repoList->removeAt(module_idx);
+			allModules->removeAt(module_idx);
 			moduleList->takeItem(module_idx);
 		}
 
@@ -276,7 +276,7 @@ void RTXIWizard::getReadme(void) {
 
 	RTXIModule *selectedModule = nullptr;
 	if ( parent == moduleList ) {
-		selectedModule = repoList->at(parent->currentRow());
+		selectedModule = allModules->at(parent->currentRow());
 	} else if ( parent == installedList ) {
 		selectedModule = installedModules->at(parent->currentRow());
 	}
@@ -323,7 +323,7 @@ std::cout<<fileText.toStdString()<<std::endl;
 	RTXIModule *selectedModule = nullptr;
 	switch(button_mode) {
 		case DOWNLOAD:
-			selectedModule = repoList->at(moduleList->currentRow());
+			selectedModule = allModules->at(moduleList->currentRow());
 			break;
 
 		case UPDATE:
@@ -335,9 +335,9 @@ std::cout<<fileText.toStdString()<<std::endl;
 			break;
 	}
 
-//	RTXIModule *selectedModule = repoList->at(moduleList->currentRow());
-//	repoList[moduleList->currentRow()]->setReadme(fileText);
-//	RTXIModule selectedModule = repoList->value(moduleList->currentRow());
+//	RTXIModule *selectedModule = allModules->at(moduleList->currentRow());
+//	allModules[moduleList->currentRow()]->setReadme(fileText);
+//	RTXIModule selectedModule = allModules->value(moduleList->currentRow());
 	selectedModule->setReadme(fileText);
 
 	readmeWindow->setHtml(fileText);
@@ -386,7 +386,7 @@ void RTXIWizard::parseRepos(void) {
 			} else {
 				module->installed = false;
 				moduleList->addItem(module->getName());
-				repoList->append(module);
+				allModules->append(module);
 			}
 		}
 	}

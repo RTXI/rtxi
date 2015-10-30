@@ -48,7 +48,7 @@ class RTXIWizard : public DefaultGUIModel
 
 		QPushButton *cloneButton;
 		QPushButton *syncButton;
-		QList<RTXIModule*> *repoList;
+		QList<RTXIModule*> *allModules;
 		QList<RTXIModule*> *installedModules;
 //		QList<RTXIModule> *remoteModules;
 
