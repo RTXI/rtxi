@@ -14,6 +14,8 @@ class RTXIWizard : public DefaultGUIModel
 		void initParameters(void);
 		void customizeGUI(void);
 
+		void installFromString(std::string);
+
 	private slots:
 		void cloneModule(void);
 		void getRepos(void);
@@ -22,17 +24,6 @@ class RTXIWizard : public DefaultGUIModel
 		void parseReadme(void);
 
 		void updateButton(void);
-
-/*
-		void cloneModules();
-		void installModules();
-		void syncModules();
-		void updateModules();
-		void repairRepos();
-		void addRemote();
-
-		void reloadUI();
-*/
 
 	private:
 
@@ -50,7 +41,6 @@ class RTXIWizard : public DefaultGUIModel
 		QPushButton *syncButton;
 		QList<RTXIModule*> *allModules;
 		QList<RTXIModule*> *installedModules;
-//		QList<RTXIModule> *remoteModules;
 
 		std::vector<QString> exclude_list;
 

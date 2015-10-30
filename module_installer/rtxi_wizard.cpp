@@ -119,7 +119,6 @@ void RTXIWizard::updateButton(void) {
       button_mode = UPDATE;
    }
 
-//std::cout<<cloneButton->text().toStdString()<<std::endl;
 }
 
 void RTXIWizard::cloneModule(void) {
@@ -183,26 +182,24 @@ void RTXIWizard::cloneModule(void) {
 		git_remote *remote = NULL;
 
 		git_repository_open(&repo, path);
-std::cout<<"before git_remote_load"<<std::endl;
+//std::cout<<"before git_remote_load"<<std::endl;
 		error = error | git_remote_load(&remote, repo, "origin");
-std::cout<<"before git_remote_connect"<<std::endl;
+//std::cout<<"before git_remote_connect"<<std::endl;
 		error = error | git_remote_connect(remote, GIT_DIRECTION_FETCH);
-std::cout<<"before git_remote_download"<<std::endl;
+//std::cout<<"before git_remote_download"<<std::endl;
 		error = error | git_remote_download(remote, NULL, NULL);
 
-//std::cout<<"cloning worked, i think..."<<std::endl;
-
-std::cout<<"before git_remote_disconnect"<<std::endl;
+//std::cout<<"before git_remote_disconnect"<<std::endl;
 		git_remote_disconnect(remote);
-std::cout<<"before git_remote_free"<<std::endl;
+//std::cout<<"before git_remote_free"<<std::endl;
 		git_remote_free(remote);
-std::cout<<"before git_repository_free"<<std::endl;
+//std::cout<<"before git_repository_free"<<std::endl;
 		git_repository_free(repo);
 
 	} else {
 		std::cout<<"module does not already exist"<<std::endl;
 		git_repository *repo = NULL;
-std::cout<<"before git_clone"<<std::endl;
+//std::cout<<"before git_clone"<<std::endl;
 		error = git_clone(&repo, url, path, NULL);
 		git_repository_free(repo);
 	}
@@ -281,12 +278,7 @@ void RTXIWizard::getReadme(void) {
 		selectedModule = installedModules->at(parent->currentRow());
 	}
 
-//std::cout<<selectedModule->getReadmeUrl().toString().toStdString()<<std::endl;
-std::cout<<selectedModule->getName().toStdString()<<std::endl;
-//std::cout<<selectedModule->getReadme().toStdString()<<std::endl;
-
 	if (selectedModule->getReadme() == "") {
-std::cout<<"readme blank"<<std::endl;
 		reply = qnam.get(QNetworkRequest(selectedModule->getReadmeUrl()));
 		QObject::connect(reply, SIGNAL(finished()), this, SLOT(parseReadme()));
 	} else {
@@ -301,7 +293,6 @@ void RTXIWizard::parseReadme(void) {
 	
 	const char* raw_data = (reply->readAll()).constData();
 	MMIOT *m = mkd_string(raw_data, strlen(raw_data), 0);
-//	FILE *temp_out = fopen("temp.html", "w");
 	mkd_compile(m, 0);
 
 	char* text;
@@ -315,11 +306,6 @@ void RTXIWizard::parseReadme(void) {
 	reply->deleteLater();
 	reply = 0;
 
-//	markdown(text, temp_out, 0);
-//	fclose(temp_out);
-std::cout<<fileText.toStdString()<<std::endl;
-	
-	
 	RTXIModule *selectedModule = nullptr;
 	switch(button_mode) {
 		case DOWNLOAD:
@@ -335,9 +321,6 @@ std::cout<<fileText.toStdString()<<std::endl;
 			break;
 	}
 
-//	RTXIModule *selectedModule = allModules->at(moduleList->currentRow());
-//	allModules[moduleList->currentRow()]->setReadme(fileText);
-//	RTXIModule selectedModule = allModules->value(moduleList->currentRow());
 	selectedModule->setReadme(fileText);
 
 	readmeWindow->setHtml(fileText);
@@ -370,9 +353,7 @@ void RTXIWizard::parseRepos(void) {
 		// if the current module isn't in the exclude_list
 		if (std::find(exclude_list.begin(), exclude_list.end(), newObj.value("name").toString()) 
 				== exclude_list.end()) {
-//			std::cout<<newObj.value("name").toString().toStdString()<<std::endl;
 
-//			RTXIModule* module(moduleList);
 			RTXIModule* module = new RTXIModule;
 		
 			module->setReadmeUrl( readmeUrlPrefix + newObj.value("name").toString() + readmeUrlSuffix);
@@ -399,3 +380,6 @@ void RTXIWizard::parseRepos(void) {
 	installedList->setDisabled(false);
 }
 
+void RTXIWizard::installFromString( std::string module_name) {
+
+}
