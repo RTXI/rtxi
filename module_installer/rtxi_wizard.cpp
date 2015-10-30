@@ -1,7 +1,4 @@
-#include <QtWidgets>
 #include <QtNetwork>
-#include <QTextDocument>
-//#include <algorithm>
 #include <iostream>
 #include <unistd.h>
 #include <git2.h>
@@ -380,6 +377,76 @@ void RTXIWizard::parseRepos(void) {
 	installedList->setDisabled(false);
 }
 
-void RTXIWizard::installFromString( std::string module_name) {
+void RTXIWizard::installFromString( std::string module_name ) {
+
+/*	
+	QByteArray temp = module->getCloneUrl().toString().toLatin1();
+	const char *url = temp.data();
+	QByteArray temp2 = module->getLocation().toString().toLatin1();
+	const char *path = temp2.data(); 
+
+	int error = 0;
+	if ( (QDir(module->getLocation().toString())).exists() ) {
+		std::cout<<"module already exists"<<std::endl;
+		git_repository *repo = NULL;
+		git_remote *remote = NULL;
+
+		git_repository_open(&repo, path);
+		error = error | git_remote_load(&remote, repo, "origin");
+		error = error | git_remote_connect(remote, GIT_DIRECTION_FETCH);
+		error = error | git_remote_download(remote, NULL, NULL);
+
+		git_remote_disconnect(remote);
+		git_remote_free(remote);
+		git_repository_free(repo);
+
+	} else {
+		std::cout<<"module does not already exist"<<std::endl;
+		git_repository *repo = NULL;
+		error = git_clone(&repo, url, path, NULL);
+		git_repository_free(repo);
+	}
+	
+	if (error) {
+		std::cout<<"git ERROR: something's fucked up somewhere..."<<std::endl;
+	} else {
+
+		if (module->installed == false) {
+			installedList->addItem(module->getName());
+			installedModules->append(module);
+			module->installed = true;
+
+			allModules->removeAt(module_idx);
+			moduleList->takeItem(module_idx);
+		}
+
+		QString make_cmd = "/usr/bin/make -j2 -C " + module->getLocation().toString();
+		QString make_install_cmd;
+		if (getuid()) make_install_cmd = "gksudo \"/usr/bin/make install -C" + module->getLocation().toString() + "\"";
+		else make_install_cmd = "/usr/bin/make install -C" + module->getLocation().toString();
+
+		QProcess *make = new QProcess();
+		QProcess *make_install = new QProcess();
+		make->start(make_cmd);
+
+		if (!make->waitForFinished()) {
+			std::cout<<"make -C "<<path<<" failed"<<std::endl;
+		} else {
+			make_install->start(make_install_cmd);
+			if (!make_install->waitForFinished()) {
+				std::cout<<"make install -C"<<path<<" failed..."<<std::endl;
+				std::cout<<"...despite make -C succeeding."<<std::endl;
+			}
+		}
+
+		make->close();
+		make_install->close();
+		
+	}
+
+	cloneButton->setEnabled(true);
+	moduleList->setDisabled(false);
+	installedList->setDisabled(false);
+*/
 
 }
