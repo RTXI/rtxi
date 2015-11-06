@@ -99,7 +99,6 @@ public:
 public slots:
     void timeoutEvent(void);
     void togglePause(void);
-    void updateDownsampleRate(int);
 
 protected:
 

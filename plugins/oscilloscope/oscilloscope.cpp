@@ -397,6 +397,9 @@ void Oscilloscope::Panel::applyChannelTab(void)
 
 void Oscilloscope::Panel::applyDisplayTab(void)
 {
+		// Update downsample rate
+    downsample_rate = r;
+
 		// Update refresh rate for oscillscope
     scopeWindow->setRefresh(refreshsSpin->value());
 
@@ -719,7 +722,6 @@ QWidget *Oscilloscope::Panel::createDisplayTab(QWidget *parent)
     ratesSpin = new QSpinBox(page);
     row1Layout->addWidget(ratesSpin);
     ratesSpin->setValue(downsample_rate);
-    QObject::connect(ratesSpin,SIGNAL(valueChanged(int)),this,SLOT(updateDownsampleRate(int)));
     ratesSpin->setEnabled(true);
     ratesSpin->setRange(1,2);
     ratesSpin->setValue(1);
@@ -1037,11 +1039,6 @@ Oscilloscope::Panel::~Panel(void)
         delete reinterpret_cast<struct channel_info *> (scopeWindow->removeChannel(scopeWindow->getChannelsBegin()));
 
     Oscilloscope::Plugin::getInstance()->removeOscilloscopePanel(this);
-}
-
-void Oscilloscope::Panel::updateDownsampleRate(int r)
-{
-    downsample_rate = r;
 }
 
 void Oscilloscope::Panel::execute(void)
