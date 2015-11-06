@@ -398,7 +398,7 @@ void Oscilloscope::Panel::applyChannelTab(void)
 void Oscilloscope::Panel::applyDisplayTab(void)
 {
 		// Update downsample rate
-    downsample_rate = r;
+    downsample_rate = ratesSpin->value();
 
 		// Update refresh rate for oscillscope
     scopeWindow->setRefresh(refreshsSpin->value());
@@ -860,6 +860,27 @@ void Oscilloscope::Panel::showChannelTab(void)
                 ERROR_MSG("Oscilloscope::Panel::displayChannelTab : invalid color selection\n");
                 colorsList->setCurrentIndex(0);
             }
+
+						switch (i->getPen().width()) {
+							case 1:
+								widthsList->setCurrentIndex(0);
+								break;
+							case 2:
+								widthsList->setCurrentIndex(1);
+								break;
+							case 3:
+								widthsList->setCurrentIndex(2);
+								break;
+							case 4:
+								widthsList->setCurrentIndex(3);
+								break;
+							case 5:
+								widthsList->setCurrentIndex(4);
+								break;
+							default:
+								ERROR_MSG("Oscilloscope::Panel::displayChannelTab : invalid width selection\n");
+								widthsList->setCurrentIndex(0);
+						}
 
             switch (i->getPen().style()) {
             case Qt::SolidLine:
