@@ -1147,6 +1147,7 @@ void Oscilloscope::Panel::adjustDataSize(void)
     double period = RT::System::getInstance()->getPeriod() * 1e-6; // ms
     size_t size = ceil(scopeWindow->getDivT() * scopeWindow->getDivX() / period) + 1;
     scopeWindow->setDataSize(size);
+    sizesEdit->setText(QString::number(scopeWindow->getDataSize()));
 }
 
 void Oscilloscope::Panel::timeoutEvent(void)
