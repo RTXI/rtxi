@@ -80,7 +80,7 @@ Scope::Scope(QWidget *parent) :	QwtPlot(parent), legendItem(NULL)
     divY = 10;
     data_idx = 0;
     data_size = 100;
-    hScl = 10.0;
+    hScl = 1.0;
     period = 1.0;
     dtLabel = "1ms";
     refresh = 250;
