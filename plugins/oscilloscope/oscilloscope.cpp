@@ -956,7 +956,7 @@ void Oscilloscope::Panel::showDisplayTab(void)
 }
 
 ////////// #Panel
-Oscilloscope::Panel::Panel(QWidget *parent) :	QWidget(parent), RT::Thread(0), fifo(10 * 1048576)
+Oscilloscope::Panel::Panel(QWidget *parent) :	QWidget(parent), RT::Thread(0), fifo(25 * 1048576)
 {
 
     // Make Mdi
