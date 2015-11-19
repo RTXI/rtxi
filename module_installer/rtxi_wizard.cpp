@@ -16,6 +16,10 @@ static DefaultGUIModel::variable_t vars[] = {};
 
 static size_t num_vars = sizeof(vars) / sizeof(DefaultGUIModel::variable_t);
 
+/* 
+ * This module uses the QNetworkManager class to fetch information on our 
+ * GitHub repos using GitHub's own API. 
+ */
 RTXIWizard::RTXIWizard(void) : DefaultGUIModel("Module Installer", ::vars, ::num_vars) {
 
 	DefaultGUIModel::createGUI(vars, num_vars);
@@ -105,6 +109,8 @@ void RTXIWizard::customizeGUI(void) {
 	setLayout(customLayout);
 }
 
+// Set the text to "Update" if the module is already installed or "Download 
+// and Install" if not.
 void RTXIWizard::updateButton(void) {
    QListWidget *parent = qobject_cast<QListWidget*>(sender());
 
