@@ -129,21 +129,10 @@ void RTXIWizard::cloneModule(void) {
 	cloneButton->setEnabled(false);
 	moduleList->setDisabled(true);
 	installedList->setDisabled(true);
-//	QPushButton *parent = qobject_cast<QPushButton*>(sender());
 
 	RTXIModule *module = nullptr;
 	int module_idx = 0;
 
-/*
-	if ( parent->text() == "Download and Install" ) {
-		module_idx = moduleList->currentRow();
-		module = allModules->at(module_idx);
-	} else if ( parent->text() == "Update" ) {
-		module_idx = installedList->currentRow();
-		module = installedModules->at(module_idx);
-	}
-*/
-	
 	switch(button_mode) {
 		case DOWNLOAD:
 			module_idx = moduleList->currentRow();
@@ -160,19 +149,6 @@ void RTXIWizard::cloneModule(void) {
 			break;
 	}
 
-/*
-	RTXIModule *module = nullptr;
-	if ( parent == moduleList ) {
-		module_idx = moduleList->currentRow();
-		module = allModules->at(module_idx);
-	} else if ( parent == installedList ) {
-		module_idx = installedList->currentRow();
-		module = installedModules->at(module_idx);
-	}
-*/
-//	int module_idx = moduleList->currentRow();
-//	RTXIModule* module = allModules->at(module_idx);
-
 	QByteArray temp = module->getCloneUrl().toString().toLatin1();
 	const char *url = temp.data();
 	QByteArray temp2 = module->getLocation().toString().toLatin1();
@@ -184,23 +160,16 @@ void RTXIWizard::cloneModule(void) {
 		git_remote *remote = NULL;
 
 		git_repository_open(&repo, path);
-//std::cout<<"before git_remote_load"<<std::endl;
 		error = error | git_remote_load(&remote, repo, "origin");
-//std::cout<<"before git_remote_connect"<<std::endl;
 		error = error | git_remote_connect(remote, GIT_DIRECTION_FETCH);
-//std::cout<<"before git_remote_download"<<std::endl;
 		error = error | git_remote_download(remote, NULL, NULL);
 
-//std::cout<<"before git_remote_disconnect"<<std::endl;
 		git_remote_disconnect(remote);
-//std::cout<<"before git_remote_free"<<std::endl;
 		git_remote_free(remote);
-//std::cout<<"before git_repository_free"<<std::endl;
 		git_repository_free(repo);
 
 	} else {
 		git_repository *repo = NULL;
-//std::cout<<"before git_clone"<<std::endl;
 		error = git_clone(&repo, url, path, NULL);
 		git_repository_free(repo);
 	}
