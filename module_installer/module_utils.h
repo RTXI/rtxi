@@ -20,6 +20,14 @@
 
 #include <QtWidgets>
 
+/*
+ * This is a utility class for the module installer. Each RTXIModule holds the 
+ * important information about a specific module, such as its name, online url,
+ *  location within the filesystem, and README text. 
+ *
+ * This class inherits QListWidgetItem and is the object that is inserted into 
+ * the QListWidget in rtxi_wizard.cpp. 
+ */
 class RTXIModule : QListWidgetItem
 {
 
@@ -31,7 +39,6 @@ class RTXIModule : QListWidgetItem
 		void setName(QString);
 		void setReadme(QString);
 		void setLocation(QString);
-		
 
 		QUrl getReadmeUrl(void);
 		QUrl getCloneUrl(void);

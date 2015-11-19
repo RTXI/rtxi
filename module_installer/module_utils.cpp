@@ -20,7 +20,8 @@
 #include "module_utils.h"
 
 /*
- * Class RTXIModule
+ * Class RTXIModule. All the functions here, apart from the constructor, are 
+ * essentially 'get' and 'set' methods. 
  */
 RTXIModule::RTXIModule(QListWidget *parent) : QListWidgetItem(parent) {
 	readme_url = QUrl("");
