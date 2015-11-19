@@ -124,6 +124,7 @@ void RTXIWizard::updateButton(void) {
 
 }
 
+// Clone the module currently highlighted in the QListWidget. 
 void RTXIWizard::cloneModule(void) {
 
 	cloneButton->setEnabled(false);
@@ -149,12 +150,19 @@ void RTXIWizard::cloneModule(void) {
 			break;
 	}
 
+	/* 
+	 * Two QByteArray variables are needed due to the way Qt stores binary data.
+	 * Calling module->getCloneUrl().toString().toLatin1().data() will produce 
+	 * an error.
+	 */ 
 	QByteArray temp = module->getCloneUrl().toString().toLatin1();
 	const char *url = temp.data();
 	QByteArray temp2 = module->getLocation().toString().toLatin1();
 	const char *path = temp2.data(); 
 
 	int error = 0;
+
+	// If the repo already exists, pull from master. If not, clone it.
 	if ( (QDir(module->getLocation().toString())).exists() ) {
 		git_repository *repo = NULL;
 		git_remote *remote = NULL;
@@ -178,6 +186,7 @@ void RTXIWizard::cloneModule(void) {
 		std::cout<<"git ERROR"<<std::endl;
 	} else {
 
+		// Add module to list of already installed modules. 
 		if (module->installed == false) {
 			installedList->addItem(module->getName());
 			installedModules->append(module);
@@ -187,11 +196,15 @@ void RTXIWizard::cloneModule(void) {
 			moduleList->takeItem(module_idx);
 		}
 
+		// Define the commands to be run. 
 		QString make_cmd = "/usr/bin/make -j2 -C " + module->getLocation().toString();
 		QString make_install_cmd;
+
+		// If RTXI is root, no need to call gksudo.  
 		if (getuid()) make_install_cmd = "gksudo \"/usr/bin/make install -C" + module->getLocation().toString() + "\"";
 		else make_install_cmd = "/usr/bin/make install -C" + module->getLocation().toString();
 
+		// Compile and instal handled by QProcess.
 		QProcess *make = new QProcess();
 		QProcess *make_install = new QProcess();
 		make->start(make_cmd);
@@ -211,12 +224,15 @@ void RTXIWizard::cloneModule(void) {
 		
 	}
 
+	// Re-enable buttons only after compilation is done. Otherwise you get race 
+	// conditions if buttons are pressed before modules are done compiling. 
 	cloneButton->setEnabled(true);
 	moduleList->setDisabled(false);
 	installedList->setDisabled(false);
 
 }
 
+// Download the list of repos from GitHub's API. Call parseRepos for the JSON.
 void RTXIWizard::getRepos() {
 
 	moduleList->setDisabled(true);
@@ -235,12 +251,21 @@ void RTXIWizard::getRepos() {
 	}
 }
 
+/*
+ * Download the README (markdown) for the highlighted repo just clicked. If the
+ *  README has already been downloaded, the function will just keep that and 
+ * not make another network request. 
+ *
+ * The module doesn't save READMEs for after it closes. If you reopen the 
+ * module, you'll have to redownload the repos. 
+ */
 void RTXIWizard::getReadme(void) {
 	moduleList->setDisabled(true);
 	installedList->setDisabled(true);
 
 	QListWidget *parent = qobject_cast<QListWidget*>(sender());
 
+	// Set a pointer to the currently selected module. 
 	RTXIModule *selectedModule = nullptr;
 	if ( parent == moduleList ) {
 		selectedModule = allModules->at(parent->currentRow());
@@ -248,10 +273,12 @@ void RTXIWizard::getReadme(void) {
 		selectedModule = installedModules->at(parent->currentRow());
 	}
 
+	// If the README hasn't been downloaded before, download it now. 
 	if (selectedModule->getReadme() == "") {
 		reply = qnam.get(QNetworkRequest(selectedModule->getReadmeUrl()));
 		QObject::connect(reply, SIGNAL(finished()), this, SLOT(parseReadme()));
 	} else {
+		// Disable buttons until all logic is done. 
 		readmeWindow->setHtml(selectedModule->getReadme());
 		cloneButton->setEnabled(true);
 		moduleList->setDisabled(false);
@@ -259,6 +286,8 @@ void RTXIWizard::getReadme(void) {
 	}
 }
 
+// READMEs are downloaded as markdown. Convert them to HTML and display them 
+// within a QTextWidget. 
 void RTXIWizard::parseReadme(void) {
 	
 	const char* raw_data = (reply->readAll()).constData();
@@ -296,11 +325,13 @@ void RTXIWizard::parseReadme(void) {
 	readmeWindow->setHtml(fileText);
 	readmeWindow->show();
 
+	// The README is now displayed, so free the user to start clicking around. 
 	cloneButton->setEnabled(true);
 	moduleList->setDisabled(false);
 	installedList->setDisabled(false);
 }
 
+// GitHub's API returns a JSON array. Parse it with QtJson functions.  
 void RTXIWizard::parseRepos(void) {
 
 	QJsonDocument jsonDoc = QJsonDocument::fromJson(reply->readAll().data());
@@ -350,6 +381,10 @@ void RTXIWizard::parseRepos(void) {
 	installedList->setDisabled(false);
 }
 
+/*
+ * Public function, not for use in this module. It gets called by other 
+ * classes. The function is basically a truncated version of cloneModule(). 
+ */ 
 void RTXIWizard::installFromString( std::string module_name ) {
 
 	std::string cloneUrl = "https://github.com/rtxi/" + module_name;
