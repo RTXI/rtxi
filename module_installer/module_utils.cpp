@@ -57,13 +57,6 @@ void RTXIModule::setReadme(QString str) {
 	return;
 }
 
-/*
-void RTXIModule::setInstalled(bool state) {
-	installed = state;
-	return;
-}
-*/
-
 QUrl RTXIModule::getLocation(void) {
 	return location;
 }

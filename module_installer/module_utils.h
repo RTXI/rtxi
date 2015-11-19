@@ -22,7 +22,6 @@
 
 class RTXIModule : QListWidgetItem
 {
-//	Q_OBJECT
 
 	public:
 		RTXIModule(QListWidget *parent =0);
@@ -33,13 +32,6 @@ class RTXIModule : QListWidgetItem
 		void setReadme(QString);
 		void setLocation(QString);
 		
-/*
-		void cloneModule();
-		void syncModule();
-		void updateModule();
-		void installModule();
-		void clearRepo();
-*/
 
 		QUrl getReadmeUrl(void);
 		QUrl getCloneUrl(void);
@@ -52,7 +44,6 @@ class RTXIModule : QListWidgetItem
 	private: 
 		QUrl readme_url;
 		QUrl clone_url;
-//		QUrl screenshot_url;		
 		QString name;
 		QString readme;
 		QUrl location;
