@@ -27,6 +27,8 @@ RTXI_LIB=/usr/local/lib/rtxi
 QWT_LIB=/usr/local/lib/qwt
 RTXI_INC_LIB=/usr/local/lib/rtxi_includes
 RTXI_INC=/usr/local/include/rtxi
+RTXI_BIN=/usr/local/bin/rtxi*
+RTXI_SHARE=/usr/local/share/rtxi
 ETC=/etc/rtxi.conf
 
 cd ${ROOT}
@@ -38,6 +40,8 @@ sudo rm -rf ${RTXI_LIB}
 sudo rm -rf ${QWT_LIB}
 sudo rm -rf ${RTXI_INC_LIB}
 sudo rm -rf ${RTXI_INC}
+sudo rm -rf ${RTXI_BIN}
+sudo rm -rf ${RTXI_SHARE}
 sudo rm -rf ${ETC}
 
 # Remove old qt/qwt installations
