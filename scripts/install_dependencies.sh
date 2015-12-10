@@ -108,7 +108,9 @@ else
 	fi
 fi
 
-# Install rtxi_includes
+# (Re)install rtxi_includes. Remove the moc files first. Failing to do so when 
+# upgrading from Qt4 to Qt5 will cause compilation errors later on. 
+[ -d /usr/local/lib/rtxi_includes ] && sudo rm -r /usr/local/lib/rtxi_includes/moc_*
 sudo rsync -a ${DEPS}/rtxi_includes /usr/local/lib/.
 if [ $? -eq 0 ]; then
 	echo "----->rtxi_includes synced."
