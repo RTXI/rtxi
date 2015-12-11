@@ -509,16 +509,16 @@ void AnalogyDevice::write(void)
                 // Get anaolgy reference
                 switch (channel->reference) {
                 case 0:
-                    ref = A4L_CHAN_AREF_GROUND;
+                    ref = AREF_GROUND;
                     break;
                 case 1:
-                    ref = A4L_CHAN_AREF_COMMON;
+                    ref = AREF_COMMON;
                     break;
                 case 2:
-                    ref = A4L_CHAN_AREF_DIFF;
+                    ref = AREF_DIFF;
                     break;
                 case 3:
-                    ref = A4L_CHAN_AREF_OTHER;
+                    ref = AREF_OTHER;
                     break;
                 }
                 // Get channel size

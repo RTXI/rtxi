@@ -123,7 +123,7 @@ fi
 # Install user libraries
 echo  "----->Installing user libraries"
 cd $build_root
-$xenomai_root/configure --enable-shared --enable-smp --enable-x86-sep
+$xenomai_root/configure --with-core=cobalt --enable-pshared --enable-smp --enable-x86-vsyscall --enable-dlopen-libs
 make -s
 sudo make install
 
