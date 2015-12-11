@@ -42,126 +42,129 @@
 static pid_t parentThread;
 
 struct cli_options_t {
-	std::string config_file;
-	std::string plugins_path;
+    std::string config_file;
+    std::string plugins_path;
 };
 
 static bool parse_cli_options(int,char *[],cli_options_t *);
 static void signal_handler(int);
 
-int main(int argc,char *argv[]) {
-	int retval = 0;
+int main(int argc,char *argv[])
+{
+    int retval = 0;
 
-	/* Initialize rtdk */
-	#ifdef _RTUTILS_H
-	rt_print_auto_init(1);
-	#endif
+    /* Initialize rtdk */
+#ifdef _RTUTILS_H
+    rt_print_auto_init(1);
+#endif
 
-	/* Try to Exit Cleanly on Signals */
-	parentThread = getpid();
-	signal(SIGINT,signal_handler);
-	signal(SIGABRT,signal_handler);
-	signal(SIGSEGV,signal_handler);
+    /* Try to Exit Cleanly on Signals */
+    parentThread = getpid();
+    signal(SIGINT,signal_handler);
+    signal(SIGABRT,signal_handler);
+    signal(SIGSEGV,signal_handler);
 
-	/* Handle Command-Line Options */
-	cli_options_t cli_options;
-	if (!parse_cli_options(argc,argv,&cli_options))
-		return -EINVAL;
+    /* Handle Command-Line Options */
+    cli_options_t cli_options;
+    if (!parse_cli_options(argc,argv,&cli_options))
+        return -EINVAL;
 
-	/* Find Configuration File */
-	std::string config_file;
-	if (cli_options.config_file.length())
-		config_file = cli_options.config_file;
-	else if (getenv("RTXI_CONF"))
-		config_file = getenv("RTXI_CONF");
-	else
-		config_file = "/etc/rtxi.conf";
+    /* Find Configuration File */
+    std::string config_file;
+    if (cli_options.config_file.length())
+        config_file = cli_options.config_file;
+    else if (getenv("RTXI_CONF"))
+        config_file = getenv("RTXI_CONF");
+    else
+        config_file = "/etc/rtxi.conf";
 
-	/************************************************************
-	 * Create Main System Components                            *
-	 *                                                          *
-	 *  These need to be created early because they should have *
-	 *  Settings::IDs of 0 and 1.                               *
-	 ************************************************************/
+    /************************************************************
+     * Create Main System Components                            *
+     *                                                          *
+     *  These need to be created early because they should have *
+     *  Settings::IDs of 0 and 1.                               *
+     ************************************************************/
 
-	/* Create GUI Objects */
-	QApplication::setDesktopSettingsAware(false);
-	QApplication *app = new QApplication(argc,argv);
-	app->connect(app,SIGNAL(lastWindowClosed()),app,SLOT(quit()));
-	MainWindow::getInstance()->showMaximized();
+    /* Create GUI Objects */
+    QApplication::setDesktopSettingsAware(false);
+    QApplication *app = new QApplication(argc,argv);
+    app->connect(app,SIGNAL(lastWindowClosed()),app,SLOT(quit()));
+    MainWindow::getInstance()->showMaximized();
 
-	CmdLine::getInstance();
-	RT::System::getInstance();
-	IO::Connector::getInstance();
+    CmdLine::getInstance();
+    RT::System::getInstance();
+    IO::Connector::getInstance();
 
-	/* Bootstrap the System */
-	Settings::Manager::getInstance()->load(config_file);
-	retval = app->exec();
+    /* Bootstrap the System */
+    Settings::Manager::getInstance()->load(config_file);
+    retval = app->exec();
 
-	Plugin::Manager::getInstance()->unloadAll();
-	return retval;
+    Plugin::Manager::getInstance()->unloadAll();
+    return retval;
 }
 
-static void error_msg(const std::string &self) {
-	std::cout << "Try \'" << self << " --help\' for more information.\n";
+static void error_msg(const std::string &self)
+{
+    std::cout << "Try \'" << self << " --help\' for more information.\n";
 }
 
-static void help_msg(const std::string &self) {
-	std::cout << "Usage: " << self << " [options]\n";
-	std::cout << "  where options include:\n";
-	std::cout << "    --help,         -h  - Displays this message\n";
-	std::cout << "    --config-file,  -c  - Pick a custom configuration file\n";
-	std::cout << "    --plugins-path, -p  - Specify a plugins directory\n";
+static void help_msg(const std::string &self)
+{
+    std::cout << "Usage: " << self << " [options]\n";
+    std::cout << "  where options include:\n";
+    std::cout << "    --help,         -h  - Displays this message\n";
+    std::cout << "    --config-file,  -c  - Pick a custom configuration file\n";
+    std::cout << "    --plugins-path, -p  - Specify a plugins directory\n";
 }
 
-static bool parse_cli_options(int argc,char *argv[],cli_options_t *cli_options) {
-	int opt, index;
+static bool parse_cli_options(int argc,char *argv[],cli_options_t *cli_options)
+{
+    int opt, index;
 
-	struct option options[] = {
-		{ "help",        no_argument,       0, 'h' },
-		{ "config-file", required_argument, 0, 'c' },
-		{ "plugins-path", required_argument, 0, 'p' },
-		{ "models-path",  required_argument, 0, 'm' },
-		{ 0,0,0,0 }
-	};
+    struct option options[] = {
+        { "help",        no_argument,       0, 'h' },
+        { "config-file", required_argument, 0, 'c' },
+        { "plugins-path", required_argument, 0, 'p' },
+        { "models-path",  required_argument, 0, 'm' },
+        { 0,0,0,0 }
+    };
 
-	for (;;) {
-		opt = getopt_long(argc,argv,"hc:p:m:",options,&index);
+    for (;;) {
+        opt = getopt_long(argc,argv,"hc:p:m:",options,&index);
 
-		if (opt < 0) break;
+        if (opt < 0) break;
 
-		switch (opt) {
-			case 'c':
-				cli_options->config_file = optarg;
-				break;
-			case 'h':
-				help_msg(argv[0]);
-				return false;
-			case 'p':
-				cli_options->plugins_path = optarg;
-				break;
-			default:
-				error_msg(argv[0]);
-				return false;
-		}
-	}
+        switch (opt) {
+        case 'c':
+            cli_options->config_file = optarg;
+            break;
+        case 'h':
+            help_msg(argv[0]);
+            return false;
+        case 'p':
+            cli_options->plugins_path = optarg;
+            break;
+        default:
+            error_msg(argv[0]);
+            return false;
+        }
+    }
 
-	return true;
+    return true;
 }
 
-static void signal_handler(int signum) {
-	static int count = 0;
+static void signal_handler(int signum)
+{
+    static int count = 0;
 
-	/* Only handler handle signals in the parent */
-	if (getpid() != parentThread) return;
+    /* Only handler handle signals in the parent */
+    if (getpid() != parentThread) return;
 
-	DEBUG_MSG("signal_handler : signal received\n");
-#ifdef DEBUG
-	PRINT_BACKTRACE();
-#endif // DEBUG
+    DEBUG_MSG("signal_handler : signal received\n");
+    PRINT_BACKTRACE();
 
-	if (count++) _exit(-EFAULT);
+    if (count++) _exit(-EFAULT);
 
-	DEBUG_MSG("signal_handler : finished\n");
-	exit(0);
+    DEBUG_MSG("signal_handler : finished\n");
+    exit(0);
 }

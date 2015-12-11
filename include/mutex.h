@@ -25,61 +25,63 @@
 /*!
  *
  */
-class Mutex {
+class Mutex
+{
 
-	public:
+public:
 
-		/*!
-		 *
-		 */
-		class Locker {
+    /*!
+     *
+     */
+    class Locker
+    {
 
-			public:
+    public:
 
-				/*!
-				 *
-				 */
-				Locker(Mutex *m);
-				~Locker(void);
+        /*!
+         *
+         */
+        Locker(Mutex *m);
+        ~Locker(void);
 
-			private:
+    private:
 
-				Mutex *mutex;
+        Mutex *mutex;
 
-		};
+    };
 
-		/*!
-		 *
-		 */
-		enum type_t {
-			FAST,       /*!< */
-			RECURSIVE,  /*!< */
-		};
+    /*!
+     *
+     */
+    enum type_t {
+        FAST,       /*!< */
+        RECURSIVE,  /*!< */
+    };
 
-		/*!
-		 *
-		 */
-		Mutex(type_t type =FAST);
-		~Mutex(void);
+    /*!
+     *
+     */
+    Mutex(type_t type =FAST);
+    ~Mutex(void);
 
-		/*!
-		 *
-		 */
-		void lock(void);
+    /*!
+     *
+     */
+    void lock(void);
 
-		/*!
-		 *
-		 */
-		void unlock(void);
+    /*!
+     *
+     */
+    void unlock(void);
 
-		/*!
-		 *
-		 */
-		bool tryLock(void);
+    /*!
+     *
+     */
+    bool tryLock(void);
 
-	private:
+private:
 
-		pthread_mutex_t mutex;
+    pthread_mutex_t mutex;
 
 }; // class Mutex
 

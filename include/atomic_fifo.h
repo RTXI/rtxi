@@ -30,7 +30,8 @@
  *
  */
 
-class AtomicFifo {
+class AtomicFifo
+{
 
 public:
     AtomicFifo(size_t);
@@ -43,7 +44,7 @@ public:
      * \param itemSize Size of memory chunk to be copied
      */
     bool write(const void *buffer, size_t itemSize);
-    
+
     /*!
      * Function for reading data from atomic FIFO
      *
@@ -51,7 +52,7 @@ public:
      * \param itemSize Size of memory chunk to be copied into fifo
      */
     bool read(void *buffer, size_t itemSize);
-    
+
     /*!
      *
      * Function to check if FIFO is truly atomic for the hardware architecture
@@ -60,7 +61,7 @@ public:
     bool isLockFree() const;
 private:
     size_t increment(size_t current_ptr, size_t itemSize) const;
-        
+
     char *data;
     std::atomic<size_t> head;
     std::atomic<size_t> tail;

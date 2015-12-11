@@ -1,3 +1,5 @@
+#!/bin/bash
+
 #
 # The Real-Time eXperiment Interface (RTXI)
 # Copyright (C) 2011 Georgia Institute of Technology, University of Utah, Weill Cornell Medical College
@@ -18,8 +20,6 @@
 #	Created by Yogi Patel <yapatel@gatech.edu> 2014.1.31
 #
 
-#!/bin/bash
-
 ###############################################################################
 # Set directory variable for compilation
 ###############################################################################
@@ -28,15 +28,18 @@ ROOT=${DIR}/../
 DEPS=${ROOT}/deps
 HDF=${DEPS}/hdf
 QWT=${DEPS}/qwt
-DYN=${DEPS}/dynamo
 PLG=${ROOT}/plugins
+
+###############################################################################
+# Some easy to use defines
+###############################################################################
+QWT_VERSION=6.1.2
 
 ###############################################################################
 # Check for all RTXI *.deb dependencies and install them. Includes:
 #  - Kernel tools
 #  - C/C++ compiler and debugger
 #  - Qt5, HDF, and Qwt6 libraries
-#  - R and some R packages
 ###############################################################################
 echo "Checking dependencies..."
 
@@ -47,7 +50,7 @@ sudo apt-get -y install autotools-dev automake libtool kernel-package gcc g++ \
                         kernel-wedge libncurses5-dev libelf-dev binutils-dev \
                         libgsl0-dev libboost-dev git vim emacs lshw stress \
                         libqt5svg5-dev libqt5opengl5 libqt5gui5 libqt5core5a \
-                        libqt5xml5 qt5-default
+                        libqt5xml5 qt5-default libgit2-dev libmarkdown2-dev
 sudo apt-get -y build-dep linux
 
 if [ $? -eq 0 ]; then
@@ -84,18 +87,18 @@ fi
 # Installing Qwt
 echo "----->Checking for Qwt"
 
-if [ -f "/usr/local/lib/qwt/include/qwt.h" ]; then
+if [ -f "/usr/local/qwt-${QWT_VERSION}/include/qwt.h" ]; then
 	echo "----->Qwt already installed."
 else
 	echo "----->Installing Qwt..."
 	cd ${QWT}
-	tar xf qwt-6.1.0.tar.bz2
-	cd qwt-6.1.0
+	tar xf qwt-${QWT_VERSION}.tar.bz2
+	cd qwt-${QWT_VERSION}
 	qmake qwt.pro
 	make -sj2
 	sudo make install
-	sudo cp /usr/local/lib/qwt/lib/libqwt.so.6.1.0 /usr/lib/.
-	sudo ln -sf /usr/lib/libqwt.so.6.1.0 /usr/lib/libqwt.so
+	sudo cp -vf /usr/local/qwt-${QWT_VERSION}/lib/libqwt.so.6.1.2 /usr/lib/.
+	sudo ln -sf /usr/lib/libqwt.so.${QWT_VERSION} /usr/lib/libqwt.so
 	sudo ldconfig
 	if [ $? -eq 0 ]; then
 		echo "----->Qwt installed."
@@ -105,7 +108,9 @@ else
 	fi
 fi
 
-# Install rtxi_includes
+# (Re)install rtxi_includes. Remove the moc files first. Failing to do so when 
+# upgrading from Qt4 to Qt5 will cause compilation errors later on. 
+[ -d /usr/local/lib/rtxi_includes ] && sudo rm -r /usr/local/lib/rtxi_includes/moc_*
 sudo rsync -a ${DEPS}/rtxi_includes /usr/local/lib/.
 if [ $? -eq 0 ]; then
 	echo "----->rtxi_includes synced."
@@ -114,19 +119,3 @@ else
 	exit
 fi
 find ${PLG}/. -name "*.h" -exec cp -t /usr/local/lib/rtxi_includes/ {} +
-
-# Install dynamo
-echo "Installing DYNAMO utility..."
-
-sudo apt-get -y install mlton
-cd ${DYN}
-mllex dl.lex
-mlyacc dl.grm
-mlton dynamo.mlb
-sudo cp dynamo /usr/bin/
-if [ $? -eq 0 ]; then
-	echo "----->DYNAMO translation utility installed."
-else
-	echo "----->DYNAMO translation utility installation failed."
-	exit
-fi

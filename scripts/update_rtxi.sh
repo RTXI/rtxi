@@ -1,3 +1,5 @@
+#!/bin/bash
+
 #
 # The Real-Time eXperiment Interface (RTXI)
 # Copyright (C) 2011 Georgia Institute of Technology, University of Utah, Weill Cornell Medical College
@@ -18,17 +20,16 @@
 #	Created by Yogi Patel <yapatel@gatech.edu> 2014.1.31
 #
 
-#!/bin/bash
-
 # Directories
-DIR=$PWD
+cd $RTXI_GIT
 
 # Determine if remote-local results in a number > 0
 VAL=$(git rev-list HEAD...origin/qt5 --count)
 
 if [ $VAL -eq 0 ]; then
 	echo "----->RTXI up-to-date."
-	exit
+	exit 0
 else
 	echo "----->RTXI update available."
+	exit 1
 fi

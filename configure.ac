@@ -1,4 +1,22 @@
-AC_INIT([RTXI],[2.1],[help@rtxi.org],rtxi)
+#
+# The Real-Time eXperiment Interface (RTXI)
+# Copyright (C) 2011 Georgia Institute of Technology, University of Utah, Weill Cornell Medical College
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+
+AC_INIT([RTXI],[2.1-rc1],[help@rtxi.org],rtxi)
 
 AM_CONFIG_HEADER(include/rtxi_config.h)
 AM_INIT_AUTOMAKE([foreign])
@@ -112,13 +130,11 @@ plugins/Makefile
 plugins/analogy_device/Makefile
 plugins/connector/Makefile
 plugins/data_recorder/Makefile
-plugins/dynamo_model_loader/Makefile
 plugins/model_loader/Makefile
 plugins/oscilloscope/Makefile
 plugins/performance_measurement/Makefile
 plugins/system_control/Makefile
 plugins/userprefs/Makefile
-deps/hdf/Makefile
 ])
 
 dnl Generate config.status and launch it

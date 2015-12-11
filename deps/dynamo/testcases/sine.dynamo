@@ -1,9 +1,0 @@
-SYSTEM sine;
-
-EXTERNAL OUTPUT Vout;
-
-TIME t;
-
-AT TIME t:
-
-Vout = sin(t);

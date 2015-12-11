@@ -1,3 +1,5 @@
+#!/bin/bash
+
 #
 # The Real-Time eXperiment Interface (RTXI)
 # Copyright (C) 2011 Georgia Institute of Technology, University of Utah, Weill Cornell Medical College
@@ -18,13 +20,13 @@
 #	Created by Yogi Patel <yapatel@gatech.edu> 2014.1.31
 #
 
-#!/bin/bash
-
 # Directories
 ROOT=../
-DEPS=../deps/
+MODS=/usr/local/lib/rtxi_modules/
+DEPS=${ROOT}/deps/
 HDF=${DEPS}/hdf
 QWT=${DEPS}/qwt
+RTXI_LIB=/usr/local/lib/rtxi/
 
 # Start at top
 cd ${ROOT}
@@ -35,17 +37,17 @@ echo "----->Starting RTXI installation..."
 
 echo "----->Kernel configuration..."
 echo "1. Xenomai+Analogy (RT)"
-echo "2. POSIX (Non-RT)"
-echo "3. POSIX (Non-RT) Debug"
+echo "2. Xenomai+Analogy (RT) Debug"
+echo "3. POSIX (Non-RT)"
 echo "----->Please select your configuration and then press enter:"
 read kernel
 
 if [ $kernel -eq "1" ]; then
 	./configure --enable-xenomai --enable-analogy --disable-debug
 elif [ $kernel -eq "2" ]; then
-	./configure --enable-posix --disable-debug
+	./configure --enable-xenomai --enable-analogy --enable-debug
 elif [ $kernel -eq "3" ]; then
-	./configure --enable-posix --enable-debug
+	./configure --enable-posix --disable-debug
 else
 	echo "Invalid configuration."
 	exit 1
@@ -70,25 +72,57 @@ else
 fi
 
 echo "----->Putting things into place."
-sudo cp -f libtool /usr/local/lib/rtxi/
-sudo cp -f scripts/icons/RTXI-icon.png /usr/local/lib/rtxi/
-sudo cp -f scripts/icons/RTXI-widget-icon.png /usr/local/lib/rtxi
+sudo mkdir -p ${RTXI_LIB}
+sudo cp -f libtool ${RTXI_LIB}
+sudo cp -f scripts/icons/RTXI-icon.png ${RTXI_LIB}
+sudo cp -f scripts/icons/RTXI-widget-icon.png ${RTXI_LIB}
 sudo cp -f scripts/rtxi.desktop /usr/share/applications/
+sudo cp -f scripts/update_rtxi.sh /usr/local/share/rtxi/.
 cp -f scripts/rtxi.desktop ~/Desktop/
 chmod +x ~/Desktop/rtxi.desktop
 sudo cp -f rtxi.conf /etc/
 sudo cp -f /usr/xenomai/sbin/analogy_config /usr/sbin/
 
 if [ $(lsb_release -sc) == "jessie" ]; then
-	echo "Load analogy driver with systemd"
+	echo "----->Load analogy driver with systemd"
 	sudo cp -f ./scripts/services/rtxi_load_analogy.service /etc/systemd/system/
 	sudo systemctl enable rtxi_load_analogy.service
 else
-	echo "Load analogy driver with sysvinit/upstart"
+	echo "----->Load analogy driver with sysvinit/upstart"
 	sudo cp -f ./scripts/services/rtxi_load_analogy /etc/init.d/
 	sudo update-rc.d rtxi_load_analogy defaults
 fi
 sudo ldconfig
+
+if [ $? -eq 0 ]; then
+	echo "----->Successfully placed files.."
+else
+	echo "----->Failed to place files."
+	exit
+fi
+
+# TEMPORARY WORKAROUND
+echo "----->Installing basic modules."
+sudo mkdir -p ${MODS}
+cd ${MODS}
+sudo git clone https://github.com/RTXI/analysis-tools.git
+sudo git clone https://github.com/RTXI/iir-filter.git
+sudo git clone https://github.com/RTXI/fir-window.git
+sudo git clone https://github.com/RTXI/sync.git
+sudo git clone https://github.com/RTXI/mimic-signal.git
+sudo git clone https://github.com/RTXI/signal-generator.git
+sudo git clone https://github.com/RTXI/ttl-pulses.git
+sudo git clone https://github.com/RTXI/wave-maker.git
+sudo git clone https://github.com/RTXI/noise-generator.git
+
+for dir in ${MODS}/*; do
+	if [ -d "$dir" ]; then
+		sudo make clean -C "$dir"
+		sudo git -C "$dir" pull
+		sudo make -C "$dir"
+		sudo make install -C "$dir"
+	fi
+done
 
 echo ""
 if [ $? -eq 0 ]; then

@@ -1,3 +1,5 @@
+#!/bin/bash
+
 #
 # The Real-Time eXperiment Interface (RTXI)
 # Copyright (C) 2011 Georgia Institute of Technology, University of Utah, Weill Cornell Medical College
@@ -18,22 +20,29 @@
 #	Created by Yogi Patel <yapatel@gatech.edu> 2014.1.31
 #
 
-#!/bin/bash
-
 # Directories
 DIR=$PWD
 ROOT=${DIR}/..
+RTXI_LIB=/usr/local/lib/rtxi
+QWT_LIB=/usr/local/lib/qwt
+RTXI_INC_LIB=/usr/local/lib/rtxi_includes
+RTXI_INC=/usr/local/include/rtxi
+RTXI_BIN=/usr/local/bin/rtxi*
+RTXI_SHARE=/usr/local/share/rtxi
+ETC=/etc/rtxi.conf
 
 cd ${ROOT}
 
 # Uninstall rtxi
 sudo make uninstall
 sudo make clean
-sudo rm -rf /usr/local/lib/rtxi
-sudo rm -rf /usr/local/lib/qwt
-sudo rm -rf /usr/local/lib/rtxi_includes
-sudo rm -rf /usr/local/include/rtxi
-sudo rm -rf /etc/rtxi.conf
+sudo rm -rf ${RTXI_LIB}
+sudo rm -rf ${QWT_LIB}
+sudo rm -rf ${RTXI_INC_LIB}
+sudo rm -rf ${RTXI_INC}
+sudo rm -rf ${RTXI_BIN}
+sudo rm -rf ${RTXI_SHARE}
+sudo rm -rf ${ETC}
 
 # Remove old qt/qwt installations
 if [ $(dpkg-query -W -f='${Status}' qt4-dev-tools 2>/dev/null | grep -c "ok installed") -eq 1 ];

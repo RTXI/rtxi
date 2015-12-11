@@ -1,7 +1,25 @@
+#
+# The Real-Time eXperiment Interface (RTXI)
+# Copyright (C) 2011 Georgia Institute of Technology, University of Utah, Weill Cornell Medical College
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+
 # this is to include the Autoconf scripts in subdir m4/
 ACLOCAL_AMFLAGS=-I m4
 
-SUBDIRS = rtxi plugins scripts deps/hdf
+SUBDIRS = rtxi plugins scripts
 
 ACLOCAL_DIST = m4/ac_pkg_swig.m4 \
 	       m4/ac_python_devel.m4 \
@@ -12,25 +30,19 @@ DEBIAN_DIST = debian/changelog  \
               debian/conffiles  \
               debian/copyright  \
               debian/rules      \
-              debian/rules.rtxi-dynamo    \
               debian/rules.rtxi-base      \
               debian/rtxi-base.rtxi.init  
 
 EXTRA_DIST  = autogen.sh TODO $(DEBIAN_DIST) $(ACLOCAL_DIST)
 
 dist-hook: ChangeLog
-	find $(srcdir)/dynamo -name "*.mlb" -or -name "*.sig" -or -name "*.sml" -or \
-                              -name "*.grm" -or -name "*.lex" -or -name "*.dynamo" -or \
-                              -name "*.texi" -or -name "*.1" -or \
-                              -name "ChangeLog" -or -name README  | cpio -pvd $(distdir)
-
 
 CLEANFILES            = *~ src/moc_*.cpp 
 DISTCLEANFILES        = rtxi.conf Makefile.modcompile config.log about.h rtos
 MAINTAINERCLEANFILES  = aclocal.m4 configure config.guess config.sub Makefile.in
 MAINTAINERCLEANDIRS   = autom4te.cache
 
-pkgdata_DATA = rtxi.conf Makefile.dynamo_compile Makefile.plugin_compile Makefile.plugin_example
+pkgdata_DATA = rtxi.conf Makefile.plugin_compile Makefile.plugin_example
 
 pkgdata_SCRIPTS = libtool
 
@@ -49,57 +61,21 @@ rtxi.conf:
 	@echo ' <OBJECT component="io" id="1" >'					>> $@
 	@echo '  <PARAM name="Num Links" >0</PARAM>'					>> $@
 	@echo ' </OBJECT>'								>> $@
-if BUILD_ANALOGY 
 	@echo ' <OBJECT component="plugin" library="analogy_driver.so" id="2" >'		>> $@
 	@echo '  <PARAM name="0" >analogy0</PARAM>'					>> $@
 	@echo '  <PARAM name="Num Devices" >1</PARAM>'					>> $@
 	@echo '  <OBJECT id="13" name="0" />'						>> $@
 	@echo ' </OBJECT>'								>> $@
-endif
 	@echo ' <OBJECT component="plugin" library="model_loader.so" id="3" />'		>> $@
-	@echo ' <OBJECT component="plugin" library="dynamo_model_loader.so" id="4" />'	>> $@
-	@echo ' <OBJECT component="plugin" library="system_control.so" id="5" />'	>> $@
-	@echo ' <OBJECT component="plugin" library="oscilloscope.so" id="6" >'		>> $@
+	@echo ' <OBJECT component="plugin" library="system_control.so" id="4" />'	>> $@
+	@echo ' <OBJECT component="plugin" library="oscilloscope.so" id="5" >'		>> $@
 	@echo '  <PARAM name="Num Panels" >0</PARAM>'					>> $@
 	@echo ' </OBJECT>'								>> $@
-	@echo ' <OBJECT component="plugin" library="data_recorder.so" id="7" />'	>> $@
-	@echo ' <OBJECT component="plugin" library="connector.so" id="8" />'		>> $@
-	@echo ' <OBJECT component="plugin" library="performance_measurement.so" id="9" />'>> $@
-	@echo ' <OBJECT component="plugin" library="userprefs.so" id="10" />'>> $@
+	@echo ' <OBJECT component="plugin" library="data_recorder.so" id="6" />'	>> $@
+	@echo ' <OBJECT component="plugin" library="connector.so" id="7" />'		>> $@
+	@echo ' <OBJECT component="plugin" library="performance_measurement.so" id="8" />'>> $@
+	@echo ' <OBJECT component="plugin" library="userprefs.so" id="9" />'>> $@
 	@echo '</RTXI>'									>> $@
-
-Makefile.dynamo_compile:  
-	@echo "Generating Makefile.dynamo_compile..."
-	@echo ''						 	>  $@
-	@echo 'exec_modeldir  = ' $(pkglibdir) 				>> $@
-	@echo ''						 	>> $@
-	@echo '.SUFFIXES:      .dynamo .o .so'			 	>> $@
-	@echo ''						 	>> $@
-	@echo 'MOD_TRANSLATOR = ' dynamo			 	>> $@
-	@echo 'LIBTOOL        = ' $(pkglibdir)/libtool		 	>> $@
-	@echo 'CXX            = ' $(CXX)			 	>> $@
-	@echo 'CXXLD          = ' $(CXX)			 	>> $@
-	@echo 'CXXCOMPILE     = $$(LIBTOOL) --mode=compile $$(CXX)'     >> $@
-	@echo 'CXXLINK	      = $$(LIBTOOL) --mode=link $$(CXXLD)'	>> $@
-	@echo ''                                                        >> $@
-	@echo 'CXXFLAGS := -I. -I/usr/include/python2.6 -I'$(pkgincludedir) $(AM_CXXFLAGS) 	>> $@
-	@echo 'LDFLAGS  := ' $(AM_LDFLAGS) -module -avoid-version	>> $@
-	@echo ''                                                        >> $@
-	@echo 'ifdef DEBUG '						>> $@
-	@echo 'CXXFLAGS += -DDEBUG'					>> $@
-	@echo 'endif'							>> $@
-	@echo ''                                                        >> $@
-	@echo '.dynamo.so:'					 	>> $@
-	@echo '	$$(MOD_TRANSLATOR) -x -o`basename $$*` $$*.dynamo'      >> $@
-	@echo '	@echo Translation complete'		         	>> $@
-	@echo '	$$(CXXCOMPILE) $$(CXXFLAGS)  -c $$*.cpp -o $$*.lo'      >> $@
-	@echo '	@echo Compilation complete'		         	>> $@
-	@echo '	$$(CXXLINK) $$(CXXFLAGS) $$(LDFLAGS) \
-		-rpath `readlink -f $$<`  -o $$*.la $$*.lo'		>> $@
-	@echo '	@echo Module created'			         	>> $@
-	@echo '	$$(LIBTOOL) --mode=install cp $$*.la `readlink -f $$<`'	>> $@
-	@echo '	@echo Module installed'			         	>> $@
-	@echo ''						 	>> $@
 
 Makefile.plugin_compile: Makefile
 	@echo "Generating Makefile.plugin_compile..."

@@ -49,177 +49,171 @@
 #include <list>
 #include <vector>
 
-class Scope : public QwtPlot {
+class Scope : public QwtPlot
+{
 
-	Q_OBJECT
+    Q_OBJECT
 
-		friend class Panel;
+    friend class Panel;
 
-	public:
+public:
 
-	class Channel {
-		friend class Scope;
+    class Channel
+    {
+        friend class Scope;
 
-		public:
-		Channel(void);
-		virtual ~Channel(void);
-		void *getInfo(void);
-		const void *getInfo(void) const;
-		double getScale(void) const;
-		double getOffset(void) const;
-		QPen getPen(void) const;
-		QString getLabel(void) const;
+    public:
+        Channel(void);
+        virtual ~Channel(void);
+        void *getInfo(void);
+        const void *getInfo(void) const;
+        double getScale(void) const;
+        double getOffset(void) const;
+        QPen getPen(void) const;
+        QString getLabel(void) const;
 
-		private:
-		QString label;
-		double scale;
-		double offset;
-		std::vector<double> prevdata;
-		std::vector<double> data;
-		QwtPlotCurve *curve;
-		void *info;
-	}; // Channel
+    private:
+        QString label;
+        double scale;
+        double offset;
+        std::vector<double> data;
+        QwtPlotCurve *curve;
+        void *info;
+    }; // Channel
 
-	class LegendItem : public QwtPlotLegendItem {
+    class LegendItem : public QwtPlotLegendItem
+    {
 
-		public:
-			LegendItem()
-			{
-				setRenderHint(QwtPlotItem::RenderAntialiased);
-				QColor color(Qt::black);
-				setTextPen(color);
-			}
-	}; // LegendItem
+    public:
+        LegendItem() {
+            setRenderHint(QwtPlotItem::RenderAntialiased);
+            QColor color(Qt::black);
+            setTextPen(color);
+        }
+    }; // LegendItem
 
-	class Canvas : public QwtPlotCanvas {
+    class Canvas : public QwtPlotCanvas
+    {
 
-		public:
-			Canvas(QwtPlot *plot = NULL) : QwtPlotCanvas(plot) {
-				setPaintAttribute(QwtPlotCanvas::BackingStore, false);
+    public:
+        Canvas(QwtPlot *plot = NULL) : QwtPlotCanvas(plot) {
+            setPaintAttribute(QwtPlotCanvas::BackingStore, false);
 
-				if(QwtPainter::isX11GraphicsSystem()) {
+            if(QwtPainter::isX11GraphicsSystem()) {
 #if QT_VERSION < 0x050000
-					setAttribute( Qt::WA_PaintOutsidePaintEvent, true );
+                setAttribute( Qt::WA_PaintOutsidePaintEvent, true );
 #endif
-					if(testPaintAttribute(QwtPlotCanvas::BackingStore)) {
-						setAttribute(Qt::WA_PaintOnScreen, true);
-						setAttribute(Qt::WA_NoSystemBackground, true);
-					}
-				}
-				setupPalette();
-			}
+                if(testPaintAttribute(QwtPlotCanvas::BackingStore)) {
+                    setAttribute(Qt::WA_PaintOnScreen, true);
+                    setAttribute(Qt::WA_NoSystemBackground, true);
+                }
+            }
+            setupPalette();
+        }
 
-		private:
-			void setupPalette()	{
-				QPalette pal = palette();
+    private:
+        void setupPalette()	{
+            QPalette pal = palette();
 
 #if QT_VERSION >= 0x040400
-				QLinearGradient gradient;
-				gradient.setCoordinateMode(QGradient::StretchToDeviceMode);
-				gradient.setColorAt(1.0, QColor(Qt::white));
-				pal.setBrush(QPalette::Window, QBrush(gradient));
+            QLinearGradient gradient;
+            gradient.setCoordinateMode(QGradient::StretchToDeviceMode);
+            gradient.setColorAt(1.0, QColor(Qt::white));
+            pal.setBrush(QPalette::Window, QBrush(gradient));
 #else
-				pal.setBrush(QPalette::Window, QBrush(color));
+            pal.setBrush(QPalette::Window, QBrush(color));
 #endif
-				pal.setColor(QPalette::WindowText, Qt::green);
-				setPalette(pal);
-			}
-	}; // Canvas
+            pal.setColor(QPalette::WindowText, Qt::green);
+            setPalette(pal);
+        }
+    }; // Canvas
 
-	enum trig_t{
-		NONE,
-		POS,
-		NEG,
-	};
+    enum trig_t {
+        NONE,
+        POS,
+        NEG,
+    };
 
-	Scope(QWidget * = NULL);
-	virtual ~Scope(void);
+    Scope(QWidget * = NULL);
+    virtual ~Scope(void);
 
-	bool paused(void) const;
-	std::list<Channel>::iterator insertChannel(QString,double,double,const QPen &,QwtPlotCurve *,void *);
-	void *removeChannel(std::list<Channel>::iterator);
-	size_t getChannelCount(void) const;
-	std::list<Channel>::iterator getChannelsBegin(void);
-	std::list<Channel>::iterator getChannelsEnd(void);
+    bool paused(void) const;
+    std::list<Channel>::iterator insertChannel(QString,double,double,const QPen &,QwtPlotCurve *,void *);
+    void *removeChannel(std::list<Channel>::iterator);
+    size_t getChannelCount(void) const;
+    std::list<Channel>::iterator getChannelsBegin(void);
+    std::list<Channel>::iterator getChannelsEnd(void);
 
-	std::list<Channel>::const_iterator getChannelsBegin(void) const;
-	std::list<Channel>::const_iterator getChannelsEnd(void) const;
+    std::list<Channel>::const_iterator getChannelsBegin(void) const;
+    std::list<Channel>::const_iterator getChannelsEnd(void) const;
 
-	void clearData(void);
-	void setData(double *,size_t);
-	size_t getDataSize(void) const;
-	void setDataSize(size_t);
+    void clearData(void);
+    void setData(double *,size_t);
+    size_t getDataSize(void) const;
+    void setDataSize(size_t);
 
-	trig_t getTriggerDirection(void);
-	double getTriggerThreshold(void);
-	std::list<Channel>::iterator getTriggerChannel(void);
-	bool getTriggerHolding(void);
-	double getTriggerHoldoff(void);
-	void setTrigger(trig_t,double,std::list<Channel>::iterator,bool,double);
+    trig_t getTriggerDirection(void);
+    double getTriggerThreshold(void);
+    double getTriggerWindow(void);
+    std::list<Channel>::iterator getTriggerChannel(void);
+    void setTrigger(trig_t,double,std::list<Channel>::iterator,double);
 
-	double getDivT(void) const;
-	void setDivT(double);
+    double getDivT(void) const;
+    void setDivT(double);
 
-	void setPeriod(double);
-	size_t getDivX(void) const;
-	size_t getDivY(void) const;
+    void setPeriod(double);
+    size_t getDivX(void) const;
+    size_t getDivY(void) const;
 
-	size_t getRefresh(void) const;
-	void setRefresh(size_t);
+    size_t getRefresh(void) const;
+    void setRefresh(size_t);
 
-	bool isPaused;
+    bool isPaused;
 
-	void setChannelScale(std::list<Channel>::iterator,double);
-	void setChannelOffset(std::list<Channel>::iterator,double);
-	void setChannelPen(std::list<Channel>::iterator,const QPen &);
-	void setChannelLabel(std::list<Channel>::iterator,const QString &);
+    void setChannelScale(std::list<Channel>::iterator,double);
+    void setChannelOffset(std::list<Channel>::iterator,double);
+    void setChannelPen(std::list<Channel>::iterator,const QPen &);
+    void setChannelLabel(std::list<Channel>::iterator,const QString &);
 
-	void updateScopeLayout();
+private slots:
+    void timeoutEvent(void);
 
-	private slots:
-		void timeoutEvent(void);
+protected:
+    void resizeEvent(QResizeEvent *);
 
-	protected:
-	void resizeEvent(QResizeEvent *);
+private:
+    void drawCurves(void);
+    size_t divX;
+    size_t divY;
+    size_t data_idx;
+    size_t data_size;
+    double hScl;        // horizontal scale for time (ms)
+    double period;      // real-time period of system (ms)
+    size_t refresh;
+    bool triggering;
+    trig_t triggerDirection;
+    double triggerThreshold;
+    double triggerWindow;
+    std::list<size_t> triggerQueue;
+    std::list<Channel>::iterator triggerChannel;
 
-	private:
-	void drawCurves(void);
-	void incrementInterval();
+    // Scope primary paint element
+    QwtPlotDirectPainter *d_directPainter;
 
-	size_t divX;
-	size_t divY;
-	size_t data_idx;
-	size_t data_size;
-	double hScl;        // horizontal scale for time (ms)
-	double period;      // real-time period of system (ms)
-	size_t refresh;
+    // Scope painter elements
+    QwtPlotGrid *grid;
+    QwtPlotMarker *origin;
 
-	bool triggering;
-	bool triggerHolding;
-	trig_t triggerDirection;
-	double triggerThreshold;
-	double triggerHoldoff;
-	std::list<size_t> triggerQueue;
-	std::list<Channel>::iterator triggerChannel;
-	size_t triggerLast;
+    // Scaling engine
+    QwtScaleMap *scaleMapY;
+    QwtScaleMap *scaleMapX;
 
-	// Scope primary paint element
-	QwtPlotDirectPainter *d_directPainter;
+    // Legend
+    LegendItem *legendItem;
 
-	// Scope painter elements
-	QwtPlotGrid *grid;
-  QwtPlotMarker *origin;
-
-	// Scaling engine
-	QwtScaleMap *scaleMapY;
-	QwtScaleMap *scaleMapX;
-
-	// Legend
-	LegendItem *legendItem;
-
-	QTimer *timer;
-	QString dtLabel;
-	std::list<Channel> channels;
+    QTimer *timer;
+    QString dtLabel;
+    std::list<Channel> channels;
 }; // Scope
 
 #endif // SCOPE_H

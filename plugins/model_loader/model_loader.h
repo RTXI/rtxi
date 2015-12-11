@@ -26,18 +26,18 @@
 
 class ModelLoader : public QObject, public Plugin::Object
 {
-	Q_OBJECT
+    Q_OBJECT
 
-	public:
-		ModelLoader(void);
-		virtual ~ModelLoader(void);
+public:
+    ModelLoader(void);
+    virtual ~ModelLoader(void);
 
-		public slots:
-			void load(void);
+public slots:
+    void load(void);
 
-	private:
-		QAction* action;
-		void updateRecentModules(QString, int);
+private:
+    QAction* action;
+    void updateRecentModules(QString, int);
 };
 
 #endif /* MODEL_LOADER_H */
