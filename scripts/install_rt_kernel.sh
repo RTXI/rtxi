@@ -1,3 +1,5 @@
+#!/bin/bash
+
 #
 # The Real-Time eXperiment Interface (RTXI)
 # Copyright (C) 2011 Georgia Institute of Technology, University of Utah, Weill Cornell Medical College
@@ -18,8 +20,6 @@
 #	Created by Yogi Patel <yapatel@gatech.edu> 2014.1.31
 #
 
-#!/bin/bash
-
 if ! id | grep -q root; then
   echo "Must run script as root; try again with sudo ./install_rt_kernel.sh"
 	exit
@@ -27,17 +27,15 @@ fi
 
 # Export environment variables
 echo  "----->Setting up variables"
-export linux_version=3.18.12
+export linux_version=3.18.20
 export linux_tree=/opt/linux-$linux_version
 
-export xenomai_version=3.0-rc6
+export xenomai_version=3.0.1
 export xenomai_root=/opt/xenomai-$xenomai_version
-
-export patch_version=
 
 export scripts_dir=`pwd`
 
-export build_root=/opt/buildx3rc6
+export build_root=/opt/build
 export opt=/opt
 
 rm -rf $build_root
@@ -55,11 +53,11 @@ fi
 # Download essentials
 echo  "----->Downloading Linux kernel"
 cd $opt
-#wget --no-check-certificate http://www.kernel.org/pub/linux/kernel/v3.x/linux-$linux_version.tar.gz
-tar xzf linux-$linux_version.tar.gz
+wget --no-check-certificate https://www.kernel.org/pub/linux/kernel/v3.x/linux-$linux_version.tar.gz
+tar xf linux-$linux_version.tar.gz
 
 echo  "----->Downloading Xenomai"
-wget --no-check-certificate http://xenomai.org/downloads/xenomai/testing/latest/xenomai-3.0-rc6.tar.bz2
+wget --no-check-certificate http://xenomai.org/downloads/xenomai/stable/xenomai-$xenomai_version.tar.bz2
 tar xf xenomai-$xenomai_version.tar.bz2
 
 if [ $? -eq 0 ]; then
@@ -72,7 +70,7 @@ fi
 # Patch kernel
 echo  "----->Patching kernel"
 cd $linux_tree
-$xenomai_root/scripts/prepare-kernel.sh --arch=x86_64 --adeos=$xenomai_root/kernel/cobalt/arch/x86/patches/ipipe-core-3.18.12-x86-1.patch --linux=$linux_tree
+$xenomai_root/scripts/prepare-kernel.sh --arch=x86 --adeos=$xenomai_root/kernel/cobalt/arch/x86/patches/ipipe-core-3.18.20-x86-3.patch --linux=$linux_tree
 yes "" | make localmodconfig
 make menuconfig
 
@@ -125,7 +123,7 @@ fi
 # Install user libraries
 echo  "----->Installing user libraries"
 cd $build_root
-$xenomai_root/configure --enable-pshared --enable-smp
+$xenomai_root/configure --enable-shared --enable-smp --enable-x86-sep
 make -s
 sudo make install
 
