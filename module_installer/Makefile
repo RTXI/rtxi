@@ -7,7 +7,7 @@ SOURCES = rtxi_wizard.cpp \
           module_utils.cpp \
           moc_rtxi_wizard.cpp
 
-LIBS += -lQt5Network -lgit2 -lmarkdown
+LIBS += -lgit2 -lmarkdown
 
 ### Do not edit below this line ###
 
