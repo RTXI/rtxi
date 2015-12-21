@@ -67,14 +67,15 @@ rtxi.conf:
 	@echo '  <OBJECT id="13" name="0" />'						>> $@
 	@echo ' </OBJECT>'								>> $@
 	@echo ' <OBJECT component="plugin" library="model_loader.so" id="3" />'		>> $@
-	@echo ' <OBJECT component="plugin" library="system_control.so" id="4" />'	>> $@
-	@echo ' <OBJECT component="plugin" library="oscilloscope.so" id="5" >'		>> $@
+	@echo ' <OBJECT component="plugin" library="module_installer.so" id="4" />'		>> $@
+	@echo ' <OBJECT component="plugin" library="system_control.so" id="5" />'	>> $@
+	@echo ' <OBJECT component="plugin" library="oscilloscope.so" id="6" >'		>> $@
 	@echo '  <PARAM name="Num Panels" >0</PARAM>'					>> $@
 	@echo ' </OBJECT>'								>> $@
-	@echo ' <OBJECT component="plugin" library="data_recorder.so" id="6" />'	>> $@
-	@echo ' <OBJECT component="plugin" library="connector.so" id="7" />'		>> $@
-	@echo ' <OBJECT component="plugin" library="performance_measurement.so" id="8" />'>> $@
-	@echo ' <OBJECT component="plugin" library="userprefs.so" id="9" />'>> $@
+	@echo ' <OBJECT component="plugin" library="data_recorder.so" id="7" />'	>> $@
+	@echo ' <OBJECT component="plugin" library="connector.so" id="8" />'		>> $@
+	@echo ' <OBJECT component="plugin" library="performance_measurement.so" id="9" />'>> $@
+	@echo ' <OBJECT component="plugin" library="userprefs.so" id="10" />'>> $@
 	@echo '</RTXI>'									>> $@
 
 Makefile.plugin_compile: Makefile

@@ -135,6 +135,7 @@ plugins/oscilloscope/Makefile
 plugins/performance_measurement/Makefile
 plugins/system_control/Makefile
 plugins/userprefs/Makefile
+plugins/module_installer/Makefile
 ])
 
 dnl Generate config.status and launch it
