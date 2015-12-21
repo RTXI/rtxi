@@ -1202,7 +1202,34 @@ void DataRecorder::Panel::closeFile(bool shutdown)
     }
 #endif
 
-    H5Fclose(file.id);
+				// Write tags to data file
+				hid_t tag_type, tag_space, data;
+				herr_t status;
+				hsize_t dims[1] = {1};
+				tag_type = H5Tcreate(H5T_STRING, TAG_SIZE);
+				tag_space = H5Screate_simple(1, dims, NULL);
+
+				// Create group for tags
+				file.tdata = H5Gcreate(file.id, "Tags", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+				// Iterate over vector (buffer) and put into data file
+				size_t i = 0;
+				for(std::vector<std::string>::iterator it = dataTags.begin(); it != dataTags.end(); ++it)
+				{
+					data = H5Dcreate(file.tdata, std::string("Tag " + std::to_string(i++)).c_str(), tag_type, tag_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+					status = H5Dwrite(data, tag_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, it->c_str());
+				}
+				dataTags.clear();
+
+				// Close all open structs
+				H5Dclose(data);
+				H5Sclose(tag_space);
+				H5Tclose(tag_type);
+				H5Gclose(file.tdata);
+
+				// Close file
+				H5Fclose(file.id);
+
     if (!shutdown) {
         mutex.lock();
         CustomEvent *event = new CustomEvent(static_cast<QEvent::Type>QSetFileNameEditEvent);
@@ -1350,35 +1377,13 @@ void DataRecorder::Panel::stopRecording(long long timestamp)
     H5Dwrite(data, H5T_STD_U64LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &datalength);
     H5Dclose(data);
 
-		// Write tags to data file
-    hid_t tag_type, tag_space;
-    herr_t status;
-    hsize_t dims[1] = {1};
-    tag_type = H5Tcreate(H5T_STRING, TAG_SIZE);
-    tag_space = H5Screate_simple(1, dims, NULL);
-
-		// Create group for tags
-		file.tdata = H5Gcreate(file.trial, "Tags", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-
-		// Iterate over vector (buffer) and put into data file
-		size_t i = 0;
-		for(std::vector<std::string>::iterator it = dataTags.begin(); it != dataTags.end(); ++it)
-		{
-			data = H5Dcreate(file.tdata, std::string("Tag " + std::to_string(i++)).c_str(), tag_type, tag_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-			status = H5Dwrite(data, tag_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, it->c_str());
-		}
-		dataTags.clear();
-
 		// Close all open structs
     H5Sclose(scalar_space);
-    H5Sclose(tag_space);
-    H5Tclose(tag_type);
     H5PTclose(file.cdata);
     H5Gclose(file.sdata);
     H5Gclose(file.pdata);
     H5Gclose(file.adata);
     H5Gclose(file.trial);
-    H5Gclose(file.tdata);
 
     H5Fflush(file.id, H5F_SCOPE_LOCAL);
     void *file_handle;
