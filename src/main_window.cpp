@@ -290,6 +290,23 @@ void MainWindow::updateCheck(void)
     }
 }
 
+/*
+ * Load MainWindow settings
+ */
+void MainWindow::loadWindow(void)
+{
+	QSettings userprefs;
+	userprefs.setPath (QSettings::NativeFormat, QSettings::SystemScope, "/usr/local/share/rtxi/");
+	userprefs.beginGroup("MainWindow");
+	restoreGeometry(userprefs.value("geometry", saveGeometry()).toByteArray());
+	move(userprefs.value("pos", pos()).toPoint());
+	resize(userprefs.value("size", size()).toSize());
+	if(userprefs.value("maximized", isMaximized()).toBool())
+		showMaximized();
+	userprefs.endGroup();
+	show();
+}
+
 void MainWindow::loadSettings (void)
 {
     QSettings userprefs;
@@ -302,17 +319,6 @@ void MainWindow::loadSettings (void)
         systemMenu->clear();
         mdiArea->closeAllSubWindows();
         Settings::Manager::getInstance()->load(filename.toStdString());
-
-				/*
-				 * Load MainWindow settings
-				 */
-				userprefs.beginGroup("MainWindow");
-				restoreGeometry(userprefs.value("geometry", saveGeometry()).toByteArray());
-				move(userprefs.value("pos", pos()).toPoint());
-				resize(userprefs.value("size", size()).toSize());
-				if(userprefs.value("maximized", isMaximized()).toBool())
-					showMaximized();
-				userprefs.endGroup();
 		}
 }
 
@@ -335,18 +341,6 @@ void MainWindow::saveSettings(void)
 			return;
 		}
 		Settings::Manager::getInstance()->save(filename.toStdString());
-
-		/*
-		 * Save MainWindow settings
-		 */
-		userprefs.beginGroup("MainWindow");
-		userprefs.setValue("geometry", saveGeometry());
-		userprefs.setValue("maximized", isMaximized());
-		if(!isMaximized()) {
-			userprefs.setValue("pos", pos());
-			userprefs.setValue("size", size());
-		}
-		userprefs.endGroup();
 	}
 }
 
@@ -430,6 +424,23 @@ void MainWindow::fileMenuActivated(QAction *id)
     systemMenu->clear();
     mdiArea->closeAllSubWindows();
     Settings::Manager::getInstance()->load(id->text().remove(0,3).toStdString());
+}
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+	/*
+	 * Save MainWindow settings
+	 */
+	QSettings userprefs;
+	userprefs.setPath (QSettings::NativeFormat, QSettings::SystemScope, "/usr/local/share/rtxi/");
+	userprefs.beginGroup("MainWindow");
+	userprefs.setValue("geometry", saveGeometry());
+	userprefs.setValue("maximized", isMaximized());
+	if(!isMaximized()) {
+		userprefs.setValue("pos", pos());
+		userprefs.setValue("size", size());
+	}
+	userprefs.endGroup();
 }
 
 static Mutex mutex;

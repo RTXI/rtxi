@@ -89,7 +89,7 @@ int main(int argc,char *argv[])
     QApplication::setDesktopSettingsAware(false);
     QApplication *app = new QApplication(argc,argv);
     app->connect(app,SIGNAL(lastWindowClosed()),app,SLOT(quit()));
-    MainWindow::getInstance()->showMaximized();
+    MainWindow::getInstance()->loadWindow();;
 
     CmdLine::getInstance();
     RT::System::getInstance();
