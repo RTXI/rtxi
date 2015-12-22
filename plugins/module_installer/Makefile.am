@@ -6,7 +6,7 @@ include $(top_srcdir)/Makefile.buildvars
 
 pkglib_LTLIBRARIES = module_installer.la
 
-LIBS = -lgit2 -lmarkdown
+LIBS = -lgit2 -lmarkdown -lQt5Network
 
 module_installer_la_LDFLAGS = -module -avoid-version
 
