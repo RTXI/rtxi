@@ -38,6 +38,11 @@ MainWindow::MainWindow (void) : QMainWindow(NULL, Qt::Window)
     setWindowTitle("RTXI - Real-time eXperimental Interface");
     setWindowIcon(QIcon("/usr/local/lib/rtxi/RTXI-icon.png"));
 
+    /* Set Qt Settings Information */
+		QCoreApplication::setOrganizationName("RTXI");
+		QCoreApplication::setOrganizationDomain("rtxi.org");
+		QCoreApplication::setApplicationName("RTXI");
+
     /* Initialize Menus */
     createFileActions();
     createFileMenu();
