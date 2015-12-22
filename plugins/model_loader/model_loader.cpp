@@ -69,7 +69,10 @@ void ModelLoader::load(void)
     QString plugin_dir = QString(EXEC_PREFIX) + QString("/lib/rtxi/");
     QString filename = QFileDialog::getOpenFileName(0, tr("Load plugin"), plugin_dir, tr("Plugins (*.so);;All (*.*)"));
 
-    if (filename.isNull() || filename.isEmpty())
+    if (filename.isNull()
+    		|| filename.isEmpty()
+    		|| filename.contains("model_loader")
+    		|| filename.contains("analogy"))
         return;
 
     if (filename.startsWith(plugin_dir))
@@ -114,29 +117,5 @@ void ModelLoader::load(void)
             index = num_module;
             userprefs.setValue("/recentFileList/num", num_module);
         }
-        updateRecentModules(filename, index);
-    }
-}
-
-void ModelLoader::updateRecentModules(QString filename, int index)
-{
-    QSettings userprefs;
-    userprefs.setPath(QSettings::NativeFormat, QSettings::SystemScope, "/usr/local/share/rtxi/");
-    userprefs.beginGroup("/recentFileList");
-    QStringList entries = userprefs.childKeys();
-    userprefs.endGroup();
-    int numRecentFiles = entries.size();
-
-    QString listmodule;
-    QString text;
-    for (int i = 0; i < std::min(numRecentFiles - 2, 10); ++i) {
-        listmodule = userprefs.value("/recentFileList/" + entries[i]).toString();
-        if (i == index)
-            text = tr("&%1 %2").arg(i).arg(filename);
-        else
-            text = tr("&%1 %2").arg(i).arg(listmodule);
-        action = MainWindow::getInstance()->createModuleMenuItem(text);
-        MainWindow::getInstance()->changeModuleMenuItem(action, text);
-        MainWindow::getInstance()->setModuleMenuItemParameter(action, i);
     }
 }
