@@ -100,6 +100,12 @@ int main(int argc,char *argv[])
     retval = app->exec();
 
     Plugin::Manager::getInstance()->unloadAll();
+
+    /* Set Qt Settings Information */
+		QCoreApplication::setOrganizationName("RTXI");
+		QCoreApplication::setOrganizationDomain("rtxi.org");
+		QCoreApplication::setApplicationName("RTXI");
+
     return retval;
 }
 

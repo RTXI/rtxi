@@ -15,14 +15,12 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <QtNetwork>
 #include <iostream>
 #include <unistd.h>
 #include <git2.h>
 extern "C" {
 #include <mkdio.h>
 }
-
 #include "rtxi_wizard.h"
 
 extern "C" Plugin::Object *createRTXIPlugin(void *) {
@@ -51,7 +49,11 @@ RTXIWizard::~RTXIWizard(void) {}
 
 void RTXIWizard::initParameters(void) {
 
+#if LIBGIT2_SOVERSION >= 22
+	git_libgit2_init();
+#else
 	git_threads_init();
+#endif
 
    allModules = new QList<RTXIModule*>;
    installedModules = new QList<RTXIModule*>;
@@ -185,9 +187,17 @@ void RTXIWizard::cloneModule(void) {
 		git_remote *remote = NULL;
 
 		git_repository_open(&repo, path);
+#if LIBGIT2_SOVERSION >= 22
+		error = error | git_remote_lookup(&remote, repo, "origin");
+#else
 		error = error | git_remote_load(&remote, repo, "origin");
+#endif
 		error = error | git_remote_connect(remote, GIT_DIRECTION_FETCH);
+#if LIBGIT2_SOVERSION >= 22
+		error = error | git_remote_download(remote, NULL);
+#else
 		error = error | git_remote_download(remote, NULL, NULL);
+#endif
 
 		git_remote_disconnect(remote);
 		git_remote_free(remote);
@@ -422,9 +432,17 @@ void RTXIWizard::installFromString( std::string module_name ) {
 		git_remote *remote = NULL;
 
 		git_repository_open(&repo, path);
+#if LIBGIT2_SOVERSION >= 22
+		error = error | git_remote_lookup(&remote, repo, "origin");
+#else
 		error = error | git_remote_load(&remote, repo, "origin");
+#endif
 		error = error | git_remote_connect(remote, GIT_DIRECTION_FETCH);
+#if LIBGIT2_SOVERSION >= 22
+		error = error | git_remote_download(remote, NULL);
+#else
 		error = error | git_remote_download(remote, NULL, NULL);
+#endif
 
 		git_remote_disconnect(remote);
 		git_remote_free(remote);

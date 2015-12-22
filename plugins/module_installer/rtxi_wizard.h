@@ -17,7 +17,6 @@
 
 #include <QtNetwork>
 #include <default_gui_model.h>
-
 #include "module_utils.h"
 
 class RTXIWizard : public DefaultGUIModel
@@ -59,5 +58,4 @@ class RTXIWizard : public DefaultGUIModel
 		QList<RTXIModule*> *installedModules;
 
 		std::vector<QString> exclude_list;
-
 };

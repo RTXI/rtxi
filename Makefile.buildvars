@@ -44,6 +44,7 @@ QT_CXXFLAGS += -I/usr/include/x86_64-linux-gnu/qt5 \
                -I/usr/include/x86_64-linux-gnu/qt5/QtSvg \
                -I/usr/include/x86_64-linux-gnu/qt5/QtXml \
                -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets \
+               -I/usr/include/x86_64-linux-gnu/qt5/QtNetwork \
                -I/usr/X11R6/include \
                -I/usr/local/qwt-$(QWT_VERSION) \
                -I/usr/local/qwt-$(QWT_VERSION)/include \
