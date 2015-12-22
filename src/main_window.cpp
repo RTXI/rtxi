@@ -302,29 +302,52 @@ void MainWindow::loadSettings (void)
         systemMenu->clear();
         mdiArea->closeAllSubWindows();
         Settings::Manager::getInstance()->load(filename.toStdString());
-    }
+
+				/*
+				 * Load MainWindow settings
+				 */
+				userprefs.beginGroup("MainWindow");
+				restoreGeometry(userprefs.value("geometry", saveGeometry()).toByteArray());
+				move(userprefs.value("pos", pos()).toPoint());
+				resize(userprefs.value("size", size()).toSize());
+				if(userprefs.value("maximized", isMaximized()).toBool())
+					showMaximized();
+				userprefs.endGroup();
+		}
 }
 
 void MainWindow::saveSettings(void)
 {
-    QSettings userprefs;
-    userprefs.setPath (QSettings::NativeFormat, QSettings::SystemScope, "/usr/local/share/rtxi/");
+	QSettings userprefs;
+	userprefs.setPath (QSettings::NativeFormat, QSettings::SystemScope, "/usr/local/share/rtxi/");
 
-    QString filename = QFileDialog::getSaveFileName(this,
-                       tr("Save current workspace"), userprefs.value("/dirs/setfiles", getenv("HOME")).toString(), tr("Settings (*.set)"));
+	QString filename = QFileDialog::getSaveFileName(this,
+			tr("Save current workspace"), userprefs.value("/dirs/setfiles", getenv("HOME")).toString(), tr("Settings (*.set)"));
 
-    if (!filename.isEmpty()) {
-        if (!filename.endsWith(".set"))
-            filename = filename+".set";
-        if (QFileInfo (filename).exists() && QMessageBox::warning(this,
-                "File Exists", "Do you wish to overwrite " + filename + "?",
-                QMessageBox::Yes | QMessageBox::Default,
-                QMessageBox::No | QMessageBox::Escape) != QMessageBox::Yes) {
-            DEBUG_MSG ("MainWindow::saveSettings : canceled overwrite\n");
-            return;
-        }
-        Settings::Manager::getInstance()->save(filename.toStdString());
-    }
+	if (!filename.isEmpty()) {
+		if (!filename.endsWith(".set"))
+			filename = filename+".set";
+		if (QFileInfo (filename).exists() && QMessageBox::warning(this,
+					"File Exists", "Do you wish to overwrite " + filename + "?",
+					QMessageBox::Yes | QMessageBox::Default,
+					QMessageBox::No | QMessageBox::Escape) != QMessageBox::Yes) {
+			DEBUG_MSG ("MainWindow::saveSettings : canceled overwrite\n");
+			return;
+		}
+		Settings::Manager::getInstance()->save(filename.toStdString());
+
+		/*
+		 * Save MainWindow settings
+		 */
+		userprefs.beginGroup("MainWindow");
+		userprefs.setValue("geometry", saveGeometry());
+		userprefs.setValue("maximized", isMaximized());
+		if(!isMaximized()) {
+			userprefs.setValue("pos", pos());
+			userprefs.setValue("size", size());
+		}
+		userprefs.endGroup();
+	}
 }
 
 void MainWindow::resetSettings(void)
