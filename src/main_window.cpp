@@ -226,7 +226,7 @@ void MainWindow::createFileActions()
     quit->setShortcut(tr("Ctrl+Q"));
     quit->setStatusTip(tr("Quit RTXI"));
     connect(qApp, SIGNAL(aboutToQuit()), mdiArea, SLOT(closeAllSubWindows()));
-    connect(quit, SIGNAL(triggered()), qApp, SLOT(quit()));
+    connect(quit, SIGNAL(triggered()), this, SLOT(close()));
 }
 
 void MainWindow::createMdi(QMdiSubWindow *subWindow)
