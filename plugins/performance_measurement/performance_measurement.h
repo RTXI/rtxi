@@ -50,7 +50,8 @@ private:
     Plugin(void);
     ~Plugin(void);
     Plugin(const Plugin &) {};
-    Plugin & operator=(const Plugin &) {
+    Plugin & operator=(const Plugin &)
+    {
         return *getInstance();
     };
     static Plugin *instance;
@@ -91,7 +92,8 @@ public slots:
 
 private:
 
-    enum {
+    enum
+    {
         INIT1, INIT2, EXEC,
     } state;
 

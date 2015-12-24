@@ -30,25 +30,27 @@ CmdLine::CmdLine(void):done(false), mutex(Mutex::RECURSIVE)
     pipe(fdm);
     pipe(fds);
 
-    if (!(child = fork())) {
-        size_t size;
-
-        read(fds[0],&size,sizeof(size));
-        while (size) {
-            int retval;
-            char cmd[size];
-
-            read(fds[0],cmd,size);
-            DEBUG_MSG("executing : \"%s\"\n",cmd);
-            retval = system(cmd);
-
-            write(fdm[1],&retval,sizeof(retval));
+    if (!(child = fork()))
+        {
+            size_t size;
 
             read(fds[0],&size,sizeof(size));
-        }
+            while (size)
+                {
+                    int retval;
+                    char cmd[size];
 
-        _exit(0);
-    }
+                    read(fds[0],cmd,size);
+                    DEBUG_MSG("executing : \"%s\"\n",cmd);
+                    retval = system(cmd);
+
+                    write(fdm[1],&retval,sizeof(retval));
+
+                    read(fds[0],&size,sizeof(size));
+                }
+
+            _exit(0);
+        }
 }
 
 CmdLine::~CmdLine(void)
@@ -80,10 +82,11 @@ CmdLine *CmdLine::getInstance(void)
         return instance;
 
     Mutex::Locker lock(&::mutex);
-    if (!instance) {
-        static CmdLine cmdline;
-        instance = &cmdline;
-    }
+    if (!instance)
+        {
+            static CmdLine cmdline;
+            instance = &cmdline;
+        }
 
     return instance;
 }

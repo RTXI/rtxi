@@ -49,21 +49,28 @@ size_t Fifo::read(void *buffer,size_t n,bool blocking)
 
     // Check that enough data is available
     if (AVAILABLE < n)
-        if (blocking) {
-            do {
-                pthread_cond_wait(&data_available,&mutex);
-            } while (AVAILABLE < n);
-        } else {
-            pthread_mutex_unlock(&mutex);
-            return 0;
-        }
+        if (blocking)
+            {
+                do
+                    {
+                        pthread_cond_wait(&data_available,&mutex);
+                    }
+                while (AVAILABLE < n);
+            }
+        else
+            {
+                pthread_mutex_unlock(&mutex);
+                return 0;
+            }
 
     // Copy the data from the fifo
-    if (size-rptr < n) {
-        size_t m = size-rptr;
-        memcpy(buffer,data+rptr,m);
-        memcpy(reinterpret_cast<char *>(buffer)+m,data,n-m);
-    } else
+    if (size-rptr < n)
+        {
+            size_t m = size-rptr;
+            memcpy(buffer,data+rptr,m);
+            memcpy(reinterpret_cast<char *>(buffer)+m,data,n-m);
+        }
+    else
         memcpy(buffer,data+rptr,n);
     rptr = (rptr+n)%size;
 
@@ -73,16 +80,19 @@ size_t Fifo::read(void *buffer,size_t n,bool blocking)
 
 size_t Fifo::write(const void *buffer,size_t n)
 {
-    if (n >= size-AVAILABLE) {
-        ERROR_MSG("Fifo::write : fifo full, data lost\n");
-        return 0;
-    }
+    if (n >= size-AVAILABLE)
+        {
+            ERROR_MSG("Fifo::write : fifo full, data lost\n");
+            return 0;
+        }
 
-    if (n > size-wptr) {
-        size_t m = size-wptr;
-        memcpy(data+wptr,buffer,m);
-        memcpy(data,reinterpret_cast<const char *>(buffer)+m,n-m);
-    } else
+    if (n > size-wptr)
+        {
+            size_t m = size-wptr;
+            memcpy(data+wptr,buffer,m);
+            memcpy(data,reinterpret_cast<const char *>(buffer)+m,n-m);
+        }
+    else
         memcpy(data+wptr,buffer,n);
     wptr = (wptr+n)%size;
 

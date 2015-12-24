@@ -44,7 +44,8 @@ private:
     SystemControl(void);
     ~SystemControl(void);
     SystemControl(const SystemControl &) {};
-    SystemControl &operator=(const SystemControl &) {
+    SystemControl &operator=(const SystemControl &)
+    {
         return *getInstance();
     };
 

@@ -50,10 +50,12 @@ public:
     DAQ::index_t getAnalogReference(DAQ::type_t,DAQ::index_t) const;
     DAQ::index_t getAnalogUnits(DAQ::type_t,DAQ::index_t) const;
     DAQ::index_t getAnalogOffsetUnits(DAQ::type_t,DAQ::index_t) const;
-    bool getAnalogCalibrationActive(DAQ::type_t,DAQ::index_t) const {
+    bool getAnalogCalibrationActive(DAQ::type_t,DAQ::index_t) const
+    {
         return false;
     };
-    bool getAnalogCalibrationState(DAQ::type_t,DAQ::index_t) const {
+    bool getAnalogCalibrationState(DAQ::type_t,DAQ::index_t) const
+    {
         return false;
     };
     int setAnalogGain(DAQ::type_t,DAQ::index_t,double);
@@ -79,7 +81,8 @@ protected:
 private:
     bool analog_exists(DAQ::type_t,DAQ::index_t) const;
 
-    struct analog_channel_t {
+    struct analog_channel_t
+    {
         double gain;
         DAQ::index_t range;
         DAQ::index_t reference;
@@ -91,20 +94,24 @@ private:
         DAQ::index_t offsetunits;
     };
 
-    struct  digital_channel_t {
+    struct  digital_channel_t
+    {
         DAQ::direction_t direction;
         int previous_value;
     };
 
-    struct channel_t {
+    struct channel_t
+    {
         bool active;
-        union {
+        union
+        {
             analog_channel_t analog;
             digital_channel_t digital;
         };
     };
 
-    struct subdevice_t {
+    struct subdevice_t
+    {
         int id;
         DAQ::index_t active;
         DAQ::index_t count;

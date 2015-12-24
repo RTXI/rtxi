@@ -61,7 +61,8 @@ public:
      * Getter function go allow customization of
      * user interface
      */
-    QGridLayout * getLayout(void) {
+    QGridLayout * getLayout(void)
+    {
         return layout;
     };
 
@@ -127,7 +128,8 @@ public:
      *
      * \sa DefaultGUIModel::update()
      */
-    enum update_flags_t {
+    enum update_flags_t
+    {
         INIT,     /*!< The parameters need to be initialized.         */
         MODIFY,   /*!< The parameters have been modified by the user. */
         PERIOD,   /*!< The system period has changed.                 */
@@ -170,7 +172,8 @@ public:
     QPushButton *modifyButton;
     QPushButton *unloadButton;
 
-    struct param_t {
+    struct param_t
+    {
         QLabel *label;
         DefaultGUILineEdit *edit;
         IO::flags_t type;

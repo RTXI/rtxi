@@ -41,22 +41,24 @@ ModelLoader::ModelLoader(void)
     int numRecentFiles = entries.size();
     QString listmodule;
     QString text;
-    for (int i = 0; i < std::min(numRecentFiles-2,10); ++i) {
-        listmodule = userprefs.value("/recentFileList/" + entries[i]).toString();
-        text = tr("&%1 %2").arg(i).arg(listmodule);
-        MainWindow::getInstance()->createModuleMenuItem(text);
-    }
+    for (int i = 0; i < std::min(numRecentFiles-2,10); ++i)
+        {
+            listmodule = userprefs.value("/recentFileList/" + entries[i]).toString();
+            text = tr("&%1 %2").arg(i).arg(listmodule);
+            MainWindow::getInstance()->createModuleMenuItem(text);
+        }
 
     // Add recently used settings files to the menu
     userprefs.beginGroup("/recentSettingsList");
     entries = userprefs.childKeys();
     userprefs.endGroup();
     numRecentFiles = entries.size()-1;
-    for (int i = 0; i < std::min(numRecentFiles,10); ++i) {
-        listmodule = userprefs.value("/recentSettingsList/" + entries[i]).toString();
-        text = tr("&%1 %2").arg(i).arg(listmodule);
-        MainWindow::getInstance()->createFileMenuItem(text);
-    }
+    for (int i = 0; i < std::min(numRecentFiles,10); ++i)
+        {
+            listmodule = userprefs.value("/recentSettingsList/" + entries[i]).toString();
+            text = tr("&%1 %2").arg(i).arg(listmodule);
+            MainWindow::getInstance()->createFileMenuItem(text);
+        }
 }
 
 ModelLoader::~ModelLoader(void)
@@ -70,9 +72,9 @@ void ModelLoader::load(void)
     QString filename = QFileDialog::getOpenFileName(0, tr("Load plugin"), plugin_dir, tr("Plugins (*.so);;All (*.*)"));
 
     if (filename.isNull()
-    		|| filename.isEmpty()
-    		|| filename.contains("model_loader")
-    		|| filename.contains("analogy"))
+            || filename.isEmpty()
+            || filename.contains("model_loader")
+            || filename.contains("analogy"))
         return;
 
     if (filename.startsWith(plugin_dir))
@@ -98,24 +100,29 @@ void ModelLoader::load(void)
 
     bool doesnotexist = true;
 
-    for (int i = 0; i < numRecentFiles; ++i) {
-        listmodule = userprefs.value("/recentFileList/" + entries[i]).toString();
-        if (filename == listmodule)
-            doesnotexist = false;
-    }
-    int index;
-    if (doesnotexist) {
-        if (num_module == 10)	{
-            userprefs.setValue("/recentFileList/" + QString::number(oldestmodule), filename);
-            index = oldestmodule;
-            oldestmodule++;
-            if (oldestmodule == 10)
-                oldestmodule = 0;
-            userprefs.setValue("/recentFileList/start", oldestmodule);
-        } else {
-            userprefs.setValue("/recentFileList/" + QString::number(num_module++), filename);
-            index = num_module;
-            userprefs.setValue("/recentFileList/num", num_module);
+    for (int i = 0; i < numRecentFiles; ++i)
+        {
+            listmodule = userprefs.value("/recentFileList/" + entries[i]).toString();
+            if (filename == listmodule)
+                doesnotexist = false;
         }
-    }
+    int index;
+    if (doesnotexist)
+        {
+            if (num_module == 10)
+                {
+                    userprefs.setValue("/recentFileList/" + QString::number(oldestmodule), filename);
+                    index = oldestmodule;
+                    oldestmodule++;
+                    if (oldestmodule == 10)
+                        oldestmodule = 0;
+                    userprefs.setValue("/recentFileList/start", oldestmodule);
+                }
+            else
+                {
+                    userprefs.setValue("/recentFileList/" + QString::number(num_module++), filename);
+                    index = num_module;
+                    userprefs.setValue("/recentFileList/num", num_module);
+                }
+        }
 }

@@ -53,7 +53,8 @@ public:
     /*!
      *
      */
-    enum type_t {
+    enum type_t
+    {
         FAST,       /*!< */
         RECURSIVE,  /*!< */
     };

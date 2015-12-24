@@ -25,7 +25,8 @@
 #include <system_control_panel.h>
 #include <main_window.h>
 
-struct find_daq_t {
+struct find_daq_t
+{
     int index;
     DAQ::Device *device;
 };
@@ -285,30 +286,31 @@ void SystemControlPanel::apply(void)
         dev = info.device;
     }
 
-    if(dev) {
-        DAQ::index_t a_chan = analogChannelList->currentIndex();
-        DAQ::type_t a_type = static_cast<DAQ::type_t>(analogSubdeviceList->currentIndex());
-        double a_gain = analogGainEdit->text().toDouble()*pow(10,-3*(analogUnitPrefixList->currentIndex()-8));
-        double a_zerooffset = analogZeroOffsetEdit->text().toDouble()*pow(10,-3*(analogUnitPrefixList2->currentIndex()-8));
+    if(dev)
+        {
+            DAQ::index_t a_chan = analogChannelList->currentIndex();
+            DAQ::type_t a_type = static_cast<DAQ::type_t>(analogSubdeviceList->currentIndex());
+            double a_gain = analogGainEdit->text().toDouble()*pow(10,-3*(analogUnitPrefixList->currentIndex()-8));
+            double a_zerooffset = analogZeroOffsetEdit->text().toDouble()*pow(10,-3*(analogUnitPrefixList2->currentIndex()-8));
 
-        dev->setChannelActive(a_type,a_chan,analogActiveButton->isChecked());
-        dev->setAnalogCalibrationActive(a_type,a_chan,analogCalibrationButton->isChecked());
-        dev->setAnalogGain(a_type,a_chan,a_gain);
-        dev->setAnalogZeroOffset(a_type,a_chan,a_zerooffset);
-        dev->setAnalogRange(a_type,a_chan,analogRangeList->currentIndex());
-        dev->setAnalogReference(a_type,a_chan,analogReferenceList->currentIndex());
-        dev->setAnalogUnits(a_type,a_chan,analogUnitList->currentIndex());
-        dev->setAnalogCalibrationActive(a_type,a_chan,analogCalibrationButton->isChecked());
+            dev->setChannelActive(a_type,a_chan,analogActiveButton->isChecked());
+            dev->setAnalogCalibrationActive(a_type,a_chan,analogCalibrationButton->isChecked());
+            dev->setAnalogGain(a_type,a_chan,a_gain);
+            dev->setAnalogZeroOffset(a_type,a_chan,a_zerooffset);
+            dev->setAnalogRange(a_type,a_chan,analogRangeList->currentIndex());
+            dev->setAnalogReference(a_type,a_chan,analogReferenceList->currentIndex());
+            dev->setAnalogUnits(a_type,a_chan,analogUnitList->currentIndex());
+            dev->setAnalogCalibrationActive(a_type,a_chan,analogCalibrationButton->isChecked());
 
-        DAQ::index_t d_chan = digitalChannelList->currentIndex();
-        DAQ::type_t d_type = static_cast<DAQ::type_t>(digitalSubdeviceList->currentIndex()+DAQ::DIO);
-        DAQ::direction_t d_dir = static_cast<DAQ::direction_t>(digitalDirectionList->currentIndex());
+            DAQ::index_t d_chan = digitalChannelList->currentIndex();
+            DAQ::type_t d_type = static_cast<DAQ::type_t>(digitalSubdeviceList->currentIndex()+DAQ::DIO);
+            DAQ::direction_t d_dir = static_cast<DAQ::direction_t>(digitalDirectionList->currentIndex());
 
-        // Write digital channel configuration to DAQ
-        dev->setChannelActive(d_type,d_chan,digitalActiveButton->isChecked());
-        if(d_type == DAQ::DIO)
-            dev->setDigitalDirection(d_chan,d_dir);
-    }
+            // Write digital channel configuration to DAQ
+            dev->setChannelActive(d_type,d_chan,digitalActiveButton->isChecked());
+            if(d_type == DAQ::DIO)
+                dev->setDigitalDirection(d_chan,d_dir);
+        }
 
     // Apply thread settings
     double period = periodEdit->text().toDouble();
@@ -334,14 +336,16 @@ void SystemControlPanel::updateDevice(void)
     digitalChannelList->clear();
 
     type = static_cast<DAQ::type_t>(analogSubdeviceList->currentIndex());
-    for(size_t i=0; i<dev->getChannelCount(type); ++i) {
-        analogChannelList->addItem(QString::number(i));
-    }
+    for(size_t i=0; i<dev->getChannelCount(type); ++i)
+        {
+            analogChannelList->addItem(QString::number(i));
+        }
 
     type = static_cast<DAQ::type_t>(digitalSubdeviceList->currentIndex()+DAQ::DIO);
-    for(size_t i=0; i<dev->getChannelCount(type); ++i) {
-        digitalChannelList->addItem(QString::number(i));
-    }
+    for(size_t i=0; i<dev->getChannelCount(type); ++i)
+        {
+            digitalChannelList->addItem(QString::number(i));
+        }
 
     display();
 }
@@ -363,10 +367,11 @@ void SystemControlPanel::updateFreq(void)
     period *= pow(10,-3*periodUnitList->currentIndex());
     freq = 1 / period;
 
-    if(freq > 1000) {
-        freq /= 1000;
-        i = 1;
-    }
+    if(freq > 1000)
+        {
+            freq /= 1000;
+            i = 1;
+        }
 
     freqEdit->setText(QString::number(freq));
     freqUnitList->setCurrentIndex(i);
@@ -390,10 +395,11 @@ void SystemControlPanel::updatePeriod(void)
 
     period = 1 / freq;
 
-    while(period < .001 && (i < 4)) {
-        period *= 1000;
-        i++;
-    }
+    while(period < .001 && (i < 4))
+        {
+            period *= 1000;
+            i++;
+        }
 
     periodEdit->setText(QString::number(period));
     periodUnitList->setCurrentIndex(i);
@@ -412,139 +418,158 @@ void SystemControlPanel::display(void)
 
     // Check to make sure DAQ is of the right type
     // if not, disable functions, else set
-    if(!dev) {
-        deviceList->setEnabled(false);
-        analogSubdeviceList->setEnabled(false);
-        digitalSubdeviceList->setEnabled(false);
-    }
-
-    if(!dev || !analogChannelList->count()) {
-        analogActiveButton->setChecked(false);
-        analogActiveButton->setEnabled(false);
-        analogActiveButton->setChecked(false);
-        analogCalibrationButton->setEnabled(false);
-        analogChannelList->setEnabled(false);
-        analogRangeList->setEnabled(false);
-        analogReferenceList->setEnabled(false);
-        analogGainEdit->setEnabled(false);
-        analogZeroOffsetEdit->setEnabled(false);
-        analogUnitPrefixList->setEnabled(false);
-        analogUnitPrefixList2->setEnabled(false);
-        analogUnitList->setEnabled(false);
-
-    } else {
-        DAQ::type_t type = static_cast<DAQ::type_t>(analogSubdeviceList->currentIndex());
-        DAQ::index_t chan = static_cast<DAQ::index_t>(analogChannelList->currentIndex());
-
-        analogActiveButton->setEnabled(true);
-        analogChannelList->setEnabled(true);
-        analogRangeList->setEnabled(true);
-        analogReferenceList->setEnabled(true);
-        analogGainEdit->setEnabled(true);
-        analogZeroOffsetEdit->setEnabled(true);
-        analogUnitPrefixList->setEnabled(true);
-        analogUnitPrefixList2->setEnabled(true);
-        analogUnitList->setEnabled(true);
-
-        analogRangeList->clear();
-        for(size_t i=0; i < dev->getAnalogRangeCount(type,chan); ++i)
-            analogRangeList->addItem(QString::fromStdString(dev->getAnalogRangeString(type,chan,i)));
-        analogReferenceList->clear();
-        for(size_t i=0; i < dev->getAnalogReferenceCount(type,chan); ++i)
-            analogReferenceList->addItem(QString::fromStdString(dev->getAnalogReferenceString(type,chan,i)));
-        analogUnitList->clear();
-        for(size_t i=0; i < dev->getAnalogUnitsCount(type,chan); ++i) {
-            analogUnitList->addItem(QString::fromStdString(dev->getAnalogUnitsString(type,chan,i)));
+    if(!dev)
+        {
+            deviceList->setEnabled(false);
+            analogSubdeviceList->setEnabled(false);
+            digitalSubdeviceList->setEnabled(false);
         }
-        analogActiveButton->setChecked(dev->getChannelActive(type,chan));
-        analogCalibrationButton->setEnabled(dev->getAnalogCalibrationState(type,chan));
-        analogCalibrationButton->setChecked(dev->getAnalogCalibrationActive(type,chan));
-        analogRangeList->setCurrentIndex(dev->getAnalogRange(type,chan));
-        analogReferenceList->setCurrentIndex(dev->getAnalogReference(type,chan));
-        analogUnitList->setCurrentIndex(dev->getAnalogUnits(type,chan));
 
-        // Determine the correct prefix for analog gain
-        int i = 8;
-        double tmp;
-        bool sign = true;
-        if(dev->getAnalogGain(type,chan) < 0.0)
-            sign = false; // Negative value
-        tmp = fabs(dev->getAnalogGain(type,chan));
-        if(tmp != 0.0)
-            while(((tmp >= 1000)&&(i > 0))||((tmp < 1)&&(i < 16))) {
-                if(tmp >= 1000) {
-                    tmp /= 1000;
-                    i--;
-                } else {
-                    tmp *= 1000;
-                    i++;
+    if(!dev || !analogChannelList->count())
+        {
+            analogActiveButton->setChecked(false);
+            analogActiveButton->setEnabled(false);
+            analogActiveButton->setChecked(false);
+            analogCalibrationButton->setEnabled(false);
+            analogChannelList->setEnabled(false);
+            analogRangeList->setEnabled(false);
+            analogReferenceList->setEnabled(false);
+            analogGainEdit->setEnabled(false);
+            analogZeroOffsetEdit->setEnabled(false);
+            analogUnitPrefixList->setEnabled(false);
+            analogUnitPrefixList2->setEnabled(false);
+            analogUnitList->setEnabled(false);
+
+        }
+    else
+        {
+            DAQ::type_t type = static_cast<DAQ::type_t>(analogSubdeviceList->currentIndex());
+            DAQ::index_t chan = static_cast<DAQ::index_t>(analogChannelList->currentIndex());
+
+            analogActiveButton->setEnabled(true);
+            analogChannelList->setEnabled(true);
+            analogRangeList->setEnabled(true);
+            analogReferenceList->setEnabled(true);
+            analogGainEdit->setEnabled(true);
+            analogZeroOffsetEdit->setEnabled(true);
+            analogUnitPrefixList->setEnabled(true);
+            analogUnitPrefixList2->setEnabled(true);
+            analogUnitList->setEnabled(true);
+
+            analogRangeList->clear();
+            for(size_t i=0; i < dev->getAnalogRangeCount(type,chan); ++i)
+                analogRangeList->addItem(QString::fromStdString(dev->getAnalogRangeString(type,chan,i)));
+            analogReferenceList->clear();
+            for(size_t i=0; i < dev->getAnalogReferenceCount(type,chan); ++i)
+                analogReferenceList->addItem(QString::fromStdString(dev->getAnalogReferenceString(type,chan,i)));
+            analogUnitList->clear();
+            for(size_t i=0; i < dev->getAnalogUnitsCount(type,chan); ++i)
+                {
+                    analogUnitList->addItem(QString::fromStdString(dev->getAnalogUnitsString(type,chan,i)));
                 }
-            }
-        if(sign)
-            analogGainEdit->setText(QString::number(tmp));
-        else
-            analogGainEdit->setText(QString::number(-tmp));
+            analogActiveButton->setChecked(dev->getChannelActive(type,chan));
+            analogCalibrationButton->setEnabled(dev->getAnalogCalibrationState(type,chan));
+            analogCalibrationButton->setChecked(dev->getAnalogCalibrationActive(type,chan));
+            analogRangeList->setCurrentIndex(dev->getAnalogRange(type,chan));
+            analogReferenceList->setCurrentIndex(dev->getAnalogReference(type,chan));
+            analogUnitList->setCurrentIndex(dev->getAnalogUnits(type,chan));
 
-        // Set gain prefix to computed index
-        analogUnitPrefixList->setCurrentIndex(i);
+            // Determine the correct prefix for analog gain
+            int i = 8;
+            double tmp;
+            bool sign = true;
+            if(dev->getAnalogGain(type,chan) < 0.0)
+                sign = false; // Negative value
+            tmp = fabs(dev->getAnalogGain(type,chan));
+            if(tmp != 0.0)
+                while(((tmp >= 1000)&&(i > 0))||((tmp < 1)&&(i < 16)))
+                    {
+                        if(tmp >= 1000)
+                            {
+                                tmp /= 1000;
+                                i--;
+                            }
+                        else
+                            {
+                                tmp *= 1000;
+                                i++;
+                            }
+                    }
+            if(sign)
+                analogGainEdit->setText(QString::number(tmp));
+            else
+                analogGainEdit->setText(QString::number(-tmp));
 
-        // Determine the correct prefix for analog offset
-        i = 8;
-        sign = true;
-        if(dev->getAnalogZeroOffset(type,chan) < 0.0)
-            sign = false; // Negative value
-        tmp = fabs(dev->getAnalogZeroOffset(type,chan));
-        if(tmp != 0.0)
-            while(((tmp >= 1000) && (i > 0)) || ((tmp < 1) && (i < 16))) {
-                if(tmp >= 1000) {
-                    tmp /= 1000;
-                    i--;
-                } else {
-                    tmp *= 1000;
-                    i++;
+            // Set gain prefix to computed index
+            analogUnitPrefixList->setCurrentIndex(i);
+
+            // Determine the correct prefix for analog offset
+            i = 8;
+            sign = true;
+            if(dev->getAnalogZeroOffset(type,chan) < 0.0)
+                sign = false; // Negative value
+            tmp = fabs(dev->getAnalogZeroOffset(type,chan));
+            if(tmp != 0.0)
+                while(((tmp >= 1000) && (i > 0)) || ((tmp < 1) && (i < 16)))
+                    {
+                        if(tmp >= 1000)
+                            {
+                                tmp /= 1000;
+                                i--;
+                            }
+                        else
+                            {
+                                tmp *= 1000;
+                                i++;
+                            }
+                    }
+            if(sign)
+                analogZeroOffsetEdit->setText(QString::number(tmp));
+            else
+                analogZeroOffsetEdit->setText(QString::number(-tmp));
+
+            // Set offset prefix to computed index
+            analogUnitPrefixList2->setCurrentIndex(i);
+        }
+
+    if(!dev || !digitalChannelList->count())
+        {
+            digitalActiveButton->setChecked(false);
+            digitalActiveButton->setEnabled(false);
+            digitalChannelList->setEnabled(false);
+            digitalDirectionList->setEnabled(false);
+        }
+    else
+        {
+            DAQ::type_t type = static_cast<DAQ::type_t>(digitalSubdeviceList->currentIndex()+DAQ::DIO);
+            DAQ::index_t chan = static_cast<DAQ::index_t>(digitalChannelList->currentIndex());
+
+            digitalActiveButton->setEnabled(true);
+            digitalChannelList->setEnabled(true);
+            if(type == DAQ::DIO)
+                digitalDirectionList->setEnabled(true);
+            else
+                digitalDirectionList->setEnabled(false);
+
+            digitalActiveButton->setChecked(dev->getChannelActive(type,chan));
+
+            if(type == DAQ::DIO)
+                {
+                    digitalDirectionList->setEnabled(true);
+                    digitalDirectionList->setCurrentIndex(dev->getDigitalDirection(chan));
                 }
-            }
-        if(sign)
-            analogZeroOffsetEdit->setText(QString::number(tmp));
-        else
-            analogZeroOffsetEdit->setText(QString::number(-tmp));
-
-        // Set offset prefix to computed index
-        analogUnitPrefixList2->setCurrentIndex(i);
-    }
-
-    if(!dev || !digitalChannelList->count()) {
-        digitalActiveButton->setChecked(false);
-        digitalActiveButton->setEnabled(false);
-        digitalChannelList->setEnabled(false);
-        digitalDirectionList->setEnabled(false);
-    } else {
-        DAQ::type_t type = static_cast<DAQ::type_t>(digitalSubdeviceList->currentIndex()+DAQ::DIO);
-        DAQ::index_t chan = static_cast<DAQ::index_t>(digitalChannelList->currentIndex());
-
-        digitalActiveButton->setEnabled(true);
-        digitalChannelList->setEnabled(true);
-        if(type == DAQ::DIO)
-            digitalDirectionList->setEnabled(true);
-        else
-            digitalDirectionList->setEnabled(false);
-
-        digitalActiveButton->setChecked(dev->getChannelActive(type,chan));
-
-        if(type == DAQ::DIO) {
-            digitalDirectionList->setEnabled(true);
-            digitalDirectionList->setCurrentIndex(dev->getDigitalDirection(chan));
-        } else
-            digitalDirectionList->setEnabled(false);
-    }
+            else
+                digitalDirectionList->setEnabled(false);
+        }
 
     // Display thread info
     int i = 3;
     long long tmp = RT::System::getInstance()->getPeriod();
-    while((tmp >= 1000)&&(i)) {
-        tmp /= 1000;
-        i--;
-    }
+    while((tmp >= 1000)&&(i))
+        {
+            tmp /= 1000;
+            i--;
+        }
     periodEdit->setText(QString::number(static_cast<unsigned long>(tmp)));
     periodUnitList->setCurrentIndex(i);
     updateFreq();
@@ -552,14 +577,16 @@ void SystemControlPanel::display(void)
 
 void SystemControlPanel::receiveEvent(const Event::Object *event)
 {
-    if(event->getName() == Event::RT_POSTPERIOD_EVENT) {
-        display();
-    }
+    if(event->getName() == Event::RT_POSTPERIOD_EVENT)
+        {
+            display();
+        }
 
     if(event->getName() == Event::SETTINGS_OBJECT_INSERT_EVENT ||
-            event->getName() == Event::SETTINGS_OBJECT_REMOVE_EVENT) {
-        deviceList->clear();
-        DAQ::Manager::getInstance()->foreachDevice(buildDAQDeviceList,deviceList);
-        updateDevice();
-    }
+            event->getName() == Event::SETTINGS_OBJECT_REMOVE_EVENT)
+        {
+            deviceList->clear();
+            DAQ::Manager::getInstance()->foreachDevice(buildDAQDeviceList,deviceList);
+            updateDevice();
+        }
 }

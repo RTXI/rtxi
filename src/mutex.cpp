@@ -37,13 +37,14 @@ Mutex::Mutex(Mutex::type_t type)
     pthread_mutexattr_t attr;
     pthread_mutexattr_init(&attr);
 
-    switch (type) {
-    case RECURSIVE:
-        pthread_mutexattr_settype(&attr,PTHREAD_MUTEX_RECURSIVE_NP);
-        break;
-    default:
-        pthread_mutexattr_settype(&attr,PTHREAD_MUTEX_FAST_NP);
-    }
+    switch (type)
+        {
+        case RECURSIVE:
+            pthread_mutexattr_settype(&attr,PTHREAD_MUTEX_RECURSIVE_NP);
+            break;
+        default:
+            pthread_mutexattr_settype(&attr,PTHREAD_MUTEX_FAST_NP);
+        }
 
     pthread_mutex_init(&mutex,&attr);
     pthread_mutexattr_destroy(&attr);
@@ -57,13 +58,14 @@ Mutex::~Mutex(void)
 void Mutex::lock(void)
 {
 #ifdef DEBUG
-    if (RT::OS::isRealtime()) {
-        ERROR_MSG("Detected unsafe lock attempt in RT thread\n");
-        PRINT_BACKTRACE();
-        if (!tryLock())
-            ERROR_MSG("Failed to obtain the lock\n");
-        return;
-    }
+    if (RT::OS::isRealtime())
+        {
+            ERROR_MSG("Detected unsafe lock attempt in RT thread\n");
+            PRINT_BACKTRACE();
+            if (!tryLock())
+                ERROR_MSG("Failed to obtain the lock\n");
+            return;
+        }
 #endif // DEBUG
 
     pthread_mutex_lock(&mutex);

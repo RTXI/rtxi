@@ -48,14 +48,16 @@ Plugin::Object *Plugin::Manager::load(const QString &library)
     Mutex::Locker lock(&mutex);
 
     void *handle = dlopen(library.toStdString().c_str(),RTLD_GLOBAL|RTLD_NOW);
-    if (!handle) {
-        std::string plugin_dir = std::string(EXEC_PREFIX) + std::string("/lib/rtxi/");
-        handle = dlopen((plugin_dir+library.toStdString()).c_str(),RTLD_GLOBAL|RTLD_NOW);
-    }
-    if (!handle) {
-        ERROR_MSG("Plugin::load : failed to load %s: %s\n",library.toStdString().c_str(),dlerror());
-        return 0;
-    }
+    if (!handle)
+        {
+            std::string plugin_dir = std::string(EXEC_PREFIX) + std::string("/lib/rtxi/");
+            handle = dlopen((plugin_dir+library.toStdString()).c_str(),RTLD_GLOBAL|RTLD_NOW);
+        }
+    if (!handle)
+        {
+            ERROR_MSG("Plugin::load : failed to load %s: %s\n",library.toStdString().c_str(),dlerror());
+            return 0;
+        }
 
     /*********************************************************************************
      * Apparently ISO C++ forbids against casting object pointer -> function pointer *
@@ -63,23 +65,26 @@ Plugin::Object *Plugin::Manager::load(const QString &library)
      *********************************************************************************/
 
     Object *(*create)(void) = (Object *(*)(void))(dlsym(handle,"createRTXIPlugin"));
-    if (!create) {
-        ERROR_MSG("Plugin::load : failed to load %s : %s\n",library.toStdString().c_str(),dlerror());
-        dlclose(handle);
-        return 0;
-    }
+    if (!create)
+        {
+            ERROR_MSG("Plugin::load : failed to load %s : %s\n",library.toStdString().c_str(),dlerror());
+            dlclose(handle);
+            return 0;
+        }
 
     Object *plugin = create();
-    if (!plugin) {
-        ERROR_MSG("Plugin::load : failed to load %s : failed to create instance\n",library.toStdString().c_str());
-        dlclose(handle);
-        return 0;
-    }
-    if (plugin->magic_number != Plugin::Object::MAGIC_NUMBER) {
-        ERROR_MSG("Plugin::load : the pointer returned from %s::createRTXIPlugin() isn't a valid Plugin::Object *.\n",library.toStdString().c_str());
-        dlclose(handle);
-        return 0;
-    }
+    if (!plugin)
+        {
+            ERROR_MSG("Plugin::load : failed to load %s : failed to create instance\n",library.toStdString().c_str());
+            dlclose(handle);
+            return 0;
+        }
+    if (plugin->magic_number != Plugin::Object::MAGIC_NUMBER)
+        {
+            ERROR_MSG("Plugin::load : the pointer returned from %s::createRTXIPlugin() isn't a valid Plugin::Object *.\n",library.toStdString().c_str());
+            dlclose(handle);
+            return 0;
+        }
 
     plugin->handle = handle;
     plugin->library = library.toStdString();
@@ -93,10 +98,11 @@ Plugin::Object *Plugin::Manager::load(const QString &library)
 
 void Plugin::Manager::unload(Plugin::Object *plugin)
 {
-    if (!plugin) {
-        ERROR_MSG("Plugin::Manager::unload : invalid plugin\n");
-        return;
-    }
+    if (!plugin)
+        {
+            ERROR_MSG("Plugin::Manager::unload : invalid plugin\n");
+            return;
+        }
 
     /* Unfortunate but we have to recast to properly
      * insert this event into the queue for QT and RTXI
@@ -110,15 +116,16 @@ void Plugin::Manager::unload(Plugin::Object *plugin)
 void Plugin::Manager::unloadAll(void)
 {
     void *handle;
-    for (std::list<Object *>::iterator i = pluginList.begin(); i != pluginList.end(); i = pluginList.begin()) {
-        Event::Object event(Event::PLUGIN_REMOVE_EVENT);
-        event.setParam("plugin",*i);
-        Event::Manager::getInstance()->postEvent(&event);
+    for (std::list<Object *>::iterator i = pluginList.begin(); i != pluginList.end(); i = pluginList.begin())
+        {
+            Event::Object event(Event::PLUGIN_REMOVE_EVENT);
+            event.setParam("plugin",*i);
+            Event::Manager::getInstance()->postEvent(&event);
 
-        handle = (*i)->handle;
-        delete *i;
-        dlclose(handle);
-    }
+            handle = (*i)->handle;
+            delete *i;
+            dlclose(handle);
+        }
 }
 
 void Plugin::Manager::foreachPlugin(void (*callback)(Plugin::Object *,void *),void *param)
@@ -130,10 +137,11 @@ void Plugin::Manager::foreachPlugin(void (*callback)(Plugin::Object *,void *),vo
 
 void Plugin::Manager::insertPlugin(Plugin::Object *plugin)
 {
-    if (!plugin) {
-        ERROR_MSG("Plugin::Manager::insertPlugin : invalid plugin\n");
-        return;
-    }
+    if (!plugin)
+        {
+            ERROR_MSG("Plugin::Manager::insertPlugin : invalid plugin\n");
+            return;
+        }
 
     Mutex::Locker lock(&mutex);
     pluginList.push_back(plugin);
@@ -141,10 +149,11 @@ void Plugin::Manager::insertPlugin(Plugin::Object *plugin)
 
 void Plugin::Manager::removePlugin(Plugin::Object *plugin)
 {
-    if (!plugin) {
-        ERROR_MSG("Plugin::Manager::removePlugin : invalid plugin\n");
-        return;
-    }
+    if (!plugin)
+        {
+            ERROR_MSG("Plugin::Manager::removePlugin : invalid plugin\n");
+            return;
+        }
 
     Mutex::Locker lock(&mutex);
     pluginList.remove(plugin);
@@ -152,22 +161,23 @@ void Plugin::Manager::removePlugin(Plugin::Object *plugin)
 
 void Plugin::Manager::customEvent(QEvent *e)
 {
-    if (e->type() == CloseEvent) {
-        RTXIEvent *e2 = reinterpret_cast<RTXIEvent *>(e);
+    if (e->type() == CloseEvent)
+        {
+            RTXIEvent *e2 = reinterpret_cast<RTXIEvent *>(e);
 
-        Mutex::Locker lock(&mutex);
+            Mutex::Locker lock(&mutex);
 
-        Object *plugin = reinterpret_cast<Plugin::Object *>(e2->data);
+            Object *plugin = reinterpret_cast<Plugin::Object *>(e2->data);
 
-        Event::Object event(Event::PLUGIN_REMOVE_EVENT);
-        event.setParam("plugin",plugin);
-        Event::Manager::getInstance()->postEvent(&event);
+            Event::Object event(Event::PLUGIN_REMOVE_EVENT);
+            event.setParam("plugin",plugin);
+            Event::Manager::getInstance()->postEvent(&event);
 
-        void *handle = plugin->handle;
-        delete plugin;
-        if(handle)
-            dlclose(handle);
-    }
+            void *handle = plugin->handle;
+            delete plugin;
+            if(handle)
+                dlclose(handle);
+        }
 }
 
 static Mutex mutex;
@@ -184,10 +194,11 @@ Plugin::Manager *Plugin::Manager::getInstance(void)
      *************************************************************************/
 
     Mutex::Locker lock(&::mutex);
-    if (!instance) {
-        static Manager manager;
-        instance = &manager;
-    }
+    if (!instance)
+        {
+            static Manager manager;
+            instance = &manager;
+        }
 
     return instance;
 }

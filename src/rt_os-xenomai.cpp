@@ -34,7 +34,8 @@
 
 #define DEBUG_RT
 
-typedef struct {
+typedef struct
+{
     long long period;
     RT_TASK task;
 } xenomai_task_t;
@@ -43,7 +44,8 @@ static bool init_rt = false;
 static pthread_key_t is_rt_key;
 
 #ifdef DEBUG_RT
-static const char *sigdebug_reasons[] = {
+static const char *sigdebug_reasons[] =
+{
     [SIGDEBUG_UNDEFINED] = "latency: received SIGXCPU for unknown reason",
     [SIGDEBUG_MIGRATE_SIGNAL] = "received signal",
     [SIGDEBUG_MIGRATE_SYSCALL] = "invoked syscall",
@@ -66,22 +68,23 @@ void sigdebug_handler(int sig, siginfo_t *si, void *context)
     if (reason > SIGDEBUG_WATCHDOG)
         reason = SIGDEBUG_UNDEFINED;
 
-    switch(reason) {
-    case SIGDEBUG_UNDEFINED:
-        n = snprintf(buffer, sizeof(buffer),
-                     "%s\n", sigdebug_reasons[reason]);
-        write(STDERR_FILENO, buffer, n);
-    case SIGDEBUG_MIGRATE_SIGNAL:
-        n = snprintf(buffer, sizeof(buffer),
-                     "%s\n", sigdebug_reasons[reason]);
-        write(STDERR_FILENO, buffer, n);
-    case SIGDEBUG_WATCHDOG:
-        /* These errors are lethal, something went really wrong. */
-        n = snprintf(buffer, sizeof(buffer),
-                     "%s\n", sigdebug_reasons[reason]);
-        write(STDERR_FILENO, buffer, n);
-        exit(EXIT_FAILURE);
-    }
+    switch(reason)
+        {
+        case SIGDEBUG_UNDEFINED:
+            n = snprintf(buffer, sizeof(buffer),
+                         "%s\n", sigdebug_reasons[reason]);
+            write(STDERR_FILENO, buffer, n);
+        case SIGDEBUG_MIGRATE_SIGNAL:
+            n = snprintf(buffer, sizeof(buffer),
+                         "%s\n", sigdebug_reasons[reason]);
+            write(STDERR_FILENO, buffer, n);
+        case SIGDEBUG_WATCHDOG:
+            /* These errors are lethal, something went really wrong. */
+            n = snprintf(buffer, sizeof(buffer),
+                         "%s\n", sigdebug_reasons[reason]);
+            write(STDERR_FILENO, buffer, n);
+            exit(EXIT_FAILURE);
+        }
 
     /* Retrieve the current backtrace, and decode it to stdout. */
     n = snprintf(buffer, sizeof(buffer), fmt, sigdebug_reasons[reason]);
@@ -109,10 +112,11 @@ int RT::OS::initiate(void)
     struct rlimit rlim = { RLIM_INFINITY, RLIM_INFINITY };
     setrlimit(RLIMIT_MEMLOCK,&rlim);
 
-    if (mlockall(MCL_CURRENT | MCL_FUTURE)) {
-        ERROR_MSG("RTOS:Xenomai::initiate : failed to lock memory.\n");
-        return -EPERM;
-    }
+    if (mlockall(MCL_CURRENT | MCL_FUTURE))
+        {
+            ERROR_MSG("RTOS:Xenomai::initiate : failed to lock memory.\n");
+            return -EPERM;
+        }
 
     pthread_key_create(&is_rt_key,0);
     init_rt = true;
@@ -146,20 +150,22 @@ int RT::OS::createTask(RT::OS::Task *task,void *(*entry)(void *),void *arg,int p
     if ((prio >=0) && (prio <=99))
         priority -= prio;
 
-    if ((retval = rt_task_create(&t->task,"RTXI RT Thread",0,priority,T_FPU|T_JOINABLE))) {
-        ERROR_MSG("RT::OS::createTask : failed to create task\n");
-        return retval;
-    }
+    if ((retval = rt_task_create(&t->task,"RTXI RT Thread",0,priority,T_FPU|T_JOINABLE)))
+        {
+            ERROR_MSG("RT::OS::createTask : failed to create task\n");
+            return retval;
+        }
 
     t->period = -1;
 
     *task = t;
     pthread_setspecific(is_rt_key,reinterpret_cast<const void *>(t));
 
-    if ((retval = rt_task_start(&t->task,reinterpret_cast<void(*)(void *)>(entry),arg))) {
-        ERROR_MSG("RT::OS::createTask : failed to start task\n");
-        return retval;
-    }
+    if ((retval = rt_task_start(&t->task,reinterpret_cast<void(*)(void *)>(entry),arg)))
+        {
+            ERROR_MSG("RT::OS::createTask : failed to start task\n");
+            return retval;
+        }
 
     return 0;
 }

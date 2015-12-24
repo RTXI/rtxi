@@ -83,13 +83,14 @@ int RT::System::SetPeriodEvent::callback(void)
     int retval;
     RT::System *sys = RT::System::getInstance();
 
-    if (!(retval = RT::OS::setPeriod(sys->task,period))) {
-        sys->period = period;
+    if (!(retval = RT::OS::setPeriod(sys->task,period)))
+        {
+            sys->period = period;
 
-        ::Event::Object event(::Event::RT_PERIOD_EVENT);
-        event.setParam("period",&period);
-        ::Event::Manager::getInstance()->postEventRT(&event);
-    }
+            ::Event::Object event(::Event::RT_PERIOD_EVENT);
+            event.setParam("period",&period);
+            ::Event::Manager::getInstance()->postEventRT(&event);
+        }
 
     return retval;
 }
@@ -130,10 +131,11 @@ void RT::Device::setActive(bool state)
 {
     if (RT::OS::isRealtime())
         active = state;
-    else {
-        SetDeviceActive event(this,state);
-        RT::System::getInstance()->postEvent(&event);
-    }
+    else
+        {
+            SetDeviceActive event(this,state);
+            RT::System::getInstance()->postEvent(&event);
+        }
 }
 
 RT::Thread::Thread(Priority p)
@@ -151,10 +153,11 @@ void RT::Thread::setActive(bool state)
 {
     if (RT::OS::isRealtime())
         active = state;
-    else {
-        SetThreadActive event(this,state);
-        RT::System::getInstance()->postEvent(&event);
-    }
+    else
+        {
+            SetThreadActive event(this,state);
+            RT::System::getInstance()->postEvent(&event);
+        }
 }
 
 RT::System::System(void)
@@ -162,15 +165,17 @@ RT::System::System(void)
 {
     period = 1000000; // 1 kHz
 
-    if (RT::OS::initiate()) {
-        ERROR_MSG("RT::System::System : failed to initialize the realtime system\n");
-        return;
-    }
+    if (RT::OS::initiate())
+        {
+            ERROR_MSG("RT::System::System : failed to initialize the realtime system\n");
+            return;
+        }
 
-    if (RT::OS::createTask(&task,&System::bounce,this)) {
-        ERROR_MSG("RT::System::System : failed to create realtime thread\n");
-        return;
-    }
+    if (RT::OS::createTask(&task,&System::bounce,this))
+        {
+            ERROR_MSG("RT::System::System : failed to create realtime thread\n");
+            return;
+        }
 }
 
 RT::System::~System(void)
@@ -213,19 +218,21 @@ void RT::System::foreachThread(void (*callback)(RT::Thread *,void *),void *param
 int RT::System::postEvent(RT::Event *event,bool blocking)
 {
     eventFifo.write(&event,sizeof(RT::Event *));
-    if (blocking) {
-        event->wait();
-        return event->retval;
-    }
+    if (blocking)
+        {
+            event->wait();
+            return event->retval;
+        }
     return 0;
 }
 
 void RT::System::insertDevice(RT::Device *device)
 {
-    if (!device) {
-        ERROR_MSG("RT::System::insertDevice : invalid device\n");
-        return;
-    }
+    if (!device)
+        {
+            ERROR_MSG("RT::System::insertDevice : invalid device\n");
+            return;
+        }
 
     Mutex::Locker lock(&deviceMutex);
 
@@ -238,10 +245,11 @@ void RT::System::insertDevice(RT::Device *device)
 
 void RT::System::removeDevice(RT::Device *device)
 {
-    if (!device) {
-        ERROR_MSG("RT::System::removeDevice : invalid device\n");
-        return;
-    }
+    if (!device)
+        {
+            ERROR_MSG("RT::System::removeDevice : invalid device\n");
+            return;
+        }
 
     Mutex::Locker lock(&deviceMutex);
 
@@ -254,10 +262,11 @@ void RT::System::removeDevice(RT::Device *device)
 
 void RT::System::insertThread(RT::Thread *thread)
 {
-    if (!thread) {
-        ERROR_MSG("RT::System::insertThread : invalid thread\n");
-        return;
-    }
+    if (!thread)
+        {
+            ERROR_MSG("RT::System::insertThread : invalid thread\n");
+            return;
+        }
 
     Mutex::Locker lock(&threadMutex);
 
@@ -277,10 +286,11 @@ void RT::System::insertThread(RT::Thread *thread)
 
 void RT::System::removeThread(RT::Thread *thread)
 {
-    if (!thread) {
-        ERROR_MSG("RT::System::removeThread : invalid thread\n");
-        return;
-    }
+    if (!thread)
+        {
+            ERROR_MSG("RT::System::removeThread : invalid thread\n");
+            return;
+        }
 
     Mutex::Locker lock(&threadMutex);
 
@@ -311,33 +321,38 @@ void RT::System::execute(void)
     List<Thread>::iterator threadListBegin = threadList.begin();
     List<Thread>::iterator threadListEnd   = threadList.end();
 
-    if (RT::OS::setPeriod(task,period)) {
-        ERROR_MSG("RT::System::execute : failed to set the initial period of the realtime thread\n");
-        return;
-    }
-
-    while (!finished) {
-        RT::OS::sleepTimestep(task);
-
-        for (iDevice = devicesBegin; iDevice != devicesEnd; ++iDevice)
-            if (iDevice->getActive()) iDevice->read();
-
-        for (iThread = threadListBegin; iThread != threadListEnd; ++iThread)
-            if (iThread->getActive()) iThread->execute();
-
-        for (iDevice = devicesBegin; iDevice != devicesEnd; ++iDevice)
-            if (iDevice->getActive()) iDevice->write();
-
-        if (eventFifo.read(&event,sizeof(RT::Event *),false)) {
-            do {
-                event->execute();
-            } while (eventFifo.read(&event,sizeof(RT::Event *),false));
-
-            event = 0;
-            devicesBegin = devices.begin();
-            threadListBegin = threadList.begin();
+    if (RT::OS::setPeriod(task,period))
+        {
+            ERROR_MSG("RT::System::execute : failed to set the initial period of the realtime thread\n");
+            return;
         }
-    }
+
+    while (!finished)
+        {
+            RT::OS::sleepTimestep(task);
+
+            for (iDevice = devicesBegin; iDevice != devicesEnd; ++iDevice)
+                if (iDevice->getActive()) iDevice->read();
+
+            for (iThread = threadListBegin; iThread != threadListEnd; ++iThread)
+                if (iThread->getActive()) iThread->execute();
+
+            for (iDevice = devicesBegin; iDevice != devicesEnd; ++iDevice)
+                if (iDevice->getActive()) iDevice->write();
+
+            if (eventFifo.read(&event,sizeof(RT::Event *),false))
+                {
+                    do
+                        {
+                            event->execute();
+                        }
+                    while (eventFifo.read(&event,sizeof(RT::Event *),false));
+
+                    event = 0;
+                    devicesBegin = devices.begin();
+                    threadListBegin = threadList.begin();
+                }
+        }
 }
 
 static Mutex mutex;
@@ -354,10 +369,11 @@ RT::System *RT::System::getInstance(void)
      *************************************************************************/
 
     Mutex::Locker lock(&::mutex);
-    if (!instance) {
-        static System system;
-        instance = &system;
-    }
+    if (!instance)
+        {
+            static System system;
+            instance = &system;
+        }
 
     return instance;
 }

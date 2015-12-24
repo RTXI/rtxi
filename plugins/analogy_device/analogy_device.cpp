@@ -35,109 +35,126 @@ AnalogyDevice::AnalogyDevice(a4l_desc_t *d,std::string name,IO::channel_t *chan,
     int idx_ai  = -1;
     int idx_ao  = -1;
     int idx_dio = -1;
-    for (int i=0; i < dsc.nb_subd; i++) {
-        err = a4l_get_subdinfo(&dsc, i, &sbinfo);
-        if(err != 0) {
-            ERROR_MSG("AnalogyDriver: a4l_get_subd_info failed, wrong subdevice index %i (err=%d)\n",  i, err);
+    for (int i=0; i < dsc.nb_subd; i++)
+        {
+            err = a4l_get_subdinfo(&dsc, i, &sbinfo);
+            if(err != 0)
+                {
+                    ERROR_MSG("AnalogyDriver: a4l_get_subd_info failed, wrong subdevice index %i (err=%d)\n",  i, err);
+                }
+            // Assign subdevice index; save just the first device if many
+            if (((sbinfo->flags & A4L_SUBD_TYPES) == A4L_SUBD_AI) && (idx_ai < 0))
+                idx_ai  = i;
+            else if (((sbinfo->flags & A4L_SUBD_TYPES) == A4L_SUBD_AO) && (idx_ao < 0))
+                idx_ao  = i;
+            else if (((sbinfo->flags & A4L_SUBD_TYPES) == A4L_SUBD_DIO) && (idx_dio < 0))
+                {
+                    idx_dio  = i;
+                }
         }
-        // Assign subdevice index; save just the first device if many
-        if (((sbinfo->flags & A4L_SUBD_TYPES) == A4L_SUBD_AI) && (idx_ai < 0))
-            idx_ai  = i;
-        else if (((sbinfo->flags & A4L_SUBD_TYPES) == A4L_SUBD_AO) && (idx_ao < 0))
-            idx_ao  = i;
-        else if (((sbinfo->flags & A4L_SUBD_TYPES) == A4L_SUBD_DIO) && (idx_dio < 0)) {
-            idx_dio  = i;
-        }
-    }
 
     // Get info about AI subdevice
     err = a4l_get_subdinfo(&dsc, idx_ai, &sbinfo);
-    if((err == 0) && ((sbinfo->flags & A4L_SUBD_TYPES) == A4L_SUBD_AI)) {
-        subdevice[AI].id = idx_ai;
-        subdevice[AI].active = 0;
-        subdevice[AI].count = sbinfo->nb_chan;
-        subdevice[AI].chan = new channel_t[subdevice[AI].count];
-        if(!subdevice[AI].chan)
+    if((err == 0) && ((sbinfo->flags & A4L_SUBD_TYPES) == A4L_SUBD_AI))
+        {
+            subdevice[AI].id = idx_ai;
+            subdevice[AI].active = 0;
+            subdevice[AI].count = sbinfo->nb_chan;
+            subdevice[AI].chan = new channel_t[subdevice[AI].count];
+            if(!subdevice[AI].chan)
+                subdevice[AI].count = 0;
+            else
+                for(size_t i=0; i<subdevice[AI].count; ++i)
+                    {
+                        err = a4l_get_chinfo(&dsc, idx_ai, i, &chinfo);
+                        // Something went wrong
+                        if(err < 0)
+                            {
+                                subdevice[AI].active = 0;
+                                subdevice[AI].count = 0;
+                                delete[] subdevice[AI].chan;
+                                break;
+                            }
+                        subdevice[AI].chan[i].active = false;
+                        subdevice[AI].chan[i].analog.maxdata = (1<<chinfo->nb_bits)-1;
+                        setAnalogGain(AI,i,1.0);
+                        setAnalogRange(AI,i,0);
+                        setAnalogZeroOffset(AI,i,0);
+                        setAnalogReference(AI,i,0);
+                        setAnalogUnits(AI,i,0);
+                    }
+        }
+    else
+        {
+            subdevice[AI].active = 0;
             subdevice[AI].count = 0;
-        else
-            for(size_t i=0; i<subdevice[AI].count; ++i) {
-                err = a4l_get_chinfo(&dsc, idx_ai, i, &chinfo);
-                // Something went wrong
-                if(err < 0) {
-                    subdevice[AI].active = 0;
-                    subdevice[AI].count = 0;
-                    delete[] subdevice[AI].chan;
-                    break;
-                }
-                subdevice[AI].chan[i].active = false;
-                subdevice[AI].chan[i].analog.maxdata = (1<<chinfo->nb_bits)-1;
-                setAnalogGain(AI,i,1.0);
-                setAnalogRange(AI,i,0);
-                setAnalogZeroOffset(AI,i,0);
-                setAnalogReference(AI,i,0);
-                setAnalogUnits(AI,i,0);
-            }
-    } else {
-        subdevice[AI].active = 0;
-        subdevice[AI].count = 0;
-        subdevice[AI].chan = NULL;
-    }
+            subdevice[AI].chan = NULL;
+        }
 
     // Get info about AO subdevice
     err = a4l_get_subdinfo(&dsc, idx_ao, &sbinfo);
-    if((err == 0) && ((sbinfo->flags & A4L_SUBD_TYPES) == A4L_SUBD_AO)) {
-        subdevice[AO].id = idx_ao;
-        subdevice[AO].active = 0;
-        subdevice[AO].count = sbinfo->nb_chan;
-        subdevice[AO].chan = new channel_t[subdevice[AO].count];
-        if(!subdevice[AO].chan)
+    if((err == 0) && ((sbinfo->flags & A4L_SUBD_TYPES) == A4L_SUBD_AO))
+        {
+            subdevice[AO].id = idx_ao;
+            subdevice[AO].active = 0;
+            subdevice[AO].count = sbinfo->nb_chan;
+            subdevice[AO].chan = new channel_t[subdevice[AO].count];
+            if(!subdevice[AO].chan)
+                subdevice[AO].count = 0;
+            else
+                for(size_t i=0; i<subdevice[AO].count; ++i)
+                    {
+                        err = a4l_get_chinfo(&dsc, idx_ao, i, &chinfo);
+                        // Something went wrong
+                        if(err < 0)
+                            {
+                                subdevice[AO].active = 0;
+                                subdevice[AO].count = 0;
+                                delete[] subdevice[AO].chan;
+                                break;
+                            }
+                        subdevice[AO].chan[i].active = false;
+                        subdevice[AO].chan[i].analog.maxdata = (1<<chinfo->nb_bits)-1;
+                        setAnalogGain(AO,i,1.0);
+                        setAnalogZeroOffset(AO,i,0);
+                        setAnalogRange(AO,i,0);
+                        setAnalogReference(AO,i,0);
+                        setAnalogUnits(AO,i,0);
+                    }
+        }
+    else
+        {
+            subdevice[AO].active = 0;
             subdevice[AO].count = 0;
-        else
-            for(size_t i=0; i<subdevice[AO].count; ++i) {
-                err = a4l_get_chinfo(&dsc, idx_ao, i, &chinfo);
-                // Something went wrong
-                if(err < 0) {
-                    subdevice[AO].active = 0;
-                    subdevice[AO].count = 0;
-                    delete[] subdevice[AO].chan;
-                    break;
-                }
-                subdevice[AO].chan[i].active = false;
-                subdevice[AO].chan[i].analog.maxdata = (1<<chinfo->nb_bits)-1;
-                setAnalogGain(AO,i,1.0);
-                setAnalogZeroOffset(AO,i,0);
-                setAnalogRange(AO,i,0);
-                setAnalogReference(AO,i,0);
-                setAnalogUnits(AO,i,0);
-            }
-    } else {
-        subdevice[AO].active = 0;
-        subdevice[AO].count = 0;
-        subdevice[AO].chan = NULL;
-    }
+            subdevice[AO].chan = NULL;
+        }
 
     // Get info about DIO subdevice and set to INPUT as default
     // Then add all Digital I/O to INPUT list for the
     // IO class to handle
     err = a4l_get_subdinfo(&dsc, idx_dio, &sbinfo);
-    if((err == 0) && ((sbinfo->flags & A4L_SUBD_TYPES) == A4L_SUBD_DIO)) {
-        subdevice[DIO].id = idx_dio;
-        subdevice[DIO].active = 0;
-        subdevice[DIO].count = sbinfo->nb_chan;
-        subdevice[DIO].chan = new channel_t[subdevice[DIO].count];
-        if(!subdevice[DIO].chan)
+    if((err == 0) && ((sbinfo->flags & A4L_SUBD_TYPES) == A4L_SUBD_DIO))
+        {
+            subdevice[DIO].id = idx_dio;
+            subdevice[DIO].active = 0;
+            subdevice[DIO].count = sbinfo->nb_chan;
+            subdevice[DIO].chan = new channel_t[subdevice[DIO].count];
+            if(!subdevice[DIO].chan)
+                subdevice[DIO].count = 0;
+            else
+                for(size_t i=0; i<subdevice[DIO].count; ++i)
+                    {
+                        subdevice[DIO].chan[i].active = false;
+                        subdevice[DIO].chan[i].digital.previous_value = 0;
+                        setDigitalDirection(i,DAQ::INPUT);
+                    }
+        }
+    else
+        {
+            subdevice[DIO].active = 0;
             subdevice[DIO].count = 0;
-        else
-            for(size_t i=0; i<subdevice[DIO].count; ++i) {
-                subdevice[DIO].chan[i].active = false;
-                subdevice[DIO].chan[i].digital.previous_value = 0;
-                setDigitalDirection(i,DAQ::INPUT);
-            }
-    } else {
-        subdevice[DIO].active = 0;
-        subdevice[DIO].count = 0;
-        subdevice[DIO].chan = NULL;
-    }
+            subdevice[DIO].chan = NULL;
+        }
     setActive(true);
 }
 
@@ -246,18 +263,19 @@ std::string AnalogyDevice::getAnalogReferenceString(type_t type,index_t channel,
     if(!analog_exists(type,channel) || !((index >= 0) && (index < getAnalogReferenceCount(type,channel))))
         return "";
 
-    switch(index) {
-    case 0:
-        return "Ground";
-    case 1:
-        return "Common";
-    case 2:
-        return "Differential";
-    case 3:
-        return "Other";
-    default:
-        return "";
-    }
+    switch(index)
+        {
+        case 0:
+            return "Ground";
+        case 1:
+            return "Common";
+        case 2:
+            return "Differential";
+        case 3:
+            return "Other";
+        default:
+            return "";
+        }
 }
 
 std::string AnalogyDevice::getAnalogUnitsString(type_t type,index_t channel,index_t index) const
@@ -265,14 +283,15 @@ std::string AnalogyDevice::getAnalogUnitsString(type_t type,index_t channel,inde
     if(!analog_exists(type,channel) || !((index >= 0) && (index < getAnalogUnitsCount(type,channel))))
         return "";
 
-    switch(index) {
-    case 0:
-        return "Volts";
-    case 1:
-        return "Amps";
-    default:
-        return "";
-    }
+    switch(index)
+        {
+        case 0:
+            return "Volts";
+        case 1:
+            return "Amps";
+        default:
+            return "";
+        }
 }
 
 index_t AnalogyDevice::getAnalogRange(type_t type,index_t channel) const
@@ -431,39 +450,41 @@ void AnalogyDevice::read(void)
     a4l_rnginfo_t *rnginfo;
 
     for(size_t i=0; i < subdevice[AI].count; ++i)
-        if(subdevice[AI].chan[i].active) {
-            channel = &subdevice[AI].chan[i].analog;
+        if(subdevice[AI].chan[i].active)
+            {
+                channel = &subdevice[AI].chan[i].analog;
 
-            // Get analogy reference
-            switch (channel->reference) {
-            case 0:
-                ref = AREF_GROUND;
-                break;
-            case 1:
-                ref = AREF_COMMON;
-                break;
-            case 2:
-                ref = AREF_DIFF;
-                break;
-            case 3:
-                ref = AREF_OTHER;
-                break;
+                // Get analogy reference
+                switch (channel->reference)
+                    {
+                    case 0:
+                        ref = AREF_GROUND;
+                        break;
+                    case 1:
+                        ref = AREF_COMMON;
+                        break;
+                    case 2:
+                        ref = AREF_DIFF;
+                        break;
+                    case 3:
+                        ref = AREF_OTHER;
+                        break;
+                    }
+
+                // Get channel info
+                a4l_get_chinfo(&dsc, subdevice[AI].id, i, &chinfo);
+                a4l_get_rnginfo(&dsc, subdevice[AI].id, i, channel->range, &rnginfo);
+                size = a4l_sizeof_chan(chinfo);
+
+                // Read 1 data sample via synchronous acq
+                a4l_sync_read(&dsc, subdevice[AI].id, PACK(i,channel->range,ref),	0, &sample, size);
+
+                // Convert to decimal via a4l
+                a4l_rawtod(chinfo, rnginfo, &value, &sample, 1);
+
+                // Gain, convert, and push into IO pipe
+                output(i) = value * channel->gain;
             }
-
-            // Get channel info
-            a4l_get_chinfo(&dsc, subdevice[AI].id, i, &chinfo);
-            a4l_get_rnginfo(&dsc, subdevice[AI].id, i, channel->range, &rnginfo);
-            size = a4l_sizeof_chan(chinfo);
-
-            // Read 1 data sample via synchronous acq
-            a4l_sync_read(&dsc, subdevice[AI].id, PACK(i,channel->range,ref),	0, &sample, size);
-
-            // Convert to decimal via a4l
-            a4l_rawtod(chinfo, rnginfo, &value, &sample, 1);
-
-            // Gain, convert, and push into IO pipe
-            output(i) = value * channel->gain;
-        }
 
     size_t offset = getChannelCount(AI);
     unsigned int data = 0, mask = 0;
@@ -478,10 +499,11 @@ void AnalogyDevice::read(void)
 
     // Read only enabled digital channels one by one with mask for each bit
     for(size_t i=0; i < subdevice[DIO].count; ++i)
-        if(subdevice[DIO].chan[i].active && subdevice[DIO].chan[i].digital.direction == DAQ::INPUT) {
-            mask = (1<<i);
-            output(i+offset) = (data & mask) == 0 ? 0 : 5;
-        }
+        if(subdevice[DIO].chan[i].active && subdevice[DIO].chan[i].digital.direction == DAQ::INPUT)
+            {
+                mask = (1<<i);
+                output(i+offset) = (data & mask) == 0 ? 0 : 5;
+            }
 }
 
 void AnalogyDevice::write(void)
@@ -495,40 +517,42 @@ void AnalogyDevice::write(void)
         a4l_chinfo_t *chinfo;
 
         for(size_t i=0; i < subdevice[AO].count; ++i)
-            if(subdevice[AO].chan[i].active) {
-                channel = &subdevice[AO].chan[i].analog;
-                value = round(channel->gain*channel->conv*(input(i)-channel->zerooffset)+channel->offset);
+            if(subdevice[AO].chan[i].active)
+                {
+                    channel = &subdevice[AO].chan[i].analog;
+                    value = round(channel->gain*channel->conv*(input(i)-channel->zerooffset)+channel->offset);
 
-                // Prevent wrap around in the data units.
-                if(value > channel->maxdata)
-                    value = channel->maxdata;
-                else if(value < 0.0)
-                    value = 0.0;
-                sample = static_cast<lsampl_t>(value);
+                    // Prevent wrap around in the data units.
+                    if(value > channel->maxdata)
+                        value = channel->maxdata;
+                    else if(value < 0.0)
+                        value = 0.0;
+                    sample = static_cast<lsampl_t>(value);
 
-                // Get anaolgy reference
-                switch (channel->reference) {
-                case 0:
-                    ref = A4L_CHAN_AREF_GROUND;
-                    break;
-                case 1:
-                    ref = A4L_CHAN_AREF_COMMON;
-                    break;
-                case 2:
-                    ref = A4L_CHAN_AREF_DIFF;
-                    break;
-                case 3:
-                    ref = A4L_CHAN_AREF_OTHER;
-                    break;
+                    // Get anaolgy reference
+                    switch (channel->reference)
+                        {
+                        case 0:
+                            ref = A4L_CHAN_AREF_GROUND;
+                            break;
+                        case 1:
+                            ref = A4L_CHAN_AREF_COMMON;
+                            break;
+                        case 2:
+                            ref = A4L_CHAN_AREF_DIFF;
+                            break;
+                        case 3:
+                            ref = A4L_CHAN_AREF_OTHER;
+                            break;
+                        }
+                    // Get channel size
+                    a4l_get_chinfo(&dsc, subdevice[AO].id, i, &chinfo);
+                    size = a4l_sizeof_chan(chinfo);
+
+                    // Write sample
+                    a4l_sync_write(&dsc, subdevice[AO].id, PACK(i,channel->range,ref),
+                                   0, &sample, size);
                 }
-                // Get channel size
-                a4l_get_chinfo(&dsc, subdevice[AO].id, i, &chinfo);
-                size = a4l_sizeof_chan(chinfo);
-
-                // Write sample
-                a4l_sync_write(&dsc, subdevice[AO].id, PACK(i,channel->range,ref),
-                               0, &sample, size);
-            }
     }
 
     {
@@ -537,14 +561,16 @@ void AnalogyDevice::write(void)
         unsigned int data = 0, mask = 0;
 
         // Create mask and data buffer with bits to be set
-        for(size_t i=0; i < subdevice[DIO].count; ++i) {
-            value = input(i+offset) != 0.0;
-            if(subdevice[DIO].chan[i].active && subdevice[DIO].chan[i].digital.direction == DAQ::OUTPUT && subdevice[DIO].chan[i].digital.previous_value != value) {
-                subdevice[DIO].chan[i].digital.previous_value = value;
-                data |= value == 0 ? (0<<i) : (1<<i); // Toggle the i-th bit for modification (set 0 or 1)
-                mask |= (1<<i); // Set i-th bit to specify channels to modify
+        for(size_t i=0; i < subdevice[DIO].count; ++i)
+            {
+                value = input(i+offset) != 0.0;
+                if(subdevice[DIO].chan[i].active && subdevice[DIO].chan[i].digital.direction == DAQ::OUTPUT && subdevice[DIO].chan[i].digital.previous_value != value)
+                    {
+                        subdevice[DIO].chan[i].digital.previous_value = value;
+                        data |= value == 0 ? (0<<i) : (1<<i); // Toggle the i-th bit for modification (set 0 or 1)
+                        mask |= (1<<i); // Set i-th bit to specify channels to modify
+                    }
             }
-        }
         // Write the data according to the mask
         if (mask)
             a4l_sync_dio(&dsc, subdevice[DIO].id, &mask, &data);
@@ -553,67 +579,73 @@ void AnalogyDevice::write(void)
 
 void AnalogyDevice::doLoad(const Settings::Object::State &s)
 {
-    for(size_t i = 0; i < subdevice[AI].count && i < static_cast<size_t>(s.loadInteger("AI Count")); ++i) {
-        std::ostringstream str;
-        str << i;
-        setChannelActive(AI,i,s.loadInteger(str.str()+" AI Active"));
-        setAnalogRange(AI,i,s.loadInteger(str.str()+" AI Range"));
-        setAnalogReference(AI,i,s.loadInteger(str.str()+" AI Reference"));
-        setAnalogUnits(AI,i,s.loadInteger(str.str()+" AI Units"));
-        setAnalogGain(AI,i,s.loadDouble(str.str()+" AI Gain"));
-        setAnalogZeroOffset(AI,i,s.loadDouble(str.str()+" AI Zero Offset"));
-    }
+    for(size_t i = 0; i < subdevice[AI].count && i < static_cast<size_t>(s.loadInteger("AI Count")); ++i)
+        {
+            std::ostringstream str;
+            str << i;
+            setChannelActive(AI,i,s.loadInteger(str.str()+" AI Active"));
+            setAnalogRange(AI,i,s.loadInteger(str.str()+" AI Range"));
+            setAnalogReference(AI,i,s.loadInteger(str.str()+" AI Reference"));
+            setAnalogUnits(AI,i,s.loadInteger(str.str()+" AI Units"));
+            setAnalogGain(AI,i,s.loadDouble(str.str()+" AI Gain"));
+            setAnalogZeroOffset(AI,i,s.loadDouble(str.str()+" AI Zero Offset"));
+        }
 
-    for(size_t i = 0; i < subdevice[AO].count && i < static_cast<size_t>(s.loadInteger("AO Count")); ++i) {
-        std::ostringstream str;
-        str << i;
-        setChannelActive(AO,i,s.loadInteger(str.str()+" AO Active"));
-        setAnalogRange(AO,i,s.loadInteger(str.str()+" AO Range"));
-        setAnalogReference(AO,i,s.loadInteger(str.str()+" AO Reference"));
-        setAnalogUnits(AO,i,s.loadInteger(str.str()+" AO Units"));
-        setAnalogGain(AO,i,s.loadDouble(str.str()+" AO Gain"));
-        setAnalogZeroOffset(AO,i,s.loadDouble(str.str()+" AO Zero Offset"));
-    }
+    for(size_t i = 0; i < subdevice[AO].count && i < static_cast<size_t>(s.loadInteger("AO Count")); ++i)
+        {
+            std::ostringstream str;
+            str << i;
+            setChannelActive(AO,i,s.loadInteger(str.str()+" AO Active"));
+            setAnalogRange(AO,i,s.loadInteger(str.str()+" AO Range"));
+            setAnalogReference(AO,i,s.loadInteger(str.str()+" AO Reference"));
+            setAnalogUnits(AO,i,s.loadInteger(str.str()+" AO Units"));
+            setAnalogGain(AO,i,s.loadDouble(str.str()+" AO Gain"));
+            setAnalogZeroOffset(AO,i,s.loadDouble(str.str()+" AO Zero Offset"));
+        }
 
-    for(size_t i = 0; i < subdevice[DIO].count && i < static_cast<size_t>(s.loadInteger("DIO Count")); ++i) {
-        std::ostringstream str;
-        str << i;
-        setChannelActive(DIO,i,s.loadInteger(str.str()+" DIO Active"));
-        setDigitalDirection(i,static_cast<DAQ::direction_t>(s.loadInteger(str.str()+" DIO Direction")));
-    }
+    for(size_t i = 0; i < subdevice[DIO].count && i < static_cast<size_t>(s.loadInteger("DIO Count")); ++i)
+        {
+            std::ostringstream str;
+            str << i;
+            setChannelActive(DIO,i,s.loadInteger(str.str()+" DIO Active"));
+            setDigitalDirection(i,static_cast<DAQ::direction_t>(s.loadInteger(str.str()+" DIO Direction")));
+        }
 }
 
 void AnalogyDevice::doSave(Settings::Object::State &s) const
 {
     s.saveInteger("AI Count",subdevice[AI].count);
-    for(size_t i = 0; i < subdevice[AI].count; ++i) {
-        std::ostringstream str;
-        str << i;
-        s.saveInteger(str.str()+" AI Active",getChannelActive(AI,i));
-        s.saveInteger(str.str()+" AI Range",getAnalogRange(AI,i));
-        s.saveInteger(str.str()+" AI Reference",getAnalogReference(AI,i));
-        s.saveInteger(str.str()+" AI Units",getAnalogUnits(AI,i));
-        s.saveDouble(str.str()+" AI Gain",getAnalogGain(AI,i));
-        s.saveDouble(str.str()+" AI Zero Offset",getAnalogZeroOffset(AI,i));
-    }
+    for(size_t i = 0; i < subdevice[AI].count; ++i)
+        {
+            std::ostringstream str;
+            str << i;
+            s.saveInteger(str.str()+" AI Active",getChannelActive(AI,i));
+            s.saveInteger(str.str()+" AI Range",getAnalogRange(AI,i));
+            s.saveInteger(str.str()+" AI Reference",getAnalogReference(AI,i));
+            s.saveInteger(str.str()+" AI Units",getAnalogUnits(AI,i));
+            s.saveDouble(str.str()+" AI Gain",getAnalogGain(AI,i));
+            s.saveDouble(str.str()+" AI Zero Offset",getAnalogZeroOffset(AI,i));
+        }
 
     s.saveInteger("AO Count",subdevice[AO].count);
-    for(size_t i = 0; i < subdevice[AO].count; ++i) {
-        std::ostringstream str;
-        str << i;
-        s.saveInteger(str.str()+" AO Active",getChannelActive(AO,i));
-        s.saveInteger(str.str()+" AO Range",getAnalogRange(AO,i));
-        s.saveInteger(str.str()+" AO Reference",getAnalogReference(AO,i));
-        s.saveInteger(str.str()+" AO Units",getAnalogUnits(AO,i));
-        s.saveDouble(str.str()+" AO Gain",getAnalogGain(AO,i));
-        s.saveDouble(str.str()+" AO Zero Offset",getAnalogZeroOffset(AO,i));
-    }
+    for(size_t i = 0; i < subdevice[AO].count; ++i)
+        {
+            std::ostringstream str;
+            str << i;
+            s.saveInteger(str.str()+" AO Active",getChannelActive(AO,i));
+            s.saveInteger(str.str()+" AO Range",getAnalogRange(AO,i));
+            s.saveInteger(str.str()+" AO Reference",getAnalogReference(AO,i));
+            s.saveInteger(str.str()+" AO Units",getAnalogUnits(AO,i));
+            s.saveDouble(str.str()+" AO Gain",getAnalogGain(AO,i));
+            s.saveDouble(str.str()+" AO Zero Offset",getAnalogZeroOffset(AO,i));
+        }
 
     s.saveInteger("DIO Count",subdevice[DIO].count);
-    for(size_t i = 0; i < subdevice[DIO].count; ++i) {
-        std::ostringstream str;
-        str << i;
-        s.saveInteger(str.str()+" DIO Active",getChannelActive(DIO,i));
-        s.saveInteger(str.str()+" DIO Direction",subdevice[DIO].chan[i].digital.direction);
-    }
+    for(size_t i = 0; i < subdevice[DIO].count; ++i)
+        {
+            std::ostringstream str;
+            str << i;
+            s.saveInteger(str.str()+" DIO Active",getChannelActive(DIO,i));
+            s.saveInteger(str.str()+" DIO Direction",subdevice[DIO].chan[i].digital.direction);
+        }
 }

@@ -26,7 +26,8 @@
 #include <sys/mman.h>
 #include <sys/time.h>
 
-typedef struct {
+typedef struct
+{
     long long period;
     long long next_t;
     pthread_t thread;
@@ -42,15 +43,16 @@ int RT::OS::initiate(void)
      */
     ERROR_MSG("***WARNING*** You are using the POSIX compatibility layer, RTXI is NOT running in realtime!!!\n");
 
-    if (mlockall(MCL_CURRENT | MCL_FUTURE)) {
-        ERROR_MSG("RT::OS(POSIX)::initiate : failed to lock memory.\n");
+    if (mlockall(MCL_CURRENT | MCL_FUTURE))
+        {
+            ERROR_MSG("RT::OS(POSIX)::initiate : failed to lock memory.\n");
 
-        /*
-         * I don't think it is necessary to return an error in this case.
-         *  Because unless you are root it will always error.
-         */
-        //return -EPERM;
-    }
+            /*
+             * I don't think it is necessary to return an error in this case.
+             *  Because unless you are root it will always error.
+             */
+            //return -EPERM;
+        }
 
     pthread_key_create(&is_rt_key,0);
     init_rt = true;
@@ -63,7 +65,8 @@ void RT::OS::shutdown(void)
     pthread_key_delete(is_rt_key);
 }
 
-struct posix_bounce_info_t {
+struct posix_bounce_info_t
+{
     void *(*entry)(void *);
     posix_task_t *t;
     void *arg;
@@ -94,7 +97,8 @@ int RT::OS::createTask(RT::OS::Task *task,void *(*entry)(void *),void *arg,int)
     posix_task_t *t = new posix_task_t;
     *task = t;
 
-    posix_bounce_info_t info = {
+    posix_bounce_info_t info =
+    {
         entry,
         t,
         arg,
@@ -156,7 +160,8 @@ void RT::OS::sleepTimestep(RT::OS::Task task)
     long long sleep_time = t->next_t-getTime();
     t->next_t += t->period;
 
-    struct timespec ts = {
+    struct timespec ts =
+    {
         sleep_time / 1000000000ll,
         sleep_time % 1000000000ll,
     };

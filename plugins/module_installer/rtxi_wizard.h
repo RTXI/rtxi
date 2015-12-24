@@ -21,41 +21,41 @@
 
 class RTXIWizard : public DefaultGUIModel
 {
-	Q_OBJECT
+    Q_OBJECT
 
-	public:
-		RTXIWizard(void);
-		~RTXIWizard(void);
-		void initParameters(void);
-		void customizeGUI(void);
+public:
+    RTXIWizard(void);
+    ~RTXIWizard(void);
+    void initParameters(void);
+    void customizeGUI(void);
 
-		void installFromString(std::string);
+    void installFromString(std::string);
 
-	private slots:
-		void cloneModule(void);
-		void getRepos(void);
-		void getReadme(void);
-		void parseRepos(void);
-		void parseReadme(void);
+private slots:
+    void cloneModule(void);
+    void getRepos(void);
+    void getReadme(void);
+    void parseRepos(void);
+    void parseReadme(void);
 
-		void updateButton(void);
+    void updateButton(void);
 
-	private:
+private:
 
-		enum button_mode_t {DOWNLOAD, UPDATE } button_mode;
+    enum button_mode_t {DOWNLOAD, UPDATE } button_mode;
 
-		QNetworkAccessManager qnam;
-		QNetworkReply *reply;
-		QProgressDialog *progressDialog;
+    QNetworkAccessManager qnam;
+    QNetworkReply *reply;
+    QProgressDialog *progressDialog;
 
-		QTextEdit *readmeWindow;
-		QListWidget *moduleList;
-		QListWidget *installedList;
+    QTextEdit *readmeWindow;
+    QListWidget *moduleList;
+    QListWidget *installedList;
 
-		QPushButton *cloneButton;
-		QPushButton *syncButton;
-		QList<RTXIModule*> *allModules;
-		QList<RTXIModule*> *installedModules;
+    QPushButton *cloneButton;
+    QPushButton *syncButton;
+    QList<RTXIModule*> *allModules;
+    QList<RTXIModule*> *installedModules;
 
-		std::vector<QString> exclude_list;
+    std::vector<QString> exclude_list;
 };

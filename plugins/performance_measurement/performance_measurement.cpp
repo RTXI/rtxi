@@ -20,7 +20,8 @@
 #include <main_window.h>
 #include <performance_measurement.h>
 
-static Workspace::variable_t vars[] = {
+static Workspace::variable_t vars[] =
+{
     { "Comp Time (ns)", "", Workspace::STATE, },
     { "Peak Comp Time (ns)", "", Workspace::STATE, },
     { "Real-time Period (ns)", "", Workspace::STATE, },
@@ -115,21 +116,22 @@ void PerformanceMeasurement::Panel::read(void)
 {
     long long now = RT::OS::getTime();
 
-    switch (state) {
-    case EXEC:
-        if (maxTimestep < now - lastRead)
-            maxTimestep = now - lastRead;
-        timestep = now - lastRead;
-        timestepStat.push(timestep);
-        break;
-    case INIT2:
-        timestep = maxTimestep = now - lastRead;
-        timestepStat.push(timestep);
-        state = EXEC;
-        break;
-    case INIT1:
-        state = INIT2;
-    }
+    switch (state)
+        {
+        case EXEC:
+            if (maxTimestep < now - lastRead)
+                maxTimestep = now - lastRead;
+            timestep = now - lastRead;
+            timestepStat.push(timestep);
+            break;
+        case INIT2:
+            timestep = maxTimestep = now - lastRead;
+            timestepStat.push(timestep);
+            state = EXEC;
+            break;
+        case INIT1:
+            state = INIT2;
+        }
     lastRead = now;
     jitter = timestepStat.std();
 }
@@ -138,19 +140,21 @@ void PerformanceMeasurement::Panel::write(void)
 {
     long long now = RT::OS::getTime();
 
-    switch (state) {
-    case EXEC:
-        if (maxDuration < now - lastRead) {
-            maxDuration = now - lastRead;
+    switch (state)
+        {
+        case EXEC:
+            if (maxDuration < now - lastRead)
+                {
+                    maxDuration = now - lastRead;
+                }
+            duration = now - lastRead;
+            break;
+        case INIT2:
+            duration = maxDuration = now - lastRead;
+            break;
+        default:
+            ERROR_MSG("PerformanceMeasurement::Panel::write : invalid state\n");
         }
-        duration = now - lastRead;
-        break;
-    case INIT2:
-        duration = maxDuration = now - lastRead;
-        break;
-    default:
-        ERROR_MSG("PerformanceMeasurement::Panel::write : invalid state\n");
-    }
 }
 
 void PerformanceMeasurement::Panel::reset(void)

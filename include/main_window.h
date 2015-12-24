@@ -143,15 +143,15 @@ public:
 
     QAction* createSystemMenuItem(const QString &label, const QObject *handler, const char *slot);
 
-		/*
-		 * Create a window for the widget in the main window
-		 */
-		void createMdi(QMdiSubWindow *);
+    /*
+     * Create a window for the widget in the main window
+     */
+    void createMdi(QMdiSubWindow *);
 
-		/*!
-		 * Load window geometry based upon previously stored settings
-		 */
-		void loadWindow(void);
+    /*!
+     * Load window geometry based upon previously stored settings
+     */
+    void loadWindow(void);
 
 private slots:
     void about(void);
@@ -178,7 +178,8 @@ private:
 
     MainWindow(void);
     MainWindow(const MainWindow &) {};
-    MainWindow &operator = (const MainWindow &) {
+    MainWindow &operator = (const MainWindow &)
+    {
         return *getInstance();
     };
 

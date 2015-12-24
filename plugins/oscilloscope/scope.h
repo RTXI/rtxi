@@ -85,7 +85,8 @@ public:
     {
 
     public:
-        LegendItem() {
+        LegendItem()
+        {
             setRenderHint(QwtPlotItem::RenderAntialiased);
             QColor color(Qt::black);
             setTextPen(color);
@@ -96,23 +97,27 @@ public:
     {
 
     public:
-        Canvas(QwtPlot *plot = NULL) : QwtPlotCanvas(plot) {
+        Canvas(QwtPlot *plot = NULL) : QwtPlotCanvas(plot)
+        {
             setPaintAttribute(QwtPlotCanvas::BackingStore, false);
 
-            if(QwtPainter::isX11GraphicsSystem()) {
+            if(QwtPainter::isX11GraphicsSystem())
+                {
 #if QT_VERSION < 0x050000
-                setAttribute( Qt::WA_PaintOutsidePaintEvent, true );
+                    setAttribute( Qt::WA_PaintOutsidePaintEvent, true );
 #endif
-                if(testPaintAttribute(QwtPlotCanvas::BackingStore)) {
-                    setAttribute(Qt::WA_PaintOnScreen, true);
-                    setAttribute(Qt::WA_NoSystemBackground, true);
+                    if(testPaintAttribute(QwtPlotCanvas::BackingStore))
+                        {
+                            setAttribute(Qt::WA_PaintOnScreen, true);
+                            setAttribute(Qt::WA_NoSystemBackground, true);
+                        }
                 }
-            }
             setupPalette();
         }
 
     private:
-        void setupPalette()	{
+        void setupPalette()
+        {
             QPalette pal = palette();
 
 #if QT_VERSION >= 0x040400
@@ -128,7 +133,8 @@ public:
         }
     }; // Canvas
 
-    enum trig_t {
+    enum trig_t
+    {
         NONE,
         POS,
         NEG,

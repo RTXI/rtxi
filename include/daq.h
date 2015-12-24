@@ -35,7 +35,8 @@ namespace DAQ
 /*!
  * Used to specify the interface type.
  */
-enum type_t {
+enum type_t
+{
     AI,   /*!< Analog Input Interface         */
     AO,   /*!< Analog Output Interface        */
     DIO,  /*!< Digital Input/Output Interface */
@@ -53,7 +54,8 @@ static const index_t INVALID = (0-1);
 /*!
  * Used to specify  digital interface direction.
  */
-enum direction_t {
+enum direction_t
+{
     INPUT,  /*!< Digital Input  */
     OUTPUT, /*!< Digital Output */
 };
@@ -112,7 +114,8 @@ private:
     Manager(void) : mutex(Mutex::RECURSIVE) {};
     ~Manager(void) {};
     Manager(const Manager &) {};
-    Manager &operator=(const Manager &) {
+    Manager &operator=(const Manager &)
+    {
         return *getInstance();
     };
 

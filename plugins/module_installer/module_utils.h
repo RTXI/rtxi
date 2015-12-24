@@ -21,41 +21,41 @@
 #include <QtWidgets>
 
 /*
- * This is a utility class for the module installer. Each RTXIModule holds the 
+ * This is a utility class for the module installer. Each RTXIModule holds the
  * important information about a specific module, such as its name, online url,
- *  location within the filesystem, and README text. 
+ *  location within the filesystem, and README text.
  *
- * This class inherits QListWidgetItem and is the object that is inserted into 
- * the QListWidget in rtxi_wizard.cpp. 
+ * This class inherits QListWidgetItem and is the object that is inserted into
+ * the QListWidget in rtxi_wizard.cpp.
  */
 class RTXIModule : QListWidgetItem
 {
 
-	public:
-		RTXIModule(QListWidget *parent =0);
+public:
+    RTXIModule(QListWidget *parent =0);
 
-		void setReadmeUrl(QString);
-		void setCloneUrl(QString);
-		void setName(QString);
-		void setReadme(QString);
-		void setLocation(QString);
+    void setReadmeUrl(QString);
+    void setCloneUrl(QString);
+    void setName(QString);
+    void setReadme(QString);
+    void setLocation(QString);
 
-		QUrl getReadmeUrl(void);
-		QUrl getCloneUrl(void);
-		QUrl getLocation(void);
-		QString getName(void);
-		QString getReadme(void);
+    QUrl getReadmeUrl(void);
+    QUrl getCloneUrl(void);
+    QUrl getLocation(void);
+    QString getName(void);
+    QString getReadme(void);
 
-		bool installed;
+    bool installed;
 
-	private: 
-		QUrl readme_url;
-		QUrl clone_url;
-		QString name;
-		QString readme;
-		QUrl location;
+private:
+    QUrl readme_url;
+    QUrl clone_url;
+    QString name;
+    QString readme;
+    QUrl location;
 
-	private slots:
+private slots:
 
 };
 
