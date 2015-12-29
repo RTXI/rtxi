@@ -18,6 +18,7 @@
 
 [Unit]
 Description=Load analogy_ni_pcimio at boot
+After=syslog.target
 
 [Service]
 Type=oneshot
