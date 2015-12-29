@@ -1,6 +1,15 @@
 #!/bin/bash
 
-#
+### BEGIN INIT INFO
+# Provides:          rtxi_load_analogy
+# Required-Start:    $all 
+# Required-Stop:     $remote_fs $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Load analogy at boot
+# Description: Find the bus ID for the NI DAQ and use the address to load the analogy driver on startup
+### END INIT INFO
+
 # The Real-Time eXperiment Interface (RTXI)
 # Copyright (C) 2011 Georgia Institute of Technology, University of Utah, Weill Cornell Medical College
 #
@@ -16,7 +25,6 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
 
 # get pci bus address of card
 bus_addr=$(lspci | grep National | awk '{print$1}' | colrm 2)
@@ -26,8 +34,6 @@ val=$(lspci | grep National | awk '{print$1}' | tr ':' ',' | sed 's/.\{2\}$//' |
 
 # setup load value for command
 load_val=${bus_addr}x${val}
-
-#echo "DAQ card PCI address is: ${load_val}"
 
 # call configuration to load the card
 #$(sudo analogy_config analogy0 analogy_ni_pcimio ${load_val})
