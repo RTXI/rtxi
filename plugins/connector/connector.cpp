@@ -126,13 +126,18 @@ Connector::Panel::Panel(QWidget *parent) : QWidget(parent)
     layout->addWidget(inputGroup, 1, 2, 1, 2);
     layout->addWidget(connectionGroup, 3, 0, 1, 4);
 
+    // Set layout so that only connectionGroup expands when resized
+	 layout->setRowStretch(0, 0);
+	 layout->setRowStretch(2, 0);
+	 layout->setRowStretch(3, 1);
+
     // Attach layout to widget
     setLayout(layout);
     setWindowTitle("Connector Panel");
 
     // Set layout to Mdi
     subWindow->setWidget(this);
-    subWindow->setFixedSize(500, subWindow->sizeHint().height());
+    subWindow->resize(500, subWindow->sizeHint().height());
     show();
 
     block_list_info_t info = {inputBlock, outputBlock, &blocks};
