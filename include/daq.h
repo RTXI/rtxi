@@ -214,6 +214,7 @@ public:
      * \return The number of available units for the channel.
      */
     virtual size_t getAnalogUnitsCount(type_t type,index_t index) const=0;
+    virtual size_t getAnalogDecimation(type_t type,index_t index) const=0;
     /*!
      * Get a string representation of the specified range.
      *
@@ -343,6 +344,8 @@ public:
      * \return 0 if successful or a negative value on error.
      */
     virtual int setAnalogOffsetUnits(type_t type,index_t index,index_t units)=0;
+    virtual int setAnalogDecimation(type_t type, index_t index, size_t decimation)=0;
+    virtual int setAnalogCounter(type_t type, index_t index)=0;
     /*!
      * Set the calibration of the selected channel.
      *
@@ -374,6 +377,7 @@ public:
      * \return 0 if successful or a negative value on error.
      */
     virtual int setDigitalDirection(index_t index,direction_t direction)=0;
+
 
 }; // class Device
 

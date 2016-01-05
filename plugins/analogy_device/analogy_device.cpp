@@ -82,6 +82,8 @@ AnalogyDevice::AnalogyDevice(a4l_desc_t *d,std::string name,IO::channel_t *chan,
                         setAnalogZeroOffset(AI,i,0);
                         setAnalogReference(AI,i,0);
                         setAnalogUnits(AI,i,0);
+                        setAnalogDecimation(AI,i,1);
+                        setAnalogCounter(AI,i);
                     }
         }
     else
@@ -238,6 +240,14 @@ size_t AnalogyDevice::getAnalogUnitsCount(type_t type,index_t channel) const
         return 0;
 
     return 2;
+}
+
+size_t AnalogyDevice::getAnalogDecimation(type_t type,index_t channel) const
+{
+    if(!analog_exists(type,channel))
+        return 0;
+
+    return subdevice[type].chan[channel].analog.decimation;
 }
 
 std::string AnalogyDevice::getAnalogRangeString(type_t type,index_t channel,index_t index) const
@@ -413,6 +423,24 @@ int AnalogyDevice::setAnalogGain(type_t type,index_t channel,double gain)
     return 0;
 }
 
+int AnalogyDevice::setAnalogDecimation(type_t type, index_t channel, size_t decimation_rate)
+{
+    if(!analog_exists(type,channel))
+        return -EINVAL;
+
+    subdevice[type].chan[channel].analog.decimation = decimation_rate;
+    return 0;
+}
+
+int AnalogyDevice::setAnalogCounter(type_t type, index_t channel)
+{
+	if(!analog_exists(type,channel))
+		return -EINVAL;
+
+	subdevice[type].chan[channel].analog.counter = 0;
+	return 0;
+}
+
 // Return the direction of the selected digital channel
 direction_t AnalogyDevice::getDigitalDirection(index_t channel) const
 {
@@ -453,6 +481,8 @@ void AnalogyDevice::read(void)
         if(subdevice[AI].chan[i].active)
             {
                 channel = &subdevice[AI].chan[i].analog;
+                if(!channel->counter++)
+																{
 
                 // Get analogy reference
                 switch (channel->reference)
@@ -484,6 +514,8 @@ void AnalogyDevice::read(void)
 
                 // Gain, convert, and push into IO pipe
                 output(i) = value * channel->gain;
+																}
+																channel->counter %= channel->decimation;
             }
 
     size_t offset = getChannelCount(AI);
