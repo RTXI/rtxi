@@ -210,6 +210,10 @@ SystemControlPanel::SystemControlPanel(QWidget *parent) : QWidget(parent)
 				analogDecimationList = new QComboBox;
 				analogDecimationList->addItem("1");
 				analogDecimationList->addItem("2");
+				analogDecimationList->addItem("4");
+				analogDecimationList->addItem("6");
+				analogDecimationList->addItem("8");
+				analogDecimationList->addItem("10");
 				analogLayout->addWidget(analogDecimationList, 5, 1);
 
     // Assign layout to child widget
