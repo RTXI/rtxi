@@ -344,20 +344,20 @@ void SystemControlPanel::updateDevice(void)
     if(!dev)
         return;
 
-    analogChannelList->clear();
-    digitalChannelList->clear();
+				analogChannelList->clear();
+				digitalChannelList->clear();
 
-    type = static_cast<DAQ::type_t>(analogSubdeviceList->currentIndex());
-    for(size_t i=0; i<dev->getChannelCount(type); ++i)
-        {
-            analogChannelList->addItem(QString::number(i));
-        }
+				type = static_cast<DAQ::type_t>(analogSubdeviceList->currentIndex());
+				for(size_t i=0; i<dev->getChannelCount(type); ++i)
+				{
+					analogChannelList->addItem(QString::number(i));
+				}
 
-    type = static_cast<DAQ::type_t>(digitalSubdeviceList->currentIndex()+DAQ::DIO);
-    for(size_t i=0; i<dev->getChannelCount(type); ++i)
-        {
-            digitalChannelList->addItem(QString::number(i));
-        }
+				type = static_cast<DAQ::type_t>(digitalSubdeviceList->currentIndex()+DAQ::DIO);
+				for(size_t i=0; i<dev->getChannelCount(type); ++i)
+				{
+					digitalChannelList->addItem(QString::number(i));
+				}
 
     display();
 }
@@ -459,10 +459,15 @@ void SystemControlPanel::display(void)
             DAQ::type_t type = static_cast<DAQ::type_t>(analogSubdeviceList->currentIndex());
             DAQ::index_t chan = static_cast<DAQ::index_t>(analogChannelList->currentIndex());
 
+												// Decimation is only enabled for AI
+												if(type == DAQ::AI)
+													analogDecimationList->setEnabled(true);
+												else
+													analogDecimationList->setEnabled(false);
+
             analogActiveButton->setEnabled(true);
             analogChannelList->setEnabled(true);
             analogRangeList->setEnabled(true);
-            analogDecimationList->setEnabled(true);
             analogReferenceList->setEnabled(true);
             analogGainEdit->setEnabled(true);
             analogZeroOffsetEdit->setEnabled(true);
