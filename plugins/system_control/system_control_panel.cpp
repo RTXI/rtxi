@@ -138,8 +138,8 @@ SystemControlPanel::SystemControlPanel(QWidget *parent) : QWidget(parent)
     analogActiveButton->setCheckable(true);
     analogLayout->addWidget(analogActiveButton, 1, 3);
 
-    analogCalibrationButton = new QPushButton("Calibrate");
-    analogCalibrationButton->setCheckable(true);
+    //analogCalibrationButton = new QPushButton("Calibrate");
+    //analogCalibrationButton->setCheckable(true);
     //analogLayout->addWidget(analogCalibrationButton, 1, 4);
 
     analogLayout->addWidget(new QLabel(tr("Range:")), 2, 0, 1, 1);
@@ -206,14 +206,14 @@ SystemControlPanel::SystemControlPanel(QWidget *parent) : QWidget(parent)
     analogLayout->addWidget(analogUnitPrefixList2, 4, 2, 1, 1);
     analogLayout->addWidget(new QLabel(tr(" Volt/Amps")), 4, 3);
 
-				analogLayout->addWidget(new QLabel(tr("Decimation:")));
+				analogLayout->addWidget(new QLabel(tr("Decimation:")), 5, 0);
 				analogDecimationList = new QComboBox;
 				analogDecimationList->addItem("1");
 				analogDecimationList->addItem("2");
 				analogDecimationList->addItem("3");
 				analogDecimationList->addItem("4");
 				analogDecimationList->addItem("5");
-				analogLayout->addWidget(analogDecimationList);
+				analogLayout->addWidget(analogDecimationList, 5, 1);
 
     // Assign layout to child widget
     analogGroup->setLayout(analogLayout);
@@ -304,13 +304,13 @@ void SystemControlPanel::apply(void)
             double a_zerooffset = analogZeroOffsetEdit->text().toDouble()*pow(10,-3*(analogUnitPrefixList2->currentIndex()-8));
 
             dev->setChannelActive(a_type,a_chan,analogActiveButton->isChecked());
-            dev->setAnalogCalibrationActive(a_type,a_chan,analogCalibrationButton->isChecked());
+            //dev->setAnalogCalibrationActive(a_type,a_chan,analogCalibrationButton->isChecked());
             dev->setAnalogGain(a_type,a_chan,a_gain);
             dev->setAnalogZeroOffset(a_type,a_chan,a_zerooffset);
             dev->setAnalogRange(a_type,a_chan,analogRangeList->currentIndex());
             dev->setAnalogReference(a_type,a_chan,analogReferenceList->currentIndex());
             dev->setAnalogUnits(a_type,a_chan,analogUnitList->currentIndex());
-            dev->setAnalogCalibrationActive(a_type,a_chan,analogCalibrationButton->isChecked());
+            //dev->setAnalogCalibrationActive(a_type,a_chan,analogCalibrationButton->isChecked());
             dev->setAnalogDecimation(a_type,a_chan,analogDecimationList->currentIndex()+1);
             dev->setAnalogCounter(a_type,a_chan);
 
@@ -442,7 +442,7 @@ void SystemControlPanel::display(void)
             analogActiveButton->setChecked(false);
             analogActiveButton->setEnabled(false);
             analogActiveButton->setChecked(false);
-            analogCalibrationButton->setEnabled(false);
+            //analogCalibrationButton->setEnabled(false);
             analogChannelList->setEnabled(false);
             analogRangeList->setEnabled(false);
             analogDecimationList->setEnabled(false);
@@ -482,8 +482,8 @@ void SystemControlPanel::display(void)
                     analogUnitList->addItem(QString::fromStdString(dev->getAnalogUnitsString(type,chan,i)));
                 }
             analogActiveButton->setChecked(dev->getChannelActive(type,chan));
-            analogCalibrationButton->setEnabled(dev->getAnalogCalibrationState(type,chan));
-            analogCalibrationButton->setChecked(dev->getAnalogCalibrationActive(type,chan));
+            //analogCalibrationButton->setEnabled(dev->getAnalogCalibrationState(type,chan));
+            //analogCalibrationButton->setChecked(dev->getAnalogCalibrationActive(type,chan));
             analogRangeList->setCurrentIndex(dev->getAnalogRange(type,chan));
             analogDecimationList->setCurrentIndex(dev->getAnalogDecimation(type,chan)-1);
             analogReferenceList->setCurrentIndex(dev->getAnalogReference(type,chan));
