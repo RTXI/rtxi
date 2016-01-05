@@ -621,6 +621,7 @@ void AnalogyDevice::doLoad(const Settings::Object::State &s)
             setAnalogUnits(AI,i,s.loadInteger(str.str()+" AI Units"));
             setAnalogGain(AI,i,s.loadDouble(str.str()+" AI Gain"));
             setAnalogZeroOffset(AI,i,s.loadDouble(str.str()+" AI Zero Offset"));
+            setAnalogDecimation(AI,i,s.loadInteger(str.str()+" AI Decimation"));
         }
 
     for(size_t i = 0; i < subdevice[AO].count && i < static_cast<size_t>(s.loadInteger("AO Count")); ++i)
@@ -657,6 +658,7 @@ void AnalogyDevice::doSave(Settings::Object::State &s) const
             s.saveInteger(str.str()+" AI Units",getAnalogUnits(AI,i));
             s.saveDouble(str.str()+" AI Gain",getAnalogGain(AI,i));
             s.saveDouble(str.str()+" AI Zero Offset",getAnalogZeroOffset(AI,i));
+            s.saveInteger(str.str()+" AI Decimation",getAnalogDecimation(AI,i));
         }
 
     s.saveInteger("AO Count",subdevice[AO].count);
