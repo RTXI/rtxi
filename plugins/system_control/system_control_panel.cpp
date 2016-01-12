@@ -311,7 +311,6 @@ void SystemControlPanel::apply(void)
             dev->setAnalogRange(a_type,a_chan,analogRangeList->currentIndex());
             dev->setAnalogReference(a_type,a_chan,analogReferenceList->currentIndex());
             dev->setAnalogUnits(a_type,a_chan,analogUnitList->currentIndex());
-            //dev->setAnalogCalibrationActive(a_type,a_chan,analogCalibrationButton->isChecked());
             dev->setAnalogDecimation(a_type,a_chan,analogDecimationList->currentIndex()+1);
             dev->setAnalogCounter(a_type,a_chan);
 

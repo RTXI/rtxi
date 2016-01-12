@@ -621,7 +621,8 @@ void AnalogyDevice::doLoad(const Settings::Object::State &s)
             setAnalogUnits(AI,i,s.loadInteger(str.str()+" AI Units"));
             setAnalogGain(AI,i,s.loadDouble(str.str()+" AI Gain"));
             setAnalogZeroOffset(AI,i,s.loadDouble(str.str()+" AI Zero Offset"));
-            setAnalogDecimation(AI,i,s.loadInteger(str.str()+" AI Decimation"));
+            if(s.loadInteger(str.str()+" AI Decimation"))
+													setAnalogDecimation(AI,i,s.loadInteger(str.str()+" AI Decimation"));
         }
 
     for(size_t i = 0; i < subdevice[AO].count && i < static_cast<size_t>(s.loadInteger("AO Count")); ++i)
