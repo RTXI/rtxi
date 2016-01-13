@@ -41,7 +41,7 @@ public:
     size_t getAnalogRangeCount(DAQ::type_t,DAQ::index_t) const;
     size_t getAnalogReferenceCount(DAQ::type_t,DAQ::index_t) const;
     size_t getAnalogUnitsCount(DAQ::type_t,DAQ::index_t) const;
-    size_t getAnalogDecimation(DAQ::type_t,DAQ::index_t) const;
+    size_t getAnalogDownsample(DAQ::type_t,DAQ::index_t) const;
     std::string getAnalogRangeString(DAQ::type_t,DAQ::index_t,DAQ::index_t) const;
     std::string getAnalogReferenceString(DAQ::type_t,DAQ::index_t,DAQ::index_t) const;
     std::string getAnalogUnitsString(DAQ::type_t,DAQ::index_t,DAQ::index_t) const;
@@ -65,7 +65,7 @@ public:
     int setAnalogReference(DAQ::type_t,DAQ::index_t,DAQ::index_t);
     int setAnalogUnits(DAQ::type_t,DAQ::index_t,DAQ::index_t);
     int setAnalogOffsetUnits(DAQ::type_t,DAQ::index_t,DAQ::index_t);
-    int setAnalogDecimation(DAQ::type_t, DAQ::index_t, size_t);
+    int setAnalogDownsample(DAQ::type_t, DAQ::index_t, size_t);
     int setAnalogCounter(DAQ::type_t, DAQ::index_t);
     int setAnalogConversion(DAQ::type_t,DAQ::index_t) {}; // Placeholder
     int setAnalogCalibrationActive(DAQ::type_t,DAQ::index_t,bool) {};
@@ -95,7 +95,7 @@ private:
         double zerooffset;
         lsampl_t maxdata;
         DAQ::index_t offsetunits;
-        size_t decimation;
+        size_t downsample;
         size_t counter;
     };
 

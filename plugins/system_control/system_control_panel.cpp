@@ -206,15 +206,15 @@ SystemControlPanel::SystemControlPanel(QWidget *parent) : QWidget(parent)
     analogLayout->addWidget(analogUnitPrefixList2, 4, 2, 1, 1);
     analogLayout->addWidget(new QLabel(tr(" Volt/Amps")), 4, 3);
 
-				analogLayout->addWidget(new QLabel(tr("Decimation:")), 5, 0);
-				analogDecimationList = new QComboBox;
-				analogDecimationList->addItem("1");
-				analogDecimationList->addItem("2");
-				analogDecimationList->addItem("4");
-				analogDecimationList->addItem("6");
-				analogDecimationList->addItem("8");
-				analogDecimationList->addItem("10");
-				analogLayout->addWidget(analogDecimationList, 5, 1);
+				analogLayout->addWidget(new QLabel(tr("Downsample:")), 5, 0);
+				analogDownsampleList = new QComboBox;
+				analogDownsampleList->addItem("1");
+				analogDownsampleList->addItem("2");
+				analogDownsampleList->addItem("4");
+				analogDownsampleList->addItem("6");
+				analogDownsampleList->addItem("8");
+				analogDownsampleList->addItem("10");
+				analogLayout->addWidget(analogDownsampleList, 5, 1);
 
     // Assign layout to child widget
     analogGroup->setLayout(analogLayout);
@@ -311,7 +311,7 @@ void SystemControlPanel::apply(void)
             dev->setAnalogRange(a_type,a_chan,analogRangeList->currentIndex());
             dev->setAnalogReference(a_type,a_chan,analogReferenceList->currentIndex());
             dev->setAnalogUnits(a_type,a_chan,analogUnitList->currentIndex());
-            dev->setAnalogDecimation(a_type,a_chan,analogDecimationList->currentIndex()+1);
+            dev->setAnalogDownsample(a_type,a_chan,analogDownsampleList->currentIndex()+1);
             dev->setAnalogCounter(a_type,a_chan);
 
             DAQ::index_t d_chan = digitalChannelList->currentIndex();
@@ -445,7 +445,7 @@ void SystemControlPanel::display(void)
             //analogCalibrationButton->setEnabled(false);
             analogChannelList->setEnabled(false);
             analogRangeList->setEnabled(false);
-            analogDecimationList->setEnabled(false);
+            analogDownsampleList->setEnabled(false);
             analogReferenceList->setEnabled(false);
             analogGainEdit->setEnabled(false);
             analogZeroOffsetEdit->setEnabled(false);
@@ -459,11 +459,11 @@ void SystemControlPanel::display(void)
             DAQ::type_t type = static_cast<DAQ::type_t>(analogSubdeviceList->currentIndex());
             DAQ::index_t chan = static_cast<DAQ::index_t>(analogChannelList->currentIndex());
 
-												// Decimation is only enabled for AI
+												// Downsample is only enabled for AI
 												if(type == DAQ::AI)
-													analogDecimationList->setEnabled(true);
+													analogDownsampleList->setEnabled(true);
 												else
-													analogDecimationList->setEnabled(false);
+													analogDownsampleList->setEnabled(false);
 
             analogActiveButton->setEnabled(true);
             analogChannelList->setEnabled(true);
@@ -490,7 +490,7 @@ void SystemControlPanel::display(void)
             //analogCalibrationButton->setEnabled(dev->getAnalogCalibrationState(type,chan));
             //analogCalibrationButton->setChecked(dev->getAnalogCalibrationActive(type,chan));
             analogRangeList->setCurrentIndex(dev->getAnalogRange(type,chan));
-            analogDecimationList->setCurrentIndex(dev->getAnalogDecimation(type,chan)-1);
+            analogDownsampleList->setCurrentIndex(dev->getAnalogDownsample(type,chan)-1);
             analogReferenceList->setCurrentIndex(dev->getAnalogReference(type,chan));
             analogUnitList->setCurrentIndex(dev->getAnalogUnits(type,chan));
 

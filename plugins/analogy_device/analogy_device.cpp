@@ -82,7 +82,7 @@ AnalogyDevice::AnalogyDevice(a4l_desc_t *d,std::string name,IO::channel_t *chan,
                         setAnalogZeroOffset(AI,i,0);
                         setAnalogReference(AI,i,0);
                         setAnalogUnits(AI,i,0);
-                        setAnalogDecimation(AI,i,1);
+                        setAnalogDownsample(AI,i,1);
                         setAnalogCounter(AI,i);
                     }
         }
@@ -242,12 +242,12 @@ size_t AnalogyDevice::getAnalogUnitsCount(type_t type,index_t channel) const
     return 2;
 }
 
-size_t AnalogyDevice::getAnalogDecimation(type_t type,index_t channel) const
+size_t AnalogyDevice::getAnalogDownsample(type_t type,index_t channel) const
 {
     if(!analog_exists(type,channel))
         return 0;
 
-    return subdevice[type].chan[channel].analog.decimation;
+    return subdevice[type].chan[channel].analog.downsample;
 }
 
 std::string AnalogyDevice::getAnalogRangeString(type_t type,index_t channel,index_t index) const
@@ -423,12 +423,12 @@ int AnalogyDevice::setAnalogGain(type_t type,index_t channel,double gain)
     return 0;
 }
 
-int AnalogyDevice::setAnalogDecimation(type_t type, index_t channel, size_t decimation_rate)
+int AnalogyDevice::setAnalogDownsample(type_t type, index_t channel, size_t downsample_rate)
 {
     if(!analog_exists(type,channel))
         return -EINVAL;
 
-    subdevice[type].chan[channel].analog.decimation = decimation_rate;
+    subdevice[type].chan[channel].analog.downsample = downsample_rate;
     return 0;
 }
 
@@ -515,7 +515,7 @@ void AnalogyDevice::read(void)
                 // Gain, convert, and push into IO pipe
                 output(i) = value * channel->gain;
 																}
-																channel->counter %= channel->decimation;
+																channel->counter %= channel->downsample;
             }
 
     size_t offset = getChannelCount(AI);
@@ -621,8 +621,8 @@ void AnalogyDevice::doLoad(const Settings::Object::State &s)
             setAnalogUnits(AI,i,s.loadInteger(str.str()+" AI Units"));
             setAnalogGain(AI,i,s.loadDouble(str.str()+" AI Gain"));
             setAnalogZeroOffset(AI,i,s.loadDouble(str.str()+" AI Zero Offset"));
-            if(s.loadInteger(str.str()+" AI Decimation"))
-													setAnalogDecimation(AI,i,s.loadInteger(str.str()+" AI Decimation"));
+            if(s.loadInteger(str.str()+" AI Downsample"))
+													setAnalogDownsample(AI,i,s.loadInteger(str.str()+" AI Downsample"));
         }
 
     for(size_t i = 0; i < subdevice[AO].count && i < static_cast<size_t>(s.loadInteger("AO Count")); ++i)
@@ -659,7 +659,7 @@ void AnalogyDevice::doSave(Settings::Object::State &s) const
             s.saveInteger(str.str()+" AI Units",getAnalogUnits(AI,i));
             s.saveDouble(str.str()+" AI Gain",getAnalogGain(AI,i));
             s.saveDouble(str.str()+" AI Zero Offset",getAnalogZeroOffset(AI,i));
-            s.saveInteger(str.str()+" AI Decimation",getAnalogDecimation(AI,i));
+            s.saveInteger(str.str()+" AI Downsample",getAnalogDownsample(AI,i));
         }
 
     s.saveInteger("AO Count",subdevice[AO].count);
