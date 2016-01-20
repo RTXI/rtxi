@@ -121,21 +121,21 @@ Connector::Panel::Panel(QWidget *parent) : QWidget(parent)
     connectionGroup->setLayout(connectionLayout);
 
     // Attach child widget to parent widget
-    layout->addWidget(outputGroup, 1, 0, 1, 2);
-    layout->addWidget(buttonGroup, 2, 0, 1, 4);
-    layout->addWidget(inputGroup, 1, 2, 1, 2);
-    layout->addWidget(connectionGroup, 3, 0, 1, 4);
+				layout->addWidget(outputGroup, 1, 0, 1, 2);
+				layout->addWidget(buttonGroup, 2, 0, 1, 4);
+				layout->addWidget(inputGroup, 1, 2, 1, 2);
+				layout->addWidget(connectionGroup, 3, 0, 1, 4);
 
-    // Set layout so that only connectionGroup expands when resized
-	 layout->setRowStretch(0, 0);
-	 layout->setRowStretch(2, 0);
-	 layout->setRowStretch(3, 1);
+				// Set layout so that only connectionGroup expands when resized
+				layout->setRowStretch(0, 0);
+				layout->setRowStretch(2, 0);
+				layout->setRowStretch(3, 1);
 
-    // Attach layout to widget
-    setLayout(layout);
-    setWindowTitle("Connector Panel");
+				// Attach layout to widget
+				setLayout(layout);
+				setWindowTitle("Connector Panel");
 
-    // Set layout to Mdi
+				// Set layout to Mdi
     subWindow->setWidget(this);
     subWindow->resize(500, subWindow->sizeHint().height());
     show();

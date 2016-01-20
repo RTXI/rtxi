@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- */
+OA */
 
 #include <analogy_device.h>
 #include <debug.h>
@@ -246,6 +246,24 @@ size_t AnalogyDevice::getAnalogDownsample(type_t type,index_t channel) const
 {
     if(!analog_exists(type,channel))
         return 0;
+
+				switch(subdevice[type].chan[channel].analog.downsample)
+				{
+					case 1:
+						return 1;
+					case 2:
+						return 2;
+					case 3:
+						return 4;
+					case 4:
+						return 6;
+					case 5:
+						return 8;
+					case 6:
+						return 10;
+					default:
+						break;
+				}
 
     return subdevice[type].chan[channel].analog.downsample;
 }

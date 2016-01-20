@@ -58,6 +58,20 @@ QDebug operator<<(QDebug str, const QEvent * ev)
     return str.maybeSpace();
 }
 
+struct find_daq_t
+{
+    int index;
+    DAQ::Device *device;
+};
+
+static void findDAQDevice(DAQ::Device *dev,void *arg)
+{
+    struct find_daq_t *info = static_cast<struct find_daq_t *>(arg);
+    if(!info->index)
+        info->device = dev;
+    info->index--;
+}
+
 namespace
 {
 void buildBlockPtrList(IO::Block *block, void *arg)
@@ -1379,6 +1393,7 @@ int DataRecorder::Panel::startRecording(long long timestamp)
     file.pdata = H5Gcreate(file.trial, "Parameters", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     file.adata = H5Gcreate(file.trial, "Asynchronous Data", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     file.sdata = H5Gcreate(file.trial, "Synchronous Data", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    file.sysdata = H5Gcreate(file.trial, "System Settings", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     hid_t scalar_space = H5Screate(H5S_SCALAR);
     hid_t string_type = H5Tcopy(H5T_C_S1);
@@ -1442,11 +1457,46 @@ int DataRecorder::Panel::startRecording(long long timestamp)
     size_t count = 0;
     for (RT::List<Channel>::iterator i = channels.begin(), end = channels.end(); i != end; ++i)
         {
-            std::string rec_chan_name = std::to_string(++count) + ": " + i->name.toStdString();
+            std::string rec_chan_name = std::to_string(++count) + " " + i->name.toStdString();
             hid_t data = H5Dcreate(file.sdata, rec_chan_name.c_str(), string_type, scalar_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
             H5Dwrite(data, string_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, rec_chan_name.c_str());
             H5Dclose(data);
         }
+
+    DAQ::Device *dev;
+    {
+        struct find_daq_t info = { 0, 0, };
+        DAQ::Manager::getInstance()->foreachDevice(findDAQDevice, &info);
+        dev = info.device;
+    }
+
+				// Save channel configurations
+				if(dev)
+					for(size_t i=0; i<dev->getChannelCount(DAQ::AI); ++i)
+						if(dev->getChannelActive(DAQ::AI,static_cast<DAQ::index_t>(i)))
+						{
+							std::string chan_name = "Analog Channel " + std::to_string(i);
+							file.chandata = H5Gcreate(file.sysdata, chan_name.c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+							hid_t data = H5Dcreate(file.chandata, "Range", string_type, scalar_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+							H5Dwrite(data, string_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, dev->getAnalogRangeString(DAQ::AI,static_cast<DAQ::index_t>(i),dev->getAnalogRange(DAQ::AI,static_cast<DAQ::index_t>(i))).c_str());
+
+							data = H5Dcreate(file.chandata, "Reference", string_type, scalar_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+							H5Dwrite(data, string_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, dev->getAnalogReferenceString(DAQ::AI,static_cast<DAQ::index_t>(i),dev->getAnalogReference(DAQ::AI,static_cast<DAQ::index_t>(i))).c_str());
+
+							long long scale = dev->getAnalogGain(DAQ::AI,static_cast<DAQ::index_t>(i));
+							data = H5Dcreate(file.chandata, "Gain", H5T_STD_U64LE, scalar_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+							H5Dwrite(data, H5T_STD_U64LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &scale); 
+
+							long long offset = dev->getAnalogZeroOffset(DAQ::AI,static_cast<DAQ::index_t>(i));
+							data = H5Dcreate(file.chandata, "Offset", H5T_STD_U64LE, scalar_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+							H5Dwrite(data, H5T_STD_U64LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &offset); 
+
+							long long downsample = dev->getAnalogDownsample(DAQ::AI,static_cast<DAQ::index_t>(i));
+							data = H5Dcreate(file.chandata, "Downsample", H5T_STD_U64LE, scalar_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+							H5Dwrite(data, H5T_STD_U64LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &downsample);
+							H5Dclose(data);
+						}
 
     H5Tclose(string_type);
     H5Sclose(scalar_space);
@@ -1496,6 +1546,8 @@ void DataRecorder::Panel::stopRecording(long long timestamp)
     H5Gclose(file.sdata);
     H5Gclose(file.pdata);
     H5Gclose(file.adata);
+    H5Gclose(file.sysdata);
+    H5Gclose(file.chandata);
     H5Gclose(file.trial);
 
     H5Fflush(file.id, H5F_SCOPE_LOCAL);

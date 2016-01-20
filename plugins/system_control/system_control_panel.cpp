@@ -311,7 +311,7 @@ void SystemControlPanel::apply(void)
             dev->setAnalogRange(a_type,a_chan,analogRangeList->currentIndex());
             dev->setAnalogReference(a_type,a_chan,analogReferenceList->currentIndex());
             dev->setAnalogUnits(a_type,a_chan,analogUnitList->currentIndex());
-            dev->setAnalogDownsample(a_type,a_chan,analogDownsampleList->currentIndex()+1);
+            dev->setAnalogDownsample(a_type,a_chan,analogDownsampleList->currentIndex());
             dev->setAnalogCounter(a_type,a_chan);
 
             DAQ::index_t d_chan = digitalChannelList->currentIndex();
@@ -490,7 +490,7 @@ void SystemControlPanel::display(void)
             //analogCalibrationButton->setEnabled(dev->getAnalogCalibrationState(type,chan));
             //analogCalibrationButton->setChecked(dev->getAnalogCalibrationActive(type,chan));
             analogRangeList->setCurrentIndex(dev->getAnalogRange(type,chan));
-            analogDownsampleList->setCurrentIndex(dev->getAnalogDownsample(type,chan)-1);
+            analogDownsampleList->setCurrentIndex(dev->getAnalogDownsample(type,chan));
             analogReferenceList->setCurrentIndex(dev->getAnalogReference(type,chan));
             analogUnitList->setCurrentIndex(dev->getAnalogUnits(type,chan));
 

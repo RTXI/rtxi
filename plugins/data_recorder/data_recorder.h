@@ -27,6 +27,7 @@
 #include <workspace.h>
 #include <vector>
 #include <time.h>
+#include <daq.h>
 
 #include <hdf5.h>
 #include <hdf5_hl.h>
@@ -147,7 +148,8 @@ private:
     {
         hid_t id;
         hid_t trial;
-        hid_t adata, cdata, pdata, sdata, tdata;
+        hid_t adata, cdata, pdata, sdata, tdata, sysdata;
+        hid_t chandata;
         long long idx;
     } file;
 
