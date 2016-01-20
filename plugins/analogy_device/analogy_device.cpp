@@ -247,23 +247,7 @@ size_t AnalogyDevice::getAnalogDownsample(type_t type,index_t channel) const
     if(!analog_exists(type,channel))
         return 0;
 
-				switch(subdevice[type].chan[channel].analog.downsample)
-				{
-					case 1:
-						return 1;
-					case 2:
-						return 2;
-					case 3:
-						return 4;
-					case 4:
-						return 6;
-					case 5:
-						return 8;
-					case 6:
-						return 10;
-					default:
-						break;
-				}
+				return subdevice[type].chan[channel].analog.downsample;
 }
 
 std::string AnalogyDevice::getAnalogRangeString(type_t type,index_t channel,index_t index) const
