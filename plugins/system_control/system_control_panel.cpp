@@ -490,7 +490,7 @@ void SystemControlPanel::display(void)
             //analogCalibrationButton->setEnabled(dev->getAnalogCalibrationState(type,chan));
             //analogCalibrationButton->setChecked(dev->getAnalogCalibrationActive(type,chan));
             analogRangeList->setCurrentIndex(dev->getAnalogRange(type,chan));
-            analogDownsampleList->setCurrentIndex(dev->getAnalogDownsample(type,chan));
+            analogDownsampleList->setCurrentIndex(analogDownsampleList->findData(QVariant::fromValue(dev->getAnalogDownsample(type,chan)),Qt::DisplayRole));
             analogReferenceList->setCurrentIndex(dev->getAnalogReference(type,chan));
             analogUnitList->setCurrentIndex(dev->getAnalogUnits(type,chan));
 

@@ -264,8 +264,6 @@ size_t AnalogyDevice::getAnalogDownsample(type_t type,index_t channel) const
 					default:
 						break;
 				}
-
-    return subdevice[type].chan[channel].analog.downsample;
 }
 
 std::string AnalogyDevice::getAnalogRangeString(type_t type,index_t channel,index_t index) const
