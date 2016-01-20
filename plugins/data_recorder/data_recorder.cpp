@@ -471,14 +471,6 @@ DataRecorder::Panel::Panel(QWidget *parent, size_t buffersize) :
     trialNum->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
     sampleLayout->addWidget(trialNum);
 
-    fileSizeLbl = new QLabel;
-    fileSizeLbl->setText("File Size (kb):");
-    sampleLayout->addWidget(fileSizeLbl);
-    fileSize = new QLabel;
-    fileSize->setText("No data recorded");
-    sampleLayout->addWidget(fileSize);
-    fileSize->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
-
     trialLengthLbl = new QLabel;
     trialLengthLbl->setText("Trial Length (s):");
     sampleLayout->addWidget(trialLengthLbl);
@@ -486,6 +478,14 @@ DataRecorder::Panel::Panel(QWidget *parent, size_t buffersize) :
     trialLength->setText("No data recorded");
     trialLength->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
     sampleLayout->addWidget(trialLength);
+
+    fileSizeLbl = new QLabel;
+    fileSizeLbl->setText("File Size (MB):");
+    sampleLayout->addWidget(fileSizeLbl);
+    fileSize = new QLabel;
+    fileSize->setText("No data recorded");
+    sampleLayout->addWidget(fileSize);
+    fileSize->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
 
     // Attach layout to child widget
     sampleGroup->setLayout(sampleLayout);
@@ -1004,7 +1004,7 @@ void DataRecorder::Panel::customEvent(QEvent *e)
             channelGroup->setEnabled(true);
             sampleGroup->setEnabled(true);
             recordStatus->setText("Ready.");
-            fileSize->setNum(int(QFile(fileNameEdit->text()).size()) / 1024);
+            fileSize->setNum(int(QFile(fileNameEdit->text()).size())/1024.0/1024.0);
             trialLength->setNum(double(RT::System::getInstance()->getPeriod()*1e-9* fixedcount));
             count = 0;
         }
