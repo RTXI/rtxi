@@ -632,13 +632,23 @@ void DataRecorder::Panel::receiveEvent(const Event::Object *event)
             QString name = QString::fromStdString(block->getName()) + " " + QString::number(block->getID());
             int n = 0;
             for (; n < blockList->count() && blockList->itemText(n) != name; ++n) ;
-            if (n < blockList->count())
+            if (n < blockList->count()) 
                 blockList->removeItem(n);
             blockPtrList.erase(blockPtrList.begin() + n);
+
             for (RT::List<Channel>::iterator i = channels.begin(), end = channels.end(); i != end; ++i)
-                if (i->block == block)
-                    if (recording)
-                        i->block = 0;
+                if (i->block == block) {
+                    if (recording) i->block = 0;
+                    RemoveChannelEvent RTevent(recording, channels, *i);
+                    if (!RT::System::getInstance()->postEvent(&RTevent)) {
+                        QList<QListWidgetItem*> channelItems = selectionBox->findItems(i->name, Qt::MatchExactly);
+                        if (!channelItems.isEmpty()) {
+                            /* Use takeItem(row) to remove the channel item. */
+                            QListWidgetItem *channelItem = channelItems.takeFirst();
+                            selectionBox->takeItem(selectionBox->row(channelItem));
+                        } 
+                    }
+                }
             buildChannelList();
         }
     else if (event->getName() == Event::OPEN_FILE_EVENT)
