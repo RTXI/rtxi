@@ -644,8 +644,7 @@ void DataRecorder::Panel::receiveEvent(const Event::Object *event)
                         QList<QListWidgetItem*> channelItems = selectionBox->findItems(i->name, Qt::MatchExactly);
                         if (!channelItems.isEmpty()) {
                             /* Use takeItem(row) to remove the channel item. */
-                            QListWidgetItem *channelItem = channelItems.takeFirst();
-                            selectionBox->takeItem(selectionBox->row(channelItem));
+                            selectionBox->takeItem(selectionBox->row(channelItems.takeFirst()));
                         } 
                     }
                 }
