@@ -1484,17 +1484,17 @@ int DataRecorder::Panel::startRecording(long long timestamp)
 							data = H5Dcreate(file.chandata, "Reference", string_type, scalar_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 							H5Dwrite(data, string_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, dev->getAnalogReferenceString(DAQ::AI,static_cast<DAQ::index_t>(i),dev->getAnalogReference(DAQ::AI,static_cast<DAQ::index_t>(i))).c_str());
 
-							long long scale = dev->getAnalogGain(DAQ::AI,static_cast<DAQ::index_t>(i));
-							data = H5Dcreate(file.chandata, "Gain", H5T_STD_U64LE, scalar_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-							H5Dwrite(data, H5T_STD_U64LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &scale); 
+							double scale = dev->getAnalogGain(DAQ::AI,static_cast<DAQ::index_t>(i));
+							data = H5Dcreate(file.chandata, "Gain", H5T_IEEE_F64LE, scalar_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+							H5Dwrite(data, H5T_IEEE_F64LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &scale); 
 
-							long long offset = dev->getAnalogZeroOffset(DAQ::AI,static_cast<DAQ::index_t>(i));
-							data = H5Dcreate(file.chandata, "Offset", H5T_STD_U64LE, scalar_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-							H5Dwrite(data, H5T_STD_U64LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &offset); 
+							double offset = dev->getAnalogZeroOffset(DAQ::AI,static_cast<DAQ::index_t>(i));
+							data = H5Dcreate(file.chandata, "Offset", H5T_IEEE_F64LE, scalar_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+							H5Dwrite(data, H5T_IEEE_F64LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &offset); 
 
-							long long downsample = dev->getAnalogDownsample(DAQ::AI,static_cast<DAQ::index_t>(i));
-							data = H5Dcreate(file.chandata, "Downsample", H5T_STD_U64LE, scalar_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-							H5Dwrite(data, H5T_STD_U64LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &downsample);
+							int downsample = dev->getAnalogDownsample(DAQ::AI,static_cast<DAQ::index_t>(i));
+							data = H5Dcreate(file.chandata, "Downsample", H5T_STD_I16LE, scalar_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+							H5Dwrite(data, H5T_STD_I16LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &downsample);
 							H5Dclose(data);
 						}
 
