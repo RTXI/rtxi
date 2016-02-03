@@ -22,8 +22,8 @@ ACLOCAL_AMFLAGS=-I m4
 SUBDIRS = rtxi plugins scripts
 
 ACLOCAL_DIST = m4/ac_pkg_swig.m4 \
-	       m4/ac_python_devel.m4 \
-	       m4/bnv_have_qt.m4
+               m4/ac_python_devel.m4 \
+               m4/bnv_have_qt.m4
 
 DEBIAN_DIST = debian/changelog  \
               debian/control    \
@@ -35,8 +35,6 @@ DEBIAN_DIST = debian/changelog  \
 
 EXTRA_DIST  = autogen.sh TODO $(DEBIAN_DIST) $(ACLOCAL_DIST)
 
-dist-hook: ChangeLog
-
 CLEANFILES            = *~ src/moc_*.cpp 
 DISTCLEANFILES        = rtxi.conf Makefile.modcompile config.log about.h rtos
 MAINTAINERCLEANFILES  = aclocal.m4 configure config.guess config.sub Makefile.in
@@ -47,10 +45,6 @@ pkgdata_DATA = rtxi.conf Makefile.plugin_compile Makefile.plugin_example
 pkgdata_SCRIPTS = libtool
 
 include $(top_srcdir)/Makefile.buildvars
-
-ChangeLog:
-	touch ChangeLog
-	-cvs2cl -rbt --fsf
 
 rtxi.conf: 
 	@echo "Generating rtxi.conf..."
