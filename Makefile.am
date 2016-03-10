@@ -25,15 +25,7 @@ ACLOCAL_DIST = m4/ac_pkg_swig.m4 \
                m4/ac_python_devel.m4 \
                m4/bnv_have_qt.m4
 
-DEBIAN_DIST = debian/changelog  \
-              debian/control    \
-              debian/conffiles  \
-              debian/copyright  \
-              debian/rules      \
-              debian/rules.rtxi-base      \
-              debian/rtxi-base.rtxi.init  
-
-EXTRA_DIST  = autogen.sh TODO $(DEBIAN_DIST) $(ACLOCAL_DIST)
+EXTRA_DIST = autogen.sh $(ACLOCAL_DIST)
 
 CLEANFILES            = *~ src/moc_*.cpp 
 DISTCLEANFILES        = rtxi.conf Makefile.modcompile config.log about.h rtos
