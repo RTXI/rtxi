@@ -47,9 +47,9 @@ fi
 # If you ever want to uninstall teamviewer and its i386 dependencies from your
 # your x86_64 system, run:
 #   $ sudo apt-get purge teamviewer
-#   $ sudo apt-get purge `dpkg --get-selections | grep i386 | awk '{print $1}'
+#   $ sudo apt-get purge `dpkg --get-selections | grep i386 | awk '{print $1}'`
 #   $ sudo dpkg --remove-architecture i386
 #
-# BE CAREFUL. This will remove ALL i386 packages listed before removing them.
-# DO NOT run this script on a i386 system. If you don't know what architecture 
-# your system is, run "uname -m" in the terminal to find out. 
+# This will remove ALL i386 packages listed before removing them. DO NOT run 
+# this script on a i386 system. If you don't know what architecture your 
+# system is, run "uname -m" in the terminal to find out. 

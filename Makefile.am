@@ -16,16 +16,16 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-# this is to include the Autoconf scripts in subdir m4/
-ACLOCAL_AMFLAGS=-I m4
+# Include the Autoconf scripts in subdir m4/
+ACLOCAL_AMFLAGS = -I m4
 
-SUBDIRS = rtxi plugins scripts
+SUBDIRS      = rtxi plugins scripts
 
 ACLOCAL_DIST = m4/ac_pkg_swig.m4 \
                m4/ac_python_devel.m4 \
                m4/bnv_have_qt.m4
 
-EXTRA_DIST = autogen.sh $(ACLOCAL_DIST)
+EXTRA_DIST   = autogen.sh $(ACLOCAL_DIST)
 
 CLEANFILES            = *~ src/moc_*.cpp 
 DISTCLEANFILES        = rtxi.conf Makefile.modcompile config.log about.h rtos
