@@ -55,11 +55,13 @@ rtxi.conf:
 	@echo ' <OBJECT component="io" id="1" >' >> $@
 	@echo '  <PARAM name="Num Links" >0</PARAM>' >> $@
 	@echo ' </OBJECT>' >> $@
+if BUILD_ANALOGY
 	@echo ' <OBJECT component="plugin" library="analogy_driver.so" id="2" >' >> $@
 	@echo '  <PARAM name="0" >analogy0</PARAM>' >> $@
 	@echo '  <PARAM name="Num Devices" >1</PARAM>' >> $@
 	@echo '  <OBJECT id="13" name="0" />' >> $@
 	@echo ' </OBJECT>' >> $@
+endif
 	@echo ' <OBJECT component="plugin" library="model_loader.so" id="3" />'>> $@
 	@echo ' <OBJECT component="plugin" library="module_installer.so" id="4" />'>> $@
 	@echo ' <OBJECT component="plugin" library="system_control.so" id="5" />'>> $@
@@ -128,4 +130,3 @@ Makefile.plugin_example:
 	@echo ''>> $@
 	@echo 'include $$(shell rtxi_plugin_config --pkgdata-dir)/Makefile.plugin_compile' >> $@
 
-force:
