@@ -513,7 +513,7 @@ void AnalogyDevice::read(void)
                 a4l_rawtod(chinfo, rnginfo, &value, &sample, 1);
 
                 // Gain, convert, and push into IO pipe
-                output(i) = value * channel->gain;
+                output(i) = channel->gain * value + channel->zerooffset;
 																}
 																channel->counter %= channel->downsample;
             }
