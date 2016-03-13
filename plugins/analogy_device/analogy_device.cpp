@@ -423,36 +423,20 @@ int AnalogyDevice::setAnalogGain(type_t type,index_t channel,double gain)
 	return 0;
 }
 
-bool AnalogyDevice::getAnalogCalibrationActive(type_t type, index_t channel) const {    
-	if(!analog_exists(type,channel))
-		return false;
-
-	return subdevice[type].chan[channel].analog.calibrationActive;
-}
-
-int AnalogyDevice::setAnalogCalibrationActive(type_t type,index_t channel,bool state)
-{
-	if(!analog_exists(type,channel))
-		return -EINVAL;
-
-	subdevice[type].chan[channel].analog.calibrationActive = state;
-	return 0;
-}
-
-bool AnalogyDevice::getAnalogCalibrationState(type_t type, index_t channel) const {    
-	if(!analog_exists(type,channel))
-		return false;
-
-	return subdevice[type].chan[channel].analog.calibrated;
-}
-
 int AnalogyDevice::setAnalogCalibrationValue(type_t type,index_t channel,double value) {
 	if(!analog_exists(type,channel))
 		return -EINVAL;
 
 	subdevice[type].chan[channel].analog.calOffset = value;
-	subdevice[type].chan[channel].analog.calibrated = true;
 	return 0;
+}
+
+double AnalogyDevice::getAnalogCalibrationValue(type_t type,index_t channel) const 
+{
+	if(!analog_exists(type,channel))
+		return -EINVAL;
+
+	return subdevice[type].chan[channel].analog.calOffset;
 }
 
 int AnalogyDevice::setAnalogDownsample(type_t type, index_t channel, size_t downsample_rate)
@@ -545,7 +529,7 @@ void AnalogyDevice::read(void)
 				a4l_rawtod(chinfo, rnginfo, &value, &sample, 1);
 
 				// Gain, convert, and push into IO pipe
-				output(i) = channel->gain * value + channel->zerooffset + channel->calOffset;
+				output(i) = channel->gain * value + channel->zerooffset - channel->calOffset;
 			}
 			channel->counter %= channel->downsample;
 		}
@@ -584,7 +568,7 @@ void AnalogyDevice::write(void)
 			if(subdevice[AO].chan[i].active)
 			{
 				channel = &subdevice[AO].chan[i].analog;
-				value = round(channel->gain*channel->conv*(input(i)-channel->zerooffset)+channel->offset+channel->calOffset);
+				value = round(channel->gain * channel->conv * (input(i) - channel->zerooffset) + channel->offset - channel->calOffset);
 
 				// Prevent wrap around in the data units.
 				if(value > channel->maxdata)
@@ -653,11 +637,8 @@ void AnalogyDevice::doLoad(const Settings::Object::State &s)
 		setAnalogUnits(AI,i,s.loadInteger(str.str()+" AI Units"));
 		setAnalogGain(AI,i,s.loadDouble(str.str()+" AI Gain"));
 		setAnalogZeroOffset(AI,i,s.loadDouble(str.str()+" AI Zero Offset"));
-		if(s.loadInteger(str.str()+" AI Calibration Active"))
-		{
-			setAnalogCalibrationActive(AI,i,s.loadInteger(str.str()+" AI Calibration Active"));
+		if(s.loadDouble(str.str()+" AI Calibration Value"))
 			setAnalogCalibrationValue(AI,i,s.loadDouble(str.str()+" AI Calibration Value"));
-		}
 		if(s.loadInteger(str.str()+" AI Downsample"))
 			setAnalogDownsample(AI,i,s.loadInteger(str.str()+" AI Downsample"));
 	}
@@ -672,11 +653,8 @@ void AnalogyDevice::doLoad(const Settings::Object::State &s)
 		setAnalogUnits(AO,i,s.loadInteger(str.str()+" AO Units"));
 		setAnalogGain(AO,i,s.loadDouble(str.str()+" AO Gain"));
 		setAnalogZeroOffset(AO,i,s.loadDouble(str.str()+" AO Zero Offset"));
-		if(s.loadInteger(str.str()+" AO Calibration Active"))
-		{
-			setAnalogCalibrationActive(AO,i,s.loadInteger(str.str()+" AO Calibration Active"));
+		if(s.loadDouble(str.str()+" AO Calibration Value"))
 			setAnalogCalibrationValue(AO,i,s.loadDouble(str.str()+" AO Calibration Value"));
-		}
 	}
 
 	for(size_t i = 0; i < subdevice[DIO].count && i < static_cast<size_t>(s.loadInteger("DIO Count")); ++i)
@@ -696,7 +674,7 @@ void AnalogyDevice::doSave(Settings::Object::State &s) const
 		std::ostringstream str;
 		str << i;
 		s.saveInteger(str.str()+" AI Active",getChannelActive(AI,i));
-		s.saveInteger(str.str()+" AI Calibration Active",getAnalogCalibrationActive(AI,i));
+		s.saveDouble(str.str()+" AI Calibration Value",getAnalogCalibrationValue(AI,i));
 		s.saveInteger(str.str()+" AI Range",getAnalogRange(AI,i));
 		s.saveInteger(str.str()+" AI Reference",getAnalogReference(AI,i));
 		s.saveInteger(str.str()+" AI Units",getAnalogUnits(AI,i));
@@ -711,7 +689,7 @@ void AnalogyDevice::doSave(Settings::Object::State &s) const
 		std::ostringstream str;
 		str << i;
 		s.saveInteger(str.str()+" AO Active",getChannelActive(AO,i));
-		s.saveInteger(str.str()+" AO Calibration Active",getAnalogCalibrationActive(AO,i));
+		s.saveDouble(str.str()+" AO Calibration Value",getAnalogCalibrationValue(AO,i));
 		s.saveInteger(str.str()+" AO Range",getAnalogRange(AO,i));
 		s.saveInteger(str.str()+" AO Reference",getAnalogReference(AO,i));
 		s.saveInteger(str.str()+" AO Units",getAnalogUnits(AO,i));

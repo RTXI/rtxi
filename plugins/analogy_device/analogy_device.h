@@ -51,8 +51,6 @@ public:
     DAQ::index_t getAnalogReference(DAQ::type_t,DAQ::index_t) const;
     DAQ::index_t getAnalogUnits(DAQ::type_t,DAQ::index_t) const;
     DAQ::index_t getAnalogOffsetUnits(DAQ::type_t,DAQ::index_t) const;
-    bool getAnalogCalibrationActive(DAQ::type_t,DAQ::index_t) const;
-    bool getAnalogCalibrationState(DAQ::type_t,DAQ::index_t) const;
     int setAnalogGain(DAQ::type_t,DAQ::index_t,double);
     int setAnalogZeroOffset(DAQ::type_t,DAQ::index_t,double);
     int setAnalogRange(DAQ::type_t,DAQ::index_t,DAQ::index_t);
@@ -62,8 +60,11 @@ public:
     int setAnalogDownsample(DAQ::type_t, DAQ::index_t, size_t);
     int setAnalogCounter(DAQ::type_t, DAQ::index_t);
     int setAnalogConversion(DAQ::type_t,DAQ::index_t) {}; // Placeholder
-    int setAnalogCalibrationActive(DAQ::type_t,DAQ::index_t,bool);
     int setAnalogCalibrationValue(DAQ::type_t,DAQ::index_t,double);
+    double getAnalogCalibrationValue(DAQ::type_t,DAQ::index_t) const;
+    int setAnalogCalibrationActive(DAQ::type_t,DAQ::index_t,bool) {};
+    bool getAnalogCalibrationActive(DAQ::type_t,DAQ::index_t) const {};
+    bool getAnalogCalibrationState(DAQ::type_t,DAQ::index_t) const {};
 
     DAQ::direction_t getDigitalDirection(DAQ::index_t) const;
     int setDigitalDirection(DAQ::index_t,DAQ::direction_t);
@@ -91,7 +92,6 @@ private:
         DAQ::index_t offsetunits;
         size_t downsample;
         size_t counter;
-        bool calibrated;
         bool calibrationActive;
         double calOffset;
     };
