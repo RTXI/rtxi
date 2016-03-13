@@ -112,35 +112,35 @@ Connector::Panel::Panel(QWidget *parent) : QWidget(parent)
     connectionGroup = new QGroupBox(tr("Connections"));
     QVBoxLayout *connectionLayout = new QVBoxLayout;
 
-    // Create elements for connection box
-    connectionBox = new QListWidget;
-    connectionLayout->addWidget(connectionBox);
-    QObject::connect(connectionBox,SIGNAL(itemClicked(QListWidgetItem *)),this,SLOT(highlightConnectionBox(QListWidgetItem *)));
+		// Create elements for connection box
+		connectionBox = new QListWidget;
+		connectionLayout->addWidget(connectionBox);
+		QObject::connect(connectionBox,SIGNAL(itemClicked(QListWidgetItem *)),this,SLOT(highlightConnectionBox(QListWidgetItem *)));
 
-    // Assign layout to child widget
-    connectionGroup->setLayout(connectionLayout);
+		// Assign layout to child widget
+		connectionGroup->setLayout(connectionLayout);
 
-    // Attach child widget to parent widget
-				layout->addWidget(outputGroup, 1, 0, 1, 2);
-				layout->addWidget(buttonGroup, 2, 0, 1, 4);
-				layout->addWidget(inputGroup, 1, 2, 1, 2);
-				layout->addWidget(connectionGroup, 3, 0, 1, 4);
+		// Attach child widget to parent widget
+		layout->addWidget(outputGroup, 1, 0, 1, 2);
+		layout->addWidget(buttonGroup, 2, 0, 1, 4);
+		layout->addWidget(inputGroup, 1, 2, 1, 2);
+		layout->addWidget(connectionGroup, 3, 0, 1, 4);
 
-				// Set layout so that only connectionGroup expands when resized
-				layout->setRowStretch(0, 0);
-				layout->setRowStretch(2, 0);
-				layout->setRowStretch(3, 1);
+		// Set layout so that only connectionGroup expands when resized
+		layout->setRowStretch(0, 0);
+		layout->setRowStretch(2, 0);
+		layout->setRowStretch(3, 1);
 
-				// Attach layout to widget
-				setLayout(layout);
-				setWindowTitle("Connector Panel");
+		// Attach layout to widget
+		setLayout(layout);
+		setWindowTitle("Connector Panel");
 
-				// Set layout to Mdi
-    subWindow->setWidget(this);
-    subWindow->resize(500, subWindow->sizeHint().height());
-    show();
+		// Set layout to Mdi
+		subWindow->setWidget(this);
+		subWindow->resize(500, subWindow->sizeHint().height());
+		show();
 
-    block_list_info_t info = {inputBlock, outputBlock, &blocks};
+		block_list_info_t info = {inputBlock, outputBlock, &blocks};
     IO::Connector::getInstance()->foreachBlock(::buildBlockList,&info);
 
     if(blocks.size() >= 1)

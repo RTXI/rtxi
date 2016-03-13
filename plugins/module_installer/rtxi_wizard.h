@@ -13,49 +13,82 @@
 
 	You should have received a copy of the GNU General Public License
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
+
+#ifndef RTXI_WIZARD_H
+#define RTXI_WIZARD_H
 
 #include <QtNetwork>
-#include <default_gui_model.h>
+#include <main_window.h>
+#include <plugin.h>
 #include "module_utils.h"
 
-class RTXIWizard : public DefaultGUIModel
+namespace RTXIWizard
 {
-    Q_OBJECT
+	class Panel : public QWidget
+	{
+		Q_OBJECT
 
-public:
-    RTXIWizard(void);
-    ~RTXIWizard(void);
-    void initParameters(void);
-    void customizeGUI(void);
+		public:
+			Panel(QWidget *);
+			virtual ~Panel(void);
+			void installFromString(std::string);
 
-    void installFromString(std::string);
+			private slots:
+				void cloneModule(void);
+			void getRepos(void);
+			void getReadme(void);
+			void parseRepos(void);
+			void parseReadme(void);
 
-private slots:
-    void cloneModule(void);
-    void getRepos(void);
-    void getReadme(void);
-    void parseRepos(void);
-    void parseReadme(void);
+			void updateButton(void);
 
-    void updateButton(void);
+		private:
+			void initParameters(void);
+			enum button_mode_t {DOWNLOAD, UPDATE } button_mode;
 
-private:
+			QMdiSubWindow *subWindow;
 
-    enum button_mode_t {DOWNLOAD, UPDATE } button_mode;
+			QNetworkAccessManager qnam;
+			QNetworkReply *reply;
+			QProgressDialog *progressDialog;
 
-    QNetworkAccessManager qnam;
-    QNetworkReply *reply;
-    QProgressDialog *progressDialog;
+			QTextEdit *readmeWindow;
+			QListWidget *moduleList;
+			QListWidget *installedList;
 
-    QTextEdit *readmeWindow;
-    QListWidget *moduleList;
-    QListWidget *installedList;
+			QPushButton *cloneButton;
+			QPushButton *syncButton;
+			QList<RTXIModule*> *allModules;
+			QList<RTXIModule*> *installedModules;
 
-    QPushButton *cloneButton;
-    QPushButton *syncButton;
-    QList<RTXIModule*> *allModules;
-    QList<RTXIModule*> *installedModules;
+			std::vector<QString> exclude_list;
+	};
 
-    std::vector<QString> exclude_list;
+	class Plugin : public QObject, public ::Plugin::Object
+	{
+		Q_OBJECT
+			friend class Panel;
+
+		public:
+		static Plugin *getInstance(void);
+
+		public slots:
+			void showRTXIWizardPanel(void);
+
+		private:
+		void removeRTXIWizardPanel(Panel *);
+		Plugin(void);
+		~Plugin(void);
+		Plugin(const Plugin &) {};
+		Plugin &operator=(const Plugin &)
+		{
+			return *getInstance();
+		};
+		static Plugin *instance;
+		Panel *panel;
+	}; // class Plugin
+
 };
+
+#endif
