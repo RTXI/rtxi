@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- */
+OA */
 
 #include <analogy_device.h>
 #include <debug.h>
@@ -84,8 +84,6 @@ AnalogyDevice::AnalogyDevice(a4l_desc_t *d,std::string name,IO::channel_t *chan,
 				setAnalogUnits(AI,i,0);
 				setAnalogDownsample(AI,i,1);
 				setAnalogCounter(AI,i);
-				setAnalogCalibration(AI,i);
-				setAnalogCalibrationActive(AI,i,getAnalogCalibrationState(AI,i));
 			}
 	}
 	else
@@ -124,8 +122,6 @@ AnalogyDevice::AnalogyDevice(a4l_desc_t *d,std::string name,IO::channel_t *chan,
 				setAnalogRange(AO,i,0);
 				setAnalogReference(AO,i,0);
 				setAnalogUnits(AO,i,0);
-				setAnalogCalibration(AO,i);
-				setAnalogCalibrationActive(AO,i,getAnalogCalibrationState(AO,i));
 			}
 	}
 	else
@@ -450,12 +446,12 @@ bool AnalogyDevice::getAnalogCalibrationState(type_t type, index_t channel) cons
 	return subdevice[type].chan[channel].analog.calibrated;
 }
 
-int AnalogyDevice::setAnalogCalibration(type_t type,index_t channel) {
+int AnalogyDevice::setAnalogCalibrationValue(type_t type,index_t channel,double value) {
 	if(!analog_exists(type,channel))
 		return -EINVAL;
 
-	analog_channel_t *chanPtr = &subdevice[type].chan[channel].analog;
-
+	subdevice[type].chan[channel].analog.calOffset = value;
+	subdevice[type].chan[channel].analog.calibrated = true;
 	return 0;
 }
 
@@ -549,7 +545,7 @@ void AnalogyDevice::read(void)
 				a4l_rawtod(chinfo, rnginfo, &value, &sample, 1);
 
 				// Gain, convert, and push into IO pipe
-				output(i) = channel->gain * value + channel->zerooffset;
+				output(i) = channel->gain * value + channel->zerooffset + channel->calOffset;
 			}
 			channel->counter %= channel->downsample;
 		}
@@ -588,7 +584,7 @@ void AnalogyDevice::write(void)
 			if(subdevice[AO].chan[i].active)
 			{
 				channel = &subdevice[AO].chan[i].analog;
-				value = round(channel->gain*channel->conv*(input(i)-channel->zerooffset)+channel->offset);
+				value = round(channel->gain*channel->conv*(input(i)-channel->zerooffset)+channel->offset+channel->calOffset);
 
 				// Prevent wrap around in the data units.
 				if(value > channel->maxdata)
@@ -652,13 +648,16 @@ void AnalogyDevice::doLoad(const Settings::Object::State &s)
 		std::ostringstream str;
 		str << i;
 		setChannelActive(AI,i,s.loadInteger(str.str()+" AI Active"));
-		setAnalogCalibrationActive(AI,i,s.loadInteger(str.str()+" AI Calibration Active"));
 		setAnalogRange(AI,i,s.loadInteger(str.str()+" AI Range"));
 		setAnalogReference(AI,i,s.loadInteger(str.str()+" AI Reference"));
 		setAnalogUnits(AI,i,s.loadInteger(str.str()+" AI Units"));
 		setAnalogGain(AI,i,s.loadDouble(str.str()+" AI Gain"));
 		setAnalogZeroOffset(AI,i,s.loadDouble(str.str()+" AI Zero Offset"));
-		setAnalogCalibration(AI,i);        
+		if(s.loadInteger(str.str()+" AI Calibration Active"))
+		{
+			setAnalogCalibrationActive(AI,i,s.loadInteger(str.str()+" AI Calibration Active"));
+			setAnalogCalibrationValue(AI,i,s.loadDouble(str.str()+" AI Calibration Value"));
+		}
 		if(s.loadInteger(str.str()+" AI Downsample"))
 			setAnalogDownsample(AI,i,s.loadInteger(str.str()+" AI Downsample"));
 	}
@@ -668,13 +667,16 @@ void AnalogyDevice::doLoad(const Settings::Object::State &s)
 		std::ostringstream str;
 		str << i;
 		setChannelActive(AO,i,s.loadInteger(str.str()+" AO Active"));
-		setAnalogCalibrationActive(AO,i,s.loadInteger(str.str()+" AO Calibration Active"));
 		setAnalogRange(AO,i,s.loadInteger(str.str()+" AO Range"));
 		setAnalogReference(AO,i,s.loadInteger(str.str()+" AO Reference"));
 		setAnalogUnits(AO,i,s.loadInteger(str.str()+" AO Units"));
 		setAnalogGain(AO,i,s.loadDouble(str.str()+" AO Gain"));
 		setAnalogZeroOffset(AO,i,s.loadDouble(str.str()+" AO Zero Offset"));
-		setAnalogCalibration(AO,i);        
+		if(s.loadInteger(str.str()+" AO Calibration Active"))
+		{
+			setAnalogCalibrationActive(AO,i,s.loadInteger(str.str()+" AO Calibration Active"));
+			setAnalogCalibrationValue(AO,i,s.loadDouble(str.str()+" AO Calibration Value"));
+		}
 	}
 
 	for(size_t i = 0; i < subdevice[DIO].count && i < static_cast<size_t>(s.loadInteger("DIO Count")); ++i)

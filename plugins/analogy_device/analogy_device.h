@@ -63,7 +63,7 @@ public:
     int setAnalogCounter(DAQ::type_t, DAQ::index_t);
     int setAnalogConversion(DAQ::type_t,DAQ::index_t) {}; // Placeholder
     int setAnalogCalibrationActive(DAQ::type_t,DAQ::index_t,bool);
-    int setAnalogCalibration(DAQ::type_t,DAQ::index_t);
+    int setAnalogCalibrationValue(DAQ::type_t,DAQ::index_t,double);
 
     DAQ::direction_t getDigitalDirection(DAQ::index_t) const;
     int setDigitalDirection(DAQ::index_t,DAQ::direction_t);

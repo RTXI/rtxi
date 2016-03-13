@@ -351,9 +351,10 @@ public:
      *
      * \param type The channel's type.
      * \param index The channel's index.
+     * \param value The calibration value.
      * \return 0 if successful or a negative value on error.
      */
-    virtual int setAnalogCalibration(type_t type,index_t index)=0;
+    virtual int setAnalogCalibrationValue(type_t type,index_t index, double value)=0;
     /*!
      * Set the calibration active state of the selected channel.
      *
