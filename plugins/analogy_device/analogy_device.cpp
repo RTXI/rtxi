@@ -84,6 +84,7 @@ AnalogyDevice::AnalogyDevice(a4l_desc_t *d,std::string name,IO::channel_t *chan,
 				setAnalogUnits(AI,i,0);
 				setAnalogDownsample(AI,i,1);
 				setAnalogCounter(AI,i);
+				setAnalogCalibrationValue(AI,i,0);
 			}
 	}
 	else
@@ -122,6 +123,7 @@ AnalogyDevice::AnalogyDevice(a4l_desc_t *d,std::string name,IO::channel_t *chan,
 				setAnalogRange(AO,i,0);
 				setAnalogReference(AO,i,0);
 				setAnalogUnits(AO,i,0);
+				setAnalogCalibrationValue(AO,i,0);
 			}
 	}
 	else
