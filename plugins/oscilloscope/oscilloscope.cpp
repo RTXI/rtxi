@@ -389,7 +389,7 @@ void Oscilloscope::Panel::applyChannelTab(void)
                     pen.setColor(QColor(178,102,255,255));
                     break;
                 case 5:
-                    pen.setColor(QColor(102,205,170,255));
+                    pen.setColor(QColor(0,153,143,255));
                     break;
                 case 6:
                     pen.setColor(QColor(83,81,84,255));
@@ -637,7 +637,7 @@ QWidget * Oscilloscope::Panel::createChannelTab(QWidget *parent)
     colorsList->addItem(tmp, " Blue");
     tmp.fill(QColor(178,102,255,255));
     colorsList->addItem(tmp, " Purple");
-    tmp.fill(QColor(102,205,170,255));
+    tmp.fill(QColor(0,153,143,255));
     colorsList->addItem(tmp, " Teal");
     tmp.fill(QColor(83,81,84,255));
     colorsList->addItem(tmp, " Black");
@@ -890,7 +890,7 @@ void Oscilloscope::Panel::showChannelTab(void)
                         colorsList->setCurrentIndex(3);
                     else if (i->getPen().color() == QColor(178,102,255,255))
                         colorsList->setCurrentIndex(4);
-                    else if (i->getPen().color() == QColor(102,205,170,255))
+                    else if (i->getPen().color() == QColor(0,153,143,255))
                         colorsList->setCurrentIndex(5);
                     else if (i->getPen().color() == QColor(83,81,84,255))
                         colorsList->setCurrentIndex(6);
