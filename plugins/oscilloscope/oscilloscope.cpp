@@ -339,7 +339,7 @@ void Oscilloscope::Panel::applyChannelTab(void)
 
                     bool active = setInactiveSync();
                     QwtPlotCurve *curve = new QwtPlotCurve(info->name);
-                    i = scopeWindow->insertChannel(info->name + " 50 mV/div", 2.0, 0.0, QPen(Qt::red, 1, Qt::SolidLine), curve, info);
+                    i = scopeWindow->insertChannel(info->name + " 50 mV/div", 2.0, 0.0, QPen(QColor(255,0,16,255), 1, Qt::SolidLine), curve, info);
                     flushFifo();
                     setActive(active);
                 }
@@ -374,29 +374,29 @@ void Oscilloscope::Panel::applyChannelTab(void)
             switch (colorsList->currentIndex())
                 {
                 case 0:
-                    pen.setColor(Qt::red);
+                    pen.setColor(QColor(255,0,16,255));
                     break;
                 case 1:
-                    pen.setColor(Qt::yellow);
+                    pen.setColor(QColor(255,164,5,255));
                     break;
                 case 2:
-                    pen.setColor(Qt::green);
+                    pen.setColor(QColor(43,206,72,255));
                     break;
                 case 3:
-                    pen.setColor(Qt::blue);
+                    pen.setColor(QColor(0,117,220,255));
                     break;
                 case 4:
-                    pen.setColor(Qt::magenta);
+                    pen.setColor(QColor(178,102,255,255));
                     break;
                 case 5:
-                    pen.setColor(Qt::cyan);
+                    pen.setColor(QColor(102,205,170,255));
                     break;
                 case 6:
-                    pen.setColor(Qt::black);
+                    pen.setColor(QColor(83,81,84,255));
                     break;
                 default:
                     ERROR_MSG("Oscilloscope::Panel::applyChannelTab : invalid color selection\n");
-                    pen.setColor(Qt::red);
+                    pen.setColor(QColor(255,0,16,255));
                 }
             pen.setWidth(widthsList->currentIndex() + 1);
             switch (stylesList->currentIndex())
@@ -627,19 +627,19 @@ QWidget * Oscilloscope::Panel::createChannelTab(QWidget *parent)
     colorsList->setSizeAdjustPolicy(QComboBox::AdjustToContents);
     row2Layout->addWidget(colorsList);
     QPixmap tmp(25, 25);
-    tmp.fill(Qt::red);
+    tmp.fill(QColor(255,0,16,255));
     colorsList->addItem(tmp, " Red");
-    tmp.fill(Qt::yellow);
-    colorsList->addItem(tmp, " Yellow");
-    tmp.fill(Qt::green);
+    tmp.fill(QColor(255,164,5,255));
+    colorsList->addItem(tmp, " Orange");
+    tmp.fill(QColor(43,206,72,255));
     colorsList->addItem(tmp, " Green");
-    tmp.fill(Qt::blue);
+    tmp.fill(QColor(0,117,220,255));
     colorsList->addItem(tmp, " Blue");
-    tmp.fill(Qt::magenta);
-    colorsList->addItem(tmp, " Magenta");
-    tmp.fill(Qt::cyan);
-    colorsList->addItem(tmp, " Cyan");
-    tmp.fill(Qt::black);
+    tmp.fill(QColor(178,102,255,255));
+    colorsList->addItem(tmp, " Purple");
+    tmp.fill(QColor(102,205,170,255));
+    colorsList->addItem(tmp, " Teal");
+    tmp.fill(QColor(83,81,84,255));
     colorsList->addItem(tmp, " Black");
 
     QLabel *widthLabel = new QLabel(tr("Width:"),page);
@@ -652,7 +652,7 @@ QWidget * Oscilloscope::Panel::createChannelTab(QWidget *parent)
     QPainter painter(&tmp);
     for (int i = 1; i < 6; i++)
         {
-            painter.setPen(QPen(Qt::black, i));
+            painter.setPen(QPen(QColor(83,81,84,255), i));
             painter.drawLine(0, 12, 25, 12);
             widthsList->addItem(tmp, QString::number(i) + QString(" Pixels"));
         }
@@ -665,23 +665,23 @@ QWidget * Oscilloscope::Panel::createChannelTab(QWidget *parent)
     stylesList->setSizeAdjustPolicy(QComboBox::AdjustToContents);
     row2Layout->addWidget(stylesList);
     tmp.fill(Qt::white);
-    painter.setPen(QPen(Qt::black, 3, Qt::SolidLine));
+    painter.setPen(QPen(QColor(83,81,84,255), 3, Qt::SolidLine));
     painter.drawLine(0, 12, 25, 12);
     stylesList->addItem(tmp, QString(" Solid"));
     tmp.fill(Qt::white);
-    painter.setPen(QPen(Qt::black, 3, Qt::DashLine));
+    painter.setPen(QPen(QColor(83,81,84,255), 3, Qt::DashLine));
     painter.drawLine(0, 12, 25, 12);
     stylesList->addItem(tmp, QString(" Dash"));
     tmp.fill(Qt::white);
-    painter.setPen(QPen(Qt::black, 3, Qt::DotLine));
+    painter.setPen(QPen(QColor(83,81,84,255), 3, Qt::DotLine));
     painter.drawLine(0, 12, 25, 12);
     stylesList->addItem(tmp, QString(" Dot"));
     tmp.fill(Qt::white);
-    painter.setPen(QPen(Qt::black, 3, Qt::DashDotLine));
+    painter.setPen(QPen(QColor(83,81,84,255), 3, Qt::DashDotLine));
     painter.drawLine(0, 12, 25, 12);
     stylesList->addItem(tmp, QString(" Dash Dot"));
     tmp.fill(Qt::white);
-    painter.setPen(QPen(Qt::black, 3, Qt::DashDotDotLine));
+    painter.setPen(QPen(QColor(83,81,84,255), 3, Qt::DashDotDotLine));
     painter.drawLine(0, 12, 25, 12);
     stylesList->addItem(tmp, QString(" Dash Dot Dot"));
 
@@ -880,19 +880,19 @@ void Oscilloscope::Panel::showChannelTab(void)
                     offsetsEdit->setText(QString::number(offset));
                     offsetsList->setCurrentIndex(offsetUnits);
 
-                    if (i->getPen().color() == Qt::red)
+                    if (i->getPen().color() == QColor(255,0,16,255))
                         colorsList->setCurrentIndex(0);
-                    else if (i->getPen().color() == Qt::yellow)
+                    else if (i->getPen().color() == QColor(255,164,5,255))
                         colorsList->setCurrentIndex(1);
-                    else if (i->getPen().color() == Qt::green)
+                    else if (i->getPen().color() == QColor(43,206,72,255))
                         colorsList->setCurrentIndex(2);
-                    else if (i->getPen().color() == Qt::blue)
+                    else if (i->getPen().color() == QColor(0,117,220,255))
                         colorsList->setCurrentIndex(3);
-                    else if (i->getPen().color() == Qt::magenta)
+                    else if (i->getPen().color() == QColor(178,102,255,255))
                         colorsList->setCurrentIndex(4);
-                    else if (i->getPen().color() == Qt::cyan)
+                    else if (i->getPen().color() == QColor(102,205,170,255))
                         colorsList->setCurrentIndex(5);
-                    else if (i->getPen().color() == Qt::black)
+                    else if (i->getPen().color() == QColor(83,81,84,255))
                         colorsList->setCurrentIndex(6);
                     else
                         {
