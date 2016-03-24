@@ -115,30 +115,36 @@ PerformanceMeasurement::Panel::~Panel(void)
 void PerformanceMeasurement::Panel::read(void)
 {
     long long now = RT::OS::getTime();
+    double period = RT::System::getInstance()->getPeriod();
 
     switch (state)
         {
         case EXEC:
-            if (maxTimestep < now - lastRead)
-                maxTimestep = now - lastRead;
+            if (maxTimestep < now - lastRead) 
+	            maxTimestep = now - lastRead;
             timestep = now - lastRead;
+            latency = (now - lastRead) - period;
             timestepStat.push(timestep);
+            latencyStat.push(latency);
             break;
         case INIT2:
             timestep = maxTimestep = now - lastRead;
+            latency = maxLatency = (now - lastRead) - period;
             timestepStat.push(timestep);
+            latencyStat.push(latency);
             state = EXEC;
             break;
         case INIT1:
             state = INIT2;
         }
     lastRead = now;
-    jitter = timestepStat.std();
+    jitter = latencyStat.std();
 }
 
 void PerformanceMeasurement::Panel::write(void)
 {
     long long now = RT::OS::getTime();
+    double period = RT::System::getInstance()->getPeriod();
 
     switch (state)
         {
@@ -161,6 +167,7 @@ void PerformanceMeasurement::Panel::reset(void)
 {
     state = INIT1;
     timestepStat.clear();
+    latencyStat.clear();
 }
 
 void PerformanceMeasurement::Panel::resetMaxTimeStep(void)

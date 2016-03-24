@@ -100,11 +100,14 @@ private:
     double duration;
     double lastRead;
     double timestep;
+    double latency;
     double maxDuration;
     double maxTimestep;
+    double maxLatency;
     double jitter;
 
     RunningStat timestepStat;
+    RunningStat latencyStat;
 
     QLineEdit *durationEdit;
     QLineEdit *timestepEdit;

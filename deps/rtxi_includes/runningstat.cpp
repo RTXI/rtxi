@@ -1,5 +1,4 @@
 #include "runningstat.h"
-#include <rt.h>
 
 // class constructor <- of all the comments this code could use, this is the one we chose...
 RunningStat::RunningStat() : m_n(0) {}
@@ -11,7 +10,7 @@ void RunningStat::clear() {
 }
 
 void RunningStat::push(double x) {
-	double p = RT::System::getInstance()->getPeriod(); // gets period in nanoseconds
+//	double p = RT::System::getInstance()->getPeriod(); // gets period in nanoseconds
 	m_n++;
 
 	if (m_n == 1) {
@@ -19,10 +18,11 @@ void RunningStat::push(double x) {
 		m_oldS = 0.0;
 	} else {
 		m_newM = m_oldM + (x - m_oldM) / m_n;
-//		m_newS = (m_oldS*(m_n-1)/m_n) + (x-m_newM)*(x-m_newM)/(m_n-1); //Sample variance
-		m_newS = (m_n-1.0)/m_n*m_oldS + (1.0/m_n)*(x-p)*(x-p); //Variance relative to rt period
+//		m_newS = (m_oldS*(m_n-1)/m_n) + (x-m_newM)*(x-m_newM)/(m_n-1); // Sample variance
+		m_newS = (m_n-1.0)/m_n*m_oldS + (1.0/m_n)*(x)*(x); // Variance
 		m_oldM = m_newM;
 		m_oldS = m_newS;
+
 	}
 }
 
