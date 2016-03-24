@@ -24,25 +24,16 @@
 # Install gdebi for detecting and automatically installing dependencies
 sudo apt-get -y install gdebi 
 
-# Teamviewer doesn't support multiarch for x86_64 systems (as of 12/29/15), 
-# so manually add the i386 architecture and use it for dependencies. 
+# Teamviewer doesn't provide a 64-bit binary, so enable multiarch (i386) for 
+# installing dependencies. 
 if [ `uname -m` == "x86_64" ]; then
-   echo "Download and install teamviewer for x86_64"
    sudo dpkg --add-architecture i386 # if x86_64, enable i386 mirrors
    sudo apt-get update
-   wget http://download.teamviewer.com/download/teamviewer_linux.deb
-   sudo gdebi teamviewer_linux.deb
-	sudo apt-get -f -y install
-   sudo apt-get update
-elif [ `uname -m` == "x86" ]; then
-   echo "Download and install teamviewer for x86"
-   wget http://download.teamviewer.com/download/teamviewer_linux.deb
-   sudo gdebi teamviewer_linux.deb
-	sudo apt-get -f -y install
-else 
-   echo "What architecture is your computer?"
 fi
 
+wget http://download.teamviewer.com/download/teamviewer_i386.deb
+sudo gdebi teamviewer_i386.deb
+sudo apt-get -f -y install
 
 # If you ever want to uninstall teamviewer and its i386 dependencies from your
 # your x86_64 system, run:
