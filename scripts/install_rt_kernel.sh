@@ -70,7 +70,7 @@ fi
 # Patch kernel
 echo  "----->Patching kernel"
 cd $linux_tree
-$xenomai_root/scripts/prepare-kernel.sh --arch=x86 --adeos=$xenomai_root/ksrc/arch/x86/patches/ipipe-core-3.8.13-x86-4.patch --linux=$linux_tree
+$xenomai_root/scripts/prepare-kernel.sh --arch=x86 --adeos=$xenomai_root/ksrc/arch/x86/patches/ipipe-core-$linux_version-x86-?.patch --linux=$linux_tree
 yes "" | make localmodconfig
 make menuconfig
 
@@ -97,8 +97,8 @@ fi
 # Install compiled kernel
 echo  "----->Installing compiled kernel"
 cd $opt
-sudo dpkg -i linux-image-*.deb
-sudo dpkg -i linux-headers-*.deb
+sudo dpkg -i linux-image-$linux_version-xenomai-$xenomai_version*.deb
+sudo dpkg -i linux-headers-$linux_version-xenomai-$xenomai_version*.deb
 
 if [ $? -eq 0 ]; then
 	echo  "----->Kernel installation complete"
