@@ -41,6 +41,7 @@ public:
     size_t getAnalogRangeCount(DAQ::type_t,DAQ::index_t) const;
     size_t getAnalogReferenceCount(DAQ::type_t,DAQ::index_t) const;
     size_t getAnalogUnitsCount(DAQ::type_t,DAQ::index_t) const;
+    size_t getAnalogDownsample(DAQ::type_t,DAQ::index_t) const;
     std::string getAnalogRangeString(DAQ::type_t,DAQ::index_t,DAQ::index_t) const;
     std::string getAnalogReferenceString(DAQ::type_t,DAQ::index_t,DAQ::index_t) const;
     std::string getAnalogUnitsString(DAQ::type_t,DAQ::index_t,DAQ::index_t) const;
@@ -50,21 +51,20 @@ public:
     DAQ::index_t getAnalogReference(DAQ::type_t,DAQ::index_t) const;
     DAQ::index_t getAnalogUnits(DAQ::type_t,DAQ::index_t) const;
     DAQ::index_t getAnalogOffsetUnits(DAQ::type_t,DAQ::index_t) const;
-    bool getAnalogCalibrationActive(DAQ::type_t,DAQ::index_t) const {
-        return false;
-    };
-    bool getAnalogCalibrationState(DAQ::type_t,DAQ::index_t) const {
-        return false;
-    };
     int setAnalogGain(DAQ::type_t,DAQ::index_t,double);
     int setAnalogZeroOffset(DAQ::type_t,DAQ::index_t,double);
     int setAnalogRange(DAQ::type_t,DAQ::index_t,DAQ::index_t);
     int setAnalogReference(DAQ::type_t,DAQ::index_t,DAQ::index_t);
     int setAnalogUnits(DAQ::type_t,DAQ::index_t,DAQ::index_t);
     int setAnalogOffsetUnits(DAQ::type_t,DAQ::index_t,DAQ::index_t);
+    int setAnalogDownsample(DAQ::type_t, DAQ::index_t, size_t);
+    int setAnalogCounter(DAQ::type_t, DAQ::index_t);
     int setAnalogConversion(DAQ::type_t,DAQ::index_t) {}; // Placeholder
+    int setAnalogCalibrationValue(DAQ::type_t,DAQ::index_t,double);
+    double getAnalogCalibrationValue(DAQ::type_t,DAQ::index_t) const;
     int setAnalogCalibrationActive(DAQ::type_t,DAQ::index_t,bool) {};
-    int setAnalogCalibration(DAQ::type_t,DAQ::index_t) {};
+    bool getAnalogCalibrationActive(DAQ::type_t,DAQ::index_t) const {};
+    bool getAnalogCalibrationState(DAQ::type_t,DAQ::index_t) const {};
 
     DAQ::direction_t getDigitalDirection(DAQ::index_t) const;
     int setDigitalDirection(DAQ::index_t,DAQ::direction_t);
@@ -79,7 +79,8 @@ protected:
 private:
     bool analog_exists(DAQ::type_t,DAQ::index_t) const;
 
-    struct analog_channel_t {
+    struct analog_channel_t
+    {
         double gain;
         DAQ::index_t range;
         DAQ::index_t reference;
@@ -89,22 +90,30 @@ private:
         double zerooffset;
         lsampl_t maxdata;
         DAQ::index_t offsetunits;
+        size_t downsample;
+        size_t counter;
+        bool calibrationActive;
+        double calOffset;
     };
 
-    struct  digital_channel_t {
+    struct  digital_channel_t
+    {
         DAQ::direction_t direction;
         int previous_value;
     };
 
-    struct channel_t {
+    struct channel_t
+    {
         bool active;
-        union {
+        union
+        {
             analog_channel_t analog;
             digital_channel_t digital;
         };
     };
 
-    struct subdevice_t {
+    struct subdevice_t
+    {
         int id;
         DAQ::index_t active;
         DAQ::index_t count;

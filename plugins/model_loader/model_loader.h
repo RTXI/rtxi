@@ -37,7 +37,6 @@ public slots:
 
 private:
     QAction* action;
-    void updateRecentModules(QString, int);
 };
 
 #endif /* MODEL_LOADER_H */

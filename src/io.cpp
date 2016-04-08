@@ -48,14 +48,17 @@ IO::Block::Block(std::string n,IO::channel_t *channel,size_t size):name(n)
 
     size_t in = 0, out = 0;
     for (size_t i = 0; i < size; ++i)
-        if (channel[i].flags & INPUT) {
-            inputs[in].name = channel[i].name;
-            inputs[in++].description = channel[i].description;
-        } else if (channel[i].flags & OUTPUT) {
-            outputs[out].name = channel[i].name;
-            outputs[out].description = channel[i].description;
-            outputs[out++].value = 0.0;
-        }
+        if (channel[i].flags & INPUT)
+            {
+                inputs[in].name = channel[i].name;
+                inputs[in++].description = channel[i].description;
+            }
+        else if (channel[i].flags & OUTPUT)
+            {
+                outputs[out].name = channel[i].name;
+                outputs[out].description = channel[i].description;
+                outputs[out++].value = 0.0;
+            }
 
     IO::Connector::getInstance()->insertBlock(this);
 }
@@ -149,30 +152,35 @@ void IO::Block::connect(IO::Block *src,size_t src_num,IO::Block *dest,size_t des
 {
     Mutex::Locker lock(&mutex);
 
-    if (!src) {
-        ERROR_MSG("Block::connect : invalid source\n");
-        return;
-    }
-    if (src_num >= src->outputs.size()) {
-        ERROR_MSG("Block::connect : invalid source channel\n");
-        return;
-    }
+    if (!src)
+        {
+            ERROR_MSG("Block::connect : invalid source\n");
+            return;
+        }
+    if (src_num >= src->outputs.size())
+        {
+            ERROR_MSG("Block::connect : invalid source channel\n");
+            return;
+        }
 
-    if (!dest) {
-        ERROR_MSG("Block::connect : invalid destination\n");
-        return;
-    }
-    if (dest_num >= dest->inputs.size()) {
-        ERROR_MSG("Block::connect : invalid destination channel\n");
-        return;
-    }
+    if (!dest)
+        {
+            ERROR_MSG("Block::connect : invalid destination\n");
+            return;
+        }
+    if (dest_num >= dest->inputs.size())
+        {
+            ERROR_MSG("Block::connect : invalid destination channel\n");
+            return;
+        }
 
     // Check if the connection exists
     for (std::list<struct link_t>::const_iterator i=src->outputs[src_num].links.begin(); i != src->outputs[src_num].links.end(); ++i)
-        if (i->block == dest && i->channel == dest_num) {
-            ERROR_MSG("Block::connect : connection exists\n");
-            return;
-        }
+        if (i->block == dest && i->channel == dest_num)
+            {
+                ERROR_MSG("Block::connect : connection exists\n");
+                return;
+            }
 
     struct link_t link;
 
@@ -198,23 +206,27 @@ void IO::Block::disconnect(IO::Block *src,size_t src_num,IO::Block *dest,size_t 
 {
     Mutex::Locker lock(&mutex);
 
-    if (!src) {
-        ERROR_MSG("Block::disconnect : invalid source\n");
-        return;
-    }
-    if (src_num >= src->outputs.size()) {
-        ERROR_MSG("Block::disconnect : invalid source channel\n");
-        return;
-    }
+    if (!src)
+        {
+            ERROR_MSG("Block::disconnect : invalid source\n");
+            return;
+        }
+    if (src_num >= src->outputs.size())
+        {
+            ERROR_MSG("Block::disconnect : invalid source channel\n");
+            return;
+        }
 
-    if (!dest) {
-        ERROR_MSG("Block::disconnect : invalid destination\n");
-        return;
-    }
-    if (dest_num >= dest->inputs.size()) {
-        ERROR_MSG("Block::disconnect : invalid destination channel\n");
-        return;
-    }
+    if (!dest)
+        {
+            ERROR_MSG("Block::disconnect : invalid destination\n");
+            return;
+        }
+    if (dest_num >= dest->inputs.size())
+        {
+            ERROR_MSG("Block::disconnect : invalid destination channel\n");
+            return;
+        }
 
     Event::Object event(Event::IO_LINK_REMOVE_EVENT);
     event.setParam("src",src);
@@ -226,18 +238,20 @@ void IO::Block::disconnect(IO::Block *src,size_t src_num,IO::Block *dest,size_t 
     // Remove the forward connection (src => dest)
 start_forward_remove:
     for (std::list<struct link_t>::iterator i=src->outputs[src_num].links.begin(); i != src->outputs[src_num].links.end(); ++i)
-        if (i->block == dest && i->channel == dest_num) {
-            src->outputs[src_num].links.erase(i);
-            goto start_forward_remove;
-        }
+        if (i->block == dest && i->channel == dest_num)
+            {
+                src->outputs[src_num].links.erase(i);
+                goto start_forward_remove;
+            }
 
     // Remove the backward connection (src <= dest)
 start_backward_remove:
     for (std::list<struct link_t>::iterator i=dest->inputs[dest_num].links.begin(); i != dest->inputs[dest_num].links.end(); ++i)
-        if (i->block == src && i->channel == src_num) {
-            dest->inputs[dest_num].links.erase(i);
-            goto start_backward_remove;
-        }
+        if (i->block == src && i->channel == src_num)
+            {
+                dest->inputs[dest_num].links.erase(i);
+                goto start_backward_remove;
+            }
 }
 
 void IO::Connector::foreachBlock(void (*callback)(Block *,void *),void *param)
@@ -261,15 +275,17 @@ void IO::Connector::connect(IO::Block *src,size_t out,IO::Block *dest,size_t in)
 {
     Mutex::Locker lock(&mutex);
 
-    if (!src) {
-        ERROR_MSG("IO::Connector::connect : invalid output block\n");
-        return;
-    }
+    if (!src)
+        {
+            ERROR_MSG("IO::Connector::connect : invalid output block\n");
+            return;
+        }
 
-    if (!dest) {
-        ERROR_MSG("IO::Connector::connect : invalid input block\n");
-        return;
-    }
+    if (!dest)
+        {
+            ERROR_MSG("IO::Connector::connect : invalid input block\n");
+            return;
+        }
 
     IO::Block::connect(src,out,dest,in);
 }
@@ -278,38 +294,44 @@ void IO::Connector::disconnect(IO::Block *src,size_t out,IO::Block *dest,size_t 
 {
     Mutex::Locker lock(&mutex);
 
-    if (!src) {
-        ERROR_MSG("IO::Connector::disconnect : invalid output block\n");
-        return;
-    }
+    if (!src)
+        {
+            ERROR_MSG("IO::Connector::disconnect : invalid output block\n");
+            return;
+        }
 
-    if (!dest) {
-        ERROR_MSG("IO::Connector::disconnect : invalid input block\n");
-        return;
-    }
+    if (!dest)
+        {
+            ERROR_MSG("IO::Connector::disconnect : invalid input block\n");
+            return;
+        }
 
     IO::Block::disconnect(src,out,dest,in);
 }
 
 bool IO::Connector::connected(IO::Block *src,size_t src_num,IO::Block *dest,size_t dest_num)
 {
-    if (!src) {
-        ERROR_MSG("Block::connected : invalid source\n");
-        return false;
-    }
-    if (src_num >= src->outputs.size()) {
-        ERROR_MSG("Block::connected : invalid source channel\n");
-        return false;
-    }
+    if (!src)
+        {
+            ERROR_MSG("Block::connected : invalid source\n");
+            return false;
+        }
+    if (src_num >= src->outputs.size())
+        {
+            ERROR_MSG("Block::connected : invalid source channel\n");
+            return false;
+        }
 
-    if (!dest) {
-        ERROR_MSG("Block::connected : invalid destination\n");
-        return false;
-    }
-    if (dest_num >= dest->inputs.size()) {
-        ERROR_MSG("Block::connected : invalid destination channel\n");
-        return false;
-    }
+    if (!dest)
+        {
+            ERROR_MSG("Block::connected : invalid destination\n");
+            return false;
+        }
+    if (dest_num >= dest->inputs.size())
+        {
+            ERROR_MSG("Block::connected : invalid destination channel\n");
+            return false;
+        }
 
     for (std::list<IO::Block::link_t>::iterator i=src->outputs[src_num].links.begin(); i != src->outputs[src_num].links.end(); ++i)
         if (i->block == dest && i->channel == dest_num)
@@ -322,16 +344,17 @@ void IO::Connector::doDeferred(const Settings::Object::State &s)
 {
     Block *src, *dest;
 
-    for (size_t i = 0,end = s.loadInteger("Num Links"); i < end; ++i) {
-        std::ostringstream str;
-        str << i;
+    for (size_t i = 0,end = s.loadInteger("Num Links"); i < end; ++i)
+        {
+            std::ostringstream str;
+            str << i;
 
-        src = dynamic_cast<Block *>(Settings::Manager::getInstance()->getObject(s.loadInteger(str.str()+" Source ID")));
-        dest = dynamic_cast<Block *>(Settings::Manager::getInstance()->getObject(s.loadInteger(str.str()+" Destination ID")));
-        if (src && dest)
-            connect(src,s.loadInteger(str.str()+" Source channel"),
-                    dest,s.loadInteger(str.str()+" Destination channel"));
-    }
+            src = dynamic_cast<Block *>(Settings::Manager::getInstance()->getObject(s.loadInteger(str.str()+" Source ID")));
+            dest = dynamic_cast<Block *>(Settings::Manager::getInstance()->getObject(s.loadInteger(str.str()+" Destination ID")));
+            if (src && dest)
+                connect(src,s.loadInteger(str.str()+" Source channel"),
+                        dest,s.loadInteger(str.str()+" Destination channel"));
+        }
 }
 
 void IO::Connector::doSave(Settings::Object::State &s) const
@@ -340,30 +363,33 @@ void IO::Connector::doSave(Settings::Object::State &s) const
 
     for (std::list<Block *>::const_iterator i = blockList.begin(),iend = blockList.end(); i != iend; ++i)
         for (size_t j = 0,jend = (*i)->getCount(INPUT); j < jend; ++j)
-            for (std::list<Block::link_t>::const_iterator k = (*i)->inputs[j].links.begin(),kend = (*i)->inputs[j].links.end(); k != kend; ++k) {
-                std::ostringstream str;
-                str << n++;
-                s.saveInteger(str.str()+" Source ID",k->block->getID());
-                s.saveInteger(str.str()+" Source channel",k->channel);
-                s.saveInteger(str.str()+" Destination ID",(*i)->getID());
-                s.saveInteger(str.str()+" Destination channel",j);
-            }
+            for (std::list<Block::link_t>::const_iterator k = (*i)->inputs[j].links.begin(),kend = (*i)->inputs[j].links.end(); k != kend; ++k)
+                {
+                    std::ostringstream str;
+                    str << n++;
+                    s.saveInteger(str.str()+" Source ID",k->block->getID());
+                    s.saveInteger(str.str()+" Source channel",k->channel);
+                    s.saveInteger(str.str()+" Destination ID",(*i)->getID());
+                    s.saveInteger(str.str()+" Destination channel",j);
+                }
     s.saveInteger("Num Links",n);
 }
 
 void IO::Connector::insertBlock(IO::Block *block)
 {
-    if (!block) {
-        ERROR_MSG("IO::Connector::insertBlock : invalid block\n");
-        return;
-    }
+    if (!block)
+        {
+            ERROR_MSG("IO::Connector::insertBlock : invalid block\n");
+            return;
+        }
 
     Mutex::Locker lock(&mutex);
 
-    if (std::find(blockList.begin(),blockList.end(),block) != blockList.end()) {
-        ERROR_MSG("IO::Connector::insertBlock : block already present\n");
-        return;
-    }
+    if (std::find(blockList.begin(),blockList.end(),block) != blockList.end())
+        {
+            ERROR_MSG("IO::Connector::insertBlock : block already present\n");
+            return;
+        }
 
     Event::Object event(Event::IO_BLOCK_INSERT_EVENT);
     event.setParam("block",block);
@@ -374,10 +400,11 @@ void IO::Connector::insertBlock(IO::Block *block)
 
 void IO::Connector::removeBlock(IO::Block *block)
 {
-    if (!block) {
-        ERROR_MSG("IO::Connector::insertBlock : invalid block\n");
-        return;
-    }
+    if (!block)
+        {
+            ERROR_MSG("IO::Connector::insertBlock : invalid block\n");
+            return;
+        }
 
     Mutex::Locker lock(&mutex);
 
@@ -402,10 +429,11 @@ IO::Connector *IO::Connector::getInstance(void)
      *************************************************************************/
 
     Mutex::Locker lock(&::mutex);
-    if (!instance) {
-        static Connector connector;
-        instance = &connector;
-    }
+    if (!instance)
+        {
+            static Connector connector;
+            instance = &connector;
+        }
 
     return instance;
 }

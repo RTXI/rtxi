@@ -85,10 +85,11 @@ void *Event::Object::getParam(const char *nam) const
 void Event::Object::setParam(const char *nam,void *val)
 {
     for (size_t i=0; i<nparams; ++i)
-        if (!strcmp(params[i].name,nam)) {
-            params[i].value = val;
-            return;
-        }
+        if (!strcmp(params[i].name,nam))
+            {
+                params[i].value = val;
+                return;
+            }
 
     if (nparams >= MAX_PARAMS)
         return;
@@ -152,10 +153,11 @@ Event::Manager *Event::Manager::getInstance(void)
      *************************************************************************/
 
     Mutex::Locker lock(&::mutex);
-    if (!instance) {
-        static Manager manager;
-        instance = &manager;
-    }
+    if (!instance)
+        {
+            static Manager manager;
+            instance = &manager;
+        }
 
     return instance;
 }

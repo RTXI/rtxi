@@ -26,7 +26,8 @@ namespace
 class SyncEvent: public RT::Event
 {
 public:
-    int callback(void) {
+    int callback(void)
+    {
         return 0;
     };
 };
@@ -50,10 +51,11 @@ void DefaultGUILineEdit::blacken(void)
 
 void DefaultGUILineEdit::redden(void)
 {
-    if(isModified()) {
-        palette.setBrush(this->foregroundRole(), Qt::red);
-        this->setPalette(palette);
-    }
+    if(isModified())
+        {
+            palette.setBrush(this->foregroundRole(), Qt::red);
+            this->setPalette(palette);
+        }
 }
 
 DefaultGUIModel::DefaultGUIModel(std::string name, DefaultGUIModel::variable_t *var, size_t size):
@@ -104,51 +106,66 @@ void DefaultGUIModel::createGUI(DefaultGUIModel::variable_t *var, int size)
     QGridLayout *gridLayout = new QGridLayout;
 
     size_t nstate = 0, nparam = 0, nevent = 0, ncomment = 0;
-    for (size_t i = 0; i < size; i++) {
-        if (var[i].flags & (PARAMETER | STATE | EVENT | COMMENT)) {
-            param_t param;
+    for (size_t i = 0; i < size; i++)
+        {
+            if (var[i].flags & (PARAMETER | STATE | EVENT | COMMENT))
+                {
+                    param_t param;
 
-            param.label = new QLabel(QString::fromStdString(var[i].name), gridBox);
-            gridLayout->addWidget(param.label, parameter.size(), 0);
-            param.edit = new DefaultGUILineEdit(gridBox);
-            gridLayout->addWidget(param.edit, parameter.size(), 1);
+                    param.label = new QLabel(QString::fromStdString(var[i].name), gridBox);
+                    gridLayout->addWidget(param.label, parameter.size(), 0);
+                    param.edit = new DefaultGUILineEdit(gridBox);
+                    gridLayout->addWidget(param.edit, parameter.size(), 1);
 
-            param.label->setToolTip(QString::fromStdString(var[i].description));
-            param.edit->setToolTip(QString::fromStdString(var[i].description));
+                    param.label->setToolTip(QString::fromStdString(var[i].description));
+                    param.edit->setToolTip(QString::fromStdString(var[i].description));
 
-            if (var[i].flags & PARAMETER) {
-                if (var[i].flags & DOUBLE) {
-                    param.edit->setValidator(new QDoubleValidator(param.edit));
-                    param.type = PARAMETER | DOUBLE;
-                } else if (var[i].flags & UINTEGER) {
-                    QIntValidator *validator = new QIntValidator(param.edit);
-                    param.edit->setValidator(validator);
-                    validator->setBottom(0);
-                    param.type = PARAMETER | UINTEGER;
-                } else if (var[i].flags & INTEGER) {
-                    param.edit->setValidator(new QIntValidator(param.edit));
-                    param.type = PARAMETER | INTEGER;
-                } else
-                    param.type = PARAMETER;
-                param.index = nparam++;
-                param.str_value = new QString;
-            } else if (var[i].flags & STATE) {
-                param.edit->setReadOnly(true);
-                palette.setBrush(param.edit->foregroundRole(), Qt::darkGray);
-                param.edit->setPalette(palette);
-                param.type = STATE;
-                param.index = nstate++;
-            } else if (var[i].flags & EVENT) {
-                param.edit->setReadOnly(true);
-                param.type = EVENT;
-                param.index = nevent++;
-            } else if (var[i].flags & COMMENT) {
-                param.type = COMMENT;
-                param.index = ncomment++;
-            }
-            parameter[QString::fromStdString(var[i].name)] = param;
+                    if (var[i].flags & PARAMETER)
+                        {
+                            if (var[i].flags & DOUBLE)
+                                {
+                                    param.edit->setValidator(new QDoubleValidator(param.edit));
+                                    param.type = PARAMETER | DOUBLE;
+                                }
+                            else if (var[i].flags & UINTEGER)
+                                {
+                                    QIntValidator *validator = new QIntValidator(param.edit);
+                                    param.edit->setValidator(validator);
+                                    validator->setBottom(0);
+                                    param.type = PARAMETER | UINTEGER;
+                                }
+                            else if (var[i].flags & INTEGER)
+                                {
+                                    param.edit->setValidator(new QIntValidator(param.edit));
+                                    param.type = PARAMETER | INTEGER;
+                                }
+                            else
+                                param.type = PARAMETER;
+                            param.index = nparam++;
+                            param.str_value = new QString;
+                        }
+                    else if (var[i].flags & STATE)
+                        {
+                            param.edit->setReadOnly(true);
+                            palette.setBrush(param.edit->foregroundRole(), Qt::darkGray);
+                            param.edit->setPalette(palette);
+                            param.type = STATE;
+                            param.index = nstate++;
+                        }
+                    else if (var[i].flags & EVENT)
+                        {
+                            param.edit->setReadOnly(true);
+                            param.type = EVENT;
+                            param.index = nevent++;
+                        }
+                    else if (var[i].flags & COMMENT)
+                        {
+                            param.type = COMMENT;
+                            param.index = ncomment++;
+                        }
+                    parameter[QString::fromStdString(var[i].name)] = param;
+                }
         }
-    }
 
     // Create child widget
     buttonGroup = new QGroupBox;
@@ -207,19 +224,25 @@ void DefaultGUIModel::exit(void)
 
 void DefaultGUIModel::refresh(void)
 {
-    for (std::map<QString, param_t>::iterator i = parameter.begin(); i!= parameter.end(); ++i) {
-        if (i->second.type & (STATE | EVENT)) {
-            i->second.edit->setText(QString::number(getValue(i->second.type, i->second.index)));
-            palette.setBrush(i->second.edit->foregroundRole(), Qt::darkGray);
-            i->second.edit->setPalette(palette);
-        } else if ((i->second.type & PARAMETER) && !i->second.edit->isModified()
-                   && i->second.edit->text() != *i->second.str_value) {
-            i->second.edit->setText(*i->second.str_value);
-        } else if ((i->second.type & COMMENT) && !i->second.edit->isModified()
-                   && i->second.edit->text() != QString::fromStdString(getValueString(COMMENT, i->second.index))) {
-            i->second.edit->setText(QString::fromStdString(getValueString(COMMENT, i->second.index)));
+    for (std::map<QString, param_t>::iterator i = parameter.begin(); i!= parameter.end(); ++i)
+        {
+            if (i->second.type & (STATE | EVENT))
+                {
+                    i->second.edit->setText(QString::number(getValue(i->second.type, i->second.index)));
+                    palette.setBrush(i->second.edit->foregroundRole(), Qt::darkGray);
+                    i->second.edit->setPalette(palette);
+                }
+            else if ((i->second.type & PARAMETER) && !i->second.edit->isModified()
+                     && i->second.edit->text() != *i->second.str_value)
+                {
+                    i->second.edit->setText(*i->second.str_value);
+                }
+            else if ((i->second.type & COMMENT) && !i->second.edit->isModified()
+                     && i->second.edit->text() != QString::fromStdString(getValueString(COMMENT, i->second.index)))
+                {
+                    i->second.edit->setText(QString::fromStdString(getValueString(COMMENT, i->second.index)));
+                }
         }
-    }
     pauseButton->setChecked(!getActive());
 }
 
@@ -232,11 +255,12 @@ void DefaultGUIModel::modify(void)
     RT::System::getInstance()->postEvent(&event);
 
     for (std::map<QString, param_t>::iterator i = parameter.begin(); i != parameter.end(); ++i)
-        if (i->second.type & COMMENT) {
-            QByteArray textData = i->second.edit->text().toLatin1();
-            const char *text = textData.constData();
-            Workspace::Instance::setComment(i->second.index, text);
-        }
+        if (i->second.type & COMMENT)
+            {
+                QByteArray textData = i->second.edit->text().toLatin1();
+                const char *text = textData.constData();
+                Workspace::Instance::setComment(i->second.index, text);
+            }
 
     update(MODIFY);
     setActive(active);
@@ -256,61 +280,67 @@ QString DefaultGUIModel::getComment(const QString &name)
 void DefaultGUIModel::setComment(const QString &name, QString comment)
 {
     std::map<QString, param_t>::iterator n = parameter.find(name);
-    if (n != parameter.end() && (n->second.type & COMMENT)) {
-        n->second.edit->setText(comment);
-        QByteArray textData = comment.toLatin1();
-        const char *text = textData.constData();
-        Workspace::Instance::setComment(n->second.index, text);
-    }
+    if (n != parameter.end() && (n->second.type & COMMENT))
+        {
+            n->second.edit->setText(comment);
+            QByteArray textData = comment.toLatin1();
+            const char *text = textData.constData();
+            Workspace::Instance::setComment(n->second.index, text);
+        }
 }
 
 QString DefaultGUIModel::getParameter(const QString &name)
 {
     std::map<QString, param_t>::iterator n = parameter.find(name);
-    if ((n != parameter.end()) && (n->second.type & PARAMETER)) {
-        *n->second.str_value = n->second.edit->text();
-        setValue(n->second.index, n->second.edit->text().toDouble());
-        return n->second.edit->text();
-    }
+    if ((n != parameter.end()) && (n->second.type & PARAMETER))
+        {
+            *n->second.str_value = n->second.edit->text();
+            setValue(n->second.index, n->second.edit->text().toDouble());
+            return n->second.edit->text();
+        }
     return "";
 }
 
 void DefaultGUIModel::setParameter(const QString &name, double value)
 {
     std::map<QString, param_t>::iterator n = parameter.find(name);
-    if ((n != parameter.end()) && (n->second.type & PARAMETER)) {
-        n->second.edit->setText(QString::number(value));
-        *n->second.str_value = n->second.edit->text();
-        setValue(n->second.index, n->second.edit->text().toDouble());
-    }
+    if ((n != parameter.end()) && (n->second.type & PARAMETER))
+        {
+            n->second.edit->setText(QString::number(value));
+            *n->second.str_value = n->second.edit->text();
+            setValue(n->second.index, n->second.edit->text().toDouble());
+        }
 }
 
 void DefaultGUIModel::setParameter(const QString &name, const QString value)
 {
     std::map<QString, param_t>::iterator n = parameter.find(name);
-    if ((n != parameter.end()) && (n->second.type & PARAMETER)) {
-        n->second.edit->setText(value);
-        *n->second.str_value = n->second.edit->text();
-        setValue(n->second.index, n->second.edit->text().toDouble());
-    }
+    if ((n != parameter.end()) && (n->second.type & PARAMETER))
+        {
+            n->second.edit->setText(value);
+            *n->second.str_value = n->second.edit->text();
+            setValue(n->second.index, n->second.edit->text().toDouble());
+        }
 }
 
 void DefaultGUIModel::setState(const QString &name, double &ref)
 {
     std::map<QString, param_t>::iterator n = parameter.find(name);
-    if ((n != parameter.end()) && (n->second.type & STATE)) {
-        setData(Workspace::STATE, n->second.index, &ref);
-        n->second.edit->setText(QString::number(ref));
-    }
+    if ((n != parameter.end()) && (n->second.type & STATE))
+        {
+            setData(Workspace::STATE, n->second.index, &ref);
+            n->second.edit->setText(QString::number(ref));
+        }
 }
 
 void DefaultGUIModel::setEvent(const QString &name, double &ref)
 {
     std::map<QString, param_t>::iterator n = parameter.find(name);
-    if ((n != parameter.end()) && (n->second.type & EVENT)) {
-        setData(Workspace::EVENT, n->second.index, &ref);
-        n->second.edit->setText(QString::number(ref));
-    }
+    if ((n != parameter.end()) && (n->second.type & EVENT))
+        {
+            setData(Workspace::EVENT, n->second.index, &ref);
+            n->second.edit->setText(QString::number(ref));
+        }
 }
 
 void DefaultGUIModel::pause(bool p)
@@ -340,10 +370,11 @@ void DefaultGUIModel::doLoad(const Settings::Object::State &s)
     else if (s.loadInteger("Minimized"))
         showMinimized();
     // this only exists in RTXI versions >1.3
-    if (s.loadInteger("W") != NULL) {
-        resize(s.loadInteger("W"), s.loadInteger("H"));
-        parentWidget()->move(s.loadInteger("X"), s.loadInteger("Y"));
-    }
+    if (s.loadInteger("W") != NULL)
+        {
+            resize(s.loadInteger("W"), s.loadInteger("H"));
+            parentWidget()->move(s.loadInteger("X"), s.loadInteger("Y"));
+        }
 
     pauseButton->setChecked(s.loadInteger("paused"));
     modify();
@@ -370,15 +401,18 @@ void DefaultGUIModel::doSave(Settings::Object::State &s) const
 
 void DefaultGUIModel::receiveEvent(const Event::Object *event)
 {
-    if (event->getName() == Event::RT_PREPERIOD_EVENT) {
-        periodEventPaused = getActive();
-        setActive(false);
-    } else if (event->getName() == Event::RT_POSTPERIOD_EVENT) {
+    if (event->getName() == Event::RT_PREPERIOD_EVENT)
+        {
+            periodEventPaused = getActive();
+            setActive(false);
+        }
+    else if (event->getName() == Event::RT_POSTPERIOD_EVENT)
+        {
 #ifdef DEBUG
-        if (getActive())
-            ERROR_MSG("DefaultGUIModel::receiveEvent : model unpaused during a period update\n");
+            if (getActive())
+                ERROR_MSG("DefaultGUIModel::receiveEvent : model unpaused during a period update\n");
 #endif
-        update(PERIOD);
-        setActive(periodEventPaused);
-    }
+            update(PERIOD);
+            setActive(periodEventPaused);
+        }
 }

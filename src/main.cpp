@@ -41,7 +41,8 @@
 
 static pid_t parentThread;
 
-struct cli_options_t {
+struct cli_options_t
+{
     std::string config_file;
     std::string plugins_path;
 };
@@ -89,7 +90,7 @@ int main(int argc,char *argv[])
     QApplication::setDesktopSettingsAware(false);
     QApplication *app = new QApplication(argc,argv);
     app->connect(app,SIGNAL(lastWindowClosed()),app,SLOT(quit()));
-    MainWindow::getInstance()->showMaximized();
+    MainWindow::getInstance()->loadWindow();;
 
     CmdLine::getInstance();
     RT::System::getInstance();
@@ -121,7 +122,8 @@ static bool parse_cli_options(int argc,char *argv[],cli_options_t *cli_options)
 {
     int opt, index;
 
-    struct option options[] = {
+    struct option options[] =
+    {
         { "help",        no_argument,       0, 'h' },
         { "config-file", required_argument, 0, 'c' },
         { "plugins-path", required_argument, 0, 'p' },
@@ -129,26 +131,28 @@ static bool parse_cli_options(int argc,char *argv[],cli_options_t *cli_options)
         { 0,0,0,0 }
     };
 
-    for (;;) {
-        opt = getopt_long(argc,argv,"hc:p:m:",options,&index);
+    for (;;)
+        {
+            opt = getopt_long(argc,argv,"hc:p:m:",options,&index);
 
-        if (opt < 0) break;
+            if (opt < 0) break;
 
-        switch (opt) {
-        case 'c':
-            cli_options->config_file = optarg;
-            break;
-        case 'h':
-            help_msg(argv[0]);
-            return false;
-        case 'p':
-            cli_options->plugins_path = optarg;
-            break;
-        default:
-            error_msg(argv[0]);
-            return false;
+            switch (opt)
+                {
+                case 'c':
+                    cli_options->config_file = optarg;
+                    break;
+                case 'h':
+                    help_msg(argv[0]);
+                    return false;
+                case 'p':
+                    cli_options->plugins_path = optarg;
+                    break;
+                default:
+                    error_msg(argv[0]);
+                    return false;
+                }
         }
-    }
 
     return true;
 }

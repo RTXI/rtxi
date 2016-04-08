@@ -46,7 +46,8 @@ private:
     Prefs(void);
     ~Prefs(void);
     Prefs(const Prefs &) {};
-    Prefs & operator=(const Prefs &) {
+    Prefs & operator=(const Prefs &)
+    {
         return *getInstance();
     };
 

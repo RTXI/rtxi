@@ -14,7 +14,7 @@ performance_measurement_la_SOURCES = \
 		performance_measurement.h \
 		performance_measurement.cpp\
 		$(rtxi_includes)/runningstat.h\
-	  $(rtxi_includes)/runningstat.cpp
+		$(rtxi_includes)/runningstat.cpp
 	
 nodist_performance_measurement_la_SOURCES = \
 		moc_performance_measurement.cpp

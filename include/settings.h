@@ -128,7 +128,8 @@ public:
     /*!
      *
      */
-    ID getID(void) const {
+    ID getID(void) const
+    {
         return id;
     };
 
@@ -204,7 +205,8 @@ private:
     Manager(void) : mutex(Mutex::RECURSIVE), currentID(Object::INVALID+1) {};
     ~Manager(void) {};
     Manager(const Manager &) {};
-    Manager &operator=(const Manager &) {
+    Manager &operator=(const Manager &)
+    {
         return *getInstance();
     };
 

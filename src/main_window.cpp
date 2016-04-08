@@ -38,6 +38,11 @@ MainWindow::MainWindow (void) : QMainWindow(NULL, Qt::Window)
     setWindowTitle("RTXI - Real-time eXperimental Interface");
     setWindowIcon(QIcon("/usr/local/lib/rtxi/RTXI-icon.png"));
 
+    /* Set Qt Settings Information */
+    QCoreApplication::setOrganizationName("RTXI");
+    QCoreApplication::setOrganizationDomain("rtxi.org");
+    QCoreApplication::setApplicationName("RTXI");
+
     /* Initialize Menus */
     createFileActions();
     createFileMenu();
@@ -156,27 +161,28 @@ void MainWindow::createUtilMenu()
         return;
 
     libsDir.setNameFilters(QStringList("*.so"));
-    for(size_t i = 0; i < libsDir.entryList().size(); i++) {
-        utilItem = new QAction(libsDir.entryList().at(i), this);
-        if(libsDir.entryList().at(i).contains("analysis"))
-            utilitiesSubMenu->addAction(utilItem);
-        else if(libsDir.entryList().at(i).contains("sync"))
-            utilitiesSubMenu->addAction(utilItem);
-        else if(libsDir.entryList().at(i).contains("mimic"))
-            utilitiesSubMenu->addAction(utilItem);
-        else if(libsDir.entryList().at(i).contains("iir"))
-            filtersSubMenu->addAction(utilItem);
-        else if(libsDir.entryList().at(i).contains("fir"))
-            filtersSubMenu->addAction(utilItem);
-        else if(libsDir.entryList().at(i).contains("signal"))
-            signalsSubMenu->addAction(utilItem);
-        else if(libsDir.entryList().at(i).contains("noise"))
-            signalsSubMenu->addAction(utilItem);
-        else if(libsDir.entryList().at(i).contains("ttl"))
-            signalsSubMenu->addAction(utilItem);
-        else if(libsDir.entryList().at(i).contains("maker"))
-            signalsSubMenu->addAction(utilItem);
-    }
+    for(size_t i = 0; i < libsDir.entryList().size(); i++)
+        {
+            utilItem = new QAction(libsDir.entryList().at(i), this);
+            if(libsDir.entryList().at(i).contains("analysis"))
+                utilitiesSubMenu->addAction(utilItem);
+            else if(libsDir.entryList().at(i).contains("sync"))
+                utilitiesSubMenu->addAction(utilItem);
+            else if(libsDir.entryList().at(i).contains("mimic"))
+                utilitiesSubMenu->addAction(utilItem);
+            else if(libsDir.entryList().at(i).contains("iir"))
+                filtersSubMenu->addAction(utilItem);
+            else if(libsDir.entryList().at(i).contains("fir"))
+                filtersSubMenu->addAction(utilItem);
+            else if(libsDir.entryList().at(i).contains("signal"))
+                signalsSubMenu->addAction(utilItem);
+            else if(libsDir.entryList().at(i).contains("noise"))
+                signalsSubMenu->addAction(utilItem);
+            else if(libsDir.entryList().at(i).contains("ttl"))
+                signalsSubMenu->addAction(utilItem);
+            else if(libsDir.entryList().at(i).contains("maker"))
+                signalsSubMenu->addAction(utilItem);
+        }
 }
 
 void MainWindow::createSystemMenu()
@@ -221,7 +227,7 @@ void MainWindow::createFileActions()
     quit->setShortcut(tr("Ctrl+Q"));
     quit->setStatusTip(tr("Quit RTXI"));
     connect(qApp, SIGNAL(aboutToQuit()), mdiArea, SLOT(closeAllSubWindows()));
-    connect(quit, SIGNAL(triggered()), qApp, SLOT(quit()));
+    connect(quit, SIGNAL(triggered()), this, SLOT(close()));
 }
 
 void MainWindow::createMdi(QMdiSubWindow *subWindow)
@@ -274,15 +280,34 @@ void MainWindow::updateCheck(void)
 {
     FILE *pp;
     pp = popen("/home/yapatel/Dev/rtxi-dev/rtxi/scripts/update_rtxi.sh","r");
-    if (pp != NULL) {
-        while (1) {
-            char *res;
-            char buf[1];
-            res = fgets(buf, sizeof buf, pp);
-            printf("%s", res);
+    if (pp != NULL)
+        {
+            while (1)
+                {
+                    char *res;
+                    char buf[1];
+                    res = fgets(buf, sizeof buf, pp);
+                    printf("%s", res);
+                }
+            pclose(pp);
         }
-        pclose(pp);
-    }
+}
+
+/*
+ * Load MainWindow settings
+ */
+void MainWindow::loadWindow(void)
+{
+    QSettings userprefs;
+    userprefs.setPath (QSettings::NativeFormat, QSettings::SystemScope, "/usr/local/share/rtxi/");
+    userprefs.beginGroup("MainWindow");
+    restoreGeometry(userprefs.value("geometry", saveGeometry()).toByteArray());
+    move(userprefs.value("pos", pos()).toPoint());
+    resize(userprefs.value("size", size()).toSize());
+    if(userprefs.value("maximized", isMaximized()).toBool())
+        showMaximized();
+    userprefs.endGroup();
+    show();
 }
 
 void MainWindow::loadSettings (void)
@@ -293,11 +318,12 @@ void MainWindow::loadSettings (void)
     QString filename = QFileDialog::getOpenFileName(this,
                        tr("Load saved workspace"), userprefs.value("/dirs/setfiles", getenv("HOME")).toString(), tr("Settings (*.set)"));
 
-    if (QFile(filename).exists()) {
-        systemMenu->clear();
-        mdiArea->closeAllSubWindows();
-        Settings::Manager::getInstance()->load(filename.toStdString());
-    }
+    if (QFile(filename).exists())
+        {
+            systemMenu->clear();
+            mdiArea->closeAllSubWindows();
+            Settings::Manager::getInstance()->load(filename.toStdString());
+        }
 }
 
 void MainWindow::saveSettings(void)
@@ -308,18 +334,20 @@ void MainWindow::saveSettings(void)
     QString filename = QFileDialog::getSaveFileName(this,
                        tr("Save current workspace"), userprefs.value("/dirs/setfiles", getenv("HOME")).toString(), tr("Settings (*.set)"));
 
-    if (!filename.isEmpty()) {
-        if (!filename.endsWith(".set"))
-            filename = filename+".set";
-        if (QFileInfo (filename).exists() && QMessageBox::warning(this,
-                "File Exists", "Do you wish to overwrite " + filename + "?",
-                QMessageBox::Yes | QMessageBox::Default,
-                QMessageBox::No | QMessageBox::Escape) != QMessageBox::Yes) {
-            DEBUG_MSG ("MainWindow::saveSettings : canceled overwrite\n");
-            return;
+    if (!filename.isEmpty())
+        {
+            if (!filename.endsWith(".set"))
+                filename = filename+".set";
+            if (QFileInfo (filename).exists() && QMessageBox::warning(this,
+                    "File Exists", "Do you wish to overwrite " + filename + "?",
+                    QMessageBox::Yes | QMessageBox::Default,
+                    QMessageBox::No | QMessageBox::Escape) != QMessageBox::Yes)
+                {
+                    DEBUG_MSG ("MainWindow::saveSettings : canceled overwrite\n");
+                    return;
+                }
+            Settings::Manager::getInstance()->save(filename.toStdString());
         }
-        Settings::Manager::getInstance()->save(filename.toStdString());
-    }
 }
 
 void MainWindow::resetSettings(void)
@@ -353,10 +381,11 @@ void MainWindow::windowsMenuAboutToShow(void)
         return;
 
     // Create windows list based off of what's open
-    for(int i = 0; i < subWindows.size(); i++) {
-        QAction *item = new QAction(subWindows.at(i)->widget()->windowTitle(), this);
-        windowsMenu->addAction(item);
-    }
+    for(int i = 0; i < subWindows.size(); i++)
+        {
+            QAction *item = new QAction(subWindows.at(i)->widget()->windowTitle(), this);
+            windowsMenu->addAction(item);
+        }
     connect(windowsMenu, SIGNAL(triggered(QAction*)), this, SLOT(windowsMenuActivated(QAction*)));
 }
 
@@ -404,6 +433,24 @@ void MainWindow::fileMenuActivated(QAction *id)
     Settings::Manager::getInstance()->load(id->text().remove(0,3).toStdString());
 }
 
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    /*
+     * Save MainWindow settings
+     */
+    QSettings userprefs;
+    userprefs.setPath (QSettings::NativeFormat, QSettings::SystemScope, "/usr/local/share/rtxi/");
+    userprefs.beginGroup("MainWindow");
+    userprefs.setValue("geometry", saveGeometry());
+    userprefs.setValue("maximized", isMaximized());
+    if(!isMaximized())
+        {
+            userprefs.setValue("pos", pos());
+            userprefs.setValue("size", size());
+        }
+    userprefs.endGroup();
+}
+
 static Mutex mutex;
 MainWindow * MainWindow::instance = 0;
 
@@ -418,9 +465,10 @@ MainWindow * MainWindow::getInstance (void)
      *************************************************************************/
 
     Mutex::Locker lock (&::mutex);
-    if (!instance) {
-        static MainWindow mainwindow;
-        instance = &mainwindow;
-    }
+    if (!instance)
+        {
+            static MainWindow mainwindow;
+            instance = &mainwindow;
+        }
     return instance;
 }

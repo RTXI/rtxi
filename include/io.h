@@ -53,7 +53,8 @@ static const flags_t OUTPUT = 0x2;
  *
  * \sa IO::Block::Block()
  */
-typedef struct {
+typedef struct
+{
     std::string name;
     std::string description;
     flags_t flags;
@@ -163,7 +164,8 @@ private:
     Connector(void) : mutex(Mutex::RECURSIVE) {};
     ~Connector(void) {};
     Connector(const Connector &) {};
-    Connector &operator=(const Connector &) {
+    Connector &operator=(const Connector &)
+    {
         return *getInstance();
     };
 
@@ -209,7 +211,8 @@ public:
      *
      * \return Tbe name of the block.
      */
-    std::string getName(void) const {
+    std::string getName(void) const
+    {
         return name;
     };
     /*!
@@ -298,18 +301,21 @@ private:
 
     static double yogi;
 
-    struct link_t {
+    struct link_t
+    {
         Block *block;
         size_t channel;
     };
 
-    struct input_t {
+    struct input_t
+    {
         std::string name;
         std::string description;
         std::list<struct link_t> links;
     };
 
-    struct output_t {
+    struct output_t
+    {
         std::string name;
         std::string description;
         double value;

@@ -193,7 +193,8 @@ protected:
 
 private:
 
-    typedef struct {
+    typedef struct
+    {
         std::string name;
         std::string description;
         double *data;
@@ -203,7 +204,8 @@ private:
     std::vector<var_t> state;
     std::vector<var_t> event;
 
-    typedef struct {
+    typedef struct
+    {
         std::string name;
         std::string description;
         std::string comment;
@@ -255,7 +257,8 @@ private:
     Manager(void) : mutex(Mutex::RECURSIVE) {};
     ~Manager(void) {};
     Manager(const Manager &) {};
-    Manager &operator=(const Manager &) {
+    Manager &operator=(const Manager &)
+    {
         return *getInstance();
     };
 

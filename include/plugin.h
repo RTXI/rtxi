@@ -122,7 +122,8 @@ private:
     Manager(void) : mutex(Mutex::RECURSIVE) {};
     ~Manager(void) {};
     Manager(const Manager &) {};
-    Manager &operator=(const Manager &) {
+    Manager &operator=(const Manager &)
+    {
         return *getInstance();
     };
 

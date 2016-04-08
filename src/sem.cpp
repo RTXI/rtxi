@@ -28,11 +28,12 @@ Semaphore::~Semaphore(void) {}
 void Semaphore::down(void)
 {
 #ifdef DEBUG
-    if (RT::OS::isRealtime()) {
-        ERROR_MSG("Detected unsafe down attempt in RT thread\n");
-        PRINT_BACKTRACE();
-        return;
-    }
+    if (RT::OS::isRealtime())
+        {
+            ERROR_MSG("Detected unsafe down attempt in RT thread\n");
+            PRINT_BACKTRACE();
+            return;
+        }
 #endif // DEBUG
 
     --count;

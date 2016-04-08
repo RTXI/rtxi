@@ -35,7 +35,8 @@ namespace DAQ
 /*!
  * Used to specify the interface type.
  */
-enum type_t {
+enum type_t
+{
     AI,   /*!< Analog Input Interface         */
     AO,   /*!< Analog Output Interface        */
     DIO,  /*!< Digital Input/Output Interface */
@@ -53,7 +54,8 @@ static const index_t INVALID = (0-1);
 /*!
  * Used to specify  digital interface direction.
  */
-enum direction_t {
+enum direction_t
+{
     INPUT,  /*!< Digital Input  */
     OUTPUT, /*!< Digital Output */
 };
@@ -112,7 +114,8 @@ private:
     Manager(void) : mutex(Mutex::RECURSIVE) {};
     ~Manager(void) {};
     Manager(const Manager &) {};
-    Manager &operator=(const Manager &) {
+    Manager &operator=(const Manager &)
+    {
         return *getInstance();
     };
 
@@ -170,23 +173,6 @@ public:
      * \param state The channel's new state.
      */
     virtual int setChannelActive(type_t type,index_t index,bool state)=0;
-
-    /*!
-     * Get the channel's active state of using its calibration.
-     *
-     * \param type The channel's type.
-     * \param index The channel's index.
-     * \return The channel's active state of using its calibration.
-     */
-    virtual bool getAnalogCalibrationActive(type_t type,index_t index) const=0;
-    /*!
-     * Get the channel's state of calibration.
-     *
-     * \param type The channel's type.
-     * \param index The channel's index.
-     * \return The channel's active state of using its calibration.
-     */
-    virtual bool getAnalogCalibrationState(type_t type,index_t index) const=0;
     /*!
      * Get the number of available ranges for the specified channel.
      *
@@ -211,6 +197,7 @@ public:
      * \return The number of available units for the channel.
      */
     virtual size_t getAnalogUnitsCount(type_t type,index_t index) const=0;
+    virtual size_t getAnalogDownsample(type_t type,index_t index) const=0;
     /*!
      * Get a string representation of the specified range.
      *
@@ -340,14 +327,25 @@ public:
      * \return 0 if successful or a negative value on error.
      */
     virtual int setAnalogOffsetUnits(type_t type,index_t index,index_t units)=0;
+    virtual int setAnalogDownsample(type_t type, index_t index, size_t downsample)=0;
+    virtual int setAnalogCounter(type_t type, index_t index)=0;
     /*!
      * Set the calibration of the selected channel.
      *
      * \param type The channel's type.
      * \param index The channel's index.
+     * \param value The calibration value.
      * \return 0 if successful or a negative value on error.
      */
-    virtual int setAnalogCalibration(type_t type,index_t index)=0;
+    virtual int setAnalogCalibrationValue(type_t type,index_t index, double value)=0;
+    /*!
+     * Get the calibration of the selected channel.
+     *
+     * \param type The channel's type.
+     * \param index The channel's index.
+     * \return the calibration value for the channel.
+     */
+    virtual double getAnalogCalibrationValue(type_t type,index_t index) const=0;
     /*!
      * Set the calibration active state of the selected channel.
      *
@@ -356,6 +354,22 @@ public:
      * \return 0 if successful or a negative value on error.
      */
     virtual int setAnalogCalibrationActive(type_t type,index_t index, bool state)=0;
+    /*!
+     * Get the channel's active state of using its calibration.
+     *
+     * \param type The channel's type.
+     * \param index The channel's index.
+     * \return The channel's active state of using its calibration.
+     */
+    virtual bool getAnalogCalibrationActive(type_t type,index_t index) const=0;
+    /*!
+     * Get the channel's state of calibration.
+     *
+     * \param type The channel's type.
+     * \param index The channel's index.
+     * \return The channel's active state of using its calibration.
+     */
+    virtual bool getAnalogCalibrationState(type_t type,index_t index) const=0;
     /*!
      * Get the direction of the specified digital channel.
      *
@@ -371,6 +385,7 @@ public:
      * \return 0 if successful or a negative value on error.
      */
     virtual int setDigitalDirection(index_t index,direction_t direction)=0;
+
 
 }; // class Device
 

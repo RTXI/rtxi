@@ -128,7 +128,8 @@ public:
     Object(const char *);
     ~Object(void);
 
-    const char *getName(void) const {
+    const char *getName(void) const
+    {
         return name;
     };
 
@@ -141,7 +142,8 @@ private:
 
     const char *name;
     size_t nparams;
-    struct {
+    struct
+    {
         const char *name;
         void *value;
     } params[MAX_PARAMS];
@@ -201,7 +203,8 @@ private:
     Manager(void);
     ~Manager(void);
     Manager(const Manager &) {};
-    Manager &operator=(const Manager &) {
+    Manager &operator=(const Manager &)
+    {
         return *getInstance();
     };
 

@@ -43,19 +43,21 @@ DAQ::Driver::~Driver(void)
 void DAQ::Manager::foreachDevice(void (*callback)(DAQ::Device *,void *),void *param)
 {
     Mutex::Locker lock(&mutex);
-    for (std::list<Device *>::iterator i = devices.begin(); i != devices.end(); ++i) {
-        callback(*i,param);
-    }
+    for (std::list<Device *>::iterator i = devices.begin(); i != devices.end(); ++i)
+        {
+            callback(*i,param);
+        }
 }
 
 DAQ::Device *DAQ::Manager::loadDevice(const std::string &name,const std::list<std::string> &args)
 {
     Mutex::Locker lock(&mutex);
 
-    if (driverMap.find(name) == driverMap.end()) {
-        ERROR_MSG("DAQ::Manager::loadDevice : Driver %s does not exist\n",name.c_str());
-        return 0;
-    }
+    if (driverMap.find(name) == driverMap.end())
+        {
+            ERROR_MSG("DAQ::Manager::loadDevice : Driver %s does not exist\n",name.c_str());
+            return 0;
+        }
 
     DAQ::Device *device = driverMap[name]->createDevice(args);
     return device;
@@ -63,27 +65,30 @@ DAQ::Device *DAQ::Manager::loadDevice(const std::string &name,const std::list<st
 
 void DAQ::Manager::insertDevice(DAQ::Device *device)
 {
-    if (!device) {
-        ERROR_MSG("DAQ::Manager::insertDevice : Invalid device\n");
-        return;
-    }
+    if (!device)
+        {
+            ERROR_MSG("DAQ::Manager::insertDevice : Invalid device\n");
+            return;
+        }
 
     Mutex::Locker lock(&mutex);
 
-    if (std::find(devices.begin(),devices.end(),device) != devices.end()) {
-        ERROR_MSG("DAQ::Device::insertDevice : Device already present\n");
-        return;
-    }
+    if (std::find(devices.begin(),devices.end(),device) != devices.end())
+        {
+            ERROR_MSG("DAQ::Device::insertDevice : Device already present\n");
+            return;
+        }
 
     devices.push_back(device);
 }
 
 void DAQ::Manager::removeDevice(DAQ::Device *device)
 {
-    if (!device) {
-        ERROR_MSG("DAQ::Manager::removeDevice : Invalid device\n");
-        return;
-    }
+    if (!device)
+        {
+            ERROR_MSG("DAQ::Manager::removeDevice : Invalid device\n");
+            return;
+        }
 
     Mutex::Locker lock(&mutex);
     devices.remove(device);
@@ -91,16 +96,18 @@ void DAQ::Manager::removeDevice(DAQ::Device *device)
 
 void DAQ::Manager::registerDriver(Driver *driver,const std::string &name)
 {
-    if (!driver) {
-        ERROR_MSG("DAQ::Manager::registerDriver : Invalid driver\n");
-        return;
-    }
+    if (!driver)
+        {
+            ERROR_MSG("DAQ::Manager::registerDriver : Invalid driver\n");
+            return;
+        }
     Mutex::Locker lock(&mutex);
 
-    if (driverMap.find(name) != driverMap.end()) {
-        ERROR_MSG("DAQ::Manager::registerDriver : Driver already registered\n");
-        return;
-    }
+    if (driverMap.find(name) != driverMap.end())
+        {
+            ERROR_MSG("DAQ::Manager::registerDriver : Driver already registered\n");
+            return;
+        }
     driverMap[name] = driver;
 }
 
@@ -108,10 +115,11 @@ void DAQ::Manager::unregisterDriver(const std::string &name)
 {
     Mutex::Locker lock(&mutex);
 
-    if (driverMap.find(name) == driverMap.end()) {
-        ERROR_MSG("DAQ::Manager::unregisterDriver : Driver not registered\n");
-        return;
-    }
+    if (driverMap.find(name) == driverMap.end())
+        {
+            ERROR_MSG("DAQ::Manager::unregisterDriver : Driver not registered\n");
+            return;
+        }
     driverMap.erase(name);
 }
 
@@ -129,10 +137,11 @@ DAQ::Manager *DAQ::Manager::getInstance(void)
      *************************************************************************/
 
     Mutex::Locker lock(&::mutex);
-    if (!instance) {
-        static Manager manager;
-        instance = &manager;
-    }
+    if (!instance)
+        {
+            static Manager manager;
+            instance = &manager;
+        }
 
     return instance;
 }

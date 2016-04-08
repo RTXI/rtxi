@@ -50,7 +50,8 @@ private:
     Plugin(void);
     ~Plugin(void);
     Plugin(const Plugin &) {};
-    Plugin & operator=(const Plugin &) {
+    Plugin & operator=(const Plugin &)
+    {
         return *getInstance();
     };
     static Plugin *instance;
@@ -91,18 +92,22 @@ public slots:
 
 private:
 
-    enum {
+    enum
+    {
         INIT1, INIT2, EXEC,
     } state;
 
     double duration;
     double lastRead;
     double timestep;
+    double latency;
     double maxDuration;
     double maxTimestep;
+    double maxLatency;
     double jitter;
 
     RunningStat timestepStat;
+    RunningStat latencyStat;
 
     QLineEdit *durationEdit;
     QLineEdit *timestepEdit;

@@ -34,7 +34,8 @@
 
 #define DEBUG_RT
 
-typedef struct {
+typedef struct
+{
     long long period;
     RT_TASK task;
 } xenomai_task_t;
@@ -43,7 +44,8 @@ static bool init_rt = false;
 static pthread_key_t is_rt_key;
 
 #ifdef DEBUG_RT
-static const char *sigdebug_reasons[] = {
+static const char *sigdebug_reasons[] =
+{
     [SIGDEBUG_UNDEFINED] = "latency: received SIGXCPU for unknown reason",
     [SIGDEBUG_MIGRATE_SIGNAL] = "received signal",
     [SIGDEBUG_MIGRATE_SYSCALL] = "invoked syscall",
@@ -96,9 +98,7 @@ void sigdebug_handler(int sig, siginfo_t *si, void *context)
 
 int RT::OS::initiate(void)
 {
-		// TO-DO
-		// SET ALCHEMY CLOCK AT COMMAND LINE
-    //rt_timer_set_mode(TM_ONESHOT);
+    rt_timer_set_mode(TM_ONESHOT);
 
     /**************************************************************************************
      * On some systems like Fedora Core 4 the memory footprint for rtxi exceeds the mlock *
@@ -148,7 +148,7 @@ int RT::OS::createTask(RT::OS::Task *task,void *(*entry)(void *),void *arg,int p
     if ((prio >=0) && (prio <=99))
         priority -= prio;
 
-    if ((retval = rt_task_create(&t->task,"RTXI RT Thread",0,priority,T_JOINABLE))) {
+    if ((retval = rt_task_create(&t->task,"RTXI RT Thread",0,priority,T_FPU|T_JOINABLE))) { //delete T_FPU?
         ERROR_MSG("RT::OS::createTask : failed to create task\n");
         return retval;
     }

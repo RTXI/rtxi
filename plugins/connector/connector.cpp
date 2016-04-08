@@ -21,7 +21,8 @@
 #include <main_window.h>
 #include <mutex.h>
 
-struct block_list_info_t {
+struct block_list_info_t
+{
     QComboBox *blockList0;
     QComboBox *blockList1;
     std::vector<IO::Block *> *blocks;
@@ -111,42 +112,49 @@ Connector::Panel::Panel(QWidget *parent) : QWidget(parent)
     connectionGroup = new QGroupBox(tr("Connections"));
     QVBoxLayout *connectionLayout = new QVBoxLayout;
 
-    // Create elements for connection box
-    connectionBox = new QListWidget;
-    connectionLayout->addWidget(connectionBox);
-    QObject::connect(connectionBox,SIGNAL(itemClicked(QListWidgetItem *)),this,SLOT(highlightConnectionBox(QListWidgetItem *)));
+		// Create elements for connection box
+		connectionBox = new QListWidget;
+		connectionLayout->addWidget(connectionBox);
+		QObject::connect(connectionBox,SIGNAL(itemClicked(QListWidgetItem *)),this,SLOT(highlightConnectionBox(QListWidgetItem *)));
 
-    // Assign layout to child widget
-    connectionGroup->setLayout(connectionLayout);
+		// Assign layout to child widget
+		connectionGroup->setLayout(connectionLayout);
 
-    // Attach child widget to parent widget
-    layout->addWidget(outputGroup, 1, 0, 1, 2);
-    layout->addWidget(buttonGroup, 2, 0, 1, 4);
-    layout->addWidget(inputGroup, 1, 2, 1, 2);
-    layout->addWidget(connectionGroup, 3, 0, 1, 4);
+		// Attach child widget to parent widget
+		layout->addWidget(outputGroup, 1, 0, 1, 2);
+		layout->addWidget(buttonGroup, 2, 0, 1, 4);
+		layout->addWidget(inputGroup, 1, 2, 1, 2);
+		layout->addWidget(connectionGroup, 3, 0, 1, 4);
 
-    // Attach layout to widget
-    setLayout(layout);
-    setWindowTitle("Connector Panel");
+		// Set layout so that only connectionGroup expands when resized
+		layout->setRowStretch(0, 0);
+		layout->setRowStretch(2, 0);
+		layout->setRowStretch(3, 1);
 
-    // Set layout to Mdi
-    subWindow->setWidget(this);
-    subWindow->setFixedSize(500, subWindow->sizeHint().height());
-    show();
+		// Attach layout to widget
+		setLayout(layout);
+		setWindowTitle("Connector Panel");
 
-    block_list_info_t info = {inputBlock, outputBlock, &blocks};
+		// Set layout to Mdi
+		subWindow->setWidget(this);
+		subWindow->resize(500, subWindow->sizeHint().height());
+		show();
+
+		block_list_info_t info = {inputBlock, outputBlock, &blocks};
     IO::Connector::getInstance()->foreachBlock(::buildBlockList,&info);
 
-    if(blocks.size() >= 1) {
-        buildInputChannelList();
-        buildOutputChannelList();
-    }
+    if(blocks.size() >= 1)
+        {
+            buildInputChannelList();
+            buildOutputChannelList();
+        }
 
     IO::Connector::getInstance()->foreachConnection(&buildConnectionList,&links);
-    for(size_t i = 0, iend = links.size(); i < iend; ++i) {
-        connectionBox->addItem(QString::number(links[i].src->getID())+" "+QString::fromStdString(links[i].src->getName())+" : "+QString::number(links[i].src_idx)+" "+QString::fromStdString(links[i].src->getName(IO::OUTPUT,links[i].src_idx))+" ==> "+
-                               QString::number(links[i].dest->getID())+" "+QString::fromStdString(links[i].dest->getName())+" : "+QString::number(links[i].dest_idx)+" "+QString::fromStdString(links[i].dest->getName(IO::INPUT,links[i].dest_idx)));
-    }
+    for(size_t i = 0, iend = links.size(); i < iend; ++i)
+        {
+            connectionBox->addItem(QString::number(links[i].src->getID())+" "+QString::fromStdString(links[i].src->getName())+" : "+QString::number(links[i].src_idx)+" "+QString::fromStdString(links[i].src->getName(IO::OUTPUT,links[i].src_idx))+" ==> "+
+                                   QString::number(links[i].dest->getID())+" "+QString::fromStdString(links[i].dest->getName())+" : "+QString::number(links[i].dest_idx)+" "+QString::fromStdString(links[i].dest->getName(IO::INPUT,links[i].dest_idx)));
+        }
 }
 
 Connector::Panel::~Panel(void)
@@ -156,68 +164,78 @@ Connector::Panel::~Panel(void)
 
 void Connector::Panel::receiveEvent(const Event::Object *event)
 {
-    if(event->getName() == Event::IO_BLOCK_INSERT_EVENT) {
-        IO::Block *block = reinterpret_cast<IO::Block *>(event->getParam("block"));
+    if(event->getName() == Event::IO_BLOCK_INSERT_EVENT)
+        {
+            IO::Block *block = reinterpret_cast<IO::Block *>(event->getParam("block"));
 
-        inputBlock->addItem(QString::fromStdString(block->getName())+QString(" ")+QString::number(block->getID()));
-        outputBlock->addItem(QString::fromStdString(block->getName())+QString(" ")+QString::number(block->getID()));
-        blocks.push_back(block);
+            inputBlock->addItem(QString::fromStdString(block->getName())+QString(" ")+QString::number(block->getID()));
+            outputBlock->addItem(QString::fromStdString(block->getName())+QString(" ")+QString::number(block->getID()));
+            blocks.push_back(block);
 
-        if(blocks.size() == 1) {
-            buildInputChannelList();
-            buildOutputChannelList();
+            if(blocks.size() == 1)
+                {
+                    buildInputChannelList();
+                    buildOutputChannelList();
+                }
         }
-    } else if(event->getName() == Event::IO_BLOCK_REMOVE_EVENT) {
-        IO::Block *block = reinterpret_cast<IO::Block *>(event->getParam("block"));
+    else if(event->getName() == Event::IO_BLOCK_REMOVE_EVENT)
+        {
+            IO::Block *block = reinterpret_cast<IO::Block *>(event->getParam("block"));
 
-        size_t index;
-        for(index = 0; index < blocks.size() && blocks[index] != block; ++index);
-        if(index >= blocks.size())
-            return;
+            size_t index;
+            for(index = 0; index < blocks.size() && blocks[index] != block; ++index);
+            if(index >= blocks.size())
+                return;
 
-        size_t current0 = inputBlock->currentIndex();
-        size_t current1 = outputBlock->currentIndex();
+            size_t current0 = inputBlock->currentIndex();
+            size_t current1 = outputBlock->currentIndex();
 
-        inputBlock->removeItem(index);
-        outputBlock->removeItem(index);
-        blocks.erase(blocks.begin()+index);
+            inputBlock->removeItem(index);
+            outputBlock->removeItem(index);
+            blocks.erase(blocks.begin()+index);
 
-        if(current0 == index) {
-            inputBlock->setCurrentIndex(0);
-            buildInputChannelList();
+            if(current0 == index)
+                {
+                    inputBlock->setCurrentIndex(0);
+                    buildInputChannelList();
+                }
+            if(current1 == index)
+                {
+                    outputBlock->setCurrentIndex(0);
+                    buildOutputChannelList();
+                }
         }
-        if(current1 == index) {
-            outputBlock->setCurrentIndex(0);
-            buildOutputChannelList();
+    else if(event->getName() == Event::IO_LINK_INSERT_EVENT)
+        {
+            IO::Block *src = reinterpret_cast<IO::Block *>(event->getParam("src"));
+            size_t src_idx = *reinterpret_cast<size_t *>(event->getParam("src_num"));
+            IO::Block *dest = reinterpret_cast<IO::Block *>(event->getParam("dest"));
+            size_t dest_idx = *reinterpret_cast<size_t *>(event->getParam("dest_num"));
+
+            connectionBox->addItem(QString::number(src->getID())+" "+QString::fromStdString(src->getName())+" : "+
+                                   QString::number(src_idx)+" "+QString::fromStdString(src->getName(IO::OUTPUT,src_idx))+" ==> "+
+                                   QString::number(dest->getID())+" "+QString::fromStdString(dest->getName())+" : "+
+                                   QString::number(dest_idx)+" "+QString::fromStdString(dest->getName(IO::INPUT,dest_idx)));
         }
-    } else if(event->getName() == Event::IO_LINK_INSERT_EVENT) {
-        IO::Block *src = reinterpret_cast<IO::Block *>(event->getParam("src"));
-        size_t src_idx = *reinterpret_cast<size_t *>(event->getParam("src_num"));
-        IO::Block *dest = reinterpret_cast<IO::Block *>(event->getParam("dest"));
-        size_t dest_idx = *reinterpret_cast<size_t *>(event->getParam("dest_num"));
+    else if(event->getName() == Event::IO_LINK_REMOVE_EVENT)
+        {
+            IO::Block *src = reinterpret_cast<IO::Block *>(event->getParam("src"));
+            size_t src_idx = *reinterpret_cast<size_t *>(event->getParam("src_num"));
+            IO::Block *dest = reinterpret_cast<IO::Block *>(event->getParam("dest"));
+            size_t dest_idx = *reinterpret_cast<size_t *>(event->getParam("dest_num"));
 
-        connectionBox->addItem(QString::number(src->getID())+" "+QString::fromStdString(src->getName())+" : "+
-                               QString::number(src_idx)+" "+QString::fromStdString(src->getName(IO::OUTPUT,src_idx))+" ==> "+
-                               QString::number(dest->getID())+" "+QString::fromStdString(dest->getName())+" : "+
-                               QString::number(dest_idx)+" "+QString::fromStdString(dest->getName(IO::INPUT,dest_idx)));
-    } else if(event->getName() == Event::IO_LINK_REMOVE_EVENT) {
-        IO::Block *src = reinterpret_cast<IO::Block *>(event->getParam("src"));
-        size_t src_idx = *reinterpret_cast<size_t *>(event->getParam("src_num"));
-        IO::Block *dest = reinterpret_cast<IO::Block *>(event->getParam("dest"));
-        size_t dest_idx = *reinterpret_cast<size_t *>(event->getParam("dest_num"));
+            QString link_name = QString::number(src->getID())+" "+QString::fromStdString(src->getName())+" : "+
+                                QString::number(src_idx)+" "+QString::fromStdString(src->getName(IO::OUTPUT,src_idx))+" ==> "+
+                                QString::number(dest->getID())+" "+QString::fromStdString(dest->getName())+" : "+
+                                QString::number(dest_idx)+" "+QString::fromStdString(dest->getName(IO::INPUT,dest_idx));
 
-        QString link_name = QString::number(src->getID())+" "+QString::fromStdString(src->getName())+" : "+
-                            QString::number(src_idx)+" "+QString::fromStdString(src->getName(IO::OUTPUT,src_idx))+" ==> "+
-                            QString::number(dest->getID())+" "+QString::fromStdString(dest->getName())+" : "+
-                            QString::number(dest_idx)+" "+QString::fromStdString(dest->getName(IO::INPUT,dest_idx));
-
-        size_t index;
-        for(index=0; index < connectionBox->count() && connectionBox->item(index)->text() != link_name; ++index);
-        if(index >= connectionBox->count())
-            ERROR_MSG("Connector::Panel::receiveEvent : removing non-existant link.\n");
-        else
-            connectionBox->takeItem(index);
-    }
+            size_t index;
+            for(index=0; index < connectionBox->count() && connectionBox->item(index)->text() != link_name; ++index);
+            if(index >= connectionBox->count())
+                ERROR_MSG("Connector::Panel::receiveEvent : removing non-existant link.\n");
+            else
+                connectionBox->takeItem(index);
+        }
 }
 
 void Connector::Panel::buildInputChannelList(void)
@@ -330,24 +348,28 @@ void Connector::Panel::toggleConnection(bool on)
 void Connector::Panel::updateConnectionButton(void)
 {
 
-    if(!inputChannel->count() || !outputChannel->count()) {
-        connectionButton->setEnabled(false);
-    } else {
-        connectionButton->setEnabled(true);
-        IO::Block *src = blocks[outputBlock->currentIndex()];
-        IO::Block *dest = blocks[inputBlock->currentIndex()];
-        size_t src_num = outputChannel->currentIndex();
-        size_t dest_num = inputChannel->currentIndex();
+    if(!inputChannel->count() || !outputChannel->count())
+        {
+            connectionButton->setEnabled(false);
+        }
+    else
+        {
+            connectionButton->setEnabled(true);
+            IO::Block *src = blocks[outputBlock->currentIndex()];
+            IO::Block *dest = blocks[inputBlock->currentIndex()];
+            size_t src_num = outputChannel->currentIndex();
+            size_t dest_num = inputChannel->currentIndex();
 
-        connectionButton->setChecked(IO::Connector::getInstance()->connected(src,src_num,dest,dest_num));
-    }
+            connectionButton->setChecked(IO::Connector::getInstance()->connected(src,src_num,dest,dest_num));
+        }
 }
 
 void Connector::Panel::buildConnectionList(IO::Block *src,size_t src_num,IO::Block *dest,size_t dest_num,void *arg)
 {
     std::vector<link_t> &list = *reinterpret_cast<std::vector<link_t> *>(arg);
 
-    link_t link = {
+    link_t link =
+    {
         src,
         src_num,
         dest,

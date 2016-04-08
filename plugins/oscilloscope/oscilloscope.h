@@ -67,7 +67,8 @@ private:
     Plugin(void);
     ~Plugin(void);
     Plugin(const Plugin &) {};
-    Plugin &operator=(const Plugin &) {
+    Plugin &operator=(const Plugin &)
+    {
         return *getInstance();
     };
     static Plugin *instance;

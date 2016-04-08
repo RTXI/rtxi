@@ -51,7 +51,8 @@ private slots:
 private:
     static void buildConnectionList(IO::Block *,size_t,IO::Block *,size_t,void *);
 
-    struct link_t {
+    struct link_t
+    {
         IO::Block *src;
         size_t src_idx;
         IO::Block *dest;
@@ -90,7 +91,8 @@ private:
     Plugin(void);
     ~Plugin(void);
     Plugin(const Plugin &) {};
-    Plugin &operator=(const Plugin &) {
+    Plugin &operator=(const Plugin &)
+    {
         return *getInstance();
     };
     static Plugin *instance;

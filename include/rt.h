@@ -114,34 +114,42 @@ public:
         iterator(const iterator &x)
             : current(x.current) {};
 
-        bool operator==(const iterator &x) const {
+        bool operator==(const iterator &x) const
+        {
             return current == x.current;
         };
-        bool operator!=(const iterator &x) const {
+        bool operator!=(const iterator &x) const
+        {
             return current != x.current;
         };
 
-        T &operator*(void) const {
+        T &operator*(void) const
+        {
             return *static_cast<T *>(current);
         };
-        T *operator->(void) const {
+        T *operator->(void) const
+        {
             return static_cast<T *>(current);
         };
 
-        iterator &operator++(void) {
+        iterator &operator++(void)
+        {
             current = current->next;
             return *this;
         };
-        iterator operator++(int) {
+        iterator operator++(int)
+        {
             typename RT::List<T>::iterator tmp = *this;
             current = current->next;
             return tmp;
         };
-        iterator &operator--(void) {
+        iterator &operator--(void)
+        {
             current = current->prev;
             return *this;
         };
-        iterator operator--(int) {
+        iterator operator--(int)
+        {
             typename RT::List<T>::iterator tmp = *this;
             current = current->prev;
             return tmp;
@@ -166,34 +174,42 @@ public:
         const_iterator(const const_iterator &x)
             : current(x.current) {};
 
-        bool operator==(const const_iterator &x) const {
+        bool operator==(const const_iterator &x) const
+        {
             return current == x.current;
         };
-        bool operator!=(const const_iterator &x) const {
+        bool operator!=(const const_iterator &x) const
+        {
             return current != x.current;
         };
 
-        const T &operator*(void) const {
+        const T &operator*(void) const
+        {
             return *static_cast<const T *>(current);
         };
-        const T *operator->(void) const {
+        const T *operator->(void) const
+        {
             return static_cast<const T *>(current);
         };
 
-        const_iterator &operator++(void) {
+        const_iterator &operator++(void)
+        {
             current = current->next;
             return *this;
         };
-        const_iterator operator++(int) {
+        const_iterator operator++(int)
+        {
             typename RT::List<T>::const_iterator tmp = *this;
             current = current->next;
             return tmp;
         };
-        const_iterator &operator--(void) {
+        const_iterator &operator--(void)
+        {
             current = current->prev;
             return *this;
         };
-        const_iterator operator--(int) {
+        const_iterator operator--(int)
+        {
             typename RT::List<T>::const_iterator tmp = *this;
             current = current->prev;
             return tmp;
@@ -219,7 +235,8 @@ public:
             : next(0), prev(0) {};
         virtual ~Node(void) {};
 
-        bool operator==(const Node &x) const {
+        bool operator==(const Node &x) const
+        {
             return next == x.next && prev == x.prev;
         };
 
@@ -231,36 +248,44 @@ public:
 
     List(void)
         : count(0), head(&tail), tail() {};
-    virtual ~List(void) {
+    virtual ~List(void)
+    {
 #ifdef DEBUG
         if(tail.next)
             ERROR_MSG("RT::List::~List : end of list overwritten\n");
 #endif
     };
 
-    size_t size(void) const {
+    size_t size(void) const
+    {
         return count;
     };
-    bool empty(void) const {
+    bool empty(void) const
+    {
         return count==0;
     };
 
-    iterator begin(void) {
+    iterator begin(void)
+    {
         return iterator(static_cast<T *>(head));
     };
-    iterator end(void) {
+    iterator end(void)
+    {
         return iterator(static_cast<T *>(&tail));
     };
 
-    const_iterator begin(void) const {
+    const_iterator begin(void) const
+    {
         return const_iterator(static_cast<const T *>(head));
     };
-    const_iterator end(void) const {
+    const_iterator end(void) const
+    {
         return const_iterator(static_cast<const T *>(&tail));
     };
 
     void insert(iterator,T &);
-    void insertRT(iterator position,T &node) {
+    void insertRT(iterator position,T &node)
+    {
         Node *object = static_cast<Node *>(&node);
 
         object->next = &(*position);
@@ -274,7 +299,8 @@ public:
     };
 
     void remove(T &);
-    void removeRT(T &node) {
+    void removeRT(T &node)
+    {
         Node *object = static_cast<Node *>(&node);
 
         if(object == &tail)
@@ -296,7 +322,8 @@ private:
 
         InsertListNodeEvent(List<T> *l,iterator i,T *n)
             : list(l), iter(i), node(n) {};
-        int callback(void) {
+        int callback(void)
+        {
             list->insertRT(iter,*node);
             return 0;
         };
@@ -316,7 +343,8 @@ private:
 
         RemoveListNodeEvent(List<T> *l,T *n)
             : list(l), node(n) {};
-        int callback(void) {
+        int callback(void)
+        {
             list->removeRT(*node);
             return 0;
         };
@@ -361,7 +389,8 @@ public:
      *
      * \return The current period
      */
-    long long getPeriod(void) const {
+    long long getPeriod(void) const
+    {
         return period;
     };
     /*!
@@ -414,7 +443,8 @@ private:
     System(void);
     ~System(void);
     System(const System &) : eventFifo(0) {};
-    System &operator=(const System &) {
+    System &operator=(const System &)
+    {
         return *getInstance();
     };
 
@@ -492,7 +522,8 @@ public:
     virtual void read(void) {};
     virtual void write(void) {};
 
-    inline bool getActive(void) const {
+    inline bool getActive(void) const
+    {
         return active;
     };
     void setActive(bool);
@@ -529,7 +560,8 @@ public:
      *
      * \return The priority of the thread.
      */
-    Priority getPriority(void) const {
+    Priority getPriority(void) const
+    {
         return priority;
     };
 
@@ -546,7 +578,8 @@ public:
 
     virtual void execute(void) {};
 
-    inline bool getActive(void) const {
+    inline bool getActive(void) const
+    {
         return active;
     };
     void setActive(bool);

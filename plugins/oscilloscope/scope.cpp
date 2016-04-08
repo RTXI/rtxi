@@ -241,9 +241,10 @@ std::list<Scope::Channel>::const_iterator Scope::getChannelsEnd(void) const
 // Zeros data
 void Scope::clearData(void)
 {
-    for(std::list<Channel>::iterator i = channels.begin(), end = channels.end(); i != end; ++i) {
-        i->data.assign(data_size, 0);
-    }
+    for(std::list<Channel>::iterator i = channels.begin(), end = channels.end(); i != end; ++i)
+        {
+            i->data.assign(data_size, 0);
+        }
 }
 
 // Scales data based upon desired settings for the channel
@@ -252,29 +253,33 @@ void Scope::setData(double data[],size_t size)
     if(isPaused)
         return;
 
-    if(size < getChannelCount()) {
-        ERROR_MSG("Scope::setData() : data size mismatch detected\n");
-        return;
-    }
+    if(size < getChannelCount())
+        {
+            ERROR_MSG("Scope::setData() : data size mismatch detected\n");
+            return;
+        }
 
     size_t index = 0;
-    for(std::list<Channel>::iterator i = channels.begin(), end = channels.end(); i != end; ++i) {
-        i->data[data_idx] = data[index++];
+    for(std::list<Channel>::iterator i = channels.begin(), end = channels.end(); i != end; ++i)
+        {
+            i->data[data_idx] = data[index++];
 
-        if(triggering && i == triggerChannel &&
-                ((triggerDirection == POS && i->data[data_idx-1] < triggerThreshold && i->data[data_idx] > triggerThreshold) ||
-                 (triggerDirection == NEG && i->data[data_idx-1] > triggerThreshold && i->data[data_idx] < triggerThreshold))) {
-            if(data_idx > triggerWindow*fs)
-                triggerQueue.push_back(data_idx-(triggerWindow*fs));
+            if(triggering && i == triggerChannel &&
+                    ((triggerDirection == POS && i->data[data_idx-1] < triggerThreshold && i->data[data_idx] > triggerThreshold) ||
+                     (triggerDirection == NEG && i->data[data_idx-1] > triggerThreshold && i->data[data_idx] < triggerThreshold)))
+                {
+                    if(data_idx > triggerWindow*fs)
+                        triggerQueue.push_back(data_idx-(triggerWindow*fs));
+                }
         }
-    }
 
     ++data_idx %= data_size;
 
-    if(triggering && !triggerQueue.empty() && (data_idx+2)%data_size == triggerQueue.front()) {
-        triggerQueue.pop_front();
-        drawCurves();
-    }
+    if(triggering && !triggerQueue.empty() && (data_idx+2)%data_size == triggerQueue.front())
+        {
+            triggerQueue.pop_front();
+            drawCurves();
+        }
 }
 
 // Returns the data size
@@ -314,24 +319,29 @@ std::list<Scope::Channel>::iterator Scope::getTriggerChannel(void)
 
 void Scope::setTrigger(trig_t direction,double threshold,std::list<Channel>::iterator channel, double window)
 {
-    if(triggerChannel != channel || triggerThreshold != threshold) {
-        triggerChannel = channel;
-        triggerThreshold = threshold;
-    }
+    if(triggerChannel != channel || triggerThreshold != threshold)
+        {
+            triggerChannel = channel;
+            triggerThreshold = threshold;
+        }
 
     // Update if direction has changed
-    if(triggerDirection != direction) {
-        if(direction == Scope::NONE) {
-            triggering = false;
-            timer->start(refresh);
-            triggerQueue.clear();
-        } else {
-            triggering = true;
-            timer->stop();
+    if(triggerDirection != direction)
+        {
+            if(direction == Scope::NONE)
+                {
+                    triggering = false;
+                    timer->start(refresh);
+                    triggerQueue.clear();
+                }
+            else
+                {
+                    triggering = true;
+                    timer->stop();
+                }
+            triggerDirection = direction;
         }
-        triggerDirection = direction;
-    }
-		triggerWindow = window;
+    triggerWindow = window;
 }
 
 double Scope::getDivT(void) const
@@ -416,30 +426,32 @@ void Scope::drawCurves(void)
 
     // Set X scale map is same for all channels
     scaleMapX->setScaleInterval(0, hScl*divX);
-    for(std::list<Channel>::iterator i = channels.begin(), iend = channels.end(); i != iend; ++i) {
-        // Set data for channel
-        std::vector<double> x (i->data.size());
-        std::vector<double> y (i->data.size());
-        double *x_loc = x.data();
-        double *y_loc = y.data();
+    for(std::list<Channel>::iterator i = channels.begin(), iend = channels.end(); i != iend; ++i)
+        {
+            // Set data for channel
+            std::vector<double> x (i->data.size());
+            std::vector<double> y (i->data.size());
+            double *x_loc = x.data();
+            double *y_loc = y.data();
 
-        // Set Y scale map for channel
-        // TODO this should not happen each iteration, instead build into channel struct
-        scaleMapY->setScaleInterval(-i->scale*divY/2, i->scale*divY/2);
+            // Set Y scale map for channel
+            // TODO this should not happen each iteration, instead build into channel struct
+            scaleMapY->setScaleInterval(-i->scale*divY/2, i->scale*divY/2);
 
-        // Scale data to pixel coordinates
-        for(size_t j = 0; j < i->data.size(); ++j) {
-            *x_loc = scaleMapX->transform(j*period);
-            *y_loc = scaleMapY->transform(i->data[(data_idx+j)%i->data.size()]+i->offset);
-            ++x_loc;
-            ++y_loc;
+            // Scale data to pixel coordinates
+            for(size_t j = 0; j < i->data.size(); ++j)
+                {
+                    *x_loc = scaleMapX->transform(j*period);
+                    *y_loc = scaleMapY->transform(i->data[(data_idx+j)%i->data.size()]+i->offset);
+                    ++x_loc;
+                    ++y_loc;
+                }
+
+            // Append data to curve
+            // Makes deep copy - which is not optimal
+            // TODO: change to pointer based method
+            i->curve->setSamples(x.data(), y.data(), i->data.size());
         }
-
-        // Append data to curve
-        // Makes deep copy - which is not optimal
-        // TODO: change to pointer based method
-        i->curve->setSamples(x.data(), y.data(), i->data.size());
-    }
 
     // Update plot
     replot();

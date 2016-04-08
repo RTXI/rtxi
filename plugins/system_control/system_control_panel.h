@@ -54,6 +54,7 @@ private:
     QComboBox *deviceList;
     QComboBox *analogChannelList;
     QComboBox *analogRangeList;
+    QComboBox *analogDownsampleList;
     QComboBox *analogReferenceList;
     QComboBox *analogSubdeviceList;
     QComboBox *analogUnitPrefixList;

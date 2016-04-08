@@ -16,7 +16,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-AC_INIT([RTXI],[2.1-rc1],[help@rtxi.org],rtxi)
+AC_INIT([RTXI],[2.1-rc2],[help@rtxi.org],rtxi)
 
 AM_CONFIG_HEADER(include/rtxi_config.h)
 AM_INIT_AUTOMAKE([foreign])
@@ -135,6 +135,7 @@ plugins/oscilloscope/Makefile
 plugins/performance_measurement/Makefile
 plugins/system_control/Makefile
 plugins/userprefs/Makefile
+plugins/module_installer/Makefile
 ])
 
 dnl Generate config.status and launch it

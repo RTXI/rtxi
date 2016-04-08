@@ -27,13 +27,15 @@
 #include <workspace.h>
 #include <vector>
 #include <time.h>
+#include <daq.h>
 
 #include <hdf5.h>
 #include <hdf5_hl.h>
 
 namespace DataRecorder
 {
-enum data_type_t {
+enum data_type_t
+{
     OPEN,
     CLOSE,
     START,
@@ -44,13 +46,15 @@ enum data_type_t {
     PARAM,
 };
 
-struct data_token_t {
+struct data_token_t
+{
     data_type_t type;
     size_t size;
     long long time;
 };
 
-struct param_change_t {
+struct param_change_t
+{
     Settings::Object::ID id;
     size_t index;
     long long step;
@@ -130,7 +134,7 @@ private:
     size_t downsample_rate;
     long long count;
     long long fixedcount;
-		std::vector<std::string> dataTags;
+    std::vector<std::string> dataTags;
 
     QMutex mutex;
 
@@ -140,10 +144,12 @@ private:
     bool tokenRetrieved;
     struct timespec sleep;
 
-    struct file_t {
+    struct file_t
+    {
         hid_t id;
         hid_t trial;
-        hid_t adata, cdata, pdata, sdata, tdata;
+        hid_t adata, cdata, pdata, sdata, tdata, sysdata;
+        hid_t chandata;
         long long idx;
     } file;
 
@@ -210,7 +216,8 @@ private:
     Plugin(void);
     ~Plugin(void);
     Plugin(const Plugin &) {};
-    Plugin &operator=(const Plugin &) {
+    Plugin &operator=(const Plugin &)
+    {
         return *getInstance();
     };
     static Plugin *instance;

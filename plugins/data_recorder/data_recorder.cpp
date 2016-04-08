@@ -34,7 +34,8 @@
 
 #define TAG_SIZE 1024
 
-struct param_hdf_t {
+struct param_hdf_t
+{
     long long index;
     double value;
 };
@@ -44,15 +45,31 @@ QDebug operator<<(QDebug str, const QEvent * ev)
 {
     static int eventEnumIndex = QEvent::staticMetaObject.indexOfEnumerator("Type");
     str << "QEvent";
-    if (ev) {
-        QString name = QEvent::staticMetaObject.enumerator(eventEnumIndex).valueToKey(ev->type());
-        if (!name.isEmpty())
-            str << name;
-        else
-            str << ev->type();
-    } else
+    if (ev)
+        {
+            QString name = QEvent::staticMetaObject.enumerator(eventEnumIndex).valueToKey(ev->type());
+            if (!name.isEmpty())
+                str << name;
+            else
+                str << ev->type();
+        }
+    else
         str << (void*)ev;
     return str.maybeSpace();
+}
+
+struct find_daq_t
+{
+    int index;
+    DAQ::Device *device;
+};
+
+static void findDAQDevice(DAQ::Device *dev,void *arg)
+{
+    struct find_daq_t *info = static_cast<struct find_daq_t *>(arg);
+    if(!info->index)
+        info->device = dev;
+    info->index--;
 }
 
 namespace
@@ -63,13 +80,15 @@ void buildBlockPtrList(IO::Block *block, void *arg)
     list->push_back(block);
 };
 
-struct FileExistsEventData {
+struct FileExistsEventData
+{
     QString filename;
     int response;
     QWaitCondition done;
 };
 
-struct SetFileNameEditEventData {
+struct SetFileNameEditEventData
+{
     QString filename;
     QWaitCondition done;
 };
@@ -424,16 +443,16 @@ DataRecorder::Panel::Panel(QWidget *parent, size_t buffersize) :
     QObject::connect(lButton,SIGNAL(released(void)),this,SLOT(removeChannel(void)));
     lButton->setEnabled(false);
 
-		// Timestamp
-		stampGroup = new QGroupBox(tr("Tag Data"));
-		QHBoxLayout *stampLayout = new QHBoxLayout;
+    // Timestamp
+    stampGroup = new QGroupBox(tr("Tag Data"));
+    QHBoxLayout *stampLayout = new QHBoxLayout;
 
-		// Add timestamp elements
+    // Add timestamp elements
     timeStampEdit = new QLineEdit;
     stampLayout->addWidget(timeStampEdit);
     addTag = new QPushButton(tr("Tag"));
     stampLayout->addWidget(addTag);
-		QObject::connect(addTag,SIGNAL(released(void)),this,SLOT(addNewTag(void)));
+    QObject::connect(addTag,SIGNAL(released(void)),this,SLOT(addNewTag(void)));
 
     // Attach layout to child widget
     stampGroup->setLayout(stampLayout);
@@ -452,14 +471,6 @@ DataRecorder::Panel::Panel(QWidget *parent, size_t buffersize) :
     trialNum->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
     sampleLayout->addWidget(trialNum);
 
-    fileSizeLbl = new QLabel;
-    fileSizeLbl->setText("File Size (kb):");
-    sampleLayout->addWidget(fileSizeLbl);
-    fileSize = new QLabel;
-    fileSize->setText("No data recorded");
-    sampleLayout->addWidget(fileSize);
-    fileSize->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
-
     trialLengthLbl = new QLabel;
     trialLengthLbl->setText("Trial Length (s):");
     sampleLayout->addWidget(trialLengthLbl);
@@ -467,6 +478,14 @@ DataRecorder::Panel::Panel(QWidget *parent, size_t buffersize) :
     trialLength->setText("No data recorded");
     trialLength->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
     sampleLayout->addWidget(trialLength);
+
+    fileSizeLbl = new QLabel;
+    fileSizeLbl->setText("File Size (MB):");
+    sampleLayout->addWidget(fileSizeLbl);
+    fileSize = new QLabel;
+    fileSize->setText("No data recorded");
+    sampleLayout->addWidget(fileSize);
+    fileSize->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
 
     // Attach layout to child widget
     sampleGroup->setLayout(sampleLayout);
@@ -592,20 +611,21 @@ DataRecorder::Panel::~Panel(void)
 // Execute loop
 void DataRecorder::Panel::execute(void)
 {
-    if (recording && !counter++) {
-        data_token_t token;
-        double data[channels.size()];
+    if (recording && !counter++)
+        {
+            data_token_t token;
+            double data[channels.size()];
 
-        size_t n = 0;
-        token.type = SYNC;
-        token.size = channels.size() * sizeof(double);
-        for (RT::List<Channel>::iterator i = channels.begin(), end = channels.end(); i != end; ++i)
-            if (i->block)
-                data[n++] = i->block->getValue(i->type, i->index);
+            size_t n = 0;
+            token.type = SYNC;
+            token.size = channels.size() * sizeof(double);
+            for (RT::List<Channel>::iterator i = channels.begin(), end = channels.end(); i != end; ++i)
+                if (i->block)
+                    data[n++] = i->block->getValue(i->type, i->index);
 
-        fifo.write(&token, sizeof(token));
-        fifo.write(data, sizeof(data));
-    }
+            fifo.write(&token, sizeof(token));
+            fifo.write(data, sizeof(data));
+        }
     count++;
     counter %= downsample_rate;
 }
@@ -613,91 +633,124 @@ void DataRecorder::Panel::execute(void)
 // Event handler
 void DataRecorder::Panel::receiveEvent(const Event::Object *event)
 {
-    if (event->getName() == Event::IO_BLOCK_INSERT_EVENT) {
-        IO::Block *block = reinterpret_cast<IO::Block *> (event->getParam("block"));
-        blockPtrList.push_back(block);
-        blockList->addItem(QString::fromStdString(block->getName()) + " " + QString::number(block->getID()));
-        buildChannelList();
-    } else if (event->getName() == Event::IO_BLOCK_REMOVE_EVENT) {
-        IO::Block *block = reinterpret_cast<IO::Block *> (event->getParam("block"));
-        QString name = QString::fromStdString(block->getName()) + " " + QString::number(block->getID());
-        int n = 0;
-        for (; n < blockList->count() && blockList->itemText(n) != name; ++n) ;
-        if (n < blockList->count())
-            blockList->removeItem(n);
-        blockPtrList.erase(blockPtrList.begin() + n);
-        for (RT::List<Channel>::iterator i = channels.begin(), end = channels.end(); i != end; ++i)
-            if (i->block == block)
-                if (recording)
-                    i->block = 0;
-        buildChannelList();
-    } else if (event->getName() == Event::OPEN_FILE_EVENT) {
-        QString filename(reinterpret_cast<char*> (event->getParam("filename")));
-        OpenFileEvent RTevent(filename, fifo);
-        RT::System::getInstance()->postEvent(&RTevent);
-    } else if (event->getName() == Event::START_RECORDING_EVENT) {
-        StartRecordingEvent RTevent(recording, fifo);
-        RT::System::getInstance()->postEvent(&RTevent);
-    } else if (event->getName() == Event::STOP_RECORDING_EVENT) {
-        StopRecordingEvent RTevent(recording, fifo);
-        RT::System::getInstance()->postEvent(&RTevent);
-    } else if (event->getName() == Event::ASYNC_DATA_EVENT) {
-        AsyncDataEvent RTevent(reinterpret_cast<double *> (event->getParam("data")),*reinterpret_cast<size_t *> (event->getParam("size")), fifo);
-        RT::System::getInstance()->postEvent(&RTevent);
-    } else if( event->getName() == Event::RT_POSTPERIOD_EVENT ) {
-        sleep.tv_nsec = RT::System::getInstance()->getPeriod(); // Update recording thread sleep time
-        buildChannelList();
-    }
+    if (event->getName() == Event::IO_BLOCK_INSERT_EVENT)
+        {
+            IO::Block *block = reinterpret_cast<IO::Block *> (event->getParam("block"));
+            blockPtrList.push_back(block);
+            blockList->addItem(QString::fromStdString(block->getName()) + " " + QString::number(block->getID()));
+            buildChannelList();
+        }
+    else if (event->getName() == Event::IO_BLOCK_REMOVE_EVENT)
+        {
+            IO::Block *block = reinterpret_cast<IO::Block *> (event->getParam("block"));
+            QString name = QString::fromStdString(block->getName()) + " " + QString::number(block->getID());
+            int n = 0;
+            for (; n < blockList->count() && blockList->itemText(n) != name; ++n) ;
+            if (n < blockList->count()) 
+                blockList->removeItem(n);
+            blockPtrList.erase(blockPtrList.begin() + n);
+
+            for (RT::List<Channel>::iterator i = channels.begin(), end = channels.end(); i != end; ++i)
+                if (i->block == block) {
+                    if (recording) i->block = 0;
+                    RemoveChannelEvent RTevent(recording, channels, *i);
+                    if (!RT::System::getInstance()->postEvent(&RTevent)) {
+                        QList<QListWidgetItem*> channelItems = selectionBox->findItems(i->name, Qt::MatchExactly);
+                        if (!channelItems.isEmpty()) {
+                            /* Use takeItem(row) to remove the channel item. */
+                            selectionBox->takeItem(selectionBox->row(channelItems.takeFirst()));
+                        } 
+                    }
+                }
+            buildChannelList();
+        }
+    else if (event->getName() == Event::OPEN_FILE_EVENT)
+        {
+            QString filename(reinterpret_cast<char*> (event->getParam("filename")));
+            OpenFileEvent RTevent(filename, fifo);
+            RT::System::getInstance()->postEvent(&RTevent);
+        }
+    else if (event->getName() == Event::START_RECORDING_EVENT)
+        {
+            StartRecordingEvent RTevent(recording, fifo);
+            RT::System::getInstance()->postEvent(&RTevent);
+        }
+    else if (event->getName() == Event::STOP_RECORDING_EVENT)
+        {
+            StopRecordingEvent RTevent(recording, fifo);
+            RT::System::getInstance()->postEvent(&RTevent);
+        }
+    else if (event->getName() == Event::ASYNC_DATA_EVENT)
+        {
+            AsyncDataEvent RTevent(reinterpret_cast<double *> (event->getParam("data")),*reinterpret_cast<size_t *> (event->getParam("size")), fifo);
+            RT::System::getInstance()->postEvent(&RTevent);
+        }
+    else if( event->getName() == Event::RT_POSTPERIOD_EVENT )
+        {
+            sleep.tv_nsec = RT::System::getInstance()->getPeriod(); // Update recording thread sleep time
+            buildChannelList();
+        }
 }
 
 // RT Event Handler
 void DataRecorder::Panel::receiveEventRT(const Event::Object *event)
 {
-    if (event->getName() == Event::OPEN_FILE_EVENT) {
-        QString filename = QString(reinterpret_cast<char*> (event->getParam("filename")));
-        data_token_t token;
-        token.type = DataRecorder::OPEN;
-        token.size = filename.length() + 1;
-        token.time = RT::OS::getTime();
-        fifo.write(&token, sizeof(token));
-        fifo.write(filename.toLatin1().constData(), token.size);
-    } else if (event->getName() == Event::START_RECORDING_EVENT) {
-        data_token_t token;
-        recording = true;
-        token.type = DataRecorder::START;
-        token.size = 0;
-        token.time = RT::OS::getTime();
-        fifo.write(&token, sizeof(token));
-    } else if (event->getName() == Event::STOP_RECORDING_EVENT) {
-        data_token_t token;
-        recording = false;
-        token.type = DataRecorder::STOP;
-        token.size = 0;
-        token.time = RT::OS::getTime();
-        fifo.write(&token, sizeof(token));
-    } else if (event->getName() == Event::ASYNC_DATA_EVENT) {
-        size_t size = *reinterpret_cast<size_t *> (event->getParam("size"));
-        data_token_t token;
-        token.type = DataRecorder::ASYNC;
-        token.size = size * sizeof(double);
-        token.time = RT::OS::getTime();
-        fifo.write(&token, sizeof(token));
-        fifo.write(event->getParam("data"), token.size);
-    } else if (event->getName() == Event::WORKSPACE_PARAMETER_CHANGE_EVENT) {
-        data_token_t token;
-        token.type = DataRecorder::PARAM;
-        token.size = sizeof(param_change_t);
-        token.time = RT::OS::getTime();
-        param_change_t data;
-        data.id = reinterpret_cast<Settings::Object::ID> (event->getParam("object"));
-        data.index = reinterpret_cast<size_t> (event->getParam("index"));
-        data.step = file.idx;
-        data.value = *reinterpret_cast<double *> (event->getParam("value"));
-        fifo.write(&token, sizeof(token));
-        fifo.write(&data, sizeof(data));
-    } else if( event->getName() == Event::RT_POSTPERIOD_EVENT ) {
-        sleep.tv_nsec = RT::System::getInstance()->getPeriod(); // Update recording thread sleep time
-    }
+    if (event->getName() == Event::OPEN_FILE_EVENT)
+        {
+            QString filename = QString(reinterpret_cast<char*> (event->getParam("filename")));
+            data_token_t token;
+            token.type = DataRecorder::OPEN;
+            token.size = filename.length() + 1;
+            token.time = RT::OS::getTime();
+            fifo.write(&token, sizeof(token));
+            fifo.write(filename.toLatin1().constData(), token.size);
+        }
+    else if (event->getName() == Event::START_RECORDING_EVENT)
+        {
+            data_token_t token;
+            recording = true;
+            token.type = DataRecorder::START;
+            token.size = 0;
+            token.time = RT::OS::getTime();
+            fifo.write(&token, sizeof(token));
+        }
+    else if (event->getName() == Event::STOP_RECORDING_EVENT)
+        {
+            data_token_t token;
+            recording = false;
+            token.type = DataRecorder::STOP;
+            token.size = 0;
+            token.time = RT::OS::getTime();
+            fifo.write(&token, sizeof(token));
+        }
+    else if (event->getName() == Event::ASYNC_DATA_EVENT)
+        {
+            size_t size = *reinterpret_cast<size_t *> (event->getParam("size"));
+            data_token_t token;
+            token.type = DataRecorder::ASYNC;
+            token.size = size * sizeof(double);
+            token.time = RT::OS::getTime();
+            fifo.write(&token, sizeof(token));
+            fifo.write(event->getParam("data"), token.size);
+        }
+    else if (event->getName() == Event::WORKSPACE_PARAMETER_CHANGE_EVENT)
+        {
+            data_token_t token;
+            token.type = DataRecorder::PARAM;
+            token.size = sizeof(param_change_t);
+            token.time = RT::OS::getTime();
+            param_change_t data;
+            data.id = reinterpret_cast<Settings::Object::ID> (event->getParam("object"));
+            data.index = reinterpret_cast<size_t> (event->getParam("index"));
+            data.step = file.idx;
+            data.value = *reinterpret_cast<double *> (event->getParam("value"));
+            fifo.write(&token, sizeof(token));
+            fifo.write(&data, sizeof(data));
+        }
+    else if( event->getName() == Event::RT_POSTPERIOD_EVENT )
+        {
+            sleep.tv_nsec = RT::System::getInstance()->getPeriod(); // Update recording thread sleep time
+        }
 }
 
 // Populate list of blocks and channels
@@ -712,27 +765,28 @@ void DataRecorder::Panel::buildChannelList(void)
 
     // Get type
     IO::flags_t type;
-    switch (typeList->currentIndex()) {
-    case 0:
-        type = Workspace::INPUT;
-        break;
-    case 1:
-        type = Workspace::OUTPUT;
-        break;
-    case 2:
-        type = Workspace::PARAMETER;
-        break;
-    case 3:
-        type = Workspace::STATE;
-        break;
-    case 4:
-        type = Workspace::EVENT;
-        break;
-    default:
-        ERROR_MSG("DataRecorder::Panel::buildChannelList : invalid type selection\n");
-        typeList->setCurrentIndex(0);
-        type = Workspace::INPUT;
-    }
+    switch (typeList->currentIndex())
+        {
+        case 0:
+            type = Workspace::INPUT;
+            break;
+        case 1:
+            type = Workspace::OUTPUT;
+            break;
+        case 2:
+            type = Workspace::PARAMETER;
+            break;
+        case 3:
+            type = Workspace::STATE;
+            break;
+        case 4:
+            type = Workspace::EVENT;
+            break;
+        default:
+            ERROR_MSG("DataRecorder::Panel::buildChannelList : invalid type selection\n");
+            typeList->setCurrentIndex(0);
+            type = Workspace::INPUT;
+        }
 
     for (size_t i = 0; i < block->getCount(type); ++i)
         channelList->addItem(QString::fromStdString(block->getName(type, i)));
@@ -789,47 +843,53 @@ void DataRecorder::Panel::insertChannel(void)
 
     Channel *channel = new Channel();
     channel->block = blockPtrList[blockList->currentIndex()];
-    switch (typeList->currentIndex()) {
-    case 0:
-        channel->type = Workspace::INPUT;
-        break;
-    case 1:
-        channel->type = Workspace::OUTPUT;
-        break;
-    case 2:
-        channel->type = Workspace::PARAMETER;
-        break;
-    case 3:
-        channel->type = Workspace::STATE;
-        break;
-    case 4:
-        channel->type = Workspace::EVENT;
-        break;
-    default:
-        ERROR_MSG("DataRecorder::Panel::insertChannel : invalid type selection\n");
-        typeList->setCurrentIndex(0);
-        channel->type = Workspace::INPUT;
-    }
+    switch (typeList->currentIndex())
+        {
+        case 0:
+            channel->type = Workspace::INPUT;
+            break;
+        case 1:
+            channel->type = Workspace::OUTPUT;
+            break;
+        case 2:
+            channel->type = Workspace::PARAMETER;
+            break;
+        case 3:
+            channel->type = Workspace::STATE;
+            break;
+        case 4:
+            channel->type = Workspace::EVENT;
+            break;
+        default:
+            ERROR_MSG("DataRecorder::Panel::insertChannel : invalid type selection\n");
+            typeList->setCurrentIndex(0);
+            channel->type = Workspace::INPUT;
+        }
     channel->index = channelList->currentIndex();
 
     channel->name.sprintf("%s %ld : %s", channel->block->getName().c_str(),
                           channel->block->getID(), channel->block->getName(channel->type, channel->index).c_str());
 
-    if(selectionBox->findItems(QString(channel->name), Qt::MatchExactly).isEmpty()) {
-        InsertChannelEvent RTevent(recording, channels, channels.end(), *channel);
-        if (!RT::System::getInstance()->postEvent(&RTevent))
-            selectionBox->addItem(channel->name);
-    }
-
-    if(selectionBox->count()) {
-        lButton->setEnabled(true);
-        if(!fileNameEdit->text().isEmpty()) {
-            startRecordButton->setEnabled(true);
+    if(selectionBox->findItems(QString(channel->name), Qt::MatchExactly).isEmpty())
+        {
+            InsertChannelEvent RTevent(recording, channels, channels.end(), *channel);
+            if (!RT::System::getInstance()->postEvent(&RTevent))
+                selectionBox->addItem(channel->name);
         }
-    } else {
-        startRecordButton->setEnabled(false);
-        lButton->setEnabled(false);
-    }
+
+    if(selectionBox->count())
+        {
+            lButton->setEnabled(true);
+            if(!fileNameEdit->text().isEmpty())
+                {
+                    startRecordButton->setEnabled(true);
+                }
+        }
+    else
+        {
+            startRecordButton->setEnabled(false);
+            lButton->setEnabled(false);
+        }
 }
 
 // Remove channel from recorder list
@@ -839,42 +899,47 @@ void DataRecorder::Panel::removeChannel(void)
         return;
 
     for (RT::List<Channel>::iterator i = channels.begin(), end = channels.end(); i != end; ++i)
-        if (i->name == selectionBox->selectedItems().first()->text()) {
-            RemoveChannelEvent RTevent(recording, channels, *i);
-            if (!RT::System::getInstance()->postEvent(&RTevent))
-                selectionBox->takeItem(selectionBox->row(selectionBox->selectedItems().first()));
-            break;
-        }
+        if (i->name == selectionBox->selectedItems().first()->text())
+            {
+                RemoveChannelEvent RTevent(recording, channels, *i);
+                if (!RT::System::getInstance()->postEvent(&RTevent))
+                    selectionBox->takeItem(selectionBox->row(selectionBox->selectedItems().first()));
+                break;
+            }
 
-    if(selectionBox->count()) {
-        startRecordButton->setEnabled(true);
-        lButton->setEnabled(true);
-    } else {
-        startRecordButton->setEnabled(false);
-        lButton->setEnabled(false);
-    }
+    if(selectionBox->count())
+        {
+            startRecordButton->setEnabled(true);
+            lButton->setEnabled(true);
+        }
+    else
+        {
+            startRecordButton->setEnabled(false);
+            lButton->setEnabled(false);
+        }
 }
 
 void DataRecorder::Panel::addNewTag(void)
 {
-	std::string newTag(std::to_string(RT::OS::getTime()));
-	newTag += ",";
-	newTag += timeStampEdit->text().toStdString();
-	dataTags.push_back(newTag);
-	timeStampEdit->clear();
-	recordStatus->setText("Tagged");
+    std::string newTag(std::to_string(RT::OS::getTime()));
+    newTag += ",";
+    newTag += timeStampEdit->text().toStdString();
+    dataTags.push_back(newTag);
+    timeStampEdit->clear();
+    recordStatus->setText("Tagged");
 }
 
 // Start recording slot
 void DataRecorder::Panel::startRecordClicked(void)
 {
-    if(fileNameEdit->text().isEmpty()) {
-        QMessageBox::critical(
-            this, "Data file not specified.",
-            "Please specify a file to write data to.",
-            QMessageBox::Ok, QMessageBox::NoButton);
-        return;
-    }
+    if(fileNameEdit->text().isEmpty())
+        {
+            QMessageBox::critical(
+                this, "Data file not specified.",
+                "Please specify a file to write data to.",
+                QMessageBox::Ok, QMessageBox::NoButton);
+            return;
+        }
 
     StartRecordingEvent RTevent(recording, fifo);
     RT::System::getInstance()->postEvent(&RTevent);
@@ -896,71 +961,80 @@ void DataRecorder::Panel::updateDownsampleRate(int r)
 // Custom event handler
 void DataRecorder::Panel::customEvent(QEvent *e)
 {
-    if (e->type() == QFileExistsEvent) {
-        mutex.lock();
-        CustomEvent * event = static_cast<CustomEvent *>(e);
-        FileExistsEventData *data = reinterpret_cast<FileExistsEventData *> (event->getData());
-        data->response = QMessageBox::question(this, "File exists",
-                                               "The file already exists. What would you like to do?",
-                                               "Append", "Overwrite", "Cancel", 0, 2);
-        recordStatus->setText("Not Recording");
-        data->done.wakeAll();
-        mutex.unlock();
-    } else if (e->type() == QSetFileNameEditEvent) {
-        mutex.lock();
-        CustomEvent * event = static_cast<CustomEvent *>(e);
-        SetFileNameEditEventData *data = reinterpret_cast<SetFileNameEditEventData *> (event->getData());
-        fileNameEdit->setText(data->filename);
-        recordStatus->setText("Ready.");
-        if(selectionBox->count()) {
-            startRecordButton->setEnabled(true);
+    if (e->type() == QFileExistsEvent)
+        {
+            mutex.lock();
+            CustomEvent * event = static_cast<CustomEvent *>(e);
+            FileExistsEventData *data = reinterpret_cast<FileExistsEventData *> (event->getData());
+            data->response = QMessageBox::question(this, "File exists",
+                                                   "The file already exists. What would you like to do?",
+                                                   "Append", "Overwrite", "Cancel", 0, 2);
+            recordStatus->setText("Not Recording");
+            data->done.wakeAll();
+            mutex.unlock();
         }
-        data->done.wakeAll();
-        mutex.unlock();
-    } else if (e->type() == QDisableGroupsEvent) {
-        startRecordButton->setEnabled(false);
-        stopRecordButton->setEnabled(true);
-        closeButton->setEnabled(false);
-        channelGroup->setEnabled(false);
-        sampleGroup->setEnabled(false);
-        recordStatus->setText("Recording...");
-    } else if (e->type() == QEnableGroupsEvent) {
-        startRecordButton->setEnabled(true);
-        stopRecordButton->setEnabled(false);
-        closeButton->setEnabled(true);
-        channelGroup->setEnabled(true);
-        sampleGroup->setEnabled(true);
-        recordStatus->setText("Ready.");
-        fileSize->setNum(int(QFile(fileNameEdit->text()).size()) / 1024);
-        trialLength->setNum(double(RT::System::getInstance()->getPeriod()*1e-9* fixedcount));
-        count = 0;
-    }
+    else if (e->type() == QSetFileNameEditEvent)
+        {
+            mutex.lock();
+            CustomEvent * event = static_cast<CustomEvent *>(e);
+            SetFileNameEditEventData *data = reinterpret_cast<SetFileNameEditEventData *> (event->getData());
+            fileNameEdit->setText(data->filename);
+            recordStatus->setText("Ready.");
+            if(selectionBox->count())
+                {
+                    startRecordButton->setEnabled(true);
+                }
+            data->done.wakeAll();
+            mutex.unlock();
+        }
+    else if (e->type() == QDisableGroupsEvent)
+        {
+            startRecordButton->setEnabled(false);
+            stopRecordButton->setEnabled(true);
+            closeButton->setEnabled(false);
+            channelGroup->setEnabled(false);
+            sampleGroup->setEnabled(false);
+            recordStatus->setText("Recording...");
+        }
+    else if (e->type() == QEnableGroupsEvent)
+        {
+            startRecordButton->setEnabled(true);
+            stopRecordButton->setEnabled(false);
+            closeButton->setEnabled(true);
+            channelGroup->setEnabled(true);
+            sampleGroup->setEnabled(true);
+            recordStatus->setText("Ready.");
+            fileSize->setNum(int(QFile(fileNameEdit->text()).size())/1024.0/1024.0);
+            trialLength->setNum(double(RT::System::getInstance()->getPeriod()*1e-9* fixedcount));
+            count = 0;
+        }
 }
 
 void DataRecorder::Panel::doDeferred(const Settings::Object::State &s)
 {
-    for (int i = 0; i < s.loadInteger("Num Channels"); ++i) {
-        Channel *channel;
-        IO::Block *block;
-        std::ostringstream str;
-        str << i;
+    for (int i = 0; i < s.loadInteger("Num Channels"); ++i)
+        {
+            Channel *channel;
+            IO::Block *block;
+            std::ostringstream str;
+            str << i;
 
-        block	= dynamic_cast<IO::Block *> (Settings::Manager::getInstance()->getObject(s.loadInteger(str.str() + " ID")));
-        if (!block)
-            continue;
+            block	= dynamic_cast<IO::Block *> (Settings::Manager::getInstance()->getObject(s.loadInteger(str.str() + " ID")));
+            if (!block)
+                continue;
 
-        channel = new Channel();
-        channel->block = block;
-        channel->type = s.loadInteger(str.str() + " type");
-        channel->index = s.loadInteger(str.str() + " index");
-        channel->name.sprintf("%s %ld : %s", channel->block->getName().c_str(),
-                              channel->block->getID(), channel->block->getName(channel->type,	channel->index).c_str());
+            channel = new Channel();
+            channel->block = block;
+            channel->type = s.loadInteger(str.str() + " type");
+            channel->index = s.loadInteger(str.str() + " index");
+            channel->name.sprintf("%s %ld : %s", channel->block->getName().c_str(),
+                                  channel->block->getID(), channel->block->getName(channel->type,	channel->index).c_str());
 
-        channels.insert(channels.end(), *channel);
-        selectionBox->addItem(channel->name);
-        if(selectionBox->count())
-            lButton->setEnabled(true);
-    }
+            channels.insert(channels.end(), *channel);
+            selectionBox->addItem(channel->name);
+            if(selectionBox->count())
+                lButton->setEnabled(true);
+        }
 }
 
 void DataRecorder::Panel::doLoad(const Settings::Object::State &s)
@@ -988,198 +1062,239 @@ void DataRecorder::Panel::doSave(Settings::Object::State &s) const
     s.saveInteger("Downsample", downsampleSpin->value());
     s.saveInteger("Num Channels", channels.size());
     size_t n = 0;
-    for (RT::List<Channel>::const_iterator i = channels.begin(), end = channels.end(); i != end; ++i) {
-        std::ostringstream str;
-        str << n++;
+    for (RT::List<Channel>::const_iterator i = channels.begin(), end = channels.end(); i != end; ++i)
+        {
+            std::ostringstream str;
+            str << n++;
 
-        s.saveInteger(str.str() + " ID", i->block->getID());
-        s.saveInteger(str.str() + " type", i->type);
-        s.saveInteger(str.str() + " index", i->index);
-    }
+            s.saveInteger(str.str() + " ID", i->block->getID());
+            s.saveInteger(str.str() + " type", i->type);
+            s.saveInteger(str.str() + " index", i->index);
+        }
 }
 
 void *DataRecorder::Panel::bounce(void *param)
 {
     Panel *that = reinterpret_cast<Panel *> (param);
-    if (that) {
-        that->processData();
-    }
+    if (that)
+        {
+            that->processData();
+        }
     return 0;
 }
 
 void DataRecorder::Panel::processData(void)
 {
-    enum {
+    enum
+    {
         CLOSED, OPENED, RECORD,
     } state = CLOSED;
 
     tokenRetrieved = false;
-    for (;;) {
-        if(!tokenRetrieved) {
-            // Returns true if data was available and retrieved
-            if(fifo.read(&_token, sizeof(_token)))
-                tokenRetrieved = true;
-            else {
-                // Sleep loop then restart if no token was retrieved
-                nanosleep(&sleep, NULL);
-                continue;
-            }
-        }
-        if (_token.type == SYNC) {
-            if (state == RECORD) {
-                double data[_token.size / sizeof(double)];
-                if(!fifo.read(data, _token.size))
-                    continue; // Restart loop if data is not available
-                H5PTappend(file.cdata, 1, data);
-                ++file.idx;
-            }
-        } else if (_token.type == ASYNC) {
-            if (state == RECORD) {
-                double data[_token.size / sizeof(double)];
-                if(!fifo.read(data, _token.size))
-                    continue; // Restart loop if data is not available
-                if (data) {
-                    hsize_t array_size[] = { _token.size / sizeof(double) };
-                    hid_t array_space = H5Screate_simple(1, array_size,	array_size);
-                    hid_t array_type = H5Tarray_create(H5T_IEEE_F64LE, 1,	array_size);
-
-                    QString data_name = QString::number(static_cast<unsigned long long> (_token.time));
-                    hid_t adata = H5Dcreate(file.adata, data_name.toLatin1().constData(),
-                                            array_type, array_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-                    H5Dwrite(adata, array_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
-
-                    H5Dclose(adata);
-                    H5Tclose(array_type);
-                    H5Sclose(array_space);
+    for (;;)
+        {
+            if(!tokenRetrieved)
+                {
+                    // Returns true if data was available and retrieved
+                    if(fifo.read(&_token, sizeof(_token)))
+                        tokenRetrieved = true;
+                    else
+                        {
+                            // Sleep loop then restart if no token was retrieved
+                            nanosleep(&sleep, NULL);
+                            continue;
+                        }
                 }
-            }
-        } else if (_token.type == OPEN) {
-            if (state == RECORD)
-                stopRecording(_token.time);
-            if (state != CLOSED)
-                closeFile();
-            char filename_string[_token.size];
-            if(!fifo.read(filename_string, _token.size))
-                continue; // Restart loop if data is not available
-            QString filename = filename_string;
-            if (openFile(filename))
-                state = CLOSED;
-            else
-                state = OPENED;
-        } else if (_token.type == CLOSE) {
-            if (state == RECORD)
-                stopRecording(RT::OS::getTime());
-            if (state != CLOSED)
-                closeFile();
-            state = CLOSED;
-        } else if (_token.type == START) {
-            if (state == OPENED) {
-                count = 0;
-                startRecording(_token.time);
-                state = RECORD;
-                QEvent *event = new QEvent(static_cast<QEvent::Type>QDisableGroupsEvent);
-                QApplication::postEvent(this, event);
-            }
-        } else if (_token.type == STOP) {
-            if (state == RECORD) {
-                stopRecording(_token.time);
-                state = OPENED;
-                fixedcount = count;
-                QEvent *event = new QEvent(static_cast<QEvent::Type>QEnableGroupsEvent);
-                QApplication::postEvent(this, event);
-            }
-        } else if (_token.type == DONE) {
-            if (state == RECORD)
-                stopRecording(_token.time);
-            if (state != CLOSED)
-                closeFile(true);
-            break;
-        } else if (_token.type == PARAM) {
-            param_change_t data;
-            if(!fifo.read(&data, sizeof(data)))
-                continue; // Restart loop if data is not available
+            if (_token.type == SYNC)
+                {
+                    if (state == RECORD)
+                        {
+                            double data[_token.size / sizeof(double)];
+                            if(!fifo.read(data, _token.size))
+                                continue; // Restart loop if data is not available
+                            H5PTappend(file.cdata, 1, data);
+                            ++file.idx;
+                        }
+                }
+            else if (_token.type == ASYNC)
+                {
+                    if (state == RECORD)
+                        {
+                            double data[_token.size / sizeof(double)];
+                            if(!fifo.read(data, _token.size))
+                                continue; // Restart loop if data is not available
+                            if (data)
+                                {
+                                    hsize_t array_size[] = { _token.size / sizeof(double) };
+                                    hid_t array_space = H5Screate_simple(1, array_size,	array_size);
+                                    hid_t array_type = H5Tarray_create(H5T_IEEE_F64LE, 1,	array_size);
 
-            IO::Block	*block = dynamic_cast<IO::Block *> (Settings::Manager::getInstance()->getObject(data.id));
+                                    QString data_name = QString::number(static_cast<unsigned long long> (_token.time));
+                                    hid_t adata = H5Dcreate(file.adata, data_name.toLatin1().constData(),
+                                                            array_type, array_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+                                    H5Dwrite(adata, array_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
 
-            if (block && state == RECORD) {
-                param_hdf_t param = { data.step, data.value, };
+                                    H5Dclose(adata);
+                                    H5Tclose(array_type);
+                                    H5Sclose(array_space);
+                                }
+                        }
+                }
+            else if (_token.type == OPEN)
+                {
+                    if (state == RECORD)
+                        stopRecording(_token.time);
+                    if (state != CLOSED)
+                        closeFile();
+                    char filename_string[_token.size];
+                    if(!fifo.read(filename_string, _token.size))
+                        continue; // Restart loop if data is not available
+                    QString filename = filename_string;
+                    if (openFile(filename))
+                        state = CLOSED;
+                    else
+                        state = OPENED;
+                }
+            else if (_token.type == CLOSE)
+                {
+                    if (state == RECORD)
+                        stopRecording(RT::OS::getTime());
+                    if (state != CLOSED)
+                        closeFile();
+                    state = CLOSED;
+                }
+            else if (_token.type == START)
+                {
+                    if (state == OPENED)
+                        {
+                            count = 0;
+                            startRecording(_token.time);
+                            state = RECORD;
+                            QEvent *event = new QEvent(static_cast<QEvent::Type>QDisableGroupsEvent);
+                            QApplication::postEvent(this, event);
+                        }
+                }
+            else if (_token.type == STOP)
+                {
+                    if (state == RECORD)
+                        {
+                            stopRecording(_token.time);
+                            state = OPENED;
+                            fixedcount = count;
+                            QEvent *event = new QEvent(static_cast<QEvent::Type>QEnableGroupsEvent);
+                            QApplication::postEvent(this, event);
+                        }
+                }
+            else if (_token.type == DONE)
+                {
+                    if (state == RECORD)
+                        stopRecording(_token.time);
+                    if (state != CLOSED)
+                        closeFile(true);
+                    break;
+                }
+            else if (_token.type == PARAM)
+                {
+                    param_change_t data;
+                    if(!fifo.read(&data, sizeof(data)))
+                        continue; // Restart loop if data is not available
 
-                hid_t param_type;
-                param_type = H5Tcreate(H5T_COMPOUND, sizeof(param_hdf_t));
-                H5Tinsert(param_type, "index", HOFFSET(param_hdf_t,index), H5T_STD_I64LE);
-                H5Tinsert(param_type, "value", HOFFSET(param_hdf_t,value), H5T_IEEE_F64LE);
+                    IO::Block	*block = dynamic_cast<IO::Block *> (Settings::Manager::getInstance()->getObject(data.id));
 
-                QString parameter_name = QString::number(block->getID()) + " "
-                                         + QString::fromStdString(block->getName()) + " : "
-                                         + QString::fromStdString(block->getName(Workspace::PARAMETER, data.index));
+                    if (block && state == RECORD)
+                        {
+                            param_hdf_t param = { data.step, data.value, };
 
-                hid_t data = H5PTopen(file.pdata, parameter_name.toLatin1().constData());
-                H5PTappend(data, 1, &param);
-                H5PTclose(data);
-                H5Tclose(param_type);
-            }
+                            hid_t param_type;
+                            param_type = H5Tcreate(H5T_COMPOUND, sizeof(param_hdf_t));
+                            H5Tinsert(param_type, "index", HOFFSET(param_hdf_t,index), H5T_STD_I64LE);
+                            H5Tinsert(param_type, "value", HOFFSET(param_hdf_t,value), H5T_IEEE_F64LE);
+
+                            QString parameter_name = QString::number(block->getID()) + " "
+                                                     + QString::fromStdString(block->getName()) + " : "
+                                                     + QString::fromStdString(block->getName(Workspace::PARAMETER, data.index));
+
+                            hid_t data = H5PTopen(file.pdata, parameter_name.toLatin1().constData());
+                            H5PTappend(data, 1, &param);
+                            H5PTclose(data);
+                            H5Tclose(param_type);
+                        }
+                }
+            tokenRetrieved = false;
         }
-        tokenRetrieved = false;
-    }
 }
 
 int DataRecorder::Panel::openFile(QString &filename)
 {
 #ifdef DEBUG
-    if(!pthread_equal(pthread_self(),thread)) {
-        ERROR_MSG("DataRecorder::Panel::openFile : called by invalid thread\n");
-        PRINT_BACKTRACE();
-    }
+    if(!pthread_equal(pthread_self(),thread))
+        {
+            ERROR_MSG("DataRecorder::Panel::openFile : called by invalid thread\n");
+            PRINT_BACKTRACE();
+        }
 #endif
 
-    if (QFile::exists(filename)) {
-        mutex.lock();
-        CustomEvent *event = new CustomEvent(static_cast<QEvent::Type>QFileExistsEvent);
-        FileExistsEventData data;
-        event->setData(static_cast<void *>(&data));
-        data.filename = filename;
-        QApplication::postEvent(this, event);
-        data.done.wait(&mutex);
-        mutex.unlock();
+    if (QFile::exists(filename))
+        {
+            mutex.lock();
+            CustomEvent *event = new CustomEvent(static_cast<QEvent::Type>QFileExistsEvent);
+            FileExistsEventData data;
+            event->setData(static_cast<void *>(&data));
+            data.filename = filename;
+            QApplication::postEvent(this, event);
+            data.done.wait(&mutex);
+            mutex.unlock();
 
-        if (data.response == 0) { // append
-            file.id = H5Fopen(filename.toLatin1().constData(), H5F_ACC_RDWR, H5P_DEFAULT);
-            size_t trial_num;
-            QString trial_name;
-            H5Eset_auto(H5E_DEFAULT, NULL, NULL);
-            for (trial_num = 1;; ++trial_num) {
-                trial_name = "/Trial" + QString::number(trial_num);
-                file.trial = H5Gopen(file.id, trial_name.toLatin1().constData(), H5P_DEFAULT);
-                if (file.trial < 0) {
-                    H5Eclear(H5E_DEFAULT);
-                    break;
-                } else {
-                    H5Gclose(file.trial);
+            if (data.response == 0)   // append
+                {
+                    file.id = H5Fopen(filename.toLatin1().constData(), H5F_ACC_RDWR, H5P_DEFAULT);
+                    size_t trial_num;
+                    QString trial_name;
+                    H5Eset_auto(H5E_DEFAULT, NULL, NULL);
+                    for (trial_num = 1;; ++trial_num)
+                        {
+                            trial_name = "/Trial" + QString::number(trial_num);
+                            file.trial = H5Gopen(file.id, trial_name.toLatin1().constData(), H5P_DEFAULT);
+                            if (file.trial < 0)
+                                {
+                                    H5Eclear(H5E_DEFAULT);
+                                    break;
+                                }
+                            else
+                                {
+                                    H5Gclose(file.trial);
+                                }
+                        }
+                    trialNum->setNum(int(trial_num)-1);
                 }
-            }
-            trialNum->setNum(int(trial_num)-1);
-        } else if (data.response == 1) { //overwrite
+            else if (data.response == 1)     //overwrite
+                {
+                    file.id = H5Fcreate(filename.toLatin1().constData(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+                    trialNum->setText("0");
+                }
+            else
+                {
+                    return -1;
+                }
+        }
+    else
+        {
             file.id = H5Fcreate(filename.toLatin1().constData(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
             trialNum->setText("0");
-        } else {
+        }
+    if (file.id < 0)
+        {
+            H5E_type_t error_type;
+            size_t error_size;
+            error_size = H5Eget_msg(file.id, &error_type, NULL, 0);
+            char error_msg[error_size + 1];
+            H5Eget_msg(file.id, &error_type, error_msg, error_size);
+            error_msg[error_size] = 0;
+            H5Eclear(file.id);
+
+            ERROR_MSG("DataRecorder::Panel::processData : failed to open \"%s\" for writing with error : %s\n", filename.toStdString().c_str(),error_msg);
             return -1;
         }
-    } else {
-        file.id = H5Fcreate(filename.toLatin1().constData(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-        trialNum->setText("0");
-    }
-    if (file.id < 0) {
-        H5E_type_t error_type;
-        size_t error_size;
-        error_size = H5Eget_msg(file.id, &error_type, NULL, 0);
-        char error_msg[error_size + 1];
-        H5Eget_msg(file.id, &error_type, error_msg, error_size);
-        error_msg[error_size] = 0;
-        H5Eclear(file.id);
-
-        ERROR_MSG("DataRecorder::Panel::processData : failed to open \"%s\" for writing with error : %s\n", filename.toStdString().c_str(),error_msg);
-        return -1;
-    }
 
     mutex.lock();
     CustomEvent *event = new CustomEvent(static_cast<QEvent::Type>QSetFileNameEditEvent);
@@ -1196,32 +1311,62 @@ int DataRecorder::Panel::openFile(QString &filename)
 void DataRecorder::Panel::closeFile(bool shutdown)
 {
 #ifdef DEBUG
-    if(!pthread_equal(pthread_self(),thread)) {
-        ERROR_MSG("DataRecorder::Panel::closeFile : called by invalid thread\n");
-        PRINT_BACKTRACE();
-    }
+    if(!pthread_equal(pthread_self(),thread))
+        {
+            ERROR_MSG("DataRecorder::Panel::closeFile : called by invalid thread\n");
+            PRINT_BACKTRACE();
+        }
 #endif
 
+    // Write tags to data file
+    hid_t tag_type, tag_space, data;
+    herr_t status;
+    hsize_t dims[1] = {1};
+    tag_type = H5Tcreate(H5T_STRING, TAG_SIZE);
+    tag_space = H5Screate_simple(1, dims, NULL);
+
+    // Create group for tags
+    file.tdata = H5Gcreate(file.id, "Tags", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    // Iterate over vector (buffer) and put into data file
+    size_t i = 0;
+    for(std::vector<std::string>::iterator it = dataTags.begin(); it != dataTags.end(); ++it)
+        {
+            data = H5Dcreate(file.tdata, std::string("Tag " + std::to_string(i++)).c_str(), tag_type, tag_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+            status = H5Dwrite(data, tag_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, it->c_str());
+        }
+    dataTags.clear();
+
+    // Close all open structs
+    H5Dclose(data);
+    H5Sclose(tag_space);
+    H5Tclose(tag_type);
+    H5Gclose(file.tdata);
+
+    // Close file
     H5Fclose(file.id);
-    if (!shutdown) {
-        mutex.lock();
-        CustomEvent *event = new CustomEvent(static_cast<QEvent::Type>QSetFileNameEditEvent);
-        SetFileNameEditEventData data;
-        data.filename = "";
-        event->setData(static_cast<void*>(&data));
-        QApplication::postEvent(this, event);
-        data.done.wait(&mutex);
-        mutex.unlock();
-    }
+
+    if (!shutdown)
+        {
+            mutex.lock();
+            CustomEvent *event = new CustomEvent(static_cast<QEvent::Type>QSetFileNameEditEvent);
+            SetFileNameEditEventData data;
+            data.filename = "";
+            event->setData(static_cast<void*>(&data));
+            QApplication::postEvent(this, event);
+            data.done.wait(&mutex);
+            mutex.unlock();
+        }
 }
 
 int DataRecorder::Panel::startRecording(long long timestamp)
 {
 #ifdef DEBUG
-    if(!pthread_equal(pthread_self(),thread)) {
-        ERROR_MSG("DataRecorder::Panel::startRecording : called by invalid thread\n");
-        PRINT_BACKTRACE();
-    }
+    if(!pthread_equal(pthread_self(),thread))
+        {
+            ERROR_MSG("DataRecorder::Panel::startRecording : called by invalid thread\n");
+            PRINT_BACKTRACE();
+        }
 #endif
 
     size_t trial_num;
@@ -1229,22 +1374,26 @@ int DataRecorder::Panel::startRecording(long long timestamp)
 
     H5Eset_auto(H5E_DEFAULT, NULL, NULL);
 
-    for (trial_num = 1;; ++trial_num) {
-        trial_name = "/Trial" + QString::number(trial_num);
-        file.trial = H5Gopen(file.id, trial_name.toLatin1().constData(), H5P_DEFAULT);
+    for (trial_num = 1;; ++trial_num)
+        {
+            trial_name = "/Trial" + QString::number(trial_num);
+            file.trial = H5Gopen(file.id, trial_name.toLatin1().constData(), H5P_DEFAULT);
 
-        if (file.trial < 0) {
-            H5Eclear(H5E_DEFAULT);
-            break;
-        } else
-            H5Gclose(file.trial);
-    }
+            if (file.trial < 0)
+                {
+                    H5Eclear(H5E_DEFAULT);
+                    break;
+                }
+            else
+                H5Gclose(file.trial);
+        }
 
     trialNum->setNum(int(trial_num));
     file.trial = H5Gcreate(file.id, trial_name.toLatin1().constData(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     file.pdata = H5Gcreate(file.trial, "Parameters", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     file.adata = H5Gcreate(file.trial, "Asynchronous Data", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     file.sdata = H5Gcreate(file.trial, "Synchronous Data", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    file.sysdata = H5Gcreate(file.trial, "System Settings", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     hid_t scalar_space = H5Screate(H5S_SCALAR);
     hid_t string_type = H5Tcopy(H5T_C_S1);
@@ -1279,46 +1428,86 @@ int DataRecorder::Panel::startRecording(long long timestamp)
     H5Tinsert(param_type, "index", HOFFSET(param_hdf_t,index), H5T_STD_I64LE);
     H5Tinsert(param_type, "value", HOFFSET(param_hdf_t,value), H5T_IEEE_F64LE);
 
-    for (RT::List<Channel>::iterator i = channels.begin(), end = channels.end(); i != end; ++i) {
-        IO::Block *block = i->block;
-        for (size_t j = 0; j < block->getCount(Workspace::PARAMETER); ++j) {
-            QString parameter_name = QString::number(block->getID()) + " "
-                                     + QString::fromStdString(block->getName()) + " : " + QString::fromStdString(block->getName(Workspace::PARAMETER, j));
-            data = H5PTcreate_fl(file.pdata, parameter_name.toLatin1().constData(),	param_type, sizeof(param_hdf_t), -1);
-            struct param_hdf_t value = { 0, block->getValue(Workspace::PARAMETER, j),};
-            H5PTappend(data, 1, &value);
-            H5PTclose(data);
+    for (RT::List<Channel>::iterator i = channels.begin(), end = channels.end(); i != end; ++i)
+        {
+            IO::Block *block = i->block;
+            for (size_t j = 0; j < block->getCount(Workspace::PARAMETER); ++j)
+                {
+                    QString parameter_name = QString::number(block->getID()) + " "
+                                             + QString::fromStdString(block->getName()) + " : " + QString::fromStdString(block->getName(Workspace::PARAMETER, j));
+                    data = H5PTcreate_fl(file.pdata, parameter_name.toLatin1().constData(),	param_type, sizeof(param_hdf_t), -1);
+                    struct param_hdf_t value = { 0, block->getValue(Workspace::PARAMETER, j),};
+                    H5PTappend(data, 1, &value);
+                    H5PTclose(data);
+                }
+            for (size_t j = 0; j < block->getCount(Workspace::COMMENT); ++j)
+                {
+                    QString comment_name = QString::number(block->getID()) + " "
+                                           + QString::fromStdString(block->getName()) + " : " + QString::fromStdString(block->getName(Workspace::COMMENT, j));
+                    hsize_t	dims = dynamic_cast<Workspace::Instance *> (block)->getValueString(Workspace::COMMENT, j).size() + 1;
+                    hid_t comment_space = H5Screate_simple(1, &dims, &dims);
+                    data = H5Dcreate(file.pdata, comment_name.toLatin1().constData(), H5T_C_S1,	comment_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+                    H5Dwrite(data, H5T_C_S1, H5S_ALL, H5S_ALL, H5P_DEFAULT,	dynamic_cast<Workspace::Instance *> (block)->getValueString(Workspace::COMMENT, j).c_str());
+                    H5Dclose(data);
+                }
         }
-        for (size_t j = 0; j < block->getCount(Workspace::COMMENT); ++j) {
-            QString comment_name = QString::number(block->getID()) + " "
-                                   + QString::fromStdString(block->getName()) + " : " + QString::fromStdString(block->getName(Workspace::COMMENT, j));
-            hsize_t	dims = dynamic_cast<Workspace::Instance *> (block)->getValueString(Workspace::COMMENT, j).size() + 1;
-            hid_t comment_space = H5Screate_simple(1, &dims, &dims);
-            data = H5Dcreate(file.pdata, comment_name.toLatin1().constData(), H5T_C_S1,	comment_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-            H5Dwrite(data, H5T_C_S1, H5S_ALL, H5S_ALL, H5P_DEFAULT,	dynamic_cast<Workspace::Instance *> (block)->getValueString(Workspace::COMMENT, j).c_str());
-            H5Dclose(data);
-        }
-    }
 
     H5Tclose(param_type);
 
     size_t count = 0;
-    for (RT::List<Channel>::iterator i = channels.begin(), end = channels.end(); i != end; ++i) {
-        std::string rec_chan_name = std::to_string(++count) + ": " + i->name.toStdString();
-        hid_t data = H5Dcreate(file.sdata, rec_chan_name.c_str(), string_type, scalar_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-        H5Dwrite(data, string_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, rec_chan_name.c_str());
-        H5Dclose(data);
+    for (RT::List<Channel>::iterator i = channels.begin(), end = channels.end(); i != end; ++i)
+        {
+            std::string rec_chan_name = std::to_string(++count) + " " + i->name.toStdString();
+            hid_t data = H5Dcreate(file.sdata, rec_chan_name.c_str(), string_type, scalar_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+            H5Dwrite(data, string_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, rec_chan_name.c_str());
+            H5Dclose(data);
+        }
+
+    DAQ::Device *dev;
+    {
+        struct find_daq_t info = { 0, 0, };
+        DAQ::Manager::getInstance()->foreachDevice(findDAQDevice, &info);
+        dev = info.device;
     }
+
+				// Save channel configurations
+				if(dev)
+					for(size_t i=0; i<dev->getChannelCount(DAQ::AI); ++i)
+						if(dev->getChannelActive(DAQ::AI,static_cast<DAQ::index_t>(i)))
+						{
+							std::string chan_name = "Analog Channel " + std::to_string(i);
+							file.chandata = H5Gcreate(file.sysdata, chan_name.c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+							hid_t data = H5Dcreate(file.chandata, "Range", string_type, scalar_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+							H5Dwrite(data, string_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, dev->getAnalogRangeString(DAQ::AI,static_cast<DAQ::index_t>(i),dev->getAnalogRange(DAQ::AI,static_cast<DAQ::index_t>(i))).c_str());
+
+							data = H5Dcreate(file.chandata, "Reference", string_type, scalar_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+							H5Dwrite(data, string_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, dev->getAnalogReferenceString(DAQ::AI,static_cast<DAQ::index_t>(i),dev->getAnalogReference(DAQ::AI,static_cast<DAQ::index_t>(i))).c_str());
+
+							double scale = dev->getAnalogGain(DAQ::AI,static_cast<DAQ::index_t>(i));
+							data = H5Dcreate(file.chandata, "Gain", H5T_IEEE_F64LE, scalar_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+							H5Dwrite(data, H5T_IEEE_F64LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &scale); 
+
+							double offset = dev->getAnalogZeroOffset(DAQ::AI,static_cast<DAQ::index_t>(i));
+							data = H5Dcreate(file.chandata, "Offset", H5T_IEEE_F64LE, scalar_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+							H5Dwrite(data, H5T_IEEE_F64LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &offset); 
+
+							int downsample = dev->getAnalogDownsample(DAQ::AI,static_cast<DAQ::index_t>(i));
+							data = H5Dcreate(file.chandata, "Downsample", H5T_STD_I16LE, scalar_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+							H5Dwrite(data, H5T_STD_I16LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &downsample);
+							H5Dclose(data);
+						}
 
     H5Tclose(string_type);
     H5Sclose(scalar_space);
 
-    if (channels.size()) {
-        hsize_t array_size[] = { channels.size() };
-        hid_t array_type = H5Tarray_create(H5T_IEEE_F64LE, 1, array_size);
-        file.cdata = H5PTcreate_fl(file.sdata, "Channel Data", array_type, (hsize_t) 64, 1);
-        H5Tclose(array_type);
-    }
+    if (channels.size())
+        {
+            hsize_t array_size[] = { channels.size() };
+            hid_t array_type = H5Tarray_create(H5T_IEEE_F64LE, 1, array_size);
+            file.cdata = H5PTcreate_fl(file.sdata, "Channel Data", array_type, (hsize_t) 64, 1);
+            H5Tclose(array_type);
+        }
 
     file.idx = 0;
 
@@ -1328,10 +1517,11 @@ int DataRecorder::Panel::startRecording(long long timestamp)
 void DataRecorder::Panel::stopRecording(long long timestamp)
 {
 #ifdef DEBUG
-    if(!pthread_equal(pthread_self(),thread)) {
-        ERROR_MSG("DataRecorder::Panel::stopRecording : called by invalid thread\n");
-        PRINT_BACKTRACE();
-    }
+    if(!pthread_equal(pthread_self(),thread))
+        {
+            ERROR_MSG("DataRecorder::Panel::stopRecording : called by invalid thread\n");
+            PRINT_BACKTRACE();
+        }
 #endif
 
     // Write stop time to data file
@@ -1341,7 +1531,7 @@ void DataRecorder::Panel::stopRecording(long long timestamp)
     H5Dwrite(data, H5T_STD_U64LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &timestamp);
     H5Dclose(data);
 
-		// Write trial length to data file
+    // Write trial length to data file
     fixedcount = count;
     long long period = RT::System::getInstance()->getPeriod();
     long long datalength = period * fixedcount;
@@ -1350,43 +1540,24 @@ void DataRecorder::Panel::stopRecording(long long timestamp)
     H5Dwrite(data, H5T_STD_U64LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &datalength);
     H5Dclose(data);
 
-		// Write tags to data file
-    hid_t tag_type, tag_space;
-    herr_t status;
-    hsize_t dims[1] = {1};
-    tag_type = H5Tcreate(H5T_STRING, TAG_SIZE);
-    tag_space = H5Screate_simple(1, dims, NULL);
-
-		// Create group for tags
-		file.tdata = H5Gcreate(file.trial, "Tags", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-
-		// Iterate over vector (buffer) and put into data file
-		size_t i = 0;
-		for(std::vector<std::string>::iterator it = dataTags.begin(); it != dataTags.end(); ++it)
-		{
-			data = H5Dcreate(file.tdata, std::string("Tag " + std::to_string(i++)).c_str(), tag_type, tag_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-			status = H5Dwrite(data, tag_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, it->c_str());
-		}
-		dataTags.clear();
-
-		// Close all open structs
+    // Close all open structs
     H5Sclose(scalar_space);
-    H5Sclose(tag_space);
-    H5Tclose(tag_type);
     H5PTclose(file.cdata);
     H5Gclose(file.sdata);
     H5Gclose(file.pdata);
     H5Gclose(file.adata);
+    H5Gclose(file.sysdata);
+    H5Gclose(file.chandata);
     H5Gclose(file.trial);
-    H5Gclose(file.tdata);
 
     H5Fflush(file.id, H5F_SCOPE_LOCAL);
     void *file_handle;
     H5Fget_vfd_handle(file.id, H5P_DEFAULT, &file_handle);
-    if (fsync(*static_cast<int *> (file_handle))) {
-        DEBUG_MSG("DataRecorder::Panel::stopRecording : fsync failed, running sync\n");
-        sync();
-    }
+    if (fsync(*static_cast<int *> (file_handle)))
+        {
+            DEBUG_MSG("DataRecorder::Panel::stopRecording : fsync failed, running sync\n");
+            sync();
+        }
 }
 
 extern "C" Plugin::Object *createRTXIPlugin(void *)
@@ -1431,11 +1602,12 @@ void DataRecorder::Plugin::doDeferred(const Settings::Object::State &s)
 
 void DataRecorder::Plugin::doLoad(const Settings::Object::State &s)
 {
-    for (size_t i = 0; i < static_cast<size_t> (s.loadInteger("Num Panels")); ++i) {
-        Panel *panel = new Panel(MainWindow::getInstance()->centralWidget(), buffersize);
-        panelList.push_back(panel);
-        panel->load(s.loadState(QString::number(i).toStdString()));
-    }
+    for (size_t i = 0; i < static_cast<size_t> (s.loadInteger("Num Panels")); ++i)
+        {
+            Panel *panel = new Panel(MainWindow::getInstance()->centralWidget(), buffersize);
+            panelList.push_back(panel);
+            panel->load(s.loadState(QString::number(i).toStdString()));
+        }
 }
 
 void DataRecorder::Plugin::doSave(Settings::Object::State &s) const

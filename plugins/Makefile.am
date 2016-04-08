@@ -9,4 +9,5 @@ SUBDIRS = \
 	userprefs \
 	connector \
 	data_recorder \
-	oscilloscope
+	oscilloscope \
+	module_installer

@@ -39,7 +39,8 @@ private:
     CmdLine(void);
     ~CmdLine(void);
     CmdLine(const CmdLine &) {};
-    CmdLine &operator=(const CmdLine &) {
+    CmdLine &operator=(const CmdLine &)
+    {
         return *getInstance();
     };
 

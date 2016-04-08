@@ -69,20 +69,21 @@ Workspace::Instance::Instance(std::string name,Workspace::variable_t *d,size_t n
 {
     size_t count[] = { 0, 0, 0, 0 };
     for (size_t i=0; i<n; ++i)
-        switch (d[i].flags & (PARAMETER|STATE|EVENT|COMMENT)) {
-        case PARAMETER:
-            count[0]++;
-            break;
-        case STATE:
-            count[1]++;
-            break;
-        case EVENT:
-            count[2]++;
-            break;
-        case COMMENT:
-            count[3]++;
-            break;
-        }
+        switch (d[i].flags & (PARAMETER|STATE|EVENT|COMMENT))
+            {
+            case PARAMETER:
+                count[0]++;
+                break;
+            case STATE:
+                count[1]++;
+                break;
+            case EVENT:
+                count[2]++;
+                break;
+            case COMMENT:
+                count[3]++;
+                break;
+            }
 
     parameter = std::vector<var_t>(count[0]);
     state = std::vector<var_t>(count[1]);
@@ -90,34 +91,36 @@ Workspace::Instance::Instance(std::string name,Workspace::variable_t *d,size_t n
     comment = std::vector<comment_t>(count[3]);
 
     size_t i[] = { 0, 0, 0, 0 };
-    for (size_t j=0; j<n; ++j) {
-        switch (d[j].flags & (PARAMETER|STATE|EVENT|COMMENT)) {
-        case PARAMETER:
-            parameter[i[0]].name = d[j].name;
-            parameter[i[0]].description = d[j].description;
-            parameter[i[0]].data = new double;
-            i[0]++;
-            break;
-        case STATE:
-            state[i[1]].name = d[j].name;
-            state[i[1]].description = d[j].description;
-            state[i[1]].data = 0;
-            i[1]++;
-            break;
-        case EVENT:
-            event[i[2]].name = d[j].name;
-            event[i[2]].description = d[j].description;
-            event[i[2]].data = 0;
-            i[2]++;
-            break;
-        case COMMENT:
-            comment[i[3]].name = d[j].name;
-            comment[i[3]].description = d[j].description;
-            comment[i[3]].comment = "";
-            i[3]++;
-            break;
+    for (size_t j=0; j<n; ++j)
+        {
+            switch (d[j].flags & (PARAMETER|STATE|EVENT|COMMENT))
+                {
+                case PARAMETER:
+                    parameter[i[0]].name = d[j].name;
+                    parameter[i[0]].description = d[j].description;
+                    parameter[i[0]].data = new double;
+                    i[0]++;
+                    break;
+                case STATE:
+                    state[i[1]].name = d[j].name;
+                    state[i[1]].description = d[j].description;
+                    state[i[1]].data = 0;
+                    i[1]++;
+                    break;
+                case EVENT:
+                    event[i[2]].name = d[j].name;
+                    event[i[2]].description = d[j].description;
+                    event[i[2]].data = 0;
+                    i[2]++;
+                    break;
+                case COMMENT:
+                    comment[i[3]].name = d[j].name;
+                    comment[i[3]].description = d[j].description;
+                    comment[i[3]].comment = "";
+                    i[3]++;
+                    break;
+                }
         }
-    }
 
     Workspace::Manager::getInstance()->insertWorkspace(this);
 }
@@ -188,34 +191,36 @@ double Workspace::Instance::getValue(IO::flags_t type,size_t n) const
         return *state[n].data;
     if (type & EVENT && n < event.size() && event[n].data)
         return *event[n].data;
-    if (type & COMMENT && n < comment.size()) {
-        std::istringstream sstr(comment[n].comment);
-        double value;
-        sstr >> value;
-        return value;
-    }
+    if (type & COMMENT && n < comment.size())
+        {
+            std::istringstream sstr(comment[n].comment);
+            double value;
+            sstr >> value;
+            return value;
+        }
     return 0.0;
 }
 
 std::string Workspace::Instance::getValueString(IO::flags_t type,size_t n) const
 {
 
-    if (type & (INPUT | OUTPUT | PARAMETER | STATE | EVENT)) {
-        std::ostringstream value;
+    if (type & (INPUT | OUTPUT | PARAMETER | STATE | EVENT))
+        {
+            std::ostringstream value;
 
-        if (type & INPUT)
-            value << input(n);
-        if (type & OUTPUT)
-            value << output(n);
-        if (type & PARAMETER && n < parameter.size() && parameter[n].data)
-            value << *parameter[n].data;
-        if (type & STATE && n < state.size() && state[n].data)
-            value << *state[n].data;
-        if (type & EVENT && n < event.size() && event[n].data)
-            value << *event[n].data;
+            if (type & INPUT)
+                value << input(n);
+            if (type & OUTPUT)
+                value << output(n);
+            if (type & PARAMETER && n < parameter.size() && parameter[n].data)
+                value << *parameter[n].data;
+            if (type & STATE && n < state.size() && state[n].data)
+                value << *state[n].data;
+            if (type & EVENT && n < event.size() && event[n].data)
+                value << *event[n].data;
 
-        return value.str();
-    }
+            return value.str();
+        }
 
     if (type & COMMENT && n < comment.size())
         return comment[n].comment;
@@ -228,18 +233,21 @@ void Workspace::Instance::setValue(size_t n,double value)
     if (n >= parameter.size() || !parameter[n].data)
         return;
 
-    if (RT::OS::isRealtime() && *parameter[n].data != value) {
-        *parameter[n].data = value;
+    if (RT::OS::isRealtime() && *parameter[n].data != value)
+        {
+            *parameter[n].data = value;
 
-        ::Event::Object event(::Event::WORKSPACE_PARAMETER_CHANGE_EVENT);
-        event.setParam("object",(void *)getID());
-        event.setParam("index",(void *)n);
-        event.setParam("value",(void *)parameter[n].data);
-        ::Event::Manager::getInstance()->postEventRT(&event);
-    } else {
-        ParameterChangeEvent event(getID(),n,value,parameter[n].data);
-        RT::System::getInstance()->postEvent(&event);
-    }
+            ::Event::Object event(::Event::WORKSPACE_PARAMETER_CHANGE_EVENT);
+            event.setParam("object",(void *)getID());
+            event.setParam("index",(void *)n);
+            event.setParam("value",(void *)parameter[n].data);
+            ::Event::Manager::getInstance()->postEventRT(&event);
+        }
+    else
+        {
+            ParameterChangeEvent event(getID(),n,value,parameter[n].data);
+            RT::System::getInstance()->postEvent(&event);
+        }
 }
 
 void Workspace::Instance::setComment(size_t n,std::string newComment)
@@ -280,27 +288,30 @@ void Workspace::Manager::foreachWorkspace(void (*callback)(Workspace::Instance *
 
 void Workspace::Manager::insertWorkspace(Workspace::Instance *workspace)
 {
-    if (!workspace) {
-        ERROR_MSG("Workspace::Manager::insertWorkspace : invalid workspace\n");
-        return;
-    }
+    if (!workspace)
+        {
+            ERROR_MSG("Workspace::Manager::insertWorkspace : invalid workspace\n");
+            return;
+        }
 
     Mutex::Locker lock(&mutex);
 
-    if (std::find(instanceList.begin(),instanceList.end(),workspace) != instanceList.end()) {
-        ERROR_MSG("Workspace::Manager::insertWorkspace : workspace already present\n");
-        return;
-    }
+    if (std::find(instanceList.begin(),instanceList.end(),workspace) != instanceList.end())
+        {
+            ERROR_MSG("Workspace::Manager::insertWorkspace : workspace already present\n");
+            return;
+        }
 
     instanceList.push_back(workspace);
 }
 
 void Workspace::Manager::removeWorkspace(Workspace::Instance *workspace)
 {
-    if (!workspace) {
-        ERROR_MSG("Workspace::Manager::removeWorkspace : invalid workspace\n");
-        return;
-    }
+    if (!workspace)
+        {
+            ERROR_MSG("Workspace::Manager::removeWorkspace : invalid workspace\n");
+            return;
+        }
 
     Mutex::Locker lock(&mutex);
     instanceList.remove(workspace);
@@ -320,10 +331,11 @@ Workspace::Manager *Workspace::Manager::getInstance(void)
      *************************************************************************/
 
     Mutex::Locker lock(&::mutex);
-    if (!instance) {
-        static Manager manager;
-        instance = &manager;
-    }
+    if (!instance)
+        {
+            static Manager manager;
+            instance = &manager;
+        }
 
     return instance;
 }
