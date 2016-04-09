@@ -16,7 +16,7 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <analogy_device.h>
+#include <rtdm/analogy/device.h>
 #include <debug.h>
 #include <math.h>
 #include <sstream>
@@ -123,7 +123,7 @@ AnalogyDevice::AnalogyDevice(a4l_desc_t *d,std::string name,IO::channel_t *chan,
                 setAnalogRange(AO,i,0);
                 setAnalogReference(AO,i,0);
                 setAnalogUnits(AO,i,0);
-                setAnalogCalibrationValue(AO,i,0)
+                setAnalogCalibrationValue(AO,i,0);
             }
     } 
     else 
@@ -549,7 +549,8 @@ void AnalogyDevice::read(void)
 
     // Read only enabled digital channels one by one with mask for each bit
     for(size_t i=0; i < subdevice[DIO].count; ++i)
-        if(subdevice[DIO].chan[i].active && subdevice[DIO].chan[i].digital.direction == DAQ::INPUT) {
+        if(subdevice[DIO].chan[i].active && subdevice[DIO].chan[i].digital.direction == DAQ::INPUT) 
+        {
             mask = (1<<i);
             output(i+offset) = (data & mask) == 0 ? 0 : 5;
         }
@@ -569,7 +570,7 @@ void AnalogyDevice::write(void)
             if(subdevice[AO].chan[i].active) 
             {
                 channel = &subdevice[AO].chan[i].analog;
-                value = round(channel->gain*channel->conv*(input(i)-channel->zerooffset)+channel->offset);
+                value = round(channel->gain * channel->conv * (input(i) - channel->zerooffset) + channel->offset - channel->calOffset);
 
                 // Prevent wrap around in the data units.
                 if(value > channel->maxdata)
@@ -581,18 +582,18 @@ void AnalogyDevice::write(void)
                 // Get anaolgy reference
                 switch (channel->reference) 
                 {
-                case 0:
-                    ref = A4L_CHAN_AREF_GROUND;
-                    break;
-                case 1:
-                    ref = A4L_CHAN_AREF_COMMON;
-                    break;
-                case 2:
-                    ref = A4L_CHAN_AREF_DIFF;
-                    break;
-                case 3:
-                    ref = A4L_CHAN_AREF_OTHER;
-                    break;
+                    case 0:
+                        ref = A4L_CHAN_AREF_GROUND;
+                        break;
+                    case 1:
+                        ref = A4L_CHAN_AREF_COMMON;
+                        break;
+                    case 2:
+                        ref = A4L_CHAN_AREF_DIFF;
+                        break;
+                    case 3:
+                        ref = A4L_CHAN_AREF_OTHER;
+                        break;
                 }
                 // Get channel size
                 a4l_get_chinfo(&dsc, subdevice[AO].id, i, &chinfo);
@@ -610,9 +611,11 @@ void AnalogyDevice::write(void)
         unsigned int data = 0, mask = 0;
 
         // Create mask and data buffer with bits to be set
-        for(size_t i=0; i < subdevice[DIO].count; ++i) {
+        for(size_t i=0; i < subdevice[DIO].count; ++i) 
+        {
             value = input(i+offset) != 0.0;
-            if(subdevice[DIO].chan[i].active && subdevice[DIO].chan[i].digital.direction == DAQ::OUTPUT && subdevice[DIO].chan[i].digital.previous_value != value) {
+            if(subdevice[DIO].chan[i].active && subdevice[DIO].chan[i].digital.direction == DAQ::OUTPUT && subdevice[DIO].chan[i].digital.previous_value != value) 
+            {
                 subdevice[DIO].chan[i].digital.previous_value = value;
                 data |= value == 0 ? (0<<i) : (1<<i); // Toggle the i-th bit for modification (set 0 or 1)
                 mask |= (1<<i); // Set i-th bit to specify channels to modify

@@ -15,8 +15,9 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-#include <analogy_device.h>
-#include <analogy_driver.h>
+
+#include <rtdm/analogy/device.h>
+#include <rtdm/analogy/driver.h>
 #include <debug.h>
 #include <sstream>
 
