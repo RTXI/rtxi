@@ -98,8 +98,6 @@ void sigdebug_handler(int sig, siginfo_t *si, void *context)
 
 int RT::OS::initiate(void)
 {
-    rt_timer_set_mode(TM_ONESHOT);
-
     /**************************************************************************************
      * On some systems like Fedora Core 4 the memory footprint for rtxi exceeds the mlock *
      *   limit allowed by the linux kernel. As root this limit can be removed with a call *
@@ -148,7 +146,7 @@ int RT::OS::createTask(RT::OS::Task *task,void *(*entry)(void *),void *arg,int p
     if ((prio >=0) && (prio <=99))
         priority -= prio;
 
-    if ((retval = rt_task_create(&t->task,"RTXI RT Thread",0,priority,T_FPU|T_JOINABLE))) { //delete T_FPU?
+    if ((retval = rt_task_create(&t->task,"RTXI RT Thread",0,priority,T_JOINABLE))) {
         ERROR_MSG("RT::OS::createTask : failed to create task\n");
         return retval;
     }
@@ -181,7 +179,7 @@ bool RT::OS::isRealtime(void)
 
 long long RT::OS::getTime(void)
 {
-    return rt_timer_read(); //t_timerrt_timer_tsc2ns(rt_timer_tsc());
+    return rt_timer_read(); 
 }
 
 int RT::OS::setPeriod(RT::OS::Task task,long long period)
