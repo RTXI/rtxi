@@ -1,4 +1,4 @@
-#!/bin/bash
+#! /bin/bash
 
 #
 # The Real-Time eXperiment Interface (RTXI)
@@ -25,6 +25,8 @@ DIR=$PWD
 ROOT=${DIR}/..
 RTXI_LIB=/usr/local/lib/rtxi
 QWT_LIB=/usr/local/lib/qwt
+QWT_LIB2=/usr/local/qwt-6.1.2
+QWT_LIB3=/usr/lib/libqwt-* # not too proud of this line...
 RTXI_INC_LIB=/usr/local/lib/rtxi_includes
 RTXI_INC=/usr/local/include/rtxi
 RTXI_BIN=/usr/local/bin/rtxi*
@@ -33,26 +35,22 @@ ETC=/etc/rtxi.conf
 
 cd ${ROOT}
 
-# Uninstall rtxi
+# Uninstall RTXI and QWT files. 
 sudo make uninstall
 sudo make clean
 sudo rm -rf ${RTXI_LIB}
 sudo rm -rf ${QWT_LIB}
+sudo rm -rf ${QWT_LIB2}
+sudo rm -rf ${QWT_LIB3}
 sudo rm -rf ${RTXI_INC_LIB}
 sudo rm -rf ${RTXI_INC}
 sudo rm -rf ${RTXI_BIN}
 sudo rm -rf ${RTXI_SHARE}
 sudo rm -rf ${ETC}
 
-# Remove old qt/qwt installations
-if [ $(dpkg-query -W -f='${Status}' qt4-dev-tools 2>/dev/null | grep -c "ok installed") -eq 1 ];
-then
-sudo apt-get purge libqt4-* qt4-*
-fi
-
 if [ $? -eq 0 ]; then
-	echo "----->RTXI intallation successful. Reboot may be required."
+	echo "----->RTXI removed. Reboot may be required."
 else
-	echo "----->RTXI installation failed."
+	echo "----->RTXI uninstallation failed."
 	exit
 fi
