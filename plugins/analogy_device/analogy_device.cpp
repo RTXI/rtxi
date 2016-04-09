@@ -21,6 +21,11 @@
 #include <math.h>
 #include <sstream>
 
+#define A4L_CHAN_AREF_GROUND 0x1; 
+#define A4L_CHAN_AREF_COMMON 0x2; 
+#define A4L_CHAN_AREF_DIFF   0x4; 
+#define A4L_CHAN_AREF_OTHER  0x8; 
+
 using namespace DAQ;
 
 AnalogyDevice::AnalogyDevice(a4l_desc_t *d,std::string name,IO::channel_t *chan,size_t size) : DAQ::Device(name,chan,size), dsc(*d)
