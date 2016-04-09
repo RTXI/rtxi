@@ -16,8 +16,8 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <rtdm/analogy/device.h>
-#include <rtdm/analogy/driver.h>
+#include <analogy_device.h>
+#include <analogy_driver.h>
 #include <debug.h>
 #include <sstream>
 
