@@ -20,9 +20,7 @@
 #	Created by Yogi Patel <yapatel@gatech.edu> 2014.1.31
 #
 
-# Directories
-DIR=$PWD
-ROOT=${DIR}/..
+# Set directories to remove. 
 RTXI_LIB=/usr/local/lib/rtxi
 QWT_LIB=/usr/local/lib/qwt
 QWT_LIB2=/usr/local/qwt-6.1.2
@@ -32,8 +30,6 @@ RTXI_INC=/usr/local/include/rtxi
 RTXI_BIN=/usr/local/bin/rtxi*
 RTXI_SHARE=/usr/local/share/rtxi
 ETC=/etc/rtxi.conf
-
-cd ${ROOT}
 
 # Uninstall RTXI and QWT files. 
 sudo make uninstall
