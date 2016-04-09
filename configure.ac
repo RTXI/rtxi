@@ -73,8 +73,8 @@ if test x$rtos = xxenomai; then
   else
     XENO_CONFIG=`which xeno-config`
   fi
-  RTOS_CPPFLAGS=`$XENO_CONFIG --alchemy --cobalt --rtdm --cflags`
-  RTOS_LDFLAGS=`$XENO_CONFIG --alchemy --cobalt --rtdm --ldflags`
+  RTOS_CPPFLAGS=`$XENO_CONFIG --alchemy --cflags`
+  RTOS_LDFLAGS=`$XENO_CONFIG --alchemy --ldflags`
 elif test x$rtos = xposix; then
   RTOS_CPPFLAGS='-I/usr/local/include'
   RTOS_LDFLAGS='-I/usr/local/include -L/usr/local/lib -lpthread'
