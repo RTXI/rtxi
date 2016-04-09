@@ -1,4 +1,4 @@
-#!/bin/bash
+#! /bin/bash
 
 #
 # The Real-Time eXperiment Interface (RTXI)
@@ -22,15 +22,15 @@
 
 if ! id | grep -q root; then
   echo "Must run script as root; try again with sudo ./install_rt_kernel.sh"
-	exit
+  exit
 fi
 
 # Export environment variables
 echo  "----->Setting up variables"
-export linux_version=3.18.20
+export linux_version=4.1.18
 export linux_tree=/opt/linux-$linux_version
 
-export xenomai_version=3.0.1
+export xenomai_version = 3.0.2
 export xenomai_root=/opt/xenomai-$xenomai_version
 
 export scripts_dir=`pwd`
@@ -50,11 +50,19 @@ else
 	exit
 fi
 
-# Download essentials
+# Download and extract a vanilla Linux kernel and Xenomai 
 echo  "----->Downloading Linux kernel"
 cd $opt
-wget --no-check-certificate https://www.kernel.org/pub/linux/kernel/v3.x/linux-$linux_version.tar.gz
-tar xf linux-$linux_version.tar.gz
+if [[ "$linux_version" =~ "3." ]]; then 
+	wget --no-check-certificate https://www.kernel.org/pub/linux/kernel/v3.x/linux-$linux_version.tar.xz
+elif [[ "$linux_version" =~ "4." ]]; then
+	wget --no-check-certificate https://www.kernel.org/pub/linux/kernel/v4.x/linux-$linux_version.tar.xz
+else
+	echo "Kernel specified in the \$linux_version variable needs to be 3.x or 4.x"
+	exit 1
+fi
+
+tar xf linux-$linux_version.tar.xz
 
 echo  "----->Downloading Xenomai"
 wget --no-check-certificate http://xenomai.org/downloads/xenomai/stable/xenomai-$xenomai_version.tar.bz2
@@ -70,7 +78,7 @@ fi
 # Patch kernel
 echo  "----->Patching kernel"
 cd $linux_tree
-$xenomai_root/scripts/prepare-kernel.sh --arch=x86 --adeos=$xenomai_root/kernel/cobalt/arch/x86/patches/ipipe-core-3.18.20-x86-3.patch --linux=$linux_tree
+$xenomai_root/scripts/prepare-kernel.sh --arch=x86 --adeos=$xenomai_root/kernel/cobalt/arch/x86/patches/ipipe-core-$linux_version-x86-?.patch --linux=$linux_tree
 yes "" | make localmodconfig
 make menuconfig
 
@@ -84,7 +92,7 @@ fi
 # Compile kernel
 echo  "----->Compiling kernel"
 cd $linux_tree
-export CONCURRENCY_LEVEL=$(grep -c ^processor /proc/cpuinfo)
+export CONCURRENCY_LEVEL=$(nproc)
 fakeroot make-kpkg --initrd --append-to-version=-xenomai-$xenomai_version --revision $(date +%Y%m%d) kernel-image kernel-headers modules
 
 if [ $? -eq 0 ]; then
@@ -120,8 +128,11 @@ else
 	exit
 fi
 
-# Install user libraries
+# Install Xenomai libraries
 echo  "----->Installing user libraries"
+if [ -d "/usr/xenomai" ]; then
+	mv /usr/xenomai /usr/xenomai-$(date +%F_%T)
+fi
 cd $build_root
 $xenomai_root/configure --with-core=cobalt --enable-pshared --enable-smp --enable-x86-vsyscall --enable-dlopen-libs
 make -s
@@ -134,10 +145,11 @@ else
 	exit
 fi
 
-# Setting up user permissions
+# Setting up user permissions. You may want to revisit this section, as the 
+# user that runs this script is technically root. 
 echo  "----->Setting up user/group"
 sudo groupadd xenomai
-sudo usermod -a -G xenomai `whoami`
+sudo usermod -aG xenomai `whoami`
 
 if [ $? -eq 0 ]; then
 	echo  "----->Group setup complete"
@@ -146,6 +158,6 @@ else
 	exit
 fi
 
-# Restart
+# (Tell them to) restart
 echo  "----->Kernel patch complete."
 echo  "----->Reboot to boot into RT kernel."
