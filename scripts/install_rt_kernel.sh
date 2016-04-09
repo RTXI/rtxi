@@ -30,7 +30,7 @@ echo  "----->Setting up variables"
 export linux_version=4.1.18
 export linux_tree=/opt/linux-$linux_version
 
-export xenomai_version = 3.0.2
+export xenomai_version=3.0.2
 export xenomai_root=/opt/xenomai-$xenomai_version
 
 export scripts_dir=`pwd`
