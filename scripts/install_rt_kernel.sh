@@ -97,8 +97,8 @@ fi
 # Install compiled kernel
 echo  "----->Installing compiled kernel"
 cd $opt
-sudo dpkg -i linux-image-*.deb
-sudo dpkg -i linux-headers-*.deb
+sudo dpkg -i linux-image-$linux_version-xenomai-$xenomai_version*.deb
+sudo dpkg -i linux-headers-$linux_version-xenomai-$xenomai_version*.deb
 
 if [ $? -eq 0 ]; then
 	echo  "----->Kernel installation complete"
