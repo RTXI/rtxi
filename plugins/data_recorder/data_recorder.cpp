@@ -1318,6 +1318,8 @@ void DataRecorder::Panel::closeFile(bool shutdown)
         }
 #endif
 
+				if(!dataTags.empty())
+				{
     // Write tags to data file
     hid_t tag_type, tag_space, data;
     herr_t status;
@@ -1342,6 +1344,7 @@ void DataRecorder::Panel::closeFile(bool shutdown)
     H5Sclose(tag_space);
     H5Tclose(tag_type);
     H5Gclose(file.tdata);
+				}
 
     // Close file
     H5Fclose(file.id);
