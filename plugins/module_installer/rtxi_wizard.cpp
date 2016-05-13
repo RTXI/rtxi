@@ -411,7 +411,7 @@ void RTXIWizard::Panel::parseRepos(void)
 	QString locationPrefix;
 	if (getuid())
 	{
-		locationPrefix = QString(getenv("HOME")) +  "/.config/rtxi/";
+		locationPrefix = QString(getenv("HOME")) +  "/.config/RTXI/";
 	}
 	else
 	{
@@ -469,7 +469,7 @@ void RTXIWizard::Panel::installFromString( std::string module_name )
 	std::string locationUrl;
 	if (getuid())
 	{
-		locationUrl = std::string(getenv("HOME")) +  "/.config/rtxi/" + module_name;
+		locationUrl = std::string(getenv("HOME")) +  "/.config/RTXI/" + module_name;
 	}
 	else
 	{
