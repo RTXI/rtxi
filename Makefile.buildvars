@@ -33,7 +33,7 @@ QT_CXXFLAGS = $(shell pkg-config --cflags \
               -I/usr/include/qwt \
               -I/usr/local/qwt-$(QWT_VERSION) \
               -I/usr/local/qwt-$(QWT_VERSION)/include \
-              -I/usr/local/lib/rtxi_includes
+              -I/usr/local/lib/rtxi_includes $(QT_DEFINES)
                
 QT_LIBS = $(shell pkg-config --libs \
             Qt5Core Qt5Gui Qt5OpenGL Qt5PrintSupport Qt5Xml Qt5Widgets \
