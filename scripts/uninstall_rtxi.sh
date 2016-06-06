@@ -28,6 +28,7 @@ QWT_LIB=/usr/local/lib/qwt
 QWT_LIB2=/usr/local/qwt-6.1.2
 QWT_LIB3=/usr/lib/libqwt-* # not too proud of this line...
 RTXI_INC_LIB=/usr/local/lib/rtxi_includes
+RTXI_INC_MOD=/usr/local/lib/rtxi_modules
 RTXI_INC=/usr/local/include/rtxi
 RTXI_BIN=/usr/local/bin/rtxi*
 RTXI_SHARE=/usr/local/share/rtxi
@@ -43,6 +44,7 @@ sudo rm -rf ${QWT_LIB}
 sudo rm -rf ${QWT_LIB2}
 sudo rm -rf ${QWT_LIB3}
 sudo rm -rf ${RTXI_INC_LIB}
+sudo rm -rf ${RTXI_INC_MOD}
 sudo rm -rf ${RTXI_INC}
 sudo rm -rf ${RTXI_BIN}
 sudo rm -rf ${RTXI_SHARE}
