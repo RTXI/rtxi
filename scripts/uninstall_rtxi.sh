@@ -32,6 +32,7 @@ RTXI_INC_MOD=/usr/local/lib/rtxi_modules
 RTXI_INC=/usr/local/include/rtxi
 RTXI_BIN=/usr/local/bin/rtxi*
 RTXI_SHARE=/usr/local/share/rtxi
+RTXI_APP=/usr/share/applications/rtxi.desktop
 ETC=/etc/rtxi.conf
 
 cd ${ROOT}
@@ -48,6 +49,7 @@ sudo rm -rf ${RTXI_INC_MOD}
 sudo rm -rf ${RTXI_INC}
 sudo rm -rf ${RTXI_BIN}
 sudo rm -rf ${RTXI_SHARE}
+sudo rm -rf ${RTXI_APP}
 sudo rm -rf ${ETC}
 
 if [ $? -eq 0 ]; then
