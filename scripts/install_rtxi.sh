@@ -75,6 +75,7 @@ echo "----->Putting things into place."
 sudo mkdir -p ${RTXI_LIB}
 sudo cp -f libtool ${RTXI_LIB}
 sudo cp -f scripts/icons/RTXI-icon.png ${RTXI_LIB}
+sudo cp -f scripts/icons/RTXI-icon.svg ${RTXI_LIB}
 sudo cp -f scripts/icons/RTXI-widget-icon.png ${RTXI_LIB}
 sudo cp -f scripts/rtxi.desktop /usr/share/applications/
 sudo cp -f scripts/update_rtxi.sh /usr/local/share/rtxi/.
