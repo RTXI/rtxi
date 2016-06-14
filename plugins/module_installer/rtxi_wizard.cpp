@@ -200,11 +200,15 @@ void RTXIWizard::Panel::cloneModule(void)
 #else
 		error = error | git_remote_load(&remote, repo, "origin");
 #endif
-		error = error | git_remote_connect(remote, GIT_DIRECTION_FETCH);
-#if LIBGIT2_SOVERSION >= 22
-		error = error | git_remote_download(remote, NULL);
+#if LIBGIT2_SOVERSION >= 24
+		error = error | git_remote_connect(remote, GIT_DIRECTION_FETCH, NULL, NULL);
 #else
+		error = error | git_remote_connect(remote, GIT_DIRECTION_FETCH);
+#endif
+#if LIBGIT2_SOVERSION >= 24
 		error = error | git_remote_download(remote, NULL, NULL);
+#else
+		error = error | git_remote_download(remote, NULL);
 #endif
 
 		git_remote_disconnect(remote);
@@ -482,11 +486,15 @@ void RTXIWizard::Panel::installFromString( std::string module_name )
 #else
 		error = error | git_remote_load(&remote, repo, "origin");
 #endif
-		error = error | git_remote_connect(remote, GIT_DIRECTION_FETCH);
-#if LIBGIT2_SOVERSION >= 22
-		error = error | git_remote_download(remote, NULL);
+#if LIBGIT2_SOVERSION >= 24
+		error = error | git_remote_connect(remote, GIT_DIRECTION_FETCH, NULL, NULL);
 #else
+		error = error | git_remote_connect(remote, GIT_DIRECTION_FETCH);
+#endif
+#if LIBGIT2_SOVERSION >= 24
 		error = error | git_remote_download(remote, NULL, NULL);
+#else
+		error = error | git_remote_download(remote, NULL);
 #endif
 
 		git_remote_disconnect(remote);

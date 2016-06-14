@@ -118,7 +118,7 @@ fi
 # Update
 echo  "----->Updating boot loader about the new kernel"
 cd $linux_tree
-sudo update-initramfs -c -k $linux_version-xenomai-$xenomai_version
+sudo update-initramfs -u -k all
 sudo update-grub
 
 if [ $? -eq 0 ]; then
