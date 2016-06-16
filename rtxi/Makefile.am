@@ -6,7 +6,7 @@ include $(top_srcdir)/Makefile.buildvars
 
 bin_PROGRAMS = rtxi
 
-LIBS = -rdynamic
+LIBS = -rdynamic -fPIC
 
 pkginclude_HEADERS = \
 		$(top_srcdir)/include/atomic_fifo.h \

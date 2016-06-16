@@ -42,6 +42,9 @@ AC_CHECK_LIB([hdf5_hl],[H5PTopen])
 HDF_LIBS=$LIBS
 AC_SUBST(HDF_LIBS)
 
+# Quiet ar warning about default modifiers
+AC_SUBST(AR_FLAGS, [cr])
+
 rtos=""
 
 AX_BOOST_BASE([1.54],,[AC_MSG_ERROR([libboost version 1.54 or great is required])])
