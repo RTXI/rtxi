@@ -34,6 +34,9 @@ PLG=${ROOT}/plugins
 # Some easy to use defines
 ###############################################################################
 QWT_VERSION=6.1.2
+OS=$(lsb_release -si)
+ARCH=$(uname -m | sed 's/x86_//;s/i[3-6]86/32/')
+OS_VER=$(lsb_release -sr)
 
 ###############################################################################
 # Check for all RTXI *.deb dependencies and install them. Includes:
@@ -63,54 +66,62 @@ fi
 # Start at top
 cd ${DEPS}
 
-# Installing HDF5
 echo "----->Checking for HDF5"
-
-if [ -f "/usr/include/hdf5.h" ]; then
-	echo "----->HDF5 already installed."
+if [ ${OS_VER} == '16.04' ]; then
+	sudo apt-get install libhdf5-dev
 else
-	echo "----->Installing HDF5..."
-	cd ${HDF}
-	tar xf hdf5-1.8.4.tar.bz2
-	cd hdf5-1.8.4
-	./configure --prefix=/usr
-	make -sj2
-	sudo make install
-	if [ $? -eq 0 ]; then
-			echo "----->HDF5 installed."
+	if [ -f "/usr/include/hdf5.h" ]; then
+		echo "----->HDF5 already installed."
 	else
-		echo "----->HDF5 installation failed."
-		exit
+		echo "----->Installing HDF5..."
+		cd ${HDF}
+		tar xf hdf5-1.8.4.tar.bz2
+		cd hdf5-1.8.4
+		./configure --prefix=/usr
+		make -sj2
+		sudo make install
+		if [ $? -eq 0 ]; then
+			echo "----->HDF5 installed."
+		else
+			echo "----->HDF5 installation failed."
+			exit
+		fi
 	fi
 fi
 
 # Installing Qwt
 echo "----->Checking for Qwt"
-
-if [ -f "/usr/local/qwt-${QWT_VERSION}/include/qwt.h" ]; then
-	echo "----->Qwt already installed."
+if [ ${OS_VER} == '16.04' ]; then
+	sudo apt-get install libqwt-qt5-6
 else
-	echo "----->Installing Qwt..."
-	cd ${QWT}
-	tar xf qwt-${QWT_VERSION}.tar.bz2
-	cd qwt-${QWT_VERSION}
-	qmake qwt.pro
-	make -sj2
-	sudo make install
-	sudo cp -vf /usr/local/qwt-${QWT_VERSION}/lib/libqwt.so.6.1.2 /usr/lib/.
-	sudo ln -sf /usr/lib/libqwt.so.${QWT_VERSION} /usr/lib/libqwt.so
-	sudo ldconfig
-	if [ $? -eq 0 ]; then
-		echo "----->Qwt installed."
+	if [ -f "/usr/local/qwt-${QWT_VERSION}/include/qwt.h" ]; then
+		echo "----->Qwt already installed."
 	else
-		echo "----->Qwt installation failed."
-	exit
+		echo "----->Installing Qwt..."
+		cd ${QWT}
+		tar xf qwt-${QWT_VERSION}.tar.bz2
+		cd qwt-${QWT_VERSION}
+		qmake qwt.pro
+		make -sj2
+		sudo make install
+		sudo cp -vf /usr/local/qwt-${QWT_VERSION}/lib/libqwt.so.6.1.2 /usr/lib/.
+		sudo ln -sf /usr/lib/libqwt.so.${QWT_VERSION} /usr/lib/libqwt.so
+		sudo ldconfig
+		if [ $? -eq 0 ]; then
+			echo "----->Qwt installed."
+		else
+			echo "----->Qwt installation failed."
+			exit
+		fi
 	fi
 fi
 
 # (Re)install rtxi_includes. Remove the moc files first. Failing to do so when 
 # upgrading from Qt4 to Qt5 will cause compilation errors later on. 
-[ -d /usr/local/lib/rtxi_includes ] && sudo rm -r /usr/local/lib/rtxi_includes/moc_*
+if [ -e /usr/local/lib/rtxi_includes/moc_* ]; then
+	sudo rm -r /usr/local/lib/rtxi_includes/moc_*
+fi
+
 sudo rsync -a ${DEPS}/rtxi_includes /usr/local/lib/.
 if [ $? -eq 0 ]; then
 	echo "----->rtxi_includes synced."
