@@ -67,58 +67,50 @@ fi
 cd ${DEPS}
 
 echo "----->Checking for HDF5"
-if [ ${OS_VER} == '16.04' ]; then
-	sudo apt-get install libhdf5-dev
+if [ -f "/usr/include/hdf5.h" ]; then
+	echo "----->HDF5 already installed."
 else
-	if [ -f "/usr/include/hdf5.h" ]; then
-		echo "----->HDF5 already installed."
+	echo "----->Installing HDF5..."
+	cd ${HDF}
+	tar xf hdf5-1.8.4.tar.bz2
+	cd hdf5-1.8.4
+	./configure --prefix=/usr
+	make -sj2
+	sudo make install
+	if [ $? -eq 0 ]; then
+		echo "----->HDF5 installed."
 	else
-		echo "----->Installing HDF5..."
-		cd ${HDF}
-		tar xf hdf5-1.8.4.tar.bz2
-		cd hdf5-1.8.4
-		./configure --prefix=/usr
-		make -sj2
-		sudo make install
-		if [ $? -eq 0 ]; then
-			echo "----->HDF5 installed."
-		else
-			echo "----->HDF5 installation failed."
-			exit
-		fi
+		echo "----->HDF5 installation failed."
+		exit
 	fi
 fi
 
 # Installing Qwt
 echo "----->Checking for Qwt"
-if [ ${OS_VER} == '16.04' ]; then
-	sudo apt-get install libqwt-qt5-6
+if [ -f "/usr/local/qwt-${QWT_VERSION}/include/qwt.h" ]; then
+	echo "----->Qwt already installed."
 else
-	if [ -f "/usr/local/qwt-${QWT_VERSION}/include/qwt.h" ]; then
-		echo "----->Qwt already installed."
+	echo "----->Installing Qwt..."
+	cd ${QWT}
+	tar xf qwt-${QWT_VERSION}.tar.bz2
+	cd qwt-${QWT_VERSION}
+	qmake qwt.pro
+	make -sj2
+	sudo make install
+	sudo cp -vf /usr/local/qwt-${QWT_VERSION}/lib/libqwt.so.6.1.2 /usr/lib/.
+	sudo ln -sf /usr/lib/libqwt.so.${QWT_VERSION} /usr/lib/libqwt.so
+	sudo ldconfig
+	if [ $? -eq 0 ]; then
+		echo "----->Qwt installed."
 	else
-		echo "----->Installing Qwt..."
-		cd ${QWT}
-		tar xf qwt-${QWT_VERSION}.tar.bz2
-		cd qwt-${QWT_VERSION}
-		qmake qwt.pro
-		make -sj2
-		sudo make install
-		sudo cp -vf /usr/local/qwt-${QWT_VERSION}/lib/libqwt.so.6.1.2 /usr/lib/.
-		sudo ln -sf /usr/lib/libqwt.so.${QWT_VERSION} /usr/lib/libqwt.so
-		sudo ldconfig
-		if [ $? -eq 0 ]; then
-			echo "----->Qwt installed."
-		else
-			echo "----->Qwt installation failed."
-			exit
-		fi
+		echo "----->Qwt installation failed."
+		exit
 	fi
 fi
 
 # (Re)install rtxi_includes. Remove the moc files first. Failing to do so when 
 # upgrading from Qt4 to Qt5 will cause compilation errors later on. 
-if [ -e /usr/local/lib/rtxi_includes/moc_* ]; then
+if ls /usr/local/lib/rtxi_includes/moc_* 1> /dev/null 2>&1; then
 	sudo rm -r /usr/local/lib/rtxi_includes/moc_*
 fi
 
