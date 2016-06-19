@@ -45,6 +45,7 @@ namespace RTXIWizard
 
 		private:
 			void initParameters(void);
+			int printGitError(int);
 			enum button_mode_t {DOWNLOAD, UPDATE } button_mode;
 
 			QMdiSubWindow *subWindow;

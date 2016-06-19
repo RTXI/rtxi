@@ -112,6 +112,10 @@ fi
 # upgrading from Qt4 to Qt5 will cause compilation errors later on. 
 [ -d /usr/local/lib/rtxi_includes ] && sudo rm -r /usr/local/lib/rtxi_includes/moc_*
 sudo rsync -a ${DEPS}/rtxi_includes /usr/local/lib/.
+
+# Allow all members of adm (administrator accounts) write access to the 
+# rtxi_includes/ directory. 
+sudo setfacl -Rm g:adm:rwX,d:g:adm:rwX /usr/local/lib/rtxi_includes
 if [ $? -eq 0 ]; then
 	echo "----->rtxi_includes synced."
 else

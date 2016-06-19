@@ -4,6 +4,6 @@ Categories=Utility;Science
 Name=RTXI
 Exec=gksudo /usr/local/bin/rtxi
 MimeType=image/x-mydata;
-Icon=/usr/local/lib/rtxi/RTXI-icon.png
+Icon=/usr/local/lib/rtxi/RTXI-icon.svg
 Terminal=false
 Comment=The Real-Time eXperiment Interface

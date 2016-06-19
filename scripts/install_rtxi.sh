@@ -75,6 +75,7 @@ echo "----->Putting things into place."
 sudo mkdir -p ${RTXI_LIB}
 sudo cp -f libtool ${RTXI_LIB}
 sudo cp -f scripts/icons/RTXI-icon.png ${RTXI_LIB}
+sudo cp -f scripts/icons/RTXI-icon.svg ${RTXI_LIB}
 sudo cp -f scripts/icons/RTXI-widget-icon.png ${RTXI_LIB}
 sudo cp -f scripts/rtxi.desktop /usr/share/applications/
 sudo cp -f scripts/update_rtxi.sh /usr/local/share/rtxi/.
@@ -83,7 +84,7 @@ chmod +x ~/Desktop/rtxi.desktop
 sudo cp -f rtxi.conf /etc/
 sudo cp -f /usr/xenomai/sbin/analogy_config /usr/sbin/
 
-if [ $(lsb_release -sc) == "jessie" ]; then
+if [ $(lsb_release -sc) == "jessie" ] || [ $(lsb_release -sc) == "xenial" ]; then
 	echo "----->Load analogy driver with systemd"
 	sudo cp -f ./scripts/services/rtxi_load_analogy.service /etc/systemd/system/
 	sudo systemctl enable rtxi_load_analogy.service
@@ -104,22 +105,27 @@ fi
 # TEMPORARY WORKAROUND
 echo "----->Installing basic modules."
 sudo mkdir -p ${MODS}
+
+# Allow all members of adm (administrator accounts) write access to the 
+# rtxi_modules/ directory. 
+sudo setfacl -Rm g:adm:rwX,d:g:adm:rwX ${MODS}
+
 cd ${MODS}
-sudo git clone https://github.com/RTXI/analysis-tools.git
-sudo git clone https://github.com/RTXI/iir-filter.git
-sudo git clone https://github.com/RTXI/fir-window.git
-sudo git clone https://github.com/RTXI/sync.git
-sudo git clone https://github.com/RTXI/mimic-signal.git
-sudo git clone https://github.com/RTXI/signal-generator.git
-sudo git clone https://github.com/RTXI/ttl-pulses.git
-sudo git clone https://github.com/RTXI/wave-maker.git
-sudo git clone https://github.com/RTXI/noise-generator.git
+git clone https://github.com/RTXI/analysis-tools.git
+git clone https://github.com/RTXI/iir-filter.git
+git clone https://github.com/RTXI/fir-window.git
+git clone https://github.com/RTXI/sync.git
+git clone https://github.com/RTXI/mimic-signal.git
+git clone https://github.com/RTXI/signal-generator.git
+git clone https://github.com/RTXI/ttl-pulses.git
+git clone https://github.com/RTXI/wave-maker.git
+git clone https://github.com/RTXI/noise-generator.git
 
 for dir in ${MODS}/*; do
 	if [ -d "$dir" ]; then
-		sudo make clean -C "$dir"
-		sudo git -C "$dir" pull
-		sudo make -C "$dir"
+		make clean -C "$dir"
+		git -C "$dir" pull
+		make -C "$dir"
 		sudo make install -C "$dir"
 	fi
 done

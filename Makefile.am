@@ -77,8 +77,8 @@ Makefile.plugin_compile: Makefile
 	@echo 'CXXLINK    = $$(LIBTOOL) --mode=link $$(CXXLD)'>> $@
 	@echo 'MOC        = ' $(MOC)>> $@
 	@echo ''                                                        >> $@
-	@echo 'CXXFLAGS := -I. -I'$(pkgincludedir) $(AM_CXXFLAGS) >> $@
-	@echo 'LDFLAGS  := ' $(AM_LDFLAGS) -module -avoid-version>> $@
+	@echo 'CXXFLAGS := $$(CXXFLAGS) -I. -I'$(pkgincludedir) $(AM_CXXFLAGS) >> $@
+	@echo 'LDFLAGS  := $$(LDFLAGS) '$(AM_LDFLAGS) -module -avoid-version>> $@
 	@echo ''                                                        >> $@
 	@echo 'ifdef DEBUG '>> $@
 	@echo 'CXXFLAGS += -DDEBUG'>> $@
