@@ -1400,7 +1400,7 @@ int DataRecorder::Panel::startRecording(long long timestamp)
 
     hid_t scalar_space = H5Screate(H5S_SCALAR);
     hid_t string_type = H5Tcopy(H5T_C_S1);
-    size_t string_size = 1024;
+    size_t string_size = 2048;
     H5Tset_size(string_type, string_size);
     hid_t data;
 
