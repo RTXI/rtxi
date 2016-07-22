@@ -115,8 +115,6 @@ private slots:
     void insertChannel(void);
     void removeChannel(void);
     void addNewTag(void);
-    void moveItemUp(void);
-    void moveItemDown(void);
 
 protected:
     void customEvent(QEvent *);
@@ -170,8 +168,6 @@ private:
     QComboBox *channelList;
     QComboBox *typeList;
     QListWidget *selectionBox;
-    QToolButton *moveUpButton;
-    QToolButton *moveDownButton;
     QLabel *recordStatus;
     QPushButton *rButton;
     QPushButton *lButton;

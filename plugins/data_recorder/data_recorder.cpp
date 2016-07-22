@@ -522,16 +522,6 @@ DataRecorder::Panel::Panel(QWidget *parent, size_t buffersize) :
     selectionBox = new QListWidget;
     listLayout->addWidget(selectionBox,1,1,4,5);
 
-    // Add up/down buttons
-    moveUpButton = new QToolButton();
-    moveUpButton->setArrowType(Qt::UpArrow);
-		QObject::connect(moveUpButton,SIGNAL(released(void)),this,SLOT(moveItemUp(void)));
-		listLayout->addWidget(moveUpButton,1,7);
-    moveDownButton = new QToolButton();
-    moveDownButton->setArrowType(Qt::DownArrow);
-		QObject::connect(moveDownButton,SIGNAL(released(void)),this,SLOT(moveItemDown(void)));
-		listLayout->addWidget(moveDownButton,2,7);
-
     // Attach layout to child
     listGroup->setLayout(listLayout);
 
@@ -939,48 +929,6 @@ void DataRecorder::Panel::addNewTag(void)
     dataTags.push_back(newTag);
     timeStampEdit->clear();
     recordStatus->setText("Tagged");
-}
-
-//  Move item up in panel
-void DataRecorder::Panel::moveItemUp(void)
-{
-	if(!selectionBox->count()
-			|| selectionBox->selectedItems().isEmpty()
-			|| selectionBox->currentRow() == 0)
-		return;
-
-	// Get current item row idx
-	int currentIdx = selectionBox->currentRow();
-
-	// Get current item
-	QListWidgetItem *currentItem = selectionBox->takeItem(currentIdx);
-
-	// Move up one row
-	selectionBox->insertItem(currentIdx-1, currentItem);
-
-	// Set new selected row
-	selectionBox->setCurrentRow(currentIdx-1);
-}
-
-// Move item down in panel
-void DataRecorder::Panel::moveItemDown(void)
-{
-	if(!selectionBox->count()
-			|| selectionBox->selectedItems().isEmpty()
-			|| selectionBox->currentRow() == selectionBox->count()-1)
-		return;
-
-	// Get current item row idx
-	int currentIdx = selectionBox->currentRow();
-
-	// Get current item
-	QListWidgetItem *currentItem = selectionBox->takeItem(currentIdx);
-
-	// Move down one row
-	selectionBox->insertItem(currentIdx+1, currentItem);
-
-	// Set new selected row
-	selectionBox->setCurrentRow(currentIdx+1);
 }
 
 // Start recording slot
