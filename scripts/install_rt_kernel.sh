@@ -140,7 +140,7 @@ sudo cp -f /usr/xenomai/sbin/analogy_config /usr/sbin/
 # Setting up user permissions
 echo  "----->Setting up user/group"
 sudo groupadd xenomai
-sudo usermod -a -G xenomai `whoami`
+sudo usermod -a -G xenomai "$SUDO_USER"
 
 if [ $? -eq 0 ]; then
 	echo  "----->Group setup complete"
