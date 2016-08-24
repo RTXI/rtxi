@@ -134,6 +134,9 @@ else
 	exit
 fi
 
+# Add analogy_config to root path
+sudo cp -f /usr/xenomai/sbin/analogy_config /usr/sbin/
+
 # Setting up user permissions
 echo  "----->Setting up user/group"
 sudo groupadd xenomai
