@@ -466,7 +466,7 @@ void RTXIWizard::Panel::parseRepos(void)
 void RTXIWizard::Panel::installFromString( std::string module_name )
 {
 
-	std::string cloneUrl = "http/://github.com/rtxi/" + module_name;
+	std::string cloneUrl = "https://github.com/rtxi/" + module_name;
 
 	std::string locationUrl;
 	if (getuid())
