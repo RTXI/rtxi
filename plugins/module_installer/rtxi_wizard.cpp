@@ -181,6 +181,7 @@ void RTXIWizard::Panel::cloneModule(void)
 	 * Calling module->getCloneUrl().toString().toLatin1().data() will produce
 	 * an error.
 	 */
+
 	QByteArray temp = module->getCloneUrl().toString().toLatin1();
 	const char *url = temp.data();
 	QByteArray temp2 = module->getLocation().toString().toLatin1();
@@ -196,19 +197,23 @@ void RTXIWizard::Panel::cloneModule(void)
 
 		git_repository_open(&repo, path);
 #if LIBGIT2_SOVERSION >= 22
-		error = error | git_remote_lookup(&remote, repo, "origin");
+		error = error | printGitError(git_remote_lookup(&remote, repo, "origin"));
 #else
-		error = error | git_remote_load(&remote, repo, "origin");
+		error = error | printGitError(git_remote_load(&remote, repo, "origin"));
 #endif
+
 #if LIBGIT2_SOVERSION >= 24
-		error = error | git_remote_connect(remote, GIT_DIRECTION_FETCH, NULL, NULL);
+		error = error | printGitError(git_remote_connect(remote, GIT_DIRECTION_FETCH, NULL, NULL, NULL));
 #else
-		error = error | git_remote_connect(remote, GIT_DIRECTION_FETCH);
+		error = error | printGitError(git_remote_connect(remote, GIT_DIRECTION_FETCH));
 #endif
+
 #if LIBGIT2_SOVERSION >= 24
-		error = error | git_remote_download(remote, NULL, NULL);
+		error = error | printGitError(git_remote_download(remote, NULL, NULL));
+#elif LIBGIT2_SOVERSION >= 22
+		error = error | printGitError(git_remote_download(remote, NULL));
 #else
-		error = error | git_remote_download(remote, NULL);
+		error = error | printGitError(git_remote_download(remote, NULL, NULL));
 #endif
 
 		git_remote_disconnect(remote);
@@ -219,7 +224,7 @@ void RTXIWizard::Panel::cloneModule(void)
 	else
 	{
 		git_repository *repo = NULL;
-		error = git_clone(&repo, url, path, NULL);
+		printGitError(git_clone(&repo, url, path, NULL));
 		git_repository_free(repo);
 	}
 
@@ -406,7 +411,7 @@ void RTXIWizard::Panel::parseRepos(void)
 	QString locationPrefix;
 	if (getuid())
 	{
-		locationPrefix = QString(getenv("HOME")) +  "/.config/rtxi/";
+		locationPrefix = QString(getenv("HOME")) +  "/.config/RTXI/";
 	}
 	else
 	{
@@ -459,12 +464,12 @@ void RTXIWizard::Panel::parseRepos(void)
 void RTXIWizard::Panel::installFromString( std::string module_name )
 {
 
-	std::string cloneUrl = "https://github.com/rtxi/" + module_name;
+	std::string cloneUrl = "http/://github.com/rtxi/" + module_name;
 
 	std::string locationUrl;
 	if (getuid())
 	{
-		locationUrl = std::string(getenv("HOME")) +  "/.config/rtxi/" + module_name;
+		locationUrl = std::string(getenv("HOME")) +  "/.config/RTXI/" + module_name;
 	}
 	else
 	{
@@ -479,22 +484,26 @@ void RTXIWizard::Panel::installFromString( std::string module_name )
 	{
 		git_repository *repo = NULL;
 		git_remote *remote = NULL;
-
+		
 		git_repository_open(&repo, path);
 #if LIBGIT2_SOVERSION >= 22
-		error = error | git_remote_lookup(&remote, repo, "origin");
+		error = error | printGitError(git_remote_lookup(&remote, repo, "origin"));
 #else
-		error = error | git_remote_load(&remote, repo, "origin");
+		error = error | printGitError(git_remote_load(&remote, repo, "origin"));
 #endif
+
 #if LIBGIT2_SOVERSION >= 24
-		error = error | git_remote_connect(remote, GIT_DIRECTION_FETCH, NULL, NULL);
+		error = error | printGitError(git_remote_connect(remote, GIT_DIRECTION_FETCH, NULL, NULL, NULL));
 #else
-		error = error | git_remote_connect(remote, GIT_DIRECTION_FETCH);
+		error = error | printGitError(git_remote_connect(remote, GIT_DIRECTION_FETCH));
 #endif
+
 #if LIBGIT2_SOVERSION >= 24
-		error = error | git_remote_download(remote, NULL, NULL);
+		error = error | printGitError(git_remote_download(remote, NULL, NULL));
+#elif LIBGIT2_SOVERSION >= 22
+		error = error | printGitError(git_remote_download(remote, NULL));
 #else
-		error = error | git_remote_download(remote, NULL);
+		error = error | printGitError(git_remote_download(remote, NULL, NULL));
 #endif
 
 		git_remote_disconnect(remote);
@@ -505,7 +514,7 @@ void RTXIWizard::Panel::installFromString( std::string module_name )
 	else
 	{
 		git_repository *repo = NULL;
-		error = git_clone(&repo, url, path, NULL);
+		error = printGitError(git_clone(&repo, url, path, NULL));
 		git_repository_free(repo);
 	}
 
@@ -541,6 +550,14 @@ void RTXIWizard::Panel::installFromString( std::string module_name )
 	make->close();
 	make_install->close();
 
+}
+
+int RTXIWizard::Panel::printGitError(int error) {
+	if (error) {
+		const git_error *e = giterr_last();
+		printf("Error %d/%d: %s\n", error, e->klass, e->message);
+	}
+	return error; 
 }
 
 extern "C" Plugin::Object *createRTXIPlugin(void *)

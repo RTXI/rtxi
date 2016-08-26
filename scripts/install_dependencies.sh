@@ -115,6 +115,10 @@ if ls /usr/local/lib/rtxi_includes/moc_* 1> /dev/null 2>&1; then
 fi
 
 sudo rsync -a ${DEPS}/rtxi_includes /usr/local/lib/.
+
+# Allow all members of adm (administrator accounts) write access to the 
+# rtxi_includes/ directory. 
+sudo setfacl -Rm g:adm:rwX,d:g:adm:rwX /usr/local/lib/rtxi_includes
 if [ $? -eq 0 ]; then
 	echo "----->rtxi_includes synced."
 else

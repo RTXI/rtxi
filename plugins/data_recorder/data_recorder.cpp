@@ -16,6 +16,7 @@
 
 */
 
+#include <cstring>
 #include <string>
 #include <unistd.h>
 #include <compiler.h>
@@ -1318,6 +1319,8 @@ void DataRecorder::Panel::closeFile(bool shutdown)
         }
 #endif
 
+				if(!dataTags.empty())
+				{
     // Write tags to data file
     hid_t tag_type, tag_space, data;
     herr_t status;
@@ -1342,6 +1345,7 @@ void DataRecorder::Panel::closeFile(bool shutdown)
     H5Sclose(tag_space);
     H5Tclose(tag_type);
     H5Gclose(file.tdata);
+				}
 
     // Close file
     H5Fclose(file.id);
@@ -1420,7 +1424,11 @@ int DataRecorder::Panel::startRecording(long long timestamp)
 
     data = H5Dcreate(file.trial, "Date", string_type,
                      scalar_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    H5Dwrite(data, string_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, std::string(QDateTime::currentDateTime().toString(Qt::ISODate).toLatin1()).c_str());
+				std::string date_string = std::string(QDateTime::currentDateTime().toString(Qt::ISODate).toLatin1());
+				char * date_c_string = new char[date_string.length()+1];
+				std::strcpy(date_c_string, date_string.c_str());
+    H5Dwrite(data, string_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, date_c_string);
+    delete[] date_c_string;
     H5Dclose(data);
 
     hid_t param_type;
@@ -1479,10 +1487,18 @@ int DataRecorder::Panel::startRecording(long long timestamp)
 							file.chandata = H5Gcreate(file.sysdata, chan_name.c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
 							hid_t data = H5Dcreate(file.chandata, "Range", string_type, scalar_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-							H5Dwrite(data, string_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, dev->getAnalogRangeString(DAQ::AI,static_cast<DAQ::index_t>(i),dev->getAnalogRange(DAQ::AI,static_cast<DAQ::index_t>(i))).c_str());
+							std::string range_string = dev->getAnalogRangeString(DAQ::AI,static_cast<DAQ::index_t>(i),dev->getAnalogRange(DAQ::AI,static_cast<DAQ::index_t>(i)));
+							char * range_c_string = new char[range_string.length()+1];
+							std::strcpy(range_c_string, range_string.c_str());
+							H5Dwrite(data, string_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, range_c_string);
+							delete[] range_c_string;
 
 							data = H5Dcreate(file.chandata, "Reference", string_type, scalar_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-							H5Dwrite(data, string_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, dev->getAnalogReferenceString(DAQ::AI,static_cast<DAQ::index_t>(i),dev->getAnalogReference(DAQ::AI,static_cast<DAQ::index_t>(i))).c_str());
+							std::string ref_string = dev->getAnalogReferenceString(DAQ::AI,static_cast<DAQ::index_t>(i),dev->getAnalogReference(DAQ::AI,static_cast<DAQ::index_t>(i)));
+							char * ref_c_string = new char[ref_string.length()+1];
+							std::strcpy(ref_c_string, ref_string.c_str());
+							H5Dwrite(data, string_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, ref_c_string);
+							delete[] ref_c_string;
 
 							double scale = dev->getAnalogGain(DAQ::AI,static_cast<DAQ::index_t>(i));
 							data = H5Dcreate(file.chandata, "Gain", H5T_IEEE_F64LE, scalar_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);

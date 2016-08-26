@@ -78,7 +78,7 @@ fi
 # Patch kernel
 echo  "----->Patching kernel"
 cd $linux_tree
-$xenomai_root/scripts/prepare-kernel.sh --arch=x86 --adeos=$xenomai_root/kernel/cobalt/arch/x86/patches/ipipe-core-$linux_version-x86-?.patch --linux=$linux_tree
+$xenomai_root/scripts/prepare-kernel.sh --arch=x86 --adeos=$xenomai_root/kernel/cobalt/arch/x86/patches/ipipe-core-$linux_version-x86-[0-9]*.patch --linux=$linux_tree
 yes "" | make localmodconfig
 make menuconfig
 
