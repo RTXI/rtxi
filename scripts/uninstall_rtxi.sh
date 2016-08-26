@@ -20,6 +20,11 @@
 #	Created by Yogi Patel <yapatel@gatech.edu> 2014.1.31
 #
 
+if ! id | grep -q root; then
+	echo "Must run script as root; try again with sudo ./uninstall_rtxi.sh"
+	exit
+fi
+
 # Directories
 DIR=$PWD
 ROOT=${DIR}/..
@@ -38,19 +43,19 @@ ETC=/etc/rtxi.conf
 cd ${ROOT}
 
 # Uninstall RTXI and QWT files. 
-sudo make uninstall
-sudo make clean
-sudo rm -rf ${RTXI_LIB}
-sudo rm -rf ${QWT_LIB}
-sudo rm -rf ${QWT_LIB2}
-sudo rm -rf ${QWT_LIB3}
-sudo rm -rf ${RTXI_INC_LIB}
-sudo rm -rf ${RTXI_INC_MOD}
-sudo rm -rf ${RTXI_INC}
-sudo rm -rf ${RTXI_BIN}
-sudo rm -rf ${RTXI_SHARE}
-sudo rm -rf ${RTXI_APP}
-sudo rm -rf ${ETC}
+make uninstall
+make clean
+rm -rf ${RTXI_LIB}
+rm -rf ${QWT_LIB}
+rm -rf ${QWT_LIB2}
+rm -rf ${QWT_LIB3}
+rm -rf ${RTXI_INC_LIB}
+rm -rf ${RTXI_INC_MOD}
+rm -rf ${RTXI_INC}
+rm -rf ${RTXI_BIN}
+rm -rf ${RTXI_SHARE}
+rm -rf ${RTXI_APP}
+rm -rf ${ETC}
 
 if [ $? -eq 0 ]; then
 	echo "----->RTXI removed. Reboot may be required."
