@@ -155,6 +155,7 @@ public:
 
 private slots:
     void about(void);
+    void aboutXeno(void);
     void aboutQt(void);
     void openDocs(void);
     void openSubIssue(void);
@@ -202,6 +203,7 @@ private:
     QAction *reset;
     QAction *quit;
     QAction *artxi;
+		QAction *axeno;
     QAction *aqt;
     QAction *adocs;
     QAction *sub_issue;
