@@ -77,7 +77,7 @@ if test x$rtos = xxenomai; then
     XENO_CONFIG=`which xeno-config`
   fi
   RTOS_CPPFLAGS=`$XENO_CONFIG --alchemy --cflags`
-  RTOS_LDFLAGS=`$XENO_CONFIG --alchemy --ldflags`
+  RTOS_LDFLAGS=`$XENO_CONFIG --alchemy --ldflags --auto-init-solib`
 elif test x$rtos = xposix; then
   RTOS_CPPFLAGS='-I/usr/local/include'
   RTOS_LDFLAGS='-I/usr/local/include -L/usr/local/lib -lpthread'
