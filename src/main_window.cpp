@@ -201,6 +201,7 @@ void MainWindow::createHelpMenu()
     helpMenu = menuBar()->addMenu(tr("&Help"));
     helpMenu->addSeparator();
     helpMenu->addAction(artxi);
+    helpMenu->addAction(axeno);
     helpMenu->addAction(aqt);
     helpMenu->addSeparator();
     helpMenu->addAction(adocs);
@@ -240,6 +241,9 @@ void MainWindow::createHelpActions()
     artxi = new QAction(tr("About &RTXI"),this);
     connect(artxi, SIGNAL(triggered()), this, SLOT(about()));
 
+    axeno = new QAction(tr("About &Xenomai"),this);
+    connect(axeno, SIGNAL(triggered()), this, SLOT(aboutXeno()));
+
     aqt = new QAction(tr("About &Qt"),this);
     connect(aqt, SIGNAL(triggered()), this, SLOT(aboutQt()));
 
@@ -257,13 +261,23 @@ QAction* MainWindow::createSystemMenuItem (const QString &text, const QObject *r
 
 void MainWindow::about(void)
 {
-    QMessageBox::about (this, "About RTXI", "Version " + QString(VERSION)
+    QMessageBox::about(this, "About RTXI", "RTXI Version " + QString(VERSION)
                         +	"\n\nReleased under the GPLv3.\nSee www.rtxi.org for details.");
 }
 
 void MainWindow::aboutQt (void)
 {
     QMessageBox::aboutQt(this);
+}
+
+void MainWindow::aboutXeno (void)
+{
+	FILE *fp;
+	char xeno_buff[8];
+	fp = fopen("/proc/xenomai/version","r");
+	fscanf(fp, "%s", xeno_buff);
+	fclose(fp);
+	QMessageBox::about(this, "About Xenomai", "Xenomai Version " + QString(xeno_buff));
 }
 
 void MainWindow::openDocs(void)
