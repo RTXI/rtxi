@@ -1,20 +1,20 @@
 /*
- * Copyright (C) 2012 University of Bristol, UK
- *
- *  This program is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU General Public License as
- *  published by the Free Software Foundation; either version 2 of the
- *  License, or (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-OA */
+	* Copyright (C) 2012 University of Bristol, UK
+	*
+	*  This program is free software; you can redistribute it and/or
+	*  modify it under the terms of the GNU General Public License as
+	*  published by the Free Software Foundation; either version 2 of the
+	*  License, or (at your option) any later version.
+	*
+	*  This program is distributed in the hope that it will be useful,
+	*  but WITHOUT ANY WARRANTY; without even the implied warranty of
+	*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+	*  General Public License for more details.
+	*
+	*  You should have received a copy of the GNU General Public License
+	*  along with this program; if not, write to the Free Software
+	*  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+	OA */
 
 #include <analogy_device.h>
 #include <debug.h>
@@ -372,8 +372,8 @@ int AnalogyDevice::setAnalogRange(type_t type,index_t channel,index_t index)
 	chan->analog.offset = -range->min/chan->analog.conv/1e6;
 
 	/*
-	 * Save ourselves an extra division each timestep in the fast path.
-	 */
+		* Save ourselves an extra division each timestep in the fast path.
+		*/
 	if(type == AO)
 		chan->analog.conv = 1/chan->analog.conv;
 
@@ -494,6 +494,7 @@ void AnalogyDevice::read(void)
 	analog_channel_t *channel;
 	a4l_chinfo_t *chinfo;
 	a4l_rnginfo_t *rnginfo;
+	int err = 0;
 
 	for(size_t i=0; i < subdevice[AI].count; ++i)
 		if(subdevice[AI].chan[i].active)
@@ -520,15 +521,24 @@ void AnalogyDevice::read(void)
 				}
 
 				// Get channel info
-				a4l_get_chinfo(&dsc, subdevice[AI].id, i, &chinfo);
-				a4l_get_rnginfo(&dsc, subdevice[AI].id, i, channel->range, &rnginfo);
+				err = a4l_get_chinfo(&dsc, subdevice[AI].id, i, &chinfo);
+				if(err < 0)
+					printf("analogy_device::read::a4l_get_chinfo error: %d\n", err);
+
+				err = a4l_get_rnginfo(&dsc, subdevice[AI].id, i, channel->range, &rnginfo);
+				if(err < 0)
+					printf("analogy_device::read::a4l_get_rnginfo error: %d\n", err);
 				size = a4l_sizeof_chan(chinfo);
 
 				// Read 1 data sample via synchronous acq
-				a4l_sync_read(&dsc, subdevice[AI].id, PACK(i,channel->range,ref),	0, &sample, size);
+				err = a4l_sync_read(&dsc, subdevice[AI].id, PACK(i,channel->range,ref),	0, &sample, size);
+				if(err < 0)
+					printf("analogy_device::read::a4l_sync_read error: %d\n", err);
 
 				// Convert to decimal via a4l
-				a4l_rawtod(chinfo, rnginfo, &value, &sample, 1);
+				err = a4l_rawtod(chinfo, rnginfo, &value, &sample, 1);
+				if(err < 0)
+					printf("analogy_device::read::a4l_rawtod error: %d\n", err);
 
 				// Gain, convert, and push into IO pipe
 				output(i) = channel->gain * value + channel->zerooffset - channel->calOffset;
@@ -545,7 +555,9 @@ void AnalogyDevice::read(void)
 			mask |= (1<<i);
 
 	// Read all data and output it according to channel activity
-	a4l_sync_dio(&dsc, subdevice[DIO].id, &mask, &data);
+	err = a4l_sync_dio(&dsc, subdevice[DIO].id, &mask, &data);
+	if(err < 0)
+		printf("analogy_device::read::a4l_sync_dio error: %d\n", err);
 
 	// Read only enabled digital channels one by one with mask for each bit
 	for(size_t i=0; i < subdevice[DIO].count; ++i)
