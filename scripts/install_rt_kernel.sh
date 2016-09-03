@@ -134,7 +134,7 @@ if [ -d "/usr/xenomai" ]; then
 	mv /usr/xenomai /usr/xenomai-$(date +%F_%T)
 fi
 cd $build_root
-$xenomai_root/configure --with-core=cobalt --enable-pshared --enable-smp --enable-dlopen-libs CFLAGS="-O3 -fPIC" LDFLAGS="-O3 -fPIC" 
+$xenomai_root/configure --with-core=cobalt --enable-pshared --enable-smp --enable-dlopen-libs
 make -s
 sudo make install
 
