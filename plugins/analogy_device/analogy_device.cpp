@@ -523,22 +523,23 @@ void AnalogyDevice::read(void)
 				// Get channel info
 				err = a4l_get_chinfo(&dsc, subdevice[AI].id, i, &chinfo);
 				if(err < 0)
-					fprintf(stderr, "analogy_device::read::a4l_get_chinfo error: %d\n", err);
+					rt_fprintf(stderr, "analogy_device::read::a4l_get_chinfo error: %d\n", err);
 
+				// Get channel range info
 				err = a4l_get_rnginfo(&dsc, subdevice[AI].id, i, channel->range, &rnginfo);
 				if(err < 0)
-					fprintf(stderr, "analogy_device::read::a4l_get_rnginfo error: %d\n", err);
+					rt_fprintf(stderr, "analogy_device::read::a4l_get_rnginfo error: %d\n", err);
 				size = a4l_sizeof_chan(chinfo);
 
 				// Read 1 data sample via synchronous acq
 				err = a4l_sync_read(&dsc, subdevice[AI].id, PACK(i,channel->range,ref),	0, &sample, size);
 				if(err < 0)
-					fprintf(stderr, "analogy_device::read::a4l_sync_read error: %d\n", err);
+					rt_fprintf(stderr, "analogy_device::read::a4l_sync_read error: %d\n", err);
 
 				// Convert to decimal via a4l
 				err = a4l_rawtod(chinfo, rnginfo, &value, &sample, 1);
 				if(err < 0)
-					fprintf(stderr, "analogy_device::read::a4l_rawtod error: %d\n", err);
+					rt_fprintf(stderr, "analogy_device::read::a4l_rawtod error: %d\n", err);
 
 				// Gain, convert, and push into IO pipe
 				output(i) = channel->gain * value + channel->zerooffset - channel->calOffset;
@@ -557,7 +558,7 @@ void AnalogyDevice::read(void)
 	// Read all data and output it according to channel activity
 	err = a4l_sync_dio(&dsc, subdevice[DIO].id, &mask, &data);
 	if(err < 0)
-		fprintf(stderr, "analogy_device::read::a4l_sync_dio error: %d\n", err);
+		rt_fprintf(stderr, "analogy_device::read::a4l_sync_dio error: %d\n", err);
 
 	// Read only enabled digital channels one by one with mask for each bit
 	for(size_t i=0; i < subdevice[DIO].count; ++i)
@@ -611,13 +612,13 @@ void AnalogyDevice::write(void)
 				// Get channel size
 				err = a4l_get_chinfo(&dsc, subdevice[AO].id, i, &chinfo);
 				if(err < 0)
-					fprintf(stderr, "analogy_device::write::a4l_get_chinfo error: %d\n", err);
+					rt_fprintf(stderr, "analogy_device::write::a4l_get_chinfo error: %d\n", err);
 				size = a4l_sizeof_chan(chinfo);
 
 				// Write sample
 				err = a4l_sync_write(&dsc, subdevice[AO].id, PACK(i,channel->range,ref),	0, &sample, size);
 				if(err < 0)
-					fprintf(stderr, "analogy_device::read::a4l_sync_write error: %d\n", err);
+					rt_fprintf(stderr, "analogy_device::read::a4l_sync_write error: %d\n", err);
 			}
 	}
 

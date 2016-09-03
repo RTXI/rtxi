@@ -26,6 +26,7 @@
 #include <sys/stat.h>
 #include <errno.h>
 #include <analogy/analogy.h>
+#include <rtdk.h>
 
 class AnalogyDevice : public DAQ::Device
 {
