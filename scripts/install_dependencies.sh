@@ -20,6 +20,11 @@
 #	Created by Yogi Patel <yapatel@gatech.edu> 2014.1.31
 #
 
+if ! id | grep -q root; then
+	echo "Must run script as root; try again with ./install_dependencies.sh"
+	exit
+fi
+
 ###############################################################################
 # Set directory variable for compilation
 ###############################################################################
@@ -46,15 +51,15 @@ OS_VER=$(lsb_release -sr)
 ###############################################################################
 echo "Checking dependencies..."
 
-sudo apt-get update
-sudo apt-get -y upgrade
-sudo apt-get -y install autotools-dev automake libtool kernel-package gcc g++ \
+apt-get update
+apt-get -y upgrade
+apt-get -y install autotools-dev automake libtool kernel-package gcc g++ \
                         gdb fakeroot crash kexec-tools makedumpfile \
                         kernel-wedge libncurses5-dev libelf-dev binutils-dev \
                         libgsl0-dev libboost-dev git vim emacs lshw stress \
                         libqt5svg5-dev libqt5opengl5 libqt5gui5 libqt5core5a \
                         libqt5xml5 qt5-default libgit2-dev libmarkdown2-dev
-sudo apt-get -y build-dep linux
+apt-get -y build-dep linux
 
 if [ $? -eq 0 ]; then
 	echo "----->Package dependencies installed."
@@ -76,7 +81,7 @@ else
 	cd hdf5-1.8.4
 	./configure --prefix=/usr
 	make -sj2
-	sudo make install
+	make install
 	if [ $? -eq 0 ]; then
 		echo "----->HDF5 installed."
 	else
@@ -96,10 +101,10 @@ else
 	cd qwt-${QWT_VERSION}
 	qmake qwt.pro
 	make -sj2
-	sudo make install
-	sudo cp -vf /usr/local/qwt-${QWT_VERSION}/lib/libqwt.so.6.1.2 /usr/lib/.
-	sudo ln -sf /usr/lib/libqwt.so.${QWT_VERSION} /usr/lib/libqwt.so
-	sudo ldconfig
+	make install
+	cp -vf /usr/local/qwt-${QWT_VERSION}/lib/libqwt.so.6.1.2 /usr/lib/.
+	ln -sf /usr/lib/libqwt.so.${QWT_VERSION} /usr/lib/libqwt.so
+	ldconfig
 	if [ $? -eq 0 ]; then
 		echo "----->Qwt installed."
 	else
@@ -110,15 +115,13 @@ fi
 
 # (Re)install rtxi_includes. Remove the moc files first. Failing to do so when 
 # upgrading from Qt4 to Qt5 will cause compilation errors later on. 
-if ls /usr/local/lib/rtxi_includes/moc_* 1> /dev/null 2>&1; then
-	sudo rm -r /usr/local/lib/rtxi_includes/moc_*
-fi
-
-sudo rsync -a ${DEPS}/rtxi_includes /usr/local/lib/.
+[ -d /usr/local/lib/rtxi_includes ] && rm -r /usr/local/lib/rtxi_includes/moc_*
+rsync -a ${DEPS}/rtxi_includes /usr/local/lib/.
 
 # Allow all members of adm (administrator accounts) write access to the 
 # rtxi_includes/ directory. 
-sudo setfacl -Rm g:adm:rwX,d:g:adm:rwX /usr/local/lib/rtxi_includes
+setfacl -Rm g:adm:rwX,d:g:adm:rwX /usr/local/lib/rtxi_includes
+
 if [ $? -eq 0 ]; then
 	echo "----->rtxi_includes synced."
 else

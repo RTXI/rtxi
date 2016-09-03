@@ -20,26 +20,30 @@
 #	Created by Yogi Patel <yapatel@gatech.edu> 2014.1.31
 #
 
+if ! id | grep -q root; then
+	echo "Must run script as root; try again with sudo ./install_teamviewer.sh"
+	exit
+fi
 
 # Install gdebi for detecting and automatically installing dependencies
-sudo apt-get -y install gdebi 
+apt-get -y install gdebi 
 
 # Teamviewer doesn't provide a 64-bit binary, so enable multiarch (i386) for 
 # installing dependencies. 
 if [ `uname -m` == "x86_64" ]; then
-   sudo dpkg --add-architecture i386 # if x86_64, enable i386 mirrors
-   sudo apt-get update
+    dpkg --add-architecture i386 # if x86_64, enable i386 mirrors
+    apt-get update
 fi
 
 wget http://download.teamviewer.com/download/teamviewer_i386.deb
-sudo gdebi teamviewer_i386.deb
-sudo apt-get -f -y install
+gdebi teamviewer_i386.deb
+apt-get -f -y install
 
 # If you ever want to uninstall teamviewer and its i386 dependencies from your
 # your x86_64 system, run:
-#   $ sudo apt-get purge teamviewer
-#   $ sudo apt-get purge `dpkg --get-selections | grep i386 | awk '{print $1}'`
-#   $ sudo dpkg --remove-architecture i386
+#   $  apt-get purge teamviewer
+#   $  apt-get purge `dpkg --get-selections | grep i386 | awk '{print $1}'`
+#   $  dpkg --remove-architecture i386
 #
 # This will remove ALL i386 packages listed before removing them. DO NOT run 
 # this script on a i386 system. If you don't know what architecture your 

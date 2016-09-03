@@ -44,7 +44,7 @@ DefaultGUILineEdit::~DefaultGUILineEdit(void)
 
 void DefaultGUILineEdit::blacken(void)
 {
-    palette.setBrush(this->foregroundRole(), Qt::black);
+    palette.setBrush(this->foregroundRole(), QApplication::palette().color(QPalette::WindowText));
     this->setPalette(palette);
     setModified(false);
 }

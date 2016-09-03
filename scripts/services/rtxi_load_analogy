@@ -38,7 +38,8 @@ val=$(lspci | grep National | awk '{print$1}' | tr ':' ',' | sed 's/.\{2\}$//' |
 load_val=${bus_addr}x${val}
 
 # call configuration to load the card
-$(sudo analogy_config analogy0 analogy_ni_pcimio ${load_val})
+#$(/usr/xenomai/sbin/analogy_config analogy0 analogy_ni_pcimio ${load_val})
+$(/usr/xenomai/sbin/analogy_config analogy0 analogy_ni_pcimio)
 
 # error check
 if [ $? -eq 0 ]; then

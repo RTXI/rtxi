@@ -1,20 +1,20 @@
 /*
- * Copyright (C) 2012 University of Bristol, UK
- *
- *  This program is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU General Public License as
- *  published by the Free Software Foundation; either version 2 of the
- *  License, or (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- */
+	* Copyright (C) 2012 University of Bristol, UK
+	*
+	*  This program is free software; you can redistribute it and/or
+	*  modify it under the terms of the GNU General Public License as
+	*  published by the Free Software Foundation; either version 2 of the
+	*  License, or (at your option) any later version.
+	*
+	*  This program is distributed in the hope that it will be useful,
+	*  but WITHOUT ANY WARRANTY; without even the implied warranty of
+	*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+	*  General Public License for more details.
+	*
+	*  You should have received a copy of the GNU General Public License
+	*  along with this program; if not, write to the Free Software
+	*  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+	*/
 
 #include <analogy_device.h>
 #include <debug.h>
@@ -492,144 +492,160 @@ int AnalogyDevice::setDigitalDirection(index_t channel,direction_t direction)
 // Acquire data
 void AnalogyDevice::read(void)
 {
-    lsampl_t sample = 0;
-    double value = 0;
-    int ref = 0;
-    int size = 0;
-    analog_channel_t *channel;
-    a4l_chinfo_t *chinfo;
-    a4l_rnginfo_t *rnginfo;
+	lsampl_t sample = 0;
+	double value = 0;
+	int ref = 0;
+	int size = 0;
+	analog_channel_t *channel;
+	a4l_chinfo_t *chinfo;
+	a4l_rnginfo_t *rnginfo;
+	int err = 0;
 
-    for(size_t i=0; i < subdevice[AI].count; ++i)
-        if(subdevice[AI].chan[i].active) 
-        {
-            channel = &subdevice[AI].chan[i].analog;
-            if(!channel->counter++) 
-            {
+	for(size_t i=0; i < subdevice[AI].count; ++i)
+		if(subdevice[AI].chan[i].active)
+		{
+			channel = &subdevice[AI].chan[i].analog;
+			if(!channel->counter++)
+			{
 
-                 // Get analogy reference
-                 switch (channel->reference) 
-                 {
-                     case 0:
-                         ref = AREF_GROUND;
-                         break;
-                     case 1:
-                         ref = AREF_COMMON;
-                         break;
-                     case 2:
-                         ref = AREF_DIFF;
-                         break;
-                     case 3:
-                         ref = AREF_OTHER;
-                         break;
-                 }
+				// Get analogy reference
+				switch (channel->reference)
+				{
+					case 0:
+						ref = AREF_GROUND;
+						break;
+					case 1:
+						ref = AREF_COMMON;
+						break;
+					case 2:
+						ref = AREF_DIFF;
+						break;
+					case 3:
+						ref = AREF_OTHER;
+						break;
+				}
 
-                // Get channel info
-                a4l_get_chinfo(&dsc, subdevice[AI].id, i, &chinfo);
-                a4l_get_rnginfo(&dsc, subdevice[AI].id, i, channel->range, &rnginfo);
-                size = a4l_sizeof_chan(chinfo);
+				// Get channel info
+				err = a4l_get_chinfo(&dsc, subdevice[AI].id, i, &chinfo);
+				if(err < 0)
+					rt_fprintf(stderr, "analogy_device::read::a4l_get_chinfo error: %d\n", err);
 
-                // Read 1 data sample via synchronous acq
-                a4l_sync_read(&dsc, subdevice[AI].id, PACK(i,channel->range,ref),	0, &sample, size);
- 
-                // Convert to decimal via a4l
-                a4l_rawtod(chinfo, rnginfo, &value, &sample, 1);
+				// Get channel range info
+				err = a4l_get_rnginfo(&dsc, subdevice[AI].id, i, channel->range, &rnginfo);
+				if(err < 0)
+					rt_fprintf(stderr, "analogy_device::read::a4l_get_rnginfo error: %d\n", err);
+				size = a4l_sizeof_chan(chinfo);
 
-                // Gain, convert, and push into IO pipe
-                output(i) = channel->gain * value + channel->zerooffset - channel->calOffset;
-            }
-            channel->counter %= channel->downsample;
-        }
+				// Read 1 data sample via synchronous acq
+				err = a4l_sync_read(&dsc, subdevice[AI].id, PACK(i,channel->range,ref),	0, &sample, size);
+				if(err < 0)
+					rt_fprintf(stderr, "analogy_device::read::a4l_sync_read error: %d\n", err);
 
-    size_t offset = getChannelCount(AI);
-    unsigned int data = 0, mask = 0;
+				// Convert to decimal via a4l
+				err = a4l_rawtod(chinfo, rnginfo, &value, &sample, 1);
+				if(err < 0)
+					rt_fprintf(stderr, "analogy_device::read::a4l_rawtod error: %d\n", err);
 
-    // Create mask using only enabled digital channels
-    for(size_t i=0; i < subdevice[DIO].count; ++i)
-        if(subdevice[DIO].chan[i].active && subdevice[DIO].chan[i].digital.direction == DAQ::INPUT)
-            mask |= (1<<i);
+				// Gain, convert, and push into IO pipe
+				output(i) = channel->gain * value + channel->zerooffset - channel->calOffset;
+			}
+			channel->counter %= channel->downsample;
+		}
 
-    // Read all data and output it according to channel activity
-    a4l_sync_dio(&dsc, subdevice[DIO].id, &mask, &data);
+	size_t offset = getChannelCount(AI);
+	unsigned int data = 0, mask = 0;
 
-    // Read only enabled digital channels one by one with mask for each bit
-    for(size_t i=0; i < subdevice[DIO].count; ++i)
-        if(subdevice[DIO].chan[i].active && subdevice[DIO].chan[i].digital.direction == DAQ::INPUT) 
-        {
-            mask = (1<<i);
-            output(i+offset) = (data & mask) == 0 ? 0 : 5;
-        }
+	// Create mask using only enabled digital channels
+	for(size_t i=0; i < subdevice[DIO].count; ++i)
+		if(subdevice[DIO].chan[i].active && subdevice[DIO].chan[i].digital.direction == DAQ::INPUT)
+			mask |= (1<<i);
+
+	// Read all data and output it according to channel activity
+	err = a4l_sync_dio(&dsc, subdevice[DIO].id, &mask, &data);
+	if(err < 0)
+		rt_fprintf(stderr, "analogy_device::read::a4l_sync_dio error: %d\n", err);
+
+	// Read only enabled digital channels one by one with mask for each bit
+	for(size_t i=0; i < subdevice[DIO].count; ++i)
+		if(subdevice[DIO].chan[i].active && subdevice[DIO].chan[i].digital.direction == DAQ::INPUT)
+		{
+			mask = (1<<i);
+			output(i+offset) = (data & mask) == 0 ? 0 : 5;
+		}
 }
 
 void AnalogyDevice::write(void)
 {
-    {
-        double value;
-        lsampl_t sample;
-        analog_channel_t *channel;
-        int ref = 0;
-        int size = 0;
-        a4l_chinfo_t *chinfo;
+	{
+		double value;
+		lsampl_t sample;
+		analog_channel_t *channel;
+		int ref = 0;
+		int size = 0;
+		a4l_chinfo_t *chinfo;
+		int err = 0;
 
-        for(size_t i=0; i < subdevice[AO].count; ++i)
-            if(subdevice[AO].chan[i].active) 
-            {
-                channel = &subdevice[AO].chan[i].analog;
-                value = round(channel->gain * channel->conv * (input(i) - channel->zerooffset) + channel->offset - channel->calOffset);
+		for(size_t i=0; i < subdevice[AO].count; ++i)
+			if(subdevice[AO].chan[i].active)
+			{
+				channel = &subdevice[AO].chan[i].analog;
+				value = round(channel->gain * channel->conv * (input(i) - channel->zerooffset) + channel->offset - channel->calOffset);
 
-                // Prevent wrap around in the data units.
-                if(value > channel->maxdata)
-                    value = channel->maxdata;
-                else if(value < 0.0)
-                    value = 0.0;
-                sample = static_cast<lsampl_t>(value);
+				// Prevent wrap around in the data units.
+				if(value > channel->maxdata)
+					value = channel->maxdata;
+				else if(value < 0.0)
+					value = 0.0;
+				sample = static_cast<lsampl_t>(value);
 
-                // Get anaolgy reference
-                switch (channel->reference) 
-                {
-                    case 0:
-                        ref = A4L_CHAN_AREF_GROUND;
-                        break;
-                    case 1:
-                        ref = A4L_CHAN_AREF_COMMON;
-                        break;
-                    case 2:
-                        ref = A4L_CHAN_AREF_DIFF;
-                        break;
-                    case 3:
-                        ref = A4L_CHAN_AREF_OTHER;
-                        break;
-                }
-                // Get channel size
-                a4l_get_chinfo(&dsc, subdevice[AO].id, i, &chinfo);
-                size = a4l_sizeof_chan(chinfo);
+				// Get anaolgy reference
+				switch (channel->reference)
+				{
+					case 0:
+						ref = A4L_CHAN_AREF_GROUND;
+						break;
+					case 1:
+						ref = A4L_CHAN_AREF_COMMON;
+						break;
+					case 2:
+						ref = A4L_CHAN_AREF_DIFF;
+						break;
+					case 3:
+						ref = A4L_CHAN_AREF_OTHER;
+						break;
+				}
+				// Get channel size
+				err = a4l_get_chinfo(&dsc, subdevice[AO].id, i, &chinfo);
+				if(err < 0)
+					rt_fprintf(stderr, "analogy_device::write::a4l_get_chinfo error: %d\n", err);
+				size = a4l_sizeof_chan(chinfo);
 
-                // Write sample
-                a4l_sync_write(&dsc, subdevice[AO].id, PACK(i,channel->range,ref),
-                               0, &sample, size);
-            }
-    }
+				// Write sample
+				err = a4l_sync_write(&dsc, subdevice[AO].id, PACK(i,channel->range,ref),	0, &sample, size);
+				if(err < 0)
+					rt_fprintf(stderr, "analogy_device::read::a4l_sync_write error: %d\n", err);
+			}
+	}
+	{
+		size_t offset = getChannelCount(AO);
+		int value = 0;
+		unsigned int data = 0, mask = 0;
 
-    {
-        size_t offset = getChannelCount(AO);
-        int value = 0;
-        unsigned int data = 0, mask = 0;
-
-        // Create mask and data buffer with bits to be set
-        for(size_t i=0; i < subdevice[DIO].count; ++i) 
-        {
-            value = input(i+offset) != 0.0;
-            if(subdevice[DIO].chan[i].active && subdevice[DIO].chan[i].digital.direction == DAQ::OUTPUT && subdevice[DIO].chan[i].digital.previous_value != value) 
-            {
-                subdevice[DIO].chan[i].digital.previous_value = value;
-                data |= value == 0 ? (0<<i) : (1<<i); // Toggle the i-th bit for modification (set 0 or 1)
-                mask |= (1<<i); // Set i-th bit to specify channels to modify
-            }
-        }
-        // Write the data according to the mask
-        if (mask)
-            a4l_sync_dio(&dsc, subdevice[DIO].id, &mask, &data);
-    }
+		// Create mask and data buffer with bits to be set
+		for(size_t i=0; i < subdevice[DIO].count; ++i)
+		{
+			value = input(i+offset) != 0.0;
+			if(subdevice[DIO].chan[i].active && subdevice[DIO].chan[i].digital.direction == DAQ::OUTPUT && subdevice[DIO].chan[i].digital.previous_value != value)
+			{
+				subdevice[DIO].chan[i].digital.previous_value = value;
+				data |= value == 0 ? (0<<i) : (1<<i); // Toggle the i-th bit for modification (set 0 or 1)
+				mask |= (1<<i); // Set i-th bit to specify channels to modify
+			}
+		}
+		// Write the data according to the mask
+		if (mask)
+			a4l_sync_dio(&dsc, subdevice[DIO].id, &mask, &data);
+	}
 }
 
 void AnalogyDevice::doLoad(const Settings::Object::State &s)

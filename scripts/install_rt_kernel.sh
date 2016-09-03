@@ -21,8 +21,8 @@
 #
 
 if ! id | grep -q root; then
-  echo "Must run script as root; try again with sudo ./install_rt_kernel.sh"
-  exit
+	echo "Must run script as root; try again with sudo ./install_rt_kernel.sh"
+	exit
 fi
 
 # Export environment variables
@@ -105,8 +105,8 @@ fi
 # Install compiled kernel
 echo  "----->Installing compiled kernel"
 cd $opt
-sudo dpkg -i linux-image-$linux_version-xenomai-$xenomai_version*.deb
-sudo dpkg -i linux-headers-$linux_version-xenomai-$xenomai_version*.deb
+dpkg -i linux-image-$linux_version-xenomai-$xenomai_version*.deb
+dpkg -i linux-headers-$linux_version-xenomai-$xenomai_version*.deb
 
 if [ $? -eq 0 ]; then
 	echo  "----->Kernel installation complete"
@@ -118,8 +118,8 @@ fi
 # Update
 echo  "----->Updating boot loader about the new kernel"
 cd $linux_tree
-sudo update-initramfs -u -k all
-sudo update-grub
+update-initramfs -u -k all
+update-grub
 
 if [ $? -eq 0 ]; then
 	echo  "----->Boot loader update complete"
@@ -135,8 +135,8 @@ if [ -d "/usr/xenomai" ]; then
 fi
 cd $build_root
 $xenomai_root/configure --with-core=cobalt --enable-pshared --enable-smp --enable-dlopen-libs
-make -s
-sudo make install
+make -sj`nproc`
+make install
 
 if [ $? -eq 0 ]; then
 	echo  "----->User library installation complete"
@@ -145,11 +145,13 @@ else
 	exit
 fi
 
-# Setting up user permissions. You may want to revisit this section, as the 
-# user that runs this script is technically root. 
+# Add analogy_config to root path
+cp -f /usr/xenomai/sbin/analogy_config /usr/sbin/
+
+# Setting up user permissions
 echo  "----->Setting up user/group"
-sudo groupadd xenomai
-sudo usermod -aG xenomai `whoami`
+groupadd xenomai
+usermod -a -G xenomai "$SUDO_USER"
 
 if [ $? -eq 0 ]; then
 	echo  "----->Group setup complete"

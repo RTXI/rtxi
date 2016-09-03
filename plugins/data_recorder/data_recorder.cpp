@@ -516,11 +516,11 @@ DataRecorder::Panel::Panel(QWidget *parent, size_t buffersize) :
 
     // Create child widget and layout
     listGroup = new QGroupBox(tr("Currently Recording"));
-    QVBoxLayout *listLayout = new QVBoxLayout;
+    QGridLayout *listLayout = new QGridLayout;
 
     // Create elements for box
     selectionBox = new QListWidget;
-    listLayout->addWidget(selectionBox);
+    listLayout->addWidget(selectionBox,1,1,4,5);
 
     // Attach layout to child
     listGroup->setLayout(listLayout);
@@ -920,6 +920,7 @@ void DataRecorder::Panel::removeChannel(void)
         }
 }
 
+// Register new data tag/stamp
 void DataRecorder::Panel::addNewTag(void)
 {
     std::string newTag(std::to_string(RT::OS::getTime()));

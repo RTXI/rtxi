@@ -82,7 +82,6 @@ sudo cp -f scripts/update_rtxi.sh /usr/local/share/rtxi/.
 cp -f scripts/rtxi.desktop ~/Desktop/
 chmod +x ~/Desktop/rtxi.desktop
 sudo cp -f rtxi.conf /etc/
-sudo cp -f /usr/xenomai/sbin/analogy_config /usr/sbin/
 
 if [ $(lsb_release -sc) == "jessie" ] || [ $(lsb_release -sc) == "xenial" ]; then
 	echo "----->Load analogy driver with systemd"
