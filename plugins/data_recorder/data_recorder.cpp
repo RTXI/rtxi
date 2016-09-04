@@ -16,6 +16,7 @@
 
 */
 
+#include <rtxi_config.h>
 #include <cstring>
 #include <string>
 #include <unistd.h>
@@ -1406,6 +1407,15 @@ int DataRecorder::Panel::startRecording(long long timestamp)
     H5Tset_size(string_type, string_size);
     hid_t data;
 
+    data = H5Dcreate(file.trial, "Version", string_type,
+                     scalar_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+		std::string version_string = QString(VERSION).toStdString();
+		char * version_c_string = new char[version_string.length()+1];
+		std::strcpy(version_c_string, version_string.c_str());
+    H5Dwrite(data, string_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, version_c_string);
+    delete[] version_c_string;
+    H5Dclose(data);
+
     long long period = RT::System::getInstance()->getPeriod();
     data = H5Dcreate(file.trial, "Period (ns)", H5T_STD_U64LE, scalar_space,
                      H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
@@ -1425,9 +1435,9 @@ int DataRecorder::Panel::startRecording(long long timestamp)
 
     data = H5Dcreate(file.trial, "Date", string_type,
                      scalar_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-				std::string date_string = std::string(QDateTime::currentDateTime().toString(Qt::ISODate).toLatin1());
-				char * date_c_string = new char[date_string.length()+1];
-				std::strcpy(date_c_string, date_string.c_str());
+		std::string date_string = QDateTime::currentDateTime().toString(Qt::ISODate).toStdString();
+		char * date_c_string = new char[date_string.length()+1];
+		std::strcpy(date_c_string, date_string.c_str());
     H5Dwrite(data, string_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, date_c_string);
     delete[] date_c_string;
     H5Dclose(data);
