@@ -25,7 +25,7 @@ set -eu
 cd $RTXI_GIT
 
 # Determine if remote-local results in a number > 0
-VAL=$(git rev-list HEAD...origin/qt5 --count)
+VAL=$(git rev-list HEAD...origin/master --count)
 
 if [ $VAL -eq 0 ]; then
 	echo "----->RTXI up-to-date."
