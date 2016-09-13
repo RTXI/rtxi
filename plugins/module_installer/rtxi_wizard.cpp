@@ -111,6 +111,8 @@ void RTXIWizard::Panel::initParameters(void)
 	// syntax here only works in c++11
 	exclude_list = std::vector<QString> ({ QString("rtxi"),
 			QString("rtxi.github.io"),
+			QString("genicam-camera"),
+			QString("rtxi-crawler"),
 			QString("analysis-tools"),
 			QString("tutorials"),
 			QString("autapse"),
