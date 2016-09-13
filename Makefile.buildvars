@@ -37,7 +37,7 @@ QT_CXXFLAGS = $(shell pkg-config --cflags \
 
 # Add path for compiling against <rtdk.h> when using Xenomai
 if XENOMAI
-  QT_CXXFLAGS += $(QT_CXXFLAGS) -I/usr/xenomai/include 
+  EXTRA_QT_CXXFLAGS = -I/usr/xenomai/include 
 endif
                
 QT_LIBS = $(shell pkg-config --libs \
