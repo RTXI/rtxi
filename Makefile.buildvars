@@ -29,6 +29,7 @@ QT_CXXFLAGS = $(shell pkg-config --cflags \
                 Qt5Core Qt5Gui Qt5OpenGL Qt5PrintSupport Qt5Xml Qt5Widgets \
                 Qt5Svg Qt5Network libgit2 ) \
               -I/usr/local/lib/qwt/include \
+              -I/usr/xenomai/include \
               -I/usr/X11R6/include \
               -I/usr/include/qwt \
               -I/usr/local/qwt-$(QWT_VERSION) \
