@@ -22,7 +22,10 @@
 
 #include <execinfo.h>
 #include <stdio.h>
+
+#if XENOMAI
 #include <rtdk.h>
+#endif
 
 //! Prints a backtrace to standard error.
 static inline void PRINT_BACKTRACE(void)

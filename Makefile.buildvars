@@ -29,12 +29,16 @@ QT_CXXFLAGS = $(shell pkg-config --cflags \
                 Qt5Core Qt5Gui Qt5OpenGL Qt5PrintSupport Qt5Xml Qt5Widgets \
                 Qt5Svg Qt5Network libgit2 ) \
               -I/usr/local/lib/qwt/include \
-              -I/usr/xenomai/include \
               -I/usr/X11R6/include \
               -I/usr/include/qwt \
               -I/usr/local/qwt-$(QWT_VERSION) \
               -I/usr/local/qwt-$(QWT_VERSION)/include \
               -I/usr/local/lib/rtxi_includes $(QT_DEFINES)
+
+# Add path for compiling against <rtdk.h> when using Xenomai
+if XENOMAI
+  QT_CXXFLAGS += $(QT_CXXFLAGS) -I/usr/xenomai/include 
+endif
                
 QT_LIBS = $(shell pkg-config --libs \
             Qt5Core Qt5Gui Qt5OpenGL Qt5PrintSupport Qt5Xml Qt5Widgets \
