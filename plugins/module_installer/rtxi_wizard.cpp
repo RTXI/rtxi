@@ -109,11 +109,12 @@ void RTXIWizard::Panel::initParameters(void)
 	installedModules = new QList<RTXIModule*>;
 
 	// syntax here only works in c++11
-	exclude_list = std::vector<QString> ({ QString("rtxi"),
+	exclude_list = std::vector<QString> ({ 
+			QString("rtxi"),
 			QString("rtxi.github.io"),
 			QString("genicam-camera"),
 			QString("rtxi-crawler"),
-			QString("analysis-tools"),
+			QString("matlab-tools"),
 			QString("tutorials"),
 			QString("autapse"),
 			QString("camera-control"),
