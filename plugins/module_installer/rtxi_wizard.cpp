@@ -107,9 +107,6 @@ void RTXIWizard::Panel::initParameters(void)
 	git_threads_init();
 #endif
 
-	//allModules = new QList<RTXIModule*>;
-	//installedModules = new QList<RTXIModule*>;
-
 	// syntax here only works in c++11
 	exclude_list = std::vector<QString> ({ 
 			QString("rtxi"),
@@ -156,7 +153,6 @@ void RTXIWizard::Panel::updateButton(void)
 // Clone the module currently highlighted in the QListWidget.
 void RTXIWizard::Panel::cloneModule(void)
 {
-
 	cloneButton->setEnabled(false);
 	availableListWidget->setDisabled(true);
 	installedListWidget->setDisabled(true);
@@ -176,29 +172,6 @@ void RTXIWizard::Panel::cloneModule(void)
 			std::cout<<"ERROR: default in swtich block in cloneModule()"<<std::endl;
 			break;
 	}
-
-
-/*
- *  RTXIModule *module = nullptr;
- *  int module_idx = 0;
- *
- *  switch(button_mode)
- *  {
- *    case DOWNLOAD:
- *      module_idx = availableListWidget->currentRow();
- *      module = allModules->at(module_idx);
- *      break;
- *
- *    case UPDATE:
- *      module_idx = installedListWidget->currentRow();
- *      module = installedModules->at(module_idx);
- *      break;
- *
- *    default:
- *      std::cout<<"ERROR: default in swtich block in cloneModule()"<<std::endl;
- *      break;
- *  }
- */
 
 	/*
 	 * Two QByteArray variables are needed due to the way Qt stores binary data.
@@ -245,7 +218,6 @@ void RTXIWizard::Panel::cloneModule(void)
 		git_remote_disconnect(remote);
 		git_remote_free(remote);
 		git_repository_free(repo);
-
 	}
 	else
 	{
@@ -260,7 +232,6 @@ void RTXIWizard::Panel::cloneModule(void)
 	}
 	else
 	{
-
 		// Add module to list of already installed modules.
 		if (modules[name].installed == false)
 		{
@@ -299,7 +270,6 @@ void RTXIWizard::Panel::cloneModule(void)
 
 		make->close();
 		make_install->close();
-
 	}
 
 	// Re-enable buttons only after compilation is done. Otherwise you get race
@@ -307,13 +277,11 @@ void RTXIWizard::Panel::cloneModule(void)
 	cloneButton->setEnabled(true);
 	availableListWidget->setDisabled(false);
 	installedListWidget->setDisabled(false);
-
 }
 
 // Download the list of repos from GitHub's API. Call parseRepos for the JSON.
 void RTXIWizard::Panel::getRepos()
 {
-
 	availableListWidget->setDisabled(true);
 	installedListWidget->setDisabled(true);
 
@@ -322,9 +290,9 @@ void RTXIWizard::Panel::getRepos()
 		QUrl url("https://api.github.com/orgs/rtxi/repos?per_page=100");
 		reply = qnam.get(QNetworkRequest(url));
 		QObject::connect(reply, SIGNAL(finished()), this, SLOT(parseRepos(void)));
-		//		connect(reply, SIGNAL(readyRead()), this, SLOT(httpReadyRead()));
-		//		connect(reply, SIGNAL(downloadProgress(qint64,qint64)),
-		//	   	     this, SLOT(updateDataReadProgress(qint64,qint64)));
+		//connect(reply, SIGNAL(readyRead()), this, SLOT(httpReadyRead()));
+		//connect(reply, SIGNAL(downloadProgress(qint64,qint64)),
+		// 	      this, SLOT(updateDataReadProgress(qint64,qint64)));
 	}
 	else
 	{
@@ -349,19 +317,6 @@ void RTXIWizard::Panel::getReadme(void)
 	QListWidget *parent = qobject_cast<QListWidget*>(sender());
 	QString name = parent->currentItem()->text();
 
-	// Set a pointer to the currently selected module.
-	/*
-	 *RTXIModule *selectedModule = nullptr;
-	 *if ( parent == availableListWidget )
-	 *{
-	 *  selectedModule = allModules->at(parent->currentRow());
-	 *}
-	 *else if ( parent == installedListWidget )
-	 *{
-	 *  selectedModule = installedModules->at(parent->currentRow());
-	 *}
-	 */
-
 	// If the README hasn't been downloaded before, download it now.
 	if (modules[parent->currentItem()->text()].readme == "")
 	{
@@ -382,7 +337,6 @@ void RTXIWizard::Panel::getReadme(void)
 // within a QTextWidget.
 void RTXIWizard::Panel::parseReadme(void)
 {
-
 	const char* raw_data = (reply->readAll()).constData();
 	MMIOT *m = mkd_string(raw_data, strlen(raw_data), 0);
 	mkd_compile(m, 0);
@@ -394,20 +348,17 @@ void RTXIWizard::Panel::parseReadme(void)
 	mkd_cleanup(m);
 	QString fileText = QString::fromStdString(html);
 
-	//	QObject::disconnect(reply, SIGNAL(finished()), this, SLOT(parseReadme(void)));
+	// QObject::disconnect(reply, SIGNAL(finished()), this, SLOT(parseReadme(void)));
 	reply->deleteLater();
 	reply = 0;
 
-	//RTXIModule *selectedModule = nullptr;
 	switch(button_mode)
 	{
 		case DOWNLOAD:
-			//selectedModule = allModules->at(availableListWidget->currentRow());
 			modules[availableListWidget->currentItem()->text()].readme = fileText;
 			break;
 
 		case UPDATE:
-			//selectedModule = installedModules->at(installedListWidget->currentRow());
 			modules[installedListWidget->currentItem()->text()].readme = fileText;
 			break;
 
@@ -415,8 +366,6 @@ void RTXIWizard::Panel::parseReadme(void)
 			std::cout<<"ERROR: default in swtich block in cloneModule()"<<std::endl;
 			break;
 	}
-
-//	selectedModule->setReadme(fileText);
 
 	readmeWindow->setHtml(fileText);
 	readmeWindow->show();
@@ -430,26 +379,22 @@ void RTXIWizard::Panel::parseReadme(void)
 // GitHub's API returns a JSON array. Parse it with QtJson functions.
 void RTXIWizard::Panel::parseRepos(void)
 {
-
 	QJsonDocument jsonDoc = QJsonDocument::fromJson(reply->readAll().data());
 	QJsonArray jsonArr = jsonDoc.array();
 
 	QString readmeUrlPrefix = "https://raw.githubusercontent.com/RTXI/";
 	QString readmeUrlSuffix = "/master/README.md";
+	// QString locationPrefix = "/usr/local/lib/rtxi_modules/";
 
-	/*
-	 *QString locationPrefix;
-	 *if (getuid())
-	 *{
-	 *  locationPrefix = QString(getenv("HOME")) +  "/.config/RTXI/";
-	 *}
-	 *else
-	 *{
-	 *  locationPrefix = "/usr/local/lib/rtxi_modules/";
-	 *}
-	 */
-
-	QString locationPrefix = "/usr/local/lib/rtxi_modules/";
+	QString locationPrefix;
+	if (getuid())
+	{
+		locationPrefix = QString(getenv("HOME")) +  "/.config/RTXI/";
+	}
+	else
+	{
+		locationPrefix = "/usr/local/lib/rtxi_modules/";
+	}
 
 	for (int idx = 0; idx < jsonArr.size(); idx++)
 	{
@@ -472,40 +417,17 @@ void RTXIWizard::Panel::parseRepos(void)
 			{
 				module.installed = true;
 				installedListWidget->addItem(module.listItem);
-				//installedModules->append(module);
 			}
 			else
 			{
 				module.installed = false;
 				availableListWidget->addItem(module.listItem);
-				//allModules->append(module);
 			}
 			modules[name] = module;
-
-/*
- *      RTXIModule* module = new RTXIModule;
- *
- *      module->setReadmeUrl( readmeUrlPrefix + newObj.value("name").toString() + readmeUrlSuffix);
- *      module->setCloneUrl(newObj.value("clone_url").toString());
- *      module->setName(newObj.value("name").toString());
- *      module->setLocation(locationPrefix + newObj.value("name").toString());
- *      if ( (QDir(module->getLocation().toString())).exists() )
- *      {
- *        module->installed = true;
- *        installedListWidget->addItem(module->getName());
- *        installedModules->append(module);
- *      }
- *      else
- *      {
- *        module->installed = false;
- *        availableListWidget->addItem(module->getName());
- *        allModules->append(module);
- *      }
- */
 		}
 	}
 
-	//	QObject::disconnect(reply, SIGNAL(finished()), this, SLOT(parseRepos(void)));
+	// QObject::disconnect(reply, SIGNAL(finished()), this, SLOT(parseRepos(void)));
 	reply->deleteLater();
 	reply = 0;
 
@@ -521,21 +443,18 @@ void RTXIWizard::Panel::parseRepos(void)
  */
 void RTXIWizard::Panel::installFromString( std::string module_name )
 {
-
 	std::string cloneUrl = "https://github.com/rtxi/" + module_name;
-	std::string locationUrl = "/usr/local/lib/rtxi_modules/" + module_name;
-
-	/*
-	 *std::string locationUrl;
-	 *if (getuid())
-	 *{
-	 *  locationUrl = std::string(getenv("HOME")) +  "/.config/RTXI/" + module_name;
-	 *}
-	 *else
-	 *{
-	 *  locationUrl = "/usr/local/lib/rtxi_modules/" + module_name;
-	 *}
-	 */
+	// QString locationPrefix = "/usr/local/lib/rtxi_modules/";
+	
+	std::string locationUrl;
+	if (getuid())
+	{
+		locationUrl = std::string(getenv("HOME")) +  "/.config/RTXI/" + module_name;
+	}
+	else
+	{
+		locationUrl = "/usr/local/lib/rtxi_modules/" + module_name;
+	}
 
 	const char *url = cloneUrl.c_str();
 	const char *path = locationUrl.c_str();

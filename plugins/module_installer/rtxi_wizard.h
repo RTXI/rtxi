@@ -22,7 +22,6 @@
 #include <map>
 #include <main_window.h>
 #include <plugin.h>
-//#include "module_utils.h"
 
 namespace RTXIWizard
 {
@@ -71,8 +70,6 @@ namespace RTXIWizard
 
 			QPushButton *cloneButton;
 			QPushButton *syncButton;
-//			QList<RTXIModule*> *allModules;
-//			QList<RTXIModule*> *installedModules;
 
 			std::vector<QString> exclude_list;
 	};
