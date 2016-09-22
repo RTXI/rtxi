@@ -88,6 +88,7 @@ RTXIWizard::Panel::Panel(QWidget *parent) : QWidget(parent)
 	setWindowTitle("Module Wizard");
 	subWindow->setWidget(this);
 	subWindow->resize(700, subWindow->sizeHint().height());
+	getRepos();
 	show();
 
 	initParameters();
