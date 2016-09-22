@@ -233,13 +233,7 @@ void RTXIWizard::Panel::cloneModule(void)
 	else
 	{
 		// Add module to list of already installed modules.
-		if (modules[name].installed == false)
-		{
-			installedListWidget->addItem(modules[name].listItem);
-			modules[name].installed = true;
-
-			availableListWidget->removeItemWidget(modules[name].listItem);
-		}
+		modules[name].installed = true;
 
 		// Define the commands to be run.
 		QString make_cmd = "/usr/bin/make -j2 -C " + modules[name].location.toString();
@@ -275,6 +269,7 @@ void RTXIWizard::Panel::cloneModule(void)
 	// Re-enable buttons only after compilation is done. Otherwise you get race
 	// conditions if buttons are pressed before modules are done compiling.
 	cloneButton->setEnabled(true);
+	rebuildListWidgets();
 	availableListWidget->setDisabled(false);
 	installedListWidget->setDisabled(false);
 }
@@ -409,19 +404,16 @@ void RTXIWizard::Panel::parseRepos(void)
 			QString name = newObj.value("name").toString();
 			module.readme_url = QUrl(readmeUrlPrefix + newObj.value("name").toString() + readmeUrlSuffix);
 			module.clone_url = QUrl(newObj.value("clone_url").toString());
-			module.listItem = new QListWidgetItem(name);
 			module.location = QString(locationPrefix + name);
 			module.readme = "";
 
 			if ( (QDir(module.location.toString())).exists() )
 			{
 				module.installed = true;
-				installedListWidget->addItem(module.listItem);
 			}
 			else
 			{
 				module.installed = false;
-				availableListWidget->addItem(module.listItem);
 			}
 			modules[name] = module;
 		}
@@ -431,11 +423,25 @@ void RTXIWizard::Panel::parseRepos(void)
 	reply->deleteLater();
 	reply = 0;
 
-	availableListWidget->sortItems(Qt::AscendingOrder);
+	rebuildListWidgets();
 	availableListWidget->setDisabled(false);
-	installedListWidget->sortItems(Qt::AscendingOrder);
 	installedListWidget->setDisabled(false);
 }
+
+void RTXIWizard::Panel::rebuildListWidgets(void)
+{
+	availableListWidget->clear();
+	installedListWidget->clear();
+
+	for (std::map<QString,module_t>::iterator i = modules.begin(); i != modules.end(); ++i) {
+		if (i->second.installed) installedListWidget->addItem(i->first);
+		else availableListWidget->addItem(i->first);
+	}
+
+	installedListWidget->sortItems(Qt::AscendingOrder);
+	availableListWidget->sortItems(Qt::AscendingOrder);
+}
+
 
 /*
  * Public function, not for use in this module. It gets called by other

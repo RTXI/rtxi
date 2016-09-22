@@ -31,7 +31,7 @@ namespace RTXIWizard
 
 		public:
 			struct module_t {
-				QListWidgetItem *listItem;
+				// QListWidgetItem *listItem;
 				QUrl readme_url;
 				QUrl clone_url;
 				QUrl location;
@@ -43,6 +43,7 @@ namespace RTXIWizard
 			Panel(QWidget *);
 			virtual ~Panel(void);
 			void installFromString(std::string);
+			void rebuildListWidgets(void);
 
 		private slots:
 			void cloneModule(void);
