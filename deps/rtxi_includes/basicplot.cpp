@@ -15,7 +15,8 @@ BasicPlot::BasicPlot(QWidget *parent) : QwtPlot(parent) {
 	setCanvasBackground(QColor(29, 100, 141)); // nice blue
 
 	// enable zooming
-	Zoomer *zoomer = new Zoomer(qobject_cast<QwtPlotCanvas *>(canvas()));
+	// Zoomer *zoomer = new Zoomer(qobject_cast<QwtPlotCanvas *>(canvas()));
+	Zoomer *zoomer = new Zoomer(qobject_cast<QWidget *>(canvas()));
 	zoomer->setRubberBandPen(QPen(Qt::white, 2, Qt::DotLine));
 	zoomer->setTrackerPen(QPen(Qt::white));
 	QObject::connect(this, SIGNAL(setNewBase(QwtScaleDiv*,QwtScaleDiv*)), zoomer, SLOT(setNewBase(QwtScaleDiv*,QwtScaleDiv*)));

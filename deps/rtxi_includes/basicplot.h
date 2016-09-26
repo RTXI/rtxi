@@ -16,7 +16,8 @@ class Zoomer: public ScrollZoomer {
 	Q_OBJECT
 
 	public:
-		Zoomer(QwtPlotCanvas *canvas):
+		// Zoomer(QwtPlotCanvas *canvas):
+		Zoomer(QWidget *canvas):
 		ScrollZoomer(canvas) {};
 
 		virtual void rescale() {
