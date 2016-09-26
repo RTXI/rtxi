@@ -2,8 +2,10 @@
 set -eu
 
 #
-# The Real-Time eXperiment Interface (RTXI) Copyright (C) 2011 Georgia
-# Institute of Technology, University of Utah, Weill Cornell Medical College
+# The Real-Time eXperiment Interface (RTXI) 
+#
+# Copyright (C) 2011 Georgia Institute of Technology, University of Utah, Weill
+# Cornell Medical College
 #
 # This program is free software: you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
@@ -35,7 +37,7 @@ QWT=${DEPS}/qwt
 PLG=${ROOT}/plugins
 
 # Some easy to use defines
-QWT_VERSION=6.1.2
+QWT_VERSION=6.1.3
 
 #
 # Check for all RTXI *.deb dependencies and install them. Includes:
@@ -99,7 +101,7 @@ else
 	qmake qwt.pro
 	make -sj2
 	make install
-	cp -vf /usr/local/qwt-${QWT_VERSION}/lib/libqwt.so.6.1.2 /usr/lib/.
+	cp -vf /usr/local/qwt-${QWT_VERSION}/lib/libqwt.so.${QWT_VERSION} /usr/lib/.
 	ln -sf /usr/lib/libqwt.so.${QWT_VERSION} /usr/lib/libqwt.so
 	ldconfig
 	if [ $? -eq 0 ]; then
