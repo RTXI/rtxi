@@ -30,7 +30,7 @@ void BasicPlot::setAxes(double xmin, double xmax, double ymin, double ymax) {
 	*bottom = axisScaleDiv(QwtPlot::xBottom);
 	QwtScaleDiv * left = new QwtScaleDiv;
 	*left = axisScaleDiv(QwtPlot::yLeft);
-	//	emit setNewBase(&axisScaleDiv(QwtPlot::xBottom), &axisScaleDiv(QwtPlot::yLeft));
+	// emit setNewBase(&axisScaleDiv(QwtPlot::xBottom), &axisScaleDiv(QwtPlot::yLeft));
 	setNewBase(bottom, left);
 }
 
