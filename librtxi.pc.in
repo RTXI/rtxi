@@ -1,0 +1,12 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: "rtxi"
+Description: "Plotting and signal processing utilities for RTXI."
+URL: "rtxi.org"
+Version: @VERSION@
+Requires: <dependencies>
+Libs: <link flags>
+Cflags: <compile flags>
