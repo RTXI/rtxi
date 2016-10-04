@@ -10,15 +10,11 @@
 //#include "typedefs.h"
 #include "ma_proc.h"
 
-template < class T >
+template <class T>
 class MaEstimate : public MaProcess<T>
 {
 public:
-  MaEstimate( int ma_order,
-              int durbin_ar_order,
-              T* sig_2,
-              int seq_len);
-
+  MaEstimate(int ma_order, int durbin_ar_order, T* sig_2, int seq_len);
 };
 
 #endif

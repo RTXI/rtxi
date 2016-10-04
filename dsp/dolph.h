@@ -10,19 +10,17 @@
 class DolphChebyWindow : public GenericWindow
 {
 public:
-
   // constructors
-  
-  DolphChebyWindow( int length, double atten);
 
-  void GenerateWindow(int length, double Alpha_Parm );
-  
+  DolphChebyWindow(int length, double atten);
+
+  void GenerateWindow(int length, double Alpha_Parm);
+
 private:
   double Alpha_Parm;
   int Interp_Rate;
-  //int Num_Taps;
-  //double *Half_Lag_Window;
+  // int Num_Taps;
+  // double *Half_Lag_Window;
 };
 
 #endif
-  

@@ -5,25 +5,22 @@
 //  simulation of analog filter
 //
 
-#include <math.h>
 #include "anlgfilt.h"
+#include <math.h>
 
 //======================================================
 //  default constructor
 //------------------------------------------------------
 
-AnalogFilter::AnalogFilter( )
-{
-};
+AnalogFilter::AnalogFilter(){};
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    
-
 
 //======================================================
 //
 //------------------------------------------------------
 
-double AnalogFilter::Run( double input )
+double
+AnalogFilter::Run(double input)
 {
-return(0.0);
+  return (0.0);
 }

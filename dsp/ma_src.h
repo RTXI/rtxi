@@ -11,9 +11,7 @@ template <class T>
 class MaSource : public MaProcess<T>
 {
 public:
-  MaSource( int ma_order, 
-            T *b_coeffs,
-            double drv_noise_var );
+  MaSource(int ma_order, T* b_coeffs, double drv_noise_var);
   ~MaSource(void);
 };
 

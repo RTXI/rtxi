@@ -8,12 +8,11 @@
 class FilterImplementation
 {
 public:
-  FilterImplementation( ){};
+  FilterImplementation(){};
 
-  virtual int GetNumTaps(void)=0;
-  virtual double ProcessSample( double input_val )=0;
-  virtual long ProcessSample( long input_val )=0;
-
+  virtual int GetNumTaps(void) = 0;
+  virtual double ProcessSample(double input_val) = 0;
+  virtual long ProcessSample(long input_val) = 0;
 };
 
 #endif

@@ -7,19 +7,18 @@
 
 #include "gen_win.h"
 
-class HammingWindow: public GenericWindow {
+class HammingWindow : public GenericWindow
+{
 public:
+  // constructors
 
-	// constructors
+  HammingWindow(int length);
 
-	HammingWindow(int length);
-
-	void GenerateWindow(int length);
+  void GenerateWindow(int length);
 
 private:
-
-	int Num_Taps;
-	double *Half_Lag_Window;
+  int Num_Taps;
+  double* Half_Lag_Window;
 };
 
 #endif

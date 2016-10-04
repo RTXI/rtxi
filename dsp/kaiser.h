@@ -7,20 +7,19 @@
 
 #include "gen_win.h"
 
-class KaiserWindow: public GenericWindow {
+class KaiserWindow : public GenericWindow
+{
 public:
+  // constructors
 
-	// constructors
+  KaiserWindow(int num_taps, double Alpha_Parm);
 
-	KaiserWindow(int num_taps, double Alpha_Parm);
-
-	void GenerateWindow(int num_taps, double Alpha_Parm);
+  void GenerateWindow(int num_taps, double Alpha_Parm);
 
 private:
-
-	//int Num_Taps;
-	//double *Half_Lag_Window;
-	double Alpha_Parm;
+  // int Num_Taps;
+  // double *Half_Lag_Window;
+  double Alpha_Parm;
 };
 
 #endif

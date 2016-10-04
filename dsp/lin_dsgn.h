@@ -3,30 +3,29 @@
  */
 
 #ifndef _LIN_DSGN_H_
-#define _LIN_DSGN_H_ 
+#define _LIN_DSGN_H_
 
 #include "typedefs.h"
 
-class LinearPhaseFirDesign: public FirFilterDesign {
+class LinearPhaseFirDesign : public FirFilterDesign
+{
 public:
+  // default constructor
 
-	// default constructor
+  LinearPhaseFirDesign();
 
-	LinearPhaseFirDesign();
+  LinearPhaseFirDesign(int num_taps);
 
-	LinearPhaseFirDesign(int num_taps);
+  // lowpass, bandpass, highpass, or bandstop
 
-	//	lowpass, bandpass, highpass, or bandstop
+  BAND_CONFIG_TYPE GetBandConfig(void);
 
-	BAND_CONFIG_TYPE GetBandConfig(void);
-
-	int GetFirType(void);
+  int GetFirType(void);
 
 protected:
+  BAND_CONFIG_TYPE Band_Config;
 
-	BAND_CONFIG_TYPE Band_Config;
-
-	int Fir_Type;
+  int Fir_Type;
 };
 
 #endif

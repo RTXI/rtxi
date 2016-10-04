@@ -7,4 +7,4 @@
 float UniformRandom(long* seed);
 double DoubleUniformRandom(long* seed);
 
-#endif      
+#endif

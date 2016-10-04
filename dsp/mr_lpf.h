@@ -12,16 +12,14 @@
 class MultirateLowpass : public FilterImplementation
 {
 public:
- MultirateLowpass( FirFilterDesign *dec_proto_filt,
-                   FirFilterDesign *int_proto_filt,
-                   int decim_rate,
-                   logical quan_enab,
-                   long input_quant_factor,
+  MultirateLowpass(FirFilterDesign* dec_proto_filt,
+                   FirFilterDesign* int_proto_filt, int decim_rate,
+                   logical quan_enab, long input_quant_factor,
                    long coeff_quant_factor);
- ~MultirateLowpass();
- double ProcessSample( double input_val );
- long ProcessSample( long input_val );
- int GetNumTaps( void );
+  ~MultirateLowpass();
+  double ProcessSample(double input_val);
+  long ProcessSample(long input_val);
+  int GetNumTaps(void);
 
 private:
   int Dec_Rate;

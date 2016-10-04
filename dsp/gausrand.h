@@ -6,4 +6,4 @@
 
 double GaussRandom(long* seed);
 
-#endif      
+#endif

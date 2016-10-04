@@ -12,13 +12,12 @@ template <class T>
 class ToeplitzMatrix : public Matrix<T>
 {
 public:
-  ToeplitzMatrix( );
+  ToeplitzMatrix();
 
   T* GetCol(int col_indx);
 
 protected:
-  T *Herm_Toep_Col_1;
-
+  T* Herm_Toep_Col_1;
 };
 
 #endif

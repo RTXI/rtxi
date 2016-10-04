@@ -5,9 +5,10 @@
 
 #include <iostream>
 
-void pausewait(void)
+void
+pausewait(void)
 {
-int i;
-std::cout << "enter any digit to continue" << std::endl;
-std::cin >> i;
+  int i;
+  std::cout << "enter any digit to continue" << std::endl;
+  std::cin >> i;
 }

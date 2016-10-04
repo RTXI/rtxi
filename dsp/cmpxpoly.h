@@ -2,55 +2,50 @@
 // File = cmpxpoly.h
 //
 #ifndef _CMPXPOLY_H_
-#define _CMPXPOLY_H_  
+#define _CMPXPOLY_H_
 
-#include <fstream>
 #include "complex.h"
-
+#include <fstream>
 
 class CmplxPolynomial
 {
-public: 
-
+public:
   //  default constructor
-  CmplxPolynomial( );
-  
+  CmplxPolynomial();
+
   //  copy constructor
-  CmplxPolynomial( const CmplxPolynomial &original);
-  
+  CmplxPolynomial(const CmplxPolynomial& original);
+
   // constructor for initializing a binomial
-  CmplxPolynomial( const complex coeff_1,
-                   const complex coeff_0);
-                   
+  CmplxPolynomial(const complex coeff_1, const complex coeff_0);
+
   //  initializing constructor
-  CmplxPolynomial( const complex *coeff,
-                   const int degree);
-                   
+  CmplxPolynomial(const complex* coeff, const int degree);
+
   //  initializing constructor
-  CmplxPolynomial( const double *coeff,
-                   const int degree);
-                   
+  CmplxPolynomial(const double* coeff, const int degree);
+
   // assignment operator
-  CmplxPolynomial& operator= (const CmplxPolynomial &right);
-  
+  CmplxPolynomial& operator=(const CmplxPolynomial& right);
+
   //  multiply assign operator
-  CmplxPolynomial& operator*= (const CmplxPolynomial &right);
-  
+  CmplxPolynomial& operator*=(const CmplxPolynomial& right);
+
   //  divide assign operator
-  CmplxPolynomial& operator/= (const CmplxPolynomial &divisor);
-  
+  CmplxPolynomial& operator/=(const CmplxPolynomial& divisor);
+
   // return array of polynomial root values
-  complex* GetRoots( void );
+  complex* GetRoots(void);
 
   // reflect root across the unit circle
-  void ReflectRoot( int root_idx );
+  void ReflectRoot(int root_idx);
 
   // dump polynomial to an output stream
-  void DumpToStream( std::ostream* output_stream);
-  
+  void DumpToStream(std::ostream* output_stream);
+
   // get degree of polynomial
   int GetDegree(void);
-  
+
   // return specified coefficient
   complex GetCoeff(int k);
 
@@ -60,16 +55,15 @@ public:
   friend class Polynomial;
 
 private:
-
   // find roots of the polynomial
-  void FindRoots( void );
+  void FindRoots(void);
 
   // build sum of powers coefficients from roots
-  void BuildFromRoots( void );
-   
+  void BuildFromRoots(void);
+
   int Degree;
-  complex* Coeff; 
+  complex* Coeff;
   complex* RemCoeff;
   complex* Root;
-}; 
-#endif 
+};
+#endif

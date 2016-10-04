@@ -7,19 +7,18 @@
 
 #include "gen_win.h"
 
-class TriangularWindow: public GenericWindow {
+class TriangularWindow : public GenericWindow
+{
 public:
+  // constructors
 
-	// constructors
+  TriangularWindow(int length, int zero_ends);
+  void GenerateWindow(int length, int zero_ends);
 
+  // private:
 
-	TriangularWindow(int length, int zero_ends);
-	void GenerateWindow(int length, int zero_ends);
-
-	//private:
-
-	//int Num_Taps;
-	//double *Half_Lag_Window;
+  // int Num_Taps;
+  // double *Half_Lag_Window;
 };
 
 #endif

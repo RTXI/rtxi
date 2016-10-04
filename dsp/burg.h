@@ -5,29 +5,26 @@
 #ifndef _BURG_H_
 #define _BURG_H_
 
+#include "ar_proc.h"
 #include "complex.h"
 #include "typedefs.h"
-#include "ar_proc.h"
 
-template< class T>
+template <class T>
 class BurgMethod
 {
 public:
-
-  BurgMethod( int est_ar_order,
-              T* sig_seq,
-              int seq_len);
+  BurgMethod(int est_ar_order, T* sig_seq, int seq_len);
 
   ~BurgMethod(void);
 
-  void DumpParameters( std::ostream& uout);
-  void GetParameters( int *ar_order, T *a_coeff);
+  void DumpParameters(std::ostream& uout);
+  void GetParameters(int* ar_order, T* a_coeff);
   double GetDrivingVariance(void);
 
 protected:
   int Ar_Order;
-  T *A_Coeffs;
-  T *Old_Output;
+  T* A_Coeffs;
+  T* Old_Output;
   long Noise_Seed;
   double Drv_Noise_Var;
   T Sum_Wgn_Samps;

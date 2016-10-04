@@ -7,4 +7,4 @@
 
 double DSubInf(double delta_p, double delta_s);
 
-#endif //FILTMATH_H
+#endif // FILTMATH_H

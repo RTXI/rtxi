@@ -4,15 +4,16 @@
 //  special functions for computing performance
 //  of equiripple filters
 //
-#include <stdlib.h> 
-#include <iostream> 
-#include <fstream>
-#include <math.h>
-#include "misdefs.h"
 #include "filtmath.h"
+#include "misdefs.h"
+#include <fstream>
+#include <iostream>
+#include <math.h>
+#include <stdlib.h>
 
-double DSubInf( double delta_p, double delta_s)
- {
+double
+DSubInf(double delta_p, double delta_s)
+{
   double log_delta_p, work;
   double a1 = 5.309e-3;
   double a2 = 7.114e-2;
@@ -31,7 +32,6 @@ double DSubInf( double delta_p, double delta_s)
   work += a4 * log_delta_p * log_delta_p;
   work += a5 * log_delta_p;
   work += a6;
-  
-  return work;
- }  
 
+  return work;
+}

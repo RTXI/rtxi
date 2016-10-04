@@ -11,12 +11,8 @@ template <class T>
 class ArmaSource : public ArmaProcess<T>
 {
 public:
-  ArmaSource( int ar_order,
-              T *a_coeffs,
-              int ma_order,
-              T *b_coeffs,
-              double drv_noise_var );
-
+  ArmaSource(int ar_order, T* a_coeffs, int ma_order, T* b_coeffs,
+             double drv_noise_var);
 };
 
 #endif

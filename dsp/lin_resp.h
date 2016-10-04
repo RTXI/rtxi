@@ -11,41 +11,37 @@
 class LinearPhaseFirResponse : public FirFilterResponse
 {
 public:
-
   //--------------------------------------------------------
   // default constructor
-  
-  LinearPhaseFirResponse( );
-  
+
+  LinearPhaseFirResponse();
+
   //----------------------------------------------------------
   //  alternate constructor that provides interactive
   //  setting of configuration parameters
-  
-  LinearPhaseFirResponse( LinearPhaseFirDesign *filter_design,
-                          std::istream& uin,
-                          std::ostream& uout );
- 
+
+  LinearPhaseFirResponse(LinearPhaseFirDesign* filter_design, std::istream& uin,
+                         std::ostream& uout);
+
   //----------------------------------------
-  // method to compute magnitude response 
+  // method to compute magnitude response
   // using formulas from Table 12.2
-  
-  void ComputeMagResp( void );
-  
+
+  void ComputeMagResp(void);
+
   //--------------------------------
   // method not used until chapter 15
   // omit from Listing 12.x and introdice in chap 15
   double GetStopbandPeak(void);
-  
-                         
-private:
 
+private:
   // filter band configuration: 1 = lowpass,  2 = highpass,
   //                            3 = bandpass, 4 = bandstop
-  //int Band_Config;
-  //int Fir_Type;
-  
+  // int Band_Config;
+  // int Fir_Type;
+
   // these vars are used for band searching in chap15
-  //int N1, N2, N3, N4;
+  // int N1, N2, N3, N4;
 };
 
 #endif

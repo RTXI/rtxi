@@ -1,9 +1,10 @@
 /*
- * Some definitions of math constants and other options for defining filters, some replaced by gsl
+ * Some definitions of math constants and other options for defining filters,
+ * some replaced by gsl
  */
 
 #ifndef _MISDEFS_H_
-#define _MISDEFS_H_ 
+#define _MISDEFS_H_
 
 #define PI 3.1415926535897932
 //#define PI 3.14159265

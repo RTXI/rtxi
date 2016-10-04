@@ -9,11 +9,11 @@ template <class T>
 class Matrix
 {
 public:
-  Matrix( ){};
+  Matrix(){};
 
-  virtual T* GetCol(int col_indx)=0;
-  //virtual double ProcessSample( double input_val )=0;
-  //virtual long ProcessSample( long input_val )=0;
+  virtual T* GetCol(int col_indx) = 0;
+  // virtual double ProcessSample( double input_val )=0;
+  // virtual long ProcessSample( long input_val )=0;
 
 protected:
   int Num_Rows;

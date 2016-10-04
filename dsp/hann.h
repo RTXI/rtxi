@@ -7,18 +7,17 @@
 
 #include "gen_win.h"
 
-class HannWindow: public GenericWindow {
+class HannWindow : public GenericWindow
+{
 public:
+  // constructors
 
-	// constructors
-
-	HannWindow(int length, int zero_ends);
-	void GenerateWindow(int length, int zero_ends);
+  HannWindow(int length, int zero_ends);
+  void GenerateWindow(int length, int zero_ends);
 
 private:
-
-	int Num_Taps;
-	double *Half_Lag_Window;
+  int Num_Taps;
+  double* Half_Lag_Window;
 };
 
 #endif

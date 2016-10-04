@@ -7,16 +7,13 @@
 
 #include "ar_proc.h"
 
-template< class T > 
+template <class T>
 class ArSource : public ArProcess<T>
 {
 public:
-  ArSource( int ar_order, 
-            T *a_coeffs,
-            double drv_noise_var );
+  ArSource(int ar_order, T* a_coeffs, double drv_noise_var);
 
   ~ArSource(void);
-  
 };
 
 #endif

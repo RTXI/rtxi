@@ -4,32 +4,32 @@
  */
 
 #ifndef _FIRIDEAL_H_
-#define _FIRIDEAL_H_ 
+#define _FIRIDEAL_H_
 
-#include "typedefs.h"
-#include "gen_win.h"
 #include "fir_dsgn.h"
+#include "gen_win.h"
 #include "lin_dsgn.h"
+#include "typedefs.h"
 
-class FirIdealFilter: public LinearPhaseFirDesign {
+class FirIdealFilter : public LinearPhaseFirDesign
+{
 public:
+  // constructors
 
-	// constructors
+  FirIdealFilter(int num_taps, double lambda1, double lambda2, int filtertype);
 
-	FirIdealFilter(int num_taps, double lambda1, double lambda2, int filtertype);
-
-	void DefineFilter(int num_taps, double lambda1, double lambda2, int band_config);
+  void DefineFilter(int num_taps, double lambda1, double lambda2,
+                    int band_config);
 
 private:
-	void Ideal_Lowpass(double lambda1);
-	void Ideal_Highpass(double lambda1);
-	void Ideal_Bandpass(double lambda1, double lambda2);
-	void Ideal_Bandstop(double lambda1, double lambda2);
+  void Ideal_Lowpass(double lambda1);
+  void Ideal_Highpass(double lambda1);
+  void Ideal_Bandpass(double lambda1, double lambda2);
+  void Ideal_Bandstop(double lambda1, double lambda2);
 
 protected:
-	double lambda1;
-	double lambda2;
-
+  double lambda1;
+  double lambda2;
 };
 
 #endif
