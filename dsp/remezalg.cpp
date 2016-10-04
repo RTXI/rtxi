@@ -5,12 +5,14 @@
 //  Remez algorithm for design of FIR filters
 //
 
-#include "remezalg.h"
-#include "fs_dsgn.h"
-#include "fs_spec.h"
 #include <iostream>
 #include <math.h>
 #include <stdlib.h>
+
+#include "fs_dsgn.h"
+#include "fs_spec.h"
+#include "remezalg.h"
+
 #ifdef _DEBUG
 extern std::ofstream DebugFile;
 #endif

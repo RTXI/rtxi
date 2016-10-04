@@ -9,7 +9,7 @@
 class RemezAlgorithm
 {
 public:
-  //  constructor
+  // constructor
   RemezAlgorithm(std::istream& uin, std::ostream& uout, int filter_length,
                  double passband_edge_freq, double stopband_edge_freq,
                  double ripple_ratio, FirFilterDesign** fir_filter);

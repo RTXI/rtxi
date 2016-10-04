@@ -2,10 +2,10 @@
  * Design of a linear phase filter, based on general filter design
  */
 
-#include "lin_dsgn.h"
-#include "fir_dsgn.h"
 #include "misdefs.h"
 #include "typedefs.h"
+#include "fir_dsgn.h"
+#include "lin_dsgn.h"
 #include <gsl/gsl_math.h>
 
 // default constructor
