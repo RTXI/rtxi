@@ -14,7 +14,7 @@
 
 using namespace std;
 
-extern std::ofstream AnalogWaveFile;
+// extern std::ofstream AnalogWaveFile;
 ofstream DigitalOutputFile("digital.txt", ios::out);
 
 IirSweptResponse::IirSweptResponse(FilterImplementation* filter_implem,
@@ -127,7 +127,7 @@ IirSweptResponse::IirSweptResponse(FilterImplementation* filter_implem,
       }
     }
     if (resp_indx == 6) {
-      reconst_output->DumpResult(&AnalogWaveFile);
+      // reconst_output->DumpResult(&AnalogWaveFile);
     }
 
     // look for peak output magnitude

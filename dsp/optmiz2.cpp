@@ -7,7 +7,7 @@
 #include "goldsrh2.h"
 #include <fstream>
 #include <math.h>
-extern std::ofstream LogFile;
+// extern std::ofstream LogFile;
 
 void
 optimize2(FreqSampFilterSpec* filter_spec, FreqSampFilterDesign* filter_design,
@@ -55,11 +55,11 @@ optimize2(FreqSampFilterSpec* filter_spec, FreqSampFilterDesign* filter_design,
     /*  and find optimal point along line  */
 
     slopes[2] = y_base * (1 - tweak_factor) / (x1 - x2);
-    LogFile << "\n slopes[2] = " << slopes[2] << std::endl;
+    // LogFile << "\n slopes[2] = " << slopes[2] << std::endl;
     origins[2] = y_base - slopes[2] * x1;
-    LogFile << "y_base = " << y_base << std::endl;
-    LogFile << "x1 = " << x1 << std::endl;
-    LogFile << " origins[2] = " << origins[2] << "\n" << std::endl;
+    // LogFile << "y_base = " << y_base << std::endl;
+    // LogFile << "x1 = " << x1 << std::endl;
+    // LogFile << " origins[2] = " << origins[2] << "\n" << std::endl;
     x_max = (1.0 - origins[2]) / slopes[2];
     std::cout << "x2 = " << x2 << std::endl;
     // std::cout << "y3 = " << y3 << std::endl;
@@ -76,8 +76,8 @@ optimize2(FreqSampFilterSpec* filter_spec, FreqSampFilterDesign* filter_design,
     /*    then stop; otherwise stay in loop and define a new line    */
     /*    starting at the best point on line just completed.         */
 
-    LogFile << "old_min = " << old_min << std::endl;
-    LogFile << "min_func_val = " << min_func_val << std::endl;
+    // LogFile << "old_min = " << old_min << std::endl;
+    // LogFile << "min_func_val = " << min_func_val << std::endl;
     // if(fabs(old_min-min_func_val) < tol) break;
     if (fabs(old_min - min_func_val) < 0.1)
       break;

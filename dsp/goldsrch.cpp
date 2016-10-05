@@ -18,8 +18,8 @@
 #ifdef _DEBUG
 extern std::ofstream DebugFile;
 #endif
-extern std::ofstream LogFile;
-extern logical PauseEnabled;
+// extern std::ofstream LogFile;
+// extern logical PauseEnabled;
 
 double
 GoldenSearch(double tol, FreqSampFilterSpec* filter_spec,
@@ -54,7 +54,7 @@ GoldenSearch(double tol, FreqSampFilterSpec* filter_spec,
   filter_resp->NormalizeResponse(db_scale);
   rightOrd = filter_resp->GetStopbandPeak();
   std::cout << "rightOrd = " << rightOrd << std::endl;
-  pause(PauseEnabled);
+  // pause(PauseEnabled);
 
   if (leftOrd < rightOrd) {
     trans_val = 1.0;
@@ -160,6 +160,6 @@ GoldenSearch(double tol, FreqSampFilterSpec* filter_spec,
     *fmin = f2;
   }
   std::cout << "minimum of " << *fmin << " at x = " << xmin << std::endl;
-  LogFile << "minimum of " << *fmin << " at x = " << xmin << std::endl;
+  // LogFile << "minimum of " << *fmin << " at x = " << xmin << std::endl;
   return (xmin);
 }
