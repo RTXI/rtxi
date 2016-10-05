@@ -11,7 +11,6 @@ HEADERS=$(shell find . -type f -name "*.h")
 SOURCES=$(shell find . -type f -name "*.cpp")
 OBJECTS=$(SOURCES:.cpp=.o)
 MOC_SOURCES=$(HEADERS:.h=.moc.cpp)
-#MOC_HEADERS=$(shell echo $(HEADERS) | sed -n "s/\(.*\)\.h[ \t\n]*/moc_\1\.cpp /p")
 MOC_OBJECTS=$(MOC_SOURCES:.moc.cpp=.moc.o)
 
 all: $(TARGET)
