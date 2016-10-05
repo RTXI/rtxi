@@ -33,4 +33,4 @@ template <class T>
 ArSource<T>::~ArSource(void){};
 //---------------------------
 // Explicit instantiations
-// template ArSource<type_of_sig_vals_T>;
+template class ArSource<type_of_sig_vals_T>;

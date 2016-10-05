@@ -140,5 +140,5 @@ LevinsonRecursion(T* toeplitz, int ar_order, T* avec, double* ar_drv_var_ret)
 };
 //
 // Force instantiations
-// template LevinsonRecursion <complex>;
+template class LevinsonRecursion <complex>;
 #endif

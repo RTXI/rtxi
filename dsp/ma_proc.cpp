@@ -93,4 +93,4 @@ MaProcess<T>::OutputSequence(long noise_seed_init, int seq_len)
 }
 //--------------------------------
 //  Explicit instantiations
-// template MaProcess<type_of_sig_vals_T>;
+template class MaProcess<type_of_sig_vals_T>;

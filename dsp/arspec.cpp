@@ -104,5 +104,5 @@ ArSpectrum<T>::DumpSpectrum(char* out_file_nam, logical db_plot_enab)
   out_file.close();
 }
 
-// template ArSpectrum<complex>;
-// template ArSpectrum<double>;
+// template class ArSpectrum<complex>;
+template class ArSpectrum<double>;

@@ -42,5 +42,5 @@ AutocorrMethCorrMtx<T>::~AutocorrMethCorrMtx()
   delete[] this->Herm_Toep_Col_1;
 }
 
-// template AutocorrMethCorrMtx<double>;
-// template AutocorrMethCorrMtx<complex>;
+template class AutocorrMethCorrMtx<double>;
+template class AutocorrMethCorrMtx<complex>;

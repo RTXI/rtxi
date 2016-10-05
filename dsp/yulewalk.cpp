@@ -46,5 +46,5 @@ YuleWalker<T>::YuleWalker(T* toep_corr_mtx, int ar_ord, T* a_vec,
   return;
 }
 
-// template YuleWalker<double>;
-// template YuleWalker<complex>;
+template class YuleWalker<double>;
+template class YuleWalker<complex>;

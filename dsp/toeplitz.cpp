@@ -31,5 +31,5 @@ ToeplitzMatrix<T>::GetCol(int col_indx)
   }
   return (col_vect);
 }
-// template ToeplitzMatrix<double>;
-// template ToeplitzMatrix<complex>;
+template class ToeplitzMatrix<double>;
+template class ToeplitzMatrix<complex>;

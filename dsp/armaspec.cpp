@@ -86,5 +86,5 @@ ArmaSpectrum<T>::DumpSpectrum(char* out_file_nam,
   out_file.close();
 }
 
-// template ArSpectrum<complex>;
-// template ArmaSpectrum<double>;
+// template class ArmaSpectrum<complex>;
+template class ArmaSpectrum<double>;

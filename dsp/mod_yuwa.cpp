@@ -75,5 +75,5 @@ ModYuleWalker<T>::GetDrivingVariance(void)
   return (Ar_Drv_Var);
 };
 
-// template ModYuleWalker<double>;
-// template ModYuleWalker<complex>;
+template class ModYuleWalker<double>;
+template class ModYuleWalker<complex>;

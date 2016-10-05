@@ -129,5 +129,5 @@ ArmaProcess<T>::GetDrivingVariance(void)
 {
   return (Drv_Noise_Var);
 }
-// template ArmaProcess<double>;
-// template ArmaProcess<complex>;
+template class ArmaProcess<double>;
+template class ArmaProcess<complex>;

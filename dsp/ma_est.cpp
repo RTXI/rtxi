@@ -64,5 +64,5 @@ MaEstimate<T>::MaEstimate(int est_ma_order, int durbin_ar_order, T* sig_seq,
 
 //------------------------------------
 //  Explicit instantiations
-// template MaEstimate<type_of_sig_vals_T>;
-// template MaEstimate<complex>;
+template class MaEstimate<type_of_sig_vals_T>;
+// template class MaEstimate<complex>;

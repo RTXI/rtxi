@@ -140,5 +140,5 @@ matrix<T>::operator-=(matrix<T>& m2)
   }
   return (*this);
 }
-// template matrix<double>;
-// template matrix<complex>;
+template class matrix<double>;
+template class matrix<complex>;

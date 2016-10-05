@@ -42,5 +42,5 @@ ArmaSource<T>::ArmaSource(int ar_order, T* a_coeffs, int ma_order, T* b_coeffs,
 }
 //-------------------------------------
 //  Explicit instantiations of template
-// template ArmaSource<double>;
-// template ArmaSource<complex>;
+template class ArmaSource<double>;
+template class ArmaSource<complex>;

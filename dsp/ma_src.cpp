@@ -44,5 +44,5 @@ MaSource<T>::~MaSource(void)
 
 //-----------------------------------------------
 //  Explicit instantiations
-// template MaSource<double>;
-// template MaSource<type_of_sig_vals_T>;
+// template class MaSource<double>;
+template class MaSource<type_of_sig_vals_T>;

@@ -97,5 +97,5 @@ ArmaEstimate<T>::ArmaEstimate(int est_ar_order, int est_ma_order,
   return;
 }
 
-// template ArmaEstimate<double>;
-// template ArmaEstimate<complex>;
+template class ArmaEstimate<double>;
+template class ArmaEstimate<complex>;

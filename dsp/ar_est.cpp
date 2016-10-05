@@ -61,4 +61,4 @@ ArEstimate<T>::DumpParameters(ostream& uout)
   return;
 }
 
-// template ArEstimate<type_of_sig_vals_T>;
+template class ArEstimate<type_of_sig_vals_T>;

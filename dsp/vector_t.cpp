@@ -581,11 +581,10 @@ vector<T>& vector<T>::operator*(matrix<T>& m2)
 }
 //---------------------------------
 // force desired instantiations
-// template vector<complex>;
-// template vector<double>;
-// template rowvec<double>;
-// template colvec<double>;
-// template vector<complex>;
-// template rowvec<complex>;
-// template colvec<complex>;
-// rowvec<double>* transpose( colvec<double>* );
+template class vector<double>;
+template class rowvec<double>;
+template class colvec<double>;
+template class vector<complex>;
+template class rowvec<complex>;
+template class colvec<complex>;
+rowvec<double>* transpose( colvec<double>* );

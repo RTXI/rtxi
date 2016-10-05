@@ -124,5 +124,5 @@ BurgMethod<T>::GetDrivingVariance(void)
   return (Drv_Noise_Var);
 }
 
-// template BurgMethod<complex>;
-// template BurgMethod<double>;
+template class BurgMethod<complex>;
+template class BurgMethod<double>;

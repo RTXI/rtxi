@@ -182,4 +182,4 @@ ArProcess<T>::NextSample(void)
   return (out_samp);
 }
 
-// template ArProcess<type_of_sig_vals_T>;
+template class ArProcess<type_of_sig_vals_T>;
