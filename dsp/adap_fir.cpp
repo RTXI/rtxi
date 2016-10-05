@@ -1,15 +1,19 @@
 //
 //  File = adap_fir.cpp
 //
-
-#include "adap_fir.h"
-#include "dirform1.h"
 #include <fstream>
 #include <math.h>
 #include <stdlib.h>
+#include <iostream>
+
+#include "adap_fir.h"
+#include "dirform1.h"
+
 #ifdef _DEBUG
 extern std::ofstream DebugFile;
 #endif
+
+using namespace std;
 
 AdaptiveFir::AdaptiveFir(int num_taps, double* coeff, logical quan_enab,
                          long coeff_quan_factor, long input_quan_factor,
@@ -40,7 +44,7 @@ AdaptiveFir::AdaptiveFir(int num_taps, double* coeff, logical quan_enab,
   return;
 }
 
-~AdaptiveFir::AdaptiveFir(void)
+AdaptiveFir::~AdaptiveFir(void)
 {
   delete[] Tally_For_Avg;
   delete[] Tally_For_Avg_2;

@@ -2,12 +2,14 @@
 //  File = sinawgn.cpp
 //
 
+#include <stdlib.h>
 #include "sinawgn.h"
 #include "complex.h"
+#include "uni_rand.h"
 #include "gausrand.h"
 #include "misdefs.h"
-#include "uni_rand.h"
-#include <stdlib.h>
+
+using namespace std;
 
 //==========================================
 // constructor with sine and noise parameters

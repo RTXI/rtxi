@@ -3,7 +3,7 @@
  */
 
 #include "kaiser.h"
-#include "bessel.cpp"
+#include "bessel.h"
 #include "misdefs.h"
 #include <gsl/gsl_math.h>
 #include <math.h>

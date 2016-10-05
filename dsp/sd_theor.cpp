@@ -2,10 +2,14 @@
 //  File = sd_filt.cpp
 //
 
-#include "sd_theor.h"
-#include "misdefs.h"
 #include <fstream>
 #include <math.h>
+#include <iostream>
+
+#include "sd_theor.h"
+#include "misdefs.h"
+
+using namespace std;
 
 #ifdef _DEBUG
 extern std::ofstream DebugFile;

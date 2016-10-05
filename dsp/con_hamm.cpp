@@ -2,12 +2,14 @@
 //  File = con_hamm.cpp
 //
 
+#include <iostream>
+#include <math.h>
+#include "typedefs.h"
 #include "con_hamm.h"
 #include "misdefs.h"
 #include "sinc.h"
-#include "typedefs.h"
-#include <iostream>
-#include <math.h>
+
+using namespace std;
 
 ContHammingMagResp::ContHammingMagResp(istream& uin, ostream& uout)
   : ContinWindowResponse(uin, uout)

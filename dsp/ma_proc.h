@@ -5,6 +5,8 @@
 #ifndef _MA_PROC_H_
 #define _MA_PROC_H_
 
+#include <iostream>
+
 //#include "complex.h"
 //#include "cmpx_vec.h"
 //#include "typedefs.h"

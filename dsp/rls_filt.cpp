@@ -2,13 +2,15 @@
 //  File = rls_filt.cpp
 //
 
+#include <fstream>
+#include <stdlib.h>
+#include <iostream>
+
 #include "rls_filt.h"
 #include "adap_fir.h"
 #include "matrix_t.h"
-#include <fstream>
-#include <stdlib.h>
+
 #ifdef _DEBUG
-#include <fstream>
 //#define _RLS_DEBUG 1
 extern std::ofstream DebugFile;
 #endif

@@ -2,13 +2,17 @@
 //  File = burg.cpp
 //
 
+#include <fstream>
+#include <stdlib.h>
+#include <iostream>
+
 #include "burg.h"
 #include "complex.h"
 #include "matrix_t.h"
 #include "overload.h"
 #include "yulewalk.h"
-#include <fstream>
-#include <stdlib.h>
+
+using namespace std;
 
 //==============================================
 
@@ -121,4 +125,4 @@ BurgMethod<T>::GetDrivingVariance(void)
 }
 
 // template BurgMethod<complex>;
-template BurgMethod<double>;
+// template BurgMethod<double>;

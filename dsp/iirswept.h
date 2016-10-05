@@ -7,13 +7,13 @@
 
 #include "filt_imp.h"
 
-class SweptResponse
+class IirSweptResponse
 {
 public:
-  SweptResponse(FilterImplementation* filter_implem, double sampling_interval,
+  IirSweptResponse(FilterImplementation* filter_implem, double sampling_interval,
                 std::istream& uin, std::ostream& uout);
-  ~SweptResponse();
-  void SweptResponse::NormalizeResponse(void);
+  ~IirSweptResponse();
+  void NormalizeResponse(void);
   void DumpMagResp(void);
 
 private:

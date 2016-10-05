@@ -5,9 +5,13 @@
 //  Arbitrary All-Pole Filter Response
 //
 
+#include <math.h>
+#include <iostream>
+
 #include "polefunc.h"
 #include "misdefs.h"
-#include <math.h>
+
+using namespace std;
 
 #ifdef _DEBUG
 extern std::ofstream DebugFile;

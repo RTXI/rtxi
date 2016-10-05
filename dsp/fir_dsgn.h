@@ -5,8 +5,8 @@
 #ifndef _FIR_DSGN_H_
 #define _FIR_DSGN_H_
 
-#include "gen_win.h"
 #include "typedefs.h"
+#include "gen_win.h"
 
 typedef enum {
   FIR_SYM_NONE,

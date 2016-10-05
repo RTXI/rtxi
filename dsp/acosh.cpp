@@ -2,9 +2,9 @@
  * Acosh, inverse hyperbolic cosine
  */
 
-#include "acosh.h"
 #include <math.h>
 #include <stdlib.h>
+#include "acosh.h"
 
 double
 acosh(double x)

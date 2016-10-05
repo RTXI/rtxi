@@ -2,18 +2,22 @@
 //  File = iirswept.cpp
 //
 
+#include <fstream>
+#include <math.h>
+#include <stdlib.h>
+#include <iostream>
+
 #include "iirswept.h"
 #include "anlg_rcn.h"
 #include "misdefs.h"
 #include "typedefs.h"
-#include <fstream>
-#include <math.h>
-#include <stdlib.h>
+
+using namespace std;
 
 extern std::ofstream AnalogWaveFile;
 ofstream DigitalOutputFile("digital.txt", ios::out);
 
-SweptResponse::SweptResponse(FilterImplementation* filter_implem,
+IirSweptResponse::IirSweptResponse(FilterImplementation* filter_implem,
                              double sampling_interval, istream& uin,
                              ostream& uout)
 {
@@ -201,7 +205,7 @@ SweptResponse::SweptResponse(FilterImplementation* filter_implem,
 // destructor
 //-------------------------------------------------------
 
-SweptResponse::~SweptResponse()
+IirSweptResponse::~IirSweptResponse()
 {
   delete[] Mag_Resp;
   delete Response_File;
@@ -211,7 +215,7 @@ SweptResponse::~SweptResponse()
 //-------------------------------------------------------
 
 void
-SweptResponse::NormalizeResponse(void)
+IirSweptResponse::NormalizeResponse(void)
 {
   int n;
   double biggest;
@@ -245,7 +249,7 @@ SweptResponse::NormalizeResponse(void)
 //-----------------------------------------------------------
 
 void
-SweptResponse::DumpMagResp(void)
+IirSweptResponse::DumpMagResp(void)
 {
   double freq;
 

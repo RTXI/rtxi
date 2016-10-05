@@ -4,12 +4,16 @@
 //
 //
 
-#include "polydiv.h"
-#include "complex.h"
 #include <fstream>
 #include <iostream>
 #include <math.h>
 #include <stdlib.h>
+
+#include "complex.h"
+#include "polydiv.h"
+
+using namespace std;
+
 #ifdef _DEBUG
 extern std::ofstream DebugFile;
 #endif

@@ -2,12 +2,16 @@
 //  File = con_tngl.cpp
 //
 
+#include <iostream>
+#include <math.h>
+#include <iostream>
+
 #include "con_tngl.h"
 #include "misdefs.h"
 #include "sincsqrd.h"
 #include "typedefs.h"
-#include <iostream>
-#include <math.h>
+
+using namespace std;
 
 ContTriangularMagResp::ContTriangularMagResp(istream& uin, ostream& uout)
   : ContinWindowResponse(uin, uout)

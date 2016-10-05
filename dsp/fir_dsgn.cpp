@@ -2,12 +2,13 @@
  * Functions for class FirFilterDesign
  */
 
-#include "fir_dsgn.h"
-#include "fir_resp.h"
-#include "misdefs.h"
 #include <gsl/gsl_math.h>
 #include <math.h>
 #include <stdlib.h>
+
+#include "misdefs.h"
+#include "fir_dsgn.h"
+#include "fir_resp.h"
 
 // default constructor
 

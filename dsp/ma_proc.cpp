@@ -2,12 +2,16 @@
 //  File = ma_proc.cpp
 //
 
+#include <fstream>
+#include <stdlib.h>
+#include <iostream>
+
 #include "ma_proc.h"
 #include "gausrand.h"
 #include "sig_type.h"
 #include "yulewalk.h"
-#include <fstream>
-#include <stdlib.h>
+
+using namespace std;
 
 #ifdef _DEBUG
 extern std::ofstream DebugFile;
@@ -89,4 +93,4 @@ MaProcess<T>::OutputSequence(long noise_seed_init, int seq_len)
 }
 //--------------------------------
 //  Explicit instantiations
-template MaProcess<type_of_sig_vals_T>;
+// template MaProcess<type_of_sig_vals_T>;

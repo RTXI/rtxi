@@ -2,16 +2,20 @@
 //  File = ma_est.cpp
 //
 
+#include <fstream>
+#include <stdlib.h>
+#include <iostream>
+
 #include "ma_est.h"
 #include "gausrand.h"
 #include "sig_type.h"
 #include "yulewalk.h"
-#include <fstream>
-#include <stdlib.h>
 
 #ifdef _DEBUG
 extern std::ofstream DebugFile;
 #endif
+
+using namespace std;
 
 //========================================================
 //  MaEstimate - subclass of MaProcess for the case where
@@ -26,12 +30,12 @@ MaEstimate<T>::MaEstimate(int est_ma_order, int durbin_ar_order, T* sig_seq,
   T* a_coeffs;
   YuleWalker<T>* yw_ptr;
 
-  Ma_Order = est_ma_order;
-  Noise_Seed = 31415927; // arbitrary default
+  this->Ma_Order = est_ma_order;
+  this->Noise_Seed = 31415927; // arbitrary default
 
-  Old_Input = new T[est_ma_order + 1];
+  this->Old_Input = new T[est_ma_order + 1];
   for (i = 0; i <= est_ma_order; i++)
-    Old_Input[i] = 0.0;
+    this->Old_Input[i] = 0.0;
 
   //---------------------------------------------------------
   //  Fit high-order AR model to the data
@@ -39,7 +43,7 @@ MaEstimate<T>::MaEstimate(int est_ma_order, int durbin_ar_order, T* sig_seq,
   a_coeffs = new T[durbin_ar_order + 1];
 
   yw_ptr = new YuleWalker<T>(sig_seq, seq_len, durbin_ar_order, a_coeffs,
-                             &Drv_Noise_Var, &err_stat);
+                             &(this->Drv_Noise_Var), &err_stat);
 
   delete yw_ptr;
 
@@ -48,10 +52,10 @@ MaEstimate<T>::MaEstimate(int est_ma_order, int durbin_ar_order, T* sig_seq,
   //  to fit desired order MA model
 
   double dummy_var;
-  B_Coeffs = new T[est_ma_order + 1];
+  this->B_Coeffs = new T[est_ma_order + 1];
 
   yw_ptr = new YuleWalker<T>(a_coeffs, durbin_ar_order + 1, est_ma_order,
-                             B_Coeffs, &dummy_var, &err_stat);
+                             this->B_Coeffs, &dummy_var, &err_stat);
 
   delete yw_ptr;
   delete[] a_coeffs;
@@ -60,5 +64,5 @@ MaEstimate<T>::MaEstimate(int est_ma_order, int durbin_ar_order, T* sig_seq,
 
 //------------------------------------
 //  Explicit instantiations
-template MaEstimate<type_of_sig_vals_T>;
+// template MaEstimate<type_of_sig_vals_T>;
 // template MaEstimate<complex>;

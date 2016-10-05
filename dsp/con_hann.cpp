@@ -2,12 +2,12 @@
 //  File = hann.cpp
 //
 
+#include <iostream>
+#include <math.h>
+#include "typedefs.h"
 #include "con_hann.h"
 #include "misdefs.h"
 #include "sinc.h"
-#include "typedefs.h"
-#include <iostream>
-#include <math.h>
 
 using namespace std;
 

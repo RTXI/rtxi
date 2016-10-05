@@ -45,5 +45,6 @@ YuleWalker<T>::YuleWalker(T* toep_corr_mtx, int ar_ord, T* a_vec,
   *err_stat = LevinsonRecursion(toep_corr_mtx, ar_ord, a_vec, drv_noise_var);
   return;
 }
-template YuleWalker<double>;
-template YuleWalker<complex>;
+
+// template YuleWalker<double>;
+// template YuleWalker<complex>;

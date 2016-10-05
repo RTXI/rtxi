@@ -2,16 +2,18 @@
 //  File = goldsrch.cpp
 //
 
-#include "goldsrch.h"
-#include "fs_dsgn.h"
-#include "fs_spec.h"
-#include "fs_util.h"
-#include "misdefs.h"
-#include "sb_peak.h"
-#include "typedefs.h"
 #include <fstream>
 #include <math.h>
 #include <stdlib.h>
+#include <iostream>
+
+#include "misdefs.h"
+#include "typedefs.h"
+#include "goldsrch.h"
+#include "fs_util.h"
+#include "fs_dsgn.h"
+#include "sb_peak.h"
+#include "fs_spec.h"
 
 #ifdef _DEBUG
 extern std::ofstream DebugFile;
@@ -39,7 +41,7 @@ GoldenSearch(double tol, FreqSampFilterSpec* filter_spec,
   /*--------------------------------------------*/
   filter_spec->SetTrans(0.0);
   filter_design->ComputeCoefficients(filter_spec);
-  filter_design->QuantizeCoefficients(quant_factor, rounding_enab);
+  // filter_design->QuantizeCoefficients(quant_factor, rounding_enab);
   filter_resp->ComputeMagResp(filter_design, db_scale);
   filter_resp->NormalizeResponse(db_scale);
   leftOrd = filter_resp->GetStopbandPeak();
@@ -47,7 +49,7 @@ GoldenSearch(double tol, FreqSampFilterSpec* filter_spec,
 
   filter_spec->SetTrans(1.0);
   filter_design->ComputeCoefficients(filter_spec);
-  filter_design->QuantizeCoefficients(quant_factor, rounding_enab);
+  // filter_design->QuantizeCoefficients(quant_factor, rounding_enab);
   filter_resp->ComputeMagResp(filter_design, db_scale);
   filter_resp->NormalizeResponse(db_scale);
   rightOrd = filter_resp->GetStopbandPeak();
@@ -61,7 +63,7 @@ GoldenSearch(double tol, FreqSampFilterSpec* filter_spec,
       trans_val = GOLD3 * trans_val;
       filter_spec->SetTrans(trans_val);
       filter_design->ComputeCoefficients(filter_spec);
-      filter_design->QuantizeCoefficients(quant_factor, rounding_enab);
+      // filter_design->QuantizeCoefficients(quant_factor, rounding_enab);
       filter_resp->ComputeMagResp(filter_design, db_scale);
       filter_resp->NormalizeResponse(db_scale);
       midOrd = filter_resp->GetStopbandPeak();
@@ -77,7 +79,7 @@ GoldenSearch(double tol, FreqSampFilterSpec* filter_spec,
       std::cout << "checkpoint 4" << std::endl;
       filter_spec->SetTrans(trans_val);
       filter_design->ComputeCoefficients(filter_spec);
-      filter_design->QuantizeCoefficients(quant_factor, rounding_enab);
+      // filter_design->QuantizeCoefficients(quant_factor, rounding_enab);
       filter_resp->ComputeMagResp(filter_design, db_scale);
       filter_resp->NormalizeResponse(db_scale);
       midOrd = filter_resp->GetStopbandPeak();
@@ -98,14 +100,14 @@ GoldenSearch(double tol, FreqSampFilterSpec* filter_spec,
 
   filter_spec->SetTrans(x1);
   filter_design->ComputeCoefficients(filter_spec);
-  filter_design->QuantizeCoefficients(quant_factor, rounding_enab);
+  // filter_design->QuantizeCoefficients(quant_factor, rounding_enab);
   filter_resp->ComputeMagResp(filter_design, db_scale);
   filter_resp->NormalizeResponse(db_scale);
   f1 = filter_resp->GetStopbandPeak();
 
   filter_spec->SetTrans(x2);
   filter_design->ComputeCoefficients(filter_spec);
-  filter_design->QuantizeCoefficients(quant_factor, rounding_enab);
+  // filter_design->QuantizeCoefficients(quant_factor, rounding_enab);
   filter_resp->ComputeMagResp(filter_design, db_scale);
   filter_resp->NormalizeResponse(db_scale);
   f2 = filter_resp->GetStopbandPeak();
@@ -121,7 +123,7 @@ GoldenSearch(double tol, FreqSampFilterSpec* filter_spec,
       f2 = f1;
       filter_spec->SetTrans(x1);
       filter_design->ComputeCoefficients(filter_spec);
-      filter_design->QuantizeCoefficients(quant_factor, rounding_enab);
+      // filter_design->QuantizeCoefficients(quant_factor, rounding_enab);
       filter_resp->ComputeMagResp(filter_design, db_scale);
       filter_resp->NormalizeResponse(db_scale);
       f1 = filter_resp->GetStopbandPeak();
@@ -135,7 +137,7 @@ GoldenSearch(double tol, FreqSampFilterSpec* filter_spec,
       f1 = f2;
       filter_spec->SetTrans(x2);
       filter_design->ComputeCoefficients(filter_spec);
-      filter_design->QuantizeCoefficients(quant_factor, rounding_enab);
+      // filter_design->QuantizeCoefficients(quant_factor, rounding_enab);
       filter_resp->ComputeMagResp(filter_design, db_scale);
       filter_resp->NormalizeResponse(db_scale);
       f2 = filter_resp->GetStopbandPeak();

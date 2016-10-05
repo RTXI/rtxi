@@ -23,12 +23,13 @@ const double TWO_PI = 6.2831853071795864;
 #define DISCRETE_FULL_LAG 2
 #define DISCRETE_DATA_WINDOW 3
 
-//#define _RECTANGULAR 1
-//#define _TRIANGULAR 2
-//#define _HAMMING 3
-//#define _HANN 4
-//#define _DOLPH_CHEBY 5
-//#define _KAISER 6
+// these defines used in con_resp.cpp
+#define _RECTANGULAR 1
+#define _TRIANGULAR 2
+#define _HAMMING 3
+#define _HANN 4
+#define _DOLPH_CHEBY 5
+#define _KAISER 6
 
 #define _NO_ZERO_ENDS 0
 #define _ZERO_ENDS 1

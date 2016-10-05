@@ -5,10 +5,11 @@
 #ifndef _FS_DSGN_H_
 #define _FS_DSGN_H_
 
+#include <fstream>
+
 #include "fir_dsgn.h"
 #include "fs_spec.h"
 #include "gen_win.h"
-#include <fstream>
 
 class FreqSampFilterDesign : public FirFilterDesign
 {

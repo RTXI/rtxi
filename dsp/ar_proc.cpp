@@ -12,6 +12,8 @@
 extern std::ofstream DebugFile;
 #endif
 
+using namespace std;
+
 //===============================================
 //  ArProcess
 
@@ -179,4 +181,5 @@ ArProcess<T>::NextSample(void)
 
   return (out_samp);
 }
-template ArProcess<type_of_sig_vals_T>;
+
+// template ArProcess<type_of_sig_vals_T>;

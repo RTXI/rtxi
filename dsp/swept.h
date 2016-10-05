@@ -5,6 +5,8 @@
 #ifndef _SWEPT_H_
 #define _SWEPT_H_
 
+#include <iostream>
+
 #include "filt_imp.h"
 
 class SweptResponse
@@ -13,7 +15,7 @@ public:
   SweptResponse(FilterImplementation* filter_implem, double sampling_interval,
                 std::istream& uin, std::ostream& uout);
   ~SweptResponse();
-  void SweptResponse::NormalizeResponse(void);
+  void NormalizeResponse(void);
   void DumpMagResp(void);
 
 private:

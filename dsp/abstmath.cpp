@@ -82,7 +82,6 @@ OrderedFactorSet::OrderedFactorSet(int num_factors, int* factors)
   }
   return;
 }
-i;
 
 OrderedFactorSet::~OrderedFactorSet(void)
 {

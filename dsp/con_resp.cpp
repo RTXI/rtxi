@@ -2,9 +2,12 @@
 //  File = con_resp.cpp
 //
 
+#include <stdlib.h>
+
 #include "con_resp.h"
 #include "misdefs.h"
-#include <stdlib.h>
+
+using namespace std;
 
 ContinWindowResponse::ContinWindowResponse(istream& uin, ostream& uout)
 {

@@ -2,12 +2,17 @@
 //  File = swept.cpp
 //
 
-#include "swept.h"
-#include "misdefs.h"
-#include "typedefs.h"
 #include <fstream>
 #include <math.h>
 #include <stdlib.h>
+#include <iostream>
+
+#include "swept.h"
+#include "misdefs.h"
+#include "typedefs.h"
+
+using namespace std;
+
 #ifdef _DEBUG
 extern std::ofstream DebugFile;
 #endif

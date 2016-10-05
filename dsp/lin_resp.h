@@ -14,14 +14,14 @@ public:
   //--------------------------------------------------------
   // default constructor
 
-  LinearPhaseFirResponse();
+  // LinearPhaseFirResponse();
 
   //----------------------------------------------------------
   //  alternate constructor that provides interactive
   //  setting of configuration parameters
 
-  LinearPhaseFirResponse(LinearPhaseFirDesign* filter_design, std::istream& uin,
-                         std::ostream& uout);
+  LinearPhaseFirResponse(LinearPhaseFirDesign *, std::istream&, std::ostream&,
+                         int, int, int, char*);
 
   //----------------------------------------
   // method to compute magnitude response

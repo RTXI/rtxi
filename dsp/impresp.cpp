@@ -4,10 +4,12 @@
 //
 //
 
-#include "impresp.h"
-#include "complex.h"
 #include <math.h>
 #include <stdlib.h>
+#include <iostream>
+
+#include "impresp.h"
+#include "complex.h"
 
 #ifdef _DEBUG
 extern std::ofstream DebugFile;
@@ -103,7 +105,7 @@ ImpulseResponse::GenerateResponse(void)
   int resp_indx;
   double h_of_t, time, delta_t;
 
-  Response_File = new ofstream("imp_anal.txt", ios::out);
+  Response_File = new std::ofstream("imp_anal.txt", std::ios::out);
 
   //-----------------------------------------------
   // compute samples of impulse response

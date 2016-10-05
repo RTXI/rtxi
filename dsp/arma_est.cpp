@@ -1,13 +1,16 @@
 //
 //  File = arma_est.cpp
 //
+#include <fstream>
+#include <stdlib.h>
+#include <iostream>
 
 #include "arma_est.h"
 #include "gausrand.h"
 #include "mod_yuwa.h"
 #include "yulewalk.h"
-#include <fstream>
-#include <stdlib.h>
+
+using namespace std;
 
 //============================================================
 //  ArmaEstimate - subclass of ArmaProcess for the case where
@@ -25,17 +28,17 @@ ArmaEstimate<T>::ArmaEstimate(int est_ar_order, int est_ma_order,
   YuleWalker<T>* yw_ptr;
   ModYuleWalker<T>* mod_yw_ptr;
 
-  Ar_Order = est_ar_order;
-  Ma_Order = est_ma_order;
-  Noise_Seed = 31415927; // arbitrary default
+  this->Ar_Order = est_ar_order;
+  this->Ma_Order = est_ma_order;
+  this->Noise_Seed = 31415927; // arbitrary default
 
-  Old_Input = new T[est_ma_order + 1];
+  this->Old_Input = new T[est_ma_order + 1];
   for (i = 0; i <= est_ma_order; i++)
-    Old_Input[i] = 0.0;
+    this->Old_Input[i] = 0.0;
 
-  Old_Output = new T[est_ar_order];
+  this->Old_Output = new T[est_ar_order];
   for (i = 0; i < est_ar_order; i++)
-    Old_Output[i] = 0.0;
+    this->Old_Output[i] = 0.0;
   //------------------------------------------------------
   //  Fit AR model of specified order to the data
   std::cout << "in ArmaModel, sig_seq[0] = " << sig_seq[0] << std::endl;
@@ -43,8 +46,8 @@ ArmaEstimate<T>::ArmaEstimate(int est_ar_order, int est_ma_order,
   mod_yw_ptr =
     new ModYuleWalker<T>(sig_seq, seq_len, est_ar_order, est_ma_order);
 
-  A_Coeffs = mod_yw_ptr->GetCoeffs();
-  Drv_Noise_Var = mod_yw_ptr->GetDrivingVariance();
+  this->A_Coeffs = mod_yw_ptr->GetCoeffs();
+  this->Drv_Noise_Var = mod_yw_ptr->GetDrivingVariance();
 
   delete mod_yw_ptr;
 
@@ -59,7 +62,7 @@ ArmaEstimate<T>::ArmaEstimate(int est_ar_order, int est_ma_order,
     for (k = est_ar_order; k < seq_len; k++) {
       sum = sig_seq[k];
       for (j = 1; j <= est_ar_order; j++) {
-        sum = sum + (A_Coeffs[j] * sig_seq[k - j]);
+        sum = sum + (this->A_Coeffs[j] * sig_seq[k - j]);
       }
       ar_out_seq[k - est_ar_order] = sum;
     }
@@ -72,7 +75,7 @@ ArmaEstimate<T>::ArmaEstimate(int est_ar_order, int est_ma_order,
     a_coeffs = new T[durbin_ar_order + 1];
     yw_ptr =
       new YuleWalker<T>(ar_out_seq, seq_len - est_ar_order, durbin_ar_order,
-                        a_coeffs, &Drv_Noise_Var, &err_stat);
+                        a_coeffs, &(this->Drv_Noise_Var), &err_stat);
 
     delete yw_ptr;
     delete[] ar_out_seq;
@@ -82,11 +85,11 @@ ArmaEstimate<T>::ArmaEstimate(int est_ar_order, int est_ma_order,
     //  to fit desired order MA model
 
     double dummy_var;
-    B_Coeffs = new T[est_ma_order + 1];
+    this->B_Coeffs = new T[est_ma_order + 1];
     yw_ptr = new YuleWalker<T>(a_coeffs, durbin_ar_order + 1, est_ma_order,
-                               B_Coeffs, &dummy_var, &err_stat);
-    std::cout << "B_Coeffs[1] = " << B_Coeffs[1] << std::endl;
-    std::cout << "B_Coeffs[2] = " << B_Coeffs[2] << std::endl;
+                               this->B_Coeffs, &dummy_var, &err_stat);
+    std::cout << "B_Coeffs[1] = " << this->B_Coeffs[1] << std::endl;
+    std::cout << "B_Coeffs[2] = " << this->B_Coeffs[2] << std::endl;
 
     delete yw_ptr;
     delete[] a_coeffs;
@@ -94,5 +97,5 @@ ArmaEstimate<T>::ArmaEstimate(int est_ar_order, int est_ma_order,
   return;
 }
 
-template ArmaEstimate<double>;
-template ArmaEstimate<complex>;
+// template ArmaEstimate<double>;
+// template ArmaEstimate<complex>;

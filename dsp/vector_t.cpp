@@ -48,11 +48,11 @@ rowvec<T>& colvec<T>::operator!(void)
   DebugFile << "\ncv::op!(): hook vrep " << (void*)p << " to rowvec "
             << (void*)rv << std::endl;
 #endif
-  rv->p = p;
-  *(rv->p) = *p;
+  rv->p = this->p;
+  *(rv->p) = *(this->p);
   ((rv->p)->refcnt)++;
   rv->Is_Temp = 1;
-  if (Is_Temp) {
+  if (this->Is_Temp) {
 #ifdef _VEC_DEBUG
     DebugFile << "\ncv::op!(): deleting colvec at " << (void*)this << std::endl;
 #endif
@@ -66,16 +66,16 @@ rowvec<T>& colvec<T>::operator!(void)
 template <class T>
 colvec<T>& rowvec<T>::operator!(void)
 {
-  colvec<T>* cv = new colvec<T>(p->orig_indx, p->length);
+  colvec<T>* cv = new colvec<T>(this->p->orig_indx, this->p->length);
 #ifdef _VEC_DEBUG
   DebugFile << "\nnew colvec at " << (void*)cv << std::endl;
   DebugFile << "\nrv::op!(): hook vrep " << (void*)p << " to colvec "
             << (void*)cv << std::endl;
 #endif
-  cv->p = p;
-  *(cv->p) = *p;
+  cv->p = this->p;
+  *(cv->p) = *(this->p);
   cv->Is_Temp = 1;
-  if (Is_Temp) {
+  if (this->Is_Temp) {
 #ifdef _VEC_DEBUG
     DebugFile << "\nrv::op!(): deleting rowvec at " << (void*)this << std::endl;
 #endif
@@ -90,8 +90,8 @@ template <class T>
 T& rowvec<T>::operator*(colvec<T>& v2)
 {
   // get origin and length of row vector
-  int v1_orig = p->orig_indx;
-  int v1_len = p->length;
+  int v1_orig = this->p->orig_indx;
+  int v1_len = this->p->length;
 
   // get origin and length of column vector
   int v2_orig = v2.p->orig_indx;
@@ -107,7 +107,7 @@ T& rowvec<T>::operator*(colvec<T>& v2)
   sum = 0;
   for (int idx = 0; idx < v1_len; idx++) {
     // sum += ((p->f[idx+v1_orig]) * (v2.p->f[idx+v2_orig]));
-    sum += ((p->f[idx]) * (v2.p->f[idx]));
+    sum += ((this->p->f[idx]) * (v2.p->f[idx]));
   }
   //*result = sum;
   if (v2.Is_Temp) {
@@ -117,7 +117,7 @@ T& rowvec<T>::operator*(colvec<T>& v2)
 #endif
     delete (&v2);
   }
-  if (Is_Temp) {
+  if (this->Is_Temp) {
 #ifdef _VEC_DEBUG
     DebugFile << "\nrv::op*(cv): deleting rowvec at " << (void*)this
               << std::endl;
@@ -133,8 +133,8 @@ template <class T>
 rowvec<T>& rowvec<T>::operator*(matrix<T>& m2)
 {
   // check dimensions
-  int vec_orig = p->orig_indx;
-  int vec_len = p->length;
+  int vec_orig = this->p->orig_indx;
+  int vec_len = this->p->length;
   int row_orig = m2._p->orig_indx;
   int nrows = m2._p->length;
   int col_orig = ((m2._p->f[row_orig])->p)->orig_indx;
@@ -158,7 +158,7 @@ rowvec<T>& rowvec<T>::operator*(matrix<T>& m2)
   for (int j = 0; j < ncols; j++) {
     sum = 0.0;
     for (int i = 0; i < nrows; i++) {
-      sum += ((p->f[i]) * (((m2._p->f[i - (m2._p->orig_indx)])->p)->f[j]));
+      sum += ((this->p->f[i]) * (((m2._p->f[i - (m2._p->orig_indx)])->p)->f[j]));
     }
     (v_res->p)->f[j] = sum;
   }
@@ -169,7 +169,7 @@ rowvec<T>& rowvec<T>::operator*(matrix<T>& m2)
 #endif
     delete (&m2);
   }
-  if (Is_Temp) {
+  if (this->Is_Temp) {
 #ifdef _VEC_DEBUG
     DebugFile << "\nrv::op*(m): deleting rowvec at " << (void*)this
               << std::endl;
@@ -208,8 +208,8 @@ template <class T>
 matrix<T>& colvec<T>::operator*(rowvec<T>& v2)
 {
   // get origin and length of column vector
-  int v1_orig = p->orig_indx;
-  int v1_len = p->length;
+  int v1_orig = this->p->orig_indx;
+  int v1_len = this->p->length;
 
   // get origin and length of row vector
   int v2_orig = v2.p->orig_indx;
@@ -223,7 +223,7 @@ matrix<T>& colvec<T>::operator*(rowvec<T>& v2)
 #endif
   for (int row = 0; row < v1_len; row++) {
     for (int col = 0; col < v2_len; col++) {
-      ((((m_res->_p)->f[row])->p)->f[col]) = (p->f[row]) * (v2.p->f[col]);
+      ((((m_res->_p)->f[row])->p)->f[col]) = (this->p->f[row]) * (v2.p->f[col]);
     }
   }
   if (v2.Is_Temp) {
@@ -233,7 +233,7 @@ matrix<T>& colvec<T>::operator*(rowvec<T>& v2)
 #endif
     delete (&v2);
   }
-  if (Is_Temp) {
+  if (this->Is_Temp) {
 #ifdef _VEC_DEBUG
     DebugFile << "\ncv::op*(rv): deleting colvec at " << (void*)this
               << std::endl;
@@ -446,19 +446,19 @@ rowvec<T>&
 rowvec<T>::operator=(vector<T>& vec)
 {
   vec.p->refcnt++;
-  if (--p->refcnt == 0) {
+  if (--(this->p->refcnt) == 0) {
 #ifdef _VEC_DEBUG
     DebugFile << "\nrv::op=(v): deleting vrep at " << (void*)p << std::endl;
 #endif
-    delete[] p->f;
-    delete p;
-    p = NULL;
+    delete[] this->p->f;
+    delete this->p;
+    this->p = NULL;
   }
 #ifdef _VEC_DEBUG
   DebugFile << "\nrv::op=(v): hook vrep " << (void*)(vec.p) << " to vector "
             << (void*)this << std::endl;
 #endif
-  p = vec.p;
+  this->p = vec.p;
   if (vec.Is_Temp) {
 #ifdef _VEC_DEBUG
     DebugFile << "\nrv::op=(v): deleting vector at " << (void*)(&vec)
@@ -476,18 +476,18 @@ colvec<T>&
 colvec<T>::operator=(vector<T>& vec)
 {
   vec.p->refcnt++;
-  if (--p->refcnt == 0) {
+  if (--(this->p->refcnt) == 0) {
 #ifdef _VEC_DEBUG
     DebugFile << "\ncv::op=(v): deleting vrep at " << (void*)p << std::endl;
 #endif
-    delete[] p->f;
-    delete p;
+    delete[] this->p->f;
+    delete this->p;
   }
 #ifdef _VEC_DEBUG
   DebugFile << "\ncv::op=(v): hook vrep " << (void*)(vec.p) << " to vector "
             << (void*)this << std::endl;
 #endif
-  p = vec.p;
+  this->p = vec.p;
   if (vec.Is_Temp) {
 #ifdef _VEC_DEBUG
     DebugFile << "\ncv::op=(v): deleting vector at " << (void*)(&vec)

@@ -4,13 +4,18 @@
 //  Member functions for class IirFilterResponse
 //
 
+#include <math.h>
+#include <stdlib.h>
+#include <iostream>
+
 #include "iir_resp.h"
 #include "complex.h"
 #include "misdefs.h"
 #include "typedefs.h"
 #include "unwrap.h"
-#include <math.h>
-#include <stdlib.h>
+
+using namespace std;
+
 #ifdef _DEBUG
 extern std::ofstream DebugFile;
 #endif

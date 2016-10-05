@@ -2,9 +2,12 @@
 #define _TYPEDEFS_H_
 
 typedef int logical;
-// typedef enum {
-//  _FALSE,
-//  _TRUE } LOGICAL_T;
+
+// used by learncur.h
+typedef enum {
+  _FALSE,
+  _TRUE 
+} LOGICAL_T;
 
 enum typesOfResponse
 {

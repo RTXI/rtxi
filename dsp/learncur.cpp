@@ -2,12 +2,16 @@
 //  File = learncur.cpp
 //
 
-#include "learncur.h"
+#include <iostream>
 #include <fstream>
 #include <stdlib.h>
+
+#include "learncur.h"
 #ifdef _DEBUG
 extern std::ofstream DebugFile;
 #endif
+
+using namespace std;
 
 LearningCurve::LearningCurve(int num_samps, int num_trials, double min_mse)
 {

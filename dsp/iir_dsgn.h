@@ -5,8 +5,9 @@
 #ifndef _IIR_DSGN_H_
 #define _IIR_DSGN_H_
 
-#include "typedefs.h"
 #include <fstream>
+
+#include "typedefs.h"
 
 class IirFilterDesign
 {

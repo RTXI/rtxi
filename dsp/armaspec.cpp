@@ -2,10 +2,13 @@
 //  File = armaspec.cpp
 //
 
-#include "armaspec.h"
-#include "misdefs.h"
 #include <fstream>
 #include <stdlib.h>
+
+#include "armaspec.h"
+#include "misdefs.h"
+
+using namespace std;
 
 //==============================================
 //  constructor
@@ -84,4 +87,4 @@ ArmaSpectrum<T>::DumpSpectrum(char* out_file_nam,
 }
 
 // template ArSpectrum<complex>;
-template ArmaSpectrum<double>;
+// template ArmaSpectrum<double>;

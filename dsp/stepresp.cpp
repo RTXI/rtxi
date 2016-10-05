@@ -4,10 +4,14 @@
 //
 //
 
-#include "stepresp.h"
-#include "complex.h"
 #include <math.h>
 #include <stdlib.h>
+#include <iostream>
+
+#include "complex.h"
+#include "stepresp.h"
+
+using namespace std;
 
 #ifdef _DEBUG
 extern std::ofstream DebugFile;

@@ -2,9 +2,12 @@
 // file = psd_est.cpp
 //
 
-#include "psd_est.h"
 #include <iostream>
 #include <stdlib.h>
+
+#include "psd_est.h"
+
+using namespace std;
 
 PsdEstimate::PsdEstimate(int num_samps, double samp_intvl)
 {

@@ -2,11 +2,13 @@
 //  File = autometh.cpp
 //
 
+#include <fstream>
+#include <stdlib.h>
+#include <iostream>
+
 #include "autometh.h"
 #include "complex.h"
 #include "overload.h"
-#include <fstream>
-#include <stdlib.h>
 
 template <class T>
 AutocorrMethCorrMtx<T>::AutocorrMethCorrMtx(T* signal, int seq_len, int max_lag)
@@ -16,9 +18,9 @@ AutocorrMethCorrMtx<T>::AutocorrMethCorrMtx(T* signal, int seq_len, int max_lag)
   double denom;
   int mode = 0;
 
-  Herm_Toep_Col_1 = new T[max_lag + 1];
-  Num_Rows = max_lag + 1;
-  Num_Cols = max_lag + 1;
+  this->Herm_Toep_Col_1 = new T[max_lag + 1];
+  this->Num_Rows = max_lag + 1;
+  this->Num_Cols = max_lag + 1;
   denom = double(seq_len);
 
   for (k = 0; k <= max_lag; k++) {
@@ -30,15 +32,15 @@ AutocorrMethCorrMtx<T>::AutocorrMethCorrMtx(T* signal, int seq_len, int max_lag)
     // if(mode == ACF_MODE_UNBIASED)
     if (mode == 0)
       denom = double(seq_len);
-    Herm_Toep_Col_1[k] = sum / denom;
+    this->Herm_Toep_Col_1[k] = sum / denom;
   }
   return;
 }
 template <class T>
 AutocorrMethCorrMtx<T>::~AutocorrMethCorrMtx()
 {
-  delete[] Herm_Toep_Col_1;
+  delete[] this->Herm_Toep_Col_1;
 }
 
-template AutocorrMethCorrMtx<double>;
-template AutocorrMethCorrMtx<complex>;
+// template AutocorrMethCorrMtx<double>;
+// template AutocorrMethCorrMtx<complex>;

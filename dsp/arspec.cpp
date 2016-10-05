@@ -2,10 +2,14 @@
 //  File = arspec.cpp
 //
 
-#include "arspec.h"
-#include "misdefs.h"
 #include <fstream>
 #include <stdlib.h>
+#include <iostream>
+
+#include "arspec.h"
+#include "misdefs.h"
+
+using namespace std;
 
 //==============================================
 //  constructor
@@ -101,4 +105,4 @@ ArSpectrum<T>::DumpSpectrum(char* out_file_nam, logical db_plot_enab)
 }
 
 // template ArSpectrum<complex>;
-template ArSpectrum<double>;
+// template ArSpectrum<double>;

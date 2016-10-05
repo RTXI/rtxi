@@ -2,12 +2,13 @@
  * Dolph-Chebyshev window
  */
 
-#include "dolph.h"
-#include "acosh.h"
-#include "misdefs.h"
 #include <gsl/gsl_math.h>
 #include <math.h>
 #include <stdlib.h>
+
+#include "dolph.h"
+#include "acosh.h"
+#include "misdefs.h"
 
 DolphChebyWindow::DolphChebyWindow(int length, double atten)
   : GenericWindow(length)

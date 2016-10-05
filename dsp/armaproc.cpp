@@ -2,12 +2,16 @@
 //  File = armaproc.cpp
 //
 
+#include <fstream>
+#include <stdlib.h>
+#include <iostream>
+
 #include "armaproc.h"
 #include "gausrand.h"
 #include "mod_yuwa.h"
 #include "yulewalk.h"
-#include <fstream>
-#include <stdlib.h>
+
+using namespace std;
 
 //============================================
 //  default constructor
@@ -125,5 +129,5 @@ ArmaProcess<T>::GetDrivingVariance(void)
 {
   return (Drv_Noise_Var);
 }
-template ArmaProcess<double>;
-template ArmaProcess<complex>;
+// template ArmaProcess<double>;
+// template ArmaProcess<complex>;

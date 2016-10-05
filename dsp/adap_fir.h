@@ -5,6 +5,7 @@
 #ifndef _ADAP_FIR_H_
 #define _ADAP_FIR_H_
 
+#include <iostream>
 #include "dirform1.h"
 #include "typedefs.h"
 
