@@ -20,7 +20,8 @@ $(TARGET): $(OBJECTS)
 %.o: %.cpp
 	$(CXX) -c $(CXXFLAGS) $< -o $@
 
-clean: 
+clean:
+	rm -f $(TARGET)
 	rm -f $(OBJECTS)
 	rm -f $(OBJECTS:.o=.lo)
 	rm -f $(OBJECTS:.o=.la)

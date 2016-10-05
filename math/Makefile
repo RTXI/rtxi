@@ -22,6 +22,7 @@ $(TARGET): $(OBJECTS)
 	$(CXX) -c $(CXXFLAGS) $< -o $@
 
 clean: 
+	rm -f $(TARGET)
 	rm -f $(OBJECTS)
 	rm -f $(OBJECTS:.o=.lo)
 	rm -f $(OBJECTS:.o=.la)
