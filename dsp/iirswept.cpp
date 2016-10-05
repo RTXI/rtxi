@@ -15,7 +15,7 @@
 using namespace std;
 
 // extern std::ofstream AnalogWaveFile;
-ofstream DigitalOutputFile("digital.txt", ios::out);
+// ofstream DigitalOutputFile("digital.txt", ios::out);
 
 IirSweptResponse::IirSweptResponse(FilterImplementation* filter_implem,
                              double sampling_interval, istream& uin,
@@ -118,10 +118,12 @@ IirSweptResponse::IirSweptResponse(FilterImplementation* filter_implem,
          samp_indx++) {
       input_val = cos(lambda * samp_indx);
       output_tone[samp_indx] = filter_implem->ProcessSample(input_val);
-      if (resp_indx == 6) {
-        DigitalOutputFile << samp_indx << ", " << input_val << ", "
-                          << output_tone[samp_indx] << std::endl;
-      }
+      /*
+       * if (resp_indx == 6) {
+       *   DigitalOutputFile << samp_indx << ", " << input_val << ", "
+       *                     << output_tone[samp_indx] << std::endl;
+       * }
+       */
       if (samp_indx >= num_holdoff_samps) {
         reconst_output->AddSample(output_tone[samp_indx]);
       }
