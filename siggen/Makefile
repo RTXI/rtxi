@@ -4,10 +4,9 @@ CXXLD=gcc
 MOC=moc
 
 CXXFLAGS := -I. -w -O3 -std=c++11 -fPIC
-#LDFLAGS := -lgsl -lgslcblas -lm -ldl -lpthread -lGL -shared -module -avoid-version
 LDFLAGS := -lgsl -lgslcblas -lm -ldl -lpthread -lGL -shared
 
-TARGET=librtdsp.so
+TARGET=librtsiggen.so
 HEADERS=$(shell find . -type f -name "*.h")
 SOURCES=$(shell find . -type f -name "*.cpp")
 OBJECTS=$(SOURCES:.cpp=.o)
