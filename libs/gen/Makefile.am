@@ -15,4 +15,4 @@ librtgen_la_SOURCES = \
 		gen_saw.cpp \
 		gen_sine.cpp \
 		gen_whitenoise.cpp \
-		gen_zap.cpp \
+		gen_zap.cpp
