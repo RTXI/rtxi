@@ -1,0 +1,30 @@
+#Ignore compiled objects and libraries
+*.o
+*.lo
+*.la
+*.so
+*.swp
+*.pyc
+*~
+compile
+
+#Ignore qt generated mocs
+moc_*
+.libs/
+.deps/
+
+#Ignore automake files
+#Makefile
+Makefile.in
+aclocal.m4
+autom4te.cache/
+config.*
+configure
+depcomp
+install-sh
+libtool
+ltmain.sh
+m4/
+missing
+stamp-h?
+.dirstamp
