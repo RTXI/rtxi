@@ -126,6 +126,11 @@ Makefile
 rtxi/Makefile
 scripts/Makefile
 scripts/rtxi_plugin_config
+libs/Makefile
+libs/dsp/Makefile
+libs/gen/Makefile
+libs/math/Makefile
+libs/plot/Makefile
 plugins/Makefile
 plugins/analogy_device/Makefile
 plugins/connector/Makefile
