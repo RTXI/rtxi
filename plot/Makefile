@@ -29,5 +29,7 @@ $(TARGET): $(OBJECTS) $(MOC_OBJECTS)
 clean: 
 	rm -f $(TARGET)
 	rm -f $(OBJECTS)
+	rm -f $(MOC_SOURCES)
+	rm -f $(MOC_OBJECTS)
 	rm -f $(OBJECTS:.o=.lo)
 	rm -f $(OBJECTS:.o=.la)
