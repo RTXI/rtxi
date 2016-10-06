@@ -1,7 +1,6 @@
 /*
- RunningStat computes running statistics (mean, standard deviation, and
- variance)
- using accurate numerical methods without storing all the numbers.
+ * RunningStat computes running statistics (mean, standard deviation, and
+ * variance) using accurate numerical methods without storing all the numbers.
  */
 
 #include <math.h>
