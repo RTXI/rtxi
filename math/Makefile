@@ -8,7 +8,7 @@ CXXFLAGS := -I. -w -O3 -std=c++11 -fPIC
 LDFLAGS := -lgsl -lgslcblas -lm -ldl -lpthread -lGL -shared
 
 TARGET=librtmath.so
-HEADERS=$(shell find . -type f -name "*.h")
+HEADERS=$(shell find . -type f \( -name "*.h" -or -name "*.hpp" \))
 SOURCES=$(shell find . -type f -name "*.cpp")
 OBJECTS=$(SOURCES:.cpp=.o)
 
