@@ -29,8 +29,6 @@ deps/hdf/hdf-*/
 
 #Ignore qt generated mocs
 moc_*
-.libs/
-.deps/
 
 #Ignore automake files
 Makefile
@@ -49,5 +47,3 @@ stamp-h?
 .deps/
 .dirstamp
 .libs/
-*.l[ao]
-*~
