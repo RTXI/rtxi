@@ -16,58 +16,67 @@
  * Ave, Cambridge, MA 02139, USA.
  */
 
-#include "rtmath.h"
-#include <math.h>
 #include <iostream>
+#include <math.h>
+
+#include "rtmath.h"
 
 using namespace std;
 
-RealTimeMath::RealTimeMath(){
-	powFast = new PowFast(18);
+RealTimeMath::RealTimeMath()
+{
+  powFast = new PowFast(18);
 }
 
-RealTimeMath::~RealTimeMath(){
-	delete powFast;
+RealTimeMath::~RealTimeMath()
+{
+  delete powFast;
 }
 
-double RealTimeMath::fastEXP(double x){
-	if(x > 88.5 || x < -87) { // Overflow prevention due to powFast library's use of float
+double
+RealTimeMath::fastEXP(double x)
+{
+  if (x > 88.5 ||
+      x < -87) { // Overflow prevention due to powFast library's use of float
 
-		// Close to 0 shortcut: If x < -746, math.h exp(x) function returns 0 due to truncation
-		if( x < -746 ) 
-			return 0;
+    // Close to 0 shortcut: If x < -746, math.h exp(x) function returns 0 due to
+    // truncation
+    if (x < -746)
+      return 0;
 
-		// Infinity shortcut: If x > 710, math.h exp(x) returns infinity
-		if( x > 710 ){ 
-			return INFINITY;
-		}
+    // Infinity shortcut: If x > 710, math.h exp(x) returns infinity
+    if (x > 710) {
+      return INFINITY;
+    }
 
-		// Standard overflow prevention
-      // Due to powFast limitations from using floats, if x is too large or
-      // small, problem is broken into smaller pieces 
-      // e.g. fastEXP(100) ==> e^180 = e^60 * e^60 * e^60
-		powCount = 1;
-		powAns = 1;
-		powExp = x;
+    // Standard overflow prevention
+    // Due to powFast limitations from using floats, if x is too large or
+    // small, problem is broken into smaller pieces
+    // e.g. fastEXP(100) ==> e^180 = e^60 * e^60 * e^60
+    powCount = 1;
+    powAns = 1;
+    powExp = x;
 
-		while(powExp > 88.5 || powExp < -87){
-			powCount++;
-			powExp = x / powCount;
-		}
+    while (powExp > 88.5 || powExp < -87) {
+      powCount++;
+      powExp = x / powCount;
+    }
 
-		for(n = 1; n <= powCount; n++){
-			powAns = powAns * powFast->e(powExp);
-		}
+    for (n = 1; n <= powCount; n++) {
+      powAns = powAns * powFast->e(powExp);
+    }
 
-		return powAns;
-	} // end overflow prevention
+    return powAns;
+  } // end overflow prevention
 
-	else // call powFast e^x function
-		return powFast->e(x);
+  else // call powFast e^x function
+    return powFast->e(x);
 }
 
 // POWER OPTIMIZATION
 // x^y = e^(y*ln(x))
-double RealTimeMath::fastPOW(double x, double y){
-	return fastEXP(y * log(x)); // Pow function using fastEXP
+double
+RealTimeMath::fastPOW(double x, double y)
+{
+  return fastEXP(y * log(x)); // Pow function using fastEXP
 }
