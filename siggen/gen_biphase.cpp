@@ -20,55 +20,65 @@
 
 // default constructor
 
-GeneratorBiphase::GeneratorBiphase() : width(1), amplitude(1), delay(1) {
-	dt = 1e-3;
-	numsamples = floor(delay / dt) + 2 * floor(width / dt) + 1;
-	wave.clear();
-	for (int i = 0; i < floor(delay / dt); i++) {
-		wave.push_back(0); // initial delay
-	}
-	for (int i = 0; i < floor(width / dt); i++) {
-		wave.push_back(amplitude); // positive part
-	}
-	for (int i = 0; i < floor(width / dt); i++) {
-		wave.push_back(-amplitude); // negative part
-	}
-	numsamples = wave.size();
-	index = 0;
+GeneratorBiphase::GeneratorBiphase()
+  : width(1)
+  , amplitude(1)
+  , delay(1)
+{
+  dt = 1e-3;
+  numsamples = floor(delay / dt) + 2 * floor(width / dt) + 1;
+  wave.clear();
+  for (int i = 0; i < floor(delay / dt); i++) {
+    wave.push_back(0); // initial delay
+  }
+  for (int i = 0; i < floor(width / dt); i++) {
+    wave.push_back(amplitude); // positive part
+  }
+  for (int i = 0; i < floor(width / dt); i++) {
+    wave.push_back(-amplitude); // negative part
+  }
+  numsamples = wave.size();
+  index = 0;
 }
 
-GeneratorBiphase::GeneratorBiphase(double delay, double width, 
-                                   double amplitude, double dt) : Generator() {
-	numsamples = floor(delay / dt) + 2 * floor(width / dt) + 1;
-	wave.clear();
-	for (int i = 0; i < floor(delay / dt); i++) {
-		wave.push_back(0); // initial delay
-	}
-	for (int i = 0; i < floor(width / dt); i++) {
-		wave.push_back(amplitude); // positive part
-	}
-	for (int i = 0; i < floor(width / dt); i++) {
-		wave.push_back(-amplitude); // negative part
-	}
-	numsamples = wave.size();
-	index = 0;
+GeneratorBiphase::GeneratorBiphase(double delay, double width, double amplitude,
+                                   double dt)
+  : Generator()
+{
+  numsamples = floor(delay / dt) + 2 * floor(width / dt) + 1;
+  wave.clear();
+  for (int i = 0; i < floor(delay / dt); i++) {
+    wave.push_back(0); // initial delay
+  }
+  for (int i = 0; i < floor(width / dt); i++) {
+    wave.push_back(amplitude); // positive part
+  }
+  for (int i = 0; i < floor(width / dt); i++) {
+    wave.push_back(-amplitude); // negative part
+  }
+  numsamples = wave.size();
+  index = 0;
 }
 
-GeneratorBiphase::~GeneratorBiphase() {}
+GeneratorBiphase::~GeneratorBiphase()
+{
+}
 
-void GeneratorBiphase::init(double delay, double width, double amplitude, double dt) {
-	numsamples = floor(delay / dt) + 2 * floor(width / dt) + 1;
-	wave.clear();
+void
+GeneratorBiphase::init(double delay, double width, double amplitude, double dt)
+{
+  numsamples = floor(delay / dt) + 2 * floor(width / dt) + 1;
+  wave.clear();
 
-	for (int i = 0; i < floor(delay / dt); i++) {
-		wave.push_back(0); // initial delay
-	}
-	for (int i = 0; i < floor(width / dt); i++) {
-		wave.push_back(amplitude); // positive part
-	}
-	for (int i = 0; i < floor(width / dt); i++) {
-		wave.push_back(-amplitude); // negative part
-	}
-	numsamples = wave.size();
-	index = 0;
+  for (int i = 0; i < floor(delay / dt); i++) {
+    wave.push_back(0); // initial delay
+  }
+  for (int i = 0; i < floor(width / dt); i++) {
+    wave.push_back(amplitude); // positive part
+  }
+  for (int i = 0; i < floor(width / dt); i++) {
+    wave.push_back(-amplitude); // negative part
+  }
+  numsamples = wave.size();
+  index = 0;
 }

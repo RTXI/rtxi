@@ -21,21 +21,22 @@
 
 #include "generator.h"
 
-class GeneratorMono : public Generator {
+class GeneratorMono : public Generator
+{
 
-	public:
-		// default constructor
-		GeneratorMono();
-		GeneratorMono(double delay, double width, double amplitude, double dt);
-		~GeneratorMono();
+public:
+  // default constructor
+  GeneratorMono();
+  GeneratorMono(double delay, double width, double amplitude, double dt);
+  ~GeneratorMono();
 
-		// initialize waveform
-		void init(double delay, double width, double amplitude, double dt);
+  // initialize waveform
+  void init(double delay, double width, double amplitude, double dt);
 
-	protected:
-		double width; // s
-		double amplitude;
-		double delay; // s
+protected:
+  double width; // s
+  double amplitude;
+  double delay; // s
 };
 
 #endif /* GEN_MONO_H_ */

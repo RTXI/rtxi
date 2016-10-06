@@ -22,36 +22,45 @@
 
 // default constructor
 
-GeneratorSine::GeneratorSine() : freq(1), amplitude(1) {
-	index = 0;
-	dt = 1e-3;
-	numsamples = floor(1 / freq / dt);
-	wave.clear();
-	for (int i = 0; i < numsamples; i++) {
-		wave.push_back(amplitude * sin(TWOPI * freq * i * dt));
-	}
-	numsamples = wave.size();
-	index = 0;
+GeneratorSine::GeneratorSine()
+  : freq(1)
+  , amplitude(1)
+{
+  index = 0;
+  dt = 1e-3;
+  numsamples = floor(1 / freq / dt);
+  wave.clear();
+  for (int i = 0; i < numsamples; i++) {
+    wave.push_back(amplitude * sin(TWOPI * freq * i * dt));
+  }
+  numsamples = wave.size();
+  index = 0;
 }
 
-GeneratorSine::GeneratorSine(double freq, double amplitude, double dt) : Generator() {
-	numsamples = floor(1 / freq / dt);
-	wave.clear();
-	for (int i = 0; i < numsamples; i++) {
-		wave.push_back(amplitude * sin(TWOPI * freq * i * dt));
-	}
-	numsamples = wave.size();
-	index = 0;
+GeneratorSine::GeneratorSine(double freq, double amplitude, double dt)
+  : Generator()
+{
+  numsamples = floor(1 / freq / dt);
+  wave.clear();
+  for (int i = 0; i < numsamples; i++) {
+    wave.push_back(amplitude * sin(TWOPI * freq * i * dt));
+  }
+  numsamples = wave.size();
+  index = 0;
 }
 
-GeneratorSine::~GeneratorSine() {}
+GeneratorSine::~GeneratorSine()
+{
+}
 
-void GeneratorSine::init(double freq, double amplitude, double dt) {
-	numsamples = floor(1 / freq / dt);
-	wave.clear();
-	for (int i = 0; i < numsamples; i++) {
-		wave.push_back(amplitude * sin(TWOPI * freq * i * dt));
-	}
-	numsamples = wave.size();
-	index = 0;
+void
+GeneratorSine::init(double freq, double amplitude, double dt)
+{
+  numsamples = floor(1 / freq / dt);
+  wave.clear();
+  for (int i = 0; i < numsamples; i++) {
+    wave.push_back(amplitude * sin(TWOPI * freq * i * dt));
+  }
+  numsamples = wave.size();
+  index = 0;
 }

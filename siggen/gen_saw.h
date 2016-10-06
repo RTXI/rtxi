@@ -21,21 +21,22 @@
 
 #include "generator.h"
 
-class GeneratorSaw : public Generator {
+class GeneratorSaw : public Generator
+{
 
-	public:
-		// default constructor
-		GeneratorSaw();
-		GeneratorSaw(double delay, double width, double amplitude, double dt);
-		~GeneratorSaw();
-		
-		// initialize waveform
-		void init(double delay, double width, double amplitude, double dt);
+public:
+  // default constructor
+  GeneratorSaw();
+  GeneratorSaw(double delay, double width, double amplitude, double dt);
+  ~GeneratorSaw();
 
-	protected:
-		double delay; // delay in time (s) between ramps
-		double width; // width in time (s) of ramp
-		double amplitude;
+  // initialize waveform
+  void init(double delay, double width, double amplitude, double dt);
+
+protected:
+  double delay; // delay in time (s) between ramps
+  double width; // width in time (s) of ramp
+  double amplitude;
 };
 
 #endif /* GEN_SAW_H_ */

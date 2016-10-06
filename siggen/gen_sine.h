@@ -21,21 +21,21 @@
 
 #include "generator.h"
 
-class GeneratorSine : public Generator {
+class GeneratorSine : public Generator
+{
 
-	public:
-		// default constructor
-		GeneratorSine();
-		GeneratorSine(double freq, double amplitude, double dt);
-		~GeneratorSine();
-		
-		// initialize waveform
-		void init(double freq, double amplitude, double dt);
+public:
+  // default constructor
+  GeneratorSine();
+  GeneratorSine(double freq, double amplitude, double dt);
+  ~GeneratorSine();
 
-	protected:
-		double freq; // Hz
-		double amplitude;
+  // initialize waveform
+  void init(double freq, double amplitude, double dt);
 
+protected:
+  double freq; // Hz
+  double amplitude;
 };
 
 #endif /* GEN_SINE_H_ */

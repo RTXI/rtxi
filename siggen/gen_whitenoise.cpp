@@ -24,69 +24,80 @@
 
 // default constructor
 
-GeneratorWNoise::GeneratorWNoise() : variance(1) {
-	numsamples = 1;
-	wave.clear();
-	gsl_rng_env_setup(); // get default generator type and random seed
-	T = gsl_rng_default; // mt
-	r = gsl_rng_alloc(T); // default seed = 0
-	
-	for (int i = 0; i < numsamples; i++) {
-		wave.push_back(gsl_ran_gaussian(r, sqrt(variance)));
-	}
+GeneratorWNoise::GeneratorWNoise()
+  : variance(1)
+{
+  numsamples = 1;
+  wave.clear();
+  gsl_rng_env_setup();  // get default generator type and random seed
+  T = gsl_rng_default;  // mt
+  r = gsl_rng_alloc(T); // default seed = 0
 
-	numsamples = wave.size();
-	index = 0;
-	genstate = gsl_rng_clone(r);
-	gsl_rng_free(r);
+  for (int i = 0; i < numsamples; i++) {
+    wave.push_back(gsl_ran_gaussian(r, sqrt(variance)));
+  }
 
+  numsamples = wave.size();
+  index = 0;
+  genstate = gsl_rng_clone(r);
+  gsl_rng_free(r);
 }
 
-GeneratorWNoise::GeneratorWNoise(double variance) : Generator() {
-	numsamples = 1;
-	wave.clear();
-	gsl_rng_env_setup(); // get default generator type and random seed
-	T = gsl_rng_default; // mt
-	r = gsl_rng_alloc(T); // default seed = 0
+GeneratorWNoise::GeneratorWNoise(double variance)
+  : Generator()
+{
+  numsamples = 1;
+  wave.clear();
+  gsl_rng_env_setup();  // get default generator type and random seed
+  T = gsl_rng_default;  // mt
+  r = gsl_rng_alloc(T); // default seed = 0
 
-	for (int i = 0; i < numsamples; i++) {
-		wave.push_back(gsl_ran_gaussian(r, sqrt(variance)));
-	}
+  for (int i = 0; i < numsamples; i++) {
+    wave.push_back(gsl_ran_gaussian(r, sqrt(variance)));
+  }
 
-	numsamples = wave.size();
-	index = 0;
-	genstate = gsl_rng_clone(r);
-	gsl_rng_free(r);
+  numsamples = wave.size();
+  index = 0;
+  genstate = gsl_rng_clone(r);
+  gsl_rng_free(r);
 }
 
-GeneratorWNoise::~GeneratorWNoise() {}
-
-void GeneratorWNoise::init(double variance) {
-	numsamples = 1;
-	wave.clear();
-	r = gsl_rng_alloc(T); // default seed = 0
-	gsl_rng_memcpy(r, genstate);
-
-	for (int i = 0; i < numsamples; i++) {
-		wave.push_back(gsl_ran_gaussian(r, sqrt(variance)));
-	}
-
-	numsamples = wave.size();
-	index = 0;
-	gsl_rng_memcpy(genstate, r);
-	gsl_rng_free(r);
+GeneratorWNoise::~GeneratorWNoise()
+{
 }
 
-double GeneratorWNoise::get() {
-	double value = wave[index];
-	index++;
-	if (index >= numsamples) {
-		index = 0;
-		init(variance);
-	}
-	return value;
+void
+GeneratorWNoise::init(double variance)
+{
+  numsamples = 1;
+  wave.clear();
+  r = gsl_rng_alloc(T); // default seed = 0
+  gsl_rng_memcpy(r, genstate);
+
+  for (int i = 0; i < numsamples; i++) {
+    wave.push_back(gsl_ran_gaussian(r, sqrt(variance)));
+  }
+
+  numsamples = wave.size();
+  index = 0;
+  gsl_rng_memcpy(genstate, r);
+  gsl_rng_free(r);
 }
 
-void GeneratorWNoise::setVariance(double var) {
-	variance = var;
+double
+GeneratorWNoise::get()
+{
+  double value = wave[index];
+  index++;
+  if (index >= numsamples) {
+    index = 0;
+    init(variance);
+  }
+  return value;
+}
+
+void
+GeneratorWNoise::setVariance(double var)
+{
+  variance = var;
 }

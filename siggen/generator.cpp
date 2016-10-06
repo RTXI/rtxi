@@ -18,49 +18,71 @@
 
 #include "generator.h"
 
-Generator::Generator() : index(0), numsamples(1), dt(1e-3) {
-	wave.clear();
-	wave.push_back(0);
+Generator::Generator()
+  : index(0)
+  , numsamples(1)
+  , dt(1e-3)
+{
+  wave.clear();
+  wave.push_back(0);
 }
 
-Generator::~Generator() {}
-
-void Generator::clear() {
-	wave.clear();
-	wave.push_back(0);
-	index = 0;
-	numsamples = wave.size();
+Generator::~Generator()
+{
 }
 
-void Generator::init() {
-	wave.clear();
-	wave.push_back(0);
-	index = 0;
-	numsamples = wave.size();
+void
+Generator::clear()
+{
+  wave.clear();
+  wave.push_back(0);
+  index = 0;
+  numsamples = wave.size();
 }
 
-double Generator::get() {
-	double value = wave[index];
-	index++;
-	if (index >= numsamples) index = 0;
-	return value;
+void
+Generator::init()
+{
+  wave.clear();
+  wave.push_back(0);
+  index = 0;
+  numsamples = wave.size();
 }
 
-double Generator::getOne() {
-	double value = wave[index];
-	index++;
-	if (index >= numsamples) value = 0;
-	return value;
+double
+Generator::get()
+{
+  double value = wave[index];
+  index++;
+  if (index >= numsamples)
+    index = 0;
+  return value;
 }
 
-int Generator::numSamples() const {
-	return numsamples;
+double
+Generator::getOne()
+{
+  double value = wave[index];
+  index++;
+  if (index >= numsamples)
+    value = 0;
+  return value;
 }
 
-int Generator::getIndex() const {
-	return index;
+int
+Generator::numSamples() const
+{
+  return numsamples;
 }
 
-void Generator::setIndex(int value) {
-	index = value;
+int
+Generator::getIndex() const
+{
+  return index;
+}
+
+void
+Generator::setIndex(int value)
+{
+  index = value;
 }

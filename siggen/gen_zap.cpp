@@ -17,12 +17,12 @@
  */
 
 /*
- The ZAP current stimulus is described by: 
+ The ZAP current stimulus is described by:
  I(t) = Io*sin [2*pi*f(t)*t], with f(t) = fo + (fm - fo) * (t/T)
- Sample parameters: 
+ Sample parameters:
  fo =  0 Hz to fm = 20 Hz (2 Hz/s)
  fo = 10 Hz to fm = 40 Hz (3 Hz/s) over a total time period of T=10 s.
- In some cells we also tested the reversed protocol (reverse ZAP) where 
+ In some cells we also tested the reversed protocol (reverse ZAP) where
  frequency was varied from 20 to 0 or 40 to 10 Hz.
  */
 
@@ -32,39 +32,52 @@
 
 // default constructor
 
-GeneratorZap::GeneratorZap() : freq(1), freq2(20), duration(10), amplitude(1) {
-	index = 0;
-	dt = 1e-3;
-	numsamples = floor(duration / dt);
-	wave.clear();
-	for (int i = 0; i < numsamples; i++) {
-		double freqtime = freq + (freq2 - freq) * (i * dt / duration);
-		wave.push_back(amplitude * sin(TWOPI * freqtime * i * dt));
-	}
-	numsamples = wave.size();
-	index = 0;
+GeneratorZap::GeneratorZap()
+  : freq(1)
+  , freq2(20)
+  , duration(10)
+  , amplitude(1)
+{
+  index = 0;
+  dt = 1e-3;
+  numsamples = floor(duration / dt);
+  wave.clear();
+  for (int i = 0; i < numsamples; i++) {
+    double freqtime = freq + (freq2 - freq) * (i * dt / duration);
+    wave.push_back(amplitude * sin(TWOPI * freqtime * i * dt));
+  }
+  numsamples = wave.size();
+  index = 0;
 }
 
-GeneratorZap::GeneratorZap(double freq, double freq2, double amplitude, double duration, double dt) :Generator() {
-	numsamples = floor(duration / dt);
-	wave.clear();
-	for (int i = 0; i < numsamples; i++) {
-		double freqtime = freq + (freq2 - freq) * (i * dt / duration);
-		wave.push_back(amplitude * sin(TWOPI * freqtime * i * dt));
-	}
-	numsamples = wave.size();
-	index = 0;
+GeneratorZap::GeneratorZap(double freq, double freq2, double amplitude,
+                           double duration, double dt)
+  : Generator()
+{
+  numsamples = floor(duration / dt);
+  wave.clear();
+  for (int i = 0; i < numsamples; i++) {
+    double freqtime = freq + (freq2 - freq) * (i * dt / duration);
+    wave.push_back(amplitude * sin(TWOPI * freqtime * i * dt));
+  }
+  numsamples = wave.size();
+  index = 0;
 }
 
-GeneratorZap::~GeneratorZap() {}
+GeneratorZap::~GeneratorZap()
+{
+}
 
-void GeneratorZap::init(double freq, double freq2, double amplitude, double duration, double dt) {
-	numsamples = floor(duration / dt);
-	wave.clear();
-	for (int i = 0; i < numsamples; i++) {
-		double freqtime = freq + (freq2 - freq) * (i * dt / duration);
-		wave.push_back(amplitude * sin(TWOPI * freqtime * i * dt));
-	}
-	numsamples = wave.size();
-	index = 0;
+void
+GeneratorZap::init(double freq, double freq2, double amplitude, double duration,
+                   double dt)
+{
+  numsamples = floor(duration / dt);
+  wave.clear();
+  for (int i = 0; i < numsamples; i++) {
+    double freqtime = freq + (freq2 - freq) * (i * dt / duration);
+    wave.push_back(amplitude * sin(TWOPI * freqtime * i * dt));
+  }
+  numsamples = wave.size();
+  index = 0;
 }
