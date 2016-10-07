@@ -4,6 +4,14 @@ MAINTAINERCLEANFILES = Makefile.in
 
 include $(top_srcdir)/Makefile.buildvars
 
+pkginclude_HEADERS = \
+		basicplot.h \
+		incrementalplot.h \
+		plotdialog.h \
+		scatterplot.h \
+		scrollbar.h \
+		scrollzoomer.h
+
 pkglib_LTLIBRARIES = librtplot.la
 
 librtplot_la_LDFLAGS = -lQt5OpenGL -lQt5PrintSupport -lQt5Xml -lQt5Svg -lQt5Widgets -lQt5Gui -lQt5Network -lQt5Core -lqwt -lgsl -lgslcblas -lm -ldl -lpthread -lGL -shared

@@ -22,18 +22,20 @@ ACLOCAL_AMFLAGS ?= -I $(top_srcdir)/m4
 QWT_VERSION = 6.1.3
 
 # Dependencies
-QT_DEFINES =  -DQT_XML_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_WIDGETS_LIB -DQT_SVG_LIB -DQT_SHARED
+QT_DEFINES =  -DQT_XML_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_WIDGETS_LIB \
+              -DQT_SVG_LIB -DQT_SHARED
 
 # Override for now
 QT_CXXFLAGS = $(shell pkg-config --cflags \
                 Qt5Core Qt5Gui Qt5OpenGL Qt5PrintSupport Qt5Xml Qt5Widgets \
-                Qt5Svg Qt5Network libgit2 ) \
-              -I/usr/local/lib/qwt/include \
-              -I/usr/X11R6/include \
-              -I/usr/include/qwt \
-              -I/usr/local/qwt-$(QWT_VERSION) \
-              -I/usr/local/qwt-$(QWT_VERSION)/include \
-              -I/usr/local/lib/rtxi_includes $(QT_DEFINES)
+                Qt5Svg Qt5Network libgit2) \
+              $(QT_DEFINES) \
+              -I/usr/X11R6/include
+
+QWT_CXXFLAGS = -I/usr/include/qwt \
+               -I/usr/local/qwt-$(QWT_VERSION) \
+               -I/usr/local/qwt-$(QWT_VERSION)/include \
+               -I/usr/local/lib/qwt/include 
 
 # Add path for compiling against <rtdk.h> when using Xenomai
 if XENOMAI
@@ -50,8 +52,8 @@ MOC = /usr/bin/moc
 UIC = /usr/bin/uic
 
 AM_CPPFLAGS = -DEXEC_PREFIX=\"$(exec_prefix)\" -DPREFIX=\"$(prefix)\" $(QT_CXXFLAGS) $(RTOS_CPPFLAGS) 
-AM_CXXFLAGS = -pipe $(QT_CXXFLAGS)
-AM_LDFLAGS  = $(QT_LIBS) $(QWT_LIB) $(GSL_LIBS) $(RTOS_LDFLAGS) 
+AM_CXXFLAGS = -pipe $(QT_CXXFLAGS) $(QWT_CXXFLAGS)
+AM_LDFLAGS  = $(QT_LIBS) $(QWT_LIB) $(GSL_LIBS) $(RTOS_LDFLAGS)
 AM_CFLAGS = $(AM_CXXFLAGS)
 
 if DEBUG

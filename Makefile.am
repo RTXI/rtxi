@@ -19,7 +19,7 @@
 # Include the Autoconf scripts in subdir m4/
 ACLOCAL_AMFLAGS = -I m4
 
-SUBDIRS      = rtxi plugins scripts
+SUBDIRS      = libs rtxi plugins scripts
 
 ACLOCAL_DIST = m4/ac_pkg_swig.m4 \
                m4/ac_python_devel.m4 \
@@ -78,7 +78,7 @@ Makefile.plugin_compile: Makefile
 	@echo 'MOC        = ' $(MOC)>> $@
 	@echo ''                                                        >> $@
 	@echo 'CXXFLAGS := $$(CXXFLAGS) -I. -I'$(pkgincludedir) $(AM_CXXFLAGS) >> $@
-	@echo 'LDFLAGS  := $$(LDFLAGS) '$(AM_LDFLAGS) -module -avoid-version>> $@
+	@echo 'LDFLAGS  := $$(LDFLAGS) -L'$(pkglibdir) $(AM_LDFLAGS) -module -avoid-version >> $@
 	@echo ''                                                        >> $@
 	@echo 'ifdef DEBUG '>> $@
 	@echo 'CXXFLAGS += -DDEBUG'>> $@

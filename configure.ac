@@ -77,7 +77,7 @@ if test x$rtos = xxenomai; then
   RTOS_LDFLAGS=`$XENO_CONFIG --skin=native --ldflags`
 elif test x$rtos = xposix; then
   RTOS_CPPFLAGS='-I/usr/local/include'
-  RTOS_LDFLAGS='-I/usr/local/include -L/usr/local/lib -lpthread'
+  RTOS_LDFLAGS='-L/usr/local/lib -lpthread'
 elif test x$rtos = x;then
   AC_MSG_ERROR([no realtime system found])
 fi
