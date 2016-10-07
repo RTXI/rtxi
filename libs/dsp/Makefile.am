@@ -8,6 +8,7 @@ pkginclude_HEADERS = \
 		abstmath.h \
 		acosh.h \
 		adap_fir.h \
+		adaptype.h \
 		anlgfilt.h \
 		anlg_rcn.h \
 		ar_est.h \
@@ -51,6 +52,7 @@ pkginclude_HEADERS = \
 		elipfunc.h \
 		fft.h \
 		filtfunc.h \
+		filt_imp.h \
 		filtmath.h \
 		fir_dsgn.h \
 		firideal.h \
@@ -83,18 +85,21 @@ pkginclude_HEADERS = \
 		ma_est.h \
 		ma_proc.h \
 		ma_src.h \
+		matrix.h \
 		matrix_t.h \
+		misdefs.h \
 		mod_yuwa.h \
 		mr_lpf.h \
 		msdcost.h \
 		msmrcost.h \
 		numinteg.h \
 		optmiz2.h \
+		overload.h \
 		pause.h \
 		polefilt.h \
 		polefunc.h \
-		poly.h \
 		polydiv.h \
+		poly.h \
 		psd_est.h \
 		pzfilt.h \
 		rectnglr.h \
@@ -103,20 +108,24 @@ pkginclude_HEADERS = \
 		sam_spec.h \
 		sb_peak.h \
 		sd_theor.h \
+		sig_src.h \
+		sig_type.h \
 		sinawgn.h \
 		sinc.h \
 		sincsqrd.h \
 		stepresp.h \
 		stpinvar.h \
 		swept.h \
+		thy_spec.h \
 		toeplitz.h \
 		trianglr.h \
+		typedefs.h \
 		uni_rand.h \
 		unq_iir.h \
 		unwrap.h \
 		vector_t.h \
 		welcpdgm.h \
-		yulewalk.h 
+		yulewalk.h
 
 pkglib_LTLIBRARIES = librtdsp.la
 
