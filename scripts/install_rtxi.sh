@@ -2,8 +2,10 @@
 set -eu
 
 #
-# The Real-Time eXperiment Interface (RTXI) Copyright (C) 2011 Georgia
-# Institute of Technology, University of Utah, Weill Cornell Medical College
+# The Real-Time eXperiment Interface (RTXI) 
+# 
+# Copyright (C) 2011 Georgia Institute of Technology, University of Utah, Weill
+# Cornell Medical College
 #
 # This program is free software: you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
@@ -55,22 +57,10 @@ else
 fi
 
 make -sj`nproc` -C ./
-
-if [ $? -eq 0 ]; then
-	echo "-----> RTXI compilation successful."
-else
-	echo "-----> RTXI compilation failed."
-	exit
-fi
+echo "-----> RTXI compilation successful."
 
 sudo make install -C ./
-
-if [ $? -eq 0 ]; then
-	echo "-----> RTXI intallation successful."
-else
-	echo "-----> RTXI installation failed."
-	exit
-fi
+echo "-----> RTXI intallation successful."
 
 echo "-----> Putting things into place."
 sudo mkdir -p ${RTXI_LIB}
@@ -84,6 +74,7 @@ cp -f scripts/rtxi.desktop ~/Desktop/
 chmod +x ~/Desktop/rtxi.desktop
 sudo cp -f rtxi.conf /etc/
 
+# Install startup script to load analogy driver at boot
 if [ $(lsb_release -sc) == "jessie" ] || [ $(lsb_release -sc) == "xenial" ]; then
 	echo "-----> Load analogy driver with systemd"
 	sudo cp -f ./scripts/services/rtxi_load_analogy.service /etc/systemd/system/
@@ -94,13 +85,7 @@ else
 	sudo update-rc.d rtxi_load_analogy defaults
 fi
 sudo ldconfig
-
-if [ $? -eq 0 ]; then
-	echo "-----> Successfully placed files.."
-else
-	echo "-----> Failed to place files."
-	exit
-fi
+echo "-----> Successfully placed files.."
 
 # TEMPORARY WORKAROUND
 echo "-----> Installing basic modules."
@@ -131,13 +116,7 @@ for dir in ${MODS}/*; do
 done
 
 echo ""
-if [ $? -eq 0 ]; then
-	echo "-----> RTXI intallation successful. Reboot may be required."
-else
-	echo "-----> RTXI installation failed."
-	exit
-fi
-
+echo "-----> RTXI intallation successful. Reboot may be required."
 echo "-----> Type '"sudo rtxi"' to start RTXI. Happy Sciencing!"
 echo "-----> Please email help@rtxi.org with any questions/help requests."
 echo "-----> Script developed/last modified by Yogi Patel <yapatel@gatech.edu> on May 2014."
