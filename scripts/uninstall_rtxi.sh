@@ -2,8 +2,10 @@
 set -eu
 
 #
-# The Real-Time eXperiment Interface (RTXI) Copyright (C) 2011 Georgia
-# Institute of Technology, University of Utah, Weill Cornell Medical College
+# The Real-Time eXperiment Interface (RTXI) 
+# 
+# Copyright (C) 2011 Georgia Institute of Technology, University of Utah, Weill
+# Cornell Medical College
 #
 # This program is free software: you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
@@ -33,7 +35,6 @@ RTXI_LIB=/usr/local/lib/rtxi
 QWT_LIB=/usr/local/lib/qwt
 QWT_LIB2=/usr/local/qwt-6.1.3
 QWT_LIB3=/usr/lib/libqwt* # not too proud of this line...
-RTXI_INC_LIB=/usr/local/lib/rtxi_includes
 RTXI_INC_MOD=/usr/local/lib/rtxi_modules
 RTXI_INC=/usr/local/include/rtxi
 RTXI_BIN=/usr/local/bin/rtxi*
@@ -50,7 +51,6 @@ rm -rf ${RTXI_LIB}
 rm -rf ${QWT_LIB}
 rm -rf ${QWT_LIB2}
 rm -rf ${QWT_LIB3}
-rm -rf ${RTXI_INC_LIB}
 rm -rf ${RTXI_INC_MOD}
 rm -rf ${RTXI_INC}
 rm -rf ${RTXI_BIN}
@@ -58,9 +58,4 @@ rm -rf ${RTXI_SHARE}
 rm -rf ${RTXI_APP}
 rm -rf ${ETC}
 
-if [ $? -eq 0 ]; then
-	echo "----->RTXI removed. Reboot may be required."
-else
-	echo "----->RTXI uninstallation failed."
-	exit
-fi
+echo "----->RTXI removed. Reboot may be required."

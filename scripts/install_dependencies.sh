@@ -80,12 +80,7 @@ else
 	./configure --prefix=/usr
 	make -sj2
 	make install
-	if [ $? -eq 0 ]; then
-		echo "-----> HDF5 installed."
-	else
-		echo "-----> HDF5 installation failed."
-		exit 1
-	fi
+	echo "-----> HDF5 installation failed."
 fi
 
 # Installing Qwt
@@ -104,29 +99,7 @@ else
 	cp -vf /usr/local/qwt-${QWT_VERSION}/lib/libqwt.so.${QWT_VERSION} /usr/lib/.
 	ln -sf /usr/lib/libqwt.so.${QWT_VERSION} /usr/lib/libqwt.so
 	ldconfig
-	if [ $? -eq 0 ]; then
-		echo "-----> Qwt installed."
-	else
-		echo "-----> Qwt installation failed."
-		exit 1
-	fi
-fi
-
-# (Re)install rtxi_includes. Remove the moc files first. Failing to do so when 
-# upgrading from Qt4 to Qt5 will cause compilation errors later on. 
-[ -d /usr/local/lib/rtxi_includes ] && rm -rf /usr/local/lib/rtxi_includes/moc_*
-rsync -a ${DEPS}/rtxi_includes /usr/local/lib/.
-
-# Allow all members of adm (administrator accounts) write access to the 
-# rtxi_includes/ directory. 
-setfacl -Rm g:adm:rwX,d:g:adm:rwX /usr/local/lib/rtxi_includes
-find ${PLG}/. -name "*.h" -exec cp -t /usr/local/lib/rtxi_includes/ {} +
-
-if [ $? -eq 0 ]; then
-	echo "-----> rtxi_includes synced."
-else
-	echo "-----> rtxi_includes sync failed."
-	exit 1
+	echo "-----> Qwt installed."
 fi
 
 echo "-----> Done."
