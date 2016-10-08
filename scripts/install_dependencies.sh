@@ -32,12 +32,11 @@ fi
 DIR=$PWD
 ROOT=${DIR}/../
 DEPS=${ROOT}/deps
-HDF=${DEPS}/hdf
-QWT=${DEPS}/qwt
 PLG=${ROOT}/plugins
 
 # Some easy to use defines
 QWT_VERSION=6.1.3
+HDF_VERSION=1.8.4
 
 #
 # Check for all RTXI *.deb dependencies and install them. Includes:
@@ -46,7 +45,6 @@ QWT_VERSION=6.1.3
 #  - Qt5, HDF, and Qwt6 libraries
 #
 echo "-----> Checking dependencies..."
-
 apt-get update
 apt-get -y upgrade
 apt-get -y install \
@@ -56,16 +54,7 @@ apt-get -y install \
 	libqt5svg5-dev libqt5opengl5 libqt5gui5 libqt5core5a libqt5xml5 \
 	qt5-default qttools5-dev-tools qttools5-dev libgit2-dev libmarkdown2-dev
 apt-get -y build-dep linux
-
-if [ $? -eq 0 ]; then
-	echo "-----> Package dependencies installed."
-else
-	echo "-----> Package dependency installation failed."
-	exit 1
-fi
-
-# Start at top
-cd ${DEPS}
+echo "-----> Package dependencies installed."
 
 # Installing HDF5
 echo "-----> Checking for HDF5."
@@ -74,9 +63,9 @@ if [ -f "/usr/include/hdf5.h" ]; then
 	echo "-----> HDF5 already installed."
 else
 	echo "-----> Installing HDF5..."
-	cd ${HDF}
-	tar xf hdf5-1.8.4.tar.bz2
-	cd hdf5-1.8.4
+	cd ${DEPS}
+	tar xf hdf5-${HDF_VERSION}.tar.bz2
+	cd hdf5-${HDF_VERSION}
 	./configure --prefix=/usr
 	make -sj2
 	make install
@@ -90,7 +79,7 @@ if [ -f "/usr/local/qwt-${QWT_VERSION}/include/qwt.h" ]; then
 	echo "-----> Qwt already installed."
 else
 	echo "-----> Installing Qwt..."
-	cd ${QWT}
+	cd ${DEPS}
 	tar xf qwt-${QWT_VERSION}.tar.bz2
 	cd qwt-${QWT_VERSION}
 	qmake qwt.pro
