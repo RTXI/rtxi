@@ -26,9 +26,6 @@ set -eu
 # Directories
 ROOT=../
 MODS=/usr/local/lib/rtxi_modules/
-DEPS=${ROOT}/deps/
-HDF=${DEPS}/hdf
-QWT=${DEPS}/qwt
 RTXI_LIB=/usr/local/lib/rtxi/
 
 # Start at top
@@ -110,7 +107,7 @@ for dir in ${MODS}/*; do
 	if [ -d "$dir" ]; then
 		make clean -C "$dir"
 		git -C "$dir" pull
-		make -C "$dir"
+		make -j`nproc`-C "$dir"
 		sudo make install -C "$dir"
 	fi
 done
