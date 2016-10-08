@@ -55,7 +55,7 @@ QWT_LIB = -lqwt
 MOC = /usr/bin/moc
 UIC = /usr/bin/uic
 
-RTDEPS_LDFLAGS = -L$(pkglibdir)
+RTDEPS_LIBS = -L$(pkglibdir)
 
 AM_CPPFLAGS = -DEXEC_PREFIX=\"$(exec_prefix)\" -DPREFIX=\"$(prefix)\" $(QT_CXXFLAGS) $(RTOS_CPPFLAGS) 
 AM_CXXFLAGS = -pipe $(QT_CXXFLAGS) $(QWT_CXXFLAGS)

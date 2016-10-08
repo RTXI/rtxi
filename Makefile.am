@@ -78,7 +78,7 @@ Makefile.plugin_compile: Makefile
 	@echo 'MOC        = ' $(MOC)>> $@
 	@echo ''                                                        >> $@
 	@echo 'CXXFLAGS := $$(CXXFLAGS) -I. '$(RTDEPS_CXXFLAGS) $(AM_CXXFLAGS) >> $@
-	@echo 'LDFLAGS  := $$(LDFLAGS) '$(RTDEPS_LDFLAGS) $(AM_LDFLAGS) -module -avoid-version>> $@
+	@echo 'LDFLAGS  := $$(LDFLAGS) '$(RTDEPS_LIBS) $(AM_LDFLAGS) -module -avoid-version>> $@
 	@echo ''                                                        >> $@
 	@echo 'ifdef DEBUG '>> $@
 	@echo 'CXXFLAGS += -DDEBUG'>> $@
