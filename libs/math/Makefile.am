@@ -4,7 +4,9 @@ MAINTAINERCLEANFILES = Makefile.in
 
 include $(top_srcdir)/Makefile.buildvars
 
-pkginclude_HEADERS = \
+mathincludedir = $(pkgincludedir)/libs/
+
+mathinclude_HEADERS = \
 		powfast.hpp \
 		rtmath.h \
 		runningstat.h

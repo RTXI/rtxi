@@ -4,7 +4,9 @@ MAINTAINERCLEANFILES = Makefile.in
 
 include $(top_srcdir)/Makefile.buildvars
 
-pkginclude_HEADERS = \
+dspincludedir = $(pkgincludedir)/libs/DSP
+
+dspinclude_HEADERS = \
 		abstmath.h \
 		acosh.h \
 		adap_fir.h \

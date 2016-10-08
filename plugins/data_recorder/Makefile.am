@@ -4,6 +4,11 @@ MAINTAINERCLEANFILES = Makefile.in
 
 include $(top_srcdir)/Makefile.buildvars
 
+pluginincludedir = $(pkgincludedir)/plugins
+
+plugininclude_HEADERS = \
+		data_recorder.h
+
 pkglib_LTLIBRARIES = data_recorder.la
 
 LIBS = $(HDF_LIBS)

@@ -4,7 +4,9 @@ MAINTAINERCLEANFILES = Makefile.in
 
 include $(top_srcdir)/Makefile.buildvars
 
-pkginclude_HEADERS = \
+plotincludedir = $(pkgincludedir)/libs/
+
+plotinclude_HEADERS = \
 		basicplot.h \
 		incrementalplot.h \
 		plotdialog.h \

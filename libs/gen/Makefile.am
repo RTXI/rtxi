@@ -4,7 +4,9 @@ MAINTAINERCLEANFILES = Makefile.in
 
 include $(top_srcdir)/Makefile.buildvars
 
-pkginclude_HEADERS = \
+genincludedir = $(pkgincludedir)/libs/
+
+geninclude_HEADERS = \
 		gen_biphase.h \
 		generator.h \
 		gen_mono.h \
