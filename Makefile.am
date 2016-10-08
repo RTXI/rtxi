@@ -120,6 +120,8 @@ Makefile.plugin_example:
 	@echo ''>> $@
 	@echo 'SOURCES = my_plugin.cpp'>> $@
 	@echo ''>> $@
+	@echo 'LIBS = '>> $@
+	@echo ''>> $@
 	@echo '### Do not edit below this line ###'>> $@
 	@echo ''>> $@
 	@echo 'include $$(shell rtxi_plugin_config --pkgdata-dir)/Makefile.plugin_compile' >> $@
