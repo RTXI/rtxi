@@ -37,6 +37,10 @@ QWT_CXXFLAGS = -I/usr/include/qwt \
                -I/usr/local/qwt-$(QWT_VERSION)/include \
                -I/usr/local/lib/qwt/include 
 
+RTDEPS_CXXFLAGS = -I$(pkgincludedir) \
+                  -I$(pkgincludedir)/plugins \
+                  -I$(pkgincludedir)/libs
+
 # Add path for compiling against <rtdk.h> when using Xenomai
 if XENOMAI
   EXTRA_QT_CXXFLAGS = -I/usr/xenomai/include 
@@ -50,6 +54,8 @@ QT_LIBS = $(shell pkg-config --libs \
 QWT_LIB = -lqwt
 MOC = /usr/bin/moc
 UIC = /usr/bin/uic
+
+RTDEPS_LDFLAGS = -L$(pkglibdir)
 
 AM_CPPFLAGS = -DEXEC_PREFIX=\"$(exec_prefix)\" -DPREFIX=\"$(prefix)\" $(QT_CXXFLAGS) $(RTOS_CPPFLAGS) 
 AM_CXXFLAGS = -pipe $(QT_CXXFLAGS) $(QWT_CXXFLAGS)
