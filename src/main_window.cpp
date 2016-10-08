@@ -272,12 +272,16 @@ void MainWindow::aboutQt (void)
 
 void MainWindow::aboutXeno (void)
 {
+#if XENOMAI
 	FILE *fp;
 	char xeno_buff[8];
 	fp = fopen("/proc/xenomai/version","r");
 	fscanf(fp, "%s", xeno_buff);
 	fclose(fp);
 	QMessageBox::about(this, "About Xenomai", "Xenomai Version " + QString(xeno_buff));
+#else
+	QMessageBox::about(this, "About Xenomai", "Running POSIX (non-RT)");
+#endif
 }
 
 void MainWindow::openDocs(void)
