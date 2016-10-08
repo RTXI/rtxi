@@ -4,7 +4,9 @@ MAINTAINERCLEANFILES = Makefile.in
 
 include $(top_srcdir)/Makefile.buildvars
 
-plotincludedir = $(pkgincludedir)/libs/
+plotincludedir = $(pkgincludedir)/libs
+
+plotlibdir = $(pkglibdir)/libs
 
 plotinclude_HEADERS = \
 		basicplot.h \
@@ -14,9 +16,9 @@ plotinclude_HEADERS = \
 		scrollbar.h \
 		scrollzoomer.h
 
-pkglib_LTLIBRARIES = librtplot.la
+plotlib_LTLIBRARIES = librtplot.la
 
-librtplot_la_LDFLAGS = -lQt5OpenGL -lQt5PrintSupport -lQt5Xml -lQt5Svg -lQt5Widgets -lQt5Gui -lQt5Network -lQt5Core -lqwt -lgsl -lgslcblas -lm -ldl -lpthread -lGL -shared
+librtplot_la_LDFLAGS = -lQt5OpenGL -lQt5PrintSupport -lQt5Xml -lQt5Svg -lQt5Widgets -lQt5Gui -lQt5Network -lQt5Core -lqwt -lgsl -lgslcblas -lm -ldl -lpthread -lGL -shared -avoid-version
 
 librtplot_la_SOURCES = \
 		basicplot.cpp \

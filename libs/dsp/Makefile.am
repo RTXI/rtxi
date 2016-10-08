@@ -6,6 +6,8 @@ include $(top_srcdir)/Makefile.buildvars
 
 dspincludedir = $(pkgincludedir)/libs/DSP
 
+dsplibdir = $(pkglibdir)/libs
+
 dspinclude_HEADERS = \
 		abstmath.h \
 		acosh.h \
@@ -129,9 +131,9 @@ dspinclude_HEADERS = \
 		welcpdgm.h \
 		yulewalk.h
 
-pkglib_LTLIBRARIES = librtdsp.la
+dsplib_LTLIBRARIES = librtdsp.la
 
-librtdsp_la_LDFLAGS = -lgsl -lgslcblas -lm -ldl -lpthread -lGL -shared
+librtdsp_la_LDFLAGS = -lgsl -lgslcblas -lm -ldl -lpthread -lGL -shared -avoid-version
 
 librtdsp_la_SOURCES = \
 		abstmath.cpp \

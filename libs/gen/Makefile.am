@@ -4,7 +4,9 @@ MAINTAINERCLEANFILES = Makefile.in
 
 include $(top_srcdir)/Makefile.buildvars
 
-genincludedir = $(pkgincludedir)/libs/
+genincludedir = $(pkgincludedir)/libs
+
+genlibdir = $(pkglibdir)/libs
 
 geninclude_HEADERS = \
 		gen_biphase.h \
@@ -15,9 +17,9 @@ geninclude_HEADERS = \
 		gen_whitenoise.h \
 		gen_zap.h
 
-pkglib_LTLIBRARIES = librtgen.la
+genlib_LTLIBRARIES = librtgen.la
 
-librtgen_la_LDFLAGS = -lgsl -lgslcblas -lm -ldl -lpthread -lGL -shared
+librtgen_la_LDFLAGS = -lgsl -lgslcblas -lm -ldl -lpthread -lGL -shared -avoid-version
 
 librtgen_la_SOURCES = \
 		gen_biphase.cpp \
