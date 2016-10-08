@@ -6,11 +6,6 @@ include $(top_srcdir)/Makefile.buildvars
 
 pluginincludedir = $(pkgincludedir)/plugins
 
-librtmath_dir = $(top_srcdir)/libs/math
-
-AM_CXXFLAGS += \
-		-I$(librtmath_dir)
-
 plugininclude_HEADERS = \
 		performance_measurement.h
 
@@ -20,9 +15,9 @@ performance_measurement_la_LDFLAGS = -module -avoid-version
 
 performance_measurement_la_SOURCES = \
 		performance_measurement.h \
-		$(librtmath_dir)/runningstat.h \
+		runningstat.h \
 		performance_measurement.cpp \
-		$(librtmath_dir)/runningstat.cpp 
+		runningstat.cpp 
 nodist_performance_measurement_la_SOURCES = \
 		moc_performance_measurement.cpp
 
