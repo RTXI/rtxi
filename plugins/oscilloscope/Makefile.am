@@ -8,7 +8,7 @@ pluginincludedir = $(pkgincludedir)/plugins
 
 plugininclude_HEADERS = \
 		oscilloscope.h \
-		scope .h
+		scope.h
 
 pkglib_LTLIBRARIES = oscilloscope.la
 
