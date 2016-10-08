@@ -20,7 +20,7 @@
 
 AC_INIT([RTXI],[2.1],[help@rtxi.org],rtxi)
 
-AM_CONFIG_HEADER(include/rtxi_config.h)
+AM_CONFIG_HEADER(src/rtxi_config.h)
 AM_INIT_AUTOMAKE([foreign])
 AM_PATH_CPPUNIT
 AM_SILENT_RULES([yes])
@@ -125,7 +125,7 @@ LIBS=
 dnl Create makefiles and other configuration files
 AC_CONFIG_FILES([
 Makefile
-rtxi/Makefile
+src/Makefile
 scripts/Makefile
 scripts/rtxi_plugin_config
 libs/Makefile
