@@ -44,6 +44,7 @@ RTXI_SHARE=/usr/local/share/rtxi
 RTXI_APP=/usr/share/applications/rtxi.desktop
 
 QWT_LIB=/usr/local/lib/libqwt* # not too proud of this line...
+QWT_DIR=/usr/local/qwt-${QWT_VERSION}
 
 # Uninstall Qwt
 cd ${DEPS}
@@ -55,6 +56,7 @@ qmake qwt.pro
 make uninstall
 cd ${DEPS}
 rm -rf ${QWT_LIB}
+rm -rf ${QWT_DIR}
 rm -rf qwt-${QWT_VERSION}
 
 # Uninstall Hdf5
