@@ -71,22 +71,22 @@ rm -rf hdf5-${HDF_VERSION}
 cd ${ROOT}
 make uninstall
 make clean
-sudo ldconfig
+ldconfig
 rm -rf ${RTXI_MOD}
 
 # Remove startup scripts/services
 if [ $(lsb_release -sc) == "jessie" ] || [ $(lsb_release -sc) == "xenial" ]; then
 	echo "-----> Remove analogy driver systemd service"
-	sudo systemctl stop rtxi_load_analogy.service
-	sudo systemctl disable rtxi_load_analogy.service
-	sudo rm -f /etc/systemd/system/rtxi_load_analogy.service
-	sudo systemctl daemon-reload
-	sudo systemctl reset-failed
+	systemctl stop rtxi_load_analogy.service
+	systemctl disable rtxi_load_analogy.service
+	rm -f /etc/systemd/system/rtxi_load_analogy.service
+	systemctl daemon-reload
+	systemctl reset-failed
 else
 	echo "-----> Remove analogy driver sysvinit/upstart scripts"
-	sudo update-rc.d rtxi_load_analogy stop
-	sudo update-rc.d -f rtxi_load_analogy remove
-	sudo rm -f /etc/init.d/rtxi_load_analogy
+	update-rc.d rtxi_load_analogy disable
+	update-rc.d -f rtxi_load_analogy remove
+	rm -f /etc/init.d/rtxi_load_analogy
 fi
 
 cd ${DIR}
