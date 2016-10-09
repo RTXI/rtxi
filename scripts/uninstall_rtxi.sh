@@ -43,9 +43,10 @@ QWT_DIR=/usr/local/qwt-${QWT_VERSION}
 
 # Uninstall Qwt
 cd ${DEPS}
-if ! [ -d qwt-${QWT_VERSION} ]; then
-	tar xf qwt-${QWT_VERSION}.tar.bz2
+if [ -d qwt-${QWT_VERSION} ]; then
+	rm -rf qwt-${QWT_VERSION}
 fi
+tar xf qwt-${QWT_VERSION}.tar.bz2
 cd qwt-${QWT_VERSION}
 qmake qwt.pro
 make uninstall
@@ -56,9 +57,10 @@ rm -rf qwt-${QWT_VERSION}
 
 # Uninstall Hdf5
 cd ${DEPS}
-if ! [ -d hdf5-${HDF_VERSION} ]; then
-	tar xf hdf5-${HDF_VERSION}.tar.bz2
+if [ -d hdf5-${HDF_VERSION} ]; then
+	rm -rf hdf5-${HDF_VERSION}
 fi
+tar xf hdf5-${HDF_VERSION}.tar.bz2
 cd hdf5-${HDF_VERSION}
 ./configure --prefix=/usr
 make uninstall
