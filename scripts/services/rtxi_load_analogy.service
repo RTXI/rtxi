@@ -24,8 +24,9 @@ After=syslog.target
 
 [Service]
 Type=oneshot
-ExecStart=/usr/xenomai/sbin/analogy_config analogy0 analogy_ni_pcimio
+ExecStart=/bin/bash -c "if [[ `uname -r` =~ \"xenomai\" ]]; then /usr/xenomai/sbin/analogy_config analogy0 analogy_ni_pcimio; fi"
 ExecStop=/usr/xenomai/sbin/analogy_config -r analogy0 analogy_ni_pcimio
+ExecStop=/bin/bash -c "if [[ `uname -r` =~ \"xenomai\" ]]; then /usr/xenomai/sbin/analogy_config -r analogy0 analogy_ni_pcimio; fi"
 RemainAfterExit=yes
 
 [Install]
