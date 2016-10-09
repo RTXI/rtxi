@@ -85,8 +85,8 @@ else
 	qmake qwt.pro
 	make -sj2
 	make install
-	cp -vf /usr/local/qwt-${QWT_VERSION}/lib/libqwt.so.${QWT_VERSION} /usr/lib/.
-	ln -sf /usr/lib/libqwt.so.${QWT_VERSION} /usr/lib/libqwt.so
+	cp -vf lib/libqwt.so.${QWT_VERSION} /usr/local/lib/.
+	ln -sf /usr/local/lib/libqwt.so.${QWT_VERSION} /usr/local/lib/libqwt.so
 	ldconfig
 	echo "-----> Qwt installed."
 fi

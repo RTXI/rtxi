@@ -31,13 +31,11 @@ QT_DEFINES =  -DQT_XML_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_WIDGETS_LIB \
 QT_CXXFLAGS = $(shell pkg-config --cflags \
                 Qt5Core Qt5Gui Qt5OpenGL Qt5PrintSupport Qt5Xml Qt5Widgets \
                 Qt5Svg Qt5Network libgit2) \
-              $(QT_DEFINES) \
-              -I/usr/X11R6/include
-
-QWT_CXXFLAGS = -I/usr/include/qwt \
-               -I/usr/local/qwt-$(QWT_VERSION) \
-               -I/usr/local/qwt-$(QWT_VERSION)/include \
-               -I/usr/local/lib/qwt/include 
+              -I/usr/X11R6/include \
+              -I/usr/include/qwt \
+              -I/usr/local/qwt-$(QWT_VERSION)/include \
+              -I/usr/local/lib/qwt/include \
+              $(QT_DEFINES)
 
 RTDEPS_CXXFLAGS = -I$(pkgincludedir) \
                   -I$(pkgincludedir)/plugins \
@@ -51,17 +49,16 @@ endif
 QT_LIBS = $(shell pkg-config --libs \
             Qt5Core Qt5Gui Qt5OpenGL Qt5PrintSupport Qt5Xml Qt5Widgets \
             Qt5Svg Qt5Network libgit2) \
-          -lGL -lpthread
+          -lGL -lpthread -lqwt
 
-QWT_LIB = -lqwt
 MOC = /usr/bin/moc
 UIC = /usr/bin/uic
 
 RTDEPS_LIBS = -L$(pkglibdir)/libs
 
 AM_CPPFLAGS = -DEXEC_PREFIX=\"$(exec_prefix)\" -DPREFIX=\"$(prefix)\" $(QT_CXXFLAGS) $(RTOS_CPPFLAGS) 
-AM_CXXFLAGS = -pipe $(QT_CXXFLAGS) $(QWT_CXXFLAGS)
-AM_LDFLAGS  = $(QT_LIBS) $(QWT_LIB) $(GSL_LIBS) $(RTOS_LDFLAGS)
+AM_CXXFLAGS = -pipe $(QT_CXXFLAGS)
+AM_LDFLAGS  = $(QT_LIBS) $(GSL_LIBS) $(RTOS_LDFLAGS)
 AM_CFLAGS = $(AM_CXXFLAGS)
 
 if DEBUG

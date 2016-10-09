@@ -28,13 +28,15 @@ if ! id | grep -q root; then
 	exit
 fi
 
+QWT_VERSION=6.1.3
+
 # Directories
 DIR=$PWD
 ROOT=${DIR}/..
 RTXI_LIB=/usr/local/lib/rtxi
 QWT_LIB=/usr/local/lib/qwt
-QWT_LIB2=/usr/local/qwt-6.1.3
-QWT_LIB3=/usr/lib/libqwt* # not too proud of this line...
+QWT_LIB2=/usr/local/qwt-${QWT_VERSION}
+QWT_LIB3=/usr/local/lib/libqwt* # not too proud of this line...
 RTXI_INC_MOD=/usr/local/lib/rtxi_modules
 RTXI_INC=/usr/local/include/rtxi
 RTXI_BIN=/usr/local/bin/rtxi*
