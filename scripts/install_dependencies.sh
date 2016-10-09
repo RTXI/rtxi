@@ -69,7 +69,7 @@ else
 	./configure --prefix=/usr
 	make -sj2
 	make install
-	echo "-----> HDF5 installation failed."
+	echo "-----> HDF5 installed."
 fi
 
 # Installing Qwt
