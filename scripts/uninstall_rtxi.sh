@@ -80,6 +80,8 @@ if [ $(lsb_release -sc) == "jessie" ] || [ $(lsb_release -sc) == "xenial" ]; the
 	sudo systemctl stop rtxi_load_analogy.service
 	sudo systemctl disable rtxi_load_analogy.service
 	sudo rm -f /etc/systemd/system/rtxi_load_analogy.service
+	sudo systemctl daemon-reload
+	sudo systemctl reset-failed
 else
 	echo "-----> Remove analogy driver sysvinit/upstart scripts"
 	sudo update-rc.d rtxi_load_analogy stop
