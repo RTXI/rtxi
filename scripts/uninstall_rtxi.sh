@@ -37,7 +37,6 @@ HDF_VERSION=1.8.4
 QWT_VERSION=6.1.3
 
 RTXI_MOD=/usr/local/lib/rtxi_modules
-RTXI_APP=/usr/share/applications/rtxi.desktop
 
 QWT_LIB=/usr/local/lib/libqwt* # not too proud of this line...
 QWT_DIR=/usr/local/qwt-${QWT_VERSION}
@@ -70,9 +69,7 @@ rm -rf hdf5-${HDF_VERSION}
 cd ${ROOT}
 make uninstall
 make clean
-
 rm -rf ${RTXI_MOD}
-rm -rf ${RTXI_APP}
 
 cd ${DIR}
 echo "----->RTXI removed. Reboot may be required."

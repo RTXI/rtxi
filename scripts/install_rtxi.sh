@@ -59,8 +59,7 @@ sudo make install -C ./
 echo "-----> RTXI intallation successful."
 
 echo "-----> Putting things into place."
-sudo cp -f scripts/rtxi.desktop /usr/share/applications/
-cp -f scripts/rtxi.desktop ~/Desktop/
+cp -f res/rtxi.desktop ~/Desktop/
 chmod +x ~/Desktop/rtxi.desktop
 
 # Install startup script to load analogy driver at boot
