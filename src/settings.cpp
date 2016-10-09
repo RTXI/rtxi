@@ -322,7 +322,7 @@ int Settings::Manager::load(const std::string &filename)
                 doesnotexist = false;
         }
 
-    if (filename == "/etc/rtxi.conf")
+    if (filename == "/usr/local/share/rtxi/rtxi.conf")
         doesnotexist = false;
 
     if (doesnotexist)
@@ -418,7 +418,7 @@ int Settings::Manager::save(const std::string &filename)
                 doesnotexist = false;
         }
 
-    if (filename == "/etc/rtxi.conf")
+    if (filename == "/usr/local/share/rtxi/rtxi.conf")
         doesnotexist = false;
 
     if (doesnotexist)

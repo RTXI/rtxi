@@ -36,7 +36,7 @@ MainWindow::MainWindow (void) : QMainWindow(NULL, Qt::Window)
 
     /* Initialize Window Settings */
     setWindowTitle("RTXI - Real-time eXperimental Interface");
-    setWindowIcon(QIcon("/usr/local/lib/rtxi/RTXI-icon.png"));
+    setWindowIcon(QIcon("/usr/local/share/rtxi/RTXI-icon.png"));
 
     /* Set Qt Settings Information */
     QCoreApplication::setOrganizationName("RTXI");
@@ -372,7 +372,7 @@ void MainWindow::resetSettings(void)
 {
     systemMenu->clear();
     mdiArea->closeAllSubWindows();
-    Settings::Manager::getInstance()->load("/etc/rtxi.conf");
+    Settings::Manager::getInstance()->load("/usr/local/share/rtxi/rtxi.conf");
 }
 
 void MainWindow::utilitiesMenuActivated(QAction *id)

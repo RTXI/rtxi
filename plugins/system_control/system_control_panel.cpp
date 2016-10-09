@@ -65,7 +65,7 @@ SystemControlPanel::SystemControlPanel(QWidget *parent) : QWidget(parent)
 
 	// Make Mdi
 	subWindow = new QMdiSubWindow;
-	subWindow->setWindowIcon(QIcon("/usr/local/lib/rtxi/RTXI-widget-icon.png"));
+	subWindow->setWindowIcon(QIcon("/usr/local/share/rtxi/RTXI-widget-icon.png"));
 	subWindow->setAttribute(Qt::WA_DeleteOnClose);
 	subWindow->setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint |
 			Qt::WindowMinimizeButtonHint);

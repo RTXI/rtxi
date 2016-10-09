@@ -60,16 +60,12 @@ sudo make install -C ./
 echo "-----> RTXI intallation successful."
 
 echo "-----> Putting things into place."
-sudo mkdir -p ${RTXI_LIB}
-sudo cp -f libtool ${RTXI_LIB}
 sudo cp -f scripts/icons/RTXI-icon.png ${RTXI_LIB}
 sudo cp -f scripts/icons/RTXI-icon.svg ${RTXI_LIB}
 sudo cp -f scripts/icons/RTXI-widget-icon.png ${RTXI_LIB}
 sudo cp -f scripts/rtxi.desktop /usr/share/applications/
-sudo cp -f scripts/update_rtxi.sh /usr/local/share/rtxi/.
 cp -f scripts/rtxi.desktop ~/Desktop/
 chmod +x ~/Desktop/rtxi.desktop
-sudo cp -f rtxi.conf /etc/
 
 # Install startup script to load analogy driver at boot
 if [ $(lsb_release -sc) == "jessie" ] || [ $(lsb_release -sc) == "xenial" ]; then

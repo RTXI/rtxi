@@ -77,7 +77,7 @@ int main(int argc,char *argv[])
     else if (getenv("RTXI_CONF"))
         config_file = getenv("RTXI_CONF");
     else
-        config_file = "/etc/rtxi.conf";
+        config_file = "/usr/local/share/rtxi/rtxi.conf";
 
     /************************************************************
      * Create Main System Components                            *

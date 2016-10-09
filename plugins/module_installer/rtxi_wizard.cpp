@@ -33,7 +33,7 @@ RTXIWizard::Panel::Panel(QWidget *parent) : QWidget(parent)
 
 	// Make Mdi
 	subWindow = new QMdiSubWindow;
-	subWindow->setWindowIcon(QIcon("/usr/local/lib/rtxi/RTXI-widget-icon.png"));
+	subWindow->setWindowIcon(QIcon("/usr/local/share/rtxi/RTXI-widget-icon.png"));
 	subWindow->setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint |
 			Qt::WindowMinimizeButtonHint);
 	subWindow->setAttribute(Qt::WA_DeleteOnClose);

@@ -19,8 +19,6 @@
 #
 
 CLEANFILES = *~ 
-DISTCLEANFILES = rtxi_plugin_config
+DISTCLEANFILES = 
 
-bin_SCRIPTS = rtxi_plugin_config
-
-pkgdata_SCRIPTS = update_rtxi.sh
+pkgdata_DATA = RTXI-icon.png RTXI-icon.svg RTXI-widget-icon.png

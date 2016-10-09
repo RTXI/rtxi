@@ -21,7 +21,7 @@
 # Include the Autoconf scripts in subdir m4/
 ACLOCAL_AMFLAGS = -I m4
 
-SUBDIRS      = libs src plugins scripts
+SUBDIRS      = libs src plugins scripts icons
 
 ACLOCAL_DIST = m4/ac_pkg_swig.m4 \
                m4/ac_python_devel.m4 \
@@ -72,7 +72,7 @@ Makefile.plugin_compile: Makefile
 	@echo "Generating Makefile.plugin_compile..."
 	@echo 'exec_modeldir = ' $(pkglibdir) > $@
 	@echo '' >> $@
-	@echo 'LIBTOOL    = ' $(pkglibdir)/libtool >> $@
+	@echo 'LIBTOOL    = ' $(pkgdatadir)/libtool >> $@
 	@echo 'CXX        = ' $(CXX) >> $@
 	@echo 'CXXLD      = ' $(CXX) >> $@
 	@echo 'CXXCOMPILE = $$(LIBTOOL) --mode=compile $$(CXX)'     >> $@
