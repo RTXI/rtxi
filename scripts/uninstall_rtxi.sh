@@ -28,36 +28,57 @@ if ! id | grep -q root; then
 	exit
 fi
 
-QWT_VERSION=6.1.3
-
 # Directories
 DIR=$PWD
 ROOT=${DIR}/..
+DEPS=${ROOT}/deps
+
+HDF_VERSION=1.8.4
+QWT_VERSION=6.1.3
+
 RTXI_LIB=/usr/local/lib/rtxi
-QWT_LIB=/usr/local/lib/qwt
-QWT_LIB2=/usr/local/qwt-${QWT_VERSION}
-QWT_LIB3=/usr/local/lib/libqwt* # not too proud of this line...
-RTXI_INC_MOD=/usr/local/lib/rtxi_modules
+RTXI_CONF=/etc/rtxi.conf
+RTXI_MOD=/usr/local/lib/rtxi_modules
 RTXI_INC=/usr/local/include/rtxi
-RTXI_BIN=/usr/local/bin/rtxi*
 RTXI_SHARE=/usr/local/share/rtxi
 RTXI_APP=/usr/share/applications/rtxi.desktop
-ETC=/etc/rtxi.conf
 
+QWT_LIB=/usr/local/lib/libqwt* # not too proud of this line...
+
+# Uninstall Qwt
+cd ${DEPS}
+if ! [ -d qwt-${QWT_VERSION} ]; then
+	tar xf qwt-${QWT_VERSION}.tar.bz2
+fi
+cd qwt-${QWT_VERSION}
+qmake qwt.pro
+make uninstall
+cd ${DEPS}
+rm -rf ${QWT_LIB}
+rm -rf qwt-${QWT_VERSION}
+
+# Uninstall Hdf5
+cd ${DEPS}
+if ! [ -d hdf5-${HDF_VERSION} ]; then
+	tar xf hdf5-${HDF_VERSION}.tar.bz2
+fi
+cd hdf5-${HDF_VERSION}
+./configure --prefix=/usr
+make uninstall
+cd ${DEPS}
+rm -rf hdf5-${HDF_VERSION}
+
+# Uninstall RTXI
 cd ${ROOT}
-
-# Uninstall RTXI and QWT files. 
 make uninstall
 make clean
+
 rm -rf ${RTXI_LIB}
-rm -rf ${QWT_LIB}
-rm -rf ${QWT_LIB2}
-rm -rf ${QWT_LIB3}
-rm -rf ${RTXI_INC_MOD}
+rm -rf ${RTXI_CONF}
+rm -rf ${RTXI_MOD}
 rm -rf ${RTXI_INC}
-rm -rf ${RTXI_BIN}
 rm -rf ${RTXI_SHARE}
 rm -rf ${RTXI_APP}
-rm -rf ${ETC}
 
+cd ${DIR}
 echo "----->RTXI removed. Reboot may be required."
