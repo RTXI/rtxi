@@ -36,7 +36,6 @@ DEPS=${ROOT}/deps
 HDF_VERSION=1.8.4
 QWT_VERSION=6.1.3
 
-RTXI_LIB=/usr/local/lib/rtxi
 RTXI_MOD=/usr/local/lib/rtxi_modules
 RTXI_APP=/usr/share/applications/rtxi.desktop
 
@@ -72,7 +71,6 @@ cd ${ROOT}
 make uninstall
 make clean
 
-rm -rf ${RTXI_LIB}
 rm -rf ${RTXI_MOD}
 rm -rf ${RTXI_APP}
 

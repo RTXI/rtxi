@@ -126,3 +126,7 @@ Makefile.plugin_example:
 	@echo ''>> $@
 	@echo 'include $$(shell rtxi_plugin_config --pkgdata-dir)/Makefile.plugin_compile' >> $@
 
+uninstall-hook:
+	if test -d $(pkglibdir); then rm -rf $(pkglibdir); fi
+	if test -d $(pkgincludedir); then rm -rf $(pkgincludedir); fi
+	if test -d $(pkgdatadir); then rm -rf $(pkgdatadir); fi
