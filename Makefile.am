@@ -21,7 +21,7 @@
 # Include the Autoconf scripts in subdir m4/
 ACLOCAL_AMFLAGS = -I m4
 
-SUBDIRS      = libs src plugins scripts icons
+SUBDIRS      = libs src plugins scripts res
 
 ACLOCAL_DIST = m4/ac_pkg_swig.m4 \
                m4/ac_python_devel.m4 \

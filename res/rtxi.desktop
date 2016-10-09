@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=RTXI
+Comment=The Real-Time eXperiment Interface
+Keywords=real-time;experiment;
+Exec=gksudo /usr/local/bin/rtxi
+Icon=/usr/local/share/rtxi/RTXI-icon.svg
+Terminal=false
+Type=Application
+Categories=Utility;

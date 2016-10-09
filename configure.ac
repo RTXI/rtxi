@@ -128,7 +128,8 @@ Makefile
 src/Makefile
 scripts/Makefile
 scripts/rtxi_plugin_config
-icons/Makefile
+res/Makefile
+res/icons/Makefile
 libs/Makefile
 libs/dsp/Makefile
 libs/gen/Makefile
