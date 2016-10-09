@@ -26,7 +26,6 @@ set -eu
 # Directories
 ROOT=../
 MODS=/usr/local/lib/rtxi_modules/
-RTXI_LIB=/usr/local/lib/rtxi/
 
 # Start at top
 cd ${ROOT}
@@ -60,9 +59,6 @@ sudo make install -C ./
 echo "-----> RTXI intallation successful."
 
 echo "-----> Putting things into place."
-sudo cp -f scripts/icons/RTXI-icon.png ${RTXI_LIB}
-sudo cp -f scripts/icons/RTXI-icon.svg ${RTXI_LIB}
-sudo cp -f scripts/icons/RTXI-widget-icon.png ${RTXI_LIB}
 sudo cp -f scripts/rtxi.desktop /usr/share/applications/
 cp -f scripts/rtxi.desktop ~/Desktop/
 chmod +x ~/Desktop/rtxi.desktop
