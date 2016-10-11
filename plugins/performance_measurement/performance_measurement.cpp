@@ -93,7 +93,7 @@ PerformanceMeasurement::Panel::Panel(QWidget *parent) : QWidget(parent),
     show();
 
     QTimer *timer = new QTimer(this);
-    timer->setTimerType(Qt::VeryCoarseTimer);
+    timer->setTimerType(Qt::PreciseTimer);
     timer->start(1000);
     QObject::connect(timer,SIGNAL(timeout(void)),this,SLOT(update(void)));
 
