@@ -42,6 +42,10 @@ const char *Event::START_RECORDING_EVENT = "SYSTEM : start recording";
 const char *Event::STOP_RECORDING_EVENT = "SYSTEM : stop recording";
 const char *Event::ASYNC_DATA_EVENT = "SYSTEM : async data";
 const char *Event::THRESHOLD_CROSSING_EVENT = "SYSTEM : threshold crossing event";
+const char *Event::START_GENICAM_RECORDING_EVENT = "SYSTEM : start genicam recording";
+const char *Event::PAUSE_GENICAM_RECORDING_EVENT = "SYSTEM : pause genicam recording";
+const char *Event::STOP_GENICAM_RECORDING_EVENT = "SYSTEM : stop genicam recording";
+const char *Event::GENICAM_SNAPSHOT_EVENT = "SYSTEM : genicam snap";
 
 Event::Handler::Handler(void)
 {

@@ -19,9 +19,9 @@
 #define RTXI_WIZARD_H
 
 #include <QtNetwork>
+#include <map>
 #include <main_window.h>
 #include <plugin.h>
-#include "module_utils.h"
 
 namespace RTXIWizard
 {
@@ -30,12 +30,23 @@ namespace RTXIWizard
 		Q_OBJECT
 
 		public:
+			struct module_t {
+				// QListWidgetItem *listItem;
+				QUrl readme_url;
+				QUrl clone_url;
+				QUrl location;
+				QString readme;
+				bool installed;
+			};
+			std::map<QString, module_t> modules;
+
 			Panel(QWidget *);
 			virtual ~Panel(void);
 			void installFromString(std::string);
+			void rebuildListWidgets(void);
 
-			private slots:
-				void cloneModule(void);
+		private slots:
+			void cloneModule(void);
 			void getRepos(void);
 			void getReadme(void);
 			void parseRepos(void);
@@ -55,13 +66,11 @@ namespace RTXIWizard
 			QProgressDialog *progressDialog;
 
 			QTextEdit *readmeWindow;
-			QListWidget *moduleList;
-			QListWidget *installedList;
+			QListWidget *availableListWidget;
+			QListWidget *installedListWidget;
 
 			QPushButton *cloneButton;
 			QPushButton *syncButton;
-			QList<RTXIModule*> *allModules;
-			QList<RTXIModule*> *installedModules;
 
 			std::vector<QString> exclude_list;
 	};

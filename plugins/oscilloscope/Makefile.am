@@ -4,6 +4,12 @@ MAINTAINERCLEANFILES = Makefile.in
 
 include $(top_srcdir)/Makefile.buildvars
 
+pluginincludedir = $(pkgincludedir)/plugins
+
+plugininclude_HEADERS = \
+		oscilloscope.h \
+		scope.h
+
 pkglib_LTLIBRARIES = oscilloscope.la
 
 oscilloscope_la_LDFLAGS = -module -avoid-version -lqwt

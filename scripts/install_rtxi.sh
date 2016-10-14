@@ -1,45 +1,44 @@
-#!/bin/bash
+#! /bin/bash
+set -eu
 
 #
-# The Real-Time eXperiment Interface (RTXI)
-# Copyright (C) 2011 Georgia Institute of Technology, University of Utah, Weill Cornell Medical College
+# The Real-Time eXperiment Interface (RTXI) 
+# 
+# Copyright (C) 2011 Georgia Institute of Technology, University of Utah, Weill
+# Cornell Medical College
 #
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# This program is free software: you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation, either version 3 of the License, or (at your option) any later
+# version.
 #
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+# details.
 #
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU General Public License along with
+# this program. If not, see <http://www.gnu.org/licenses/>.
 #
-#	Created by Yogi Patel <yapatel@gatech.edu> 2014.1.31
+# Created by Yogi Patel <yapatel@gatech.edu> 2014.1.31
 #
 
 # Directories
 ROOT=../
 MODS=/usr/local/lib/rtxi_modules/
-DEPS=${ROOT}/deps/
-HDF=${DEPS}/hdf
-QWT=${DEPS}/qwt
-RTXI_LIB=/usr/local/lib/rtxi/
 
 # Start at top
 cd ${ROOT}
 
 # Start configuring - by default configured to run on non-RT kernel
-echo "----->Starting RTXI installation..."
+echo "-----> Starting RTXI installation..."
 ./autogen.sh
 
-echo "----->Kernel configuration..."
+echo "-----> Kernel configuration..."
 echo "1. Xenomai+Analogy (RT)"
 echo "2. Xenomai+Analogy (RT) Debug"
 echo "3. POSIX (Non-RT)"
-echo "----->Please select your configuration and then press enter:"
+echo "-----> Please select your configuration and then press enter:"
 read kernel
 
 if [ $kernel -eq "1" ]; then
@@ -54,55 +53,31 @@ else
 fi
 
 make -sj`nproc` -C ./
-
-if [ $? -eq 0 ]; then
-	echo "----->RTXI compilation successful."
-else
-	echo "----->RTXI compilation failed."
-	exit
-fi
+echo "-----> RTXI compilation successful."
 
 sudo make install -C ./
+echo "-----> RTXI intallation successful."
 
-if [ $? -eq 0 ]; then
-	echo "----->RTXI intallation successful."
-else
-	echo "----->RTXI installation failed."
-	exit
-fi
-
-echo "----->Putting things into place."
-sudo mkdir -p ${RTXI_LIB}
-sudo cp -f libtool ${RTXI_LIB}
-sudo cp -f scripts/icons/RTXI-icon.png ${RTXI_LIB}
-sudo cp -f scripts/icons/RTXI-icon.svg ${RTXI_LIB}
-sudo cp -f scripts/icons/RTXI-widget-icon.png ${RTXI_LIB}
-sudo cp -f scripts/rtxi.desktop /usr/share/applications/
-sudo cp -f scripts/update_rtxi.sh /usr/local/share/rtxi/.
-cp -f scripts/rtxi.desktop ~/Desktop/
+echo "-----> Putting things into place."
+cp -f res/rtxi.desktop ~/Desktop/
 chmod +x ~/Desktop/rtxi.desktop
-sudo cp -f rtxi.conf /etc/
 
+# Install startup script to load analogy driver at boot
 if [ $(lsb_release -sc) == "jessie" ] || [ $(lsb_release -sc) == "xenial" ]; then
-	echo "----->Load analogy driver with systemd"
+	echo "-----> Load analogy driver with systemd"
 	sudo cp -f ./scripts/services/rtxi_load_analogy.service /etc/systemd/system/
+	sudo systemctl start rtxi_load_analogy.service
 	sudo systemctl enable rtxi_load_analogy.service
 else
-	echo "----->Load analogy driver with sysvinit/upstart"
+	echo "-----> Load analogy driver with sysvinit/upstart"
 	sudo cp -f ./scripts/services/rtxi_load_analogy /etc/init.d/
 	sudo update-rc.d rtxi_load_analogy defaults
 fi
 sudo ldconfig
-
-if [ $? -eq 0 ]; then
-	echo "----->Successfully placed files.."
-else
-	echo "----->Failed to place files."
-	exit
-fi
+echo "-----> Successfully placed files.."
 
 # TEMPORARY WORKAROUND
-echo "----->Installing basic modules."
+echo "-----> Installing basic modules."
 sudo mkdir -p ${MODS}
 
 # Allow all members of adm (administrator accounts) write access to the 
@@ -110,7 +85,7 @@ sudo mkdir -p ${MODS}
 sudo setfacl -Rm g:adm:rwX,d:g:adm:rwX ${MODS}
 
 cd ${MODS}
-git clone https://github.com/RTXI/analysis-tools.git
+git clone https://github.com/RTXI/analysis-module.git
 git clone https://github.com/RTXI/iir-filter.git
 git clone https://github.com/RTXI/fir-window.git
 git clone https://github.com/RTXI/sync.git
@@ -124,19 +99,13 @@ for dir in ${MODS}/*; do
 	if [ -d "$dir" ]; then
 		make clean -C "$dir"
 		git -C "$dir" pull
-		make -C "$dir"
+		make -j`nproc` -C "$dir"
 		sudo make install -C "$dir"
 	fi
 done
 
 echo ""
-if [ $? -eq 0 ]; then
-	echo "----->RTXI intallation successful. Reboot may be required."
-else
-	echo "----->RTXI installation failed."
-	exit
-fi
-
-echo "----->Type '"sudo rtxi"' to start RTXI. Happy Sciencing!"
-echo "----->Please email help@rtxi.org with any questions/help requests."
-echo "----->Script developed/last modified by Yogi Patel <yapatel@gatech.edu> on May 2014."
+echo "-----> RTXI intallation successful. Reboot may be required."
+echo "-----> Type '"sudo rtxi"' to start RTXI. Happy Sciencing!"
+echo "-----> Please email help@rtxi.org with any questions/help requests."
+echo "-----> Script developed/last modified by Yogi Patel <yapatel@gatech.edu> on May 2014."

@@ -33,7 +33,7 @@ RTXIWizard::Panel::Panel(QWidget *parent) : QWidget(parent)
 
 	// Make Mdi
 	subWindow = new QMdiSubWindow;
-	subWindow->setWindowIcon(QIcon("/usr/local/lib/rtxi/RTXI-widget-icon.png"));
+	subWindow->setWindowIcon(QIcon("/usr/local/share/rtxi/RTXI-widget-icon.png"));
 	subWindow->setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint |
 			Qt::WindowMinimizeButtonHint);
 	subWindow->setAttribute(Qt::WA_DeleteOnClose);
@@ -42,10 +42,10 @@ RTXIWizard::Panel::Panel(QWidget *parent) : QWidget(parent)
 	QGridLayout *customLayout = new QGridLayout;
 
 	QGroupBox *buttonBox = new QGroupBox;
-	QVBoxLayout *buttonLayout = new QVBoxLayout();
+	QHBoxLayout *buttonLayout = new QHBoxLayout();
 	buttonBox->setLayout(buttonLayout);
-	syncButton = new QPushButton("Sync Repos", this);
-	cloneButton = new QPushButton("Download and Install", this);
+	syncButton = new QPushButton("Sync", this);
+	cloneButton = new QPushButton("Install", this);
 	cloneButton->setEnabled(false);
 	buttonLayout->addWidget(syncButton);
 	buttonLayout->addWidget(cloneButton);
@@ -53,16 +53,18 @@ RTXIWizard::Panel::Panel(QWidget *parent) : QWidget(parent)
 	QGroupBox *installedBox = new QGroupBox("Installed");
 	QVBoxLayout *installedLayout = new QVBoxLayout;
 	installedBox->setLayout(installedLayout);
-	installedList = new QListWidget(installedBox);
-	installedList->setFixedWidth(200);
-	installedLayout->addWidget(installedList);
+	installedListWidget = new QListWidget(installedBox);
+	installedListWidget->setFixedWidth(175);
+	installedListWidget->setSortingEnabled(true);
+	installedLayout->addWidget(installedListWidget);
 
-	QGroupBox *moduleBox = new QGroupBox("All Modules");
+	QGroupBox *moduleBox = new QGroupBox("Available");
 	QVBoxLayout *moduleLayout = new QVBoxLayout;
 	moduleBox->setLayout(moduleLayout);
-	moduleList = new QListWidget(this);
-	moduleList->setFixedWidth(200);
-	moduleLayout->addWidget(moduleList);
+	availableListWidget = new QListWidget(this);
+	availableListWidget->setFixedWidth(175);
+	availableListWidget->setSortingEnabled(true);
+	moduleLayout->addWidget(availableListWidget);
 
 	readmeWindow = new QTextEdit;
 	readmeWindow->setReadOnly(true);
@@ -77,15 +79,16 @@ RTXIWizard::Panel::Panel(QWidget *parent) : QWidget(parent)
 
 	QObject::connect(syncButton, SIGNAL(clicked()), this, SLOT(getRepos()));
 	QObject::connect(cloneButton, SIGNAL(clicked()), this, SLOT(cloneModule()));
-	QObject::connect(moduleList, SIGNAL(itemClicked(QListWidgetItem*)), this, SLOT(getReadme(void)));
-	QObject::connect(moduleList, SIGNAL(itemClicked(QListWidgetItem*)), this, SLOT(updateButton(void)));
-	QObject::connect(installedList, SIGNAL(itemClicked(QListWidgetItem*)), this, SLOT(getReadme(void)));
-	QObject::connect(installedList, SIGNAL(itemClicked(QListWidgetItem*)), this, SLOT(updateButton(void)));
+	QObject::connect(availableListWidget, SIGNAL(itemClicked(QListWidgetItem*)), this, SLOT(getReadme(void)));
+	QObject::connect(availableListWidget, SIGNAL(itemClicked(QListWidgetItem*)), this, SLOT(updateButton(void)));
+	QObject::connect(installedListWidget, SIGNAL(itemClicked(QListWidgetItem*)), this, SLOT(getReadme(void)));
+	QObject::connect(installedListWidget, SIGNAL(itemClicked(QListWidgetItem*)), this, SLOT(updateButton(void)));
 
 	setLayout(customLayout);
 	setWindowTitle("Module Wizard");
 	subWindow->setWidget(this);
-	subWindow->resize(500, subWindow->sizeHint().height());
+	subWindow->resize(700, subWindow->sizeHint().height());
+	getRepos();
 	show();
 
 	initParameters();
@@ -105,13 +108,13 @@ void RTXIWizard::Panel::initParameters(void)
 	git_threads_init();
 #endif
 
-	allModules = new QList<RTXIModule*>;
-	installedModules = new QList<RTXIModule*>;
-
 	// syntax here only works in c++11
-	exclude_list = std::vector<QString> ({ QString("rtxi"),
+	exclude_list = std::vector<QString> ({ 
+			QString("rtxi"),
 			QString("rtxi.github.io"),
-			QString("analysis-tools"),
+			QString("genicam-camera"),
+			QString("rtxi-crawler"),
+			QString("matlab-tools"),
 			QString("tutorials"),
 			QString("autapse"),
 			QString("camera-control"),
@@ -124,7 +127,7 @@ void RTXIWizard::Panel::initParameters(void)
 			QString("logos"),
 			QString("live-image"),
 			QString("conference-2015")
-			});
+	});
 	button_mode = DOWNLOAD;
 
 }
@@ -135,12 +138,12 @@ void RTXIWizard::Panel::updateButton(void)
 {
 	QListWidget *parent = qobject_cast<QListWidget*>(sender());
 
-	if ( parent == moduleList )
+	if ( parent == availableListWidget )
 	{
-		cloneButton->setText("Download and Install");
+		cloneButton->setText("Install");
 		button_mode = DOWNLOAD;
 	}
-	else if ( parent == installedList )
+	else if ( parent == installedListWidget )
 	{
 		cloneButton->setText("Update");
 		button_mode = UPDATE;
@@ -151,24 +154,19 @@ void RTXIWizard::Panel::updateButton(void)
 // Clone the module currently highlighted in the QListWidget.
 void RTXIWizard::Panel::cloneModule(void)
 {
-
 	cloneButton->setEnabled(false);
-	moduleList->setDisabled(true);
-	installedList->setDisabled(true);
+	availableListWidget->setDisabled(true);
+	installedListWidget->setDisabled(true);
 
-	RTXIModule *module = nullptr;
-	int module_idx = 0;
-
+	QString name;
 	switch(button_mode)
 	{
 		case DOWNLOAD:
-			module_idx = moduleList->currentRow();
-			module = allModules->at(module_idx);
+			name = availableListWidget->currentItem()->text();
 			break;
 
 		case UPDATE:
-			module_idx = installedList->currentRow();
-			module = installedModules->at(module_idx);
+			name = installedListWidget->currentItem()->text();
 			break;
 
 		default:
@@ -182,15 +180,15 @@ void RTXIWizard::Panel::cloneModule(void)
 	 * an error.
 	 */
 
-	QByteArray temp = module->getCloneUrl().toString().toLatin1();
+	QByteArray temp = modules[name].clone_url.toString().toLatin1();
 	const char *url = temp.data();
-	QByteArray temp2 = module->getLocation().toString().toLatin1();
+	QByteArray temp2 = modules[name].location.toString().toLatin1();
 	const char *path = temp2.data();
 
 	int error = 0;
 
 	// If the repo already exists, pull from master. If not, clone it.
-	if ( (QDir(module->getLocation().toString())).exists() )
+	if ( (QDir(modules[name].location.toString())).exists() )
 	{
 		git_repository *repo = NULL;
 		git_remote *remote = NULL;
@@ -222,7 +220,6 @@ void RTXIWizard::Panel::cloneModule(void)
 		git_remote_disconnect(remote);
 		git_remote_free(remote);
 		git_repository_free(repo);
-
 	}
 	else
 	{
@@ -237,25 +234,16 @@ void RTXIWizard::Panel::cloneModule(void)
 	}
 	else
 	{
-
 		// Add module to list of already installed modules.
-		if (module->installed == false)
-		{
-			installedList->addItem(module->getName());
-			installedModules->append(module);
-			module->installed = true;
-
-			allModules->removeAt(module_idx);
-			moduleList->takeItem(module_idx);
-		}
+		modules[name].installed = true;
 
 		// Define the commands to be run.
-		QString make_cmd = "/usr/bin/make -j2 -C " + module->getLocation().toString();
+		QString make_cmd = "/usr/bin/make -j2 -C " + modules[name].location.toString();
 		QString make_install_cmd;
 
 		// If RTXI is root, no need to call gksudo.
-		if (getuid()) make_install_cmd = "gksudo \"/usr/bin/make install -C" + module->getLocation().toString() + "\"";
-		else make_install_cmd = "/usr/bin/make install -C" + module->getLocation().toString();
+		if (getuid()) make_install_cmd = "gksudo \"/usr/bin/make install -C" + modules[name].location.toString() + "\"";
+		else make_install_cmd = "/usr/bin/make install -C" + modules[name].location.toString();
 
 		// Compile and instal handled by QProcess.
 		QProcess *make = new QProcess();
@@ -278,37 +266,35 @@ void RTXIWizard::Panel::cloneModule(void)
 
 		make->close();
 		make_install->close();
-
 	}
 
 	// Re-enable buttons only after compilation is done. Otherwise you get race
 	// conditions if buttons are pressed before modules are done compiling.
 	cloneButton->setEnabled(true);
-	moduleList->setDisabled(false);
-	installedList->setDisabled(false);
-
+	rebuildListWidgets();
+	availableListWidget->setDisabled(false);
+	installedListWidget->setDisabled(false);
 }
 
 // Download the list of repos from GitHub's API. Call parseRepos for the JSON.
 void RTXIWizard::Panel::getRepos()
 {
+	availableListWidget->setDisabled(true);
+	installedListWidget->setDisabled(true);
 
-	moduleList->setDisabled(true);
-	installedList->setDisabled(true);
-
-	if (!moduleList->count())
+	if (!availableListWidget->count())
 	{
 		QUrl url("https://api.github.com/orgs/rtxi/repos?per_page=100");
 		reply = qnam.get(QNetworkRequest(url));
 		QObject::connect(reply, SIGNAL(finished()), this, SLOT(parseRepos(void)));
-		//		connect(reply, SIGNAL(readyRead()), this, SLOT(httpReadyRead()));
-		//		connect(reply, SIGNAL(downloadProgress(qint64,qint64)),
-		//	   	     this, SLOT(updateDataReadProgress(qint64,qint64)));
+		//connect(reply, SIGNAL(readyRead()), this, SLOT(httpReadyRead()));
+		//connect(reply, SIGNAL(downloadProgress(qint64,qint64)),
+		// 	      this, SLOT(updateDataReadProgress(qint64,qint64)));
 	}
 	else
 	{
-		moduleList->setDisabled(false);
-		installedList->setDisabled(false);
+		availableListWidget->setDisabled(false);
+		installedListWidget->setDisabled(false);
 	}
 }
 
@@ -322,35 +308,25 @@ void RTXIWizard::Panel::getRepos()
  */
 void RTXIWizard::Panel::getReadme(void)
 {
-	moduleList->setDisabled(true);
-	installedList->setDisabled(true);
+	availableListWidget->setDisabled(true);
+	installedListWidget->setDisabled(true);
 
 	QListWidget *parent = qobject_cast<QListWidget*>(sender());
-
-	// Set a pointer to the currently selected module.
-	RTXIModule *selectedModule = nullptr;
-	if ( parent == moduleList )
-	{
-		selectedModule = allModules->at(parent->currentRow());
-	}
-	else if ( parent == installedList )
-	{
-		selectedModule = installedModules->at(parent->currentRow());
-	}
+	QString name = parent->currentItem()->text();
 
 	// If the README hasn't been downloaded before, download it now.
-	if (selectedModule->getReadme() == "")
+	if (modules[parent->currentItem()->text()].readme == "")
 	{
-		reply = qnam.get(QNetworkRequest(selectedModule->getReadmeUrl()));
+		reply = qnam.get(QNetworkRequest(modules[name].readme_url));
 		QObject::connect(reply, SIGNAL(finished()), this, SLOT(parseReadme()));
 	}
 	else
 	{
 		// Disable buttons until all logic is done.
-		readmeWindow->setHtml(selectedModule->getReadme());
+		readmeWindow->setHtml(modules[parent->currentItem()->text()].readme);
 		cloneButton->setEnabled(true);
-		moduleList->setDisabled(false);
-		installedList->setDisabled(false);
+		availableListWidget->setDisabled(false);
+		installedListWidget->setDisabled(false);
 	}
 }
 
@@ -358,7 +334,6 @@ void RTXIWizard::Panel::getReadme(void)
 // within a QTextWidget.
 void RTXIWizard::Panel::parseReadme(void)
 {
-
 	const char* raw_data = (reply->readAll()).constData();
 	MMIOT *m = mkd_string(raw_data, strlen(raw_data), 0);
 	mkd_compile(m, 0);
@@ -370,19 +345,18 @@ void RTXIWizard::Panel::parseReadme(void)
 	mkd_cleanup(m);
 	QString fileText = QString::fromStdString(html);
 
-	//	QObject::disconnect(reply, SIGNAL(finished()), this, SLOT(parseReadme(void)));
+	// QObject::disconnect(reply, SIGNAL(finished()), this, SLOT(parseReadme(void)));
 	reply->deleteLater();
 	reply = 0;
 
-	RTXIModule *selectedModule = nullptr;
 	switch(button_mode)
 	{
 		case DOWNLOAD:
-			selectedModule = allModules->at(moduleList->currentRow());
+			modules[availableListWidget->currentItem()->text()].readme = fileText;
 			break;
 
 		case UPDATE:
-			selectedModule = installedModules->at(installedList->currentRow());
+			modules[installedListWidget->currentItem()->text()].readme = fileText;
 			break;
 
 		default:
@@ -390,26 +364,24 @@ void RTXIWizard::Panel::parseReadme(void)
 			break;
 	}
 
-	selectedModule->setReadme(fileText);
-
 	readmeWindow->setHtml(fileText);
 	readmeWindow->show();
 
 	// The README is now displayed, so free the user to start clicking around.
 	cloneButton->setEnabled(true);
-	moduleList->setDisabled(false);
-	installedList->setDisabled(false);
+	availableListWidget->setDisabled(false);
+	installedListWidget->setDisabled(false);
 }
 
 // GitHub's API returns a JSON array. Parse it with QtJson functions.
 void RTXIWizard::Panel::parseRepos(void)
 {
-
 	QJsonDocument jsonDoc = QJsonDocument::fromJson(reply->readAll().data());
 	QJsonArray jsonArr = jsonDoc.array();
 
 	QString readmeUrlPrefix = "https://raw.githubusercontent.com/RTXI/";
 	QString readmeUrlSuffix = "/master/README.md";
+	// QString locationPrefix = "/usr/local/lib/rtxi_modules/";
 
 	QString locationPrefix;
 	if (getuid())
@@ -427,38 +399,51 @@ void RTXIWizard::Panel::parseRepos(void)
 		newObj.find("name").key();
 
 		// if the current module isn't in the exclude_list
-		if (std::find(exclude_list.begin(), exclude_list.end(), newObj.value("name").toString())
-				== exclude_list.end())
+		if (std::find(exclude_list.begin(), exclude_list.end(), newObj.value("name").toString()) == exclude_list.end())
 		{
+			module_t module;
 
-			RTXIModule* module = new RTXIModule;
+			QString name = newObj.value("name").toString();
+			module.readme_url = QUrl(readmeUrlPrefix + newObj.value("name").toString() + readmeUrlSuffix);
+			module.clone_url = QUrl(newObj.value("clone_url").toString());
+			module.location = QString(locationPrefix + name);
+			module.readme = "";
 
-			module->setReadmeUrl( readmeUrlPrefix + newObj.value("name").toString() + readmeUrlSuffix);
-			module->setCloneUrl(newObj.value("clone_url").toString());
-			module->setName(newObj.value("name").toString());
-			module->setLocation(locationPrefix + newObj.value("name").toString());
-			if ( (QDir(module->getLocation().toString())).exists() )
+			if ( (QDir(module.location.toString())).exists() )
 			{
-				module->installed = true;
-				installedList->addItem(module->getName());
-				installedModules->append(module);
+				module.installed = true;
 			}
 			else
 			{
-				module->installed = false;
-				moduleList->addItem(module->getName());
-				allModules->append(module);
+				module.installed = false;
 			}
+			modules[name] = module;
 		}
 	}
 
-	//	QObject::disconnect(reply, SIGNAL(finished()), this, SLOT(parseRepos(void)));
+	// QObject::disconnect(reply, SIGNAL(finished()), this, SLOT(parseRepos(void)));
 	reply->deleteLater();
 	reply = 0;
 
-	moduleList->setDisabled(false);
-	installedList->setDisabled(false);
+	rebuildListWidgets();
+	availableListWidget->setDisabled(false);
+	installedListWidget->setDisabled(false);
 }
+
+void RTXIWizard::Panel::rebuildListWidgets(void)
+{
+	availableListWidget->clear();
+	installedListWidget->clear();
+
+	for (std::map<QString,module_t>::iterator i = modules.begin(); i != modules.end(); ++i) {
+		if (i->second.installed) installedListWidget->addItem(i->first);
+		else availableListWidget->addItem(i->first);
+	}
+
+	installedListWidget->sortItems(Qt::AscendingOrder);
+	availableListWidget->sortItems(Qt::AscendingOrder);
+}
+
 
 /*
  * Public function, not for use in this module. It gets called by other
@@ -466,9 +451,9 @@ void RTXIWizard::Panel::parseRepos(void)
  */
 void RTXIWizard::Panel::installFromString( std::string module_name )
 {
-
-	std::string cloneUrl = "http/://github.com/rtxi/" + module_name;
-
+	std::string cloneUrl = "https://github.com/rtxi/" + module_name;
+	// QString locationPrefix = "/usr/local/lib/rtxi_modules/";
+	
 	std::string locationUrl;
 	if (getuid())
 	{

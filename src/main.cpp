@@ -34,7 +34,10 @@
 #include <debug.h>
 #include <main_window.h>
 #include <plugin.h>
+
+#if XENOMAI
 #include <rtdk.h>
+#endif
 
 static pid_t parentThread;
 
@@ -51,8 +54,10 @@ int main(int argc,char *argv[])
 {
     int retval = 0;
 
+#if XENOMAI
     /* Initialize rtdk */
     rt_print_auto_init(1);
+#endif
 
     /* Try to Exit Cleanly on Signals */
     parentThread = getpid();
@@ -72,7 +77,7 @@ int main(int argc,char *argv[])
     else if (getenv("RTXI_CONF"))
         config_file = getenv("RTXI_CONF");
     else
-        config_file = "/etc/rtxi.conf";
+        config_file = "/usr/local/share/rtxi/rtxi.conf";
 
     /************************************************************
      * Create Main System Components                            *
