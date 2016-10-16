@@ -51,8 +51,8 @@ apt-get -y upgrade
 apt-get -y install \
 	autotools-dev automake libtool kernel-package gcc g++ gdb fakeroot \
 	crash kexec-tools makedumpfile kernel-wedge libncurses5-dev libelf-dev \
-	binutils-dev libgsl0-dev libboost-dev git vim emacs lshw stress gksu libpng-dev \
-	libqt5svg5-dev libqt5opengl5 libqt5gui5 libqt5core5a libqt5xml5  libslang2-dev \
+	binutils-dev libgsl0-dev libboost-dev git vim emacs lshw stress gksu \
+	libqt5svg5-dev libqt5opengl5 libqt5gui5 libqt5core5a libqt5xml5 \
 	qt5-default qttools5-dev-tools qttools5-dev libgit2-dev libmarkdown2-dev
 apt-get -y build-dep linux
 echo "-----> Package dependencies installed."
@@ -90,23 +90,6 @@ else
 	ln -sf /usr/local/lib/libqwt.so.${QWT_VERSION} /usr/local/lib/libqwt.so
 	ldconfig
 	echo "-----> Qwt installed."
-fi
-
-# (Re)install rtxi_includes. Remove the moc files first. Failing to do so when 
-# upgrading from Qt4 to Qt5 will cause compilation errors later on. 
-[ -d /usr/local/lib/rtxi_includes ] && rm -rf /usr/local/lib/rtxi_includes
-mkdir /usr/local/lib/rtxi_includes
-
-# Allow all members of adm (administrator accounts) write access to the 
-# rtxi_includes/ directory. 
-setfacl -Rm g:adm:rwX,d:g:adm:rwX /usr/local/lib/rtxi_includes
-find ${SRC}/. -name "*.h" -exec cp -t /usr/local/lib/rtxi_includes/ {} +
-
-if [ $? -eq 0 ]; then
-	echo "-----> rtxi_includes synced."
-else
-	echo "-----> rtxi_includes sync failed."
-	exit 1
 fi
 
 echo "-----> Done."
