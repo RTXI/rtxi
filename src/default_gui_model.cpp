@@ -88,7 +88,7 @@ void DefaultGUIModel::createGUI(DefaultGUIModel::variable_t *var, int size)
     // Make Mdi
     subWindow = new QMdiSubWindow;
     subWindow->setAttribute(Qt::WA_DeleteOnClose);
-    subWindow->setWindowIcon(QIcon("/usr/local/lib/rtxi/RTXI-widget-icon.png"));
+    subWindow->setWindowIcon(QIcon("/usr/local/share/rtxi/RTXI-widget-icon.png"));
     subWindow->setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint | Qt::WindowMinimizeButtonHint);
     subWindow->setOption(QMdiSubWindow::RubberBandResize, true);
     subWindow->setOption(QMdiSubWindow::RubberBandMove, true);

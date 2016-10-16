@@ -36,7 +36,7 @@ MainWindow::MainWindow (void) : QMainWindow(NULL, Qt::Window)
 
     /* Initialize Window Settings */
     setWindowTitle("RTXI - Real-time eXperimental Interface");
-    setWindowIcon(QIcon("/usr/local/lib/rtxi/RTXI-icon.png"));
+    setWindowIcon(QIcon("/usr/local/share/rtxi/RTXI-icon.png"));
 
     /* Set Qt Settings Information */
     QCoreApplication::setOrganizationName("RTXI");
@@ -272,12 +272,16 @@ void MainWindow::aboutQt (void)
 
 void MainWindow::aboutXeno (void)
 {
+#if XENOMAI
 	FILE *fp;
 	char xeno_buff[8];
 	fp = fopen("/proc/xenomai/version","r");
 	fscanf(fp, "%s", xeno_buff);
 	fclose(fp);
 	QMessageBox::about(this, "About Xenomai", "Xenomai Version " + QString(xeno_buff));
+#else
+	QMessageBox::about(this, "About Xenomai", "Running POSIX (non-RT)");
+#endif
 }
 
 void MainWindow::openDocs(void)
@@ -368,7 +372,7 @@ void MainWindow::resetSettings(void)
 {
     systemMenu->clear();
     mdiArea->closeAllSubWindows();
-    Settings::Manager::getInstance()->load("/etc/rtxi.conf");
+    Settings::Manager::getInstance()->load("/usr/local/share/rtxi/rtxi.conf");
 }
 
 void MainWindow::utilitiesMenuActivated(QAction *id)

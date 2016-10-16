@@ -2,8 +2,10 @@
 set -eu
 
 #
-# The Real-Time eXperiment Interface (RTXI) Copyright (C) 2011 Georgia
-# Institute of Technology, University of Utah, Weill Cornell Medical College
+# The Real-Time eXperiment Interface (RTXI) 
+#
+# Copyright (C) 2011 Georgia Institute of Technology, University of Utah, Weill
+# Cornell Medical College
 #
 # This program is free software: you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
@@ -30,12 +32,12 @@ fi
 DIR=$PWD
 ROOT=${DIR}/../
 DEPS=${ROOT}/deps
-HDF=${DEPS}/hdf
-QWT=${DEPS}/qwt
 PLG=${ROOT}/plugins
+SRC=${ROOT}/src
 
 # Some easy to use defines
-QWT_VERSION=6.1.2
+QWT_VERSION=6.1.3
+HDF_VERSION=1.8.4
 
 #
 # Check for all RTXI *.deb dependencies and install them. Includes:
@@ -44,26 +46,16 @@ QWT_VERSION=6.1.2
 #  - Qt5, HDF, and Qwt6 libraries
 #
 echo "-----> Checking dependencies..."
-
 apt-get update
 apt-get -y upgrade
 apt-get -y install \
-	autotools-dev automake libtool kernel-package gcc g++ gdb fakeroot crash \
-	kexec-tools makedumpfile kernel-wedge libncurses5-dev libelf-dev \
-	binutils-dev libgsl0-dev libboost-dev git vim emacs lshw stress \
+	autotools-dev automake libtool kernel-package gcc g++ gdb fakeroot \
+	crash kexec-tools makedumpfile kernel-wedge libncurses5-dev libelf-dev \
+	binutils-dev libgsl0-dev libboost-dev git vim emacs lshw stress gksu \
 	libqt5svg5-dev libqt5opengl5 libqt5gui5 libqt5core5a libqt5xml5 \
-	qt5-default libgit2-dev libmarkdown2-dev
+	qt5-default qttools5-dev-tools qttools5-dev libgit2-dev libmarkdown2-dev
 apt-get -y build-dep linux
-
-if [ $? -eq 0 ]; then
-	echo "-----> Package dependencies installed."
-else
-	echo "-----> Package dependency installation failed."
-	exit 1
-fi
-
-# Start at top
-cd ${DEPS}
+echo "-----> Package dependencies installed."
 
 # Installing HDF5
 echo "-----> Checking for HDF5."
@@ -72,18 +64,13 @@ if [ -f "/usr/include/hdf5.h" ]; then
 	echo "-----> HDF5 already installed."
 else
 	echo "-----> Installing HDF5..."
-	cd ${HDF}
-	tar xf hdf5-1.8.4.tar.bz2
-	cd hdf5-1.8.4
+	cd ${DEPS}
+	tar xf hdf5-${HDF_VERSION}.tar.bz2
+	cd hdf5-${HDF_VERSION}
 	./configure --prefix=/usr
 	make -sj2
 	make install
-	if [ $? -eq 0 ]; then
-		echo "-----> HDF5 installed."
-	else
-		echo "-----> HDF5 installation failed."
-		exit 1
-	fi
+	echo "-----> HDF5 installed."
 fi
 
 # Installing Qwt
@@ -93,38 +80,16 @@ if [ -f "/usr/local/qwt-${QWT_VERSION}/include/qwt.h" ]; then
 	echo "-----> Qwt already installed."
 else
 	echo "-----> Installing Qwt..."
-	cd ${QWT}
+	cd ${DEPS}
 	tar xf qwt-${QWT_VERSION}.tar.bz2
 	cd qwt-${QWT_VERSION}
 	qmake qwt.pro
 	make -sj2
 	make install
-	cp -vf /usr/local/qwt-${QWT_VERSION}/lib/libqwt.so.6.1.2 /usr/lib/.
-	ln -sf /usr/lib/libqwt.so.${QWT_VERSION} /usr/lib/libqwt.so
+	cp -vf lib/libqwt.so.${QWT_VERSION} /usr/local/lib/.
+	ln -sf /usr/local/lib/libqwt.so.${QWT_VERSION} /usr/local/lib/libqwt.so
 	ldconfig
-	if [ $? -eq 0 ]; then
-		echo "-----> Qwt installed."
-	else
-		echo "-----> Qwt installation failed."
-		exit 1
-	fi
-fi
-
-# (Re)install rtxi_includes. Remove the moc files first. Failing to do so when 
-# upgrading from Qt4 to Qt5 will cause compilation errors later on. 
-[ -d /usr/local/lib/rtxi_includes ] && rm -rf /usr/local/lib/rtxi_includes/moc_*
-rsync -a ${DEPS}/rtxi_includes /usr/local/lib/.
-
-# Allow all members of adm (administrator accounts) write access to the 
-# rtxi_includes/ directory. 
-setfacl -Rm g:adm:rwX,d:g:adm:rwX /usr/local/lib/rtxi_includes
-find ${PLG}/. -name "*.h" -exec cp -t /usr/local/lib/rtxi_includes/ {} +
-
-if [ $? -eq 0 ]; then
-	echo "-----> rtxi_includes synced."
-else
-	echo "-----> rtxi_includes sync failed."
-	exit 1
+	echo "-----> Qwt installed."
 fi
 
 echo "-----> Done."

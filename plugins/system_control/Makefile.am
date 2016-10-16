@@ -4,6 +4,12 @@ MAINTAINERCLEANFILES = Makefile.in
 
 include $(top_srcdir)/Makefile.buildvars
 
+pluginincludedir = $(pkgincludedir)/plugins
+
+plugininclude_HEADERS = \
+		system_control.h \
+		system_control_panel.h
+
 pkglib_LTLIBRARIES = system_control.la
 
 system_control_la_LDFLAGS = -module -avoid-version

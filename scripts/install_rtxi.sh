@@ -2,8 +2,10 @@
 set -eu
 
 #
-# The Real-Time eXperiment Interface (RTXI) Copyright (C) 2011 Georgia
-# Institute of Technology, University of Utah, Weill Cornell Medical College
+# The Real-Time eXperiment Interface (RTXI) 
+# 
+# Copyright (C) 2011 Georgia Institute of Technology, University of Utah, Weill
+# Cornell Medical College
 #
 # This program is free software: you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
@@ -24,10 +26,6 @@ set -eu
 # Directories
 ROOT=../
 MODS=/usr/local/lib/rtxi_modules/
-DEPS=${ROOT}/deps/
-HDF=${DEPS}/hdf
-QWT=${DEPS}/qwt
-RTXI_LIB=/usr/local/lib/rtxi/
 
 # Start at top
 cd ${ROOT}
@@ -55,38 +53,20 @@ else
 fi
 
 make -sj`nproc` -C ./
-
-if [ $? -eq 0 ]; then
-	echo "-----> RTXI compilation successful."
-else
-	echo "-----> RTXI compilation failed."
-	exit
-fi
+echo "-----> RTXI compilation successful."
 
 sudo make install -C ./
-
-if [ $? -eq 0 ]; then
-	echo "-----> RTXI intallation successful."
-else
-	echo "-----> RTXI installation failed."
-	exit
-fi
+echo "-----> RTXI intallation successful."
 
 echo "-----> Putting things into place."
-sudo mkdir -p ${RTXI_LIB}
-sudo cp -f libtool ${RTXI_LIB}
-sudo cp -f scripts/icons/RTXI-icon.png ${RTXI_LIB}
-sudo cp -f scripts/icons/RTXI-icon.svg ${RTXI_LIB}
-sudo cp -f scripts/icons/RTXI-widget-icon.png ${RTXI_LIB}
-sudo cp -f scripts/rtxi.desktop /usr/share/applications/
-sudo cp -f scripts/update_rtxi.sh /usr/local/share/rtxi/.
-cp -f scripts/rtxi.desktop ~/Desktop/
+cp -f res/rtxi.desktop ~/Desktop/
 chmod +x ~/Desktop/rtxi.desktop
-sudo cp -f rtxi.conf /etc/
 
+# Install startup script to load analogy driver at boot
 if [ $(lsb_release -sc) == "jessie" ] || [ $(lsb_release -sc) == "xenial" ]; then
 	echo "-----> Load analogy driver with systemd"
 	sudo cp -f ./scripts/services/rtxi_load_analogy.service /etc/systemd/system/
+	sudo systemctl start rtxi_load_analogy.service
 	sudo systemctl enable rtxi_load_analogy.service
 else
 	echo "-----> Load analogy driver with sysvinit/upstart"
@@ -94,13 +74,7 @@ else
 	sudo update-rc.d rtxi_load_analogy defaults
 fi
 sudo ldconfig
-
-if [ $? -eq 0 ]; then
-	echo "-----> Successfully placed files.."
-else
-	echo "-----> Failed to place files."
-	exit
-fi
+echo "-----> Successfully placed files.."
 
 # TEMPORARY WORKAROUND
 echo "-----> Installing basic modules."
@@ -125,19 +99,13 @@ for dir in ${MODS}/*; do
 	if [ -d "$dir" ]; then
 		make clean -C "$dir"
 		git -C "$dir" pull
-		make -C "$dir"
+		make -j`nproc` -C "$dir"
 		sudo make install -C "$dir"
 	fi
 done
 
 echo ""
-if [ $? -eq 0 ]; then
-	echo "-----> RTXI intallation successful. Reboot may be required."
-else
-	echo "-----> RTXI installation failed."
-	exit
-fi
-
+echo "-----> RTXI intallation successful. Reboot may be required."
 echo "-----> Type '"sudo rtxi"' to start RTXI. Happy Sciencing!"
 echo "-----> Please email help@rtxi.org with any questions/help requests."
 echo "-----> Script developed/last modified by Yogi Patel <yapatel@gatech.edu> on May 2014."

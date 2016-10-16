@@ -2,8 +2,10 @@
 set -eu
 
 #
-# The Real-Time eXperiment Interface (RTXI) Copyright (C) 2011 Georgia
-# Institute of Technology, University of Utah, Weill Cornell Medical College
+# The Real-Time eXperiment Interface (RTXI) 
+# 
+# Copyright (C) 2011 Georgia Institute of Technology, University of Utah, Weill
+# Cornell Medical College
 #
 # This program is free software: you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
@@ -29,38 +31,63 @@ fi
 # Directories
 DIR=$PWD
 ROOT=${DIR}/..
-RTXI_LIB=/usr/local/lib/rtxi
-QWT_LIB=/usr/local/lib/qwt
-QWT_LIB2=/usr/local/qwt-6.1.2
-QWT_LIB3=/usr/lib/libqwt-* # not too proud of this line...
-RTXI_INC_LIB=/usr/local/lib/rtxi_includes
-RTXI_INC_MOD=/usr/local/lib/rtxi_modules
-RTXI_INC=/usr/local/include/rtxi
-RTXI_BIN=/usr/local/bin/rtxi*
-RTXI_SHARE=/usr/local/share/rtxi
-RTXI_APP=/usr/share/applications/rtxi.desktop
-ETC=/etc/rtxi.conf
+DEPS=${ROOT}/deps
 
+HDF_VERSION=1.8.4
+QWT_VERSION=6.1.3
+
+RTXI_MOD=/usr/local/lib/rtxi_modules
+
+QWT_LIB=/usr/local/lib/libqwt* # not too proud of this line...
+QWT_DIR=/usr/local/qwt-${QWT_VERSION}
+
+# Uninstall Qwt
+cd ${DEPS}
+if [ -d qwt-${QWT_VERSION} ]; then
+	rm -rf qwt-${QWT_VERSION}
+fi
+tar xf qwt-${QWT_VERSION}.tar.bz2
+cd qwt-${QWT_VERSION}
+qmake qwt.pro
+make uninstall
+cd ${DEPS}
+rm -rf ${QWT_LIB}
+rm -rf ${QWT_DIR}
+rm -rf qwt-${QWT_VERSION}
+
+# Uninstall Hdf5
+cd ${DEPS}
+if [ -d hdf5-${HDF_VERSION} ]; then
+	rm -rf hdf5-${HDF_VERSION}
+fi
+tar xf hdf5-${HDF_VERSION}.tar.bz2
+cd hdf5-${HDF_VERSION}
+./configure --prefix=/usr
+make uninstall
+cd ${DEPS}
+rm -rf hdf5-${HDF_VERSION}
+
+# Uninstall RTXI
 cd ${ROOT}
-
-# Uninstall RTXI and QWT files. 
 make uninstall
 make clean
-rm -rf ${RTXI_LIB}
-rm -rf ${QWT_LIB}
-rm -rf ${QWT_LIB2}
-rm -rf ${QWT_LIB3}
-rm -rf ${RTXI_INC_LIB}
-rm -rf ${RTXI_INC_MOD}
-rm -rf ${RTXI_INC}
-rm -rf ${RTXI_BIN}
-rm -rf ${RTXI_SHARE}
-rm -rf ${RTXI_APP}
-rm -rf ${ETC}
+ldconfig
+rm -rf ${RTXI_MOD}
 
-if [ $? -eq 0 ]; then
-	echo "----->RTXI removed. Reboot may be required."
+# Remove startup scripts/services
+if [ $(lsb_release -sc) == "jessie" ] || [ $(lsb_release -sc) == "xenial" ]; then
+	echo "-----> Remove analogy driver systemd service"
+	systemctl stop rtxi_load_analogy.service
+	systemctl disable rtxi_load_analogy.service
+	rm -f /etc/systemd/system/rtxi_load_analogy.service
+	systemctl daemon-reload
+	systemctl reset-failed
 else
-	echo "----->RTXI uninstallation failed."
-	exit
+	echo "-----> Remove analogy driver sysvinit/upstart scripts"
+	update-rc.d rtxi_load_analogy disable
+	update-rc.d -f rtxi_load_analogy remove
+	rm -f /etc/init.d/rtxi_load_analogy
 fi
+
+cd ${DIR}
+echo "-----> RTXI removed. Reboot may be required."
