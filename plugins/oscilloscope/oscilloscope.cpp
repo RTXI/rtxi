@@ -1090,7 +1090,7 @@ Oscilloscope::Panel::Panel(QWidget *parent) :	QWidget(parent), RT::Thread(0), fi
     setWindowTitle(QString::number(getID()) + " Oscilloscope");
 
     QTimer *otimer = new QTimer;
-    otimer->setTimerType(Qt::CoarseTimer);
+    otimer->setTimerType(Qt::PreciseTimer);
     QObject::connect(otimer,SIGNAL(timeout(void)),this,SLOT(timeoutEvent(void)));
     otimer->start(25);
 

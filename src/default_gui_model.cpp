@@ -64,7 +64,7 @@ DefaultGUIModel::DefaultGUIModel(std::string name, DefaultGUIModel::variable_t *
     setWindowTitle(QString::number(getID()) + " " + QString::fromStdString(name));
 
     QTimer *timer = new QTimer(this);
-    timer->setTimerType(Qt::VeryCoarseTimer);
+    timer->setTimerType(Qt::PreciseTimer);
     timer->start(1000);
     QObject::connect(timer,SIGNAL(timeout(void)),this,SLOT(refresh(void)));
 }
