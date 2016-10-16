@@ -33,6 +33,7 @@ DIR=$PWD
 ROOT=${DIR}/../
 DEPS=${ROOT}/deps
 PLG=${ROOT}/plugins
+SRC=${ROOT}/src
 
 # Some easy to use defines
 QWT_VERSION=6.1.3
@@ -89,6 +90,23 @@ else
 	ln -sf /usr/local/lib/libqwt.so.${QWT_VERSION} /usr/local/lib/libqwt.so
 	ldconfig
 	echo "-----> Qwt installed."
+fi
+
+# (Re)install rtxi_includes. Remove the moc files first. Failing to do so when 
+# upgrading from Qt4 to Qt5 will cause compilation errors later on. 
+[ -d /usr/local/lib/rtxi_includes ] && rm -rf /usr/local/lib/rtxi_includes
+mkdir /usr/local/lib/rtxi_includes
+
+# Allow all members of adm (administrator accounts) write access to the 
+# rtxi_includes/ directory. 
+setfacl -Rm g:adm:rwX,d:g:adm:rwX /usr/local/lib/rtxi_includes
+find ${SRC}/. -name "*.h" -exec cp -t /usr/local/lib/rtxi_includes/ {} +
+
+if [ $? -eq 0 ]; then
+	echo "-----> rtxi_includes synced."
+else
+	echo "-----> rtxi_includes sync failed."
+	exit 1
 fi
 
 echo "-----> Done."
