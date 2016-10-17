@@ -85,6 +85,7 @@ sudo mkdir -p ${MODS}
 sudo setfacl -Rm g:adm:rwX,d:g:adm:rwX ${MODS}
 
 cd ${MODS}
+sudo rm -rf ${MODS}/*
 git clone https://github.com/RTXI/analysis-module.git
 git clone https://github.com/RTXI/iir-filter.git
 git clone https://github.com/RTXI/fir-window.git

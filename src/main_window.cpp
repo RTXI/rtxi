@@ -272,7 +272,7 @@ void MainWindow::aboutQt (void)
 
 void MainWindow::aboutXeno (void)
 {
-#if XENOMAI
+#if CONFIG_XENO_VERSION_MAJOR
 	FILE *fp;
 	char xeno_buff[8];
 	fp = fopen("/proc/xenomai/version","r");
