@@ -22,8 +22,6 @@
 #include <rt.h>
 #include <sys/mman.h>
 #include <sys/resource.h>
-#include <alchemy/task.h>
-#include <alchemy/timer.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -31,6 +29,14 @@
 #include <getopt.h>
 #include <execinfo.h>
 #include <unistd.h>
+
+#if CONFIG_XENO_VERSION_MAJOR >= 3
+#include <alchemy/task.h>
+#include <alchemy/timer.h>
+#else
+#include <native/task.h>
+#include <native/timer.h>
+#endif
 
 typedef struct
 {
@@ -175,7 +181,11 @@ bool RT::OS::isRealtime(void)
 
 long long RT::OS::getTime(void)
 {
+#if CONFIG_XENO_VERSION_MAJOR >= 3
     return rt_timer_read(); 
+#else
+				return rt_timer_tsc2ns(rt_timer_tsc());
+#endif
 }
 
 int RT::OS::setPeriod(RT::OS::Task task,long long period)
