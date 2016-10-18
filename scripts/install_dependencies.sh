@@ -28,17 +28,6 @@ if ! id | grep -q root; then
 	exit 1
 fi
 
-# Set directory variable for compilation
-DIR=$PWD
-ROOT=${DIR}/../
-DEPS=${ROOT}/deps
-PLG=${ROOT}/plugins
-SRC=${ROOT}/src
-
-# Some easy to use defines
-QWT_VERSION=6.1.3
-HDF_VERSION=1.8.4
-
 #
 # Check for all RTXI *.deb dependencies and install them. Includes:
 #  - Kernel tools
@@ -53,43 +42,8 @@ apt-get -y install \
 	crash kexec-tools makedumpfile kernel-wedge libncurses5-dev libelf-dev \
 	binutils-dev libgsl0-dev libboost-dev git vim emacs lshw stress gksu \
 	libqt5svg5-dev libqt5opengl5 libqt5gui5 libqt5core5a libqt5xml5 \
-	qt5-default qttools5-dev-tools qttools5-dev libgit2-dev libmarkdown2-dev
+	qt5-default qttools5-dev-tools qttools5-dev libqwt-qt5-dev \
+	libhdf5-dev libgit2-dev libmarkdown2-dev
 apt-get -y build-dep linux
 echo "-----> Package dependencies installed."
-
-# Installing HDF5
-echo "-----> Checking for HDF5."
-
-if [ -f "/usr/include/hdf5.h" ]; then
-	echo "-----> HDF5 already installed."
-else
-	echo "-----> Installing HDF5..."
-	cd ${DEPS}
-	tar xf hdf5-${HDF_VERSION}.tar.bz2
-	cd hdf5-${HDF_VERSION}
-	./configure --prefix=/usr
-	make -sj2
-	make install
-	echo "-----> HDF5 installed."
-fi
-
-# Installing Qwt
-echo "-----> Checking for Qwt"
-
-if [ -f "/usr/local/qwt-${QWT_VERSION}/include/qwt.h" ]; then
-	echo "-----> Qwt already installed."
-else
-	echo "-----> Installing Qwt..."
-	cd ${DEPS}
-	tar xf qwt-${QWT_VERSION}.tar.bz2
-	cd qwt-${QWT_VERSION}
-	qmake qwt.pro
-	make -sj2
-	make install
-	cp -vf lib/libqwt.so.${QWT_VERSION} /usr/local/lib/.
-	ln -sf /usr/local/lib/libqwt.so.${QWT_VERSION} /usr/local/lib/libqwt.so
-	ldconfig
-	echo "-----> Qwt installed."
-fi
-
 echo "-----> Done."

@@ -37,12 +37,12 @@ AC_CHECK_LIB([gsl],[gsl_blas_dgemm])
 GSL_LIBS=$LIBS
 AC_SUBST(GSL_LIBS)
 
-LIBS=
-AC_CHECK_HEADER([hdf5.h])
-AC_CHECK_LIB([hdf5],[H5Fopen])
-AC_CHECK_LIB([hdf5_hl],[H5PTopen])
-HDF_LIBS=$LIBS
-AC_SUBST(HDF_LIBS)
+# LIBS=
+# AC_CHECK_HEADER([hdf5.h])
+# AC_CHECK_LIB([hdf5],[H5Fopen])
+# AC_CHECK_LIB([hdf5_hl],[H5PTopen])
+# HDF_LIBS=$LIBS
+# AC_SUBST(HDF_LIBS)
 
 rtos=""
 

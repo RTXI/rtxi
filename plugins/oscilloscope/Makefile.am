@@ -12,7 +12,7 @@ plugininclude_HEADERS = \
 
 pkglib_LTLIBRARIES = oscilloscope.la
 
-oscilloscope_la_LDFLAGS = -module -avoid-version -lqwt
+oscilloscope_la_LDFLAGS = -module -avoid-version -lqwt-qt5
 
 oscilloscope_la_SOURCES = \
 		oscilloscope.h \
