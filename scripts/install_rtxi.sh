@@ -66,7 +66,6 @@ chmod +x ~/Desktop/rtxi.desktop
 if [ $(lsb_release -sc) == "jessie" ] || [ $(lsb_release -sc) == "xenial" ]; then
 	echo "-----> Load analogy driver with systemd"
 	sudo cp -f ./scripts/services/rtxi_load_analogy.service /etc/systemd/system/
-	sudo systemctl start rtxi_load_analogy.service
 	sudo systemctl enable rtxi_load_analogy.service
 else
 	echo "-----> Load analogy driver with sysvinit/upstart"
