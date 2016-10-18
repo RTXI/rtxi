@@ -49,8 +49,9 @@ endif
 QT_LIBS = $(shell pkg-config --libs \
             Qt5Core Qt5Gui Qt5OpenGL Qt5PrintSupport Qt5Xml Qt5Widgets \
             Qt5Svg Qt5Network libgit2) \
+          -L/usr/local/qwt-$(QWT_VERSION)/lib -lqwt-qt5 \
           -L/usr/lib/x86_64-linux-gnu/hdf5/serial -lhdf5 -lhdf5_hl \
-          -lGL -lpthread -lqwt-qt5
+          -lGL -lpthread
 
 MOC = /usr/bin/moc
 UIC = /usr/bin/uic

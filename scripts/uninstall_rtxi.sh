@@ -37,7 +37,6 @@ QWT_VERSION=6.1.3
 
 RTXI_MOD=/usr/local/lib/rtxi_modules
 
-QWT_LIB=/usr/local/lib/libqwt* # not too proud of this line...
 QWT_DIR=/usr/local/qwt-${QWT_VERSION}
 
 # Uninstall Qwt
@@ -51,7 +50,6 @@ if ! [[ $(dpkg -s libqwt-qt5-dev) > /dev/null ]]; then
 	qmake qwt.pro
 	make uninstall
 	cd ${DEPS}
-	rm -rf ${QWT_LIB}
 	rm -rf ${QWT_DIR}
 	rm -rf qwt-${QWT_VERSION}
 fi
