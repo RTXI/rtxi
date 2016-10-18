@@ -32,8 +32,6 @@ fi
 DIR=$PWD
 ROOT=${DIR}/../
 DEPS=${ROOT}/deps
-PLG=${ROOT}/plugins
-SRC=${ROOT}/src
 
 # Some easy to use defines
 QWT_VERSION=6.1.3
