@@ -11,7 +11,9 @@ plugininclude_HEADERS = \
 
 pkglib_LTLIBRARIES = data_recorder.la
 
-data_recorder_la_LDFLAGS = -module -avoid-version -L/usr/lib/x86_64-linux-gnu/hdf5/serial -hdf5 -lhdf5_hl
+HDF_LIBS = $(shell pkg-config --libs hdf5) -lhdf5_hl
+
+data_recorder_la_LDFLAGS = -module -avoid-version $(HDF_LIBS)
 
 data_recorder_la_SOURCES = \
 		data_recorder.h \
