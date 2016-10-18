@@ -60,7 +60,7 @@ echo "-----> Package dependencies installed."
 # Install Qwt package if available in repos, compile if not.
 if [[ $(apt-cache show libqwt-qt5-dev) > /dev/null ]]; then 
 	echo "Repos have libqwt-qt5-dev. Installing."
-	sudo apt-get -y install libqwt-qt5-dev
+	apt-get -y install libqwt-qt5-dev
 else 
 	echo "libqwt-qt5-dev not available in repos. Compiling."
         cd ${DEPS}
@@ -68,9 +68,8 @@ else
         cd qwt-${QWT_VERSION}
         qmake qwt.pro
         make -sj`nproc`
-        make install
-        cp -vf lib/libqwt.so.${QWT_VERSION} /usr/local/lib/libqwt-qt5.so.${QWT_VERSION}
-        ln -sf /usr/local/lib/libqwt-qt5.so.${QWT_VERSION} /usr/local/lib/libqwt-qt5.so
+	make install
+	ldconfig
 fi 
 echo "-----> Qwt installed."
 
