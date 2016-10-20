@@ -61,11 +61,11 @@ if [[ $(apt-cache show libqwt-qt5-dev) > /dev/null ]]; then
 	apt-get -y install libqwt-qt5-dev
 else 
 	echo "libqwt-qt5-dev not available in repos. Compiling."
-        cd ${DEPS}
-        tar xf qwt-${QWT_VERSION}.tar.bz2
-        cd qwt-${QWT_VERSION}
-        qmake qwt.pro
-        make -sj`nproc`
+	cd ${DEPS}
+	tar xf qwt-${QWT_VERSION}.tar.bz2
+	cd qwt-${QWT_VERSION}
+	qmake qwt.pro
+	make -sj`nproc`
 	make install
 	ldconfig
 fi 
