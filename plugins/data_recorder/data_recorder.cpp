@@ -1477,6 +1477,9 @@ int DataRecorder::Panel::startRecording(long long timestamp)
     for (RT::List<Channel>::iterator i = channels.begin(), end = channels.end(); i != end; ++i)
         {
             std::string rec_chan_name = std::to_string(++count) + " " + i->name.toStdString();
+            rec_chan_name.erase(std::remove(rec_chan_name.begin(), rec_chan_name.end(), '^'), rec_chan_name.end());
+            rec_chan_name.erase(std::remove(rec_chan_name.begin(), rec_chan_name.end(), '/'), rec_chan_name.end());
+            rec_chan_name.erase(std::remove(rec_chan_name.begin(), rec_chan_name.end(), '-'), rec_chan_name.end());
             hid_t data = H5Dcreate(file.sdata, rec_chan_name.c_str(), string_type, scalar_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
             H5Dwrite(data, string_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, rec_chan_name.c_str());
             H5Dclose(data);
