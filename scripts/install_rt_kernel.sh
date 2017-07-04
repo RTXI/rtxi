@@ -30,7 +30,7 @@ fi
 
 # Export environment variables
 echo  "-----> Setting up variables."
-export linux_version=4.1.18
+export linux_version=4.9.24
 export linux_tree=/opt/linux-$linux_version
 export xenomai_version=3.0.5
 export xenomai_root=/opt/xenomai-$xenomai_version
@@ -42,6 +42,7 @@ rm -rf $build_root
 rm -rf $linux_tree
 rm -rf $xenomai_root
 mkdir $build_root
+
 echo  "-----> Environment configuration complete."
 
 # Download essentials

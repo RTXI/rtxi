@@ -28,6 +28,9 @@ if ! id | grep -q root; then
 	exit 1
 fi
 
+# System specifics
+export UBUNTU=`lsb_release -sr`
+
 # Set directory variable for compilation
 DIR=$PWD
 ROOT=${DIR}/../
@@ -36,19 +39,14 @@ DEPS=${ROOT}/deps
 # Some easy to use defines
 QWT_VERSION=6.1.3
 
-#
-# Check for all RTXI *.deb dependencies and install them. Includes:
-#  - Kernel tools
-#  - C/C++ compiler and debugger
-#  - Qt5 and HDF libraries
-#
-echo "-----> Checking dependencies..."
+# Install RTXI dependencies
+echo "-----> Installing dependencies..."
 apt-get update
 apt-get -y upgrade
 apt-get -y install \
 	autotools-dev automake libtool kernel-package gcc g++ gdb fakeroot \
 	crash kexec-tools makedumpfile kernel-wedge libncurses5-dev libelf-dev \
-	binutils-dev libgsl0-dev libboost-dev git vim emacs lshw stress gksu \
+	binutils-dev libgsl0-dev libboost-dev git vim lshw stress gksu \
 	libqt5svg5-dev libqt5opengl5 libqt5gui5 libqt5core5a libqt5xml5 \
 	qt5-default qttools5-dev-tools qttools5-dev libhdf5-dev \
 	libgit2-dev libmarkdown2-dev
@@ -57,10 +55,10 @@ echo "-----> Package dependencies installed."
 
 # Install Qwt package if available in repos, compile if not.
 if [[ $(apt-cache show libqwt-qt5-dev) > /dev/null ]]; then 
-	echo "Repos have libqwt-qt5-dev. Installing."
+	echo "Installing libqwt-qt5-dev from repos..."
 	apt-get -y install libqwt-qt5-dev
 else 
-	echo "libqwt-qt5-dev not available in repos. Compiling."
+	echo "Installing libqwt-qt5-dev from source..."
 	cd ${DEPS}
 	tar xf qwt-${QWT_VERSION}.tar.bz2
 	cd qwt-${QWT_VERSION}
