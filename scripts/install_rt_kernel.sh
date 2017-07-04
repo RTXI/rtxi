@@ -32,7 +32,7 @@ fi
 echo  "-----> Setting up variables."
 export linux_version=4.1.18
 export linux_tree=/opt/linux-$linux_version
-export xenomai_version=3.0.3
+export xenomai_version=3.0.5
 export xenomai_root=/opt/xenomai-$xenomai_version
 export scripts_dir=`pwd`
 export build_root=/opt/build
@@ -70,8 +70,7 @@ $xenomai_root/scripts/prepare-kernel.sh \
 	--arch=x86 \
 	--adeos=$xenomai_root/kernel/cobalt/arch/x86/patches/ipipe-core-$linux_version-x86-[0-9]*.patch \
 	--linux=$linux_tree
-yes "" | make oldconfig
-make localmodconfig
+yes "" | make localmodconfig
 make menuconfig
 echo  "-----> Patching complete."
 
