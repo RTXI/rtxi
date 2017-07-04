@@ -322,37 +322,37 @@ void RT::System::execute(void)
     List<Thread>::iterator threadListEnd   = threadList.end();
 
     if (RT::OS::setPeriod(task,period))
-        {
-            ERROR_MSG("RT::System::execute : failed to set the initial period of the realtime thread\n");
-            return;
-        }
+    {
+        ERROR_MSG("RT::System::execute : failed to set the initial period of the realtime thread\n");
+        return;
+    }
 
     while (!finished)
+    {
+        RT::OS::sleepTimestep(task);
+
+        for (iDevice = devicesBegin; iDevice != devicesEnd; ++iDevice)
+            if (iDevice->getActive()) iDevice->read();
+
+        for (iThread = threadListBegin; iThread != threadListEnd; ++iThread)
+            if (iThread->getActive()) iThread->execute();
+
+        for (iDevice = devicesBegin; iDevice != devicesEnd; ++iDevice)
+            if (iDevice->getActive()) iDevice->write();
+
+        if (eventFifo.read(&event,sizeof(RT::Event *),false))
         {
-            RT::OS::sleepTimestep(task);
+            do
+            {
+                event->execute();
+            }
+            while (eventFifo.read(&event,sizeof(RT::Event *),false));
 
-            for (iDevice = devicesBegin; iDevice != devicesEnd; ++iDevice)
-                if (iDevice->getActive()) iDevice->read();
-
-            for (iThread = threadListBegin; iThread != threadListEnd; ++iThread)
-                if (iThread->getActive()) iThread->execute();
-
-            for (iDevice = devicesBegin; iDevice != devicesEnd; ++iDevice)
-                if (iDevice->getActive()) iDevice->write();
-
-            if (eventFifo.read(&event,sizeof(RT::Event *),false))
-                {
-                    do
-                        {
-                            event->execute();
-                        }
-                    while (eventFifo.read(&event,sizeof(RT::Event *),false));
-
-                    event = 0;
-                    devicesBegin = devices.begin();
-                    threadListBegin = threadList.begin();
-                }
+            event = 0;
+            devicesBegin = devices.begin();
+            threadListBegin = threadList.begin();
         }
+    }
 }
 
 static Mutex mutex;

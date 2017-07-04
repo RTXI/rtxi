@@ -44,6 +44,9 @@ AC_SUBST(GSL_LIBS)
 # HDF_LIBS=$LIBS
 # AC_SUBST(HDF_LIBS)
 
+# Quiet ar warning about default modifiers
+AC_SUBST(AR_FLAGS, [cr])
+
 rtos=""
 
 AX_BOOST_BASE([1.54],,[AC_MSG_ERROR([libboost version 1.54 or great is required])])
@@ -75,8 +78,8 @@ if test x$rtos = xxenomai; then
   else
     XENO_CONFIG=`which xeno-config`
   fi
-  RTOS_CPPFLAGS=`$XENO_CONFIG --skin=native --cflags`
-  RTOS_LDFLAGS=`$XENO_CONFIG --skin=native --ldflags`
+  RTOS_CPPFLAGS=`$XENO_CONFIG --alchemy --cflags`
+  RTOS_LDFLAGS=`$XENO_CONFIG --alchemy --ldflags --auto-init-solib`
 elif test x$rtos = xposix; then
   RTOS_CPPFLAGS='-I/usr/local/include'
   RTOS_LDFLAGS='-L/usr/local/lib -lpthread'

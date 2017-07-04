@@ -201,7 +201,8 @@ void RTXIWizard::Panel::cloneModule(void)
 #endif
 
 #if LIBGIT2_SOVERSION >= 24
-		error = error | printGitError(git_remote_connect(remote, GIT_DIRECTION_FETCH, NULL, NULL));
+		error = error | printGitError(git_remote_connect(remote, GIT_DIRECTION_FETCH, NULL, NULL, NULL));
+		//error = error | printGitError(git_remote_connect(remote, GIT_DIRECTION_FETCH, NULL, NULL));
 #else
 		error = error | printGitError(git_remote_connect(remote, GIT_DIRECTION_FETCH));
 #endif
@@ -480,7 +481,8 @@ void RTXIWizard::Panel::installFromString( std::string module_name )
 #endif
 
 #if LIBGIT2_SOVERSION >= 24
-		error = error | printGitError(git_remote_connect(remote, GIT_DIRECTION_FETCH, NULL, NULL));
+		error = error | printGitError(git_remote_connect(remote, GIT_DIRECTION_FETCH, NULL, NULL, NULL));
+		//error = error | printGitError(git_remote_connect(remote, GIT_DIRECTION_FETCH, NULL, NULL));
 #else
 		error = error | printGitError(git_remote_connect(remote, GIT_DIRECTION_FETCH));
 #endif
