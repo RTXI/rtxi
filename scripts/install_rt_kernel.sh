@@ -59,6 +59,7 @@ tar xf linux-$linux_version.tar.xz
 
 echo  "-----> Downloading Xenomai."
 wget --no-check-certificate https://xenomai.org/downloads/xenomai/stable/xenomai-$xenomai_version.tar.bz2
+wget --no-check-certificate https://xenomai.org/downloads/ipipe/v4.x/x86/ipipe-core-4.9.24-x86-2.patch
 tar xf xenomai-$xenomai_version.tar.bz2
 echo  "-----> Downloads complete."
 
@@ -67,7 +68,7 @@ echo  "-----> Patching kernel."
 cd $linux_tree
 $xenomai_root/scripts/prepare-kernel.sh \
 	--arch=x86 \
-	--adeos=$xenomai_root/kernel/cobalt/arch/x86/patches/ipipe-core-$linux_version-x86-[0-9]*.patch \
+	--ipipe=$opt/ipipe-core-$linux_version-x86-[0-9]*.patch \
 	--linux=$linux_tree
 yes "" | make oldconfig
 make menuconfig
