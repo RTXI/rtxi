@@ -42,7 +42,6 @@ rm -rf $build_root
 rm -rf $linux_tree
 rm -rf $xenomai_root
 mkdir $build_root
-
 echo  "-----> Environment configuration complete."
 
 # Download essentials
@@ -56,7 +55,6 @@ else
 	echo "Kernel specified in the \$linux_version variable needs to be 3.x or 4.x"
 	exit 1
 fi
-
 tar xf linux-$linux_version.tar.xz
 
 echo  "-----> Downloading Xenomai."
@@ -71,7 +69,7 @@ $xenomai_root/scripts/prepare-kernel.sh \
 	--arch=x86 \
 	--adeos=$xenomai_root/kernel/cobalt/arch/x86/patches/ipipe-core-$linux_version-x86-[0-9]*.patch \
 	--linux=$linux_tree
-yes "" | make localmodconfig
+yes "" | make oldconfig
 make menuconfig
 echo  "-----> Patching complete."
 
@@ -96,7 +94,12 @@ echo  "-----> Kernel installation complete."
 # Update
 echo  "-----> Updating boot loader about the new kernel."
 cd $linux_tree
-update-initramfs -u -k all
+update-initramfs -ck all
+
+# Modify grub file to enable verbose boot
+sed -i '7,8 s/^/#/' /etc/default/grub
+sed -i -e 's/quiet//g' /etc/default/grub
+sed -i -e 's/splash//g' /etc/default/grub
 update-grub
 echo  "-----> Boot loader update complete."
 

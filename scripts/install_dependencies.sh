@@ -28,9 +28,6 @@ if ! id | grep -q root; then
 	exit 1
 fi
 
-# System specifics
-export UBUNTU=`lsb_release -sr`
-
 # Set directory variable for compilation
 DIR=$PWD
 ROOT=${DIR}/../

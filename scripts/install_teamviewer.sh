@@ -41,14 +41,3 @@ fi
 wget http://download.teamviewer.com/download/teamviewer_i386.deb
 gdebi teamviewer_i386.deb
 apt-get -f -y install
-
-# If you ever want to uninstall teamviewer and its i386 dependencies from your
-# your x86_64 system, run:
-#
-#  $ apt-get purge teamviewer
-#  $ apt-get purge `dpkg --get-selections | grep i386 | awk '{print $1}'`
-#  $ dpkg --remove-architecture i386
-#
-# This will remove ALL i386 packages listed. DO NOT run this script on a i386
-# system. If you don't know what architecture your system is, run "uname -m" in
-# the terminal to find out. 
