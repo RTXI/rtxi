@@ -127,7 +127,7 @@ void RTXIWizard::Panel::initParameters(void)
 			QString("logos"),
 			QString("live-image"),
 			QString("conference-2015")
-	});
+			});
 	button_mode = DOWNLOAD;
 
 }
@@ -170,7 +170,7 @@ void RTXIWizard::Panel::cloneModule(void)
 			break;
 
 		default:
-			std::cout<<"ERROR: default in swtich block in cloneModule()"<<std::endl;
+			std::cout<<"ERROR: default in switch block in cloneModule()"<<std::endl;
 			break;
 	}
 
@@ -201,8 +201,8 @@ void RTXIWizard::Panel::cloneModule(void)
 #endif
 
 #if LIBGIT2_SOVERSION >= 24
-		error = error | printGitError(git_remote_connect(remote, GIT_DIRECTION_FETCH, NULL, NULL, NULL));
-		//error = error | printGitError(git_remote_connect(remote, GIT_DIRECTION_FETCH, NULL, NULL));
+		//error = error | printGitError(git_remote_connect(remote, GIT_DIRECTION_FETCH, NULL, NULL, NULL));
+		error = error | printGitError(git_remote_connect(remote, GIT_DIRECTION_FETCH, NULL, NULL));
 #else
 		error = error | printGitError(git_remote_connect(remote, GIT_DIRECTION_FETCH));
 #endif
@@ -453,7 +453,7 @@ void RTXIWizard::Panel::installFromString( std::string module_name )
 {
 	std::string cloneUrl = "https://github.com/rtxi/" + module_name;
 	// QString locationPrefix = "/usr/local/lib/rtxi_modules/";
-	
+
 	std::string locationUrl;
 	if (getuid())
 	{
@@ -472,7 +472,7 @@ void RTXIWizard::Panel::installFromString( std::string module_name )
 	{
 		git_repository *repo = NULL;
 		git_remote *remote = NULL;
-		
+
 		git_repository_open(&repo, path);
 #if LIBGIT2_SOVERSION >= 22
 		error = error | printGitError(git_remote_lookup(&remote, repo, "origin"));
@@ -481,8 +481,8 @@ void RTXIWizard::Panel::installFromString( std::string module_name )
 #endif
 
 #if LIBGIT2_SOVERSION >= 24
-		error = error | printGitError(git_remote_connect(remote, GIT_DIRECTION_FETCH, NULL, NULL, NULL));
-		//error = error | printGitError(git_remote_connect(remote, GIT_DIRECTION_FETCH, NULL, NULL));
+		//error = error | printGitError(git_remote_connect(remote, GIT_DIRECTION_FETCH, NULL, NULL, NULL));
+		error = error | printGitError(git_remote_connect(remote, GIT_DIRECTION_FETCH, NULL, NULL));
 #else
 		error = error | printGitError(git_remote_connect(remote, GIT_DIRECTION_FETCH));
 #endif
