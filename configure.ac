@@ -18,7 +18,7 @@
 # this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-AC_INIT([RTXI],[2.1],[help@rtxi.org],rtxi)
+AC_INIT([RTXI],[2.2],[help@rtxi.org],rtxi)
 
 AM_CONFIG_HEADER(src/rtxi_config.h)
 AM_INIT_AUTOMAKE([foreign])
