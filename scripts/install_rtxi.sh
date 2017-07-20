@@ -23,6 +23,11 @@ set -eu
 # Created by Yogi Patel <yapatel@gatech.edu> 2014.1.31
 #
 
+if id | grep -q root; then
+	echo "You do not need to run as root; try again without sudo"
+	exit
+fi
+
 # Directories
 ROOT=../
 MODS=/usr/local/lib/rtxi_modules/
