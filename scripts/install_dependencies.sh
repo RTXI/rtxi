@@ -46,16 +46,26 @@ apt-get -y install \
 	binutils-dev libgsl0-dev libboost-dev git vim lshw stress gksu \
 	libqt5svg5-dev libqt5opengl5 libqt5gui5 libqt5core5a libqt5xml5 \
 	qt5-default qttools5-dev-tools qttools5-dev libhdf5-dev \
-	libgit2-dev libmarkdown2-dev
+	libmarkdown2-dev cmake
 apt-get -y build-dep linux
 echo "-----> Package dependencies installed."
 
+# Install libgit2 from source
+echo "-----> Installing libgit2..."
+cd $DEPS
+mkdir "git" && cd "$_"
+git clone https://github.com/libgit2/libgit2.git && cd libgit2
+mkdir build && cd build
+cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local/libgit2 -DCURL=OFF
+cmake --build . --target install
+ldconfig
+echo "-----> libgit2 installed."
+
 # Install Qwt package if available in repos, compile if not.
+echo "-----> Installing qwt..."
 if [[ $(apt-cache show libqwt-qt5-dev) > /dev/null ]]; then 
-	echo "Installing libqwt-qt5-dev from repos..."
 	apt-get -y install libqwt-qt5-dev
 else 
-	echo "Installing libqwt-qt5-dev from source..."
 	cd ${DEPS}
 	tar xf qwt-${QWT_VERSION}.tar.bz2
 	cd qwt-${QWT_VERSION}

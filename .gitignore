@@ -25,6 +25,7 @@ scripts/rtxi_plugin_config
 #Ignore files extracted from bundled tarballs
 deps/qwt-*/
 deps/hdf5-*/
+deps/git/*
 
 #Ignore qt generated mocs
 moc_*

@@ -195,26 +195,26 @@ void RTXIWizard::Panel::cloneModule(void)
 
 		git_repository_open(&repo, path);
 #if LIBGIT2_SOVERSION >= 22
-		error = error | printGitError(git_remote_lookup(&remote, repo, "origin"));
+		printGitError(git_remote_lookup(&remote, repo, "origin"));
 #else
-		error = error | printGitError(git_remote_load(&remote, repo, "origin"));
+		printGitError(git_remote_load(&remote, repo, "origin"));
 #endif
 
 #if LIBGIT2_SOVERSION >= 24
-		//error = error | printGitError(git_remote_connect(remote, GIT_DIRECTION_FETCH, NULL, NULL, NULL));
-		error = error | printGitError(git_remote_connect(remote, GIT_DIRECTION_FETCH, NULL, NULL));
+		printGitError(git_remote_connect(remote, GIT_DIRECTION_FETCH, NULL, NULL, NULL));
+		//printGitError(git_remote_connect(remote, GIT_DIRECTION_FETCH, NULL, NULL));
 #else
-		error = error | printGitError(git_remote_connect(remote, GIT_DIRECTION_FETCH));
+		printGitError(git_remote_connect(remote, GIT_DIRECTION_FETCH));
 #endif
 
 #if LIBGIT2_SOVERSION >= 24
-		error = error | printGitError(git_remote_download(remote, NULL, NULL));
+		printGitError(git_remote_download(remote, NULL, NULL));
 #elif LIBGIT2_SOVERSION >= 22
-		error = error | printGitError(git_remote_download(remote, NULL));
+		printGitError(git_remote_download(remote, NULL));
 #elif LIBGIT2_SOVERSION >= 21
-		error = error | printGitError(git_remote_download(remote));
+		printGitError(git_remote_download(remote));
 #else
-		error = error | printGitError(git_remote_download(remote, NULL, NULL));
+		printGitError(git_remote_download(remote, NULL, NULL));
 #endif
 
 		git_remote_disconnect(remote);
@@ -475,26 +475,26 @@ void RTXIWizard::Panel::installFromString( std::string module_name )
 
 		git_repository_open(&repo, path);
 #if LIBGIT2_SOVERSION >= 22
-		error = error | printGitError(git_remote_lookup(&remote, repo, "origin"));
+		printGitError(git_remote_lookup(&remote, repo, "origin"));
 #else
-		error = error | printGitError(git_remote_load(&remote, repo, "origin"));
+		printGitError(git_remote_load(&remote, repo, "origin"));
 #endif
 
 #if LIBGIT2_SOVERSION >= 24
-		//error = error | printGitError(git_remote_connect(remote, GIT_DIRECTION_FETCH, NULL, NULL, NULL));
-		error = error | printGitError(git_remote_connect(remote, GIT_DIRECTION_FETCH, NULL, NULL));
+		printGitError(git_remote_connect(remote, GIT_DIRECTION_FETCH, NULL, NULL, NULL));
+		//printGitError(git_remote_connect(remote, GIT_DIRECTION_FETCH, NULL, NULL));
 #else
-		error = error | printGitError(git_remote_connect(remote, GIT_DIRECTION_FETCH));
+		printGitError(git_remote_connect(remote, GIT_DIRECTION_FETCH));
 #endif
 
 #if LIBGIT2_SOVERSION >= 24
-		error = error | printGitError(git_remote_download(remote, NULL, NULL));
+		printGitError(git_remote_download(remote, NULL, NULL));
 #elif LIBGIT2_SOVERSION >= 22
-		error = error | printGitError(git_remote_download(remote, NULL));
+		printGitError(git_remote_download(remote, NULL));
 #elif LIBGIT2_SOVERSION >= 21
-		error = error | printGitError(git_remote_download(remote));
+		printGitError(git_remote_download(remote));
 #else
-		error = error | printGitError(git_remote_download(remote, NULL, NULL));
+		printGitError(git_remote_download(remote, NULL, NULL));
 #endif
 
 		git_remote_disconnect(remote);
@@ -505,7 +505,7 @@ void RTXIWizard::Panel::installFromString( std::string module_name )
 	else
 	{
 		git_repository *repo = NULL;
-		error = printGitError(git_clone(&repo, url, path, NULL));
+		printGitError(git_clone(&repo, url, path, NULL));
 		git_repository_free(repo);
 	}
 
