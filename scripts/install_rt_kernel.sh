@@ -71,6 +71,7 @@ $xenomai_root/scripts/prepare-kernel.sh \
 	--ipipe=$opt/ipipe-core-$linux_version-x86-[0-9]*.patch \
 	--linux=$linux_tree
 yes "" | make oldconfig
+make localmodconfig
 make menuconfig
 echo  "-----> Patching complete."
 
