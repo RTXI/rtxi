@@ -33,39 +33,23 @@ DIR=$PWD
 ROOT=${DIR}/..
 DEPS=${ROOT}/deps
 
-HDF_VERSION=1.8.4
 QWT_VERSION=6.1.3
 
 RTXI_MOD=/usr/local/lib/rtxi_modules
 
-QWT_LIB=/usr/local/lib/libqwt* # not too proud of this line...
-QWT_DIR=/usr/local/qwt-${QWT_VERSION}
-
 # Uninstall Qwt
-cd ${DEPS}
-if [ -d qwt-${QWT_VERSION} ]; then
+if ! [[ $(dpkg -s libqwt-qt5-dev) > /dev/null ]]; then
+	cd ${DEPS}
+	if [ -d qwt-${QWT_VERSION} ]; then
+		rm -rf qwt-${QWT_VERSION}
+	fi
+	tar xf qwt-${QWT_VERSION}.tar.bz2
+	cd qwt-${QWT_VERSION}
+	qmake qwt.pro
+	make uninstall
+	cd ${DEPS}
 	rm -rf qwt-${QWT_VERSION}
 fi
-tar xf qwt-${QWT_VERSION}.tar.bz2
-cd qwt-${QWT_VERSION}
-qmake qwt.pro
-make uninstall
-cd ${DEPS}
-rm -rf ${QWT_LIB}
-rm -rf ${QWT_DIR}
-rm -rf qwt-${QWT_VERSION}
-
-# Uninstall Hdf5
-cd ${DEPS}
-if [ -d hdf5-${HDF_VERSION} ]; then
-	rm -rf hdf5-${HDF_VERSION}
-fi
-tar xf hdf5-${HDF_VERSION}.tar.bz2
-cd hdf5-${HDF_VERSION}
-./configure --prefix=/usr
-make uninstall
-cd ${DEPS}
-rm -rf hdf5-${HDF_VERSION}
 
 # Uninstall RTXI
 cd ${ROOT}

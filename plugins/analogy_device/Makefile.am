@@ -15,7 +15,7 @@ pkglib_LTLIBRARIES = analogy_driver.la
 endif
 
 analogy_driver_la_LDFLAGS =-module -avoid-version \
-                           $(RTOS_LDFLAGS) -lanalogy -lrtdm
+                           $(RTOS_LDFLAGS) -lanalogy
 
 analogy_driver_la_SOURCES = \
 		analogy_device.h \

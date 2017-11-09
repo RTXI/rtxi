@@ -30,9 +30,9 @@ fi
 
 # Export environment variables
 echo  "-----> Setting up variables."
-export linux_version=3.8.13
+export linux_version=4.9.24
 export linux_tree=/opt/linux-$linux_version
-export xenomai_version=2.6.4
+export xenomai_version=3.0.5
 export xenomai_root=/opt/xenomai-$xenomai_version
 export scripts_dir=`pwd`
 export build_root=/opt/build
@@ -47,11 +47,19 @@ echo  "-----> Environment configuration complete."
 # Download essentials
 echo  "-----> Downloading Linux kernel."
 cd $opt
-wget --no-check-certificate https://www.kernel.org/pub/linux/kernel/v3.x/linux-$linux_version.tar.bz2
-tar xf linux-$linux_version.tar.bz2
+if [[ "$linux_version" =~ "3." ]]; then 
+	wget --no-check-certificate https://www.kernel.org/pub/linux/kernel/v3.x/linux-$linux_version.tar.xz
+elif [[ "$linux_version" =~ "4." ]]; then
+	wget --no-check-certificate https://www.kernel.org/pub/linux/kernel/v4.x/linux-$linux_version.tar.xz
+else
+	echo "Kernel specified in the \$linux_version variable needs to be 3.x or 4.x"
+	exit 1
+fi
+tar xf linux-$linux_version.tar.xz
 
 echo  "-----> Downloading Xenomai."
 wget --no-check-certificate https://xenomai.org/downloads/xenomai/stable/xenomai-$xenomai_version.tar.bz2
+wget --no-check-certificate https://xenomai.org/downloads/ipipe/v4.x/x86/ipipe-core-4.9.24-x86-2.patch
 tar xf xenomai-$xenomai_version.tar.bz2
 echo  "-----> Downloads complete."
 
@@ -60,9 +68,10 @@ echo  "-----> Patching kernel."
 cd $linux_tree
 $xenomai_root/scripts/prepare-kernel.sh \
 	--arch=x86 \
-	--adeos=$xenomai_root/ksrc/arch/x86/patches/ipipe-core-$linux_version-x86-[0-9]*.patch \
+	--ipipe=$opt/ipipe-core-$linux_version-x86-[0-9]*.patch \
 	--linux=$linux_tree
-yes "" | make localmodconfig
+yes "" | make oldconfig
+make localmodconfig
 make menuconfig
 echo  "-----> Patching complete."
 
@@ -87,14 +96,19 @@ echo  "-----> Kernel installation complete."
 # Update
 echo  "-----> Updating boot loader about the new kernel."
 cd $linux_tree
-update-initramfs -c -k $linux_version-xenomai-$xenomai_version
+update-initramfs -ck all
+
+# Modify grub file to enable verbose boot
+sed -i '7,8 s/^/#/' /etc/default/grub
+sed -i -e 's/quiet//g' /etc/default/grub
+sed -i -e 's/splash//g' /etc/default/grub
 update-grub
 echo  "-----> Boot loader update complete."
 
 # Install user libraries
 echo  "-----> Installing user libraries."
 cd $build_root
-$xenomai_root/configure --enable-shared --enable-smp --enable-x86-sep
+$xenomai_root/configure --with-core=cobalt --enable-pshared --enable-smp --enable-dlopen-libs
 make -sj`nproc`
 make install
 echo  "-----> User library installation complete."

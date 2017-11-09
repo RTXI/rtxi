@@ -18,7 +18,7 @@
 # this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-AC_INIT([RTXI],[2.1],[help@rtxi.org],rtxi)
+AC_INIT([RTXI],[2.2],[help@rtxi.org],rtxi)
 
 AM_CONFIG_HEADER(src/rtxi_config.h)
 AM_INIT_AUTOMAKE([foreign])
@@ -37,12 +37,15 @@ AC_CHECK_LIB([gsl],[gsl_blas_dgemm])
 GSL_LIBS=$LIBS
 AC_SUBST(GSL_LIBS)
 
-LIBS=
-AC_CHECK_HEADER([hdf5.h])
-AC_CHECK_LIB([hdf5],[H5Fopen])
-AC_CHECK_LIB([hdf5_hl],[H5PTopen])
-HDF_LIBS=$LIBS
-AC_SUBST(HDF_LIBS)
+# LIBS=
+# AC_CHECK_HEADER([hdf5.h])
+# AC_CHECK_LIB([hdf5],[H5Fopen])
+# AC_CHECK_LIB([hdf5_hl],[H5PTopen])
+# HDF_LIBS=$LIBS
+# AC_SUBST(HDF_LIBS)
+
+# Quiet ar warning about default modifiers
+AC_SUBST(AR_FLAGS, [cr])
 
 rtos=""
 
@@ -75,8 +78,8 @@ if test x$rtos = xxenomai; then
   else
     XENO_CONFIG=`which xeno-config`
   fi
-  RTOS_CPPFLAGS=`$XENO_CONFIG --skin=native --cflags`
-  RTOS_LDFLAGS=`$XENO_CONFIG --skin=native --ldflags`
+  RTOS_CPPFLAGS=`$XENO_CONFIG --alchemy --cflags`
+  RTOS_LDFLAGS=`$XENO_CONFIG --alchemy --ldflags --auto-init-solib`
 elif test x$rtos = xposix; then
   RTOS_CPPFLAGS='-I/usr/local/include'
   RTOS_LDFLAGS='-L/usr/local/lib -lpthread'

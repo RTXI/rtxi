@@ -32,64 +32,55 @@ fi
 DIR=$PWD
 ROOT=${DIR}/../
 DEPS=${ROOT}/deps
-PLG=${ROOT}/plugins
-SRC=${ROOT}/src
 
 # Some easy to use defines
 QWT_VERSION=6.1.3
-HDF_VERSION=1.8.4
 
-#
-# Check for all RTXI *.deb dependencies and install them. Includes:
-#  - Kernel tools
-#  - C/C++ compiler and debugger
-#  - Qt5, HDF, and Qwt6 libraries
-#
-echo "-----> Checking dependencies..."
+# Install RTXI dependencies
+echo "-----> Installing dependencies..."
 apt-get update
 apt-get -y upgrade
 apt-get -y install \
 	autotools-dev automake libtool kernel-package gcc g++ gdb fakeroot \
 	crash kexec-tools makedumpfile kernel-wedge libncurses5-dev libelf-dev \
-	binutils-dev libgsl0-dev libboost-dev git vim emacs lshw stress gksu \
+	binutils-dev libgsl0-dev libboost-dev git vim lshw stress gksu \
 	libqt5svg5-dev libqt5opengl5 libqt5gui5 libqt5core5a libqt5xml5 \
-	qt5-default qttools5-dev-tools qttools5-dev libgit2-dev libmarkdown2-dev
+	qt5-default qttools5-dev-tools qttools5-dev libhdf5-dev \
+	libmarkdown2-dev cmake
 apt-get -y build-dep linux
 echo "-----> Package dependencies installed."
 
-# Installing HDF5
-echo "-----> Checking for HDF5."
-
-if [ -f "/usr/include/hdf5.h" ]; then
-	echo "-----> HDF5 already installed."
+# Install libgit2 from source
+echo "-----> Installing libgit2..."
+cd $DEPS
+if [ ! -d "libgit2" ]; then
+	git clone https://github.com/libgit2/libgit2.git && cd libgit2
+	mkdir build && cd build
+	cmake .. -DCURL=OFF
+	cmake --build . --target install
+	ldconfig
 else
-	echo "-----> Installing HDF5..."
-	cd ${DEPS}
-	tar xf hdf5-${HDF_VERSION}.tar.bz2
-	cd hdf5-${HDF_VERSION}
-	./configure --prefix=/usr
-	make -sj2
-	make install
-	echo "-----> HDF5 installed."
+	cd libgit2
+	rm -rf build && mkdir build && cd build
+	cmake .. -DCURL=OFF
+	cmake --build . --target install
+	ldconfig
 fi
+echo "-----> libgit2 installed."
 
-# Installing Qwt
-echo "-----> Checking for Qwt"
-
-if [ -f "/usr/local/qwt-${QWT_VERSION}/include/qwt.h" ]; then
-	echo "-----> Qwt already installed."
-else
-	echo "-----> Installing Qwt..."
+# Install Qwt package if available in repos, compile if not.
+echo "-----> Installing qwt..."
+if [ $(apt-cache show libqwt-qt5-dev) > /dev/null ]; then 
+	apt-get -y install libqwt-qt5-dev
+else 
 	cd ${DEPS}
 	tar xf qwt-${QWT_VERSION}.tar.bz2
 	cd qwt-${QWT_VERSION}
 	qmake qwt.pro
-	make -sj2
+	make -sj`nproc`
 	make install
-	cp -vf lib/libqwt.so.${QWT_VERSION} /usr/local/lib/.
-	ln -sf /usr/local/lib/libqwt.so.${QWT_VERSION} /usr/local/lib/libqwt.so
 	ldconfig
-	echo "-----> Qwt installed."
-fi
+fi 
+echo "-----> Qwt installed."
 
 echo "-----> Done."

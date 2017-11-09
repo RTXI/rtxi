@@ -23,6 +23,11 @@ set -eu
 # Created by Yogi Patel <yapatel@gatech.edu> 2014.1.31
 #
 
+if id | grep -q root; then
+	echo "You do not need to run as root; try again without sudo"
+	exit
+fi
+
 # Directories
 ROOT=../
 MODS=/usr/local/lib/rtxi_modules/
@@ -66,7 +71,6 @@ chmod +x ~/Desktop/rtxi.desktop
 if [ $(lsb_release -sc) == "jessie" ] || [ $(lsb_release -sc) == "xenial" ]; then
 	echo "-----> Load analogy driver with systemd"
 	sudo cp -f ./scripts/services/rtxi_load_analogy.service /etc/systemd/system/
-	sudo systemctl start rtxi_load_analogy.service
 	sudo systemctl enable rtxi_load_analogy.service
 else
 	echo "-----> Load analogy driver with sysvinit/upstart"

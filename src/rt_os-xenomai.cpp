@@ -22,8 +22,6 @@
 #include <rt.h>
 #include <sys/mman.h>
 #include <sys/resource.h>
-#include <native/task.h>
-#include <native/timer.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -31,6 +29,14 @@
 #include <getopt.h>
 #include <execinfo.h>
 #include <unistd.h>
+
+#if CONFIG_XENO_VERSION_MAJOR >= 3
+#include <alchemy/task.h>
+#include <alchemy/timer.h>
+#else
+#include <native/task.h>
+#include <native/timer.h>
+#endif
 
 typedef struct
 {
@@ -97,8 +103,6 @@ void sigdebug_handler(int sig, siginfo_t *si, void *context)
 
 int RT::OS::initiate(void)
 {
-	rt_timer_set_mode(TM_ONESHOT);
-
 	// Kernel limitations on memory lock are no longer present, however
 	// still a useful (for performance) method for preventing paging
 	// of active RTXI memory
@@ -142,7 +146,7 @@ int RT::OS::createTask(RT::OS::Task *task,void *(*entry)(void *),void *arg,int p
 	if ((prio >=0) && (prio <=99))
 		priority -= prio;
 
-	if ((retval = rt_task_create(&t->task,"RTXI RT Thread",0,priority,T_FPU)))
+	if ((retval = rt_task_create(&t->task, "RTXI RT Thread" , 0, priority, 0)))
 	{
 		ERROR_MSG("RT::OS::createTask : failed to create task\n");
 		return retval;
@@ -177,7 +181,11 @@ bool RT::OS::isRealtime(void)
 
 long long RT::OS::getTime(void)
 {
-	return rt_timer_tsc2ns(rt_timer_tsc());
+#if CONFIG_XENO_VERSION_MAJOR >= 3
+    return rt_timer_read(); 
+#else
+				return rt_timer_tsc2ns(rt_timer_tsc());
+#endif
 }
 
 int RT::OS::setPeriod(RT::OS::Task task,long long period)
