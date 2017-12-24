@@ -209,7 +209,6 @@ private:
     QAction *sub_issue;
     QAction *utilItem;
 
-    void updateCheck(void);
     void createFileMenu();
     void createModuleMenu();
     void createUtilMenu();

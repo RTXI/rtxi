@@ -62,9 +62,6 @@ MainWindow::MainWindow (void) : QMainWindow(NULL, Qt::Window)
     /* Initialize Help Menu */
     createHelpActions();
     createHelpMenu();
-
-    /* Check for updates */
-    //updateCheck();
 }
 
 MainWindow::~MainWindow (void)
@@ -292,23 +289,6 @@ void MainWindow::openDocs(void)
 void MainWindow::openSubIssue(void)
 {
     QDesktopServices::openUrl(QUrl("https://github.com/rtxi/rtxi/issues", QUrl::TolerantMode));
-}
-
-void MainWindow::updateCheck(void)
-{
-    FILE *pp;
-    pp = popen("/home/yapatel/Dev/rtxi-dev/rtxi/scripts/update_rtxi.sh","r");
-    if (pp != NULL)
-        {
-            while (1)
-                {
-                    char *res;
-                    char buf[1];
-                    res = fgets(buf, sizeof buf, pp);
-                    printf("%s", res);
-                }
-            pclose(pp);
-        }
 }
 
 /*
