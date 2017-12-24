@@ -18,14 +18,14 @@
 
 #!/bin/bash
 
-echo "----->Running latency test under load. Please wait 30 minutes."
+echo "----->Running latency test with a system frequency of 20 kHz under load. Please wait 30 minutes."
 echo "----->Do not interrupt."
 echo "----->If you do interrupt, stop stressing the system by running:"
 echo "      $ pkill stress"
 echo ""
 
-echo "----->Please enter the frequency (in Hz) that you would like to test, then press enter."
-read SysFreq
+#echo "----->Please enter the frequency (in Hz) that you would like to test, then press enter."
+SysFreq=20000
 
 # Get system information
 DISTRO="$(lsb_release -is) $(lsb_release -rs)"
