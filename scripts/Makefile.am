@@ -23,4 +23,4 @@ DISTCLEANFILES = rtxi_plugin_config
 
 bin_SCRIPTS = rtxi_plugin_config
 
-pkgdata_SCRIPTS = update_rtxi.sh
+pkgdata_SCRIPTS = 
