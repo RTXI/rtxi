@@ -30,9 +30,9 @@ fi
 
 # Export environment variables
 echo  "-----> Setting up variables."
-export linux_version=4.9.24
+export linux_version=4.9.90
 export linux_tree=/opt/linux-$linux_version
-export xenomai_version=3.0.5
+export xenomai_version=3.1
 export xenomai_root=/opt/xenomai-$xenomai_version
 export scripts_dir=`pwd`
 export build_root=/opt/build
@@ -48,9 +48,9 @@ echo  "-----> Environment configuration complete."
 echo  "-----> Downloading Linux kernel."
 cd $opt
 if [[ "$linux_version" =~ "3." ]]; then 
-	wget --no-check-certificate https://www.kernel.org/pub/linux/kernel/v3.x/linux-$linux_version.tar.xz
+	wget --no-clobber --no-check-certificate https://www.kernel.org/pub/linux/kernel/v3.x/linux-$linux_version.tar.xz
 elif [[ "$linux_version" =~ "4." ]]; then
-	wget --no-check-certificate https://www.kernel.org/pub/linux/kernel/v4.x/linux-$linux_version.tar.xz
+	wget --no-clobber --no-check-certificate https://www.kernel.org/pub/linux/kernel/v4.x/linux-$linux_version.tar.xz
 else
 	echo "Kernel specified in the \$linux_version variable needs to be 3.x or 4.x"
 	exit 1
@@ -59,7 +59,7 @@ tar xf linux-$linux_version.tar.xz
 
 echo  "-----> Downloading Xenomai."
 wget --no-check-certificate https://xenomai.org/downloads/xenomai/stable/xenomai-$xenomai_version.tar.bz2
-wget --no-check-certificate https://xenomai.org/downloads/ipipe/v4.x/x86/ipipe-core-4.9.24-x86-2.patch
+wget --no-check-certificate https://xenomai.org/downloads/ipipe/v4.x/x86/ipipe-core-4.9.90-x86-6.patch
 tar xf xenomai-$xenomai_version.tar.bz2
 echo  "-----> Downloads complete."
 
@@ -118,7 +118,11 @@ cp -f /usr/xenomai/sbin/analogy_config /usr/sbin/
 
 # Setting up user permissions
 echo  "-----> Setting up user/group."
-groupadd xenomai
+if [ -n `grep xenomai /etc/group` ]; then
+    echo "xenomai group already exists"
+else
+    groupadd xenomai
+fi
 usermod -a -G xenomai "$SUDO_USER"
 echo  "-----> Group setup complete."
 
