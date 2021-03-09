@@ -102,11 +102,7 @@ RTXIWizard::Panel::~Panel(void)
 void RTXIWizard::Panel::initParameters(void)
 {
 
-#if LIBGIT2_SOVERSION >= 22
 	git_libgit2_init();
-#else
-	git_threads_init();
-#endif
 
 	// syntax here only works in c++11
 	exclude_list = std::vector<QString> ({ 
@@ -194,28 +190,11 @@ void RTXIWizard::Panel::cloneModule(void)
 		git_remote *remote = NULL;
 
 		git_repository_open(&repo, path);
-#if LIBGIT2_SOVERSION >= 22
 		printGitError(git_remote_lookup(&remote, repo, "origin"));
-#else
-		printGitError(git_remote_load(&remote, repo, "origin"));
-#endif
 
-#if LIBGIT2_SOVERSION >= 24
 		printGitError(git_remote_connect(remote, GIT_DIRECTION_FETCH, NULL, NULL, NULL));
-		//printGitError(git_remote_connect(remote, GIT_DIRECTION_FETCH, NULL, NULL));
-#else
-		printGitError(git_remote_connect(remote, GIT_DIRECTION_FETCH));
-#endif
 
-#if LIBGIT2_SOVERSION >= 24
 		printGitError(git_remote_download(remote, NULL, NULL));
-#elif LIBGIT2_SOVERSION >= 22
-		printGitError(git_remote_download(remote, NULL));
-#elif LIBGIT2_SOVERSION >= 21
-		printGitError(git_remote_download(remote));
-#else
-		printGitError(git_remote_download(remote, NULL, NULL));
-#endif
 
 		git_remote_disconnect(remote);
 		git_remote_free(remote);
@@ -474,28 +453,11 @@ void RTXIWizard::Panel::installFromString( std::string module_name )
 		git_remote *remote = NULL;
 
 		git_repository_open(&repo, path);
-#if LIBGIT2_SOVERSION >= 22
 		printGitError(git_remote_lookup(&remote, repo, "origin"));
-#else
-		printGitError(git_remote_load(&remote, repo, "origin"));
-#endif
 
-#if LIBGIT2_SOVERSION >= 24
 		printGitError(git_remote_connect(remote, GIT_DIRECTION_FETCH, NULL, NULL, NULL));
-		//printGitError(git_remote_connect(remote, GIT_DIRECTION_FETCH, NULL, NULL));
-#else
-		printGitError(git_remote_connect(remote, GIT_DIRECTION_FETCH));
-#endif
 
-#if LIBGIT2_SOVERSION >= 24
 		printGitError(git_remote_download(remote, NULL, NULL));
-#elif LIBGIT2_SOVERSION >= 22
-		printGitError(git_remote_download(remote, NULL));
-#elif LIBGIT2_SOVERSION >= 21
-		printGitError(git_remote_download(remote));
-#else
-		printGitError(git_remote_download(remote, NULL, NULL));
-#endif
 
 		git_remote_disconnect(remote);
 		git_remote_free(remote);
