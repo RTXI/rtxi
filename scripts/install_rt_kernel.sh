@@ -37,6 +37,7 @@ export xenomai_root=/opt/xenomai-$xenomai_version
 export scripts_dir=`pwd`
 export build_root=/opt/build
 export opt=/opt
+export ipipe_patch_digit=4
 
 rm -rf $build_root
 rm -rf $linux_tree
@@ -47,12 +48,15 @@ echo  "-----> Environment configuration complete."
 # Download essentials
 echo  "-----> Downloading Linux kernel."
 cd $opt
-wget --no-clobber --no-check-certificate https://www.kernel.org/pub/linux/kernel/v5.x/linux-$linux_version.tar.xz
+wget --no-clobber --no-check-certificate https://www.kernel.org/pub/linux/kernel/v${linux_version:0:1}.x/linux-$linux_version.tar.xz
 tar xf linux-$linux_version.tar.xz
 
 echo  "-----> Downloading Xenomai."
 wget --no-clobber --no-check-certificate https://xenomai.org/downloads/xenomai/stable/xenomai-$xenomai_version.tar.bz2
-wget --no-clobber --no-check-certificate https://xenomai.org/downloads/ipipe/v5.x/x86/ipipe-core-5.4.105-x86-4.patch
+
+echo "------> Downloading linux ipipe patch."
+wget --no-clobber --no-check-certificate https://xenomai.org/downloads/ipipe/v${linux_version:0:1}.x/x86/ipipe-core-${linux_version}-x86-${ipipe_patch_digit}.patch
+
 tar xf xenomai-$xenomai_version.tar.bz2
 echo  "-----> Downloads complete."
 
@@ -61,7 +65,7 @@ echo  "-----> Patching kernel."
 cd $linux_tree
 $xenomai_root/scripts/prepare-kernel.sh \
 	--arch=x86 \
-	--ipipe=$opt/ipipe-core-$linux_version-x86-[0-9]*.patch \
+	--ipipe=$opt/ipipe-core-$linux_version-x86-${ipipe_patch_version}.patch \
 	--linux=$linux_tree \
 	--verbose
 #yes "" | make oldconfig
