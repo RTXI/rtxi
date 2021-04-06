@@ -46,7 +46,7 @@ apt-get -y install \
 	binutils-dev libgsl0-dev libboost-dev git vim lshw stress \
 	libqt5svg5-dev libqt5opengl5 libqt5gui5 libqt5core5a libqt5xml5 \
 	qt5-default qttools5-dev-tools qttools5-dev libhdf5-dev \
-	libmarkdown2-dev cmake
+	libmarkdown2-dev cmake flex bison
 #apt-get -y build-dep linux
 echo "-----> Package dependencies installed."
 

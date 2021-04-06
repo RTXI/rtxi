@@ -30,7 +30,7 @@ fi
 
 # Export environment variables
 echo  "-----> Setting up variables."
-export linux_version=4.9.90
+export linux_version=5.4.105
 export linux_tree=/opt/linux-$linux_version
 export xenomai_version=3.1
 export xenomai_root=/opt/xenomai-$xenomai_version
@@ -47,19 +47,12 @@ echo  "-----> Environment configuration complete."
 # Download essentials
 echo  "-----> Downloading Linux kernel."
 cd $opt
-if [[ "$linux_version" =~ "3." ]]; then 
-	wget --no-clobber --no-check-certificate https://www.kernel.org/pub/linux/kernel/v3.x/linux-$linux_version.tar.xz
-elif [[ "$linux_version" =~ "4." ]]; then
-	wget --no-clobber --no-check-certificate https://www.kernel.org/pub/linux/kernel/v4.x/linux-$linux_version.tar.xz
-else
-	echo "Kernel specified in the \$linux_version variable needs to be 3.x or 4.x"
-	exit 1
-fi
+wget --no-clobber --no-check-certificate https://www.kernel.org/pub/linux/kernel/v5.x/linux-$linux_version.tar.xz
 tar xf linux-$linux_version.tar.xz
 
 echo  "-----> Downloading Xenomai."
-wget --no-check-certificate https://xenomai.org/downloads/xenomai/stable/xenomai-$xenomai_version.tar.bz2
-wget --no-check-certificate https://xenomai.org/downloads/ipipe/v4.x/x86/ipipe-core-4.9.90-x86-6.patch
+wget --no-clobber --no-check-certificate https://xenomai.org/downloads/xenomai/stable/xenomai-$xenomai_version.tar.bz2
+wget --no-clobber --no-check-certificate https://xenomai.org/downloads/ipipe/v5.x/x86/ipipe-core-5.4.105-x86-4.patch
 tar xf xenomai-$xenomai_version.tar.bz2
 echo  "-----> Downloads complete."
 
@@ -69,9 +62,10 @@ cd $linux_tree
 $xenomai_root/scripts/prepare-kernel.sh \
 	--arch=x86 \
 	--ipipe=$opt/ipipe-core-$linux_version-x86-[0-9]*.patch \
-	--linux=$linux_tree
-yes "" | make oldconfig
-make localmodconfig
+	--linux=$linux_tree \
+	--verbose
+#yes "" | make oldconfig
+#make localmodconfig
 make menuconfig
 echo  "-----> Patching complete."
 
