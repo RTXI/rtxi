@@ -30,14 +30,14 @@ fi
 
 # Export environment variables
 echo  "-----> Setting up variables."
-export linux_version=4.9.90
+export linux_version=4.19.89
 export linux_tree=/opt/linux-$linux_version
 export xenomai_version=3.1
 export xenomai_root=/opt/xenomai-$xenomai_version
 export scripts_dir=`pwd`
 export build_root=/opt/build
 export opt=/opt
-export ipipe_patch_digit=6
+export ipipe_patch_digit=9
 
 rm -rf $build_root
 mkdir $build_root
