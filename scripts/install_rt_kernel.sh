@@ -30,18 +30,16 @@ fi
 
 # Export environment variables
 echo  "-----> Setting up variables."
-export linux_version=5.4.105
+export linux_version=4.9.90
 export linux_tree=/opt/linux-$linux_version
 export xenomai_version=3.1
 export xenomai_root=/opt/xenomai-$xenomai_version
 export scripts_dir=`pwd`
 export build_root=/opt/build
 export opt=/opt
-export ipipe_patch_digit=4
+export ipipe_patch_digit=6
 
 rm -rf $build_root
-rm -rf $linux_tree
-rm -rf $xenomai_root
 mkdir $build_root
 echo  "-----> Environment configuration complete."
 
@@ -65,7 +63,7 @@ echo  "-----> Patching kernel."
 cd $linux_tree
 $xenomai_root/scripts/prepare-kernel.sh \
 	--arch=x86 \
-	--ipipe=$opt/ipipe-core-$linux_version-x86-${ipipe_patch_version}.patch \
+	--ipipe=$opt/ipipe-core-$linux_version-x86-${ipipe_patch_digit}.patch \
 	--linux=$linux_tree \
 	--verbose
 #yes "" | make oldconfig
@@ -116,7 +114,7 @@ cp -f /usr/xenomai/sbin/analogy_config /usr/sbin/
 
 # Setting up user permissions
 echo  "-----> Setting up user/group."
-if [ -n `grep xenomai /etc/group` ]; then
+if grep -q xenomai /etc/group; then
     echo "xenomai group already exists"
 else
     groupadd xenomai
