@@ -37,7 +37,8 @@ cd ${ROOT}
 
 # Start configuring - by default configured to run on non-RT kernel
 echo "-----> Starting RTXI installation..."
-./autogen.sh
+#./autogen.sh
+autoreconf -if
 
 echo "-----> Kernel configuration..."
 echo "1. Xenomai+Analogy (RT)"
