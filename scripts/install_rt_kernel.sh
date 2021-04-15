@@ -37,8 +37,8 @@ export xenomai_root=/opt/xenomai-$xenomai_version
 export scripts_dir=`pwd`
 export build_root=/opt/build
 export opt=/opt
-export ipipe_cip_digit=44
 export ipipe_patch_digit=17
+export ipipe_cip_str=-cip44
 
 rm -rf $build_root
 mkdir $build_root
@@ -54,7 +54,7 @@ echo  "-----> Downloading Xenomai."
 wget --no-clobber --no-check-certificate https://xenomai.org/downloads/xenomai/stable/xenomai-$xenomai_version.tar.bz2
 
 echo "------> Downloading linux ipipe patch."
-wget --no-clobber --no-check-certificate https://xenomai.org/downloads/ipipe/v${linux_version:0:1}.x/x86/ipipe-core-${linux_version}-cip${ipipe_cip_digit}-x86-${ipipe_patch_digit}.patch
+wget --no-clobber --no-check-certificate https://xenomai.org/downloads/ipipe/v${linux_version:0:1}.x/x86/ipipe-core-${linux_version}${ipipe_cip_str}-x86-${ipipe_patch_digit}.patch
 
 tar xf xenomai-$xenomai_version.tar.bz2
 echo  "-----> Downloads complete."
@@ -64,7 +64,7 @@ echo  "-----> Patching kernel."
 cd $linux_tree
 $xenomai_root/scripts/prepare-kernel.sh \
 	--arch=x86 \
-	--ipipe=$opt/ipipe-core-$linux_version-cip${ipipe_cip_digit}-x86-${ipipe_patch_digit}.patch \
+	--ipipe=$opt/ipipe-core-${linux_version}${ipipe_cip_str}-x86-${ipipe_patch_digit}.patch \
 	--linux=$linux_tree \
 	--verbose
 yes "" | make oldconfig
