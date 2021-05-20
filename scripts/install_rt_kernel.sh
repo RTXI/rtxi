@@ -30,36 +30,44 @@ fi
 
 # Export environment variables
 echo  "-----> Setting up variables."
-export linux_version=4.9.24
-export linux_tree=/opt/linux-$linux_version
-export xenomai_version=3.0.5
+export linux_version=4.19.177
+export xenomai_version=3.1
 export xenomai_root=/opt/xenomai-$xenomai_version
 export scripts_dir=`pwd`
 export build_root=/opt/build
 export opt=/opt
+export ipipe_patch_digit=17
+export ipipe_cip_str=-cip44
+if [ -z $ipipe_cip_str ]; then
+    export linux_tree=/opt/linux-$linux_version;
+else
+    export linux_tree=/opt/linux-cip-${linux_version}${ipipe_cip_str};
+fi
 
 rm -rf $build_root
-rm -rf $linux_tree
-rm -rf $xenomai_root
 mkdir $build_root
 echo  "-----> Environment configuration complete."
 
 # Download essentials
 echo  "-----> Downloading Linux kernel."
 cd $opt
-if [[ "$linux_version" =~ "3." ]]; then 
-	wget --no-check-certificate https://www.kernel.org/pub/linux/kernel/v3.x/linux-$linux_version.tar.xz
-elif [[ "$linux_version" =~ "4." ]]; then
-	wget --no-check-certificate https://www.kernel.org/pub/linux/kernel/v4.x/linux-$linux_version.tar.xz
+if [ -z $ipipe_cip_str ]; then
+    echo "-----> Downloading main line kernel"
+    wget --no-clobber --no-check-certificate https://www.kernel.org/pub/linux/kernel/v${linux_version:0:1}.x/linux-$linux_version.tar.xz;
+    tar xf linux-$linux_version.tar.xz
 else
-	echo "Kernel specified in the \$linux_version variable needs to be 3.x or 4.x"
-	exit 1
+    echo "-----> Downloading CIP kernel"
+    wget --no-clobber --no-check-certificate https://git.kernel.org/pub/scm/linux/kernel/git/cip/linux-cip.git/snapshot/linux-cip-${linux_version}${ipipe_cip_str}.tar.gz;
+    tar xf linux-cip-${linux_version}${ipipe_cip_str}.tar.gz
 fi
-tar xf linux-$linux_version.tar.xz
+ 
 
 echo  "-----> Downloading Xenomai."
-wget --no-check-certificate https://xenomai.org/downloads/xenomai/stable/xenomai-$xenomai_version.tar.bz2
-wget --no-check-certificate https://xenomai.org/downloads/ipipe/v4.x/x86/ipipe-core-4.9.24-x86-2.patch
+wget --no-clobber --no-check-certificate https://xenomai.org/downloads/xenomai/stable/xenomai-$xenomai_version.tar.bz2
+
+echo "------> Downloading linux ipipe patch."
+wget --no-clobber --no-check-certificate https://xenomai.org/downloads/ipipe/v${linux_version:0:1}.x/x86/ipipe-core-${linux_version}${ipipe_cip_str}-x86-${ipipe_patch_digit}.patch
+
 tar xf xenomai-$xenomai_version.tar.bz2
 echo  "-----> Downloads complete."
 
@@ -68,8 +76,9 @@ echo  "-----> Patching kernel."
 cd $linux_tree
 $xenomai_root/scripts/prepare-kernel.sh \
 	--arch=x86 \
-	--ipipe=$opt/ipipe-core-$linux_version-x86-[0-9]*.patch \
-	--linux=$linux_tree
+	--ipipe=$opt/ipipe-core-${linux_version}${ipipe_cip_str}-x86-${ipipe_patch_digit}.patch \
+	--linux=$linux_tree \
+	--verbose
 yes "" | make oldconfig
 make localmodconfig
 make menuconfig
@@ -118,7 +127,11 @@ cp -f /usr/xenomai/sbin/analogy_config /usr/sbin/
 
 # Setting up user permissions
 echo  "-----> Setting up user/group."
-groupadd xenomai
+if grep -q xenomai /etc/group; then
+    echo "xenomai group already exists"
+else
+    groupadd xenomai
+fi
 usermod -a -G xenomai "$SUDO_USER"
 echo  "-----> Group setup complete."
 

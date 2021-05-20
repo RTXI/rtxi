@@ -37,7 +37,8 @@ cd ${ROOT}
 
 # Start configuring - by default configured to run on non-RT kernel
 echo "-----> Starting RTXI installation..."
-./autogen.sh
+#./autogen.sh
+autoreconf -if
 
 echo "-----> Kernel configuration..."
 echo "1. Xenomai+Analogy (RT)"
@@ -90,21 +91,22 @@ sudo setfacl -Rm g:adm:rwX,d:g:adm:rwX ${MODS}
 
 cd ${MODS}
 sudo rm -rf ${MODS}/*
-git clone https://github.com/RTXI/analysis-module.git
-git clone https://github.com/RTXI/iir-filter.git
-git clone https://github.com/RTXI/fir-window.git
-git clone https://github.com/RTXI/sync.git
-git clone https://github.com/RTXI/mimic-signal.git
-git clone https://github.com/RTXI/signal-generator.git
-git clone https://github.com/RTXI/ttl-pulses.git
-git clone https://github.com/RTXI/wave-maker.git
-git clone https://github.com/RTXI/noise-generator.git
+echo $(pwd)
+sudo git clone https://github.com/RTXI/analysis-module.git
+sudo git clone https://github.com/RTXI/iir-filter.git
+sudo git clone https://github.com/RTXI/fir-window.git
+sudo git clone https://github.com/RTXI/sync.git
+sudo git clone https://github.com/RTXI/mimic-signal.git
+sudo git clone https://github.com/RTXI/signal-generator.git
+sudo git clone https://github.com/RTXI/ttl-pulses.git
+sudo git clone https://github.com/RTXI/wave-maker.git
+sudo git clone https://github.com/RTXI/noise-generator.git
 
 for dir in ${MODS}/*; do
 	if [ -d "$dir" ]; then
 		make clean -C "$dir"
-		git -C "$dir" pull
-		make -j`nproc` -C "$dir"
+		sudo git -C "$dir" pull
+		sudo make -j`nproc` -C "$dir"
 		sudo make install -C "$dir"
 	fi
 done
@@ -113,4 +115,4 @@ echo ""
 echo "-----> RTXI intallation successful. Reboot may be required."
 echo "-----> Type '"sudo rtxi"' to start RTXI. Happy Sciencing!"
 echo "-----> Please email help@rtxi.org with any questions/help requests."
-echo "-----> Script developed/last modified by Yogi Patel <yapatel@gatech.edu> on May 2014."
+echo "-----> Script developed/last modified by Ivan F. Valerio <ivan@rtxi.org> on May 2021."
