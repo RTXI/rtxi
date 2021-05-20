@@ -28,16 +28,5 @@ if ! id | grep -q root; then
 	exit
 fi
 
-# Install gdebi for detecting and automatically installing dependencies
-apt-get -y install gdebi 
-
-# Teamviewer doesn't provide a 64-bit binary, so enable multiarch (i386) for 
-# installing dependencies. 
-if [ `uname -m` == "x86_64" ]; then
-	dpkg --add-architecture i386 # if x86_64, enable i386 mirrors
-	apt-get update
-fi
-
-wget http://download.teamviewer.com/download/teamviewer_i386.deb
-gdebi teamviewer_i386.deb
-apt-get -f -y install
+wget http://download.teamviewer.com/download/linux/teamviewer_amd64.deb
+apt install ./teamviewer*
