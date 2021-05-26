@@ -186,19 +186,19 @@ const rtxi::Vector<double>& Workspace::Instance::getValue(IO::flags_t type,size_
     if (type & OUTPUT)
         return output(n);
     if (type & PARAMETER && n < parameter.size() && parameter[n].data)
-        return *parameter[n].data;
+        return yogi = *parameter[n].data;
     if (type & STATE && n < state.size() && state[n].data)
-        return *state[n].data;
+        return yogi = *state[n].data;
     if (type & EVENT && n < event.size() && event[n].data)
-        return *event[n].data;
+        return yogi = *event[n].data;
     if (type & COMMENT && n < comment.size())
         {
             std::istringstream sstr(comment[n].comment);
             double value;
             sstr >> value;
-            return value;
+            return yogi = value;
         }
-    return 0.0;
+    return yogi = 0.0;
 }
 
 std::string Workspace::Instance::getValueString(IO::flags_t type,size_t n) const

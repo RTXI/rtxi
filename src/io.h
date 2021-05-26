@@ -278,6 +278,13 @@ protected:
      */
     rtxi::Vector<double>& output(size_t index);
 
+    /*************************************************************
+     * yogi exists because "double &output(size_t n)" has to     *
+     *   return a reference to something if n >= outputs.size(). *
+     *************************************************************/
+
+    static rtxi::Vector<double> yogi;
+    
 private:
 
     struct input_t;
@@ -294,13 +301,6 @@ private:
     static Mutex mutex;
     static void connect(Block *,size_t,Block *,size_t);
     static void disconnect(Block *,size_t,Block *,size_t);
-
-    /*************************************************************
-     * yogi exists because "double &output(size_t n)" has to     *
-     *   return a reference to something if n >= outputs.size(). *
-     *************************************************************/
-
-    static rtxi::Vector<double> yogi;
 
     struct link_t
     {

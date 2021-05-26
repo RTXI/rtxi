@@ -24,6 +24,7 @@
 #include <algorithm>
 #include <sstream>
 #include <string>
+#include <iostream> 
 
 Mutex IO::Block::mutex = Mutex(Mutex::RECURSIVE);
 
@@ -112,24 +113,34 @@ const rtxi::Vector<double>& IO::Block::getValue(IO::flags_t type,size_t n) const
         return input(n);
     if (type & OUTPUT)
         return output(n);
-    return rtxi::Vector<double>();
+    return yogi = 0.0;
 }
 
 const rtxi::Vector<double>& IO::Block::input(size_t n) const
 {
     if (unlikely(n >= inputs.size()))
-        return 0.0;
+        return yogi = 0.0;
 
-    double v = 0.0;
-    for (std::list<struct link_t>::const_iterator i = inputs[n].links.begin(),end = inputs[n].links.end(); i != end; ++i)
-        v += i->block->output(i->channel);
-    return v;
+    // double v = 0.0;
+    // for (std::list<struct link_t>::const_iterator i = inputs[n].links.begin(),end = inputs[n].links.end(); i != end; ++i)
+    //     v += i->block->output(i->channel);
+
+    // TODO(mbolus): Make sure maintainers/users are ok with this change.
+    // Previous behavior was to add together inputs if multiple linked to inputs[n] (commented above)
+    // With vectors, these different linked values could have different dimensions so addition is not viable.
+    // Instead, taking first in list.
+    if (inputs[n].links.size()) {
+        auto i = inputs[n].links.begin();
+        return i->block->output(i->channel);
+    } else {
+        return yogi = 0.0;
+    }
 }
 
 const rtxi::Vector<double>& IO::Block::output(size_t n) const
 {
     if (unlikely(n >= outputs.size()))
-        return 0.0;
+        return yogi = 0.0;
     return outputs[n].value;
 }
 

@@ -108,7 +108,7 @@ public:
     // mfbolus 2021/05:
     void countChannels(void); // get the *actual* channel count, checking for
                               // vectors.
-    bool getRecording() const {return recording;}; // so other plugins can know
+    bool isRecording() const {return recording;}; // so other plugins can know
                                                    // when *not* to change
                                                    // vector dimensions
 public slots:

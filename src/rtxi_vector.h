@@ -34,7 +34,7 @@ class Vector : public std::vector<T> {
   using std::vector<T>::operator=;
   using std::vector<T>::at;
 
-  Vector(size_t n=1, T fill=0): std::vector<T>(n, fill) {};
+  explicit Vector(size_t n=1, T fill=0): std::vector<T>(n, fill) {};
 
   /// conversion: T -> vector
   Vector(T in) : std::vector<T>(1, in) {};
