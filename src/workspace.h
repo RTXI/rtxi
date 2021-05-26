@@ -135,7 +135,7 @@ public:
      * \sa IO::Block::getValue()
      * \sa Workspace::setData()
      */
-    double getValue(IO::flags_t type,size_t index) const;
+    const rtxi::Vector<double>& getValue(IO::flags_t type,size_t index) const;
     /*!
      * Get the value of the specified EVENT, PARAMETER, STATE,
      *   or COMMENT variable in string form.

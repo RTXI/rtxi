@@ -570,7 +570,7 @@ void AnalogyDevice::read(void)
 		if(subdevice[DIO].chan[i].active && subdevice[DIO].chan[i].digital.direction == DAQ::INPUT)
 		{
 			mask = (1<<i);
-			output(i+offset) = (data & mask) == 0 ? 0 : 5;
+			output(i+offset) = (data & mask) == 0 ? 0.0 : 5.0;
 		}
 }
 

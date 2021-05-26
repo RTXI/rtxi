@@ -28,6 +28,7 @@
 #include <data_recorder.h>
 #include <iostream>
 #include <pthread.h>
+#include <iomanip>
 
 #define QFileExistsEvent            (QEvent::User+0)
 #define QSetFileNameEditEvent       (QEvent::User+1)
@@ -1500,7 +1501,7 @@ int DataRecorder::Panel::startRecording(long long timestamp)
     size_t count = 0;
     for (RT::List<Channel>::iterator i = channels.begin(), end = channels.end(); i != end; ++i)
         {
-            std::size_t chanDim = i->block->getValue(i->index).size(); // number of dims per "channel"
+            std::size_t chanDim = i->block->getValue(i->type, i->index).size(); // number of dims per "channel"
 
             for (std::size_t k=0; k<chanDim; ++k)
             {

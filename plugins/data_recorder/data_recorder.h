@@ -28,6 +28,7 @@
 #include <vector>
 #include <time.h>
 #include <daq.h>
+#include <rtxi_vector.h>
 
 #include <hdf5.h>
 #include <hdf5_hl.h>

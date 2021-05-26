@@ -179,7 +179,7 @@ std::string Workspace::Instance::getDescription(IO::flags_t type,size_t n) const
     return "";
 }
 
-double Workspace::Instance::getValue(IO::flags_t type,size_t n) const
+const rtxi::Vector<double>& Workspace::Instance::getValue(IO::flags_t type,size_t n) const
 {
     if (type & INPUT)
         return input(n);

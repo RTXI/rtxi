@@ -25,6 +25,7 @@
 #include <settings.h>
 #include <string>
 #include <vector>
+#include <rtxi_vector.h>
 
 //! Connection Oriented Classes
 /*!
@@ -299,7 +300,7 @@ private:
      *   return a reference to something if n >= outputs.size(). *
      *************************************************************/
 
-    static double yogi;
+    static rtxi::Vector<double> yogi;
 
     struct link_t
     {
