@@ -245,7 +245,7 @@ public:
      * \param index The channel's index.
      * \return The value of the channel.
      */
-    virtual double getValue(flags_t type,size_t index) const;
+    virtual const rtxi::Vector<double>& getValue(flags_t type,size_t index) const;
 
     /*!
      * Get the value of the specified input channel.
@@ -253,7 +253,7 @@ public:
      * \param index The input channel's index.
      * \return The value of the specified input channel.
      */
-    double input(size_t index) const;
+    const rtxi::Vector<double>& input(size_t index) const;
     /*!
      * Get the value of the specified output channel.
      *
@@ -262,7 +262,7 @@ public:
      *
      * \sa IO::Block::output()
      */
-    double output(size_t index) const;
+    const rtxi::Vector<double>& output(size_t index) const;
 
 protected:
 
@@ -275,7 +275,7 @@ protected:
      *
      * \sa IO::Block::output()
      */
-    double &output(size_t index);
+    rtxi::Vector<double>& output(size_t index);
 
 private:
 
@@ -318,7 +318,7 @@ private:
     {
         std::string name;
         std::string description;
-        double value;
+        rtxi::Vector<double> value;
         std::list<struct link_t> links;
     };
 

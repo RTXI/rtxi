@@ -104,6 +104,12 @@ public:
     void receiveEvent(const Event::Object *);
     void receiveEventRT(const Event::Object *);
 
+    // mfbolus 2021/05:
+    void countChannels(void); // get the *actual* channel count, checking for
+                              // vectors.
+    bool getRecording() const {return recording;}; // so other plugins can know
+                                                   // when *not* to change
+                                                   // vector dimensions
 public slots:
     void startRecordClicked(void);
     void stopRecordClicked(void);
@@ -191,6 +197,11 @@ private:
 
     RT::List<Channel> channels;
     std::vector<IO::Block *> blockPtrList;
+
+    // TODO(mfbolus): Not sure if atomics necessary here
+    std::atomic<std::size_t> nChan; // will be the *actual* channel count,
+                                    // taking into account dimensionality of
+                                    // any vectors
 }; // class Panel
 
 class Plugin : public QObject, public ::Plugin::Object

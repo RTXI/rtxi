@@ -616,14 +616,22 @@ void DataRecorder::Panel::execute(void)
     if (recording && !counter++)
         {
             data_token_t token;
-            double data[channels.size()];
+
+            // TODO(mfbolus): Should probably not need to do this!
+            // Dangerous if dims change during recording...
+            countChannels();
+            double data[nChan.load()];
 
             size_t n = 0;
             token.type = SYNC;
             token.size = channels.size() * sizeof(double);
             for (RT::List<Channel>::iterator i = channels.begin(), end = channels.end(); i != end; ++i)
-                if (i->block)
-                    data[n++] = i->block->getValue(i->type, i->index);
+                if (i->block) {
+                    const rtxi::Vector<double>& data_block = i->block->getValue(i->type, i->index);
+                    for (double d: data_block) {
+                        data[n++] = d;
+                    }
+                }
 
             fifo.write(&token, sizeof(token));
             fifo.write(data, sizeof(data));
@@ -631,6 +639,20 @@ void DataRecorder::Panel::execute(void)
     count++;
     counter %= downsample_rate;
 }
+
+// Get channel count : call this when the panel inserts/removes channels.
+void DataRecorder::Panel::countChannels(void)
+{
+  nChan = 0;
+  for (RT::List<Channel>::iterator i = channels.begin(), end = channels.end(); i != end; ++i)
+  {
+    if (i->block)
+    {
+        const rtxi::Vector<double>& data_block = i->block->getValue(i->type, i->index);
+        nChan += data_block.size();
+    } //if block loop
+  } //channels loop
+} //countChannels
 
 // Event handler
 void DataRecorder::Panel::receiveEvent(const Event::Object *event)
@@ -648,7 +670,7 @@ void DataRecorder::Panel::receiveEvent(const Event::Object *event)
             QString name = QString::fromStdString(block->getName()) + " " + QString::number(block->getID());
             int n = 0;
             for (; n < blockList->count() && blockList->itemText(n) != name; ++n) ;
-            if (n < blockList->count()) 
+            if (n < blockList->count())
                 blockList->removeItem(n);
             blockPtrList.erase(blockPtrList.begin() + n);
 
@@ -661,7 +683,7 @@ void DataRecorder::Panel::receiveEvent(const Event::Object *event)
                         if (!channelItems.isEmpty()) {
                             /* Use takeItem(row) to remove the channel item. */
                             selectionBox->takeItem(selectionBox->row(channelItems.takeFirst()));
-                        } 
+                        }
                     }
                 }
             buildChannelList();
@@ -892,6 +914,7 @@ void DataRecorder::Panel::insertChannel(void)
             startRecordButton->setEnabled(false);
             lButton->setEnabled(false);
         }
+    countChannels();
 }
 
 // Remove channel from recorder list
@@ -919,6 +942,7 @@ void DataRecorder::Panel::removeChannel(void)
             startRecordButton->setEnabled(false);
             lButton->setEnabled(false);
         }
+    countChannels();
 }
 
 // Register new data tag/stamp
@@ -1476,12 +1500,28 @@ int DataRecorder::Panel::startRecording(long long timestamp)
     size_t count = 0;
     for (RT::List<Channel>::iterator i = channels.begin(), end = channels.end(); i != end; ++i)
         {
-            std::string rec_chan_name = std::to_string(++count) + " " + i->name.toStdString();
-            rec_chan_name.erase(std::remove_if(rec_chan_name.begin(), rec_chan_name.end(), &ispunct), rec_chan_name.end());
-            hid_t data = H5Dcreate(file.sdata, rec_chan_name.c_str(), string_type, scalar_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-            H5Dwrite(data, string_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, rec_chan_name.c_str());
-            H5Dclose(data);
-        }
+            std::size_t chanDim = i->block->getValue(i->index).size(); // number of dims per "channel"
+
+            for (std::size_t k=0; k<chanDim; ++k)
+            {
+              // Adding leading zeros where appropriate.
+              // This makes sorting a tad easier, but it also places a limit on
+              // channel numbers.
+              std::stringstream ss_chanNo;
+              ss_chanNo << std::setw(3) << std::setfill('0') << ++count;
+              std::string chanNo = ss_chanNo.str();
+
+              std::string rec_chan_name = chanNo;
+              rec_chan_name += " " + i->name.toStdString();
+              if (chanDim > 1)
+              rec_chan_name += std::to_string(k);// " " + std::to_string(k);
+
+              rec_chan_name.erase(std::remove_if(rec_chan_name.begin(), rec_chan_name.end(), &ispunct), rec_chan_name.end());
+              hid_t data = H5Dcreate(file.sdata, rec_chan_name.c_str(), string_type, scalar_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+              H5Dwrite(data, string_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, rec_chan_name.c_str());
+              H5Dclose(data);
+            }
+        } //channel name loop
 
     DAQ::Device *dev;
     {
@@ -1514,11 +1554,11 @@ int DataRecorder::Panel::startRecording(long long timestamp)
 
 							double scale = dev->getAnalogGain(DAQ::AI,static_cast<DAQ::index_t>(i));
 							data = H5Dcreate(file.chandata, "Gain", H5T_IEEE_F64LE, scalar_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-							H5Dwrite(data, H5T_IEEE_F64LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &scale); 
+							H5Dwrite(data, H5T_IEEE_F64LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &scale);
 
 							double offset = dev->getAnalogZeroOffset(DAQ::AI,static_cast<DAQ::index_t>(i));
 							data = H5Dcreate(file.chandata, "Offset", H5T_IEEE_F64LE, scalar_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-							H5Dwrite(data, H5T_IEEE_F64LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &offset); 
+							H5Dwrite(data, H5T_IEEE_F64LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &offset);
 
 							int downsample = dev->getAnalogDownsample(DAQ::AI,static_cast<DAQ::index_t>(i));
 							data = H5Dcreate(file.chandata, "Downsample", H5T_STD_I16LE, scalar_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
@@ -1531,9 +1571,9 @@ int DataRecorder::Panel::startRecording(long long timestamp)
 
     if (channels.size())
         {
-            hsize_t array_size[] = { channels.size() };
+            hsize_t array_size[] = { nChan.load() };
             hid_t array_type = H5Tarray_create(H5T_IEEE_F64LE, 1, array_size);
-            file.cdata = H5PTcreate_fl(file.sdata, "Channel Data", array_type, (hsize_t) 64, 1);
+            file.cdata = H5PTcreate_fl(file.sdata, "Channel Data", array_type, (hsize_t) 256, 1);
             H5Tclose(array_type);
         }
 

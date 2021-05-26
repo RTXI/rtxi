@@ -57,7 +57,7 @@ IO::Block::Block(std::string n,IO::channel_t *channel,size_t size):name(n)
             {
                 outputs[out].name = channel[i].name;
                 outputs[out].description = channel[i].description;
-                outputs[out++].value = 0.0;
+                outputs[out++].value = rtxi::Vector<double>();// fills with 0
             }
 
     IO::Connector::getInstance()->insertBlock(this);
@@ -106,16 +106,16 @@ std::string IO::Block::getDescription(IO::flags_t type,size_t n) const
     return "";
 }
 
-double IO::Block::getValue(IO::flags_t type,size_t n) const
+const rtxi::Vector<double>& IO::Block::getValue(IO::flags_t type,size_t n) const
 {
     if (type & INPUT)
         return input(n);
     if (type & OUTPUT)
         return output(n);
-    return 0.0;
+    return rtxi::Vector<double>();
 }
 
-double IO::Block::input(size_t n) const
+const rtxi::Vector<double>& IO::Block::input(size_t n) const
 {
     if (unlikely(n >= inputs.size()))
         return 0.0;
@@ -126,16 +126,16 @@ double IO::Block::input(size_t n) const
     return v;
 }
 
-double IO::Block::output(size_t n) const
+const rtxi::Vector<double>& IO::Block::output(size_t n) const
 {
     if (unlikely(n >= outputs.size()))
         return 0.0;
     return outputs[n].value;
 }
 
-double IO::Block::yogi = 0.0;
+rtxi::Vector<double> IO::Block::yogi = 0.0;
 
-double &IO::Block::output(size_t n)
+rtxi::Vector<double>& IO::Block::output(size_t n)
 {
 
     /*********************************************************
