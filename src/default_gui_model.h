@@ -268,12 +268,12 @@ protected:
      */
     void setEvent(const QString &name,double &ref);
 
-private:
-
+    // mfbolus (2021/05): Allow derived classes to access.
     void doDeferred(const Settings::Object::State &);
     void doLoad(const Settings::Object::State &);
     void doSave(Settings::Object::State &) const;
 
+private:
     void receiveEvent(const Event::Object *);
 
     bool periodEventPaused;

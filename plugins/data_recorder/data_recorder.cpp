@@ -625,7 +625,7 @@ void DataRecorder::Panel::execute(void)
 
             size_t n = 0;
             token.type = SYNC;
-            token.size = channels.size() * sizeof(double);
+            token.size = nChan.load() * sizeof(double);
             for (RT::List<Channel>::iterator i = channels.begin(), end = channels.end(); i != end; ++i)
                 if (i->block) {
                     const rtxi::Vector<double>& data_block = i->block->getValue(i->type, i->index);
