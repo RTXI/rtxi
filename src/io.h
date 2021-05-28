@@ -25,6 +25,7 @@
 #include <settings.h>
 #include <string>
 #include <vector>
+#include <rtxi_vector.h>
 
 //! Connection Oriented Classes
 /*!
@@ -245,7 +246,7 @@ public:
      * \param index The channel's index.
      * \return The value of the channel.
      */
-    virtual double getValue(flags_t type,size_t index) const;
+    virtual const rtxi::Vector<double>& getValue(flags_t type,size_t index) const;
 
     /*!
      * Get the value of the specified input channel.
@@ -253,7 +254,7 @@ public:
      * \param index The input channel's index.
      * \return The value of the specified input channel.
      */
-    double input(size_t index) const;
+    const rtxi::Vector<double>& input(size_t index) const;
     /*!
      * Get the value of the specified output channel.
      *
@@ -262,7 +263,7 @@ public:
      *
      * \sa IO::Block::output()
      */
-    double output(size_t index) const;
+    const rtxi::Vector<double>& output(size_t index) const;
 
 protected:
 
@@ -275,8 +276,15 @@ protected:
      *
      * \sa IO::Block::output()
      */
-    double &output(size_t index);
+    rtxi::Vector<double>& output(size_t index);
 
+    /*************************************************************
+     * yogi exists because "double &output(size_t n)" has to     *
+     *   return a reference to something if n >= outputs.size(). *
+     *************************************************************/
+
+    static rtxi::Vector<double> yogi;
+    
 private:
 
     struct input_t;
@@ -293,13 +301,6 @@ private:
     static Mutex mutex;
     static void connect(Block *,size_t,Block *,size_t);
     static void disconnect(Block *,size_t,Block *,size_t);
-
-    /*************************************************************
-     * yogi exists because "double &output(size_t n)" has to     *
-     *   return a reference to something if n >= outputs.size(). *
-     *************************************************************/
-
-    static double yogi;
 
     struct link_t
     {
@@ -318,7 +319,7 @@ private:
     {
         std::string name;
         std::string description;
-        double value;
+        rtxi::Vector<double> value;
         std::list<struct link_t> links;
     };
 

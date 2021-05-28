@@ -24,6 +24,7 @@
 #include <algorithm>
 #include <sstream>
 #include <string>
+#include <iostream> 
 
 Mutex IO::Block::mutex = Mutex(Mutex::RECURSIVE);
 
@@ -57,7 +58,7 @@ IO::Block::Block(std::string n,IO::channel_t *channel,size_t size):name(n)
             {
                 outputs[out].name = channel[i].name;
                 outputs[out].description = channel[i].description;
-                outputs[out++].value = 0.0;
+                outputs[out++].value = rtxi::Vector<double>();// fills with 0
             }
 
     IO::Connector::getInstance()->insertBlock(this);
@@ -106,36 +107,46 @@ std::string IO::Block::getDescription(IO::flags_t type,size_t n) const
     return "";
 }
 
-double IO::Block::getValue(IO::flags_t type,size_t n) const
+const rtxi::Vector<double>& IO::Block::getValue(IO::flags_t type,size_t n) const
 {
     if (type & INPUT)
         return input(n);
     if (type & OUTPUT)
         return output(n);
-    return 0.0;
+    return yogi = 0.0;
 }
 
-double IO::Block::input(size_t n) const
+const rtxi::Vector<double>& IO::Block::input(size_t n) const
 {
     if (unlikely(n >= inputs.size()))
-        return 0.0;
+        return yogi = 0.0;
 
-    double v = 0.0;
-    for (std::list<struct link_t>::const_iterator i = inputs[n].links.begin(),end = inputs[n].links.end(); i != end; ++i)
-        v += i->block->output(i->channel);
-    return v;
+    // double v = 0.0;
+    // for (std::list<struct link_t>::const_iterator i = inputs[n].links.begin(),end = inputs[n].links.end(); i != end; ++i)
+    //     v += i->block->output(i->channel);
+
+    // TODO(mbolus): Make sure maintainers/users are ok with this change.
+    // Previous behavior was to add together inputs if multiple linked to inputs[n] (commented above)
+    // With vectors, these different linked values could have different dimensions so addition is not viable.
+    // Instead, taking first in list.
+    if (inputs[n].links.size()) {
+        auto i = inputs[n].links.begin();
+        return i->block->output(i->channel);
+    } else {
+        return yogi = 0.0;
+    }
 }
 
-double IO::Block::output(size_t n) const
+const rtxi::Vector<double>& IO::Block::output(size_t n) const
 {
     if (unlikely(n >= outputs.size()))
-        return 0.0;
+        return yogi = 0.0;
     return outputs[n].value;
 }
 
-double IO::Block::yogi = 0.0;
+rtxi::Vector<double> IO::Block::yogi = 0.0;
 
-double &IO::Block::output(size_t n)
+rtxi::Vector<double>& IO::Block::output(size_t n)
 {
 
     /*********************************************************
