@@ -17,7 +17,7 @@ module_installer_la_LDFLAGS = -module -avoid-version
 
 module_installer_la_SOURCES = \
 		rtxi_wizard.h \
-		rtxi_wizard.cpp \
+		rtxi_wizard.cpp
 nodist_module_installer_la_SOURCES = \
 		moc_rtxi_wizard.cpp
 
