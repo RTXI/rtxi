@@ -158,8 +158,8 @@ void RTXIWizard::Panel::cloneModule(void)
     QProgressDialog *progress =  new QProgressDialog("Installing plugin", "Cancel", 0, 4, this);
     progress->setWindowModality(Qt::WindowModal);
     progress->show();
-    QApplication::processEvents();
     progress->setLabelText("Configuring...");
+    QApplication::processEvents();
 
 	QString name;
 	switch(button_mode)
@@ -227,9 +227,7 @@ void RTXIWizard::Panel::cloneModule(void)
         progress->setValue(2);
         QApplication::processEvents();
 
-		// Add module to list of already installed modules.
-		modules[name].installed = true;
-
+		
 		// Define the commands to be run.
 		QString make_cmd = "/usr/bin/make -j2 -C " + modules[name].location.toString();
 		QString make_install_cmd;
@@ -246,6 +244,8 @@ void RTXIWizard::Panel::cloneModule(void)
 
 		if (!make->waitForFinished())
 		{
+            QMessageBox *errmessage;
+            errmessage->critical(0, "Error", "Could not compile plugin. Email help@rtxi.org for assistance");
 			std::cout<<"make -C "<<path<<" failed"<<std::endl;
 		}
 		else
@@ -258,7 +258,11 @@ void RTXIWizard::Panel::cloneModule(void)
 			{
 				std::cout<<"make install -C"<<path<<" failed..."<<std::endl;
 				std::cout<<"...despite make -C succeeding."<<std::endl;
-			}
+			} else {
+                // Add module to list of already installed modules.
+                modules[name].installed = true;
+            }
+
 		}
 
         progress->setValue(4);
@@ -267,7 +271,7 @@ void RTXIWizard::Panel::cloneModule(void)
 		make_install->close();
 	}
 
-	// Re-enable buttons only after compilation is done. Otherwise you get race
+    // Re-enable buttons only after compilation is done. Otherwise you get race
 	// conditions if buttons are pressed before modules are done compiling.
 	cloneButton->setEnabled(true);
 	rebuildListWidgets();
