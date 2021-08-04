@@ -154,6 +154,13 @@ void RTXIWizard::Panel::cloneModule(void)
 	availableListWidget->setDisabled(true);
 	installedListWidget->setDisabled(true);
 
+    // Let the user know that RTXI is installing the plugin.
+    QProgressDialog *progress =  new QProgressDialog("Installing plugin", "Cancel", 0, 4, this);
+    progress->setWindowModality(Qt::WindowModal);
+    progress->show();
+    QApplication::processEvents();
+    progress->setLabelText("Configuring...");
+
 	QString name;
 	switch(button_mode)
 	{
@@ -183,6 +190,9 @@ void RTXIWizard::Panel::cloneModule(void)
 
 	int error = 0;
 
+    progress->setLabelText("Downloading extension...");
+    progress->setValue(1);
+    QApplication::processEvents();
 	// If the repo already exists, pull from master. If not, clone it.
 	if ( (QDir(modules[name].location.toString())).exists() )
 	{
@@ -213,6 +223,10 @@ void RTXIWizard::Panel::cloneModule(void)
 	}
 	else
 	{
+        progress->setLabelText("Building...");
+        progress->setValue(2);
+        QApplication::processEvents();
+
 		// Add module to list of already installed modules.
 		modules[name].installed = true;
 
@@ -220,6 +234,7 @@ void RTXIWizard::Panel::cloneModule(void)
 		QString make_cmd = "/usr/bin/make -j2 -C " + modules[name].location.toString();
 		QString make_install_cmd;
 
+        
 		// If RTXI is root, no need to call gksudo.
 		if (getuid()) make_install_cmd = "gksudo \"/usr/bin/make install -C" + modules[name].location.toString() + "\"";
 		else make_install_cmd = "/usr/bin/make install -C" + modules[name].location.toString();
@@ -235,6 +250,9 @@ void RTXIWizard::Panel::cloneModule(void)
 		}
 		else
 		{
+            progress->setLabelText("Installing binaries...");
+            progress->setValue(3);
+            QApplication::processEvents();
 			make_install->start(make_install_cmd);
 			if (!make_install->waitForFinished())
 			{
@@ -243,6 +261,8 @@ void RTXIWizard::Panel::cloneModule(void)
 			}
 		}
 
+        progress->setValue(4);
+        QApplication::processEvents();
 		make->close();
 		make_install->close();
 	}
@@ -430,8 +450,14 @@ void RTXIWizard::Panel::rebuildListWidgets(void)
  */
 void RTXIWizard::Panel::installFromString( std::string module_name )
 {
+    QProcess *make = new QProcess();
+	QProcess *make_install = new QProcess();
+
+    // Let the user know that RTXI is installing the plugin.
+    QProgressDialog *progress =  new QProgressDialog("Installing plugin", "Cancel", 0, 5, this);
+    progress->setWindowModality(Qt::WindowModal);
+    progress->setLabelText("Configuring...");
 	std::string cloneUrl = "https://github.com/rtxi/" + module_name;
-	// QString locationPrefix = "/usr/local/lib/rtxi_modules/";
 
 	std::string locationUrl;
 	if (getuid())
@@ -446,6 +472,8 @@ void RTXIWizard::Panel::installFromString( std::string module_name )
 	const char *url = cloneUrl.c_str();
 	const char *path = locationUrl.c_str();
 
+    progress->setLabelText("Downloading Plugin...");
+    progress->setValue(1);
 	int error = 0;
 	if ( (QDir(QString::fromStdString(locationUrl))).exists() )
 	{
@@ -482,10 +510,12 @@ void RTXIWizard::Panel::installFromString( std::string module_name )
 	if (getuid()) make_install_cmd = "gksudo \"/usr/bin/make install -C" + QString::fromStdString(locationUrl) + "\"";
 	else make_install_cmd = "/usr/bin/make install -C" + QString::fromStdString(locationUrl);
 
-	QProcess *make = new QProcess();
-	QProcess *make_install = new QProcess();
+    progress->setLabelText("Building...");
+    progress->setValue(2);
 	make->start(make_cmd);
 
+    progress->setLabelText("Installing extension...");
+    progress->setValue(3);
 	if (!make->waitForFinished())
 	{
 		std::cout<<"make -C "<<path<<" failed"<<std::endl;
@@ -502,7 +532,7 @@ void RTXIWizard::Panel::installFromString( std::string module_name )
 
 	make->close();
 	make_install->close();
-
+    progress->setValue(5);
 }
 
 int RTXIWizard::Panel::printGitError(int error) {
