@@ -313,7 +313,6 @@ void RTXIWizard::Panel::getReadme(void)
 {
 	availableListWidget->setDisabled(true);
 	installedListWidget->setDisabled(true);
-
 	QListWidget *parent = qobject_cast<QListWidget*>(sender());
 	QString name = parent->currentItem()->text();
 
@@ -322,6 +321,7 @@ void RTXIWizard::Panel::getReadme(void)
 	{
 		reply = qnam.get(QNetworkRequest(modules[name].readme_url));
 		QObject::connect(reply, SIGNAL(finished()), this, SLOT(parseReadme()));
+
 	}
 	else
 	{
@@ -348,8 +348,7 @@ void RTXIWizard::Panel::parseReadme(void)
 	mkd_cleanup(m);
 	QString fileText = QString::fromStdString(html);
 
-	// QObject::disconnect(reply, SIGNAL(finished()), this, SLOT(parseReadme(void)));
-	reply->deleteLater();
+	//reply->deleteLater();
 	reply = 0;
 
 	switch(button_mode)
