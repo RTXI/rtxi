@@ -57,10 +57,10 @@ RTDEPS_LIBS = -L$(pkglibdir)/libs
 
 AM_CPPFLAGS = -DEXEC_PREFIX=\"$(exec_prefix)\" -DPREFIX=\"$(prefix)\" \
             $(QT_CXXFLAGS) $(RTOS_CPPFLAGS) $(BOOST_CPPFLAGS) 
-AM_CXXFLAGS = -pipe $(QT_CXXFLAGS) $(CPPUTEST_CXXFLAGS)
+AM_CXXFLAGS = -pipe $(QT_CXXFLAGS)
 AM_LDFLAGS = $(QT_LIBS) $(GSL_LIBS) $(RTOS_LDFLAGS) \
             $(BOOST_LDFLAGS)
-AM_CFLAGS = $(AM_CXXFLAGS) $(CPPUTEST_CFLAGS)
+AM_CFLAGS = $(AM_CXXFLAGS)
 
 if DEBUG
   AM_CXXFLAGS += -Wall -Wextra -g -std=c++11 -fPIC
