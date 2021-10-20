@@ -6,6 +6,7 @@
 *.swp
 *.pyc
 *~
+*.log
 compile
 
 #Ignore user specific rtxi files
