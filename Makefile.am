@@ -21,7 +21,7 @@
 # Include the Autoconf scripts in subdir m4/
 ACLOCAL_AMFLAGS = -I m4
 
-SUBDIRS      = libs src plugins scripts res
+SUBDIRS      = libs src plugins scripts res tests
 
 ACLOCAL_DIST = 
 

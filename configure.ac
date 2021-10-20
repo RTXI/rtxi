@@ -48,9 +48,11 @@ AC_SUBST(GSL_LIBS)
 # Quiet ar warning about default modifiers
 AC_SUBST(AR_FLAGS, [cr])
 
-rtos=""
+# check for boost libraries
+AX_BOOST_BASE([1.54],,[AC_MSG_ERROR([libboost version 2.54 or great is required])])
+AX_BOOST_UNIT_TEST_FRAMEWORK
 
-AX_BOOST_BASE([1.54],,[AC_MSG_ERROR([libboost version 1.54 or great is required])])
+rtos=""
 
 AC_ARG_ENABLE(xenomai,
   [  --enable-xenomai        build the Xenomai interface],
@@ -149,6 +151,7 @@ plugins/performance_measurement/Makefile
 plugins/system_control/Makefile
 plugins/userprefs/Makefile
 plugins/module_installer/Makefile
+tests/Makefile
 ])
 
 dnl Generate config.status and launch it
