@@ -39,7 +39,6 @@ static inline void PRINT_BACKTRACE(void)
 
 template<typename... Args>
 void ERROR_MSG(const std::string& errmsg, Args... args){
-    //fprintf(stderr, errmsg, args);
     auto size = errmsg.size();
     std::unique_ptr<char[]> buf = std::make_unique<char[]>(size);
     std::snprintf(buf.get(), size, errmsg.c_str(), args ...);
