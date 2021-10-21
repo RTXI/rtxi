@@ -180,7 +180,7 @@ void Oscilloscope::Panel::receiveEvent(const ::Event::Object *event)
                             showTab(0);
                         }
                     else
-                        DEBUG_MSG("Oscilloscope::Panel::receiveEvent : removed block never inserted\n");
+                        std::cout << "Oscilloscope::Panel::receiveEvent : removed block never inserted\n";
                 }
         }
     else if (event->getName() == Event::RT_POSTPERIOD_EVENT)
