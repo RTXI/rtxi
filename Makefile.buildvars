@@ -63,9 +63,9 @@ AM_LDFLAGS = $(QT_LIBS) $(GSL_LIBS) $(RTOS_LDFLAGS) \
 AM_CFLAGS = $(AM_CXXFLAGS)
 
 if DEBUG
-  AM_CXXFLAGS += -Wall -Wextra -g -std=c++11 -fPIC
+  AM_CXXFLAGS += -Wall -Wextra -g -fPIC -DBOOST_STACKTRACE_USE_BACKTRACE
   AM_CPPFLAGS += -DDEBUG
 else
-  AM_CXXFLAGS += -w -O3 -std=c++11 -fPIC
+  AM_CXXFLAGS += -w -O3 -fPIC
   AM_CPPFLAGS += -w
 endif

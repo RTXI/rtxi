@@ -164,11 +164,11 @@ static void signal_handler(int signum)
     /* Only handler handle signals in the parent */
     if (getpid() != parentThread) return;
 
-    DEBUG_MSG("signal_handler : signal received\n");
+    //DEBUG_MSG("signal_handler : signal received\n");
     PRINT_BACKTRACE();
 
     if (count++) _exit(-EFAULT);
 
-    DEBUG_MSG("signal_handler : finished\n");
+    //DEBUG_MSG("signal_handler : finished\n");
     exit(0);
 }

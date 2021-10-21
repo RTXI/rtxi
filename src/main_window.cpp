@@ -341,7 +341,7 @@ void MainWindow::saveSettings(void)
                     QMessageBox::Yes | QMessageBox::Default,
                     QMessageBox::No | QMessageBox::Escape) != QMessageBox::Yes)
                 {
-                    DEBUG_MSG ("MainWindow::saveSettings : canceled overwrite\n");
+                    //DEBUG_MSG ("MainWindow::saveSettings : canceled overwrite\n");
                     return;
                 }
             Settings::Manager::getInstance()->save(filename.toStdString());

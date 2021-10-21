@@ -20,8 +20,12 @@
 #ifndef DEBUG_H
 #define DEBUG_H
 
+#include <boost/stacktrace.hpp>
 #include <execinfo.h>
-#include <stdio.h>
+//#include <stdio.h>
+#include <iostream>
+#include <string>
+#include <memory>
 
 #if XENOMAI
 #include <rtdk.h>
@@ -30,28 +34,16 @@
 //! Prints a backtrace to standard error.
 static inline void PRINT_BACKTRACE(void)
 {
-    int buffer_size;
-    void *buffer[256];
-
-    buffer_size = backtrace(buffer,sizeof(buffer));
-    fprintf(stderr,"Backtrace:\n");
-    backtrace_symbols_fd(buffer,buffer_size,2);
+    std::cerr << boost::stacktrace::stacktrace();
 }
 
-#define ERROR_MSG(fmt,args...) do { fprintf(stderr,"%s:%d:",__FILE__,__LINE__); fprintf(stderr,fmt,## args); } while(0)
-
-#ifdef DEBUG
-
-#define DEBUG_MSG(fmt,args...) do { fprintf(stderr,"%s:%d:",__FILE__,__LINE__); fprintf(stderr,fmt,## args); } while(0)
-
-#else /* !DEBUG */
-
-//! Prints debug messages to standard error.
-/*!
- * When compiled without the DEBUG flag messages compile out.
- */
-#define DEBUG_MSG(fmt,args...) do { ; } while(0)
-
-#endif /* DEBUG */
+template<typename... Args>
+void ERROR_MSG(const std::string& errmsg, Args... args){
+    auto size = errmsg.size();
+    std::unique_ptr<char[]> buf = std::make_unique<char[]>(size);
+    std::snprintf(buf.get(), size, errmsg.c_str(), args ...);
+    std::cerr << std::string(buf.get(), buf.get() + size) << "\n";
+    std::cerr << boost::stacktrace::stacktrace();
+}
 
 #endif /* DEBUG_H */

@@ -453,8 +453,8 @@ void Settings::Manager::acquireID(Settings::Object *object,Settings::Object::ID 
                     object->id = id;
                     return;
                 }
-            else
-                DEBUG_MSG("Settings::Manager::acquireID : requested ID in use\n");
+            //else
+                //DEBUG_MSG("Settings::Manager::acquireID : requested ID in use\n");
         }
 
     /***********************************************************

@@ -41,7 +41,7 @@ CmdLine::CmdLine(void):done(false), mutex(Mutex::RECURSIVE)
                     char cmd[size];
 
                     read(fds[0],cmd,size);
-                    DEBUG_MSG("executing : \"%s\"\n",cmd);
+                    //DEBUG_MSG("executing : \"%s\"\n",cmd);
                     retval = system(cmd);
 
                     write(fdm[1],&retval,sizeof(retval));
