@@ -43,10 +43,10 @@ apt-get -y upgrade
 apt-get -y install \
 	autotools-dev automake libtool kernel-package gcc g++ gdb fakeroot \
 	crash kexec-tools makedumpfile kernel-wedge libncurses5-dev libelf-dev \
-	binutils-dev libgsl0-dev libboost-dev git vim lshw stress \
+	binutils-dev libgsl0-dev libboost-dev libboost-test-dev git vim lshw stress \
 	libqt5svg5-dev libqt5opengl5 libqt5gui5 libqt5core5a libqt5xml5 \
 	qt5-default qttools5-dev-tools qttools5-dev libhdf5-dev \
-	libmarkdown2-dev cmake flex bison libssl-dev pkgconf
+	libmarkdown2-dev cmake flex bison libssl-dev pkgconf autoconf-archive
 #apt-get -y build-dep linux
 echo "-----> Package dependencies installed."
 
