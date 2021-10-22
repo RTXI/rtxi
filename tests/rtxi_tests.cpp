@@ -17,14 +17,22 @@
 
  */
 
+
 #define BOOST_TEST_MODULE rtxi_test 
-#include "boost/test/included/unit_test.hpp"
+#define BOOST_TEST_DYN_LINK
+#include "boost/test/unit_test.hpp"
+#include <rt.h>
 
+struct SystemFixture {
+    SystemFixture() {system = RT::System::getInstance();}
+    ~SystemFixture() { };
+    RT::System* system;
+};
 
-BOOST_AUTO_TEST_CASE(first_test) 
+BOOST_FIXTURE_TEST_CASE(instance, SystemFixture) 
 {
-  int i = 1;
-  BOOST_TEST(i); 
-  BOOST_TEST(i == 2); 
+    int i = 1;
+    BOOST_TEST(i); 
+    BOOST_TEST(i == 2); 
 }
 
