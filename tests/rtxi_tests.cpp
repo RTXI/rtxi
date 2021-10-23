@@ -22,17 +22,46 @@
 #define BOOST_TEST_DYN_LINK
 #include "boost/test/unit_test.hpp"
 #include <rt.h>
+#include <event.h>
 
 struct SystemFixture {
-    SystemFixture() {system = RT::System::getInstance();}
+    SystemFixture() {dummySystem = RT::System::getInstance();}
     ~SystemFixture() { };
-    RT::System* system;
+    RT::System* dummySystem;
+    RT::Thread* dummyThread;
+    RT::Event* dummyEvent;
 };
 
-BOOST_FIXTURE_TEST_CASE(instance, SystemFixture) 
+BOOST_FIXTURE_TEST_SUITE(System, SystemFixture);
+
+BOOST_AUTO_TEST_CASE(instance) 
 {
-    int i = 1;
-    BOOST_TEST(i); 
-    BOOST_TEST(i == 2); 
+    BOOST_CHECK_EQUAL(dummySystem, RT::System::getInstance());
+    BOOST_CHECK_EQUAL(dummySystem, dummySystem->getInstance());
 }
+
+BOOST_AUTO_TEST_CASE(period)
+{
+    auto period = dummySystem->getPeriod();
+    BOOST_CHECK_EQUAL(period, dummySystem->getPeriod());
+    dummySystem->setPeriod(1000000ll);
+    BOOST_CHECK_EQUAL(1000000ll, dummySystem->getPeriod());
+}
+
+BOOST_AUTO_TEST_CASE(forEachThread)
+{
+    BOOST_CHECK(true);          
+}
+
+BOOST_AUTO_TEST_CASE(forEachDevice)
+{
+    BOOST_CHECK(true);
+}
+
+BOOST_AUTO_TESET_CASE(postEvent)
+{
+    BOOST_CHECK(true);
+}
+
+BOOST_AUTO_TEST_SUITE_END()
 

@@ -41,11 +41,11 @@ int RT::OS::initiate(void)
     /*
      * I want users to be very much aware that they aren't running in realtime.
      */
-    ERROR_MSG("***WARNING*** You are using the POSIX compatibility layer, RTXI is NOT running in realtime!!!\n");
+    std::cout << "***WARNING*** You are using the POSIX compatibility layer, RTXI is NOT running in realtime!!!\n";
 
     if (mlockall(MCL_CURRENT | MCL_FUTURE))
         {
-            ERROR_MSG("RT::OS(POSIX)::initiate : failed to lock memory.\n");
+            std::cout << "RT::OS(POSIX)::initiate : failed to lock memory.\n";
 
             /*
              * I don't think it is necessary to return an error in this case.
