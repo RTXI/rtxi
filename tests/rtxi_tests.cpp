@@ -21,17 +21,50 @@
 #define BOOST_TEST_MODULE rtxi_test 
 #define BOOST_TEST_DYN_LINK
 #include "boost/test/unit_test.hpp"
-#include <rt.h>
-#include <event.h>
+#include "rtxi_tests.h"
 
-struct SystemFixture {
-    SystemFixture() {dummySystem = RT::System::getInstance();}
-    ~SystemFixture() { };
-    RT::System* dummySystem;
-    RT::Thread* dummyThread;
-    RT::Event* dummyEvent;
-};
+// Event::Manager testing suite
+BOOST_FIXTURE_TEST_SUITE(eventManager, eventManagerFixture);
 
+BOOST_AUTO_TEST_CASE(instance)
+{
+    BOOST_CHECK_EQUAL(dummyEventManager, Event::Manager::getInstance());
+    BOOST_CHECK_EQUAL(dummyEventManager, dummyEventManager->getInstance());
+}
+
+BOOST_AUTO_TEST_CASE(postEvent)
+{
+    BOOST_CHECK(true);
+}
+
+BOOST_AUTO_TEST_CASE(postEventRT)
+{
+    BOOST_CHECK(true);
+}
+
+BOOST_AUTO_TEST_SUITE_END();
+
+// Event::Handler testing suite
+BOOST_FIXTURE_TEST_SUITE(eventHandler, eventHandlerFixture);
+
+BOOST_AUTO_TEST_CASE(receiveEvent)
+{
+    BOOST_CHECK(true);
+}
+
+BOOST_AUTO_TEST_SUITE_END();
+
+// Event::HandlerRT testing suite
+BOOST_FIXTURE_TEST_SUITE(eventHandlerRT, eventHandlerRTFixture);
+
+BOOST_AUTO_TEST_CASE(receiveEventRT)
+{
+    BOOST_CHECK(true);
+}
+
+BOOST_AUTO_TEST_SUITE_END();
+
+// RT::System testing suite
 BOOST_FIXTURE_TEST_SUITE(System, SystemFixture);
 
 BOOST_AUTO_TEST_CASE(instance) 
@@ -58,10 +91,11 @@ BOOST_AUTO_TEST_CASE(forEachDevice)
     BOOST_CHECK(true);
 }
 
-BOOST_AUTO_TESET_CASE(postEvent)
+BOOST_AUTO_TEST_CASE(postEvent)
 {
     BOOST_CHECK(true);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
+
 
