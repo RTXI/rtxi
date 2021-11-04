@@ -17,7 +17,8 @@ TESTS = rtxiTests
 check_PROGRAMS = rtxiTests
 
 bin_PROGRAMS = rtxiTests 
-rtxiTests_SOURCES = rtxiTests.cpp
+pkginclude_HEADERS = rtxiTests.h
+rtxiTests_SOURCES = rtxiTests.cpp 
 
 OBJS = $(top_srcdir)/src/rt.o \
        $(top_srcdir)/src/event.o \
@@ -42,5 +43,5 @@ endif
 
 #rtxi_tests_LDADD = ${BOOST_UNIT_TEST_FRAMEWORK_LIB} $(OBJS)
 #rtxi_tests_LDADD = $(top_builddir)/src/func.o
-rtxiTests_LDADD = -lgtest -lgmock
+rtxiTests_LDADD = -lgtest -lgmock $(OBJS)
 

@@ -17,37 +17,22 @@
 
  */
 
-#include <rtxiTests.h>
+#ifndef RTXITESTS_H
+#define RTXITESTS_H
+
+#include <gtest/gtest.h>
 #include <rt.h>
 #include <event.h>
 
-TEST_F(SystemTest, getInstance)
+// Define all fixtures for testing purposes
+class SystemTest : public ::testing::Test
 {
-    system = RT::System::getInstance();
-    EXPECT_EQ(system, RT::System::getInstance());
-    EXPECT_EQ(system, system->getInstance());
-}
+protected:
+    SystemTest() { }
+    ~SystemTest() { }
 
-TEST_F(SystemTest, getPeriod)
-{
-    // Check with default period
-    auto period = 1000000ll;
-    ASSERT_EQ(period, system->getPeriod());
-}
+    RT::System *system;
+};
 
-TEST_F(SystemTest, setPeriod)
-{
-    auto period = 1000000ll;
-    int retval = system->setPeriod(period);
-    ASSERT_EQ(retval, 0);
-    EXPECT_EQ(period, system->getPeriod());
-    period += period;
-    retval = system->setPeriod(period);
-    EXPECT_EQ(period, system->getPeriod());
-}
 
-int main(int argc, char *argv[])
-{
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
-}
+#endif
