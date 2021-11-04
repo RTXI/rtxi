@@ -21,6 +21,7 @@
 #define SYSTEM_TESTS_H
 
 #include <gtest/gtest.h>
+#include <gmock/gmock.h>
 #include <rt.h>
 #include <event.h>
 
@@ -34,5 +35,10 @@ protected:
     RT::System *system;
 };
 
+class MockRTEvent : public RT::Event
+{
+public:
+    MOCK_METHOD(int, callback, (), (override));
+};
 
 #endif

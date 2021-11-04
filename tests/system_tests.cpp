@@ -46,4 +46,10 @@ TEST_F(SystemTest, setPeriod)
     EXPECT_EQ(period, system->getPeriod());
 }
 
+TEST_F(SystemTest, postEvent)
+{
+    MockRTEvent *event;
+    EXPECT_CALL(*event, callback()).Times(::testing::AtLeast(1));
+    bool result = system->postEvent(event);
+}
 
