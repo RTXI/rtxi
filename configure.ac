@@ -36,6 +36,8 @@ AC_CHECK_LIB([dl],[dlopen])
 AC_CHECK_LIB([m],[cos])
 AC_CHECK_LIB([gslcblas],[cblas_dgemm])
 AC_CHECK_LIB([gsl],[gsl_blas_dgemm])
+#AX_CXX_CHECK_LIB(gtest, [testing::InitGoogleTest])
+#AX_CXX_CHECK_LIB(gmock, [testing::MOCK_METHOD])
 GSL_LIBS=$LIBS
 AC_SUBST(GSL_LIBS)
 
@@ -50,8 +52,9 @@ AC_SUBST(GSL_LIBS)
 AC_SUBST(AR_FLAGS, [cr])
 
 # check for boost libraries
-AX_BOOST_BASE([1.54],,[AC_MSG_ERROR([libboost version 2.54 or great is required])])
-AX_BOOST_UNIT_TEST_FRAMEWORK
+# AX_BOOST_BASE([1.54],,[AC_MSG_ERROR([libboost version 2.54 or great is required])])
+# AX_BOOST_UNIT_TEST_FRAMEWORK
+
 
 rtos=""
 
