@@ -17,12 +17,33 @@
 
  */
 
+#include <system_tests.h>
 #include <rt.h>
 #include <event.h>
-#include <system_tests.h>
 
-int main(int argc, char *argv[])
+TEST_F(SystemTest, getInstance)
 {
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
+    system = RT::System::getInstance();
+    EXPECT_EQ(system, RT::System::getInstance());
+    EXPECT_EQ(system, system->getInstance());
 }
+
+TEST_F(SystemTest, getPeriod)
+{
+    // Check with default period
+    auto period = 1000000ll;
+    ASSERT_EQ(period, system->getPeriod());
+}
+
+TEST_F(SystemTest, setPeriod)
+{
+    auto period = 1000000ll;
+    int retval = system->setPeriod(period);
+    ASSERT_EQ(retval, 0);
+    EXPECT_EQ(period, system->getPeriod());
+    period += period;
+    retval = system->setPeriod(period);
+    EXPECT_EQ(period, system->getPeriod());
+}
+
+

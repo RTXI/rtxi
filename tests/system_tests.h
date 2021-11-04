@@ -17,8 +17,8 @@
 
  */
 
-#ifndef RTXITESTS_H
-#define RTXITESTS_H
+#ifndef SYSTEM_TESTS_H
+#define SYSTEM_TESTS_H
 
 #include <gtest/gtest.h>
 #include <rt.h>
