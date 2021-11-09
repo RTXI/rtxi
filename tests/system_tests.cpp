@@ -21,6 +21,8 @@
 #include <gmock/gmock.h>
 #include <rt.h>
 #include <event.h>
+#include <chrono>
+#include <thread>
 
 TEST_F(SystemTest, getInstance)
 {
@@ -55,3 +57,27 @@ TEST_F(SystemTest, postEvent)
     EXPECT_EQ(retval, 0);
 }
 
+TEST_F(SystemTest, forEachDevice)
+{
+    // foreachDevice function is unused by RT::System. This test 
+    // however checks whether RT::System is looping through all
+    // devices. Useful for RT Thread testing.
+    using namespace std::chrono_literals;
+    MockRTDevice device;
+    device.setActive(true);
+    EXPECT_CALL(device, read()).Times(::testing::AtLeast(10));
+    EXPECT_CALL(device, write()).Times(::testing::AtLeast(10));
+    std::this_thread::sleep_for(1s);
+}
+
+TEST_F(SystemTest, forEachThread)
+{ 
+    // foreachThread function is unused by RT::System. This test 
+    // however checks whether RT::System is looping through all
+    // threads. Useful for RT Thread testign
+    using namespace std::chrono_literals;
+    MockRTThread thread;
+    thread.setActive(true);
+    EXPECT_CALL(thread, execute()).Times(::testing::AtLeast(10));
+    std::this_thread::sleep_for(1s);
+}

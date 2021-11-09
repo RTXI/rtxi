@@ -41,4 +41,18 @@ public:
     MOCK_METHOD(int, callback, (), (override));
 };
 
+class MockRTDevice : public RT::Device
+{
+public:
+    MOCK_METHOD(void, read, (), (override));
+    MOCK_METHOD(void, write, (), (override));
+};
+
+class MockRTThread : public RT::Thread
+{
+public:
+    MOCK_METHOD(unsigned long, getPriority, (), (const));
+    MOCK_METHOD(void, execute, (), (override));
+};
+
 #endif

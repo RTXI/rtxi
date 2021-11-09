@@ -17,8 +17,6 @@
 
  */
 
-#include <rt.h>
-#include <event.h>
 #include <system_tests.h>
 
 int main(int argc, char *argv[])
