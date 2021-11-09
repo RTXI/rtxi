@@ -18,6 +18,7 @@
  */
 
 #include <system_tests.h>
+#include <gmock/gmock.h>
 #include <rt.h>
 #include <event.h>
 
@@ -48,8 +49,9 @@ TEST_F(SystemTest, setPeriod)
 
 TEST_F(SystemTest, postEvent)
 {
-    MockRTEvent *event;
-    EXPECT_CALL(*event, callback()).Times(::testing::AtLeast(1));
-    bool result = system->postEvent(event);
+    MockRTEvent event;
+    EXPECT_CALL(event, callback()).Times(::testing::AtLeast(1));
+    auto retval = system->postEvent(&event, true);
+    EXPECT_EQ(retval, 0);
 }
 

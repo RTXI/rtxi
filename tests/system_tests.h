@@ -34,7 +34,7 @@ protected:
 
     RT::System *system;
 };
-
+   
 class MockRTEvent : public RT::Event
 {
 public:
