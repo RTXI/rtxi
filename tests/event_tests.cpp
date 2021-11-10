@@ -17,7 +17,7 @@
 
  */
 
-#include <eventmanager_tests.h>
+#include <event_tests.h>
 #include <gmock/gmock.h>
 #include <event.h>
 
