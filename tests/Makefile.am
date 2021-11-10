@@ -3,22 +3,17 @@
 
 include $(top_srcdir)/Makefile.buildvars
 
-#TESTS = rtxi_tests
-#check_PROGRAMS = rtxi_tests
-
-#bin_PROGRAMS = rtxi_tests
-
-# pkginclude_HEADERS = rtxi_tests.h
-# rtxi_tests_SOURCES = rtxi_tests.cpp
-# pkginclude_HEADERS = rtxiTests.h
-
-
 TESTS = rtxiTests 
 check_PROGRAMS = rtxiTests
 
 bin_PROGRAMS = rtxiTests 
-pkginclude_HEADERS = system_tests.h
-rtxiTests_SOURCES = rtxiTests.cpp system_tests.cpp
+
+pkginclude_HEADERS = system_tests.h \
+                     eventmanager_tests.h
+
+rtxiTests_SOURCES = rtxiTests.cpp \
+                    system_tests.cpp \
+                    eventmanager_tests.cpp
 
 OBJS = $(top_srcdir)/src/rt.o \
        $(top_srcdir)/src/event.o \
@@ -41,7 +36,5 @@ else
 OBJS += $(top_srcdir)/src/rt_os-posix.o 
 endif
 
-#rtxi_tests_LDADD = ${BOOST_UNIT_TEST_FRAMEWORK_LIB} $(OBJS)
-#rtxi_tests_LDADD = $(top_builddir)/src/func.o
 rtxiTests_LDADD = -lgtest -lgmock $(OBJS)
 

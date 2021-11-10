@@ -20,7 +20,6 @@
 #include <system_tests.h>
 #include <gmock/gmock.h>
 #include <rt.h>
-#include <event.h>
 #include <chrono>
 #include <thread>
 
@@ -74,7 +73,7 @@ TEST_F(SystemTest, forEachThread)
 { 
     // foreachThread function is unused by RT::System. This test 
     // however checks whether RT::System is looping through all
-    // threads. Useful for RT Thread testign
+    // threads. Useful for RT Thread testing.
     using namespace std::chrono_literals;
     MockRTThread thread;
     thread.setActive(true);
