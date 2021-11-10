@@ -17,45 +17,39 @@
 
  */
 
-#ifndef EVENT_TESTS_H
-#define EVENT_TESTS_H
+#ifndef IO_TESTS_H
+#define IO_TESTS_H
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
-#include <rt.h>
-#include <event.h>
+#include <io.h>
 
-class EventManagerTest : public ::testing::Test
+class IOBlockTest : public ::testing::Test
 {
+public:
+    std::string defaultBlockName;
+    IO::channel_t defaultChannel_t;
+    std::string defaultChannelName;
+    std::string defaultChannelDescription;
+    IO::flags_t defaultChannelFlags;
+
 protected:
-    EventManagerTest() { }
-    ~EventManagerTest() { }
+    IOBlockTest() 
+    {
+        defaultBlockName = "DEFAULT:BLOCK:NAME";
+        defaultChannelName = "DEFAULT:CHANNEL:NAME";
+        defaultChannelDescription = "DEFAULT:CHANNEL:DESCRIPTION";
+        defaultChannelFlags = IO::INPUT;
+        defaultChannel_t = { 
+            defaultChannelName,
+            defaultChannelDescription,
+            defaultChannelFlags,
+        };
+        block = new IO::Block(defaultBlockName, &defaultChannel_t, (size_t) 1);
+    }
+    ~IOBlockTest() { }
 
-    Event::Manager *event_manager;
-    RT::System *system;
-};
-
-class MockEventObject : public Event::Object
-{
-public:
-    MockEventObject(const char * n) : Event::Object(n) { }
-    ~MockEventObject() { }
-
-    MOCK_METHOD(void *, getParam, (const char *), (const));
-    MOCK_METHOD(void, setParam, (const char *, void *), (const));
-    MOCK_METHOD(const char *, getName, (), (const));
-};
-
-class MockEventHandler : public Event::Handler
-{
-public:
-    MOCK_METHOD(void, receiveEvent, (const Event::Object *), (override));
-};
-
-class MockEventRTHandler : public Event::RTHandler
-{
-public:
-    MOCK_METHOD(void, receiveEventRT, (const Event::Object *), (override));
+    IO::Block *block;
 };
 
 #endif
