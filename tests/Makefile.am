@@ -9,11 +9,11 @@ check_PROGRAMS = rtxiTests
 bin_PROGRAMS = rtxiTests 
 
 pkginclude_HEADERS = system_tests.h \
-                     eventmanager_tests.h
+                     event_tests.h
 
 rtxiTests_SOURCES = rtxiTests.cpp \
                     system_tests.cpp \
-                    eventmanager_tests.cpp
+                    event_tests.cpp
 
 OBJS = $(top_srcdir)/src/rt.o \
        $(top_srcdir)/src/event.o \

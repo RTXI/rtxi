@@ -35,6 +35,7 @@ TEST_F(EventManagerTest, postEvent)
     MockEventObject event_object(TEST_EVENT_NAME);
     MockEventHandler event_handler;
     MockEventRTHandler event_rthandler;
+    // Make sure post event always calls the right handler
     EXPECT_CALL(event_handler, receiveEvent).Times(::testing::AtLeast(1));
     EXPECT_CALL(event_rthandler, receiveEventRT).Times(::testing::Exactly(0));
     event_manager->postEvent(&event_object);
@@ -47,6 +48,7 @@ TEST_F(EventManagerTest, postEventRT)
     MockEventObject event_object(TEST_EVENT_NAME);
     MockEventRTHandler event_rthandler;
     MockEventHandler event_handler;
+    // Make sure post event always calls the right handler
     EXPECT_CALL(event_rthandler, receiveEventRT).Times(::testing::AtLeast(1));
     EXPECT_CALL(event_handler, receiveEvent).Times(::testing::Exactly(0));
     event_manager->postEventRT(&event_object);
