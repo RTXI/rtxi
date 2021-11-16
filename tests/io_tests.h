@@ -28,24 +28,31 @@ class IOBlockTest : public ::testing::Test
 {
 public:
     std::string defaultBlockName;
-    IO::channel_t defaultChannel_t;
-    std::string defaultChannelName;
-    std::string defaultChannelDescription;
-    IO::flags_t defaultChannelFlags;
+    std::string defaultInputChannelName = "CHANNEL INPUT";
+    std::string defaultInputChannelDescription = "DEFAULT INPUT CHANNEL DESCRIPTION";
+    std::string defaultOutputChannelName = "CHANNEL OUTPUT";
+    std::string defaultOutputChannelDescription = "DEFAULT OUTPUT CHANNEL DESCRIPTION";
+    IO::channel_t *defaultChannelList;
 
 protected:
     IOBlockTest() 
     {
+        // Generates a default block with single input and output channel
         defaultBlockName = "DEFAULT:BLOCK:NAME";
-        defaultChannelName = "DEFAULT:CHANNEL:NAME";
-        defaultChannelDescription = "DEFAULT:CHANNEL:DESCRIPTION";
-        defaultChannelFlags = IO::INPUT;
-        defaultChannel_t = { 
-            defaultChannelName,
-            defaultChannelDescription,
-            defaultChannelFlags,
+        IO::channel_t defaultInputChannel_t = { 
+            defaultInputChannelName,
+            defaultInputChannelDescription,
+            IO::INPUT
         };
-        block = new IO::Block(defaultBlockName, &defaultChannel_t, (size_t) 1);
+        IO::channel_t defaultOutputChannel_t = {
+            defaultOutputChannelName,
+            defaultOutputChannelDescription,
+            IO::OUTPUT
+        };
+        defaultChannelList = new IO::channel_t[2];
+        defaultChannelList[0] = defaultInputChannel_t;
+        defaultChannelList[1] = defaultOutputChannel_t;
+        block = new IO::Block(defaultBlockName, defaultChannelList, (size_t) 2);
     }
     ~IOBlockTest() { }
 

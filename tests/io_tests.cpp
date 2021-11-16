@@ -22,5 +22,48 @@
 
 TEST_F(IOBlockTest, getName)
 {
+    // TODO: rename functions to differentiate between getting block name and channel name
     ASSERT_EQ(block->getName(), defaultBlockName);
+    ASSERT_EQ(block->getName(IO::INPUT, (size_t) 0), defaultInputChannelName);
+    ASSERT_EQ(block->getName(IO::OUTPUT, (size_t) 0), defaultOutputChannelName);
 }
+
+TEST_F(IOBlockTest, getCount)
+{
+    ASSERT_EQ(block->getCount(IO::INPUT), (size_t) 1);
+    ASSERT_EQ(block->getCount(IO::OUTPUT), (size_t) 1);
+}
+
+TEST_F(IOBlockTest, getDescription)
+{
+    ASSERT_EQ(block->getDescription(IO::INPUT, (size_t) 0), defaultInputChannelDescription);
+    ASSERT_EQ(block->getDescription(IO::OUTPUT, (size_t) 0), defaultOutputChannelDescription);
+}
+
+TEST_F(IOBlockTest, getValue)
+{
+    double defaultval = 0.0;
+    EXPECT_DOUBLE_EQ(defaultval, block->getValue(IO::INPUT, (size_t) 1));
+    EXPECT_DOUBLE_EQ(defaultval, block->getValue(IO::OUTPUT, (size_t) 1));
+}
+
+TEST_F(IOBlockTest, input)
+{
+    double defaultval = 0.0;
+    for(size_t i = 0; i < 2; ++i)
+    {
+        EXPECT_DOUBLE_EQ(defaultval, block->input(i));
+    }
+}
+
+TEST_F(IOBlockTest, output)
+{
+    double defaultval = 0.0;
+    // TODO: Maybe reduce output function to single definition instead of two
+    const IO::Block *const_block = block;
+    for(size_t i = 0; i < 2; ++i)
+    {
+        EXPECT_DOUBLE_EQ(defaultval, const_block->output(i));
+    }
+}
+
