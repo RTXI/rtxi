@@ -18,6 +18,7 @@
  */
 
 #include <io.h>
+#include <iostream>
 #include <io_tests.h>
 
 TEST_F(IOBlockTest, getName)
@@ -66,4 +67,66 @@ TEST_F(IOBlockTest, output)
         EXPECT_DOUBLE_EQ(defaultval, const_block->output(i));
     }
 }
+
+TEST_F(IOConnectorTest, getInstance)
+{
+    connector = IO::Connector::getInstance();
+    EXPECT_EQ(connector, IO::Connector::getInstance());
+    EXPECT_EQ(connector, connector->getInstance());
+}
+
+// checking connections is very involved so could not separate into 
+// individual functin tests. Here we test connect, disconnect, and connected
+TEST_F(IOConnectorTest, connections)
+{
+    // Have to build example blocks to test connector
+    IO::channel_t outputchannel = {
+        "OUTPUT CHANNEL",
+        "OUTPUT CHANNEL DESCRIPTION",
+        IO::OUTPUT
+    };
+    IO::channel_t inputchannel = {
+        "INPUT CHANNEL",
+        "INPUT CHANNEL DESCRIPTION",
+        IO::INPUT
+    };
+    IO::channel_t *block1channels = new IO::channel_t[2];
+    block1channels[0] = outputchannel;
+    block1channels[1] = inputchannel;
+    IO::channel_t *block2channels = new IO::channel_t[2];
+    block2channels[0] = outputchannel;
+    block2channels[1] = inputchannel;
+    MockIOBlock *block1 = new MockIOBlock("block1", block1channels, (size_t) 2);
+    MockIOBlock *block2 = new MockIOBlock("block2", block2channels, (size_t) 2);
+
+    // It is not possible to mock static functions, therefore we must use
+    // other means to figure out whether two blocks are connected
+    //EXPECT_CALL(*block1, connect).Times(::testing::AtLeast(2));
+    //EXPECT_CALL(*block2, connect).Times(::testing::AtLeast(2));
+
+    // connect and disconnect between two blocks
+    EXPECT_FALSE(connector->connected(block1, (size_t) 0, block2, (size_t) 0)); 
+    EXPECT_FALSE(connector->connected(block2, (size_t) 0, block1, (size_t) 0)); 
+    connector->connect(block1, (size_t) 0, block2, (size_t) 0);
+    connector->connect(block2, (size_t) 0, block1, (size_t) 0);
+    EXPECT_TRUE(connector->connected(block1, (size_t) 0, block2, (size_t) 0));
+    EXPECT_TRUE(connector->connected(block2, (size_t) 0, block1, (size_t) 0)); 
+    connector->disconnect(block1, (size_t) 0, block2, (size_t) 0);
+    connector->disconnect(block2, (size_t) 0, block1, (size_t) 0);
+    EXPECT_FALSE(connector->connected(block1, (size_t) 0, block2, (size_t) 0)); 
+    EXPECT_FALSE(connector->connected(block2, (size_t) 0, block1, (size_t) 0)); 
+    delete block1;
+    delete block2;
+}
+
+TEST_F(IOConnectorTest, foreachBlock)
+{
+
+}
+
+TEST_F(IOConnectorTest, foreachConnection)
+{
+
+}
+
 

@@ -23,6 +23,8 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 #include <io.h>
+#include <string>
+#include <vector>
 
 class IOBlockTest : public ::testing::Test
 {
@@ -58,5 +60,33 @@ protected:
 
     IO::Block *block;
 };
+
+class MockIOBlock : public IO::Block
+{
+public:
+    MockIOBlock(std::string n, IO::channel_t * l, size_t c) : IO::Block(n, l, c) { }
+    ~MockIOBlock() { }
+
+    MOCK_METHOD(std::string, getName, (), (const));
+    MOCK_METHOD(size_t, getCount, (IO::flags_t), (const, override));
+    MOCK_METHOD(std::string, getName, (IO::flags_t, size_t), (const, override));
+    MOCK_METHOD(std::string, getDescription, (IO::flags_t, size_t), (const, override));
+    MOCK_METHOD(double, getValue, (IO::flags_t, size_t), (const, override));
+    MOCK_METHOD(double, input, (size_t), (const));
+    MOCK_METHOD(double, output, (size_t), (const));
+    //MOCK_METHOD(void, connect, (IO::Block *, size_t, IO::Block *, size_t), (const));
+    //MOCK_METHOD(void, disconnect, (IO::Block *, size_t, IO::Block *, size_t), (const));
+};
+
+class IOConnectorTest : public ::testing::Test
+{
+protected:
+    IOConnectorTest() { }
+    ~IOConnectorTest() { }
+
+    IO::channel_t *defaultChannelList;
+    IO::Connector *connector;
+};
+
 
 #endif

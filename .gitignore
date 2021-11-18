@@ -8,6 +8,9 @@
 *~
 *.log
 *.bak
+*.gcda
+*.gcno
+*.info
 compile
 
 #Ignore user specific rtxi files

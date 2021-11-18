@@ -63,7 +63,7 @@ AM_LDFLAGS = -ldl -lbacktrace $(BOOST_LDFLAGS) $(QT_LIBS) $(GSL_LIBS) $(RTOS_LDF
 AM_CFLAGS = $(AM_CXXFLAGS)
 
 if DEBUG
-  AM_CXXFLAGS += -Wall -Wextra -g -fPIC 
+  AM_CXXFLAGS += -Wall -Wextra -g -fPIC -fprofile-arcs -ftest-coverage
   AM_CPPFLAGS += -DDEBUG
 else
   AM_CXXFLAGS += -w -O3 -fPIC
