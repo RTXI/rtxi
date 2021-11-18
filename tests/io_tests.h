@@ -76,6 +76,7 @@ public:
     MOCK_METHOD(double, output, (size_t), (const));
     //MOCK_METHOD(void, connect, (IO::Block *, size_t, IO::Block *, size_t), (const));
     //MOCK_METHOD(void, disconnect, (IO::Block *, size_t, IO::Block *, size_t), (const));
+    void changeOutput(double val) { IO::Block::output((size_t) 0) = val; }
 };
 
 class IOConnectorTest : public ::testing::Test

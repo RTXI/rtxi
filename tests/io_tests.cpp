@@ -55,6 +55,39 @@ TEST_F(IOBlockTest, input)
     {
         EXPECT_DOUBLE_EQ(defaultval, block->input(i));
     }
+
+    // Have to build example blocks to test connector
+    IO::channel_t outputchannel = {
+        "OUTPUT CHANNEL",
+        "OUTPUT CHANNEL DESCRIPTION",
+        IO::OUTPUT
+    };
+    IO::channel_t inputchannel = {
+        "INPUT CHANNEL",
+        "INPUT CHANNEL DESCRIPTION",
+        IO::INPUT
+    };
+
+    IO::channel_t *block1channels = new IO::channel_t[2];
+    block1channels[0] = outputchannel;
+    block1channels[1] = inputchannel;
+    IO::channel_t *block2channels = new IO::channel_t[2];
+    block2channels[0] = outputchannel;
+    block2channels[1] = inputchannel;
+    MockIOBlock *block1 = new MockIOBlock("block1", block1channels, (size_t) 2);
+    MockIOBlock *block2 = new MockIOBlock("block2", block2channels, (size_t) 2);
+
+    // Now connect the test blocks to default block input channel
+    IO::Connector::getInstance()->connect(block1, (size_t) 0, block, (size_t) 0);
+    IO::Connector::getInstance()->connect(block2, (size_t) 0, block, (size_t) 0);
+    block1->changeOutput(1.0);
+    EXPECT_DOUBLE_EQ(1.0, block->input(0));
+    block2->changeOutput(1.0);
+    EXPECT_DOUBLE_EQ(2.0, block->input(0));
+
+    // please cleanup after yourself
+    delete block1;
+    delete block2;
 }
 
 TEST_F(IOBlockTest, output)
