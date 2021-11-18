@@ -132,10 +132,8 @@ TEST_F(IOConnectorTest, connections)
     MockIOBlock *block1 = new MockIOBlock("block1", block1channels, (size_t) 2);
     MockIOBlock *block2 = new MockIOBlock("block2", block2channels, (size_t) 2);
 
-    // It is not possible to mock static functions, therefore we must use
+    // NOTE: It is not possible to mock static functions, therefore we must use
     // other means to figure out whether two blocks are connected
-    //EXPECT_CALL(*block1, connect).Times(::testing::AtLeast(2));
-    //EXPECT_CALL(*block2, connect).Times(::testing::AtLeast(2));
 
     // connect and disconnect between two blocks
     EXPECT_FALSE(connector->connected(block1, (size_t) 0, block2, (size_t) 0)); 
@@ -152,11 +150,14 @@ TEST_F(IOConnectorTest, connections)
     delete block2;
 }
 
+// The cases where foreachBlock function is used are too unique (only used a handful of times)
+// TODO: Create a test case for IO::Connector::foreachBlock
 TEST_F(IOConnectorTest, foreachBlock)
 {
-
 }
 
+// the cases where foreachConnection function is used are too unique (only used a handful of times)
+// TODO: create a test case for IO::Connector::foreachConnection
 TEST_F(IOConnectorTest, foreachConnection)
 {
 

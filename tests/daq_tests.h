@@ -22,39 +22,42 @@
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <string>
+#include <list>
 #include <daq.h>
+#include <io.h>
 
-class DAQManagerTest : public ::testing::Test
+class MockDAQDriver : public DAQ::Driver
 {
-protected:
-    DAQManagerTest() { }
-    ~DAQManagerTest() { }
+public:
+    MockDAQDriver(const std::string name) : DAQ::Driver(name) { }
+    ~MockDAQDriver() { }
 
-    DAQ::Manager *daq_manager;
-}
+    MOCK_METHOD(DAQ::Device *, createDevice, (const std::list<std::string>&), (override));
+};
 
 class MockDAQDevice : public DAQ::Device
 {
 public:
-    MockDAQDevice(std::string a, IO::Channel_t *b) : DAQ::Device(a, b) { }
+    MockDAQDevice(std::string a, IO::channel_t *b, size_t s) : DAQ::Device(a, b, s) { }
     ~MockDAQDevice() { }
 
-    MOCK_METHOD(size_t, getChannelCount, (DAQ::type_t), (override));
-    MOCK_METHOD(bool, getChannelActive, (DAQ::type_t,DAQ::index_t), (override));
-    MOCK_METHOD(int, setChannelActive, (DAQ::type_t,DAQ::index_t,bool state), (override));
-    MOCK_METHOD(size_t, getAnalogRangeCount, (DAQ::type_t,DAQ::index_t), (override));
-    MOCK_METHOD(size_t, getAnalogReferenceCount, (DAQ::type_t,DAQ::index_t), (override));
-    MOCK_METHOD(size_t, getAnalogUnitsCount, (DAQ::type_t,DAQ::index_t), (override));
-    MOCK_METHOD(size_t, getAnalogDownsample, (DAQ::type_t,DAQ::index_t), (override));
-    MOCK_METHOD(std::string, getAnalogRangeString, (DAQ::type_t,DAQ::index_t,DAQ::index_t), (override));
-    MOCK_METHOD(std::string, getAnalogReferenceString, (DAQ::type_t,DAQ::index_t,DAQ::index_t), (override));
-    MOCK_METHOD(std::string, getAnalogUnitsString, (DAQ::type_t,DAQ::index_t,DAQ::index_t), (override));
-    MOCK_METHOD(double, getAnalogGain, (DAQ::type_t,DAQ::index_t), (override));
-    MOCK_METHOD(double, getAnalogZeroOffset, (DAQ::type_t,DAQ::index_t), (override));
-    MOCK_METHOD(DAQ::index_t, getAnalogRange, (DAQ::type_t,DAQ::index_t), (override));
-    MOCK_METHOD(DAQ::index_t, getAnalogReference, (DAQ::type_t,DAQ::index_t), (override));
-    MOCK_METHOD(DAQ::index_t, getAnalogUnits, (DAQ::type_t,DAQ::index_t), (override));
-    MOCK_METHOD(DAQ::index_t, getAnalogOffsetUnits, (DAQ::type_t,DAQ::index_t), (override));
+    MOCK_METHOD(size_t, getChannelCount, (DAQ::type_t), (const, override));
+    MOCK_METHOD(bool, getChannelActive, (DAQ::type_t,DAQ::index_t), (const, override));
+    MOCK_METHOD(int, setChannelActive, (DAQ::type_t,DAQ::index_t,bool), (override));
+    MOCK_METHOD(size_t, getAnalogRangeCount, (DAQ::type_t,DAQ::index_t), (const, override));
+    MOCK_METHOD(size_t, getAnalogReferenceCount, (DAQ::type_t,DAQ::index_t), (const, override));
+    MOCK_METHOD(size_t, getAnalogUnitsCount, (DAQ::type_t,DAQ::index_t), (const, override));
+    MOCK_METHOD(size_t, getAnalogDownsample, (DAQ::type_t,DAQ::index_t), (const, override));
+    MOCK_METHOD(std::string, getAnalogRangeString, (DAQ::type_t,DAQ::index_t,DAQ::index_t), (const, override));
+    MOCK_METHOD(std::string, getAnalogReferenceString, (DAQ::type_t,DAQ::index_t,DAQ::index_t), (const, override));
+    MOCK_METHOD(std::string, getAnalogUnitsString, (DAQ::type_t,DAQ::index_t,DAQ::index_t), (const, override));
+    MOCK_METHOD(double, getAnalogGain, (DAQ::type_t,DAQ::index_t), (const, override));
+    MOCK_METHOD(double, getAnalogZeroOffset, (DAQ::type_t,DAQ::index_t), (const, override));
+    MOCK_METHOD(DAQ::index_t, getAnalogRange, (DAQ::type_t,DAQ::index_t), (const, override));
+    MOCK_METHOD(DAQ::index_t, getAnalogReference, (DAQ::type_t,DAQ::index_t), (const, override));
+    MOCK_METHOD(DAQ::index_t, getAnalogUnits, (DAQ::type_t,DAQ::index_t), (const, override));
+    MOCK_METHOD(DAQ::index_t, getAnalogOffsetUnits, (DAQ::type_t,DAQ::index_t), (const, override));
     MOCK_METHOD(int, setAnalogGain, (DAQ::type_t,DAQ::index_t,double), (override));
     MOCK_METHOD(int, setAnalogRange, (DAQ::type_t,DAQ::index_t,DAQ::index_t), (override));
     MOCK_METHOD(int, setAnalogZeroOffset, (DAQ::type_t,DAQ::index_t,double), (override));
@@ -63,13 +66,25 @@ public:
     MOCK_METHOD(int, setAnalogOffsetUnits, (DAQ::type_t,DAQ::index_t,DAQ::index_t), (override));
     MOCK_METHOD(int, setAnalogDownsample, (DAQ::type_t, DAQ::index_t, size_t), (override));
     MOCK_METHOD(int, setAnalogCounter, (DAQ::type_t, DAQ::index_t), (override));
-    MOCK_METHOD(int, setAnalogCalibrationValue, (DAQ::type_t,DAQ::index_t, double value), (override));
-    MOCK_METHOD(double, getAnalogCalibrationValue, (DAQ::type_t,DAQ::index_t), (override));
+    MOCK_METHOD(int, setAnalogCalibrationValue, (DAQ::type_t,DAQ::index_t, double), (override));
+    MOCK_METHOD(double, getAnalogCalibrationValue, (DAQ::type_t,DAQ::index_t), (const, override));
     MOCK_METHOD(int, setAnalogCalibrationActive, (DAQ::type_t,DAQ::index_t, bool), (override));
-    MOCK_METHOD(bool, getAnalogCalibrationActive, (DAQ::type_t,DAQ::index_t), (override));
-    MOCK_METHOD(bool, getAnalogCalibrationState, (DAQ::type_t,DAQ::index_t), (override));
-    MOCK_METHOD(DAQ::direction_t, getDigitalDirection, (DAQ::index_t), (override));
+    MOCK_METHOD(bool, getAnalogCalibrationActive, (DAQ::type_t,DAQ::index_t), (const, override));
+    MOCK_METHOD(bool, getAnalogCalibrationState, (DAQ::type_t,DAQ::index_t), (const, override));
+    MOCK_METHOD(DAQ::direction_t, getDigitalDirection, (DAQ::index_t), (const, override));
     MOCK_METHOD(int, setDigitalDirection, (DAQ::index_t,DAQ::direction_t), (override));
-}
+};
+
+class DAQManagerTest : public ::testing::Test
+{
+public:
+    //void *callback(MockDAQDevice *device) { size_t temp = device->getChannelCount(DAQ::AI)};
+
+protected:
+    DAQManagerTest() { daq_manager = DAQ::Manager::getInstance(); }
+    ~DAQManagerTest() { }
+
+    DAQ::Manager *daq_manager;
+};
 
 #endif
