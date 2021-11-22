@@ -54,6 +54,7 @@ TEST_F(DAQManagerTest, foreachDevice)
     };
     std::vector<IO::channel_t *> channelList;
     std::vector<MockDAQDevice *> deviceList;
+
     for(int i = 0; i < 5; ++i)
     {
         channelList.push_back(new IO::channel_t[2]);
@@ -61,7 +62,13 @@ TEST_F(DAQManagerTest, foreachDevice)
         channelList[i][1] = outputchannel;
         deviceList.push_back(new MockDAQDevice(std::to_string(i), channelList[i], (size_t) 2));
     }
-    //daq_manager->foreachDevice(callback, 
+
+    for(auto it = deviceList.begin(); it != deviceList.end(); ++it)
+    {
+        EXPECT_CALL(**it, getChannelCount).Times(::testing::AtLeast(1));
+    }
+
+    daq_manager->foreachDevice(callback, &deviceList);
     for(int i = 0; i < 5; ++i)
     {
         delete[] channelList[i];

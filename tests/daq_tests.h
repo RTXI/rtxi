@@ -78,7 +78,7 @@ public:
 class DAQManagerTest : public ::testing::Test
 {
 public:
-    //void *callback(MockDAQDevice *device) { size_t temp = device->getChannelCount(DAQ::AI)};
+    static void callback(DAQ::Device *device, void * par) { size_t temp = device->getChannelCount(DAQ::AI); }
 
 protected:
     DAQManagerTest() { daq_manager = DAQ::Manager::getInstance(); }
