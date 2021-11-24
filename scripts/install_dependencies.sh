@@ -45,28 +45,28 @@ apt-get -y install \
 	crash kexec-tools makedumpfile kernel-wedge libncurses5-dev libelf-dev \
 	binutils-dev libgsl0-dev libboost-dev git vim lshw stress \
 	libqt5svg5-dev libqt5opengl5 libqt5gui5 libqt5core5a libqt5xml5 \
-	qt5-default qttools5-dev-tools qttools5-dev libhdf5-dev \
-	libmarkdown2-dev cmake flex bison libssl-dev pkgconf
+	qt5-default qttools5-dev-tools qttools5-dev libhdf5-dev libgit2-dev \
+	libmarkdown2-dev cmake flex bison libssl-dev pkgconf autoconf-archive
 #apt-get -y build-dep linux
 echo "-----> Package dependencies installed."
 
 # Install libgit2 from source
-echo "-----> Installing libgit2..."
-cd $DEPS
-if [ ! -d "libgit2" ]; then
-	git clone https://github.com/libgit2/libgit2.git && cd libgit2
-	mkdir build && cd build
-	cmake .. -DCURL=OFF
-	cmake --build . --target install
-	ldconfig
-else
-	cd libgit2
-	rm -rf build && mkdir build && cd build
-	cmake .. -DCURL=OFF
-	cmake --build . --target install
-	ldconfig
-fi
-echo "-----> libgit2 installed."
+# echo "-----> Installing libgit2..."
+# cd $DEPS
+# if [ ! -d "libgit2" ]; then
+# 	git clone https://github.com/libgit2/libgit2.git && cd libgit2
+# 	mkdir build && cd build
+# 	cmake .. -DCURL=OFF
+# 	cmake --build . --target install
+# 	ldconfig
+# else
+# 	cd libgit2
+# 	rm -rf build && mkdir build && cd build
+# 	cmake .. -DCURL=OFF
+# 	cmake --build . --target install
+# 	ldconfig
+# fi
+# echo "-----> libgit2 installed."
 
 # Install Qwt package if available in repos, compile if not.
 echo "-----> Installing qwt..."
