@@ -45,7 +45,7 @@ apt-get -y install \
 	crash kexec-tools makedumpfile kernel-wedge libncurses5-dev libelf-dev \
 	binutils-dev libgsl0-dev libboost-dev git vim lshw stress \
 	libqt5svg5-dev libqt5opengl5 libqt5gui5 libqt5core5a libqt5xml5 \
-	qt5-default qttools5-dev-tools qttools5-dev libhdf5-dev libgit2-dev \
+	qt5-default qttools5-dev-tools qttools5-dev libhdf5-dev libgit2-dev libqwt-qt5-dev \
 	libmarkdown2-dev cmake flex bison libssl-dev pkgconf autoconf-archive
 #apt-get -y build-dep linux
 echo "-----> Package dependencies installed."
@@ -69,18 +69,18 @@ echo "-----> Package dependencies installed."
 # echo "-----> libgit2 installed."
 
 # Install Qwt package if available in repos, compile if not.
-echo "-----> Installing qwt..."
-if [ $(apt-cache show libqwt-qt5-dev) > /dev/null ]; then 
-	apt-get -y install libqwt-qt5-dev
-else 
-	cd ${DEPS}
-	tar xf qwt-${QWT_VERSION}.tar.bz2
-	cd qwt-${QWT_VERSION}
-	qmake qwt.pro
-	make -sj`nproc`
-	make install
-	ldconfig
-fi 
-echo "-----> Qwt installed."
+# echo "-----> Installing qwt..."
+# if [ $(apt-cache show libqwt-qt5-dev) > /dev/null ]; then 
+# 	apt-get -y install libqwt-qt5-dev
+# else 
+# 	cd ${DEPS}
+# 	tar xf qwt-${QWT_VERSION}.tar.bz2
+# 	cd qwt-${QWT_VERSION}
+# 	qmake qwt.pro
+# 	make -sj`nproc`
+# 	make install
+# 	ldconfig
+# fi 
+# echo "-----> Qwt installed."
 
 echo "-----> Done."
