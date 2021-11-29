@@ -42,4 +42,12 @@ protected:
     Settings::Object *object;
 };
 
+class MockSettingsObject : public Settings::Object
+{
+public:
+    //MOCK_METHOD(Settings::Object::ID, getID, (), (const));
+    MOCK_METHOD(Settings::Object::State, save, (), (const));
+    MOCK_METHOD(void, load, (const State &), (const));
+    MOCK_METHOD(void, deferred, (const State &), (const));
+};
 #endif

@@ -18,6 +18,7 @@
  */
 
 #include <settings_tests.h>
+#include <typeinfo>
 
 TEST_F(SettingsObjectTest, getID)
 {
@@ -33,37 +34,76 @@ TEST_F(SettingsObjectTest, getID)
 
 TEST_F(SettingsObjectTest, save)
 {
+    // the Save Object is defined inside the Settings class, and without it being
+    // exposed to the user it doesn't make sense to test too much of it. 
+    // TODO: Perhaps move the save object to a public namespace? If so test and document it
+    object = new Settings::Object();
+    auto saveObject = object->save();
+    ASSERT_EQ(typeid(saveObject), typeid(Settings::Object::State));
 }
 
 TEST_F(SettingsObjectTest, load)
 {
+    // Unfortunately the Settings::Object class is tightly coupled with Settings::Manager, which
+    // means that it is not possible (in my view) to test these two classes individually without 
+    // changing the classes.
+    // TODO: Uncouple Settings::Object and Settings::Manager (remove friend keyword, build messages,
+    // etc.)
+
+    // // Define default values to save in settings state
+    // double testdouble = 100.0;
+    // std::string teststring = "teststring";
+    // int testint = 100;
+
+    // // Test the save and load of state information
+    // object = new Settings::Object();
+    // auto state = object->save();
+    // state.saveDouble("testdouble", testdouble);
+    // state.saveInteger("testinteger", testint);
+    // state.saveString("teststring", teststring);
+    // object->load(state);
+    // auto retstate = object->save();
+    // EXPECT_DOUBLE_EQ(retstate.loadDouble("testdouble"), testdouble);
+    // EXPECT_EQ(retstate.loadInteger("testinteger"), testint);
+    // EXPECT_EQ(retstate.loadString("string"), teststring);
 }
 
 TEST_F(SettingsObjectTest, deferred)
 {
-}
-
-TEST_F(SettingsObjectTest, stateClassFuncs)
-{
+    // NOTE: See the load test for SettingsObjectTest
 }
 
 TEST_F(SettingsManagerTest, getInstance)
 {
+    manager = Settings::Manager::getInstance();
+    ASSERT_EQ(manager, Settings::Manager::getInstance());
+    ASSERT_EQ(manager, manager->getInstance());
 }
 
 TEST_F(SettingsManagerTest, getObject)
 {
+    manager = Settings::Manager::getInstance();
+    // Objects are automatically registered to manager on creation
+    MockSettingsObject *objectList = new MockSettingsObject[5];    
+    for(int i = 0; i < 5; ++i)
+    {
+        ASSERT_EQ(objectList[i].getID(), manager->getObject(objectList[i].getID())->getID());
+    }
+    delete[] objectList; 
 }
 
 TEST_F(SettingsManagerTest, load)
 {
+    // TODO: Should test this with mock plugins
 }
 
 TEST_F(SettingsManagerTest, save)
 {
+    // TODO: should test this with mock plugins
 }
 
 TEST_F(SettingsManagerTest, foreachObject)
 {
+    // TODO: should test this with settings plugin
 }
 
