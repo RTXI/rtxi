@@ -12,14 +12,16 @@ pkginclude_HEADERS = system_tests.h \
                      event_tests.h \
                      io_tests.h \
                      daq_tests.h \
-                     settings_tests.h
+                     settings_tests.h \
+                     workspace_tests.h
 
 rtxiTests_SOURCES = rtxiTests.cpp \
                     system_tests.cpp \
                     event_tests.cpp \
                     io_tests.cpp \
                     daq_tests.cpp \
-                    settings_tests.cpp
+                    settings_tests.cpp \
+                    workspace_tests.cpp
 
 OBJS = $(top_srcdir)/src/rt.o \
        $(top_srcdir)/src/event.o \
