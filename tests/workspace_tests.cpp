@@ -21,36 +21,70 @@
 
 TEST_F(WorkspaceInstanceTest, getCount)
 {
+    for(int i = 0; i < 6; ++i)
+    {
+        ASSERT_EQ(instance->getCount(flagsList[i]), 1);
+    }
+    ASSERT_EQ(instance->getCount(flagsList[5]<<1), 0);
 }
 
 TEST_F(WorkspaceInstanceTest, getName)
 {
+    ASSERT_EQ(instance->getName(Workspace::INPUT, (size_t) 0), defaultInputChannelName);
+    ASSERT_EQ(instance->getName(Workspace::OUTPUT, (size_t) 0), defaultOutputChannelName);
+    ASSERT_EQ(instance->getName(Workspace::PARAMETER, (size_t) 0), defaultParameterChannelName);
+    ASSERT_EQ(instance->getName(Workspace::STATE, (size_t) 0), defaultStateChannelName);
+    ASSERT_EQ(instance->getName(Workspace::EVENT, (size_t) 0), defaultEventChannelName);
+    ASSERT_EQ(instance->getName(Workspace::COMMENT, (size_t) 0), defaultCommentChannelName);
 }
 
 TEST_F(WorkspaceInstanceTest, getDescription)
 {
+    ASSERT_EQ(instance->getDescription(Workspace::PARAMETER, (size_t) 0), defaultParameterChannelDescription);
+    ASSERT_EQ(instance->getDescription(Workspace::STATE, (size_t) 0), defaultStateChannelDescription);
+    ASSERT_EQ(instance->getDescription(Workspace::EVENT, (size_t) 0), defaultEventChannelDescription);
 }
 
 TEST_F(WorkspaceInstanceTest, getValue)
 {
-}
-
-TEST_F(WorkspaceInstanceTest, getValueString)
-{
+    ASSERT_EQ(instance->getValue(Workspace::EVENT, (size_t) 0), 0);
+    ASSERT_EQ(instance->getValue(Workspace::PARAMETER, (size_t) 0), 0);
+    ASSERT_EQ(instance->getValue(Workspace::STATE, (size_t) 0), 0);
 }
 
 TEST_F(WorkspaceInstanceTest, setValue)
 {
+    double temp = 10.0;
+    ASSERT_DOUBLE_EQ(instance->getValue(Workspace::PARAMETER, (size_t) 0), 0.0);
+    for(int i = 0; i < 3; ++i)
+    {
+        instance->setValue(0, temp*i);
+        ASSERT_DOUBLE_EQ(instance->getValue(Workspace::PARAMETER, (size_t) 0), temp*i);
+    }
+}
+
+TEST_F(WorkspaceInstanceTest, getValueString)
+{
+    ASSERT_EQ(instance->getValueString(Workspace::EVENT, (size_t) 0), "");
+    ASSERT_EQ(instance->getValueString(Workspace::PARAMETER, (size_t) 0), std::to_string(0));
+    ASSERT_EQ(instance->getValueString(Workspace::STATE, (size_t) 0), "");
 }
 
 TEST_F(WorkspaceInstanceTest, setComment)
 {
+    instance->setComment((size_t) 0, "test");
+    ASSERT_EQ(instance->getValueString(Workspace::COMMENT, (size_t) 0), "test");
 }
 
 TEST_F(WorkspaceManagerTest, getInstance)
 {
+    manager = Workspace::Manager::getInstance();
+    ASSERT_EQ(manager, Workspace::Manager::getInstance());
+    ASSERT_EQ(manager, manager->getInstance());
 }
 
+// This function is never used. Test creation delayed until completion of other tasks.
+// TODO: Create tests for foreachWorkspace function
 TEST_F(WorkspaceManagerTest, foreachWorkspace)
 {
 }

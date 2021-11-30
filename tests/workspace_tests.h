@@ -26,11 +26,70 @@
 
 class WorkspaceInstanceTest : public ::testing::Test
 {
+public:
+    std::string defaultWorkspaceName;
+    std::string defaultInputChannelName = "CHANNEL INPUT";
+    std::string defaultInputChannelDescription = "DEFAULT INPUT CHANNEL DESCRIPTION";
+    std::string defaultOutputChannelName = "CHANNEL OUTPUT";
+    std::string defaultOutputChannelDescription = "DEFAULT OUTPUT CHANNEL DESCRIPTION";
+    std::string defaultParameterChannelName = "DEFAULT PARAMETER CHANNEL NAME";
+    std::string defaultParameterChannelDescription = "DEFAULT PARAMETER CHANNEL DESCRIPTION";
+    std::string defaultStateChannelName = "DEFAULT STATE CHANNEL NAME";
+    std::string defaultStateChannelDescription = "DEFAULT STATE CHANNEL DESCRIPTION";
+    std::string defaultEventChannelName = "DEFAULT EVENT CHANNEL NAME";
+    std::string defaultEventChannelDescription = "DEFAULT EVENT CHANNEL DESCRIPTION";
+    std::string defaultCommentChannelName = "DEFAULT COMMENT CHANNEL NAME";
+    std::string defaultCommentChannelDescription = "DEFAULT COMMENT CHANNEL DESCRIPTION";
+    IO::channel_t *defaultChannelList;
+
 protected:
-    WorkspaceInstanceTest() { }
+    WorkspaceInstanceTest() { 
+        // Generates a default workspace with single input and output channel
+        defaultWorkspaceName = "DEFAULT:INSTANCE:NAME";
+        IO::channel_t defaultInputChannel_t = { 
+            defaultInputChannelName,
+            defaultInputChannelDescription,
+            Workspace::INPUT
+        };
+        IO::channel_t defaultOutputChannel_t = {
+            defaultOutputChannelName,
+            defaultOutputChannelDescription,
+            Workspace::OUTPUT
+        };
+        IO::channel_t defaultParameterChannel_t {
+            defaultParameterChannelName,
+            defaultParameterChannelDescription,
+            Workspace::PARAMETER
+        };
+        IO::channel_t defaultStateChannel_t {
+            defaultStateChannelName,
+            defaultStateChannelDescription,
+            Workspace::STATE
+        };
+        IO::channel_t defaultEventChannel_t {
+            defaultEventChannelName,
+            defaultEventChannelDescription,
+            Workspace::EVENT
+        };
+        IO::channel_t defaultCommentChannel_t {
+            defaultCommentChannelName,
+            defaultCommentChannelDescription,
+            Workspace::COMMENT
+        };
+        defaultChannelList = new IO::channel_t[6];
+        defaultChannelList[0] = defaultInputChannel_t;
+        defaultChannelList[1] = defaultOutputChannel_t;
+        defaultChannelList[2] = defaultParameterChannel_t;
+        defaultChannelList[3] = defaultStateChannel_t;
+        defaultChannelList[4] = defaultEventChannel_t;
+        defaultChannelList[5] = defaultCommentChannel_t;
+        instance = new Workspace::Instance(defaultWorkspaceName, defaultChannelList, (size_t) 6);
+    }
     ~WorkspaceInstanceTest() { }
 
     Workspace::Instance *instance;
+    std::vector<IO::flags_t> flagsList = {Workspace::INPUT, Workspace::OUTPUT, Workspace::PARAMETER,
+                                          Workspace::STATE, Workspace::EVENT, Workspace::COMMENT};
 };
 
 class WorkspaceManagerTest : public ::testing::Test
