@@ -6,14 +6,15 @@ include $(top_srcdir)/Makefile.buildvars
 TESTS = rtxiTests 
 check_PROGRAMS = rtxiTests
 
-bin_PROGRAMS = rtxiTests 
+bin_PROGRAMS = rtxiTests
 
 pkginclude_HEADERS = system_tests.h \
                      event_tests.h \
                      io_tests.h \
                      daq_tests.h \
                      settings_tests.h \
-                     workspace_tests.h
+                     workspace_tests.h \
+                     plugin_tests.h
 
 rtxiTests_SOURCES = rtxiTests.cpp \
                     system_tests.cpp \
@@ -21,7 +22,13 @@ rtxiTests_SOURCES = rtxiTests.cpp \
                     io_tests.cpp \
                     daq_tests.cpp \
                     settings_tests.cpp \
-                    workspace_tests.cpp
+                    workspace_tests.cpp \
+                    plugin_tests.cpp
+
+pkglib_LTLIBRARIES = fakePlugin.la
+fakePlugin_la_SOURCES = pluginFake.h pluginFake.cpp
+fakePlugin_la_LDFLAGS = -module
+
 
 OBJS = $(top_srcdir)/src/rt.o \
        $(top_srcdir)/src/event.o \
@@ -45,4 +52,4 @@ OBJS += $(top_srcdir)/src/rt_os-posix.o
 endif
 
 rtxiTests_LDADD = -lgtest -lgmock $(OBJS)
-
+# fakePlugin_la_LIBADD = fakePlugin.la
