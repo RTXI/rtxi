@@ -23,12 +23,7 @@
 class fakePlugin : public Plugin::Object
 {
 public:
-    fakePlugin() { }
+    fakePlugin() { std::cout << "Fake Plugin Initialized\n"; }
     ~fakePlugin() { }
-
-    extern "c" Plugin::Object * createRTXIPlugin(void) {
-        std::cout << "fake loaded\n";
-        return this
-    }
 };
 

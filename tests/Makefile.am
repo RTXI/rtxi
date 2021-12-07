@@ -25,11 +25,6 @@ rtxiTests_SOURCES = rtxiTests.cpp \
                     workspace_tests.cpp \
                     plugin_tests.cpp
 
-pkglib_LTLIBRARIES = fakePlugin.la
-fakePlugin_la_SOURCES = pluginFake.h pluginFake.cpp
-fakePlugin_la_LDFLAGS = -module
-
-
 OBJS = $(top_srcdir)/src/rt.o \
        $(top_srcdir)/src/event.o \
        $(top_srcdir)/src/atomic_fifo.o \
@@ -45,6 +40,23 @@ OBJS = $(top_srcdir)/src/rt.o \
        $(top_srcdir)/src/default_gui_model.o \
        $(top_srcdir)/src/moc_*.o 
 
+noinst_LTLIBRARIES = fakePlugin.la
+fakePlugin_la_SOURCES = fakePlugin.h fakePlugin.cpp
+
+# Sometimes in life you encounter the most complex and
+# crazy ways of doing the most simple tasks. Exibit A:
+# all i wanted to do was to generate a test plugin based
+# on Plugin::Object to run my tests on. It should not have
+# taken this long to figure out.
+fakePlugin_la_LDFLAGS = $(AM_LDFLAGS) \
+                        -module \
+                        -shared \
+                        -avoid-version \
+                        -export-dynamic \
+                        -rpath $(abs_builddir) \
+                        $(OBJS)
+
+
 if XENOMAI
 OBJS += $(top_srcdir)/src/rt_os-xenomai.o 
 else
@@ -52,4 +64,3 @@ OBJS += $(top_srcdir)/src/rt_os-posix.o
 endif
 
 rtxiTests_LDADD = -lgtest -lgmock $(OBJS)
-# fakePlugin_la_LIBADD = fakePlugin.la

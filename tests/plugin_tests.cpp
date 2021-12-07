@@ -19,6 +19,8 @@
 
 #include <plugin_tests.h>
 #include <QString>
+#include <typeinfo>
+#include <filesystem>
 #include <dlfcn.h>
 
 TEST_F(PluginObjectTest, getLibrary)
@@ -46,8 +48,12 @@ TEST_F(PluginManagerTest, load)
 {
     manager = Plugin::Manager::getInstance();
     Plugin::Object *object;
-    //object = manager->load(QString("./fakePlugin.la"));
-    void *handle = dlopen("fakePlugin.la",RTLD_GLOBAL|RTLD_NOW);
+    QString libraryPath(std::filesystem::current_path().string().c_str());
+    libraryPath += "/.libs/fakePlugin.so";
+    object = manager->load(libraryPath);
+    Plugin::Object *testobject = new Plugin::Object();
+    ASSERT_EQ(typeid(testobject).name(), typeid(object).name());
+    delete testobject;
 }
 
 TEST_F(PluginManagerTest, unload)

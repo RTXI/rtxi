@@ -18,9 +18,10 @@
  */
 
 #include <iostream>
+#include <fakePlugin.h>
 
-extern "C" Plugin::Object * fakePlugin::createRTXIPlugin(void)
+extern "C" Plugin::Object * createRTXIPlugin(void)
 {
-    std::cout << "fake loaded\n";
-    return this
+    return new fakePlugin(); 
 }
+
