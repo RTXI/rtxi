@@ -24,6 +24,6 @@ class fakePlugin : public Plugin::Object
 {
 public:
     fakePlugin() { std::cout << "Fake Plugin Initialized\n"; }
-    ~fakePlugin() { }
+    ~fakePlugin() { std::cout << "Fake Plugin Terminated\n"; }
 };
 

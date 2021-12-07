@@ -47,25 +47,39 @@ TEST_F(PluginManagerTest, getInstance)
 TEST_F(PluginManagerTest, load)
 {
     manager = Plugin::Manager::getInstance();
-    Plugin::Object *object;
+    Plugin::Object *plugin;
     QString libraryPath(std::filesystem::current_path().string().c_str());
     libraryPath += "/.libs/fakePlugin.so";
-    object = manager->load(libraryPath);
+    plugin = manager->load(libraryPath);
     Plugin::Object *testobject = new Plugin::Object();
-    ASSERT_EQ(typeid(testobject).name(), typeid(object).name());
+    ASSERT_EQ(typeid(testobject).name(), typeid(plugin).name());
     delete testobject;
 }
 
 TEST_F(PluginManagerTest, unload)
 {
     manager = Plugin::Manager::getInstance();
-    // TODO: create a test plugin for testing unload function in Plugin::Manager
+    MockPluginObject *plugin = new MockPluginObject();
+    EXPECT_CALL(*plugin, unload()).Times(::testing::AtLeast(1));
+    manager->unload(plugin);
+    delete plugin;
+    // Plugin::Manager uses QEvents from QT to tell itself that it needs to unload plugins... why?
+    // TODO: eliminate the need to use QEvents in this instance
 }
 
 TEST_F(PluginManagerTest, unloadAll)
 {
     manager = Plugin::Manager::getInstance();
-    // TODO: create a test plugin for testing unloadAll function in Plugin::Manager
+    MockPluginObject *plugins = new MockPluginObject[5];
+    for(int i = 0; i < 5; ++i)
+    {
+        EXPECT_CALL(plugins[i], unload()).Times(::testing::AtLeast(5));
+    }
+    manager->unloadAll();
+    // Manager class deletes the plugins in this function, but not in normal unload...
+    // sigh... so no need to delete. 
+    // TODO: Make both unload and unloadAll functions consistent.
+    //delete[] plugins;
 }
 
 TEST_F(PluginManagerTest, foreachPlugin)
