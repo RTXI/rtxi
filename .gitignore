@@ -6,6 +6,11 @@
 *.swp
 *.pyc
 *~
+*.log
+*.bak
+*.gcda
+*.gcno
+*.info
 compile
 
 #Ignore user specific rtxi files
@@ -21,6 +26,8 @@ src/rtxi
 scripts/init_rtxi
 scripts/rtxi_comedi
 scripts/rtxi_plugin_config
+workspace.set
+docs/*
 
 #Ignore files extracted from bundled tarballs
 deps/qwt-*/
@@ -42,9 +49,15 @@ depcomp
 install-sh
 libtool
 ltmain.sh
+test-driver
 m4/
 missing
 stamp-h?
 .deps/
 .dirstamp
 .libs/
+*.d
+
+
+#Ignore text editors
+.vscode
