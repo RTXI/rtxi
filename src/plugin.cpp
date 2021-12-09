@@ -156,6 +156,7 @@ void Plugin::Manager::removePlugin(Plugin::Object *plugin)
         }
 
     Mutex::Locker lock(&mutex);
+    // TODO: uhhh removing a plugin by calling plugin destructor, which calls this function... not good.
     pluginList.remove(plugin);
 }
 

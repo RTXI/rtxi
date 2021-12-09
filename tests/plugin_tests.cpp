@@ -22,6 +22,7 @@
 #include <typeinfo>
 #include <filesystem>
 #include <dlfcn.h>
+#include <fakePlugin.h>
 
 TEST_F(PluginObjectTest, getLibrary)
 {
@@ -59,27 +60,34 @@ TEST_F(PluginManagerTest, load)
 TEST_F(PluginManagerTest, unload)
 {
     manager = Plugin::Manager::getInstance();
-    MockPluginObject *plugin = new MockPluginObject();
-    EXPECT_CALL(*plugin, unload()).Times(::testing::AtLeast(1));
+    Plugin::Object *plugin;
+    QString libraryPath(std::filesystem::current_path().string().c_str());
+    libraryPath += "/.libs/fakePlugin.so";
+    plugin = manager->load(libraryPath);
     manager->unload(plugin);
     delete plugin;
     // Plugin::Manager uses QEvents from QT to tell itself that it needs to unload plugins... why?
     // TODO: eliminate the need to use QEvents in this instance
+    // TODO: How can I tell if a single plugin has been unloaded? answer: you can't *face palm*
 }
 
 TEST_F(PluginManagerTest, unloadAll)
 {
     manager = Plugin::Manager::getInstance();
-    MockPluginObject *plugins = new MockPluginObject[5];
-    for(int i = 0; i < 5; ++i)
+    Plugin::Object **plugins = new Plugin::Object*[5];
+    QString libraryPath(std::filesystem::current_path().string().c_str());
+    libraryPath += "/.libs/fakePlugin.so";
+    for (int i = 0; i < 5; ++i)
     {
-        EXPECT_CALL(plugins[i], unload()).Times(::testing::AtLeast(5));
+        plugins[i] = manager->load(libraryPath);
     }
-    manager->unloadAll();
-    // Manager class deletes the plugins in this function, but not in normal unload...
-    // sigh... so no need to delete. 
-    // TODO: Make both unload and unloadAll functions consistent.
-    //delete[] plugins;
+    manager->unloadAll(); 
+    // TODO: How do I know that all plugins have been unloaded? Answer: you can't? *face palm*
+    for (int i = 0; i < 5; ++i)
+    {
+        delete plugins[i];
+    }
+    delete[] plugins;
 }
 
 TEST_F(PluginManagerTest, foreachPlugin)

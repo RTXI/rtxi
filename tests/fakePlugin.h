@@ -17,13 +17,19 @@
 
  */
 
+#ifndef FAKE_PLUGIN_H
+#define FAKE_PLUGIN_H
+
 #include <plugin.h>
+#include <gmock/gmock.h>
+#include <iostream>
 
 // This is a fake plugin created in order to test Plugin Manager
-class fakePlugin : public Plugin::Object
+class fakePlugin : public Plugin::Object 
 {
 public:
-    fakePlugin() { std::cout << "Fake Plugin Initialized\n"; }
-    ~fakePlugin() { std::cout << "Fake Plugin Terminated\n"; }
+    fakePlugin() { std::cout << "Fake Plugin Constructed\n"; }
+    ~fakePlugin() { std::cout << "Fake Plugin Destroyed\n"; }
 };
 
+#endif

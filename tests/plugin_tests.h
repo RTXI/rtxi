@@ -21,7 +21,6 @@
 #define PLUGIN_TESTS_H
 
 #include <gtest/gtest.h>
-#include <gmock/gmock.h>
 #include <plugin.h>
 
 class PluginObjectTest : public ::testing::Test
@@ -42,10 +41,4 @@ protected:
     Plugin::Manager *manager;
 };
 
-class MockPluginObject : public Plugin::Object
-{
-public:
-    MOCK_METHOD(std::string, getLibrary, (), (const));
-    MOCK_METHOD(void, unload, (), (const));
-};
 #endif

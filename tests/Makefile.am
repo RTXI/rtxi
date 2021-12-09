@@ -14,7 +14,8 @@ pkginclude_HEADERS = system_tests.h \
                      daq_tests.h \
                      settings_tests.h \
                      workspace_tests.h \
-                     plugin_tests.h
+                     plugin_tests.h \
+                     fakePlugin.h
 
 rtxiTests_SOURCES = rtxiTests.cpp \
                     system_tests.cpp \
@@ -38,7 +39,7 @@ OBJS = $(top_srcdir)/src/rt.o \
        $(top_srcdir)/src/workspace.o \
        $(top_srcdir)/src/main_window.o \
        $(top_srcdir)/src/default_gui_model.o \
-       $(top_srcdir)/src/moc_*.o 
+       $(top_srcdir)/src/moc_*.o
 
 noinst_LTLIBRARIES = fakePlugin.la
 fakePlugin_la_SOURCES = fakePlugin.h fakePlugin.cpp
@@ -54,7 +55,7 @@ fakePlugin_la_LDFLAGS = $(AM_LDFLAGS) \
                         -avoid-version \
                         -export-dynamic \
                         -rpath $(abs_builddir) \
-                        $(OBJS)
+                        $(OBJS) 
 
 
 if XENOMAI

@@ -17,7 +17,6 @@
 
  */
 
-#include <iostream>
 #include <fakePlugin.h>
 
 extern "C" Plugin::Object * createRTXIPlugin(void)
