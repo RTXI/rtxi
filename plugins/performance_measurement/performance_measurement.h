@@ -30,7 +30,7 @@
 #include <plugin.h>
 #include <rt.h>
 #include <workspace.h>
-#include <runningstat.h>
+#include <math/runningstat.h>
 
 namespace PerformanceMeasurement
 {

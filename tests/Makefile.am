@@ -3,6 +3,8 @@
 
 include $(top_srcdir)/Makefile.buildvars
 
+AM_CXXFLAGS += -I$(top_srcdir)/libs -I$(top_srcdir)/plugins
+
 TESTS = rtxiTests 
 check_PROGRAMS = rtxiTests
 
@@ -15,7 +17,8 @@ pkginclude_HEADERS = system_tests.h \
                      settings_tests.h \
                      workspace_tests.h \
                      plugin_tests.h \
-                     fakePlugin.h
+                     fakePlugin.h \
+                     performance_measurement_plugin_tests.h
 
 rtxiTests_SOURCES = rtxiTests.cpp \
                     system_tests.cpp \
@@ -24,7 +27,8 @@ rtxiTests_SOURCES = rtxiTests.cpp \
                     daq_tests.cpp \
                     settings_tests.cpp \
                     workspace_tests.cpp \
-                    plugin_tests.cpp
+                    plugin_tests.cpp \
+                    performance_measurement_plugin_tests.cpp 
 
 OBJS = $(top_srcdir)/src/rt.o \
        $(top_srcdir)/src/event.o \
@@ -39,10 +43,19 @@ OBJS = $(top_srcdir)/src/rt.o \
        $(top_srcdir)/src/workspace.o \
        $(top_srcdir)/src/main_window.o \
        $(top_srcdir)/src/default_gui_model.o \
+       $(top_srcdir)/libs/math/runningstat.o \
        $(top_srcdir)/src/moc_*.o
 
 noinst_LTLIBRARIES = fakePlugin.la
 fakePlugin_la_SOURCES = fakePlugin.h fakePlugin.cpp
+
+if XENOMAI
+OBJS += $(top_srcdir)/src/rt_os-xenomai.o 
+else
+OBJS += $(top_srcdir)/src/rt_os-posix.o 
+endif
+
+rtxiTests_LDADD = -lgtest -lgmock $(OBJS)
 
 # Sometimes in life you encounter the most complex and
 # crazy ways of doing the most simple tasks. Exibit A:
@@ -58,10 +71,4 @@ fakePlugin_la_LDFLAGS = $(AM_LDFLAGS) \
                         $(OBJS) 
 
 
-if XENOMAI
-OBJS += $(top_srcdir)/src/rt_os-xenomai.o 
-else
-OBJS += $(top_srcdir)/src/rt_os-posix.o 
-endif
 
-rtxiTests_LDADD = -lgtest -lgmock $(OBJS)

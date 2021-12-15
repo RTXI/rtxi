@@ -31,7 +31,8 @@ RunningStat::push(double x)
     m_newM = m_oldM + (x - m_oldM) / m_n;
     // m_newS = (m_oldS*(m_n-1)/m_n) + (x-m_newM)*(x-m_newM)/(m_n-1); // Sample
     // variance
-    m_newS = (m_n - 1.0) / m_n * m_oldS + (1.0 / m_n) * (x) * (x); // Variance
+    //m_newS = (m_n - 1.0) / m_n * m_oldS + (1.0 / m_n) * (x) * (x); // Variance
+    m_newS = m_oldS + ((m_n - 1.0) / m_n) * (x - m_oldM) * (x - m_oldM); 
     m_oldM = m_newM;
     m_oldS = m_newS;
   }
@@ -52,7 +53,7 @@ RunningStat::mean() const
 double
 RunningStat::var() const
 {
-  return ((m_n > 1) ? m_newS : 0.0);
+  return ((m_n > 1) ? m_newS/m_n : 0.0);
 }
 
 double

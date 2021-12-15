@@ -3,6 +3,9 @@
  * variance) using accurate numerical methods without storing all the numbers.
  */
 
+#ifndef RUNNINGSTAT_H
+#define RUNNINGSTAT_H
+
 #include <math.h>
 
 class RunningStat
@@ -22,3 +25,5 @@ private:
   int m_n;
   double m_oldM, m_newM, m_oldS, m_newS;
 };
+
+#endif
