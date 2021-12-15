@@ -18,7 +18,8 @@ pkginclude_HEADERS = system_tests.h \
                      workspace_tests.h \
                      plugin_tests.h \
                      fakePlugin.h \
-                     performance_measurement_plugin_tests.h
+                     performance_measurement_plugin_tests.h \
+                     connector_plugin_tests.h
 
 rtxiTests_SOURCES = rtxiTests.cpp \
                     system_tests.cpp \
@@ -28,7 +29,8 @@ rtxiTests_SOURCES = rtxiTests.cpp \
                     settings_tests.cpp \
                     workspace_tests.cpp \
                     plugin_tests.cpp \
-                    performance_measurement_plugin_tests.cpp 
+                    performance_measurement_plugin_tests.cpp \
+                    connector_plugin_tests.cpp
 
 OBJS = $(top_srcdir)/src/rt.o \
        $(top_srcdir)/src/event.o \
