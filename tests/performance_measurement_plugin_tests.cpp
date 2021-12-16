@@ -22,32 +22,25 @@
 #include <cmath>
 #include <performance_measurement_plugin_tests.h>
 
-TEST_F(PerformanceMeasurementPanelTests, pluginLoad)
+TEST_F(PerformanceMeasurementPluginTests, pluginLoad)
 {
-    // Because plugin loading for the perforamnce_measurement apnel is tightly coupled with
-    // the QT gui framework, it is not possible to test it without an instance of QT QApplication.
     // TODO: decouple PerformanceMeasurement::Plugin loading from QT gui framework
 
-    //manager = Plugin::Manager::getInstance();
-    //QString libraryPath(std::filesystem::current_path().string().c_str());
-    //libraryPath += "/../plugins/performance_measurement/.libs/performance_measurement.so";
-    //std::cout << libraryPath.toStdString() << "\n";
-    //plugin = manager->load(libraryPath);
-    //Plugin::Object *testobj = new Plugin::Object();
-    //ASSERT_EQ(typeid(plugin).name(), typeid(testobj).name());
-    //delete testobj;
+    manager = Plugin::Manager::getInstance();
+    QString libraryPath(std::filesystem::current_path().string().c_str());
+    libraryPath += "/../plugins/performance_measurement/.libs/performance_measurement.so";
+    plugin = manager->load(libraryPath);
+    Plugin::Object *testobj = new Plugin::Object();
+    ASSERT_EQ(typeid(plugin).name(), typeid(testobj).name());
+    delete testobj;
 }
 
-TEST_F(PerformanceMeasurementPanelTests, getInstance)
+TEST_F(PerformanceMeasurementPluginTests, getInstance)
 {
-    // Because getInstance is tightly coupled with the Qt gui framework, it is not
-    // possible to generate unit tests for this function without creating a QApplication
-    // instance.
-
     // TODO: decouple PerformanceMeasurement::Plugin class from qt gui framework.
-    //auto testplugin = PerformanceMeasurement::Plugin::getInstance(); 
-    //ASSERT_EQ(testplugin, PerformanceMeasurement::Plugin::getInstance());
-    //ASSERT_EQ(testplugin, testplugin->getInstance());
+    auto testplugin = PerformanceMeasurement::Plugin::getInstance(); 
+    ASSERT_EQ(testplugin, PerformanceMeasurement::Plugin::getInstance());
+    ASSERT_EQ(testplugin, testplugin->getInstance());
 }
 
 TEST_F(RunningStatTests, numValues)

@@ -45,6 +45,7 @@ OBJS = $(top_srcdir)/src/rt.o \
        $(top_srcdir)/src/workspace.o \
        $(top_srcdir)/src/main_window.o \
        $(top_srcdir)/src/default_gui_model.o \
+       $(top_srcdir)/plugins/performance_measurement/*.o \
        $(top_srcdir)/libs/math/runningstat.o \
        $(top_srcdir)/src/moc_*.o
 

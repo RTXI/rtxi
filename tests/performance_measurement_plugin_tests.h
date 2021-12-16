@@ -28,12 +28,12 @@
 #include <math/runningstat.h>
 #include <performance_measurement/performance_measurement.h>
 
-class PerformanceMeasurementPanelTests : public ::testing::Test
+class PerformanceMeasurementPluginTests : public ::testing::Test
 {
 protected:
-    PerformanceMeasurementPanelTests() { }
-    ~PerformanceMeasurementPanelTests() { }
-    
+    PerformanceMeasurementPluginTests() { }
+    ~PerformanceMeasurementPluginTests() { }
+
     Plugin::Object *plugin;
     Plugin::Manager *manager;
 };

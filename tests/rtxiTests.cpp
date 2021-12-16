@@ -18,9 +18,11 @@
  */
 
 #include <system_tests.h>
+#include <QApplication>
 
 int main(int argc, char *argv[])
 {
+    auto app = new QApplication(argc, argv);
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }
