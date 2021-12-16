@@ -113,3 +113,59 @@ TEST_F(ConnectorPluginTests, getInstance)
     // TODO: decouple getInstance function from QT gui framework for unit testing
     // TODO: change Connector::Plugin::getInstance to virtual for late linkage
 }
+
+TEST_F(DataRecorderPluginTests, loadPlugin)
+{
+    // TODO: decouple plugin loading from QT gui framework for unit testing
+
+    Plugin::Object *testobj = new Plugin::Object();
+    ASSERT_EQ(typeid(plugin).name(), typeid(testobj).name());
+    delete testobj;
+}
+
+TEST_F(ModelLoaderPluginTests, loadPlugin)
+{
+    // TODO: decouple plugin loading from QT gui framework for unit testing
+
+    Plugin::Object *testobj = new Plugin::Object();
+    ASSERT_EQ(typeid(plugin).name(), typeid(testobj).name());
+    delete testobj;
+}
+
+TEST_F(ModuleInstallerPluginTests, loadPlugin)
+{
+    // TODO: decouple plugin loading from QT gui framework for unit testing
+
+    Plugin::Object *testobj = new Plugin::Object();
+    ASSERT_EQ(typeid(plugin).name(), typeid(testobj).name());
+    delete testobj;
+}
+
+TEST_F(OscilloscopePluginTests, loadPlugin)
+{
+    // TODO: decouple plugin loading from QT gui framework for unit testing
+
+    Plugin::Object *testobj = new Plugin::Object();
+    ASSERT_EQ(typeid(plugin).name(), typeid(testobj).name());
+    delete testobj;
+}
+
+TEST_F(SystemControlPluginTests, loadPlugin)
+{
+    // TODO: decouple plugin loading from QT gui framework for unit testing
+
+    Plugin::Object *testobj = new Plugin::Object();
+    ASSERT_EQ(typeid(plugin).name(), typeid(testobj).name());
+    delete testobj;
+}
+
+TEST_F(UserPreferencesPluginTests, loadPlugin)
+{
+    // TODO: decouple plugin loading from QT gui framework for unit testing
+
+    Plugin::Object *testobj = new Plugin::Object();
+    ASSERT_EQ(typeid(plugin).name(), typeid(testobj).name());
+    delete testobj;
+}
+
+

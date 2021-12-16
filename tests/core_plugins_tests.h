@@ -26,8 +26,6 @@
 #include <plugin.h>
 #include <gtest/gtest.h>
 #include <math/runningstat.h>
-#include <connector/connector.h>
-#include <performance_measurement/performance_measurement.h>
 
 class PerformanceMeasurementPluginTests : public ::testing::Test
 {
@@ -63,8 +61,6 @@ protected:
     std::vector<double> randnums;
 };
 
-
-
 class ConnectorPluginTests : public ::testing::Test
 {
 protected:
@@ -79,5 +75,103 @@ protected:
     Plugin::Object *plugin;
     Plugin::Manager *manager;
 };
+
+class DataRecorderPluginTests : public ::testing::Test
+{
+protected:
+    DataRecorderPluginTests() { 
+        manager = Plugin::Manager::getInstance();
+        QString libraryPath(std::filesystem::current_path().string().c_str());
+        libraryPath += "/../plugins/data_recorder/.libs/data_recorder.so";
+        plugin = manager->load(libraryPath);
+    }
+    ~DataRecorderPluginTests() { }
+
+    Plugin::Object *plugin;
+    Plugin::Manager *manager;
+
+};
+
+class ModelLoaderPluginTests : public ::testing::Test
+{
+protected:
+    ModelLoaderPluginTests() { 
+        manager = Plugin::Manager::getInstance();
+        QString libraryPath(std::filesystem::current_path().string().c_str());
+        libraryPath += "/../plugins/model_loader/.libs/model_loader.so";
+        plugin = manager->load(libraryPath);
+    }
+    ~ModelLoaderPluginTests() { }
+
+    Plugin::Object *plugin;
+    Plugin::Manager *manager;
+
+};
+
+
+class ModuleInstallerPluginTests : public ::testing::Test
+{
+protected:
+    ModuleInstallerPluginTests() { 
+        manager = Plugin::Manager::getInstance();
+        QString libraryPath(std::filesystem::current_path().string().c_str());
+        libraryPath += "/../plugins/module_installer/.libs/module_installer.so";
+        plugin = manager->load(libraryPath);
+    }
+    ~ModuleInstallerPluginTests() { }
+
+    Plugin::Object *plugin;
+    Plugin::Manager *manager;
+
+};
+
+class OscilloscopePluginTests : public ::testing::Test
+{
+protected:
+    OscilloscopePluginTests() { 
+        manager = Plugin::Manager::getInstance();
+        QString libraryPath(std::filesystem::current_path().string().c_str());
+        libraryPath += "/../plugins/oscilloscope/.libs/oscilloscope.so";
+        plugin = manager->load(libraryPath);
+    }
+    ~OscilloscopePluginTests() { }
+
+    Plugin::Object *plugin;
+    Plugin::Manager *manager;
+
+};
+
+class SystemControlPluginTests : public ::testing::Test
+{
+protected:
+    SystemControlPluginTests() { 
+        manager = Plugin::Manager::getInstance();
+        QString libraryPath(std::filesystem::current_path().string().c_str());
+        libraryPath += "/../plugins/system_control/.libs/system_control.so";
+        plugin = manager->load(libraryPath);
+    }
+    ~SystemControlPluginTests() { }
+
+    Plugin::Object *plugin;
+    Plugin::Manager *manager;
+
+};
+
+class UserPreferencesPluginTests : public ::testing::Test
+{
+protected:
+    UserPreferencesPluginTests() { 
+        manager = Plugin::Manager::getInstance();
+        QString libraryPath(std::filesystem::current_path().string().c_str());
+        libraryPath += "/../plugins/userprefs/.libs/userprefs.so";
+        plugin = manager->load(libraryPath);
+    }
+    ~UserPreferencesPluginTests() { }
+
+    Plugin::Object *plugin;
+    Plugin::Manager *manager;
+
+};
+
 
 #endif
