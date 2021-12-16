@@ -20,16 +20,12 @@
 #include <typeinfo>
 #include <numeric>
 #include <cmath>
-#include <performance_measurement_plugin_tests.h>
+#include <core_plugins_tests.h>
 
 TEST_F(PerformanceMeasurementPluginTests, pluginLoad)
 {
     // TODO: decouple PerformanceMeasurement::Plugin loading from QT gui framework
 
-    manager = Plugin::Manager::getInstance();
-    QString libraryPath(std::filesystem::current_path().string().c_str());
-    libraryPath += "/../plugins/performance_measurement/.libs/performance_measurement.so";
-    plugin = manager->load(libraryPath);
     Plugin::Object *testobj = new Plugin::Object();
     ASSERT_EQ(typeid(plugin).name(), typeid(testobj).name());
     delete testobj;
@@ -38,9 +34,10 @@ TEST_F(PerformanceMeasurementPluginTests, pluginLoad)
 TEST_F(PerformanceMeasurementPluginTests, getInstance)
 {
     // TODO: decouple PerformanceMeasurement::Plugin class from qt gui framework.
-    auto testplugin = PerformanceMeasurement::Plugin::getInstance(); 
-    ASSERT_EQ(testplugin, PerformanceMeasurement::Plugin::getInstance());
-    ASSERT_EQ(testplugin, testplugin->getInstance());
+    // TODO: change PerformanceMeasurement::Plugin::getInstance function to virutal for late linkage 
+    //auto testplugin = reinterpret_cast<PerformanceMeasurement::Plugin *>(plugin); 
+    //ASSERT_EQ(testplugin, PerformanceMeasurement::Plugin::getInstance());
+    //ASSERT_EQ(testplugin, testplugin->getInstance());
 }
 
 TEST_F(RunningStatTests, numValues)
@@ -102,4 +99,17 @@ TEST_F(RunningStatTests, clear)
     ASSERT_EQ(0, statobj->numValues());
 }
 
+TEST_F(ConnectorPluginTests, loadPlugin)
+{
+    // TODO: decouple plugin loading from QT gui framework for unit testing
 
+    Plugin::Object *testobj = new Plugin::Object();
+    ASSERT_EQ(typeid(plugin).name(), typeid(testobj).name());
+    delete testobj;
+}
+
+TEST_F(ConnectorPluginTests, getInstance)
+{
+    // TODO: decouple getInstance function from QT gui framework for unit testing
+    // TODO: change Connector::Plugin::getInstance to virtual for late linkage
+}

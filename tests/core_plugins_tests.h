@@ -17,21 +17,27 @@
 
  */
 
-#ifndef PERFORMANCE_MEASUREMENT_PLUGIN_TESTS_H
-#define PERFORMANCE_MEASUREMENT_PLUGIN_TESTS_H
+#ifndef CORE_PLUGINS_TESTS_H
+#define CORE_PLUGINS_TESTS_H
 
 #include <filesystem>
 #include <random>
 #include <vector>
-#include <gtest/gtest.h>
 #include <plugin.h>
+#include <gtest/gtest.h>
 #include <math/runningstat.h>
+#include <connector/connector.h>
 #include <performance_measurement/performance_measurement.h>
 
 class PerformanceMeasurementPluginTests : public ::testing::Test
 {
 protected:
-    PerformanceMeasurementPluginTests() { }
+    PerformanceMeasurementPluginTests() { 
+        manager = Plugin::Manager::getInstance();
+        QString libraryPath(std::filesystem::current_path().string().c_str());
+        libraryPath += "/../plugins/performance_measurement/.libs/performance_measurement.so";
+        plugin = manager->load(libraryPath);
+    }
     ~PerformanceMeasurementPluginTests() { }
 
     Plugin::Object *plugin;
@@ -55,6 +61,23 @@ protected:
 
     RunningStat *statobj;
     std::vector<double> randnums;
+};
+
+
+
+class ConnectorPluginTests : public ::testing::Test
+{
+protected:
+    ConnectorPluginTests() { 
+        manager = Plugin::Manager::getInstance();
+        QString libraryPath(std::filesystem::current_path().string().c_str());
+        libraryPath += "/../plugins/connector/.libs/connector.so";
+        plugin = manager->load(libraryPath);
+    }
+    ~ConnectorPluginTests() { }
+
+    Plugin::Object *plugin;
+    Plugin::Manager *manager;
 };
 
 #endif
