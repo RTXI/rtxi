@@ -48,12 +48,10 @@ TEST_F(PluginManagerTest, getInstance)
 TEST_F(PluginManagerTest, load)
 {
     manager = Plugin::Manager::getInstance();
-    Plugin::Object *plugin;
     QString libraryPath(std::filesystem::current_path().string().c_str());
     libraryPath += "/.libs/fakePlugin.so";
-    plugin = manager->load(libraryPath);
     Plugin::Object *testobject = new Plugin::Object();
-    ASSERT_EQ(typeid(testobject).name(), typeid(plugin).name());
+    ASSERT_EQ(typeid(testobject).name(), typeid(manager->load(libraryPath)).name());
     delete testobject;
 }
 
@@ -82,11 +80,6 @@ TEST_F(PluginManagerTest, unloadAll)
         plugins[i] = manager->load(libraryPath);
     }
     manager->unloadAll(); 
-    // TODO: How do I know that all plugins have been unloaded? Answer: you can't? *face palm*
-    for (int i = 0; i < 5; ++i)
-    {
-        delete plugins[i];
-    }
     delete[] plugins;
 }
 

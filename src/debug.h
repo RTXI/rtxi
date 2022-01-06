@@ -22,28 +22,18 @@
 
 #include <boost/stacktrace.hpp>
 #include <execinfo.h>
-//#include <stdio.h>
-#include <iostream>
+#include <stdarg.h>
 #include <string>
 #include <memory>
+#include <iostream>
 
 #if XENOMAI
 #include <rtdk.h>
 #endif
 
 //! Prints a backtrace to standard error.
-static inline void PRINT_BACKTRACE(void)
-{
-    std::cerr << boost::stacktrace::stacktrace();
-}
+void PRINT_BACKTRACE(void);
 
-template<typename... Args>
-void ERROR_MSG(const std::string& errmsg, Args... args){
-    auto size = errmsg.size();
-    std::unique_ptr<char[]> buf = std::make_unique<char[]>(size);
-    std::snprintf(buf.get(), size, errmsg.c_str(), args ...);
-    std::cerr << std::string(buf.get(), buf.get() + size) << "\n";
-    std::cerr << boost::stacktrace::stacktrace();
-}
+void ERROR_MSG(const std::string& errmsg, ...);
 
 #endif /* DEBUG_H */

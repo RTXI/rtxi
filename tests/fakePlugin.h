@@ -25,7 +25,7 @@
 #include <iostream>
 
 // This is a fake plugin created in order to test Plugin Manager
-class fakePlugin : public Plugin::Object 
+class fakePlugin : public ::Plugin::Object 
 {
 public:
     fakePlugin() { std::cout << "Fake Plugin Constructed\n"; }

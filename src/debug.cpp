@@ -1,5 +1,5 @@
 /*
- 	 The Real-Time eXperiment Interface (RTXI)
+	 The Real-Time eXperiment Interface (RTXI)
 	 Copyright (C) 2011 Georgia Institute of Technology, University of Utah, Weill Cornell Medical College
 
 	 This program is free software: you can redistribute it and/or modify
@@ -15,12 +15,22 @@
 	 You should have received a copy of the GNU General Public License
 	 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
- */
+*/
 
-#include <fakePlugin.h>
+#include <debug.h>
 
-extern "C" Plugin::Object * createRTXIPlugin(void *)
+void PRINT_BACKTRACE(void)
 {
-    return new fakePlugin(); 
+    std::cerr << boost::stacktrace::stacktrace();
 }
+
+void ERROR_MSG(const std::string& errmsg, ...){
+    va_list args;
+    va_start(args, errmsg);
+    char buf[256] = ""; 
+    vsprintf(buf, errmsg.c_str(), args);
+    std::cerr << std::string(buf, 256) << "\n";
+    std::cerr << boost::stacktrace::stacktrace();
+}
+
 

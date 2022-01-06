@@ -174,7 +174,7 @@ void RT::OS::deleteTask(RT::OS::Task task)
 
 bool RT::OS::isRealtime(void)
 {
-	if (init_rt && pthread_getspecific(is_rt_key))
+	if (init_rt && rt_task_self() != NULL)
 		return true;
 	return false;
 }
