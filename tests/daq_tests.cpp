@@ -34,9 +34,9 @@ TEST_F(DAQManagerTest, loadDevice)
     EXPECT_CALL(*testDriver, createDevice).Times(::testing::AtLeast(2));
     std::list<std::string> deviceArgs1, deviceArgs2;
     deviceArgs1.push_back("testDeviceArgs1");
-    DAQ::Device *device1 = daq_manager->loadDevice("testDeviceDriver", deviceArgs1);
+    daq_manager->loadDevice("testDeviceDriver", deviceArgs1);
     deviceArgs2.push_back("testDeviceArgs2");
-    DAQ::Device *device2 = daq_manager->loadDevice("testDeviceDriver", deviceArgs2);
+    daq_manager->loadDevice("testDeviceDriver", deviceArgs2);
     delete testDriver;
 }
 
