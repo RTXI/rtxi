@@ -11,7 +11,7 @@ extern std::ofstream DebugFile;
 #endif
 
 int
-CholeskyDecomp(int ord, matrix<complex>* ax, complex* bx, double epsilon)
+CholeskyDecomp(int ord, matrix<complex>* ax, complex* bx)
 {
   double* dx;
   int i, j, k;

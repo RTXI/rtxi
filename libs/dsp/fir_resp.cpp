@@ -19,8 +19,7 @@ using namespace std;
 
 FirFilterResponse::FirFilterResponse(FirFilterDesign* filter_design,
                                      int num_resp_pts, int db_scale_enabled,
-                                     int normalize_enabled,
-                                     char* resp_file_name)
+                                     int normalize_enabled)
 {
   Filter_Design = filter_design;
   Num_Resp_Pts = num_resp_pts;
@@ -105,27 +104,26 @@ FirFilterResponse::GetMagResp(void)
   return (Mag_Resp);
 }
 
-void
-FirFilterResponse::DumpMagResp(void)
-{
-  double freq;
-  for (int n = 0; n < Num_Resp_Pts; n++) {
-    freq = (n * M_PI) / double(Num_Resp_Pts);
-  }
-  return;
-}
+//void
+//FirFilterResponse::DumpMagResp(void)
+//{
+//  double freq;
+//  for (int n = 0; n < Num_Resp_Pts; n++) {
+//    freq = (n * M_PI) / double(Num_Resp_Pts);
+//  }
+//  return;
+//}
 
 double
 FirFilterResponse::GetIntervalPeak(int nBeg, int nEnd)
 {
   double peak;
-  int n, indexOfPeak;
+  int n;
 
   peak = -9999.0;
   for (n = nBeg; n < nEnd; n++) {
     if (Mag_Resp[n] > peak) {
       peak = Mag_Resp[n];
-      indexOfPeak = n;
     }
   }
   return (peak);

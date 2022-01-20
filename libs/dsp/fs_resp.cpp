@@ -37,7 +37,7 @@ double
 FreqSampFilterResponse::GetStopbandPeak()
 {
   double peak;
-  int n, nBeg, nEnd, indexOfPeak;
+  int n, nBeg, nEnd;
 
   std::cout << "doing case " << Band_Config << std::endl;
   switch (Band_Config) {

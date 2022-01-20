@@ -9,7 +9,7 @@ class FilterImplementation
 {
 public:
   FilterImplementation(){};
-
+  virtual ~FilterImplementation(){};
   virtual int GetNumTaps(void) = 0;
   virtual double ProcessSample(double input_val) = 0;
   virtual long ProcessSample(long input_val) = 0;

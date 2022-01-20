@@ -11,6 +11,6 @@ class BesselTransFunc : public FilterTransFunc
 {
 public:
   // constructor to initialize for a specified filter order
-  BesselTransFunc(int order, double passband_edge, int norm_for_delay);
+  BesselTransFunc(int order, int norm_for_delay);
 };
 #endif

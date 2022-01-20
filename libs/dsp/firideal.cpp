@@ -46,6 +46,9 @@ FirIdealFilter::DefineFilter(int num_taps, double lambda1, double lambda2,
       case _BANDSTOP_RESP_:
         Ideal_Bandstop(lambda1, lambda2);
         break;
+      case _UNDEF_RESP_:
+        printf("Undefined response used for band configuration.");
+        break;
     } // end of switch on Band_Config
   } else {
     printf("Error in FIR window filter: no filter made!");

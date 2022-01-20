@@ -65,8 +65,6 @@ void
 AnalogReconst::DumpResult(ofstream* out_file)
 {
   int i;
-  double mse;
-  mse = 0.0;
   for (i = Max_Offset; i < (Num_Analog_Samps - Max_Offset); i++) {
     (*out_file) << i << ", " << Analog_Signal[i] << std::endl;
   }
@@ -120,18 +118,16 @@ AnalogReconst::FindPeakMag(void)
 }
 //------------------------------------------------------------
 double
-AnalogReconst::CosineCorrelate(double norm_freq, double phase_offset,
-                               double cycles_per_corr)
+AnalogReconst::CosineCorrelate(double norm_freq, double phase_offset)
 {
   double sum, auto_sum;
-  int samps_per_corr, num_holdoff_samps;
   int samp_idx;
   double lambda;
 
   sum = 0.0;
   auto_sum = 0.0;
-  samps_per_corr = int(cycles_per_corr / (norm_freq * Interp_Samp_Intvl));
-  num_holdoff_samps = int(1.0 / (norm_freq * Interp_Samp_Intvl));
+  //samps_per_corr = int(cycles_per_corr / (norm_freq * Interp_Samp_Intvl));
+  //num_holdoff_samps = int(1.0 / (norm_freq * Interp_Samp_Intvl));
   lambda = TWO_PI * norm_freq * Interp_Samp_Intvl;
 
   for (samp_idx = Max_Offset; samp_idx < (Num_Analog_Samps - Max_Offset);

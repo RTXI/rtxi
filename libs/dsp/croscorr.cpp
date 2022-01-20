@@ -12,7 +12,7 @@ CrossCorrelation(int seg_len, double* input_segment, double* output_segment,
                  double* gain, double* phase_delta, int* indx_of_peak)
 {
   double input_peak, output_peak;
-  int indx_of_input_peak, indx_of_output_peak;
+  int indx_of_output_peak;
   int i;
 
   //-----------------------------------
@@ -21,13 +21,11 @@ CrossCorrelation(int seg_len, double* input_segment, double* output_segment,
 
   input_peak = 0.0;
   output_peak = 0.0;
-  indx_of_input_peak = 0;
   indx_of_output_peak = 0;
 
   for (i = int(0.05 * seg_len); i < int(0.9 * seg_len); i++) {
     if (input_segment[i] > input_peak) {
       input_peak = input_segment[i];
-      indx_of_input_peak = i;
     }
     if (output_segment[i] > output_peak) {
       output_peak = output_segment[i];
@@ -56,7 +54,6 @@ CrossCorrelation(int seg_len, double* input_segment, double* output_segment,
   for (i = beg_input_cycle; i < seg_len; i++) {
     if (input_segment[i] > input_peak) {
       input_peak = input_segment[i];
-      indx_of_input_peak = i;
     }
     if (input_segment[i] > 0.0)
       continue;

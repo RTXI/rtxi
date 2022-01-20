@@ -8,7 +8,7 @@
 #include "complex.h"
 #include "matrix_t.h"
 
-int CholeskyDecomp(int ord, matrix<complex>* ax, complex* bx, double epsilon);
+int CholeskyDecomp(int ord, matrix<complex>* ax, complex* bx);
 // int CholeskyDecomp( int ord,
 //                    complex_matrix *ax,
 //                    complex *bx,

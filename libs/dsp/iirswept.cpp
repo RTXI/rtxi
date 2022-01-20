@@ -154,8 +154,7 @@ IirSweptResponse::IirSweptResponse(FilterImplementation* filter_implem,
          phase_indx < int(-360. / phase_delta); phase_indx++) {
       num_worsening_phases++;
       phase_offset = (old_phase_lag + (phase_indx * phase_delta)) * PI / 180.0;
-      correl_coeff = reconst_output->CosineCorrelate(norm_freq, phase_offset,
-                                                     cycles_per_corr);
+      correl_coeff = reconst_output->CosineCorrelate(norm_freq, phase_offset);
       /*
       sum = 0.0;
       auto_sum = 0.0;

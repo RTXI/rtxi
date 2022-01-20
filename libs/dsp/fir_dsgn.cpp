@@ -55,18 +55,17 @@ FirFilterDesign::FirFilterDesign(int num_taps, FIR_SYM_T symmetry,
     first_right = last_left + 1;
   }
 
-  switch (symmetry) {
-    case FIR_SYM_EVEN_LEFT:
-      for (n = 0; n <= last_left; n++) {
-        Original_Coeff[n] = input_coeff[n];
-        Imp_Resp_Coeff[n] = input_coeff[n];
-        Quant_Coeff[n] = long(Original_Coeff[n]);
-      }
-      for (n = first_right; n < num_taps; n++) {
-        Original_Coeff[n] = input_coeff[num_taps - n - 1];
-        Imp_Resp_Coeff[n] = input_coeff[num_taps - n - 1];
-        Quant_Coeff[n] = long(Original_Coeff[n]);
-      }
+  if (symmetry == FIR_SYM_EVEN_LEFT){
+    for (n = 0; n <= last_left; n++) {
+      Original_Coeff[n] = input_coeff[n];
+      Imp_Resp_Coeff[n] = input_coeff[n];
+      Quant_Coeff[n] = long(Original_Coeff[n]);
+    }
+    for (n = first_right; n < num_taps; n++) {
+      Original_Coeff[n] = input_coeff[num_taps - n - 1];
+      Imp_Resp_Coeff[n] = input_coeff[num_taps - n - 1];
+      Quant_Coeff[n] = long(Original_Coeff[n]);
+    }
   } // end of switch on symmetry
   return;
 }
@@ -102,7 +101,7 @@ FirFilterDesign::NormalizeFilter(void)
   double passband_peak;
   FirFilterResponse* temp_response;
 
-  temp_response = new FirFilterResponse(this, 500, 0, 0, NULL);
+  temp_response = new FirFilterResponse(this, 500, 0, 0);
   passband_peak = temp_response->GetIntervalPeak(0, 499);
   delete temp_response;
   for (n = 0; n < Num_Taps; n++) {
