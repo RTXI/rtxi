@@ -53,7 +53,7 @@ public:
   void removeData();     // clears all data and lines
   const double* xData(); // returns data points (not points defining lines)
   const double* yData();
-  const uint dataSize(); // returns number of data points
+  uint dataSize();       // returns number of data points
   bool dataExists();     // returns whether plot contains data
   void nextSymbol();     // sets symbol to the next QwtSymbol style
 
