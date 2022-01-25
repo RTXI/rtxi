@@ -75,9 +75,7 @@ colvec<T>& matrix<T>::operator*(colvec<T>& v2)
   // check dimensions
   int row_orig = _p->orig_indx;
   int nrows = _p->length;
-  int col_orig = ((_p->f[_p->orig_indx])->p)->orig_indx;
   int ncols = ((_p->f[_p->orig_indx])->p)->length;
-  int vec_orig = v2.p->orig_indx;
   int vec_len = v2.p->length;
 
   if (ncols != vec_len) {

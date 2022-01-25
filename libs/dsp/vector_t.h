@@ -42,7 +42,7 @@ public:
   vector<T>& operator/(T x);
   T* array(void);
   T& operator[](int);
-  vector<T>& operator*(matrix<T>& m2);
+  vector<T> operator*(matrix<T>& m2);
   // vector<T>& operator*( matrix &m2);
   // friend vector<T>& matrix<T>::operator*( vector<T> &v2);
   friend class matrix<T>;
@@ -68,7 +68,7 @@ public:
   colvec<T>& operator!();
 
   // row vector times column vector
-  T& operator*(colvec<T>& v2);
+  T operator*(colvec<T>& v2);
   // T operator*(colvec<T> &v2);
   friend class colvec<T>;
   // friend rowvec<T>* transpose( colvec<T> *x);

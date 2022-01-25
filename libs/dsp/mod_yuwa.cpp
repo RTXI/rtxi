@@ -18,8 +18,6 @@ template <class T>
 ModYuleWalker<T>::ModYuleWalker(T* signal, int seq_len, int ar_order,
                                 int ma_order)
 {
-  int err_stat;
-  double epsilon = 0.0001;
 
   matrix<T> a_work(1, ar_order, 1, ar_order);
   matrix<T> b_work(1, ar_order, 1, ar_order);
@@ -31,9 +29,12 @@ ModYuleWalker<T>::ModYuleWalker(T* signal, int seq_len, int ar_order,
     new AutocorrMethCorrMtx<T>(signal, seq_len, ar_order + ma_order + 1);
   Toeplitz_Corr_Matrix = Correl_Matrix->GetCol(1);
 
+#ifdef _DEBUG
+  double epsilon = 0.0001;
+  int err_stat;
   err_stat = GeneralizedLevinson(Toeplitz_Corr_Matrix, ar_order, ma_order,
                                  epsilon, A_Vec);
-#ifdef _DEBUG
+
   DebugFile << "returned to ModYuleWalker" << std::endl;
   DebugFile << "err_stat = " << err_stat << std::endl;
   for (int indx = 0; indx <= ar_order; indx++) {

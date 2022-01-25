@@ -14,7 +14,7 @@ class ToeplitzMatrix : public Matrix<T>
 public:
   ToeplitzMatrix();
 
-  T* GetCol(int col_indx);
+  T* GetCol(int);
 
 protected:
   T* Herm_Toep_Col_1;

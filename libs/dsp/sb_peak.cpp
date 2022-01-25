@@ -9,7 +9,7 @@ double
 FindStopbandPeak(FreqSampFilterSpec* filter, int numPts, double H[])
 {
   double peak;
-  int n, nBeg, nEnd, indexOfPeak;
+  int n, nBeg, nEnd;
 
   std::cout << "doing case " << filter->GetBandConfig() << std::endl;
   switch (filter->GetBandConfig()) {
@@ -34,7 +34,6 @@ FindStopbandPeak(FreqSampFilterSpec* filter, int numPts, double H[])
   for (n = nBeg; n < nEnd; n++) {
     if (H[n] > peak) {
       peak = H[n];
-      indexOfPeak = n;
     }
   }
   if (filter->GetBandConfig() == 4) { /* bandpass has second stopband */
@@ -43,7 +42,6 @@ FindStopbandPeak(FreqSampFilterSpec* filter, int numPts, double H[])
     for (n = nBeg; n < nEnd; n++) {
       if (H[n] > peak) {
         peak = H[n];
-        indexOfPeak = n;
       }
     }
   }

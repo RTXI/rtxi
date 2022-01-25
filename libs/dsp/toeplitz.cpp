@@ -16,7 +16,7 @@ ToeplitzMatrix<T>::ToeplitzMatrix(void)
 
 template <class T>
 T*
-ToeplitzMatrix<T>::GetCol(int col_indx)
+ToeplitzMatrix<T>::GetCol(int )
 {
   // right now this only returns column 1
   int indx;

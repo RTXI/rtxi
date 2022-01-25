@@ -87,29 +87,16 @@ colvec<T>& rowvec<T>::operator!(void)
 //---------------------------------------------------
 //  row vector times column vector
 template <class T>
-T& rowvec<T>::operator*(colvec<T>& v2)
+T rowvec<T>::operator*(colvec<T>& v2)
 {
   // get origin and length of row vector
-  int v1_orig = this->p->orig_indx;
   int v1_len = this->p->length;
 
-  // get origin and length of column vector
-  int v2_orig = v2.p->orig_indx;
-  int v2_len = v2.p->length;
-
-  // alocate scalar for result
-  // T *result = new T;
-  // #ifdef _VEC_DEBUG
-  //   DebugFile << "rv::op*(cv): new scalar alloc at "
-  //             << (void*)result << std::endl;
-  // #endif
   T sum;
   sum = 0;
   for (int idx = 0; idx < v1_len; idx++) {
-    // sum += ((p->f[idx+v1_orig]) * (v2.p->f[idx+v2_orig]));
     sum += ((this->p->f[idx]) * (v2.p->f[idx]));
   }
-  //*result = sum;
   if (v2.Is_Temp) {
 #ifdef _VEC_DEBUG
     DebugFile << "\nrv::op*(cv): deleting colvec at " << (void*)(&v2)
@@ -124,7 +111,6 @@ T& rowvec<T>::operator*(colvec<T>& v2)
 #endif
     delete this;
   }
-  // return(*result);
   return (sum);
 }
 //---------------------------------------------------
@@ -133,7 +119,6 @@ template <class T>
 rowvec<T>& rowvec<T>::operator*(matrix<T>& m2)
 {
   // check dimensions
-  int vec_orig = this->p->orig_indx;
   int vec_len = this->p->length;
   int row_orig = m2._p->orig_indx;
   int nrows = m2._p->length;
@@ -533,10 +518,9 @@ T& vector<T>::operator[](int i)
 //-----------------------------------------------------
 //  pre-multiply matrix by a row vector
 template <class T>
-vector<T>& vector<T>::operator*(matrix<T>& m2)
+vector<T> vector<T>::operator*(matrix<T>& m2)
 {
   // check dimensions
-  int vec_orig = p->orig_indx;
   int vec_len = p->length;
   int row_orig = m2._p->orig_indx;
   int nrows = m2._p->length;
