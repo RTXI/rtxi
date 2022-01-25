@@ -144,7 +144,6 @@ void PerformanceMeasurement::Panel::read(void)
 void PerformanceMeasurement::Panel::write(void)
 {
     long long now = RT::OS::getTime();
-    double period = RT::System::getInstance()->getPeriod();
 
     switch (state)
         {
