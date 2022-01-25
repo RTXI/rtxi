@@ -230,8 +230,8 @@ void Connector::Panel::receiveEvent(const Event::Object *event)
                                 QString::number(dest_idx)+" "+QString::fromStdString(dest->getName(IO::INPUT,dest_idx));
 
             size_t index;
-            for(index=0; index < connectionBox->count() && connectionBox->item(index)->text() != link_name; ++index);
-            if(index >= connectionBox->count())
+            for(index=0; index < (size_t) connectionBox->count() && connectionBox->item(index)->text() != link_name; ++index);
+            if(index >= (size_t) connectionBox->count())
                 ERROR_MSG("Connector::Panel::receiveEvent : removing non-existant link.\n");
             else
                 connectionBox->takeItem(index);
