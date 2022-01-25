@@ -259,7 +259,7 @@ size_t AnalogyDevice::getAnalogDownsample(type_t type,index_t channel) const
 
 std::string AnalogyDevice::getAnalogRangeString(type_t type,index_t channel,index_t index) const
 {
-    if(!analog_exists(type,channel) || !((index >= 0) && (index < getAnalogRangeCount(type,channel))))
+    if(!analog_exists(type,channel) || !(index < getAnalogRangeCount(type,channel)))
         return "";
 
     std::ostringstream rangeString;
@@ -277,7 +277,7 @@ std::string AnalogyDevice::getAnalogRangeString(type_t type,index_t channel,inde
 
 std::string AnalogyDevice::getAnalogReferenceString(type_t type,index_t channel,index_t index) const
 {
-    if(!analog_exists(type,channel) || !((index >= 0) && (index < getAnalogReferenceCount(type,channel))))
+    if(!analog_exists(type,channel) || !(index < getAnalogReferenceCount(type,channel)))
         return "";
 
     switch(index) 
@@ -297,7 +297,7 @@ std::string AnalogyDevice::getAnalogReferenceString(type_t type,index_t channel,
 
 std::string AnalogyDevice::getAnalogUnitsString(type_t type,index_t channel,index_t index) const
 {
-    if(!analog_exists(type,channel) || !((index >= 0) && (index < getAnalogUnitsCount(type,channel))))
+    if(!analog_exists(type,channel) || !(index < getAnalogUnitsCount(type,channel)))
         return "";
 
     switch(index) 
@@ -361,7 +361,7 @@ double AnalogyDevice::getAnalogZeroOffset(type_t type,index_t channel) const
 
 int AnalogyDevice::setAnalogRange(type_t type,index_t channel,index_t index)
 {
-    if(!analog_exists(type,channel) || !((index >= 0) && (index < getAnalogRangeCount(type,channel))))
+    if(!analog_exists(type,channel) || !(index < getAnalogRangeCount(type,channel)))
         return -EINVAL;
 
     channel_t *chan = &subdevice[type].chan[channel];
@@ -387,7 +387,7 @@ int AnalogyDevice::setAnalogRange(type_t type,index_t channel,index_t index)
 
 int AnalogyDevice::setAnalogReference(type_t type,index_t channel,index_t index)
 {
-    if(!analog_exists(type,channel) || !((index >= 0) && (index < getAnalogReferenceCount(type,channel))))
+    if(!analog_exists(type,channel) || !(index < getAnalogReferenceCount(type,channel)))
         return -EINVAL;
 
     subdevice[type].chan[channel].analog.reference = index;
@@ -396,7 +396,7 @@ int AnalogyDevice::setAnalogReference(type_t type,index_t channel,index_t index)
 
 int AnalogyDevice::setAnalogUnits(type_t type,index_t channel,index_t index)
 {
-    if(!analog_exists(type,channel) || !((index >= 0) && (index < getAnalogUnitsCount(type,channel))))
+    if(!analog_exists(type,channel) || !(index < getAnalogUnitsCount(type,channel)))
         return -EINVAL;
 
     subdevice[type].chan[channel].analog.units = index;
@@ -405,7 +405,7 @@ int AnalogyDevice::setAnalogUnits(type_t type,index_t channel,index_t index)
 
 int AnalogyDevice::setAnalogOffsetUnits(type_t type,index_t channel,index_t index)
 {
-    if(!analog_exists(type,channel) || !((index >= 0) && (index < getAnalogUnitsCount(type,channel))))
+    if(!analog_exists(type,channel) || !(index < getAnalogUnitsCount(type,channel)))
         return -EINVAL;
 
     subdevice[type].chan[channel].analog.offsetunits = index;

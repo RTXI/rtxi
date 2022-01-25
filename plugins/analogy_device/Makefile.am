@@ -1,4 +1,4 @@
-CLEANFILES = *~
+CLEANFILES = *~ *.gcno *.gcda
 DISTCLEANFILES =
 MAINTAINERCLEANFILES = Makefile.in
 

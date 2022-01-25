@@ -59,12 +59,13 @@ public:
     int setAnalogOffsetUnits(DAQ::type_t,DAQ::index_t,DAQ::index_t);
     int setAnalogDownsample(DAQ::type_t, DAQ::index_t, size_t);
     int setAnalogCounter(DAQ::type_t, DAQ::index_t);
-    int setAnalogConversion(DAQ::type_t,DAQ::index_t) {}; // Placeholder
+    void setAnalogConversion(DAQ::type_t,DAQ::index_t) {}; // Placeholder
     int setAnalogCalibrationValue(DAQ::type_t,DAQ::index_t,double);
     double getAnalogCalibrationValue(DAQ::type_t,DAQ::index_t) const;
-    int setAnalogCalibrationActive(DAQ::type_t,DAQ::index_t,bool) {};
-    bool getAnalogCalibrationActive(DAQ::type_t,DAQ::index_t) const {};
-    bool getAnalogCalibrationState(DAQ::type_t,DAQ::index_t) const {};
+    // TODO: Finish defining the functions below for AnalogyDevice class
+    int setAnalogCalibrationActive(DAQ::type_t,DAQ::index_t,bool) {return 0;};
+    bool getAnalogCalibrationActive(DAQ::type_t,DAQ::index_t) const {return false;};
+    bool getAnalogCalibrationState(DAQ::type_t,DAQ::index_t) const {return false;};
 
     DAQ::direction_t getDigitalDirection(DAQ::index_t) const;
     int setDigitalDirection(DAQ::index_t,DAQ::direction_t);
