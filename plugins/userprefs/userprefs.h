@@ -45,7 +45,7 @@ public slots:
 private:
     Prefs(void);
     ~Prefs(void);
-    Prefs(const Prefs &) {};
+    Prefs(const Prefs &) : QObject() {};
     Prefs & operator=(const Prefs &)
     {
         return *getInstance();
