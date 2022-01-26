@@ -19,10 +19,17 @@
 
 #include <system_tests.h>
 #include <QApplication>
+#include <iostream>
 
 int main(int argc, char *argv[])
 {
     auto app = new QApplication(argc, argv);
+    if (app){
+        std::cout << "QT Application object initialized. Starting tests..." << std::endl;
+    }else{
+        std::cout << "Unable to initialized QT application. exiting" << std::endl;
+        return -1;
+    }
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }

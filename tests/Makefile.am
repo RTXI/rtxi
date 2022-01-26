@@ -1,5 +1,8 @@
 # TESTS -- Programs run automatically by "make check"
 # check_PROGRAMS -- Programs built by "make check" but not necessarily run
+CLEANFILES = *~ *.gcno *.gcda
+DISTCLEANFILES = 
+MAINTAINERCLEANFILES = Makefile.in
 
 include $(top_srcdir)/Makefile.buildvars
 

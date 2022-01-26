@@ -78,7 +78,7 @@ public:
 class DAQManagerTest : public ::testing::Test
 {
 public:
-    static void callback(DAQ::Device *device, void * par) { device->getChannelCount(DAQ::AI); }
+    static void callback(DAQ::Device *device, void *) { device->getChannelCount(DAQ::AI); }
 
 protected:
     DAQManagerTest() { daq_manager = DAQ::Manager::getInstance(); }
