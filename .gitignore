@@ -23,11 +23,13 @@ src/rtxi_config.h
 src/rtxi_config.h.in
 rtxi.conf
 src/rtxi
+tests/rtxiTests
 scripts/init_rtxi
 scripts/rtxi_comedi
 scripts/rtxi_plugin_config
 workspace.set
 docs/*
+coverage/*
 
 #Ignore files extracted from bundled tarballs
 deps/qwt-*/
