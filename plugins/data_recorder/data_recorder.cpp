@@ -16,11 +16,11 @@
 
 */
 
+#include <compiler.h>
 #include <rtxi_config.h>
 #include <cstring>
 #include <string>
 #include <unistd.h>
-#include <compiler.h>
 #include <debug.h>
 #include <main_window.h>
 #include <sstream>
@@ -1325,7 +1325,7 @@ void DataRecorder::Panel::closeFile(bool shutdown)
 				{
     // Write tags to data file
     hid_t tag_type, tag_space, data;
-    herr_t status;
+    //herr_t status;
     hsize_t dims[1] = {1};
     tag_type = H5Tcreate(H5T_STRING, TAG_SIZE);
     tag_space = H5Screate_simple(1, dims, NULL);
@@ -1338,7 +1338,7 @@ void DataRecorder::Panel::closeFile(bool shutdown)
     for(std::vector<std::string>::iterator it = dataTags.begin(); it != dataTags.end(); ++it)
         {
             data = H5Dcreate(file.tdata, std::string("Tag " + std::to_string(i++)).c_str(), tag_type, tag_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-            status = H5Dwrite(data, tag_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, it->c_str());
+            //status = H5Dwrite(data, tag_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, it->c_str());
         }
     dataTags.clear();
 
