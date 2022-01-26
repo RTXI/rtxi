@@ -66,7 +66,7 @@ protected:
 private:
     Plugin(void);
     ~Plugin(void);
-    Plugin(const Plugin &) {};
+    Plugin(const Plugin &) : QObject(), RT::Thread() {};
     Plugin &operator=(const Plugin &)
     {
         return *getInstance();
