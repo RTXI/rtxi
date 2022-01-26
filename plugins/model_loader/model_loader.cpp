@@ -106,13 +106,11 @@ void ModelLoader::load(void)
             if (filename == listmodule)
                 doesnotexist = false;
         }
-    int index;
     if (doesnotexist)
         {
             if (num_module == 10)
                 {
                     userprefs.setValue("/recentFileList/" + QString::number(oldestmodule), filename);
-                    index = oldestmodule;
                     oldestmodule++;
                     if (oldestmodule == 10)
                         oldestmodule = 0;
@@ -121,7 +119,6 @@ void ModelLoader::load(void)
             else
                 {
                     userprefs.setValue("/recentFileList/" + QString::number(num_module++), filename);
-                    index = num_module;
                     userprefs.setValue("/recentFileList/num", num_module);
                 }
         }
