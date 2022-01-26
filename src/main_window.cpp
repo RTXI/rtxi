@@ -158,7 +158,7 @@ void MainWindow::createUtilMenu()
         return;
 
     libsDir.setNameFilters(QStringList("*.so"));
-    for(size_t i = 0; i < libsDir.entryList().size(); i++)
+    for(int i = 0; i < libsDir.entryList().size(); i++)
         {
             utilItem = new QAction(libsDir.entryList().at(i), this);
             if(libsDir.entryList().at(i).contains("analysis"))
@@ -431,7 +431,7 @@ void MainWindow::fileMenuActivated(QAction *id)
     Settings::Manager::getInstance()->load(id->text().remove(0,3).toStdString());
 }
 
-void MainWindow::closeEvent(QCloseEvent *event)
+void MainWindow::closeEvent(QCloseEvent *)
 {
     /*
      * Save MainWindow settings

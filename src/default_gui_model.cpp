@@ -106,7 +106,7 @@ void DefaultGUIModel::createGUI(DefaultGUIModel::variable_t *var, int size)
     QGridLayout *gridLayout = new QGridLayout;
 
     size_t nstate = 0, nparam = 0, nevent = 0, ncomment = 0;
-    for (size_t i = 0; i < size; i++)
+    for (int i = 0; i < size; i++)
         {
             if (var[i].flags & (PARAMETER | STATE | EVENT | COMMENT))
                 {
@@ -370,7 +370,7 @@ void DefaultGUIModel::doLoad(const Settings::Object::State &s)
     else if (s.loadInteger("Minimized"))
         showMinimized();
     // this only exists in RTXI versions >1.3
-    if (s.loadInteger("W") != NULL)
+    if (s.loadInteger("W") != 0)
         {
             resize(s.loadInteger("W"), s.loadInteger("H"));
             parentWidget()->move(s.loadInteger("X"), s.loadInteger("Y"));

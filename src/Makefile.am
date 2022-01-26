@@ -1,4 +1,4 @@
-CLEANFILES = *~ stamp-h?
+CLEANFILES = *~ stamp-h? moc_* *.gcno *.gcda
 DISTCLEANFILES = 
 MAINTAINERCLEANFILES = Makefile.in
 

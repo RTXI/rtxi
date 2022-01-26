@@ -62,7 +62,7 @@ static const char *sigdebug_reasons[] =
 		"(period too short?)",
 };
 
-void sigdebug_handler(int sig, siginfo_t *si, void *context)
+void sigdebug_handler(int sig, siginfo_t *si, void *)
 {
 	const char fmt[] = "Mode switch (reason: %s), aborting. Backtrace:\n";
 	unsigned int reason = si->si_value.sival_int;
@@ -79,10 +79,12 @@ void sigdebug_handler(int sig, siginfo_t *si, void *context)
 			n = snprintf(buffer, sizeof(buffer),
 					"%s\n", sigdebug_reasons[reason]);
 			write(STDERR_FILENO, buffer, n);
+            break;
 		case SIGDEBUG_MIGRATE_SIGNAL:
 			n = snprintf(buffer, sizeof(buffer),
 					"%s\n", sigdebug_reasons[reason]);
 			write(STDERR_FILENO, buffer, n);
+            break;
 		case SIGDEBUG_WATCHDOG:
 			/* These errors are lethal, something went really wrong. */
 			n = snprintf(buffer, sizeof(buffer),

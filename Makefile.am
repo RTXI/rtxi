@@ -27,9 +27,7 @@ ACLOCAL_DIST =
 
 EXTRA_DIST   = autogen.sh $(ACLOCAL_DIST)
 
-CLEANFILES            = *~ src/moc_*.cpp src/*.gcov tests/*.gcov \
-                        src/*.gcda tests/*.gcda \
-                        src/*.gcno tests/*.gcno
+CLEANFILES            = *~ 
 DISTCLEANFILES        = rtxi.conf Makefile.modcompile config.log about.h rtos
 MAINTAINERCLEANFILES  = aclocal.m4 configure config.guess config.sub Makefile.in
 MAINTAINERCLEANDIRS   = autom4te.cache
