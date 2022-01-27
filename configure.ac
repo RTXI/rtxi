@@ -22,7 +22,6 @@ AC_INIT([RTXI],[2.3],[help@rtxi.org],rtxi)
 
 AM_CONFIG_HEADER(src/rtxi_config.h)
 AM_INIT_AUTOMAKE([foreign])
-AM_PATH_CPPUNIT
 AM_SILENT_RULES([yes])
 
 AC_CONFIG_MACRO_DIRS([m4])
