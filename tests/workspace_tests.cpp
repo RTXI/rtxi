@@ -47,9 +47,9 @@ TEST_F(WorkspaceInstanceTest, getDescription)
 
 TEST_F(WorkspaceInstanceTest, getValue)
 {
-    ASSERT_DOUBLE_EQ(instance->getValue(Workspace::EVENT, (size_t) 0), 0.0);
-    ASSERT_DOUBLE_EQ(instance->getValue(Workspace::PARAMETER, (size_t) 0), 0.0);
-    ASSERT_DOUBLE_EQ(instance->getValue(Workspace::STATE, (size_t) 0), 0.0);
+    EXPECT_NEAR(instance->getValue(Workspace::EVENT, (size_t) 0), 0.0, 0.001);
+    EXPECT_NEAR(instance->getValue(Workspace::PARAMETER, (size_t) 0), 0.0, 0.001);
+    EXPECT_NEAR(instance->getValue(Workspace::STATE, (size_t) 0), 0.0, 0.001);
 }
 
 TEST_F(WorkspaceInstanceTest, setValue)
