@@ -24,20 +24,6 @@
 #include <dlfcn.h>
 #include <fakePlugin.h>
 
-TEST_F(PluginObjectTest, getLibrary)
-{
-    // Its impossible to test this. No interface provided in order to check loading and unloading
-    // status. Mainly tied to the manager class.
-    // TODO: Decouple Plugin::Object from Plugin::Manager and test getLibrary function
-}
-
-TEST_F(PluginObjectTest, unload)
-{
-    // Its impossible to test this. No interface provided in order to check loading and unloading
-    // status. Mainly tied to the manager class.
-    // TODO: Decouple Plugin::Object from Plugin::Manager and test unload function
-}
-
 TEST_F(PluginManagerTest, getInstance)
 {
     manager = Plugin::Manager::getInstance();
@@ -88,3 +74,24 @@ TEST_F(PluginManagerTest, foreachPlugin)
     manager = Plugin::Manager::getInstance();
     // TODO: create a test plugin for testing foreachPlugin function in Plugin::Manager
 }
+
+TEST_F(PluginObjectTest, getLibrary)
+{
+    // TODO: Decouple Plugin::Object from Plugin::Manager and test getLibrary function
+    Plugin::Manager *manager = Plugin::Manager::getInstance();
+    QString libraryPath(std::filesystem::current_path().string().c_str());
+    libraryPath += "/.libs/fakePlugin.so";
+    object = manager->load(libraryPath);
+    EXPECT_EQ(libraryPath.toStdString(), object->getLibrary());
+    manager->unload(object);
+    delete object;
+}
+
+TEST_F(PluginObjectTest, unload)
+{
+    // Its impossible to test this. No interface provided in order to check loading and unloading
+    // status. Mainly tied to the manager class.
+    // TODO: Decouple Plugin::Object from Plugin::Manager and test unload function
+}
+
+

@@ -23,15 +23,47 @@
 #include <cstdlib>
 #include <pthread.h>
 
+/*!
+Simple FIFO(First In First Out) for data transfer between components in RTXI
+
+\sa AtomicFifo
+*/
 class Fifo
 {
 
 public:
 
+    /*!
+    * FIFO constructor. Builds a simple FIFO object.
+    *
+    * \param s Size of the FIFO 
+    */
     Fifo(size_t);
+
+    /*!
+    * FIFO Destructor
+    */
     ~Fifo(void);
 
+    /*!
+    * Read the data stored in the FIFO. clears out the data after
+    * the operation is complete.
+    * 
+    * \param buffer The buffer where the data from the buffer should be
+    *     written to
+    * \param size The size of the data to read from the buffer
+    * \param blocking Whether the thread should expect to be blocked or not
+    * \return n Number of elements read. Same as size.
+    */
     size_t read(void *,size_t,bool =true);
+
+    /*!
+    * Write to the FIFO. 
+    * 
+    * \param buffer The buffer holding the data to write to the FIFO. 
+    * \param size The size of the data to read from the buffer
+    * \return n Number of elements written. Same as size.
+    */
     size_t write(const void *,size_t);
 
 private:

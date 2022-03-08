@@ -31,6 +31,8 @@ bin_PROGRAMS = rtxiTests
 pkginclude_HEADERS = system_tests.h \
                      event_tests.h \
                      io_tests.h \
+                     fifo_tests.h \
+                     atomic_fifo_tests.h \
                      daq_tests.h \
                      settings_tests.h \
                      workspace_tests.h \
@@ -41,6 +43,8 @@ rtxiTests_SOURCES = rtxiTests.cpp \
                     system_tests.cpp \
                     event_tests.cpp \
                     io_tests.cpp \
+                    fifo_tests.cpp \
+                    atomic_fifo_tests.cpp \
                     daq_tests.cpp \
                     settings_tests.cpp \
                     workspace_tests.cpp \
