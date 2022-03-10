@@ -30,7 +30,9 @@ void ERROR_MSG(const std::string& errmsg, ...){
     char buf[256] = ""; 
     vsprintf(buf, errmsg.c_str(), args);
     std::cerr << std::string(buf, 256) << "\n";
+    #ifdef DEBUG
     std::cerr << boost::stacktrace::stacktrace();
+    #endif
 }
 
 
