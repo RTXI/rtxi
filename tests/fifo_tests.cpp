@@ -19,6 +19,7 @@
 
 #include <fifo_tests.h>
 #include <stdio.h>
+#include <thread>
 
 TEST_F(FifoTest, ReadAndWrite)
 {
@@ -29,10 +30,31 @@ TEST_F(FifoTest, ReadAndWrite)
         inbuff[i] = (char) i+97;
     }
     inbuff[9] = '\0';
-    fifo->write(inbuff, (size_t) 10);
-    fifo->read(outbuff, (size_t) 10);
+
+    // There should be zero bits read if the fifo is empty
+    EXPECT_EQ((size_t) 0, fifo->read(outbuff, (size_t) 10, false));
+
+    // check that read and write work properly
+    size_t written_bytes = fifo->write(inbuff, (size_t) 10);
+    size_t read_bytes = fifo->read(outbuff, (size_t) 10);
     EXPECT_STREQ(inbuff, outbuff);
+    EXPECT_EQ(written_bytes, read_bytes);
+
+    // The fifo should be empty after reading
+    EXPECT_EQ((size_t) 0, fifo->read(outbuff, (size_t) 10, false));
     delete fifo;
 }
 
-
+TEST_F(FifoTest, Threaded)
+{
+    char message[8] = "message";
+    char output[8]; 
+    size_t size = 8;
+    fifo = new Fifo((size_t) 10);
+    std::thread sender(&Fifo::write, &*fifo, message, size);
+    std::thread receiver(&Fifo::read, &*fifo, output, size, true);
+    sender.join();
+    receiver.join();
+    EXPECT_STREQ(message, output);
+    delete fifo;
+}
