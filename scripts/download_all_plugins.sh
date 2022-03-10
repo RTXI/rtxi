@@ -2,14 +2,14 @@
 
 set -eu
 
-if [ ! -d plugins ]; then
+if [ ! -d all_plugins ]; then
     mkdir all_plugins
     cd all_plugins/
 else
     cd all_plugins
 fi
 
-REPO_PREFIX="https://github.com/RTXI/"
+REPO_PREFIX="git@github.com:RTXI/"
 declare -a EXCLUDE_LIST=( 
     "${REPO_PREFIX}rtxi.git" 
     "${REPO_PREFIX}rtxi.github.io.git" 
