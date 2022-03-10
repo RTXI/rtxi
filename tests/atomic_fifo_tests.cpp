@@ -18,10 +18,68 @@
  */
 
 #include <atomic_fifo_tests.h>
+#include <thread>
+
+TEST_F(AtomicFifoTest, isLockFree)
+{
+    fifo = new AtomicFifo((size_t) 100);
+    ASSERT_TRUE(fifo->isLockFree());
+    delete fifo;
+}
 
 TEST_F(AtomicFifoTest, ReadAndWrite)
 {
+    fifo = new AtomicFifo((size_t) 100); 
+    char inbuff[22];
+    char outbuff[22];
+    for(int i=0; i<9; i++){
+        inbuff[i] = (char) i+97;
+    }
+    inbuff[9] = '\0';
 
+    // There should be zero bits read if the fifo is empty
+    EXPECT_EQ((size_t) 0, fifo->read(outbuff, (size_t) 10));
+
+    // check that read and write work properly
+    bool write_success = fifo->write(inbuff, (size_t) 21);
+    bool read_success = fifo->read(outbuff, (size_t) 21);
+    EXPECT_STREQ(inbuff, outbuff);
+    EXPECT_EQ(write_success, read_success);
+
+    // The fifo should be empty after reading
+    EXPECT_EQ((size_t) 0, fifo->read(outbuff, (size_t) 21));
+
+    // should be able to write multiple times
+    for(int i = 0; i < 10; i++){
+        write_success = fifo->write(inbuff, (size_t) 11);
+        read_success = fifo->read(outbuff, (size_t) 11);
+        EXPECT_STREQ(inbuff, outbuff);
+        EXPECT_EQ(write_success, read_success);
+    }
+
+    delete fifo;
 }
 
+TEST_F(AtomicFifoTest, Failures)
+{
+    fifo = new AtomicFifo((size_t) 2);
+    char buff[8] = "message";
+
+    // Test whether FIFO fails when overwritting to it
+    EXPECT_EQ(fifo->write(buff, (size_t) 8), (size_t) 0);
+}
+
+TEST_F(AtomicFifoTest, Threaded)
+{
+    char message[8] = "message";
+    char output[8]; 
+    size_t size = 8;
+    fifo = new AtomicFifo((size_t) 10);
+    std::thread sender(&AtomicFifo::write, &*fifo, message, size);
+    std::thread receiver(&AtomicFifo::read, &*fifo, output, size);
+    sender.join();
+    receiver.join();
+    EXPECT_STREQ(message, output);
+    delete fifo;
+}
 

@@ -17,9 +17,7 @@
 
  */
 
-#include <gtest/gtest-spi.h>
 #include <fifo_tests.h>
-#include <stdio.h>
 #include <thread>
 
 TEST_F(FifoTest, ReadAndWrite)
@@ -27,6 +25,8 @@ TEST_F(FifoTest, ReadAndWrite)
     fifo = new Fifo((size_t) 100); 
     char inbuff[22];
     char outbuff[22];
+    size_t written_bytes;
+    size_t read_bytes;
     for(int i=0; i<9; i++){
         inbuff[i] = (char) i+97;
     }
@@ -36,8 +36,9 @@ TEST_F(FifoTest, ReadAndWrite)
     EXPECT_EQ((size_t) 0, fifo->read(outbuff, (size_t) 10, false));
 
     // check that read and write work properly
-    size_t written_bytes = fifo->write(inbuff, (size_t) 21);
-    size_t read_bytes = fifo->read(outbuff, (size_t) 21);
+
+    written_bytes = fifo->write(inbuff, (size_t) 21);
+    read_bytes = fifo->read(outbuff, (size_t) 21);
     EXPECT_STREQ(inbuff, outbuff);
     EXPECT_EQ(written_bytes, read_bytes);
 
@@ -45,11 +46,12 @@ TEST_F(FifoTest, ReadAndWrite)
     EXPECT_EQ((size_t) 0, fifo->read(outbuff, (size_t) 21, false));
 
     // should be able to write multiple times
-    written_bytes = fifo->write(inbuff, (size_t) 11);
-    written_bytes += fifo->write(inbuff, (size_t) 11);
-    read_bytes = fifo->read(outbuff, (size_t) 22);
-    EXPECT_STREQ(inbuff, outbuff);
-    EXPECT_EQ(written_bytes, read_bytes);
+    for(int i = 0; i < 10; i++){
+        written_bytes = fifo->write(inbuff, (size_t) 11);
+        read_bytes = fifo->read(outbuff, (size_t) 11);
+        EXPECT_STREQ(inbuff, outbuff);
+        EXPECT_EQ(written_bytes, read_bytes);
+    }
 
     delete fifo;
 }
