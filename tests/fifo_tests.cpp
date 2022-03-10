@@ -17,15 +17,16 @@
 
  */
 
+#include <gtest/gtest-spi.h>
 #include <fifo_tests.h>
 #include <stdio.h>
 #include <thread>
 
 TEST_F(FifoTest, ReadAndWrite)
 {
-    fifo = new Fifo((size_t) 11); 
-    char inbuff[10];
-    char outbuff[10];
+    fifo = new Fifo((size_t) 100); 
+    char inbuff[22];
+    char outbuff[22];
     for(int i=0; i<9; i++){
         inbuff[i] = (char) i+97;
     }
@@ -35,14 +36,31 @@ TEST_F(FifoTest, ReadAndWrite)
     EXPECT_EQ((size_t) 0, fifo->read(outbuff, (size_t) 10, false));
 
     // check that read and write work properly
-    size_t written_bytes = fifo->write(inbuff, (size_t) 10);
-    size_t read_bytes = fifo->read(outbuff, (size_t) 10);
+    size_t written_bytes = fifo->write(inbuff, (size_t) 21);
+    size_t read_bytes = fifo->read(outbuff, (size_t) 21);
     EXPECT_STREQ(inbuff, outbuff);
     EXPECT_EQ(written_bytes, read_bytes);
 
     // The fifo should be empty after reading
-    EXPECT_EQ((size_t) 0, fifo->read(outbuff, (size_t) 10, false));
+    EXPECT_EQ((size_t) 0, fifo->read(outbuff, (size_t) 21, false));
+
+    // should be able to write multiple times
+    written_bytes = fifo->write(inbuff, (size_t) 11);
+    written_bytes += fifo->write(inbuff, (size_t) 11);
+    read_bytes = fifo->read(outbuff, (size_t) 22);
+    EXPECT_STREQ(inbuff, outbuff);
+    EXPECT_EQ(written_bytes, read_bytes);
+
     delete fifo;
+}
+
+TEST_F(FifoTest, Failures)
+{
+    fifo = new Fifo((size_t) 2);
+    char buff[8] = "message";
+
+    // Test whether FIFO fails when overwritting to it
+    EXPECT_EQ(fifo->write(buff, (size_t) 8), (size_t) 0);
 }
 
 TEST_F(FifoTest, Threaded)
