@@ -20,6 +20,7 @@
 #include <atomic_fifo_tests.h>
 #include <thread>
 
+
 TEST_F(AtomicFifoTest, isLockFree)
 {
     fifo = new AtomicFifo((size_t) 100);
@@ -69,14 +70,36 @@ TEST_F(AtomicFifoTest, Failures)
     EXPECT_EQ(fifo->write(buff, (size_t) 8), (size_t) 0);
 }
 
+void send(std::mutex &m, std::condition_variable &cv, std::atomic<bool> &ready, AtomicFifo *fifo, char *message, size_t size)
+{
+    std::unique_lock<std::mutex> lk(m);
+    fifo->write(message, size);
+    ready.store(true);
+    cv.notify_one();
+}
+
+void receive(std::mutex &m, std::condition_variable &cv, std::atomic<bool> &ready, AtomicFifo *fifo, char *output, size_t size)
+{
+    std::unique_lock<std::mutex> lk(m);
+    // handle spurius calls
+    cv.wait(lk, [&]{return ready.load();});
+
+    fifo->read(output, size);
+}
+
 TEST_F(AtomicFifoTest, Threaded)
 {
+    std::mutex m;
+    std::condition_variable cv;
+    std::atomic<bool> ready;
+    ready.store(false);
+
     char message[8] = "message";
     char output[8]; 
     size_t size = 8;
     fifo = new AtomicFifo((size_t) 10);
-    std::thread sender(&AtomicFifo::write, &*fifo, message, size);
-    std::thread receiver(&AtomicFifo::read, &*fifo, output, size);
+    std::thread sender(&send, std::ref(m), std::ref(cv), std::ref(ready), fifo, message, size);
+    std::thread receiver(&receive, std::ref(m), std::ref(cv), std::ref(ready), fifo, output, size);
     sender.join();
     receiver.join();
     EXPECT_STREQ(message, output);

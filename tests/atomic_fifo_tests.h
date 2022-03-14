@@ -23,6 +23,11 @@
 #include <gtest/gtest.h>
 #include <atomic_fifo.h>
 
+// C++20 has a semaphore library, but can't use it just yet as it's too new and might not
+// work for current users of RTXI testing facilities. Use condition variable and mutex instead. 
+#include <condition_variable>
+#include <mutex>
+
 // Define all fixtures for testing purposes
 class AtomicFifoTest : public ::testing::Test
 {
@@ -32,5 +37,9 @@ protected:
 
     AtomicFifo *fifo;
 };
-   
+
+// Need wrappers on fifo methods for threadding purposes
+void send(std::mutex &m, std::condition_variable &cv, std::atomic<bool> &ready, AtomicFifo *fifo, char *message, size_t size);
+void receive(std::mutex &m, std::condition_variable &cv, std::atomic<bool> &ready, AtomicFifo *fifo, char *output, size_t size);
+
 #endif
