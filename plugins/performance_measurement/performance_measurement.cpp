@@ -76,8 +76,18 @@ PerformanceMeasurement::Panel::Panel(QWidget *parent) : QWidget(parent),
     gridLayout->addWidget(new QLabel(tr("Real-time Jitter (").append(suffix)), 5, 0);
     gridLayout->addWidget(timestepJitterEdit, 5, 1);
 
+    RTCpuPercentEdit = new QLineEdit(subWindow);
+    RTCpuPercentEdit->setReadOnly(true);
+    gridLayout->addWidget(new QLabel("Real-time Cpu Usage(%)"), 6, 0);
+    gridLayout->addWidget(RTCpuPercentEdit, 6, 1);
+
+    AppCpuPercentEdit = new QLineEdit(subWindow);
+    AppCpuPercentEdit->setReadOnly(true);
+    gridLayout->addWidget(new QLabel("RTXI App Cpu Usage(%)"), 7, 0);
+    gridLayout->addWidget(AppCpuPercentEdit, 7, 1);
+
     QPushButton *resetButton = new QPushButton("Reset", this);
-    gridLayout->addWidget(resetButton, 6, 1);
+    gridLayout->addWidget(resetButton, 8, 1);
     QObject::connect(resetButton,SIGNAL(released(void)),this,SLOT(reset(void)));
 
     // Attach child widget to parent widget
