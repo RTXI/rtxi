@@ -81,7 +81,7 @@ void send(std::mutex &m, std::condition_variable &cv, std::atomic<bool> &ready, 
 void receive(std::mutex &m, std::condition_variable &cv, std::atomic<bool> &ready, AtomicFifo *fifo, char *output, size_t size)
 {
     std::unique_lock<std::mutex> lk(m);
-    // handle spurius calls
+    // handle spurious calls
     cv.wait(lk, [&]{return ready.load();});
 
     fifo->read(output, size);
