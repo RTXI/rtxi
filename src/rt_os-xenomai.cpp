@@ -29,6 +29,8 @@
 #include <getopt.h>
 #include <execinfo.h>
 #include <unistd.h>
+#include <fstream>
+#include <string>
 
 #if CONFIG_XENO_VERSION_MAJOR >= 3
 #include <alchemy/task.h>
@@ -48,6 +50,7 @@ typedef struct
 
 static bool init_rt = false;
 static pthread_key_t is_rt_key;
+static char *RT_TASK_NAME = "RTXI RT Thread"; 
 
 static const char *sigdebug_reasons[] =
 {
@@ -148,7 +151,7 @@ int RT::OS::createTask(RT::OS::Task *task,void *(*entry)(void *),void *arg,int p
 	if ((prio >=0) && (prio <=99))
 		priority -= prio;
 
-	if ((retval = rt_task_create(&t->task, "RTXI RT Thread" , 0, priority, 0)))
+	if ((retval = rt_task_create(&t->task, RT_TASK_NAME, 0, priority, 0)))
 	{
 		ERROR_MSG("RT::OS::createTask : failed to create task\n");
 		return retval;
@@ -220,4 +223,29 @@ void RT::OS::sleepTimestep(RT::OS::Task task)
 
 	// Update next interrupt time
 	t->next_t += t->period;
+}
+
+double RT::OS::getCpuUsage()
+{
+    // Should not attempt this in the real-time thread
+    if(RT::OS::isRealtime()){
+        ERROR_MSG("RT::OS::getCpuUsage : This function should only be run in user space. Aborting.");
+        return 0.0;
+    }
+
+    char tempbuff[256];
+    double cpu_percent;
+    unsigned long cpu_cycles[7];
+    bool found = false;
+    std::ifstream infile("/proc/xenomai/sched/stat");
+    infile.getline(tempbuff, 256);
+    while (infile >> cpu_cycles[0]){
+        for(int i=1; i<6; i++) infile >> cpu_cycles[i];
+        infile >> tempbuff;
+        infile >> cpu_percent;
+        infile.getline(tempbuff, 256);
+        if(std::string(tempbuff).find(RT_TASK_NAME) != std::string::npos) {found = true; break;}
+    }
+    if (found) return cpu_percent;
+    else return 0.0;
 }

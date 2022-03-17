@@ -19,6 +19,8 @@
 #include <debug.h>
 #include <main_window.h>
 #include <performance_measurement.h>
+#include <rt.h>
+
 
 static Workspace::variable_t vars[] =
 {
@@ -191,6 +193,7 @@ void PerformanceMeasurement::Panel::update(void)
     timestepEdit->setText(QString::number(timestep * 1e-3));
     maxTimestepEdit->setText(QString::number(maxTimestep * 1e-3));
     timestepJitterEdit->setText(QString::number(jitter * 1e-3));
+    RTCpuPercentEdit->setText(QString::number(RT::OS::getCpuUsage()));
 }
 
 extern "C" Plugin::Object * createRTXIPlugin(void *)
@@ -238,3 +241,4 @@ PerformanceMeasurement::Plugin * PerformanceMeasurement::Plugin::getInstance(voi
 
     return instance;
 }
+
