@@ -25,6 +25,12 @@
 #include <semaphore.h>
 #include <sys/mman.h>
 #include <sys/time.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <pthread.h>
+
+#include <fstream>
+#include <string>
 
 typedef struct
 {
@@ -167,4 +173,33 @@ void RT::OS::sleepTimestep(RT::OS::Task task)
     };
 
     while (nanosleep(&ts,&ts) < 0 && errno == EINTR);
+}
+
+double RT::OS::getCpuUsage()
+{
+    // Should not attempt this in the real-time thread
+    if(RT::OS::isRealtime()){
+        ERROR_MSG("RT::OS::getCpuUsage : This function should only be run in user space. Aborting.");
+        return 0.0;
+    }
+
+    std::stringstream ss;
+    std::string ppid;
+    ss << getppid();
+    ss >> ppid;
+    char tempbuff[256];
+    double cpu_percent;
+    unsigned long temp_ul;
+    std::ifstream infile("/proc/"+ppid+"/stat");
+    infile >> temp_ul;
+    std::cout << temp_ul << "\n";
+    infile >> tempbuff >> tempbuff;
+    std::cout << tempbuff << "\n";
+    for(int i = 0; i < 10; i++){
+        infile >> temp_ul;
+    }
+    for (int i = 0; i < 4; i++){
+        infile >> temp_ul;
+        std::cout << temp_ul << "\n";
+    }
 }
