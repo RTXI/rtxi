@@ -29,8 +29,6 @@
 #include <getopt.h>
 #include <execinfo.h>
 #include <unistd.h>
-#include <fstream>
-#include <string>
 
 #if CONFIG_XENO_VERSION_MAJOR >= 3
 #include <alchemy/task.h>
@@ -225,6 +223,10 @@ void RT::OS::sleepTimestep(RT::OS::Task task)
 	t->next_t += t->period;
 }
 
+timespec last_clock_read;
+timespec last_proc_time;
+ticks_t last_rt_clock;
+
 double RT::OS::getCpuUsage()
 {
     // Should not attempt this in the real-time thread
@@ -233,19 +235,39 @@ double RT::OS::getCpuUsage()
         return 0.0;
     }
 
-    char tempbuff[256];
-    double cpu_percent;
-    unsigned long cpu_cycles[7];
-    bool found = false;
-    std::ifstream infile("/proc/xenomai/sched/stat");
-    infile.getline(tempbuff, 256);
-    while (infile >> cpu_cycles[0]){
-        for(int i=1; i<6; i++) infile >> cpu_cycles[i];
-        infile >> tempbuff;
-        infile >> cpu_percent;
-        infile.getline(tempbuff, 256);
-        if(std::string(tempbuff).find(RT_TASK_NAME) != std::string::npos) {found = true; break;}
-    }
-    if (found) return cpu_percent;
-    else return 0.0;
+    timespec clock_time;
+    timespec proc_time;
+    double cpu_rt_percent;
+    double cpu_user_percent;
+    long rt_time_elapsed;
+    long proc_time_elapsed;
+    long cpu_time_elapsed;
+    RT_TASK_INFO task_info;
+
+    // First get task information
+    xenomai_task_t *task = reinterpret_cast<xenomai_task_t *>(RT::System::getInstance()->getTask());
+    rt_task_inquire(&(task->task), &task_info);
+
+    // get ticks from normal system
+    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &proc_time);
+    clock_gettime(CLOCK_REALTIME, &clock_time);
+
+    // calculate cpu usage in user space
+    cpu_time_elapsed = 1e9*(clock_time.tv_sec - last_clock_read.tv_sec) + 
+                           (clock_time.tv_nsec - last_clock_read.tv_nsec);
+    if (cpu_time_elapsed <= 0) return 0.0;
+    proc_time_elapsed = 1e9*(proc_time.tv_sec - last_proc_time.tv_sec) + 
+                            (proc_time.tv_nsec - last_proc_time.tv_nsec);
+    cpu_user_percent = 100.0*(proc_time_elapsed) / cpu_time_elapsed;
+
+    // calcualte cpu usage by real-time therad
+    rt_time_elapsed = task_info.stat.xtime - last_rt_clock;
+    cpu_rt_percent = 100.0*rt_time_elapsed / cpu_time_elapsed;
+
+    // keep track of last clock reads
+    last_proc_time = proc_time;
+    last_clock_read = clock_time;
+    last_rt_clock = task_info.stat.xtime;
+
+    return cpu_rt_percent + cpu_user_percent;
 }
