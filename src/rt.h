@@ -59,6 +59,18 @@ bool isRealtime(void);
  */
 long long getTime(void);
 
+/*!
+ * Returns the percentage of Cpu being used by the Real-Time
+ * Thread. Should not be run from the real-time thread
+ * directly as this can cause high latency.
+ *
+ * \return CPU_TIME Percentage of time the cpu is spent on
+ *      real-time thread calculations. In multicore systems it
+ *      is the percent of Cpu for the specific processor running
+ *      the real-time task.
+ */
+double getCpuUsage(void);
+
 } // namespace OS
 
 /*!
@@ -433,6 +445,13 @@ public:
      */
     int postEvent(Event *event,bool blocking =true);
 
+    /*!
+     * Return information on the task running in real time.
+     * 
+     * \return RT::OS::Task a pointer to the task structure containing the 
+     *      relevant information. The data cannot be modified.
+     */
+    const RT::OS::Task getTask(){ return this->task; }
 private:
 
     /******************************************************************

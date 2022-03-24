@@ -25,6 +25,14 @@
 #include <semaphore.h>
 #include <sys/mman.h>
 #include <sys/time.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <pthread.h>
+#include <time.h>
+#include <sys/resource.h>
+
+#include <fstream>
+#include <string>
 
 typedef struct
 {
@@ -168,3 +176,39 @@ void RT::OS::sleepTimestep(RT::OS::Task task)
 
     while (nanosleep(&ts,&ts) < 0 && errno == EINTR);
 }
+
+timespec last_clock_read;
+timespec last_proc_time;
+
+double RT::OS::getCpuUsage()
+{
+    // Should not attempt this in the real-time thread
+    if(RT::OS::isRealtime()){
+        ERROR_MSG("RT::OS::getCpuUsage : This function should only be run in user space. Aborting.");
+        return 0.0;
+    }
+
+    double cpu_percent;
+    long cpu_time_elapsed;
+    long proc_time_elapsed;
+
+    timespec clock_time;
+    timespec proc_time;
+    //rusage resource_usage;
+
+    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &proc_time);
+    clock_gettime(CLOCK_REALTIME, &clock_time);
+    //getrusage(RUSAGE_SELF, &resource_usage); 
+
+    cpu_time_elapsed = 1e9*(clock_time.tv_sec - last_clock_read.tv_sec) + 
+                           (clock_time.tv_nsec - last_clock_read.tv_nsec);
+    if (cpu_time_elapsed <= 0) return 0.0;
+    proc_time_elapsed = 1e9*(proc_time.tv_sec - last_proc_time.tv_sec) + 
+                            (proc_time.tv_nsec - last_proc_time.tv_nsec);
+    cpu_percent = 100.0*(proc_time_elapsed) / cpu_time_elapsed;
+
+    last_proc_time = proc_time; 
+    last_clock_read = clock_time;
+    return cpu_percent;
+}
+

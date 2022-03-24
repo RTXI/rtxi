@@ -114,6 +114,7 @@ private:
     QLineEdit *maxDurationEdit;
     QLineEdit *maxTimestepEdit;
     QLineEdit *timestepJitterEdit;
+    QLineEdit *AppCpuPercentEdit;
 }; // class Panel
 }; // namespace PerformanceMeasurement
 #endif /* PERFORMANCE_MEASUREMENT_H */
