@@ -11,7 +11,6 @@ LIBS = -rdynamic
 pkginclude_HEADERS = \
 		debug.h \
 		atomic_fifo.h \
-		cmdline.h \
 		compiler.h \
 		daq.h \
 		default_gui_model.h \
@@ -29,7 +28,6 @@ pkginclude_HEADERS = \
 rtxi_SOURCES = \
         debug.cpp \
 		atomic_fifo.cpp \
-		cmdline.cpp \
 		daq.cpp \
 		default_gui_model.cpp \
 		event.cpp \

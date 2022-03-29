@@ -17,7 +17,6 @@
 
 */
 
-#include <cmdline.h>
 #include <debug.h>
 #include <algorithm>
 #include <settings.h>

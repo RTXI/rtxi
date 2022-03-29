@@ -25,6 +25,15 @@
 #include <rt.h>
 #include <event.h>
 
+class EventObjectTest : public ::testing::Test
+{
+protected:
+    EventObjectTest() { }
+    ~EventObjectTest() { }
+
+    Event::Object *event;
+};
+
 class EventManagerTest : public ::testing::Test
 {
 protected:

@@ -21,6 +21,18 @@
 #include <gmock/gmock.h>
 #include <event.h>
 
+TEST_F(EventObjectTest, ParameterTests)
+{
+    const char *TEST_EVENT_NAME = "EventManagerTest - postEvent : Test Event";
+    const char *TEST_EVENT_PARAM = "TEST_PARAM";
+    bool *TEST_EVENT_PARAM_VALUE;
+    event = new Event::Object(TEST_EVENT_NAME);
+    event->setParam(TEST_EVENT_PARAM, TEST_EVENT_PARAM_VALUE);
+    ASSERT_EQ(event->getName(), TEST_EVENT_NAME);
+    ASSERT_EQ(event->getParam(TEST_EVENT_PARAM), TEST_EVENT_PARAM_VALUE);
+}
+
+
 TEST_F(EventManagerTest, getInstance)
 {
     event_manager = Event::Manager::getInstance();
@@ -53,5 +65,4 @@ TEST_F(EventManagerTest, postEventRT)
     EXPECT_CALL(event_handler, receiveEvent).Times(::testing::Exactly(0));
     event_manager->postEventRT(&event_object);
 }
-
 

@@ -28,7 +28,6 @@
 #include <signal.h>
 #include <string>
 #include <unistd.h>
-#include <cmdline.h>
 #include <ctype.h>
 #include <daq.h>
 #include <debug.h>
@@ -92,7 +91,6 @@ int main(int argc,char *argv[])
     app->connect(app,SIGNAL(lastWindowClosed()),app,SLOT(quit()));
     MainWindow::getInstance()->loadWindow();;
 
-    CmdLine::getInstance();
     RT::System::getInstance();
     IO::Connector::getInstance();
 
