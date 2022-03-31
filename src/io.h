@@ -153,8 +153,9 @@ public:
 
 private:
 
-    void doDeferred(const Settings::Object::State &);
-    void doSave(Settings::Object::State &) const;
+    // Who uses this??
+    //void doDeferred(const Settings::Object::State &);
+    //void doSave(Settings::Object::State &) const;
 
     /*****************************************************************
      * The constructor, destructor, and assignment operator are made *

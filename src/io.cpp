@@ -340,40 +340,40 @@ bool IO::Connector::connected(IO::Block *src,size_t src_num,IO::Block *dest,size
     return false;
 }
 
-void IO::Connector::doDeferred(const Settings::Object::State &s)
-{
-    Block *src, *dest;
-
-    for (size_t i = 0,end = s.loadInteger("Num Links"); i < end; ++i)
-        {
-            std::ostringstream str;
-            str << i;
-
-            src = dynamic_cast<Block *>(Settings::Manager::getInstance()->getObject(s.loadInteger(str.str()+" Source ID")));
-            dest = dynamic_cast<Block *>(Settings::Manager::getInstance()->getObject(s.loadInteger(str.str()+" Destination ID")));
-            if (src && dest)
-                connect(src,s.loadInteger(str.str()+" Source channel"),
-                        dest,s.loadInteger(str.str()+" Destination channel"));
-        }
-}
-
-void IO::Connector::doSave(Settings::Object::State &s) const
-{
-    size_t n = 0;
-
-    for (std::list<Block *>::const_iterator i = blockList.begin(),iend = blockList.end(); i != iend; ++i)
-        for (size_t j = 0,jend = (*i)->getCount(INPUT); j < jend; ++j)
-            for (std::list<Block::link_t>::const_iterator k = (*i)->inputs[j].links.begin(),kend = (*i)->inputs[j].links.end(); k != kend; ++k)
-                {
-                    std::ostringstream str;
-                    str << n++;
-                    s.saveInteger(str.str()+" Source ID",k->block->getID());
-                    s.saveInteger(str.str()+" Source channel",k->channel);
-                    s.saveInteger(str.str()+" Destination ID",(*i)->getID());
-                    s.saveInteger(str.str()+" Destination channel",j);
-                }
-    s.saveInteger("Num Links",n);
-}
+//void IO::Connector::doDeferred(const Settings::Object::State &s)
+//{
+//    Block *src, *dest;
+//
+//    for (size_t i = 0,end = s.loadInteger("Num Links"); i < end; ++i)
+//        {
+//            std::ostringstream str;
+//            str << i;
+//
+//            src = dynamic_cast<Block *>(Settings::Manager::getInstance()->getObject(s.loadInteger(str.str()+" Source ID")));
+//            dest = dynamic_cast<Block *>(Settings::Manager::getInstance()->getObject(s.loadInteger(str.str()+" Destination ID")));
+//            if (src && dest)
+//                connect(src,s.loadInteger(str.str()+" Source channel"),
+//                        dest,s.loadInteger(str.str()+" Destination channel"));
+//        }
+//}
+//
+//void IO::Connector::doSave(Settings::Object::State &s) const
+//{
+//    size_t n = 0;
+//
+//    for (std::list<Block *>::const_iterator i = blockList.begin(),iend = blockList.end(); i != iend; ++i)
+//        for (size_t j = 0,jend = (*i)->getCount(INPUT); j < jend; ++j)
+//            for (std::list<Block::link_t>::const_iterator k = (*i)->inputs[j].links.begin(),kend = (*i)->inputs[j].links.end(); k != kend; ++k)
+//                {
+//                    std::ostringstream str;
+//                    str << n++;
+//                    s.saveInteger(str.str()+" Source ID",k->block->getID());
+//                    s.saveInteger(str.str()+" Source channel",k->channel);
+//                    s.saveInteger(str.str()+" Destination ID",(*i)->getID());
+//                    s.saveInteger(str.str()+" Destination channel",j);
+//                }
+//    s.saveInteger("Num Links",n);
+//}
 
 void IO::Connector::insertBlock(IO::Block *block)
 {
