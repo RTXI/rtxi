@@ -29,7 +29,9 @@
 class SystemTest : public ::testing::Test
 {
 protected:
-    SystemTest() { }
+    SystemTest() { 
+        system = RT::System::getInstance();
+    }
     ~SystemTest() { }
 
     RT::System *system;

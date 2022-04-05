@@ -27,6 +27,8 @@
 #include <daq.h>
 #include <io.h>
 
+#include <sstream>
+
 class MockDAQDriver : public DAQ::Driver
 {
 public:
@@ -81,10 +83,12 @@ public:
     static void callback(DAQ::Device *device, void *) { device->getChannelCount(DAQ::AI); }
 
 protected:
-    DAQManagerTest() { daq_manager = DAQ::Manager::getInstance(); }
-    ~DAQManagerTest() { }
+    DAQManagerTest();
+    ~DAQManagerTest(); 
 
     DAQ::Manager *daq_manager;
+    std::stringstream cerr_buffer;
+    std::streambuf *cerr_original_buffer;
 };
 
 #endif

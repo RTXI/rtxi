@@ -56,7 +56,9 @@ protected:
         defaultChannelList[1] = defaultOutputChannel_t;
         block = new IO::Block(defaultBlockName, defaultChannelList, (size_t) 2);
     }
-    ~IOBlockTest() { }
+    ~IOBlockTest() { 
+        delete block;
+    }
 
     IO::Block *block;
 };
@@ -80,7 +82,9 @@ public:
 class IOConnectorTest : public ::testing::Test
 {
 protected:
-    IOConnectorTest() { }
+    IOConnectorTest() { 
+        connector = IO::Connector::getInstance();
+    }
     ~IOConnectorTest() { }
 
     IO::channel_t *defaultChannelList;

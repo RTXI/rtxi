@@ -71,8 +71,8 @@ TEST_F(FifoTest, Threaded)
     char output[8]; 
     size_t size = 8;
     fifo = new Fifo((size_t) 10);
-    std::thread sender(&Fifo::write, &*fifo, message, size);
-    std::thread receiver(&Fifo::read, &*fifo, output, size, true);
+    std::thread sender(&Fifo::write, fifo, message, size);
+    std::thread receiver(&Fifo::read, fifo, output, size, true);
     sender.join();
     receiver.join();
     EXPECT_STREQ(message, output);

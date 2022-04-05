@@ -17,29 +17,21 @@
 
  */
 
-#include <rtxiTests.h>
-#include <iostream>
+#ifndef RTXITESTS_H
+#define RTXITESTS_H
 
-void TestEnvironment::SetUp()
-{
-    argc = 1;
-    argv[0] = (char*) "TestQApp";
-    app = new QApplication(argc, argv);
-    if (app){
-        std::cout << "QT Application object initialized." << std::endl;
-    }else{
-        std::cout << "Unable to initialized QT application." << std::endl;
-    } 
-}
+#include <gtest/gtest.h>
+#include <QApplication>
 
-void TestEnvironment::TearDown()
+class TestEnvironment : public ::testing::Environment
 {
-    delete app;
-}
+    ~TestEnvironment() override {}
+    void SetUp();
+    void TearDown();
 
-int main(int argc, char *argv[])
-{
-    ::testing::InitGoogleTest(&argc, argv);
-    ::testing::AddGlobalTestEnvironment(new TestEnvironment());
-    return RUN_ALL_TESTS();
-}
+    QApplication *app;
+    int argc;
+    char *argv[1];
+};
+
+#endif

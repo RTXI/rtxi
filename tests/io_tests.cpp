@@ -148,6 +148,8 @@ TEST_F(IOConnectorTest, connections)
     EXPECT_FALSE(connector->connected(block2, (size_t) 0, block1, (size_t) 0)); 
     delete block1;
     delete block2;
+    delete[] block1channels;
+    delete[] block2channels;
 }
 
 // The cases where foreachBlock function is used are too unique (only used a handful of times)

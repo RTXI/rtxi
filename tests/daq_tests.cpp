@@ -22,6 +22,18 @@
 #include <gmock/gmock.h>
 #include <daq_tests.h>
 
+DAQManagerTest::DAQManagerTest()
+{
+    daq_manager = DAQ::Manager::getInstance();
+    cerr_original_buffer = std::cerr.rdbuf();
+    std::cerr.rdbuf(cerr_buffer.rdbuf());
+}
+
+DAQManagerTest::~DAQManagerTest()
+{
+    std::cerr.rdbuf(cerr_original_buffer);
+}
+
 TEST_F(DAQManagerTest, getInstance)
 {
     ASSERT_EQ(daq_manager, DAQ::Manager::getInstance());
@@ -37,6 +49,12 @@ TEST_F(DAQManagerTest, loadDevice)
     daq_manager->loadDevice("testDeviceDriver", deviceArgs1);
     deviceArgs2.push_back("testDeviceArgs2");
     daq_manager->loadDevice("testDeviceDriver", deviceArgs2);
+
+    // Check that there are the appropriate errors.
+    std::list<std::string> deviceArgs3;
+    deviceArgs3.push_back("missingDriver");
+    daq_manager->loadDevice("missingDriver", deviceArgs3);
+
     delete testDriver;
 }
 
