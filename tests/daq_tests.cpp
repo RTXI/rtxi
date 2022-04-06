@@ -50,12 +50,21 @@ TEST_F(DAQManagerTest, loadDevice)
     deviceArgs2.push_back("testDeviceArgs2");
     daq_manager->loadDevice("testDeviceDriver", deviceArgs2);
 
-    // Check that there are the appropriate errors.
+    // Check error message for missing drivers
     std::list<std::string> deviceArgs3;
     deviceArgs3.push_back("missingDriver");
     daq_manager->loadDevice("missingDriver", deviceArgs3);
+    EXPECT_THAT(cerr_buffer.str(), ::testing::HasSubstr("does not exist")); 
+    cerr_buffer.str("");
 
+    // Check erro message for already initialized drivers
+    MockDAQDriver *anotherTestDriver = new MockDAQDriver("testDeviceDriver");
+    EXPECT_THAT(cerr_buffer.str(), ::testing::HasSubstr("Driver already registered"));
+    cerr_buffer.str("");
+
+    delete anotherTestDriver;
     delete testDriver;
+
 }
 
 TEST_F(DAQManagerTest, foreachDevice)
