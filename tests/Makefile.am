@@ -14,7 +14,6 @@ OBJS = $(top_srcdir)/src/debug.o \
        $(top_srcdir)/src/fifo.o \
        $(top_srcdir)/src/io.o \
        $(top_srcdir)/src/mutex.o \
-       $(top_srcdir)/src/sem.o \
        $(top_srcdir)/src/settings.o \
        $(top_srcdir)/src/workspace.o \
        $(top_srcdir)/src/main_window.o \

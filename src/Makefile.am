@@ -21,7 +21,6 @@ pkginclude_HEADERS = \
 		mutex.h \
 		plugin.h \
 		rt.h \
-		sem.h \
 		settings.h \
 		workspace.h 
 
@@ -38,7 +37,6 @@ rtxi_SOURCES = \
 		mutex.cpp \
 		plugin.cpp \
 		rt.cpp \
-		sem.cpp \
 		settings.cpp \
 		workspace.cpp
 

@@ -451,7 +451,7 @@ public:
      * \return RT::OS::Task a pointer to the task structure containing the 
      *      relevant information. The data cannot be modified.
      */
-    const RT::OS::Task getTask(){ return this->task; }
+    RT::OS::Task getTask(){ return this->task; }
 private:
 
     /******************************************************************
