@@ -22,8 +22,11 @@
 
 void TestEnvironment::SetUp()
 {
-    argc = 1;
-    argv[0] = (char*) "TestQApp";
+    argc = 3;
+    char *argv[3];
+    argv[0] = const_cast<char *>("TestQApp");
+    argv[1] = const_cast<char *>("-platform");
+    argv[2] = const_cast<char *>("offscreen");
     app = new QApplication(argc, argv);
     if (app){
         std::cout << "QT Application object initialized." << std::endl;
