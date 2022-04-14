@@ -19,6 +19,8 @@
 #include <debug.h>
 #include <main_window.h>
 #include <performance_measurement.h>
+#include <rt.h>
+
 
 static Workspace::variable_t vars[] =
 {
@@ -76,8 +78,13 @@ PerformanceMeasurement::Panel::Panel(QWidget *parent) : QWidget(parent),
     gridLayout->addWidget(new QLabel(tr("Real-time Jitter (").append(suffix)), 5, 0);
     gridLayout->addWidget(timestepJitterEdit, 5, 1);
 
+    AppCpuPercentEdit = new QLineEdit(subWindow);
+    AppCpuPercentEdit->setReadOnly(true);
+    gridLayout->addWidget(new QLabel("RTXI App Cpu Usage(%)"), 6, 0);
+    gridLayout->addWidget(AppCpuPercentEdit, 6, 1);
+
     QPushButton *resetButton = new QPushButton("Reset", this);
-    gridLayout->addWidget(resetButton, 6, 1);
+    gridLayout->addWidget(resetButton, 7, 1);
     QObject::connect(resetButton,SIGNAL(released(void)),this,SLOT(reset(void)));
 
     // Attach child widget to parent widget
@@ -144,7 +151,6 @@ void PerformanceMeasurement::Panel::read(void)
 void PerformanceMeasurement::Panel::write(void)
 {
     long long now = RT::OS::getTime();
-    double period = RT::System::getInstance()->getPeriod();
 
     switch (state)
         {
@@ -182,6 +188,7 @@ void PerformanceMeasurement::Panel::update(void)
     timestepEdit->setText(QString::number(timestep * 1e-3));
     maxTimestepEdit->setText(QString::number(maxTimestep * 1e-3));
     timestepJitterEdit->setText(QString::number(jitter * 1e-3));
+    AppCpuPercentEdit->setText(QString::number(RT::OS::getCpuUsage()));
 }
 
 extern "C" Plugin::Object * createRTXIPlugin(void *)
@@ -229,3 +236,4 @@ PerformanceMeasurement::Plugin * PerformanceMeasurement::Plugin::getInstance(voi
 
     return instance;
 }
+

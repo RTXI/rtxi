@@ -121,7 +121,7 @@ private:
 
     Manager(void) : mutex(Mutex::RECURSIVE) {};
     ~Manager(void) {};
-    Manager(const Manager &) {};
+    Manager(const Manager &) : QObject() {};
     Manager &operator=(const Manager &)
     {
         return *getInstance();

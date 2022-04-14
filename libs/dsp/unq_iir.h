@@ -12,7 +12,7 @@ public:
   UnquantDirectFormIir(int num_numer_coeff, int num_denom_coeff,
                        double* numer_coeff, double* denom_coeff);
   double ProcessSample(double input_val);
-  long ProcessSample(long input_val) { return (0); };
+  long ProcessSample(long) { return (0); };
   int GetNumNumerCoeff(void);
   int GetNumTaps(void);
   int GetNumDenomCoeff(void);

@@ -178,7 +178,7 @@ private:
      ****************************************************************/
 
     MainWindow(void);
-    MainWindow(const MainWindow &) {};
+    MainWindow(const MainWindow &) : QMainWindow(NULL, Qt::Window) {};
     MainWindow &operator = (const MainWindow &)
     {
         return *getInstance();

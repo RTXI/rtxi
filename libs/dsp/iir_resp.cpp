@@ -243,13 +243,12 @@ double
 IirFilterResponse::GetIntervalPeak(int nBeg, int nEnd)
 {
   double peak;
-  int n, indexOfPeak;
+  int n;
 
   peak = -9999.0;
   for (n = nBeg; n < nEnd; n++) {
     if (Mag_Resp[n] > peak) {
       peak = Mag_Resp[n];
-      indexOfPeak = n;
     }
   }
   return (peak);

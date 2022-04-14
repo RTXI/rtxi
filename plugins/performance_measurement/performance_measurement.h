@@ -30,7 +30,7 @@
 #include <plugin.h>
 #include <rt.h>
 #include <workspace.h>
-#include <runningstat.h>
+#include <math/runningstat.h>
 
 namespace PerformanceMeasurement
 {
@@ -49,7 +49,7 @@ public slots:
 private:
     Plugin(void);
     ~Plugin(void);
-    Plugin(const Plugin &) {};
+    Plugin(const Plugin &) : QObject() {};
     Plugin & operator=(const Plugin &)
     {
         return *getInstance();
@@ -114,6 +114,7 @@ private:
     QLineEdit *maxDurationEdit;
     QLineEdit *maxTimestepEdit;
     QLineEdit *timestepJitterEdit;
+    QLineEdit *AppCpuPercentEdit;
 }; // class Panel
 }; // namespace PerformanceMeasurement
 #endif /* PERFORMANCE_MEASUREMENT_H */

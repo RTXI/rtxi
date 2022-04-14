@@ -17,8 +17,6 @@
 #ifdef _DEBUG
 extern std::ofstream DebugFile;
 #endif
-// extern std::ofstream LogFile;
-// extern logical PauseEnabled;
 
 double
 GoldenSearch2(double tol, FreqSampFilterSpec* filter_spec,
@@ -26,7 +24,7 @@ GoldenSearch2(double tol, FreqSampFilterSpec* filter_spec,
               FreqSampFilterResponse* filter_resp, double rho_min,
               double rho_max, double* origins, double* slopes, double* fmin)
 {
-  double x0, x1, x2, x3, xmin, f0, f1, f2, f3, oldXmin;
+  double x0, x1, x2, x3, xmin, f1, f2;
   double leftOrd, rightOrd, midOrd, x, xb;
   double trans_val;
   double delta;
@@ -34,7 +32,6 @@ GoldenSearch2(double tol, FreqSampFilterSpec* filter_spec,
   logical db_scale;
 
   std::cout << "in goldenSearch\n" << std::endl;
-  // LogFile << "in goldenSearch\n" << std::endl;
   db_scale = TRUE;
 
   /*--------------------------------------------*/
@@ -43,15 +40,12 @@ GoldenSearch2(double tol, FreqSampFilterSpec* filter_spec,
   filter_resp->ComputeMagResp(filter_design, db_scale);
   filter_resp->NormalizeResponse(db_scale);
   leftOrd = filter_resp->GetStopbandPeak();
-  // LogFile << "leftOrd = " << leftOrd << std::endl;
 
   filter_spec->SetTrans(origins, slopes, 1.0);
   filter_design->ComputeCoefficients(filter_spec);
   filter_resp->ComputeMagResp(filter_design, db_scale);
   filter_resp->NormalizeResponse(db_scale);
   rightOrd = filter_resp->GetStopbandPeak();
-  // LogFile << "rightOrd = " << rightOrd << std::endl;
-  // pause(PauseEnabled);
 
   if (leftOrd < rightOrd) {
     trans_val = 1.0;
@@ -88,68 +82,43 @@ GoldenSearch2(double tol, FreqSampFilterSpec* filter_spec,
   x3 = rho_max;
   x1 = xb;
   x2 = xb + GOLD3 * (rho_max - xb);
-  /*
-   * LogFile << "x0= " << x0 << " x1= " << x1 << " x2= " << x2 << " x3= " << x3
-   *         << std::endl;
-   */
 
   filter_spec->SetTrans(origins, slopes, x1);
   filter_design->ComputeCoefficients(filter_spec);
   filter_resp->ComputeMagResp(filter_design, db_scale);
   filter_resp->NormalizeResponse(db_scale);
   f1 = filter_resp->GetStopbandPeak();
-  // LogFile << "f1 = " << f1 << std::endl;
 
   filter_spec->SetTrans(origins, slopes, x2);
   filter_design->ComputeCoefficients(filter_spec);
   filter_resp->ComputeMagResp(filter_design, db_scale);
   filter_resp->NormalizeResponse(db_scale);
   f2 = filter_resp->GetStopbandPeak();
-  // LogFile << "f2 = " << f2 << std::endl;
-
-  oldXmin = 0.0;
 
   for (n = 1; n <= 100; n++) {
     if (f1 <= f2) {
       x3 = x2;
       x2 = x1;
       x1 = GOLD6 * x2 + GOLD3 * x0;
-      f3 = f2;
       f2 = f1;
       filter_spec->SetTrans(origins, slopes, x1);
       filter_design->ComputeCoefficients(filter_spec);
       filter_resp->ComputeMagResp(filter_design, db_scale);
       filter_resp->NormalizeResponse(db_scale);
       f1 = filter_resp->GetStopbandPeak();
-      /*
-       * LogFile << "x0= " << x0 << " x1= " << x1 << " x2= " << x2 << " x3= " << x3
-       *         << std::endl;
-       * LogFile << "f1 = " << f1 << std::endl;
-       */
     } else {
       x0 = x1;
       x1 = x2;
       x2 = GOLD6 * x1 + GOLD3 * x3;
-      f0 = f1;
       f1 = f2;
       filter_spec->SetTrans(origins, slopes, x2);
       filter_design->ComputeCoefficients(filter_spec);
       filter_resp->ComputeMagResp(filter_design, db_scale);
       filter_resp->NormalizeResponse(db_scale);
       f2 = filter_resp->GetStopbandPeak();
-      /*
-       * LogFile << "f2 = " << f2 << std::endl;
-       * LogFile << "x0= " << x0 << " x1= " << x1 << " x2= " << x2 << " x3= " << x3
-       *         << std::endl;
-       */
     }
 
     delta = fabs(x3 - x0);
-    oldXmin = xmin;
-    /*
-     * LogFile << "at iter " << n << " delta = " << delta << std::endl;
-     * LogFile << "tol = " << tol << std::endl;
-     */
     if (delta <= tol)
       break;
   }
@@ -161,6 +130,5 @@ GoldenSearch2(double tol, FreqSampFilterSpec* filter_spec,
     *fmin = f2;
   }
   std::cout << "minimum of " << *fmin << " at x = " << xmin << std::endl;
-  // LogFile << "minimum of " << *fmin << " at x = " << xmin << std::endl;
   return (xmin);
 }

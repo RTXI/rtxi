@@ -1,4 +1,4 @@
-CLEANFILES = moc_*.cpp *~
+CLEANFILES = moc_*.cpp *~ *.gcno *.gcda
 DISTCLEANFILES =
 MAINTAINERCLEANFILES = Makefile.in
 
@@ -16,7 +16,7 @@ oscilloscope_la_LDFLAGS = -lqwt-qt5 -module -avoid-version
 
 oscilloscope_la_SOURCES = \
 		oscilloscope.h \
-		scope .h \
+		scope.h \
 		oscilloscope.cpp \
 		scope.cpp 
 nodist_oscilloscope_la_SOURCES = \

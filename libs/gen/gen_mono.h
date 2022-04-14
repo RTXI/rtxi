@@ -33,9 +33,9 @@ public:
   void init(double delay, double width, double amplitude, double dt);
 
 protected:
+  double delay; // s
   double width; // s
   double amplitude;
-  double delay; // s
 };
 
 #endif /* GEN_MONO_H_ */

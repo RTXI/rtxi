@@ -14,9 +14,8 @@ public:
   // constructor with all configuration parameters
 
   FirFilterResponse(FirFilterDesign* filter_design, int num_resp_pts,
-                    int db_scale_enabled, int normalize_enabled,
-                    char* resp_file_name);
-
+                    int db_scale_enabled, int normalize_enabled);
+  virtual ~FirFilterResponse(){ };
   //--------------------------------------
   // method to compute magnitude response
 
@@ -29,7 +28,7 @@ public:
 
   double* GetMagResp(void);
 
-  void DumpMagResp(void);
+  //void DumpMagResp(void);
 
   double GetIntervalPeak(int beg_indx, int end_indx);
 

@@ -138,14 +138,12 @@ void Oscilloscope::Panel::receiveEvent(const ::Event::Object *event)
 
                     if (index < blocks.size())
                         {
-                            bool found = false;
                             // Stop displaying channels coming from the removed block
                             for (std::list<Scope::Channel>::iterator i = scopeWindow->getChannelsBegin(), end = scopeWindow->getChannelsEnd(); i != end;)
                                 {
                                     struct channel_info *info = reinterpret_cast<struct channel_info *> (i->getInfo());
                                     if (info->block == block)
                                         {
-                                            found = true;
                                             // If triggering on this channel disable triggering
                                             if(trigsChanList->currentText() != "<None>")
                                                 if (i->getLabel()	== scopeWindow->getTriggerChannel()->getLabel())
@@ -180,7 +178,7 @@ void Oscilloscope::Panel::receiveEvent(const ::Event::Object *event)
                             showTab(0);
                         }
                     else
-                        DEBUG_MSG("Oscilloscope::Panel::receiveEvent : removed block never inserted\n");
+                        std::cout << "Oscilloscope::Panel::receiveEvent : removed block never inserted\n";
                 }
         }
     else if (event->getName() == Event::RT_POSTPERIOD_EVENT)

@@ -20,7 +20,7 @@ AnalogFilter::AnalogFilter(){};
 //------------------------------------------------------
 
 double
-AnalogFilter::Run(double input)
+AnalogFilter::Run(double)
 {
   return (0.0);
 }

@@ -17,7 +17,6 @@
 
 */
 
-#include <cmdline.h>
 #include <debug.h>
 #include <algorithm>
 #include <settings.h>
@@ -158,7 +157,7 @@ void MainWindow::createUtilMenu()
         return;
 
     libsDir.setNameFilters(QStringList("*.so"));
-    for(size_t i = 0; i < libsDir.entryList().size(); i++)
+    for(int i = 0; i < libsDir.entryList().size(); i++)
         {
             utilItem = new QAction(libsDir.entryList().at(i), this);
             if(libsDir.entryList().at(i).contains("analysis"))
@@ -341,7 +340,7 @@ void MainWindow::saveSettings(void)
                     QMessageBox::Yes | QMessageBox::Default,
                     QMessageBox::No | QMessageBox::Escape) != QMessageBox::Yes)
                 {
-                    DEBUG_MSG ("MainWindow::saveSettings : canceled overwrite\n");
+                    //DEBUG_MSG ("MainWindow::saveSettings : canceled overwrite\n");
                     return;
                 }
             Settings::Manager::getInstance()->save(filename.toStdString());
@@ -431,7 +430,7 @@ void MainWindow::fileMenuActivated(QAction *id)
     Settings::Manager::getInstance()->load(id->text().remove(0,3).toStdString());
 }
 
-void MainWindow::closeEvent(QCloseEvent *event)
+void MainWindow::closeEvent(QCloseEvent *)
 {
     /*
      * Save MainWindow settings

@@ -9,7 +9,7 @@
 
 DaniellPeriodogram::DaniellPeriodogram(complex* time_seq, double samp_intvl,
                                        int num_samps, int fft_len,
-                                       GenericWindow* window, int big_p)
+                                       int big_p)
   : PsdEstimate(num_samps, samp_intvl)
 {
   int k, m;

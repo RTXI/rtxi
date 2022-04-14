@@ -29,8 +29,7 @@ public:
 
   double FindPeakMag(void);
 
-  double CosineCorrelate(double norm_freq, double phase_offset,
-                         double cycles_per_correl);
+  double CosineCorrelate(double norm_freq, double phase_offset);
 
 private:
   double Delta_Arg;

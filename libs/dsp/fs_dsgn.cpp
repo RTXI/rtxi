@@ -42,11 +42,10 @@ void
 FreqSampFilterDesign::ComputeCoefficients(FreqSampFilterSpec* filter_spec)
 {
 
-  int n, k, num_taps, status;
+  int n, k, num_taps;
   double x, mid_pt, work;
 
   num_taps = filter_spec->GetNumTaps();
-  status = 0;
   mid_pt = (num_taps - 1.0) / 2.0;
   switch (filter_spec->GetFirType()) {
     //---------------------------------------

@@ -41,19 +41,11 @@ LearningCurve::AddSample(int samp_idx, double err_samp,
 void
 LearningCurve::DumpCurve(void)
 {
-  double mean, var;
+  double mean;
   ofstream out_file("learncur.txt", ios::out);
   for (int i = 0; i < Num_Samps; i++) {
-    // mean = Buffer[i]/(Num_Trials-1);
-    // var = (Sqr_Buf[i]/(Num_Trials-1)) - (mean*mean);
     mean = Buffer[i] / Num_Trials;
-    var = (Sqr_Buf[i] / Num_Trials) - (mean * mean);
     mean = Buffer[i] / Num_Trials;
-    /*
-    out_file << i << ", "
-             << (mean-Min_Mse) << ", "
-             << (Trial_Buf[i]-Min_Mse) << std::endl;
-    */
 
     out_file << i << ", " << mean << ", " << Trial_Buf[i] << ", " << Min_Mse
              << std::endl;

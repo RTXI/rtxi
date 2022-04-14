@@ -43,7 +43,7 @@ private:
 
     SystemControl(void);
     ~SystemControl(void);
-    SystemControl(const SystemControl &) {};
+    SystemControl(const SystemControl &) : QObject() {};
     SystemControl &operator=(const SystemControl &)
     {
         return *getInstance();

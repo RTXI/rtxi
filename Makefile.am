@@ -21,13 +21,13 @@
 # Include the Autoconf scripts in subdir m4/
 ACLOCAL_AMFLAGS = -I m4
 
-SUBDIRS      = libs src plugins scripts res
+SUBDIRS      = libs src plugins scripts res tests
 
 ACLOCAL_DIST = 
 
 EXTRA_DIST   = autogen.sh $(ACLOCAL_DIST)
 
-CLEANFILES            = *~ src/moc_*.cpp 
+CLEANFILES            = *~ 
 DISTCLEANFILES        = rtxi.conf Makefile.modcompile config.log about.h rtos
 MAINTAINERCLEANFILES  = aclocal.m4 configure config.guess config.sub Makefile.in
 MAINTAINERCLEANDIRS   = autom4te.cache

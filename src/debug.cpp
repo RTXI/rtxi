@@ -17,41 +17,19 @@
 
 */
 
-#include <mutex.h>
-#include <string>
+#include <debug.h>
 
-class CmdLine
+void PRINT_BACKTRACE(void)
 {
+    std::cerr << boost::stacktrace::stacktrace();
+}
 
-public:
+void ERROR_MSG(const std::string& errmsg, ...){
+    va_list args;
+    va_start(args, errmsg);
+    char buf[256] = ""; 
+    vsprintf(buf, errmsg.c_str(), args);
+    std::cerr << std::string(buf, 256) << "\n";
+}
 
-    int execute(const std::string &);
 
-    static CmdLine *getInstance(void);
-
-private:
-
-    /*****************************************************************
-     * The constructor, destructor, and assignment operator are made *
-     *   private to control instantiation of the class.              *
-     *****************************************************************/
-
-    CmdLine(void);
-    ~CmdLine(void);
-    CmdLine(const CmdLine &) {};
-    CmdLine &operator=(const CmdLine &)
-    {
-        return *getInstance();
-    };
-
-    static CmdLine *instance;
-
-    volatile bool done;
-    pid_t child;
-
-    int fdm[2];
-    int fds[2];
-
-    Mutex mutex;
-
-}; // class CmdLine

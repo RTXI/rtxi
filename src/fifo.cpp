@@ -48,7 +48,7 @@ size_t Fifo::read(void *buffer,size_t n,bool blocking)
         return 0;
 
     // Check that enough data is available
-    if (AVAILABLE < n)
+    if (AVAILABLE < n){
         if (blocking)
             {
                 do
@@ -62,7 +62,7 @@ size_t Fifo::read(void *buffer,size_t n,bool blocking)
                 pthread_mutex_unlock(&mutex);
                 return 0;
             }
-
+    }
     // Copy the data from the fifo
     if (size-rptr < n)
         {

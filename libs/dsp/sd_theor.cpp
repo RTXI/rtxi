@@ -21,11 +21,10 @@ SteepestDescentTheoretic(double start_pt_0, double start_pt_1, double mu,
 {
   int n;
   double w0, w1, old_w0, old_w1, grad_0, grad_1;
-  double dist, radius, angle, deg_per_rad;
+  double dist;
   std::cout << "in SteepestDescentTheoretic" << std::endl;
   ofstream out_file("sd_traj.txt", ios::out);
 
-  deg_per_rad = 180.0 / PI;
   w0 = start_pt_0;
   w1 = start_pt_1;
   old_w0 = w0;
@@ -40,8 +39,6 @@ SteepestDescentTheoretic(double start_pt_0, double start_pt_1, double mu,
     dist = sqrt((w0 - old_w0) * (w0 - old_w0) + (w1 - old_w1) * (w1 - old_w1));
     if (dist < min_dist)
       continue;
-    radius = sqrt(w0 * w0 + w1 * w1);
-    angle = deg_per_rad * atan2(w1, w0);
     out_file << n << ", " << w0 << ", " << w1 << std::endl;
     old_w0 = w0;
     old_w1 = w1;

@@ -37,7 +37,7 @@ double
 FreqSampFilterResponse::GetStopbandPeak()
 {
   double peak;
-  int n, nBeg, nEnd, indexOfPeak;
+  int n, nBeg, nEnd;
 
   std::cout << "doing case " << Band_Config << std::endl;
   switch (Band_Config) {
@@ -62,7 +62,6 @@ FreqSampFilterResponse::GetStopbandPeak()
   for (n = nBeg; n < nEnd; n++) {
     if (Mag_Resp[n] > peak) {
       peak = Mag_Resp[n];
-      indexOfPeak = n;
     }
   }
   if (Band_Config == 4) { /* bandpass has second stopband */
@@ -71,7 +70,6 @@ FreqSampFilterResponse::GetStopbandPeak()
     for (n = nBeg; n < nEnd; n++) {
       if (Mag_Resp[n] > peak) {
         peak = Mag_Resp[n];
-        indexOfPeak = n;
       }
     }
   }

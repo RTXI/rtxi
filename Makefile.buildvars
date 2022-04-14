@@ -24,14 +24,14 @@ ACLOCAL_AMFLAGS ?= -I $(top_srcdir)/m4
 QT_DEFINES =  -DQT_XML_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_WIDGETS_LIB \
               -DQT_SVG_LIB -DQT_SHARED
 
-# Override for now
+# We set some header directories as system type to avoid looking at their warnings
 QT_CXXFLAGS = $(shell pkg-config --cflags \
                 Qt5Core Qt5Gui Qt5OpenGL Qt5PrintSupport Qt5Xml Qt5Widgets \
-                Qt5Svg Qt5Network libgit2) \
+                Qt5Svg Qt5Network libgit2 | sed -r "s/-I/-isystem/g") \
               -I/usr/X11R6/include \
               -I/usr/include/hdf5/serial \
-              -I/usr/include/qwt \
-              -I/usr/local/include/qwt \
+              -isystem/usr/include/qwt \
+              -isystem/usr/local/include/qwt \
               $(QT_DEFINES)
 
 RTDEPS_CXXFLAGS = -I$(pkgincludedir) \
@@ -55,15 +55,19 @@ UIC = /usr/bin/uic
 
 RTDEPS_LIBS = -L$(pkglibdir)/libs
 
-AM_CPPFLAGS = -DEXEC_PREFIX=\"$(exec_prefix)\" -DPREFIX=\"$(prefix)\" $(QT_CXXFLAGS) $(RTOS_CPPFLAGS) 
-AM_CXXFLAGS = -pipe $(QT_CXXFLAGS)
-AM_LDFLAGS  = $(QT_LIBS) $(GSL_LIBS) $(RTOS_LDFLAGS)
+AM_CPPFLAGS = -DEXEC_PREFIX=\"$(exec_prefix)\" -DPREFIX=\"$(prefix)\" \
+            $(BOOST_CPPFLAGS) $(QT_CXXFLAGS) $(RTOS_CPPFLAGS)  
+AM_CXXFLAGS = -pipe -DBOOST_STACKTRACE_USE_BACKTRACE $(QT_CXXFLAGS)
+AM_LDFLAGS = -ldl -lbacktrace $(BOOST_LDFLAGS) $(QT_LIBS) $(GSL_LIBS) $(RTOS_LDFLAGS) 
+            
 AM_CFLAGS = $(AM_CXXFLAGS)
 
 if DEBUG
-  AM_CXXFLAGS += -Wall -Wextra -g -std=c++11 -fPIC
+  AM_CXXFLAGS += -g -fPIC -fprofile-arcs -ftest-coverage
   AM_CPPFLAGS += -DDEBUG
+  CFLAGS += -Wall -Wextra
+  CXXFLAGS += -Wall -Wextra
 else
-  AM_CXXFLAGS += -w -O3 -std=c++11 -fPIC
+  AM_CXXFLAGS += -w -O3 -fPIC
   AM_CPPFLAGS += -w
 endif

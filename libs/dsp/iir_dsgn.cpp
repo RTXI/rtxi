@@ -24,7 +24,7 @@ IirFilterDesign::IirFilterDesign(void)
 // constructor that provides interactive initialization
 //------------------------------------------------------
 
-IirFilterDesign::IirFilterDesign(std::istream& uin, std::ostream& uout)
+IirFilterDesign::IirFilterDesign(std::istream&, std::ostream& uout)
 {
   uout << "We made it into interactive constructor" << std::endl;
 }
@@ -107,7 +107,6 @@ IirFilterDesign::QuantizeCoefficients(long quant_factor,
 {
   int n;
   long work_long;
-  double quan_err;
 
   //-----------------------------------
   // if quant_factor == 0, then restore
@@ -135,8 +134,9 @@ IirFilterDesign::QuantizeCoefficients(long quant_factor,
     }
 
     Numer_Coeffs[n] = double(work_long) / double(quant_factor);
-    quan_err = (Numer_Coeffs[n] - Orig_Numer_Coeffs[n]) / Orig_Numer_Coeffs[n];
 #ifdef _DEBUG
+    double quan_err;
+    quan_err = (Numer_Coeffs[n] - Orig_Numer_Coeffs[n]) / Orig_Numer_Coeffs[n];
     DebugFile << "numer coeff " << n << " quant from " << Orig_Numer_Coeffs[n]
               << "\n    to " << Numer_Coeffs[n] << " error is " << quan_err
               << std::endl;
@@ -150,8 +150,8 @@ IirFilterDesign::QuantizeCoefficients(long quant_factor,
     }
 
     Denom_Coeffs[n] = double(work_long) / double(quant_factor);
-    quan_err = (Denom_Coeffs[n] - Orig_Denom_Coeffs[n]) / Orig_Denom_Coeffs[n];
 #ifdef _DEBUG
+    quan_err = (Denom_Coeffs[n] - Orig_Denom_Coeffs[n]) / Orig_Denom_Coeffs[n];
     DebugFile << "denom coeff " << n << " quant from " << Orig_Denom_Coeffs[n]
               << "\n   to " << Denom_Coeffs[n] << " error is " << quan_err
               << std::endl;

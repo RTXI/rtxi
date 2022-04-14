@@ -50,6 +50,7 @@ Plugin::Object *Plugin::Manager::load(const QString &library)
     void *handle = dlopen(library.toStdString().c_str(),RTLD_GLOBAL|RTLD_NOW);
     if (!handle)
         {
+            //ERROR_MSG("Plugin::load : failed to load library: %s", dlerror());
             std::string plugin_dir = std::string(EXEC_PREFIX) + std::string("/lib/rtxi/");
             handle = dlopen((plugin_dir+library.toStdString()).c_str(),RTLD_GLOBAL|RTLD_NOW);
         }
@@ -156,6 +157,7 @@ void Plugin::Manager::removePlugin(Plugin::Object *plugin)
         }
 
     Mutex::Locker lock(&mutex);
+    // TODO: uhhh removing a plugin by calling plugin destructor, which calls this function... not good.
     pluginList.remove(plugin);
 }
 

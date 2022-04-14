@@ -19,8 +19,7 @@ extern std::ofstream DebugFile;
 //======================================================
 //  constructor
 
-BesselTransFunc::BesselTransFunc(int order, double passband_edge,
-                                 int norm_for_delay)
+BesselTransFunc::BesselTransFunc(int order, int norm_for_delay)
   : FilterTransFunc(order)
 {
   int indx, indx_m1, indx_m2;

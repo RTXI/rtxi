@@ -28,7 +28,6 @@
 #include <signal.h>
 #include <string>
 #include <unistd.h>
-#include <cmdline.h>
 #include <ctype.h>
 #include <daq.h>
 #include <debug.h>
@@ -92,7 +91,6 @@ int main(int argc,char *argv[])
     app->connect(app,SIGNAL(lastWindowClosed()),app,SLOT(quit()));
     MainWindow::getInstance()->loadWindow();;
 
-    CmdLine::getInstance();
     RT::System::getInstance();
     IO::Connector::getInstance();
 
@@ -164,11 +162,11 @@ static void signal_handler(int signum)
     /* Only handler handle signals in the parent */
     if (getpid() != parentThread) return;
 
-    DEBUG_MSG("signal_handler : signal received\n");
+    ERROR_MSG("signal_handler : signal type %i received\n", signum);
     PRINT_BACKTRACE();
 
     if (count++) _exit(-EFAULT);
 
-    DEBUG_MSG("signal_handler : finished\n");
+    //DEBUG_MSG("signal_handler : finished\n");
     exit(0);
 }

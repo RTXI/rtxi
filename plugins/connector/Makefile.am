@@ -1,4 +1,4 @@
-CLEANFILES = moc_*.cpp *~
+CLEANFILES = moc_*.cpp *~ *.gcno *.gcda
 DISTCLEANFILES =
 MAINTAINERCLEANFILES = Makefile.in
 

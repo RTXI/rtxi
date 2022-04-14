@@ -15,37 +15,22 @@
 	 You should have received a copy of the GNU General Public License
 	 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-*/
+ */
 
-#include <rt.h>
-#include <sem.h>
-#include <unistd.h>
+#ifndef FIFO_TESTS_H
+#define FIFO_TESTS_H
 
-Semaphore::Semaphore(size_t n):count(n) {}
+#include <gtest/gtest.h>
+#include <fifo.h>
 
-Semaphore::~Semaphore(void) {}
-
-void Semaphore::down(void)
+// Define all fixtures for testing purposes
+class FifoTest : public ::testing::Test
 {
-#ifdef DEBUG
-    if (RT::OS::isRealtime())
-        {
-            ERROR_MSG("Detected unsafe down attempt in RT thread\n");
-            PRINT_BACKTRACE();
-            return;
-        }
-#endif // DEBUG
+protected:
+    FifoTest() { }
+    ~FifoTest() { }
 
-    --count;
-    while (count < 0) usleep(1000);
-}
-
-void Semaphore::up(void)
-{
-    ++count;
-}
-
-int Semaphore::value(void)
-{
-    return count;
-}
+    Fifo *fifo;
+};
+   
+#endif

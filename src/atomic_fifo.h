@@ -42,6 +42,8 @@ public:
      *
      * \param buffer Memory destination
      * \param itemSize Size of memory chunk to be copied
+     * 
+     * \return success True if successful false otherwise
      */
     bool write(const void *buffer, size_t itemSize);
 
@@ -50,6 +52,8 @@ public:
      *
      * \param buffer Memory source
      * \param itemSize Size of memory chunk to be copied into fifo
+     * 
+     * \return success True if successful false otherwise
      */
     bool read(void *buffer, size_t itemSize);
 
@@ -57,6 +61,7 @@ public:
      *
      * Function to check if FIFO is truly atomic for the hardware architecture
      *
+     * \return LockFree true if free of locks false otherwise
      */
     bool isLockFree() const;
 private:

@@ -61,7 +61,6 @@ void Mutex::lock(void)
     if (RT::OS::isRealtime())
         {
             ERROR_MSG("Detected unsafe lock attempt in RT thread\n");
-            PRINT_BACKTRACE();
             if (!tryLock())
                 ERROR_MSG("Failed to obtain the lock\n");
             return;

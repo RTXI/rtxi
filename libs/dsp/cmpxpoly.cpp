@@ -202,10 +202,8 @@ CmplxPolynomial::operator/=(const CmplxPolynomial& divisor)
 void
 CmplxPolynomial::FindRoots(void)
 {
-  complex* root;
   int status, i;
   CmplxPolynomial root_factor;
-  //  root = new complex[Degree]; // What's this supposed to do? -ansel
   CmplxPolynomial work_poly;
   double epsilon = 0.0000001;
   double epsilon2 = 1.0e-10;

@@ -133,14 +133,35 @@ public:
     Object(const char *);
     ~Object(void);
 
+    /*!
+     * Obtains the name of the event object that was emitted.
+     *
+     * \return A string containing the name of event
+     */
     const char *getName(void) const
     {
         return name;
     };
 
+    /*!
+     * Retrieves the paramaters values attached to the event
+     *
+     * \param Name The parameter name for which to retrieve the value of event
+     * \return The value connected with the input key
+     */
     void *getParam(const char *) const;
+
+    /*!
+     * Stores a key and value inside event object
+     *
+     * \param Key The name of the parameter to store inside event object
+     * \param Value The value to store
+     */
     void setParam(const char *,void *);
 
+    /*!
+     * The agreed maximum number of parameters event objects are allowed to have
+     */
     const static size_t MAX_PARAMS = 8;
 
 private:

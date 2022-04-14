@@ -199,7 +199,7 @@ RemezAlgorithm::ComputeRemezAmplitudeResponse(int init_flag, double contin_freq)
 {
   static int i, j, k, sign;
   static double freq, denom, numer, alpha, delta;
-  static double absDelta, xCont, term;
+  static double xCont, term;
   double aa;
 
   if (init_flag) {
@@ -233,7 +233,6 @@ RemezAlgorithm::ComputeRemezAmplitudeResponse(int init_flag, double contin_freq)
     } // end of loop over k
 
     delta = numer / denom;
-    absDelta = fabs(delta);
 
     sign = -1;
     for (k = 0; k <= Num_Approx_Funcs - 1; k++) {

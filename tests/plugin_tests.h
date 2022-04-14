@@ -1,5 +1,5 @@
 /*
-	 The Real-Time eXperiment Interface (RTXI)
+ 	 The Real-Time eXperiment Interface (RTXI)
 	 Copyright (C) 2011 Georgia Institute of Technology, University of Utah, Weill Cornell Medical College
 
 	 This program is free software: you can redistribute it and/or modify
@@ -15,29 +15,30 @@
 	 You should have received a copy of the GNU General Public License
 	 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-*/
+ */
 
-#ifndef SEM_H
-#define SEM_H
+#ifndef PLUGIN_TESTS_H
+#define PLUGIN_TESTS_H
 
-#include <unistd.h>
+#include <gtest/gtest.h>
+#include <plugin.h>
 
-class Semaphore
+class PluginObjectTest : public ::testing::Test
 {
+protected:
+    PluginObjectTest() { }
+    ~PluginObjectTest() { }
 
-public:
+    Plugin::Object *object;
+};
 
-    Semaphore(size_t n =0);
-    ~Semaphore(void);
+class PluginManagerTest : public ::testing::Test
+{
+protected:
+    PluginManagerTest() { }
+    ~PluginManagerTest() { }
 
-    void down(void);
-    void up(void);
-    int value(void);
+    Plugin::Manager *manager;
+};
 
-private:
-
-    int count;
-
-}; // class Semaphore
-
-#endif // SEM_H
+#endif
