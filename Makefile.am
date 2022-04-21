@@ -93,7 +93,7 @@ Makefile.plugin_compile: Makefile
 	@echo '	$$(CXXCOMPILE) $$(CXXFLAGS) -c $$< -o $$@'>> $@
 	@echo ''>> $@
 	@echo '$$(PLUGIN_NAME).la: $$(OBJECTS) $$(SOURCES) $$(HEADERS)' >> $@
-	@echo '	$$(CXXLINK) $$(CXXFLAGS) $$(LIBS) $$(LDFLAGS) -rpath `readlink -f $$(exec_modeldir)` -o $$(PLUGIN_NAME).la $$(OBJECTS)' >> $@
+	@echo '	$$(CXXLINK) $$(CXXFLAGS) $$(LIBS) $$(LDFLAGS) $$(OBJECTS) -rpath `readlink -f $$(exec_modeldir)` -o $$(PLUGIN_NAME).la' >> $@
 	@echo ''>> $@
 	@echo 'install: $$(PLUGIN_NAME).la'>> $@
 	@echo '	$$(LIBTOOL) --mode=install cp $$(PLUGIN_NAME).la `readlink -f $$(exec_modeldir)`' >> $@
