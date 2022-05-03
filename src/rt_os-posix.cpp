@@ -17,9 +17,6 @@
 
 */
 
-#include <debug.h>
-#include <rt.h>
-
 #include <errno.h>
 #include <list>
 #include <semaphore.h>
@@ -33,6 +30,9 @@
 
 #include <fstream>
 #include <string>
+
+#include "debug.h"
+#include "rt.h"
 
 typedef struct
 {

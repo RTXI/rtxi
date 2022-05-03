@@ -20,12 +20,14 @@
 #ifndef EVENT_H
 #define EVENT_H
 
-#include <fifo.h>
 #include <list>
 #include <map>
-#include <pthread.h>
-#include <rt.h>
 #include <string>
+#include <pthread.h>
+#include <cstring>
+
+#include "fifo.h"
+#include "rt.h"
 
 //! Event Oriented Classes
 /*

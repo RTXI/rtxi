@@ -17,8 +17,8 @@
 
  */
 
-#include <rtxiTests.h>
 #include <iostream>
+#include "rtxiTests.h"
 
 void TestEnvironment::SetUp()
 {

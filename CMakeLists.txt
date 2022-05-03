@@ -1,11 +1,8 @@
+cmake_minimum_required(VERSION 3.20)
 
-# CMakeList.txt : Top-level CMake project file, do global configuration
-# and include sub-projects here.
-#
-cmake_minimum_required (VERSION 3.20)
-
-project ("rtxi" 
-    VERSION 3.0.0 
+project(
+    "rtxi"
+    VERSION 3.0.0
     DESCRIPTION "The Real-Time eXperiment Interface"
     HOMEPAGE_URL "http://rtxi.org/"
     LANGUAGES CXX
@@ -14,48 +11,26 @@ project ("rtxi"
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-include(cmake/project-is-top-level.cmake)
-include(cmake/variables.cmake)
+# Make sure to complain for the tiniest things
+add_compile_options(-Wall -Wextra -pedantic)
 
-# Let's find some packages and libraries
-find_package(Qt5 COMPONENTS Widgets REQUIRED)
-#add_library()
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+set(CMAKE_AUTOUIC ON)
 
-# Include sub-projects.
-add_subdirectory("src")
-#add_subdirectory("libs")
-#add_subdirectory("plugins")
-#add_subdirectory("res")
-#add_subdirectory("tests")
+find_package(Qt5 COMPONENTS Core Widgets Gui Network REQUIRED)
+find_package(GTest REQUIRED)
+find_package(Threads REQUIRED)
 
-# Installation targets
-install(TARGETS rtxi DESTINATION bin)
+add_subdirectory(src)
+#add_subdirectory(libs)
+#add_subdirectory(plugins)
+#add_subdirectory(res)
+#add_subdirectory(scripts)
 
-configure_file(rtxiConfig.h.in 
-    rtxiConfig.h)
-
-target_include_directories(${PROJECT_NAME} 
+target_include_directories(${PROJECT_NAME}
     PUBLIC ${PROJECT_BINARY_DIR}
 )
 
+include_directories(src)
 
-target_link_libraries(${PROJECT_NAME} 
-    Qt5::Widgets
-)
-
-# ---- Install Rules start here ----
-
-if(NOT CMAKE_SKIP_INSTALL_RULES)
-  include(cmake/install-rules.cmake)
-endif()
-
-if(NOT testcmake_DEVELOPER_MODE)
-  return()
-elseif(NOT PROJECT_IS_TOP_LEVEL)
-  message(
-      AUTHOR_WARNING
-      "Developer mode is intended for developers of testcmake"
-  )
-endif()
-
-include(cmake/dev-mode.cmake)

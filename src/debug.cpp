@@ -17,12 +17,12 @@
 
 */
 
-#include <debug.h>
-
-void PRINT_BACKTRACE(void)
-{
-    std::cerr << boost::stacktrace::stacktrace();
-}
+#include "debug.h"
+//
+//void PRINT_BACKTRACE(void)
+//{
+//    std::cerr << boost::stacktrace::stacktrace();
+//}
 
 void ERROR_MSG(const std::string& errmsg, ...){
     va_list args;

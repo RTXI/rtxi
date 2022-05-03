@@ -17,8 +17,8 @@
 
 */
 
-#include <mutex.h>
-#include <rt.h>
+#include "mutex.h"
+#include "rt.h"
 
 Mutex::Locker::Locker(Mutex *m):mutex(m)
 {

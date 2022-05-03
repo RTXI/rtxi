@@ -17,9 +17,8 @@
 
 */
 
-#include <debug.h>
-#include <event.h>
-#include <string.h>
+#include "debug.h"
+#include "event.h"
 
 const char *Event::RT_PERIOD_EVENT = "SYSTEM : period";
 const char *Event::RT_PREPERIOD_EVENT = "SYSTEM : pre period";

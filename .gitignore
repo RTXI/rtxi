@@ -1,65 +1,23 @@
-#Ignore compiled objects and libraries
-*.o
-*.lo
-*.la
-*.so
-*.swp
-*.pyc
-*~
-*.log
-*.bak
-*.gcda
-*.gcno
-*.info
-compile
+.idea/
+.vs/
+.vscode/
+build/
+cmake/open-cpp-coverage.cmake
+cmake-build-*/
+prefix/
+CMakeLists.txt.user
+CMakeUserPresets.json
 
 #Ignore user specific rtxi files
-Makefile.dynamo_compile
-Makefile.plugin_compile
-Makefile.plugin_example
-hdf/rtxi_hdf_matlabize
-hdf/rtxi_hdf_reader
-src/rtxi_config.h
-src/rtxi_config.h.in
-rtxi.conf
 src/rtxi
 tests/rtxiTests
-scripts/init_rtxi
-scripts/rtxi_comedi
-scripts/rtxi_plugin_config
-workspace.set
 docs/*
 coverage/*
 
-#Ignore files extracted from bundled tarballs
-deps/qwt-*/
-deps/hdf5-*/
-deps/git/*
-deps/*
-					 
 #Ignore qt generated mocs
 moc_*
 
-#Ignore automake files
-Makefile
-Makefile.in
-aclocal.m4
-autom4te.cache/
-config.*
-configure
-depcomp
-install-sh
-libtool
-ltmain.sh
-test-driver
-m4/
-missing
-stamp-h?
 .deps/
 .dirstamp
 .libs/
 *.d
-
-
-#Ignore text editors
-.vscode

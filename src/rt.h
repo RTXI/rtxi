@@ -20,11 +20,11 @@
 #ifndef RT_H
 #define RT_H
 
-#include <fifo.h>
-#include <mutex.h>
 #include <pthread.h>
 #include <semaphore.h>
-#include <settings.h>
+
+#include "fifo.h"
+#include "mutex.h"
 
 //! Realtime Oriented Classes
 /*!

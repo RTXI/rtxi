@@ -17,9 +17,10 @@
 
 */
 
-#include <debug.h>
-#include <fifo.h>
-#include <string.h>
+#include <cstring>
+
+#include "debug.h"
+#include "fifo.h"
 
 #define AVAILABLE    ((size+wptr-rptr)%size)
 

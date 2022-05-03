@@ -17,10 +17,10 @@
 
  */
 
-#include <debug.h>
-#include <event.h>
-#include <mutex.h>
-#include <rt.h>
+#include "debug.h"
+#include "event.h"
+#include "mutex.h"
+#include "rt.h"
 
 namespace
 {

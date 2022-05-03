@@ -22,8 +22,8 @@
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
-#include <rt.h>
-#include <event.h>
+#include "rt.h"
+//#include <event.h>
 
 // Define all fixtures for testing purposes
 class SystemTest : public ::testing::Test
@@ -37,11 +37,11 @@ protected:
     RT::System *system;
 };
    
-class MockRTEvent : public RT::Event
-{
-public:
-    MOCK_METHOD(int, callback, (), (override));
-};
+//class MockRTEvent : public RT::Event
+//{
+//public:
+//    MOCK_METHOD(int, callback, (), (override));
+//};
 
 class MockRTDevice : public RT::Device
 {
