@@ -27,12 +27,8 @@ include(cmake/variables.cmake)
 #)
 #
 
-
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-# Make sure to complain for the tiniest things
-add_compile_options(-Wall -Wextra -pedantic)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
