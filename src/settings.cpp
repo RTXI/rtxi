@@ -22,7 +22,6 @@
 #include <QFile>
 #include <QSettings>
 #include <QTextStream>
-#include <cstdlib>
 #include <sstream>
 
 #include <debug.h>
@@ -34,6 +33,7 @@
 #include <rt.h>
 #include <rtxi_config.h>
 #include <settings.h>
+#include <stdlib.h>
 
 namespace
 {

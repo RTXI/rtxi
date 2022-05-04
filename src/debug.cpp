@@ -18,7 +18,9 @@
 
 */
 
-#include "debug.h"
+#include <iostream>
+#include "debug.hpp"
+
 //
 // void PRINT_BACKTRACE(void)
 //{

@@ -8,7 +8,7 @@ AlignConsecutiveAssignments: false
 AlignConsecutiveBitFields: false
 AlignConsecutiveDeclarations: false
 AlignEscapedNewlines: DontAlign
-AlignOperands: DontAlign
+AlignOperands: false 
 AlignTrailingComments: false
 AllowAllArgumentsOnNextLine: true
 AllowAllConstructorInitializersOnNextLine: false
@@ -26,6 +26,7 @@ AlwaysBreakBeforeMultilineStrings: true
 AlwaysBreakTemplateDeclarations: Yes
 BinPackArguments: false
 BinPackParameters: false
+BreakBeforeBraces: Custom
 BraceWrapping:
   AfterCaseLabel: false
   AfterClass: true
@@ -46,7 +47,6 @@ BraceWrapping:
   SplitEmptyRecord: true
   SplitEmptyNamespace: true
 BreakBeforeBinaryOperators: NonAssignment
-BreakBeforeBraces: Custom
 # BreakBeforeInheritanceComma: true
 BreakInheritanceList: BeforeComma
 BreakBeforeTernaryOperators: true

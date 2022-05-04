@@ -22,7 +22,7 @@
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
-#include "rt.h"
+#include "rt.hpp"
 //#include <event.h>
 
 // Define all fixtures for testing purposes

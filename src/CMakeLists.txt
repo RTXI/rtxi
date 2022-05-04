@@ -1,16 +1,16 @@
 cmake_minimum_required(VERSION 3.20)
 
 add_executable(rtxi_exe
-    "debug.h"
+    "debug.hpp"
+    "mutex.hpp"
+    "fifo.hpp"
+    "rt.hpp" 
+    "event.hpp"
     "debug.cpp"
-    "mutex.h"
     "mutex.cpp"
-    "fifo.h"
     "fifo.cpp"
-    "rt.h" 
     "rt.cpp"
     "rt_os-posix.cpp"
-    "event.h" 
     "event.cpp"
     "tempmain.cpp"
 )
@@ -23,4 +23,4 @@ set_target_properties(
     EXPORT_NAME exe
 )
 
-target_link_libraries(rtxi_exe Qt5::Widgets Threads::Threads)
+target_link_libraries(rtxi_exe PUBLIC Qt5::Widgets Threads::Threads)

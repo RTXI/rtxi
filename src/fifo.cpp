@@ -18,11 +18,11 @@
 
 */
 
-#include <cstring>
+#include "fifo.hpp"
 
-#include "fifo.h"
+#include <string.h>
 
-#include "debug.h"
+#include "debug.hpp"
 
 #define AVAILABLE ((size + wptr - rptr) % size)
 

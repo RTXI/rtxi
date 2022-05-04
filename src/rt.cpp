@@ -18,11 +18,11 @@
 
  */
 
-#include "rt.h"
+#include "rt.hpp"
 
-#include "debug.h"
-#include "event.h"
-#include "mutex.h"
+#include "debug.hpp"
+#include "event.hpp"
+#include "mutex.hpp"
 
 namespace
 {

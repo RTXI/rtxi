@@ -20,7 +20,7 @@
 
 #include "event.h"
 
-#include "debug.h"
+#include "debug.hpp"
 
 const char* Event::RT_PERIOD_EVENT = "SYSTEM : period";
 const char* Event::RT_PREPERIOD_EVENT = "SYSTEM : pre period";

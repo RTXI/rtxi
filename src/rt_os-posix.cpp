@@ -18,11 +18,6 @@
 
 */
 
-#include <fstream>
-#include <list>
-#include <string>
-
-#include "rt.h"
 
 #include <errno.h>
 #include <pthread.h>
@@ -34,7 +29,8 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "debug.h"
+#include "debug.hpp"
+#include "rt.hpp"
 
 typedef struct
 {

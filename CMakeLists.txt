@@ -29,14 +29,22 @@ include(cmake/variables.cmake)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
+set(Boost_USE_STATIC_LIBS OFF) 
+set(Boost_USE_MULTITHREADED OFF)  
+set(Boost_USE_STATIC_RUNTIME OFF)
 
 find_package(Qt5 COMPONENTS Core Widgets Gui Network REQUIRED)
 find_package(GTest REQUIRED)
 find_package(Threads REQUIRED)
+find_package(Boost REQUIRED) 
+
+#find_library(BOOST_STACKTRACE_BACKTRACE_LIBRARY NAMES boost_stacktrace_backtrace)
+#find_library(BOOST_STACKTRACE_BASIC_LIBRARY NAMES Boost_stacktrace_basic)
 
 add_subdirectory(src)
 #add_subdirectory(libs)
