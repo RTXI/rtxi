@@ -40,7 +40,7 @@
       "name": "clang-tidy",
       "hidden": true,
       "cacheVariables": {
-        "CMAKE_CXX_CLANG_TIDY": "clang-tidy-12;--header-filter=${sourceDir}/*;-p ${sourceDir}/build/dev;-extra-arg=-std=c++17"
+        "CMAKE_CXX_CLANG_TIDY": "clang-tidy;--header-filter=${sourceDir}/*;--extra-arg=-std=c++17"
       }
     },
     {
