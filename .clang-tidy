@@ -1,8 +1,11 @@
 ---
 # Enable ALL the things! Except not really
 # misc-non-private-member-variables-in-classes: the options don't do anything
+# readability-identifier-naming: Should be enabled after main refactoring is done
 Checks: "*,\
+  -modernize-use-trailing-return-type,\
   -google-readability-todo,\
+  -readability-identifier-naming,\
   -altera-*,\
   -fuchsia-*,\
   fuchsia-multiple-inheritance,\

@@ -1,5 +1,6 @@
 /*
- Copyright (C) 2011 Georgia Institute of Technology, University of Utah, Weill Cornell Medical College
+ Copyright (C) 2011 Georgia Institute of Technology, University of Utah, Weill
+ Cornell Medical College
 
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -19,8 +20,9 @@
 #ifndef ATOMIC_FIFO_H
 #define ATOMIC_FIFO_H
 
-#include <stdlib.h>
 #include <atomic>
+
+#include <stdlib.h>
 
 //! Lockfree SINGLE producer / SINGLE consumer FIFO
 /*
@@ -32,46 +34,45 @@
 
 class AtomicFifo
 {
-
 public:
-    AtomicFifo(size_t);
-    ~AtomicFifo(void);
+  AtomicFifo(size_t);
+  ~AtomicFifo(void);
 
-    /*!
-     * Function for writing data to atomic FIFO
-     *
-     * \param buffer Memory destination
-     * \param itemSize Size of memory chunk to be copied
-     * 
-     * \return success True if successful false otherwise
-     */
-    bool write(const void *buffer, size_t itemSize);
+  /*!
+   * Function for writing data to atomic FIFO
+   *
+   * \param buffer Memory destination
+   * \param itemSize Size of memory chunk to be copied
+   *
+   * \return success True if successful false otherwise
+   */
+  bool write(const void* buffer, size_t itemSize);
 
-    /*!
-     * Function for reading data from atomic FIFO
-     *
-     * \param buffer Memory source
-     * \param itemSize Size of memory chunk to be copied into fifo
-     * 
-     * \return success True if successful false otherwise
-     */
-    bool read(void *buffer, size_t itemSize);
+  /*!
+   * Function for reading data from atomic FIFO
+   *
+   * \param buffer Memory source
+   * \param itemSize Size of memory chunk to be copied into fifo
+   *
+   * \return success True if successful false otherwise
+   */
+  bool read(void* buffer, size_t itemSize);
 
-    /*!
-     *
-     * Function to check if FIFO is truly atomic for the hardware architecture
-     *
-     * \return LockFree true if free of locks false otherwise
-     */
-    bool isLockFree() const;
+  /*!
+   *
+   * Function to check if FIFO is truly atomic for the hardware architecture
+   *
+   * \return LockFree true if free of locks false otherwise
+   */
+  bool isLockFree() const;
+
 private:
-    size_t increment(size_t current_ptr, size_t itemSize) const;
+  size_t increment(size_t current_ptr, size_t itemSize) const;
 
-    char *data;
-    std::atomic<size_t> head;
-    std::atomic<size_t> tail;
-    size_t fifoSize;
-
+  char* data;
+  std::atomic<size_t> head;
+  std::atomic<size_t> tail;
+  size_t fifoSize;
 };
 
 #endif /* ATOMIC_FIFO_H */

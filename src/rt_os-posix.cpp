@@ -19,6 +19,9 @@
 */
 
 #include <iostream>
+
+#include "rt.hpp"
+
 #include <errno.h>
 #include <pthread.h>
 #include <semaphore.h>
@@ -30,7 +33,6 @@
 #include <unistd.h>
 
 #include "debug.hpp"
-#include "rt.hpp"
 
 typedef struct
 {
