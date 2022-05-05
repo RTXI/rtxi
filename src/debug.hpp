@@ -35,6 +35,6 @@
 //! Prints a backtrace to standard error.
 //void PRINT_BACKTRACE(void);
 
-void ERROR_MSG(const std::string& errmsg, ...);
+void ERROR_MSG(const std::string errmsg, ...);
 
 #endif /* DEBUG_H */
