@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.16)
 
 include(cmake/prelude.cmake)
 
@@ -30,6 +30,9 @@ include(cmake/variables.cmake)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+# Clang-tidy is by far the most annoying tool to please. Depending on your development
+# environment you may get useless errors unless you add the line below.
+set(CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES ${CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES})
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
