@@ -3,10 +3,13 @@ project(rtxiTests LANGUAGES CXX)
 
 add_executable(rtxiTests
     "system_tests.cpp"
-    "system_tests.h"
+    "system_tests.hpp"
     "rtxiTests.cpp"
 )
 
+target_include_directories(rtxiTests PRIVATE
+    ${CMAKE_SOURCE_DIR}/src
+)
 target_link_libraries(rtxiTests PRIVATE
     GTest::gtest GTest::gtest_main
     GTest::gmock GTest::gmock_main 

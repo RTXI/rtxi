@@ -18,7 +18,7 @@
 
 */
 
-#include "event.h"
+#include "event.hpp"
 
 #include "debug.hpp"
 

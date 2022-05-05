@@ -21,7 +21,7 @@
 #include <chrono>
 #include <thread>
 
-#include "system_tests.h"
+#include "system_tests.hpp"
 
 #include <gmock/gmock.h>
 

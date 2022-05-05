@@ -26,8 +26,8 @@
 #include <pthread.h>
 #include <cstring>
 
-#include "fifo.h"
-#include "rt.h"
+#include "fifo.hpp"
+#include "rt.hpp"
 
 //! Event Oriented Classes
 /*
