@@ -355,8 +355,101 @@ private:
 
 };  // class List
 
-class Device;
-class Thread;
+
+/*!
+ * Base class for devices that are to interface with System.
+ *
+ * \sa RT::System
+ */
+class Device : public List<Device>::Node
+{
+public:
+  Device(void);
+  virtual ~Device(void);
+
+  /*! \fn virtual void read(void)
+   * Function called by the realtime task at the beginning of each period.
+   *
+   * \sa RT::System
+   */
+  /*! \fn virtual void write(void)
+   * Function called by the realtime task at the end of each period.
+   *
+   * \sa RT::System
+   */
+
+  /**********************************************************
+   * read & write must not be pure virtual because they can *
+   *    be called during construction and destruction.      *
+   **********************************************************/
+
+  virtual void read(void) {};
+  virtual void write(void) {};
+
+  inline bool getActive(void) const
+  {
+    return active;
+  };
+  void setActive(bool);
+
+private:
+  bool active;
+
+};  // class Device
+
+/*!
+ * Base class for objects that are to interface with System.
+ *
+ * \sa RT::System
+ */
+class Thread : public List<Thread>::Node
+{
+public:
+  typedef unsigned long Priority;
+
+  static const Priority MinimumPriority = 0;
+  static const Priority MaximumPriority = 100;
+  static const Priority DefaultPriority = MaximumPriority / 2;
+
+  Thread(Priority p = DefaultPriority);
+  virtual ~Thread(void);
+
+  /*!
+   * Returns the priority of the thread. The higher the
+   *   priority the sooner the thread is called in the
+   *   timestep.
+   *
+   * \return The priority of the thread.
+   */
+  Priority getPriority(void) const
+  {
+    return priority;
+  };
+
+  /*! \fn virtual void execute(void)
+   * Function called periodically by the realtime task.
+   *
+   * \sa RT::System
+   */
+
+  /**********************************************************
+   * execute must not be pure virtual because it can be     *
+   *   called during construction and destruction.          *
+   **********************************************************/
+
+  virtual void execute(void) {};
+
+  inline bool getActive(void) const
+  {
+    return active;
+  };
+  void setActive(bool);
+
+private:
+  bool active;
+  Priority priority;
+
+};  // class Thread
 
 /*!
  * Manages the RTOS as well as all objects that require
@@ -364,9 +457,6 @@ class Thread;
  */
 class System
 {
-  friend class Device;
-  friend class Thread;
-
 public:
   /*!
    * System is a Singleton, which means that there can only be one instance.
@@ -488,101 +578,6 @@ private:
   Fifo eventFifo;
 
 };  // class System
-
-/*!
- * Base class for devices that are to interface with System.
- *
- * \sa RT::System
- */
-class Device : public List<Device>::Node
-{
-public:
-  Device(void);
-  virtual ~Device(void);
-
-  /*! \fn virtual void read(void)
-   * Function called by the realtime task at the beginning of each period.
-   *
-   * \sa RT::System
-   */
-  /*! \fn virtual void write(void)
-   * Function called by the realtime task at the end of each period.
-   *
-   * \sa RT::System
-   */
-
-  /**********************************************************
-   * read & write must not be pure virtual because they can *
-   *    be called during construction and destruction.      *
-   **********************************************************/
-
-  virtual void read(void) {};
-  virtual void write(void) {};
-
-  inline bool getActive(void) const
-  {
-    return active;
-  };
-  void setActive(bool);
-
-private:
-  bool active;
-
-};  // class Device
-
-/*!
- * Base class for objects that are to interface with System.
- *
- * \sa RT::System
- */
-class Thread : public List<Thread>::Node
-{
-public:
-  typedef unsigned long Priority;
-
-  static const Priority MinimumPriority = 0;
-  static const Priority MaximumPriority = 100;
-  static const Priority DefaultPriority = MaximumPriority / 2;
-
-  Thread(Priority p = DefaultPriority);
-  virtual ~Thread(void);
-
-  /*!
-   * Returns the priority of the thread. The higher the
-   *   priority the sooner the thread is called in the
-   *   timestep.
-   *
-   * \return The priority of the thread.
-   */
-  Priority getPriority(void) const
-  {
-    return priority;
-  };
-
-  /*! \fn virtual void execute(void)
-   * Function called periodically by the realtime task.
-   *
-   * \sa RT::System
-   */
-
-  /**********************************************************
-   * execute must not be pure virtual because it can be     *
-   *   called during construction and destruction.          *
-   **********************************************************/
-
-  virtual void execute(void) {};
-
-  inline bool getActive(void) const
-  {
-    return active;
-  };
-  void setActive(bool);
-
-private:
-  bool active;
-  Priority priority;
-
-};  // class Thread
 
 template<typename T>
 void List<T>::insert(iterator position, T& node)
