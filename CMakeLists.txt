@@ -10,29 +10,24 @@ project(
     LANGUAGES CXX
 )
 
+configure_file(rtxiConfig.h.in rtxiConfig.h)
 include(cmake/project-is-top-level.cmake)
 include(cmake/variables.cmake)
 
 # ---- Declare library ----
-
-#add_library(
-#    rtxi_lib OBJECT
-#    source/lib.cpp
-#)
-#
-#target_include_directories(
-#    rtxi_lib ${warning_guard}
-#    PUBLIC
-#    "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/source>"
-#)
-#
+include(FindPkgConfig)
+pkg_check_modules(evl REQUIRED evl)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # Clang-tidy is by far the most annoying tool to please. Depending on your development
 # environment you may get useless errors unless you add the line below.
-set(CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES ${CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES})
+set(CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES 
+  ${CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES}
+  ${evl_INCLUDE_DIRS}
+)
+include_directories(${PROJECT_BINARY_DIR})
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)

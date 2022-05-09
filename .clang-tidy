@@ -3,6 +3,7 @@
 # misc-non-private-member-variables-in-classes: the options don't do anything
 # readability-identifier-naming: Should be enabled after main refactoring is done
 Checks: "*,\
+  -hicpp-deprecated-headers,\
   -modernize-use-trailing-return-type,\
   -google-readability-todo,\
   -readability-identifier-naming,\

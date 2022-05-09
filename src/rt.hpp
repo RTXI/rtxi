@@ -38,16 +38,16 @@ namespace OS
 {
 typedef void* Task;
 
-int initiate(void);
-void shutdown(void);
+int initiate();
+void shutdown();
 
-int createTask(Task*, void* (*)(void*), void*, int = 0);
-void deleteTask(Task);
+int createTask(Task* task, void* (*entry)(void*), void* arg, int prio=0);
+void deleteTask(Task task);
 
-int setPeriod(Task, long long);
-void sleepTimestep(Task);
+int setPeriod(Task task, long long period);
+void sleepTimestep(Task task);
 
-bool isRealtime(void);
+bool isRealtime();
 
 /*!
  * Returns the current CPU time in nanoseconds. In general
@@ -56,7 +56,7 @@ bool isRealtime(void);
  *
  * \return The current CPU time.
  */
-long long getTime(void);
+long long getTime();
 
 /*!
  * Returns the percentage of Cpu being used by the Real-Time
@@ -68,7 +68,7 @@ long long getTime(void);
  *      is the percent of Cpu for the specific processor running
  *      the real-time task.
  */
-double getCpuUsage(void);
+double getCpuUsage();
 
 }  // namespace OS
 
@@ -80,24 +80,22 @@ double getCpuUsage(void);
  */
 class Event
 {
-  friend class System;
-
 public:
-  Event(void);
-  virtual ~Event(void);
+  Event();
+  virtual ~Event();
 
   /*!
    * Function called by the realtime task in System::postEvent()
    *
    * \sa RT::System::postEvent()
    */
-  virtual int callback(void) = 0;
-
-private:
-  void execute(void);
-  void wait(void);
+  virtual int callback() = 0;
+  void execute();
+  void wait();
 
   int retval;
+private:
+
   sem_t signal;
 
 };  // class Event
@@ -111,7 +109,7 @@ public:
   class iterator
   {
   public:
-    iterator(void)
+    iterator()
         : current(0) {};
     iterator(T* x)
         : current(static_cast<Node*>(x)) {};
@@ -127,16 +125,16 @@ public:
       return current != x.current;
     };
 
-    T& operator*(void) const
+    T& operator*() const
     {
       return *static_cast<T*>(current);
     };
-    T* operator->(void) const
+    T* operator->() const
     {
       return static_cast<T*>(current);
     };
 
-    iterator& operator++(void)
+    iterator& operator++()
     {
       current = current->next;
       return *this;
@@ -147,7 +145,7 @@ public:
       current = current->next;
       return tmp;
     };
-    iterator& operator--(void)
+    iterator& operator--()
     {
       current = current->prev;
       return *this;
@@ -167,7 +165,7 @@ public:
   class const_iterator
   {
   public:
-    const_iterator(void)
+    const_iterator()
         : current(0) {};
     const_iterator(const T* x)
         : current(static_cast<const Node*>(x)) {};
@@ -183,16 +181,16 @@ public:
       return current != x.current;
     };
 
-    const T& operator*(void) const
+    const T& operator*() const
     {
       return *static_cast<const T*>(current);
     };
-    const T* operator->(void) const
+    const T* operator->() const
     {
       return static_cast<const T*>(current);
     };
 
-    const_iterator& operator++(void)
+    const_iterator& operator++()
     {
       current = current->next;
       return *this;
@@ -203,7 +201,7 @@ public:
       current = current->next;
       return tmp;
     };
-    const_iterator& operator--(void)
+    const_iterator& operator--()
     {
       current = current->prev;
       return *this;
@@ -227,10 +225,10 @@ public:
     friend class List<T>::const_iterator;
 
   public:
-    Node(void)
+    Node()
         : next(0)
         , prev(0) {};
-    virtual ~Node(void) {};
+    virtual ~Node() {};
 
     bool operator==(const Node& x) const
     {
@@ -242,11 +240,11 @@ public:
 
   };  // class Node
 
-  List(void)
+  List()
       : count(0)
       , head(&tail)
       , tail() {};
-  virtual ~List(void)
+  virtual ~List()
   {
 #ifdef DEBUG
     if (tail.next)
@@ -254,29 +252,29 @@ public:
 #endif
   };
 
-  size_t size(void) const
+  size_t size() const
   {
     return count;
   };
-  bool empty(void) const
+  bool empty() const
   {
     return count == 0;
   };
 
-  iterator begin(void)
+  iterator begin()
   {
     return iterator(static_cast<T*>(head));
   };
-  iterator end(void)
+  iterator end()
   {
     return iterator(static_cast<T*>(&tail));
   };
 
-  const_iterator begin(void) const
+  const_iterator begin() const
   {
     return const_iterator(static_cast<const T*>(head));
   };
-  const_iterator end(void) const
+  const_iterator end() const
   {
     return const_iterator(static_cast<const T*>(&tail));
   };
@@ -319,7 +317,7 @@ private:
         : list(l)
         , iter(i)
         , node(n) {};
-    int callback(void)
+    int callback()
     {
       list->insertRT(iter, *node);
       return 0;
@@ -338,7 +336,7 @@ private:
     RemoveListNodeEvent(List<T>* l, T* n)
         : list(l)
         , node(n) {};
-    int callback(void)
+    int callback()
     {
       list->removeRT(*node);
       return 0;
@@ -365,7 +363,7 @@ class Device : public List<Device>::Node
 {
 public:
   Device(void);
-  virtual ~Device(void);
+  virtual ~Device();
 
   /*! \fn virtual void read(void)
    * Function called by the realtime task at the beginning of each period.
@@ -383,10 +381,10 @@ public:
    *    be called during construction and destruction.      *
    **********************************************************/
 
-  virtual void read(void) {};
-  virtual void write(void) {};
+  virtual void read() {};
+  virtual void write() {};
 
-  inline bool getActive(void) const
+  inline bool getActive() const
   {
     return active;
   };
