@@ -11,7 +11,8 @@ add_executable(rtxiTests
 target_include_directories(rtxiTests PRIVATE
     ${CMAKE_SOURCE_DIR}/src
 )
-target_link_libraries(rtxiTests rtxi_lib
+target_link_libraries(rtxiTests 
+    rtxi_lib rt_os_lib
     GTest::gtest GTest::gtest_main
     GTest::gmock GTest::gmock_main 
     Qt5::Core Qt5::Widgets Qt5::Gui

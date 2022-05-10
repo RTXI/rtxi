@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.20)
 
 include(cmake/prelude.cmake)
 
@@ -14,9 +14,6 @@ configure_file(rtxiConfig.h.in rtxiConfig.h)
 include(cmake/project-is-top-level.cmake)
 include(cmake/variables.cmake)
 
-# ---- Declare library ----
-include(FindPkgConfig)
-pkg_check_modules(evl REQUIRED evl)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -25,7 +22,6 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # environment you may get useless errors unless you add the line below.
 set(CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES 
   ${CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES}
-  ${evl_INCLUDE_DIRS}
 )
 include_directories(${PROJECT_BINARY_DIR})
 

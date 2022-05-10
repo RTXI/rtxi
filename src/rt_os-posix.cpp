@@ -44,7 +44,7 @@ typedef struct
 static bool init_rt = false;
 static pthread_key_t is_rt_key;
 
-int RT::OS::initiate(void)
+int RT::OS::initiate()
 {
   /*
    * I want users to be very much aware that they aren't running in realtime.
@@ -68,7 +68,7 @@ int RT::OS::initiate(void)
   return 0;
 }
 
-void RT::OS::shutdown(void)
+void RT::OS::shutdown()
 {
   pthread_key_delete(is_rt_key);
 }
@@ -103,7 +103,7 @@ static void* bounce(void* bounce_info)
 int RT::OS::createTask(RT::OS::Task* task,
                        void* (*entry)(void*),
                        void* arg,
-                       int)
+                       int prio)
 {
   int retval = 0;
   posix_task_t* t = new posix_task_t;
@@ -136,14 +136,14 @@ void RT::OS::deleteTask(RT::OS::Task task)
   delete t;
 }
 
-bool RT::OS::isRealtime(void)
+bool RT::OS::isRealtime()
 {
   if (init_rt && pthread_getspecific(is_rt_key))
     return true;
   return false;
 }
 
-long long RT::OS::getTime(void)
+long long RT::OS::getTime()
 {
   struct timeval tv;
 
