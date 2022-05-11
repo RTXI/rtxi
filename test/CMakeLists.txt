@@ -3,6 +3,8 @@ project(rtxiTests LANGUAGES CXX)
 
 include(CTest)
 add_executable(rtxiTests
+    "rt_os_tests.hpp"
+    "rt_os_tests.cpp"
     "system_tests.cpp"
     "system_tests.hpp"
     "rtxiTests.cpp"

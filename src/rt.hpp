@@ -38,8 +38,20 @@ namespace OS
 {
 typedef void* Task;
 
+/*!
+ * Initializes the real-time resources. This is done by locking memory
+ * Pages and storing real-time identification variables
+ * 
+ * \return 0 if successful, error code otherwise
+ */
 int initiate();
+
+/*!
+ * Releases real-time resources from the operating system. Called when rtxi
+ * is closing.
+ */
 void shutdown();
+
 
 int createTask(Task* task, void* (*entry)(void*), void* arg, int prio=0);
 void deleteTask(Task task);

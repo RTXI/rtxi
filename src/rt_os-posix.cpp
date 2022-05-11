@@ -51,25 +51,21 @@ int RT::OS::initiate()
    */
   std::cout << "***WARNING*** You are using the POSIX compatibility layer, "
                "RTXI is NOT running in realtime!!!\n";
-
+  int retval = 0;
   if (mlockall(MCL_CURRENT | MCL_FUTURE)) {
     std::cout << "RT::OS(POSIX)::initiate : failed to lock memory.\n";
-
-    /*
-     * I don't think it is necessary to return an error in this case.
-     *  Because unless you are root it will always error.
-     */
-    // return -EPERM;
+    retval = -1;
   }
 
   pthread_key_create(&is_rt_key, 0);
   init_rt = true;
 
-  return 0;
+  return retval;
 }
 
 void RT::OS::shutdown()
 {
+  munlockall();
   pthread_key_delete(is_rt_key);
 }
 
