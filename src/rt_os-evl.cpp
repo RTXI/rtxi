@@ -18,12 +18,12 @@
 
 */
 
-#include <evl/evl.h>
 #include <iostream>
 
 #include "rt.hpp"
 
 #include <errno.h>
+#include <evl/evl.h>
 #include <pthread.h>
 #include <semaphore.h>
 #include <sys/mman.h>
@@ -84,7 +84,8 @@ struct posix_bounce_info_t
 
 static void* bounce(void* bounce_info)
 {
-  posix_bounce_info_t* info = reinterpret_cast<posix_bounce_info_t*>(bounce_info);
+  posix_bounce_info_t* info =
+      reinterpret_cast<posix_bounce_info_t*>(bounce_info);
 
   posix_task_t* t = info->t;
   void* (*entry)(void*) = info->entry;
@@ -98,8 +99,9 @@ static void* bounce(void* bounce_info)
 
   int retval = 0;
   retval = evl_attach_self("RT_THREAD_RTXI-%d", getpid());
-  if (retval != 0){
-    ERROR_MSG("RT::OS::createTask::bounce : Unable to attach evl core to rt thread");
+  if (retval != 0) {
+    ERROR_MSG(
+        "RT::OS::createTask::bounce : Unable to attach evl core to rt thread");
   }
   sem_post(&info->sem);
   return entry(arg);

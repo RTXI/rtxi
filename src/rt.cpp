@@ -128,12 +128,12 @@ void RT::Event::wait(void)
 RT::Device::Device(void)
     : active(false)
 {
-  //RT::System::getInstance()->insertDevice(this);
+  // RT::System::getInstance()->insertDevice(this);
 }
 
 RT::Device::~Device(void)
 {
-  //RT::System::getInstance()->removeDevice(this);
+  // RT::System::getInstance()->removeDevice(this);
 }
 
 void RT::Device::setActive(bool state)
@@ -150,12 +150,12 @@ RT::Thread::Thread(Priority p)
     : active(false)
     , priority(p)
 {
-  //RT::System::getInstance()->insertThread(this);
+  // RT::System::getInstance()->insertThread(this);
 }
 
 RT::Thread::~Thread(void)
 {
-  //RT::System::getInstance()->removeThread(this);
+  // RT::System::getInstance()->removeThread(this);
 }
 
 void RT::Thread::setActive(bool state)

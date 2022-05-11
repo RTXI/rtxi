@@ -1,6 +1,7 @@
 #include <iostream>
-#include "rtxiConfig.h"
+
 #include "rt.hpp"
+#include "rtxiConfig.h"
 
 int main(int argc, char* argv[])
 {

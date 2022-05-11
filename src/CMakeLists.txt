@@ -1,12 +1,10 @@
 cmake_minimum_required(VERSION 3.20)
 
-# ---- Find EVL Core library ----
-include(FindPkgConfig)
-pkg_check_modules(evl evl)
+
 if(${evl_FOUND})
   add_library(rt_os_lib OBJECT "rt_os-evl.cpp")
   target_link_libraries(rt_os_lib PRIVATE ${evl_LINK_LIBRARIES})
-  target_include_directories(rt_os_lib PRIVATE ${evl_INCLUDE_DIRS})
+  target_include_directories(rt_os_lib SYSTEM PRIVATE ${evl_INCLUDE_DIRS})
 else()
   message("EVL Library not found. Reverting to POSIX Interface.")
   add_library(rt_os_lib OBJECT "rt_os-posix.cpp")
@@ -24,6 +22,8 @@ add_library(rtxi_lib OBJECT
     "rt.hpp" 
     "rt.cpp"
 )
+
+target_link_libraries(rtxi_lib PRIVATE Threads::Threads)
 
 add_executable(rtxi_exe
     "tempmain.cpp"
