@@ -5,15 +5,13 @@ include(CTest)
 add_executable(rtxiTests
     "rt_os_tests.hpp"
     "rt_os_tests.cpp"
-    "system_tests.cpp"
-    "system_tests.hpp"
     "rtxiTests.cpp"
 )
 
 target_include_directories(rtxiTests PRIVATE
     ${CMAKE_SOURCE_DIR}/src
 )
-target_link_libraries(rtxiTests 
+target_link_libraries(rtxiTests PRIVATE
     rtxi_lib rt_os_lib
     GTest::gtest GTest::gtest_main
     GTest::gmock GTest::gmock_main 

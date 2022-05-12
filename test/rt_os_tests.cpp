@@ -18,52 +18,39 @@
 
  */
 
-#include <sys/resource.h>
+#include <malloc.h>
 #include <sys/time.h>
-#include <sys/errno.h>
+#include <sys/resource.h>
+
+#include <thread>
+#include <string>
 
 #include "rt_os_tests.hpp"
 
-std::vector<char>* RTOSTests::test_function(size_t bytes)
+
+void temp_function(size_t bytes, int* retval)
 {
-    auto *retval = new std::vector<char>();
-    retval->reserve(bytes);
-    return retval;
+  *retval = RT::OS::initiate();
+  RT::OS::shutdown();
 }
 
-TEST_F(RTOSTests, initiate_and_shutdown)
-{
-    struct rlimit rlim;
-    int res = getrlimit(RLIMIT_MEMLOCK, &rlim);
-    std::vector<char> *data = test_function(rlim.rlim_cur-1);
-    ASSERT_EQ(RT::OS::initiate(), 0);
-    delete data;
-    data = test_function(rlim.rlim_cur+1);
-    ASSERT_EQ(RT::OS::initiate, -1);
-    delete data;
+TEST_F(RTOSTests, InitiateAndShutdown) {
+  int result;
+  std::thread temp_thread(&temp_function, 1, &result);
+  temp_thread.join();
+  EXPECT_EQ(result, 0);
 }
 
-TEST_F(RTOSTests, createTask)
-{
+TEST_F(RTOSTests, createTask_and_deleteTask) {
+
 }
 
-TEST_F(RTOSTests, setPeriod)
-{
-}
+TEST_F(RTOSTests, setPeriod) {}
 
-TEST_F(RTOSTests, sleepTimestep)
-{
-}
+TEST_F(RTOSTests, sleepTimestep) {}
 
-TEST_F(RTOSTests, isRealtime)
-{
-}
+TEST_F(RTOSTests, isRealtime) {}
 
-TEST_F(RTOSTests, getTime)
-{
-}
+TEST_F(RTOSTests, getTime) {}
 
-TEST_F(RTOSTests, getCpuUsage)
-{
-}
-
+TEST_F(RTOSTests, getCpuUsage) {}

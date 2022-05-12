@@ -27,6 +27,7 @@
 #include "rt.hpp"
 
 #include <vector>
+#include <memory>
 
 class RTOSTests : public ::testing::Test
 {
@@ -34,7 +35,7 @@ protected:
   RTOSTests()=default;
   ~RTOSTests()=default;
 
-  std::vector<char>* test_function(size_t bytes);
 };
 
+void temp_function(size_t bytes, int* retval);
 #endif

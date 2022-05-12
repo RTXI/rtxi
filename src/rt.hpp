@@ -21,8 +21,7 @@
 #ifndef RT_H
 #define RT_H
 
-#include <pthread.h>
-#include <semaphore.h>
+#include <thread>
 
 #include "fifo.hpp"
 #include "mutex.hpp"
@@ -36,7 +35,12 @@ namespace RT
 {
 namespace OS
 {
-typedef void* Task;
+
+struct Task {
+  int64_t period;
+  std::unique_ptr<std::thread> rt_thread;
+  std::thread::id task_id;
+};
 
 /*!
  * Initializes the real-time resources. This is done by locking memory
