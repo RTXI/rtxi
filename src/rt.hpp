@@ -25,6 +25,7 @@
 
 #include "fifo.hpp"
 #include "mutex.hpp"
+#include "rtos.hpp"
 
 //! Realtime Oriented Classes
 /*!
@@ -33,60 +34,6 @@
  */
 namespace RT
 {
-namespace OS
-{
-
-struct Task {
-  int64_t period;
-  std::unique_ptr<std::thread> rt_thread;
-  std::thread::id task_id;
-};
-
-/*!
- * Initializes the real-time resources. This is done by locking memory
- * Pages and storing real-time identification variables
- * 
- * \return 0 if successful, error code otherwise
- */
-int initiate();
-
-/*!
- * Releases real-time resources from the operating system. Called when rtxi
- * is closing.
- */
-void shutdown();
-
-
-int createTask(Task* task, void* (*entry)(void*), void* arg, int prio=0);
-void deleteTask(Task task);
-
-int setPeriod(Task task, long long period);
-void sleepTimestep(Task task);
-
-bool isRealtime();
-
-/*!
- * Returns the current CPU time in nanoseconds. In general
- *   this is really only useful for determining the time
- *   between two events.
- *
- * \return The current CPU time.
- */
-long long getTime();
-
-/*!
- * Returns the percentage of Cpu being used by the Real-Time
- * Thread. Should not be run from the real-time thread
- * directly as this can cause high latency.
- *
- * \return CPU_TIME Percentage of time the cpu is spent on
- *      real-time thread calculations. In multicore systems it
- *      is the percent of Cpu for the specific processor running
- *      the real-time task.
- */
-double getCpuUsage();
-
-}  // namespace OS
 
 /*!
  * A token passed to the realtime task through System::postEvent()
@@ -111,8 +58,6 @@ public:
 
   int retval;
 private:
-
-  sem_t signal;
 
 };  // class Event
 
@@ -381,23 +326,23 @@ public:
   Device(void);
   virtual ~Device();
 
-  /*! \fn virtual void read(void)
-   * Function called by the realtime task at the beginning of each period.
-   *
-   * \sa RT::System
-   */
-  /*! \fn virtual void write(void)
-   * Function called by the realtime task at the end of each period.
-   *
-   * \sa RT::System
-   */
-
   /**********************************************************
    * read & write must not be pure virtual because they can *
    *    be called during construction and destruction.      *
    **********************************************************/
 
+  /*! \fn virtual void read(void)
+   * Function called by the realtime task at the beginning of each period.
+   *
+   * \sa RT::System
+   */
   virtual void read() {};
+
+    /*! \fn virtual void write(void)
+   * Function called by the realtime task at the end of each period.
+   *
+   * \sa RT::System
+   */
   virtual void write() {};
 
   inline bool getActive() const
@@ -478,17 +423,15 @@ public:
    *
    * \return The instance of System.
    */
-  static System* getInstance(void);
+  static System* getInstance();
 
   /*!
    * Get the current period of the System in nanoseconds.
    *
    * \return The current period
    */
-  long long getPeriod(void) const
-  {
-    return period;
-  };
+  int64_t getPeriod();
+
   /*!
    * Set a new period for the System in nanoseconds.
    *
@@ -528,17 +471,6 @@ public:
    * \sa RT:Event
    */
   int postEvent(Event* event, bool blocking = true);
-
-  /*!
-   * Return information on the task running in real time.
-   *
-   * \return RT::OS::Task a pointer to the task structure containing the
-   *      relevant information. The data cannot be modified.
-   */
-  RT::OS::Task getTask()
-  {
-    return this->task;
-  }
 
 private:
   /******************************************************************
@@ -581,10 +513,7 @@ private:
   static void* bounce(void*);
   void execute(void);
 
-  bool finished;
-  pthread_t thread;
-  RT::OS::Task task;
-  long long period;
+  RT::OS::Task *task;
 
   List<RT::Device> devices;
   List<RT::Thread> threadList;

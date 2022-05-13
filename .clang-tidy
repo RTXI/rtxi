@@ -2,8 +2,12 @@
 # Enable ALL the things! Except not really
 # misc-non-private-member-variables-in-classes: the options don't do anything
 # readability-identifier-naming: Should be enabled after main refactoring is done
+# *-vararg: we are dealing with variable argument c functions. cannot be helped
+# -modernize-deprecated-headers: dealing with c headers
 Checks: "*,\
   -hicpp-deprecated-headers,\
+  -*-vararg,\
+  -modernize-deprecated-headers,\
   -modernize-use-trailing-return-type,\
   -google-readability-todo,\
   -readability-identifier-naming,\

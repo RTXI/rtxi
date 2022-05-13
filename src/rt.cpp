@@ -18,6 +18,7 @@
 
  */
 
+#include "rtos.hpp"
 #include "rt.hpp"
 
 #include "debug.hpp"
@@ -92,9 +93,10 @@ int RT::System::SetPeriodEvent::callback(void)
 {
   int retval;
   RT::System* sys = RT::System::getInstance();
+  auto rt_task = sys->task;
 
-  if (!(retval = RT::OS::setPeriod(sys->task, period))) {
-    sys->period = period;
+  if (!(retval = RT::OS::setPeriod(rt_task, this->period))) {
+    rt_task->period = this->period;
 
     ::Event::Object event(::Event::RT_PERIOD_EVENT);
     event.setParam("period", &period);
@@ -106,23 +108,23 @@ int RT::System::SetPeriodEvent::callback(void)
 
 RT::Event::Event(void)
 {
-  sem_init(&signal, 0, 0);
+  //sem_init(&signal, 0, 0);
 }
 
 RT::Event::~Event(void)
 {
-  sem_destroy(&signal);
+  //sem_destroy(&signal);
 }
 
 void RT::Event::execute(void)
 {
   retval = callback();
-  sem_post(&signal);
+  //sem_post(&signal);
 }
 
 void RT::Event::wait(void)
 {
-  sem_wait(&signal);
+  //sem_wait(&signal);
 }
 
 RT::Device::Device(void)
@@ -168,29 +170,23 @@ void RT::Thread::setActive(bool state)
   }
 }
 
-RT::System::System(void)
-    : finished(false)
-    , eventFifo(100 * sizeof(RT::Event*))
+RT::System::System()
+    : eventFifo(100 * sizeof(RT::Event*))
 {
-  period = 1000000;  // 1 kHz
-
-  if (RT::OS::initiate()) {
-    ERROR_MSG(
-        "RT::System::System : failed to initialize the realtime system\n");
-    return;
-  }
-
-  if (RT::OS::createTask(&task, &System::bounce, this)) {
+  if (RT::OS::createTask(this->task, &System::bounce, this)) {
     ERROR_MSG("RT::System::System : failed to create realtime thread\n");
     return;
   }
 }
 
-RT::System::~System(void)
+RT::System::~System()
 {
-  finished = true;
   RT::OS::deleteTask(task);
-  RT::OS::shutdown();
+}
+
+int64_t RT::System::getPeriod() 
+{
+  return this->task->period;
 }
 
 int RT::System::setPeriod(long long period)
@@ -328,14 +324,14 @@ void RT::System::execute(void)
   List<Thread>::iterator threadListBegin = threadList.begin();
   List<Thread>::iterator threadListEnd = threadList.end();
 
-  if (RT::OS::setPeriod(task, period)) {
+  if (RT::OS::setPeriod(this->task, this->task->period)) {
     ERROR_MSG(
         "RT::System::execute : failed to set the initial period of the "
         "realtime thread\n");
     return;
   }
 
-  while (!finished) {
+  while (!this->task->task_finished) {
     RT::OS::sleepTimestep(task);
 
     for (iDevice = devicesBegin; iDevice != devicesEnd; ++iDevice)

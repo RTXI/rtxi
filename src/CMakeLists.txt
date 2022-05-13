@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.20)
 
 
 if(${evl_FOUND})
-  add_library(rt_os_lib OBJECT "rt_os-evl.cpp")
+  add_library(rt_os_lib OBJECT "rtos.hpp" "rtos_evl.cpp")
   target_link_libraries(rt_os_lib PRIVATE ${evl_LINK_LIBRARIES})
   target_include_directories(rt_os_lib SYSTEM PRIVATE ${evl_INCLUDE_DIRS})
 else()
