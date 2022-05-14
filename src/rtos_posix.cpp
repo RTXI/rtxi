@@ -41,7 +41,7 @@ int RT::OS::initiate()
    */
   std::cout << "***WARNING*** You are using the POSIX compatibility layer, "
                "RTXI is NOT running in realtime!!!\n";
-  int retval = mlockall(MCL_CURRENT | MCL_FUTURE);
+  int retval = mlockall(MCL_CURRENT | MCL_FUTURE); // NOLINT
   if (retval != 0) {
     std::cout << "RT::OS(POSIX)::initiate : failed to lock memory.\n";
   }
@@ -51,8 +51,8 @@ int RT::OS::initiate()
 
 void RT::OS::shutdown()
 {
-  realtime_key = false;
   munlockall();
+  realtime_key = false;
 }
 
 void rt_thread_wrapper(void* (*rt_loop)(void*), void* args){
