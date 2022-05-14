@@ -23,8 +23,6 @@
 #include "rt.hpp"
 
 #include <errno.h>
-#include <pthread.h>
-#include <semaphore.h>
 #include <sys/mman.h>
 #include <sys/resource.h>
 #include <sys/time.h>
@@ -34,15 +32,7 @@
 
 #include "debug.hpp"
 
-typedef struct
-{
-  long long period;
-  long long next_t;
-  pthread_t thread;
-} posix_task_t;
-
-static bool init_rt = false;
-static pthread_key_t is_rt_key;
+thread_local bool realtime_key = false;
 
 int RT::OS::initiate()
 {
@@ -51,129 +41,92 @@ int RT::OS::initiate()
    */
   std::cout << "***WARNING*** You are using the POSIX compatibility layer, "
                "RTXI is NOT running in realtime!!!\n";
-  int retval = 0;
-  if (mlockall(MCL_CURRENT | MCL_FUTURE)) {
+  int retval = mlockall(MCL_CURRENT | MCL_FUTURE);
+  if (retval != 0) {
     std::cout << "RT::OS(POSIX)::initiate : failed to lock memory.\n";
-    retval = -1;
   }
-
-  pthread_key_create(&is_rt_key, 0);
-  init_rt = true;
-
+  realtime_key = true;
   return retval;
 }
 
 void RT::OS::shutdown()
 {
+  realtime_key = false;
   munlockall();
-  pthread_key_delete(is_rt_key);
 }
 
-struct posix_bounce_info_t
-{
-  void* (*entry)(void*);
-  posix_task_t* t;
-  void* arg;
-  sem_t sem;
-};
-
-static void* bounce(void* bounce_info)
-{
-  posix_bounce_info_t* info =
-      reinterpret_cast<posix_bounce_info_t*>(bounce_info);
-
-  posix_task_t* t = info->t;
-  void* (*entry)(void*) = info->entry;
-  void* arg = info->arg;
-
-  t->period = -1;
-  t->next_t = -1;
-  t->thread = pthread_self();
-
-  pthread_setspecific(is_rt_key, reinterpret_cast<const void*>(t));
-
-  sem_post(&info->sem);
-  return entry(arg);
+void rt_thread_wrapper(void* (*rt_loop)(void*), void* args){
+  RT::OS::initiate();
+  rt_loop(args);
+  RT::OS::shutdown();
 }
 
-int RT::OS::createTask(RT::OS::Task* task,
+int RT::OS::createTask(RT::OS::Task *task,
                        void* (*entry)(void*),
                        void* arg,
                        int prio)
 {
-  int retval = 0;
-  posix_task_t* t = new posix_task_t;
-  *task = t;
-
-  posix_bounce_info_t info = {
-      entry,
-      t,
-      arg,
-  };
-  sem_init(&info.sem, 0, 0);
-
-  retval = pthread_create(&t->thread, NULL, &::bounce, &info);
-  if (!retval)
-    sem_wait(&info.sem);
-  else
-    ERROR_MSG("RT::OS::createTask : pthread_create failed\n");
-
-  sem_destroy(&info.sem);
-  return retval;
+  // Should not be creating real-time tasks from another real-time task
+  if (RT::OS::isRealtime()) {
+    ERROR_MSG("RT::OS::createTask : Task cannot be created from rt context");
+    return -1;
+  }
+  if (task->rt_thread->joinable()){
+    ERROR_MSG("RT::OS::createTask : RT Task is already initialized");
+    return -1;
+  }
+  auto thread_obj = std::make_shared<std::thread>(rt_thread_wrapper,
+                                                  entry,
+                                                  arg);
+  task->rt_thread = std::move(thread_obj);
+  return 0;
 }
 
-void RT::OS::deleteTask(RT::OS::Task task)
-{
-  posix_task_t* t = reinterpret_cast<posix_task_t*>(task);
-  if (t == NULL)
-    return;
 
-  pthread_join(t->thread, 0);
-  delete t;
+void RT::OS::deleteTask(RT::OS::Task *task)
+{
+  // Should not be deleting real-time tasks from another real-time task
+  if (RT::OS::isRealtime()) {
+    ERROR_MSG("RT::OS::createTask : Task cannot be deleted from rt context");
+    return;
+  }
+  task->task_finished = true;
+  if (task->rt_thread->joinable()){
+    task->rt_thread->join();
+  }
 }
 
 bool RT::OS::isRealtime()
 {
-  if (init_rt && pthread_getspecific(is_rt_key))
-    return true;
-  return false;
+  return realtime_key;
 }
 
-long long RT::OS::getTime()
+int64_t RT::OS::getTime()
 {
-  struct timeval tv;
+  timespec tp = { };
 
-  gettimeofday(&tv, NULL);
+  clock_gettime(CLOCK_MONOTONIC, &tp);
 
-  return 1000000000ll * tv.tv_sec + 1000ll * tv.tv_usec;
+  return RT::OS::SECONDS_TO_NANOSECONDS * tp.tv_sec + tp.tv_nsec;
 }
 
-int RT::OS::setPeriod(RT::OS::Task task, long long period)
+int RT::OS::setPeriod(RT::OS::Task *task, int64_t period)
 {
-  posix_task_t* t = reinterpret_cast<posix_task_t*>(task);
-
-  t->period = period;
-  t->next_t = getTime() + period;
-
+  task->period = period;
   return 0;
 }
 
-void RT::OS::sleepTimestep(RT::OS::Task task)
+void RT::OS::sleepTimestep(RT::OS::Task *task)
 {
-  posix_task_t* t = reinterpret_cast<posix_task_t*>(task);
-  if (t == NULL)
-    return;
+  int64_t sleep_time = task->next_t;
+  task->next_t += task->period;
 
-  long long sleep_time = t->next_t - getTime();
-  t->next_t += t->period;
-
-  struct timespec ts = {
-      sleep_time / 1000000000ll,
-      sleep_time % 1000000000ll,
+  const struct timespec ts = {
+      sleep_time / 1000000000,
+      sleep_time % 1000000000
   };
 
-  while (nanosleep(&ts, &ts) < 0 && errno == EINTR)
-    ;
+  clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &ts, nullptr);
 }
 
 timespec last_clock_read;
@@ -183,31 +136,30 @@ double RT::OS::getCpuUsage()
 {
   // Should not attempt this in the real-time thread
   if (RT::OS::isRealtime()) {
-    ERROR_MSG(
-        "RT::OS::getCpuUsage : This function should only be run in user space. "
-        "Aborting.");
     return 0.0;
   }
 
-  double cpu_percent;
-  long cpu_time_elapsed;
-  long proc_time_elapsed;
+  ;
+  double cpu_percent = 0.0;
+  int64_t cpu_time_elapsed = 0;
+  int64_t proc_time_elapsed = 0;
 
-  timespec clock_time;
-  timespec proc_time;
+  timespec clock_time = { };
+  timespec proc_time = { };
   // rusage resource_usage;
 
   clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &proc_time);
   clock_gettime(CLOCK_REALTIME, &clock_time);
   // getrusage(RUSAGE_SELF, &resource_usage);
 
-  cpu_time_elapsed = 1e9 * (clock_time.tv_sec - last_clock_read.tv_sec)
+  cpu_time_elapsed = RT::OS::SECONDS_TO_NANOSECONDS * (clock_time.tv_sec - last_clock_read.tv_sec)
       + (clock_time.tv_nsec - last_clock_read.tv_nsec);
-  if (cpu_time_elapsed <= 0)
+  if (cpu_time_elapsed <= 0) {
     return 0.0;
-  proc_time_elapsed = 1e9 * (proc_time.tv_sec - last_proc_time.tv_sec)
+  }
+  proc_time_elapsed = RT::OS::SECONDS_TO_NANOSECONDS * (proc_time.tv_sec - last_proc_time.tv_sec)
       + (proc_time.tv_nsec - last_proc_time.tv_nsec);
-  cpu_percent = 100.0 * (proc_time_elapsed) / cpu_time_elapsed;
+  cpu_percent = 100.0 * (static_cast<double>(proc_time_elapsed)) / static_cast<double>(cpu_time_elapsed);
 
   last_proc_time = proc_time;
   last_clock_read = clock_time;
