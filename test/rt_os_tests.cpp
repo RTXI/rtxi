@@ -33,7 +33,13 @@ void temp_function(int& retval)
 
 TEST_F(RTOSTests, InitiateAndShutdown) {
   int result = 0;
-  std::thread temp_thread(temp_function, std::ref(result));
+  std::thread temp_thread(
+    [](int& retval){
+      retval = RT::OS::initiate();
+      RT::OS::shutdown();
+    }, 
+    std::ref(result)
+  );
   temp_thread.join();
   // It is not possible to lock memory without admin privilages. 
   EXPECT_TRUE(result == 0 || result == -1);
@@ -43,7 +49,14 @@ TEST_F(RTOSTests, CreateAndDeleteTask) {
   using namespace std::chrono_literals;
   int result = 0;
   RT::OS::Task *test_task;
-  result = createTask(test_task, &temp_task, &result, 0);
+  result = createTask(
+    test_task, 
+    [](int& retval){
+      std::this_thread::sleep_for(1s);
+      retval = 1;
+    }, 
+    &result, 
+    0);
 
 }
 

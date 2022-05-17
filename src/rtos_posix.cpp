@@ -29,6 +29,7 @@
 #include <sys/types.h>
 #include <time.h>
 #include <unistd.h>
+#include <string.h>
 
 #include "debug.hpp"
 
@@ -43,7 +44,7 @@ int RT::OS::initiate()
                "RTXI is NOT running in realtime!!!\n";
   int retval = mlockall(MCL_CURRENT | MCL_FUTURE); // NOLINT
   if (retval != 0) {
-    std::cout << "RT::OS(POSIX)::initiate : failed to lock memory.\n";
+    ERROR_MSG("RT::OS(POSIX)::initiate : failed to lock memory : %s", strerror(errno));
   }
   realtime_key = true;
   return retval;
@@ -139,7 +140,6 @@ double RT::OS::getCpuUsage()
     return 0.0;
   }
 
-  ;
   double cpu_percent = 0.0;
   int64_t cpu_time_elapsed = 0;
   int64_t proc_time_elapsed = 0;
