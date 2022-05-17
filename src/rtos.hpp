@@ -28,7 +28,7 @@ struct Task
 int initiate();
 
 /*!
- * Releases real-time resources from the operating system. Called when rtxi
+ * Releases real-time resources from the operating system. Called when rt thread
  * is closing.
  */
 void shutdown();

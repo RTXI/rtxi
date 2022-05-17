@@ -18,30 +18,32 @@
 
  */
 
-#include <malloc.h>
-#include <sys/time.h>
-#include <sys/resource.h>
-
 #include <thread>
-#include <string>
+#include <functional>
+#include <chrono>
 
 #include "rt_os_tests.hpp"
 
 
-void temp_function(size_t bytes, int* retval)
+void temp_function(int& retval)
 {
-  *retval = RT::OS::initiate();
+  retval = RT::OS::initiate();
   RT::OS::shutdown();
 }
 
 TEST_F(RTOSTests, InitiateAndShutdown) {
-  int result;
-  std::thread temp_thread(&temp_function, 1, &result);
+  int result = 0;
+  std::thread temp_thread(temp_function, std::ref(result));
   temp_thread.join();
-  EXPECT_EQ(result, 0);
+  // It is not possible to lock memory without admin privilages. 
+  EXPECT_TRUE(result == 0 || result == -1);
 }
 
-TEST_F(RTOSTests, createTask_and_deleteTask) {
+TEST_F(RTOSTests, CreateAndDeleteTask) {
+  using namespace std::chrono_literals;
+  int result = 0;
+  RT::OS::Task *test_task;
+  result = createTask(test_task, &temp_task, &result, 0);
 
 }
 

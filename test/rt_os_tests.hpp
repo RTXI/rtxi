@@ -24,10 +24,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "rt.hpp"
-
-#include <vector>
-#include <memory>
+#include "rtos.hpp"
 
 class RTOSTests : public ::testing::Test
 {
@@ -37,5 +34,5 @@ protected:
 
 };
 
-void temp_function(size_t bytes, int* retval);
+void temp_function(int& retval);
 #endif
