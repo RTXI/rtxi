@@ -23,18 +23,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 include(FindPkgConfig)
 pkg_check_modules(evl evl)
 
-if(${evl_FOUND})
-  set(RTOS_INCLUDES ${evl_INCLUDE_DIRS})
-else()
-  set(RTOS_INCLUDES "")
-endif()
 
-# Clang-tidy is by far the most annoying tool to please. Depending on your development
-# environment you may get useless errors unless you add the line below.
-set(CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES 
-  ${CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES}
-  RTOS_INCLUDES
-)
 # Make sure we can find the rtxiConfig.h generated file in binary directory
 include_directories(${PROJECT_BINARY_DIR})
 
@@ -54,6 +43,19 @@ set(Boost_USE_STATIC_RUNTIME OFF)
 
 #find_library(BOOST_STACKTRACE_BACKTRACE_LIBRARY NAMES boost_stacktrace_backtrace)
 #find_library(BOOST_STACKTRACE_BASIC_LIBRARY NAMES Boost_stacktrace_basic)
+
+# Clang-tidy is by far the most annoying tool to please. Depending on your development
+# environment you may get useless errors unless you add the line below.
+if(${evl_FOUND})
+  set(CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES 
+    ${CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES}
+    ${evl_INCLUDE_DIRS}
+  )
+else()
+  set(CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES 
+    ${CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES}
+  )
+endif()
 
 add_subdirectory(src)
 #add_subdirectory(libs)

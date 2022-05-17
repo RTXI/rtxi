@@ -173,7 +173,7 @@ void RT::Thread::setActive(bool state)
 RT::System::System()
     : eventFifo(100 * sizeof(RT::Event*))
 {
-  if (RT::OS::createTask(this->task, &System::bounce, this)) {
+  if (RT::OS::createTask(this->task, System::bounce, this)) {
     ERROR_MSG("RT::System::System : failed to create realtime thread\n");
     return;
   }
@@ -306,9 +306,9 @@ void RT::System::removeThread(RT::Thread* thread)
   threadList.remove(*thread);
 }
 
-void* RT::System::bounce(void* param)
+void RT::System::bounce(RT::System* param)
 {
-  RT::System* that = reinterpret_cast<RT::System*>(param);
+  RT::System* that = param;
   if (that)
     that->execute();
   return 0;

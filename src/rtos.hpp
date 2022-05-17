@@ -1,15 +1,22 @@
 #ifndef RTOS_H
 #define RTOS_H
 
+#include <evl/evl.h>
+#include <evl/sched.h>
+#include <evl/thread.h>
+
+#include <functional>
 #include <thread>
+
+#include "debug.hpp"
 
 namespace RT
 {
 namespace OS
 {
 
-const int SECONDS_TO_NANOSECONDS = 1000000000; // Conversion from sec to nsec
-const int64_t DEFAULT_PERIOD = 1000000; // Default period is set to 1 msec
+const int SECONDS_TO_NANOSECONDS = 1000000000;  // Conversion from sec to nsec
+const int64_t DEFAULT_PERIOD = 1000000;  // Default period is set to 1 msec
 
 struct Task
 {
@@ -28,23 +35,11 @@ struct Task
 int initiate();
 
 /*!
- * Releases real-time resources from the operating system. Called when rt thread
+ * Releases real-time resources from the operating system. Called when rtxi
  * is closing.
  */
 void shutdown();
 
-/*!
- * Creates a real-time task
- *
- * \param task Object holding metadata for real-time task
- * \param entry Pointer to function that will be run in real-time loop
- * \param arg Arguments to pass to function that will run in real-time loop
- * \param prio Priority of the real-time thread running the function. Currently
- * unused.
- *
- * \returns 0 if successful, -1 otherwise
- */
-int createTask(Task* task, void* (*entry)(void*), void* arg, int prio = 0);
 
 /*!
  * terminates task in real-time loop
@@ -100,6 +95,49 @@ int64_t getTime();
  *      the real-time task.
  */
 double getCpuUsage();
+
+template <class T>
+void rt_thread_wrapper(std::function<void(T*)> rt_loop, T* args)
+{
+  if (RT::OS::initiate() == -1) {
+    ERROR_MSG("Unable to create real-time thread");
+    return;
+  }
+  rt_loop(args);
+  RT::OS::shutdown();
+}
+
+/*!
+ * Creates a real-time task. This task will be associated with a system object
+ * to manage it.
+ *
+ * \param task Object holding metadata for real-time task
+ * \param entry Pointer to function that will be run in real-time loop
+ * \param arg Pointer to RT::System object that will manage this real-time loop
+ * \param prio Priority of the real-time thread running the function. Currently
+ * unused.
+ *
+ * \returns 0 if successful, -1 otherwise
+ */
+template <class T>
+int createTask(Task* task,
+               std::function<void(T*)> entry,
+               T* arg)
+{
+  // Should not be creating real-time tasks from another real-time task
+  if (RT::OS::isRealtime()) {
+    ERROR_MSG("RT::OS::createTask : Task cannot be created from rt context");
+    return -1;
+  }
+  if (task->rt_thread->joinable()) {
+    ERROR_MSG("RT::OS::createTask : RT Task is already initialized");
+    return -1;
+  }
+  auto thread_obj =
+      std::make_shared<std::thread>(rt_thread_wrapper<T>, entry, arg);
+  task->rt_thread = std::move(thread_obj);
+  return 0;
+}
 
 }  // namespace OS
 }  // namespace RT

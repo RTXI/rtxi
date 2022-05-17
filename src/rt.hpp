@@ -510,7 +510,7 @@ private:
   void insertThread(Thread*);
   void removeThread(Thread*);
 
-  static void* bounce(void*);
+  static void bounce(RT::System* param);
   void execute(void);
 
   RT::OS::Task *task;
