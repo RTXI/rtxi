@@ -13,10 +13,10 @@ int main(int argc, char* argv[])
   std::cout << RTXI_VERSION_MAJOR << ".";
   std::cout << RTXI_VERSION_MINOR << ".";
   std::cout << RTXI_VERSION_PATCH << "\n";
-  RT::OS::Task *task = { };
+  RT::OS::Task task = { };
   int retval = 0;
   int function_retval = 0;
-  retval = RT::OS::createTask<int>(task, &test_func, &function_retval);
-  RT::OS::deleteTask(task);
+  retval = RT::OS::createTask<int>(&task, &test_func, &function_retval);
+  RT::OS::deleteTask(&task);
   return retval;
 }

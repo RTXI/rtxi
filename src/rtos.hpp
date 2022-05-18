@@ -23,7 +23,7 @@ struct Task
   int64_t period = DEFAULT_PERIOD;
   int64_t next_t = 0;
   bool task_finished = false;
-  std::shared_ptr<std::thread> rt_thread;
+  std::thread rt_thread;
 };
 
 /*!
@@ -129,12 +129,7 @@ int createTask(Task* task,
     ERROR_MSG("RT::OS::createTask : Task cannot be created from rt context");
     return -1;
   }
-  if (task->rt_thread->joinable()) {
-    ERROR_MSG("RT::OS::createTask : RT Task is already initialized");
-    return -1;
-  }
-  auto thread_obj =
-      std::make_shared<std::thread>(rt_thread_wrapper<T>, entry, arg);
+  std::thread thread_obj(rt_thread_wrapper<T>, entry, arg);
   task->rt_thread = std::move(thread_obj);
   return 0;
 }
