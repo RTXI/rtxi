@@ -21,20 +21,16 @@
 #ifndef DEBUG_H
 #define DEBUG_H
 
-//#include <boost/stacktrace.hpp>
-#include <memory>
 #include <string>
-
-#include <execinfo.h>
-#include <stdarg.h>
-
-#if XENOMAI
-#  include <rtdk.h>
-#endif
+#include <fmt/core.h>
 
 //! Prints a backtrace to standard error.
 // void PRINT_BACKTRACE(void);
 
-void ERROR_MSG(const std::string errmsg, ...);
+template <typename... Args>
+void ERROR_MSG(const std::string &errmsg, Args... args) {
+  std::cerr << fmt::format(errmsg, args...); 
+  std::cerr << "\n";
+}
 
 #endif /* DEBUG_H */

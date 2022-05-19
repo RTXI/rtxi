@@ -28,13 +28,13 @@
 //    std::cerr << boost::stacktrace::stacktrace();
 //}
 
-void ERROR_MSG(const std::string errmsg, ...)
-{
-  va_list args;
-  va_start(args, errmsg);
-  char buf[256] = "";
-  vsprintf(buf, errmsg.c_str(), args);
-  std::cerr << std::string(buf);
-  std::cerr << "\n";
-  va_end(args);
-}
+//void ERROR_MSG(const std::string errmsg, ...)
+//{
+//  va_list args;
+//  va_start(args, errmsg);
+//  char buf[256] = "";
+//  vsprintf(buf, errmsg.c_str(), args);
+//  std::cerr << std::string(buf);
+//  std::cerr << "\n";
+//  va_end(args);
+//}

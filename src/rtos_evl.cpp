@@ -33,12 +33,12 @@ int RT::OS::initiate()
 {
   int retval = evl_init();
   if (retval != 0) {
-    ERROR_MSG("RT::OS(EVL)::initiate : evl_init() : %s", strerror(errno));
+    ERROR_MSG("RT::OS(EVL)::initiate : evl_init() : {}", strerror(errno));
     return retval;
   }
   retval = evl_attach_self("RTXI-RT-Thread:%d", getpid());  // NOLINT
   if (retval != 0) {
-    ERROR_MSG("RT::OS(EVL)::initiate : evl_attach_self() : %s",
+    ERROR_MSG("RT::OS(EVL)::initiate : evl_attach_self() : {}",
               strerror(errno));
   }
   return retval;
@@ -49,7 +49,7 @@ void RT::OS::shutdown()
   int retval = evl_detach_self();
   if (retval != 0) {
     ERROR_MSG("Unable to detach thread from evl core!");
-    ERROR_MSG("RT::OS(EVL)::shutdown : evl_detach_self() : %s",
+    ERROR_MSG("RT::OS(EVL)::shutdown : evl_detach_self() : {}",
               strerror(errno));
   }
 }

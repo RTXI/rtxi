@@ -15,7 +15,10 @@ add_library(rtxi_lib OBJECT
     "debug.cpp"
 )
 
-target_link_libraries(rtxi_lib PRIVATE Threads::Threads)
+target_link_libraries(rtxi_lib PRIVATE 
+    Threads::Threads
+    fmt::fmt
+)
 
 add_executable(rtxi_exe
     "tempmain.cpp"

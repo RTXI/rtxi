@@ -9,7 +9,7 @@
     {
       "name": "dev-common",
       "hidden": true,
-      "inherits": ["dev-mode", "clang-tidy", "cppcheck"],
+      "inherits": ["dev-mode", "conan", "clang-tidy", "cppcheck"],
       "cacheVariables": {
         "BUILD_MCSS_DOCS": "ON"
       }
@@ -35,7 +35,7 @@
     {
       "name": "dev-coverage",
       "binaryDir": "${sourceDir}/build/coverage",
-      "inherits": ["dev-mode", "coverage-unix"]
+      "inherits": ["dev-mode", "coverage-unix", "conan"]
     }
   ],
   "buildPresets": [
@@ -43,7 +43,7 @@
       "name": "dev",
       "configurePreset": "dev",
       "configuration": "Debug",
-      "jobs": 8
+      "jobs": 4
     }
   ],
   "testPresets": [
@@ -55,7 +55,7 @@
         "outputOnFailure": true
       },
       "execution": {
-        "jobs": 8
+        "jobs": 4
       }
     }
   ]

@@ -14,8 +14,7 @@ configure_file(rtxiConfig.h.in rtxiConfig.h)
 include(cmake/project-is-top-level.cmake)
 include(cmake/variables.cmake)
 
-
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
@@ -23,23 +22,28 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 include(FindPkgConfig)
 pkg_check_modules(evl evl)
 
-
 # Make sure we can find the rtxiConfig.h generated file in binary directory
 include_directories(${PROJECT_BINARY_DIR})
+#include(${CMAKE_BINARY_DIR}/conan_paths.cmake)
+#set(CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR})
 
 #Find the packages
+find_package(fmt REQUIRED)
+find_package(HDF5 REQUIRED)
+find_package(libgit2 REQUIRED)
+find_package(qwt REQUIRED)
 find_package(Qt5 COMPONENTS Core Widgets Gui Network REQUIRED)
 find_package(GTest REQUIRED)
 find_package(Threads REQUIRED)
-find_package(Boost REQUIRED) 
+#find_package(Boost REQUIRED) 
 
 #Handle QT and boost libraries shenanigans
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
-set(Boost_USE_STATIC_LIBS OFF) 
-set(Boost_USE_MULTITHREADED OFF)  
-set(Boost_USE_STATIC_RUNTIME OFF)
+#set(Boost_USE_STATIC_LIBS OFF) 
+#set(Boost_USE_MULTITHREADED OFF)  
+#set(Boost_USE_STATIC_RUNTIME OFF)
 
 #find_library(BOOST_STACKTRACE_BACKTRACE_LIBRARY NAMES boost_stacktrace_backtrace)
 #find_library(BOOST_STACKTRACE_BASIC_LIBRARY NAMES Boost_stacktrace_basic)
@@ -62,8 +66,6 @@ add_subdirectory(src)
 #add_subdirectory(plugins)
 #add_subdirectory(res)
 #add_subdirectory(scripts)
-
-
 
 # ---- Install rules ----
 
