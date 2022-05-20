@@ -13,6 +13,11 @@ src/rtxi
 tests/rtxiTests
 docs/*
 coverage/*
+conan/*
+conan.lock
+conanbuildinfo.txt
+conaninfo.txt
+graph_info.json
 
 #Ignore qt generated mocs
 moc_*
