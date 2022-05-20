@@ -14,9 +14,10 @@ configure_file(rtxiConfig.h.in rtxiConfig.h)
 include(cmake/project-is-top-level.cmake)
 include(cmake/variables.cmake)
 
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+#set(CMAKE_CXX_STANDARD 20)
+#set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 
 # Find EVL Core library
 include(FindPkgConfig)
@@ -32,7 +33,7 @@ find_package(fmt REQUIRED)
 find_package(HDF5 REQUIRED)
 find_package(libgit2 REQUIRED)
 find_package(qwt REQUIRED)
-find_package(Qt5 COMPONENTS Core Widgets Gui Network REQUIRED)
+find_package(Qt5 REQUIRED)
 find_package(GTest REQUIRED)
 find_package(Threads REQUIRED)
 #find_package(Boost REQUIRED) 
