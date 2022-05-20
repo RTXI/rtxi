@@ -114,12 +114,10 @@ void rt_thread_wrapper(std::function<void(T*)> rt_loop, T* args)
  * \param task Object holding metadata for real-time task
  * \param entry Pointer to function that will be run in real-time loop
  * \param arg Pointer to RT::System object that will manage this real-time loop
- * \param prio Priority of the real-time thread running the function. Currently
- * unused.
  *
  * \returns 0 if successful, -1 otherwise
  */
-template <class T>
+template <typename T>
 int createTask(Task* task,
                std::function<void(T*)> entry,
                T* arg)

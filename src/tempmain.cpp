@@ -5,9 +5,10 @@
 
 void test_func(int *retval){
   std::cout << "test function reached.\n";
+  *retval = 0;
 }
 
-int main(int argc, char* argv[])
+int main()
 {
   std::cout << "Welcome to RTXI Version ";
   std::cout << RTXI_VERSION_MAJOR << ".";
