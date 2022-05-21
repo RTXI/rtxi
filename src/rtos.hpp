@@ -1,10 +1,6 @@
 #ifndef RTOS_H
 #define RTOS_H
 
-#include <evl/evl.h>
-#include <evl/sched.h>
-#include <evl/thread.h>
-
 #include <functional>
 #include <thread>
 

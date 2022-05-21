@@ -20,8 +20,6 @@
 
 #include <iostream>
 
-#include "rt.hpp"
-
 #include <errno.h>
 #include <sys/mman.h>
 #include <sys/resource.h>
@@ -32,6 +30,7 @@
 #include <string.h>
 
 #include "debug.hpp"
+#include "rtos.hpp"
 
 thread_local bool realtime_key = false;
 
@@ -56,32 +55,31 @@ void RT::OS::shutdown()
   realtime_key = false;
 }
 
-void rt_thread_wrapper(void* (*rt_loop)(void*), void* args){
-  RT::OS::initiate();
-  rt_loop(args);
-  RT::OS::shutdown();
-}
+// void rt_thread_wrapper(void* (*rt_loop)(void*), void* args){
+//   RT::OS::initiate();
+//   rt_loop(args);
+//   RT::OS::shutdown();
+// }
 
-int RT::OS::createTask(RT::OS::Task *task,
-                       void* (*entry)(void*),
-                       void* arg,
-                       int prio)
-{
-  // Should not be creating real-time tasks from another real-time task
-  if (RT::OS::isRealtime()) {
-    ERROR_MSG("RT::OS::createTask : Task cannot be created from rt context");
-    return -1;
-  }
-  if (task->rt_thread->joinable()){
-    ERROR_MSG("RT::OS::createTask : RT Task is already initialized");
-    return -1;
-  }
-  auto thread_obj = std::make_shared<std::thread>(rt_thread_wrapper,
-                                                  entry,
-                                                  arg);
-  task->rt_thread = std::move(thread_obj);
-  return 0;
-}
+// int RT::OS::createTask(RT::OS::Task *task,
+//                        void* (*entry)(void*),
+//                        void* arg)
+// {
+//   // Should not be creating real-time tasks from another real-time task
+//   if (RT::OS::isRealtime()) {
+//     ERROR_MSG("RT::OS::createTask : Task cannot be created from rt context");
+//     return -1;
+//   }
+//   if (task->rt_thread->joinable()){
+//     ERROR_MSG("RT::OS::createTask : RT Task is already initialized");
+//     return -1;
+//   }
+//   auto thread_obj = std::make_shared<std::thread>(rt_thread_wrapper,
+//                                                   entry,
+//                                                   arg);
+//   task->rt_thread = std::move(thread_obj);
+//   return 0;
+// }
 
 
 void RT::OS::deleteTask(RT::OS::Task *task)
@@ -92,8 +90,8 @@ void RT::OS::deleteTask(RT::OS::Task *task)
     return;
   }
   task->task_finished = true;
-  if (task->rt_thread->joinable()){
-    task->rt_thread->join();
+  if (task->rt_thread.joinable()){
+    task->rt_thread.join();
   }
 }
 

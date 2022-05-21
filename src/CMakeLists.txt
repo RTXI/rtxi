@@ -8,6 +8,7 @@ if(${evl_FOUND})
 else()
   message("EVL Library not found. Reverting to POSIX Interface.")
   add_library(rt_os_lib OBJECT "rtos.hpp" "rtos_posix.cpp")
+  target_link_libraries(rt_os_lib PUBLIC fmt::fmt)
 endif()
 
 
