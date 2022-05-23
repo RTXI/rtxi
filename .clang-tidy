@@ -5,12 +5,16 @@
 # *-vararg: we are dealing with variable argument c functions. cannot be helped
 # -modernize-deprecated-headers: dealing with c headers
 # -google-runtime-references: Not a useful warning really. We want references
+# -cert-err58-cpp: eliminate google test warnings
+# -cppcoreguidelines-owning-memory: eliminate google test warnings. use unique_ptr
 Checks: "*,\
   -hicpp-deprecated-headers,\
   -*-vararg,\
   -modernize-deprecated-headers,\
   -modernize-use-trailing-return-type,\
   -google-runtime-references,\
+  -cert-err58-cpp,\
+  -cppcoreguidelines-owning-memory,\
   -google-readability-todo,\
   -readability-identifier-naming,\
   -altera-*,\

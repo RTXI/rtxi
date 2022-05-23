@@ -26,8 +26,6 @@
 
 void temp_function(bool& retval)
 {
-  using namespace std::chrono_literals;
-  std::this_thread::sleep_for(1s);
   retval = true;
 }
 
@@ -56,7 +54,7 @@ TEST_F(RTOSTests, CreateAndDeleteTask)
   RT::OS::deleteTask(test_task);
   // It is not possible to lock memory without admin privilages.
   // Either it succeeds or we don't have permissions
-  EXPECT_TRUE(result == 0 | result == -13);
+  EXPECT_TRUE(result == 0 || result == -13);
 }
 
 TEST_F(RTOSTests, setPeriod) {}

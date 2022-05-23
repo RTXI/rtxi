@@ -28,9 +28,6 @@
 
 class RTOSTests : public ::testing::Test
 {
-protected:
-  RTOSTests()=default;
-  ~RTOSTests()=default;
 
 };
 
