@@ -52,7 +52,7 @@ void deleteTask(std::unique_ptr<Task> & task);
  *
  * \returns 0 if successful, -1 otherwise
  */
-int setPeriod(std::unique_ptr<Task> task, int64_t period);
+int setPeriod(std::unique_ptr<Task> & task, int64_t period);
 
 /*!
  * Uses real-time core to sleep until the next periodic wakeup.
@@ -60,7 +60,7 @@ int setPeriod(std::unique_ptr<Task> task, int64_t period);
  *
  * \param task Object holding the timestep data for the task
  */
-void sleepTimestep(std::unique_ptr<Task> task);
+void sleepTimestep(const std::unique_ptr<Task> & task);
 
 /*!
  * CHecks whether the calling thread is in real time. Important
@@ -113,7 +113,7 @@ int createTask(std::unique_ptr<Task> & task,
     return -1;
   }
   auto wrapper = [&func, &arg](){
-    if (RT::OS::initiate() == -1) {
+    if (RT::OS::initiate() != 0) {
       ERROR_MSG("Unable to create real-time thread");
       return;
     }

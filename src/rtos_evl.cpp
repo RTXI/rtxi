@@ -82,18 +82,23 @@ int64_t RT::OS::getTime()
   return RT::OS::SECONDS_TO_NANOSECONDS * tp.tv_sec + tp.tv_nsec;
 }
 
-int RT::OS::setPeriod(std::unique_ptr<RT::OS::Task> task, int64_t period)
+int RT::OS::setPeriod(std::unique_ptr<RT::OS::Task> & task, int64_t period)
 {
   task->period = period;
   return 0;
 }
 
-void RT::OS::sleepTimestep(std::unique_ptr<RT::OS::Task> task)
+void RT::OS::sleepTimestep(const std::unique_ptr<RT::OS::Task> & task)
 {
-  int64_t sleep_time = task->next_t;
+  if (task->next_t < RT::OS::DEFAULT_PERIOD)
+  {
+    task->next_t = RT::OS::getTime() + task->period;
+  }
+  int64_t wakeup_time = task->next_t;
   task->next_t += task->period;
 
-  const struct timespec ts = {sleep_time / 1000000000, sleep_time % 1000000000};
+  const struct timespec ts = {wakeup_time / RT::OS::SECONDS_TO_NANOSECONDS, 
+                              wakeup_time % RT::OS::SECONDS_TO_NANOSECONDS};
 
   evl_sleep_until(EVL_CLOCK_MONOTONIC, &ts);
 }

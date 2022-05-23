@@ -32,13 +32,12 @@ void temp_function(bool& retval)
 TEST_F(RTOSTests, InitiateAndShutdown)
 {
   int result = 0;
-  std::thread temp_thread(
-      [](int& retval)
-      {
-        retval = RT::OS::initiate();
-        RT::OS::shutdown();
-      },
-      std::ref(result));
+  std::thread temp_thread([&result]()
+    {
+      result = RT::OS::initiate();
+      RT::OS::shutdown();
+    }
+  );
   temp_thread.join();
   // It is not possible to lock memory without admin privilages.
   // Either it succeeds or we don't have permissions
@@ -57,12 +56,40 @@ TEST_F(RTOSTests, CreateAndDeleteTask)
   EXPECT_TRUE(result == 0 || result == -13);
 }
 
-TEST_F(RTOSTests, setPeriod) {}
+TEST_F(RTOSTests, setPeriod) 
+{
+  auto test_task = std::make_unique<RT::OS::Task>();
+  ASSERT_EQ(RT::OS::DEFAULT_PERIOD, test_task->period);
+  int64_t period = RT::OS::DEFAULT_PERIOD * 2;
+  RT::OS::setPeriod(test_task, period);
+  ASSERT_EQ(period, test_task->period);
+}
 
-TEST_F(RTOSTests, sleepTimestep) {}
+TEST_F(RTOSTests, getTime) 
+{
+  auto nsec = RT::OS::getTime();
+  ASSERT_GT(RT::OS::getTime(), nsec);
+}
 
-TEST_F(RTOSTests, isRealtime) {}
+TEST_F(RTOSTests, sleepTimestep) 
+{
+  auto test_task = std::make_unique<RT::OS::Task>();
+  ASSERT_EQ(test_task->next_t, 0);
+  int resval = RT::OS::initiate();
+  auto stime = RT::OS::getTime();
+  RT::OS::sleepTimestep(test_task);
+  auto etime = RT::OS::getTime();
+  auto duration = etime - stime;
+  RT::OS::shutdown();
+  //if (resval)
+  ASSERT_GE(duration, test_task->period);
+  ASSERT_NE(test_task->next_t, 0);
+}
 
-TEST_F(RTOSTests, getTime) {}
+TEST_F(RTOSTests, isRealtime) 
+{
+  ASSERT_EQ(false, RT::OS::isRealtime());
+}
 
+// TODO: Create test for cpu usage modules
 TEST_F(RTOSTests, getCpuUsage) {}

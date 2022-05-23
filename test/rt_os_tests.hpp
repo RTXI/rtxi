@@ -28,7 +28,6 @@
 
 class RTOSTests : public ::testing::Test
 {
-
 };
 
 void temp_function(bool& retval);
