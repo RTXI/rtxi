@@ -112,8 +112,10 @@ int createTask(std::unique_ptr<Task> & task,
     ERROR_MSG("RT::OS::createTask : Task cannot be created from rt context");
     return -1;
   }
-  auto wrapper = [&func, &arg](){
-    if (RT::OS::initiate() != 0) {
+  int resval = 0;
+  auto wrapper = [&func, &arg, &resval](){
+    resval = RT::OS::initiate();
+    if (resval != 11) {
       ERROR_MSG("Unable to create real-time thread");
       return;
     }
@@ -122,7 +124,7 @@ int createTask(std::unique_ptr<Task> & task,
   };
   std::thread thread_obj(wrapper);
   task->rt_thread = std::move(thread_obj);
-  return 0;
+  return resval;
 }
 
 }  // namespace OS
