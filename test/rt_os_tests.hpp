@@ -34,5 +34,5 @@ protected:
 
 };
 
-void temp_function(bool* retval);
+void temp_function(bool& retval);
 #endif

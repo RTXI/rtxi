@@ -42,7 +42,7 @@ void shutdown();
  *
  * \param task Object holding metadata for real-time task
  */
-void deleteTask(Task* task);
+void deleteTask(std::unique_ptr<Task> & task);
 
 /*!
  * Set the period for the real-time task
@@ -52,7 +52,7 @@ void deleteTask(Task* task);
  *
  * \returns 0 if successful, -1 otherwise
  */
-int setPeriod(Task* task, int64_t period);
+int setPeriod(std::unique_ptr<Task> task, int64_t period);
 
 /*!
  * Uses real-time core to sleep until the next periodic wakeup.
@@ -60,7 +60,7 @@ int setPeriod(Task* task, int64_t period);
  *
  * \param task Object holding the timestep data for the task
  */
-void sleepTimestep(Task* task);
+void sleepTimestep(std::unique_ptr<Task> task);
 
 /*!
  * CHecks whether the calling thread is in real time. Important
@@ -92,38 +92,35 @@ int64_t getTime();
  */
 double getCpuUsage();
 
-template <class T>
-void rt_thread_wrapper(std::function<void(T*)> rt_loop, T* args)
-{
-  if (RT::OS::initiate() == -1) {
-    ERROR_MSG("Unable to create real-time thread");
-    return;
-  }
-  rt_loop(args);
-  RT::OS::shutdown();
-}
-
 /*!
  * Creates a real-time task. This task will be associated with a system object
  * to manage it.
  *
  * \param task Object holding metadata for real-time task
- * \param entry Pointer to function that will be run in real-time loop
- * \param arg Pointer to RT::System object that will manage this real-time loop
+ * \param entry Callable function that will run the real-time loop
+ * \param arg Reference to RT::System object that will manage this real-time loop
  *
  * \returns 0 if successful, -1 otherwise
  */
 template <typename T>
-int createTask(Task* task,
-               std::function<void(T*)> entry,
-               T* arg)
+int createTask(std::unique_ptr<Task> & task,
+               std::function<void(T&)> func,
+               T & arg)
 {
   // Should not be creating real-time tasks from another real-time task
   if (RT::OS::isRealtime()) {
     ERROR_MSG("RT::OS::createTask : Task cannot be created from rt context");
     return -1;
   }
-  std::thread thread_obj(rt_thread_wrapper<T>, entry, arg);
+  auto wrapper = [&func, &arg](){
+    if (RT::OS::initiate() == -1) {
+      ERROR_MSG("Unable to create real-time thread");
+      return;
+    }
+    func(arg);
+    RT::OS::shutdown();
+  };
+  std::thread thread_obj(wrapper);
   task->rt_thread = std::move(thread_obj);
   return 0;
 }

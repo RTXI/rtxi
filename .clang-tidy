@@ -4,11 +4,13 @@
 # readability-identifier-naming: Should be enabled after main refactoring is done
 # *-vararg: we are dealing with variable argument c functions. cannot be helped
 # -modernize-deprecated-headers: dealing with c headers
+# -google-runtime-references: Not a useful warning really. We want references
 Checks: "*,\
   -hicpp-deprecated-headers,\
   -*-vararg,\
   -modernize-deprecated-headers,\
   -modernize-use-trailing-return-type,\
+  -google-runtime-references,\
   -google-readability-todo,\
   -readability-identifier-naming,\
   -altera-*,\

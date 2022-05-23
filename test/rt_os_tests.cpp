@@ -24,11 +24,11 @@
 
 #include "rt_os_tests.hpp"
 
-void temp_function(bool* retval)
+void temp_function(bool& retval)
 {
   using namespace std::chrono_literals;
   std::this_thread::sleep_for(1s);
-  *retval = true;
+  retval = true;
 }
 
 TEST_F(RTOSTests, InitiateAndShutdown)
@@ -50,11 +50,12 @@ TEST_F(RTOSTests, InitiateAndShutdown)
 TEST_F(RTOSTests, CreateAndDeleteTask)
 {
   int result = 0;
-  bool *func_retval;
-  *func_retval = false;
-  RT::OS::Task* test_task = { };
-  std::function<void(bool*)> testfunc = temp_function;
-  result = RT::OS::createTask<bool>(test_task, testfunc, func_retval);
+  bool func_retval = false;
+  auto test_task = std::make_unique<RT::OS::Task>();
+  result = RT::OS::createTask<bool>(test_task, temp_function, func_retval);
+  RT::OS::deleteTask(test_task);
+  // It is not possible to lock memory without admin privilages.
+  // Either it succeeds or we don't have permissions
   EXPECT_TRUE(result == 0 | result == -13);
 }
 
