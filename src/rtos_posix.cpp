@@ -55,33 +55,6 @@ void RT::OS::shutdown()
   realtime_key = false;
 }
 
-// void rt_thread_wrapper(void* (*rt_loop)(void*), void* args){
-//   RT::OS::initiate();
-//   rt_loop(args);
-//   RT::OS::shutdown();
-// }
-
-// int RT::OS::createTask(RT::OS::Task *task,
-//                        void* (*entry)(void*),
-//                        void* arg)
-// {
-//   // Should not be creating real-time tasks from another real-time task
-//   if (RT::OS::isRealtime()) {
-//     ERROR_MSG("RT::OS::createTask : Task cannot be created from rt context");
-//     return -1;
-//   }
-//   if (task->rt_thread->joinable()){
-//     ERROR_MSG("RT::OS::createTask : RT Task is already initialized");
-//     return -1;
-//   }
-//   auto thread_obj = std::make_shared<std::thread>(rt_thread_wrapper,
-//                                                   entry,
-//                                                   arg);
-//   task->rt_thread = std::move(thread_obj);
-//   return 0;
-// }
-
-
 void RT::OS::deleteTask(std::unique_ptr<RT::OS::Task> & task)
 {
   // Should not be deleting real-time tasks from another real-time task
@@ -115,14 +88,18 @@ int RT::OS::setPeriod(std::unique_ptr<RT::OS::Task> & task, int64_t period)
   return 0;
 }
 
-void RT::OS::sleepTimestep(const std::unique_ptr<RT::OS::Task> & task)
+void RT::OS::sleepTimestep(std::unique_ptr<RT::OS::Task> & task)
 {
+  if (task->next_t < RT::OS::DEFAULT_PERIOD)
+  {
+    task->next_t = RT::OS::getTime() + task->period;
+  }
   int64_t sleep_time = task->next_t;
   task->next_t += task->period;
 
   const struct timespec ts = {
-      sleep_time / 1000000000,
-      sleep_time % 1000000000
+      sleep_time / RT::OS::SECONDS_TO_NANOSECONDS,
+      sleep_time % RT::OS::SECONDS_TO_NANOSECONDS
   };
 
   clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &ts, nullptr);

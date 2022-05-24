@@ -88,7 +88,7 @@ int RT::OS::setPeriod(std::unique_ptr<RT::OS::Task> & task, int64_t period)
   return 0;
 }
 
-void RT::OS::sleepTimestep(const std::unique_ptr<RT::OS::Task> & task)
+void RT::OS::sleepTimestep(std::unique_ptr<RT::OS::Task> & task)
 {
   if (task->next_t < RT::OS::DEFAULT_PERIOD)
   {

@@ -60,7 +60,7 @@ int setPeriod(std::unique_ptr<Task> & task, int64_t period);
  *
  * \param task Object holding the timestep data for the task
  */
-void sleepTimestep(const std::unique_ptr<Task> & task);
+void sleepTimestep(std::unique_ptr<Task> & task);
 
 /*!
  * CHecks whether the calling thread is in real time. Important
@@ -115,8 +115,8 @@ int createTask(std::unique_ptr<Task> & task,
   int resval = 0;
   auto wrapper = [&func, &arg, &resval](){
     resval = RT::OS::initiate();
-    if (resval != 11) {
-      ERROR_MSG("Unable to create real-time thread");
+    if (resval != 0) {
+      ERROR_MSG("There was a problem creating the real-time thread");
       return;
     }
     func(arg);
