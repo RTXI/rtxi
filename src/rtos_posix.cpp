@@ -82,7 +82,7 @@ void RT::OS::shutdown()
 // }
 
 
-void RT::OS::deleteTask(RT::OS::Task *task)
+void RT::OS::deleteTask(std::unique_ptr<RT::OS::Task> & task)
 {
   // Should not be deleting real-time tasks from another real-time task
   if (RT::OS::isRealtime()) {
@@ -109,13 +109,13 @@ int64_t RT::OS::getTime()
   return RT::OS::SECONDS_TO_NANOSECONDS * tp.tv_sec + tp.tv_nsec;
 }
 
-int RT::OS::setPeriod(RT::OS::Task *task, int64_t period)
+int RT::OS::setPeriod(std::unique_ptr<RT::OS::Task> & task, int64_t period)
 {
   task->period = period;
   return 0;
 }
 
-void RT::OS::sleepTimestep(RT::OS::Task *task)
+void RT::OS::sleepTimestep(const std::unique_ptr<RT::OS::Task> & task)
 {
   int64_t sleep_time = task->next_t;
   task->next_t += task->period;
