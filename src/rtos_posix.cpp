@@ -27,12 +27,36 @@
 #include <sys/types.h>
 #include <time.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <string.h>
 
 #include "debug.hpp"
 #include "rtos.hpp"
 
 thread_local bool realtime_key = false;
+
+// First let's define a posix specific Fifo class.
+namespace RT
+{
+namespace OS
+{
+class posixFifo : public RT::OS::Fifo 
+{
+  public:
+  posixFifo(size_t size);
+  ~posixFifo();
+
+  size_t read(void*, size_t, bool=true);
+  size_t write(const void*, size_t);
+  size_t readRT(void*, size_t, bool=true);
+  size_t writeRT(void*, size_t);
+
+  private:
+  int rt_to_ui_fd[2];
+  int ui_to_rt_fd[2];
+};
+}
+}
 
 int RT::OS::initiate()
 {
@@ -139,4 +163,14 @@ double RT::OS::getCpuUsage()
   last_proc_time = proc_time;
   last_clock_read = clock_time;
   return cpu_percent;
+}
+
+RT::OS::posixFifo::posixFifo(size_t size) : RT::OS::Fifo(size)
+{
+  if (pipe(this->rt_to_ui_fd) != 0){
+    ERROR_MSG("RT::OS::posixFifo : failed to create rt-to-ui ipc : {}", strerror(errno));
+  }
+  if (pipe(this->ui_to_rt_fd) != 0){
+    ERROR_MSG("RT::OS::posixFifo : failed to create ui-to-rt ipc : {}", strerror(errno));
+  }
 }

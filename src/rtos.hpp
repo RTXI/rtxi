@@ -127,6 +127,75 @@ int createTask(std::unique_ptr<Task> & task,
   return resval;
 }
 
+/*!
+Simple FIFO(First In First Out) for data transfer between RTXI threads
+
+This data structure is a fundamental component to the inter-process 
+communication between threads spawned by RTXI. In particular this is used
+for communication between the real-time thread and non-realtime threads.
+This is platform and interface dependent, so the FIFO primitive used in
+posix interface will be different than Xenomai's evl interface
+*/
+class Fifo
+{
+public:
+  /*!
+   * FIFO constructor. Builds a FIFO object.
+   *
+   * \param s Size of the FIFO
+   */
+  Fifo(size_t size) : fifo_size(size) { }
+
+  /*!
+   * FIFO Destructor
+   */
+  virtual ~Fifo();
+
+  /*!
+   * Read the data stored in the FIFO written by RT thread.
+   *
+   * \param buffer The buffer where the data from the buffer should be
+   *     written to
+   * \param size The size of the data to read from the buffer
+   * \param blocking Whether the thread should expect to be blocked or not
+   * \return n Number of elements read. Same as size.
+   */
+  virtual size_t read(void* event, size_t event_size, bool blocking = true);
+
+  /*!
+   * Write to the FIFO storage for the RT thread.
+   *
+   * \param buffer The buffer holding the data to write to the FIFO.
+   * \param size The size of the data to read from the buffer
+   * \return n Number of elements written. Same as size.
+   */
+  virtual size_t write(const void* event, size_t event_size);
+
+  /*!
+   * Read the data stored in the FIFO written by non-RT thread.
+   *
+   * \param buffer The buffer where the data from the buffer should be
+   *     written to
+   * \param size The size of the data to read from the buffer
+   * \param blocking Whether the thread should expect to be blocked or not
+   * \return n Number of elements read. Same as size.
+   */
+  virtual size_t readRT(void* event, size_t event_size, bool blocking = true);
+
+  /*!
+   * Write to the FIFO storage for the non-RT thread.
+   *
+   * \param buffer The buffer holding the data to write to the FIFO.
+   * \param size The size of the data to read from the buffer
+   * \return n Number of elements written. Same as size.
+   */
+  virtual size_t writeRT(void* event, size_t event_size);
+
+  size_t fifo_size;
+};
+
+int getFifo(std::unique_ptr<Fifo> & fifo);
+
 }  // namespace OS
 }  // namespace RT
 
