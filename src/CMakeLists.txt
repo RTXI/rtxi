@@ -1,14 +1,22 @@
 cmake_minimum_required(VERSION 3.20)
 
 if(${evl_FOUND})
-  add_library(rt_os_lib OBJECT "rtos.hpp" "rtos_evl.cpp")
-  target_link_libraries(rt_os_lib PUBLIC ${evl_LINK_LIBRARIES} fmt::fmt)
-  target_include_directories(rt_os_lib SYSTEM PUBLIC ${evl_INCLUDE_DIRS})
-  #target_compile_options(rt_os_lib PUBLIC ${evl_CFLAGS})
+    add_library(rtos_fifo_lib OBJECT "fifo.hpp" "fifo_evl.cpp")
+    add_library(rtos_lib OBJECT "rtos.hpp" "rtos_evl.cpp")
+    target_link_libraries(rtos_lib PUBLIC 
+        ${evl_LINK_LIBRARIES}
+        rtos_fifo_lib
+        fmt::fmt
+    )
+    target_include_directories(rtos_lib SYSTEM PUBLIC ${evl_INCLUDE_DIRS})
 else()
-  message("EVL Library not found. Reverting to POSIX Interface.")
-  add_library(rt_os_lib OBJECT "rtos.hpp" "rtos_posix.cpp")
-  target_link_libraries(rt_os_lib PUBLIC fmt::fmt)
+    message("EVL Library not found. Reverting to POSIX Interface.")
+    add_library(rtos_fifo_lib OBJECT "fifo.hpp" "fifo_posix.cpp")
+    add_library(rtos_lib OBJECT "rtos.hpp" "rtos_posix.cpp")
+    target_link_libraries(rt_os_lib PUBLIC 
+        rtos_fifo_lib
+        fmt::fmt
+    )
 endif()
 
 
@@ -36,7 +44,7 @@ set_target_properties(
 # Link all of the static and dynamic librarise to rtxi
 target_link_libraries(rtxi_exe 
     rtxi_lib 
-    rt_os_lib 
+    rtos_lib 
     Qt5::Widgets 
     Threads::Threads
 )

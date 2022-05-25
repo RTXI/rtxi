@@ -12,12 +12,13 @@ target_include_directories(rtxiTests PRIVATE
     ${CMAKE_SOURCE_DIR}/src
 )
 target_link_libraries(rtxiTests PRIVATE
-    rtxi_lib 
-    rt_os_lib
+    rtos_fifo_lib
+    rtos_lib
     GTest::gtest GTest::gtest_main
     GTest::gmock GTest::gmock_main 
     Qt5::Core Qt5::Widgets Qt5::Gui
     Threads::Threads
+    rtxi_lib 
 )
 
 add_test(NAME rtxiTests COMMAND rtxiTests)

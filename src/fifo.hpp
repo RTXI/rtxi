@@ -21,32 +21,29 @@
 #ifndef FIFO_H
 #define FIFO_H
 
-#include <pthread.h>
-#include <stdlib.h>
+#include <memory>
 
+#include <sys/types.h>
+
+namespace RT::OS 
+{
 /*!
-Simple FIFO(First In First Out) for data transfer between components in RTXI
+Simple FIFO(First In First Out) for data transfer between RTXI threads
 
-\sa AtomicFifo
+This data structure is a fundamental component to the inter-process 
+communication between threads spawned by RTXI. In particular this is used
+for communication between the real-time thread and non-realtime(UI) threads.
+This is platform and interface dependent, so the FIFO primitive used in
+posix interface will be different than Xenomai's evl interface
 */
 class Fifo
 {
 public:
-  /*!
-   * FIFO constructor. Builds a simple FIFO object.
-   *
-   * \param s Size of the FIFO
-   */
-  Fifo(size_t);
+  Fifo() = default;
 
   /*!
-   * FIFO Destructor
-   */
-  ~Fifo(void);
-
-  /*!
-   * Read the data stored in the FIFO. clears out the data after
-   * the operation is complete.
+   * Read the data stored in the FIFO written by RT thread. Must be run 
+   * from non-rt thread.
    *
    * \param buffer The buffer where the data from the buffer should be
    *     written to
@@ -54,24 +51,44 @@ public:
    * \param blocking Whether the thread should expect to be blocked or not
    * \return n Number of elements read. Same as size.
    */
-  size_t read(void*, size_t, bool = true);
+  virtual ssize_t read(void* buf, size_t buf_size, bool blocking);
 
   /*!
-   * Write to the FIFO.
+   * Write to the FIFO storage for the RT thread. Must be run from non-rt 
+   * thread.
    *
    * \param buffer The buffer holding the data to write to the FIFO.
    * \param size The size of the data to read from the buffer
    * \return n Number of elements written. Same as size.
    */
-  size_t write(const void*, size_t);
+  virtual ssize_t write(const void* buf, size_t buf_size);
 
-private:
-  char* data;
-  volatile int rptr;
-  volatile int wptr;
-  size_t size;
-  pthread_mutex_t mutex;
-  pthread_cond_t data_available;
+  /*!
+   * Read the data stored in the FIFO written by non-RT thread. Must be run
+   * from RT thread.
+   *
+   * \param buffer The buffer where the data from the buffer should be
+   *     written to
+   * \param size The size of the data to read from the buffer
+   * \param blocking Whether the thread should expect to be blocked or not
+   * \return n Number of elements read. Same as size.
+   */
+  virtual ssize_t readRT(void* buf, size_t buf_size, bool blocking);
+
+  /*!
+   * Write to the FIFO storage for the non-RT thread. Must be run from RT
+   * thread.
+   *
+   * \param buffer The buffer holding the data to write to the FIFO.
+   * \param size The size of the data to read from the buffer
+   * \return n Number of elements written. Same as size.
+   */
+  virtual ssize_t writeRT(void* buf, size_t buf_size);
+
+  virtual size_t getCapacity();
 };
+
+int getFifo(std::unique_ptr<Fifo> & fifo, size_t fifo_size);
+}
 
 #endif /* FIFO_H */

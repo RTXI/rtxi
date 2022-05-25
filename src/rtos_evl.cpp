@@ -18,17 +18,15 @@
 
 */
 
-#include <evl/evl.h>
-
 #include <iostream>
 
-#include "rtos.hpp"
-
 #include <errno.h>
+#include <evl/evl.h>
 #include <string.h>
 #include <unistd.h>
 
-
+#include "fifo.hpp"
+#include "rtos.hpp"
 
 int RT::OS::initiate()
 {
@@ -55,14 +53,14 @@ void RT::OS::shutdown()
   }
 }
 
-void RT::OS::deleteTask(std::unique_ptr<RT::OS::Task> & task)
+void RT::OS::deleteTask(std::unique_ptr<RT::OS::Task>& task)
 {
   // Should not be deleting real-time tasks from another real-time task
   if (RT::OS::isRealtime()) {
     ERROR_MSG("RT::OS::createTask : Task cannot be deleted from rt context");
     return;
   }
-  //task->task_finished = true;
+  // task->task_finished = true;
   if (task->rt_thread.joinable()) {
     task->rt_thread.join();
   }
@@ -82,22 +80,21 @@ int64_t RT::OS::getTime()
   return RT::OS::SECONDS_TO_NANOSECONDS * tp.tv_sec + tp.tv_nsec;
 }
 
-int RT::OS::setPeriod(std::unique_ptr<RT::OS::Task> & task, int64_t period)
+int RT::OS::setPeriod(std::unique_ptr<RT::OS::Task>& task, int64_t period)
 {
   task->period = period;
   return 0;
 }
 
-void RT::OS::sleepTimestep(std::unique_ptr<RT::OS::Task> & task)
+void RT::OS::sleepTimestep(std::unique_ptr<RT::OS::Task>& task)
 {
-  if (task->next_t < RT::OS::DEFAULT_PERIOD)
-  {
+  if (task->next_t < RT::OS::DEFAULT_PERIOD) {
     task->next_t = RT::OS::getTime() + task->period;
   }
   int64_t wakeup_time = task->next_t;
   task->next_t += task->period;
 
-  const struct timespec ts = {wakeup_time / RT::OS::SECONDS_TO_NANOSECONDS, 
+  const struct timespec ts = {wakeup_time / RT::OS::SECONDS_TO_NANOSECONDS,
                               wakeup_time % RT::OS::SECONDS_TO_NANOSECONDS};
 
   evl_sleep_until(EVL_CLOCK_MONOTONIC, &ts);
@@ -113,7 +110,6 @@ double RT::OS::getCpuUsage()
     return 0.0;
   }
 
-  ;
   double cpu_percent = 0.0;
   int64_t cpu_time_elapsed = 0;
   int64_t proc_time_elapsed = 0;
