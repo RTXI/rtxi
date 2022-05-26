@@ -5,7 +5,7 @@
 
 #include "fifo.hpp"
 
-// First let's define a evl specific Fifo class.
+// First let's define an evl specific Fifo class.
 namespace RT::OS
 {
 class evlFifo : public Fifo
@@ -34,6 +34,11 @@ RT::OS::evlFifo::evlFifo(size_t size)
                                   fifo_capacity,
                                   EVL_CLONE_PRIVATE | EVL_CLONE_NONBLOCK,
                                   "RTXI Fifo");
+}
+
+RT::OS::evlFifo::~evlFifo()
+{
+  ::close(this->xbuf_fd);
 }
 
 ssize_t RT::OS::evlFifo::read(void* buf, size_t buf_size, bool blocking)

@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.14)
 project(rtxiTests LANGUAGES CXX)
 
-include(CTest)
 add_executable(rtxiTests
     "rt_os_tests.hpp"
     "rt_os_tests.cpp"
@@ -12,13 +11,12 @@ target_include_directories(rtxiTests PRIVATE
     ${CMAKE_SOURCE_DIR}/src
 )
 target_link_libraries(rtxiTests PRIVATE
-    rtos_fifo_lib
     rtos_lib
+    rtxi_lib 
     GTest::gtest GTest::gtest_main
     GTest::gmock GTest::gmock_main 
     Qt5::Core Qt5::Widgets Qt5::Gui
     Threads::Threads
-    rtxi_lib 
 )
 
 add_test(NAME rtxiTests COMMAND rtxiTests)

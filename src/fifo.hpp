@@ -45,9 +45,9 @@ public:
    * Read the data stored in the FIFO written by RT thread. Must be run 
    * from non-rt thread.
    *
-   * \param buffer The buffer where the data from the buffer should be
+   * \param buf The buffer where the data from the buffer should be
    *     written to
-   * \param size The size of the data to read from the buffer
+   * \param buf_size The size of the data to read from the buffer
    * \param blocking Whether the thread should expect to be blocked or not
    * \return n Number of elements read. Same as size.
    */
@@ -57,8 +57,8 @@ public:
    * Write to the FIFO storage for the RT thread. Must be run from non-rt 
    * thread.
    *
-   * \param buffer The buffer holding the data to write to the FIFO.
-   * \param size The size of the data to read from the buffer
+   * \param buf The buffer holding the data to write to the FIFO.
+   * \param buf_size The size of the data to read from the buffer
    * \return n Number of elements written. Same as size.
    */
   virtual ssize_t write(const void* buf, size_t buf_size);
@@ -67,9 +67,9 @@ public:
    * Read the data stored in the FIFO written by non-RT thread. Must be run
    * from RT thread.
    *
-   * \param buffer The buffer where the data from the buffer should be
+   * \param buf The buffer where the data from the buffer should be
    *     written to
-   * \param size The size of the data to read from the buffer
+   * \param buf_size The size of the data to read from the buffer
    * \param blocking Whether the thread should expect to be blocked or not
    * \return n Number of elements read. Same as size.
    */
@@ -79,15 +79,30 @@ public:
    * Write to the FIFO storage for the non-RT thread. Must be run from RT
    * thread.
    *
-   * \param buffer The buffer holding the data to write to the FIFO.
-   * \param size The size of the data to read from the buffer
+   * \param buf The buffer holding the data to write to the FIFO.
+   * \param buf_size The size of the data to read from the buffer
    * \return n Number of elements written. Same as size.
    */
   virtual ssize_t writeRT(void* buf, size_t buf_size);
 
+  /*!
+   * Get the memory capacity of the fifo
+   *
+   * \returns The maximum amount of memory the fifo can hold
+   */
   virtual size_t getCapacity();
 };
 
+/*!
+ * Obtain the Fifo object for this architecture.
+ * 
+ * The Object Returned is a Fifo object that holds an implementatin
+ * specific fifo/pipe. 
+ *
+ * \param fifo The fifo object to store the newly created fifo.
+ * \param fifo_size The size of the fifo to create
+ * \returns 0 if successful, and errno otherwise.
+ */
 int getFifo(std::unique_ptr<Fifo> & fifo, size_t fifo_size);
 }
 
