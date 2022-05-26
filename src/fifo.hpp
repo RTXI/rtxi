@@ -40,6 +40,7 @@ class Fifo
 {
 public:
   Fifo() = default;
+  virtual ~Fifo() = default;
 
   /*!
    * Read the data stored in the FIFO written by RT thread. Must be run 
@@ -51,7 +52,7 @@ public:
    * \param blocking Whether the thread should expect to be blocked or not
    * \return n Number of elements read. Same as size.
    */
-  virtual ssize_t read(void* buf, size_t buf_size, bool blocking);
+  virtual ssize_t read(void* buf, size_t buf_size, bool blocking)=0;
 
   /*!
    * Write to the FIFO storage for the RT thread. Must be run from non-rt 
@@ -61,7 +62,7 @@ public:
    * \param buf_size The size of the data to read from the buffer
    * \return n Number of elements written. Same as size.
    */
-  virtual ssize_t write(const void* buf, size_t buf_size);
+  virtual ssize_t write(const void* buf, size_t buf_size)=0;
 
   /*!
    * Read the data stored in the FIFO written by non-RT thread. Must be run
@@ -73,7 +74,7 @@ public:
    * \param blocking Whether the thread should expect to be blocked or not
    * \return n Number of elements read. Same as size.
    */
-  virtual ssize_t readRT(void* buf, size_t buf_size, bool blocking);
+  virtual ssize_t readRT(void* buf, size_t buf_size, bool blocking)=0;
 
   /*!
    * Write to the FIFO storage for the non-RT thread. Must be run from RT
@@ -83,14 +84,14 @@ public:
    * \param buf_size The size of the data to read from the buffer
    * \return n Number of elements written. Same as size.
    */
-  virtual ssize_t writeRT(void* buf, size_t buf_size);
+  virtual ssize_t writeRT(void* buf, size_t buf_size)=0;
 
   /*!
    * Get the memory capacity of the fifo
    *
    * \returns The maximum amount of memory the fifo can hold
    */
-  virtual size_t getCapacity();
+  virtual size_t getCapacity()=0;
 };
 
 /*!

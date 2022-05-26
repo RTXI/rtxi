@@ -12,7 +12,7 @@ class evlFifo : public Fifo
 {
 public:
   evlFifo(size_t size);
-  ~evlFifo() = default;
+  ~evlFifo();
 
   int buffer_fd();
   ssize_t read(void* buf, size_t buf_size, bool blocking = true) override;

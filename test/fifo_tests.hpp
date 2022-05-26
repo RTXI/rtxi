@@ -21,7 +21,9 @@
 #define FIFO_TESTS_H
 
 #include <gtest/gtest.h>
-#include <fifo.h>
+#include <memory>
+
+#include "fifo.hpp"
 
 // Define all fixtures for testing purposes
 class FifoTest : public ::testing::Test
@@ -30,7 +32,7 @@ protected:
     FifoTest() { }
     ~FifoTest() { }
 
-    Fifo *fifo;
+    std::unique_ptr<RT::OS::Fifo> fifo;
 };
    
 #endif
