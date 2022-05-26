@@ -41,7 +41,7 @@ TEST_F(RTOSTests, InitiateAndShutdown)
   temp_thread.join();
   // It is not possible to lock memory without admin privilages.
   // Either it succeeds or we don't have permissions
-  EXPECT_TRUE(result == 11 || result == -13 || result == 0);
+  EXPECT_TRUE(result == -13 || result == 0);
 }
 
 TEST_F(RTOSTests, CreateAndDeleteTask)
@@ -75,15 +75,20 @@ TEST_F(RTOSTests, sleepTimestep)
 {
   auto test_task = std::make_unique<RT::OS::Task>();
   ASSERT_EQ(test_task->next_t, 0);
-  int resval = RT::OS::initiate();
-  auto stime = RT::OS::getTime();
-  RT::OS::sleepTimestep(test_task);
-  auto etime = RT::OS::getTime();
-  auto duration = etime - stime;
-  RT::OS::shutdown();
-  //if (resval)
-  ASSERT_GE(duration, test_task->period);
+  int64_t duration = 0;
+  std::thread sleeper_thread([&duration, &test_task]()
+    {
+      RT::OS::initiate();
+      auto stime = RT::OS::getTime();
+      RT::OS::sleepTimestep(test_task);
+      auto etime = RT::OS::getTime();
+      duration = etime - stime;
+      RT::OS::shutdown();
+    }
+  );
+  sleeper_thread.join();
   ASSERT_NE(test_task->next_t, 0);
+  ASSERT_GE(duration, test_task->period);
 }
 
 TEST_F(RTOSTests, isRealtime) 

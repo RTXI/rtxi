@@ -35,8 +35,8 @@ int RT::OS::initiate()
     ERROR_MSG("RT::OS(EVL)::initiate : evl_init() : {}", strerror(errno));
     return retval;
   }
-  retval = evl_attach_self("RTXI-RT-Thread:%d", getpid());  // NOLINT
-  if (retval != 0) {
+  int thread_fd = evl_attach_self("RTXI-RT-Thread:%d", getpid());  // NOLINT
+  if (thread_fd < 0) {
     ERROR_MSG("RT::OS(EVL)::initiate : evl_attach_self() : {}",
               strerror(errno));
   }

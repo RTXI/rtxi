@@ -1,6 +1,8 @@
 #ifndef RTOS_H
 #define RTOS_H
 
+#include <string.h>
+#include <errno.h>
 #include <functional>
 #include <thread>
 
@@ -135,7 +137,8 @@ int createTask(std::unique_ptr<Task> & task,
   auto wrapper = [&func, &arg, &resval](){
     resval = RT::OS::initiate();
     if (resval != 0) {
-      ERROR_MSG("There was a problem creating the real-time thread");
+      ERROR_MSG("RT::OS::createTask : RT::OS::initiate() : {}", strerror(errno));
+      // In the event that we fail to initiate real-time environment let's just quit
       return;
     }
     func(arg);
