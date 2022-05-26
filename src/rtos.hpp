@@ -15,6 +15,14 @@ namespace OS
 const int SECONDS_TO_NANOSECONDS = 1000000000;  // Conversion from sec to nsec
 const int64_t DEFAULT_PERIOD = 1000000;  // Default period is set to 1 msec
 
+/*!
+ * Object representation of a real-time loop
+ * 
+ * \param period The period for the real-time loop in nanoseconds.
+ * \param next_t Next wakup time in absolute clock time (nanoseconds).
+ * \param task_finished Bool field used by real-time loop to signal end.
+ * \param rt_thread a std::thread object representing the rt loop.
+ */
 struct Task
 {
   int64_t period = DEFAULT_PERIOD;
@@ -28,12 +36,16 @@ struct Task
  * Pages and storing real-time identification variables
  *
  * \return 0 if successful, error code otherwise
+ * 
+ * \sa RT::OS::shutdown()
  */
 int initiate();
 
 /*!
  * Releases real-time resources from the operating system. Called when rtxi
  * is closing.
+ * 
+ * \sa RT::OS::initiate()
  */
 void shutdown();
 
@@ -41,7 +53,9 @@ void shutdown();
 /*!
  * terminates task in real-time loop
  *
- * \param task Object holding metadata for real-time task
+ * \param task Task object holding metadata for real-time task
+ * 
+ * \sa RT::OS::createTask()
  */
 void deleteTask(std::unique_ptr<Task> & task);
 
@@ -52,6 +66,8 @@ void deleteTask(std::unique_ptr<Task> & task);
  * \param period The new period to set the real-time loop to
  *
  * \returns 0 if successful, -1 otherwise
+ * 
+ * \sa RT::OS::sleepTimestep
  */
 int setPeriod(std::unique_ptr<Task> & task, int64_t period);
 
@@ -60,6 +76,8 @@ int setPeriod(std::unique_ptr<Task> & task, int64_t period);
  * It uses the timestep given in task to determine next waekup.
  *
  * \param task Object holding the timestep data for the task
+ * 
+ * \sa RT::OS::setPeriod()
  */
 void sleepTimestep(std::unique_ptr<Task> & task);
 
