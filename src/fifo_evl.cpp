@@ -2,7 +2,10 @@
 
 #include <evl/evl.h>
 #include <unistd.h>
+#include <string.h>
+#include <errno.h>
 
+#include "debug.hpp"
 #include "fifo.hpp"
 
 // First let's define an evl specific Fifo class.
@@ -15,9 +18,9 @@ public:
   ~evlFifo();
 
   int buffer_fd();
-  ssize_t read(void* buf, size_t buf_size, bool blocking = true) override;
+  ssize_t read(void* buf, size_t buf_size, bool blocking) override;
   ssize_t write(const void* buf, size_t buf_size) override;
-  ssize_t readRT(void* buf, size_t buf_size, bool blocking = true) override;
+  ssize_t readRT(void* buf, size_t buf_size, bool blocking) override;
   ssize_t writeRT(void* buf, size_t buf_size) override;
   size_t getCapacity() override;
 
@@ -79,6 +82,7 @@ int RT::OS::getFifo(std::unique_ptr<Fifo>& fifo, size_t fifo_size)
   auto tmp_fifo = std::make_unique<RT::OS::evlFifo>(fifo_size);
   if (tmp_fifo->buffer_fd() < 0) {
     init_state = tmp_fifo->buffer_fd();
+    ERROR_MSG("RT::OS::getFifo(EVL) : {}", strerror(errno));
   } else {
     fifo = std::move(tmp_fifo);
   }

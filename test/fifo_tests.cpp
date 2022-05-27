@@ -26,8 +26,10 @@
 #include "debug.hpp"
 #include "rtos.hpp"
 
+//NOLINTBEGIN(*-avoid-c-arrays)
 TEST_F(FifoTest, getFifo)
 {
+  std::unique_ptr<RT::OS::Fifo> fifo;
   size_t bufsize = this->default_buffer_size;
   int result = RT::OS::getFifo(fifo, bufsize);
   ASSERT_EQ(result, 0);
@@ -36,37 +38,40 @@ TEST_F(FifoTest, getFifo)
 
 TEST_F(FifoTest, roundtrip)
 {
+  std::unique_ptr<RT::OS::Fifo> fifo;
   char output[this->default_buffer_size];
   size_t size = this->default_buffer_size;
   int result = RT::OS::getFifo(fifo, size);
   ASSERT_EQ(result, 0);
-  auto echo = [this](size_t bufsize)
+  auto echo = [this, &fifo](size_t bufsize)
   {
     char buf[bufsize];
     RT::OS::initiate();
-    this->fifo->readRT(&buf, bufsize, false);
-    this->fifo->writeRT(&buf, bufsize);
+    fifo->readRT(&buf, bufsize, false);
+    fifo->writeRT(&buf, bufsize);
     RT::OS::shutdown();
   };
-  this->fifo->write(this->default_message, size);
+  fifo->write(this->default_message, size);
   std::thread test_thread(echo, size);
   test_thread.join();
-  this->fifo->read(output, size, false);
+  fifo->read(output, size, false);
   EXPECT_STREQ(this->default_message, output);
 }
 
 TEST_F(FifoTest, nonblocking)
 {
+  std::unique_ptr<RT::OS::Fifo> fifo;
   size_t size = this->default_buffer_size;
   char output[this->default_message_size];
   int result = RT::OS::getFifo(fifo, size);
+  ASSERT_EQ(result, 0);
   auto test_task = std::make_unique<RT::OS::Task>();
   RT::OS::setPeriod(test_task, RT::OS::SECONDS_TO_NANOSECONDS);
-  auto sender = [this, &test_task]()
+  auto sender = [this, &fifo, &test_task]()
   {
     RT::OS::initiate();
     RT::OS::sleepTimestep(test_task);
-    this->fifo->writeRT(&(this->default_message), this->default_message_size);
+    fifo->writeRT(&(this->default_message), this->default_message_size);
     RT::OS::shutdown();
   };
   int64_t start_time = RT::OS::getTime();
@@ -79,3 +84,4 @@ TEST_F(FifoTest, nonblocking)
   ASSERT_STRNE(output, this->default_message);
   EXPECT_GE(test_task->period, duration);
 }
+// NOLINTEND(*-avoid-c-arrays)

@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.20)
 
 if(${evl_FOUND})
     add_library(rtos_fifo_lib OBJECT "fifo.hpp" "fifo_evl.cpp")
+    target_link_libraries(rtos_fifo_lib PUBLIC fmt::fmt)
     add_library(rtos_lib OBJECT "rtos.hpp" "rtos_evl.cpp")
     target_link_libraries(rtos_lib PUBLIC 
         ${evl_LINK_LIBRARIES}

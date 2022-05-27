@@ -39,7 +39,12 @@ posix interface will be different than Xenomai's evl interface
 class Fifo
 {
 public:
-  Fifo() = default;
+  Fifo() = default; // default constructor
+  Fifo(const Fifo& fifo) = delete; // copy constructor
+  Fifo& operator=(const Fifo& fifo) = delete; //copy assignment operator
+  Fifo(Fifo &&) = default; // move constructor
+  Fifo& operator=(Fifo &&) = default; // move assignment operator
+  virtual ~Fifo() = default;
 
   /*!
    * Read the data stored in the FIFO written by RT thread. Must be run
