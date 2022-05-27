@@ -6,11 +6,10 @@ macro(default name)
   endif()
 endmacro()
 
-default(FORMAT_COMMAND clang-format)
+default(FORMAT_COMMAND clang-format-12)
 default(
     PATTERNS
     source/*.cpp source/*.hpp
-    include/*.hpp
     test/*.cpp test/*.hpp
 )
 default(FIX NO)

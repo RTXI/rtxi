@@ -1,13 +1,12 @@
 set(
     FORMAT_PATTERNS
     source/*.cpp source/*.hpp
-    include/*.hpp
     test/*.cpp test/*.hpp
     CACHE STRING
     "; separated patterns relative to the project source dir to format"
 )
 
-set(FORMAT_COMMAND clang-format CACHE STRING "Formatter to use")
+set(FORMAT_COMMAND clang-format-12 CACHE STRING "Formatter to use")
 
 add_custom_target(
     format-check

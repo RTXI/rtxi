@@ -18,52 +18,17 @@
 
  */
 
-#include <thread>
 #include <functional>
+#include <thread>
+
+#include "fifo_tests.hpp"
 
 #include "debug.hpp"
 #include "rtos.hpp"
-#include "fifo_tests.hpp"
-
-// TEST_F(FifoTest, ReadAndWrite)
-// {
-//   fifo = new Fifo((size_t)100);
-//   char inbuff[22];
-//   char outbuff[22];
-//   size_t written_bytes;
-//   size_t read_bytes;
-//   for (int i = 0; i < 9; i++) {
-//     inbuff[i] = (char)i + 97;
-//   }
-//   inbuff[9] = '\0';
-
-//   // There should be zero bits read if the fifo is empty
-//   EXPECT_EQ((size_t)0, fifo->read(outbuff, (size_t)10, false));
-
-//   // check that read and write work properly
-
-//   written_bytes = fifo->write(inbuff, (size_t)21);
-//   read_bytes = fifo->read(outbuff, (size_t)21);
-//   EXPECT_STREQ(inbuff, outbuff);
-//   EXPECT_EQ(written_bytes, read_bytes);
-
-//   // The fifo should be empty after reading
-//   EXPECT_EQ((size_t)0, fifo->read(outbuff, (size_t)21, false));
-
-//   // should be able to write multiple times
-//   for (int i = 0; i < 10; i++) {
-//     written_bytes = fifo->write(inbuff, (size_t)11);
-//     read_bytes = fifo->read(outbuff, (size_t)11);
-//     EXPECT_STREQ(inbuff, outbuff);
-//     EXPECT_EQ(written_bytes, read_bytes);
-//   }
-
-//   delete fifo;
-// }
 
 TEST_F(FifoTest, getFifo)
 {
-  size_t bufsize = 10;
+  size_t bufsize = this->default_buffer_size;
   int result = RT::OS::getFifo(fifo, bufsize);
   ASSERT_EQ(result, 0);
   EXPECT_EQ(fifo->getCapacity(), bufsize);
@@ -71,32 +36,46 @@ TEST_F(FifoTest, getFifo)
 
 TEST_F(FifoTest, roundtrip)
 {
-  char message[8] = "message";
-  char output[8];
-  size_t size = 8;
+  char output[this->default_buffer_size];
+  size_t size = this->default_buffer_size;
   int result = RT::OS::getFifo(fifo, size);
   ASSERT_EQ(result, 0);
-  auto echo = [this](size_t bufsize){
+  auto echo = [this](size_t bufsize)
+  {
     char buf[bufsize];
     RT::OS::initiate();
     this->fifo->readRT(&buf, bufsize, false);
     this->fifo->writeRT(&buf, bufsize);
     RT::OS::shutdown();
   };
-  this->fifo->write(message, size);
+  this->fifo->write(this->default_message, size);
   std::thread test_thread(echo, size);
   test_thread.join();
   this->fifo->read(output, size, false);
-  EXPECT_STREQ(message, output);
+  EXPECT_STREQ(this->default_message, output);
 }
 
-// TEST_F(FifoTest, Failures)
-// {
-//   fifo = new Fifo((size_t)2);
-//   char buff[8] = "message";
-
-//   // Test whether FIFO fails when overwritting to it
-//   EXPECT_EQ(fifo->write(buff, (size_t)8), (size_t)0);
-// }
-
-
+TEST_F(FifoTest, nonblocking)
+{
+  size_t size = this->default_buffer_size;
+  char output[this->default_message_size];
+  int result = RT::OS::getFifo(fifo, size);
+  auto test_task = std::make_unique<RT::OS::Task>();
+  RT::OS::setPeriod(test_task, RT::OS::SECONDS_TO_NANOSECONDS);
+  auto sender = [this, &test_task]()
+  {
+    RT::OS::initiate();
+    RT::OS::sleepTimestep(test_task);
+    this->fifo->writeRT(&(this->default_message), this->default_message_size);
+    RT::OS::shutdown();
+  };
+  int64_t start_time = RT::OS::getTime();
+  std::thread sender_thread(sender);
+  fifo->read(&output, this->default_message_size, false);
+  int64_t end_time = RT::OS::getTime();
+  sender_thread.join();
+  int64_t duration = end_time - start_time;
+  // Should return immediately when in nonblocking mode. No message transferred
+  ASSERT_STRNE(output, this->default_message);
+  EXPECT_GE(test_task->period, duration);
+}
