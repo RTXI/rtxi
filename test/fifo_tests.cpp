@@ -39,11 +39,11 @@ TEST_F(FifoTest, getFifo)
 TEST_F(FifoTest, roundtrip)
 {
   std::unique_ptr<RT::OS::Fifo> fifo;
-  char output[this->default_buffer_size];
-  size_t size = this->default_buffer_size;
-  int result = RT::OS::getFifo(fifo, size);
+  //char output[this->default_buffer_size];
+  std::string *output;
+  int result = RT::OS::getFifo(fifo, this->default_buffer_size);
   ASSERT_EQ(result, 0);
-  auto echo = [this, &fifo](size_t bufsize)
+  auto echo = [&fifo](size_t bufsize)
   {
     char buf[bufsize];
     RT::OS::initiate();
@@ -51,19 +51,19 @@ TEST_F(FifoTest, roundtrip)
     fifo->writeRT(&buf, bufsize);
     RT::OS::shutdown();
   };
-  fifo->write(this->default_message, size);
-  std::thread test_thread(echo, size);
+  fifo->write(&this->default_message, sizeof(std::string *));
+  std::thread test_thread(echo, sizeof(std::string *));
   test_thread.join();
-  fifo->read(output, size, false);
-  EXPECT_STREQ(this->default_message, output);
+  fifo->read(output, sizeof(std::string *), false);
+  EXPECT_STREQ(this->default_message.c_str(), output->c_str());
 }
 
 TEST_F(FifoTest, nonblocking)
 {
   std::unique_ptr<RT::OS::Fifo> fifo;
-  size_t size = this->default_buffer_size;
-  char output[this->default_message_size];
-  int result = RT::OS::getFifo(fifo, size);
+  //size_t size = this->default_buffer_size;
+  std::string *output;
+  int result = RT::OS::getFifo(fifo, this->default_buffer_size);
   ASSERT_EQ(result, 0);
   auto test_task = std::make_unique<RT::OS::Task>();
   RT::OS::setPeriod(test_task, RT::OS::SECONDS_TO_NANOSECONDS);
@@ -71,17 +71,17 @@ TEST_F(FifoTest, nonblocking)
   {
     RT::OS::initiate();
     RT::OS::sleepTimestep(test_task);
-    fifo->writeRT(&(this->default_message), this->default_message_size);
+    fifo->writeRT(&(this->default_message), sizeof(std::string *));
     RT::OS::shutdown();
   };
   int64_t start_time = RT::OS::getTime();
   std::thread sender_thread(sender);
-  fifo->read(&output, this->default_message_size, false);
+  fifo->read(output, sizeof(std::string *), false);
   int64_t end_time = RT::OS::getTime();
   sender_thread.join();
   int64_t duration = end_time - start_time;
   // Should return immediately when in nonblocking mode. No message transferred
-  ASSERT_STRNE(output, this->default_message);
+  ASSERT_STRNE(output->c_str(), this->default_message.c_str());
   EXPECT_GE(test_task->period, duration);
 }
 // NOLINTEND(*-avoid-c-arrays)

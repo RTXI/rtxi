@@ -22,6 +22,7 @@
 #define FIFO_TESTS_H
 
 #include <memory>
+#include <string>
 
 #include <gtest/gtest.h>
 
@@ -33,9 +34,9 @@ class FifoTest : public ::testing::Test
 {
 protected:
   //std::unique_ptr<RT::OS::Fifo> fifo;
-  size_t default_buffer_size = 100;
-  char default_message[8] = "message";
-  size_t default_message_size = 8;
+  const size_t default_buffer_size = 100;
+  std::string default_message = "message";
+  //size_t default_message_size = 8;
 };
 // NOLINTEND(*-avoid-c-arrays)
 
