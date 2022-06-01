@@ -20,13 +20,14 @@
 
 #include <iostream>
 
+#include "rtos.hpp"
+
 #include <errno.h>
 #include <evl/evl.h>
 #include <string.h>
 #include <unistd.h>
 
 #include "fifo.hpp"
-#include "rtos.hpp"
 
 int RT::OS::initiate()
 {
@@ -53,7 +54,7 @@ void RT::OS::shutdown()
   }
 }
 
-void RT::OS::deleteTask(std::unique_ptr<RT::OS::Task>& task)
+void RT::OS::deleteTask(RT::OS::Task* task)
 {
   // Should not be deleting real-time tasks from another real-time task
   if (RT::OS::isRealtime()) {
@@ -80,13 +81,13 @@ int64_t RT::OS::getTime()
   return RT::OS::SECONDS_TO_NANOSECONDS * tp.tv_sec + tp.tv_nsec;
 }
 
-int RT::OS::setPeriod(std::unique_ptr<RT::OS::Task>& task, int64_t period)
+int RT::OS::setPeriod(RT::OS::Task* task, int64_t period)
 {
   task->period = period;
   return 0;
 }
 
-void RT::OS::sleepTimestep(std::unique_ptr<RT::OS::Task>& task)
+void RT::OS::sleepTimestep(RT::OS::Task* task)
 {
   if (task->next_t < RT::OS::DEFAULT_PERIOD) {
     task->next_t = RT::OS::getTime() + task->period;

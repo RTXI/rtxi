@@ -49,8 +49,8 @@ TEST_F(RTOSTests, CreateAndDeleteTask)
   int result = 0;
   bool func_retval = false;
   auto test_task = std::make_unique<RT::OS::Task>();
-  result = RT::OS::createTask<bool>(test_task, temp_function, func_retval);
-  RT::OS::deleteTask(test_task);
+  result = RT::OS::createTask<bool>(test_task.get(), temp_function, func_retval);
+  RT::OS::deleteTask(test_task.get());
   // It is not possible to lock memory without admin privilages.
   // Either it succeeds or we don't have permissions
   EXPECT_TRUE(result == 0 || result == -13);
@@ -61,7 +61,7 @@ TEST_F(RTOSTests, setPeriod)
   auto test_task = std::make_unique<RT::OS::Task>();
   ASSERT_EQ(RT::OS::DEFAULT_PERIOD, test_task->period);
   int64_t period = RT::OS::DEFAULT_PERIOD * 2;
-  RT::OS::setPeriod(test_task, period);
+  RT::OS::setPeriod(test_task.get(), period);
   ASSERT_EQ(period, test_task->period);
 }
 
@@ -81,7 +81,7 @@ TEST_F(RTOSTests, sleepTimestep)
       {
         RT::OS::initiate();
         auto stime = RT::OS::getTime();
-        RT::OS::sleepTimestep(test_task);
+        RT::OS::sleepTimestep(test_task.get());
         auto etime = RT::OS::getTime();
         duration = etime - stime;
         RT::OS::shutdown();

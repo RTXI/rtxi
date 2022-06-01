@@ -72,11 +72,11 @@ TEST_F(FifoTest, nonblocking)
   int result = RT::OS::getFifo(fifo, this->default_buffer_size);
   ASSERT_EQ(result, 0);
   auto test_task = std::make_unique<RT::OS::Task>();
-  RT::OS::setPeriod(test_task, RT::OS::SECONDS_TO_NANOSECONDS);
-  auto sender = [this, &fifo, &test_task, &input]()
+  RT::OS::setPeriod(test_task.get(), RT::OS::SECONDS_TO_NANOSECONDS);
+  auto sender = [&fifo, &test_task, &input]()
   {
     RT::OS::initiate();
-    RT::OS::sleepTimestep(test_task);
+    RT::OS::sleepTimestep(test_task.get());
     fifo->writeRT(&input, sizeof(std::string *));
     RT::OS::shutdown();
   };
@@ -87,7 +87,7 @@ TEST_F(FifoTest, nonblocking)
   sender_thread.join();
   int64_t duration = end_time - start_time;
   // Should return immediately when in nonblocking mode. No message transferred
-  ASSERT_EQ(read_bytes, 0);
+  ASSERT_EQ(read_bytes, -1);
   EXPECT_GE(test_task->period, duration);
   output = nullptr;
   delete input;

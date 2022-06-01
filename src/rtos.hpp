@@ -1,10 +1,11 @@
 #ifndef RTOS_H
 #define RTOS_H
 
-#include <string.h>
-#include <errno.h>
 #include <functional>
 #include <thread>
+
+#include <errno.h>
+#include <string.h>
 
 #include "debug.hpp"
 #include "fifo.hpp"
@@ -19,7 +20,7 @@ const int64_t DEFAULT_PERIOD = 1000000;  // Default period is set to 1 msec
 
 /*!
  * Object representation of a real-time loop
- * 
+ *
  * \param period The period for the real-time loop in nanoseconds.
  * \param next_t Next wakup time in absolute clock time (nanoseconds).
  * \param task_finished Bool field used by real-time loop to signal end.
@@ -38,7 +39,7 @@ struct Task
  * Pages and storing real-time identification variables
  *
  * \return 0 if successful, error code otherwise
- * 
+ *
  * \sa RT::OS::shutdown()
  */
 int initiate();
@@ -46,20 +47,19 @@ int initiate();
 /*!
  * Releases real-time resources from the operating system. Called when rtxi
  * is closing.
- * 
+ *
  * \sa RT::OS::initiate()
  */
 void shutdown();
-
 
 /*!
  * terminates task in real-time loop
  *
  * \param task Task object holding metadata for real-time task
- * 
+ *
  * \sa RT::OS::createTask()
  */
-void deleteTask(std::unique_ptr<Task> & task);
+void deleteTask(Task* task);
 
 /*!
  * Set the period for the real-time task
@@ -68,20 +68,20 @@ void deleteTask(std::unique_ptr<Task> & task);
  * \param period The new period to set the real-time loop to
  *
  * \returns 0 if successful, -1 otherwise
- * 
+ *
  * \sa RT::OS::sleepTimestep
  */
-int setPeriod(std::unique_ptr<Task> & task, int64_t period);
+int setPeriod(Task* task, int64_t period);
 
 /*!
  * Uses real-time core to sleep until the next periodic wakeup.
  * It uses the timestep given in task to determine next waekup.
  *
  * \param task Object holding the timestep data for the task
- * 
+ *
  * \sa RT::OS::setPeriod()
  */
-void sleepTimestep(std::unique_ptr<Task> & task);
+void sleepTimestep(Task* task);
 
 /*!
  * CHecks whether the calling thread is in real time. Important
@@ -119,14 +119,13 @@ double getCpuUsage();
  *
  * \param task Object holding metadata for real-time task
  * \param entry Callable function that will run the real-time loop
- * \param arg Reference to RT::System object that will manage this real-time loop
+ * \param arg Reference to RT::System object that will manage this real-time
+ * loop
  *
  * \returns 0 if successful, -1 otherwise
  */
-template <typename T>
-int createTask(std::unique_ptr<Task> & task,
-               std::function<void(T&)> func,
-               T & arg)
+template<typename T>
+int createTask(Task* task, std::function<void(T&)> func, T& arg)
 {
   // Should not be creating real-time tasks from another real-time task
   if (RT::OS::isRealtime()) {
@@ -134,11 +133,14 @@ int createTask(std::unique_ptr<Task> & task,
     return -1;
   }
   int resval = 0;
-  auto wrapper = [&func, &arg, &resval](){
+  auto wrapper = [&func, &arg, &resval]()
+  {
     resval = RT::OS::initiate();
     if (resval != 0) {
-      ERROR_MSG("RT::OS::createTask : RT::OS::initiate() : {}", strerror(errno));
-      // In the event that we fail to initiate real-time environment let's just quit
+      ERROR_MSG("RT::OS::createTask : RT::OS::initiate() : {}",
+                strerror(errno));
+      // In the event that we fail to initiate real-time environment let's just
+      // quit
       return;
     }
     func(arg);

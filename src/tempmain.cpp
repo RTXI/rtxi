@@ -17,7 +17,7 @@ int main()
   auto task = std::make_unique<RT::OS::Task>();
   int retval = 0;
   int function_retval = 0;
-  retval = RT::OS::createTask<int>(task, test_func, function_retval);
-  RT::OS::deleteTask(task);
+  retval = RT::OS::createTask<int>(task.get(), test_func, function_retval);
+  RT::OS::deleteTask(task.get());
   return retval;
 }
