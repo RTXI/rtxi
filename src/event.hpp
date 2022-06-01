@@ -21,15 +21,9 @@
 #ifndef EVENT_H
 #define EVENT_H
 
-#include <cstring>
-#include <list>
-#include <map>
 #include <string>
-
-#include <pthread.h>
-
-#include "fifo.hpp"
-#include "rt.hpp"
+#include <any>
+#include <list>
 
 //! Event Oriented Classes
 /*
@@ -38,111 +32,49 @@
  */
 namespace Event
 {
-/*!
- * Name of the event that is posted when the period is changed.
- *
- * \sa RT::System::setPeriod()
- * \sa Event::RTHandler
- */
-extern const char* RT_PERIOD_EVENT;
-/*!
- * Name of the event that is posted before the period is changed.
- *
- * \sa RT::System::setPeriod()
- * \sa Event::Handler
- */
-extern const char* RT_PREPERIOD_EVENT;
-/*!
- * Name of the event that is posted after the period is changed.
- *
- * \sa RT::System::setPeriod()
- * \sa Event::Handler
- */
-extern const char* RT_POSTPERIOD_EVENT;
 
-/*!
- * Name of the event that is posted when a thread is inserted.
- *
- * \sa RT::Thread
- */
-extern const char* RT_THREAD_INSERT_EVENT;
-/*!
- * Name of the event that is posted when a thread is removed.
- *
- * \sa RT::Thread
- */
-extern const char* RT_THREAD_REMOVE_EVENT;
-/*!
- * Name of the event that is posted when a device is inserted.
- *
- * \sa RT::Device
- */
-extern const char* RT_DEVICE_INSERT_EVENT;
-/*!
- * Name of the event that is posted when a device is removed.
- *
- * \sa RT::Device
- */
-extern const char* RT_DEVICE_REMOVE_EVENT;
+enum Type{
+  RT_PERIOD_EVENT = 0,
+  RT_PREPERIOD_EVENT,
+  RT_POSTPERIOD_EVENT,
+  RT_THREAD_INSERT_EVENT,
+  RT_THREAD_REMOVE_EVENT,
+  RT_DEVICE_INSERT_EVENT,
+  RT_DEVICE_REMOVE_EVENT,
+  IO_BLOCK_INSERT_EVENT,
+  IO_BLOCK_REMOVE_EVENT,
+  IO_LINK_INSERT_EVENT,
+  IO_LINK_REMOVE_EVENT,
+  WORKSPACE_PARAMETER_CHANGE_EVENT,
+  PLUGIN_INSERT_EVENT,
+  PLUGIN_REMOVE_EVENT,
+  SETTINGS_OBJECT_INSERT_EVENT,
+  SETTINGS_OBJECT_REMOVE_EVENT,
+  OPEN_FILE_EVENT,
+  START_RECORDING_EVENT,
+  STOP_RECORDING_EVENT,
+  ASYNC_DATA_EVENT,
+  THRESHOLD_CROSSING_EVENT,
+  START_GENICAM_RECORDING_EVENT,
+  PAUSE_GENICAM_RECORDING_EVENT,
+  STOP_GENICAM_RECORDING_EVENT,
+  GENICAM_SNAPSHOT_EVENT,
+};
 
-extern const char* IO_BLOCK_INSERT_EVENT;
-extern const char* IO_BLOCK_REMOVE_EVENT;
-
-extern const char* IO_LINK_INSERT_EVENT;
-extern const char* IO_LINK_REMOVE_EVENT;
-
-extern const char* WORKSPACE_PARAMETER_CHANGE_EVENT;
-
-/*!
- * Name of the event that is posted when a plugin is inserted.
- *
- * \sa Plugin::Manager::load()
- */
-extern const char* PLUGIN_INSERT_EVENT;
-/*!
- * Name of the event that is posted when a plugin is removed.
- *
- * \sa Plugin::Manager::unload()
- * \sa Plugin::Manager::unloadAll()
- */
-extern const char* PLUGIN_REMOVE_EVENT;
-
-/*!
- *
- */
-extern const char* SETTINGS_OBJECT_INSERT_EVENT;
-/*!
- *
- */
-extern const char* SETTINGS_OBJECT_REMOVE_EVENT;
-
-extern const char* OPEN_FILE_EVENT;
-extern const char* START_RECORDING_EVENT;
-extern const char* STOP_RECORDING_EVENT;
-extern const char* ASYNC_DATA_EVENT;
-
-extern const char* THRESHOLD_CROSSING_EVENT;
-
-extern const char* START_GENICAM_RECORDING_EVENT;
-extern const char* PAUSE_GENICAM_RECORDING_EVENT;
-extern const char* STOP_GENICAM_RECORDING_EVENT;
-extern const char* GENICAM_SNAPSHOT_EVENT;
+std::string type_to_string(Type event_type);
 
 class Object
 {
 public:
-  Object(const char*);
-  ~Object(void);
+  Object(Event::Type event_type);
+  ~Object();
 
   /*!
    * Obtains the name of the event object that was emitted.
    *
    * \return A string containing the name of event
    */
-  const char* getName(void) const
-  {
-    return name;
-  };
+  std::string getName();
 
   /*!
    * Retrieves the paramaters values attached to the event
@@ -150,7 +82,7 @@ public:
    * \param Name The parameter name for which to retrieve the value of event
    * \return The value connected with the input key
    */
-  void* getParam(const char*) const;
+  std::any getParam(std::string param_name) const;
 
   /*!
    * Stores a key and value inside event object
@@ -158,7 +90,9 @@ public:
    * \param Key The name of the parameter to store inside event object
    * \param Value The value to store
    */
-  void setParam(const char*, void*);
+  void setParam(std::string param_name, std::any param_value);
+
+  const Type event_type;
 
   /*!
    * The agreed maximum number of parameters event objects are allowed to have
@@ -166,18 +100,63 @@ public:
   const static size_t MAX_PARAMS = 8;
 
 private:
-  const char* name;
   size_t nparams;
-  struct
+
+  struct param
   {
-    const char* name;
-    void* value;
+    std::string name;
+    std::any value;
   } params[MAX_PARAMS];
 
 };  // class Object
 
-class Handler;
-class RTHandler;
+/*!
+ * Object that is signaled when an event is posted.
+ *
+ * \sa Event::Manager::postEvent()
+ */
+class Handler
+{
+public:
+  Handler();
+  virtual ~Handler();
+
+  /*!
+   * Function that is called in non-realtime everytime an non-realtime
+   *  event is posted.
+   *
+   * \param event The the event being posted.
+   *
+   * \sa Event::Object
+   * \sa Event::Manager::postEvent()
+   */
+  virtual void receiveEvent(const Object* event);
+
+};  // class Handler
+
+/*!
+ * Object that is signaled when a realtime event is posted.
+ *
+ * \sa Event::Manager::postEventRT()
+ */
+class RTHandler
+{
+public:
+  RTHandler();
+  virtual ~RTHandler();
+
+  /*!
+   * Function that is called in realtime everytime a realtime
+   *  event is posted.
+   *
+   * \param name The the event being posted.
+   *
+   * \sa Event::Object
+   * \sa Event::Manager::postEventRT()
+   */
+  virtual void receiveEventRT(const Object* event);
+
+};  // class RTHandler
 
 /*
  * Managaes the collection of all objects waiting to
@@ -185,9 +164,6 @@ class RTHandler;
  */
 class Manager
 {
-  friend class Handler;
-  friend class RTHandler;
-
 public:
   /*!
    * Manager is a Singleton, which means that there can only be
@@ -196,7 +172,7 @@ public:
    *
    * \return The instance of Manager.
    */
-  static Manager* getInstance(void);
+  static Manager* getInstance();
 
   /*!
    * Function for posting an event to be signaled. This function
@@ -222,9 +198,16 @@ public:
    */
   void postEventRT(const Object* event);
 
+
+  void registerHandler(Handler* handler);
+  void unregisterHandler(Handler* handler);
+
+  void registerRTHandler(RTHandler* handler);
+  void unregisterRTHandler(RTHandler* handler);
+
 private:
-  Manager(void);
-  ~Manager(void);
+  Manager();
+  ~Manager();
   Manager(const Manager&) {};
   Manager& operator=(const Manager&)
   {
@@ -233,65 +216,10 @@ private:
 
   static Manager* instance;
 
-  void registerHandler(Handler*);
-  void unregisterHandler(Handler*);
-
-  void registerRTHandler(RTHandler*);
-  void unregisterRTHandler(RTHandler*);
-
-  Mutex mutex;
   std::list<Handler*> handlerList;
-  RT::List<RTHandler> rthandlerList;
+  std::list<RTHandler*> rthandlerList;
 
 };  // class Manager
-
-/*!
- * Object that is signaled when an event is posted.
- *
- * \sa Event::Manager::postEvent()
- */
-class Handler
-{
-public:
-  Handler(void);
-  virtual ~Handler(void);
-
-  /*!
-   * Function that is called in non-realtime everytime an non-realtime
-   *  event is posted.
-   *
-   * \param event The the event being posted.
-   *
-   * \sa Event::Object
-   * \sa Event::Manager::postEvent()
-   */
-  virtual void receiveEvent(const Object* event);
-
-};  // class Handler
-
-/*!
- * Object that is signaled when a realtime event is posted.
- *
- * \sa Event::Manager::postEventRT()
- */
-class RTHandler : public RT::List<RTHandler>::Node
-{
-public:
-  RTHandler(void);
-  virtual ~RTHandler(void);
-
-  /*!
-   * Function that is called in realtime everytime a realtime
-   *  event is posted.
-   *
-   * \param name The the event being posted.
-   *
-   * \sa Event::Object
-   * \sa Event::Manager::postEventRT()
-   */
-  virtual void receiveEventRT(const Object* event);
-
-};  // class RTHandler
 
 };  // namespace Event
 

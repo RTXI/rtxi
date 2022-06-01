@@ -18,160 +18,209 @@
 
 */
 
+#include <algorithm>
+
 #include "event.hpp"
 
 #include "debug.hpp"
 
-const char* Event::RT_PERIOD_EVENT = "SYSTEM : period";
-const char* Event::RT_PREPERIOD_EVENT = "SYSTEM : pre period";
-const char* Event::RT_POSTPERIOD_EVENT = "SYSTEM : post period";
-const char* Event::RT_THREAD_INSERT_EVENT = "SYSTEM : thread insert";
-const char* Event::RT_THREAD_REMOVE_EVENT = "SYSTEM : thread remove";
-const char* Event::RT_DEVICE_INSERT_EVENT = "SYSTEM : device insert";
-const char* Event::RT_DEVICE_REMOVE_EVENT = "SYSTEM : device remove";
-const char* Event::IO_BLOCK_INSERT_EVENT = "SYSTEM : block insert";
-const char* Event::IO_BLOCK_REMOVE_EVENT = "SYSTEM : block remove";
-const char* Event::IO_LINK_INSERT_EVENT = "SYSTEM : link insert";
-const char* Event::IO_LINK_REMOVE_EVENT = "SYSTEM : link remove";
-const char* Event::WORKSPACE_PARAMETER_CHANGE_EVENT =
-    "SYSTEM : parameter change";
-const char* Event::PLUGIN_INSERT_EVENT = "SYSTEM : plugin insert";
-const char* Event::PLUGIN_REMOVE_EVENT = "SYSTEM : plugin remove";
-const char* Event::SETTINGS_OBJECT_INSERT_EVENT =
-    "SYSTEM : settings object insert";
-const char* Event::SETTINGS_OBJECT_REMOVE_EVENT =
-    "SYSTEM : settings object remove";
-const char* Event::OPEN_FILE_EVENT = "SYSTEM : open file";
-const char* Event::START_RECORDING_EVENT = "SYSTEM : start recording";
-const char* Event::STOP_RECORDING_EVENT = "SYSTEM : stop recording";
-const char* Event::ASYNC_DATA_EVENT = "SYSTEM : async data";
-const char* Event::THRESHOLD_CROSSING_EVENT =
-    "SYSTEM : threshold crossing event";
-const char* Event::START_GENICAM_RECORDING_EVENT =
-    "SYSTEM : start genicam recording";
-const char* Event::PAUSE_GENICAM_RECORDING_EVENT =
-    "SYSTEM : pause genicam recording";
-const char* Event::STOP_GENICAM_RECORDING_EVENT =
-    "SYSTEM : stop genicam recording";
-const char* Event::GENICAM_SNAPSHOT_EVENT = "SYSTEM : genicam snap";
-
-Event::Handler::Handler(void)
+std::string type_to_string(Event::Type event_type)
 {
-  Event::Manager::getInstance()->registerHandler(this);
+  std::string return_string;
+  switch (event_type) {
+    case Event::RT_PERIOD_EVENT:
+      return_string = "SYSTEM : period";
+      break;
+    case Event::RT_PREPERIOD_EVENT:
+      return_string = "SYSTEM : pre period";
+      break;
+    case Event::RT_POSTPERIOD_EVENT:
+      return_string = "SYSTEM : post period";
+      break;
+    case Event::RT_THREAD_INSERT_EVENT:
+      return_string = "SYSTEM : thread insert";
+      break;
+    case Event::RT_THREAD_REMOVE_EVENT:
+      return_string = "SYSTEM : thread remove";
+      break;
+    case Event::RT_DEVICE_INSERT_EVENT:
+      return_string = "SYSTEM : device insert";
+      break;
+    case Event::RT_DEVICE_REMOVE_EVENT:
+      return_string = "SYSTEM : device remove";
+      break;
+    case Event::IO_BLOCK_INSERT_EVENT:
+      return_string = "SYSTEM : block insert";
+      break;
+    case Event::IO_BLOCK_REMOVE_EVENT:
+      return_string = "SYSTEM : block remove";
+      break;
+    case Event::IO_LINK_INSERT_EVENT:
+      return_string = "SYSTEM : link insert";
+      break;
+    case Event::IO_LINK_REMOVE_EVENT:
+      return_string = "SYSTEM : link remove";
+      break;
+    case Event::WORKSPACE_PARAMETER_CHANGE_EVENT:
+      return_string = "SYSTEvent::EM : parameter change";
+      break;
+    case Event::PLUGIN_INSERT_EVENT:
+      return_string = "SYSTEM : plugin insert";
+      break;
+    case Event::PLUGIN_REMOVE_EVENT:
+      return_string = "SYSTEM : plugin remove";
+      break;
+    case Event::SETTINGS_OBJECT_INSERT_EVENT:
+      return_string = "SYSTEvent::EM : settings object insert";
+      break;
+    case Event::SETTINGS_OBJECT_REMOVE_EVENT:
+      return_string = "SYSTEvent::EM : settings object remove";
+      break;
+    case Event::OPEN_FILE_EVENT:
+      return_string = "SYSTEM : open file";
+      break;
+    case Event::START_RECORDING_EVENT:
+      return_string = "SYSTEM : start recording";
+      break;
+    case Event::STOP_RECORDING_EVENT:
+      return_string = "SYSTEM : stop recording";
+      break;
+    case Event::ASYNC_DATA_EVENT:
+      return_string = "SYSTEM : async data";
+      break;
+    case Event::THRESHOLD_CROSSING_EVENT:
+      return_string = "SYSTEvent::EM : threshold crossing event";
+      break;
+    case Event::START_GENICAM_RECORDING_EVENT:
+      return_string = "SYSTEvent::EM : start genicam recording";
+      break;
+    case Event::PAUSE_GENICAM_RECORDING_EVENT:
+      return_string = "SYSTEvent::EM : pause genicam recording";
+      break;
+    case Event::STOP_GENICAM_RECORDING_EVENT:
+      return_string = "SYSTEvent::EM : stop genicam recording";
+      break;
+    case Event::GENICAM_SNAPSHOT_EVENT:
+      return_string = "SYSTEM : genicam snap";
+      break;
+  }
+  return return_string;
 }
 
-Event::Handler::~Handler(void)
+Event::Handler::Handler()
 {
-  Event::Manager::getInstance()->unregisterHandler(this);
+  // Event::Manager::getInstance()->registerHandler(this);
+}
+
+Event::Handler::~Handler()
+{
+  // Event::Manager::getInstance()->unregisterHandler(this);
 }
 
 void Event::Handler::receiveEvent(const Event::Object*) {}
 
-Event::RTHandler::RTHandler(void)
+Event::RTHandler::RTHandler()
 {
-  Event::Manager::getInstance()->registerRTHandler(this);
+  // Event::Manager::getInstance()->registerRTHandler(this);
 }
 
-Event::RTHandler::~RTHandler(void)
+Event::RTHandler::~RTHandler()
 {
-  Event::Manager::getInstance()->unregisterRTHandler(this);
+  // Event::Manager::getInstance()->unregisterRTHandler(this);
 }
 
 void Event::RTHandler::receiveEventRT(const Event::Object*) {}
 
-Event::Object::Object(const char* nam)
-    : name(nam)
+Event::Object::Object(Event::Type event_t)
+    : event_type(event_t)
     , nparams(0)
 {
-  memset(params, 0, sizeof(params));
+  // memset(params, 0, sizeof(params));
 }
 
-Event::Object::~Object(void) {}
+Event::Object::~Object() {}
 
-void* Event::Object::getParam(const char* nam) const
+std::string Event::Object::getName()
+{
+  return Event::type_to_string(this->event_type);
+}
+
+std::any Event::Object::getParam(std::string param_name) const
 {
   for (size_t i = 0; i < nparams; ++i)
-    if (!strcmp(params[i].name, nam))
+    if (params[i].name == param_name)
       return params[i].value;
-  return 0;
+  return std::any();
 }
 
-void Event::Object::setParam(const char* nam, void* val)
+void Event::Object::setParam(std::string param_name, std::any param_value)
 {
   for (size_t i = 0; i < nparams; ++i)
-    if (!strcmp(params[i].name, nam)) {
-      params[i].value = val;
+    if (params[i].name == param_name) {
+      params[i].value = param_value;
       return;
     }
 
   if (nparams >= MAX_PARAMS)
     return;
 
-  params[nparams].name = nam;
-  params[nparams].value = val;
+  params[nparams].name = param_name;
+  params[nparams].value = param_value;
   ++nparams;
 }
 
-Event::Manager::Manager(void) {}
+Event::Manager::Manager() {}
 
-Event::Manager::~Manager(void) {}
-
-void Event::Manager::postEvent(const Object* event)
+Event::Manager::~Manager()
 {
-  Mutex::Locker lock(&mutex);
-
-  for (std::list<Handler*>::iterator i = handlerList.begin(),
-                                     end = handlerList.end();
-       i != end;
-       ++i)
-    (*i)->receiveEvent(event);
+  this->handlerList.clear();
+  this->rthandlerList.clear();
 }
 
-void Event::Manager::postEventRT(const Object* event)
+void Event::Manager::postEvent(const Event::Object* event)
 {
-  for (RT::List<RTHandler>::iterator i = rthandlerList.begin(),
-                                     end = rthandlerList.end();
-       i != end;
-       ++i)
-    i->receiveEventRT(event);
+  for (auto i = this->handlerList.begin(); i != this->handlerList.end(); ++i) {
+    (*i)->receiveEvent(event);
+  }
+}
+
+void Event::Manager::postEventRT(const Event::Object* event)
+{
+  for (auto i = this->rthandlerList.begin(); i != this->rthandlerList.end();
+       ++i) {
+    (*i)->receiveEventRT(event);
+  }
 }
 
 void Event::Manager::registerHandler(Handler* handler)
 {
-  Mutex::Locker lock(&mutex);
-  handlerList.insert(handlerList.end(), handler);
+  handlerList.push_back(handler);
 }
 
 void Event::Manager::unregisterHandler(Handler* handler)
 {
-  Mutex::Locker lock(&mutex);
-  handlerList.remove(handler);
+  auto location = std::find(handlerList.begin(), handlerList.end(), handler);
+  handlerList.erase(location);
 }
 
 void Event::Manager::registerRTHandler(RTHandler* handler)
 {
-  rthandlerList.insert(rthandlerList.end(), *handler);
+  rthandlerList.push_back(handler);
 }
 
 void Event::Manager::unregisterRTHandler(RTHandler* handler)
 {
-  rthandlerList.remove(*handler);
+  auto location =
+      std::find(rthandlerList.begin(), rthandlerList.end(), handler);
+  rthandlerList.erase(location);
 }
-
-static Mutex mutex;
-Event::Manager* Event::Manager::instance = 0;
 
 Event::Manager* Event::Manager::getInstance(void)
 {
-  if (instance)
+  if (instance) {
     return instance;
+  }
 
-  /*************************************************************************
-   * Seems like alot of hoops to jump through, but static allocation isn't *
-   *   thread-safe. So effort must be taken to ensure mutual exclusion.    *
-   *************************************************************************/
-
-  Mutex::Locker lock(&::mutex);
   if (!instance) {
     static Manager manager;
     instance = &manager;

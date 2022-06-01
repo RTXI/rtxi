@@ -23,8 +23,8 @@ endif()
 
 # Create static library for rtxi core components
 add_library(rtxi_lib OBJECT
-    "debug.hpp"
-    "debug.cpp"
+    "debug.hpp" "debug.cpp"
+    "event.hpp" "event.cpp"
 )
 target_link_libraries(rtxi_lib PUBLIC 
     Threads::Threads
