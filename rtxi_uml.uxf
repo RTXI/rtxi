@@ -1,0 +1,38 @@
+<diagram program="umletino" version="14.4.0-SNAPSHOT"><zoom_level>10</zoom_level><element><id>UMLClass</id><coordinates><x>100</x><y>320</y><w>210</w><h>190</h></coordinates><panel_attributes>RT::System
+--
+-id: Long
+_-ClassAttribute: Long_
+--
+#Operation(i: int): int
+/+AbstractOperation()/
+--
+Responsibilities
+-- read and write to hardware
+-- run critical functions
+-- perform data changes for io blocks, parameters, etc
+bg=blue</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>350</x><y>320</y><w>210</w><h>190</h></coordinates><panel_attributes>/RT::OS::Fifo/
+--
+/+read()/
+/+write()/
+/+readRT()/
+/+readRT()/
+/+getCapacity()/
+--
+Responsibilities
+-- Transfer data between realtime and non-realtime threads
+layer=1</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>600</x><y>320</y><w>290</w><h>230</h></coordinates><panel_attributes>Event::Manager
+--
+-fifo: RT::OS::Fifo
+-handlerList: Event::Handler* [0..*]
+-rthandlerList: Event::RTHandler* [0..*]
+--
++postEvent(obj: Event::Object)
++postEventRT(obj: Event::Object)
++registerHandler(handler: Event::Handler*)
++unregisterHandler(handler: Event::Handler*)
++registerRTHandler(handler: Event::RTHandler*)
++unregisterRTHandler(handler: Event::RTHandler*)
+--
+Responsibilities
+-- Forward events from publisher to observers
+bg=green</panel_attributes><additional_attributes></additional_attributes></element></diagram>
