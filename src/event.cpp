@@ -26,82 +26,85 @@
 
 std::string Event::type_to_string(Event::Type event_type)
 {
-  std::string return_string;
+  std::string return_string = "";
   switch (event_type) {
-    case Event::RT_PERIOD_EVENT:
+    case Event::Type::RT_PERIOD_EVENT:
       return_string = "SYSTEM : period";
       break;
-    case Event::RT_PREPERIOD_EVENT:
+    case Event::Type::RT_PREPERIOD_EVENT:
       return_string = "SYSTEM : pre period";
       break;
-    case Event::RT_POSTPERIOD_EVENT:
+    case Event::Type::RT_POSTPERIOD_EVENT:
       return_string = "SYSTEM : post period";
       break;
-    case Event::RT_THREAD_INSERT_EVENT:
+    case Event::Type::RT_THREAD_INSERT_EVENT:
       return_string = "SYSTEM : thread insert";
       break;
-    case Event::RT_THREAD_REMOVE_EVENT:
+    case Event::Type::RT_THREAD_REMOVE_EVENT:
       return_string = "SYSTEM : thread remove";
       break;
-    case Event::RT_DEVICE_INSERT_EVENT:
+    case Event::Type::RT_DEVICE_INSERT_EVENT:
       return_string = "SYSTEM : device insert";
       break;
-    case Event::RT_DEVICE_REMOVE_EVENT:
+    case Event::Type::RT_DEVICE_REMOVE_EVENT:
       return_string = "SYSTEM : device remove";
       break;
-    case Event::IO_BLOCK_INSERT_EVENT:
+    case Event::Type::IO_BLOCK_INSERT_EVENT:
       return_string = "SYSTEM : block insert";
       break;
-    case Event::IO_BLOCK_REMOVE_EVENT:
+    case Event::Type::IO_BLOCK_REMOVE_EVENT:
       return_string = "SYSTEM : block remove";
       break;
-    case Event::IO_LINK_INSERT_EVENT:
+    case Event::Type::IO_LINK_INSERT_EVENT:
       return_string = "SYSTEM : link insert";
       break;
-    case Event::IO_LINK_REMOVE_EVENT:
+    case Event::Type::IO_LINK_REMOVE_EVENT:
       return_string = "SYSTEM : link remove";
       break;
-    case Event::WORKSPACE_PARAMETER_CHANGE_EVENT:
+    case Event::Type::WORKSPACE_PARAMETER_CHANGE_EVENT:
       return_string = "SYSTEM : parameter change";
       break;
-    case Event::PLUGIN_INSERT_EVENT:
+    case Event::Type::PLUGIN_INSERT_EVENT:
       return_string = "SYSTEM : plugin insert";
       break;
-    case Event::PLUGIN_REMOVE_EVENT:
+    case Event::Type::PLUGIN_REMOVE_EVENT:
       return_string = "SYSTEM : plugin remove";
       break;
-    case Event::SETTINGS_OBJECT_INSERT_EVENT:
+    case Event::Type::SETTINGS_OBJECT_INSERT_EVENT:
       return_string = "SYSTEM : settings object insert";
       break;
-    case Event::SETTINGS_OBJECT_REMOVE_EVENT:
+    case Event::Type::SETTINGS_OBJECT_REMOVE_EVENT:
       return_string = "SYSTEM : settings object remove";
       break;
-    case Event::OPEN_FILE_EVENT:
+    case Event::Type::OPEN_FILE_EVENT:
       return_string = "SYSTEM : open file";
       break;
-    case Event::START_RECORDING_EVENT:
+    case Event::Type::START_RECORDING_EVENT:
       return_string = "SYSTEM : start recording";
       break;
-    case Event::STOP_RECORDING_EVENT:
+    case Event::Type::STOP_RECORDING_EVENT:
       return_string = "SYSTEM : stop recording";
       break;
-    case Event::ASYNC_DATA_EVENT:
+    case Event::Type::ASYNC_DATA_EVENT:
       return_string = "SYSTEM : async data";
       break;
-    case Event::THRESHOLD_CROSSING_EVENT:
+    case Event::Type::THRESHOLD_CROSSING_EVENT:
       return_string = "SYSTEM : threshold crossing event";
       break;
-    case Event::START_GENICAM_RECORDING_EVENT:
+    case Event::Type::START_GENICAM_RECORDING_EVENT:
       return_string = "SYSTEM : start genicam recording";
       break;
-    case Event::PAUSE_GENICAM_RECORDING_EVENT:
+    case Event::Type::PAUSE_GENICAM_RECORDING_EVENT:
       return_string = "SYSTEM : pause genicam recording";
       break;
-    case Event::STOP_GENICAM_RECORDING_EVENT:
+    case Event::Type::STOP_GENICAM_RECORDING_EVENT:
       return_string = "SYSTEM : stop genicam recording";
       break;
-    case Event::GENICAM_SNAPSHOT_EVENT:
+    case Event::Type::GENICAM_SNAPSHOT_EVENT:
       return_string = "SYSTEM : genicam snap";
+      break;
+    case Event::Type::NOOP:
+      return_string = "SYSTEM : no operation";
       break;
   }
   return return_string;
