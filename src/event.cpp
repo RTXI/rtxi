@@ -24,7 +24,7 @@
 
 #include "debug.hpp"
 
-std::string type_to_string(Event::Type event_type)
+std::string Event::type_to_string(Event::Type event_type)
 {
   std::string return_string;
   switch (event_type) {
@@ -62,7 +62,7 @@ std::string type_to_string(Event::Type event_type)
       return_string = "SYSTEM : link remove";
       break;
     case Event::WORKSPACE_PARAMETER_CHANGE_EVENT:
-      return_string = "SYSTEvent::EM : parameter change";
+      return_string = "SYSTEM : parameter change";
       break;
     case Event::PLUGIN_INSERT_EVENT:
       return_string = "SYSTEM : plugin insert";
@@ -71,10 +71,10 @@ std::string type_to_string(Event::Type event_type)
       return_string = "SYSTEM : plugin remove";
       break;
     case Event::SETTINGS_OBJECT_INSERT_EVENT:
-      return_string = "SYSTEvent::EM : settings object insert";
+      return_string = "SYSTEM : settings object insert";
       break;
     case Event::SETTINGS_OBJECT_REMOVE_EVENT:
-      return_string = "SYSTEvent::EM : settings object remove";
+      return_string = "SYSTEM : settings object remove";
       break;
     case Event::OPEN_FILE_EVENT:
       return_string = "SYSTEM : open file";
@@ -89,16 +89,16 @@ std::string type_to_string(Event::Type event_type)
       return_string = "SYSTEM : async data";
       break;
     case Event::THRESHOLD_CROSSING_EVENT:
-      return_string = "SYSTEvent::EM : threshold crossing event";
+      return_string = "SYSTEM : threshold crossing event";
       break;
     case Event::START_GENICAM_RECORDING_EVENT:
-      return_string = "SYSTEvent::EM : start genicam recording";
+      return_string = "SYSTEM : start genicam recording";
       break;
     case Event::PAUSE_GENICAM_RECORDING_EVENT:
-      return_string = "SYSTEvent::EM : pause genicam recording";
+      return_string = "SYSTEM : pause genicam recording";
       break;
     case Event::STOP_GENICAM_RECORDING_EVENT:
-      return_string = "SYSTEvent::EM : stop genicam recording";
+      return_string = "SYSTEM : stop genicam recording";
       break;
     case Event::GENICAM_SNAPSHOT_EVENT:
       return_string = "SYSTEM : genicam snap";
@@ -107,69 +107,53 @@ std::string type_to_string(Event::Type event_type)
   return return_string;
 }
 
-Event::Handler::Handler()
+Event::Object::Object(Event::Type et)
+    : event_type(et)
 {
-  // Event::Manager::getInstance()->registerHandler(this);
 }
-
-Event::Handler::~Handler()
-{
-  // Event::Manager::getInstance()->unregisterHandler(this);
-}
-
-void Event::Handler::receiveEvent(const Event::Object*) {}
-
-Event::RTHandler::RTHandler()
-{
-  // Event::Manager::getInstance()->registerRTHandler(this);
-}
-
-Event::RTHandler::~RTHandler()
-{
-  // Event::Manager::getInstance()->unregisterRTHandler(this);
-}
-
-void Event::RTHandler::receiveEventRT(const Event::Object*) {}
-
-Event::Object::Object(Event::Type event_t)
-    : event_type(event_t)
-    , nparams(0)
-{
-  // memset(params, 0, sizeof(params));
-}
-
-Event::Object::~Object() {}
 
 std::string Event::Object::getName()
 {
   return Event::type_to_string(this->event_type);
 }
 
-std::any Event::Object::getParam(std::string param_name) const
+std::any Event::Object::getParam(const std::string& param_name)
 {
-  for (size_t i = 0; i < nparams; ++i)
-    if (params[i].name == param_name)
-      return params[i].value;
+  for (auto& parameter : params) {
+    if (parameter.name == param_name) {
+      return parameter.value;
+    }
+  }
   return std::any();
 }
 
-void Event::Object::setParam(std::string param_name, std::any param_value)
+void Event::Object::setParam(const std::string& param_name, const std::any& param_value)
 {
-  for (size_t i = 0; i < nparams; ++i)
-    if (params[i].name == param_name) {
-      params[i].value = param_value;
+  for (auto& parameter : params) {
+    if (parameter.name == param_name) {
+      parameter.value = param_value;
       return;
     }
+  }
 
-  if (nparams >= MAX_PARAMS)
-    return;
-
-  params[nparams].name = param_name;
-  params[nparams].value = param_value;
-  ++nparams;
+  param temp = {};
+  temp.name = param_name;
+  temp.value = param_value;
+  params.push_back(temp);
 }
 
-Event::Manager::Manager() {}
+void Event::Object::wait()
+{
+  std::unique_lock done_lock(this->processing_done_mut);
+  processing_done_cond.wait(done_lock, [this]{return processed;});
+}
+
+void Event::Object::done()
+{
+  std::unique_lock done_lock(this->processing_done_mut);
+  this->processed = true;
+  this->processing_done_cond.notify_all();
+}
 
 Event::Manager::~Manager()
 {
@@ -179,16 +163,15 @@ Event::Manager::~Manager()
 
 void Event::Manager::postEvent(const Event::Object* event)
 {
-  for (auto i = this->handlerList.begin(); i != this->handlerList.end(); ++i) {
-    (*i)->receiveEvent(event);
+  for (auto & handler : this->handlerList) {
+    handler->receiveEvent(event);
   }
 }
 
 void Event::Manager::postEventRT(const Event::Object* event)
 {
-  for (auto i = this->rthandlerList.begin(); i != this->rthandlerList.end();
-       ++i) {
-    (*i)->receiveEventRT(event);
+  for (auto & handler : this->rthandlerList) {
+    handler->receiveEvent(event);
   }
 }
 
@@ -203,28 +186,14 @@ void Event::Manager::unregisterHandler(Handler* handler)
   handlerList.erase(location);
 }
 
-void Event::Manager::registerRTHandler(RTHandler* handler)
+void Event::Manager::registerRTHandler(Handler* handler)
 {
   rthandlerList.push_back(handler);
 }
 
-void Event::Manager::unregisterRTHandler(RTHandler* handler)
+void Event::Manager::unregisterRTHandler(Handler* handler)
 {
   auto location =
       std::find(rthandlerList.begin(), rthandlerList.end(), handler);
   rthandlerList.erase(location);
-}
-
-Event::Manager* Event::Manager::getInstance(void)
-{
-  if (instance) {
-    return instance;
-  }
-
-  if (!instance) {
-    static Manager manager;
-    instance = &manager;
-  }
-
-  return instance;
 }

@@ -21,9 +21,14 @@
 #ifndef EVENT_H
 #define EVENT_H
 
-#include <string>
 #include <any>
+#include <condition_variable>
 #include <list>
+#include <mutex>
+#include <string>
+#include <vector>
+
+#include "fifo.hpp"
 
 //! Event Oriented Classes
 /*
@@ -33,7 +38,8 @@
 namespace Event
 {
 
-enum Type{
+enum Type
+{
   RT_PERIOD_EVENT = 0,
   RT_PREPERIOD_EVENT,
   RT_POSTPERIOD_EVENT,
@@ -58,7 +64,7 @@ enum Type{
   START_GENICAM_RECORDING_EVENT,
   PAUSE_GENICAM_RECORDING_EVENT,
   STOP_GENICAM_RECORDING_EVENT,
-  GENICAM_SNAPSHOT_EVENT,
+  GENICAM_SNAPSHOT_EVENT
 };
 
 std::string type_to_string(Type event_type);
@@ -66,8 +72,12 @@ std::string type_to_string(Type event_type);
 class Object
 {
 public:
-  Object(Event::Type event_type);
-  ~Object();
+  explicit Object(Event::Type et);
+  Object(const Object& obj) = delete; // copy constructor
+  Object& operator=(const Object& obj) = delete; //copy assignment operator
+  Object(Object &&) = delete; // move constructor
+  Object& operator=(Object &&) = delete; // move assignment operator
+  ~Object() = default;
 
   /*!
    * Obtains the name of the event object that was emitted.
@@ -76,13 +86,15 @@ public:
    */
   std::string getName();
 
+  Event::Type getType();
+
   /*!
    * Retrieves the paramaters values attached to the event
    *
    * \param Name The parameter name for which to retrieve the value of event
    * \return The value connected with the input key
    */
-  std::any getParam(std::string param_name) const;
+  std::any getParam(const std::string& param_name);
 
   /*!
    * Stores a key and value inside event object
@@ -90,24 +102,23 @@ public:
    * \param Key The name of the parameter to store inside event object
    * \param Value The value to store
    */
-  void setParam(std::string param_name, std::any param_value);
+  void setParam(const std::string& param_name, const std::any& param_value);
 
-  const Type event_type;
-
-  /*!
-   * The agreed maximum number of parameters event objects are allowed to have
-   */
-  const static size_t MAX_PARAMS = 8;
+  void wait();
+  void done();
 
 private:
-  size_t nparams;
-
   struct param
   {
     std::string name;
     std::any value;
-  } params[MAX_PARAMS];
+  };
 
+  std::vector<param> params;
+  std::mutex processing_done_mut;
+  std::condition_variable processing_done_cond;
+  const Type event_type;
+  bool processed=false;
 };  // class Object
 
 /*!
@@ -118,9 +129,6 @@ private:
 class Handler
 {
 public:
-  Handler();
-  virtual ~Handler();
-
   /*!
    * Function that is called in non-realtime everytime an non-realtime
    *  event is posted.
@@ -131,32 +139,7 @@ public:
    * \sa Event::Manager::postEvent()
    */
   virtual void receiveEvent(const Object* event);
-
 };  // class Handler
-
-/*!
- * Object that is signaled when a realtime event is posted.
- *
- * \sa Event::Manager::postEventRT()
- */
-class RTHandler
-{
-public:
-  RTHandler();
-  virtual ~RTHandler();
-
-  /*!
-   * Function that is called in realtime everytime a realtime
-   *  event is posted.
-   *
-   * \param name The the event being posted.
-   *
-   * \sa Event::Object
-   * \sa Event::Manager::postEventRT()
-   */
-  virtual void receiveEventRT(const Object* event);
-
-};  // class RTHandler
 
 /*
  * Managaes the collection of all objects waiting to
@@ -165,14 +148,12 @@ public:
 class Manager
 {
 public:
-  /*!
-   * Manager is a Singleton, which means that there can only be
-   * one instance. This function returns a pointer to that
-   * single instance.
-   *
-   * \return The instance of Manager.
-   */
-  static Manager* getInstance();
+  Manager() = default;
+  Manager(const Manager& manager) = delete; // copy constructor
+  Manager& operator=(const Manager& manager) = delete; //copy assignment operator
+  Manager(Manager &&) = default; // move constructor
+  Manager& operator=(Manager &&) = default; // move assignment operator
+  ~Manager();
 
   /*!
    * Function for posting an event to be signaled. This function
@@ -198,29 +179,17 @@ public:
    */
   void postEventRT(const Object* event);
 
-
   void registerHandler(Handler* handler);
   void unregisterHandler(Handler* handler);
 
-  void registerRTHandler(RTHandler* handler);
-  void unregisterRTHandler(RTHandler* handler);
+  void registerRTHandler(Handler* handler);
+  void unregisterRTHandler(Handler* handler);
 
 private:
-  Manager();
-  ~Manager();
-  Manager(const Manager&) {};
-  Manager& operator=(const Manager&)
-  {
-    return *getInstance();
-  };
-
-  static Manager* instance;
-
   std::list<Handler*> handlerList;
-  std::list<RTHandler*> rthandlerList;
-
+  std::list<Handler*> rthandlerList;
 };  // class Manager
 
-};  // namespace Event
+}  // namespace Event
 
 #endif  // EVENT_H
