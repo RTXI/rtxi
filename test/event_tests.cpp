@@ -18,26 +18,23 @@
 
  */
 
-#include <event.h>
-#include <event_tests.h>
 #include <gmock/gmock.h>
+
+#include "event_tests.hpp"
 
 TEST_F(EventObjectTest, ParameterTests)
 {
-  const char* TEST_EVENT_NAME = "EventManagerTest - postEvent : Test Event";
-  const char* TEST_EVENT_PARAM = "TEST_PARAM";
-  bool* TEST_EVENT_PARAM_VALUE;
-  event = new Event::Object(TEST_EVENT_NAME);
+  const std::string TEST_EVENT_PARAM = "TEST_PARAM";
+  bool TEST_EVENT_PARAM_VALUE = true;
+  event = std::make_unique<Event::Object>(Event::Type::NOOP);
   event->setParam(TEST_EVENT_PARAM, TEST_EVENT_PARAM_VALUE);
-  ASSERT_EQ(event->getName(), TEST_EVENT_NAME);
+  ASSERT_EQ(event->getName(), Event::type_to_string(Event::Type::NOOP));
   ASSERT_EQ(event->getParam(TEST_EVENT_PARAM), TEST_EVENT_PARAM_VALUE);
 }
 
-TEST_F(EventManagerTest, getInstance)
+TEST_F(EventObjectTest, EventProcessingWait)
 {
-  event_manager = Event::Manager::getInstance();
-  EXPECT_EQ(event_manager, Event::Manager::getInstance());
-  EXPECT_EQ(event_manager, event_manager->getInstance());
+  
 }
 
 TEST_F(EventManagerTest, postEvent)

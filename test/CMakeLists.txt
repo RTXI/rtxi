@@ -4,6 +4,7 @@ project(rtxiTests LANGUAGES CXX)
 add_executable(rtxiTests
     "rt_os_tests.hpp" "rt_os_tests.cpp"
     "fifo_tests.hpp" "fifo_tests.cpp"
+    "event_tests.hpp" "event_tests.cpp"
     "rtxiTests.cpp"
 )
 

@@ -22,8 +22,7 @@
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
-#include <rt.h>
-#include <event.h>
+#include "event.hpp"
 
 class EventObjectTest : public ::testing::Test
 {
@@ -31,7 +30,6 @@ protected:
     EventObjectTest() { }
     ~EventObjectTest() { }
 
-    Event::Object *event;
 };
 
 class EventManagerTest : public ::testing::Test
@@ -40,14 +38,12 @@ protected:
     EventManagerTest() { }
     ~EventManagerTest() { }
 
-    Event::Manager *event_manager;
-    RT::System *system;
 };
 
 class MockEventObject : public Event::Object
 {
 public:
-    MockEventObject(const char * n) : Event::Object(n) { }
+    MockEventObject() : Event::Object(Event::Type::NOOP) { }
     ~MockEventObject() { }
 
     MOCK_METHOD(void *, getParam, (const char *), (const));
@@ -59,12 +55,6 @@ class MockEventHandler : public Event::Handler
 {
 public:
     MOCK_METHOD(void, receiveEvent, (const Event::Object *), (override));
-};
-
-class MockEventRTHandler : public Event::RTHandler
-{
-public:
-    MOCK_METHOD(void, receiveEventRT, (const Event::Object *), (override));
 };
 
 #endif
