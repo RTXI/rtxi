@@ -1,4 +1,5 @@
-<diagram program="umletino" version="14.4.0-SNAPSHOT"><zoom_level>10</zoom_level><element><id>UMLClass</id><coordinates><x>100</x><y>320</y><w>210</w><h>190</h></coordinates><panel_attributes>RT::System
+<diagram program="umletino" version="14.4.0-SNAPSHOT"><zoom_level>10</zoom_level><element><id>UMLClass</id><coordinates><x>80</x><y>320</y><w>310</w><h>190</h></coordinates><panel_attributes>&lt;&lt;Event::Handler&gt;&gt;
+RT::System
 --
 -id: Long
 _-ClassAttribute: Long_
@@ -9,8 +10,9 @@ _-ClassAttribute: Long_
 Responsibilities
 -- read and write to hardware
 -- run critical functions
--- perform data changes for io blocks, parameters, etc
-bg=blue</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>350</x><y>320</y><w>210</w><h>190</h></coordinates><panel_attributes>/RT::OS::Fifo/
+-- perform data changes for 
+   io blocks, parameters, etc
+bg=blue</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>430</x><y>320</y><w>210</w><h>190</h></coordinates><panel_attributes>/RT::OS::Fifo/
 --
 /+read()/
 /+write()/
@@ -19,12 +21,12 @@ bg=blue</panel_attributes><additional_attributes></additional_attributes></eleme
 /+getCapacity()/
 --
 Responsibilities
--- Transfer data between realtime and non-realtime threads
-layer=1</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>600</x><y>320</y><w>290</w><h>230</h></coordinates><panel_attributes>Event::Manager
+-- Transfer data between 
+    realtime and non-realtime threads
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>740</x><y>320</y><w>290</w><h>230</h></coordinates><panel_attributes>Event::Manager
 --
--fifo: RT::OS::Fifo
 -handlerList: Event::Handler* [0..*]
--rthandlerList: Event::RTHandler* [0..*]
+-rthandlerList: Event::Handler* [0..*]
 --
 +postEvent(obj: Event::Object)
 +postEventRT(obj: Event::Object)

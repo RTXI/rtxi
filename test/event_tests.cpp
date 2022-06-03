@@ -26,7 +26,7 @@ TEST_F(EventObjectTest, ParameterTests)
 {
   const std::string TEST_EVENT_PARAM = "TEST_PARAM";
   bool TEST_EVENT_PARAM_VALUE = true;
-  event = std::make_unique<Event::Object>(Event::Type::NOOP);
+  auto event = std::make_unique<Event::Object>(Event::Type::NOOP);
   event->setParam(TEST_EVENT_PARAM, TEST_EVENT_PARAM_VALUE);
   ASSERT_EQ(event->getName(), Event::type_to_string(Event::Type::NOOP));
   ASSERT_EQ(event->getParam(TEST_EVENT_PARAM), TEST_EVENT_PARAM_VALUE);
@@ -34,16 +34,15 @@ TEST_F(EventObjectTest, ParameterTests)
 
 TEST_F(EventObjectTest, EventProcessingWait)
 {
-  
+
 }
 
 TEST_F(EventManagerTest, postEvent)
 {
-  event_manager = Event::Manager::getInstance();
-  const char* TEST_EVENT_NAME = "EventManagerTest - postEvent : Test Event";
-  MockEventObject event_object(TEST_EVENT_NAME);
+  auto event_manager = std::make_unique<Event::Manager>();
+  MockEventObject event_object(Event::Type::NOOP);
   MockEventHandler event_handler;
-  MockEventRTHandler event_rthandler;
+  MockEventHandler event_rthandler;
   // Make sure post event always calls the right handler
   EXPECT_CALL(event_handler, receiveEvent).Times(::testing::AtLeast(1));
   EXPECT_CALL(event_rthandler, receiveEventRT).Times(::testing::Exactly(0));
