@@ -33,10 +33,10 @@
 class FifoTest : public ::testing::Test
 {
 protected:
-  //std::unique_ptr<RT::OS::Fifo> fifo;
+  // std::unique_ptr<RT::OS::Fifo> fifo;
   const size_t default_buffer_size = 100;
   std::string default_message = "message";
-  //size_t default_message_size = 8;
+  // size_t default_message_size = 8;
 };
 // NOLINTEND(*-avoid-c-arrays)
 
