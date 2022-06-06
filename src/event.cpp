@@ -26,7 +26,7 @@
 
 std::string Event::type_to_string(Event::Type event_type)
 {
-  std::string return_string = "";
+  std::string return_string;
   switch (event_type) {
     case Event::Type::RT_PERIOD_EVENT:
       return_string = "SYSTEM : period";
@@ -111,7 +111,7 @@ std::string Event::type_to_string(Event::Type event_type)
 }
 
 Event::Object::Object(Event::Type et)
-    : event_type(et)
+    : event_type(et), processed(false)
 {
 }
 
@@ -155,48 +155,43 @@ void Event::Object::done()
 {
   std::unique_lock done_lock(this->processing_done_mut);
   this->processed = true;
-  this->processing_done_cond.notify_all();
+  this->processing_done_cond.notify_one();
+}
+
+bool Event::Object::isdone() const
+{
+  return this->processed;
+}
+
+Event::Type Event::Object::getType()
+{
+  return this->event_type;
 }
 
 Event::Manager::~Manager()
 {
   this->handlerList.clear();
-  this->rthandlerList.clear();
 }
 
-void Event::Manager::postEvent(const Event::Object* event)
+void Event::Manager::postEvent(Event::Object* event)
 {
   for (auto & handler : this->handlerList) {
     handler->receiveEvent(event);
   }
 }
 
-void Event::Manager::postEventRT(const Event::Object* event)
-{
-  for (auto & handler : this->rthandlerList) {
-    handler->receiveEvent(event);
-  }
-}
-
 void Event::Manager::registerHandler(Handler* handler)
 {
-  handlerList.push_back(handler);
+  auto location = std::find(handlerList.begin(), handlerList.end(), handler);
+  if(location != handlerList.end()){
+    handlerList.push_back(handler);
+  }
 }
 
 void Event::Manager::unregisterHandler(Handler* handler)
 {
   auto location = std::find(handlerList.begin(), handlerList.end(), handler);
-  handlerList.erase(location);
-}
-
-void Event::Manager::registerRTHandler(Handler* handler)
-{
-  rthandlerList.push_back(handler);
-}
-
-void Event::Manager::unregisterRTHandler(Handler* handler)
-{
-  auto location =
-      std::find(rthandlerList.begin(), rthandlerList.end(), handler);
-  rthandlerList.erase(location);
+  if(location != handlerList.end()){
+    handlerList.erase(location);
+  }
 }

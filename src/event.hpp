@@ -107,6 +107,7 @@ public:
 
   void wait();
   void done();
+  bool isdone() const;
 
 private:
   struct param
@@ -119,11 +120,13 @@ private:
   std::mutex processing_done_mut;
   std::condition_variable processing_done_cond;
   const Type event_type;
-  bool processed=false;
+  bool processed;
 };  // class Object
 
 /*!
- * Object that is signaled when an event is posted.
+ * Entity that is signaled when an event is posted. This is an interface
+ * that allows rtxi components and plugins to define how they receive those
+ * events.
  *
  * \sa Event::Manager::postEvent()
  */
@@ -139,7 +142,7 @@ public:
    * \sa Event::Object
    * \sa Event::Manager::postEvent()
    */
-  virtual void receiveEvent(const Object* event);
+  virtual void receiveEvent(Object* event)=0;
 };  // class Handler
 
 /*
@@ -166,29 +169,13 @@ public:
    * \sa Event::Handler
    * \sa Event::Object
    */
-  void postEvent(const Object* event);
-
-  /*!
-   * Function for posting an event to be signaled. This function
-   * should only be called from realtime, and blocks until
-   * it is been dispatched to all handlers.
-   *
-   * \param event The event to be posted.
-   *
-   * \sa Event::RTHandler
-   * \sa Event::Object
-   */
-  void postEventRT(const Object* event);
+  void postEvent(Object* event);
 
   void registerHandler(Handler* handler);
   void unregisterHandler(Handler* handler);
 
-  void registerRTHandler(Handler* handler);
-  void unregisterRTHandler(Handler* handler);
-
 private:
   std::list<Handler*> handlerList;
-  std::list<Handler*> rthandlerList;
 };  // class Manager
 
 }  // namespace Event
