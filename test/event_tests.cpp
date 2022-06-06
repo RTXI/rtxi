@@ -29,19 +29,17 @@ TEST_F(EventObjectTest, ParameterTests)
   Event::Object event(Event::Type::NOOP);
   event.setParam(TEST_EVENT_PARAM, std::any(TEST_EVENT_PARAM_VALUE));
   ASSERT_EQ(event.getName(), Event::type_to_string(Event::Type::NOOP));
-  ASSERT_EQ(std::any_cast<bool>(event.getParam(TEST_EVENT_PARAM)), TEST_EVENT_PARAM_VALUE);
+  ASSERT_EQ(std::any_cast<bool>(event.getParam(TEST_EVENT_PARAM)),
+            TEST_EVENT_PARAM_VALUE);
 }
 
 TEST_F(EventObjectTest, EventProcessingWait)
 {
   Event::Object test_event(Event::Type::NOOP);
-  auto listener = [&test_event](){
-    test_event.done();
-  };
+  auto listener = [&test_event]() { test_event.done(); };
   std::thread test_thread(listener);
   test_event.wait();
-  if (test_thread.joinable())
-  {
+  if (test_thread.joinable()) {
     test_thread.join();
   }
   ASSERT_EQ(true, test_event.isdone());
@@ -69,7 +67,7 @@ TEST_F(EventManagerTest, Registration)
   EXPECT_CALL(event_handler, receiveEvent(&test_event)).Times(1);
   EXPECT_CALL(event_handler_not_called, receiveEvent(&test_event)).Times(0);
 
-  // event manager shouldn't crash if it doesn't find the handler in 
+  // event manager shouldn't crash if it doesn't find the handler in
   // its registry
   event_manager->unregisterHandler(&event_handler);
   event_manager->registerHandler(&event_handler);
