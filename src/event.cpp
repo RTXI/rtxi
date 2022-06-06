@@ -180,10 +180,10 @@ void Event::Manager::postEvent(Event::Object* event)
   }
 }
 
-void Event::Manager::registerHandler(Handler* handler)
+void Event::Manager::registerHandler(Event::Handler* handler)
 {
   auto location = std::find(handlerList.begin(), handlerList.end(), handler);
-  if(location != handlerList.end()){
+  if(location == handlerList.end()){
     handlerList.push_back(handler);
   }
 }

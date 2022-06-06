@@ -18,7 +18,7 @@
 
  */
 
-#include <gmock/gmock.h>
+#include <thread>
 
 #include "event_tests.hpp"
 
@@ -26,38 +26,54 @@ TEST_F(EventObjectTest, ParameterTests)
 {
   const std::string TEST_EVENT_PARAM = "TEST_PARAM";
   bool TEST_EVENT_PARAM_VALUE = true;
-  auto event = std::make_unique<Event::Object>(Event::Type::NOOP);
-  event->setParam(TEST_EVENT_PARAM, TEST_EVENT_PARAM_VALUE);
-  ASSERT_EQ(event->getName(), Event::type_to_string(Event::Type::NOOP));
-  ASSERT_EQ(event->getParam(TEST_EVENT_PARAM), TEST_EVENT_PARAM_VALUE);
+  Event::Object event(Event::Type::NOOP);
+  event.setParam(TEST_EVENT_PARAM, std::any(TEST_EVENT_PARAM_VALUE));
+  ASSERT_EQ(event.getName(), Event::type_to_string(Event::Type::NOOP));
+  ASSERT_EQ(std::any_cast<bool>(event.getParam(TEST_EVENT_PARAM)), TEST_EVENT_PARAM_VALUE);
 }
 
 TEST_F(EventObjectTest, EventProcessingWait)
 {
-
+  Event::Object test_event(Event::Type::NOOP);
+  auto listener = [&test_event](){
+    test_event.done();
+  };
+  std::thread test_thread(listener);
+  test_event.wait();
+  if (test_thread.joinable())
+  {
+    test_thread.join();
+  }
+  ASSERT_EQ(true, test_event.isdone());
 }
 
 TEST_F(EventManagerTest, postEvent)
 {
   auto event_manager = std::make_unique<Event::Manager>();
-  MockEventObject event_object(Event::Type::NOOP);
+  Event::Object event_obj(Event::Type::NOOP);
   MockEventHandler event_handler;
-  MockEventHandler event_rthandler;
-  // Make sure post event always calls the right handler
-  EXPECT_CALL(event_handler, receiveEvent).Times(::testing::AtLeast(1));
-  EXPECT_CALL(event_rthandler, receiveEventRT).Times(::testing::Exactly(0));
-  event_manager->postEvent(&event_object);
+  EXPECT_CALL(event_handler, receiveEvent(&event_obj));
+  event_manager->registerHandler(&event_handler);
+  event_manager->postEvent(&event_obj);
 }
 
-TEST_F(EventManagerTest, postEventRT)
+TEST_F(EventManagerTest, Registration)
 {
-  event_manager = Event::Manager::getInstance();
-  const char* TEST_EVENT_NAME = "EventManagerTest - postEventRT : Test Event";
-  MockEventObject event_object(TEST_EVENT_NAME);
-  MockEventRTHandler event_rthandler;
+  auto event_manager = std::make_unique<Event::Manager>();
   MockEventHandler event_handler;
-  // Make sure post event always calls the right handler
-  EXPECT_CALL(event_rthandler, receiveEventRT).Times(::testing::AtLeast(1));
-  EXPECT_CALL(event_handler, receiveEvent).Times(::testing::Exactly(0));
-  event_manager->postEventRT(&event_object);
+  MockEventHandler event_handler_not_called;
+  Event::Object test_event(Event::Type::NOOP);
+
+  // handlers should be called an appropriate amount of times if registration
+  // is working as it should
+  EXPECT_CALL(event_handler, receiveEvent(&test_event)).Times(1);
+  EXPECT_CALL(event_handler_not_called, receiveEvent(&test_event)).Times(0);
+
+  // event manager shouldn't crash if it doesn't find the handler in 
+  // its registry
+  event_manager->unregisterHandler(&event_handler);
+  event_manager->registerHandler(&event_handler);
+  event_manager->registerHandler(&event_handler);
+
+  event_manager->postEvent(&test_event);
 }
