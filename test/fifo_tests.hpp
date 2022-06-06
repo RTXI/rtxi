@@ -28,16 +28,11 @@
 
 #include "fifo.hpp"
 
-// Define all fixtures for testing purposes
-// NOLINTBEGIN(*-avoid-c-arrays)
 class FifoTest : public ::testing::Test
 {
 protected:
-  // std::unique_ptr<RT::OS::Fifo> fifo;
   const size_t default_buffer_size = 100;
   std::string default_message = "message";
-  // size_t default_message_size = 8;
 };
-// NOLINTEND(*-avoid-c-arrays)
 
 #endif

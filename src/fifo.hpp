@@ -53,10 +53,9 @@ public:
    * \param buf The buffer where the data from the buffer should be
    *     written to
    * \param buf_size The size of the data to read from the buffer
-   * \param blocking Whether the thread should expect to be blocked or not
    * \return n Number of elements read. Same as size.
    */
-  virtual ssize_t read(void* buf, size_t buf_size, bool blocking) = 0;
+  virtual ssize_t read(void* buf, size_t buf_size) = 0;
 
   /*!
    * Write to the FIFO storage for the RT thread. Must be run from non-rt
@@ -75,10 +74,9 @@ public:
    * \param buf The buffer where the data from the buffer should be
    *     written to
    * \param buf_size The size of the data to read from the buffer
-   * \param blocking Whether the thread should expect to be blocked or not
    * \return n Number of elements read. Same as size.
    */
-  virtual ssize_t readRT(void* buf, size_t buf_size, bool blocking) = 0;
+  virtual ssize_t readRT(void* buf, size_t buf_size) = 0;
 
   /*!
    * Write to the FIFO storage for the non-RT thread. Must be run from RT

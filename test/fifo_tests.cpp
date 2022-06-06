@@ -48,14 +48,14 @@ TEST_F(FifoTest, roundtrip)
   {
     char buf[bufsize];
     RT::OS::initiate();
-    fifo->readRT(&buf, bufsize, false);
+    fifo->readRT(&buf, bufsize);
     fifo->writeRT(&buf, bufsize);
     RT::OS::shutdown();
   };
   fifo->write(&input, sizeof(std::string*));
   std::thread test_thread(echo, sizeof(std::string*));
   test_thread.join();
-  fifo->read(&output, sizeof(std::string*), false);
+  fifo->read(&output, sizeof(std::string*));
   EXPECT_STREQ(this->default_message.c_str(), output->c_str());
 
   // We should remove the double reference of output to avoid double free
@@ -82,7 +82,7 @@ TEST_F(FifoTest, nonblocking)
   };
   int64_t start_time = RT::OS::getTime();
   std::thread sender_thread(sender);
-  ssize_t read_bytes = fifo->read(&output, sizeof(std::string*), false);
+  ssize_t read_bytes = fifo->read(&output, sizeof(std::string*));
   int64_t end_time = RT::OS::getTime();
   sender_thread.join();
   int64_t duration = end_time - start_time;
