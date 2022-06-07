@@ -23,8 +23,6 @@
 
 #include <memory>
 
-#include <sys/types.h>
-
 namespace RT::OS
 {
 /*!
@@ -35,6 +33,9 @@ communication between threads spawned by RTXI. In particular this is used
 for communication between the real-time thread and non-realtime(UI) threads.
 This is platform and interface dependent, so the FIFO primitive used in
 posix interface will be different than Xenomai's evl interface
+
+This structure should not be used between two threads of the same priority.
+It is meant only for realtime and non-realtime thread communications.
 */
 class Fifo
 {
@@ -65,7 +66,7 @@ public:
    * \param buf_size The size of the data to read from the buffer
    * \return n Number of elements written. Same as size.
    */
-  virtual ssize_t write(const void* buf, size_t buf_size) = 0;
+  virtual ssize_t write(void* buf, size_t buf_size) = 0;
 
   /*!
    * Read the data stored in the FIFO written by non-RT thread. Must be run

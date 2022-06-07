@@ -23,7 +23,7 @@ public:
 
   int buffer_fd() const;
   ssize_t read(void* buf, size_t buf_size) override;
-  ssize_t write(const void* buf, size_t buf_size) override;
+  ssize_t write(void* buf, size_t buf_size) override;
   ssize_t readRT(void* buf, size_t buf_size) override;
   ssize_t writeRT(void* buf, size_t buf_size) override;
   size_t getCapacity() override;

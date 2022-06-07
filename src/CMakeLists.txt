@@ -11,10 +11,11 @@ if(${evl_FOUND})
     )
     target_include_directories(rtos_lib SYSTEM PUBLIC ${evl_INCLUDE_DIRS})
 else()
-    message("EVL Library not found. Reverting to POSIX Interface.")
-    add_library(rtos_fifo_lib OBJECT "fifo.hpp" "fifo_posix.cpp")
+    message("EVL Library not found. Reverting to posix Interface.")
+    add_library(rtos_fifo_lib OBJECT "fifo.hpp" "fifo.cpp")
+    target_link_libraries(rtos_fifo_lib PUBLIC fmt::fmt)
     add_library(rtos_lib OBJECT "rtos.hpp" "rtos_posix.cpp")
-    target_link_libraries(rt_os_lib PUBLIC 
+    target_link_libraries(rtos_lib PUBLIC 
         rtos_fifo_lib
         fmt::fmt
     )

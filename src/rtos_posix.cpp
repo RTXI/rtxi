@@ -35,29 +35,6 @@
 
 thread_local bool realtime_key = false;
 
-// First let's define a posix specific Fifo class.
-namespace RT
-{
-namespace OS
-{
-class posixFifo : public RT::OS::Fifo 
-{
-  public:
-  posixFifo(size_t size);
-  ~posixFifo();
-
-  size_t read(void*, size_t, bool=true);
-  size_t write(const void*, size_t);
-  size_t readRT(void*, size_t, bool=true);
-  size_t writeRT(void*, size_t);
-
-  private:
-  int rt_to_ui_fd[2];
-  int ui_to_rt_fd[2];
-};
-}
-}
-
 int RT::OS::initiate()
 {
   /*
@@ -79,14 +56,14 @@ void RT::OS::shutdown()
   realtime_key = false;
 }
 
-void RT::OS::deleteTask(std::unique_ptr<RT::OS::Task> & task)
+void RT::OS::deleteTask(RT::OS::Task* task)
 {
   // Should not be deleting real-time tasks from another real-time task
   if (RT::OS::isRealtime()) {
     ERROR_MSG("RT::OS::createTask : Task cannot be deleted from rt context");
     return;
   }
-  task->task_finished = true;
+  //task->task_finished = true;
   if (task->rt_thread.joinable()){
     task->rt_thread.join();
   }
@@ -106,13 +83,13 @@ int64_t RT::OS::getTime()
   return RT::OS::SECONDS_TO_NANOSECONDS * tp.tv_sec + tp.tv_nsec;
 }
 
-int RT::OS::setPeriod(std::unique_ptr<RT::OS::Task> & task, int64_t period)
+int RT::OS::setPeriod(RT::OS::Task* task, int64_t period)
 {
   task->period = period;
   return 0;
 }
 
-void RT::OS::sleepTimestep(std::unique_ptr<RT::OS::Task> & task)
+void RT::OS::sleepTimestep(RT::OS::Task* task)
 {
   if (task->next_t < RT::OS::DEFAULT_PERIOD)
   {
@@ -163,14 +140,4 @@ double RT::OS::getCpuUsage()
   last_proc_time = proc_time;
   last_clock_read = clock_time;
   return cpu_percent;
-}
-
-RT::OS::posixFifo::posixFifo(size_t size) : RT::OS::Fifo(size)
-{
-  if (pipe(this->rt_to_ui_fd) != 0){
-    ERROR_MSG("RT::OS::posixFifo : failed to create rt-to-ui ipc : {}", strerror(errno));
-  }
-  if (pipe(this->ui_to_rt_fd) != 0){
-    ERROR_MSG("RT::OS::posixFifo : failed to create ui-to-rt ipc : {}", strerror(errno));
-  }
 }

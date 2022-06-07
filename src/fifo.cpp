@@ -18,82 +18,85 @@
 
 */
 
-#include "fifo.hpp"
-
-#include <string.h>
+#include <unistd.h>
+#include <fcntl.h>
 
 #include "debug.hpp"
+#include "fifo.hpp"
+
 
 #define AVAILABLE ((size + wptr - rptr) % size)
 
-Fifo::Fifo(size_t s)
-    : rptr(0)
-    , wptr(0)
-    , size(s)
+// Generic posix fifo based on pipes
+namespace RT::OS
 {
-  data = new char[size];
-
-  pthread_mutex_init(&mutex, NULL);
-  pthread_cond_init(&data_available, NULL);
-}
-
-Fifo::~Fifo(void)
+class posixFifo : public RT::OS::Fifo 
 {
-  if (data)
-    delete[] data;
+  public:
+  posixFifo(size_t size);
+  ~posixFifo();
 
-  pthread_mutex_destroy(&mutex);
-  pthread_cond_destroy(&data_available);
-}
+  size_t getCapacity();
+  ssize_t read(void*, size_t) override;
+  ssize_t write(void*, size_t) override;
+  ssize_t readRT(void*, size_t) override;
+  ssize_t writeRT(void*, size_t) override;
 
-size_t Fifo::read(void* buffer, size_t n, bool blocking)
+  private:
+  int rt_to_ui_fd[2]; // 0 is read from rt; 1 is write to ui
+  int ui_to_rt_fd[2]; // 0 is read from ui; 1 is write to rt
+  size_t fifo_capacity;
+};
+}  // namespace RT::OS
+
+RT::OS::posixFifo::posixFifo(size_t size) : fifo_capacity(size)
 {
-  // Acquire the data lock
-  if (blocking)
-    pthread_mutex_lock(&mutex);
-  else if (pthread_mutex_trylock(&mutex) != 0)
-    return 0;
-
-  // Check that enough data is available
-  if (AVAILABLE < n) {
-    if (blocking) {
-      do {
-        pthread_cond_wait(&data_available, &mutex);
-      } while (AVAILABLE < n);
-    } else {
-      pthread_mutex_unlock(&mutex);
-      return 0;
-    }
+  if (pipe2(this->rt_to_ui_fd, O_NONBLOCK) != 0){
+    ERROR_MSG("RT::OS::posixFifo : failed to create rt-to-ui ipc : {}", strerror(errno));
   }
-  // Copy the data from the fifo
-  if (size - rptr < n) {
-    size_t m = size - rptr;
-    memcpy(buffer, data + rptr, m);
-    memcpy(reinterpret_cast<char*>(buffer) + m, data, n - m);
-  } else
-    memcpy(buffer, data + rptr, n);
-  rptr = (rptr + n) % size;
-
-  pthread_mutex_unlock(&mutex);
-  return n;
+  if (pipe2(this->ui_to_rt_fd, O_NONBLOCK) != 0){
+    ERROR_MSG("RT::OS::posixFifo : failed to create ui-to-rt ipc : {}", strerror(errno));
+  }
 }
 
-size_t Fifo::write(const void* buffer, size_t n)
+RT::OS::posixFifo::~posixFifo()
 {
-  if (n >= size - AVAILABLE) {
-    ERROR_MSG("Fifo::write : fifo full, data lost\n");
-    return 0;
-  }
+  ::close(rt_to_ui_fd[0]);
+  ::close(rt_to_ui_fd[1]);
+  ::close(ui_to_rt_fd[0]);
+  ::close(ui_to_rt_fd[1]);
+}
 
-  if (n > size - wptr) {
-    size_t m = size - wptr;
-    memcpy(data + wptr, buffer, m);
-    memcpy(data, reinterpret_cast<const char*>(buffer) + m, n - m);
-  } else
-    memcpy(data + wptr, buffer, n);
-  wptr = (wptr + n) % size;
+ssize_t RT::OS::posixFifo::read(void* buf, size_t buf_size)
+{
+  // We need to specify to compiler that we are using read from c lib
+  return ::read(this->rt_to_ui_fd[0], buf, buf_size);
+}
 
-  pthread_cond_signal(&data_available);
+ssize_t RT::OS::posixFifo::write(void* buf, size_t buf_size)
+{
+  // we need to specify to compiler that we are using write from c lib
+  return ::write(this->ui_to_rt_fd[1], buf, buf_size);
+}
 
-  return n;
+ssize_t RT::OS::posixFifo::readRT(void* buf, size_t buf_size)
+{
+  return ::read(this->ui_to_rt_fd[0] , buf, buf_size);
+}
+
+ssize_t RT::OS::posixFifo::writeRT(void* buf, size_t buf_size)
+{
+  return ::write(this->rt_to_ui_fd[1], buf, buf_size);
+}
+
+size_t RT::OS::posixFifo::getCapacity()
+{
+  return this->fifo_capacity;
+}
+
+int RT::OS::getFifo(std::unique_ptr<Fifo>& fifo, size_t fifo_size)
+{
+  auto tmp_fifo = std::make_unique<RT::OS::posixFifo>(fifo_size);
+  fifo = std::move(tmp_fifo);
+  return 0;
 }
