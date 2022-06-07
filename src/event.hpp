@@ -30,10 +30,11 @@
 
 #include "fifo.hpp"
 
-//! Event Oriented Classes
-/*
+/*!
+ * Event Oriented Classes
+ *
  * Objects contained within this namespace are responsible
- *   for dispatching signals.
+ *   for dispatching signals. 
  */
 namespace Event
 {
@@ -68,8 +69,22 @@ enum Type
   NOOP
 };
 
+/*!
+ * converts the event type to a human readable name of event
+ *
+ * \param event_type type of event that was emitted
+ * 
+ * \returns A string representation of the event type
+ */
 std::string type_to_string(Type event_type);
 
+/*!
+ * Token used to signal event
+ * 
+ * This object is able to hold metadata information about the event for
+ * handlers to use. In order to properly use the token, the caller must 
+ * wait for handlers to mark the event processed with wait()
+ */
 class Object
 {
 public:
@@ -87,6 +102,11 @@ public:
    */
   std::string getName();
 
+  /*!
+   * Returns the type of event that was emitted.
+   *
+   * \return The type of event
+   */
   Event::Type getType();
 
   /*!
@@ -105,8 +125,27 @@ public:
    */
   void setParam(const std::string& param_name, const std::any& param_value);
 
+  /*!
+   * Forces caller to wait for the event to be processed. This is needed for
+   * events that carry metadata information for the handlers. This function
+   * will block until the event is handled (marked done by handler)
+   * 
+   * \sa Event::Object::done()
+   */
   void wait();
+
+  /*!
+   * Marks the event object as processed.
+   */
   void done();
+
+  /*!
+   * Checks whether the event object has been processed already. This can be an
+   * alternative for situations where waiting for event is not neccessary and
+   * caller just wishes to check event processing completion.
+   * 
+   * \returns true if processed. False otherwise
+   */
   bool isdone() const;
 
 private:
@@ -161,8 +200,7 @@ public:
 
   /*!
    * Function for posting an event to be signaled. This function
-   * should only be called from non-realtime, and blocks until
-   * it is been dispatched to all handlers.
+   * should only be called from non-realtime.
    *
    * \param event The event to be posted.
    *
@@ -171,7 +209,18 @@ public:
    */
   void postEvent(Object* event);
 
+  /*!
+   * Registers handler in the registry
+   *
+   * \param handler pointer of handler to add to registy
+   */
   void registerHandler(Handler* handler);
+
+  /*!
+   * Removes handler from registry
+   *
+   * \param handler pointer of handler to remove from registry 
+   */
   void unregisterHandler(Handler* handler);
 
 private:
