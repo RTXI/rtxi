@@ -22,9 +22,7 @@
 #include <sstream>
 #include <string>
 
-#include <compiler.h>
 #include <debug.h>
-#include <event.h>
 #include <io.h>
 
 Mutex IO::Block::mutex = Mutex(Mutex::RECURSIVE);
