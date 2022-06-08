@@ -23,6 +23,7 @@
 
 #include <list>
 #include <string>
+#include <array>
 #include <vector>
 
 //! Connection Oriented Classes
@@ -41,16 +42,11 @@ namespace IO
 /*!
  * Variable used to specify the type of a channel.
  */
-typedef unsigned long flags_t;
-
-/*!
- * Bitmask to represent an input type channel.
- */
-static const flags_t INPUT = 0x1;
-/*!
- * Bitmask to represent an output type channel.
- */
-static const flags_t OUTPUT = 0x2;
+enum flags_t: unsigned long
+{
+  INPUT = 0,
+  OUTPUT
+};
 
 /*!
  * Structure used to pass information to an IO::Block upon creation.
@@ -61,7 +57,7 @@ typedef struct
 {
   std::string name;
   std::string description;
-  flags_t flags;  // IO::INPUT or IO::OUTPUT
+  IO::flags_t flags;  // IO::INPUT or IO::OUTPUT
   size_t data_size;  // For those channels that accept arays of values
 } channel_t;
 
@@ -83,7 +79,7 @@ public:
    *
    * \sa IO::channel_t
    */
-  Block(std::string name, std::vector<channel_t> channels, size_t size);
+  Block(std::string name, std::vector<channel_t> channels);
   ~Block();
 
   /*!
@@ -91,7 +87,7 @@ public:
    *
    * \return Tbe name of the block.
    */
-  std::string getName(void) const
+  std::string getName() const
   {
     return name;
   };
@@ -107,37 +103,34 @@ public:
   /*!
    * Get the name of the specified channel.
    *
-   * \param type The channel's type.
    * \param index The channel's index.
    * \return The name of the channel.
    */
-  std::string getChannelName(flags_t type, size_t index) const;
+  std::string getChannelName(size_t index) const;
 
   /*!
    * Get the description of the specified channel.
    *
-   * \param type The channel's type.
    * \param index The channel's index.
    * \return The description of the channel.
    */
-  std::string getChannelDescription(flags_t type, size_t index) const;
+  std::string getChannelDescription(size_t index) const;
 
   /*!
    * Get the value of the specified channel.
    *
-   * \param type The channel's type.
    * \param index The channel's index.
    * \return The value of the channel.
    */
-  double getChannelValue(flags_t type, size_t index) const;
+  std::vector<double> getChannelValue(size_t index) const;
 
   /*!
    * Get the value of the specified input channel.
    *
    * \param index The input channel's index.
-   * \return The value of the specified input channel.
    */
-  double input(size_t index) const;
+  void writeinput(size_t index, const std::vector<double>& data);
+  const std::vector<double>& readinput(size_t index);
 
   /*!
    * Get the value of the specified output channel.
@@ -147,19 +140,8 @@ public:
    *
    * \sa IO::Block::output()
    */
-  double output(size_t index) const;
-
-protected:
-  /*!
-   * Get a reference to the value of the specified output channel.
-   *   This method can be used to set the value of specified output.
-   *
-   * \param index The output channel's index.
-   * \return A reference to the value of the specified output channel.
-   *
-   * \sa IO::Block::output()
-   */
-  double& output(size_t index);
+  const std::vector<double>& readoutput(size_t index);
+  void writeoutput(size_t index, const std::vector<double>& data);
 
 private:
   struct port_t
@@ -168,7 +150,7 @@ private:
     std::vector<double> values;
   };
   std::string name;
-  std::vector<struct port_t> ports;
+  std::array<std::vector<port_t>, 2> ports;
 };  // class Block
 
 /*!
@@ -267,6 +249,7 @@ public:
 private:
 
   std::list<Block*> blockList;
+  std::list<
 };  // class Connector
 
 }  // namespace IO
