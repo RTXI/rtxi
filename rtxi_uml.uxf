@@ -1,4 +1,4 @@
-<diagram program="umletino" version="14.4.0-SNAPSHOT"><zoom_level>10</zoom_level><element><id>UMLClass</id><coordinates><x>80</x><y>320</y><w>310</w><h>190</h></coordinates><panel_attributes>&lt;&lt;Event::Handler&gt;&gt;
+<diagram program="umletino" version="14.4.0-SNAPSHOT"><zoom_level>10</zoom_level><help_text>Space for diagram notes</help_text><element><id>UMLClass</id><coordinates><x>80</x><y>320</y><w>310</w><h>190</h></coordinates><panel_attributes>&lt;&lt;Event::Handler&gt;&gt;
 RT::System
 --
 -id: Long
@@ -12,18 +12,19 @@ Responsibilities
 -- run critical functions
 -- perform data changes for 
    io blocks, parameters, etc
-bg=blue</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>430</x><y>320</y><w>210</w><h>190</h></coordinates><panel_attributes>/RT::OS::Fifo/
+bg=blue</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>420</x><y>320</y><w>210</w><h>190</h></coordinates><panel_attributes>&lt;&lt;interface&gt;&gt;
+/RT::OS::Fifo/
 --
-/+read()/
-/+write()/
-/+readRT()/
-/+readRT()/
-/+getCapacity()/
+/+read(buffer: void*, size: size_t)/: ssize_t
+/+write(buffer: void*, size: size_t)/: ssize_t
+/+readRT(buffer: void*, size: size_t)/: ssize_t
+/+readRT(buffer: void*, size: size_t)/: ssize_t
+/+getCapacity()/: size_t
 --
 Responsibilities
 -- Transfer data between 
     realtime and non-realtime threads
-</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>740</x><y>320</y><w>290</w><h>230</h></coordinates><panel_attributes>Event::Manager
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>720</x><y>300</y><w>290</w><h>230</h></coordinates><panel_attributes>Event::Manager
 --
 -handlerList: Event::Handler* [0..*]
 -rthandlerList: Event::Handler* [0..*]
@@ -37,4 +38,14 @@ Responsibilities
 --
 Responsibilities
 -- Forward events from publisher to observers
-bg=green</panel_attributes><additional_attributes></additional_attributes></element></diagram>
+bg=green</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>480</x><y>30</y><w>210</w><h>190</h></coordinates><panel_attributes>IO::Block
+--
+-id: Long
+_-ClassAttribute: Long_
+--
+#Operation(i: int): int
+/+AbstractOperation()/
+--
+Responsibilities
+-- Resp1
+</panel_attributes><additional_attributes></additional_attributes></element></diagram>
