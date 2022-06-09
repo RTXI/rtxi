@@ -106,7 +106,7 @@ public:
    * \param index The channel's index.
    * \return The name of the channel.
    */
-  std::string getChannelName(size_t index) const;
+  std::string getChannelName(IO::flags_t type, size_t index) const;
 
   /*!
    * Get the description of the specified channel.
@@ -114,7 +114,7 @@ public:
    * \param index The channel's index.
    * \return The description of the channel.
    */
-  std::string getChannelDescription(size_t index) const;
+  std::string getChannelDescription(IO::flags_t type, size_t index) const;
 
   /*!
    * Get the value of the specified channel.
@@ -122,7 +122,7 @@ public:
    * \param index The channel's index.
    * \return The value of the channel.
    */
-  std::vector<double> getChannelValue(size_t index) const;
+  std::vector<double> getChannelValue(IO::flags_t type, size_t index) const;
 
   /*!
    * Get the value of the specified input channel.
@@ -247,9 +247,11 @@ public:
   void removeBlock(Block*);
 
 private:
-
-  std::list<Block*> blockList;
-  std::list<
+  struct connection{
+    IO::Block* src;
+    std::list<IO::Block*> destList;
+  };
+  std::list<connection*> connectionList;
 };  // class Connector
 
 }  // namespace IO

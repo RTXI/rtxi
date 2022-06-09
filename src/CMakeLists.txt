@@ -26,7 +26,9 @@ endif()
 add_library(rtxi_lib OBJECT
     "debug.hpp" "debug.cpp"
     "event.hpp" "event.cpp"
+    "io.hpp" "io.cpp"
 )
+
 target_link_libraries(rtxi_lib PUBLIC 
     Threads::Threads
     fmt::fmt

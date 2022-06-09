@@ -82,119 +82,8 @@ const std::vector<double>& IO::Block::readoutput(size_t index)
   return this->ports[IO::OUTPUT][index].values;
 }
 
-// void IO::Block::connect(IO::Block* src,
-//                         size_t src_num,
-//                         IO::Block* dest,
-//                         size_t dest_num)
-// {
-//   Mutex::Locker lock(&mutex);
-
-//   if (!src) {
-//     ERROR_MSG("Block::connect : invalid source\n");
-//     return;
-//   }
-//   if (src_num >= src->outputs.size()) {
-//     ERROR_MSG("Block::connect : invalid source channel\n");
-//     return;
-//   }
-
-//   if (!dest) {
-//     ERROR_MSG("Block::connect : invalid destination\n");
-//     return;
-//   }
-//   if (dest_num >= dest->inputs.size()) {
-//     ERROR_MSG("Block::connect : invalid destination channel\n");
-//     return;
-//   }
-
-//   // Check if the connection exists
-//   for (std::list<struct link_t>::const_iterator i =
-//            src->outputs[src_num].links.begin();
-//        i != src->outputs[src_num].links.end();
-//        ++i)
-//     if (i->block == dest && i->channel == dest_num) {
-//       ERROR_MSG("Block::connect : connection exists\n");
-//       return;
-//     }
-
-//   struct link_t link;
-
-//   // Make the forward connection (src => dest)
-//   link.block = dest;
-//   link.channel = dest_num;
-//   src->outputs[src_num].links.push_back(link);
-
-//   // Make the backward connection (src <= dest)
-//   link.block = src;
-//   link.channel = src_num;
-//   dest->inputs[dest_num].links.push_back(link);
-
-//   Event::Object event(Event::IO_LINK_INSERT_EVENT);
-//   event.setParam("src", src);
-//   event.setParam("src_num", &src_num);
-//   event.setParam("dest", dest);
-//   event.setParam("dest_num", &dest_num);
-//   Event::Manager::getInstance()->postEvent(&event);
-// }
-
-// void IO::Block::disconnect(IO::Block* src,
-//                            size_t src_num,
-//                            IO::Block* dest,
-//                            size_t dest_num)
-// {
-//   Mutex::Locker lock(&mutex);
-
-//   if (!src) {
-//     ERROR_MSG("Block::disconnect : invalid source\n");
-//     return;
-//   }
-//   if (src_num >= src->outputs.size()) {
-//     ERROR_MSG("Block::disconnect : invalid source channel\n");
-//     return;
-//   }
-
-//   if (!dest) {
-//     ERROR_MSG("Block::disconnect : invalid destination\n");
-//     return;
-//   }
-//   if (dest_num >= dest->inputs.size()) {
-//     ERROR_MSG("Block::disconnect : invalid destination channel\n");
-//     return;
-//   }
-
-//   Event::Object event(Event::IO_LINK_REMOVE_EVENT);
-//   event.setParam("src", src);
-//   event.setParam("src_num", &src_num);
-//   event.setParam("dest", dest);
-//   event.setParam("dest_num", &dest_num);
-//   Event::Manager::getInstance()->postEvent(&event);
-
-//   // Remove the forward connection (src => dest)
-// start_forward_remove:
-//   for (std::list<struct link_t>::iterator i =
-//            src->outputs[src_num].links.begin();
-//        i != src->outputs[src_num].links.end();
-//        ++i)
-//     if (i->block == dest && i->channel == dest_num) {
-//       src->outputs[src_num].links.erase(i);
-//       goto start_forward_remove;
-//     }
-
-//   // Remove the backward connection (src <= dest)
-// start_backward_remove:
-//   for (std::list<struct link_t>::iterator i =
-//            dest->inputs[dest_num].links.begin();
-//        i != dest->inputs[dest_num].links.end();
-//        ++i)
-//     if (i->block == src && i->channel == src_num) {
-//       dest->inputs[dest_num].links.erase(i);
-//       goto start_backward_remove;
-//     }
-// }
-
 void IO::Connector::foreachBlock(void (*callback)(Block*, void*), void* param)
 {
-  Mutex::Locker lock(&mutex);
   for (std::list<Block*>::iterator i = blockList.begin(); i != blockList.end();
        ++i)
     callback(*i, param);
@@ -203,7 +92,6 @@ void IO::Connector::foreachBlock(void (*callback)(Block*, void*), void* param)
 void IO::Connector::foreachConnection(
     void (*callback)(Block*, size_t, Block*, size_t, void*), void* param)
 {
-  Mutex::Locker lock(&mutex);
 
   for (std::list<Block*>::iterator i = blockList.begin(),
                                    iend = blockList.end();
