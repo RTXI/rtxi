@@ -23,6 +23,7 @@
 
 #include "fifo.hpp"
 #include "rtos.hpp"
+#include "io.hpp"
 
 //! Realtime Oriented Classes
 /*!
@@ -89,12 +90,6 @@ public:
    *
    * \sa RT::System
    */
-
-  /**********************************************************
-   * execute must not be pure virtual because it can be     *
-   *   called during construction and destruction.          *
-   **********************************************************/
-
   virtual void execute(void) {};
 
   inline bool getActive(void) const
@@ -103,6 +98,12 @@ public:
   };
   void setActive(bool);
 
+  void input(const std::vector<double>& data);
+  const std::vector<double>& output();
+
+protected:
+  std::unique_ptr<IO::Block> dataBlock;
+  
 private:
   bool active;
 
