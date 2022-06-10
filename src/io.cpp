@@ -82,48 +82,27 @@ const std::vector<double>& IO::Block::readoutput(size_t index)
   return this->ports[IO::OUTPUT][index].values;
 }
 
-void IO::Connector::foreachBlock(void (*callback)(Block*, void*), void* param)
-{
-  for (std::list<Block*>::iterator i = blockList.begin(); i != blockList.end();
-       ++i)
-    callback(*i, param);
-}
-
-void IO::Connector::foreachConnection(
-    void (*callback)(Block*, size_t, Block*, size_t, void*), void* param)
-{
-
-  for (std::list<Block*>::iterator i = blockList.begin(),
-                                   iend = blockList.end();
-       i != iend;
-       ++i)
-    for (size_t j = 0, jend = (*i)->outputs.size(); j < jend; ++j)
-      for (std::list<Block::link_t>::iterator
-               k = (*i)->outputs[j].links.begin(),
-               kend = (*i)->outputs[j].links.end();
-           k != kend;
-           ++k)
-        callback(*i, j, k->block, k->channel, param);
-}
-
 void IO::Connector::connect(IO::Block* src,
                             size_t out,
                             IO::Block* dest,
                             size_t in)
 {
-  Mutex::Locker lock(&mutex);
+  auto compare_con = [&](connection_t* con)
+  {
+    return con->src == src && con->src_port == out && con->dest == dest
+        && con->dest_port == in;
+  };
 
-  if (!src) {
-    ERROR_MSG("IO::Connector::connect : invalid output block\n");
-    return;
+  auto loc = std::find_if(
+      this->connections.begin(), this->connections.end(), compare_con);
+  if (loc == this->connections.end()) {
+    connection_t con = {};
+    con.src = src;
+    con.src_port = out;
+    con.dest = dest;
+    con.dest_port = in;
+    this->connections.push_back(con);
   }
-
-  if (!dest) {
-    ERROR_MSG("IO::Connector::connect : invalid input block\n");
-    return;
-  }
-
-  IO::Block::connect(src, out, dest, in);
 }
 
 void IO::Connector::disconnect(IO::Block* src,
@@ -131,51 +110,33 @@ void IO::Connector::disconnect(IO::Block* src,
                                IO::Block* dest,
                                size_t in)
 {
-  Mutex::Locker lock(&mutex);
+  auto compare_con = [&](connection_t* con)
+  {
+    return con->src == src && con->src_port == out && con->dest == dest
+        && con->dest_port == in;
+  };
 
-  if (!src) {
-    ERROR_MSG("IO::Connector::disconnect : invalid output block\n");
-    return;
+  auto loc = std::find_if(
+      this->connections.begin(), this->connections.end(), compare_con);
+  if (loc != this->connections.end()) {
+    this->connections.erase(loc);
   }
-
-  if (!dest) {
-    ERROR_MSG("IO::Connector::disconnect : invalid input block\n");
-    return;
-  }
-
-  IO::Block::disconnect(src, out, dest, in);
 }
 
 bool IO::Connector::connected(IO::Block* src,
-                              size_t src_num,
+                              size_t out,
                               IO::Block* dest,
-                              size_t dest_num)
+                              size_t in)
 {
-  if (!src) {
-    ERROR_MSG("Block::connected : invalid source\n");
-    return false;
-  }
-  if (src_num >= src->outputs.size()) {
-    ERROR_MSG("Block::connected : invalid source channel\n");
-    return false;
-  }
-
-  if (!dest) {
-    ERROR_MSG("Block::connected : invalid destination\n");
-    return false;
-  }
-  if (dest_num >= dest->inputs.size()) {
-    ERROR_MSG("Block::connected : invalid destination channel\n");
-    return false;
-  }
-
-  for (std::list<IO::Block::link_t>::iterator i =
-           src->outputs[src_num].links.begin();
-       i != src->outputs[src_num].links.end();
-       ++i)
-    if (i->block == dest && i->channel == dest_num)
-      return true;
-
+  auto compare_con = [&](connection_t* con)
+  {
+    return con->src == src && con->src_port == out && con->dest == dest
+        && con->dest_port == in;
+  };
+  auto loc = std::find_if(
+      this->connections.begin(), this->connections.end(), compare_con);
+  if (loc != this->connections.end())
+    return true;
   return false;
 }
 
@@ -226,18 +187,13 @@ void IO::Connector::insertBlock(IO::Block* block)
     return;
   }
 
-  Mutex::Locker lock(&mutex);
-
-  if (std::find(blockList.begin(), blockList.end(), block) != blockList.end()) {
-    ERROR_MSG("IO::Connector::insertBlock : block already present\n");
+  if (std::find(this->registry.begin(), this->registry.end(), block)
+      != this->registry.end())
+  {
     return;
   }
 
-  Event::Object event(Event::IO_BLOCK_INSERT_EVENT);
-  event.setParam("block", block);
-  Event::Manager::getInstance()->postEvent(&event);
-
-  blockList.push_back(block);
+  registry.push_back(block);
 }
 
 void IO::Connector::removeBlock(IO::Block* block)
@@ -246,34 +202,7 @@ void IO::Connector::removeBlock(IO::Block* block)
     ERROR_MSG("IO::Connector::insertBlock : invalid block\n");
     return;
   }
-
-  Mutex::Locker lock(&mutex);
-
-  Event::Object event(Event::IO_BLOCK_REMOVE_EVENT);
-  event.setParam("block", block);
-  Event::Manager::getInstance()->postEvent(&event);
-
-  blockList.remove(block);
-}
-
-static Mutex mutex;
-IO::Connector* IO::Connector::instance = 0;
-
-IO::Connector* IO::Connector::getInstance(void)
-{
-  if (instance)
-    return instance;
-
-  /*************************************************************************
-   * Seems like alot of hoops to jump through, but static allocation isn't *
-   *   thread-safe. So effort must be taken to ensure mutual exclusion.    *
-   *************************************************************************/
-
-  Mutex::Locker lock(&::mutex);
-  if (!instance) {
-    static Connector connector;
-    instance = &connector;
-  }
-
-  return instance;
+  auto position =
+      std::find(this->registry.begin(), this->registry.end(), block);
+  this->registry.erase(position);
 }

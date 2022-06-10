@@ -50,7 +50,13 @@ enum flags_t: unsigned long
 
 /*!
  * Structure used to pass information to an IO::Block upon creation.
+ * It is a structure critical for describing the block's ports.
  *
+ * \param name The name of the channel
+ * \param description short description of the channel
+ * \param flags whether the channel is IO::INPUT or IO::OUTPUT type
+ * \param data_size accepted data length of the input/output
+ * 
  * \sa IO::Block::Block()
  */
 typedef struct
@@ -60,6 +66,34 @@ typedef struct
   IO::flags_t flags;  // IO::INPUT or IO::OUTPUT
   size_t data_size;  // For those channels that accept arays of values
 } channel_t;
+
+/*!
+ * structure representing a blocks IO ports for communication.
+ *
+ * \param channel_info a channel_t structure holding port metadata
+ * \param values a vector holding the data to be exchanged
+ */
+typedef struct
+{
+  IO::channel_t channel_info;
+  std::vector<double> values;
+} port_t;
+
+/*!
+ * The structure representating the connection between two block devices
+ *
+ * \param src pointer to source block
+ * \param src_port port ID for source block
+ * \param dest pointer to destination block
+ * \param dest_port port ID for destination block
+ */
+typedef struct 
+{
+  IO::Block* src;
+  size_t src_port;
+  IO::Block* dest;
+  size_t dest_port;
+} connection_t;
 
 /*!
  * Interface for IO data between RTXI devices and plugins.
@@ -117,7 +151,7 @@ public:
   std::string getChannelDescription(IO::flags_t type, size_t index) const;
 
   /*!
-   * Get the value of the specified channel.
+   * Get a copy of the value in the specified channel.
    *
    * \param index The channel's index.
    * \return The value of the channel.
@@ -125,30 +159,29 @@ public:
   std::vector<double> getChannelValue(IO::flags_t type, size_t index) const;
 
   /*!
-   * Get the value of the specified input channel.
-   *
-   * \param index The input channel's index.
-   */
+    * write the values of the specified input channel.
+    *
+    * \param index The input channel's index.
+    * \param data the data to push into the block
+    * 
+    * \return The value of the specified input channel.
+    */
   void writeinput(size_t index, const std::vector<double>& data);
-  const std::vector<double>& readinput(size_t index);
 
   /*!
-   * Get the value of the specified output channel.
-   *
-   * \param index The output channel's index.
-   * \return The value of the specified output channel.
-   *
-   * \sa IO::Block::output()
-   */
+    * Get the values of the specified output channel.
+    *
+    * \param index The output channel's index.
+    * \return The value of the specified output channel.
+    */
   const std::vector<double>& readoutput(size_t index);
+
+protected:
+  // These functions are meant to be used by RT::Thread classes
+  const std::vector<double>& readinput(size_t index);
   void writeoutput(size_t index, const std::vector<double>& data);
 
 private:
-  struct port_t
-  {
-    IO::channel_t channel_info;
-    std::vector<double> values;
-  };
   std::string name;
   std::array<std::vector<port_t>, 2> ports;
 };  // class Block
@@ -164,35 +197,6 @@ class Connector
 public:
   Connector();
   ~Connector();
-
-  /*!
-   * Loop through each Block and execute a callback.
-   * The callback takes two parameters, a Block pointer and param,
-   *   the second parameter to foreachBlock.
-   *
-   * \param callback The callback function.
-   * \param param A parameter to the callback function.
-   *
-   * \sa IO::Block
-   */
-  void foreachBlock(void (*callback)(Block*, void*), void* param);
-
-  /*!
-   * Loop through each Connection and execute callback.
-   * The callback takes 5 parameters:
-   *   The source block
-   *   The source output.
-   *   The destination block.
-   *   The destination input.
-   *   The last parameter to foreachConnection.
-   *
-   * \param callback The callback function.
-   * \param param A parameter to the callback function.
-   *
-   * \sa IO::Block
-   */
-  void foreachConnection(
-      void (*callback)(Block*, size_t, Block*, size_t, void*), void* param);
 
   /*!
    * Create a connection between the two specified Blocks.
@@ -231,7 +235,7 @@ public:
    * Determine whether two channels are connected or not.
    *
    * \param outputBlock The source of the data.
-   * \param outputChannel THe source channel of the data.
+   * \param outputChannel The source channel of the data.
    * \param inputBlock The destination of the data.
    * \param inputChannel The destination channel of the data.
    *
@@ -247,11 +251,9 @@ public:
   void removeBlock(Block*);
 
 private:
-  struct connection{
-    IO::Block* src;
-    std::list<IO::Block*> destList;
-  };
-  std::list<connection*> connectionList;
+
+  std::vector<connection_t> connections;
+  std::vector<IO::Block*> registry;
 };  // class Connector
 
 }  // namespace IO

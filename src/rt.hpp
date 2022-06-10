@@ -69,6 +69,9 @@ public:
   };
   void setActive(bool);
 
+protected:
+  std::unique_ptr<IO::Block> dataBlock;
+
 private:
   bool active;
 
@@ -103,7 +106,7 @@ public:
 
 protected:
   std::unique_ptr<IO::Block> dataBlock;
-  
+
 private:
   bool active;
 
