@@ -250,8 +250,10 @@ public:
   void insertBlock(Block*);
   void removeBlock(Block*);
 
-private:
+  std::vector<connection_t> topological_sort();
 
+private:
+  bool acyclical();
   std::vector<connection_t> connections;
   std::vector<IO::Block*> registry;
 };  // class Connector
