@@ -54,7 +54,7 @@ ssize_t RT::OS::evlFifo::read(void* buf, size_t buf_size)
   return ::read(this->xbuf_fd, buf, buf_size);
 }
 
-ssize_t RT::OS::evlFifo::write(const void* buf, size_t buf_size)
+ssize_t RT::OS::evlFifo::write(void* buf, size_t buf_size)
 {
   // we need to specify to compiler that we are using write from c lib
   return ::write(this->xbuf_fd, buf, buf_size);

@@ -24,7 +24,7 @@ bg=blue</panel_attributes><additional_attributes></additional_attributes></eleme
 Responsibilities
 -- Transfer data between 
     realtime and non-realtime threads
-</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>720</x><y>300</y><w>290</w><h>230</h></coordinates><panel_attributes>Event::Manager
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>660</x><y>300</y><w>290</w><h>230</h></coordinates><panel_attributes>Event::Manager
 --
 -handlerList: Event::Handler* [0..*]
 -rthandlerList: Event::Handler* [0..*]

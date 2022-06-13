@@ -21,12 +21,13 @@
 #include <algorithm>
 #include <sstream>
 #include <string>
+#include <queue>
 
 #include "io.hpp"
 
 #include "debug.hpp"
 
-IO::Block::Block(std::string n, std::vector<IO::channel_t> channels)
+IO::Block::Block(const std::string& n, const std::vector<IO::channel_t>& channels)
     : name(n)
 {
   port_t port = {};
@@ -87,22 +88,14 @@ void IO::Connector::connect(IO::Block* src,
                             IO::Block* dest,
                             size_t in)
 {
-  auto compare_con = [&](connection_t* con)
-  {
-    return con->src == src && con->src_port == out && con->dest == dest
-        && con->dest_port == in;
-  };
-
-  auto loc = std::find_if(
-      this->connections.begin(), this->connections.end(), compare_con);
-  if (loc == this->connections.end()) {
-    connection_t con = {};
-    con.src = src;
-    con.src_port = out;
-    con.dest = dest;
-    con.dest_port = in;
-    this->connections.push_back(con);
+  outputs_con out_con = {};
+  out_con.destblock = dest;
+  out_con.srcport = out;
+  out_con.destport = in;
+  if (!(this->registry.contains(src))) {
+    this->registry[src] = std::vector<outputs_con>();
   }
+  this->registry[src].push_back(out_con);
 }
 
 void IO::Connector::disconnect(IO::Block* src,
@@ -110,17 +103,13 @@ void IO::Connector::disconnect(IO::Block* src,
                                IO::Block* dest,
                                size_t in)
 {
-  auto compare_con = [&](connection_t* con)
-  {
-    return con->src == src && con->src_port == out && con->dest == dest
-        && con->dest_port == in;
-  };
-
+  if(!(this->registry.contains(src))){ return; }
   auto loc = std::find_if(
-      this->connections.begin(), this->connections.end(), compare_con);
-  if (loc != this->connections.end()) {
-    this->connections.erase(loc);
-  }
+    this->registry[src].begin(),
+    this->registry[src].end(),
+    [&](outputs_con out_con){ return out_con.destblock == dest;}
+  );
+  this->registry[src].erase(loc);
 }
 
 bool IO::Connector::connected(IO::Block* src,
@@ -128,15 +117,16 @@ bool IO::Connector::connected(IO::Block* src,
                               IO::Block* dest,
                               size_t in)
 {
-  auto compare_con = [&](connection_t* con)
-  {
-    return con->src == src && con->src_port == out && con->dest == dest
-        && con->dest_port == in;
-  };
+  if(!(registry.contains(src))){ return false;}
   auto loc = std::find_if(
-      this->connections.begin(), this->connections.end(), compare_con);
-  if (loc != this->connections.end())
+    this->registry[src].begin(),
+    this->registry[src].end(),
+    [&](outputs_con out_con){ return out_con.destblock == dest;}
+  );
+  if(loc == this->registry[src].end()) { return false; }
+  if(loc->srcport == out && loc->destport == in){
     return true;
+  } 
   return false;
 }
 
@@ -146,14 +136,7 @@ void IO::Connector::insertBlock(IO::Block* block)
     ERROR_MSG("IO::Connector::insertBlock : invalid block\n");
     return;
   }
-
-  if (std::find(this->registry.begin(), this->registry.end(), block)
-      != this->registry.end())
-  {
-    return;
-  }
-
-  registry.push_back(block);
+  this->registry[block] = std::vector<outputs_con>();
 }
 
 void IO::Connector::removeBlock(IO::Block* block)
@@ -162,17 +145,47 @@ void IO::Connector::removeBlock(IO::Block* block)
     ERROR_MSG("IO::Connector::insertBlock : invalid block\n");
     return;
   }
-  auto position =
-      std::find(this->registry.begin(), this->registry.end(), block);
-  this->registry.erase(position);
+  this->registry.erase(block);
 }
 
 bool IO::Connector::acyclical()
 {
-
+  return true;
 }
 
-std::vector<IO::connection_t> IO::Connector::topological_sort()
+std::vector<IO::Block*> IO::Connector::topological_sort()
 {
+  std::queue<IO::Block*> processing_q;
+  std::vector<IO::Block*> sorted_blocks;
+  std::unordered_map<IO::Block*, int> sources_per_block;
 
+  // Calculate number of sources per block
+  for(auto outputs : registry){
+    for(auto destination_con : outputs.second){
+      if(sources_per_block.contains(destination_con.destblock)) {
+        sources_per_block[destination_con.destblock] += 1;
+      } else {
+        sources_per_block[destination_con.destblock] = 1;
+      }
+    }
+  }
+
+  // Initialize queue for processing nodes in graph
+  for(auto block_count : sources_per_block){
+    if(block_count.second == 0){ processing_q.push(block_count.first); }
+  }
+
+  // Process the graph nodes
+  while(processing_q.size() > 0){
+    sorted_blocks.push_back(processing_q.front());
+    processing_q.pop();
+    for(auto connection_info : registry[sorted_blocks.back()]){
+      sources_per_block[connection_info.destblock] -= 1;
+      if(sources_per_block[connection_info.destblock] == 0){
+        processing_q.push(connection_info.destblock);
+      }
+    }
+  }
+  
+  return sorted_blocks;
 }

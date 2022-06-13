@@ -25,6 +25,7 @@
 #include <string>
 #include <array>
 #include <vector>
+#include <map>
 
 //! Connection Oriented Classes
 /*!
@@ -79,21 +80,6 @@ typedef struct
   std::vector<double> values;
 } port_t;
 
-/*!
- * The structure representating the connection between two block devices
- *
- * \param src pointer to source block
- * \param src_port port ID for source block
- * \param dest pointer to destination block
- * \param dest_port port ID for destination block
- */
-typedef struct 
-{
-  IO::Block* src;
-  size_t src_port;
-  IO::Block* dest;
-  size_t dest_port;
-} connection_t;
 
 /*!
  * Interface for IO data between RTXI devices and plugins.
@@ -113,7 +99,7 @@ public:
    *
    * \sa IO::channel_t
    */
-  Block(std::string name, std::vector<channel_t> channels);
+  Block(const std::string& name, const std::vector<channel_t>& channels);
   ~Block();
 
   /*!
@@ -187,6 +173,22 @@ private:
 };  // class Block
 
 /*!
+ * The structure representating the connection between two block devices
+ *
+ * \param src pointer to source block
+ * \param src_port port ID for source block
+ * \param dest pointer to destination block
+ * \param dest_port port ID for destination block
+ */
+typedef struct 
+{
+  IO::Block* src;
+  size_t src_port;
+  IO::Block* dest;
+  size_t dest_port;
+} connection_t;
+
+/*!
  * Acts as a central meeting point between Blocks. Provides
  *   interfaces for finding and connecting blocks.
  *
@@ -247,15 +249,19 @@ public:
                  IO::Block* inputBlock,
                  size_t inputChannel);
 
-  void insertBlock(Block*);
-  void removeBlock(Block*);
-
-  std::vector<connection_t> topological_sort();
+  void insertBlock(IO::Block* block);
+  void removeBlock(IO::Block* block);
+  void propagateData(IO::Block* block);
 
 private:
+  struct outputs_con{
+    IO::Block* destblock;
+    size_t srcport; // This port is always from the source stored in the map
+    size_t destport;
+  };
   bool acyclical();
-  std::vector<connection_t> connections;
-  std::vector<IO::Block*> registry;
+  std::vector<IO::Block*> topological_sort();
+  std::unordered_map<IO::Block*, std::vector<outputs_con>> registry;
 };  // class Connector
 
 }  // namespace IO
