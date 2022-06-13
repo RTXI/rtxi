@@ -69,19 +69,6 @@ typedef struct
 } channel_t;
 
 /*!
- * structure representing a blocks IO ports for communication.
- *
- * \param channel_info a channel_t structure holding port metadata
- * \param values a vector holding the data to be exchanged
- */
-typedef struct
-{
-  IO::channel_t channel_info;
-  std::vector<double> values;
-} port_t;
-
-
-/*!
  * Interface for IO data between RTXI devices and plugins.
  */
 class Block
@@ -99,8 +86,12 @@ public:
    *
    * \sa IO::channel_t
    */
-  Block(const std::string& name, const std::vector<channel_t>& channels);
-  ~Block();
+  Block(std::string name, const std::vector<channel_t>& channels); // default constructor
+  Block(const Block& block) = default; // copy constructor
+  Block& operator=(const Block& block) = default; // copy assignment operator
+  Block(Block &&) = delete; // move constructor
+  Block& operator=(Block &&) = delete; // move assignment operator
+  ~Block() = default;
 
   /*!
    * Get the name of the block.
@@ -123,6 +114,7 @@ public:
   /*!
    * Get the name of the specified channel.
    *
+   * \param type Port type. Either ::IO::INPUT or ::IO::OUTPUT
    * \param index The channel's index.
    * \return The name of the channel.
    */
@@ -168,8 +160,13 @@ protected:
   void writeoutput(size_t index, const std::vector<double>& data);
 
 private:
+  using port_t = struct
+  {
+    IO::channel_t channel_info;
+    std::vector<double> values;
+  };
   std::string name;
-  std::array<std::vector<port_t>, 2> ports;
+  std::array<std::vector<port_t>, IO::OUTPUT+1> ports;
 };  // class Block
 
 /*!
@@ -180,13 +177,13 @@ private:
  * \param dest pointer to destination block
  * \param dest_port port ID for destination block
  */
-typedef struct 
+using connection_t =  struct 
 {
   IO::Block* src;
   size_t src_port;
   IO::Block* dest;
   size_t dest_port;
-} connection_t;
+};
 
 /*!
  * Acts as a central meeting point between Blocks. Provides
@@ -197,57 +194,61 @@ typedef struct
 class Connector
 {
 public:
-  Connector();
+  Connector(); // default constructor
+  Connector(const Connector& connector) = delete; // copy constructor
+  Connector& operator=(const Connector& connector) = delete; // copy assignment operator
+  Connector(Connector &&) = delete; // move constructor
+  Connector& operator=(Connector &&) = delete; // move assignment operator
   ~Connector();
 
   /*!
    * Create a connection between the two specified Blocks.
    *
-   * \param outputBlock The source of the data.
-   * \param outputChannel The source channel of the data.
-   * \param inputBlock The destination of the data.
-   * \param inputChannel The destination channel of the data.
+   * \param src The source of the data.
+   * \param out The source channel of the data.
+   * \param dest The destination of the data.
+   * \param in The destination channel of the data.
    *
    * \sa IO::Block
    * \sa IO::Block::input()
    * \sa IO::Block::output()
    */
-  void connect(IO::Block* outputBlock,
-               size_t outputChannel,
-               IO::Block* inputBlock,
-               size_t inputChannel);
+  void connect(IO::Block* src,
+               size_t out,
+               IO::Block* dest,
+               size_t in);
   /*!
    * Break a connection between the two specified Blocks.
    *
-   * \param outputBlock The source of the data.
-   * \param outputChannel The source channel of the data.
-   * \param inputBlock The destination of the data.
-   * \param inputChannel The destination channel of the data.
+   * \param src The source of the data.
+   * \param out The source channel of the data.
+   * \param dest The destination of the data.
+   * \param in The destination channel of the data.
    *
    * \sa IO::Block
    * \sa IO::Block::input()
    * \sa IO::Block::output()
    */
-  void disconnect(IO::Block* outputBlock,
-                  size_t outputChannel,
-                  IO::Block* inputBlock,
-                  size_t inputChannel);
+  void disconnect(IO::Block* src,
+                  size_t out,
+                  IO::Block* dest,
+                  size_t in);
 
   /*!
    * Determine whether two channels are connected or not.
    *
-   * \param outputBlock The source of the data.
-   * \param outputChannel The source channel of the data.
-   * \param inputBlock The destination of the data.
-   * \param inputChannel The destination channel of the data.
+   * \param src The source of the data.
+   * \param out The source channel of the data.
+   * \param dest The destination of the data.
+   * \param in The destination channel of the data.
    *
    * \sa IO::Block::connect()
    * \sa IO::Block::disconnect()
    */
-  bool connected(IO::Block* outputBlock,
-                 size_t outputChannel,
-                 IO::Block* inputBlock,
-                 size_t inputChannel);
+  bool connected(IO::Block* src,
+                 size_t out,
+                 IO::Block* dest,
+                 size_t in);
 
   void insertBlock(IO::Block* block);
   void removeBlock(IO::Block* block);

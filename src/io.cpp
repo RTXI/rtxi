@@ -27,11 +27,11 @@
 
 #include "debug.hpp"
 
-IO::Block::Block(const std::string& n, const std::vector<IO::channel_t>& channels)
-    : name(n)
+IO::Block::Block(std::string n, const std::vector<IO::channel_t>& channels)
+    : name(std::move(n))
 {
   port_t port = {};
-  for (auto channel : channels) {
+  for (const auto& channel : channels) {
     port.channel_info = channel;
     port.values = std::vector<double>(channel.data_size, 0.0);
     ports[channel.flags].push_back(port);
@@ -39,26 +39,24 @@ IO::Block::Block(const std::string& n, const std::vector<IO::channel_t>& channel
   }
 }
 
-IO::Block::~Block() {}
-
 size_t IO::Block::getCount(IO::flags_t type) const
 {
   return this->ports[type].size();
 }
 
-std::string IO::Block::getChannelName(IO::flags_t type, size_t n) const
+std::string IO::Block::getChannelName(IO::flags_t type, size_t index) const
 {
-  return this->ports[type][n].channel_info.name;
+  return this->ports[type][index].channel_info.name;
 }
 
-std::string IO::Block::getChannelDescription(IO::flags_t type, size_t n) const
+std::string IO::Block::getChannelDescription(IO::flags_t type, size_t index) const
 {
-  return this->ports[type][n].channel_info.description;
+  return this->ports[type][index].channel_info.description;
 }
 
-std::vector<double> IO::Block::getChannelValue(IO::flags_t type, size_t n) const
+std::vector<double> IO::Block::getChannelValue(IO::flags_t type, size_t index) const
 {
-  return this->ports[type][n].values;
+  return this->ports[type][index].values;
 }
 
 void IO::Block::writeinput(size_t index, const std::vector<double>& data)
@@ -107,7 +105,11 @@ void IO::Connector::disconnect(IO::Block* src,
   auto loc = std::find_if(
     this->registry[src].begin(),
     this->registry[src].end(),
-    [&](outputs_con out_con){ return out_con.destblock == dest;}
+    [&](outputs_con out_con){ 
+      return out_con.destblock == dest 
+        && out_con.srcport == out 
+        && out_con.destport == in;
+      }
   );
   this->registry[src].erase(loc);
 }
@@ -124,15 +126,12 @@ bool IO::Connector::connected(IO::Block* src,
     [&](outputs_con out_con){ return out_con.destblock == dest;}
   );
   if(loc == this->registry[src].end()) { return false; }
-  if(loc->srcport == out && loc->destport == in){
-    return true;
-  } 
-  return false;
+  return loc->srcport == out && loc->destport == in;
 }
 
 void IO::Connector::insertBlock(IO::Block* block)
 {
-  if (!block) {
+  if (block == nullptr) {
     ERROR_MSG("IO::Connector::insertBlock : invalid block\n");
     return;
   }
@@ -141,7 +140,7 @@ void IO::Connector::insertBlock(IO::Block* block)
 
 void IO::Connector::removeBlock(IO::Block* block)
 {
-  if (!block) {
+  if (block == nullptr) {
     ERROR_MSG("IO::Connector::insertBlock : invalid block\n");
     return;
   }
@@ -160,7 +159,7 @@ std::vector<IO::Block*> IO::Connector::topological_sort()
   std::unordered_map<IO::Block*, int> sources_per_block;
 
   // Calculate number of sources per block
-  for(auto outputs : registry){
+  for(const auto& outputs : registry){
     for(auto destination_con : outputs.second){
       if(sources_per_block.contains(destination_con.destblock)) {
         sources_per_block[destination_con.destblock] += 1;
@@ -176,7 +175,7 @@ std::vector<IO::Block*> IO::Connector::topological_sort()
   }
 
   // Process the graph nodes
-  while(processing_q.size() > 0){
+  while(!processing_q.empty()){
     sorted_blocks.push_back(processing_q.front());
     processing_q.pop();
     for(auto connection_info : registry[sorted_blocks.back()]){
