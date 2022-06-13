@@ -43,10 +43,10 @@ namespace IO
 /*!
  * Variable used to specify the type of a channel.
  */
-enum flags_t: unsigned long
+enum flags_t: size_t
 {
   INPUT = 0,
-  OUTPUT
+  OUTPUT = 1
 };
 
 /*!
