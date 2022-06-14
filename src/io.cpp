@@ -76,11 +76,29 @@ const std::vector<double>& IO::Block::readoutput(size_t index)
   return this->ports[IO::OUTPUT][index].values;
 }
 
-void IO::Connector::connect(IO::Block* src,
+int IO::Connector::connect(IO::Block* src,
                             size_t out,
                             IO::Block* dest,
                             size_t in)
 {
+  // First we must make sure that we aren't going to create a cycle
+  std::vector<IO::Block*> connected_blocks;
+  std::queue<IO::Block*> processing;
+  processing.push(dest);
+  while(!processing.empty())
+  {
+    if(processing.front() == src){ return -1; }
+    auto loc = std::find(connected_blocks.begin(), connected_blocks.end(), processing.front());
+    if(loc == connected_blocks.end()) { 
+      connected_blocks.push_back(processing.front());
+      for(auto connections : this->registry[processing.front()]){
+        processing.push(connections.destblock);
+      }
+      processing.pop();
+    }
+  }
+
+  // now that we made sure not to create cycle, create connection object and save it
   outputs_con out_con = {};
   out_con.destblock = dest;
   out_con.srcport = out;
@@ -89,6 +107,7 @@ void IO::Connector::connect(IO::Block* src,
     this->registry[src] = std::vector<outputs_con>();
   }
   this->registry[src].push_back(out_con);
+  return 0;
 }
 
 void IO::Connector::disconnect(IO::Block* src,

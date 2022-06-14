@@ -20,135 +20,72 @@
 
 #include <iostream>
 
-#include <io.h>
-#include <io_tests.h>
+#include "io_tests.hpp"
 
 TEST_F(IOBlockTest, getName)
 {
-  // TODO: rename functions to differentiate between getting block name and
-  // channel name
-  ASSERT_EQ(block->getName(), defaultBlockName);
-  ASSERT_EQ(block->getName(IO::INPUT, (size_t)0), defaultInputChannelName);
-  ASSERT_EQ(block->getName(IO::OUTPUT, (size_t)0), defaultOutputChannelName);
+  IO::Block block (this->defaultBlockName, this->defaultChannelList);
+  ASSERT_EQ(block.getName(), defaultBlockName);
+  ASSERT_EQ(block.getChannelName(IO::INPUT, 0), defaultInputChannelName);
+  ASSERT_EQ(block.getChannelName(IO::OUTPUT, 0), defaultOutputChannelName);
 }
 
 TEST_F(IOBlockTest, getCount)
 {
-  ASSERT_EQ(block->getCount(IO::INPUT), (size_t)1);
-  ASSERT_EQ(block->getCount(IO::OUTPUT), (size_t)1);
+  IO::Block block (this->defaultBlockName, this->defaultChannelList);
+  ASSERT_EQ(block.getCount(IO::INPUT), 1);
+  ASSERT_EQ(block.getCount(IO::OUTPUT), 1);
 }
 
 TEST_F(IOBlockTest, getDescription)
 {
-  ASSERT_EQ(block->getDescription(IO::INPUT, (size_t)0),
+  IO::Block block (this->defaultBlockName, this->defaultChannelList);
+  ASSERT_EQ(block.getChannelDescription(IO::INPUT, 0),
             defaultInputChannelDescription);
-  ASSERT_EQ(block->getDescription(IO::OUTPUT, (size_t)0),
+  ASSERT_EQ(block.getChannelDescription(IO::OUTPUT, 0),
             defaultOutputChannelDescription);
 }
 
-TEST_F(IOBlockTest, getValue)
+TEST_F(IOBlockTest, readoutput)
 {
-  double defaultval = 0.0;
-  EXPECT_DOUBLE_EQ(defaultval, block->getValue(IO::INPUT, (size_t)1));
-  EXPECT_DOUBLE_EQ(defaultval, block->getValue(IO::OUTPUT, (size_t)1));
+  IO::Block block (this->defaultBlockName, this->defaultChannelList);
+  std::vector<double> defaultval = {0.0};
+  EXPECT_DOUBLE_EQ(defaultval[0], block.readoutput(0)[0]);
 }
 
-TEST_F(IOBlockTest, input)
+TEST_F(IOBlockTest, writeinput)
 {
-  double defaultval = 0.0;
-  for (size_t i = 0; i < 2; ++i) {
-    EXPECT_DOUBLE_EQ(defaultval, block->input(i));
-  }
-
-  // Have to build example blocks to test connector
-  IO::channel_t outputchannel = {
-      "OUTPUT CHANNEL", "OUTPUT CHANNEL DESCRIPTION", IO::OUTPUT};
-  IO::channel_t inputchannel = {
-      "INPUT CHANNEL", "INPUT CHANNEL DESCRIPTION", IO::INPUT};
-
-  IO::channel_t* block1channels = new IO::channel_t[2];
-  block1channels[0] = outputchannel;
-  block1channels[1] = inputchannel;
-  IO::channel_t* block2channels = new IO::channel_t[2];
-  block2channels[0] = outputchannel;
-  block2channels[1] = inputchannel;
-  MockIOBlock* block1 = new MockIOBlock("block1", block1channels, (size_t)2);
-  MockIOBlock* block2 = new MockIOBlock("block2", block2channels, (size_t)2);
-
-  // Now connect the test blocks to default block input channel
-  IO::Connector::getInstance()->connect(block1, (size_t)0, block, (size_t)0);
-  IO::Connector::getInstance()->connect(block2, (size_t)0, block, (size_t)0);
-  block1->changeOutput(1.0);
-  EXPECT_DOUBLE_EQ(1.0, block->input(0));
-  block2->changeOutput(1.0);
-  EXPECT_DOUBLE_EQ(2.0, block->input(0));
-
-  // please cleanup after yourself
-  delete block1;
-  delete block2;
+  std::vector<double> values = {1.0};
+  class testBlock : public IO::Block
+  {
+    public:
+    testBlock(std::string n, const std::vector<IO::channel_t>& c) : IO::Block(n, c){}
+    void echo(){ this->writeoutput(0, this->readinput(0)); }
+  };
+  testBlock tempblock("TEST:BLOCK:NAME", this->defaultChannelList);
+  tempblock.writeinput(0, values);
+  tempblock.echo();
+  EXPECT_DOUBLE_EQ(values[0], tempblock.readoutput(0)[0]);
 }
 
-TEST_F(IOBlockTest, output)
-{
-  double defaultval = 0.0;
-  // TODO: Maybe reduce output function to single definition instead of two
-  const IO::Block* const_block = block;
-  for (size_t i = 0; i < 2; ++i) {
-    EXPECT_DOUBLE_EQ(defaultval, const_block->output(i));
-  }
-}
-
-TEST_F(IOConnectorTest, getInstance)
-{
-  connector = IO::Connector::getInstance();
-  EXPECT_EQ(connector, IO::Connector::getInstance());
-  EXPECT_EQ(connector, connector->getInstance());
-}
-
-// checking connections is very involved so could not separate into
-// individual functin tests. Here we test connect, disconnect, and connected
 TEST_F(IOConnectorTest, connections)
 {
   // Have to build example blocks to test connector
-  IO::channel_t outputchannel = {
-      "OUTPUT CHANNEL", "OUTPUT CHANNEL DESCRIPTION", IO::OUTPUT};
-  IO::channel_t inputchannel = {
-      "INPUT CHANNEL", "INPUT CHANNEL DESCRIPTION", IO::INPUT};
-  IO::channel_t* block1channels = new IO::channel_t[2];
-  block1channels[0] = outputchannel;
-  block1channels[1] = inputchannel;
-  IO::channel_t* block2channels = new IO::channel_t[2];
-  block2channels[0] = outputchannel;
-  block2channels[1] = inputchannel;
-  MockIOBlock* block1 = new MockIOBlock("block1", block1channels, (size_t)2);
-  MockIOBlock* block2 = new MockIOBlock("block2", block2channels, (size_t)2);
-
-  // NOTE: It is not possible to mock static functions, therefore we must use
-  // other means to figure out whether two blocks are connected
+  IO::Block block1("BLOCK1", this->defaultChannelList);
+  IO::Block block2("BLOCK2", this->defaultChannelList);
 
   // connect and disconnect between two blocks
-  EXPECT_FALSE(connector->connected(block1, (size_t)0, block2, (size_t)0));
-  EXPECT_FALSE(connector->connected(block2, (size_t)0, block1, (size_t)0));
-  connector->connect(block1, (size_t)0, block2, (size_t)0);
-  connector->connect(block2, (size_t)0, block1, (size_t)0);
-  EXPECT_TRUE(connector->connected(block1, (size_t)0, block2, (size_t)0));
-  EXPECT_TRUE(connector->connected(block2, (size_t)0, block1, (size_t)0));
-  connector->disconnect(block1, (size_t)0, block2, (size_t)0);
-  connector->disconnect(block2, (size_t)0, block1, (size_t)0);
-  EXPECT_FALSE(connector->connected(block1, (size_t)0, block2, (size_t)0));
-  EXPECT_FALSE(connector->connected(block2, (size_t)0, block1, (size_t)0));
-  delete block1;
-  delete block2;
-  delete[] block1channels;
-  delete[] block2channels;
+  EXPECT_FALSE(connector.connected(&block1, 0, &block2, 0));
+  EXPECT_FALSE(connector.connected(&block2, 0, &block1, 0));
+  int result = 0;
+  result = connector.connect(&block1, 0, &block2, 0);
+  ASSERT_EQ(result, 0);
+  connector.connect(&block2, 0, &block1, 0);
+  ASSERT_EQ(result, -1);
+  EXPECT_TRUE(connector.connected(&block1, 0, &block2, 0));
+  EXPECT_FALSE(connector.connected(&block2, 0, &block1, 0));
+  connector.disconnect(&block1, 0, &block2, 0);
+  connector.disconnect(&block2, 0, &block1, 0);
+  EXPECT_FALSE(connector.connected(&block1, 0, &block2, 0));
+  EXPECT_FALSE(connector.connected(&block2, 0, &block1, 0));
 }
-
-// The cases where foreachBlock function is used are too unique (only used a
-// handful of times)
-// TODO: Create a test case for IO::Connector::foreachBlock
-TEST_F(IOConnectorTest, foreachBlock) {}
-
-// the cases where foreachConnection function is used are too unique (only used
-// a handful of times)
-// TODO: create a test case for IO::Connector::foreachConnection
-TEST_F(IOConnectorTest, foreachConnection) {}

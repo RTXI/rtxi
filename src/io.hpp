@@ -21,11 +21,11 @@
 #ifndef IO_H
 #define IO_H
 
-#include <list>
-#include <string>
 #include <array>
-#include <vector>
+#include <list>
 #include <map>
+#include <string>
+#include <vector>
 
 //! Connection Oriented Classes
 /*!
@@ -43,10 +43,11 @@ namespace IO
 /*!
  * Variable used to specify the type of a channel.
  */
-enum flags_t: size_t
+enum flags_t : size_t
 {
   INPUT = 0,
-  OUTPUT = 1
+  OUTPUT = 1,
+  UNKNOWN = 2
 };
 
 /*!
@@ -57,15 +58,15 @@ enum flags_t: size_t
  * \param description short description of the channel
  * \param flags whether the channel is IO::INPUT or IO::OUTPUT type
  * \param data_size accepted data length of the input/output
- * 
+ *
  * \sa IO::Block::Block()
  */
 typedef struct
 {
   std::string name;
   std::string description;
-  IO::flags_t flags;  // IO::INPUT or IO::OUTPUT
-  size_t data_size;  // For those channels that accept arays of values
+  IO::flags_t flags = IO::UNKNOWN;  // IO::INPUT or IO::OUTPUT
+  size_t data_size = 0;  // For those channels that accept arays of values
 } channel_t;
 
 /*!
@@ -86,11 +87,12 @@ public:
    *
    * \sa IO::channel_t
    */
-  Block(std::string name, const std::vector<channel_t>& channels); // default constructor
-  Block(const Block& block) = default; // copy constructor
-  Block& operator=(const Block& block) = default; // copy assignment operator
-  Block(Block &&) = delete; // move constructor
-  Block& operator=(Block &&) = delete; // move assignment operator
+  Block(std::string name,
+        const std::vector<channel_t>& channels);  // default constructor
+  Block(const Block& block) = default;  // copy constructor
+  Block& operator=(const Block& block) = default;  // copy assignment operator
+  Block(Block&&) = delete;  // move constructor
+  Block& operator=(Block&&) = delete;  // move assignment operator
   ~Block() = default;
 
   /*!
@@ -98,10 +100,7 @@ public:
    *
    * \return Tbe name of the block.
    */
-  std::string getName() const
-  {
-    return name;
-  };
+  std::string getName() const { return name; };
 
   /*!
    * Get the number of channels of the specified type.
@@ -129,21 +128,21 @@ public:
   std::string getChannelDescription(IO::flags_t type, size_t index) const;
 
   /*!
-    * write the values of the specified input channel.
-    *
-    * \param index The input channel's index.
-    * \param data the data to push into the block
-    * 
-    * \return The value of the specified input channel.
-    */
+   * write the values of the specified input channel.
+   *
+   * \param index The input channel's index.
+   * \param data the data to push into the block
+   *
+   * \return The value of the specified input channel.
+   */
   void writeinput(size_t index, const std::vector<double>& data);
 
   /*!
-    * Get the values of the specified output channel.
-    *
-    * \param index The output channel's index.
-    * \return The value of the specified output channel.
-    */
+   * Get the values of the specified output channel.
+   *
+   * \param index The output channel's index.
+   * \return The value of the specified output channel.
+   */
   const std::vector<double>& readoutput(size_t index);
 
 protected:
@@ -151,7 +150,7 @@ protected:
 
   /*!
    * Read the input sent to this block. Only the block itself has access.
-   * 
+   *
    * \param index The channel to read the sent input from
    * \returns A vector of values
    */
@@ -172,7 +171,7 @@ private:
     std::vector<double> values;
   };
   std::string name;
-  std::array<std::vector<port_t>, IO::OUTPUT+1> ports;
+  std::array<std::vector<port_t>, IO::UNKNOWN> ports;
 };  // class Block
 
 /*!
@@ -183,7 +182,7 @@ private:
  * \param dest pointer to destination block
  * \param dest_port port ID for destination block
  */
-using connection_t =  struct 
+using connection_t = struct
 {
   IO::Block* src;
   size_t src_port;
@@ -200,12 +199,13 @@ using connection_t =  struct
 class Connector
 {
 public:
-  Connector(); // default constructor
-  Connector(const Connector& connector) = delete; // copy constructor
-  Connector& operator=(const Connector& connector) = delete; // copy assignment operator
-  Connector(Connector &&) = delete; // move constructor
-  Connector& operator=(Connector &&) = delete; // move assignment operator
-  ~Connector();
+  Connector() = default;  // default constructor
+  Connector(const Connector& connector) = delete;  // copy constructor
+  Connector& operator=(const Connector& connector) =
+      delete;  // copy assignment operator
+  Connector(Connector&&) = delete;  // move constructor
+  Connector& operator=(Connector&&) = delete;  // move assignment operator
+  ~Connector() = default;
 
   /*!
    * Create a connection between the two specified Blocks.
@@ -215,14 +215,12 @@ public:
    * \param dest The destination of the data.
    * \param in The destination channel of the data.
    *
+   * \returns 0 if successfully connected, -1 if it found a cycle
+   *
    * \sa IO::Block
-   * \sa IO::Block::input()
-   * \sa IO::Block::output()
    */
-  void connect(IO::Block* src,
-               size_t out,
-               IO::Block* dest,
-               size_t in);
+  int connect(IO::Block* src, size_t out, IO::Block* dest, size_t in);
+
   /*!
    * Break a connection between the two specified Blocks.
    *
@@ -235,10 +233,7 @@ public:
    * \sa IO::Block::input()
    * \sa IO::Block::output()
    */
-  void disconnect(IO::Block* src,
-                  size_t out,
-                  IO::Block* dest,
-                  size_t in);
+  void disconnect(IO::Block* src, size_t out, IO::Block* dest, size_t in);
 
   /*!
    * Determine whether two channels are connected or not.
@@ -251,10 +246,7 @@ public:
    * \sa IO::Block::connect()
    * \sa IO::Block::disconnect()
    */
-  bool connected(IO::Block* src,
-                 size_t out,
-                 IO::Block* dest,
-                 size_t in);
+  bool connected(IO::Block* src, size_t out, IO::Block* dest, size_t in);
 
   /*!
    * Register the block in order to access connection services
@@ -271,9 +263,10 @@ public:
   void removeBlock(IO::Block* block);
 
 private:
-  struct outputs_con{
+  struct outputs_con
+  {
     IO::Block* destblock;
-    size_t srcport; // This port always refers to the source stored in the map
+    size_t srcport;  // This port always refers to the source stored in the map
     size_t destport;
   };
   std::vector<IO::Block*> topological_sort();
