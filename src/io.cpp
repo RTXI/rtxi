@@ -26,7 +26,7 @@
 #include "io.hpp"
 
 #include "debug.hpp"
-
+// NOLINTBEGIN(cppcoreguidelines-pro-bounds-constant-array-index)
 IO::Block::Block(std::string n, const std::vector<IO::channel_t>& channels)
     : name(std::move(n))
 {
@@ -52,11 +52,6 @@ std::string IO::Block::getChannelName(IO::flags_t type, size_t index) const
 std::string IO::Block::getChannelDescription(IO::flags_t type, size_t index) const
 {
   return this->ports[type][index].channel_info.description;
-}
-
-std::vector<double> IO::Block::getChannelValue(IO::flags_t type, size_t index) const
-{
-  return this->ports[type][index].values;
 }
 
 void IO::Block::writeinput(size_t index, const std::vector<double>& data)
@@ -132,7 +127,7 @@ bool IO::Connector::connected(IO::Block* src,
 void IO::Connector::insertBlock(IO::Block* block)
 {
   if (block == nullptr) {
-    ERROR_MSG("IO::Connector::insertBlock : invalid block\n");
+    ERROR_MSG("IO::Connector::insertBlock : nullptr block\n");
     return;
   }
   this->registry[block] = std::vector<outputs_con>();
@@ -141,15 +136,10 @@ void IO::Connector::insertBlock(IO::Block* block)
 void IO::Connector::removeBlock(IO::Block* block)
 {
   if (block == nullptr) {
-    ERROR_MSG("IO::Connector::insertBlock : invalid block\n");
+    ERROR_MSG("IO::Connector::removeBlock : nullptr block\n");
     return;
   }
   this->registry.erase(block);
-}
-
-bool IO::Connector::acyclical()
-{
-  return true;
 }
 
 std::vector<IO::Block*> IO::Connector::topological_sort()
@@ -188,3 +178,4 @@ std::vector<IO::Block*> IO::Connector::topological_sort()
   
   return sorted_blocks;
 }
+// NOLINTEND(cppcoreguidelines-pro-bounds-constant-array-index)

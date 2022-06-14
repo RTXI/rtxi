@@ -129,14 +129,6 @@ public:
   std::string getChannelDescription(IO::flags_t type, size_t index) const;
 
   /*!
-   * Get a copy of the value in the specified channel.
-   *
-   * \param index The channel's index.
-   * \return The value of the channel.
-   */
-  std::vector<double> getChannelValue(IO::flags_t type, size_t index) const;
-
-  /*!
     * write the values of the specified input channel.
     *
     * \param index The input channel's index.
@@ -156,7 +148,21 @@ public:
 
 protected:
   // These functions are meant to be used by RT::Thread classes
+
+  /*!
+   * Read the input sent to this block. Only the block itself has access.
+   * 
+   * \param index The channel to read the sent input from
+   * \returns A vector of values
+   */
   const std::vector<double>& readinput(size_t index);
+
+  /*!
+   * Writes output to specified channel. Only the block itself has access.
+   *
+   * \param index The channel to write the output to
+   * \param data A vector of values to send to the channel
+   */
   void writeoutput(size_t index, const std::vector<double>& data);
 
 private:
@@ -250,17 +256,26 @@ public:
                  IO::Block* dest,
                  size_t in);
 
+  /*!
+   * Register the block in order to access connection services
+   *
+   * \param block Pointer to block object to register
+   */
   void insertBlock(IO::Block* block);
+
+  /*!
+   * Unregister the block from the registry
+   *
+   * \param block Pointer to block to unregister
+   */
   void removeBlock(IO::Block* block);
-  void propagateData(IO::Block* block);
 
 private:
   struct outputs_con{
     IO::Block* destblock;
-    size_t srcport; // This port is always from the source stored in the map
+    size_t srcport; // This port always refers to the source stored in the map
     size_t destport;
   };
-  bool acyclical();
   std::vector<IO::Block*> topological_sort();
   std::unordered_map<IO::Block*, std::vector<outputs_con>> registry;
 };  // class Connector
