@@ -80,7 +80,7 @@ TEST_F(IOConnectorTest, connections)
   int result = 0;
   result = connector.connect(&block1, 0, &block2, 0);
   ASSERT_EQ(result, 0);
-  connector.connect(&block2, 0, &block1, 0);
+  result = connector.connect(&block2, 0, &block1, 0);
   ASSERT_EQ(result, -1);
   EXPECT_TRUE(connector.connected(&block1, 0, &block2, 0));
   EXPECT_FALSE(connector.connected(&block2, 0, &block1, 0));

@@ -52,8 +52,8 @@ protected:
     defaultInputChannel.flags = IO::INPUT;
     defaultInputChannel.data_size = 1;
     IO::channel_t defaultOutputChannel = { };
-    defaultOutputChannel.name = defaultInputChannelName;
-    defaultOutputChannel.description = defaultInputChannelDescription;
+    defaultOutputChannel.name = defaultOutputChannelName;
+    defaultOutputChannel.description = defaultOutputChannelDescription;
     defaultOutputChannel.flags = IO::OUTPUT;
     defaultOutputChannel.data_size = 1;
     defaultChannelList.push_back(defaultInputChannel);

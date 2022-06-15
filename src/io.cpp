@@ -82,20 +82,23 @@ int IO::Connector::connect(IO::Block* src,
                             size_t in)
 {
   // First we must make sure that we aren't going to create a cycle
+  if(dest == src){ return -1; } // can't be connected to itself
   std::vector<IO::Block*> connected_blocks;
   std::queue<IO::Block*> processing;
   processing.push(dest);
+  std::vector<IO::Block*>::iterator loc;
   while(!processing.empty())
   {
-    if(processing.front() == src){ return -1; }
-    auto loc = std::find(connected_blocks.begin(), connected_blocks.end(), processing.front());
+    loc = std::find(connected_blocks.begin(), connected_blocks.end(), processing.front());
     if(loc == connected_blocks.end()) { 
       connected_blocks.push_back(processing.front());
-      for(auto connections : this->registry[processing.front()]){
-        processing.push(connections.destblock);
+      for(auto connection : this->registry[processing.front()]){
+        processing.push(connection.destblock);
       }
-      processing.pop();
     }
+    loc = std::find(connected_blocks.begin(), connected_blocks.end(), src);
+    if(loc != connected_blocks.end()){ return -1; }
+    processing.pop();
   }
 
   // now that we made sure not to create cycle, create connection object and save it
@@ -125,8 +128,11 @@ void IO::Connector::disconnect(IO::Block* src,
         && out_con.destport == in;
       }
   );
-  this->registry[src].erase(loc);
+  if(loc != this->registry[src].end()){
+    this->registry[src].erase(loc);
+  }
 }
+
 
 bool IO::Connector::connected(IO::Block* src,
                               size_t out,
