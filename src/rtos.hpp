@@ -125,7 +125,7 @@ double getCpuUsage();
  * \returns 0 if successful, -1 otherwise
  */
 template<typename T>
-int createTask(Task* task, std::function<void(T&)> func, T& arg)
+int createTask(Task* task, std::function<void(T)> func, T arg)
 {
   // Should not be creating real-time tasks from another real-time task
   if (RT::OS::isRealtime()) {

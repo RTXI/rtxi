@@ -21,8 +21,11 @@
 #ifndef RT_H
 #define RT_H
 
+#include <vector>
+
 #include "fifo.hpp"
 #include "rtos.hpp"
+#include "event.hpp"
 #include "io.hpp"
 
 //! Realtime Oriented Classes
@@ -38,10 +41,13 @@ namespace RT
  *
  * \sa RT::System
  */
-class Device
+class Device : public IO::Block
 {
 public:
-  Device();
+  Device(std::string n, const std::vector<IO::channel_t>& c)
+      : IO::Block(n, c), active(false)
+  {
+  }
   virtual ~Device();
 
   /**********************************************************
@@ -56,21 +62,15 @@ public:
    */
   virtual void read() {};
 
-    /*! \fn virtual void write(void)
+  /*! \fn virtual void write(void)
    * Function called by the realtime task at the end of each period.
    *
    * \sa RT::System
    */
   virtual void write() {};
 
-  inline bool getActive() const
-  {
-    return active;
-  };
+  inline bool getActive() const { return active; };
   void setActive(bool);
-
-protected:
-  std::unique_ptr<IO::Block> dataBlock;
 
 private:
   bool active;
@@ -82,10 +82,13 @@ private:
  *
  * \sa RT::System
  */
-class Thread
+class Thread : public IO::Block
 {
 public:
-  Thread();
+  Thread(std::string n, const std::vector<IO::channel_t>& c)
+      : IO::Block(n, c), active(false)
+  {
+  }
   virtual ~Thread();
 
   /*! \fn virtual void execute(void)
@@ -95,114 +98,81 @@ public:
    */
   virtual void execute(void) {};
 
-  inline bool getActive(void) const
-  {
-    return active;
-  };
+  inline bool getActive(void) const { return active; };
   void setActive(bool);
 
   void input(const std::vector<double>& data);
   const std::vector<double>& output();
-
-protected:
-  std::unique_ptr<IO::Block> dataBlock;
 
 private:
   bool active;
 
 };  // class Thread
 
-// /*!
-//  * Manages the RTOS as well as all objects that require
-//  *   realtime execution.
-//  */
-// class System
-// {
-// public:
-//   /*!
-//    * System is a Singleton, which means that there can only be one instance.
-//    *   This function returns a pointer to that single instance.
-//    *
-//    * \return The instance of System.
-//    */
-//   static System* getInstance();
+/*!
+ * Manages the RTOS as well as all objects that require
+ *   realtime execution.
+ */
+class System
+{
+public:
+  System(Event::Manager* manager);
+  ~System();
 
-//   /*!
-//    * Get the current period of the System in nanoseconds.
-//    *
-//    * \return The current period
-//    */
-//   int64_t getPeriod();
+  /*!
+   * Get the current period of the System in nanoseconds.
+   *
+   * \return The current period
+   */
+  int64_t getPeriod();
 
-//   /*!
-//    * Set a new period for the System in nanoseconds.
-//    *
-//    * \param period The new desired period.
-//    * \return 0 on success, A negative value upon failure.
-//    */
-//   int setPeriod(long long period);
+  /*!
+   * Set a new period for the System in nanoseconds.
+   *
+   * \param period The new desired period.
+   * \return 0 on success, A negative value upon failure.
+   */
+  int setPeriod(int64_t period);
 
-//   /*!
-//    * Loop through each Device and executes a callback.
-//    * The callback takes two parameters, a Device pointer and param,
-//    *   the second parameter to foreachDevice.
-//    *
-//    * \param callback The callback function.
-//    * \param param A parameter to the callback function.
-//    * \sa RT::Device
-//    */
-//   void foreachDevice(void (*callback)(Device*, void*), void* param);
-//   /*!
-//    * Loop through each Thread and executes a callback.
-//    * The callback takes two parameters, a Thread pointer and param,
-//    *   the second parameter to foreachThread.
-//    *
-//    * \param callback The callback function
-//    * \param param A parameter to the callback function
-//    * \sa RT::Thread
-//    */
-//   void foreachThread(void (*callback)(Thread*, void*), void* param);
+  void insertDevice(Device*);
+  void removeDevice(Device*);
 
-//   /*!
-//    * Post an Event for execution by the realtime task, this acts as a
-//    *   mechanism to synchronizing with the realtime task.
-//    *
-//    * \param event The event to be posted.
-//    * \param blocking If true the call to postEvent is blocking.
-//    * \return The value returned from event->callback()
-//    * \sa RT:Event
-//    */
-//   int postEvent(Event* event, bool blocking = true);
+  void insertThread(Thread*);
+  void removeThread(Thread*);
 
-// private:
-//   /******************************************************************
-//    * The constructors, destructor, and assignment operator are made *
-//    *   private to control instantiation of the class.               *
-//    ******************************************************************/
+private:
+  /*!
+   * Post a telemitry value to be received by the non-realtime
+   * system. Used as an event handling result response.
+   *
+   * \param telemitry The event type pointer that was processed.
+   * 
+   * \sa RT:Event
+   */
+  void postTelemitry(Event::Type* telemitry);
 
-//   System();
-//   ~System();
+  Event::Manager* eventManager;
 
-//   Mutex deviceMutex;
-//   void insertDevice(Device*);
-//   void removeDevice(Device*);
 
-//   Mutex threadMutex;
-//   void insertThread(Thread*);
-//   void removeThread(Thread*);
+  void execute(RT::System* system);
 
-//   static void bounce(RT::System* param);
-//   void execute(void);
+  std::unique_ptr<RT::OS::Task> task;
 
-//   RT::OS::Task *task;
+  std::vector<RT::Device*> devices;
+  std::vector<RT::Thread*> threads;
 
-//   List<RT::Device> devices;
-//   List<RT::Thread> threadList;
+  std::unique_ptr<RT::OS::Fifo> eventFifo;
+  std::unique_ptr<Event::Handler> handler;
+};  // class System
 
-//   Fifo eventFifo;
+class eventHandler : public Event::Handler
+{
+  eventHandler();
+  ~eventHandler();
 
-// };  // class System
-
-}  // namespace RT
+  void receiveEvent(Event::Object* event) override;
+  void execute(Event::Object* event) override;
+}
+}// namespace RT
 
 #endif  // RT_H

@@ -27,6 +27,7 @@ add_library(rtxi_lib OBJECT
     "debug.hpp" "debug.cpp"
     "event.hpp" "event.cpp"
     "io.hpp" "io.cpp"
+    "rt.hpp" "rt.cpp"
 )
 
 target_link_libraries(rtxi_lib PUBLIC 
