@@ -49,9 +49,44 @@ void RT::System::postTelemitry(const RT::Telemitry::Response* telemitry)
   this->eventFifo->writeRT(&telemitry, sizeof(RT::Telemitry::Response*));
 }
 
+void RT::System::receiveEvent(Event::Object* event)
+{
+  switch(event->getType()){
+    case Event::Type::RT_PERIOD_EVENT :
+      this->setPeriod(event);
+      break;
+    case Event::Type::RT_THREAD_INSERT_EVENT :
+      this->insertThread(event);
+      break;
+    case Event::Type::RT_THREAD_REMOVE_EVENT :
+      this->removeThread(event);
+      break;
+    case Event::Type::RT_DEVICE_INSERT_EVENT :
+      this->insertDevice(event);
+      break;
+    case Event::Type::RT_DEVICE_REMOVE_EVENT :
+      this->removeDevice(event);
+      break;
+    default:
+      // Don't leave the caller waiting bro
+      event->done();
+  }
+}
+
+void RT::System::setPeriod(Event::Object* event)
+{
+  auto period = std::any_cast<int64_t>(event->getParam("period"));
+  if (period == this->task->period) { return; }
+  RT::System::CMD cmd(event->getType());
+  cmd.setParam("period", std::any(period));
+  this->eventFifo->write(&cmd, sizeof(RT::System::CMD*));
+  cmd.wait();
+  event->done();
+}
+
 void RT::System::setPeriod(RT::System::CMD* cmd)
 {
-  uint64_t period = std::any_cast<uint64_t>(cmd->getParam("period"));
+  auto period = std::any_cast<int64_t>(cmd->getParam("period"));
   this->task->period = period;
   this->postTelemitry(&RT::Telemitry::RT_PERIOD_UPDATE);
   cmd->done();
@@ -91,12 +126,14 @@ void RT::System::executeCMD(RT::System::CMD* cmd)
       break;
     default:
       RT::System::postTelemitry(&RT::Telemitry::RT_NOOP);
+      // make sure the command is handled so caller can continue
+      cmd->done();
   }
 }
 
 void RT::System::insertDevice(Event::Object* event)
 {
-  RT::Device* device = std::any_cast<RT::Device*>(event->getParam("device"));
+  auto device = std::any_cast<RT::Device*>(event->getParam("device"));
   if (device == nullptr) {
     ERROR_MSG("RT::System::insertDevice : invalid device pointer\n");
     return;
@@ -104,14 +141,15 @@ void RT::System::insertDevice(Event::Object* event)
   this->io_connector->insertBlock(device);
   std::vector<IO::Block*> device_list = this->io_connector->getDevices();
   RT::System::CMD cmd(event->getType());
-  cmd->setParam("deviceList", std::any(device_list));
+  cmd.setParam("deviceList", std::any(device_list));
   this->eventFifo->write(&cmd, sizeof(RT::System::CMD*));
-  cmd->wait();
+  cmd.wait();
+  event->done();
 }
 
 void RT::System::removeDevice(Event::Object* event)
 {
-  RT::Device* device = std::any_cast<RT::Device*>(event->getParam("device"));
+  auto device = std::any_cast<RT::Device*>(event->getParam("device"));
   if (device == nullptr) {
     ERROR_MSG("RT::System::removeDevice : invalid device pointer\n");
     return;
@@ -121,14 +159,15 @@ void RT::System::removeDevice(Event::Object* event)
   this->io_connector->removeBlock(device);
   std::vector<IO::Block*> device_list = this->io_connector->getDevices();
   RT::System::CMD cmd(event->getType());
-  cmd->setParam("deviceList", std::any(device_list));
+  cmd.setParam("deviceList", std::any(device_list));
   this->eventFifo->write(&cmd, sizeof(RT::System::CMD*));
-  cmd->wait();
+  cmd.wait();
+  event->done();
 }
 
 void RT::System::insertThread(Event::Object* event)
 {
-  RT::Thread* thread = std::any_cast<RT::Thread*>(event->getParam("thread"));
+  auto thread = std::any_cast<RT::Thread*>(event->getParam("thread"));
   if (thread == nullptr) {
     ERROR_MSG("RT::System::removeDevice : invalid device pointer\n");
     return;
@@ -136,14 +175,15 @@ void RT::System::insertThread(Event::Object* event)
   this->io_connector->insertBlock(thread);
   std::vector<IO::Block*> thread_list = this->io_connector->getThreads();
   RT::System::CMD cmd(event->getType());
-  cmd->setParam("threadList", std::any(thread_list));
+  cmd.setParam("threadList", std::any(thread_list));
   this->eventFifo->write(&cmd, sizeof(RT::System::CMD*));
-  cmd->wait();
+  cmd.wait();
+  event->done();
 }
 
 void RT::System::removeThread(Event::Object* event)
 {
-  RT::Thread* thread = std::any_cast<RT::Thread*>(event->getParam("thread"));
+  auto thread = std::any_cast<RT::Thread*>(event->getParam("thread"));
   if (thread == nullptr) {
     ERROR_MSG("RT::System::removeDevice : invalid device pointer\n");
     return;
@@ -153,9 +193,10 @@ void RT::System::removeThread(Event::Object* event)
   this->io_connector->removeBlock(thread);
   std::vector<IO::Block*> thread_list = this->io_connector->getThreads();
   RT::System::CMD cmd(event->getType());
-  cmd->setParam("threadList", std::any(thread_list));
+  cmd.setParam("threadList", std::any(thread_list));
   this->eventFifo->write(&cmd, sizeof(RT::System::CMD*));
-  cmd->wait();
+  cmd.wait();
+  event->done();
 }
 
 void RT::System::execute(RT::System* system)

@@ -36,14 +36,15 @@
 namespace RT
 {
 
-namespace Telemitry{
+namespace Telemitry
+{
 typedef int Response;
 constexpr Response RT_PERIOD_UPDATE = 0;
 constexpr Response RT_THREAD_LIST_UPDATE = 1;
 constexpr Response RT_DEVICE_LIST_UPDATE = 2;
 constexpr Response RT_NOOP = 3;
 constexpr Response RT_ERROR = -1;
-};
+}  // namespace Telemitry
 
 /*!
  * Base class for devices that are to interface with System.
@@ -128,7 +129,9 @@ private:
   // RT::System functions is through its event handler.
   class CMD : public Event::Object
   {
-    CMD(Event::Type et) : Event::Object(et) {};
+  public:
+    explicit CMD(Event::Type et)
+        : Event::Object(et) {};
     ~CMD() = default;
   };
 
@@ -136,6 +139,7 @@ private:
   void removeDevice(Event::Object* event);
   void insertThread(Event::Object* event);
   void removeThread(Event::Object* event);
+  void setPeriod(Event::Object* event);
 
   void executeCMD(CMD* cmd);
   void updateDeviceList(CMD* cmd);
