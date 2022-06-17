@@ -182,7 +182,6 @@ public:
    * \sa Event::Manager::postEvent()
    */
   virtual void receiveEvent(Object* event)=0;
-  virtual void execute(Object* event)=0;
 };  // class Handler
 
 /*

@@ -3,7 +3,7 @@
 #include "rtos.hpp"
 #include "rtxiConfig.h"
 
-void test_func(int& retval){
+void test_func(int retval){
   std::cout << "test function reached.\n";
   retval = 0;
 }

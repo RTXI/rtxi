@@ -23,10 +23,11 @@
 
 #include <vector>
 
-#include "fifo.hpp"
 #include "rtos.hpp"
+#include "fifo.hpp"
 #include "event.hpp"
 #include "io.hpp"
+
 
 //! Realtime Oriented Classes
 /*!
@@ -45,10 +46,10 @@ class Device : public IO::Block
 {
 public:
   Device(std::string n, const std::vector<IO::channel_t>& c)
-      : IO::Block(n, c), active(false)
+      : IO::Block(std::move(n), c)
   {
   }
-  virtual ~Device();
+  virtual ~Device()=default;
 
   /**********************************************************
    * read & write must not be pure virtual because they can *
@@ -60,21 +61,17 @@ public:
    *
    * \sa RT::System
    */
-  virtual void read() {};
+  virtual void read()=0;
 
   /*! \fn virtual void write(void)
    * Function called by the realtime task at the end of each period.
    *
    * \sa RT::System
    */
-  virtual void write() {};
+  virtual void write()=0;
 
-  inline bool getActive() const { return active; };
-  void setActive(bool);
-
-private:
-  bool active;
-
+  virtual bool getActive()=0;
+  virtual void setActive(bool)=0;
 };  // class Device
 
 /*!
@@ -86,37 +83,35 @@ class Thread : public IO::Block
 {
 public:
   Thread(std::string n, const std::vector<IO::channel_t>& c)
-      : IO::Block(n, c), active(false)
+      : IO::Block(std::move(n), c)
   {
   }
-  virtual ~Thread();
+  virtual ~Thread()=default;
 
   /*! \fn virtual void execute(void)
    * Function called periodically by the realtime task.
    *
    * \sa RT::System
    */
-  virtual void execute(void) {};
+  virtual void execute()=0;
 
-  inline bool getActive(void) const { return active; };
-  void setActive(bool);
+  virtual bool getActive()=0;
+  virtual void setActive(bool)=0;
 
-  void input(const std::vector<double>& data);
-  const std::vector<double>& output();
-
-private:
-  bool active;
-
+  virtual void input(const std::vector<double>& data)=0;
+  virtual const std::vector<double>& output()=0;
 };  // class Thread
+
+class CMD : public Event::Object {};
 
 /*!
  * Manages the RTOS as well as all objects that require
  *   realtime execution.
  */
-class System
+class System : public Event::Handler
 {
 public:
-  System(Event::Manager* manager);
+  explicit System(Event::Manager* manager);
   ~System();
 
   /*!
@@ -134,11 +129,14 @@ public:
    */
   int setPeriod(int64_t period);
 
-  void insertDevice(Device*);
-  void removeDevice(Device*);
+  void insertDevice(Device* device);
+  void removeDevice(Device* device);
 
-  void insertThread(Thread*);
-  void removeThread(Thread*);
+  void insertThread(Thread* thread);
+  void removeThread(Thread* thread);
+
+  static void execute(RT::System* system);
+  void executeCMD(RT::CMD* cmd);
 
 private:
   /*!
@@ -146,15 +144,12 @@ private:
    * system. Used as an event handling result response.
    *
    * \param telemitry The event type pointer that was processed.
-   * 
+   *
    * \sa RT:Event
    */
   void postTelemitry(Event::Type* telemitry);
 
   Event::Manager* eventManager;
-
-
-  void execute(RT::System* system);
 
   std::unique_ptr<RT::OS::Task> task;
 
@@ -162,17 +157,6 @@ private:
   std::vector<RT::Thread*> threads;
 
   std::unique_ptr<RT::OS::Fifo> eventFifo;
-  std::unique_ptr<Event::Handler> handler;
 };  // class System
-
-class eventHandler : public Event::Handler
-{
-  eventHandler();
-  ~eventHandler();
-
-  void receiveEvent(Event::Object* event) override;
-  void execute(Event::Object* event) override;
-}
-}// namespace RT
-
+}  // namespace RT
 #endif  // RT_H

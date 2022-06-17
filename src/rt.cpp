@@ -18,35 +18,24 @@
 
  */
 
-#include "rt.hpp"
-
 #include "debug.hpp"
-#include "event.hpp"
 #include "rtos.hpp"
-
-void RT::Device::setActive(bool state)
-{
-  this->active = state;
-}
-
-void RT::Thread::setActive(bool state)
-{
-  this->active = state;
-}
+#include "event.hpp"
+#include "rt.hpp"
 
 RT::System::System(Event::Manager* manager) : eventManager(manager)
 {
-  if (RT::OS::createTask<RT::System*>(this->task.get(), System::execute, this)) {
+  if (RT::OS::createTask<RT::System*>(this->task.get(), &RT::System::execute, this) != 0) {
     ERROR_MSG("RT::System::System : failed to create realtime thread\n");
     return;
   }
-  this->eventManager->registerHandler(this->eventHandler.get());
+  this->eventManager->registerHandler(this);
 }
 
 RT::System::~System()
 {
   RT::OS::deleteTask(task.get());
-  this->eventManager->unregisterHandler(this->eventHandler.get());
+  this->eventManager->unregisterHandler(this);
 }
 
 int64_t RT::System::getPeriod()
@@ -123,44 +112,55 @@ void RT::System::removeThread(RT::Thread* thread)
 
 void RT::System::execute(RT::System* system)
 {
-  Event::Object* event = 0;
+  RT::CMD* cmd = nullptr;
   std::vector<Device*>::iterator iDevice;
   std::vector<Thread*>::iterator iThread;
-  std::vector<Device*>::iterator devicesBegin = system->devices.begin();
-  std::vector<Device*>::iterator devicesEnd = system->devices.end();
-  std::vector<Thread*>::iterator threadListBegin = system->threads.begin();
-  std::vector<Thread*>::iterator threadListEnd = system->threads.end();
+  auto devicesBegin = system->devices.begin();
+  auto devicesEnd = system->devices.end();
+  auto threadListBegin = system->threads.begin();
+  auto threadListEnd = system->threads.end();
 
-  if (RT::OS::setPeriod(system->task.get(), this->task->period)) {
+  if (RT::OS::setPeriod(system->task.get(), RT::OS::DEFAULT_PERIOD) != 0) {
     ERROR_MSG(
         "RT::System::execute : failed to set the initial period of the "
         "realtime thread\n");
     return;
   }
 
-  while (!this->task->task_finished) {
+  while (!system->task->task_finished) {
     RT::OS::sleepTimestep(system->task.get());
 
-    for (iDevice = devicesBegin; iDevice != devicesEnd; ++iDevice)
-      if ((*iDevice)->getActive())
+    for (iDevice = devicesBegin; iDevice != devicesEnd; ++iDevice){
+      if ((*iDevice)->getActive()){
         (*iDevice)->read();
+      }
+    }
 
-    for (iThread = threadListBegin; iThread != threadListEnd; ++iThread)
-      if ((*iThread)->getActive())
+    for (iThread = threadListBegin; iThread != threadListEnd; ++iThread){
+      if ((*iThread)->getActive()){
         (*iThread)->execute();
+      }
+    }
 
-    for (iDevice = devicesBegin; iDevice != devicesEnd; ++iDevice)
-      if ((*iDevice)->getActive())
+    for (iDevice = devicesBegin; iDevice != devicesEnd; ++iDevice){
+      if ((*iDevice)->getActive()){
         (*iDevice)->write();
+      }
+    }
 
-    if (eventFifo->readRT(&event, sizeof(Event::Object*))) {
+    if (system->eventFifo->readRT(&cmd, sizeof(RT::CMD*)) != 0) {
       do {
-        this->handler->execute(event);
-      } while (eventFifo->readRT(&event, sizeof(Event::Object*)));
+        system->executeCMD(cmd);
+      } while (system->eventFifo->readRT(&cmd, sizeof(RT::CMD*)) != 0);
 
-      event = 0;
-      devicesBegin = devices.begin();
-      threadListBegin = threads.begin();
+      cmd = nullptr;
+      devicesBegin = system->devices.begin();
+      threadListBegin = system->threads.begin();
     }
   }
+}
+
+void RT::System::executeCMD(RT::CMD* cmd)
+{
+
 }

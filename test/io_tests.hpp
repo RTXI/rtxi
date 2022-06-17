@@ -46,12 +46,12 @@ protected:
   {
     // Generates a default block with single input and output channel
     defaultBlockName = "DEFAULT:BLOCK:NAME";
-    IO::channel_t defaultInputChannel = { };
+    IO::channel_t defaultInputChannel = {};
     defaultInputChannel.name = defaultInputChannelName;
     defaultInputChannel.description = defaultInputChannelDescription;
     defaultInputChannel.flags = IO::INPUT;
     defaultInputChannel.data_size = 1;
-    IO::channel_t defaultOutputChannel = { };
+    IO::channel_t defaultOutputChannel = {};
     defaultOutputChannel.name = defaultOutputChannelName;
     defaultOutputChannel.description = defaultOutputChannelDescription;
     defaultOutputChannel.flags = IO::OUTPUT;
@@ -59,7 +59,6 @@ protected:
     defaultChannelList.push_back(defaultInputChannel);
     defaultChannelList.push_back(defaultOutputChannel);
   }
-
 };
 
 class IOConnectorTest : public ::testing::Test
@@ -73,18 +72,18 @@ public:
   std::string defaultOutputChannelDescription =
       "DEFAULT OUTPUT CHANNEL DESCRIPTION";
   std::vector<IO::channel_t> defaultChannelList;
-  
+
 protected:
   IOConnectorTest()
   {
     // Generates a default block with single input and output channel
     defaultBlockName = "DEFAULT:BLOCK:NAME";
-    IO::channel_t defaultInputChannel = { };
+    IO::channel_t defaultInputChannel = {};
     defaultInputChannel.name = defaultInputChannelName;
     defaultInputChannel.description = defaultInputChannelDescription;
     defaultInputChannel.flags = IO::INPUT;
     defaultInputChannel.data_size = 1;
-    IO::channel_t defaultOutputChannel = { };
+    IO::channel_t defaultOutputChannel = {};
     defaultOutputChannel.name = defaultInputChannelName;
     defaultOutputChannel.description = defaultInputChannelDescription;
     defaultOutputChannel.flags = IO::OUTPUT;
