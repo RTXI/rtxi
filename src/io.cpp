@@ -203,4 +203,14 @@ std::vector<IO::Block*> IO::Connector::topological_sort()
   
   return sorted_blocks;
 }
+
+std::vector<IO::Block*> IO::Connector::getDevices()
+{
+  return this->devices;
+}
+
+std::vector<IO::Block*> IO::Connector::getThreads()
+{
+  return this->topological_sort();
+}
 // NOLINTEND(cppcoreguidelines-pro-bounds-constant-array-index)

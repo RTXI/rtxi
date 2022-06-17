@@ -262,15 +262,19 @@ public:
    */
   void removeBlock(IO::Block* block);
 
+
+  std::vector<IO::Block*> getDevices();
+  std::vector<IO::Block*> getThreads();
 private:
+  std::vector<IO::Block*> topological_sort();
   struct outputs_con
   {
     IO::Block* destblock;
     size_t srcport;  // This port always refers to the source stored in the map
     size_t destport;
   };
-  std::vector<IO::Block*> topological_sort();
   std::unordered_map<IO::Block*, std::vector<outputs_con>> registry;
+  std::vector<IO::Block*> devices;
 };  // class Connector
 
 }  // namespace IO

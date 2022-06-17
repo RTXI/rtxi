@@ -23,11 +23,10 @@
 
 #include <vector>
 
-#include "rtos.hpp"
-#include "fifo.hpp"
 #include "event.hpp"
+#include "fifo.hpp"
 #include "io.hpp"
-
+#include "rtos.hpp"
 
 //! Realtime Oriented Classes
 /*!
@@ -36,6 +35,15 @@
  */
 namespace RT
 {
+
+namespace Telemitry{
+typedef int Response;
+constexpr Response RT_PERIOD_UPDATE = 0;
+constexpr Response RT_THREAD_LIST_UPDATE = 1;
+constexpr Response RT_DEVICE_LIST_UPDATE = 2;
+constexpr Response RT_NOOP = 3;
+constexpr Response RT_ERROR = -1;
+};
 
 /*!
  * Base class for devices that are to interface with System.
@@ -49,7 +57,7 @@ public:
       : IO::Block(std::move(n), c)
   {
   }
-  virtual ~Device()=default;
+  virtual ~Device() = default;
 
   /**********************************************************
    * read & write must not be pure virtual because they can *
@@ -61,17 +69,17 @@ public:
    *
    * \sa RT::System
    */
-  virtual void read()=0;
+  virtual void read() = 0;
 
   /*! \fn virtual void write(void)
    * Function called by the realtime task at the end of each period.
    *
    * \sa RT::System
    */
-  virtual void write()=0;
+  virtual void write() = 0;
 
-  virtual bool getActive()=0;
-  virtual void setActive(bool)=0;
+  virtual bool getActive() = 0;
+  virtual void setActive(bool) = 0;
 };  // class Device
 
 /*!
@@ -86,23 +94,21 @@ public:
       : IO::Block(std::move(n), c)
   {
   }
-  virtual ~Thread()=default;
+  virtual ~Thread() = default;
 
   /*! \fn virtual void execute(void)
    * Function called periodically by the realtime task.
    *
    * \sa RT::System
    */
-  virtual void execute()=0;
+  virtual void execute() = 0;
 
-  virtual bool getActive()=0;
-  virtual void setActive(bool)=0;
+  virtual bool getActive() = 0;
+  virtual void setActive(bool) = 0;
 
-  virtual void input(const std::vector<double>& data)=0;
-  virtual const std::vector<double>& output()=0;
+  virtual void input(const std::vector<double>& data) = 0;
+  virtual const std::vector<double>& output() = 0;
 };  // class Thread
-
-class CMD : public Event::Object {};
 
 /*!
  * Manages the RTOS as well as all objects that require
@@ -111,52 +117,46 @@ class CMD : public Event::Object {};
 class System : public Event::Handler
 {
 public:
-  explicit System(Event::Manager* manager);
+  explicit System(Event::Manager* em, IO::Connector* ioc);
   ~System();
-
-  /*!
-   * Get the current period of the System in nanoseconds.
-   *
-   * \return The current period
-   */
   int64_t getPeriod();
 
-  /*!
-   * Set a new period for the System in nanoseconds.
-   *
-   * \param period The new desired period.
-   * \return 0 on success, A negative value upon failure.
-   */
-  int setPeriod(int64_t period);
-
-  void insertDevice(Device* device);
-  void removeDevice(Device* device);
-
-  void insertThread(Thread* thread);
-  void removeThread(Thread* thread);
-
-  static void execute(RT::System* system);
-  void executeCMD(RT::CMD* cmd);
+  void receiveEvent(Event::Object* event) override;
 
 private:
-  /*!
-   * Post a telemitry value to be received by the non-realtime
-   * system. Used as an event handling result response.
-   *
-   * \param telemitry The event type pointer that was processed.
-   *
-   * \sa RT:Event
-   */
-  void postTelemitry(Event::Type* telemitry);
+  // We want our cmd class to be private. the only way to access
+  // RT::System functions is through its event handler.
+  class CMD : public Event::Object
+  {
+    CMD(Event::Type et) : Event::Object(et) {};
+    ~CMD() = default;
+  };
 
-  Event::Manager* eventManager;
+  void insertDevice(Event::Object* event);
+  void removeDevice(Event::Object* event);
+  void insertThread(Event::Object* event);
+  void removeThread(Event::Object* event);
 
+  void executeCMD(CMD* cmd);
+  void updateDeviceList(CMD* cmd);
+  void updateThreadList(CMD* cmd);
+  void setPeriod(CMD* cmd);
+
+  void postTelemitry(const RT::Telemitry::Response* telemitry);
+
+  static void execute(RT::System* system);
+
+  // System owns the task objet and the pipe used to communicate with it
   std::unique_ptr<RT::OS::Task> task;
+  std::unique_ptr<RT::OS::Fifo> eventFifo;
+
+  // system doesn't own any of the below variables. That's why they are
+  // only pointers.
+  Event::Manager* event_manager;
+  IO::Connector* io_connector;
 
   std::vector<RT::Device*> devices;
   std::vector<RT::Thread*> threads;
-
-  std::unique_ptr<RT::OS::Fifo> eventFifo;
 };  // class System
 }  // namespace RT
 #endif  // RT_H
