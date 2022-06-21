@@ -27,8 +27,8 @@
 
 #include "debug.hpp"
 // NOLINTBEGIN(cppcoreguidelines-pro-bounds-constant-array-index)
-IO::Block::Block(std::string n, const std::vector<IO::channel_t>& channels)
-    : name(std::move(n))
+IO::Block::Block(std::string n, const std::vector<IO::channel_t>& channels, bool isdependent)
+    : name(std::move(n)) , isInputDependent(isdependent)
 {
   port_t port = {};
   for (const auto& channel : channels) {
@@ -83,31 +83,34 @@ int IO::Connector::connect(IO::Block* src,
 {
   // First we must make sure that we aren't going to create a cycle
   if(dest == src){ return -1; } // can't be connected to itself
-  std::vector<IO::Block*> connected_blocks;
-  std::queue<IO::Block*> processing;
-  processing.push(dest);
-  std::vector<IO::Block*>::iterator loc;
-  while(!processing.empty())
+  if(src->dependent()) // we check for cycles only if src has dependencies (RT::Thread)
   {
-    loc = std::find(connected_blocks.begin(), connected_blocks.end(), processing.front());
-    if(loc == connected_blocks.end()) { 
-      connected_blocks.push_back(processing.front());
-      for(auto connection : this->registry[processing.front()]){
-        processing.push(connection.destblock);
+    std::vector<IO::Block*> connected_blocks;
+    std::queue<IO::Block*> processing;
+    processing.push(dest);
+    std::vector<IO::Block*>::iterator loc;
+    while(!processing.empty())
+    {
+      loc = std::find(connected_blocks.begin(), connected_blocks.end(), processing.front());
+      if(loc == connected_blocks.end()) { 
+        connected_blocks.push_back(processing.front());
+        for(auto connection : this->registry[processing.front()]){
+          processing.push(connection.dest);
+        }
       }
+      loc = std::find(connected_blocks.begin(), connected_blocks.end(), src);
+      if(loc != connected_blocks.end()){ return -1; }
+      processing.pop();
     }
-    loc = std::find(connected_blocks.begin(), connected_blocks.end(), src);
-    if(loc != connected_blocks.end()){ return -1; }
-    processing.pop();
   }
 
-  // now that we made sure not to create cycle, create connection object and save it
-  outputs_con out_con = {};
-  out_con.destblock = dest;
-  out_con.srcport = out;
-  out_con.destport = in;
+  // now create connection object and save it
+  IO::outputs_info out_con = {};
+  out_con.dest = dest;
+  out_con.src_port = out;
+  out_con.dest_port = in;
   if (!(this->registry.contains(src))) {
-    this->registry[src] = std::vector<outputs_con>();
+    this->registry[src] = std::vector<IO::outputs_info>();
   }
   this->registry[src].push_back(out_con);
   return 0;
@@ -122,10 +125,10 @@ void IO::Connector::disconnect(IO::Block* src,
   auto loc = std::find_if(
     this->registry[src].begin(),
     this->registry[src].end(),
-    [&](outputs_con out_con){ 
-      return out_con.destblock == dest 
-        && out_con.srcport == out 
-        && out_con.destport == in;
+    [&](IO::outputs_info out_con){ 
+      return out_con.dest == dest 
+        && out_con.src_port == out 
+        && out_con.dest_port == in;
       }
   );
   if(loc != this->registry[src].end()){
@@ -143,10 +146,10 @@ bool IO::Connector::connected(IO::Block* src,
   auto loc = std::find_if(
     this->registry[src].begin(),
     this->registry[src].end(),
-    [&](outputs_con out_con){ return out_con.destblock == dest;}
+    [&](outputs_info out_con){ return out_con.dest == dest;}
   );
   if(loc == this->registry[src].end()) { return false; }
-  return loc->srcport == out && loc->destport == in;
+  return loc->src_port == out && loc->dest_port == in;
 }
 
 void IO::Connector::insertBlock(IO::Block* block)
@@ -155,7 +158,8 @@ void IO::Connector::insertBlock(IO::Block* block)
     ERROR_MSG("IO::Connector::insertBlock : nullptr block\n");
     return;
   }
-  this->registry[block] = std::vector<outputs_con>();
+
+  this->registry[block] = std::vector<IO::outputs_info>();
 }
 
 void IO::Connector::removeBlock(IO::Block* block)
@@ -163,6 +167,17 @@ void IO::Connector::removeBlock(IO::Block* block)
   if (block == nullptr) {
     ERROR_MSG("IO::Connector::removeBlock : nullptr block\n");
     return;
+  }
+  // first we have to disconnect all blocks that are connected to this
+  for(const auto& block_connections : registry){
+    for(const auto connection : block_connections.second){
+      if(connection.dest == block){
+        this->disconnect(block_connections.first, 
+                         connection.src_port, 
+                         connection.dest, 
+                         connection.dest_port);
+      }
+    }
   }
   this->registry.erase(block);
 }
@@ -175,11 +190,12 @@ std::vector<IO::Block*> IO::Connector::topological_sort()
 
   // Calculate number of sources per block
   for(const auto& outputs : registry){
+    if(!outputs.first->dependent()) { continue; } // topology sort skips devices
     for(auto destination_con : outputs.second){
-      if(sources_per_block.contains(destination_con.destblock)) {
-        sources_per_block[destination_con.destblock] += 1;
+      if(sources_per_block.contains(destination_con.dest)) {
+        sources_per_block[destination_con.dest] += 1;
       } else {
-        sources_per_block[destination_con.destblock] = 1;
+        sources_per_block[destination_con.dest] = 1;
       }
     }
   }
@@ -189,14 +205,15 @@ std::vector<IO::Block*> IO::Connector::topological_sort()
     if(block_count.second == 0){ processing_q.push(block_count.first); }
   }
 
-  // Process the graph nodes
+  // Process the graph nodes. Don't add independent blocks to processing queue
   while(!processing_q.empty()){
     sorted_blocks.push_back(processing_q.front());
     processing_q.pop();
-    for(auto connection_info : registry[sorted_blocks.back()]){
-      sources_per_block[connection_info.destblock] -= 1;
-      if(sources_per_block[connection_info.destblock] == 0){
-        processing_q.push(connection_info.destblock);
+    for(auto connections : registry[sorted_blocks.back()]){
+      if(connections.dest->dependent()) { continue; }
+      sources_per_block[connections.dest] -= 1;
+      if(sources_per_block[connections.dest] == 0){
+        processing_q.push(connections.dest);
       }
     }
   }
@@ -206,11 +223,23 @@ std::vector<IO::Block*> IO::Connector::topological_sort()
 
 std::vector<IO::Block*> IO::Connector::getDevices()
 {
-  return this->devices;
+  std::vector<IO::Block*> devices;
+  for(const auto& block_info : this->registry)
+  {
+    if(!block_info.first->dependent()) { devices.push_back(block_info.first); }
+  }
+  return devices;
 }
 
 std::vector<IO::Block*> IO::Connector::getThreads()
 {
   return this->topological_sort();
+}
+
+std::vector<IO::outputs_info> IO::Connector::getOutputs(IO::Block* src)
+{
+  auto result = std::vector<IO::outputs_info>();
+  if(this->registry.contains(src)) { result = this->registry[src]; }
+  return result;
 }
 // NOLINTEND(cppcoreguidelines-pro-bounds-constant-array-index)

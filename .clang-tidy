@@ -5,12 +5,14 @@
 # *-vararg: we are dealing with variable argument c functions. cannot be helped
 # -modernize-deprecated-headers: dealing with c headers
 # -modernize-use-nodiscard: We are dealing with legacy code so this is too much.
+# -modernize-use-using: Conflicts with another warning. 
 Checks: "*,\
   -hicpp-deprecated-headers,\
   -*-vararg,\
   -modernize-deprecated-headers,\
   -modernize-use-trailing-return-type,\
   -modernize-use-nodiscard,\
+  -modernize-use-using,\
   -google-readability-todo,\
   -readability-identifier-naming,\
   -altera-*,\

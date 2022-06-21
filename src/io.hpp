@@ -88,7 +88,8 @@ public:
    * \sa IO::channel_t
    */
   Block(std::string name,
-        const std::vector<channel_t>& channels);  // default constructor
+        const std::vector<channel_t>& channels,
+        bool isdependent);  // default constructor
   Block(const Block& block) = default;  // copy constructor
   Block& operator=(const Block& block) = default;  // copy assignment operator
   Block(Block&&) = delete;  // move constructor
@@ -144,6 +145,8 @@ public:
    * \return The value of the specified output channel.
    */
   const std::vector<double>& readoutput(size_t index);
+    
+  bool dependent() const {return this->isInputDependent;}
 
 protected:
   // These functions are meant to be used by RT::Thread classes
@@ -164,6 +167,7 @@ protected:
    */
   void writeoutput(size_t index, const std::vector<double>& data);
 
+
 private:
   using port_t = struct
   {
@@ -171,24 +175,37 @@ private:
     std::vector<double> values;
   };
   std::string name;
+  bool isInputDependent;
   std::array<std::vector<port_t>, IO::UNKNOWN> ports;
 };  // class Block
+
+/*!
+ * Information about the outputs of a particular block. This is
+ * meant to be used along with a block pointer for the source and
+ * should not be used alone.
+ * 
+ * \param src_port Index of the source channel generating the output
+ * \param dest Pointer to IO::Block to send the output to
+ * \param dest_port Index of the destination channel taking the input
+ */
+typedef struct
+{
+  size_t src_port;
+  IO::Block* dest;
+  size_t dest_port;
+}outputs_info;
 
 /*!
  * The structure representating the connection between two block devices
  *
  * \param src pointer to source block
- * \param src_port port ID for source block
- * \param dest pointer to destination block
- * \param dest_port port ID for destination block
+ * \param outputs a list of outputs coming out from the block
  */
-using connection_t = struct
+typedef struct
 {
   IO::Block* src;
-  size_t src_port;
-  IO::Block* dest;
-  size_t dest_port;
-};
+  std::vector<outputs_info> outputs;
+}connections_t;
 
 /*!
  * Acts as a central meeting point between Blocks. Provides
@@ -262,19 +279,12 @@ public:
    */
   void removeBlock(IO::Block* block);
 
-
   std::vector<IO::Block*> getDevices();
   std::vector<IO::Block*> getThreads();
+  std::vector<IO::outputs_info> getOutputs(IO::Block* src);
 private:
   std::vector<IO::Block*> topological_sort();
-  struct outputs_con
-  {
-    IO::Block* destblock;
-    size_t srcport;  // This port always refers to the source stored in the map
-    size_t destport;
-  };
-  std::unordered_map<IO::Block*, std::vector<outputs_con>> registry;
-  std::vector<IO::Block*> devices;
+  std::unordered_map<IO::Block*, std::vector<outputs_info>> registry;
 };  // class Connector
 
 }  // namespace IO

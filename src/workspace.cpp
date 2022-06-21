@@ -26,52 +26,6 @@
 #include <rt.h>
 #include <workspace.h>
 
-namespace
-{
-class ParameterChangeEvent : public RT::Event
-{
-public:
-  ParameterChangeEvent(Settings::Object::ID, size_t, double, double*);
-  ~ParameterChangeEvent(void);
-  int callback(void);
-
-private:
-  Settings::Object::ID object;
-  size_t index;
-  double value;
-  double* data;
-};  // class ParameterChangeEvent
-};  // namespace
-
-ParameterChangeEvent::ParameterChangeEvent(Settings::Object::ID id,
-                                           size_t i,
-                                           double v,
-                                           double* d)
-    : object(id)
-    , index(i)
-    , value(v)
-    , data(d)
-{
-}
-
-ParameterChangeEvent::~ParameterChangeEvent(void) {}
-
-int ParameterChangeEvent::callback(void)
-{
-  if (*data == value)
-    return 0;
-
-  *data = value;
-
-  ::Event::Object event(::Event::WORKSPACE_PARAMETER_CHANGE_EVENT);
-  event.setParam("object", (void*)object);
-  event.setParam("index", (void*)index);
-  event.setParam("value", (void*)data);
-  ::Event::Manager::getInstance()->postEventRT(&event);
-
-  return 0;
-}
-
 Workspace::Instance::Instance(std::string name,
                               Workspace::variable_t* d,
                               size_t n)

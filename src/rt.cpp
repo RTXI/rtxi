@@ -113,14 +113,10 @@ void RT::System::executeCMD(RT::System::CMD* cmd)
       RT::System::setPeriod(cmd);
       break;
     case Event::Type::RT_DEVICE_INSERT_EVENT : 
-      RT::System::updateDeviceList(cmd);
-      break;
     case Event::Type::RT_DEVICE_REMOVE_EVENT :
       RT::System::updateDeviceList(cmd);
       break;
     case Event::Type::RT_THREAD_INSERT_EVENT :
-      RT::System::updateThreadList(cmd);
-      break;
     case Event::Type::RT_THREAD_REMOVE_EVENT :
       RT::System::updateThreadList(cmd);
       break;
@@ -133,7 +129,7 @@ void RT::System::executeCMD(RT::System::CMD* cmd)
 
 void RT::System::insertDevice(Event::Object* event)
 {
-  auto device = std::any_cast<RT::Device*>(event->getParam("device"));
+  auto* device = std::any_cast<RT::Device*>(event->getParam("device"));
   if (device == nullptr) {
     ERROR_MSG("RT::System::insertDevice : invalid device pointer\n");
     return;
@@ -149,7 +145,7 @@ void RT::System::insertDevice(Event::Object* event)
 
 void RT::System::removeDevice(Event::Object* event)
 {
-  auto device = std::any_cast<RT::Device*>(event->getParam("device"));
+  auto* device = std::any_cast<RT::Device*>(event->getParam("device"));
   if (device == nullptr) {
     ERROR_MSG("RT::System::removeDevice : invalid device pointer\n");
     return;
@@ -167,7 +163,7 @@ void RT::System::removeDevice(Event::Object* event)
 
 void RT::System::insertThread(Event::Object* event)
 {
-  auto thread = std::any_cast<RT::Thread*>(event->getParam("thread"));
+  auto* thread = std::any_cast<RT::Thread*>(event->getParam("thread"));
   if (thread == nullptr) {
     ERROR_MSG("RT::System::removeDevice : invalid device pointer\n");
     return;
@@ -183,7 +179,7 @@ void RT::System::insertThread(Event::Object* event)
 
 void RT::System::removeThread(Event::Object* event)
 {
-  auto thread = std::any_cast<RT::Thread*>(event->getParam("thread"));
+  auto* thread = std::any_cast<RT::Thread*>(event->getParam("thread"));
   if (thread == nullptr) {
     ERROR_MSG("RT::System::removeDevice : invalid device pointer\n");
     return;

@@ -55,15 +55,9 @@ class Device : public IO::Block
 {
 public:
   Device(std::string n, const std::vector<IO::channel_t>& c)
-      : IO::Block(std::move(n), c)
+      : IO::Block(std::move(n), c, false)
   {
   }
-  virtual ~Device() = default;
-
-  /**********************************************************
-   * read & write must not be pure virtual because they can *
-   *    be called during construction and destruction.      *
-   **********************************************************/
 
   /*! \fn virtual void read(void)
    * Function called by the realtime task at the beginning of each period.
@@ -92,10 +86,9 @@ class Thread : public IO::Block
 {
 public:
   Thread(std::string n, const std::vector<IO::channel_t>& c)
-      : IO::Block(std::move(n), c)
+      : IO::Block(std::move(n), c, true)
   {
   }
-  virtual ~Thread() = default;
 
   /*! \fn virtual void execute(void)
    * Function called periodically by the realtime task.
@@ -119,6 +112,11 @@ class System : public Event::Handler
 {
 public:
   explicit System(Event::Manager* em, IO::Connector* ioc);
+  System(const System& system) = delete;  // copy constructor
+  System& operator=(const System& system) =
+      delete;  // copy assignment operator
+  System(System&&) = delete;  // move constructor
+  System& operator=(System&&) = delete;  // move assignment operator
   ~System();
   int64_t getPeriod();
 
@@ -132,7 +130,6 @@ private:
   public:
     explicit CMD(Event::Type et)
         : Event::Object(et) {};
-    ~CMD() = default;
   };
 
   void insertDevice(Event::Object* event);
