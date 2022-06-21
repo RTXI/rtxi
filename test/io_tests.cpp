@@ -24,7 +24,7 @@
 
 TEST_F(IOBlockTest, getName)
 {
-  IO::Block block(this->defaultBlockName, this->defaultChannelList);
+  IO::Block block(this->defaultBlockName, this->defaultChannelList, true);
   ASSERT_EQ(block.getName(), defaultBlockName);
   ASSERT_EQ(block.getChannelName(IO::INPUT, 0), defaultInputChannelName);
   ASSERT_EQ(block.getChannelName(IO::OUTPUT, 0), defaultOutputChannelName);
@@ -32,14 +32,14 @@ TEST_F(IOBlockTest, getName)
 
 TEST_F(IOBlockTest, getCount)
 {
-  IO::Block block(this->defaultBlockName, this->defaultChannelList);
+  IO::Block block(this->defaultBlockName, this->defaultChannelList, true);
   ASSERT_EQ(block.getCount(IO::INPUT), 1);
   ASSERT_EQ(block.getCount(IO::OUTPUT), 1);
 }
 
 TEST_F(IOBlockTest, getDescription)
 {
-  IO::Block block(this->defaultBlockName, this->defaultChannelList);
+  IO::Block block(this->defaultBlockName, this->defaultChannelList, true);
   ASSERT_EQ(block.getChannelDescription(IO::INPUT, 0),
             defaultInputChannelDescription);
   ASSERT_EQ(block.getChannelDescription(IO::OUTPUT, 0),
@@ -48,7 +48,7 @@ TEST_F(IOBlockTest, getDescription)
 
 TEST_F(IOBlockTest, readoutput)
 {
-  IO::Block block(this->defaultBlockName, this->defaultChannelList);
+  IO::Block block(this->defaultBlockName, this->defaultChannelList, true);
   std::vector<double> defaultval = {0.0};
   EXPECT_DOUBLE_EQ(defaultval[0], block.readoutput(0)[0]);
 }
@@ -60,7 +60,7 @@ TEST_F(IOBlockTest, writeinput)
   {
   public:
     testBlock(std::string n, const std::vector<IO::channel_t>& c)
-        : IO::Block(n, c)
+        : IO::Block(n, c, true)
     {
     }
     void echo()
@@ -77,8 +77,8 @@ TEST_F(IOBlockTest, writeinput)
 TEST_F(IOConnectorTest, connections)
 {
   // Have to build example blocks to test connector
-  IO::Block block1("BLOCK1", this->defaultChannelList);
-  IO::Block block2("BLOCK2", this->defaultChannelList);
+  IO::Block block1("BLOCK1", this->defaultChannelList, true);
+  IO::Block block2("BLOCK2", this->defaultChannelList, true);
 
   // connect and disconnect between two blocks
   EXPECT_FALSE(connector.connected(&block1, 0, &block2, 0));
