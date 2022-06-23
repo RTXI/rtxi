@@ -279,8 +279,31 @@ public:
    */
   void removeBlock(IO::Block* block);
 
+  /*!
+   * Get the list of devices that are registered with connector class.
+   * To the connector class devices are io blocks that are independent
+   * of other blocks when connected.
+   *
+   * \returns List of IO::Block pointers representing registred devices
+   */
   std::vector<IO::Block*> getDevices();
+
+  /*!
+   * Get a lsit of threads that are registered with connector class. To
+   * the connector class threads are blocks that are dependent of other 
+   * blocks when connected. They are topologically sorted.
+   *
+   * \returns List of IO::Block pointers representing registered threads
+   */
   std::vector<IO::Block*> getThreads();
+
+  /*!
+   * Returns a list of outputs for the input block pointer
+   *
+   * \param src Input IO::Block pointer to find the outputs for
+   * \returns A vector of IO::outputs_info containing connection info
+   * \sa IO::outputs_info
+   */
   std::vector<IO::outputs_info> getOutputs(IO::Block* src);
 private:
   std::vector<IO::Block*> topological_sort();

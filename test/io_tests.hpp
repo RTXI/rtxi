@@ -76,7 +76,7 @@ public:
 protected:
   IOConnectorTest()
   {
-    // Generates a default block with single input and output channel
+    // Generates a default channels
     defaultBlockName = "DEFAULT:BLOCK:NAME";
     IO::channel_t defaultInputChannel = {};
     defaultInputChannel.name = defaultInputChannelName;

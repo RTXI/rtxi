@@ -188,15 +188,16 @@ std::vector<IO::Block*> IO::Connector::topological_sort()
   std::vector<IO::Block*> sorted_blocks;
   std::unordered_map<IO::Block*, int> sources_per_block;
 
+  // initialize counts
+  for(const auto& block : this->registry){
+    sources_per_block[block.first] = 0;
+  }
+
   // Calculate number of sources per block
-  for(const auto& outputs : registry){
-    if(!outputs.first->dependent()) { continue; } // topology sort skips devices
+  for(const auto& outputs : this->registry){
+    if(!(outputs.first->dependent())) { continue; } // topology sort skips devices
     for(auto destination_con : outputs.second){
-      if(sources_per_block.contains(destination_con.dest)) {
-        sources_per_block[destination_con.dest] += 1;
-      } else {
-        sources_per_block[destination_con.dest] = 1;
-      }
+      sources_per_block[destination_con.dest] += 1;
     }
   }
 
@@ -210,7 +211,7 @@ std::vector<IO::Block*> IO::Connector::topological_sort()
     sorted_blocks.push_back(processing_q.front());
     processing_q.pop();
     for(auto connections : registry[sorted_blocks.back()]){
-      if(connections.dest->dependent()) { continue; }
+      if(!(connections.dest->dependent())) { continue; }
       sources_per_block[connections.dest] -= 1;
       if(sources_per_block[connections.dest] == 0){
         processing_q.push(connections.dest);
