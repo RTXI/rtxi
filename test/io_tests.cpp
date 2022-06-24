@@ -145,7 +145,6 @@ TEST_F(IOConnectorTest, getBlocks)
 
   // first verify that they are in topological order
   for(auto thread_iter=threads.begin(); thread_iter != threads.end(); thread_iter++){
-    std::cout << *thread_iter << "\n";
     for(auto outputs : this->connector.getOutputs(*thread_iter)){
       auto loc = std::find(threads.begin(), thread_iter, outputs.dest);
       ASSERT_EQ(loc, thread_iter);

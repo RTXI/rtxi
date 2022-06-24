@@ -203,7 +203,9 @@ std::vector<IO::Block*> IO::Connector::topological_sort()
 
   // Initialize queue for processing nodes in graph
   for(auto block_count : sources_per_block){
-    if(block_count.second == 0){ processing_q.push(block_count.first); }
+    if(block_count.second == 0 && block_count.first->dependent()){ 
+      processing_q.push(block_count.first); 
+    }
   }
 
   // Process the graph nodes. Don't add independent blocks to processing queue
