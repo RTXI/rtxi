@@ -42,7 +42,7 @@ RT::System::System(Event::Manager* em, IO::Connector* ioc)
 
 RT::System::~System()
 {
-  this->task->task_finished = true;
+  //this->task->task_finished = true;
   RT::OS::deleteTask(this->task.get());
   this->event_manager->unregisterHandler(this);
 }

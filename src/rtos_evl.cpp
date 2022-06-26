@@ -61,7 +61,7 @@ void RT::OS::deleteTask(RT::OS::Task* task)
     ERROR_MSG("RT::OS::createTask : Task cannot be deleted from rt context");
     return;
   }
-  // task->task_finished = true;
+  task->task_finished = true;
   if (task->rt_thread.joinable()) {
     task->rt_thread.join();
   }
