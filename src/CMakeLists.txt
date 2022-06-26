@@ -50,6 +50,7 @@ set_target_properties(
 target_link_libraries(rtxi_exe 
     rtxi_lib 
     rtos_lib 
+    rtos_fifo_lib
     Qt5::Widgets 
     Threads::Threads
 )

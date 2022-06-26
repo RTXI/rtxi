@@ -33,18 +33,15 @@ class SystemTest : public ::testing::Test
 protected:
   SystemTest()
   {
-    system = RT::System::getInstance();
+    this->event_manager = std::make_unique<Event::Manager>();
+    this->io_connector = std::make_unique<IO::Connector>();
+    this->system = std::make_unique<RT::System>(event_manager.get(),
+                                                io_connector.get());
   }
-  ~SystemTest() {}
-
-  RT::System* system;
+  std::unique_ptr<Event::Manager> event_manager;
+  std::unique_ptr<IO::Connector> io_connector;
+  std::unique_ptr<RT::System> system;
 };
-
-// class MockRTEvent : public RT::Event
-//{
-// public:
-//    MOCK_METHOD(int, callback, (), (override));
-//};
 
 class MockRTDevice : public RT::Device
 {

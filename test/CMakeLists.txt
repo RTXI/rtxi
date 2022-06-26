@@ -2,11 +2,12 @@ cmake_minimum_required(VERSION 3.14)
 project(rtxiTests LANGUAGES CXX)
 
 add_executable(rtxiTests
-    "rt_os_tests.hpp" "rt_os_tests.cpp"
-    "fifo_tests.hpp" "fifo_tests.cpp"
-    "event_tests.hpp" "event_tests.cpp"
-    "io_tests.hpp" "io_tests.cpp"
-    "rtxiTests.cpp"
+    rt_os_tests.hpp rt_os_tests.cpp
+    fifo_tests.hpp fifo_tests.cpp
+    event_tests.hpp event_tests.cpp
+    io_tests.hpp io_tests.cpp
+    system_tests.hpp system_tests.cpp
+    rtxiTests.cpp
 )
 
 target_include_directories(rtxiTests PRIVATE

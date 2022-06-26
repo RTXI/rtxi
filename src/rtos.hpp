@@ -15,7 +15,7 @@ namespace RT
 namespace OS
 {
 
-const int SECONDS_TO_NANOSECONDS = 1000000000;  // Conversion from sec to nsec
+const int64_t SECONDS_TO_NANOSECONDS = 1000000000;  // Conversion from sec to nsec
 const int64_t DEFAULT_PERIOD = 1000000;  // Default period is set to 1 msec
 
 /*!
@@ -127,15 +127,15 @@ double getCpuUsage();
 template<typename T>
 int createTask(Task* task, std::function<void(T)> func, T arg)
 {
+  int result = 0;
   // Should not be creating real-time tasks from another real-time task
   if (RT::OS::isRealtime()) {
     ERROR_MSG("RT::OS::createTask : Task cannot be created from rt context");
     return -1;
   }
-  int resval = 0;
-  auto wrapper = [&func, &arg, &resval]()
+  auto wrapper = [](std::function<void(T)> fn, T args)
   {
-    resval = RT::OS::initiate();
+    auto resval = RT::OS::initiate();
     if (resval != 0) {
       ERROR_MSG("RT::OS::createTask : RT::OS::initiate() : {}",
                 strerror(errno));
@@ -143,12 +143,16 @@ int createTask(Task* task, std::function<void(T)> func, T arg)
       // quit
       return;
     }
-    func(arg);
+    fn(args);
     RT::OS::shutdown();
   };
-  std::thread thread_obj(wrapper);
-  task->rt_thread = std::move(thread_obj);
-  return resval;
+  std::thread thread_obj(wrapper, func, arg);
+  if(thread_obj.joinable()){
+    task->rt_thread = std::move(thread_obj);
+  } else {
+    result = -1;
+  }
+  return result;
 }
 
 }  // namespace OS

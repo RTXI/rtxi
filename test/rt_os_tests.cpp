@@ -24,9 +24,9 @@
 
 #include "rt_os_tests.hpp"
 
-void temp_function(bool& retval)
+void temp_function(bool* retval)
 {
-  retval = true;
+  *retval = true;
 }
 
 TEST_F(RTOSTests, InitiateAndShutdown)
@@ -50,7 +50,7 @@ TEST_F(RTOSTests, CreateAndDeleteTask)
   bool func_retval = false;
   auto test_task = std::make_unique<RT::OS::Task>();
   result =
-      RT::OS::createTask<bool&>(test_task.get(), temp_function, func_retval);
+      RT::OS::createTask<bool*>(test_task.get(), &temp_function, &func_retval);
   RT::OS::deleteTask(test_task.get());
   // It is not possible to lock memory without admin privilages.
   // Either it succeeds or we don't have permissions

@@ -39,11 +39,13 @@ namespace RT
 namespace Telemitry
 {
 typedef int Response;
-constexpr Response RT_PERIOD_UPDATE = 0;
-constexpr Response RT_THREAD_LIST_UPDATE = 1;
-constexpr Response RT_DEVICE_LIST_UPDATE = 2;
-constexpr Response RT_NOOP = 3;
-constexpr Response RT_ERROR = -1;
+const Response RT_PERIOD_UPDATE = 0;
+const Response RT_THREAD_LIST_UPDATE = 1;
+const Response RT_DEVICE_LIST_UPDATE = 2;
+const Response RT_NOOP = 3;
+const Response RT_SHUTDOWN = 4;
+const Response RT_ERROR = -1;
+const Response NO_TELEMITRY = -2;
 }  // namespace Telemitry
 
 /*!
@@ -118,7 +120,10 @@ public:
   System(System&&) = delete;  // move constructor
   System& operator=(System&&) = delete;  // move assignment operator
   ~System();
+
+
   int64_t getPeriod();
+  RT::Telemitry::Response getTelemitry();
 
   void receiveEvent(Event::Object* event) override;
 
@@ -137,13 +142,16 @@ private:
   void insertThread(Event::Object* event);
   void removeThread(Event::Object* event);
   void setPeriod(Event::Object* event);
+  void shutdown(Event::Object* event);
+  void NOOP(Event::Object* event);
 
   void executeCMD(CMD* cmd);
   void updateDeviceList(CMD* cmd);
   void updateThreadList(CMD* cmd);
   void setPeriod(CMD* cmd);
+  void shutdown(CMD* cmd);
 
-  void postTelemitry(const RT::Telemitry::Response* telemitry);
+  void postTelemitry(const RT::Telemitry::Response telemitry);
 
   static void execute(RT::System* system);
 
@@ -156,6 +164,7 @@ private:
   Event::Manager* event_manager;
   IO::Connector* io_connector;
 
+  // System's real-time loop maintains copy of device and thread pointers
   std::vector<RT::Device*> devices;
   std::vector<RT::Thread*> threads;
 };  // class System

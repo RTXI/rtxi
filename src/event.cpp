@@ -46,6 +46,9 @@ std::string Event::type_to_string(Event::Type event_type)
     case Event::Type::RT_DEVICE_INSERT_EVENT:
       return_string = "SYSTEM : device insert";
       break;
+    case Event::Type::RT_SHUTDOWN_EVENT :
+      return_string = "SYSTEM : shutdown";
+      break;
     case Event::Type::RT_DEVICE_REMOVE_EVENT:
       return_string = "SYSTEM : device remove";
       break;
@@ -148,15 +151,15 @@ void Event::Object::setParam(const std::string& param_name, const std::any& para
 void Event::Object::wait()
 {
   std::unique_lock done_lock(this->processing_done_mut);
-  processing_done_cond.wait(done_lock, [this]{return processed;});
-  done_lock.unlock();
+  this->processing_done_cond.wait(done_lock, [this](){return this->processed;});
+  //done_lock.unlock();
 }
 
 void Event::Object::done()
 {
   std::unique_lock done_lock(this->processing_done_mut);
   this->processed = true;
-  done_lock.unlock();
+  //done_lock.unlock();
   this->processing_done_cond.notify_one();
 }
 
