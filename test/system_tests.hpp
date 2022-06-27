@@ -46,13 +46,17 @@ protected:
 class MockRTDevice : public RT::Device
 {
 public:
+  MockRTDevice(std::string name, std::vector<IO::channel_t> channel_list) : RT::Device(name, channel_list) {}
   MOCK_METHOD(void, read, (), (override));
   MOCK_METHOD(void, write, (), (override));
+  MOCK_METHOD(bool, getActive, (), (override));
+  MOCK_METHOD(void, setActive, (bool), (override));
 };
 
 class MockRTThread : public RT::Thread
 {
 public:
+  MockRTThread(std::string name, std::vector<IO::channel_t> channel_list) : RT::Thread(name, channel_list) {}
   MOCK_METHOD(unsigned long, getPriority, (), (const));
   MOCK_METHOD(void, execute, (), (override));
 };
