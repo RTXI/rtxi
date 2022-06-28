@@ -22,6 +22,7 @@
 #define RT_H
 
 #include <vector>
+#include <string>
 
 #include "event.hpp"
 #include "fifo.hpp"
@@ -47,6 +48,52 @@ const Response RT_SHUTDOWN = 4;
 const Response RT_ERROR = -1;
 const Response NO_TELEMITRY = -2;
 }  // namespace Telemitry
+
+
+struct insertThreadEvent : public Event::Object
+{
+  insertThreadEvent(RT::Thread* thread) : thread(thread) {}
+  RT::Thread* thread;
+  const std::string event_name = std::string("RT_INSERT_THREAD_EVENT");
+};
+
+struct removeThreadEvent : public Event::Object
+{
+  removeThreadEvent(RT::Thread* thread) : thread(thread) {}
+  RT::Thread* thread;
+  const std::string event_name = std::string("RT_REMOVE_THREAD_EVENT");
+};
+
+struct insertDeviceEvent : public Event::Object
+{
+  insertDeviceEvent(RT::Device* device) : device(device) {}
+  RT::Device* device;
+  const std::string event_name = std::string("RT_INSERT_DEVICE_EVENT");
+};
+
+struct removeDeviceEvent : public Event::Object
+{
+  removeDeviceEvent(RT::Device* device) : device(device) {}
+  RT::Device* device;
+  const std::string event_name = std::string("RT_REMOVE_DEVICE_EVENT");
+};
+
+struct changePeriodEvent : public Event::Object
+{
+  changePeriodEvent(int64_t* period) : period(period) {}
+  int64_t* period;
+  const std::string event_name = std::string("RT_PERIOD_CHANGE_EVENT");
+};
+
+struct shutdownSystemEvent : Event::Object
+{
+  const std::string event_name = std::string("RT_SYSTEM_SHUTDOWN_EVENT");
+};
+
+struct NOOPEvent : Event::Object
+{
+  const std::string event_name = std::string("RT_NOOP_EVENT");
+};
 
 /*!
  * Base class for devices that are to interface with System.
@@ -115,12 +162,10 @@ class System : public Event::Handler
 public:
   explicit System(Event::Manager* em, IO::Connector* ioc);
   System(const System& system) = delete;  // copy constructor
-  System& operator=(const System& system) =
-      delete;  // copy assignment operator
+  System& operator=(const System& system) = delete;  // copy assignment operator
   System(System&&) = delete;  // move constructor
   System& operator=(System&&) = delete;  // move assignment operator
   ~System();
-
 
   int64_t getPeriod();
   RT::Telemitry::Response getTelemitry();
@@ -130,26 +175,52 @@ public:
 private:
   // We want our cmd class to be private. the only way to access
   // RT::System functions is through its event handler.
-  class CMD : public Event::Object
+  struct threadListUpdate : public Event::Object
   {
-  public:
-    explicit CMD(Event::Type et)
-        : Event::Object(et) {};
+    threadListUpdate(std::vector<IO::Block*> thread_list) : thread_list(thread_list) {}
+    const std::string event_name = std::string("RT_CMD_UPDATE_THREAD_LIST");
+    std::vector<IO::Block*> thread_list;
   };
 
-  void insertDevice(Event::Object* event);
-  void removeDevice(Event::Object* event);
-  void insertThread(Event::Object* event);
-  void removeThread(Event::Object* event);
-  void setPeriod(Event::Object* event);
-  void shutdown(Event::Object* event);
-  void NOOP(Event::Object* event);
+  struct deviceListUpdate : public Event::Object
+  {
+    deviceListUpdate(std::vector<IO::Block*> device_list) : device_list(device_list) {}
+    const std::string event_name = std::string("RT_CMD_UPDATE_DEVICE_LIST");
+    std::vector<IO::Block*> device_list;
+  };
 
-  void executeCMD(CMD* cmd);
-  void updateDeviceList(CMD* cmd);
-  void updateThreadList(CMD* cmd);
-  void setPeriod(CMD* cmd);
-  void shutdown(CMD* cmd);
+  struct periodUpdate : public Event::Object
+  {
+    periodUpdate(int64_t* period) : period(period) {}
+    const std::string event_name = std::string("RT_CMD_UPDATE_PERIOD");
+    int64_t* period;
+  };
+
+  struct shutdownCMD : public Event::Object
+  {
+    const std::string event_name = std::string("RT_CMD_SHUTDOWN");
+  };
+
+  struct NOOPCMD : public Event::Object
+  {
+    const std::string event_name = std::string("RT_CMD_NOOP");
+  };
+
+  virtual void handleEvent(insertDeviceEvent* event);
+  virtual void handleEvent(removeDeviceEvent* event);
+  virtual void handleEvent(insertThreadEvent* event);
+  virtual void handleEvent(removeThreadEvent* event);
+  virtual void handleEvent(changePeriodEvent* event);
+  virtual void handleEvent(shutdownSystemEvent* event);
+  virtual void handleEvent(NOOPEvent* event);
+  virtual void handleEvent(Event::Object* event);
+
+  virtual void executeCMD(shutdownCMD* cmd);
+  virtual void executeCMD(deviceListUpdate* cmd);
+  virtual void executeCMD(threadListUpdate* cmd);
+  virtual void executeCMD(periodUpdate* cmd);
+  virtual void executeCMD(NOOPCMD* cmd);
+  virtual void executeCMD(Event::Object* cmd);
 
   void postTelemitry(const RT::Telemitry::Response telemitry);
 

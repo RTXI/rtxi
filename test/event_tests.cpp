@@ -22,20 +22,9 @@
 
 #include "event_tests.hpp"
 
-TEST_F(EventObjectTest, ParameterTests)
-{
-  const std::string TEST_EVENT_PARAM = "TEST_PARAM";
-  bool TEST_EVENT_PARAM_VALUE = true;
-  Event::Object event(Event::Type::NOOP);
-  event.setParam(TEST_EVENT_PARAM, std::any(TEST_EVENT_PARAM_VALUE));
-  ASSERT_EQ(event.getName(), Event::type_to_string(Event::Type::NOOP));
-  ASSERT_EQ(std::any_cast<bool>(event.getParam(TEST_EVENT_PARAM)),
-            TEST_EVENT_PARAM_VALUE);
-}
-
 TEST_F(EventObjectTest, EventProcessingWait)
 {
-  Event::Object test_event(Event::Type::NOOP);
+  MockEventObject test_event;
   auto listener = [&test_event]() { test_event.done(); };
   std::thread test_thread(listener);
   test_event.wait();
@@ -48,7 +37,7 @@ TEST_F(EventObjectTest, EventProcessingWait)
 TEST_F(EventManagerTest, postEvent)
 {
   auto event_manager = std::make_unique<Event::Manager>();
-  Event::Object event_obj(Event::Type::NOOP);
+  MockEventObject event_obj;
   MockEventHandler event_handler;
   EXPECT_CALL(event_handler, receiveEvent(&event_obj));
   event_manager->registerHandler(&event_handler);
@@ -60,7 +49,7 @@ TEST_F(EventManagerTest, Registration)
   auto event_manager = std::make_unique<Event::Manager>();
   MockEventHandler event_handler;
   MockEventHandler event_handler_not_called;
-  Event::Object test_event(Event::Type::NOOP);
+  MockEventObject test_event;
 
   // handlers should be called an appropriate amount of times if registration
   // is working as it should
