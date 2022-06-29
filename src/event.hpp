@@ -39,6 +39,46 @@
 namespace Event
 {
 
+enum Type
+{
+  RT_PERIOD_EVENT = 0,
+  RT_PREPERIOD_EVENT,
+  RT_POSTPERIOD_EVENT,
+  RT_THREAD_INSERT_EVENT,
+  RT_THREAD_REMOVE_EVENT,
+  RT_DEVICE_INSERT_EVENT,
+  RT_DEVICE_REMOVE_EVENT,
+  RT_SHUTDOWN_EVENT,
+  IO_BLOCK_INSERT_EVENT,
+  IO_BLOCK_REMOVE_EVENT,
+  IO_LINK_INSERT_EVENT,
+  IO_LINK_REMOVE_EVENT,
+  WORKSPACE_PARAMETER_CHANGE_EVENT,
+  PLUGIN_INSERT_EVENT,
+  PLUGIN_REMOVE_EVENT,
+  SETTINGS_OBJECT_INSERT_EVENT,
+  SETTINGS_OBJECT_REMOVE_EVENT,
+  OPEN_FILE_EVENT,
+  START_RECORDING_EVENT,
+  STOP_RECORDING_EVENT,
+  ASYNC_DATA_EVENT,
+  THRESHOLD_CROSSING_EVENT,
+  START_GENICAM_RECORDING_EVENT,
+  PAUSE_GENICAM_RECORDING_EVENT,
+  STOP_GENICAM_RECORDING_EVENT,
+  GENICAM_SNAPSHOT_EVENT,
+  NOOP
+};
+
+/*!
+ * converts the event type to a human readable name of event
+ *
+ * \param event_type type of event that was emitted
+ * 
+ * \returns A string representation of the event type
+ */
+std::string type_to_string(Type event_type);
+
 /*!
  * Token used to signal event
  * 
@@ -46,15 +86,45 @@ namespace Event
  * handlers to use. In order to properly use the token, the caller must 
  * wait for handlers to mark the event processed with wait()
  */
-struct Object
+class Object
 {
 public:
-  explicit Object() : processed(false) {};
+  explicit Object(Event::Type et);
   Object(const Object& obj) = delete; // copy constructor
   Object& operator=(const Object& obj) = delete; //copy assignment operator
   Object(Object &&) = delete; // move constructor
   Object& operator=(Object &&) = delete; // move assignment operator
   ~Object() = default;
+
+  /*!
+   * Obtains the name of the event object that was emitted.
+   *
+   * \return A string containing the name of event
+   */
+  std::string getName();
+
+  /*!
+   * Returns the type of event that was emitted.
+   *
+   * \return The type of event
+   */
+  Event::Type getType();
+
+  /*!
+   * Retrieves the paramaters values attached to the event
+   *
+   * \param Name The parameter name for which to retrieve the value of event
+   * \return The value connected with the input key
+   */
+  std::any getParam(const std::string& param_name);
+
+  /*!
+   * Stores a key and value inside event object
+   *
+   * \param Key The name of the parameter to store inside event object
+   * \param Value The value to store
+   */
+  void setParam(const std::string& param_name, const std::any& param_value);
 
   /*!
    * Forces caller to wait for the event to be processed. This is needed for
@@ -78,11 +148,18 @@ public:
    * \returns true if processed. False otherwise
    */
   bool isdone() const;
-  
-  const std::string event_name = "NOOP";
+
 private:
+  struct param
+  {
+    std::string name;
+    std::any value;
+  };
+
+  std::vector<param> params;
   std::mutex processing_done_mut;
   std::condition_variable processing_done_cond;
+  const Type event_type;
   bool processed;
 };  // class Object
 
@@ -105,7 +182,7 @@ public:
    * \sa Event::Object
    * \sa Event::Manager::postEvent()
    */
-  virtual void receiveEvent(Event::Object* event)=0;
+  virtual void receiveEvent(Object* event)=0;
 };  // class Handler
 
 /*

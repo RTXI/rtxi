@@ -64,134 +64,200 @@ RT::Telemitry::Response RT::System::getTelemitry()
   return telemitry;
 }
 
-void RT::System::executeCMD(RT::System::periodUpdate* cmd)
+void RT::System::setPeriod(RT::System::CMD* cmd)
 {
-  this->task->period = *(cmd->period);
+  auto period = std::any_cast<int64_t>(cmd->getParam("period"));
+  this->task->period = period;
   auto telem = RT::Telemitry::RT_PERIOD_UPDATE;
   this->postTelemitry(telem);
   cmd->done();
 }
 
-void RT::System::executeCMD(RT::System::deviceListUpdate* cmd)
+void RT::System::updateDeviceList(RT::System::CMD* cmd)
 {
-  this->devices = cmd->device_list;
+  this->devices = std::any_cast<std::vector<RT::Device*>>(cmd->getParam("deviceList"));
   auto telem = RT::Telemitry::RT_DEVICE_LIST_UPDATE;
   this->postTelemitry(telem);
   cmd->done();
 }
 
-void RT::System::executeCMD(RT::System::threadListUpdate* cmd)
+void RT::System::updateThreadList(RT::System::CMD* cmd)
 {
-  this->threads = cmd->thread_list;
+  this->threads = std::any_cast<std::vector<RT::Thread*>>(cmd->getParam("threadList"));
   auto telem = RT::Telemitry::RT_THREAD_LIST_UPDATE;
   this->postTelemitry(telem);
   cmd->done();
 }
 
-void RT::System::executeCMD(shutdownCMD* cmd)
+void RT::System::executeCMD(RT::System::CMD* cmd)
 {
-  this->task->task_finished = true;
-  auto telem = RT::Telemitry::RT_SHUTDOWN;
-  this->postTelemitry(telem);
-  cmd->done();
+  RT::Telemitry::Response telem = RT::Telemitry::NO_TELEMITRY;
+  switch(cmd->getType()){
+    case Event::Type::RT_PERIOD_EVENT :
+      this->setPeriod(cmd);
+      break;
+    case Event::Type::RT_DEVICE_INSERT_EVENT : 
+    case Event::Type::RT_DEVICE_REMOVE_EVENT :
+      this->updateDeviceList(cmd);
+      break;
+    case Event::Type::RT_THREAD_INSERT_EVENT :
+    case Event::Type::RT_THREAD_REMOVE_EVENT :
+      this->updateThreadList(cmd);
+      break;
+    case Event::Type::RT_SHUTDOWN_EVENT :
+      this->task->task_finished = true;
+      telem = RT::Telemitry::RT_SHUTDOWN;
+      this->postTelemitry(telem);
+      cmd->done();
+      break;
+    case Event::Type::NOOP :
+      telem = RT::Telemitry::RT_NOOP;
+      this->postTelemitry(telem);
+      cmd->done();
+      break;
+    default:
+      telem = RT::Telemitry::RT_ERROR;
+      RT::System::postTelemitry(telem);
+      // make sure the command is handled so caller can continue
+      cmd->done();
+  }
 }
 
 void RT::System::receiveEvent(Event::Object* event)
 {
-  this->handleEvent(event);
+  switch(event->getType()){
+    case Event::Type::RT_PERIOD_EVENT :
+      this->setPeriod(event);
+      break;
+    case Event::Type::RT_THREAD_INSERT_EVENT :
+      this->insertThread(event);
+      break;
+    case Event::Type::RT_THREAD_REMOVE_EVENT :
+      this->removeThread(event);
+      break;
+    case Event::Type::RT_DEVICE_INSERT_EVENT :
+      this->insertDevice(event);
+      break;
+    case Event::Type::RT_DEVICE_REMOVE_EVENT :
+      this->removeDevice(event);
+      break;
+    case Event::Type::RT_SHUTDOWN_EVENT :
+      this->shutdown(event);
+      break;
+    case Event::Type::NOOP :
+      this->NOOP(event);
+      break;
+    default:
+      // Don't leave the caller waiting bro
+      event->done();
+  }
 }
 
-void RT::System::handleEvent(RT::changePeriodEvent* event)
+void RT::System::setPeriod(Event::Object* event)
 {
-  RT::System::periodUpdate cmd(event->period);
-  RT::System::periodUpdate* cmd_ptr = &cmd;
-  this->eventFifo->write(&cmd_ptr, sizeof(RT::System::periodUpdate*));
+  //auto period = std::any_cast<int64_t>(event->getParam("period"));
+  RT::System::CMD cmd(event->getType());
+  cmd.setParam("period", event->getParam("period"));
+  RT::System::CMD* cmd_ptr = &cmd;
+  this->eventFifo->write(&cmd_ptr, sizeof(RT::System::CMD*));
+  cmd.wait();
+  event->done();
+}
+
+void RT::System::NOOP(Event::Object* event)
+{
+  RT::System::CMD cmd(Event::Type::NOOP);
+  RT::System::CMD* cmd_ptr = &cmd;
+  this->eventFifo->write(&cmd_ptr, sizeof(RT::System::CMD*));
   cmd.wait();
   event->done();
   cmd_ptr = nullptr;
 }
 
-void RT::System::handleEvent(RT::NOOPEvent* event)
+void RT::System::insertDevice(Event::Object* event)
 {
-  RT::System::NOOPCMD cmd;
-  RT::System::NOOPCMD* cmd_ptr = &cmd;
-  this->eventFifo->write(&cmd_ptr, sizeof(RT::System::NOOPCMD*));
-  cmd.wait();
-  event->done();
-  cmd_ptr = nullptr;
-}
-
-void RT::System::handleEvent(RT::insertDeviceEvent* event)
-{
-  if (event->device == nullptr) {
+  auto* device = std::any_cast<RT::Device*>(event->getParam("device"));
+  if (device == nullptr) {
     ERROR_MSG("RT::System::insertDevice : invalid device pointer\n");
     return;
   }
-  this->io_connector->insertBlock(event->device);
+  this->io_connector->insertBlock(device);
   std::vector<IO::Block*> device_list = this->io_connector->getDevices();
-  RT::System::deviceListUpdate cmd(device_list);
-  RT::System::deviceListUpdate* cmd_ptr = &cmd;
-  this->eventFifo->write(&cmd_ptr, sizeof(RT::System::deviceListUpdate*));
+  RT::System::CMD cmd(event->getType());
+  cmd.setParam("deviceList", std::any(device_list));
+  RT::System::CMD* cmd_ptr = &cmd;
+  this->eventFifo->write(&cmd_ptr, sizeof(RT::System::CMD*));
   cmd.wait();
   event->done();
-  cmd_ptr = nullptr;
 }
 
-void RT::System::handleEvent(RT::removeDeviceEvent* event)
+void RT::System::removeDevice(Event::Object* event)
 {
-  if (event->device == nullptr) {
+  auto* device = std::any_cast<RT::Device*>(event->getParam("device"));
+  if (device == nullptr) {
     ERROR_MSG("RT::System::removeDevice : invalid device pointer\n");
     return;
   }
   // We have to make sure to deactivate device before removing
-  event->device->setActive(false);
-  this->io_connector->removeBlock(event->device);
+  device->setActive(false);
+  this->io_connector->removeBlock(device);
   std::vector<IO::Block*> device_list = this->io_connector->getDevices();
-  RT::System::deviceListUpdate cmd(device_list);
-  RT::System::deviceListUpdate* cmd_ptr = &cmd;
-  this->eventFifo->write(&cmd_ptr, sizeof(RT::System::deviceListUpdate*));
+  RT::System::CMD cmd(event->getType());
+  cmd.setParam("deviceList", std::any(device_list));
+  RT::System::CMD* cmd_ptr = &cmd;
+  this->eventFifo->write(&cmd_ptr, sizeof(RT::System::CMD*));
   cmd.wait();
   event->done();
-  cmd_ptr = nullptr;
 }
 
-void RT::System::handleEvent(RT::insertThreadEvent* event)
+void RT::System::insertThread(Event::Object* event)
 {
-  if (event->thread == nullptr) {
+  auto* thread = std::any_cast<RT::Thread*>(event->getParam("thread"));
+  if (thread == nullptr) {
     ERROR_MSG("RT::System::removeDevice : invalid device pointer\n");
     return;
   }
-  this->io_connector->insertBlock(event->thread);
+  this->io_connector->insertBlock(thread);
   std::vector<IO::Block*> thread_list = this->io_connector->getThreads();
-  RT::System::threadListUpdate cmd(thread_list);
-  RT::System::threadListUpdate* cmd_ptr = &cmd;
-  this->eventFifo->write(&cmd_ptr, sizeof(RT::System::threadListUpdate*));
+  RT::System::CMD cmd(event->getType());
+  cmd.setParam("threadList", std::any(thread_list));
+  RT::System::CMD* cmd_ptr = &cmd;
+  this->eventFifo->write(&cmd_ptr, sizeof(RT::System::CMD*));
   cmd.wait();
   event->done();
-  cmd_ptr = nullptr;
 }
 
-void RT::System::handleEvent(RT::removeThreadEvent* event)
+void RT::System::removeThread(Event::Object* event)
 {
-  if (event->thread == nullptr) {
+  auto* thread = std::any_cast<RT::Thread*>(event->getParam("thread"));
+  if (thread == nullptr) {
     ERROR_MSG("RT::System::removeDevice : invalid device pointer\n");
     return;
   }
   // We have to make sure to deactivate thread before removing
-  event->thread->setActive(false);
-  this->io_connector->removeBlock(event->thread);
+  thread->setActive(false);
+  this->io_connector->removeBlock(thread);
   std::vector<IO::Block*> thread_list = this->io_connector->getThreads();
-  RT::System::threadListUpdate cmd(thread_list);
-  RT::System::threadListUpdate* cmd_ptr = &cmd;
-  this->eventFifo->write(&cmd_ptr, sizeof(RT::System::threadListUpdate*));
+  RT::System::CMD cmd(event->getType());
+  cmd.setParam("threadList", std::any(thread_list));
+  RT::System::CMD* cmd_ptr = &cmd;
+  this->eventFifo->write(&cmd_ptr, sizeof(RT::System::CMD*));
   cmd.wait();
   event->done();
-  cmd_ptr = nullptr;
+}
+
+void RT::System::shutdown(Event::Object* event)
+{
+  RT::System::CMD cmd(event->getType());
+  RT::System::CMD* cmd_ptr = &cmd;
+  this->eventFifo->write(&cmd_ptr, sizeof(RT::System::CMD*));
+  cmd.wait();
+  event->done();
 }
 
 void RT::System::execute(RT::System* system)
 {
-  Event::Object* cmd = nullptr;
+  RT::System::CMD* cmd = nullptr;
   std::vector<Device*>::iterator iDevice;
   std::vector<Thread*>::iterator iThread;
   auto devicesBegin = system->devices.begin();
@@ -226,10 +292,10 @@ void RT::System::execute(RT::System* system)
       }
     }
 
-    if (system->eventFifo->readRT(&cmd, sizeof(Event::Object*)) != -1) {
+    if (system->eventFifo->readRT(&cmd, sizeof(RT::System::CMD*)) != -1) {
       do {
         system->executeCMD(cmd);
-      } while (system->eventFifo->readRT(&cmd, sizeof(Event::Object*)) != -1);
+      } while (system->eventFifo->readRT(&cmd, sizeof(RT::System::CMD*)) != -1);
 
       cmd = nullptr;
       devicesBegin = system->devices.begin();

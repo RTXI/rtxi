@@ -46,9 +46,4 @@ public:
   MOCK_METHOD(void, receiveEvent, (Event::Object*), (override));
 };
 
-class MockEventObject : public Event::Object
-{
-public:
-  std::string getName() override { return std::string("mockEventObject"); } 
-};
 #endif
