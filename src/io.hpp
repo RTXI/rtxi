@@ -22,8 +22,6 @@
 #define IO_H
 
 #include <array>
-#include <list>
-#include <unordered_map>
 #include <string>
 #include <vector>
 
@@ -128,6 +126,8 @@ public:
    */
   std::string getChannelDescription(IO::flags_t type, size_t index) const;
 
+  size_t getChannelSize(IO::flags_t type, size_t channel);
+
   /*!
    * write the values of the specified input channel.
    *
@@ -178,137 +178,6 @@ private:
   bool isInputDependent;
   std::array<std::vector<port_t>, IO::UNKNOWN> ports;
 };  // class Block
-
-/*!
- * Information about the outputs of a particular block. This is
- * meant to be used along with a block pointer for the source and
- * should not be used alone.
- * 
- * \param src_port Index of the source channel generating the output
- * \param dest Pointer to IO::Block to send the output to
- * \param dest_port Index of the destination channel taking the input
- */
-typedef struct
-{
-  size_t src_port;
-  IO::Block* dest;
-  size_t dest_port;
-}outputs_info;
-
-/*!
- * The structure representating the connection between two block devices
- *
- * \param src pointer to source block
- * \param outputs a list of outputs coming out from the block
- */
-typedef struct
-{
-  IO::Block* src;
-  std::vector<outputs_info> outputs;
-}connections_t;
-
-/*!
- * Acts as a central meeting point between Blocks. Provides
- *   interfaces for finding and connecting blocks.
- *
- * \sa IO::Block
- */
-class Connector
-{
-public:
-  Connector() = default;  // default constructor
-  Connector(const Connector& connector) = delete;  // copy constructor
-  Connector& operator=(const Connector& connector) =
-      delete;  // copy assignment operator
-  Connector(Connector&&) = delete;  // move constructor
-  Connector& operator=(Connector&&) = delete;  // move assignment operator
-  ~Connector() = default;
-
-  /*!
-   * Create a connection between the two specified Blocks.
-   *
-   * \param src The source of the data.
-   * \param out The source channel of the data.
-   * \param dest The destination of the data.
-   * \param in The destination channel of the data.
-   *
-   * \returns 0 if successfully connected, -1 if it found a cycle
-   *
-   * \sa IO::Block
-   */
-  int connect(IO::Block* src, size_t out, IO::Block* dest, size_t in);
-
-  /*!
-   * Break a connection between the two specified Blocks.
-   *
-   * \param src The source of the data.
-   * \param out The source channel of the data.
-   * \param dest The destination of the data.
-   * \param in The destination channel of the data.
-   *
-   * \sa IO::Block
-   * \sa IO::Block::input()
-   * \sa IO::Block::output()
-   */
-  void disconnect(IO::Block* src, size_t out, IO::Block* dest, size_t in);
-
-  /*!
-   * Determine whether two channels are connected or not.
-   *
-   * \param src The source of the data.
-   * \param out The source channel of the data.
-   * \param dest The destination of the data.
-   * \param in The destination channel of the data.
-   *
-   * \sa IO::Block::connect()
-   * \sa IO::Block::disconnect()
-   */
-  bool connected(IO::Block* src, size_t out, IO::Block* dest, size_t in);
-
-  /*!
-   * Register the block in order to access connection services
-   *
-   * \param block Pointer to block object to register
-   */
-  void insertBlock(IO::Block* block);
-
-  /*!
-   * Unregister the block from the registry
-   *
-   * \param block Pointer to block to unregister
-   */
-  void removeBlock(IO::Block* block);
-
-  /*!
-   * Get the list of devices that are registered with connector class.
-   * To the connector class devices are io blocks that are independent
-   * of other blocks when connected.
-   *
-   * \returns List of IO::Block pointers representing registred devices
-   */
-  std::vector<IO::Block*> getDevices();
-
-  /*!
-   * Get a lsit of threads that are registered with connector class. To
-   * the connector class threads are blocks that are dependent of other 
-   * blocks when connected. They are topologically sorted.
-   *
-   * \returns List of IO::Block pointers representing registered threads
-   */
-  std::vector<IO::Block*> getThreads();
-
-  /*!
-   * Returns a list of outputs for the input block pointer
-   *
-   * \param src Input IO::Block pointer to find the outputs for
-   * \returns A vector of IO::outputs_info containing connection info
-   * \sa IO::outputs_info
-   */
-  std::vector<IO::outputs_info> getOutputs(IO::Block* src);
-private:
-  std::vector<IO::Block*> topological_sort();
-  std::unordered_map<IO::Block*, std::vector<outputs_info>> registry;
-};  // class Connector
 
 }  // namespace IO
 

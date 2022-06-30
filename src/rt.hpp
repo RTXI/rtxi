@@ -22,6 +22,7 @@
 #define RT_H
 
 #include <vector>
+#include <unordered_map>
 
 #include "event.hpp"
 #include "fifo.hpp"
@@ -106,6 +107,152 @@ public:
   virtual const std::vector<double>& output() = 0;
 };  // class Thread
 
+typedef struct
+{
+  RT::Device* dest;
+  size_t dest_port;
+} device_connection_t;
+
+typedef struct
+{
+  RT::Thread* dest;
+  size_t dest_port;
+} thread_connection_t;
+
+/*!
+ * Information about the outputs of a particular block. This is
+ * meant to be used along with a block pointer for the source and
+ * should not be used alone.
+ * 
+ * \param src_port Index of the source channel generating the output
+ * \param dest Pointer to IO::Block to send the output to
+ * \param dest_port Index of the destination channel taking the input
+ */
+typedef struct
+{
+  std::vector<thread_connection_t> output_threads;
+  std::vector<device_connection_t> output_devices;
+}outputs_info;
+
+/*!
+ * Acts as a central meeting point between Blocks. Provides
+ *   interfaces for finding and connecting blocks.
+ *
+ * \sa IO::Block
+ */
+class Connector
+{
+public:
+  Connector() = default;  // default constructor
+  Connector(const Connector& connector) = delete;  // copy constructor
+  Connector& operator=(const Connector& connector) =
+      delete;  // copy assignment operator
+  Connector(Connector&&) = delete;  // move constructor
+  Connector& operator=(Connector&&) = delete;  // move assignment operator
+  ~Connector() = default;
+
+  /*!
+   * Create a connection between the two specified Blocks.
+   *
+   * \param src The source of the data.
+   * \param out The source channel of the data.
+   * \param dest The destination of the data.
+   * \param in The destination channel of the data.
+   *
+   * \returns 0 if successfully connected, -1 if it found a cycle
+   *
+   * \sa IO::Block
+   */
+  int connect(RT::Thread* src, size_t out, RT::Thread* dest, size_t in);
+  int connect(RT::Thread* src, size_t out, RT::Device* dest, size_t in);
+  int connect(RT::Device* src, size_t out, RT::Thread* dest, size_t in);
+  int connect(RT::Device* src, size_t out, RT::Device* dest, size_t in);
+
+  /*!
+   * Break a connection between the two specified Blocks.
+   *
+   * \param src The source of the data.
+   * \param out The source channel of the data.
+   * \param dest The destination of the data.
+   * \param in The destination channel of the data.
+   *
+   * \sa IO::Block
+   * \sa IO::Block::input()
+   * \sa IO::Block::output()
+   */
+  void disconnect(RT::Thread* src, size_t out, RT::Thread* dest, size_t in);
+  void disconnect(RT::Thread* src, size_t out, RT::Device* dest, size_t in);
+  void disconnect(RT::Device* src, size_t out, RT::Thread* dest, size_t in);
+  void disconnect(RT::Device* src, size_t out, RT::Device* dest, size_t in);
+  
+  /*!
+   * Determine whether two channels are connected or not.
+   *
+   * \param src The source of the data.
+   * \param out The source channel of the data.
+   * \param dest The destination of the data.
+   * \param in The destination channel of the data.
+   *
+   * \sa IO::Block::connect()
+   * \sa IO::Block::disconnect()
+   */
+  bool connected(RT::Thread* src, size_t out, RT::Thread* dest, size_t in);
+  bool connected(RT::Thread* src, size_t out, RT::Device* dest, size_t in);
+  bool connected(RT::Device* src, size_t out, RT::Thread* dest, size_t in);
+  bool connected(RT::Device* src, size_t out, RT::Device* dest, size_t in);
+
+  /*!
+   * Register the block in order to access connection services
+   *
+   * \param block Pointer to block object to register
+   */
+  void insertBlock(RT::Thread* thread);
+  void insertBlock(RT::Device* device);
+
+  /*!
+   * Unregister the block from the registry
+   *
+   * \param block Pointer to block to unregister
+   */
+  void removeBlock(RT::Thread* thread);
+  void removeBlock(RT::Device* device);
+
+  bool isRegistered(RT::Thread* thread);
+  bool isRegistered(RT::Device* device);
+
+  /*!
+   * Get the list of devices that are registered with connector class.
+   * To the connector class devices are io blocks that are independent
+   * of other blocks when connected.
+   *
+   * \returns List of IO::Block pointers representing registred devices
+   */
+  std::vector<RT::Device*> getDevices();
+
+  /*!
+   * Get a lsit of threads that are registered with connector class. To
+   * the connector class threads are blocks that are dependent of other 
+   * blocks when connected. They are topologically sorted.
+   *
+   * \returns List of IO::Block pointers representing registered threads
+   */
+  std::vector<RT::Thread*> getThreads();
+
+  /*!
+   * Returns a list of outputs for the input block pointer
+   *
+   * \param src Input IO::Block pointer to find the outputs for
+   * \returns A vector of IO::outputs_info containing connection info
+   * \sa IO::outputs_info
+   */
+  std::vector<RT::outputs_info> getOutputs(RT::Thread* src);
+  std::vector<RT::outputs_info> getOutputs(RT::Device* src);
+private:
+  std::vector<RT::Thread*> topological_sort();
+  std::unordered_map<RT::Thread*, std::vector<outputs_info>> thread_registry;
+  std::unordered_map<RT::Device*, std::vector<outputs_info>> device_registry;
+};  // class Connector
+
 /*!
  * Manages the RTOS as well as all objects that require
  *   realtime execution.
@@ -113,7 +260,7 @@ public:
 class System : public Event::Handler
 {
 public:
-  explicit System(Event::Manager* em, IO::Connector* ioc);
+  explicit System(Event::Manager* em, RT::Connector* rtc);
   System(const System& system) = delete;  // copy constructor
   System& operator=(const System& system) =
       delete;  // copy assignment operator
@@ -151,7 +298,7 @@ private:
   void setPeriod(CMD* cmd);
   void shutdown(CMD* cmd);
 
-  void postTelemitry(const RT::Telemitry::Response telemitry);
+  void postTelemitry(RT::Telemitry::Response& telemitry);
 
   static void execute(RT::System* system);
 
@@ -162,7 +309,7 @@ private:
   // system doesn't own any of the below variables. That's why they are
   // only pointers.
   Event::Manager* event_manager;
-  IO::Connector* io_connector;
+  RT::Connector* rt_connector;
 
   // System's real-time loop maintains copy of device and thread pointers
   std::vector<RT::Device*> devices;
