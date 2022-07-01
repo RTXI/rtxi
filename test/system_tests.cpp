@@ -216,3 +216,48 @@ TEST_F(SystemTest, updateDeviceList)
   ASSERT_EQ(this->system->getTelemitry(), RT::Telemitry::RT_DEVICE_LIST_UPDATE);
   ASSERT_FALSE(this->rt_connector->isRegistered(&mock_device));
 }
+
+TEST_F(SystemTest, updateThreadList)
+{
+  std::string defaultInputChannelName = "CHANNEL INPUT";
+  std::string defaultInputChannelDescription =
+      "DEFAULT INPUT CHANNEL DESCRIPTION";
+  std::string defaultOutputChannelName = "CHANNEL OUTPUT";
+  std::string defaultOutputChannelDescription =
+      "DEFAULT OUTPUT CHANNEL DESCRIPTION";
+  std::vector<IO::channel_t> defaultChannelList;
+
+  // Generates a default block with single input and output channel
+  IO::channel_t defaultInputChannel = {};
+  defaultInputChannel.name = defaultInputChannelName;
+  defaultInputChannel.description = defaultInputChannelDescription;
+  defaultInputChannel.flags = IO::INPUT;
+  defaultInputChannel.data_size = 1;
+  IO::channel_t defaultOutputChannel = {};
+  defaultOutputChannel.name = defaultOutputChannelName;
+  defaultOutputChannel.description = defaultOutputChannelDescription;
+  defaultOutputChannel.flags = IO::OUTPUT;
+  defaultOutputChannel.data_size = 1;
+  defaultChannelList.push_back(defaultInputChannel);
+  defaultChannelList.push_back(defaultOutputChannel);
+
+  MockRTThread mock_thread("mockthread", defaultChannelList);
+  RT::Thread* thread_ptr = &mock_thread;
+
+  // insert thread
+  this->rt_connector->insertBlock(thread_ptr);
+  Event::Object insertEvent(Event::Type::RT_THREAD_INSERT_EVENT);
+  insertEvent.setParam("thread", thread_ptr);
+  this->system->receiveEvent(&insertEvent);
+  insertEvent.wait();
+  ASSERT_EQ(this->system->getTelemitry(), RT::Telemitry::RT_THREAD_LIST_UPDATE);
+  ASSERT_TRUE(this->rt_connector->isRegistered(&mock_thread));
+
+  // remove thread
+  Event::Object removeEvent(Event::Type::RT_THREAD_REMOVE_EVENT);
+  removeEvent.setParam("thread", thread_ptr);
+  this->system->receiveEvent(&removeEvent);
+  removeEvent.wait();
+  ASSERT_EQ(this->system->getTelemitry(), RT::Telemitry::RT_THREAD_LIST_UPDATE);
+  ASSERT_FALSE(this->rt_connector->isRegistered(&mock_thread));
+}
