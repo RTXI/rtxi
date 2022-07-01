@@ -35,8 +35,8 @@ protected:
   {
     this->event_manager = std::make_unique<Event::Manager>();
     this->rt_connector = std::make_unique<RT::Connector>();
-    this->system = std::make_unique<RT::System>(event_manager.get(),
-                                                rt_connector.get());
+    this->system =
+        std::make_unique<RT::System>(event_manager.get(), rt_connector.get());
   }
   std::unique_ptr<Event::Manager> event_manager;
   std::unique_ptr<RT::Connector> rt_connector;
@@ -46,7 +46,10 @@ protected:
 class MockRTDevice : public RT::Device
 {
 public:
-  MockRTDevice(std::string name, std::vector<IO::channel_t> channel_list) : RT::Device(name, channel_list) {}
+  MockRTDevice(std::string name, std::vector<IO::channel_t> channel_list)
+      : RT::Device(name, channel_list)
+  {
+  }
   MOCK_METHOD(void, read, (), (override));
   MOCK_METHOD(void, write, (), (override));
   MOCK_METHOD(bool, getActive, (), (override));
@@ -56,7 +59,10 @@ public:
 class MockRTThread : public RT::Thread
 {
 public:
-  MockRTThread(std::string name, std::vector<IO::channel_t> channel_list) : RT::Thread(name, channel_list) {}
+  MockRTThread(std::string name, std::vector<IO::channel_t> channel_list)
+      : RT::Thread(name, channel_list)
+  {
+  }
   MOCK_METHOD(void, execute, (), (override));
   MOCK_METHOD(bool, getActive, (), (override));
   MOCK_METHOD(void, setActive, (bool), (override));

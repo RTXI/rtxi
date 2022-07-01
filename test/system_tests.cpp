@@ -19,13 +19,12 @@
  */
 
 #include <chrono>
-#include <thread>
 #include <random>
-
-
-#include <gmock/gmock.h>
+#include <thread>
 
 #include "system_tests.hpp"
+
+#include <gmock/gmock.h>
 
 TEST_F(RTConnectorTest, connections)
 {
@@ -64,24 +63,28 @@ TEST_F(RTConnectorTest, getOutputs)
   MockRTThread outputThread(this->defaultBlockName, this->defaultChannelList);
   this->connector.insertBlock(&outputThread);
   std::vector<std::unique_ptr<RT::Thread>> inputThreads;
-  for(int i=0; i<100; i++){
-    inputThreads.push_back(std::make_unique<MockRTThread>("randblock", this->defaultChannelList));
+  for (int i = 0; i < 100; i++) {
+    inputThreads.push_back(
+        std::make_unique<MockRTThread>("randblock", this->defaultChannelList));
     this->connector.insertBlock(inputThreads.back().get());
   }
   std::random_device rd;
   std::mt19937 gen(rd());
-  std::uniform_int_distribution<> distribution(0,1);
+  std::uniform_int_distribution<> distribution(0, 1);
   std::vector<int> randvals(100);
-  for(auto& val : randvals){ val = distribution(gen); }
-  for(int i=0; i<100; i++){
-    if(randvals[i] == 1){
+  for (auto& val : randvals) {
+    val = distribution(gen);
+  }
+  for (int i = 0; i < 100; i++) {
+    if (randvals[i] == 1) {
       this->connector.connect(&outputThread, 0, inputThreads[i].get(), 0);
     }
   }
-  std::vector<RT::outputs_info> output_connections = this->connector.getOutputs(&outputThread);
+  std::vector<RT::outputs_info> output_connections =
+      this->connector.getOutputs(&outputThread);
   int num_of_connections = std::accumulate(randvals.begin(), randvals.end(), 0);
   EXPECT_EQ(output_connections[0].output_threads.size(), num_of_connections);
-  for(auto con : output_connections[0].output_threads){
+  for (auto con : output_connections[0].output_threads) {
     ASSERT_TRUE(this->connector.connected(&outputThread, 0, con.dest, 0));
   }
 }
@@ -92,17 +95,22 @@ TEST_F(RTConnectorTest, getBlocks)
   std::vector<std::unique_ptr<RT::Device>> devices(50);
   std::random_device rd;
   std::mt19937 gen(rd());
-  std::uniform_int_distribution<> distribution(0,49);
-  for(int i=0; i<50; i++){
-    devices[i] = std::make_unique<MockRTDevice>("randdevice", this->defaultChannelList);
-    threads[i] = std::make_unique<MockRTThread>("randthread", this->defaultChannelList);
+  std::uniform_int_distribution<> distribution(0, 49);
+  for (int i = 0; i < 50; i++) {
+    devices[i] =
+        std::make_unique<MockRTDevice>("randdevice", this->defaultChannelList);
+    threads[i] =
+        std::make_unique<MockRTThread>("randthread", this->defaultChannelList);
     this->connector.insertBlock(threads[i].get());
     this->connector.insertBlock(devices[i].get());
   }
-  for(int iter = 0; iter < 50; iter++){
-    this->connector.connect(threads[iter].get(), 0, threads[distribution(gen)].get(), 0);
-    this->connector.connect(devices[iter].get(), 0, threads[distribution(gen)].get(), 0);
-    this->connector.connect(threads[iter].get(), 0, devices[distribution(gen)].get(), 0);
+  for (int iter = 0; iter < 50; iter++) {
+    this->connector.connect(
+        threads[iter].get(), 0, threads[distribution(gen)].get(), 0);
+    this->connector.connect(
+        devices[iter].get(), 0, threads[distribution(gen)].get(), 0);
+    this->connector.connect(
+        threads[iter].get(), 0, devices[distribution(gen)].get(), 0);
   }
   std::vector<RT::Thread*> received_threads = this->connector.getThreads();
   std::vector<RT::Device*> received_devices = this->connector.getDevices();
@@ -110,15 +118,17 @@ TEST_F(RTConnectorTest, getBlocks)
   ASSERT_EQ(received_devices.size(), 50);
 
   // verify that thread objects are in topological order
-  RT::outputs_info tempinfo{};
-  for(auto thread_iter=received_threads.begin(); thread_iter != received_threads.end(); thread_iter++){
+  RT::outputs_info tempinfo {};
+  for (auto thread_iter = received_threads.begin();
+       thread_iter != received_threads.end();
+       thread_iter++)
+  {
     tempinfo = this->connector.getOutputs(*thread_iter)[0];
-    for(auto output_thread : tempinfo.output_threads){
-      auto loc = std::find_if(received_threads.begin(), 
+    for (auto output_thread : tempinfo.output_threads) {
+      auto loc = std::find_if(received_threads.begin(),
                               thread_iter,
-                              [&output_thread](RT::Thread* current_thread){
-                                return current_thread == output_thread.dest;
-                              });
+                              [&output_thread](RT::Thread* current_thread)
+                              { return current_thread == output_thread.dest; });
       ASSERT_EQ(loc, thread_iter);
     }
   }
@@ -150,11 +160,11 @@ TEST_F(SystemTest, getPeriod)
 TEST_F(SystemTest, setPeriod)
 {
   Event::Object ev(Event::Type::RT_PERIOD_EVENT);
-  ev.setParam("period", RT::OS::DEFAULT_PERIOD/2);
+  ev.setParam("period", RT::OS::DEFAULT_PERIOD / 2);
   this->system->receiveEvent(&ev);
   ev.wait();
   EXPECT_EQ(RT::Telemitry::RT_PERIOD_UPDATE, this->system->getTelemitry());
-  ASSERT_EQ(RT::OS::DEFAULT_PERIOD/2, system->getPeriod());
+  ASSERT_EQ(RT::OS::DEFAULT_PERIOD / 2, system->getPeriod());
   ev.setParam("period", RT::OS::DEFAULT_PERIOD);
   this->system->receiveEvent(&ev);
   ev.wait();
@@ -192,7 +202,7 @@ TEST_F(SystemTest, updateDeviceList)
   // insert device
   this->rt_connector->insertBlock(device_ptr);
   Event::Object insertEvent(Event::Type::RT_DEVICE_INSERT_EVENT);
-  insertEvent.setParam("device",  device_ptr);
+  insertEvent.setParam("device", device_ptr);
   this->system->receiveEvent(&insertEvent);
   insertEvent.wait();
   ASSERT_EQ(this->system->getTelemitry(), RT::Telemitry::RT_DEVICE_LIST_UPDATE);
@@ -205,5 +215,4 @@ TEST_F(SystemTest, updateDeviceList)
   removeEvent.wait();
   ASSERT_EQ(this->system->getTelemitry(), RT::Telemitry::RT_DEVICE_LIST_UPDATE);
   ASSERT_FALSE(this->rt_connector->isRegistered(&mock_device));
-
 }

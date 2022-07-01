@@ -18,12 +18,11 @@
 
  */
 
-#include <iostream>
 #include <algorithm>
-#include <numeric>
-
-#include <vector>
+#include <iostream>
 #include <memory>
+#include <numeric>
+#include <vector>
 
 #include "io_tests.hpp"
 

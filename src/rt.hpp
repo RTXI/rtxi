@@ -395,7 +395,21 @@ public:
    */
   std::vector<RT::outputs_info> getOutputs(RT::Device* src);
 
+  /*!
+   * Copies outputs of the given device object to the inputs of 
+   * connected thread and device objects
+   * 
+   * \param device Pointer to device that is the source of the output.
+   */
   void propagate(RT::Device* device);
+
+
+  /*!
+   * Copies outputs of the given thread object to the inputs of 
+   * connected thread and device objects
+   * 
+   * \param thread Pointer to thraed that is the source of the output.
+   */
   void propagate(RT::Thread* thread);
 private:
   std::vector<RT::Thread*> topological_sort();
