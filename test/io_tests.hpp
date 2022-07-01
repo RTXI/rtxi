@@ -61,37 +61,6 @@ protected:
   }
 };
 
-class IOConnectorTest : public ::testing::Test
-{
-public:
-  std::string defaultBlockName;
-  std::string defaultInputChannelName = "CHANNEL INPUT";
-  std::string defaultInputChannelDescription =
-      "DEFAULT INPUT CHANNEL DESCRIPTION";
-  std::string defaultOutputChannelName = "CHANNEL OUTPUT";
-  std::string defaultOutputChannelDescription =
-      "DEFAULT OUTPUT CHANNEL DESCRIPTION";
-  std::vector<IO::channel_t> defaultChannelList;
 
-protected:
-  IOConnectorTest()
-  {
-    // Generates a default channels
-    defaultBlockName = "DEFAULT:BLOCK:NAME";
-    IO::channel_t defaultInputChannel = {};
-    defaultInputChannel.name = defaultInputChannelName;
-    defaultInputChannel.description = defaultInputChannelDescription;
-    defaultInputChannel.flags = IO::INPUT;
-    defaultInputChannel.data_size = 1;
-    IO::channel_t defaultOutputChannel = {};
-    defaultOutputChannel.name = defaultInputChannelName;
-    defaultOutputChannel.description = defaultInputChannelDescription;
-    defaultOutputChannel.flags = IO::OUTPUT;
-    defaultOutputChannel.data_size = 1;
-    defaultChannelList.push_back(defaultInputChannel);
-    defaultChannelList.push_back(defaultOutputChannel);
-  }
-  IO::Connector connector;
-};
 
 #endif

@@ -21,7 +21,7 @@
 #include <iostream>
 #include <algorithm>
 #include <numeric>
-#include <random>
+
 #include <vector>
 #include <memory>
 
@@ -78,80 +78,3 @@ TEST_F(IOBlockTest, writeinput)
   tempblock.echo();
   EXPECT_DOUBLE_EQ(values[0], tempblock.readoutput(0)[0]);
 }
-
-TEST_F(IOConnectorTest, connections)
-{
-  // Have to build example blocks to test connector
-  IO::Block block1("BLOCK1", this->defaultChannelList, true);
-  IO::Block block2("BLOCK2", this->defaultChannelList, true);
-
-  // connect and disconnect between two blocks
-  EXPECT_FALSE(this->connector.connected(&block1, 0, &block2, 0));
-  EXPECT_FALSE(this->connector.connected(&block2, 0, &block1, 0));
-  int result = 0;
-  result = this->connector.connect(&block1, 0, &block2, 0);
-  ASSERT_EQ(result, 0);
-  result = this->connector.connect(&block2, 0, &block1, 0);
-  ASSERT_EQ(result, -1);
-  EXPECT_TRUE(this->connector.connected(&block1, 0, &block2, 0));
-  EXPECT_FALSE(this->connector.connected(&block2, 0, &block1, 0));
-  this->connector.disconnect(&block1, 0, &block2, 0);
-  this->connector.disconnect(&block2, 0, &block1, 0);
-  EXPECT_FALSE(this->connector.connected(&block1, 0, &block2, 0));
-  EXPECT_FALSE(this->connector.connected(&block2, 0, &block1, 0));
-}
-
-TEST_F(IOConnectorTest, getOutputs)
-{
-  IO::Block outputblock(this->defaultBlockName, this->defaultChannelList, true);
-  std::vector<std::unique_ptr<IO::Block>> inputblocks;
-  for(int i=0; i<100; i++){
-    inputblocks.push_back(std::make_unique<IO::Block>("randblock", this->defaultChannelList, true));
-  }
-  std::random_device rd;
-  std::mt19937 gen(rd());
-  std::uniform_int_distribution<> distribution(0,1);
-  std::vector<int> randvals(100);
-  for(auto& val : randvals){ val = distribution(gen); }
-  for(int i=0; i<100; i++){
-    if(randvals[i] == 1){
-      this->connector.connect(&outputblock, 0, inputblocks[i].get(), 0);
-    }
-  }
-  std::vector<IO::outputs_info> output_connections = this->connector.getOutputs(&outputblock);
-  int num_of_connections = std::accumulate(randvals.begin(), randvals.end(), 0);
-  EXPECT_EQ(output_connections.size(), num_of_connections);
-  for(auto con : output_connections){
-    ASSERT_TRUE(this->connector.connected(&outputblock, 0, con.dest, 0));
-  }
-}
-
-TEST_F(IOConnectorTest, getBlocks)
-{
-  std::vector<std::unique_ptr<IO::Block>> blocks(50);
-  std::random_device rd;
-  std::mt19937 gen(rd());
-  std::uniform_int_distribution<> distribution(0,49);
-  for(int i=0; i<50; i++){
-    blocks[i] = std::make_unique<IO::Block>("randblock", this->defaultChannelList, distribution(gen) >= 25);
-    this->connector.insertBlock(blocks[i].get());
-  }
-  for(auto iter=blocks.begin(); iter != blocks.end(); iter++){
-    this->connector.connect(iter->get(), 0, blocks[distribution(gen)].get(), 0);
-    this->connector.connect(iter->get(), 0, blocks[distribution(gen)].get(), 0);
-    this->connector.connect(iter->get(), 0, blocks[distribution(gen)].get(), 0);
-  }
-  std::vector<IO::Block*> threads = this->connector.getThreads();
-
-  // first verify that they are in topological order
-  for(auto thread_iter=threads.begin(); thread_iter != threads.end(); thread_iter++){
-    for(auto outputs : this->connector.getOutputs(*thread_iter)){
-      auto loc = std::find(threads.begin(), thread_iter, outputs.dest);
-      ASSERT_EQ(loc, thread_iter);
-    }
-  }
-  std::vector<IO::Block*> devices = this->connector.getDevices();
-  ASSERT_EQ(devices.size()+threads.size(), 50);
-}
-
-

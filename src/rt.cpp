@@ -32,7 +32,7 @@ int RT::Connector::connect(RT::Thread* src,
 {
   // Let's remind our users to register their block first
   if(!(this->isRegistered(src) && this->isRegistered(dest))) { 
-    ERROR_MSG("RT::Connector : source or destination threads are not cregsitered");
+    ERROR_MSG("RT::Connector : source or destination threads are not regsitered");
     return -1; 
   }
   // First we must make sure that we aren't going to create a cycle
@@ -68,7 +68,7 @@ int RT::Connector::connect(RT::Thread* src,
 {
   // Let's remind our users to register their block first
   if(!(this->isRegistered(src) && this->isRegistered(dest))) { 
-    ERROR_MSG("RT::Connector : source or destination threads are not cregsitered");
+    ERROR_MSG("RT::Connector : source or destination threads are not regsitered");
     return -1; 
   }
 
@@ -86,7 +86,7 @@ int RT::Connector::connect(RT::Device* src,
 {
   // Let's remind our users to register their block first
   if(!(this->isRegistered(src) && this->isRegistered(dest))) { 
-    ERROR_MSG("RT::Connector : source or destination threads are not cregsitered");
+    ERROR_MSG("RT::Connector : source or destination threads are not regsitered");
     return -1; 
   }
 
@@ -104,7 +104,7 @@ int RT::Connector::connect(RT::Device* src,
 {
   // Let's remind our users to register their block first
   if(!(this->isRegistered(src) && this->isRegistered(dest))) { 
-    ERROR_MSG("RT::Connector : source or destination threads are not cregsitered");
+    ERROR_MSG("RT::Connector : source or destination threads are not regsitered");
     return -1; 
   }
 
@@ -611,12 +611,6 @@ void RT::System::shutdown(Event::Object* event)
 void RT::System::execute(RT::System* system)
 {
   RT::System::CMD* cmd = nullptr;
-  std::vector<Device*>::iterator iDevice;
-  std::vector<Thread*>::iterator iThread;
-  auto devicesBegin = system->devices.begin();
-  auto devicesEnd = system->devices.end();
-  auto threadListBegin = system->threads.begin();
-  auto threadListEnd = system->threads.end();
 
   if (RT::OS::setPeriod(system->task.get(), RT::OS::DEFAULT_PERIOD) != 0) {
     ERROR_MSG(
@@ -624,35 +618,38 @@ void RT::System::execute(RT::System* system)
         "realtime thread\n");
     return;
   }
-  while (!system->task->task_finished) {
+  while (!(system->task->task_finished)) {
     RT::OS::sleepTimestep(system->task.get());
 
-    for (iDevice = devicesBegin; iDevice != devicesEnd; ++iDevice){
-      if ((*iDevice)->getActive()){
-        (*iDevice)->read();
+    for (auto iDevice : system->devices){
+      if (iDevice->getActive()){
+        iDevice->read();
       }
     }
 
-    for (iThread = threadListBegin; iThread != threadListEnd; ++iThread){
-      if ((*iThread)->getActive()){
-        (*iThread)->execute();
+    for (auto iThread : system->threads){
+      if (iThread->getActive()){
+        iThread->execute();
       }
     }
 
-    for (iDevice = devicesBegin; iDevice != devicesEnd; ++iDevice){
-      if ((*iDevice)->getActive()){
-        (*iDevice)->write();
+    for (auto iDevice : system->devices){
+      if (iDevice->getActive()){
+        iDevice->write();
       }
     }
 
-    if (system->eventFifo->readRT(&cmd, sizeof(RT::System::CMD*)) != -1) {
-      do {
-        system->executeCMD(cmd);
-      } while (system->eventFifo->readRT(&cmd, sizeof(RT::System::CMD*)) != -1);
+    // if (system->eventFifo->readRT(&cmd, sizeof(RT::System::CMD*)) != -1) {
+    //   do {
+    //     system->executeCMD(cmd);
+    //   } while (system->eventFifo->readRT(&cmd, sizeof(RT::System::CMD*)) != -1);
 
-      cmd = nullptr;
-      devicesBegin = system->devices.begin();
-      threadListBegin = system->threads.begin();
+    //   cmd = nullptr;
+    // }
+    while(system->eventFifo->readRT(&cmd, sizeof(RT::System::CMD*)) != -1)
+    {
+      system->executeCMD(cmd);
     }
+    cmd = nullptr;
   }
 }

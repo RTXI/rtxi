@@ -34,12 +34,12 @@ protected:
   SystemTest()
   {
     this->event_manager = std::make_unique<Event::Manager>();
-    this->io_connector = std::make_unique<IO::Connector>();
+    this->rt_connector = std::make_unique<RT::Connector>();
     this->system = std::make_unique<RT::System>(event_manager.get(),
-                                                io_connector.get());
+                                                rt_connector.get());
   }
   std::unique_ptr<Event::Manager> event_manager;
-  std::unique_ptr<IO::Connector> io_connector;
+  std::unique_ptr<RT::Connector> rt_connector;
   std::unique_ptr<RT::System> system;
 };
 
@@ -57,8 +57,44 @@ class MockRTThread : public RT::Thread
 {
 public:
   MockRTThread(std::string name, std::vector<IO::channel_t> channel_list) : RT::Thread(name, channel_list) {}
-  MOCK_METHOD(unsigned long, getPriority, (), (const));
   MOCK_METHOD(void, execute, (), (override));
+  MOCK_METHOD(bool, getActive, (), (override));
+  MOCK_METHOD(void, setActive, (bool), (override));
+  MOCK_METHOD(void, input, (const std::vector<double>&), (override));
+  MOCK_METHOD(const std::vector<double>&, output, (), (override));
+};
+
+class RTConnectorTest : public ::testing::Test
+{
+public:
+  std::string defaultBlockName;
+  std::string defaultInputChannelName = "CHANNEL INPUT";
+  std::string defaultInputChannelDescription =
+      "DEFAULT INPUT CHANNEL DESCRIPTION";
+  std::string defaultOutputChannelName = "CHANNEL OUTPUT";
+  std::string defaultOutputChannelDescription =
+      "DEFAULT OUTPUT CHANNEL DESCRIPTION";
+  std::vector<IO::channel_t> defaultChannelList;
+
+protected:
+  RTConnectorTest()
+  {
+    // Generates a default channels
+    defaultBlockName = "DEFAULT:BLOCK:NAME";
+    IO::channel_t defaultInputChannel = {};
+    defaultInputChannel.name = defaultInputChannelName;
+    defaultInputChannel.description = defaultInputChannelDescription;
+    defaultInputChannel.flags = IO::INPUT;
+    defaultInputChannel.data_size = 1;
+    IO::channel_t defaultOutputChannel = {};
+    defaultOutputChannel.name = defaultInputChannelName;
+    defaultOutputChannel.description = defaultInputChannelDescription;
+    defaultOutputChannel.flags = IO::OUTPUT;
+    defaultOutputChannel.data_size = 1;
+    defaultChannelList.push_back(defaultInputChannel);
+    defaultChannelList.push_back(defaultOutputChannel);
+  }
+  RT::Connector connector;
 };
 
 #endif
