@@ -20,6 +20,8 @@
 
 #include <functional>
 #include <thread>
+#include <mutex>
+#include <condition_variable>
 
 #include "fifo_tests.hpp"
 
@@ -66,6 +68,10 @@ TEST_F(FifoTest, roundtrip)
 TEST_F(FifoTest, nonblocking)
 {
   std::unique_ptr<RT::OS::Fifo> fifo;
+  std::mutex mut;
+  std::condition_variable cv;
+  bool ready = false;
+
   // size_t size = this->default_buffer_size;
   std::string* input = new std::string(this->default_message);
   std::string* output = nullptr;
@@ -73,22 +79,30 @@ TEST_F(FifoTest, nonblocking)
   ASSERT_EQ(result, 0);
   auto test_task = std::make_unique<RT::OS::Task>();
   RT::OS::setPeriod(test_task.get(), RT::OS::SECONDS_TO_NANOSECONDS);
-  auto sender = [&fifo, &test_task, &input]()
+  auto sender = [&fifo, &test_task, &input, &mut, &cv, &ready]()
   {
     RT::OS::initiate();
-    RT::OS::sleepTimestep(test_task.get());
+    //RT::OS::sleepTimestep(test_task.get());
     fifo->writeRT(&input, sizeof(std::string*));
+    std::unique_lock<std::mutex> lk(mut);
+    ready = true;
+    lk.unlock();
+    cv.notify_one();
     RT::OS::shutdown();
   };
+
   int64_t start_time = RT::OS::getTime();
   std::thread sender_thread(sender);
+  {
+    std::unique_lock<std::mutex> lk(mut);
+    cv.wait(lk, [&ready](){return ready;});
+  }
   ssize_t read_bytes = fifo->read(&output, sizeof(std::string*));
   int64_t end_time = RT::OS::getTime();
   sender_thread.join();
   int64_t duration = end_time - start_time;
-  // Should return immediately when in nonblocking mode. No message transferred
-  ASSERT_EQ(read_bytes, -1);
-  EXPECT_GE(test_task->period, duration);
+
+  ASSERT_NE(read_bytes, -1);
   output = nullptr;
   delete input;
 }
