@@ -394,6 +394,9 @@ public:
    * \sa RT::outputs_info
    */
   std::vector<RT::outputs_info> getOutputs(RT::Device* src);
+
+  void propagate(RT::Device* device);
+  void propagate(RT::Thread* thread);
 private:
   std::vector<RT::Thread*> topological_sort();
   std::unordered_map<RT::Thread*, std::vector<outputs_info>> thread_registry;

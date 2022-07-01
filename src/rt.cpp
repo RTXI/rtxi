@@ -378,6 +378,30 @@ std::vector<RT::outputs_info> RT::Connector::getOutputs(RT::Device* src)
   return result;
 }
 
+void RT::Connector::propagate(RT::Device* device)
+{
+  for(size_t out_ch = 0; out_ch < this->device_registry[device].size(); out_ch++){
+    for(auto dest_info : this->device_registry[device][out_ch].output_devices){
+      dest_info.dest->writeinput(dest_info.dest_port, device->readoutput(out_ch));
+    }
+    for(auto dest_info : this->device_registry[device][out_ch].output_threads){
+      dest_info.dest->writeinput(dest_info.dest_port, device->readoutput(out_ch));
+    }
+  }
+}
+
+void RT::Connector::propagate(RT::Thread* thread)
+{
+  for(size_t out_ch = 0; out_ch < this->thread_registry[thread].size(); out_ch++){
+    for(auto dest_info : this->thread_registry[thread][out_ch].output_devices){
+      dest_info.dest->writeinput(dest_info.dest_port, thread->readoutput(out_ch));
+    }
+    for(auto dest_info : this->thread_registry[thread][out_ch].output_threads){
+      dest_info.dest->writeinput(dest_info.dest_port, thread->readoutput(out_ch));
+    }
+  }
+}
+
 RT::System::System(Event::Manager* em, RT::Connector* rtc) 
   : event_manager(em), rt_connector(rtc)
 {
@@ -621,31 +645,26 @@ void RT::System::execute(RT::System* system)
   while (!(system->task->task_finished)) {
     RT::OS::sleepTimestep(system->task.get());
 
-    for (auto iDevice : system->devices){
+    for (auto* iDevice : system->devices){
       if (iDevice->getActive()){
         iDevice->read();
+        system->rt_connector->propagate(iDevice);
       }
     }
 
-    for (auto iThread : system->threads){
+    for (auto* iThread : system->threads){
       if (iThread->getActive()){
         iThread->execute();
+        system->rt_connector->propagate(iThread);
       }
     }
 
-    for (auto iDevice : system->devices){
+    for (auto* iDevice : system->devices){
       if (iDevice->getActive()){
         iDevice->write();
       }
     }
 
-    // if (system->eventFifo->readRT(&cmd, sizeof(RT::System::CMD*)) != -1) {
-    //   do {
-    //     system->executeCMD(cmd);
-    //   } while (system->eventFifo->readRT(&cmd, sizeof(RT::System::CMD*)) != -1);
-
-    //   cmd = nullptr;
-    // }
     while(system->eventFifo->readRT(&cmd, sizeof(RT::System::CMD*)) != -1)
     {
       system->executeCMD(cmd);
