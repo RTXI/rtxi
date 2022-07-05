@@ -49,11 +49,15 @@ public:
   MockRTDevice(std::string name, std::vector<IO::channel_t> channel_list)
       : RT::Device(name, channel_list)
   {
+    this->isactive = false;
   }
   MOCK_METHOD(void, read, (), (override));
   MOCK_METHOD(void, write, (), (override));
-  MOCK_METHOD(bool, getActive, (), (override));
-  MOCK_METHOD(void, setActive, (bool), (override));
+  bool getActive() override { return isactive; }
+  void setActive(bool active) override { this->isactive = active; }
+
+  private:
+  bool isactive;
 };
 
 class MockRTThread : public RT::Thread
@@ -64,10 +68,13 @@ public:
   {
   }
   MOCK_METHOD(void, execute, (), (override));
-  MOCK_METHOD(bool, getActive, (), (override));
-  MOCK_METHOD(void, setActive, (bool), (override));
+  bool getActive() override { return isactive; }
+  void setActive(bool active) override { this->isactive = active; }
   MOCK_METHOD(void, input, (const std::vector<double>&), (override));
   MOCK_METHOD(const std::vector<double>&, output, (), (override));
+
+  private:
+  bool isactive;
 };
 
 class RTConnectorTest : public ::testing::Test

@@ -420,6 +420,7 @@ RT::System::System(Event::Manager* em, RT::Connector* rtc)
 
 RT::System::~System()
 {
+  this->task->task_finished = true;
   RT::OS::deleteTask(this->task.get());
   this->event_manager->unregisterHandler(this);
 }
