@@ -44,8 +44,11 @@ namespace IO
 enum flags_t : size_t
 {
   INPUT = 0,
-  OUTPUT = 1,
-  UNKNOWN = 2
+  OUTPUT,
+  PARAMETER,
+  STATE,
+  COMMENT,
+  UNKNOWN
 };
 
 /*!
