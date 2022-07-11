@@ -43,6 +43,10 @@ protected:
 class MockEventHandler : public Event::Handler
 {
 public:
+  MockEventHandler() = default;
+  ~MockEventHandler() = default;
+
+  //void receiveEvent(Event::Object* event) { event->done(); }
   MOCK_METHOD(void, receiveEvent, (Event::Object*), (override));
 };
 

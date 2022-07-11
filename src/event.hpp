@@ -24,9 +24,12 @@
 #include <any>
 #include <condition_variable>
 #include <list>
+#include <queue>
 #include <mutex>
 #include <string>
 #include <vector>
+#include <atomic>
+#include <thread>
 
 #include "fifo.hpp"
 
@@ -192,11 +195,11 @@ public:
 class Manager
 {
 public:
-  Manager() = default;
+  Manager();
   Manager(const Manager& manager) = delete; // copy constructor
   Manager& operator=(const Manager& manager) = delete; //copy assignment operator
-  Manager(Manager &&) = default; // move constructor
-  Manager& operator=(Manager &&) = default; // move assignment operator
+  Manager(Manager &&) = delete; // move constructor
+  Manager& operator=(Manager &&) = delete; // move assignment operator
   ~Manager();
 
   /*!
@@ -209,6 +212,7 @@ public:
    * \sa Event::Object
    */
   void postEvent(Object* event);
+  void processEvents();
 
   /*!
    * Registers handler in the registry
@@ -226,6 +230,11 @@ public:
 
 private:
   std::list<Handler*> handlerList;
+  std::queue<Event::Object*> event_q;
+  std::mutex event_mut;
+  std::condition_variable available_event_cond;
+  std::atomic<bool> running = true;
+  std::unique_ptr<std::thread> event_thread;
 };  // class Manager
 
 }  // namespace Event

@@ -173,15 +173,42 @@ Event::Type Event::Object::getType()
   return this->event_type;
 }
 
+Event::Manager::Manager()
+{
+  this->event_thread = std::make_unique<std::thread>(&Event::Manager::processEvents, this);
+}
+
 Event::Manager::~Manager()
 {
-  this->handlerList.clear();
+  // clear pointers and terminate event thread. We don't have to wait for
+  // NOOP event to be handled as there won't be anything to do so.
+  this->running = false;
+  Event::Object event(Event::Type::RT_SHUTDOWN_EVENT);
+  this->postEvent(&event);
 }
 
 void Event::Manager::postEvent(Event::Object* event)
 {
-  for (auto & handler : this->handlerList) {
-    handler->receiveEvent(event);
+  std::lock_guard<std::mutex> lk(this->event_mut);
+  this->event_q.push(event);
+  this->available_event_cond.notify_all();
+}
+
+void Event::Manager::processEvents()
+{
+  Event::Object *event = nullptr;
+  std::unique_lock lk(this->event_mut);
+  while(this->running){
+    this->available_event_cond.wait(lk, [this]{
+      return !(this->event_q.empty()); 
+    });
+    event = event_q.front();
+    for (auto & handler : this->handlerList) {
+      handler->receiveEvent(event);
+    }
+    this->event_q.pop();
+    event = nullptr;
+
   }
 }
 

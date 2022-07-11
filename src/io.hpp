@@ -45,9 +45,6 @@ enum flags_t : size_t
 {
   INPUT = 0,
   OUTPUT,
-  PARAMETER,
-  STATE,
-  COMMENT,
   UNKNOWN
 };
 
@@ -78,9 +75,9 @@ class Block
 public:
   /*!
    * The constructor needs to be provided with a specification of the channels
-   * that will be embedded in this block in the channels parameter. Fields that
-   * are not of type INPUT or OUTPUT will be safely ignored. Size should be the
-   * number of total fields in the channels parameter, regardless of type.
+   * that will be embedded in this block in the channels parameter. Fields could
+   * be IO::INPUT, IO::OUTPUT, IO::STATE, IO::COMMENT, AND IO::PARAMETER. Size 
+   * should be the number of total channels, regardless of type.
    *
    * \param name The name of the block.
    * \param channels The lis of channel specifications for this block.
@@ -115,7 +112,7 @@ public:
   /*!
    * Get the name of the specified channel.
    *
-   * \param type Port type. Either ::IO::INPUT or ::IO::OUTPUT
+   * \param type Port type.
    * \param index The channel's index.
    * \return The name of the channel.
    */
