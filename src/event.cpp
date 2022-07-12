@@ -175,7 +175,7 @@ Event::Type Event::Object::getType()
 
 Event::Manager::Manager()
 {
-  this->event_thread = std::make_unique<std::thread>(&Event::Manager::processEvents, this);
+  this->event_thread = std::thread(&Event::Manager::processEvents, this);
 }
 
 Event::Manager::~Manager()
@@ -185,6 +185,7 @@ Event::Manager::~Manager()
   this->running = false;
   Event::Object event(Event::Type::RT_SHUTDOWN_EVENT);
   this->postEvent(&event);
+  if(this->event_thread.joinable()) { this->event_thread.join(); };
 }
 
 void Event::Manager::postEvent(Event::Object* event)
@@ -197,23 +198,27 @@ void Event::Manager::postEvent(Event::Object* event)
 void Event::Manager::processEvents()
 {
   Event::Object *event = nullptr;
-  std::unique_lock lk(this->event_mut);
+  std::unique_lock<std::mutex> event_lock(this->event_mut);
+  std::unique_lock<std::mutex> handlerlist_lock(this->handlerlist_mut, std::defer_lock);
   while(this->running){
-    this->available_event_cond.wait(lk, [this]{
+    this->available_event_cond.wait(event_lock, [this]{
       return !(this->event_q.empty()); 
     });
     event = event_q.front();
+    handlerlist_lock.lock();
     for (auto & handler : this->handlerList) {
       handler->receiveEvent(event);
     }
+    handlerlist_lock.unlock();
+    if(!(event->isdone())) { event->done(); };
     this->event_q.pop();
     event = nullptr;
-
   }
 }
 
 void Event::Manager::registerHandler(Event::Handler* handler)
 {
+  std::lock_guard<std::mutex> lk(this->handlerlist_mut);
   auto location = std::find(handlerList.begin(), handlerList.end(), handler);
   if(location == handlerList.end()){
     handlerList.push_back(handler);
@@ -222,6 +227,7 @@ void Event::Manager::registerHandler(Event::Handler* handler)
 
 void Event::Manager::unregisterHandler(Handler* handler)
 {
+  std::lock_guard<std::mutex> lk(this->handlerlist_mut);
   auto location = std::find(handlerList.begin(), handlerList.end(), handler);
   if(location != handlerList.end()){
     handlerList.erase(location);

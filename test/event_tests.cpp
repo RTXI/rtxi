@@ -53,6 +53,12 @@ TEST_F(EventManagerTest, postEvent)
   EXPECT_CALL(event_handler, receiveEvent(&event_obj));
   event_manager->registerHandler(&event_handler);
   event_manager->postEvent(&event_obj);
+  event_obj.wait();
+
+  // before exiting the test we must unregister event handler
+  // because the event thread may call event handler functions 
+  // after the handler has been destroyed from stack
+  event_manager->unregisterHandler(&event_handler);
 }
 
 TEST_F(EventManagerTest, Registration)
@@ -74,4 +80,8 @@ TEST_F(EventManagerTest, Registration)
   event_manager->registerHandler(&event_handler);
 
   event_manager->postEvent(&test_event);
+  test_event.wait();
+
+  // Unregister all event handlers before exiting
+  event_manager->unregisterHandler(&event_handler);
 }

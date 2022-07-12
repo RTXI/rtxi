@@ -232,9 +232,10 @@ private:
   std::list<Handler*> handlerList;
   std::queue<Event::Object*> event_q;
   std::mutex event_mut;
+  std::mutex handlerlist_mut;
   std::condition_variable available_event_cond;
   std::atomic<bool> running = true;
-  std::unique_ptr<std::thread> event_thread;
+  std::thread event_thread;
 };  // class Manager
 
 }  // namespace Event
