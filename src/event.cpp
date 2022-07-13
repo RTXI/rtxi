@@ -199,7 +199,7 @@ void Event::Manager::postEvent(std::vector<Event::Object*> events)
 {
   // For performance provide postEvent that accepts multiple events
   std::lock_guard<std::mutex> lk(this->event_mut);
-  for(auto event : events){
+  for(auto* event : events){
     this->event_q.push(event);
   }
   this->available_event_cond.notify_all();

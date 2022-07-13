@@ -1,17 +1,21 @@
 
+#include <optional>
 #include <string>
 #include <vector>
-#include <optional>
+
 #include <QWidgets>
 
 #include "event.hpp"
 #include "io.hpp"
 #include "rt.hpp"
 
-namespace Modules{
+namespace Modules
+{
 
-namespace Variable{
-enum variable_t : size_t{
+namespace Variable
+{
+enum variable_t : size_t
+{
   PARAMETER = 0,
   STATE,
   EVENT,
@@ -21,26 +25,59 @@ enum variable_t : size_t{
 
 /*!
  * Structure used to store information about module upon creation.
- * It is a structure describing module specific constants and 
+ * It is a structure describing module specific constants and
  * variables.
  *
  * \param name The name of the channel
  * \param description short description of the channel
  * \param vartype type of variable that is stored
- * \param value the data stored for this variable
- * 
+ *
  * \sa IO::Block::Block()
  */
-typedef struct
+struct Info
 {
   std::string name;
   std::string description;
-  Modules::Variable::variable_t vartype = Modules::Variable::UNKNOWN;
-  std::variant<bool, int, float, Event::Object, std::string> value;
-} Info;
-}
+  Modules::Variable::variable_t vartype;
+};
 
-class Component : public RT::Thread, public Event::Handler
+struct State_var : Info
+{
+  int value;
+};
+
+struct Event_var : Info
+{
+  Event::Object value;
+};
+
+struct Comment_var : Info
+{
+  std::string value;
+};
+
+struct Parameter_var : Info
+{
+  double value;
+};
+
+}  // namespace Variable
+
+class Settings
+{
+public:
+  Settings();
+  ~Settings();
+
+private:
+  std::vector<Modules::Variable::Parameter_var> parameters;
+  std::vector<Modules::Variable::State_var> states;
+  std::vector<Modules::Variable::Comment_var> comments;
+};
+
+class Component
+    : public RT::Thread
+    , public Event::Handler
 {
 public:
   Component(std::string name,
@@ -50,13 +87,18 @@ public:
   ~Component();
 
 private:
-  std::unordered_map<std::string, Modules::Component::Info> variables;
-}
+  std::vector<Modules::Variable::Parameter_var> parameters;
+  std::vector<Modules::Variable::State_var> states;
+  std::vector<Modules::Variable::Comment_var> comments;
+  std::vector<Modules::Variable::Event_var> events;
+};
 
+class UI : public QWidgets
+{
+};
 
 class Manager
 {
-  
-}
+};
 
-}
+}  // namespace Modules
