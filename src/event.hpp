@@ -212,6 +212,26 @@ public:
    * \sa Event::Object
    */
   void postEvent(Object* event);
+
+  /*!
+   * Function for posting multiple events at the same time. The order
+   * at which these events are posted are preserved. This is more 
+   * efficient for situations where multiple events can be generated
+   * from a single action(loading multiple plugins, loading settings
+   * file that changes many parameters, unregister module, etc.)
+   * 
+   * \param events A vector of event pointers that will be published
+   */
+  void postEvent(std::vector<Object*> events);
+
+  /*!
+   * The main processing thread driver. It starts the event processing
+   * loop responsible for routing events to handlers. Will mark the
+   * event as done automatically regardless if it is handled or
+   * not to prevent caller from waiting indefinitely.
+   * 
+   * \sa  Event::Object
+   */
   void processEvents();
 
   /*!
