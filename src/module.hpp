@@ -69,6 +69,9 @@ public:
   Settings();
   ~Settings();
 
+protected:
+
+
 private:
   std::vector<Modules::Variable::Parameter_var> parameters;
   std::vector<Modules::Variable::State_var> states;
@@ -86,6 +89,8 @@ public:
             Event::Manager event_manager);
   ~Component();
 
+  virtual Modules::Settings getSettings();
+  virtual void loadSettings(Module::Settings settings);
 private:
   std::vector<Modules::Variable::Parameter_var> parameters;
   std::vector<Modules::Variable::State_var> states;
@@ -95,10 +100,30 @@ private:
 
 class UI : public QWidgets
 {
+public:
+  UI();
+  ~UI();
 };
+
+class Object
+{
+public:
+  Object();
+  ~Object();
+
+private:
+  std::unique_ptr<Modules::Component> rtxi_component;
+  std::unique_ptr<Modules::UI> rtxi_interface;
+}
 
 class Manager
 {
+public:
+  Manager();
+  ~Manager();
+
+private:
+  std::vector<std::unique_ptr<Modules::Object>> rtxi_modules;
 };
 
 }  // namespace Modules
