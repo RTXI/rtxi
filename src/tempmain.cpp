@@ -1,23 +1,23 @@
 #include <iostream>
 
+#include <QApplication>
+#include <QtWidgets>
+
 #include "rtos.hpp"
 #include "rtxiConfig.h"
+#include "main_window.hpp"
 
-void test_func(int retval){
-  std::cout << "test function reached.\n";
-  retval = 0;
-}
-
-int main()
+int main(int argc, char *argv[])
 {
   std::cout << "Welcome to RTXI Version ";
   std::cout << RTXI_VERSION_MAJOR << ".";
   std::cout << RTXI_VERSION_MINOR << ".";
   std::cout << RTXI_VERSION_PATCH << "\n";
-  auto task = std::make_unique<RT::OS::Task>();
-  int retval = 0;
-  int function_retval = 0;
-  retval = RT::OS::createTask<int>(task.get(), test_func, function_retval);
-  RT::OS::deleteTask(task.get());
-  return retval;
+  //QApplication::setDesktopSettingsAware(false);
+  QApplication* app = new QApplication(argc, argv);
+  app->connect(app, SIGNAL(lastWindowClosed()), app, SLOT(quit()));
+  auto rtxi_window = std::make_unique<MainWindow>();
+  rtxi_window->loadWindow();
+  int retval = app->exec();
+  return 0;
 }

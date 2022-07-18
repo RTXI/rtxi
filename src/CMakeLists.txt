@@ -28,16 +28,18 @@ add_library(rtxi_lib OBJECT
     event.hpp event.cpp
     io.hpp io.cpp
     rt.hpp rt.cpp
+    main_window.hpp main_window.cpp
 )
 
 target_link_libraries(rtxi_lib PUBLIC 
     Threads::Threads
     fmt::fmt
+    Qt5::Widgets
 )
 
 # Create RTXI executable
 add_executable(rtxi_exe
-    "tempmain.cpp"
+    tempmain.cpp
 )
 add_executable(rtxi::exe ALIAS rtxi_exe)
 set_target_properties(
@@ -51,6 +53,6 @@ target_link_libraries(rtxi_exe
     rtxi_lib 
     rtos_lib 
     rtos_fifo_lib
-    Qt5::Widgets 
+    Qt6::Widgets
     Threads::Threads
 )

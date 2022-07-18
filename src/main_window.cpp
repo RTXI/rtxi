@@ -19,16 +19,13 @@
 */
 
 #include <algorithm>
-
-#include <debug.h>
-#include <main_window.h>
-#include <mutex.h>
-#include <plugin.h>
-#include <rtxi_config.h>
-#include <settings.h>
 #include <stdlib.h>
 
-MainWindow::MainWindow(void)
+#include "debug.hpp"
+#include "main_window.hpp"
+#include "rtxiConfig.h"
+
+MainWindow::MainWindow()
     : QMainWindow(NULL, Qt::Window)
 {
   // Make central RTXI parent widget
@@ -37,7 +34,7 @@ MainWindow::MainWindow(void)
 
   /* Initialize Window Settings */
   setWindowTitle("RTXI - Real-time eXperimental Interface");
-  setWindowIcon(QIcon("/usr/local/share/rtxi/RTXI-icon.png"));
+  //setWindowIcon(QIcon("/usr/local/share/rtxi/RTXI-icon.png"));
 
   /* Set Qt Settings Information */
   QCoreApplication::setOrganizationName("RTXI");
@@ -65,7 +62,7 @@ MainWindow::MainWindow(void)
   createHelpMenu();
 }
 
-MainWindow::~MainWindow(void) {}
+MainWindow::~MainWindow() {}
 
 QAction* MainWindow::insertModuleMenuSeparator(void)
 {
@@ -277,7 +274,9 @@ void MainWindow::about(void)
   QMessageBox::about(
       this,
       "About RTXI",
-      "RTXI Version " + QString(VERSION)
+      "RTXI Version " + QString(RTXI_VERSION_MAJOR) + QString(".")
+                      + QString(RTXI_VERSION_MINOR) + QString(".")
+                      + QString(RTXI_VERSION_PATCH)
           + "\n\nReleased under the GPLv3.\nSee www.rtxi.org for details.");
 }
 
@@ -347,7 +346,7 @@ void MainWindow::loadSettings(void)
   if (QFile(filename).exists()) {
     systemMenu->clear();
     mdiArea->closeAllSubWindows();
-    Settings::Manager::getInstance()->load(filename.toStdString());
+    //Settings::Manager::getInstance()->load(filename.toStdString());
   }
 }
 
@@ -378,20 +377,20 @@ void MainWindow::saveSettings(void)
       // DEBUG_MSG ("MainWindow::saveSettings : canceled overwrite\n");
       return;
     }
-    Settings::Manager::getInstance()->save(filename.toStdString());
+    //Settings::Manager::getInstance()->save(filename.toStdString());
   }
 }
 
 void MainWindow::resetSettings(void)
 {
-  systemMenu->clear();
-  mdiArea->closeAllSubWindows();
-  Settings::Manager::getInstance()->load("/usr/local/share/rtxi/rtxi.conf");
+  // systemMenu->clear();
+  // mdiArea->closeAllSubWindows();
+  // Settings::Manager::getInstance()->load("/usr/local/share/rtxi/rtxi.conf");
 }
 
 void MainWindow::utilitiesMenuActivated(QAction* id)
 {
-  Plugin::Manager::getInstance()->load(id->text());
+  // Plugin::Manager::getInstance()->load(id->text());
 }
 
 void MainWindow::windowsMenuAboutToShow(void)
@@ -439,14 +438,14 @@ void MainWindow::windowsMenuActivated(QAction* id)
 
 void MainWindow::modulesMenuActivated(QAction* id)
 {
-  // Annoying but the best way to do it is to tie an action to the entire menu
-  // so we have to tell it to ignore the first two modules
-  if (id->text().contains("Load Plugin"))
-    return;
+  // // Annoying but the best way to do it is to tie an action to the entire menu
+  // // so we have to tell it to ignore the first two modules
+  // if (id->text().contains("Load Plugin"))
+  //   return;
 
-  // Have to trim the first three characters before loading
-  // or else parser will include qstring formatting
-  Plugin::Manager::getInstance()->load(id->text().remove(0, 3));
+  // // Have to trim the first three characters before loading
+  // // or else parser will include qstring formatting
+  // Plugin::Manager::getInstance()->load(id->text().remove(0, 3));
 }
 
 void MainWindow::fileMenuActivated(QAction* id)
@@ -462,7 +461,7 @@ void MainWindow::fileMenuActivated(QAction* id)
   // or else parser will include qstring formatting
   systemMenu->clear();
   mdiArea->closeAllSubWindows();
-  Settings::Manager::getInstance()->load(id->text().remove(0, 3).toStdString());
+  //Settings::Manager::getInstance()->load(id->text().remove(0, 3).toStdString());
 }
 
 void MainWindow::closeEvent(QCloseEvent*)
@@ -482,25 +481,4 @@ void MainWindow::closeEvent(QCloseEvent*)
     userprefs.setValue("size", size());
   }
   userprefs.endGroup();
-}
-
-static Mutex mutex;
-MainWindow* MainWindow::instance = 0;
-
-MainWindow* MainWindow::getInstance(void)
-{
-  if (instance)
-    return instance;
-
-  /*************************************************************************
-   * Seems like alot of hoops to jump through, but static allocation isn't *
-   *   thread-safe. So effort must be taken to ensure mutual exclusion.    *
-   *************************************************************************/
-
-  Mutex::Locker lock(&::mutex);
-  if (!instance) {
-    static MainWindow mainwindow;
-    instance = &mainwindow;
-  }
-  return instance;
 }
