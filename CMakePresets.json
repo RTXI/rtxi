@@ -47,7 +47,7 @@
       "name": "clang-tidy",
       "hidden": true,
       "cacheVariables": {
-        "CMAKE_CXX_CLANG_TIDY": "clang-tidy;--header-filter=${sourceDir}/*"
+        "CMAKE_CXX_CLANG_TIDY": "clang-tidy-12;--header-filter=^(?!moc).*\\.h[p]{0,2};--use-color"
       }
     },
     {
@@ -56,7 +56,7 @@
       "hidden": true,
       "cacheVariables": {
         "CMAKE_CXX_EXTENSIONS": "OFF",
-        "CMAKE_CXX_STANDARD": "20",
+        "CMAKE_CXX_STANDARD": "17",
         "CMAKE_CXX_STANDARD_REQUIRED": "ON"
       }
     },

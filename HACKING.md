@@ -77,6 +77,12 @@ in the terminal.
 
 ### Configure, build and test
 
+To install dependencies using Conan, make sure you run this command from the project root first:
+
+```sh
+conan install . -if conan -s build_type=Debug
+```
+
 If you followed the above instructions, then you can configure, build and test
 the project respectively with the following commands from the project root on
 any operating system with any build system:

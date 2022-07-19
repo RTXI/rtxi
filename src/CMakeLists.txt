@@ -34,7 +34,7 @@ add_library(rtxi_lib OBJECT
 target_link_libraries(rtxi_lib PUBLIC 
     Threads::Threads
     fmt::fmt
-    Qt5::Widgets
+    Qt6::Widgets
 )
 
 # Create RTXI executable

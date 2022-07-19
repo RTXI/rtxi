@@ -3,7 +3,7 @@ from conan import ConanFile
 
 class Recipe(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "CMakeToolchain", "CMakeDeps", "VirtualRunEnv"
+    generators = "CMakeToolchain", "CMakeDeps", "VirtualRunEnv", "cmake_find_package"
     default_options = {
         "fmt:shared": True,
         "gtest:shared": True, 
@@ -17,8 +17,8 @@ class Recipe(ConanFile):
         self.folders.generators = "conan"
 
     def requirements(self):
+        self.requires("libiconv/1.17")
         self.requires("fmt/8.1.1")
-        self.requires("gtest/1.11.0")
         self.requires("qt/6.3.1")
         self.requires("hdf5/1.12.1")
         self.requires("libgit2/1.3.0")

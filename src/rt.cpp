@@ -297,12 +297,12 @@ void RT::Connector::removeBlock(RT::Device* device)
 
 bool RT::Connector::isRegistered(RT::Thread* thread)
 {
-  return this->thread_registry.contains(thread);
+  return this->thread_registry.find(thread) == this->thread_registry.end();
 }
 
 bool RT::Connector::isRegistered(RT::Device* device)
 {
-  return this->device_registry.contains(device);
+  return this->device_registry.find(device) == this->device_registry.end();
 }
 
 std::vector<RT::Thread*> RT::Connector::topological_sort()
@@ -367,14 +367,14 @@ std::vector<RT::Thread*> RT::Connector::getThreads()
 std::vector<RT::outputs_info> RT::Connector::getOutputs(RT::Thread* src)
 {
   auto result = std::vector<RT::outputs_info>();
-  if(this->thread_registry.contains(src)) { result = this->thread_registry[src]; }
+  if(this->isRegistered(src)) { result = this->thread_registry[src]; }
   return result;
 }
 
 std::vector<RT::outputs_info> RT::Connector::getOutputs(RT::Device* src)
 {
   auto result = std::vector<RT::outputs_info>();
-  if(this->device_registry.contains(src)) { result = this->device_registry[src]; }
+  if(this->isRegistered(src)) { result = this->device_registry[src]; }
   return result;
 }
 
