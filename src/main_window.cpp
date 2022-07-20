@@ -20,6 +20,10 @@
 
 #include <algorithm>
 #include <stdlib.h>
+#include <string>
+
+#include <QObject>
+#include <fmt/core.h>
 
 #include "debug.hpp"
 #include "main_window.hpp"
@@ -271,13 +275,14 @@ QAction* MainWindow::createSystemMenuItem(const QString& text,
 
 void MainWindow::about(void)
 {
+  std::string version_str = fmt::format("{}.{}.{}", RTXI_VERSION_MAJOR,
+                                                    RTXI_VERSION_MINOR,
+                                                    RTXI_VERSION_PATCH);
   QMessageBox::about(
       this,
       "About RTXI",
-      "RTXI Version " + QString(RTXI_VERSION_MAJOR) + QString(".")
-                      + QString(RTXI_VERSION_MINOR) + QString(".")
-                      + QString(RTXI_VERSION_PATCH)
-          + "\n\nReleased under the GPLv3.\nSee www.rtxi.org for details.");
+      QString("RTXI Version ") + QString(version_str.c_str())
+          + QString("\n\nReleased under the GPLv3.\nSee www.rtxi.org for details."));
 }
 
 void MainWindow::aboutQt(void)

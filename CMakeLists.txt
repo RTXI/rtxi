@@ -52,16 +52,16 @@ find_package(Threads REQUIRED)
 
 # Clang-tidy is by far the most annoying tool to please. Depending on your development
 # environment you may get useless errors unless you add the line below.
-if(${evl_FOUND})
-  set(CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES 
-    ${CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES}
-    ${evl_INCLUDE_DIRS}
-  )
-else()
-  set(CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES 
-    ${CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES}
-  )
-endif()
+#if(${evl_FOUND})
+#  set(CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES 
+#    ${CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES}
+#    ${evl_INCLUDE_DIRS}
+#  )
+#else()
+#  set(CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES 
+#    ${CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES}
+#  )
+#endif()
 
 add_subdirectory(src)
 #add_subdirectory(libs)

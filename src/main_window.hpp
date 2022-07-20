@@ -21,11 +21,11 @@
 #ifndef MAIN_WINDOW_H
 #define MAIN_WINDOW_H
 
+#include <QObject>
 #include <QAction>
 #include <QMainWindow>
 #include <QMdiArea>
 #include <QMdiSubWindow>
-#include <QObject>
 #include <QtWidgets>
 
 class QMenu;
