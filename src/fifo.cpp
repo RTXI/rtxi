@@ -20,12 +20,12 @@
 
 #include <unistd.h>
 #include <fcntl.h>
+#include <string.h>
+
+#include <array>
 
 #include "debug.hpp"
 #include "fifo.hpp"
-
-
-#define AVAILABLE ((size + wptr - rptr) % size)
 
 // Generic posix fifo based on pipes
 namespace RT::OS
@@ -33,29 +33,37 @@ namespace RT::OS
 class posixFifo : public RT::OS::Fifo 
 {
   public:
-  posixFifo(size_t size);
-  ~posixFifo();
+  explicit posixFifo(size_t size);
+  posixFifo(const posixFifo& fifo) = delete;
+  posixFifo& operator=(const posixFifo& fifo) = delete;
+  posixFifo(posixFifo &&) = default;
+  posixFifo& operator=(posixFifo &&) = default;
+  ~posixFifo() override;
 
-  size_t getCapacity();
-  ssize_t read(void*, size_t) override;
-  ssize_t write(void*, size_t) override;
-  ssize_t readRT(void*, size_t) override;
-  ssize_t writeRT(void*, size_t) override;
+  size_t getCapacity() override;
+  ssize_t read(void* buf, size_t buf_size) override;
+  ssize_t write(void* buf, size_t buf_size) override;
+  ssize_t readRT(void* buf, size_t buf_size) override;
+  ssize_t writeRT(void* buf, size_t buf_size) override;
 
   private:
-  int rt_to_ui_fd[2]; // 0 is read from rt; 1 is write to ui
-  int ui_to_rt_fd[2]; // 0 is read from ui; 1 is write to rt
+  std::array<int, 2> rt_to_ui_fd; // 0 is read from rt; 1 is write to ui
+  std::array<int, 2> ui_to_rt_fd; // 0 is read from ui; 1 is write to rt
   size_t fifo_capacity;
 };
 }  // namespace RT::OS
 
-RT::OS::posixFifo::posixFifo(size_t size) : fifo_capacity(size)
+RT::OS::posixFifo::posixFifo(size_t size) : rt_to_ui_fd({0,1}),
+                                            ui_to_rt_fd({0,1}),
+                                            fifo_capacity(size)
 {
-  if (pipe2(this->rt_to_ui_fd, O_NONBLOCK) != 0){
-    ERROR_MSG("RT::OS::posixFifo : failed to create rt-to-ui ipc : {}", strerror(errno));
+  char buf[256]; // NOLINT: we have to use c arrays with c functions
+  char *err = nullptr;
+  if (pipe2(this->rt_to_ui_fd.data(), O_NONBLOCK | O_CLOEXEC) != 0){
+    ERROR_MSG("RT::OS::posixFifo : failed to create rt-to-ui ipc : {}\n{}", err, buf); // NOLINT
   }
-  if (pipe2(this->ui_to_rt_fd, O_NONBLOCK) != 0){
-    ERROR_MSG("RT::OS::posixFifo : failed to create ui-to-rt ipc : {}", strerror(errno));
+  if (pipe2(this->ui_to_rt_fd.data(), O_NONBLOCK | O_CLOEXEC) != 0){
+    ERROR_MSG("RT::OS::posixFifo : failed to create ui-to-rt ipc : {}\n{}", err, buf); // NOLINT
   }
 }
 
