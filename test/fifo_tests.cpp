@@ -18,10 +18,10 @@
 
  */
 
-#include <functional>
-#include <thread>
-#include <mutex>
 #include <condition_variable>
+#include <functional>
+#include <mutex>
+#include <thread>
 
 #include "fifo_tests.hpp"
 
@@ -82,7 +82,7 @@ TEST_F(FifoTest, nonblocking)
   auto sender = [&fifo, &test_task, &input, &mut, &cv, &ready]()
   {
     RT::OS::initiate();
-    //RT::OS::sleepTimestep(test_task.get());
+    // RT::OS::sleepTimestep(test_task.get());
     fifo->writeRT(&input, sizeof(std::string*));
     std::unique_lock<std::mutex> lk(mut);
     ready = true;
@@ -95,7 +95,7 @@ TEST_F(FifoTest, nonblocking)
   std::thread sender_thread(sender);
   {
     std::unique_lock<std::mutex> lk(mut);
-    cv.wait(lk, [&ready](){return ready;});
+    cv.wait(lk, [&ready]() { return ready; });
   }
   ssize_t read_bytes = fifo->read(&output, sizeof(std::string*));
   int64_t end_time = RT::OS::getTime();

@@ -46,7 +46,7 @@ public:
   MockEventHandler() = default;
   ~MockEventHandler() = default;
 
-  //void receiveEvent(Event::Object* event) { event->done(); }
+  // void receiveEvent(Event::Object* event) { event->done(); }
   MOCK_METHOD(void, receiveEvent, (Event::Object*), (override));
 };
 

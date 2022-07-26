@@ -236,7 +236,7 @@ void RT::Connector::disconnect(RT::Device* src,
                                RT::Thread* dest,
                                size_t in)
 {
-  if(!(this->isRegistered(src) && this->isRegistered(dest))) { 
+  if(!(this->isRegistered(src) || this->isRegistered(dest))) { 
     return; 
   }
   if(!(this->connected(src, out, dest, in))) { return; }
@@ -297,12 +297,12 @@ void RT::Connector::removeBlock(RT::Device* device)
 
 bool RT::Connector::isRegistered(RT::Thread* thread)
 {
-  return this->thread_registry.find(thread) == this->thread_registry.end();
+  return !(this->thread_registry.find(thread) == this->thread_registry.end());
 }
 
 bool RT::Connector::isRegistered(RT::Device* device)
 {
-  return this->device_registry.find(device) == this->device_registry.end();
+  return !(this->device_registry.find(device) == this->device_registry.end());
 }
 
 std::vector<RT::Thread*> RT::Connector::topological_sort()

@@ -56,7 +56,7 @@ TEST_F(EventManagerTest, postEvent)
   event_obj.wait();
 
   // before exiting the test we must unregister event handler
-  // because the event thread may call event handler functions 
+  // because the event thread may call event handler functions
   // after the handler has been destroyed from stack
   event_manager->unregisterHandler(&event_handler);
 }

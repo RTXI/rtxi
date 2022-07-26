@@ -53,10 +53,16 @@ public:
   }
   MOCK_METHOD(void, read, (), (override));
   MOCK_METHOD(void, write, (), (override));
-  bool getActive() override { return isactive; }
-  void setActive(bool active) override { this->isactive = active; }
+  bool getActive() override
+  {
+    return isactive;
+  }
+  void setActive(bool active) override
+  {
+    this->isactive = active;
+  }
 
-  private:
+private:
   bool isactive;
 };
 
@@ -68,12 +74,18 @@ public:
   {
   }
   MOCK_METHOD(void, execute, (), (override));
-  bool getActive() override { return isactive; }
-  void setActive(bool active) override { this->isactive = active; }
+  bool getActive() override
+  {
+    return isactive;
+  }
+  void setActive(bool active) override
+  {
+    this->isactive = active;
+  }
   MOCK_METHOD(void, input, (const std::vector<double>&), (override));
   MOCK_METHOD(const std::vector<double>&, output, (), (override));
 
-  private:
+private:
   bool isactive;
 };
 
