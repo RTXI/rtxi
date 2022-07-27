@@ -19,7 +19,7 @@
 */
 
 #include <algorithm>
-#include <stdlib.h>
+//#include <stdlib.h>
 #include <string>
 
 #include <QObject>

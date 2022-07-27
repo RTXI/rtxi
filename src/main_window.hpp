@@ -26,7 +26,7 @@
 #include <QMainWindow>
 #include <QMdiArea>
 #include <QMdiSubWindow>
-#include <QtWidgets>
+//#include <QtWidgets>
 
 class QMenu;
 

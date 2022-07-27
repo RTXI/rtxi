@@ -14,10 +14,8 @@ configure_file(rtxiConfig.h.in rtxiConfig.h)
 include(cmake/project-is-top-level.cmake)
 include(cmake/variables.cmake)
 
-#set(CMAKE_CXX_STANDARD 20)
-#set(CMAKE_CXX_STANDARD_REQUIRED ON)
+# We need to let third-party tools know how to compile our project
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
 
 # Find EVL Core library
 include(FindPkgConfig)
@@ -33,7 +31,7 @@ find_package(fmt REQUIRED)
 find_package(HDF5 REQUIRED)
 find_package(libgit2 REQUIRED)
 find_package(qwt REQUIRED)
-find_package(Qt6 REQUIRED)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
 qt_standard_project_setup()
 find_package(GTest REQUIRED)
 find_package(Threads REQUIRED)
@@ -43,25 +41,10 @@ find_package(Threads REQUIRED)
 # set(CMAKE_AUTOMOC ON)
 # set(CMAKE_AUTORCC ON)
 # set(CMAKE_AUTOUIC ON)
-#set(Boost_USE_STATIC_LIBS OFF) 
-#set(Boost_USE_MULTITHREADED OFF)  
-#set(Boost_USE_STATIC_RUNTIME OFF)
-
-#find_library(BOOST_STACKTRACE_BACKTRACE_LIBRARY NAMES boost_stacktrace_backtrace)
-#find_library(BOOST_STACKTRACE_BASIC_LIBRARY NAMES Boost_stacktrace_basic)
 
 # Clang-tidy is by far the most annoying tool to please. Depending on your development
 # environment you may get useless errors unless you add the line below.
-#if(${evl_FOUND})
-#  set(CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES 
-#    ${CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES}
-#    ${evl_INCLUDE_DIRS}
-#  )
-#else()
-#  set(CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES 
-#    ${CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES}
-#  )
-#endif()
+list(APPEND CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES ${CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES})
 
 add_subdirectory(src)
 #add_subdirectory(libs)
