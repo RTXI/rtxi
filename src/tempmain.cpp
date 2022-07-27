@@ -4,7 +4,7 @@
 
 //#include "rtos.hpp"
 #include "rtxiConfig.h"
-//#include "main_window.hpp"
+#include "main_window.hpp"
 
 int main(int argc, char *argv[])
 {
@@ -15,8 +15,8 @@ int main(int argc, char *argv[])
   QApplication::setDesktopSettingsAware(false);
   QApplication* app = new QApplication(argc, argv);
   app->connect(app, SIGNAL(lastWindowClosed()), app, SLOT(quit()));
-  //auto rtxi_window = std::make_unique<MainWindow>();
-  //rtxi_window->loadWindow();
+  auto rtxi_window = std::make_unique<MainWindow>();
+  rtxi_window->loadWindow();
   int retval = app->exec();
   return 0;
 }
