@@ -24,11 +24,12 @@
 #include <QObject>
 #include <QAction>
 #include <QMainWindow>
+#include <QMenu>
 #include <QMdiArea>
 #include <QMdiSubWindow>
 //#include <QtWidgets>
 
-class QMenu;
+//class QMenu;
 
 /*!
  * The primary graphical object in the program.

@@ -21,6 +21,7 @@ target_link_libraries(rtxiTests PRIVATE
     GTest::gmock GTest::gmock_main 
     Qt6::Core Qt6::Widgets Qt6::Gui
     Threads::Threads
+    fmt::fmt
 )
 
 add_test(NAME rtxiTests COMMAND rtxiTests)

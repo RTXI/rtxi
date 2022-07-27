@@ -22,7 +22,16 @@
 //#include <stdlib.h>
 #include <string>
 
-#include <QObject>
+//#include <QObject>
+#include <QApplication>
+#include <QMenuBar>
+#include <QDir>
+#include <QMessageBox>
+#include <QDesktopServices>
+#include <QUrl>
+#include <QSettings>
+#include <QString>
+#include <QFileDialog>
 #include <fmt/core.h>
 
 #include "debug.hpp"
@@ -41,9 +50,9 @@ MainWindow::MainWindow()
   //setWindowIcon(QIcon("/usr/local/share/rtxi/RTXI-icon.png"));
 
   /* Set Qt Settings Information */
-  QCoreApplication::setOrganizationName("RTXI");
-  QCoreApplication::setOrganizationDomain("rtxi.org");
-  QCoreApplication::setApplicationName("RTXI");
+  QApplication::setOrganizationName("RTXI");
+  QApplication::setOrganizationDomain("rtxi.org");
+  QApplication::setApplicationName("RTXI");
 
   /* Initialize Menus */
   createFileActions();
