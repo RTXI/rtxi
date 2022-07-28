@@ -237,12 +237,8 @@ protected:
    */
   void setEvent(const QString& name, double& ref);
 
-private:
-  void doDeferred(const Settings::Object::State&);
-  void doLoad(const Settings::Object::State&);
-  void doSave(Settings::Object::State&) const;
-
   void receiveEvent(const Event::Object*);
+private:
 
   bool periodEventPaused;
 
@@ -252,11 +248,11 @@ private:
   QMdiSubWindow* subWind
 };
 
-class Object
+class Module
 {
 public:
-  Object();
-  ~Object();
+  Plugin();
+  ~Plugin();
 
 private:
   std::unique_ptr<Modules::Component> rtxi_component;
@@ -266,11 +262,14 @@ private:
 class Manager
 {
 public:
-  Manager();
+  Manager(Event::Manager* event_manager);
   ~Manager();
 
+  int loadModule(std::string location);
+  int unloadModule(Modules::Object* module);
 private:
   std::vector<std::unique_ptr<Modules::Object>> rtxi_modules;
+  Event::Manager* event_manager;
 };
 
 }  // namespace Modules

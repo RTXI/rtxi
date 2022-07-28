@@ -222,7 +222,7 @@ public:
    * 
    * \param events A vector of event pointers that will be published
    */
-  void postEvent(std::vector<Object*> events);
+  void postEvent(const std::vector<Object*>& events);
 
   /*!
    * The main processing thread driver. It starts the event processing

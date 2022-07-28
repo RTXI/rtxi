@@ -7,7 +7,9 @@
 # -modernize-use-nodiscard: We are dealing with legacy code so this is too much.
 # -modernize-use-using: Conflicts with another warning. 
 # -hicpp-signed-bitwise: There are c functions that will fire this warning. bye bye.
+# -cppcoreguidelines-owning-memory: Qt uses parent widget relationships. 
 Checks: "*,\
+  -cppcoreguidelines-owning-memory,\
   -hicpp-signed-bitwise,\
   -hicpp-deprecated-headers,\
   -*-vararg,\

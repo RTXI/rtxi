@@ -33,28 +33,33 @@ IO::Block::Block(std::string n, const std::vector<IO::channel_t>& channels, bool
   for (const auto& channel : channels) {
     port.channel_info = channel;
     port.values = std::vector<double>(channel.data_size, 0.0);
-    ports[channel.flags].push_back(port);
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index
+    ports[channel.flags].push_back(port); 
     port = {};
   }
 }
 
 size_t IO::Block::getCount(IO::flags_t type) const
 {
+  // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index
   return this->ports[type].size();
 }
 
 std::string IO::Block::getChannelName(IO::flags_t type, size_t index) const
 {
+  // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index
   return this->ports[type][index].channel_info.name;
 }
 
 std::string IO::Block::getChannelDescription(IO::flags_t type, size_t index) const
 {
+  // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index
   return this->ports[type][index].channel_info.description;
 }
 
 size_t IO::Block::getChannelSize(IO::flags_t type, size_t channel)
 {
+  // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index
   return this->ports[type][channel].values.size();
 }
 
@@ -79,6 +84,4 @@ const std::vector<double>& IO::Block::readoutput(size_t index)
 {
   return this->ports[IO::OUTPUT][index].values;
 }
-
-
 // NOLINTEND(cppcoreguidelines-pro-bounds-constant-array-index)

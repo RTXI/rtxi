@@ -27,9 +27,6 @@
 #include <QMenu>
 #include <QMdiArea>
 #include <QMdiSubWindow>
-//#include <QtWidgets>
-
-//class QMenu;
 
 /*!
  * The primary graphical object in the program.
@@ -39,7 +36,7 @@ class MainWindow : public QMainWindow
   Q_OBJECT
 public:
   MainWindow();
-  ~MainWindow();
+  ~MainWindow()=default;
 
   /*!
    * Add an item to the File menu.
@@ -155,29 +152,29 @@ private slots:
   void utilitiesMenuActivated(QAction*);
 
 private:
-  QMdiArea* mdiArea;
+  QMdiArea* mdiArea=nullptr;
   QList<QMdiSubWindow*> subWindows;
 
-  QMenu* fileMenu;
-  QMenu* moduleMenu;
-  QMenu* utilMenu;
-  QMenu* filtersSubMenu;
-  QMenu* signalsSubMenu;
-  QMenu* utilitiesSubMenu;
-  QMenu* systemMenu;
-  QMenu* windowsMenu;
-  QMenu* helpMenu;
+  QMenu* fileMenu=nullptr;
+  QMenu* moduleMenu=nullptr;
+  QMenu* utilMenu=nullptr;
+  QMenu* filtersSubMenu=nullptr;
+  QMenu* signalsSubMenu=nullptr;
+  QMenu* utilitiesSubMenu=nullptr;
+  QMenu* systemMenu=nullptr;
+  QMenu* windowsMenu=nullptr;
+  QMenu* helpMenu=nullptr;
 
-  QAction* load;
-  QAction* save;
-  QAction* reset;
-  QAction* quit;
-  QAction* artxi;
-  QAction* axeno;
-  QAction* aqt;
-  QAction* adocs;
-  QAction* sub_issue;
-  QAction* utilItem;
+  QAction* load=nullptr;
+  QAction* save=nullptr;
+  QAction* reset=nullptr;
+  QAction* quit=nullptr;
+  QAction* artxi=nullptr;
+  QAction* axeno=nullptr;
+  QAction* aqt=nullptr;
+  QAction* adocs=nullptr;
+  QAction* sub_issue=nullptr;
+  QAction* utilItem=nullptr;
 
   void createFileMenu();
   void createModuleMenu();

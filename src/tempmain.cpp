@@ -18,5 +18,5 @@ int main(int argc, char *argv[])
   auto rtxi_window = std::make_unique<MainWindow>();
   rtxi_window->loadWindow();
   int retval = app->exec();
-  return 0;
+  return retval;
 }
