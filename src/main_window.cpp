@@ -298,17 +298,7 @@ void MainWindow::aboutQt()
 
 void MainWindow::aboutXeno()
 {
-#if CONFIG_XENO_VERSION_MAJOR
-  FILE* fp;
-  char xeno_buff[8];
-  fp = fopen("/proc/xenomai/version", "r");
-  fscanf(fp, "%s", xeno_buff);
-  fclose(fp);
-  QMessageBox::about(
-      this, "About Xenomai", "Xenomai Version " + QString(xeno_buff));
-#else
   QMessageBox::about(this, "About Xenomai", "Running POSIX (non-RT)");
-#endif
 }
 
 void MainWindow::openDocs()
@@ -381,8 +371,8 @@ void MainWindow::saveSettings()
         && QMessageBox::warning(this,
                                 "File Exists",
                                 "Do you wish to overwrite " + filename + "?",
-                                QMessageBox::Yes | QMessageBox::Default,
-                                QMessageBox::No | QMessageBox::Escape)
+                                QMessageBox::Yes,
+                                QMessageBox::No)
             != QMessageBox::Yes)
     {
       // DEBUG_MSG ("MainWindow::saveSettings : canceled overwrite\n");
@@ -418,14 +408,14 @@ void MainWindow::windowsMenuAboutToShow()
   subWindows = mdiArea->subWindowList();
 
   // Make sure it isn't empty
-  if (subWindows.isEmpty())
+  if (subWindows.isEmpty()){
     return;
-
+  }
   // Create windows list based off of what's open
-  for (int i = 0; i < subWindows.size(); i++) {
-    QAction* item =
-        new QAction(subWindows.at(i)->widget()->windowTitle(), this);
-    windowsMenu->addAction(item);
+  for (auto* subwin : subWindows) {
+    // QAction* item =
+    //     new QAction(subWindows.at(i)->widget()->windowTitle(), this);
+    windowsMenu->addAction(new QAction(subwin->widget()->windowTitle(), this));
   }
   connect(windowsMenu,
           SIGNAL(triggered(QAction*)),

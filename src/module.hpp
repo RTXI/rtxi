@@ -256,19 +256,21 @@ public:
 
 private:
   std::unique_ptr<Modules::Component> rtxi_component;
-  std::unique_ptr<Modules::UI> rtxi_interface;
+  Modules::UI* rtxi_interface;
 }
 
 class Manager
 {
 public:
-  Manager(Event::Manager* event_manager);
+  Manager(Event::Manager* event_manager,
+          QMainWindow* main_window);
   ~Manager();
 
   int loadModule(std::string location);
   int unloadModule(Modules::Object* module);
 private:
   std::vector<std::unique_ptr<Modules::Object>> rtxi_modules;
+  QMainWindow* main_window;
   Event::Manager* event_manager;
 };
 

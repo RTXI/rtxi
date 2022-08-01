@@ -78,12 +78,12 @@ public:
    * \param menuid The index of the item to be removed.
    * \param parameter The parameter value to set.
    */
-  void setModuleMenuItemParameter(QAction* action, int parameter);
+  static void setModuleMenuItemParameter(QAction* action, int parameter);
 
   /*!
    * Clears the Modules menu.
    */
-  void clearModuleMenu(void);
+  void clearModuleMenu();
 
   /*!
    * Change the text associated with the Modules menu item.
@@ -91,7 +91,7 @@ public:
    * \param id The index of the item to change.
    * \param text The next text to assign to that menu item.
    */
-  void changeModuleMenuItem(QAction* action, QString text);
+  static void changeModuleMenuItem(QAction* action, QString text);
 
   /*!
    * Remove an item from the Modules menu.
@@ -132,20 +132,20 @@ public:
   /*!
    * Load window geometry based upon previously stored settings
    */
-  void loadWindow(void);
+  void loadWindow();
 
 private slots:
-  void about(void);
-  void aboutXeno(void);
-  void aboutQt(void);
-  void openDocs(void);
-  void openSubIssue(void);
+  void about();
+  void aboutXeno();
+  void aboutQt();
+  static void openDocs();
+  static void openSubIssue();
 
-  void loadSettings(void);
-  void saveSettings(void);
-  void resetSettings(void);
+  void loadSettings();
+  void saveSettings();
+  void resetSettings();
 
-  void windowsMenuAboutToShow(void);
+  void windowsMenuAboutToShow();
   void windowsMenuActivated(QAction*);
   void modulesMenuActivated(QAction*);
   void fileMenuActivated(QAction*);
