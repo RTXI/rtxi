@@ -248,15 +248,15 @@ private:
   QMdiSubWindow* subWind
 };
 
-class Module
+class Widget
 {
 public:
-  Plugin();
-  ~Plugin();
+  Widget();
+  ~Widget();
 
 private:
-  std::unique_ptr<Modules::Component> rtxi_component;
-  Modules::UI* rtxi_interface;
+  std::unique_ptr<Modules::Component> plugin_component;
+  Modules::UI* plugin_panel;
 }
 
 class Manager
@@ -266,10 +266,10 @@ public:
           QMainWindow* main_window);
   ~Manager();
 
-  int loadModule(std::string location);
-  int unloadModule(Modules::Object* module);
+  int addModule(std::string location);
+  int removeModule(Modules::Widget* module);
 private:
-  std::vector<std::unique_ptr<Modules::Object>> rtxi_modules;
+  std::vector<std::unique_ptr<Modules::Widget>> rtxi_modules;
   QMainWindow* main_window;
   Event::Manager* event_manager;
 };
