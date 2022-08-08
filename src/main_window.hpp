@@ -36,7 +36,6 @@ class MainWindow : public QMainWindow
   Q_OBJECT
 public:
   MainWindow();
-  ~MainWindow()=default;
 
   /*!
    * Add an item to the File menu.
@@ -69,8 +68,8 @@ public:
    */
   QAction* createModuleMenuItem(const QString& text);
   QAction* createModuleMenuItem(const QString& text,
-                                const QObject* handler,
-                                const char* slot);
+                                const QObject* receiver,
+                                const char* member);
 
   /*!
    * Sets the parameter value of a menu item in the Modules menu.
@@ -91,7 +90,7 @@ public:
    * \param id The index of the item to change.
    * \param text The next text to assign to that menu item.
    */
-  static void changeModuleMenuItem(QAction* action, QString text);
+  static void changeModuleMenuItem(QAction* action, const QString& text);
 
   /*!
    * Remove an item from the Modules menu.
@@ -184,6 +183,6 @@ private:
   void createHelpMenu();
   void createFileActions();
   void createHelpActions();
-  void closeEvent(QCloseEvent*);
+  void closeEvent(QCloseEvent* event) override;
 };
 #endif /* MAIN_WINDOW_H */

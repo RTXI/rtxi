@@ -26,8 +26,8 @@
 
 #include "debug.hpp"
 // NOLINTBEGIN(cppcoreguidelines-pro-bounds-constant-array-index)
-IO::Block::Block(std::string n, const std::vector<IO::channel_t>& channels, bool isdependent)
-    : name(std::move(n)) , isInputDependent(isdependent)
+IO::Block::Block(std::string name, const std::vector<IO::channel_t>& channels, bool isdependent)
+    : name(std::move(name)) , isInputDependent(isdependent)
 {
   port_t port = {};
   for (const auto& channel : channels) {

@@ -405,7 +405,7 @@ void RT::Connector::propagate(RT::Thread* thread)
 RT::System::System(Event::Manager* em, RT::Connector* rtc) 
   : event_manager(em), rt_connector(rtc)
 {
-  if(RT::OS::getFifo(this->eventFifo, 255*sizeof(Event::Object*)) != 0){
+  if(RT::OS::getFifo(this->eventFifo, RT::OS::DEFAULT_FIFO_SIZE*sizeof(Event::Object*)) != 0){
     ERROR_MSG("RT::System::System : failed to create Fifo");
     return;
   }

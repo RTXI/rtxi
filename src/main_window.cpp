@@ -118,7 +118,7 @@ void MainWindow::clearModuleMenu()
   moduleMenu->clear();
 }
 
-void MainWindow::changeModuleMenuItem(QAction* action, QString text)
+void MainWindow::changeModuleMenuItem(QAction* action, const QString& text)
 {
   action->setText(text);
 }
@@ -131,11 +131,11 @@ void MainWindow::removeModuleMenuItem(QAction* action)
   }
 }
 
-QAction* MainWindow::createUtilMenuItem(const QString& text,
-                                        const QObject* receiver,
-                                        const char* member)
+QAction* MainWindow::createUtilMenuItem(const QString& label,
+                                        const QObject* handler,
+                                        const char* slot)
 {
-  return utilMenu->addAction(text, receiver, member);
+  return utilMenu->addAction(label, handler, slot);
 }
 
 void MainWindow::createFileMenu()
@@ -245,7 +245,10 @@ void MainWindow::createFileActions()
   quit = new QAction(tr("&Quit"), this);
   quit->setShortcut(tr("Ctrl+Q"));
   quit->setStatusTip(tr("Quit RTXI"));
-  connect(qApp, SIGNAL(aboutToQuit()), mdiArea, SLOT(closeAllSubWindows()));
+  connect(QCoreApplication::instance(),
+          SIGNAL(aboutToQuit()),
+          mdiArea,
+          SLOT(closeAllSubWindows()));
   connect(quit, SIGNAL(triggered()), this, SLOT(close()));
 }
 
@@ -272,11 +275,11 @@ void MainWindow::createHelpActions()
   connect(sub_issue, SIGNAL(triggered()), this, SLOT(openSubIssue()));
 }
 
-QAction* MainWindow::createSystemMenuItem(const QString& text,
-                                          const QObject* receiver,
-                                          const char* member)
+QAction* MainWindow::createSystemMenuItem(const QString& label,
+                                          const QObject* handler,
+                                          const char* slot)
 {
-  return systemMenu->addAction(text, receiver, member);
+  return systemMenu->addAction(label, handler, slot);
 }
 
 void MainWindow::about()
@@ -318,15 +321,16 @@ void MainWindow::openSubIssue()
 void MainWindow::loadWindow()
 {
   QSettings userprefs;
-  userprefs.setPath(QSettings::NativeFormat,
-                    QSettings::SystemScope,
-                    "/usr/local/share/rtxi/");
+  QSettings::setPath(QSettings::NativeFormat,
+                     QSettings::SystemScope,
+                     "/usr/local/share/rtxi/");
   userprefs.beginGroup("MainWindow");
   restoreGeometry(userprefs.value("geometry", saveGeometry()).toByteArray());
   move(userprefs.value("pos", pos()).toPoint());
   resize(userprefs.value("size", size()).toSize());
-  if (userprefs.value("maximized", isMaximized()).toBool())
+  if (userprefs.value("maximized", isMaximized()).toBool()){
     showMaximized();
+  }
   userprefs.endGroup();
   show();
 }
@@ -334,7 +338,7 @@ void MainWindow::loadWindow()
 void MainWindow::loadSettings()
 {
   QSettings userprefs;
-  userprefs.setPath(QSettings::NativeFormat,
+  QSettings::setPath(QSettings::NativeFormat,
                     QSettings::SystemScope,
                     "/usr/local/share/rtxi/");
 
@@ -354,7 +358,7 @@ void MainWindow::loadSettings()
 void MainWindow::saveSettings()
 {
   QSettings userprefs;
-  userprefs.setPath(QSettings::NativeFormat,
+  QSettings::setPath(QSettings::NativeFormat,
                     QSettings::SystemScope,
                     "/usr/local/share/rtxi/");
 
@@ -365,8 +369,9 @@ void MainWindow::saveSettings()
       tr("Settings (*.set)"));
 
   if (!filename.isEmpty()) {
-    if (!filename.endsWith(".set"))
+    if (!filename.endsWith(".set")){
       filename = filename + ".set";
+    }
     if (QFileInfo(filename).exists()
         && QMessageBox::warning(this,
                                 "File Exists",
@@ -408,7 +413,7 @@ void MainWindow::windowsMenuAboutToShow()
   subWindows = mdiArea->subWindowList();
 
   // Make sure it isn't empty
-  if (subWindows.isEmpty()){
+  if (subWindows.isEmpty()) {
     return;
   }
   // Create windows list based off of what's open
@@ -429,12 +434,12 @@ void MainWindow::windowsMenuActivated(QAction* id)
   subWindows = mdiArea->subWindowList();
 
   // Make sure it isn't empty
-  if (subWindows.isEmpty())
-    return;
-
-  for (uint16_t i = 0; i < subWindows.size(); i++)
-    if (subWindows.at(i)->widget()->windowTitle() == id->text())
-      mdiArea->setActiveSubWindow(subWindows.at(i));
+  if (subWindows.isEmpty()){ return; }
+  for (QMdiSubWindow* subwindow : this->subWindows){
+    if (subwindow->widget()->windowTitle() == id->text()){
+      mdiArea->setActiveSubWindow(subwindow);
+    }
+  }
 }
 
 void MainWindow::modulesMenuActivated(QAction* id)
@@ -456,8 +461,9 @@ void MainWindow::fileMenuActivated(QAction* id)
   // so we have to tell it to ignore the first three items
   if (id->text().contains("Load Workspace")
       || id->text().contains("Save Workspace")
-      || id->text().contains("Reset Workspace") || id->text().contains("Quit"))
+      || id->text().contains("Reset Workspace") || id->text().contains("Quit")){
     return;
+  }
 
   // Have to trim the first three characters before loading
   // or else parser will include qstring formatting
@@ -467,13 +473,13 @@ void MainWindow::fileMenuActivated(QAction* id)
   // 3).toStdString());
 }
 
-void MainWindow::closeEvent(QCloseEvent*)
+void MainWindow::closeEvent(QCloseEvent* event)
 {
   /*
    * Save MainWindow settings
    */
   QSettings userprefs;
-  userprefs.setPath(QSettings::NativeFormat,
+  QSettings::setPath(QSettings::NativeFormat,
                     QSettings::SystemScope,
                     "/usr/local/share/rtxi/");
   userprefs.beginGroup("MainWindow");
