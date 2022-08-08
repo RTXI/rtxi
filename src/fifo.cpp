@@ -57,13 +57,11 @@ RT::OS::posixFifo::posixFifo(size_t size) : rt_to_ui_fd({0,1}),
                                             ui_to_rt_fd({0,1}),
                                             fifo_capacity(size)
 {
-  char buf[256]; // NOLINT: we have to use c arrays with c functions
-  char *err = nullptr;
   if (pipe2(this->rt_to_ui_fd.data(), O_NONBLOCK | O_CLOEXEC) != 0){
-    ERROR_MSG("RT::OS::posixFifo : failed to create rt-to-ui ipc : {}\n{}", err, buf); // NOLINT
+    ERROR_MSG("RT::OS::posixFifo : failed to create rt-to-ui ipc");
   }
   if (pipe2(this->ui_to_rt_fd.data(), O_NONBLOCK | O_CLOEXEC) != 0){
-    ERROR_MSG("RT::OS::posixFifo : failed to create ui-to-rt ipc : {}\n{}", err, buf); // NOLINT
+    ERROR_MSG("RT::OS::posixFifo : failed to create ui-to-rt ipc");
   }
 }
 

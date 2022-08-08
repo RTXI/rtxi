@@ -16,6 +16,7 @@ include(cmake/variables.cmake)
 
 # We need to let third-party tools know how to compile our project
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+cmake_policy(SET CMP0135 NEW) 
 
 # Find EVL Core library
 include(FindPkgConfig)
@@ -23,8 +24,6 @@ pkg_check_modules(evl evl)
 
 # Make sure we can find the rtxiConfig.h generated file in binary directory
 include_directories(${PROJECT_BINARY_DIR})
-#include(${CMAKE_BINARY_DIR}/conan_paths.cmake)
-#set(CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR})
 
 #Find the packages
 find_package(fmt REQUIRED)
@@ -35,7 +34,6 @@ find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
 qt_standard_project_setup()
 find_package(GTest REQUIRED)
 find_package(Threads REQUIRED)
-#find_package(Boost REQUIRED) 
 
 #Handle QT and boost libraries shenanigans
 # set(CMAKE_AUTOMOC ON)
