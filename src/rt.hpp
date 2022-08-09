@@ -58,7 +58,7 @@ class Device : public IO::Block
 {
 public:
   Device(std::string n, const std::vector<IO::channel_t>& c)
-      : IO::Block(std::move(n), c, false)
+      : IO::Block(std::move(n), c, /*isDependent=*/false)
   {
   }
 
@@ -89,7 +89,7 @@ class Thread : public IO::Block
 {
 public:
   Thread(std::string n, const std::vector<IO::channel_t>& c)
-      : IO::Block(std::move(n), c, true)
+      : IO::Block(std::move(n), c, /*isDependent=*/true)
   {
   }
 

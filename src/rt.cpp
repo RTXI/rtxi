@@ -37,10 +37,10 @@ int RT::Connector::connect(RT::Thread* src,
   }
   // First we must make sure that we aren't going to create a cycle
   if(dest == src){ return -1; } // can't be connected to itself
-  std::vector<RT::Thread*> connected_blocks;
-  std::queue<RT::Thread*> processing;
+  auto connected_blocks = std::vector<RT::Thread*>();
+  auto processing = std::queue<RT::Thread*>();
   processing.push(dest);
-  std::vector<RT::Thread*>::iterator loc;
+  auto loc = std::vector<RT::Thread*>::iterator();
   while(!processing.empty())
   {
     connected_blocks.push_back(processing.front());
@@ -307,9 +307,9 @@ bool RT::Connector::isRegistered(RT::Device* device)
 
 std::vector<RT::Thread*> RT::Connector::topological_sort()
 {
-  std::queue<RT::Thread*> processing_q;
-  std::vector<RT::Thread*> sorted_blocks;
-  std::unordered_map<RT::Thread*, int> sources_per_block;
+  auto processing_q = std::queue<RT::Thread*>();
+  auto sorted_blocks = std::vector<RT::Thread*>();
+  auto sources_per_block = std::unordered_map<RT::Thread*, int>();
 
   // initialize counts
   for(const auto& block : this->thread_registry){

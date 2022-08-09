@@ -79,13 +79,13 @@ public:
    * be IO::INPUT, IO::OUTPUT, IO::STATE, IO::COMMENT, AND IO::PARAMETER. Size 
    * should be the number of total channels, regardless of type.
    *
-   * \param name The name of the block.
+   * \param blockname The name of the block.
    * \param channels The lis of channel specifications for this block.
    * \param size The number of channels in the specification.
    *
    * \sa IO::channel_t
    */
-  Block(std::string name,
+  Block(std::string blockname,
         const std::vector<channel_t>& channels,
         bool isdependent);  // default constructor
   Block(const Block& block) = default;  // copy constructor

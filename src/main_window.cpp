@@ -328,7 +328,7 @@ void MainWindow::loadWindow()
   restoreGeometry(userprefs.value("geometry", saveGeometry()).toByteArray());
   move(userprefs.value("pos", pos()).toPoint());
   resize(userprefs.value("size", size()).toSize());
-  if (userprefs.value("maximized", isMaximized()).toBool()){
+  if (userprefs.value("maximized", isMaximized()).toBool()) {
     showMaximized();
   }
   userprefs.endGroup();
@@ -339,8 +339,8 @@ void MainWindow::loadSettings()
 {
   QSettings userprefs;
   QSettings::setPath(QSettings::NativeFormat,
-                    QSettings::SystemScope,
-                    "/usr/local/share/rtxi/");
+                     QSettings::SystemScope,
+                     "/usr/local/share/rtxi/");
 
   QString filename = QFileDialog::getOpenFileName(
       this,
@@ -359,8 +359,8 @@ void MainWindow::saveSettings()
 {
   QSettings userprefs;
   QSettings::setPath(QSettings::NativeFormat,
-                    QSettings::SystemScope,
-                    "/usr/local/share/rtxi/");
+                     QSettings::SystemScope,
+                     "/usr/local/share/rtxi/");
 
   QString filename = QFileDialog::getSaveFileName(
       this,
@@ -369,7 +369,7 @@ void MainWindow::saveSettings()
       tr("Settings (*.set)"));
 
   if (!filename.isEmpty()) {
-    if (!filename.endsWith(".set")){
+    if (!filename.endsWith(".set")) {
       filename = filename + ".set";
     }
     if (QFileInfo(filename).exists()
@@ -434,9 +434,11 @@ void MainWindow::windowsMenuActivated(QAction* id)
   subWindows = mdiArea->subWindowList();
 
   // Make sure it isn't empty
-  if (subWindows.isEmpty()){ return; }
-  for (QMdiSubWindow* subwindow : this->subWindows){
-    if (subwindow->widget()->windowTitle() == id->text()){
+  if (subWindows.isEmpty()) {
+    return;
+  }
+  for (QMdiSubWindow* subwindow : this->subWindows) {
+    if (subwindow->widget()->windowTitle() == id->text()) {
       mdiArea->setActiveSubWindow(subwindow);
     }
   }
@@ -461,7 +463,8 @@ void MainWindow::fileMenuActivated(QAction* id)
   // so we have to tell it to ignore the first three items
   if (id->text().contains("Load Workspace")
       || id->text().contains("Save Workspace")
-      || id->text().contains("Reset Workspace") || id->text().contains("Quit")){
+      || id->text().contains("Reset Workspace") || id->text().contains("Quit"))
+  {
     return;
   }
 
@@ -480,8 +483,8 @@ void MainWindow::closeEvent(QCloseEvent* event)
    */
   QSettings userprefs;
   QSettings::setPath(QSettings::NativeFormat,
-                    QSettings::SystemScope,
-                    "/usr/local/share/rtxi/");
+                     QSettings::SystemScope,
+                     "/usr/local/share/rtxi/");
   userprefs.beginGroup("MainWindow");
   userprefs.setValue("geometry", saveGeometry());
   userprefs.setValue("maximized", isMaximized());
