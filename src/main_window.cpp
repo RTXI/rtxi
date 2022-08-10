@@ -178,26 +178,22 @@ void MainWindow::createUtilMenu()
     return;
   }
   libsDir.setNameFilters(QStringList("*.so"));
-  for (int i = 0; i < libsDir.entryList().size(); i++) {
-    utilItem = new QAction(libsDir.entryList().at(i), this);
-    if (libsDir.entryList().at(i).contains("analysis")) {
+  for (const auto& entryItem : libsDir.entryList()) {
+    utilItem = new QAction(entryItem, this);
+    if (entryItem.contains("analysis") ||
+        entryItem.contains("sync") ||
+        entryItem.contains("mimic")) {
       utilitiesSubMenu->addAction(utilItem);
-    } else if (libsDir.entryList().at(i).contains("sync")) {
-      utilitiesSubMenu->addAction(utilItem);
-    } else if (libsDir.entryList().at(i).contains("mimic")) {
-      utilitiesSubMenu->addAction(utilItem);
-    } else if (libsDir.entryList().at(i).contains("iir")) {
+    } else if (entryItem.contains("iir") ||
+               entryItem.contains("fir")) {
       filtersSubMenu->addAction(utilItem);
-    } else if (libsDir.entryList().at(i).contains("fir")) {
-      filtersSubMenu->addAction(utilItem);
-    } else if (libsDir.entryList().at(i).contains("signal")) {
+    } else if (entryItem.contains("signal")|| 
+               entryItem.contains("noise") ||
+               entryItem.contains("ttl") ||
+               entryItem.contains("maker")) {
       signalsSubMenu->addAction(utilItem);
-    } else if (libsDir.entryList().at(i).contains("noise")) {
-      signalsSubMenu->addAction(utilItem);
-    } else if (libsDir.entryList().at(i).contains("ttl")) {
-      signalsSubMenu->addAction(utilItem);
-    } else if (libsDir.entryList().at(i).contains("maker")) {
-      signalsSubMenu->addAction(utilItem);
+    } else {
+      delete utilItem;
     }
   }
 }
