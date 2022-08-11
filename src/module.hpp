@@ -3,6 +3,7 @@
 #include <optional>
 #include <string>
 #include <vector>
+#include <variant>
 
 #include "event.hpp"
 #include "io.hpp"
@@ -38,26 +39,7 @@ struct Info
   std::string name;
   std::string description;
   Modules::Variable::variable_t vartype;
-};
-
-struct State_var : Info
-{
-  int value;
-};
-
-struct Event_var : Info
-{
-  Event::Object value;
-};
-
-struct Comment_var : Info
-{
-  std::string value;
-};
-
-struct Parameter_var : Info
-{
-  double value;
+  std::variant<int, Event::Object, std::string, double> value;
 };
 
 }  // namespace Variable
@@ -72,14 +54,23 @@ public:
             std::vector<Modules::Variable::Info> variables);
   ~Component();
 
+  virtual size_t getCount(Modules::Variable::variable_t vartype);
+  virtual std::string getName(Modules::Variable::variable_t, size_t index);
+  virtual std::string getDescription(Modules::Variable::variable_t, size_t index);
+
+  virtual int getValue(Modules::Variable::STATE vartype, size_t index);
+  virtual double getValue(Modules::Variable::PARAMETER vartype, size_t index);
+  virtual std::string getValue(Modules::Variable::COMMENT vartype, size_t index);
+  virtual Event::Object getValue(Modules::Variable::EVENT vartype, size_t index);
+
   virtual Modules::Settings getSettings();
   virtual void loadSettings(Module::Settings settings);
 
 private:
-  std::vector<Modules::Variable::Parameter_var> parameters;
-  std::vector<Modules::Variable::State_var> states;
-  std::vector<Modules::Variable::Comment_var> comments;
-  std::vector<Modules::Variable::Event_var> events;
+  std::vector<Modules::Variable::Info> parameters;
+  std::vector<Modules::Variable::Info> states;
+  std::vector<Modules::Variable::Info> comments;
+  std::vector<Modules::Variable::Info> events;
 };
 
 class UI : public QWidgets
@@ -92,14 +83,14 @@ public:
    * Getter function go allow customization of
    * user interface
    */
-  QGridLayout* getLayout(void) { return layout; };
+  QGridLayout* getLayout() { return layout; };
 
   /*!
    * Flag passed to DefaultGUIModel::update to signal the kind of update.
    *
    * \sa DefaultGUIModel::update()
    */
-  enum update_flags_t
+  enum update_flags_t : int64_t
   {
     INIT, /*!< The parameters need to be initialized.         */
     MODIFY, /*!< The parameters have been modified by the user. */
