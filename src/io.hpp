@@ -76,8 +76,8 @@ public:
   /*!
    * The constructor needs to be provided with a specification of the channels
    * that will be embedded in this block in the channels parameter. Fields could
-   * be IO::INPUT, IO::OUTPUT, IO::STATE, IO::COMMENT, AND IO::PARAMETER. Size 
-   * should be the number of total channels, regardless of type.
+   * be IO::INPUT, IO::OUTPUT. Size should be the number of total channels, 
+   * regardless of type.
    *
    * \param blockname The name of the block.
    * \param channels The lis of channel specifications for this block.

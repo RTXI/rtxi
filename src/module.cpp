@@ -1,6 +1,7 @@
 
 #include <vector>
 
+#include "event.hpp"
 #include "module.hpp"
 
 Module::Component(std::string name, 
@@ -19,7 +20,7 @@ Module::Component(std::string name,
     } else if (std::holds_alternative<Event::Object>(var)){
       this->events.push_back(var);
     } else {
-      ERROR_MSG("Unknown or empty module variable type provided for module {}. Ignoring", this->name);
+      ERROR_MSG("Unknown or empty variable type provided for module {}. Ignoring", this->name);
     }
   }
 }
@@ -127,6 +128,10 @@ std::string Module::Component::getValueString(Modules::Variable::variable_t vart
 
 void Module::Component::setValue(size_t n, double value)
 {
+  Event::Object event(Event::Type::MODULE_PARAMETER_CHANGE_EVENT);
+  event.setParam("index", n);
+  event.setParam("value", std::any(value));
+  
   if (n >= parameter.size() || !parameter[n].data)
     return;
 
