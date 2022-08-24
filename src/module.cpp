@@ -1,7 +1,6 @@
 
 #include <vector>
 
-#include "event.hpp"
 #include "module.hpp"
 
 Module::Component(std::string name, 
@@ -128,25 +127,13 @@ std::string Module::Component::getValueString(Modules::Variable::variable_t vart
 
 void Module::Component::setValue(size_t n, double value)
 {
+  if (n >= this->parameters.size()) { return; }
+
   Event::Object event(Event::Type::MODULE_PARAMETER_CHANGE_EVENT);
   event.setParam("index", n);
   event.setParam("value", std::any(value));
   
-  if (n >= parameter.size() || !parameter[n].data)
-    return;
 
-  if (RT::OS::isRealtime() && *parameter[n].data != value) {
-    *parameter[n].data = value;
-
-    ::Event::Object event(::Event::WORKSPACE_PARAMETER_CHANGE_EVENT);
-    event.setParam("object", (void*)getID());
-    event.setParam("index", (void*)n);
-    event.setParam("value", (void*)parameter[n].data);
-    ::Event::Manager::getInstance()->postEventRT(&event);
-  } else {
-    ParameterChangeEvent event(getID(), n, value, parameter[n].data);
-    RT::System::getInstance()->postEvent(&event);
-  }
 }
 
 void Module::Component::setComment(size_t n, std::string newComment)

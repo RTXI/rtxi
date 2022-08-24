@@ -64,7 +64,7 @@ std::string Event::type_to_string(Event::Type event_type)
     case Event::Type::IO_LINK_REMOVE_EVENT:
       return_string = "SYSTEM : link remove";
       break;
-    case Event::Type::WORKSPACE_PARAMETER_CHANGE_EVENT:
+    case Event::Type::MODULE_PARAMETER_CHANGE_EVENT:
       return_string = "SYSTEM : parameter change";
       break;
     case Event::Type::PLUGIN_INSERT_EVENT:

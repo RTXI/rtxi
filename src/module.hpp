@@ -1,3 +1,5 @@
+#ifndef MODULE_HPP
+#define MODULE_HPP
 
 #include <QtWidgets>
 #include <optional>
@@ -266,3 +268,5 @@ private:
 };
 
 }  // namespace Modules
+
+#endif
