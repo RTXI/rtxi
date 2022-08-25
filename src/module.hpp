@@ -20,10 +20,24 @@ enum variable_t : size_t
 {
   PARAMETER = 0,
   STATE,
-  EVENT,
   COMMENT,
   UNKNOWN
 }
+
+/*!
+  * Flag passed to DefaultGUIModel::update to signal the kind of update.
+  *
+  * \sa DefaultGUIModel::update()
+  */
+enum state_t : int64_t
+{
+  INIT, /*!< The parameters need to be initialized.         */
+  MODIFY, /*!< The parameters have been modified by the user. */
+  PERIOD, /*!< The system period has changed.                 */
+  PAUSE, /*!< The Pause button has been activated            */
+  UNPAUSE, /*!< When the pause button has been deactivated     */
+  EXIT, /*!< When the module has been told to exit        */
+};
 
 /*!
  * Structure used to store information about module upon creation.
@@ -41,66 +55,54 @@ struct Info
   std::string name;
   std::string description;
   Modules::Variable::variable_t vartype;
-  std::variant<int, Event::Object, std::string, double> value;
+  std::variant<int, std::string, double> value;
 };
 
 }  // namespace Variable
 
+// Forward declare plugin class for the component and panel private pointers
+class Plugin;
+
 class Component
     : public RT::Thread
-    , public Event::Handler
 {
 public:
   Component(std::string name,
             std::vector<IO::Channel_t> channels,
-            std::vector<Modules::Variable::Info> variables);
+            std::vector<Modules::Variable::Info> variables
+            Modules::Plugin* hostPlugin);
   ~Component();
 
-  virtual size_t getCount(Modules::Variable::variable_t vartype);
-  virtual std::string getName(Modules::Variable::variable_t, size_t index);
-  virtual std::string getDescription(Modules::Variable::variable_t, size_t index);
+  size_t getCount(Modules::Variable::variable_t vartype);
+  std::string getName(Modules::Variable::variable_t, size_t index);
+  std::string getDescription(Modules::Variable::variable_t, size_t index);
 
-  virtual int getValue(Modules::Variable::STATE vartype, size_t index);
-  virtual double getValue(Modules::Variable::PARAMETER vartype, size_t index);
-  virtual std::string getValue(Modules::Variable::COMMENT vartype, size_t index);
-  virtual Event::Object getValue(Modules::Variable::EVENT vartype, size_t index);
+  std::any getValue(Modules::Variable::variable_t vartype, size_t index);
+  std::string getValueString(Modules::Variable::variable_t vartype, size_t index);
+  void setParameter(size_t n, double value);
+  void setState(size_t n, int value);
+  void setComment(size_t n, std::string newComment);
 
-  virtual Modules::Settings getSettings();
-  virtual void loadSettings(Module::Settings settings);
+  Modules::Plugin* getHostPlugin();
 
 private:
   std::vector<Modules::Variable::Info> parameters;
   std::vector<Modules::Variable::Info> states;
   std::vector<Modules::Variable::Info> comments;
-  std::vector<Modules::Variable::Info> events;
+
+  Modules::Plugin* hostPlugin;
 };
 
-class UI : public QWidgets
+class Panel : public QWidgets
 {
   Q_OBJECT
 public:
-  UI();
-  ~UI();
+  Panel();
   /*
    * Getter function go allow customization of
    * user interface
    */
   QGridLayout* getLayout() { return layout; };
-
-  /*!
-   * Flag passed to DefaultGUIModel::update to signal the kind of update.
-   *
-   * \sa DefaultGUIModel::update()
-   */
-  enum update_flags_t : int64_t
-  {
-    INIT, /*!< The parameters need to be initialized.         */
-    MODIFY, /*!< The parameters have been modified by the user. */
-    PERIOD, /*!< The system period has changed.                 */
-    PAUSE, /*!< The Pause button has been activated            */
-    UNPAUSE, /*!< When the pause button has been deactivated     */
-    EXIT, /*!< When the module has been told to exit        */
-  };
 
   /*!
    * Callback function that is called when the system state changes.
@@ -241,28 +243,38 @@ private:
   QMdiSubWindow* subWind
 };
 
-class Widget
+class Plugin
 {
 public:
-  Widget();
-  ~Widget();
+  Plugin(Event::Manager* ev_manager, QMainWindow* main_window);
+  ~Plugin();
+
+  Event::Manager* getEventManagerInstance();
+  virtual void receiveEvent(Event::Object* event) override;
 
 private:
+  // owned pointers
   std::unique_ptr<Modules::Component> plugin_component;
-  Modules::UI* plugin_panel;
-}
+
+  // not owned pointers (managed by external objects)
+  Modules::Panel* widget_panel;
+  Event::Manager* event_manager;
+};
 
 class Manager
 {
 public:
   Manager(Event::Manager* event_manager,
-          QMainWindow* main_window);
+          QMainWindow* main_window) : event_manager(event_manager), main_window(main_window);
   ~Manager();
 
-  int addModule(std::string location);
-  int removeModule(Modules::Widget* module);
+  int insertPlugin(Modules::Plugin* plugin);
+  int removePlugin(Modules::Plugin* plugin);
+
+  int loadPlugin(std::string dynlib);
+
 private:
-  std::vector<std::unique_ptr<Modules::Widget>> rtxi_modules;
+  std::vector<std::unique_ptr<Modules::Plugin>> rtxi_modules;
   QMainWindow* main_window;
   Event::Manager* event_manager;
 };

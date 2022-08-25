@@ -52,12 +52,6 @@ std::string Event::type_to_string(Event::Type event_type)
     case Event::Type::RT_DEVICE_REMOVE_EVENT:
       return_string = "SYSTEM : device remove";
       break;
-    case Event::Type::IO_BLOCK_INSERT_EVENT:
-      return_string = "SYSTEM : block insert";
-      break;
-    case Event::Type::IO_BLOCK_REMOVE_EVENT:
-      return_string = "SYSTEM : block remove";
-      break;
     case Event::Type::IO_LINK_INSERT_EVENT:
       return_string = "SYSTEM : link insert";
       break;
