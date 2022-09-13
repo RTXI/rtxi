@@ -143,23 +143,13 @@ Modules::Plugin* Modules::Component::getHostPlugin();
   return this->hostPlugin;
 }
 
-int Modules::Manager::insertPlugin(Modules::Plugin* plugin)
-{
-  return 0;
-}
-
-int Modules:Manager::removePlugin(Modules::Plugin* plugin)
-{
-  return 0;
-}
-
 int Modules::Manager::loadPlugin(std::string dynlib)
 {
   return 0;
 }
 
-Modules::Panel(std::string name)
-    : QWidget(MainWindow::getInstance()->centralWidget())
+Modules::Panel(std::string name, QMainWindow main_window)
+    : QWidget(main_window)
 {
   setWindowTitle(QString::number(getID()) + " " + QString::fromStdString(name));
 

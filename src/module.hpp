@@ -268,10 +268,9 @@ public:
           QMainWindow* main_window) : event_manager(event_manager), main_window(main_window);
   ~Manager();
 
-  int insertPlugin(Modules::Plugin* plugin);
-  int removePlugin(Modules::Plugin* plugin);
-
-  int loadPlugin(std::string dynlib);
+  int loadPlugin(std::string dynlib_name);
+  int unloadPlugin(std::string dynlib_name);
+  int unloadPlugin(Modules::Plugin* dynlib_pointer);
 
 private:
   std::vector<std::unique_ptr<Modules::Plugin>> rtxi_modules;
