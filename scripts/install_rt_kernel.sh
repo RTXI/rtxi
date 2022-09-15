@@ -30,14 +30,14 @@ fi
 
 # Export environment variables
 echo  "-----> Setting up variables."
-export linux_version=4.19.177
-export xenomai_version=3.1
+export linux_version=5.4.198
+export xenomai_version=3.2
 export xenomai_root=/opt/xenomai-$xenomai_version
 export scripts_dir=`pwd`
 export build_root=/opt/build
 export opt=/opt
-export ipipe_patch_digit=17
-export ipipe_cip_str=-cip44
+export ipipe_patch_digit=9
+export ipipe_cip_str=
 if [ -z $ipipe_cip_str ]; then
     export linux_tree=/opt/linux-$linux_version;
 else
@@ -63,12 +63,15 @@ fi
  
 
 echo  "-----> Downloading Xenomai."
-wget --no-clobber --no-check-certificate https://xenomai.org/downloads/xenomai/stable/xenomai-$xenomai_version.tar.bz2
+#wget --no-clobber --no-check-certificate https://xenomai.org/downloads/xenomai/stable/xenomai-$xenomai_version.tar.bz2
+if [ ! -d /opt/xenomai-$xenomai_version ] ; then
+  git clone --branch stable/v3.2.x https://source.denx.de/Xenomai/xenomai.git xenomai-$xenomai_version
+fi
 
 echo "------> Downloading linux ipipe patch."
 wget --no-clobber --no-check-certificate https://xenomai.org/downloads/ipipe/v${linux_version:0:1}.x/x86/ipipe-core-${linux_version}${ipipe_cip_str}-x86-${ipipe_patch_digit}.patch
 
-tar xf xenomai-$xenomai_version.tar.bz2
+#tar xf xenomai-$xenomai_version.tar.bz2
 echo  "-----> Downloads complete."
 
 # Patch kernel
@@ -79,7 +82,8 @@ $xenomai_root/scripts/prepare-kernel.sh \
 	--ipipe=$opt/ipipe-core-${linux_version}${ipipe_cip_str}-x86-${ipipe_patch_digit}.patch \
 	--linux=$linux_tree \
 	--verbose
-yes "" | make oldconfig
+#yes "" | make oldconfig
+make defconfig
 make localmodconfig
 make menuconfig
 echo  "-----> Patching complete."
@@ -89,7 +93,6 @@ echo  "-----> Compiling kernel."
 cd $linux_tree
 export CONCURRENCY_LEVEL=$(grep -c ^processor /proc/cpuinfo)
 fakeroot make-kpkg \
-	--initrd \
 	--append-to-version=-xenomai-$xenomai_version \
 	--revision $(date +%Y%m%d) \
 	kernel-image kernel-headers modules
@@ -116,6 +119,8 @@ echo  "-----> Boot loader update complete."
 
 # Install user libraries
 echo  "-----> Installing user libraries."
+cd $xenomai_root
+$xenomai_root/scripts/bootstrap
 cd $build_root
 $xenomai_root/configure --with-core=cobalt --enable-pshared --enable-smp --enable-dlopen-libs
 make -sj`nproc`
