@@ -2,140 +2,59 @@
 #include <vector>
 #include <any>
 
+#include <QtWidgets>
+
 #include "module.hpp"
 
-Modules::Component(std::string name, 
-                  std::vector<IO::channel_t> channels,
-                  size_t channel_size,
-                  std::vector<Modules::Variable::Info> variables)
-    : RT::Thread(name, channels, channel_size)
+Modules::DefaultGUILineEdit::DefaultGUILineEdit(QWidget* parent)
+    : QLineEdit(parent)
+{
+  QObject::connect(
+      this, SIGNAL(textChanged(const QString&)), this, SLOT(redden()));
+}
+
+Modules::DefaultGUILineEdit::~DefaultGUILineEdit() {}
+
+void Modules::DefaultGUILineEdit::blacken()
+{
+  palette.setBrush(this->foregroundRole(),
+                   QApplication::palette().color(QPalette::WindowText));
+  this->setPalette(palette);
+  setModified(false);
+}
+
+void Modules::DefaultGUILineEdit::redden()
+{
+  if (isModified()) {
+    palette.setBrush(this->foregroundRole(), Qt::red);
+    this->setPalette(palette);
+  }
+}
+
+Modules::Component::Component(Modules::Plugin* hostPlugin,
+                              std::string name, 
+                              std::vector<IO::channel_t> channels,
+                              std::vector<Modules::Variable::Info> variables)
+    : RT::Thread(name, channels), hostPlugin(hostPlugin)
 {
   for(auto var : variables){
-    switch(var.vartype){
-      case Modules::Variable::State:
-        this->states.push_back(var);
-        break;
-      case Modules::Variable::Parameter:
-        this->parameters.push_back(var);
-        break;
-      case Modules::Variable::Comment:
-        this->comments.push_back(var);
-        break;
-      default:
-        ERROR_MSG("Unknown or empty variable type provided for module {}. Ignoring", this->name);
-    }
+    this->parameter[var.name] = var;
   }
 }
 
-size_t Modules::Component::getCount(Modules::Variable::variable_t vartype)
+std::string Modules::Component::getDescription(const std::string& varname)
 {
-  size_t result;
-  switch(vartype){
-    case Modules::Variable::PARAMETER:
-      result = this->parameter.size();
-      break;
-    case Modules::Variable::STATE:
-      result = this->states.size();
-      break;
-    case Modules::Variable::COMMENT:
-      result = this->comments.size();
-      break;
-    default:
-      result =  0;
-  }
-  return result;
+  return this->parameter[varname].description;
 }
 
-std::string Modules::Component::getName(Modules::Variable::variable_t vartype, size_t index)
+std::string Modules::Component::getValueString(const std::string& varname)
 {
-  std::string result;
-  switch(vartype){
-    case Modules::Variable::PARAMETER:
-      result = this->parameter.at(index).name;
-      break;
-    case Modules::Variable::STATE:
-      result = this->states.at(index).name;
-      break;
-    case Modules::Variable::COMMENT:
-      result = this->comments.at(index).name;
-      break;
-    default:
-      result = "";
-  }
-
-  return result;
+  return "";
 }
 
-std::string Modules::Component::getDescription(IO::flags_t vartype, size_t n) const
+void Modules::Component::setComment(const std::string& varname, std::string newComment)
 {
-  std::string result;
-  switch(vartype){
-    case Modules::Variable::PARAMETER:
-      result = this->parameter.at(index).description;
-      break;
-    case Modules::Variable::STATE:
-      result = this->states.at(index).description;
-      break;
-    case Modules::Variable::COMMENT:
-      result = this->comments.at(index).description;
-      break;
-    default:
-      result = "";
-  }
-  return result;
-}
-
-std::any Modules::Component::getValue(Modules::Variable::variable_t vartype, size_t index)
-{
-  std::any retval;
-  switch(vartype){
-    case Modules::Variable::PARAMETERS:
-      retval = this->parameters.at(index);
-    case Modules::Variable::STATE:
-      retval = this->states.at(index);
-    case Modules::Variable::COMMENT:
-      retval = this->comments.at(index);
-    default:
-      ERROR_MSG("Modules::Component::getValue : Unknown variable type provided!");
-  }
-  return retval;
-}
-
-std::string Modules::Component::getValueString(Modules::Variable::variable_t vartype, size_t index) const
-{
-  std::string result;
-  switch(vartype){
-    case Modules::Variable::STATE:
-      result = fmt::format("{}", std::any_cast<int>(this->getvalue(vartype, n)));
-      break;
-    case Modules::Variable::PARAMETER:
-      result = fmt::format("{}", std::any_cast<double>(this->getvalue(vartype, n)));
-      break;
-    case Modules::Variable::COMMENT:
-      result = fmt::format("{}", std::any_cast<std::string>(this->getvalue(vartype, n)));
-      break;
-    default:
-      result = ""
-  }
-  return result;
-}
-
-void Modules::Component::setParameter(size_t n, double value)
-{
-  if (n >= this->parameters.size()) { return; }
-  this->parameters[n] = value;
-}
-
-void Modules::Component::setState(size_t n, int value)
-{
-  if (n >= this->states.size()) { return; }
-  this->states[n] = value;
-}
-
-void Modules::Component::setComment(size_t n, std::string newComment)
-{
-  if (n >= comment.size()) { return; }
-  this->comments[n] = newComment;
+  this->parameter[varname].comment = newComment;
 }
 
 Modules::Plugin* Modules::Component::getHostPlugin();
@@ -159,12 +78,12 @@ Modules::Panel(std::string name, QMainWindow main_window)
   QObject::connect(timer, SIGNAL(timeout(void)), this, SLOT(refresh(void)));
 }
 
-void Modules::Panel::createGUI(Modules::Panel::variable_t* var, int size)
+void Modules::Panel::createGUI(std::vector<Modules::Variable::Info> vars, int size)
 {
   // Make Mdi
   subWindow = new QMdiSubWindow;
   subWindow->setAttribute(Qt::WA_DeleteOnClose);
-  subWindow->setWindowIcon(QIcon("/usr/local/share/rtxi/RTXI-widget-icon.png"));
+  //subWindow->setWindowIcon(QIcon("/usr/local/share/rtxi/RTXI-widget-icon.png"));
   subWindow->setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint
                             | Qt::WindowMinimizeButtonHint);
   subWindow->setOption(QMdiSubWindow::RubberBandResize, true);
@@ -172,61 +91,58 @@ void Modules::Panel::createGUI(Modules::Panel::variable_t* var, int size)
   MainWindow::getInstance()->createMdi(subWindow);
 
   // Create main layout
-  layout = new QGridLayout;
+  this->layout = new QGridLayout;
 
   // Create child widget and gridLayout
   QScrollArea* gridArea = new QScrollArea;
-  gridBox = new QWidget;
-  gridArea->setWidget(gridBox);
-  gridArea->ensureWidgetVisible(gridBox, 0, 0);
+  this->gridBox = new QWidget;
+  gridArea->setWidget(this->gridBox);
+  gridArea->ensureWidgetVisible(this->gridBox, 0, 0);
   gridArea->setWidgetResizable(true);
   QGridLayout* gridLayout = new QGridLayout;
 
-  size_t nstate = 0, nparam = 0, nevent = 0, ncomment = 0;
-  for (int i = 0; i < size; i++) {
-    if (var[i].flags & (PARAMETER | STATE | EVENT | COMMENT)) {
-      param_t param;
+  size_t nstate = 0, nparam = 0, ncomment = 0;
+  for (auto varinfo : vars) {
+    param_t param;
 
-      param.label = new QLabel(QString::fromStdString(var[i].name), gridBox);
-      gridLayout->addWidget(param.label, parameter.size(), 0);
-      param.edit = new DefaultGUILineEdit(gridBox);
-      gridLayout->addWidget(param.edit, parameter.size(), 1);
+    param.label = new QLabel(QString::fromStdString(varinfo.name), gridBox);
+    gridLayout->addWidget(param.label, parameter.size(), 0);
+    gridLayout->addWidget(param.edit, this->parameter.size(), 1);
 
-      param.label->setToolTip(QString::fromStdString(var[i].description));
-      param.edit->setToolTip(QString::fromStdString(var[i].description));
+    param.label->setToolTip(QString::fromStdString(varinfo.description));
+    param.edit->setToolTip(QString::fromStdString(var[i].description));
 
-      if (var[i].flags & PARAMETER) {
-        if (var[i].flags & DOUBLE) {
-          param.edit->setValidator(new QDoubleValidator(param.edit));
-          param.type = PARAMETER | DOUBLE;
-        } else if (var[i].flags & UINTEGER) {
-          QIntValidator* validator = new QIntValidator(param.edit);
-          param.edit->setValidator(validator);
-          validator->setBottom(0);
-          param.type = PARAMETER | UINTEGER;
-        } else if (var[i].flags & INTEGER) {
-          param.edit->setValidator(new QIntValidator(param.edit));
-          param.type = PARAMETER | INTEGER;
-        } else
-          param.type = PARAMETER;
-        param.index = nparam++;
-        param.str_value = new QString;
-      } else if (var[i].flags & STATE) {
-        param.edit->setReadOnly(true);
-        palette.setBrush(param.edit->foregroundRole(), Qt::darkGray);
-        param.edit->setPalette(palette);
-        param.type = STATE;
-        param.index = nstate++;
-      } else if (var[i].flags & EVENT) {
-        param.edit->setReadOnly(true);
-        param.type = EVENT;
-        param.index = nevent++;
-      } else if (var[i].flags & COMMENT) {
-        param.type = COMMENT;
-        param.index = ncomment++;
-      }
-      parameter[QString::fromStdString(var[i].name)] = param;
+    if (var[i].flags & PARAMETER) {
+      if (var[i].flags & DOUBLE) {
+        param.edit->setValidator(new QDoubleValidator(param.edit));
+        param.type = PARAMETER | DOUBLE;
+      } else if (var[i].flags & UINTEGER) {
+        QIntValidator* validator = new QIntValidator(param.edit);
+        param.edit->setValidator(validator);
+        validator->setBottom(0);
+        param.type = PARAMETER | UINTEGER;
+      } else if (var[i].flags & INTEGER) {
+        param.edit->setValidator(new QIntValidator(param.edit));
+        param.type = PARAMETER | INTEGER;
+      } else
+        param.type = PARAMETER;
+      param.index = nparam++;
+      param.str_value = new QString;
+    } else if (var[i].flags & STATE) {
+      param.edit->setReadOnly(true);
+      palette.setBrush(param.edit->foregroundRole(), Qt::darkGray);
+      param.edit->setPalette(palette);
+      param.type = STATE;
+      param.index = nstate++;
+    } else if (var[i].flags & EVENT) {
+      param.edit->setReadOnly(true);
+      param.type = EVENT;
+      param.index = nevent++;
+    } else if (var[i].flags & COMMENT) {
+      param.type = COMMENT;
+      param.index = ncomment++;
     }
+    parameter[QString::fromStdString(var[i].name)] = param;
   }
 
   // Create child widget

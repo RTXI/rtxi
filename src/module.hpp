@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 #include <variant>
+#include <unordered_map>
 
 #include "event.hpp"
 #include "io.hpp"
@@ -18,7 +19,9 @@ namespace Variable
 {
 enum variable_t : size_t
 {
-  PARAMETER = 0,
+  INT_PARAMETER = 0,
+  DOUBLE_PARAMETER,
+  UINT_PARAMETER,
   STATE,
   COMMENT,
   UNKNOWN
@@ -55,10 +58,25 @@ struct Info
   std::string name;
   std::string description;
   Modules::Variable::variable_t vartype;
-  std::variant<int, std::string, double> value;
+  std::variant<int, double, uint64_t, std::string> value;
 };
 
 }  // namespace Variable
+
+class DefaultGUILineEdit : public QLineEdit
+{
+
+    Q_OBJECT
+
+public:
+    DefaultGUILineEdit(QWidget *);
+    ~DefaultGUILineEdit(void);
+    void blacken(void);
+    QPalette palette;
+
+public slots:
+    void redden(void);
+}; // class DefaultGUILineEdit
 
 // Forward declare plugin class for the component and panel private pointers
 class Plugin;
@@ -67,28 +85,30 @@ class Component
     : public RT::Thread
 {
 public:
-  Component(std::string name,
+  Component(Modules::Plugin* hostPlugin
+            std::string name,
             std::vector<IO::Channel_t> channels,
-            std::vector<Modules::Variable::Info> variables
-            Modules::Plugin* hostPlugin);
+            std::vector<Modules::Variable::Info> variables);
   ~Component();
 
-  size_t getCount(Modules::Variable::variable_t vartype);
-  std::string getName(Modules::Variable::variable_t, size_t index);
-  std::string getDescription(Modules::Variable::variable_t, size_t index);
+  template<typename T>
+  T getValue(const std::string& varname)
+  {
+    return std::get<T>(this->parameter[varname].value);
+  }
 
-  std::any getValue(Modules::Variable::variable_t vartype, size_t index);
-  std::string getValueString(Modules::Variable::variable_t vartype, size_t index);
-  void setParameter(size_t n, double value);
-  void setState(size_t n, int value);
-  void setComment(size_t n, std::string newComment);
+  template<typename T>
+  void setValue(const std::string& varname, T value)
+  {
+    this->parameter[varname].value = value;
+  }
 
+  std::string getDescription(const std::string& varname);
+  std::string getValueString(const std::string& varname);
   Modules::Plugin* getHostPlugin();
 
 private:
-  std::vector<Modules::Variable::Info> parameters;
-  std::vector<Modules::Variable::Info> states;
-  std::vector<Modules::Variable::Info> comments;
+  std::unordered_map<std::string, Modules::Variable::Info> parameter;
 
   Modules::Plugin* hostPlugin;
 };
@@ -131,9 +151,6 @@ public:
   struct param_t
   {
     QLabel* label;
-    DefaultGUILineEdit* edit;
-    IO::flags_t type;
-    size_t index;
     QString* str_value;
   };
   std::map<QString, param_t> parameter;
@@ -149,21 +166,21 @@ public slots:
   /*!
    * Function that allows the object to safely delete and unload itself.
    */
-  virtual void exit(void);
+  virtual void exit();
 
   /*!
    * Function that updates the GUI with new parameter values.
    *
    * \sa DefaultGUIModel::update_flags_t
    */
-  virtual void refresh(void);
+  virtual void refresh();
 
   /*!
    * Function that calls DefaultGUIModel::update with the MODIFY flag
    *
    * \sa DefaultGUIModel::update_flags_t
    */
-  virtual void modify(void);
+  virtual void modify();
 
   /*!
    * Function that pauses/unpauses the model.
@@ -243,14 +260,14 @@ private:
   QMdiSubWindow* subWind
 };
 
-class Plugin
+class Plugin : public Event::Handler
 {
 public:
   Plugin(Event::Manager* ev_manager, QMainWindow* main_window);
   ~Plugin();
 
   Event::Manager* getEventManagerInstance();
-  virtual void receiveEvent(Event::Object* event) override;
+  void receiveEvent(Event::Object* event) override;
 
 private:
   // owned pointers
