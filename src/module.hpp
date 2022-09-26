@@ -141,7 +141,7 @@ public:
    *
    * \sa DefaultGUIModel::update_flags_t
    */
-  void createGUI(DefaultGUIModel::variable_t* var, int size);
+  virtual void createGUI(std::vector<Modules::Variable::Info> vars);
 
   // Default buttons
   QPushButton* pauseButton;
@@ -152,6 +152,7 @@ public:
   {
     QLabel* label;
     QString* str_value;
+    DefaultGUILineEdit* edit;
   };
   std::map<QString, param_t> parameter;
   QPalette palette;

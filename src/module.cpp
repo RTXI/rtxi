@@ -78,7 +78,7 @@ Modules::Panel(std::string name, QMainWindow main_window)
   QObject::connect(timer, SIGNAL(timeout(void)), this, SLOT(refresh(void)));
 }
 
-void Modules::Panel::createGUI(std::vector<Modules::Variable::Info> vars, int size)
+void Modules::Panel::createGUI(std::vector<Modules::Variable::Info> vars)
 {
   // Make Mdi
   subWindow = new QMdiSubWindow;
