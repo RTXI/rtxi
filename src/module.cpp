@@ -1,10 +1,42 @@
 
 #include <vector>
 #include <any>
+#include <memory>
+#include <algorithm>
 
 #include <QtWidgets>
 
+#include "debug.hpp"
 #include "module.hpp"
+
+std::string Modules::Variable::state2string(Modules::Variable::state_t state)
+{
+  std::string result;
+  switch(state){
+    case Modules::Variable::INIT :
+      result = std::string("INIT");
+      break;
+    case Modules::Variable::MODIFY :
+      result = std::string("MODIFIED PARAMETERS");
+      break;
+    case Modules::Variable::PERIOD :
+      result = std::string("PERIOD CHANGE");
+      break;
+    case Modules::Variable::PAUSE :
+      result = std::string("PLUGIN PAUSED");
+      break;
+    case Modules::Variable::UNPAUSE :
+      result = std::string("PLUGIN UNPAUSED");
+      break;
+    case Modules::Variable::EXIT :
+      result = std::string("EXIT");
+      break;
+    default:
+      result = std::string("UNKNOWN STATE");
+      break;
+  }
+  return result;
+}
 
 Modules::DefaultGUILineEdit::DefaultGUILineEdit(QWidget* parent)
     : QLineEdit(parent)
@@ -32,7 +64,7 @@ void Modules::DefaultGUILineEdit::redden()
 }
 
 Modules::Component::Component(Modules::Plugin* hostPlugin,
-                              std::string name, 
+                              const std::string& name, 
                               std::vector<IO::channel_t> channels,
                               std::vector<Modules::Variable::Info> variables)
     : RT::Thread(name, channels), hostPlugin(hostPlugin)
@@ -49,46 +81,60 @@ std::string Modules::Component::getDescription(const std::string& varname)
 
 std::string Modules::Component::getValueString(const std::string& varname)
 {
-  return "";
+  std::string value;
+  switch(this->parameter[varname].vartype){
+    case Modules::Variable::UINT_PARAMETER :
+      value = std::to_string(std::get<uint64_t>(this->parameter[varname].value));
+      break;
+    case Modules::Variable::INT_PARAMETER :
+      value = std::to_string(std::get<int>(this->parameter[varname].value));
+      break;
+    case Modules::Variable::DOUBLE_PARAMETER :
+      value = std::to_string(std::get<double>(this->parameter[varname].value));
+      break;
+    case Modules::Variable::STATE :
+      value = "";
+      break;
+    case Modules::Variable::COMMENT :
+      value = std::get<std::string>(this->parameter[varname].value);
+      break;
+    case Modules::Variable::UNKNOWN :
+      value = "UNKNOWN";
+      break;
+    default:
+      value = "ERROR";
+      break;
+  }
+  return value;
 }
 
-void Modules::Component::setComment(const std::string& varname, std::string newComment)
+std::unique_ptr<Modules::Component> Modules::Component::createComponent()
 {
-  this->parameter[varname].comment = newComment;
+  return std::move(std::make_unique<Modules::Component>(this));
 }
 
-Modules::Plugin* Modules::Component::getHostPlugin();
-{
-  return this->hostPlugin;
-}
-
-int Modules::Manager::loadPlugin(std::string dynlib)
-{
-  return 0;
-}
-
-Modules::Panel(std::string name, QMainWindow main_window)
+Modules::Panel::Panel(std::string name, QMainWindow* main_window)
     : QWidget(main_window)
 {
-  setWindowTitle(QString::number(getID()) + " " + QString::fromStdString(name));
+  setWindowTitle(QString::fromStdString(name));
 
   QTimer* timer = new QTimer(this);
   timer->setTimerType(Qt::PreciseTimer);
   timer->start(1000);
-  QObject::connect(timer, SIGNAL(timeout(void)), this, SLOT(refresh(void)));
+  QObject::connect(timer, SIGNAL(timeout()), this, SLOT(refresh()));
 }
 
-void Modules::Panel::createGUI(std::vector<Modules::Variable::Info> vars)
+void Modules::Panel::createGUI(std::vector<Modules::Variable::Info> vars, MainWindow* main_window)
 {
   // Make Mdi
-  subWindow = new QMdiSubWindow;
-  subWindow->setAttribute(Qt::WA_DeleteOnClose);
+  this->subWindow = new QMdiSubWindow;
+  this->subWindow->setAttribute(Qt::WA_DeleteOnClose);
   //subWindow->setWindowIcon(QIcon("/usr/local/share/rtxi/RTXI-widget-icon.png"));
-  subWindow->setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint
+  this->subWindow->setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint
                             | Qt::WindowMinimizeButtonHint);
-  subWindow->setOption(QMdiSubWindow::RubberBandResize, true);
-  subWindow->setOption(QMdiSubWindow::RubberBandMove, true);
-  MainWindow::getInstance()->createMdi(subWindow);
+  this->subWindow->setOption(QMdiSubWindow::RubberBandResize, true);
+  this->subWindow->setOption(QMdiSubWindow::RubberBandMove, true);
+  main_window->createMdi(subWindow);
 
   // Create main layout
   this->layout = new QGridLayout;
@@ -101,48 +147,43 @@ void Modules::Panel::createGUI(std::vector<Modules::Variable::Info> vars)
   gridArea->setWidgetResizable(true);
   QGridLayout* gridLayout = new QGridLayout;
 
-  size_t nstate = 0, nparam = 0, ncomment = 0;
   for (auto varinfo : vars) {
     param_t param;
 
     param.label = new QLabel(QString::fromStdString(varinfo.name), gridBox);
-    gridLayout->addWidget(param.label, parameter.size(), 0);
+    gridLayout->addWidget(param.label, this->parameter.size(), 0);
     gridLayout->addWidget(param.edit, this->parameter.size(), 1);
 
     param.label->setToolTip(QString::fromStdString(varinfo.description));
-    param.edit->setToolTip(QString::fromStdString(var[i].description));
+    param.edit->setToolTip(QString::fromStdString(varinfo.description));
 
-    if (var[i].flags & PARAMETER) {
-      if (var[i].flags & DOUBLE) {
+    param.str_value = new QString;
+    param.label = new QLabel;
+    param.type = varinfo.vartype;
+    switch(varinfo.vartype) {
+      case Modules::Variable::DOUBLE_PARAMETER :
         param.edit->setValidator(new QDoubleValidator(param.edit));
-        param.type = PARAMETER | DOUBLE;
-      } else if (var[i].flags & UINTEGER) {
-        QIntValidator* validator = new QIntValidator(param.edit);
-        param.edit->setValidator(validator);
-        validator->setBottom(0);
-        param.type = PARAMETER | UINTEGER;
-      } else if (var[i].flags & INTEGER) {
+        break;
+      case Modules::Variable::UINT_PARAMETER :
         param.edit->setValidator(new QIntValidator(param.edit));
-        param.type = PARAMETER | INTEGER;
-      } else
-        param.type = PARAMETER;
-      param.index = nparam++;
-      param.str_value = new QString;
-    } else if (var[i].flags & STATE) {
-      param.edit->setReadOnly(true);
-      palette.setBrush(param.edit->foregroundRole(), Qt::darkGray);
-      param.edit->setPalette(palette);
-      param.type = STATE;
-      param.index = nstate++;
-    } else if (var[i].flags & EVENT) {
-      param.edit->setReadOnly(true);
-      param.type = EVENT;
-      param.index = nevent++;
-    } else if (var[i].flags & COMMENT) {
-      param.type = COMMENT;
-      param.index = ncomment++;
+        //validator->setBottom(0);
+        break;
+      case Modules::Variable::INT_PARAMETER :
+        param.edit->setValidator(new QIntValidator(param.edit));
+        break;
+      case Modules::Variable::STATE :
+        param.edit->setReadOnly(true);
+        palette.setBrush(param.edit->foregroundRole(), Qt::darkGray);
+        param.edit->setPalette(palette);
+        break;
+      case Modules::Variable::COMMENT :
+        break;
+      case Modules::Variable::UNKNOWN :
+        ERR_MSG("Variable {} in Module {} is of category UNKNOWN", varinfo.name, this->getName());
+      default
+        ERR_MSG("Variable {} in Module {} has undefined or broken category", varinfo.name, this->getName());
     }
-    parameter[QString::fromStdString(var[i].name)] = param;
+    parameter[QString::fromStdString(varinfo.name)] = param;
   }
 
   // Create child widget
@@ -180,221 +221,356 @@ void Modules::Panel::createGUI(std::vector<Modules::Variable::Info> vars)
   subWindow->show();
 }
 
-void Modules::Panel::update(Modules::Panel::State state) {}
+void Modules::Panel::update(Modules::Panel::state_t state) {}
 
 void Modules::Panel::resizeMe()
 {
   subWindow->adjustSize();
 }
 
-void Modules::Panel::exit(void)
+void Modules::Panel::exit()
 {
-  // Ensure that the realtime thread isn't in the middle of executing
-  // Modules::Panel::execute()
-  setActive(false);
-  SyncEvent event;
-  RT::System::getInstance()->postEvent(&event);
-
-  update(EXIT);
-  Plugin::Manager::getInstance()->unload(this);
-  subWindow->close();
+  this->hostPlugin->exit()
+  this->exit();
 }
 
-void Modules::Panel::refresh(void)
+void Modules::Panel::refresh()
 {
-  for (std::map<QString, param_t>::iterator i = parameter.begin();
-       i != parameter.end();
-       ++i)
+  for (auto i = parameter.begin(); i != parameter.end(); ++i)
   {
-    if (i->second.type & (STATE | EVENT)) {
-      i->second.edit->setText(
-          QString::number(getValue(i->second.type, i->second.index)));
-      palette.setBrush(i->second.edit->foregroundRole(), Qt::darkGray);
-      i->second.edit->setPalette(palette);
-    } else if ((i->second.type & PARAMETER) && !i->second.edit->isModified()
-               && i->second.edit->text() != *i->second.str_value)
-    {
-      i->second.edit->setText(*i->second.str_value);
-    } else if ((i->second.type & COMMENT) && !i->second.edit->isModified()
-               && i->second.edit->text()
-                   != QString::fromStdString(
-                       getValueString(COMMENT, i->second.index)))
-    {
-      i->second.edit->setText(
-          QString::fromStdString(getValueString(COMMENT, i->second.index)));
+    switch(i->second.type) {
+      case Modules::Variable::STATE :
+        i->second.edit->setText(QString::fromStdString(i->second.value));
+        palette.setBrush(i->second.edit->foregroundRole(), Qt::darkGray);
+        i->second.edit->setPalette(palette);
+        break;
+      case Modules::Variable::UINT_PARAMETER :
+      case Modules::Variable::INT_PARAMETER :
+      case Modules::Variable::DOUBLE_PARAMETER :
+        i->second.edit->setText(this->hostPlugin->getComponentParameterString(i.second.name));
+        break;
+      case Modules::Variable::COMMENT :
+        if(i->second.edit->isModified()){
+          i->second.edit->setText(this->hostPlugin->getComponentComment(i.second.name));
+        }
     }
   }
-  pauseButton->setChecked(!getActive());
+  pauseButton->setChecked(!(this->hostPlugin->getActive()));
 }
 
-void Modules::Panel::modify(void)
+void Modules::Panel::modify()
 {
-  bool active = getActive();
-  setActive(false);
-  // Ensure that the realtime thread isn't in the middle of executing
-  // Modules::Panel::execute()
-  SyncEvent event;
-  RT::System::getInstance()->postEvent(&event);
+  // bool active = getActive();
+  // setActive(false);
 
-  for (std::map<QString, param_t>::iterator i = parameter.begin();
-       i != parameter.end();
-       ++i)
-    if (i->second.type & COMMENT) {
-      QByteArray textData = i->second.edit->text().toLatin1();
-      const char* text = textData.constData();
-      Workspace::Instance::setComment(i->second.index, text);
-    }
+  // for (auto i = parameter.begin(); i != parameter.end(); ++i) {
+  //   if (i->second.type == Modules::Variable::COMMENT) {
+  //     QByteArray textData = i->second.edit->text().toLatin1();
+  //     const char* text = textData.constData();
+  //     this->hostPlugin->setComment(i->second.index, text);
+  //   }
+  // }
 
-  update(MODIFY);
-  setActive(active);
+  // this->update(Modules::Variable::MODIFY);
+  // this->setActive(active);
 
-  for (std::map<QString, param_t>::iterator i = parameter.begin();
-       i != parameter.end();
-       ++i)
-    i->second.edit->blacken();
-}
-
-QString Modules::Panel::getComment(const QString& name)
-{
-  std::map<QString, param_t>::iterator n = parameter.find(name);
-  if (n != parameter.end() && (n->second.type & COMMENT))
-    return QString::fromStdString(getValueString(COMMENT, n->second.index));
-  return "";
+  // for (auto i = parameter.begin(); i != parameter.end(); ++i){
+  //   i->second.edit->blacken();
+  // }
 }
 
 void Modules::Panel::setComment(const QString& name, QString comment)
 {
-  std::map<QString, param_t>::iterator n = parameter.find(name);
-  if (n != parameter.end() && (n->second.type & COMMENT)) {
+  auto n = parameter.find(name);
+  if (n != parameter.end() && (n->second.type == Modules::Variable::COMMENT)) {
     n->second.edit->setText(comment);
     QByteArray textData = comment.toLatin1();
     const char* text = textData.constData();
-    Workspace::Instance::setComment(n->second.index, text);
+    this->hostPlugin->setComponentComment(n->first.toStdString(), text);
   }
-}
-
-QString Modules::Panel::getParameter(const QString& name)
-{
-  std::map<QString, param_t>::iterator n = parameter.find(name);
-  if ((n != parameter.end()) && (n->second.type & PARAMETER)) {
-    *n->second.str_value = n->second.edit->text();
-    setValue(n->second.index, n->second.edit->text().toDouble());
-    return n->second.edit->text();
-  }
-  return "";
 }
 
 void Modules::Panel::setParameter(const QString& name, double value)
 {
-  std::map<QString, param_t>::iterator n = parameter.find(name);
-  if ((n != parameter.end()) && (n->second.type & PARAMETER)) {
+  auto n = parameter.find(name);
+  if ((n != parameter.end()) && (n->second.type == Modules::Variable::DOUBLE_PARAMETER)) {
     n->second.edit->setText(QString::number(value));
-    *n->second.str_value = n->second.edit->text();
-    setValue(n->second.index, n->second.edit->text().toDouble());
+    n->second.str_value = n->second.edit->text();
+    this->hostPlugin->setComponentParameter(n->first.toStdString(), value);
+    //setValue(n->second.index, n->second.edit->text().toDouble());
   }
 }
 
-void Modules::Panel::setParameter(const QString& name, const QString value)
+void Modules::Panel::setParameter(const QString& name, int value)
 {
-  std::map<QString, param_t>::iterator n = parameter.find(name);
-  if ((n != parameter.end()) && (n->second.type & PARAMETER)) {
-    n->second.edit->setText(value);
-    *n->second.str_value = n->second.edit->text();
-    setValue(n->second.index, n->second.edit->text().toDouble());
+  auto n = parameter.find(name);
+  if ((n != parameter.end()) && (n->second.type == Modules::Variable::INT_PARAMETER)) {
+    n->second.edit->setText(QString::number(value));
+    n->second.str_value = n->second.edit->text();
+    this->hostPlugin->setComponentParameter(n->first.toStdString(), value);
+    //setValue(n->second.index, n->second.edit->text().toDouble());
   }
 }
 
-void Modules::Panel::setState(const QString& name, double& ref)
+void Modules::Panel::setParameter(const QString& name, uint64_t value)
 {
-  std::map<QString, param_t>::iterator n = parameter.find(name);
-  if ((n != parameter.end()) && (n->second.type & STATE)) {
-    setData(Workspace::STATE, n->second.index, &ref);
+  auto n = parameter.find(name);
+  if ((n != parameter.end()) && (n->second.type == Modules::Variable::UINT_PARAMETER)) {
+    n->second.edit->setText(QString::number(value));
+    n->second.str_value = n->second.edit->text();
+    this->hostPlugin->setComponentParameter(n->first.toStdString(), value);
+    //setValue(n->second.index, n->second.edit->text().toDouble());
+  }
+}
+
+void Modules::Panel::setState(const QString& name, Modules::Variable::state_t state)
+{
+  auto n = parameter.find(name);
+  if ((n != parameter.end()) && (n->second.type == Modules::Variable::STATE)) {
+    //setData(Workspace::STATE, n->second.index, &ref);
     n->second.edit->setText(QString::number(ref));
-  }
-}
-
-void Modules::Panel::setEvent(const QString& name, double& ref)
-{
-  std::map<QString, param_t>::iterator n = parameter.find(name);
-  if ((n != parameter.end()) && (n->second.type & EVENT)) {
-    setData(Workspace::EVENT, n->second.index, &ref);
-    n->second.edit->setText(QString::number(ref));
+    this->hostPlugin->setComponentState(n->first.toStdString(), ref);
   }
 }
 
 void Modules::Panel::pause(bool p)
 {
-  if (pauseButton->isChecked() != p)
+  if (pauseButton->isChecked() != p){
     pauseButton->setDown(p);
-
-  setActive(!p);
-  if (p)
-    update(PAUSE);
-  else
-    update(UNPAUSE);
-}
-
-void Modules::Panel::doDeferred(const Settings::Object::State&)
-{
-  setWindowTitle(QString::number(getID()) + " "
-                 + QString::fromStdString(myname));
-}
-
-void Modules::Panel::doLoad(const Settings::Object::State& s)
-{
-  for (std::map<QString, param_t>::iterator i = parameter.begin();
-       i != parameter.end();
-       ++i)
-    i->second.edit->setText(
-        QString::fromStdString(s.loadString((i->first).toStdString())));
-  if (s.loadInteger("Maximized"))
-    showMaximized();
-  else if (s.loadInteger("Minimized"))
-    showMinimized();
-  // this only exists in RTXI versions >1.3
-  if (s.loadInteger("W") != 0) {
-    resize(s.loadInteger("W"), s.loadInteger("H"));
-    parentWidget()->move(s.loadInteger("X"), s.loadInteger("Y"));
   }
-
-  pauseButton->setChecked(s.loadInteger("paused"));
-  modify();
-}
-
-void Modules::Panel::doSave(Settings::Object::State& s) const
-{
-  s.saveInteger("paused", pauseButton->isChecked());
-  if (isMaximized())
-    s.saveInteger("Maximized", 1);
-  else if (isMinimized())
-    s.saveInteger("Minimized", 1);
-
-  QPoint pos = parentWidget()->pos();
-  s.saveInteger("X", pos.x());
-  s.saveInteger("Y", pos.y());
-  s.saveInteger("W", width());
-  s.saveInteger("H", height());
-
-  for (std::map<QString, param_t>::const_iterator i = parameter.begin();
-       i != parameter.end();
-       ++i)
-    s.saveString((i->first).toStdString(),
-                 (i->second.edit->text()).toStdString());
-}
-
-void Modules::Panel::receiveEvent(const Event::Object* event)
-{
-  if (event->getName() == Event::RT_PREPERIOD_EVENT) {
-    periodEventPaused = getActive();
-    setActive(false);
-  } else if (event->getName() == Event::RT_POSTPERIOD_EVENT) {
-#ifdef DEBUG
-    if (getActive())
-      ERROR_MSG(
-          "Modules::Panel::receiveEvent : model unpaused during a period "
-          "update\n");
-#endif
-    update(PERIOD);
-    setActive(periodEventPaused);
+  int result = this->hostPlugin->setActive(!p);
+  if(result != 0) { 
+    ERR_MSG("Unable to pause/Unpause Plugin {} ", this->hostPlugin->getName());
+    return; 
+  }
+  if (p){
+    this->update(Module::Variable::PAUSE);
+  } else {
+    this->update(Module::Variable::UNPAUSE);
   }
 }
+
+// void Modules::Panel::doDeferred(const Settings::Object::State&)
+// {
+//   setWindowTitle(QString::number(getID()) + " "
+//                  + QString::fromStdString(myname));
+// }
+
+// void Modules::Panel::doLoad(const Settings::Object::State& s)
+// {
+//   for (std::map<QString, param_t>::iterator i = parameter.begin();
+//        i != parameter.end();
+//        ++i)
+//     i->second.edit->setText(
+//         QString::fromStdString(s.loadString((i->first).toStdString())));
+//   if (s.loadInteger("Maximized"))
+//     showMaximized();
+//   else if (s.loadInteger("Minimized"))
+//     showMinimized();
+//   // this only exists in RTXI versions >1.3
+//   if (s.loadInteger("W") != 0) {
+//     resize(s.loadInteger("W"), s.loadInteger("H"));
+//     parentWidget()->move(s.loadInteger("X"), s.loadInteger("Y"));
+//   }
+
+//   pauseButton->setChecked(s.loadInteger("paused"));
+//   modify();
+// }
+
+// void Modules::Panel::doSave(Settings::Object::State& s) const
+// {
+//   s.saveInteger("paused", pauseButton->isChecked());
+//   if (isMaximized())
+//     s.saveInteger("Maximized", 1);
+//   else if (isMinimized())
+//     s.saveInteger("Minimized", 1);
+
+//   QPoint pos = parentWidget()->pos();
+//   s.saveInteger("X", pos.x());
+//   s.saveInteger("Y", pos.y());
+//   s.saveInteger("W", width());
+//   s.saveInteger("H", height());
+
+//   for (std::map<QString, param_t>::const_iterator i = parameter.begin();
+//        i != parameter.end();
+//        ++i)
+//     s.saveString((i->first).toStdString(),
+//                  (i->second.edit->text()).toStdString());
+// }
+
+Modules::Plugin::Plugin(Event::Manager* ev_manager, QMainWindow* main_window) :
+  event_manager(ev_manager), main_window(main_window)
+{
+  this->event_manager->registerHandler(this);
+  Event::Object event(EVENT::TYPE::PLUGIN_INSERT_EVENT);
+  event.setParam("plugin", std::any(this));
+  this->event_manager->postEvent(&event);
+  event.wait();
+}
+
+Modules::Plugin::~Plugin()
+{
+  Event::Object unplug_block_event(Event::Type::RT_THREAD_REMOVE_EVENT);
+  unplug_block_event.setParam("thread", std::any(this->component->get()));
+  unplug_block_event.wait();
+  if(!unplug_block_event.isdone()){
+    ERROR_MSG("Component in {} was not removed by Real-Time system", this->plugin_component->getName());
+  }
+  Event::Object event(Event::Type::PLUGIN_REMOVE_EVENT);
+  event.setParam("plugin", std::any(this));
+  this->event_manager->postEvent(&event);
+  event.wait();
+  if(!event.isdone()){
+    ERROR_MSG("Plugin {} was not removed by the modules manager", this->plugin_component->getName());
+  }
+}
+
+int Modules::Plugin::getComponentIntParameter(const std::string& parameter_name)
+{
+  return this->component->getValue<int>(parameter_name);
+}
+
+uint64_t Modules::Plugin::getComponentUIntParameter(const std::string& parameter_name)
+{
+  return this->component->getValue<uint64_t>(parameter_name);
+}
+
+double Modules::Plugin::getComponentDoubleParameter(const std::string& parameter_name)
+{
+  return this->component->getValue<double>(parameter_name);
+}
+
+int Modules::Plugin::setComponentIntParameter(const std::string& parameter_name, int value)
+{
+  int result = 0;
+  Event::Object event(Event::Type::MODULE_PARAMETER_CHANGE_EVENT);
+  event.setParam("paramName", std::any(parameter_name));
+  event.setParam("paramType", std::any(Modules::Variable::INT_PARAMETER));
+  event.setParam("paramValue", std::any(value));
+  event.setParam("paramModule", std::any(this->plugin_component));
+  this->event_manager->postEvent(&event)
+  event.wait();
+  if(!(event.isdone()))
+  {
+    result = 1;
+  }
+  return result;
+}
+
+int Modules::Plugin::setComponentDoubleParameter(const std::string& parameter_name, double value)
+{
+  int result = 0;
+  Event::Object event(Event::Type::MODULE_PARAMETER_CHANGE_EVENT);
+  event.setParam("paramName", std::any(parameter_name));
+  event.setParam("paramType", std::any(Modules::Variable::DOUBLE_PARAMETER));
+  event.setParam("paramValue", std::any(value));
+  event.setParam("paramModule", std::any(this->plugin_component));
+  this->event_manager->postEvent(&event)
+  event.wait();
+  if(!(event.isdone()))
+  {
+    result = 1;
+  }
+  return result;
+}
+
+int Modules::Plugin::setComponentUintParameter(const std::string& parameter_name, uint64_t value)
+{
+  int result = 0;
+  Event::Object event(Event::Type::MODULE_PARAMETER_CHANGE_EVENT);
+  event.setParam("paramName", std::any(parameter_name));
+  event.setParam("paramType", std::any(Modules::Variable::UINT_PARAMETER));
+  event.setParam("paramValue", std::any(value));
+  event.setParam("paramModule", std::any(this->plugin_component));
+  this->event_manager->postEvent(&event)
+  event.wait();
+  if(!(event.isdone()))
+  {
+    result = 1;
+  }
+  return result;
+}
+
+int Modules::Plugin::setComponentComment(const std::string& parameter_name, std::string value)
+{
+  int result = 0;
+  Event::Object event(Event::Type::MODULE_PARAMETER_CHANGE_EVENT);
+  event.setParam("paramName", std::any(parameter_name));
+  event.setParam("paramType", std::any(Modules::Variable::INT_PARAMETER));
+  event.setParam("paramValue", std::any(value));
+  event.setParam("paramModule", std::any(this->plugin_component));
+  this->event_manager->postEvent(&event)
+  event.wait();
+  if(!(event.isdone()))
+  {
+    result = 1;
+  }
+  return result;
+}
+
+int Modules::Plugin::setCoponentState(const std::string& parameter_name, Modules::Variable::state_t state)
+{
+  int result = 0;
+  Event::Object event(Event::Type::MODULE_PARAMETER_CHANGE_EVENT);
+  event.setParam("paramName", std::any(parameter_name));
+  event.setParam("paramType", std::any(Modules::Variable::STATE));
+  event.setParam("paramValue", std::any(value));
+  event.setParam("paramModule", std::any(this->plugin_component));
+  this->event_manager->postEvent(&event)
+  event.wait();
+  if(!(event.isdone()))
+  {
+    result = 1;
+  }
+  return result;
+}
+
+void Modules::Plugin::receiveEvent(Event::Object* event)
+{
+  // Set by users who want to handle events
+}
+
+
+int Modules::Manager::loadPlugin(const std::string& dynlib_name)
+{
+  return 0;
+}
+
+int Modules::Manager::loadPlugin(Modules::Plugin* dynlib_pointer)
+{
+  return 0;
+}
+
+int Modules::Manager::unloadPlugin(Modules::Plugin* dynlib_pointer)
+{
+  return 0;
+}
+
+int Modules::Manager::registerModule(std::unique_ptr<Moddules::Plugin> module)
+{
+  this->rtxi_modules_registry[module.get()] = std::move(module);
+}
+
+int Modules::Manager::unregisterModule(Modules::Plugin* module)
+{
+  if(this->rtxi_modules_registry.find(module) != this->rtxi_modules_registry.end()){
+    this->rtxi_modules_registry.erase(module);
+  }
+}
+
+void Modules::Manager::receiveEvent(Event::Object* event)
+{
+  switch(event->getType()){
+    case Event::Type::PLUGIN_REMOVE_EVENT :
+      this->unloadPlugin(std::any_cast<Modules::Plugin*>(event->getParam("plugin")));
+      event->done();
+      break;
+    case Event::Type::PLUGIN_INSERT_EVENT :
+      this->loadPlugin(std::any_cast<Modules::Plugin*>(event->getParam("plugin")));
+      event->done();
+      break;
+    default:
+      break;
+  }
+}
+

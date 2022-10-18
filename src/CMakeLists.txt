@@ -36,6 +36,7 @@ add_library(rtxi_lib OBJECT
     io.hpp io.cpp
     rt.hpp rt.cpp
     main_window.hpp main_window.cpp
+    module.hpp module.cpp
 )
 
 target_link_libraries(rtxi_lib PRIVATE 
