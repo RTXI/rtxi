@@ -82,8 +82,8 @@ public:
   {
     this->isactive = active;
   }
-  MOCK_METHOD(void, input, (const std::vector<double>&), (override));
-  MOCK_METHOD(const std::vector<double>&, output, (), (override));
+  //MOCK_METHOD(void, input, (const std::vector<double>&), (override));
+  //MOCK_METHOD(const std::vector<double>&, output, (), (override));
 
 private:
   bool isactive;

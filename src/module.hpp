@@ -1,13 +1,20 @@
 #ifndef MODULE_HPP
 #define MODULE_HPP
 
-#include <QtWidgets>
 #include <optional>
 #include <string>
 #include <vector>
 #include <map>
 #include <variant>
 #include <unordered_map>
+#include <memory>
+
+#include <QLabel>
+#include <QLineEdit>
+#include <QGridLayout>
+#include <QPushButton>
+#include <QGroupBox>
+#include <QValidator>
 
 #include "event.hpp"
 #include "io.hpp"
@@ -93,7 +100,6 @@ public:
             const std::string& name,
             std::vector<IO::channel_t> channels,
             std::vector<Modules::Variable::Info> variables);
-  ~Component();
 
   template<typename T>
   T getValue(const std::string& varname)
@@ -110,12 +116,22 @@ public:
   std::string getDescription(const std::string& varname);
   std::string getValueString(const std::string& varname);
 
-  std::unique_ptr<Component> createComponent();
+ 
+  // Here are a list of functions inherited from RT::Thread
 
+  virtual void execute() override;
+
+  virtual bool getActive() override;
+  virtual void setActive(bool state) override;
+
+  //virtual void input(size_t channel, const std::vector<double>& data) override;
+  //virtual const std::vector<double>& output(size_t channel) override;
+  
 private:
   std::unordered_map<std::string, Modules::Variable::Info> parameter;
-
+  bool active;
   Modules::Plugin* hostPlugin;
+
 };
 
 class Panel : public QWidget
@@ -155,7 +171,7 @@ public:
   struct param_t
   {
     QLabel* label;
-    QString* str_value;
+    QString str_value;
     DefaultGUILineEdit* edit;
     Modules::Variable::variable_t type = Modules::Variable::UNKNOWN;
   };
@@ -194,7 +210,7 @@ public slots:
   virtual void pause(bool);
 
 protected:
-  QGridLayout* layout;
+
 
   /*!
    * Get the value of the parameter in the GUI, and update the value
@@ -224,7 +240,7 @@ protected:
   /*!
    *
    */
-  void setComment(const QString& name, const QString comment);
+  void setComment(const QString& name, QString comment);
 
   /*!
    * Set the reference to this state within the Workspace
@@ -235,7 +251,7 @@ protected:
    *
    * \sa Workspace::setData()
    */
-  void setState(const QString& name, int ref);
+  void setState(const QString& name, Modules::Variable::state_t ref);
 
   std::string getName(){ return this->myname; }
   //virtual void receiveEvent(const Event::Object* event) override;
@@ -249,57 +265,62 @@ private:
   std::string myname;
   QMdiSubWindow* subWindow;
   Modules::Plugin* hostPlugin;
+  QGridLayout* layout;
 };
 
 class Plugin : public Event::Handler
 {
 public:
-  Plugin(Event::Manager* ev_manager, QMainWindow* main_window);
+  Plugin(Event::Manager* ev_manager, QMainWindow* main_window, std::string name);
+  Plugin(const Plugin& plugin) = default; // copy constructor
+  Plugin& operator=(const Plugin& plugin) = default; // copy assignment noperator
+  Plugin(Plugin &&) = default; // move constructor
+  Plugin& operator=(Plugin &&) = default; // move assignment operator
   ~Plugin();
 
+  int exit();
   int getComponentIntParameter(const std::string& parameter_name);
   uint64_t getComponentUIntParameter(const std::string& parameter_name);
   double getComponentDoubleParameter(const std::string& parameter_name);
-  std::string getComponentParameterString(const std::string& parameter_name);
 
   int setComponentIntParameter(const std::string& parameter_name, int value);
   int setComponentDoubleParameter(const std::string& parameter_name, double value);
   int setComponentUintParameter(const std::string& parameter_name, uint64_t value);
   int setComponentComment(const std::string& parameter_name, std::string value);
-  int setComponentState(const std::string& parameter_name, int value);
+  int setComponentState(const std::string& parameter_name, Modules::Variable::state_t value);
 
-  int getActive();
-  int setActive(bool active);
+  std::string getName() { return this->name; }
+  bool getActive();
+  int setActive(bool state);
   void receiveEvent(Event::Object* event) override;
 
 private:
+  std::string name;
   // owned pointers
   std::unique_ptr<Modules::Component> plugin_component;
 
   // not owned pointers (managed by external objects)
   QMainWindow* main_window;
-  Modules::Panel* widget_panel;
+  Modules::Panel* widget_panel; // Qt handles this lifetime
   Event::Manager* event_manager;
-  Modules::Manager* modules_manager;
 };
 
 class Manager : public Event::Handler
 {
 public:
-  Manager(Event::Manager* event_manager, QMainWindow* main_window) : 
-    event_manager(event_manager), main_window(main_window) {}
+  Manager(Event::Manager* event_manager, QMainWindow* main_window);
 
   int loadPlugin(const std::string& dynlib_name);
   int loadPlugin(Modules::Plugin* dynlib_pointer);
   int unloadPlugin(Modules::Plugin* dynlib_pointer);
 
-  int registerModule(Modules::Plugin* module);
-  int unregisterModule(Modules::Plugin* module);
+  int registerModule(std::unique_ptr<Modules::Plugin> module);
+  int unregisterModule(std::string module_name);
 
   void receiveEvent(Event::Object* event) override;
 
 private:
-  std::unordered_map<Modules::Plugin*, std::unique_ptr<Modules::Plugin>> rtxi_modules_registry;
+  std::unordered_map<std::string, std::unique_ptr<Modules::Plugin>> rtxi_modules_registry;
   QMainWindow* main_window;
   Event::Manager* event_manager;
 };

@@ -103,8 +103,8 @@ public:
   virtual bool getActive() = 0;
   virtual void setActive(bool) = 0;
 
-  virtual void input(const std::vector<double>& data) = 0;
-  virtual const std::vector<double>& output() = 0;
+  //virtual void input(const std::vector<double>& data) = 0;
+  //virtual const std::vector<double>& output() = 0;
 };  // class Thread
 
 typedef struct
