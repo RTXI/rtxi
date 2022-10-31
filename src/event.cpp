@@ -58,6 +58,12 @@ std::string Event::type_to_string(Event::Type event_type)
     case Event::Type::IO_LINK_REMOVE_EVENT:
       return_string = "SYSTEM : link remove";
       break;
+    case Event::Type::RT_BLOCK_PAUSE_EVENT:
+      return_string = "SYSTEM : block paused";
+      break;
+    case Event::Type::RT_BLOCK_UNPAUSE_EVENT:
+      return_string = "SYSTEM : block unpaused";
+      break;
     case Event::Type::MODULE_PARAMETER_CHANGE_EVENT:
       return_string = "SYSTEM : parameter change";
       break;
