@@ -26,6 +26,35 @@
 
 #include "io_tests.hpp"
 
+std::vector<IO::channel_t> generateDefaultChannelList()
+{
+  std::string defaultBlockName;
+  std::string defaultInputChannelName = "CHANNEL INPUT";
+  std::string defaultInputChannelDescription =
+      "DEFAULT INPUT CHANNEL DESCRIPTION";
+  std::string defaultOutputChannelName = "CHANNEL OUTPUT";
+  std::string defaultOutputChannelDescription =
+      "DEFAULT OUTPUT CHANNEL DESCRIPTION";
+  std::vector<IO::channel_t> defaultChannelList;
+
+    // Generates a default block with single input and output channel
+  defaultBlockName = "DEFAULT:BLOCK:NAME";
+  IO::channel_t defaultInputChannel = {};
+  defaultInputChannel.name = defaultInputChannelName;
+  defaultInputChannel.description = defaultInputChannelDescription;
+  defaultInputChannel.flags = IO::INPUT;
+  defaultInputChannel.data_size = 1;
+  IO::channel_t defaultOutputChannel = {};
+  defaultOutputChannel.name = defaultOutputChannelName;
+  defaultOutputChannel.description = defaultOutputChannelDescription;
+  defaultOutputChannel.flags = IO::OUTPUT;
+  defaultOutputChannel.data_size = 1;
+  defaultChannelList.push_back(defaultInputChannel);
+  defaultChannelList.push_back(defaultOutputChannel);
+
+  return defaultChannelList;
+}
+
 TEST_F(IOBlockTest, getName)
 {
   IO::Block block(this->defaultBlockName, this->defaultChannelList, true);

@@ -143,6 +143,9 @@ public:
    */
   void done();
 
+  void setSuccess();
+  bool successful();
+
   /*!
    * Checks whether the event object has been processed already. This can be an
    * alternative for situations where waiting for event is not neccessary and
@@ -164,6 +167,7 @@ private:
   std::condition_variable processing_done_cond;
   const Type event_type;
   bool processed;
+  bool isSuccessful = false;
 };  // class Object
 
 /*!

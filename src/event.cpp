@@ -163,6 +163,16 @@ void Event::Object::done()
   this->processing_done_cond.notify_one();
 }
 
+void Event::Object::setSuccess()
+{
+  this->isSuccessful = true;
+}
+
+bool Event::Object::successful()
+{
+  return this->isSuccessful;
+}
+
 bool Event::Object::isdone() const
 {
   return this->processed;
@@ -207,22 +217,19 @@ void Event::Manager::postEvent(const std::vector<Event::Object*>& events)
 
 void Event::Manager::processEvents()
 {
-  Event::Object *event = nullptr;
   std::unique_lock<std::mutex> event_lock(this->event_mut);
   std::unique_lock<std::mutex> handlerlist_lock(this->handlerlist_mut, std::defer_lock);
   while(this->running){
     this->available_event_cond.wait(event_lock, [this]{
       return !(this->event_q.empty()); 
     });
-    event = event_q.front();
     handlerlist_lock.lock();
     for (auto & handler : this->handlerList) {
-      handler->receiveEvent(event);
+      handler->receiveEvent(event_q.front());
     }
     handlerlist_lock.unlock();
-    if(!(event->isdone())) { event->done(); };
+    if(!(event_q.front()->isdone())) { event_q.front()->done(); };
     this->event_q.pop();
-    event = nullptr;
   }
 }
 
