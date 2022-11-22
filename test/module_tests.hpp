@@ -20,34 +20,77 @@
 #ifndef MODULE_TESTS
 #define MODULE_TESTS
 
-#include <gtest/gtest.h>
+#include <vector>
 
+#include <gtest/gtest.h>
+#include <gmock/gmock.h>
+
+
+#include "event.hpp"
+#include "main_window.hpp"
 #include "module.hpp"
+#include "io_tests.hpp"
+
+std::vector<Modules::Variable::Info> generateDefaultComponentVariables();
+
+class mockModuleComponent : public Modules::Component
+{
+public:
+  mockModuleComponent() : Modules::Component(
+    nullptr, 
+    std::string("testcomponent"), 
+    generateDefaultChannelList(), 
+    generateDefaultComponentVariables()) {}
+
+  MOCK_METHOD(void, execute, (), (override));
+};
 
 class ModuleComponetTests : public ::testing::Test
 {
 protected:
-  ModuleComponetTests() = default;
-  ~ModuleComponetTests() = default;
+  ModuleComponetTests() {
+
+  }
+  ~ModuleComponetTests() {}
+
+  //Modules::Component componnent;
 };
 
 class ModulePanelTests : public ::testing::Test
 {
 protected:
-  ModulePanelTests() = default;
-  ~ModulePanelTests() = default;
+  ModulePanelTests() {}
+  ~ModulePanelTests() {}
 };
 
 class ModulePluginTests : public ::testing::Test
 {
-  ModulePluginTests() = default;
-  ~ModulePluginTests() = default;
+protected:
+  ModulePluginTests() 
+  {
+    //this->main_window = new MainWindow();
+    this->event_manager = std::make_unique<Event::Manager>();
+    this->connector = std::make_unique<RT::Connector>();
+    this->system = std::make_unique<RT::System>(this->event_manager.get(), this->connector.get());
+
+    this->plugin = std::make_unique<Modules::Plugin>(this->event_manager.get(), this->main_window, "testname");
+  
+  }
+
+  std::unique_ptr<RT::Connector> connector;
+  std::unique_ptr<Event::Manager> event_manager;
+  std::unique_ptr<RT::System> system;
+
+  std::unique_ptr<Modules::Plugin> plugin;
+  MainWindow* main_window = nullptr;
+  //Modules::Plugin plugin;
 };
 
 class ModuleManagerTests : public ::testing::Test
 {
-  ModuleManagerTests() = default;
-  ~ModuleManagerTests() = default;
+protected:
+  ModuleManagerTests() {}
+  ~ModuleManagerTests() {}
 };
 
 #endif

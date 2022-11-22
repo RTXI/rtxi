@@ -242,7 +242,7 @@ void Event::Manager::registerHandler(Event::Handler* handler)
   }
 }
 
-void Event::Manager::unregisterHandler(Handler* handler)
+void Event::Manager::unregisterHandler(Event::Handler* handler)
 {
   std::lock_guard<std::mutex> lk(this->handlerlist_mut);
   auto location = std::find(handlerList.begin(), handlerList.end(), handler);

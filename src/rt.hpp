@@ -75,9 +75,6 @@ public:
    * \sa RT::System
    */
   virtual void write() = 0;
-
-  virtual bool getActive() = 0;
-  virtual void setActive(bool) = 0;
 };  // class Device
 
 /*!
@@ -99,9 +96,6 @@ public:
    * \sa RT::System
    */
   virtual void execute() = 0;
-
-  virtual bool getActive() = 0;
-  virtual void setActive(bool) = 0;
 
   //virtual void input(const std::vector<double>& data) = 0;
   //virtual const std::vector<double>& output() = 0;
@@ -452,6 +446,7 @@ private:
   void removeDevice(Event::Object* event);
   void insertThread(Event::Object* event);
   void removeThread(Event::Object* event);
+  void blockActivityChange(Event::Object* event);
   void setPeriod(Event::Object* event);
   void shutdown(Event::Object* event);
   void NOOP(Event::Object* event);
@@ -459,6 +454,7 @@ private:
   void executeCMD(CMD* cmd);
   void updateDeviceList(CMD* cmd);
   void updateThreadList(CMD* cmd);
+  void updateBlockActivity(CMD* cmd);
   void setPeriod(CMD* cmd);
   void shutdown(CMD* cmd);
 

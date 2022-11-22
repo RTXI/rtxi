@@ -467,6 +467,24 @@ void RT::System::updateThreadList(RT::System::CMD* cmd)
   cmd->done();
 }
 
+void RT::System::updateBlockActivity(RT::System::CMD* cmd)
+{
+  IO::Block* block = std::any_cast<IO::Block*>(cmd->getParam("block"));
+  switch(cmd->getType()){
+    case Event::Type::RT_BLOCK_PAUSE_EVENT :
+      block->setActive(false);
+      cmd->done();
+      break;
+    case Event::Type::RT_BLOCK_UNPAUSE_EVENT :
+      block->setActive(true);
+      cmd->done();
+      break;
+    default:
+      cmd->done();
+      break;
+  }
+}
+
 void RT::System::executeCMD(RT::System::CMD* cmd)
 {
   RT::Telemitry::Response telem = RT::Telemitry::NO_TELEMITRY;
@@ -481,6 +499,10 @@ void RT::System::executeCMD(RT::System::CMD* cmd)
     case Event::Type::RT_THREAD_INSERT_EVENT :
     case Event::Type::RT_THREAD_REMOVE_EVENT :
       this->updateThreadList(cmd);
+      break;
+    case Event::Type::RT_BLOCK_PAUSE_EVENT :
+    case Event::Type::RT_BLOCK_UNPAUSE_EVENT :
+      this->updateBlockActivity(cmd);
       break;
     case Event::Type::RT_SHUTDOWN_EVENT :
       this->task->task_finished = true;
@@ -512,6 +534,10 @@ void RT::System::receiveEvent(Event::Object* event)
       break;
     case Event::Type::RT_THREAD_REMOVE_EVENT :
       this->removeThread(event);
+      break;
+    case Event::Type::RT_BLOCK_PAUSE_EVENT :
+    case Event::Type::RT_BLOCK_UNPAUSE_EVENT :
+      this->blockActivityChange(event);
       break;
     case Event::Type::RT_DEVICE_INSERT_EVENT :
       this->insertDevice(event);
@@ -619,6 +645,17 @@ void RT::System::removeThread(Event::Object* event)
   RT::System::CMD cmd(event->getType());
   cmd.setParam("threadList", std::any(thread_list));
   RT::System::CMD* cmd_ptr = &cmd;
+  this->eventFifo->write(&cmd_ptr, sizeof(RT::System::CMD*));
+  cmd.wait();
+  event->done();
+}
+
+void RT::System::blockActivityChange(Event::Object* event)
+{
+  RT::System::CMD cmd(event->getType());
+  cmd.setParam("block", std::any(event->getParam("block")));
+  RT::System::CMD* cmd_ptr = &cmd;
+  
   this->eventFifo->write(&cmd_ptr, sizeof(RT::System::CMD*));
   cmd.wait();
   event->done();

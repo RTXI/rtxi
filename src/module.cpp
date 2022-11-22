@@ -117,16 +117,6 @@ void Modules::Component::execute()
   // This is defined by the user
 }
 
-bool Modules::Component::getActive()
-{
-  return this->active;
-}
-
-void Modules::Component::setActive(bool state)
-{
-  this->hostPlugin->setActive(state);
-}
-
 Modules::Panel::Panel(std::string name, QMainWindow* main_window)
     : QWidget(main_window)
 {
@@ -194,6 +184,7 @@ void Modules::Panel::createGUI(std::vector<Modules::Variable::Info> vars, MainWi
         break;
       case Modules::Variable::UNKNOWN :
         ERROR_MSG("Variable {} in Module {} is of category UNKNOWN", varinfo.name, this->getName());
+        break;
       default :
         ERROR_MSG("Variable {} in Module {} has undefined or broken category", varinfo.name, this->getName());
     }
@@ -438,16 +429,39 @@ Modules::Plugin::Plugin(Event::Manager* ev_manager, QMainWindow* main_window, st
   event.setParam("plugin", std::any(this));
   this->event_manager->postEvent(&event);
   event.wait();
-
 }
 
 Modules::Plugin::~Plugin()
 {
-  Event::Object unplug_block_event(Event::Type::RT_THREAD_REMOVE_EVENT);
-  unplug_block_event.setParam("thread", std::any(this->plugin_component.get()));
-  unplug_block_event.wait();
-  if(!unplug_block_event.isdone()){
-    ERROR_MSG("Component in {} was not removed by Real-Time system", this->plugin_component->getName());
+  if (this->plugin_component != nullptr) {
+    Event::Object unplug_block_event(Event::Type::RT_THREAD_REMOVE_EVENT);
+    unplug_block_event.setParam("thread", std::any(static_cast<RT::Thread*>(this->plugin_component.get())));
+    this->event_manager->postEvent(&unplug_block_event);
+    unplug_block_event.wait();
+    if(!unplug_block_event.successful()){
+      ERROR_MSG("Component in {} was not removed by Real-Time system", this->name);
+    }
+  }
+  Event::Object remove_plugin_event(Event::Type::PLUGIN_REMOVE_EVENT);
+  remove_plugin_event.setParam("plugin", this);
+  this->event_manager->postEvent(&remove_plugin_event);
+  remove_plugin_event.wait();
+  if (!remove_plugin_event.successful()){
+    ERROR_MSG("Plugin {} was not removed correctly from the Plugin registry", this->name);
+  }
+
+  this->event_manager->unregisterHandler(this);
+}
+
+void Modules::Plugin::attachComponent(std::unique_ptr<Modules::Component> component)
+{
+  this->plugin_component = std::move(component);
+  Event::Object event = Event::Object(Event::Type::RT_THREAD_INSERT_EVENT);
+  event.setParam("thread", static_cast<RT::Thread*>(this->plugin_component.get()));
+  this->event_manager->postEvent(&event);
+  event.wait();
+  if(!event.isdone()){
+    ERROR_MSG("Real-Time system was unable to register plugin component {}", this->name);
   }
 }
 

@@ -7,6 +7,7 @@ add_executable(rtxiTests
     event_tests.hpp event_tests.cpp
     io_tests.hpp io_tests.cpp
     system_tests.hpp system_tests.cpp
+    module_tests.hpp module_tests.cpp
     rtxiTests.cpp
 )
 

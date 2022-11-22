@@ -197,12 +197,18 @@ TEST_F(SystemTest, updateDeviceList)
   defaultChannelList.push_back(defaultOutputChannel);
 
   MockRTDevice mock_device("mockdevice", defaultChannelList);
-  RT::Device* device_ptr = &mock_device;
+  Event::Object change_activity_event(Event::Type::RT_BLOCK_UNPAUSE_EVENT);
+  change_activity_event.setParam("block", static_cast<IO::Block*>(&mock_device));
+  this->system->receiveEvent(&change_activity_event);
+  change_activity_event.wait();
 
+  //std::any_cast<RT::Device*>(std::any(static_cast<RT::Device*>(&mock_device)))->read();
+  //std::any_cast<RT::Device*>(std::any(static_cast<RT::Device*>(&mock_device)))->write();
+  
   // insert device
-  this->rt_connector->insertBlock(device_ptr);
+  this->rt_connector->insertBlock(&mock_device);
   Event::Object insertEvent(Event::Type::RT_DEVICE_INSERT_EVENT);
-  insertEvent.setParam("device", device_ptr);
+  insertEvent.setParam("device", static_cast<RT::Device*>(&mock_device));
   this->system->receiveEvent(&insertEvent);
   insertEvent.wait();
   ASSERT_EQ(this->system->getTelemitry(), RT::Telemitry::RT_DEVICE_LIST_UPDATE);
@@ -210,7 +216,7 @@ TEST_F(SystemTest, updateDeviceList)
 
   // remove device
   Event::Object removeEvent(Event::Type::RT_DEVICE_REMOVE_EVENT);
-  removeEvent.setParam("device", device_ptr);
+  removeEvent.setParam("device", static_cast<RT::Device*>(&mock_device));
   this->system->receiveEvent(&removeEvent);
   removeEvent.wait();
   ASSERT_EQ(this->system->getTelemitry(), RT::Telemitry::RT_DEVICE_LIST_UPDATE);
@@ -243,6 +249,10 @@ TEST_F(SystemTest, updateThreadList)
 
   MockRTThread mock_thread("mockthread", defaultChannelList);
   RT::Thread* thread_ptr = &mock_thread;
+  Event::Object change_activity_event(Event::Type::RT_BLOCK_UNPAUSE_EVENT);
+  change_activity_event.setParam("block", static_cast<IO::Block*>(thread_ptr));
+  this->system->receiveEvent(&change_activity_event);
+  change_activity_event.wait();
 
   // insert thread
   this->rt_connector->insertBlock(thread_ptr);

@@ -69,7 +69,7 @@ struct Info
   std::string name;
   std::string description;
   Modules::Variable::variable_t vartype;
-  std::variant<int, double, uint64_t, std::string> value;
+  std::variant<int, double, uint64_t, std::string, state_t> value;
 };
 
 }  // namespace Variable
@@ -100,6 +100,7 @@ public:
             const std::string& name,
             std::vector<IO::channel_t> channels,
             std::vector<Modules::Variable::Info> variables);
+  virtual ~Component()=default;
 
   template<typename T>
   T getValue(const std::string& varname)
@@ -120,9 +121,6 @@ public:
   // Here are a list of functions inherited from RT::Thread
 
   virtual void execute() override;
-
-  virtual bool getActive() override;
-  virtual void setActive(bool state) override;
 
   //virtual void input(size_t channel, const std::vector<double>& data) override;
   //virtual const std::vector<double>& output(size_t channel) override;
@@ -279,6 +277,7 @@ public:
   ~Plugin();
 
   int exit();
+  void attachComponent(std::unique_ptr<Modules::Component> component);
   int getComponentIntParameter(const std::string& parameter_name);
   uint64_t getComponentUIntParameter(const std::string& parameter_name);
   double getComponentDoubleParameter(const std::string& parameter_name);

@@ -148,6 +148,8 @@ public:
     
   bool dependent() const {return this->isInputDependent;}
 
+  bool getActive() { return this->active; }
+  void setActive(bool act) { this->active = act; } 
 protected:
   // These functions are meant to be used by RT::Thread classes
 
@@ -177,6 +179,7 @@ private:
   std::string name;
   bool isInputDependent;
   std::array<std::vector<port_t>, IO::UNKNOWN> ports;
+  bool active=false;
 };  // class Block
 
 }  // namespace IO
