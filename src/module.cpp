@@ -438,7 +438,7 @@ Modules::Plugin::~Plugin()
     unplug_block_event.setParam("thread", std::any(static_cast<RT::Thread*>(this->plugin_component.get())));
     this->event_manager->postEvent(&unplug_block_event);
     unplug_block_event.wait();
-    if(!unplug_block_event.successful()){
+    if(!unplug_block_event.isdone()){
       ERROR_MSG("Component in {} was not removed by Real-Time system", this->name);
     }
   }
@@ -446,7 +446,7 @@ Modules::Plugin::~Plugin()
   remove_plugin_event.setParam("plugin", this);
   this->event_manager->postEvent(&remove_plugin_event);
   remove_plugin_event.wait();
-  if (!remove_plugin_event.successful()){
+  if (!remove_plugin_event.isdone()){
     ERROR_MSG("Plugin {} was not removed correctly from the Plugin registry", this->name);
   }
 

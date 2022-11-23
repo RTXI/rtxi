@@ -159,21 +159,25 @@ void Event::Object::done()
 {
   std::unique_lock done_lock(this->processing_done_mut);
   this->processed = true;
+  this->success = true;
   //done_lock.unlock();
-  this->processing_done_cond.notify_one();
+  this->processing_done_cond.notify_all();
 }
 
-void Event::Object::setSuccess()
+void Event::Object::notdone()
 {
-  this->isSuccessful = true;
+  std::unique_lock done_lock(this->processing_done_mut);
+  this->processed = true;
+  this->success = false;
+  this->processing_done_cond.notify_all();
 }
 
-bool Event::Object::successful()
+bool Event::Object::isdone()
 {
-  return this->isSuccessful;
+  return this->success;
 }
 
-bool Event::Object::isdone() const
+bool Event::Object::handled()
 {
   return this->processed;
 }
@@ -228,7 +232,7 @@ void Event::Manager::processEvents()
       handler->receiveEvent(event_q.front());
     }
     handlerlist_lock.unlock();
-    if(!(event_q.front()->isdone())) { event_q.front()->done(); };
+    if(!(event_q.front()->handled())) { event_q.front()->notdone(); };
     this->event_q.pop();
   }
 }

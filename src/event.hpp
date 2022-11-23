@@ -143,8 +143,9 @@ public:
    */
   void done();
 
-  void setSuccess();
-  bool successful();
+  void notdone();
+
+  bool handled();
 
   /*!
    * Checks whether the event object has been processed already. This can be an
@@ -153,7 +154,7 @@ public:
    * 
    * \returns true if processed. False otherwise
    */
-  bool isdone() const;
+  bool isdone();
 
 private:
   struct param
@@ -167,7 +168,7 @@ private:
   std::condition_variable processing_done_cond;
   const Type event_type;
   bool processed;
-  bool isSuccessful = false;
+  bool success;
 };  // class Object
 
 /*!

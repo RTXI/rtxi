@@ -480,7 +480,7 @@ void RT::System::updateBlockActivity(RT::System::CMD* cmd)
       cmd->done();
       break;
     default:
-      cmd->done();
+      cmd->notdone();
       break;
   }
 }

@@ -42,7 +42,22 @@ public:
     generateDefaultChannelList(), 
     generateDefaultComponentVariables()) {}
 
-  MOCK_METHOD(void, execute, (), (override));
+  void execute() override { 
+    std::unique_lock lck(this->mut);
+    this->executed = true; 
+    this->cond_var.notify_all();
+  } 
+
+  bool wasExecuted() { 
+    std::unique_lock lck(this->mut);
+    this->cond_var.wait(lck, [this](){ return this->executed; });
+    return this->executed; 
+  }
+
+private:
+  bool executed=false;
+  std::condition_variable cond_var; 
+  std::mutex mut;
 };
 
 class ModuleComponetTests : public ::testing::Test

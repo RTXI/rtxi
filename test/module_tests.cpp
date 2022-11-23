@@ -61,6 +61,8 @@ TEST_F(ModulePluginTests, attachComponent)
 {
   // mocking unique pointers can be tricky
   auto component = std::make_unique<mockModuleComponent>();
+  component->setActive(true);
+  auto* componentref = component.get();
   // Unfortunately gmock is not capable of capturing calls to 
   // mocked functions from another thread. Therefore we are not able
   // to use EXPECT_CALL on execute as it would not be caputured
@@ -68,8 +70,9 @@ TEST_F(ModulePluginTests, attachComponent)
   // the rt system thread.
   // TODO: Test execute is being called at all!
   //EXPECT_CALL(*component, execute());
-  this->plugin->attachComponent(std::move(component));
 
+  this->plugin->attachComponent(std::move(component));
+  EXPECT_TRUE(componentref->wasExecuted());
 }
 
 TEST_F(ModulePluginTests, exit)
