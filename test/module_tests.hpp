@@ -38,7 +38,7 @@ class mockModuleComponent : public Modules::Component
 public:
   mockModuleComponent() : Modules::Component(
     nullptr, 
-    std::string("testcomponent"), 
+    std::string("testname"), 
     generateDefaultChannelList(), 
     generateDefaultComponentVariables()) {}
 
@@ -64,7 +64,7 @@ class ModuleComponetTests : public ::testing::Test
 {
 protected:
   ModuleComponetTests() {
-
+    
   }
   ~ModuleComponetTests() {}
 
@@ -89,7 +89,10 @@ protected:
     this->system = std::make_unique<RT::System>(this->event_manager.get(), this->connector.get());
 
     this->plugin = std::make_unique<Modules::Plugin>(this->event_manager.get(), this->main_window, "testname");
-  
+    auto component = std::make_unique<mockModuleComponent>();
+    component->setActive(true);
+    this->component_ptr = component.get();
+    this->plugin->attachComponent(std::move(component));
   }
 
   std::unique_ptr<RT::Connector> connector;
@@ -97,6 +100,7 @@ protected:
   std::unique_ptr<RT::System> system;
 
   std::unique_ptr<Modules::Plugin> plugin;
+  mockModuleComponent* component_ptr;
   MainWindow* main_window = nullptr;
   //Modules::Plugin plugin;
 };

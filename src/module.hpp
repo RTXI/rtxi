@@ -292,6 +292,27 @@ public:
   bool getActive();
   int setActive(bool state);
   void receiveEvent(Event::Object* event) override;
+  void* getHandle() { return this->handle; }
+
+  /*!
+  * Get the name of the library from which the object was loaded.
+  *
+  * \return The library file the object from which the object was created.
+  */
+  std::string getLibrary() const;
+
+  std::unique_ptr<Modules::Plugin> load();
+
+  /*!
+    * A mechanism which an object can use to unload itself. Should only be
+    *   called from within the GUI thread.
+    */
+  void unload();
+
+  // These functions are here in order to have backwards compatibility
+  // with previous versions of RTXI that used DefaultGuiModel
+  // (before RTXI 3.0.0)
+
 
 private:
   std::string name;
@@ -299,9 +320,12 @@ private:
   std::unique_ptr<Modules::Component> plugin_component;
 
   // not owned pointers (managed by external objects)
-  QMainWindow* main_window;
+  QMainWindow* main_window; // Qt handles this lifetime
   Modules::Panel* widget_panel; // Qt handles this lifetime
   Event::Manager* event_manager;
+  std::string library;
+  void* handle=nullptr; // if it is a shared object then this will not be null
+  
 };
 
 class Manager : public Event::Handler
@@ -309,9 +333,8 @@ class Manager : public Event::Handler
 public:
   Manager(Event::Manager* event_manager, QMainWindow* main_window);
 
-  int loadPlugin(const std::string& dynlib_name);
-  int loadPlugin(Modules::Plugin* dynlib_pointer);
-  int unloadPlugin(Modules::Plugin* dynlib_pointer);
+  int loadPlugin(const std::string& library);
+  void unloadPlugin(const std::string& library);
 
   int registerModule(std::unique_ptr<Modules::Plugin> module);
   int unregisterModule(std::string module_name);

@@ -59,40 +59,41 @@ std::vector<Modules::Variable::Info> generateDefaultComponentVariables()
 
 TEST_F(ModulePluginTests, attachComponent)
 {
-  // mocking unique pointers can be tricky
-  auto component = std::make_unique<mockModuleComponent>();
-  component->setActive(true);
-  auto* componentref = component.get();
-  // Unfortunately gmock is not capable of capturing calls to 
-  // mocked functions from another thread. Therefore we are not able
-  // to use EXPECT_CALL on execute as it would not be caputured
-  // in the test thread even though it is definitely called by
-  // the rt system thread.
-  // TODO: Test execute is being called at all!
-  //EXPECT_CALL(*component, execute());
-
-  this->plugin->attachComponent(std::move(component));
-  EXPECT_TRUE(componentref->wasExecuted());
+  // there is a component already registered automatically during
+  // initialization of test. We just have to check whether the 
+  // real-time thread executed the thread object.
+  EXPECT_TRUE(this->component_ptr->wasExecuted());
 }
 
 TEST_F(ModulePluginTests, exit)
 {
-
+  int result = this->plugin->exit();
+  EXPECT_EQ(result, 0);
 }
 
 TEST_F(ModulePluginTests, ComponentParameters)
 {
-
+  // We will check whether plugin actually retrieves component values
+  std::vector<Modules::Variable::Info> variable_list = generateDefaultComponentVariables();
+  ASSERT_EQ(std::get<int>(variable_list[0].value), this->plugin->getComponentIntParameter(variable_list[0].name));
+  ASSERT_DOUBLE_EQ(std::get<double>(variable_list[1].value), this->plugin->getComponentDoubleParameter(variable_list[1].name));
+  ASSERT_EQ(std::get<uint64_t>(variable_list[2].value), this->plugin->getComponentUIntParameter(variable_list[2].name));
 }
 
 TEST_F(ModulePluginTests, getName)
 {
-
+  ASSERT_EQ(this->plugin->getName(), this->component_ptr->getName());
 }
 
 TEST_F(ModulePluginTests, activity)
 {
-
+  ASSERT_EQ(this->plugin->getActive(), this->component_ptr->getActive());
+  int result = this->plugin->setActive(false);
+  EXPECT_EQ(result, 0);
+  ASSERT_FALSE(this->component_ptr->getActive());
+  result = this->plugin->setActive(true);
+  EXPECT_EQ(result, 0);
+  ASSERT_TRUE(this->component_ptr->getActive());
 }
 
 TEST_F(ModulePluginTests, receiveEvent)
@@ -100,31 +101,6 @@ TEST_F(ModulePluginTests, receiveEvent)
 
 }
 
-TEST_F(ModuleComponetTests, value)
-{
-
-}
-
-
-TEST_F(ModuleComponetTests, getDescription)
-{
-
-}
-
-TEST_F(ModuleComponetTests, getValueString)
-{
-
-}
-
-TEST_F(ModuleComponetTests, execute)
-{
-
-}
-
-TEST_F(ModuleComponetTests, active)
-{
-
-}
 
 TEST_F(ModulePanelTests, getLayout)
 {

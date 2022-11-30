@@ -1,4 +1,5 @@
 
+#include <dlfcn.h>
 #include <any>
 #include <algorithm>
 #include <sstream>
@@ -8,7 +9,6 @@
 #include <QDoubleValidator>
 #include <QIntValidator>
 #include <QTimer>
-
 
 #include "debug.hpp"
 #include "module.hpp"
@@ -599,6 +599,7 @@ int Modules::Plugin::setActive(bool state)
     event_type = Event::Type::RT_BLOCK_PAUSE_EVENT;
   }
   Event::Object event(event_type);
+  event.setParam("block", std::any(static_cast<IO::Block*>(this->plugin_component.get())));
   this->event_manager->postEvent(&event);
   event.wait();
   if (!event.isdone()){
@@ -613,19 +614,63 @@ Modules::Manager::Manager(Event::Manager* event_manager, QMainWindow* main_windo
   this->rtxi_modules_registry = std::unordered_map<std::string, std::unique_ptr<Modules::Plugin>>();
 }
 
-int Modules::Manager::loadPlugin(const std::string& dynlib_name)
+int Modules::Manager::loadPlugin(const std::string& library)
 {
+  void* handle = dlopen(library.c_str(), RTLD_GLOBAL | RTLD_NOW);
+  if (!handle) {
+    // ERROR_MSG("Plugin::load : failed to load library: {}", dlerror());
+    std::string plugin_dir = std::string("/lib/rtxi/");
+    handle = dlopen((plugin_dir + library).c_str(),
+                    RTLD_GLOBAL | RTLD_NOW);
+  }
+  if (!handle) {
+    ERROR_MSG("Plugin::load : failed to load {}: {}\n",
+              library.c_str(),
+              dlerror());
+    return -1;
+  }
+
+  /*********************************************************************************
+   * Apparently ISO C++ forbids against casting object pointer -> function
+   *pointer * But what the hell do they know? It is probably safe here... *
+   *********************************************************************************/
+
+  std::unique_ptr<Modules::Plugin> (*create)(void) =
+      (std::unique_ptr<Modules::Plugin> (*)(void))(dlsym(handle, "createRTXIPlugin"));
+  if (!create) {
+    ERROR_MSG("Plugin::load : failed to load {} : {}\n",
+              library,
+              dlerror());
+    dlclose(handle);
+    return -1;
+  }
+
+  auto plugin = create();
+  if (plugin == nullptr) {
+    ERROR_MSG("Plugin::load : failed to load {} : failed to create instance\n",
+              library);
+    dlclose(handle);
+    return -1;
+  }
+  // if (plugin->magic_number != Plugin::Object::MAGIC_NUMBER) {
+  //   ERROR_MSG(
+  //       "Plugin::load : the pointer returned from {}::createRTXIPlugin() isn't "
+  //       "a valid Plugin::Object *.\n",
+  //       library.toStdString().c_str());
+  //   dlclose(handle);
+  //   return 0;
+  // }
+
+  this->registerModule(std::move(plugin));
   return 0;
 }
 
-int Modules::Manager::loadPlugin(Modules::Plugin* dynlib_pointer)
+void Modules::Manager::unloadPlugin(const std::string& library)
 {
-  return 0;
-}
-
-int Modules::Manager::unloadPlugin(Modules::Plugin* dynlib_pointer)
-{
-  return 0;
+  if(this->rtxi_modules_registry.find(library) != this->rtxi_modules_registry.end()){
+    void* handle = this->rtxi_modules_registry[library]->getHandle();
+    if(handle != nullptr) { dlclose(handle); }
+  }
 }
 
 int Modules::Manager::registerModule(std::unique_ptr<Modules::Plugin> module)
@@ -642,17 +687,6 @@ int Modules::Manager::unregisterModule(std::string module_name)
 
 void Modules::Manager::receiveEvent(Event::Object* event)
 {
-  switch(event->getType()){
-    case Event::Type::PLUGIN_REMOVE_EVENT :
-      this->unloadPlugin(std::any_cast<Modules::Plugin*>(event->getParam("plugin")));
-      event->done();
-      break;
-    case Event::Type::PLUGIN_INSERT_EVENT :
-      this->loadPlugin(std::any_cast<Modules::Plugin*>(event->getParam("plugin")));
-      event->done();
-      break;
-    default:
-      break;
-  }
+
 }
 
