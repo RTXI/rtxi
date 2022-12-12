@@ -469,7 +469,7 @@ void RT::System::updateThreadList(RT::System::CMD* cmd)
 
 void RT::System::updateBlockActivity(RT::System::CMD* cmd)
 {
-  IO::Block* block = std::any_cast<IO::Block*>(cmd->getParam("block"));
+ auto block = std::any_cast<IO::Block*>(cmd->getParam("block"));
   switch(cmd->getType()){
     case Event::Type::RT_BLOCK_PAUSE_EVENT :
       block->setActive(false);
@@ -680,8 +680,15 @@ void RT::System::execute(RT::System* system)
         "realtime thread\n");
     return;
   }
+  auto starttime = RT::OS::getTime();
+  int64_t endtime;
   while (!(system->task->task_finished)) {
+    // storing timing information and placing it in local variables
+    endtime = RT::OS::getTime();
+    system->periodStartTime = starttime;
+    system->periodEndTime = endtime;
     RT::OS::sleepTimestep(system->task.get());
+    starttime = RT::OS::getTime();
 
     for (auto* iDevice : system->devices){
       if (iDevice->getActive()){

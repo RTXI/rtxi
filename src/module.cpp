@@ -118,7 +118,7 @@ void Modules::Component::execute()
 }
 
 Modules::Panel::Panel(std::string name, QMainWindow* main_window)
-    : QWidget(main_window)
+    : QWidget(main_window), maind_window(main_window)
 {
   setWindowTitle(QString::fromStdString(name));
 

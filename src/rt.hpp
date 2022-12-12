@@ -462,6 +462,9 @@ private:
 
   static void execute(RT::System* system);
 
+  int64_t periodStartTime = 1;
+  int64_t periodEndTime = 1;
+
   // System owns the task objet and the pipe used to communicate with it
   std::unique_ptr<RT::OS::Task> task;
   std::unique_ptr<RT::OS::Fifo> eventFifo;

@@ -44,9 +44,15 @@ find_package(Threads REQUIRED)
 # environment you may get useless errors unless you add the line below.
 list(APPEND CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES ${CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES})
 
+include_directories(
+  ${CMAKE_SOURCE_DIR}/src 
+  ${CMAKE_SOURCE_DIR}/libs
+  ${CMAKE_SOURCE_DIR}/plugins
+)
+
 add_subdirectory(src)
-#add_subdirectory(libs)
-#add_subdirectory(plugins)
+add_subdirectory(libs)
+add_subdirectory(plugins)
 #add_subdirectory(res)
 #add_subdirectory(scripts)
 
