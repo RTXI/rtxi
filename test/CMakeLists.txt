@@ -20,7 +20,7 @@ target_link_libraries(rtxiTests PRIVATE
     rtxi_lib 
     GTest::gtest GTest::gtest_main
     GTest::gmock GTest::gmock_main 
-    Qt6::Core Qt6::Widgets Qt6::Gui
+    Qt5::Core Qt5::Widgets Qt5::Gui
     Threads::Threads
     fmt::fmt
 )

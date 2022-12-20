@@ -30,15 +30,14 @@ find_package(fmt REQUIRED)
 find_package(HDF5 REQUIRED)
 find_package(libgit2 REQUIRED)
 find_package(qwt REQUIRED)
-find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
-qt_standard_project_setup()
+find_package(Qt5 REQUIRED COMPONENTS Core Gui Widgets)
 find_package(GTest REQUIRED)
 find_package(Threads REQUIRED)
 
 #Handle QT and boost libraries shenanigans
-# set(CMAKE_AUTOMOC ON)
-# set(CMAKE_AUTORCC ON)
-# set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+set(CMAKE_AUTOUIC ON)
 
 # Clang-tidy is by far the most annoying tool to please. Depending on your development
 # environment you may get useless errors unless you add the line below.
