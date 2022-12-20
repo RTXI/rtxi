@@ -29,6 +29,7 @@
 #include "io.hpp"
 #include "rtos.hpp"
 
+// forward declare important performance measurement
 //! Realtime Oriented Classes
 /*!
  * Objects contained within this namespace are responsible
@@ -450,6 +451,7 @@ private:
   void setPeriod(Event::Object* event);
   void shutdown(Event::Object* event);
   void NOOP(Event::Object* event);
+  void provideTimetickPointers(Event::Object* event);
 
   void executeCMD(CMD* cmd);
   void updateDeviceList(CMD* cmd);
@@ -457,6 +459,7 @@ private:
   void updateBlockActivity(CMD* cmd);
   void setPeriod(CMD* cmd);
   void shutdown(CMD* cmd);
+  void getPeriodTicksCMD(CMD* cmd);
 
   void postTelemitry(RT::Telemitry::Response& telemitry);
 

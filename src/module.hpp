@@ -69,7 +69,7 @@ struct Info
   std::string name;
   std::string description;
   Modules::Variable::variable_t vartype;
-  std::variant<int, double, uint64_t, std::string, state_t> value;
+  std::variant<int, double, unsigned long long, std::string, state_t> value;
 };
 
 }  // namespace Variable
@@ -253,11 +253,10 @@ protected:
 
   std::string getName(){ return this->myname; }
   //virtual void receiveEvent(const Event::Object* event) override;
-  
-private:
 
   bool periodEventPaused;
 
+  MainWindow* main_window;
   QWidget* gridBox;
   QGroupBox* buttonGroup;
   std::string myname;
@@ -274,7 +273,7 @@ public:
   Plugin& operator=(const Plugin& plugin) = default; // copy assignment noperator
   Plugin(Plugin &&) = default; // move constructor
   Plugin& operator=(Plugin &&) = default; // move assignment operator
-  ~Plugin();
+  virtual ~Plugin();
 
   int exit();
   void attachComponent(std::unique_ptr<Modules::Component> component);

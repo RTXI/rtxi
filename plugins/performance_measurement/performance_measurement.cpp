@@ -1,5 +1,6 @@
 /*
- Copyright (C) 2011 Georgia Institute of Technology, University of Utah, Weill Cornell Medical College
+ Copyright (C) 2011 Georgia Institute of Technology, University of Utah, Weill
+ Cornell Medical College
 
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -16,224 +17,186 @@
 
  */
 
-#include <debug.h>
-#include <main_window.h>
-#include <performance_measurement.h>
-#include <rt.h>
+#include "performance_measurement.hpp"
 
+#include "debug.hpp"
+#include "main_window.hpp"
+#include "rt.hpp"
 
-static Workspace::variable_t vars[] =
+PerformanceMeasurement::Panel::Panel(std::string name, QMainWindow* main_window)
+    : Modules::Panel(name, main_window)
+    , state(INIT1)
+    , duration(0)
+    , lastRead(0)
+    , timestep(0)
+    , maxDuration(0)
+    , maxTimestep(0)
+    , jitter(0)
 {
-    { "Comp Time (ns)", "", Workspace::STATE, },
-    { "Peak Comp Time (ns)", "", Workspace::STATE, },
-    { "Real-time Period (ns)", "", Workspace::STATE, },
-    { "Peak RT Period (ns)", "", Workspace::STATE, },
-    { "RT Jitter (ns)", "", Workspace::STATE, },
-};
+  // Make Mdi
+  QMdiSubWindow* subWindow = new QMdiSubWindow;
+  subWindow->setWindowIcon(QIcon("/usr/local/share/rtxi/RTXI-widget-icon.png"));
+  subWindow->setAttribute(Qt::WA_DeleteOnClose);
+  subWindow->setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint
+                            | Qt::WindowMinimizeButtonHint);
+  this->main_window->createMdi(subWindow);
 
-static size_t num_vars = sizeof(vars) / sizeof(Workspace::variable_t); // Required variable (number of variables)
+  // Create main layout
+  QVBoxLayout* layout = new QVBoxLayout;
+  QString suffix = QString("s)").prepend(QChar(0x3BC));
 
-PerformanceMeasurement::Panel::Panel(QWidget *parent) : QWidget(parent),
-    Workspace::Instance("Performance Measurement", vars, num_vars), state(INIT1), duration(0),
-    lastRead(0), timestep(0), maxDuration(0), maxTimestep(0), jitter(0)
-{
+  // Create child widget and gridLayout
+  QGridLayout* gridLayout = new QGridLayout;
 
-    // Make Mdi
-    QMdiSubWindow *subWindow = new QMdiSubWindow;
-    subWindow->setWindowIcon(QIcon("/usr/local/share/rtxi/RTXI-widget-icon.png"));
-    subWindow->setAttribute(Qt::WA_DeleteOnClose);
-    subWindow->setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint |
-                              Qt::WindowMinimizeButtonHint);
-    MainWindow::getInstance()->createMdi(subWindow);
+  durationEdit = new QLineEdit(subWindow);
+  durationEdit->setReadOnly(true);
+  gridLayout->addWidget(
+      new QLabel(tr("Computation Time (").append(suffix)), 1, 0);
+  gridLayout->addWidget(durationEdit, 1, 1);
 
-    // Create main layout
-    QVBoxLayout *layout = new QVBoxLayout;
-    QString suffix = QString("s)").prepend(QChar(0x3BC));
+  maxDurationEdit = new QLineEdit(subWindow);
+  maxDurationEdit->setReadOnly(true);
+  gridLayout->addWidget(
+      new QLabel(tr("Peak Computation Time (").append(suffix)), 2, 0);
+  gridLayout->addWidget(maxDurationEdit, 2, 1);
 
-    // Create child widget and gridLayout
-    QGridLayout *gridLayout = new QGridLayout;
+  timestepEdit = new QLineEdit(subWindow);
+  timestepEdit->setReadOnly(true);
+  gridLayout->addWidget(
+      new QLabel(tr("Real-time Period (").append(suffix)), 3, 0);
+  gridLayout->addWidget(timestepEdit, 3, 1);
 
-    durationEdit = new QLineEdit(subWindow);
-    durationEdit->setReadOnly(true);
-    gridLayout->addWidget(new QLabel(tr("Computation Time (").append(suffix)), 1, 0);
-    gridLayout->addWidget(durationEdit, 1, 1);
+  maxTimestepEdit = new QLineEdit(subWindow);
+  maxTimestepEdit->setReadOnly(true);
+  gridLayout->addWidget(
+      new QLabel(tr("Peak Real-time Period (").append(suffix)), 4, 0);
+  gridLayout->addWidget(maxTimestepEdit, 4, 1);
 
-    maxDurationEdit = new QLineEdit(subWindow);
-    maxDurationEdit->setReadOnly(true);
-    gridLayout->addWidget(new QLabel(tr("Peak Computation Time (").append(suffix)), 2, 0);
-    gridLayout->addWidget(maxDurationEdit, 2, 1);
+  timestepJitterEdit = new QLineEdit(subWindow);
+  timestepJitterEdit->setReadOnly(true);
+  gridLayout->addWidget(
+      new QLabel(tr("Real-time Jitter (").append(suffix)), 5, 0);
+  gridLayout->addWidget(timestepJitterEdit, 5, 1);
 
-    timestepEdit = new QLineEdit(subWindow);
-    timestepEdit->setReadOnly(true);
-    gridLayout->addWidget(new QLabel(tr("Real-time Period (").append(suffix)), 3, 0);
-    gridLayout->addWidget(timestepEdit, 3, 1);
+  AppCpuPercentEdit = new QLineEdit(subWindow);
+  AppCpuPercentEdit->setReadOnly(true);
+  gridLayout->addWidget(new QLabel("RTXI App Cpu Usage(%)"), 6, 0);
+  gridLayout->addWidget(AppCpuPercentEdit, 6, 1);
 
-    maxTimestepEdit = new QLineEdit(subWindow);
-    maxTimestepEdit->setReadOnly(true);
-    gridLayout->addWidget(new QLabel(tr("Peak Real-time Period (").append(suffix)), 4, 0);
-    gridLayout->addWidget(maxTimestepEdit, 4, 1);
+  QPushButton* resetButton = new QPushButton("Reset", this);
+  gridLayout->addWidget(resetButton, 7, 1);
+  QObject::connect(
+      resetButton, SIGNAL(released(void)), this, SLOT(reset(void)));
 
-    timestepJitterEdit = new QLineEdit(subWindow);
-    timestepJitterEdit->setReadOnly(true);
-    gridLayout->addWidget(new QLabel(tr("Real-time Jitter (").append(suffix)), 5, 0);
-    gridLayout->addWidget(timestepJitterEdit, 5, 1);
+  // Attach child widget to parent widget
+  layout->addLayout(gridLayout);
 
-    AppCpuPercentEdit = new QLineEdit(subWindow);
-    AppCpuPercentEdit->setReadOnly(true);
-    gridLayout->addWidget(new QLabel("RTXI App Cpu Usage(%)"), 6, 0);
-    gridLayout->addWidget(AppCpuPercentEdit, 6, 1);
+  // Attach gridLayout to Widget
+  setLayout(layout);
+  setWindowTitle(tr(" RT Benchmarks"));
 
-    QPushButton *resetButton = new QPushButton("Reset", this);
-    gridLayout->addWidget(resetButton, 7, 1);
-    QObject::connect(resetButton,SIGNAL(released(void)),this,SLOT(reset(void)));
+  // Set layout to Mdi
+  subWindow->setWidget(this);
+  subWindow->setFixedSize(subWindow->minimumSizeHint());
+  show();
 
-    // Attach child widget to parent widget
-    layout->addLayout(gridLayout);
+  QTimer* timer = new QTimer(this);
+  timer->setTimerType(Qt::PreciseTimer);
+  timer->start(1000);
+  QObject::connect(timer, SIGNAL(timeout(void)), this, SLOT(update(void)));
 
-    // Attach gridLayout to Widget
-    setLayout(layout);
-    setWindowTitle(QString::number(getID()) + tr(" RT Benchmarks"));
-
-    // Set layout to Mdi
-    subWindow->setWidget(this);
-    subWindow->setFixedSize(subWindow->minimumSizeHint());
-    show();
-
-    QTimer *timer = new QTimer(this);
-    timer->setTimerType(Qt::PreciseTimer);
-    timer->start(1000);
-    QObject::connect(timer,SIGNAL(timeout(void)),this,SLOT(update(void)));
-
-    // Connect states to workspace
-    setData(Workspace::STATE, 0, &duration);
-    setData(Workspace::STATE, 1, &maxDuration);
-    setData(Workspace::STATE, 2, &timestep);
-    setData(Workspace::STATE, 3, &maxTimestep);
-    setData(Workspace::STATE, 4, &jitter);
-
-    setActive(true);
+  // // Connect states to workspace
+  // setData(Modules::Variable::UINT_PARAMETER, 0ull, &duration);
+  // setData(Modules::Variable::UINT_PARAMETER, 1ull, &maxDuration);
+  // setData(Modules::Variable::UINT_PARAMETER, 2ull, &timestep);
+  // setData(Modules::Variable::UINT_PARAMETER, 3ull, &maxTimestep);
+  // setData(Modules::Variable::UINT_PARAMETER, 4ull, &jitter);
 }
 
-PerformanceMeasurement::Panel::~Panel(void)
+void PerformanceMeasurement::Component::execute()
 {
-    Plugin::getInstance()->panel = 0;
-}
-
-void PerformanceMeasurement::Panel::read(void)
-{
-    long long now = RT::OS::getTime();
-    double period = RT::System::getInstance()->getPeriod();
-
-    switch (state)
-        {
-        case EXEC:
-            if (maxTimestep < now - lastRead) 
-	            maxTimestep = now - lastRead;
-            timestep = now - lastRead;
-            latency = (now - lastRead) - period;
-            timestepStat.push(timestep);
-            latencyStat.push(latency);
-            break;
-        case INIT2:
-            timestep = maxTimestep = now - lastRead;
-            latency = maxLatency = (now - lastRead) - period;
-            timestepStat.push(timestep);
-            latencyStat.push(latency);
-            state = EXEC;
-            break;
-        case INIT1:
-            state = INIT2;
-        }
-    lastRead = now;
-    jitter = latencyStat.std();
+  switch (state) {
+    case EXEC:
+      if (maxTimestep < now - lastRead)
+        maxTimestep = now - lastRead;
+      timestep = now - lastRead;
+      latency = (now - lastRead) - period;
+      timestepStat.push(timestep);
+      latencyStat.push(latency);
+      break;
+    case INIT2:
+      timestep = maxTimestep = now - lastRead;
+      latency = maxLatency = (now - lastRead) - period;
+      timestepStat.push(timestep);
+      latencyStat.push(latency);
+      state = EXEC;
+      break;
+    case INIT1:
+      state = INIT2;
+  }
+  lastRead = now;
+  jitter = latencyStat.std();
 }
 
 void PerformanceMeasurement::Panel::write(void)
 {
-    long long now = RT::OS::getTime();
+  long long now = RT::OS::getTime();
 
-    switch (state)
-        {
-        case EXEC:
-            if (maxDuration < now - lastRead)
-                {
-                    maxDuration = now - lastRead;
-                }
-            duration = now - lastRead;
-            break;
-        case INIT2:
-            duration = maxDuration = now - lastRead;
-            break;
-        default:
-            ERROR_MSG("PerformanceMeasurement::Panel::write : invalid state\n");
-        }
+  switch (state) {
+    case EXEC:
+      if (maxDuration < now - lastRead) {
+        maxDuration = now - lastRead;
+      }
+      duration = now - lastRead;
+      break;
+    case INIT2:
+      duration = maxDuration = now - lastRead;
+      break;
+    default:
+      ERROR_MSG("PerformanceMeasurement::Panel::write : invalid state\n");
+  }
 }
 
 void PerformanceMeasurement::Panel::reset(void)
 {
-    state = INIT1;
-    timestepStat.clear();
-    latencyStat.clear();
+  state = INIT1;
+  timestepStat.clear();
+  latencyStat.clear();
 }
 
 void PerformanceMeasurement::Panel::resetMaxTimeStep(void)
 {
-    maxTimestep = timestep;
+  maxTimestep = timestep;
 }
 
 void PerformanceMeasurement::Panel::update(void)
 {
-    durationEdit->setText(QString::number(duration * 1e-3));
-    maxDurationEdit->setText(QString::number(maxDuration * 1e-3));
-    timestepEdit->setText(QString::number(timestep * 1e-3));
-    maxTimestepEdit->setText(QString::number(maxTimestep * 1e-3));
-    timestepJitterEdit->setText(QString::number(jitter * 1e-3));
-    AppCpuPercentEdit->setText(QString::number(RT::OS::getCpuUsage()));
+  durationEdit->setText(QString::number(duration * 1e-3));
+  maxDurationEdit->setText(QString::number(maxDuration * 1e-3));
+  timestepEdit->setText(QString::number(timestep * 1e-3));
+  maxTimestepEdit->setText(QString::number(maxTimestep * 1e-3));
+  timestepJitterEdit->setText(QString::number(jitter * 1e-3));
+  AppCpuPercentEdit->setText(QString::number(RT::OS::getCpuUsage()));
 }
 
-extern "C" Plugin::Object * createRTXIPlugin(void *)
+// extern "C" Plugin::Object * createRTXIPlugin(void *)
+// {
+//     return PerformanceMeasurement::Plugin::getInstance();
+// }
+
+PerformanceMeasurement::Plugin::Plugin()
+    : panel(0)
 {
-    return PerformanceMeasurement::Plugin::getInstance();
+  MainWindow::getInstance()->createSystemMenuItem(
+      "RT Benchmarks", this, SLOT(createPerformanceMeasurementPanel(void)));
 }
 
-PerformanceMeasurement::Plugin::Plugin(void) : panel(0)
+PerformanceMeasurement::Component::Component(
+    Modules::Plugin* hostPlugin,
+    const std::string& name,
+    std::vector<IO::channel_t> channels,
+    std::vector<Modules::Variable::Info> variables)
+    : Modules::Component(hostPlugin, name, channels, variables)
 {
-    MainWindow::getInstance()->createSystemMenuItem("RT Benchmarks",this,SLOT(createPerformanceMeasurementPanel(void)));
+  this->
 }
-
-PerformanceMeasurement::Plugin::~Plugin(void)
-{
-    if (panel)
-        delete panel;
-    instance = 0;
-    panel = 0;
-}
-
-void
-PerformanceMeasurement::Plugin::createPerformanceMeasurementPanel(void)
-{
-    if (!panel)
-        panel = new Panel(MainWindow::getInstance()->centralWidget());
-    panel->show();
-}
-
-static Mutex mutex;
-PerformanceMeasurement::Plugin *PerformanceMeasurement::Plugin::instance = 0;
-
-PerformanceMeasurement::Plugin * PerformanceMeasurement::Plugin::getInstance(void)
-{
-    if (instance)
-        return instance;
-
-    /*************************************************************************
-     * Seems like alot of hoops to jump through, but allocation isn't        *
-     *   thread-safe. So effort must be taken to ensure mutual exclusion.    *
-     *************************************************************************/
-
-    Mutex::Locker lock(&::mutex);
-    if (!instance)
-        instance = new Plugin();
-
-    return instance;
-}
-

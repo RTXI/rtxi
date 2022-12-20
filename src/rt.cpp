@@ -485,12 +485,23 @@ void RT::System::updateBlockActivity(RT::System::CMD* cmd)
   }
 }
 
+void RT::System::getPeriodTicksCMD(RT::System::CMD* cmd)
+{
+  cmd->setParam("pre-period", std::any(&(this->periodStartTime)));
+  cmd->setParam("post-period", std::any(&(this->periodEndTime)));
+  cmd->done();
+}
+
 void RT::System::executeCMD(RT::System::CMD* cmd)
 {
   RT::Telemitry::Response telem = RT::Telemitry::NO_TELEMITRY;
   switch(cmd->getType()){
     case Event::Type::RT_PERIOD_EVENT :
       this->setPeriod(cmd);
+      break;
+    case Event::Type::RT_PREPERIOD_EVENT :
+    case Event::Type::RT_POSTPERIOD_EVENT :
+      this->getPeriodTicksCMD(cmd);
       break;
     case Event::Type::RT_DEVICE_INSERT_EVENT : 
     case Event::Type::RT_DEVICE_REMOVE_EVENT :
@@ -667,6 +678,21 @@ void RT::System::shutdown(Event::Object* event)
   RT::System::CMD* cmd_ptr = &cmd;
   this->eventFifo->write(&cmd_ptr, sizeof(RT::System::CMD*));
   cmd.wait();
+  event->done();
+}
+
+void RT::System::provideTimetickPointers(Event::Object* event)
+{
+  RT::System::CMD cmd(event->getType());
+  RT::System::CMD* cmd_ptr = &cmd;
+  this->eventFifo->write(&cmd_ptr, sizeof(RT::System::CMD*));
+  cmd.wait();
+
+  // transfer values to event for poster to use
+  auto* startperiod = std::any_cast<int64_t*>(cmd.getParam("pre-period"));
+  auto* stopperiod = std::any_cast<int64_t*>(cmd.getParam("post-period"));
+  event->setParam("pre-period", std::any(startperiod));
+  event->setParam("post-period", std::any(stopperiod));
   event->done();
 }
 
