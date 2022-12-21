@@ -50,8 +50,8 @@ include_directories(
 )
 
 add_subdirectory(src)
-add_subdirectory(libs)
-add_subdirectory(plugins)
+#add_subdirectory(libs)
+#add_subdirectory(plugins)
 #add_subdirectory(res)
 #add_subdirectory(scripts)
 

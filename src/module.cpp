@@ -88,7 +88,7 @@ std::string Modules::Component::getValueString(const std::string& varname)
   std::string value;
   switch(this->parameter[varname].vartype){
     case Modules::Variable::UINT_PARAMETER :
-      value = std::to_string(std::get<uint64_t>(this->parameter[varname].value));
+      value = std::to_string(std::get<unsigned long long>(this->parameter[varname].value));
       break;
     case Modules::Variable::INT_PARAMETER :
       value = std::to_string(std::get<int>(this->parameter[varname].value));
@@ -117,8 +117,8 @@ void Modules::Component::execute()
   // This is defined by the user
 }
 
-Modules::Panel::Panel(std::string name, QMainWindow* main_window)
-    : QWidget(main_window), maind_window(main_window)
+Modules::Panel::Panel(std::string name, MainWindow* mw)
+    : QWidget(mw), main_window(mw)
 {
   setWindowTitle(QString::fromStdString(name));
 
@@ -486,7 +486,7 @@ int Modules::Plugin::getComponentIntParameter(const std::string& parameter_name)
 
 uint64_t Modules::Plugin::getComponentUIntParameter(const std::string& parameter_name)
 {
-  return this->plugin_component->getValue<uint64_t>(parameter_name);
+  return this->plugin_component->getValue<unsigned long long>(parameter_name);
 }
 
 double Modules::Plugin::getComponentDoubleParameter(const std::string& parameter_name)

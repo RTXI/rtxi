@@ -136,7 +136,7 @@ class Panel : public QWidget
 {
   Q_OBJECT
 public:
-  Panel(std::string name, QMainWindow* main_window);
+  Panel(std::string name, MainWindow* mw);
 
   /*
    * Getter function go allow customization of
