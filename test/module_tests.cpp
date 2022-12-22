@@ -22,45 +22,45 @@
 
 std::vector<Modules::Variable::Info> generateDefaultComponentVariables()
 {
-    std::vector<Modules::Variable::Info> default_variable_list;
-    Modules::Variable::Info tempvarinfo;
-    tempvarinfo.name = std::string("testint");
-    tempvarinfo.description = std::string("TEST INTEGER");
-    tempvarinfo.vartype = Modules::Variable::INT_PARAMETER;
-    tempvarinfo.value = 0;
-    default_variable_list.push_back(tempvarinfo);
+  std::vector<Modules::Variable::Info> default_variable_list;
+  Modules::Variable::Info tempvarinfo;
+  tempvarinfo.name = std::string("testint");
+  tempvarinfo.description = std::string("TEST INTEGER");
+  tempvarinfo.vartype = Modules::Variable::INT_PARAMETER;
+  tempvarinfo.value = 0;
+  default_variable_list.push_back(tempvarinfo);
 
-    tempvarinfo.name = std::string("testdouble");
-    tempvarinfo.description = std::string("TEST DOUBLE");
-    tempvarinfo.vartype = Modules::Variable::DOUBLE_PARAMETER;
-    tempvarinfo.value = 0.0;
-    default_variable_list.push_back(tempvarinfo);
+  tempvarinfo.name = std::string("testdouble");
+  tempvarinfo.description = std::string("TEST DOUBLE");
+  tempvarinfo.vartype = Modules::Variable::DOUBLE_PARAMETER;
+  tempvarinfo.value = 0.0;
+  default_variable_list.push_back(tempvarinfo);
 
-    tempvarinfo.name = std::string("testuint");
-    tempvarinfo.description = std::string("TEST UNSIGNED INTEGER");
-    tempvarinfo.vartype = Modules::Variable::UINT_PARAMETER;
-    tempvarinfo.value = 0ul;
-    default_variable_list.push_back(tempvarinfo);
+  tempvarinfo.name = std::string("testuint");
+  tempvarinfo.description = std::string("TEST UNSIGNED INTEGER");
+  tempvarinfo.vartype = Modules::Variable::UINT_PARAMETER;
+  tempvarinfo.value = 0ull;
+  default_variable_list.push_back(tempvarinfo);
 
-    tempvarinfo.name = std::string("teststring");
-    tempvarinfo.description = std::string("TEST STRING");
-    tempvarinfo.vartype = Modules::Variable::COMMENT;
-    tempvarinfo.value = std::string("");
-    default_variable_list.push_back(tempvarinfo);
+  tempvarinfo.name = std::string("teststring");
+  tempvarinfo.description = std::string("TEST STRING");
+  tempvarinfo.vartype = Modules::Variable::COMMENT;
+  tempvarinfo.value = std::string("");
+  default_variable_list.push_back(tempvarinfo);
 
-    tempvarinfo.name = std::string("teststate");
-    tempvarinfo.description = std::string("TEST STATE");
-    tempvarinfo.vartype = Modules::Variable::STATE;
-    tempvarinfo.value = Modules::Variable::INIT;
-    default_variable_list.push_back(tempvarinfo);
+  tempvarinfo.name = std::string("teststate");
+  tempvarinfo.description = std::string("TEST STATE");
+  tempvarinfo.vartype = Modules::Variable::STATE;
+  tempvarinfo.value = Modules::Variable::INIT;
+  default_variable_list.push_back(tempvarinfo);
 
-    return default_variable_list;
+  return default_variable_list;
 }
 
 TEST_F(ModulePluginTests, attachComponent)
 {
   // there is a component already registered automatically during
-  // initialization of test. We just have to check whether the 
+  // initialization of test. We just have to check whether the
   // real-time thread executed the thread object.
   EXPECT_TRUE(this->component_ptr->wasExecuted());
 }
@@ -74,10 +74,15 @@ TEST_F(ModulePluginTests, exit)
 TEST_F(ModulePluginTests, ComponentParameters)
 {
   // We will check whether plugin actually retrieves component values
-  std::vector<Modules::Variable::Info> variable_list = generateDefaultComponentVariables();
-  ASSERT_EQ(std::get<int>(variable_list[0].value), this->plugin->getComponentIntParameter(variable_list[0].name));
-  ASSERT_DOUBLE_EQ(std::get<double>(variable_list[1].value), this->plugin->getComponentDoubleParameter(variable_list[1].name));
-  ASSERT_EQ(std::get<uint64_t>(variable_list[2].value), this->plugin->getComponentUIntParameter(variable_list[2].name));
+  std::vector<Modules::Variable::Info> variable_list =
+      generateDefaultComponentVariables();
+  ASSERT_EQ(std::get<int>(variable_list[0].value),
+            this->plugin->getComponentIntParameter(variable_list[0].name));
+  ASSERT_DOUBLE_EQ(
+      std::get<double>(variable_list[1].value),
+      this->plugin->getComponentDoubleParameter(variable_list[1].name));
+  ASSERT_EQ(std::get<unsigned long long>(variable_list[2].value),
+            this->plugin->getComponentUIntParameter(variable_list[2].name));
 }
 
 TEST_F(ModulePluginTests, getName)
@@ -96,58 +101,24 @@ TEST_F(ModulePluginTests, activity)
   ASSERT_TRUE(this->component_ptr->getActive());
 }
 
-TEST_F(ModulePluginTests, receiveEvent)
-{
+TEST_F(ModulePluginTests, receiveEvent) {}
 
-}
+TEST_F(ModulePanelTests, getLayout) {}
 
+TEST_F(ModulePanelTests, update) {}
 
-TEST_F(ModulePanelTests, getLayout)
-{
+TEST_F(ModulePanelTests, createGUI) {}
 
-}
+TEST_F(ModuleManagerTests, loadingPlugin) {}
 
-TEST_F(ModulePanelTests, update)
-{
+TEST_F(ModuleManagerTests, moduleRegistration) {}
 
-}
+TEST_F(ModuleManagerTests, receiveEvent) {}
 
-TEST_F(ModulePanelTests, createGUI)
-{
+TEST_F(ModuleComponetTests, integration) {}
 
-}
+TEST_F(ModulePanelTests, integration) {}
 
-TEST_F(ModuleManagerTests, loadingPlugin)
-{
+TEST_F(ModulePluginTests, integration) {}
 
-}
-
-TEST_F(ModuleManagerTests, moduleRegistration)
-{
-
-}
-
-TEST_F(ModuleManagerTests, receiveEvent)
-{
-
-}
-
-TEST_F(ModuleComponetTests, integration)
-{
-
-}
-
-TEST_F(ModulePanelTests, integration)
-{
-
-}
-
-TEST_F(ModulePluginTests, integration)
-{
-
-}
-
-TEST_F(ModuleManagerTests, integration)
-{
-  
-}
+TEST_F(ModuleManagerTests, integration) {}

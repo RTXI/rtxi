@@ -37,7 +37,7 @@ std::vector<IO::channel_t> generateDefaultChannelList()
       "DEFAULT OUTPUT CHANNEL DESCRIPTION";
   std::vector<IO::channel_t> defaultChannelList;
 
-    // Generates a default block with single input and output channel
+  // Generates a default block with single input and output channel
   defaultBlockName = "DEFAULT:BLOCK:NAME";
   IO::channel_t defaultInputChannel = {};
   defaultInputChannel.name = defaultInputChannelName;

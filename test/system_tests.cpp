@@ -198,13 +198,14 @@ TEST_F(SystemTest, updateDeviceList)
 
   MockRTDevice mock_device("mockdevice", defaultChannelList);
   Event::Object change_activity_event(Event::Type::RT_BLOCK_UNPAUSE_EVENT);
-  change_activity_event.setParam("block", static_cast<IO::Block*>(&mock_device));
+  change_activity_event.setParam("block",
+                                 static_cast<IO::Block*>(&mock_device));
   this->system->receiveEvent(&change_activity_event);
   change_activity_event.wait();
 
-  //std::any_cast<RT::Device*>(std::any(static_cast<RT::Device*>(&mock_device)))->read();
-  //std::any_cast<RT::Device*>(std::any(static_cast<RT::Device*>(&mock_device)))->write();
-  
+  // std::any_cast<RT::Device*>(std::any(static_cast<RT::Device*>(&mock_device)))->read();
+  // std::any_cast<RT::Device*>(std::any(static_cast<RT::Device*>(&mock_device)))->write();
+
   // insert device
   this->rt_connector->insertBlock(&mock_device);
   Event::Object insertEvent(Event::Type::RT_DEVICE_INSERT_EVENT);

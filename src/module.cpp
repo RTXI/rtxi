@@ -49,8 +49,6 @@ Modules::DefaultGUILineEdit::DefaultGUILineEdit(QWidget* parent)
       this, SIGNAL(textChanged(const QString&)), this, SLOT(redden()));
 }
 
-Modules::DefaultGUILineEdit::~DefaultGUILineEdit() {}
-
 void Modules::DefaultGUILineEdit::blacken()
 {
   palette.setBrush(this->foregroundRole(),
@@ -67,13 +65,13 @@ void Modules::DefaultGUILineEdit::redden()
   }
 }
 
-Modules::Component::Component(Modules::Plugin* hostPlugin,
-                              const std::string& name, 
-                              std::vector<IO::channel_t> channels,
-                              std::vector<Modules::Variable::Info> variables)
-    : RT::Thread(name, channels), hostPlugin(hostPlugin)
+Modules::Component::Component(Modules::Plugin* hplugin,
+                              const std::string& mod_name, 
+                              const std::vector<IO::channel_t>& channels,
+                              const std::vector<Modules::Variable::Info>& variables)
+    : RT::Thread(mod_name, channels), hostPlugin(hplugin), active(false)
 {
-  for(auto var : variables){
+  for(const auto& var : variables){
     this->parameter[var.name] = var;
   }
 }
@@ -117,18 +115,18 @@ void Modules::Component::execute()
   // This is defined by the user
 }
 
-Modules::Panel::Panel(std::string name, MainWindow* mw)
+Modules::Panel::Panel(const std::string& mod_name, MainWindow* mw)
     : QWidget(mw), main_window(mw)
 {
-  setWindowTitle(QString::fromStdString(name));
+  setWindowTitle(QString::fromStdString(mod_name));
 
-  QTimer* timer = new QTimer(this);
+  auto* timer = new QTimer(this);
   timer->setTimerType(Qt::PreciseTimer);
   timer->start(1000);
   QObject::connect(timer, SIGNAL(timeout()), this, SLOT(refresh()));
 }
 
-void Modules::Panel::createGUI(std::vector<Modules::Variable::Info> vars, MainWindow* main_window)
+void Modules::Panel::createGUI(const std::vector<Modules::Variable::Info>& vars, MainWindow* mw)
 {
   // Make Mdi
   this->subWindow = new QMdiSubWindow;
@@ -138,20 +136,20 @@ void Modules::Panel::createGUI(std::vector<Modules::Variable::Info> vars, MainWi
                             | Qt::WindowMinimizeButtonHint);
   this->subWindow->setOption(QMdiSubWindow::RubberBandResize, true);
   this->subWindow->setOption(QMdiSubWindow::RubberBandMove, true);
-  main_window->createMdi(subWindow);
+  mw->createMdi(subWindow);
 
   // Create main layout
   this->layout = new QGridLayout;
 
   // Create child widget and gridLayout
-  QScrollArea* gridArea = new QScrollArea;
+  auto* gridArea = new QScrollArea;
   this->gridBox = new QWidget;
   gridArea->setWidget(this->gridBox);
   gridArea->ensureWidgetVisible(this->gridBox, 0, 0);
   gridArea->setWidgetResizable(true);
-  QGridLayout* gridLayout = new QGridLayout;
+  auto* gridLayout = new QGridLayout;
 
-  for (auto varinfo : vars) {
+  for (const auto& varinfo : vars) {
     param_t param;
 
     param.label = new QLabel(QString::fromStdString(varinfo.name), gridBox);
@@ -169,9 +167,6 @@ void Modules::Panel::createGUI(std::vector<Modules::Variable::Info> vars, MainWi
         param.edit->setValidator(new QDoubleValidator(param.edit));
         break;
       case Modules::Variable::UINT_PARAMETER :
-        param.edit->setValidator(new QIntValidator(param.edit));
-        //validator->setBottom(0);
-        break;
       case Modules::Variable::INT_PARAMETER :
         param.edit->setValidator(new QIntValidator(param.edit));
         break;
@@ -193,7 +188,7 @@ void Modules::Panel::createGUI(std::vector<Modules::Variable::Info> vars, MainWi
 
   // Create child widget
   buttonGroup = new QGroupBox;
-  QHBoxLayout* buttonLayout = new QHBoxLayout;
+  auto* buttonLayout = new QHBoxLayout;
 
   // Create elements
   pauseButton = new QPushButton("Pause", this);
@@ -226,7 +221,7 @@ void Modules::Panel::createGUI(std::vector<Modules::Variable::Info> vars, MainWi
   subWindow->show();
 }
 
-void Modules::Panel::update(Modules::Variable::state_t state) {}
+void Modules::Panel::update(Modules::Variable::state_t flag) {}
 
 void Modules::Panel::resizeMe()
 {
@@ -241,15 +236,15 @@ void Modules::Panel::exit()
 
 void Modules::Panel::refresh()
 {
-  double double_value;
-  int int_value;
-  uint64_t uint_value;
+  double double_value = 0.0;
+  int int_value = 0;
+  unsigned long long uint_value = 0ull;
   std::stringstream sstream;
   for (auto i : this->parameter)
   {
-    double_value = 0;
+    double_value = 0.0;
     int_value = 0;
-    uint_value = 0;
+    uint_value = 0ULL;
     sstream.str("");
 
     switch(i.second.type) {
@@ -301,9 +296,9 @@ void Modules::Panel::modify()
   // }
 }
 
-void Modules::Panel::setComment(const QString& name, QString comment)
+void Modules::Panel::setComment(const QString& var_name, const QString& comment)
 {
-  auto n = parameter.find(name);
+  auto n = parameter.find(var_name);
   if (n != parameter.end() && (n->second.type == Modules::Variable::COMMENT)) {
     n->second.edit->setText(comment);
     QByteArray textData = comment.toLatin1();
@@ -421,8 +416,8 @@ void Modules::Panel::pause(bool p)
 //                  (i->second.edit->text()).toStdString());
 // }
 
-Modules::Plugin::Plugin(Event::Manager* ev_manager, QMainWindow* main_window, std::string name) :
-  event_manager(ev_manager), main_window(main_window), name(name)
+Modules::Plugin::Plugin(Event::Manager* ev_manager, MainWindow* mw, const std::string& mod_name) :
+  event_manager(ev_manager), main_window(mw), name(mod_name)
 {
   this->event_manager->registerHandler(this);
   Event::Object event(Event::Type::PLUGIN_INSERT_EVENT);
@@ -562,13 +557,13 @@ int Modules::Plugin::setComponentComment(const std::string& parameter_name, std:
   return result;
 }
 
-int Modules::Plugin::setComponentState(const std::string& parameter_name, Modules::Variable::state_t state)
+int Modules::Plugin::setComponentState(const std::string& parameter_name, Modules::Variable::state_t value)
 {
   int result = 0;
   Event::Object event(Event::Type::MODULE_PARAMETER_CHANGE_EVENT);
   event.setParam("paramName", std::any(parameter_name));
   event.setParam("paramType", std::any(Modules::Variable::STATE));
-  event.setParam("paramValue", std::any(state));
+  event.setParam("paramValue", std::any(value));
   event.setParam("paramModule", std::any(this->plugin_component.get()));
   this->event_manager->postEvent(&event);
   event.wait();
@@ -608,8 +603,8 @@ int Modules::Plugin::setActive(bool state)
   return result;
 }
 
-Modules::Manager::Manager(Event::Manager* event_manager, QMainWindow* main_window) :
-  event_manager(event_manager), main_window(main_window)
+Modules::Manager::Manager(Event::Manager* event_manager, MainWindow* mw) :
+  event_manager(event_manager), main_window(mw)
 {
   this->rtxi_modules_registry = std::unordered_map<std::string, std::unique_ptr<Modules::Plugin>>();
 }
@@ -678,7 +673,7 @@ int Modules::Manager::registerModule(std::unique_ptr<Modules::Plugin> module)
   this->rtxi_modules_registry[module->getName()] = std::move(module);
 }
 
-int Modules::Manager::unregisterModule(std::string module_name)
+int Modules::Manager::unregisterModule(const std::string& module_name)
 {
   if(this->rtxi_modules_registry.find(module_name) != this->rtxi_modules_registry.end()){
     this->rtxi_modules_registry.erase(module_name);
