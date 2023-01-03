@@ -139,22 +139,29 @@ public:
   void wait();
 
   /*!
-   * Marks the event object as processed.
+   * Marks the event object as processed and successfully completed
    */
   void done();
 
+  /*!
+   * Marks the event object as processed but not successfully completed
+   */
   void notdone();
 
-  bool handled();
+  /*!
+   * Checks whether the event has been proccessed. May return true if 
+   * event was processed by apropriate handler but failed completion
+   * 
+   * \returns True if handled. False otherwise
+   */
+  bool handled() const;
 
   /*!
-   * Checks whether the event object has been processed already. This can be an
-   * alternative for situations where waiting for event is not neccessary and
-   * caller just wishes to check event processing completion.
-   * 
+   * Checks whether the event object has been processed already. Events 
+   * that have true value for processed are also handled. 
    * \returns true if processed. False otherwise
    */
-  bool isdone();
+  bool isdone() const;
 
 private:
   struct param

@@ -114,7 +114,7 @@ std::string Event::type_to_string(Event::Type event_type)
 }
 
 Event::Object::Object(Event::Type et)
-    : event_type(et), processed(false)
+    : event_type(et), processed(false), success(false)
 {
 }
 
@@ -172,12 +172,12 @@ void Event::Object::notdone()
   this->processing_done_cond.notify_all();
 }
 
-bool Event::Object::isdone()
+bool Event::Object::isdone() const
 {
   return this->success;
 }
 
-bool Event::Object::handled()
+bool Event::Object::handled() const
 {
   return this->processed;
 }
