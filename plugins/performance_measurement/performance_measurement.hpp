@@ -49,7 +49,7 @@ public:
   Component(Modules::Plugin* hostPlugin,
             const std::string& name,
             std::vector<IO::channel_t> channels,
-            std::vector<Modules::Variable::Info> variables) 
+            std::vector<Modules::Variable::Info> variables);
         
   virtual void execute() override;
 

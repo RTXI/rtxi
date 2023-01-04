@@ -86,7 +86,7 @@ std::string Modules::Component::getValueString(const std::string& varname)
   std::string value;
   switch(this->parameter[varname].vartype){
     case Modules::Variable::UINT_PARAMETER :
-      value = std::to_string(std::get<unsigned long long>(this->parameter[varname].value));
+      value = std::to_string(std::get<uint64_t>(this->parameter[varname].value));
       break;
     case Modules::Variable::INT_PARAMETER :
       value = std::to_string(std::get<int>(this->parameter[varname].value));
@@ -238,7 +238,7 @@ void Modules::Panel::refresh()
 {
   double double_value = 0.0;
   int int_value = 0;
-  unsigned long long uint_value = 0ull;
+  uint64_t uint_value = 0ULL;
   std::stringstream sstream;
   for (auto i : this->parameter)
   {
@@ -307,9 +307,9 @@ void Modules::Panel::setComment(const QString& var_name, const QString& comment)
   }
 }
 
-void Modules::Panel::setParameter(const QString& name, double value)
+void Modules::Panel::setParameter(const QString& var_name, double value)
 {
-  auto n = parameter.find(name);
+  auto n = parameter.find(var_name);
   if ((n != parameter.end()) && (n->second.type == Modules::Variable::DOUBLE_PARAMETER)) {
     n->second.edit->setText(QString::number(value));
     n->second.str_value = n->second.edit->text();
@@ -318,9 +318,9 @@ void Modules::Panel::setParameter(const QString& name, double value)
   }
 }
 
-void Modules::Panel::setParameter(const QString& name, int value)
+void Modules::Panel::setParameter(const QString& var_name, int value)
 {
-  auto n = parameter.find(name);
+  auto n = parameter.find(var_name);
   if ((n != parameter.end()) && (n->second.type == Modules::Variable::INT_PARAMETER)) {
     n->second.edit->setText(QString::number(value));
     n->second.str_value = n->second.edit->text();
@@ -329,9 +329,9 @@ void Modules::Panel::setParameter(const QString& name, int value)
   }
 }
 
-void Modules::Panel::setParameter(const QString& name, uint64_t value)
+void Modules::Panel::setParameter(const QString& var_name, uint64_t value)
 {
-  auto n = parameter.find(name);
+  auto n = parameter.find(var_name);
   if ((n != parameter.end()) && (n->second.type == Modules::Variable::UINT_PARAMETER)) {
     n->second.edit->setText(QString::number(value));
     n->second.str_value = n->second.edit->text();
@@ -340,9 +340,9 @@ void Modules::Panel::setParameter(const QString& name, uint64_t value)
   }
 }
 
-void Modules::Panel::setState(const QString& name, Modules::Variable::state_t ref)
+void Modules::Panel::setState(const QString& var_name, Modules::Variable::state_t ref)
 {
-  auto n = parameter.find(name);
+  auto n = parameter.find(var_name);
   if ((n != parameter.end()) && (n->second.type == Modules::Variable::STATE)) {
     //setData(Workspace::STATE, n->second.index, &ref);
     
@@ -481,7 +481,7 @@ int Modules::Plugin::getComponentIntParameter(const std::string& parameter_name)
 
 uint64_t Modules::Plugin::getComponentUIntParameter(const std::string& parameter_name)
 {
-  return this->plugin_component->getValue<unsigned long long>(parameter_name);
+  return this->plugin_component->getValue<uint64_t>(parameter_name);
 }
 
 double Modules::Plugin::getComponentDoubleParameter(const std::string& parameter_name)

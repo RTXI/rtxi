@@ -69,7 +69,7 @@ struct Info
   std::string name;
   std::string description;
   Modules::Variable::variable_t vartype;
-  std::variant<int, double, unsigned long long, std::string, state_t> value;
+  std::variant<int, double, uint64_t, std::string, state_t> value;
 };
 
 }  // namespace Variable
@@ -80,7 +80,7 @@ class DefaultGUILineEdit : public QLineEdit
   Q_OBJECT
 
 public:
-  DefaultGUILineEdit(QWidget * widget);
+  DefaultGUILineEdit(QWidget * parent);
 
   void blacken();
   QPalette palette;
@@ -135,7 +135,7 @@ class Panel : public QWidget
 {
   Q_OBJECT
 public:
-  Panel(const std::string& name, MainWindow* mw);
+  Panel(const std::string& mod_name, MainWindow* mw);
 
   /*
    * Getter function go allow customization of
@@ -201,7 +201,7 @@ protected:
    * \param name The parameter's name.
    * \return The value of the parameter.
    */
-  QString getParameter(const QString& name);
+  QString getParameter(const QString& var_name);
   
   /*!
    * Set the value of this parameter within the Workspace and GUI.
@@ -210,9 +210,9 @@ protected:
    * \param ref A reference to the parameter.
    *
    */
-  void setParameter(const QString& name, double value);
-  void setParameter(const QString& name, uint64_t value);
-  void setParameter(const QString& name, int value);
+  void setParameter(const QString& var_name, double value);
+  void setParameter(const QString& var_name, uint64_t value);
+  void setParameter(const QString& var_name, int value);
 
   /*!
    *
@@ -222,7 +222,7 @@ protected:
   /*!
    *
    */
-  void setComment(const QString& name, const QString& comment);
+  void setComment(const QString& var_name, const QString& comment);
 
   /*!
    * Set the reference to this state within the Workspace
