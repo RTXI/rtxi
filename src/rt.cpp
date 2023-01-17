@@ -487,8 +487,17 @@ void RT::System::updateBlockActivity(RT::System::CMD* cmd)
 
 void RT::System::getPeriodTicksCMD(RT::System::CMD* cmd)
 {
-  cmd->setParam("pre-period", std::any(&(this->periodStartTime)));
-  cmd->setParam("post-period", std::any(&(this->periodEndTime)));
+  switch(cmd->getType()){
+    case Event::Type::RT_PREPERIOD_EVENT :
+      cmd->setParam("pre-period", std::any(&(this->periodStartTime)));
+      break;
+    case Event::Type::RT_POSTPERIOD_EVENT :
+      cmd->setParam("post-period", std::any(&(this->periodEndTime)));
+      break;
+    default:
+      cmd->notdone();
+      return;
+  }
   cmd->done();
 }
 
@@ -559,6 +568,13 @@ void RT::System::receiveEvent(Event::Object* event)
     case Event::Type::RT_SHUTDOWN_EVENT :
       this->shutdown(event);
       break;
+    case Event::Type::RT_PREPERIOD_EVENT :
+    case Event::Type::RT_POSTPERIOD_EVENT :
+      this->provideTimetickPointers(event);
+      break;
+    case Event::Type::RT_GET_PERIOD_EVENT:
+      this->getPeriodValues(event);
+      break;
     case Event::Type::NOOP :
       this->NOOP(event);
       break;
@@ -576,6 +592,12 @@ void RT::System::setPeriod(Event::Object* event)
   RT::System::CMD* cmd_ptr = &cmd;
   this->eventFifo->write(&cmd_ptr, sizeof(RT::System::CMD*));
   cmd.wait();
+  event->done();
+}
+
+void RT::System::getPeriodValues(Event::Object* event)
+{
+  event->setParam("period", std::any(this->getPeriod()));
   event->done();
 }
 
@@ -688,11 +710,22 @@ void RT::System::provideTimetickPointers(Event::Object* event)
   this->eventFifo->write(&cmd_ptr, sizeof(RT::System::CMD*));
   cmd.wait();
 
+  int64_t* startperiod = nullptr;
+  int64_t* stopperiod = nullptr;
   // transfer values to event for poster to use
-  auto* startperiod = std::any_cast<int64_t*>(cmd.getParam("pre-period"));
-  auto* stopperiod = std::any_cast<int64_t*>(cmd.getParam("post-period"));
-  event->setParam("pre-period", std::any(startperiod));
-  event->setParam("post-period", std::any(stopperiod));
+  switch(event->getType()){
+    case Event::Type::RT_PREPERIOD_EVENT :
+      startperiod = std::any_cast<int64_t*>(cmd.getParam("pre-period"));
+      event->setParam("pre-period", std::any(startperiod));
+      break;
+    case Event::Type::RT_POSTPERIOD_EVENT :
+      stopperiod = std::any_cast<int64_t*>(cmd.getParam("post-period"));
+      event->setParam("post-period", std::any(stopperiod));
+      break;
+    default:
+      event->notdone();
+      return;
+  }
   event->done();
 }
 
@@ -711,8 +744,12 @@ void RT::System::execute(RT::System* system)
   while (!(system->task->task_finished)) {
     // storing timing information and placing it in local variables
     endtime = RT::OS::getTime();
+
+    // store period timing values for previous period
     system->periodStartTime = starttime;
     system->periodEndTime = endtime;
+
+    // sleep until next cycle
     RT::OS::sleepTimestep(system->task.get());
     starttime = RT::OS::getTime();
 

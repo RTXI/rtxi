@@ -49,6 +49,7 @@ enum Type
   RT_BLOCK_UNPAUSE_EVENT,
   RT_PREPERIOD_EVENT,
   RT_POSTPERIOD_EVENT,
+  RT_GET_PERIOD_EVENT,
   RT_THREAD_INSERT_EVENT,
   RT_THREAD_REMOVE_EVENT,
   RT_DEVICE_INSERT_EVENT,
@@ -81,6 +82,8 @@ enum Type
  * \returns A string representation of the event type
  */
 std::string type_to_string(Type event_type);
+
+// TODO: create a standardize way of generating events and their params
 
 /*!
  * Token used to signal event

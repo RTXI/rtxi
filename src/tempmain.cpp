@@ -22,7 +22,7 @@ int main(int argc, char *argv[])
   QApplication::setDesktopSettingsAware(false);
   QApplication* app = new QApplication(argc, argv);
   app->connect(app, SIGNAL(lastWindowClosed()), app, SLOT(quit()));
-  auto rtxi_window = std::make_unique<MainWindow>();
+  auto rtxi_window = std::make_unique<MainWindow>(event_manager.get());
   rtxi_window->loadWindow();
   int retval = app->exec();
   delete app;

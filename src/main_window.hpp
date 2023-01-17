@@ -28,6 +28,8 @@
 #include <QMdiArea>
 #include <QMdiSubWindow>
 
+#include "event.hpp"
+
 /*!
  * The primary graphical object in the program.
  */
@@ -35,7 +37,7 @@ class MainWindow : public QMainWindow
 {
   Q_OBJECT
 public:
-  MainWindow();
+  MainWindow(Event::Manager* ev_manager);
 
   /*!
    * Add an item to the File menu.
@@ -151,6 +153,7 @@ private slots:
   void utilitiesMenuActivated(QAction*);
 
 private:
+  Event::Manager* event_manager;
   QMdiArea* mdiArea=nullptr;
   QList<QMdiSubWindow*> subWindows;
 

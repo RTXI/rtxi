@@ -49,9 +49,9 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/plugins
 )
 
+#\add_subdirectory(libs)
 add_subdirectory(src)
-add_subdirectory(libs)
-add_subdirectory(plugins)
+#add_subdirectory(plugins)
 #add_subdirectory(res)
 #add_subdirectory(scripts)
 

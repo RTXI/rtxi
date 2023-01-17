@@ -451,6 +451,7 @@ private:
   void setPeriod(Event::Object* event);
   void shutdown(Event::Object* event);
   void NOOP(Event::Object* event);
+  void getPeriodValues(Event::Object* event);
   void provideTimetickPointers(Event::Object* event);
 
   void executeCMD(CMD* cmd);
@@ -467,6 +468,7 @@ private:
 
   int64_t periodStartTime = 1;
   int64_t periodEndTime = 1;
+  int64_t lastperiodStartTime = 1;
 
   // System owns the task objet and the pipe used to communicate with it
   std::unique_ptr<RT::OS::Task> task;

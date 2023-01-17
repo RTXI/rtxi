@@ -3,6 +3,7 @@
 #include <any>
 #include <algorithm>
 #include <sstream>
+#include <memory>
 
 #include <QApplication>
 #include <QScrollArea>
@@ -448,6 +449,15 @@ Modules::Plugin::~Plugin()
   this->event_manager->unregisterHandler(this);
 }
 
+void Modules::Plugin::registerComponent()
+{
+  if(this->plugin_component == nullptr){return;}
+  Event::Object register_thread_event(Event::Type::RT_THREAD_INSERT_EVENT);
+  register_thread_event.setParam("thread", this->plugin_component.get());
+  this->event_manager->postEvent(&register_thread_event);
+  register_thread_event.wait();
+}
+
 void Modules::Plugin::attachComponent(std::unique_ptr<Modules::Component> component)
 {
   this->plugin_component = std::move(component);
@@ -668,12 +678,12 @@ void Modules::Manager::unloadPlugin(const std::string& library)
   }
 }
 
-int Modules::Manager::registerModule(std::unique_ptr<Modules::Plugin> module)
+void Modules::Manager::registerModule(std::unique_ptr<Modules::Plugin> module)
 {
   this->rtxi_modules_registry[module->getName()] = std::move(module);
 }
 
-int Modules::Manager::unregisterModule(const std::string& module_name)
+void Modules::Manager::unregisterModule(const std::string& module_name)
 {
   if(this->rtxi_modules_registry.find(module_name) != this->rtxi_modules_registry.end()){
     this->rtxi_modules_registry.erase(module_name);
@@ -682,6 +692,12 @@ int Modules::Manager::unregisterModule(const std::string& module_name)
 
 void Modules::Manager::receiveEvent(Event::Object* event)
 {
-
+  switch(event->getType()){
+    case Event::Type::PLUGIN_REMOVE_EVENT :
+      this->unregisterModule(std::any_cast<std::string>(event->getParam("pluginName")));
+      break;
+    default:
+      return;
+  }
 }
 

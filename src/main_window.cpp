@@ -37,8 +37,11 @@
 #include "debug.hpp"
 #include "rtxiConfig.h"
 
-MainWindow::MainWindow()
-    : QMainWindow(nullptr, Qt::Window)
+#include "performance_measurement/performance_measurement.hpp"
+
+MainWindow::MainWindow(Event::Manager* ev_manager)
+    : QMainWindow(nullptr, Qt::Window),
+      event_manager(ev_manager)
 {
   // Make central RTXI parent widget
   mdiArea = new QMdiArea;
@@ -72,6 +75,12 @@ MainWindow::MainWindow()
   /* Initialize Help Menu */
   createHelpActions();
   createHelpMenu();
+
+  // create default plugin menu entries
+  // this->createSystemMenuItem(
+  //     "RT Benchmarks", 
+  //     this, 
+  //     SLOT(std::make_unique<PerformanceMeasurement::Plugin>()))
 }
 
 QAction* MainWindow::insertModuleMenuSeparator()

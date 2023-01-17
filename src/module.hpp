@@ -293,6 +293,7 @@ public:
   void receiveEvent(Event::Object* event) override;
   void* getHandle() { return this->handle; }
 
+
   /*!
   * Get the name of the library from which the object was loaded.
   *
@@ -312,6 +313,8 @@ public:
   // with previous versions of RTXI that used DefaultGuiModel
   // (before RTXI 3.0.0)
 
+protected:
+  void registerComponent();
 
 private:
   // owned pointers
@@ -335,8 +338,8 @@ public:
   int loadPlugin(const std::string& library);
   void unloadPlugin(const std::string& library);
 
-  int registerModule(std::unique_ptr<Modules::Plugin> module);
-  int unregisterModule(const std::string& module_name);
+  void registerModule(std::unique_ptr<Modules::Plugin> module);
+  void unregisterModule(const std::string& module_name);
 
   void receiveEvent(Event::Object* event) override;
 

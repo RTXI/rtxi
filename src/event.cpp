@@ -37,6 +37,9 @@ std::string Event::type_to_string(Event::Type event_type)
     case Event::Type::RT_POSTPERIOD_EVENT:
       return_string = "SYSTEM : post period";
       break;
+    case Event::Type::RT_GET_PERIOD_EVENT:
+      return_string = "SYSTEM : Period value requested";
+      break;
     case Event::Type::RT_THREAD_INSERT_EVENT:
       return_string = "SYSTEM : thread insert";
       break;
@@ -109,6 +112,8 @@ std::string Event::type_to_string(Event::Type event_type)
     case Event::Type::NOOP:
       return_string = "SYSTEM : no operation";
       break;
+    default:
+      return_string = "UNKNOWN EVENT!";
   }
   return return_string;
 }
