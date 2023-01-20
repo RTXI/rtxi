@@ -27,3 +27,5 @@ moc_*
 .libs/
 *.d
 *.swp
+compile_commands.json
+.cache
