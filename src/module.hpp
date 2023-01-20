@@ -44,6 +44,7 @@ enum variable_t : size_t
 enum state_t : int64_t
 {
   INIT, /*!< The parameters need to be initialized.         */
+  EXEC, /*!< The module is in execution mode                */
   MODIFY, /*!< The parameters have been modified by the user. */
   PERIOD, /*!< The system period has changed.                 */
   PAUSE, /*!< The Pause button has been activated            */
@@ -236,9 +237,10 @@ protected:
   void setState(const QString& name, Modules::Variable::state_t ref);
 
   std::string getName(){ return this->name; }
+  Modules::Plugin* getHostPlugin(){ return this->hostPlugin; }
   //virtual void receiveEvent(const Event::Object* event) override;
 
-
+  MainWindow* getMainWindowPtr() { return this->main_window; }
 private:
 
   MainWindow* main_window=nullptr;

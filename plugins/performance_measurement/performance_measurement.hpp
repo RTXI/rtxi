@@ -34,44 +34,97 @@
 
 namespace PerformanceMeasurement
 {
-class Plugin : public Modules::Plugin
+
+struct stats_info
 {
-public:
-  Plugin();
-  ~Plugin();
-
-private:
-};  // class Plugin
-
-class Component : public Modules::Component
-{
-public:
-  Component(Modules::Plugin* hostPlugin,
-            const std::string& name,
-            std::vector<IO::channel_t> channels,
-            std::vector<Modules::Variable::Info> variables);
-        
-  virtual void execute() override;
-
-  private:
-  enum
-  {
-    INIT1,
-    INIT2,
-    EXEC,
-  } state;
-
   double duration;
-  double lastRead;
   double timestep;
   double latency;
   double maxDuration;
   double maxTimestep;
   double maxLatency;
   double jitter;
+  double period;
+};
+
+const std::vector<Modules::Variable::Info> performance_measurement_vars 
+{
+  {
+    "state",
+    "RT Benchmarks State",
+    Modules::Variable::STATE,
+    Modules::Variable::INIT
+  },
+  {
+    "duration",
+    "Average time in nanoseconds for Real-Time loop computations",
+    Modules::Variable::DOUBLE_PARAMETER,
+    0.0
+  },
+  {
+    "timestep",
+    "Average time in nanoseconds for Real-Time period",
+    Modules::Variable::DOUBLE_PARAMETER,
+    0.0
+  },
+  {
+    "latency",
+    "Average time in nanoseconds for latency between expected wakeup and period start",
+    Modules::Variable::DOUBLE_PARAMETER,
+    0.0
+  },
+  {
+    "maxDuration",
+    "Maximum duration stat recorded in nanoseconds",
+    Modules::Variable::DOUBLE_PARAMETER,
+    0.0
+  },
+  {
+    "maxTimestep",
+    "maximum real-time period recorded in nanoseconds",
+    Modules::Variable::DOUBLE_PARAMETER,
+    0.0
+  },
+  {
+    "maxLatency",
+    "Maximum latency stat recorded in nanoseconds",
+    Modules::Variable::DOUBLE_PARAMETER,
+    0.0
+  },
+  {
+    "jitter",
+    "",
+    Modules::Variable::DOUBLE_PARAMETER,
+    0.0
+  }
+};
+
+class Plugin : public Modules::Plugin
+{
+public:
+  Plugin(Event::Manager* ev_manager, MainWindow* mw);
+};  // class Plugin
+
+class Component : public Modules::Component
+{
+public: 
+  Component(PerformanceMeasurement::Plugin* hplugin) : 
+            Modules::Component(hplugin,
+                               "RT Benchmarks",
+                               std::vector<IO::channel_t>(),
+                               PerformanceMeasurement::performance_measurement_vars){}
+  void execute() override;
+
+  double getPeriod();
+
+  private:
 
   RunningStat timestepStat;
   RunningStat latencyStat;
+
+  int64_t *start_ticks; // only accessed in rt
+  int64_t *end_ticks; // only accessed in rt
+  int64_t last_start_ticks;
 };
 
 class Panel : public Modules::Panel
@@ -79,10 +132,9 @@ class Panel : public Modules::Panel
   Q_OBJECT
 
 public:
-  Panel(std::string name, QMainWindow* main_window);
+  Panel(std::string name, MainWindow* main_window);
 
 public slots:
-
   /*!
    * Starts the statistics over
    */
@@ -94,7 +146,7 @@ public slots:
   void update(void);
 
 
-
+private:
   QLineEdit* durationEdit;
   QLineEdit* timestepEdit;
   QLineEdit* maxDurationEdit;
@@ -102,5 +154,8 @@ public slots:
   QLineEdit* timestepJitterEdit;
   QLineEdit* AppCpuPercentEdit;
 };  // class Panel
+
+std::unique_ptr<Modules::Plugin> createRTXIPlugin();
+
 };  // namespace PerformanceMeasurement
 #endif /* PERFORMANCE_MEASUREMENT_H */

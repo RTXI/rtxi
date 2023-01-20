@@ -17,21 +17,16 @@
 
  */
 
-#include "performance_measurement.hpp"
-
 #include "debug.hpp"
 #include "main_window.hpp"
 #include "rt.hpp"
+#include "module.hpp"
+#include "event.hpp"
 
-PerformanceMeasurement::Panel::Panel(std::string name, QMainWindow* main_window)
+#include "performance_measurement.hpp"
+
+PerformanceMeasurement::Panel::Panel(std::string name, MainWindow* main_window)
     : Modules::Panel(name, main_window)
-    , state(INIT1)
-    , duration(0)
-    , lastRead(0)
-    , timestep(0)
-    , maxDuration(0)
-    , maxTimestep(0)
-    , jitter(0)
 {
   // Make Mdi
   QMdiSubWindow* subWindow = new QMdiSubWindow;
@@ -39,7 +34,7 @@ PerformanceMeasurement::Panel::Panel(std::string name, QMainWindow* main_window)
   subWindow->setAttribute(Qt::WA_DeleteOnClose);
   subWindow->setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint
                             | Qt::WindowMinimizeButtonHint);
-  this->main_window->createMdi(subWindow);
+  this->getMainWindowPtr()->createMdi(subWindow);
 
   // Create main layout
   QVBoxLayout* layout = new QVBoxLayout;
@@ -86,7 +81,7 @@ PerformanceMeasurement::Panel::Panel(std::string name, QMainWindow* main_window)
   QPushButton* resetButton = new QPushButton("Reset", this);
   gridLayout->addWidget(resetButton, 7, 1);
   QObject::connect(
-      resetButton, SIGNAL(released(void)), this, SLOT(reset(void)));
+      resetButton, SIGNAL(released(void)), this, SLOT(this->plugin_component->reset(void)));
 
   // Attach child widget to parent widget
   layout->addLayout(gridLayout);
@@ -115,68 +110,79 @@ PerformanceMeasurement::Panel::Panel(std::string name, QMainWindow* main_window)
 
 void PerformanceMeasurement::Component::execute()
 {
-  switch (state) {
-    case EXEC:
-      if (maxTimestep < now - lastRead)
-        maxTimestep = now - lastRead;
-      timestep = now - lastRead;
-      latency = (now - lastRead) - period;
-      timestepStat.push(timestep);
-      latencyStat.push(latency);
-      break;
-    case INIT2:
-      timestep = maxTimestep = now - lastRead;
-      latency = maxLatency = (now - lastRead) - period;
-      timestepStat.push(timestep);
-      latencyStat.push(latency);
-      state = EXEC;
-      break;
-    case INIT1:
-      state = INIT2;
-  }
-  lastRead = now;
-  jitter = latencyStat.std();
-}
+  auto maxDuration = getValue<double>("maxDuration");
+  auto maxTimestep = getValue<double>("maxTimestep");
+  auto maxLatency = getValue<double>("maxLatency");
+  auto period = getValue<double>("period");
 
-void PerformanceMeasurement::Panel::write(void)
-{
-  long long now = RT::OS::getTime();
+  double duration = *(end_ticks) - *(start_ticks);
+  double timestep = last_start_ticks - *(start_ticks);
+  auto latency = timestep - period;
 
-  switch (state) {
-    case EXEC:
-      if (maxDuration < now - lastRead) {
-        maxDuration = now - lastRead;
+  switch (getValue<Modules::Variable::state_t>("state")) {
+    case Modules::Variable::EXEC :
+      if (maxTimestep < timestep){
+        setValue("maxTimestep", timestep);
       }
-      duration = now - lastRead;
+      if (maxDuration < duration){
+        setValue("maxDuration", duration);
+      }
+      if (maxLatency < latency){
+        setValue("maxLatency", latency);
+      }
+      setValue("latency", latency);
+      timestepStat.push(timestep);
+      latencyStat.push(latency);
       break;
-    case INIT2:
-      duration = maxDuration = now - lastRead;
+    case Modules::Variable::INIT :
+      timestepStat.clear();
+      latencyStat.clear();
+      setValue("maxTimestep", timestep);
+      setValue("maxLatency", timestep - period);
+      timestepStat.push(timestep);
+      latencyStat.push(latency);
+      setValue("state", Modules::Variable::EXEC);
       break;
-    default:
-      ERROR_MSG("PerformanceMeasurement::Panel::write : invalid state\n");
+    case Modules::Variable::PERIOD :
+      setValue("period", getPeriod());
+      break;
+    case Modules::Variable::MODIFY :
+    case Modules::Variable::PAUSE :
+    case Modules::Variable::UNPAUSE :
+    case Modules::Variable::EXIT :
+      break;
   }
+  last_start_ticks = *start_ticks;
+  setValue("jitter", latencyStat.std());
 }
 
-void PerformanceMeasurement::Panel::reset(void)
+double PerformanceMeasurement::Component::getPeriod()
 {
-  state = INIT1;
-  timestepStat.clear();
-  latencyStat.clear();
+  // TODO: Find a way to retreive the current period in RT and non-RT contexts
+  return static_cast<double>(RT::OS::DEFAULT_PERIOD);
 }
 
-void PerformanceMeasurement::Panel::resetMaxTimeStep(void)
+void PerformanceMeasurement::Panel::update()
 {
-  maxTimestep = timestep;
-}
+  Modules::Plugin* hostplugin = this->getHostPlugin();
+  const double nano2micro = 1e-3;
+  auto duration = hostplugin->getComponentDoubleParameter("duration") * nano2micro;
+  auto maxduration = hostplugin->getComponentDoubleParameter("maxDuration") * nano2micro;
+  auto timestep = hostplugin->getComponentDoubleParameter("timestep") * nano2micro;
+  auto maxtimestep = hostplugin->getComponentDoubleParameter("maxTimestep") * nano2micro;
+  auto timestepjitter = hostplugin->getComponentDoubleParameter("jitter") * nano2micro;
 
-void PerformanceMeasurement::Panel::update(void)
-{
-  durationEdit->setText(QString::number(duration * 1e-3));
-  maxDurationEdit->setText(QString::number(maxDuration * 1e-3));
-  timestepEdit->setText(QString::number(timestep * 1e-3));
-  maxTimestepEdit->setText(QString::number(maxTimestep * 1e-3));
-  timestepJitterEdit->setText(QString::number(jitter * 1e-3));
+  durationEdit->setText(QString::number(duration));
+  maxDurationEdit->setText(QString::number(maxduration));
+  timestepEdit->setText(QString::number(timestep));
+  maxTimestepEdit->setText(QString::number(maxtimestep));
+  timestepJitterEdit->setText(QString::number(timestepjitter));
   AppCpuPercentEdit->setText(QString::number(RT::OS::getCpuUsage()));
+}
+
+void PerformanceMeasurement::Panel::reset()
+{
+  this->getHostPlugin()->setComponentState("state", Modules::Variable::INIT);
 }
 
 // extern "C" Plugin::Object * createRTXIPlugin(void *)
@@ -184,19 +190,17 @@ void PerformanceMeasurement::Panel::update(void)
 //     return PerformanceMeasurement::Plugin::getInstance();
 // }
 
-PerformanceMeasurement::Plugin::Plugin()
-    : panel(0)
+PerformanceMeasurement::Plugin::Plugin(Event::Manager* ev_manager, 
+                                       MainWindow* mw) 
+  : Modules::Plugin(ev_manager, mw, "RT Benchmarks")
 {
-  MainWindow::getInstance()->createSystemMenuItem(
-      "RT Benchmarks", this, SLOT(createPerformanceMeasurementPanel(void)));
+  auto plugin_component = std::make_unique<PerformanceMeasurement::Component>(this);
+  this->attachComponent(std::move(plugin_component));
+  // MainWindow::getInstance()->createSystemMenuItem(
+  //     "RT Benchmarks", this, SLOT(createPerformanceMeasurementPanel(void)));
 }
 
-PerformanceMeasurement::Component::Component(
-    Modules::Plugin* hostPlugin,
-    const std::string& name,
-    std::vector<IO::channel_t> channels,
-    std::vector<Modules::Variable::Info> variables)
-    : Modules::Component(hostPlugin, name, channels, variables)
+std::unique_ptr<Modules::Plugin> createRTXIPlugin(Event::Manager* ev_manager, MainWindow* main_window)
 {
-  this->
+  return std::move(std::make_unique<PerformanceMeasurement::Plugin>(ev_manager, main_window));
 }

@@ -67,8 +67,11 @@ std::string Event::type_to_string(Event::Type event_type)
     case Event::Type::RT_BLOCK_UNPAUSE_EVENT:
       return_string = "SYSTEM : block unpaused";
       break;
-    case Event::Type::MODULE_PARAMETER_CHANGE_EVENT:
+    case Event::Type::RT_MODULE_PARAMETER_CHANGE_EVENT:
       return_string = "SYSTEM : parameter change";
+      break;
+    case Event::Type::RT_MODULE_STATE_CHANGE_EVENT:
+      return_string = "SYSTEM : Module State change";
       break;
     case Event::Type::PLUGIN_INSERT_EVENT:
       return_string = "SYSTEM : plugin insert";
@@ -108,6 +111,9 @@ std::string Event::type_to_string(Event::Type event_type)
       break;
     case Event::Type::GENICAM_SNAPSHOT_EVENT:
       return_string = "SYSTEM : genicam snap";
+      break;
+    case Event::Type::GENERIC_MODULE_EVENT:
+      return_string = "MODULE : Generic Module Event";
       break;
     case Event::Type::NOOP:
       return_string = "SYSTEM : no operation";

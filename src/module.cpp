@@ -439,7 +439,7 @@ Modules::Plugin::~Plugin()
     }
   }
   Event::Object remove_plugin_event(Event::Type::PLUGIN_REMOVE_EVENT);
-  remove_plugin_event.setParam("plugin", this);
+  remove_plugin_event.setParam("pluginName", this->getName());
   this->event_manager->postEvent(&remove_plugin_event);
   remove_plugin_event.wait();
   if (!remove_plugin_event.isdone()){
@@ -502,7 +502,7 @@ double Modules::Plugin::getComponentDoubleParameter(const std::string& parameter
 int Modules::Plugin::setComponentIntParameter(const std::string& parameter_name, int value)
 {
   int result = 0;
-  Event::Object event(Event::Type::MODULE_PARAMETER_CHANGE_EVENT);
+  Event::Object event(Event::Type::RT_MODULE_PARAMETER_CHANGE_EVENT);
   event.setParam("paramName", std::any(parameter_name));
   event.setParam("paramType", std::any(Modules::Variable::INT_PARAMETER));
   event.setParam("paramValue", std::any(value));
@@ -519,7 +519,7 @@ int Modules::Plugin::setComponentIntParameter(const std::string& parameter_name,
 int Modules::Plugin::setComponentDoubleParameter(const std::string& parameter_name, double value)
 {
   int result = 0;
-  Event::Object event(Event::Type::MODULE_PARAMETER_CHANGE_EVENT);
+  Event::Object event(Event::Type::RT_MODULE_PARAMETER_CHANGE_EVENT);
   event.setParam("paramName", std::any(parameter_name));
   event.setParam("paramType", std::any(Modules::Variable::DOUBLE_PARAMETER));
   event.setParam("paramValue", std::any(value));
@@ -536,7 +536,7 @@ int Modules::Plugin::setComponentDoubleParameter(const std::string& parameter_na
 int Modules::Plugin::setComponentUintParameter(const std::string& parameter_name, uint64_t value)
 {
   int result = 0;
-  Event::Object event(Event::Type::MODULE_PARAMETER_CHANGE_EVENT);
+  Event::Object event(Event::Type::RT_MODULE_PARAMETER_CHANGE_EVENT);
   event.setParam("paramName", std::any(parameter_name));
   event.setParam("paramType", std::any(Modules::Variable::UINT_PARAMETER));
   event.setParam("paramValue", std::any(value));
@@ -553,7 +553,7 @@ int Modules::Plugin::setComponentUintParameter(const std::string& parameter_name
 int Modules::Plugin::setComponentComment(const std::string& parameter_name, std::string value)
 {
   int result = 0;
-  Event::Object event(Event::Type::MODULE_PARAMETER_CHANGE_EVENT);
+  Event::Object event(Event::Type::RT_MODULE_PARAMETER_CHANGE_EVENT);
   event.setParam("paramName", std::any(parameter_name));
   event.setParam("paramType", std::any(Modules::Variable::INT_PARAMETER));
   event.setParam("paramValue", std::any(value));
@@ -570,7 +570,7 @@ int Modules::Plugin::setComponentComment(const std::string& parameter_name, std:
 int Modules::Plugin::setComponentState(const std::string& parameter_name, Modules::Variable::state_t value)
 {
   int result = 0;
-  Event::Object event(Event::Type::MODULE_PARAMETER_CHANGE_EVENT);
+  Event::Object event(Event::Type::RT_MODULE_STATE_CHANGE_EVENT);
   event.setParam("paramName", std::any(parameter_name));
   event.setParam("paramType", std::any(Modules::Variable::STATE));
   event.setParam("paramValue", std::any(value));
