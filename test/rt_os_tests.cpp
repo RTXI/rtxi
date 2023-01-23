@@ -24,19 +24,21 @@
 
 #include "rt_os_tests.hpp"
 
-void temp_function(bool* retval)
+void temp_function(void* retval)
 {
-  *retval = true;
+  auto returnvalue = static_cast<bool*>(retval);
+  *returnvalue = true;
 }
 
 TEST_F(RTOSTests, InitiateAndShutdown)
 {
   int result = 0;
+  RT::OS::Task task;
   std::thread temp_thread(
-      [&result]()
+      [&result, &task]()
       {
-        result = RT::OS::initiate();
-        RT::OS::shutdown();
+        result = RT::OS::initiate(&task);
+        RT::OS::shutdown(&task);
       });
   temp_thread.join();
   // It is not possible to lock memory without admin privilages.
@@ -50,7 +52,7 @@ TEST_F(RTOSTests, CreateAndDeleteTask)
   bool func_retval = false;
   auto test_task = std::make_unique<RT::OS::Task>();
   result =
-      RT::OS::createTask<bool*>(test_task.get(), &temp_function, &func_retval);
+      RT::OS::createTask(test_task.get(), &temp_function, &func_retval);
   RT::OS::deleteTask(test_task.get());
   // It is not possible to lock memory without admin privilages.
   // Either it succeeds or we don't have permissions
@@ -64,6 +66,17 @@ TEST_F(RTOSTests, setPeriod)
   int64_t period = RT::OS::DEFAULT_PERIOD * 2;
   RT::OS::setPeriod(test_task.get(), period);
   ASSERT_EQ(period, test_task->period);
+}
+
+TEST_F(RTOSTests, getPeriod)
+{
+  auto test_task = std::make_unique<RT::OS::Task>();
+  ASSERT_EQ(RT::OS::DEFAULT_PERIOD, test_task->period);
+  ASSERT_EQ(RT::OS::getPeriod(), -1);
+  RT::OS::initiate(test_task.get());
+  ASSERT_EQ(RT::OS::getPeriod(), RT::OS::DEFAULT_PERIOD);
+  RT::OS::shutdown(test_task.get());
+  ASSERT_EQ(RT::OS::getPeriod(), -1);
 }
 
 TEST_F(RTOSTests, getTime)
@@ -80,12 +93,12 @@ TEST_F(RTOSTests, sleepTimestep)
   std::thread sleeper_thread(
       [&duration, &test_task]()
       {
-        RT::OS::initiate();
+        RT::OS::initiate(test_task.get());
         auto stime = RT::OS::getTime();
         RT::OS::sleepTimestep(test_task.get());
         auto etime = RT::OS::getTime();
         duration = etime - stime;
-        RT::OS::shutdown();
+        RT::OS::shutdown(test_task.get());
       });
   sleeper_thread.join();
   ASSERT_NE(test_task->next_t, 0);

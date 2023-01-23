@@ -27,7 +27,7 @@ std::vector<Modules::Variable::Info> generateDefaultComponentVariables()
   tempvarinfo.name = std::string("testint");
   tempvarinfo.description = std::string("TEST INTEGER");
   tempvarinfo.vartype = Modules::Variable::INT_PARAMETER;
-  tempvarinfo.value = 0;
+  tempvarinfo.value = static_cast<int64_t>(0);
   default_variable_list.push_back(tempvarinfo);
 
   tempvarinfo.name = std::string("testdouble");
@@ -39,7 +39,7 @@ std::vector<Modules::Variable::Info> generateDefaultComponentVariables()
   tempvarinfo.name = std::string("testuint");
   tempvarinfo.description = std::string("TEST UNSIGNED INTEGER");
   tempvarinfo.vartype = Modules::Variable::UINT_PARAMETER;
-  tempvarinfo.value = 0ul;
+  tempvarinfo.value = static_cast<uint64_t>(0);
   default_variable_list.push_back(tempvarinfo);
 
   tempvarinfo.name = std::string("teststring");
@@ -76,12 +76,12 @@ TEST_F(ModulePluginTests, ComponentParameters)
   // We will check whether plugin actually retrieves component values
   std::vector<Modules::Variable::Info> variable_list =
       generateDefaultComponentVariables();
-  ASSERT_EQ(std::get<int>(variable_list[0].value),
+  ASSERT_EQ(std::get<int64_t>(variable_list[0].value),
             this->plugin->getComponentIntParameter(variable_list[0].name));
   ASSERT_DOUBLE_EQ(
       std::get<double>(variable_list[1].value),
       this->plugin->getComponentDoubleParameter(variable_list[1].name));
-  ASSERT_EQ(std::get<unsigned long>(variable_list[2].value),
+  ASSERT_EQ(std::get<uint64_t>(variable_list[2].value),
             this->plugin->getComponentUIntParameter(variable_list[2].name));
 }
 
