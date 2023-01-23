@@ -144,7 +144,7 @@ void PerformanceMeasurement::Component::execute()
       setValue("state", Modules::Variable::EXEC);
       break;
     case Modules::Variable::PERIOD :
-      setValue("period", getPeriod());
+      setValue("period", RT::OS::getPeriod());
       break;
     case Modules::Variable::MODIFY :
     case Modules::Variable::PAUSE :
@@ -154,12 +154,6 @@ void PerformanceMeasurement::Component::execute()
   }
   last_start_ticks = *start_ticks;
   setValue("jitter", latencyStat.std());
-}
-
-double PerformanceMeasurement::Component::getPeriod()
-{
-  // TODO: Find a way to retreive the current period in RT and non-RT contexts
-  return static_cast<double>(RT::OS::DEFAULT_PERIOD);
 }
 
 void PerformanceMeasurement::Panel::update()

@@ -25,6 +25,7 @@
 #include <sys/resource.h>
 #include <sys/time.h>
 #include <sys/types.h>
+#include <pthread.h>
 #include <time.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -34,8 +35,9 @@
 #include "rtos.hpp"
 
 thread_local bool realtime_key = false;
+thread_local int64_t* RT_PERIOD = nullptr;
 
-int RT::OS::initiate()
+int RT::OS::initiate(RT::OS::Task * task)
 {
   /*
    * I want users to be very much aware that they aren't running in realtime.
@@ -47,13 +49,47 @@ int RT::OS::initiate()
     ERROR_MSG("RT::OS(POSIX)::initiate : failed to lock memory : %s", strerror(errno));
   }
   realtime_key = true;
+  task->period = RT::OS::DEFAULT_PERIOD;
+  RT_PERIOD = &(task->period);
+  task->thread_id = std::any(pthread_self());
   return retval;
 }
 
-void RT::OS::shutdown()
+void RT::OS::shutdown(RT::OS::Task * task)
 {
   munlockall();
   realtime_key = false;
+  task->task_finished = true;
+}
+
+int RT::OS::createTask(Task* task, void (*func)(void*), void* arg)
+{
+  int result = 0;
+  // Should not be creating real-time tasks from another real-time task
+  if (RT::OS::isRealtime()) {
+    ERROR_MSG("RT::OS::createTask : Task cannot be created from rt context");
+    return -1;
+  }
+  auto wrapper = [](RT::OS::Task * tsk, void(*fn)(void*), void* args)
+  {
+    auto resval = RT::OS::initiate(tsk);
+    if (resval != 0) {
+      ERROR_MSG("RT::OS::createTask : RT::OS::initiate() : {}",
+                strerror(errno));
+      // In the event that we fail to initiate real-time environment let's just
+      // quit
+      return;
+    }
+    fn(args);
+    RT::OS::shutdown(tsk);
+  };
+  std::thread thread_obj(wrapper, task, func, arg);
+  if (thread_obj.joinable()) {
+    task->rt_thread = std::move(thread_obj);
+  } else {
+    result = -1;
+  }
+  return result;
 }
 
 void RT::OS::deleteTask(RT::OS::Task* task)
@@ -87,6 +123,13 @@ int RT::OS::setPeriod(RT::OS::Task* task, int64_t period)
 {
   task->period = period;
   return 0;
+}
+
+int64_t RT::OS::getPeriod()
+{
+  // This function should only ever be accessed withint a real-tim context
+  if(RT_PERIOD == nullptr || !RT::OS::isRealtime()) { return -1; };
+  return *(RT_PERIOD);
 }
 
 void RT::OS::sleepTimestep(RT::OS::Task* task)

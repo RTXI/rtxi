@@ -90,7 +90,7 @@ std::string Modules::Component::getValueString(const std::string& varname)
       value = std::to_string(std::get<uint64_t>(this->parameter[varname].value));
       break;
     case Modules::Variable::INT_PARAMETER :
-      value = std::to_string(std::get<int>(this->parameter[varname].value));
+      value = std::to_string(std::get<int64_t>(this->parameter[varname].value));
       break;
     case Modules::Variable::DOUBLE_PARAMETER :
       value = std::to_string(std::get<double>(this->parameter[varname].value));
@@ -222,7 +222,10 @@ void Modules::Panel::createGUI(const std::vector<Modules::Variable::Info>& vars,
   subWindow->show();
 }
 
-void Modules::Panel::update(Modules::Variable::state_t flag) {}
+void Modules::Panel::update(Modules::Variable::state_t flag) 
+{
+  //TODO: Update function needs to have default functionality for derived classes
+}
 
 void Modules::Panel::resizeMe()
 {
@@ -238,7 +241,7 @@ void Modules::Panel::exit()
 void Modules::Panel::refresh()
 {
   double double_value = 0.0;
-  int int_value = 0;
+  int64_t int_value = 0;
   uint64_t uint_value = 0ULL;
   std::stringstream sstream;
   for (auto i : this->parameter)
@@ -484,9 +487,9 @@ int Modules::Plugin::exit()
   return result;
 }
 
-int Modules::Plugin::getComponentIntParameter(const std::string& parameter_name)
+int64_t Modules::Plugin::getComponentIntParameter(const std::string& parameter_name)
 {
-  return this->plugin_component->getValue<int>(parameter_name);
+  return this->plugin_component->getValue<int64_t>(parameter_name);
 }
 
 uint64_t Modules::Plugin::getComponentUIntParameter(const std::string& parameter_name)
@@ -499,7 +502,7 @@ double Modules::Plugin::getComponentDoubleParameter(const std::string& parameter
   return this->plugin_component->getValue<double>(parameter_name);
 }
 
-int Modules::Plugin::setComponentIntParameter(const std::string& parameter_name, int value)
+int Modules::Plugin::setComponentIntParameter(const std::string& parameter_name, int64_t value)
 {
   int result = 0;
   Event::Object event(Event::Type::RT_MODULE_PARAMETER_CHANGE_EVENT);

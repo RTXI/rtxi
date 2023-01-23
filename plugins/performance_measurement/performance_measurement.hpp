@@ -115,8 +115,6 @@ public:
                                PerformanceMeasurement::performance_measurement_vars){}
   void execute() override;
 
-  double getPeriod();
-
   private:
 
   RunningStat timestepStat;

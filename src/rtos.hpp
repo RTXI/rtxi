@@ -6,6 +6,7 @@
 
 #include <errno.h>
 #include <string.h>
+#include <any>
 
 #include "debug.hpp"
 #include "fifo.hpp"
@@ -32,25 +33,28 @@ struct Task
   int64_t next_t = 0;
   bool task_finished = false;
   std::thread rt_thread;
+  std::any thread_id;
 };
 
 /*!
  * Initializes the real-time resources. This is done by locking memory
  * Pages and storing real-time identification variables
  *
+ * \param task The real-time structure identifying the task
  * \return 0 if successful, error code otherwise
  *
  * \sa RT::OS::shutdown()
  */
-int initiate();
+int initiate(RT::OS::Task * task);
 
 /*!
  * Releases real-time resources from the operating system. Called when rtxi
  * is closing.
  *
+ * \param task the real-time structure identifying the task
  * \sa RT::OS::initiate()
  */
-void shutdown();
+void shutdown(RT::OS::Task * task);
 
 /*!
  * terminates task in real-time loop
@@ -74,6 +78,22 @@ void deleteTask(Task* task);
 int setPeriod(Task* task, int64_t period);
 
 /*!
+ * Get the period for the real-time task
+ *
+ * This function can only be called from a real-time context and
+ * will not function from other threads that are not real-time.
+ * It is meant to provide the real-time period to Thread/Device
+ * classes that require this value for their calculations in the
+ * real-time loop. Available inside execute().
+ *
+ * \returns Period of the realtime thread the calling function is
+ *    runninng from, -1 otherwise.
+ *
+ * \sa RT::OS::sleepTimestep
+ */
+int64_t getPeriod();
+
+/*!
  * Uses real-time core to sleep until the next periodic wakeup.
  * It uses the timestep given in task to determine next waekup.
  *
@@ -95,7 +115,7 @@ bool isRealtime();
 /*!
  * Returns the current CPU time in nanoseconds. In general
  *   this is really only useful for determining the time
- *   between two bufs.
+ *   between two events.
  *
  * \return The current CPU time.
  */
@@ -124,36 +144,7 @@ double getCpuUsage();
  *
  * \returns 0 if successful, -1 otherwise
  */
-template<typename T>
-int createTask(Task* task, std::function<void(T)> func, T arg)
-{
-  int result = 0;
-  // Should not be creating real-time tasks from another real-time task
-  if (RT::OS::isRealtime()) {
-    ERROR_MSG("RT::OS::createTask : Task cannot be created from rt context");
-    return -1;
-  }
-  auto wrapper = [](std::function<void(T)> fn, T args)
-  {
-    auto resval = RT::OS::initiate();
-    if (resval != 0) {
-      ERROR_MSG("RT::OS::createTask : RT::OS::initiate() : {}",
-                strerror(errno));
-      // In the event that we fail to initiate real-time environment let's just
-      // quit
-      return;
-    }
-    fn(args);
-    RT::OS::shutdown();
-  };
-  std::thread thread_obj(wrapper, func, arg);
-  if (thread_obj.joinable()) {
-    task->rt_thread = std::move(thread_obj);
-  } else {
-    result = -1;
-  }
-  return result;
-}
+int createTask(Task* task, void (*func)(void*), void* arg);
 
 }  // namespace RT::OS
 

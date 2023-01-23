@@ -410,7 +410,7 @@ RT::System::System(Event::Manager* em, RT::Connector* rtc)
     return;
   }
   this->task = std::make_unique<RT::OS::Task>();
-  if (RT::OS::createTask<RT::System*>(this->task.get(), &RT::System::execute, this) != 0) {
+  if (RT::OS::createTask(this->task.get(), &RT::System::execute, this) != 0) {
     ERROR_MSG("RT::System::System : failed to create realtime thread\n");
     return;
   }
@@ -729,8 +729,9 @@ void RT::System::provideTimetickPointers(Event::Object* event)
   event->done();
 }
 
-void RT::System::execute(RT::System* system)
+void RT::System::execute(void* sys)
 {
+  auto* system = static_cast<RT::System*>(sys);
   RT::System::CMD* cmd = nullptr;
 
   if (RT::OS::setPeriod(system->task.get(), RT::OS::DEFAULT_PERIOD) != 0) {

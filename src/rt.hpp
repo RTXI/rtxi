@@ -464,7 +464,7 @@ private:
 
   void postTelemitry(RT::Telemitry::Response& telemitry);
 
-  static void execute(RT::System* system);
+  static void execute(void* sys);
 
   int64_t periodStartTime = 1;
   int64_t periodEndTime = 1;

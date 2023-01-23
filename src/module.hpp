@@ -70,7 +70,7 @@ struct Info
   std::string name;
   std::string description;
   Modules::Variable::variable_t vartype;
-  std::variant<int, double, uint64_t, std::string, state_t> value;
+  std::variant<int64_t, double, uint64_t, std::string, state_t> value;
 };
 
 }  // namespace Variable
@@ -279,11 +279,11 @@ public:
 
   int exit();
   void attachComponent(std::unique_ptr<Modules::Component> component);
-  int getComponentIntParameter(const std::string& parameter_name);
+  int64_t getComponentIntParameter(const std::string& parameter_name);
   uint64_t getComponentUIntParameter(const std::string& parameter_name);
   double getComponentDoubleParameter(const std::string& parameter_name);
 
-  int setComponentIntParameter(const std::string& parameter_name, int value);
+  int setComponentIntParameter(const std::string& parameter_name, int64_t value);
   int setComponentDoubleParameter(const std::string& parameter_name, double value);
   int setComponentUintParameter(const std::string& parameter_name, uint64_t value);
   int setComponentComment(const std::string& parameter_name, std::string value);
