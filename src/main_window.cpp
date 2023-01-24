@@ -77,10 +77,10 @@ MainWindow::MainWindow(Event::Manager* ev_manager)
   createHelpMenu();
 
   // create default plugin menu entries
-  // this->createSystemMenuItem(
-  //     "RT Benchmarks", 
-  //     this, 
-  //     SLOT(std::make_unique<PerformanceMeasurement::Plugin>()))
+  this->createSystemMenuItem(
+      "RT Benchmarks", 
+      this, 
+      SLOT());
 }
 
 QAction* MainWindow::insertModuleMenuSeparator()

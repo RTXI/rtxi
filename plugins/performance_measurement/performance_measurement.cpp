@@ -81,7 +81,7 @@ PerformanceMeasurement::Panel::Panel(std::string name, MainWindow* main_window)
   QPushButton* resetButton = new QPushButton("Reset", this);
   gridLayout->addWidget(resetButton, 7, 1);
   QObject::connect(
-      resetButton, SIGNAL(released(void)), this, SLOT(this->plugin_component->reset(void)));
+      resetButton, SIGNAL(released()), this, SLOT(reset()));
 
   // Attach child widget to parent widget
   layout->addLayout(gridLayout);
@@ -113,7 +113,7 @@ void PerformanceMeasurement::Component::execute()
   auto maxDuration = getValue<double>("maxDuration");
   auto maxTimestep = getValue<double>("maxTimestep");
   auto maxLatency = getValue<double>("maxLatency");
-  auto period = getValue<double>("period");
+  auto period = RT::OS::getPeriod();
 
   double duration = *(end_ticks) - *(start_ticks);
   double timestep = last_start_ticks - *(start_ticks);
@@ -144,8 +144,6 @@ void PerformanceMeasurement::Component::execute()
       setValue("state", Modules::Variable::EXEC);
       break;
     case Modules::Variable::PERIOD :
-      setValue("period", RT::OS::getPeriod());
-      break;
     case Modules::Variable::MODIFY :
     case Modules::Variable::PAUSE :
     case Modules::Variable::UNPAUSE :
@@ -179,11 +177,6 @@ void PerformanceMeasurement::Panel::reset()
   this->getHostPlugin()->setComponentState("state", Modules::Variable::INIT);
 }
 
-// extern "C" Plugin::Object * createRTXIPlugin(void *)
-// {
-//     return PerformanceMeasurement::Plugin::getInstance();
-// }
-
 PerformanceMeasurement::Plugin::Plugin(Event::Manager* ev_manager, 
                                        MainWindow* mw) 
   : Modules::Plugin(ev_manager, mw, "RT Benchmarks")
@@ -194,7 +187,7 @@ PerformanceMeasurement::Plugin::Plugin(Event::Manager* ev_manager,
   //     "RT Benchmarks", this, SLOT(createPerformanceMeasurementPanel(void)));
 }
 
-std::unique_ptr<Modules::Plugin> createRTXIPlugin(Event::Manager* ev_manager, MainWindow* main_window)
+std::unique_ptr<Modules::Plugin> PerformanceMeasurement::createRTXIPlugin(Event::Manager* ev_manager, MainWindow* main_window)
 {
   return std::move(std::make_unique<PerformanceMeasurement::Plugin>(ev_manager, main_window));
 }

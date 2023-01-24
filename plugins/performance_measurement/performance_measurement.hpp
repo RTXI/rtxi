@@ -35,18 +35,6 @@
 namespace PerformanceMeasurement
 {
 
-struct stats_info
-{
-  double duration;
-  double timestep;
-  double latency;
-  double maxDuration;
-  double maxTimestep;
-  double maxLatency;
-  double jitter;
-  double period;
-};
-
 const std::vector<Modules::Variable::Info> performance_measurement_vars 
 {
   {
@@ -136,12 +124,12 @@ public slots:
   /*!
    * Starts the statistics over
    */
-  void reset(void);
-  void resetMaxTimeStep(void);
+  void reset();
+  void resetMaxTimeStep();
   /*!
    * Updates the GUI with the latest values
    */
-  void update(void);
+  void update();
 
 
 private:
@@ -153,7 +141,7 @@ private:
   QLineEdit* AppCpuPercentEdit;
 };  // class Panel
 
-std::unique_ptr<Modules::Plugin> createRTXIPlugin();
+std::unique_ptr<Modules::Plugin> createRTXIPlugin(Event::Manager* ev_manager, MainWindow* main_window);
 
 };  // namespace PerformanceMeasurement
 #endif /* PERFORMANCE_MEASUREMENT_H */

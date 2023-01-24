@@ -13,6 +13,7 @@
 
 #include "debug.hpp"
 #include "module.hpp"
+#include "performance_measurement/performance_measurement.hpp"
 
 std::string Modules::Variable::state2string(Modules::Variable::state_t state)
 {
@@ -622,54 +623,61 @@ Modules::Manager::Manager(Event::Manager* event_manager, MainWindow* mw) :
   this->rtxi_modules_registry = std::unordered_map<std::string, std::unique_ptr<Modules::Plugin>>();
 }
 
+
+//std::unique_ptr<Modules::Plugin> PerformanceMeasurement::createRTXIPlugin(Event::Manager* ev_manager, MainWindow* main_window);
+
 int Modules::Manager::loadPlugin(const std::string& library)
 {
-  void* handle = dlopen(library.c_str(), RTLD_GLOBAL | RTLD_NOW);
-  if (!handle) {
-    // ERROR_MSG("Plugin::load : failed to load library: {}", dlerror());
-    std::string plugin_dir = std::string("/lib/rtxi/");
-    handle = dlopen((plugin_dir + library).c_str(),
-                    RTLD_GLOBAL | RTLD_NOW);
-  }
-  if (!handle) {
-    ERROR_MSG("Plugin::load : failed to load {}: {}\n",
-              library.c_str(),
-              dlerror());
-    return -1;
-  }
+  if(library == std::string("RT Bemchmarks")){
+    this->registerModule(PerformanceMeasurement::createRTXIPlugin(event_manager, main_window));
+  } else {
+    void* handle = dlopen(library.c_str(), RTLD_GLOBAL | RTLD_NOW);
+    if (!handle) {
+      // ERROR_MSG("Plugin::load : failed to load library: {}", dlerror());
+      std::string plugin_dir = std::string("/lib/rtxi/");
+      handle = dlopen((plugin_dir + library).c_str(),
+                      RTLD_GLOBAL | RTLD_NOW);
+    }
+    if (!handle) {
+      ERROR_MSG("Plugin::load : failed to load {}: {}\n",
+                library.c_str(),
+                dlerror());
+      return -1;
+    }
 
-  /*********************************************************************************
-   * Apparently ISO C++ forbids against casting object pointer -> function
-   *pointer * But what the hell do they know? It is probably safe here... *
-   *********************************************************************************/
+    /*********************************************************************************
+     * Apparently ISO C++ forbids against casting object pointer -> function
+     *pointer * But what the hell do they know? It is probably safe here... *
+     *********************************************************************************/
 
-  std::unique_ptr<Modules::Plugin> (*create)(void) =
-      (std::unique_ptr<Modules::Plugin> (*)(void))(dlsym(handle, "createRTXIPlugin"));
-  if (!create) {
-    ERROR_MSG("Plugin::load : failed to load {} : {}\n",
-              library,
-              dlerror());
-    dlclose(handle);
-    return -1;
+    std::unique_ptr<Modules::Plugin> (*create)(void) =
+        (std::unique_ptr<Modules::Plugin> (*)(void))(dlsym(handle, "createRTXIPlugin"));
+    if (!create) {
+      ERROR_MSG("Plugin::load : failed to load {} : {}\n",
+                library,
+                dlerror());
+      dlclose(handle);
+      return -1;
+    }
+
+    auto plugin = create();
+    if (plugin == nullptr) {
+      ERROR_MSG("Plugin::load : failed to load {} : failed to create instance\n",
+                library);
+      dlclose(handle);
+      return -1;
+    }
+    // if (plugin->magic_number != Plugin::Object::MAGIC_NUMBER) {
+    //   ERROR_MSG(
+    //       "Plugin::load : the pointer returned from {}::createRTXIPlugin() isn't "
+    //       "a valid Plugin::Object *.\n",
+    //       library.toStdString().c_str());
+    //   dlclose(handle);
+    //   return 0;
+    // }
+
+    this->registerModule(std::move(plugin));
   }
-
-  auto plugin = create();
-  if (plugin == nullptr) {
-    ERROR_MSG("Plugin::load : failed to load {} : failed to create instance\n",
-              library);
-    dlclose(handle);
-    return -1;
-  }
-  // if (plugin->magic_number != Plugin::Object::MAGIC_NUMBER) {
-  //   ERROR_MSG(
-  //       "Plugin::load : the pointer returned from {}::createRTXIPlugin() isn't "
-  //       "a valid Plugin::Object *.\n",
-  //       library.toStdString().c_str());
-  //   dlclose(handle);
-  //   return 0;
-  // }
-
-  this->registerModule(std::move(plugin));
   return 0;
 }
 
@@ -697,8 +705,10 @@ void Modules::Manager::receiveEvent(Event::Object* event)
 {
   switch(event->getType()){
     case Event::Type::PLUGIN_REMOVE_EVENT :
-      this->unregisterModule(std::any_cast<std::string>(event->getParam("pluginName")));
+      this->unloadPlugin(std::any_cast<std::string>(event->getParam("pluginName")));
       break;
+    case Event::Type::PLUGIN_INSERT_EVENT :
+      this->loadPlugin(std::any_cast<std::string>(event->getParam("pluginName")));
     default:
       return;
   }

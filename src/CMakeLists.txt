@@ -68,4 +68,5 @@ target_link_libraries(rtxi_exe
     rtos_fifo_lib
     rtos_lib 
     rtxi_lib 
+    performance_measurement_lib
 )

@@ -23,6 +23,7 @@ target_link_libraries(rtxiTests PRIVATE
     Qt5::Core Qt5::Widgets Qt5::Gui
     Threads::Threads
     fmt::fmt
+    performance_measurement_lib
 )
 
 add_test(NAME rtxiTests COMMAND rtxiTests)
