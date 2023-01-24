@@ -24,6 +24,7 @@ target_link_libraries(rtxiTests PRIVATE
     Threads::Threads
     fmt::fmt
     performance_measurement_lib
+    rtmath_lib
 )
 
 add_test(NAME rtxiTests COMMAND rtxiTests)

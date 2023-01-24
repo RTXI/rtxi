@@ -65,6 +65,7 @@ target_link_libraries(rtxi_exe
     Qt5::Gui
     Qt5::Widgets
     fmt::fmt
+    rtmath_lib
     rtos_fifo_lib
     rtos_lib 
     rtxi_lib 

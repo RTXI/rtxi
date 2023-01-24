@@ -623,9 +623,6 @@ Modules::Manager::Manager(Event::Manager* event_manager, MainWindow* mw) :
   this->rtxi_modules_registry = std::unordered_map<std::string, std::unique_ptr<Modules::Plugin>>();
 }
 
-
-//std::unique_ptr<Modules::Plugin> PerformanceMeasurement::createRTXIPlugin(Event::Manager* ev_manager, MainWindow* main_window);
-
 int Modules::Manager::loadPlugin(const std::string& library)
 {
   if(library == std::string("RT Bemchmarks")){

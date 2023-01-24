@@ -6,4 +6,4 @@ add_library(rtmath_lib OBJECT
     runningstat.h runningstat.cpp
 )
 
-target_link_libraries(rtmath_lib PRIVATE rtxi_lib)
+#target_link_libraries(rtmath_lib PRIVATE rtxi_lib)

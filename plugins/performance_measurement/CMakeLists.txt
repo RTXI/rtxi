@@ -6,6 +6,7 @@ add_library(performance_measurement_lib OBJECT
 )
 
 target_link_libraries(performance_measurement_lib PRIVATE 
+    rtmath_lib
     rtxi_lib
     Qt5::Core Qt5::Widgets Qt5::Gui
     fmt::fmt

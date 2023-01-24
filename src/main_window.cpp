@@ -36,6 +36,7 @@
 
 #include "debug.hpp"
 #include "rtxiConfig.h"
+#include "event.hpp"
 
 #include "performance_measurement/performance_measurement.hpp"
 
@@ -67,6 +68,7 @@ MainWindow::MainWindow(Event::Manager* ev_manager)
   createUtilMenu();
 
   /* Initialize System Menu */
+  createSystemActions();
   createSystemMenu();
 
   /* Initialize Windows Menu */
@@ -75,13 +77,7 @@ MainWindow::MainWindow(Event::Manager* ev_manager)
   /* Initialize Help Menu */
   createHelpActions();
   createHelpMenu();
-
-  // create default plugin menu entries
-  this->createSystemMenuItem(
-      "RT Benchmarks", 
-      this, 
-      SLOT());
-}
+ }
 
 QAction* MainWindow::insertModuleMenuSeparator()
 {
@@ -210,6 +206,11 @@ void MainWindow::createUtilMenu()
 void MainWindow::createSystemMenu()
 {
   systemMenu = menuBar()->addMenu(tr("&System"));
+  systemMenu->addAction(openRTBenchmarks);
+  connect(systemMenu, 
+          SIGNAL(triggered(QAction*)), 
+          this, 
+          SLOT(systemMenuActivated(QAction*)));
 }
 
 void MainWindow::createWindowsMenu()
@@ -280,11 +281,10 @@ void MainWindow::createHelpActions()
   connect(sub_issue, SIGNAL(triggered()), this, SLOT(openSubIssue()));
 }
 
-QAction* MainWindow::createSystemMenuItem(const QString& label,
-                                          const QObject* handler,
-                                          const char* slot)
+void MainWindow::createSystemActions()
 {
-  return systemMenu->addAction(label, handler, slot);
+  openRTBenchmarks = new QAction(tr("RT Benchmarks"), this);
+
 }
 
 void MainWindow::about()
@@ -402,6 +402,14 @@ void MainWindow::resetSettings()
 void MainWindow::utilitiesMenuActivated(QAction* id)
 {
   // Plugin::Manager::getInstance()->load(id->text());
+}
+
+void MainWindow::systemMenuActivated(QAction* id)
+{
+  Event::Object event(Event::Type::PLUGIN_INSERT_EVENT);
+  event.setParam("pluginName", std::any(id->text().toStdString()));
+  this->event_manager->postEvent(&event);
+  event.wait();
 }
 
 void MainWindow::windowsMenuAboutToShow()

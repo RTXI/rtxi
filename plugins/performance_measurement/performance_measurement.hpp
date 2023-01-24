@@ -32,6 +32,7 @@
 #include "module.hpp"
 #include "rt.hpp"
 
+
 namespace PerformanceMeasurement
 {
 
@@ -125,7 +126,7 @@ public slots:
    * Starts the statistics over
    */
   void reset();
-  void resetMaxTimeStep();
+  //void resetMaxTimeStep();
   /*!
    * Updates the GUI with the latest values
    */

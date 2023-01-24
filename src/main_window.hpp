@@ -152,6 +152,8 @@ private slots:
   void fileMenuActivated(QAction*);
   void utilitiesMenuActivated(QAction*);
 
+  void systemMenuActivated(QAction*);
+
 private:
   Event::Manager* event_manager;
   QMdiArea* mdiArea=nullptr;
@@ -177,11 +179,13 @@ private:
   QAction* adocs=nullptr;
   QAction* sub_issue=nullptr;
   QAction* utilItem=nullptr;
+  QAction* openRTBenchmarks=nullptr;
 
   void createFileMenu();
   void createModuleMenu();
   void createUtilMenu();
   void createSystemMenu();
+  void createSystemActions();
   void createWindowsMenu();
   void createHelpMenu();
   void createFileActions();
