@@ -621,6 +621,7 @@ Modules::Manager::Manager(Event::Manager* event_manager, MainWindow* mw) :
   event_manager(event_manager), main_window(mw)
 {
   this->rtxi_modules_registry = std::unordered_map<std::string, std::unique_ptr<Modules::Plugin>>();
+  event_manager->registerHandler(this);
 }
 
 int Modules::Manager::loadPlugin(const std::string& library)
