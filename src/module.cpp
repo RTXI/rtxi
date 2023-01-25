@@ -424,11 +424,12 @@ void Modules::Panel::pause(bool p)
 Modules::Plugin::Plugin(Event::Manager* ev_manager, MainWindow* mw, const std::string& mod_name) :
   event_manager(ev_manager), main_window(mw), name(mod_name)
 {
-  this->event_manager->registerHandler(this);
-  Event::Object event(Event::Type::PLUGIN_INSERT_EVENT);
-  event.setParam("plugin", std::any(this));
-  this->event_manager->postEvent(&event);
-  event.wait();
+  
+  //this->event_manager->registerHandler(this);
+  //Event::Object event(Event::Type::PLUGIN_INSERT_EVENT);
+  //event.setParam("plugin", std::any(this));
+  //this->event_manager->postEvent(&event);
+  //event.wait();
 }
 
 Modules::Plugin::~Plugin()
@@ -472,6 +473,11 @@ void Modules::Plugin::attachComponent(std::unique_ptr<Modules::Component> compon
   if(!event.isdone()){
     ERROR_MSG("Real-Time system was unable to register plugin component {}", this->name);
   }
+}
+
+void Modules::Plugin::attachPanel(Modules::Panel* panel)
+{
+  this->widget_panel = panel;
 }
 
 int Modules::Plugin::exit()
@@ -626,7 +632,7 @@ Modules::Manager::Manager(Event::Manager* event_manager, MainWindow* mw) :
 
 int Modules::Manager::loadPlugin(const std::string& library)
 {
-  if(library == std::string("RT Bemchmarks")){
+  if(library == std::string("RT Benchmarks")){
     this->registerModule(PerformanceMeasurement::createRTXIPlugin(event_manager, main_window));
   } else {
     void* handle = dlopen(library.c_str(), RTLD_GLOBAL | RTLD_NOW);
@@ -704,9 +710,11 @@ void Modules::Manager::receiveEvent(Event::Object* event)
   switch(event->getType()){
     case Event::Type::PLUGIN_REMOVE_EVENT :
       this->unloadPlugin(std::any_cast<std::string>(event->getParam("pluginName")));
+      event->done();
       break;
     case Event::Type::PLUGIN_INSERT_EVENT :
       this->loadPlugin(std::any_cast<std::string>(event->getParam("pluginName")));
+      event->done();
     default:
       return;
   }

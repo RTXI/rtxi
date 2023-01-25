@@ -279,6 +279,7 @@ public:
 
   int exit();
   void attachComponent(std::unique_ptr<Modules::Component> component);
+  void attachPanel(Modules::Panel* panel);
   int64_t getComponentIntParameter(const std::string& parameter_name);
   uint64_t getComponentUIntParameter(const std::string& parameter_name);
   double getComponentDoubleParameter(const std::string& parameter_name);

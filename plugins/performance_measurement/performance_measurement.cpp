@@ -182,7 +182,9 @@ PerformanceMeasurement::Plugin::Plugin(Event::Manager* ev_manager,
   : Modules::Plugin(ev_manager, mw, "RT Benchmarks")
 {
   auto plugin_component = std::make_unique<PerformanceMeasurement::Component>(this);
+  auto panel = new PerformanceMeasurement::Panel("RT Benchmarks", mw);
   this->attachComponent(std::move(plugin_component));
+  this->attachPanel(panel);
   // MainWindow::getInstance()->createSystemMenuItem(
   //     "RT Benchmarks", this, SLOT(createPerformanceMeasurementPanel(void)));
 }
