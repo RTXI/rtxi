@@ -579,8 +579,10 @@ void RT::System::receiveEvent(Event::Object* event)
       this->NOOP(event);
       break;
     default:
-      // Don't leave the caller waiting bro
-      event->done();
+      // Event manager should be the one to 
+    // let the caller know event is not processed
+      //event->notdone();
+      return;
   }
 }
 

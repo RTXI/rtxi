@@ -31,6 +31,7 @@ TEST_F(EventObjectTest, ParameterTests)
   ASSERT_EQ(event.getName(), Event::type_to_string(Event::Type::NOOP));
   ASSERT_EQ(std::any_cast<bool>(event.getParam(TEST_EVENT_PARAM)),
             TEST_EVENT_PARAM_VALUE);
+  ASSERT_TRUE(event.getParam("DOESNOTEXIST").has_value());
 }
 
 TEST_F(EventObjectTest, EventProcessingWait)
