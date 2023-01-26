@@ -144,5 +144,8 @@ private:
 
 std::unique_ptr<Modules::Plugin> createRTXIPlugin(Event::Manager* ev_manager, MainWindow* main_window);
 
+Modules::Panel* createRTXIPanel(MainWindow* main_window);
+
+Modules::FactoryMethods getFactories();
 };  // namespace PerformanceMeasurement
 #endif /* PERFORMANCE_MEASUREMENT_H */

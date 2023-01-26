@@ -633,7 +633,9 @@ Modules::Manager::Manager(Event::Manager* event_manager, MainWindow* mw) :
 int Modules::Manager::loadPlugin(const std::string& library)
 {
   if(library == std::string("RT Benchmarks")){
-    this->registerModule(PerformanceMeasurement::createRTXIPlugin(event_manager, main_window));
+    Modules::FactoryMethods fact_methods = PerformanceMeasurement::getFactories();
+    this->registerModule(fact_methods.createPlugin(event_manager, main_window));
+    this->registerFactories(library, fact_methods);
   } else {
     void* handle = dlopen(library.c_str(), RTLD_GLOBAL | RTLD_NOW);
     if (!handle) {
@@ -687,6 +689,8 @@ int Modules::Manager::loadPlugin(const std::string& library)
 
 void Modules::Manager::unloadPlugin(const std::string& library)
 {
+  this->unregisterModule(library);
+  this->unregisterFactories(library);
   if(this->rtxi_modules_registry.find(library) != this->rtxi_modules_registry.end()){
     void* handle = this->rtxi_modules_registry[library]->getHandle();
     if(handle != nullptr) { dlclose(handle); }
@@ -705,18 +709,36 @@ void Modules::Manager::unregisterModule(const std::string& module_name)
   }
 }
 
+void Modules::Manager::registerFactories(std::string module_name, Modules::FactoryMethods fact)
+{
+  this->rtxi_factories_registry[module_name] = fact;
+}
+
+void Modules::Manager::unregisterFactories(std::string module_name)
+{
+  if(this->rtxi_factories_registry.find(module_name) != this->rtxi_factories_registry.end()){
+    this->rtxi_factories_registry.erase(module_name);
+  }
+}
+
 void Modules::Manager::receiveEvent(Event::Object* event)
 {
+  std::string plugin_name;
   switch(event->getType()){
     case Event::Type::PLUGIN_REMOVE_EVENT :
-      this->unloadPlugin(std::any_cast<std::string>(event->getParam("pluginName")));
+      plugin_name = std::any_cast<std::string>(event->getParam("pluginName"));
+      this->unloadPlugin(plugin_name);
       event->done();
       break;
     case Event::Type::PLUGIN_INSERT_EVENT :
-      this->loadPlugin(std::any_cast<std::string>(event->getParam("pluginName")));
+      plugin_name = std::any_cast<std::string>(event->getParam("pluginName"));
+      this->loadPlugin(plugin_name);
+      event->setParam("createRTXIPanel", 
+                      std::any(&this->rtxi_factories_registry[plugin_name].createPanel));
+      event->setParam("pluginPointer" , 
+                      std::any(this->rtxi_modules_registry[plugin_name].get()));
       event->done();
     default:
       return;
   }
 }
-

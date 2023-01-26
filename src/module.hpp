@@ -88,7 +88,7 @@ public:
 
 public slots:
   void redden();
-}; // class DefaultGUILineEdit
+}; // class DefaultGUILineEdi
 
 // Forward declare plugin class for the component and panel private pointers
 class Plugin;
@@ -333,6 +333,12 @@ private:
   std::string name;
 };
 
+struct FactoryMethods
+{
+  std::unique_ptr<Modules::Plugin>(*createPlugin)(Event::Manager*, MainWindow*) = nullptr;
+  Modules::Panel*(*createPanel)(MainWindow*) = nullptr;
+};
+
 class Manager : public Event::Handler
 {
 public:
@@ -340,14 +346,18 @@ public:
 
   int loadPlugin(const std::string& library);
   void unloadPlugin(const std::string& library);
-
-  void registerModule(std::unique_ptr<Modules::Plugin> module);
-  void unregisterModule(const std::string& module_name);
-
   void receiveEvent(Event::Object* event) override;
 
 private:
+  void registerModule(std::unique_ptr<Modules::Plugin> module);
+  void unregisterModule(const std::string& module_name);
+
+  void registerFactories(std::string module_name, Modules::FactoryMethods);
+  void unregisterFactories(std::string module_name);
+
+
   std::unordered_map<std::string, std::unique_ptr<Modules::Plugin>> rtxi_modules_registry;
+  std::unordered_map<std::string, Modules::FactoryMethods> rtxi_factories_registry;
   Event::Manager* event_manager;
   MainWindow* main_window;
 

@@ -182,9 +182,9 @@ PerformanceMeasurement::Plugin::Plugin(Event::Manager* ev_manager,
   : Modules::Plugin(ev_manager, mw, "RT Benchmarks")
 {
   auto plugin_component = std::make_unique<PerformanceMeasurement::Component>(this);
-  auto panel = new PerformanceMeasurement::Panel("RT Benchmarks", mw);
+  //auto panel = new PerformanceMeasurement::Panel("RT Benchmarks", mw);
   this->attachComponent(std::move(plugin_component));
-  this->attachPanel(panel);
+  //this->attachPanel(panel);
   // MainWindow::getInstance()->createSystemMenuItem(
   //     "RT Benchmarks", this, SLOT(createPerformanceMeasurementPanel(void)));
 }
@@ -192,4 +192,17 @@ PerformanceMeasurement::Plugin::Plugin(Event::Manager* ev_manager,
 std::unique_ptr<Modules::Plugin> PerformanceMeasurement::createRTXIPlugin(Event::Manager* ev_manager, MainWindow* main_window)
 {
   return std::move(std::make_unique<PerformanceMeasurement::Plugin>(ev_manager, main_window));
+}
+
+Modules::Panel* PerformanceMeasurement::createRTXIPanel(MainWindow* main_window)
+{
+  return static_cast<Modules::Panel*>(new PerformanceMeasurement::Panel("RT Benchmarks", main_window));
+}
+
+Modules::FactoryMethods PerformanceMeasurement::getFactories()
+{
+  Modules::FactoryMethods fact;
+  fact.createPanel = &PerformanceMeasurement::createRTXIPanel;
+  fact.createPlugin = &PerformanceMeasurement::createRTXIPlugin;
+  return fact;
 }
