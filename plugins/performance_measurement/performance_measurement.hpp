@@ -97,7 +97,7 @@ public:
 class Component : public Modules::Component
 {
 public: 
-  Component(PerformanceMeasurement::Plugin* hplugin) : 
+  Component(Modules::Plugin* hplugin) : 
             Modules::Component(hplugin,
                                "RT Benchmarks",
                                std::vector<IO::channel_t>(),
@@ -145,6 +145,8 @@ private:
 std::unique_ptr<Modules::Plugin> createRTXIPlugin(Event::Manager* ev_manager, MainWindow* main_window);
 
 Modules::Panel* createRTXIPanel(MainWindow* main_window);
+
+std::unique_ptr<Modules::Component> createRTXIComponent(Modules::Plugin* host_plugin);
 
 Modules::FactoryMethods getFactories();
 };  // namespace PerformanceMeasurement

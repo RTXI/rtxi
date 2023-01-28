@@ -457,15 +457,6 @@ Modules::Plugin::~Plugin()
 void Modules::Plugin::registerComponent()
 {
   if(this->plugin_component == nullptr){return;}
-  Event::Object register_thread_event(Event::Type::RT_THREAD_INSERT_EVENT);
-  register_thread_event.setParam("thread", this->plugin_component.get());
-  this->event_manager->postEvent(&register_thread_event);
-  register_thread_event.wait();
-}
-
-void Modules::Plugin::attachComponent(std::unique_ptr<Modules::Component> component)
-{
-  this->plugin_component = std::move(component);
   Event::Object event = Event::Object(Event::Type::RT_THREAD_INSERT_EVENT);
   event.setParam("thread", static_cast<RT::Thread*>(this->plugin_component.get()));
   this->event_manager->postEvent(&event);
@@ -473,6 +464,11 @@ void Modules::Plugin::attachComponent(std::unique_ptr<Modules::Component> compon
   if(!event.isdone()){
     ERROR_MSG("Real-Time system was unable to register plugin component {}", this->name);
   }
+}
+
+void Modules::Plugin::attachComponent(std::unique_ptr<Modules::Component> component)
+{
+  this->plugin_component = std::move(component);
 }
 
 void Modules::Plugin::attachPanel(Modules::Panel* panel)
@@ -738,6 +734,12 @@ void Modules::Manager::receiveEvent(Event::Object* event)
       event->setParam("pluginPointer" , 
                       std::any(this->rtxi_modules_registry[plugin_name].get()));
       event->done();
+      // IMPORTANT!: component registration to the connector must not occur while
+      // handling another event lest you risk a deadlock in the program. That is why 
+      // we mark the event done so the caller can release event and run registration
+      // on another thread;
+      std::async(std::launch::deferred, 
+                 this->rtxi_modules_registry[plugin_name]->registerComponent());
     default:
       return;
   }

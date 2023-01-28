@@ -316,7 +316,6 @@ public:
   // with previous versions of RTXI that used DefaultGuiModel
   // (before RTXI 3.0.0)
 
-protected:
   void registerComponent();
 
 private:
@@ -336,6 +335,7 @@ private:
 struct FactoryMethods
 {
   std::unique_ptr<Modules::Plugin>(*createPlugin)(Event::Manager*, MainWindow*) = nullptr;
+  std::unique_ptr<Modules::Component>(*createComponent)(Modules::Plugin*) = nullptr;
   Modules::Panel*(*createPanel)(MainWindow*) = nullptr;
 };
 
