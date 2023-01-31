@@ -66,8 +66,8 @@ private:
 class ModuleComponetTests : public ::testing::Test
 {
 protected:
-  ModuleComponetTests() {}
-  ~ModuleComponetTests() {}
+  ModuleComponetTests() = default;
+  ~ModuleComponetTests() = default;
 
   // Modules::Component componnent;
 };
@@ -75,8 +75,8 @@ protected:
 class ModulePanelTests : public ::testing::Test
 {
 protected:
-  ModulePanelTests() {}
-  ~ModulePanelTests() {}
+  ModulePanelTests() = default;
+  ~ModulePanelTests() = default; 
 };
 
 class ModulePluginTests : public ::testing::Test
@@ -89,6 +89,8 @@ protected:
     this->connector = std::make_unique<RT::Connector>();
     this->system = std::make_unique<RT::System>(this->event_manager.get(),
                                                 this->connector.get());
+    this->plugin_manager = std::make_unique<Modules::Manager>(this->event_manager.get(),
+                                                              nullptr);
 
     this->plugin = std::make_unique<Modules::Plugin>(
         this->event_manager.get(), this->main_window, "testname");
@@ -101,6 +103,7 @@ protected:
   std::unique_ptr<RT::Connector> connector;
   std::unique_ptr<Event::Manager> event_manager;
   std::unique_ptr<RT::System> system;
+  std::unique_ptr<Modules::Manager> plugin_manager;
 
   std::unique_ptr<Modules::Plugin> plugin;
   mockModuleComponent* component_ptr;

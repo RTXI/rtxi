@@ -469,6 +469,7 @@ void Modules::Plugin::registerComponent()
 void Modules::Plugin::attachComponent(std::unique_ptr<Modules::Component> component)
 {
   this->plugin_component = std::move(component);
+  this->registerComponent();
 }
 
 void Modules::Plugin::attachPanel(Modules::Panel* panel)
@@ -480,11 +481,11 @@ int Modules::Plugin::exit()
 {
   int result = 0;
   Event::Object event(Event::Type::PLUGIN_REMOVE_EVENT);
-  event.setParam("plugin", std::any(this));
+  event.setParam("pluginName", std::any(this->getName()));
   this->event_manager->postEvent(&event);
   event.wait();
   if(!event.isdone()){
-    ERROR_MSG("Plugin {} was not removed by the modules manager", this->plugin_component->getName());
+    ERROR_MSG("Plugin {} was not removed by the modules manager", this->getName());
     result = -1;
   }
   return result;

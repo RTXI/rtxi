@@ -235,11 +235,8 @@ void Event::Manager::processEvents()
 {
   std::unique_lock<std::mutex> event_lock(this->event_mut);
   std::unique_lock<std::mutex> handlerlist_lock(this->handlerlist_mut, std::defer_lock);
-  auto event_propagator = [](const std::list<Event::Handler*>& handler_list, Event::Object* event){
-    for(auto* handler : handler_list){
-      handler->receiveEvent(event);
-    } 
-    if(!(event->handled())) { event->notdone(); };
+  auto event_processor = [](Event::Handler* handler, Event::Object* event){
+    handler->receiveEvent(event);
   };
   // TODO: Turn this into an event pool implementation for performance
   while(this->running){
@@ -248,7 +245,9 @@ void Event::Manager::processEvents()
     });
     handlerlist_lock.lock();
     while(!event_q.empty()){
-      std::thread(event_propagator, this->handlerList, event_q.front()).detach();
+      for(auto* handler : this->handlerList){
+        std::thread(event_processor, handler, event_q.front()).detach();
+      }
       this->event_q.pop();
     }
     handlerlist_lock.unlock();
