@@ -19,6 +19,7 @@
 */
 
 #include <algorithm>
+#include <future>
 
 #include "event.hpp"
 
@@ -234,17 +235,23 @@ void Event::Manager::processEvents()
 {
   std::unique_lock<std::mutex> event_lock(this->event_mut);
   std::unique_lock<std::mutex> handlerlist_lock(this->handlerlist_mut, std::defer_lock);
+  auto event_propagator = [](const std::list<Event::Handler*>& handler_list, Event::Object* event){
+    for(auto* handler : handler_list){
+      handler->receiveEvent(event);
+    } 
+    if(!(event->handled())) { event->notdone(); };
+  };
+  // TODO: Turn this into an event pool implementation for performance
   while(this->running){
     this->available_event_cond.wait(event_lock, [this]{
       return !(this->event_q.empty()); 
     });
     handlerlist_lock.lock();
-    for (auto & handler : this->handlerList) {
-      handler->receiveEvent(event_q.front());
+    while(!event_q.empty()){
+      std::thread(event_propagator, this->handlerList, event_q.front()).detach();
+      this->event_q.pop();
     }
     handlerlist_lock.unlock();
-    if(!(event_q.front()->handled())) { event_q.front()->notdone(); };
-    this->event_q.pop();
   }
 }
 

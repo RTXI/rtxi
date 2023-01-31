@@ -738,8 +738,8 @@ void Modules::Manager::receiveEvent(Event::Object* event)
       // handling another event lest you risk a deadlock in the program. That is why 
       // we mark the event done so the caller can release event and run registration
       // on another thread;
-      std::async(std::launch::deferred, 
-                 this->rtxi_modules_registry[plugin_name]->registerComponent());
+      // std::async(std::launch::deferred, 
+      //            this->rtxi_modules_registry[plugin_name]->registerComponent());
     default:
       return;
   }

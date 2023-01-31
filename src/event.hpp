@@ -268,8 +268,8 @@ public:
 private:
   std::list<Handler*> handlerList;
   std::queue<Event::Object*> event_q;
-  std::mutex event_mut;
-  std::mutex handlerlist_mut;
+  std::mutex event_mut; // Mutex for posting events
+  std::mutex handlerlist_mut; // Mutex for poping events from queue
   std::condition_variable available_event_cond;
   std::atomic<bool> running = true;
   std::thread event_thread;
