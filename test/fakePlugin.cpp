@@ -18,9 +18,23 @@
 
  */
 
-#include <fakePlugin.h>
+#include "fakePlugin.h"
 
-extern "C" Plugin::Object* createRTXIPlugin(void*)
+extern "C" {
+std::unique_ptr<Modules::Plugin> createRTXIPlugin(Event::Manager* ev_manager, 
+                                                            MainWindow* mw)
 {
-  return new fakePlugin();
+  return std::make_unique<fakePlugin>(ev_manager, mw);
+}
+
+std::unique_ptr<Modules::Component> createRTXIComponent(Modules::Plugin* host_plugin)
+{
+  return std::make_unique<fakeComponent>(host_plugin);
+}
+
+Modules::Panel* createRTXIPanel(MainWindow* mw, Event::Manager* ev_manager)
+{
+  return nullptr;
+}
+
 }

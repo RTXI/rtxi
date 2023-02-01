@@ -20,16 +20,40 @@
 #ifndef FAKE_PLUGIN_H
 #define FAKE_PLUGIN_H
 
-#include <plugin.h>
 #include <gmock/gmock.h>
 #include <iostream>
 
+#include "module.hpp"
+
+#include "io_tests.hpp"
+#include "module_tests.hpp"
+
+
+const std::vector<Modules::Variable::Info> defaultFakeModuleVariables = 
+    generateDefaultComponentVariables();
+const std::vector<IO::channel_t> defaultFakeChannelList = 
+    generateDefaultChannelList();
+
 // This is a fake plugin created in order to test Plugin Manager
-class fakePlugin : public ::Plugin::Object 
+class fakePlugin : public Modules::Plugin 
 {
 public:
-    fakePlugin() { std::cout << "Fake Plugin Constructed\n"; }
+    fakePlugin(Event::Manager* ev_manager, MainWindow* mw) : 
+            Modules::Plugin(ev_manager, mw, "fakeModule") 
+        { std::cout << "Fake Plugin Constructed\n"; }
     ~fakePlugin() { std::cout << "Fake Plugin Destroyed\n"; }
+};
+
+class fakeComponent : public Modules::Component
+{
+public:
+    fakeComponent(Modules::Plugin* hplugin) :
+        Modules::Component(hplugin, 
+                           "fakeModule", 
+                           defaultFakeChannelList, 
+                           defaultFakeModuleVariables)
+        { std::cout << "Fake Component Created\n"; } 
+    ~fakeComponent() { std::cout << "Fake Component Destroyed\n"; }
 };
 
 #endif
