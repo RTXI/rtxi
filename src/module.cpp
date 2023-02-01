@@ -715,7 +715,7 @@ void Modules::Manager::receiveEvent(Event::Object* event)
     case Event::Type::PLUGIN_REMOVE_EVENT :
       plugin_name = std::any_cast<std::string>(event->getParam("pluginName"));
       this->unloadPlugin(plugin_name);
-      event->done();
+      //event->done();
       break;
     case Event::Type::PLUGIN_INSERT_EVENT :
       plugin_name = std::any_cast<std::string>(event->getParam("pluginName"));

@@ -234,11 +234,15 @@ void Event::Manager::postEvent(const std::vector<Event::Object*>& events)
 void Event::Manager::processEvents()
 {
   std::unique_lock<std::mutex> event_lock(this->event_mut);
-  auto event_processor = [this](std::list<Event::Handler*> handlerList, 
-                                                  Event::Object* event){
+  Event::Object* tmp_event = nullptr;
+  auto event_processor = [this](Event::Object* event){
+    if(event == nullptr) {
+      ERROR_MSG("Null pointer event received by event processor. Ignoring");
+      return;
+    }
     std::unique_lock<std::mutex> handlerlist_lock(this->handlerlist_mut, std::defer_lock);
     handlerlist_lock.lock();
-    for(auto* handler : handlerList){
+    for(auto* handler : this->handlerList){
       handler->receiveEvent(event);
     }
     handlerlist_lock.unlock();
@@ -250,8 +254,10 @@ void Event::Manager::processEvents()
       return !(this->event_q.empty()); 
     });
     while(!event_q.empty()){
-      std::thread(event_processor, this->handlerList, this->event_q.front()).detach();
+      tmp_event = event_q.front();
+      std::thread(event_processor, tmp_event).detach();
       this->event_q.pop();
+      tmp_event = nullptr;
     }
   }
 }
