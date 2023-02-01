@@ -136,7 +136,7 @@ class Panel : public QWidget
 {
   Q_OBJECT
 public:
-  Panel(const std::string& mod_name, MainWindow* mw);
+  Panel(const std::string& mod_name, MainWindow* mw, Event::Manager* event_manager);
 
   /*
    * Getter function go allow customization of
@@ -241,6 +241,8 @@ protected:
   //virtual void receiveEvent(const Event::Object* event) override;
 
   MainWindow* getMainWindowPtr() { return this->main_window; }
+  Event::Manager* getRTXIEventManager() { return this->event_manager; }
+
 private:
 
   MainWindow* main_window=nullptr;
@@ -250,6 +252,7 @@ private:
   QMdiSubWindow* subWindow=nullptr;
   Modules::Plugin* hostPlugin=nullptr;
   QGridLayout* layout=nullptr;
+  Event::Manager* event_manager=nullptr;
 
   // Default buttons
   QPushButton* pauseButton=nullptr;
@@ -277,7 +280,6 @@ public:
   Plugin& operator=(Plugin &&) = delete; // move assignment operator
   virtual ~Plugin();
 
-  int exit();
   void attachComponent(std::unique_ptr<Modules::Component> component);
   void attachPanel(Modules::Panel* panel);
   int64_t getComponentIntParameter(const std::string& parameter_name);
@@ -336,7 +338,7 @@ struct FactoryMethods
 {
   std::unique_ptr<Modules::Plugin>(*createPlugin)(Event::Manager*, MainWindow*) = nullptr;
   std::unique_ptr<Modules::Component>(*createComponent)(Modules::Plugin*) = nullptr;
-  Modules::Panel*(*createPanel)(MainWindow*) = nullptr;
+  Modules::Panel*(*createPanel)(MainWindow*, Event::Manager*) = nullptr;
 };
 
 class Manager : public Event::Handler

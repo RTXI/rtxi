@@ -65,12 +65,6 @@ TEST_F(ModulePluginTests, attachComponent)
   EXPECT_TRUE(this->component_ptr->wasExecuted());
 }
 
-TEST_F(ModulePluginTests, exit)
-{
-  int result = this->plugin->exit();
-  EXPECT_EQ(result, 0);
-}
-
 TEST_F(ModulePluginTests, ComponentParameters)
 {
   // We will check whether plugin actually retrieves component values

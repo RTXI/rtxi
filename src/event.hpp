@@ -265,6 +265,8 @@ public:
    */
   void unregisterHandler(Handler* handler);
 
+  bool isRegistered(Handler* handler);
+
 private:
   std::list<Handler*> handlerList;
   std::queue<Event::Object*> event_q;

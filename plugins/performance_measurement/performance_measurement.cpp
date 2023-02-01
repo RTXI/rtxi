@@ -25,8 +25,8 @@
 
 #include "performance_measurement.hpp"
 
-PerformanceMeasurement::Panel::Panel(std::string name, MainWindow* main_window)
-    : Modules::Panel(name, main_window)
+PerformanceMeasurement::Panel::Panel(std::string name, MainWindow* main_window, Event::Manager* ev_manager)
+    : Modules::Panel(name, main_window, ev_manager)
 {
   // Make Mdi
   QMdiSubWindow* subWindow = new QMdiSubWindow;
@@ -194,9 +194,9 @@ std::unique_ptr<Modules::Plugin> PerformanceMeasurement::createRTXIPlugin(Event:
   return std::make_unique<PerformanceMeasurement::Plugin>(ev_manager, main_window);
 }
 
-Modules::Panel* PerformanceMeasurement::createRTXIPanel(MainWindow* main_window)
+Modules::Panel* PerformanceMeasurement::createRTXIPanel(MainWindow* main_window, Event::Manager* ev_manager)
 {
-  return static_cast<Modules::Panel*>(new PerformanceMeasurement::Panel("RT Benchmarks", main_window));
+  return static_cast<Modules::Panel*>(new PerformanceMeasurement::Panel("RT Benchmarks", main_window, ev_manager));
 }
 
 std::unique_ptr<Modules::Component> PerformanceMeasurement::createRTXIComponent(Modules::Plugin* host_plugin)

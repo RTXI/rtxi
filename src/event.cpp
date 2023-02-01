@@ -234,23 +234,25 @@ void Event::Manager::postEvent(const std::vector<Event::Object*>& events)
 void Event::Manager::processEvents()
 {
   std::unique_lock<std::mutex> event_lock(this->event_mut);
-  std::unique_lock<std::mutex> handlerlist_lock(this->handlerlist_mut, std::defer_lock);
-  auto event_processor = [](Event::Handler* handler, Event::Object* event){
-    handler->receiveEvent(event);
+  auto event_processor = [this](std::list<Event::Handler*> handlerList, 
+                                                  Event::Object* event){
+    std::unique_lock<std::mutex> handlerlist_lock(this->handlerlist_mut, std::defer_lock);
+    handlerlist_lock.lock();
+    for(auto* handler : handlerList){
+      handler->receiveEvent(event);
+    }
+    handlerlist_lock.unlock();
+    event->done();
   };
   // TODO: Turn this into an event pool implementation for performance
   while(this->running){
     this->available_event_cond.wait(event_lock, [this]{
       return !(this->event_q.empty()); 
     });
-    handlerlist_lock.lock();
     while(!event_q.empty()){
-      for(auto* handler : this->handlerList){
-        std::thread(event_processor, handler, event_q.front()).detach();
-      }
+      std::thread(event_processor, this->handlerList, this->event_q.front()).detach();
       this->event_q.pop();
     }
-    handlerlist_lock.unlock();
   }
 }
 
@@ -270,4 +272,10 @@ void Event::Manager::unregisterHandler(Event::Handler* handler)
   if(location != handlerList.end()){
     handlerList.erase(location);
   }
+}
+
+bool Event::Manager::isRegistered(Event::Handler* handler)
+{
+  auto location = std::find(handlerList.begin(), handlerList.end(), handler);
+  return location != handlerList.end();
 }

@@ -117,8 +117,8 @@ void Modules::Component::execute()
   // This is defined by the user
 }
 
-Modules::Panel::Panel(const std::string& mod_name, MainWindow* mw)
-    : QWidget(mw), main_window(mw)
+Modules::Panel::Panel(const std::string& mod_name, MainWindow* mw, Event::Manager* ev_manager)
+    : QWidget(mw), main_window(mw), event_manager(ev_manager)
 {
   setWindowTitle(QString::fromStdString(mod_name));
 
@@ -235,7 +235,11 @@ void Modules::Panel::resizeMe()
 
 void Modules::Panel::exit()
 {
-  this->hostPlugin->exit();
+  this->event_manager->unregisterHandler(this->hostPlugin);
+  Event::Object event(Event::Type::PLUGIN_REMOVE_EVENT);
+  event.setParam("pluginName", this->getName());
+  this->event_manager->postEvent(&event);
+  event.wait();
   this->subWindow->close();
 }
 
@@ -443,15 +447,15 @@ Modules::Plugin::~Plugin()
       ERROR_MSG("Component in {} was not removed by Real-Time system", this->name);
     }
   }
-  Event::Object remove_plugin_event(Event::Type::PLUGIN_REMOVE_EVENT);
-  remove_plugin_event.setParam("pluginName", this->getName());
-  this->event_manager->postEvent(&remove_plugin_event);
-  remove_plugin_event.wait();
-  if (!remove_plugin_event.isdone()){
-    ERROR_MSG("Plugin {} was not removed correctly from the Plugin registry", this->name);
-  }
+  // Event::Object remove_plugin_event(Event::Type::PLUGIN_REMOVE_EVENT);
+  // remove_plugin_event.setParam("pluginName", this->getName());
+  // this->event_manager->postEvent(&remove_plugin_event);
+  // remove_plugin_event.wait();
+  // if (!remove_plugin_event.isdone()){
+  //   ERROR_MSG("Plugin {} was not removed correctly from the Plugin registry", this->name);
+  // }
 
-  this->event_manager->unregisterHandler(this);
+  // this->event_manager->unregisterHandler(this);
 }
 
 void Modules::Plugin::registerComponent()
@@ -475,20 +479,6 @@ void Modules::Plugin::attachComponent(std::unique_ptr<Modules::Component> compon
 void Modules::Plugin::attachPanel(Modules::Panel* panel)
 {
   this->widget_panel = panel;
-}
-
-int Modules::Plugin::exit()
-{
-  int result = 0;
-  Event::Object event(Event::Type::PLUGIN_REMOVE_EVENT);
-  event.setParam("pluginName", std::any(this->getName()));
-  this->event_manager->postEvent(&event);
-  event.wait();
-  if(!event.isdone()){
-    ERROR_MSG("Plugin {} was not removed by the modules manager", this->getName());
-    result = -1;
-  }
-  return result;
 }
 
 int64_t Modules::Plugin::getComponentIntParameter(const std::string& parameter_name)
