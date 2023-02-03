@@ -114,9 +114,10 @@ void PerformanceMeasurement::Component::execute()
   auto maxTimestep = getValue<double>("maxTimestep");
   auto maxLatency = getValue<double>("maxLatency");
   auto period = RT::OS::getPeriod();
+  if(period < 0) { period = RT::OS::DEFAULT_PERIOD; }
 
   double duration = *(end_ticks) - *(start_ticks);
-  double timestep = last_start_ticks - *(start_ticks);
+  double timestep = *(start_ticks) - last_start_ticks;
   auto latency = timestep - period;
 
   switch (getValue<Modules::Variable::state_t>("state")) {
@@ -133,6 +134,8 @@ void PerformanceMeasurement::Component::execute()
       setValue("latency", latency);
       timestepStat.push(timestep);
       latencyStat.push(latency);
+      setValue("timestep", timestep);
+      setValue("duration", duration);
       break;
     case Modules::Variable::INIT :
       timestepStat.clear();
@@ -154,7 +157,13 @@ void PerformanceMeasurement::Component::execute()
   setValue("jitter", latencyStat.std());
 }
 
-void PerformanceMeasurement::Panel::update()
+void PerformanceMeasurement::Component::setTickPointers(int64_t* s_ticks, int64_t* e_ticks)
+{
+  this->start_ticks = s_ticks;
+  this->end_ticks = e_ticks;
+}
+
+void PerformanceMeasurement::Panel::refresh()
 {
   Modules::Plugin* hostplugin = this->getHostPlugin();
   const double nano2micro = 1e-3;
@@ -182,8 +191,22 @@ PerformanceMeasurement::Plugin::Plugin(Event::Manager* ev_manager,
   : Modules::Plugin(ev_manager, mw, "RT Benchmarks")
 {
   auto plugin_component = std::make_unique<PerformanceMeasurement::Component>(this);
-  //auto panel = new PerformanceMeasurement::Panel("RT Benchmarks", mw);
   this->attachComponent(std::move(plugin_component));
+  std::vector<Event::Object*> events;
+  Event::Object preperiod_event(Event::Type::RT_PREPERIOD_EVENT);
+  Event::Object postperiod_event(Event::Type::RT_POSTPERIOD_EVENT);
+  events.push_back(&preperiod_event);
+  events.push_back(&postperiod_event);
+  this->event_manager->postEvent(events);
+  preperiod_event.wait();
+  postperiod_event.wait();
+  auto* performance_measurement_component = 
+    dynamic_cast<PerformanceMeasurement::Component*>(this->plugin_component.get());
+  performance_measurement_component->setTickPointers(
+      std::any_cast<int64_t*>(preperiod_event.getParam("pre-period")),
+      std::any_cast<int64_t*>(postperiod_event.getParam("post-period"))
+  );
+  this->setActive(true);
   //this->attachPanel(panel);
   // MainWindow::getInstance()->createSystemMenuItem(
   //     "RT Benchmarks", this, SLOT(createPerformanceMeasurementPanel(void)));

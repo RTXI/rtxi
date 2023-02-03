@@ -104,6 +104,7 @@ public:
                                PerformanceMeasurement::performance_measurement_vars){}
   void execute() override;
 
+  void setTickPointers(int64_t* s_ticks, int64_t* e_ticks);
   private:
 
   RunningStat timestepStat;
@@ -130,7 +131,7 @@ public slots:
   /*!
    * Updates the GUI with the latest values
    */
-  void update();
+  void refresh() override;
 
 
 private:

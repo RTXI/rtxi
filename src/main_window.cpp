@@ -410,9 +410,9 @@ void MainWindow::systemMenuActivated(QAction* id)
   event.setParam("pluginName", std::any(id->text().toStdString()));
   this->event_manager->postEvent(&event);
   event.wait();
-  auto create_rtxi_panel_func = std::any_cast<Modules::Panel*(*)(MainWindow*)>(event.getParam("createRTXIPanel"));
+  auto create_rtxi_panel_func = std::any_cast<Modules::Panel*(*)(MainWindow*, Event::Manager*)>(event.getParam("createRTXIPanel"));
   auto rtxi_plugin_pointer = std::any_cast<Modules::Plugin*>(event.getParam("pluginPointer"));
-  rtxi_plugin_pointer->attachPanel(create_rtxi_panel_func(this));
+  rtxi_plugin_pointer->attachPanel(create_rtxi_panel_func(this, this->event_manager)); 
 }
 
 void MainWindow::windowsMenuAboutToShow()
