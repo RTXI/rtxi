@@ -70,4 +70,11 @@ target_link_libraries(rtxi_exe
     rtos_lib 
     rtxi_lib 
     performance_measurement_lib
+    Boost::headers
+    backtrace
+    l
+    dl
 )
+
+target_compile_definitions(rtxi_exe PRIVATE BOOST_STACKTRACE_USE_ADDR2LINE)
+target_compile_definitions(rtxi_exe PRIVATE BOOST_STACKTRACE_USE_BACKTRACE)

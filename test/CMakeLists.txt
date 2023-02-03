@@ -18,15 +18,21 @@ target_link_libraries(rtxiTests PRIVATE
     rtos_lib
     rtos_fifo_lib
     rtxi_lib 
+    performance_measurement_lib
     GTest::gtest GTest::gtest_main
     GTest::gmock GTest::gmock_main 
     Qt5::Core Qt5::Widgets Qt5::Gui
     Threads::Threads
     fmt::fmt
-    performance_measurement_lib
     rtmath_lib
+    Boost::headers
+    dl
+    l
+    backtrace
 )
 
+target_compile_definitions(rtxiTests PRIVATE BOOST_STACKTRACE_USE_ADDR2LINE)
+target_compile_definitions(rtxiTests PRIVATE BOOST_STACKTRACE_USE_BACKTRACE)
 add_test(NAME rtxiTests COMMAND rtxiTests)
 
 add_folders(Test)
