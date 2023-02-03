@@ -19,7 +19,10 @@
  */
 
 #include <iostream>
+#include <boost/stacktrace.hpp>
+#include <signal.h>
 
+#include "debug.hpp"
 #include "rtxiTests.h"
 
 void TestEnvironment::SetUp()
@@ -37,6 +40,15 @@ void TestEnvironment::SetUp()
   }
 }
 
+static void signal_handler(int signum)
+{
+  static int count = 0;
+
+  ERROR_MSG("signal_handler : signal type {} received\n", signum);
+  std::cerr << boost::stacktrace::stacktrace();
+  exit(0);
+}
+
 void TestEnvironment::TearDown()
 {
   delete app;
@@ -44,6 +56,10 @@ void TestEnvironment::TearDown()
 
 int main(int argc, char* argv[])
 {
+  signal(SIGINT, signal_handler);
+  signal(SIGABRT, signal_handler);
+  signal(SIGSEGV, signal_handler);
+
   ::testing::InitGoogleTest(&argc, argv);
   ::testing::AddGlobalTestEnvironment(new TestEnvironment());
   return RUN_ALL_TESTS();

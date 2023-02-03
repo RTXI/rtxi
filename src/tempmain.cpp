@@ -1,14 +1,29 @@
 #include <iostream>
+#include <signal.h>
 
 #include <QApplication>
+#include <boost/stacktrace.hpp>
 
 #include "rtxiConfig.h"
+#include "debug.hpp"
 #include "rt.hpp"
 #include "module.hpp"
 #include "main_window.hpp"
 
+static void signal_handler(int signum)
+{
+  static int count = 0;
+
+  ERROR_MSG("signal_handler : signal type {} received\n", signum);
+  std::cerr << boost::stacktrace::stacktrace();
+}
+
 int main(int argc, char *argv[])
 {
+  signal(SIGINT, signal_handler);
+  signal(SIGABRT, signal_handler);
+  signal(SIGSEGV, signal_handler);
+
   std::cout << "Welcome to RTXI Version ";
   std::cout << RTXI_VERSION_MAJOR << ".";
   std::cout << RTXI_VERSION_MINOR << ".";
