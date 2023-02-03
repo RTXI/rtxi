@@ -1,5 +1,6 @@
 #include <iostream>
 #include <signal.h>
+#include <string.h>
 
 #include <QApplication>
 #include <boost/stacktrace.hpp>
@@ -14,8 +15,9 @@ static void signal_handler(int signum)
 {
   static int count = 0;
 
-  ERROR_MSG("signal_handler : signal type {} received\n", signum);
+  ERROR_MSG("signal_handler : signal type {} received\n", ::strsignal(signum));
   std::cerr << boost::stacktrace::stacktrace();
+  exit(-1);
 }
 
 int main(int argc, char *argv[])
