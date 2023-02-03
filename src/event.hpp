@@ -276,8 +276,7 @@ private:
   std::atomic<bool> running = true;
   std::thread event_thread;
 
-  // in c++20 atomic container includes wait and signal from condition 
-  // variables. However this was written with c++17 support 
+  // Shared mutex allows for multiple reader single writer scenarios.
   std::shared_mutex handlerlist_mut; // Mutex for modifying event handler queue
 };  // class Manager
 

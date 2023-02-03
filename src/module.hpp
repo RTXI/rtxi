@@ -161,6 +161,8 @@ public:
    */
   virtual void createGUI(const std::vector<Modules::Variable::Info>& vars, MainWindow* mw);
 
+  void setHostPlugin(Modules::Plugin* hplugin) { this->hostPlugin = hplugin; }
+
 public slots:
 
   /*!
@@ -238,7 +240,6 @@ protected:
 
   std::string getName(){ return this->name; }
   Modules::Plugin* getHostPlugin(){ return this->hostPlugin; }
-  //virtual void receiveEvent(const Event::Object* event) override;
 
   MainWindow* getMainWindowPtr() { return this->main_window; }
   Event::Manager* getRTXIEventManager() { return this->event_manager; }
@@ -320,7 +321,7 @@ public:
 
   void registerComponent();
 
-private:
+protected:
   // owned pointers
   std::unique_ptr<Modules::Component> plugin_component;
 
@@ -328,9 +329,10 @@ private:
   Event::Manager* event_manager=nullptr;
   MainWindow* main_window=nullptr; // Qt handles this lifetime
   Modules::Panel* widget_panel=nullptr; // Qt handles this lifetime
+
+private:
   std::string library;
   void* handle=nullptr; // if it is a shared object then this will not be null
-  
   std::string name;
 };
 

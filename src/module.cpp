@@ -479,6 +479,7 @@ void Modules::Plugin::attachComponent(std::unique_ptr<Modules::Component> compon
 void Modules::Plugin::attachPanel(Modules::Panel* panel)
 {
   this->widget_panel = panel;
+  panel->setHostPlugin(this);
 }
 
 int64_t Modules::Plugin::getComponentIntParameter(const std::string& parameter_name)
@@ -721,16 +722,10 @@ void Modules::Manager::receiveEvent(Event::Object* event)
       plugin_name = std::any_cast<std::string>(event->getParam("pluginName"));
       this->loadPlugin(plugin_name);
       event->setParam("createRTXIPanel", 
-                      std::any(&this->rtxi_factories_registry[plugin_name].createPanel));
+                      std::any(this->rtxi_factories_registry[plugin_name].createPanel));
       event->setParam("pluginPointer" , 
                       std::any(this->rtxi_modules_registry[plugin_name].get()));
-      //event->done();
-      // IMPORTANT!: component registration to the connector must not occur while
-      // handling another event lest you risk a deadlock in the program. That is why 
-      // we mark the event done so the caller can release event and run registration
-      // on another thread;
-      // std::async(std::launch::deferred, 
-      //            this->rtxi_modules_registry[plugin_name]->registerComponent());
+      //this->rtxi_modules_registry[plugin_name]->registerComponent();
     default:
       return;
   }

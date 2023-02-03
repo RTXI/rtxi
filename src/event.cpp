@@ -162,23 +162,23 @@ void Event::Object::setParam(const std::string& param_name, const std::any& para
 
 void Event::Object::wait()
 {
-  std::unique_lock done_lock(this->processing_done_mut);
+  std::unique_lock<std::mutex> done_lock(this->processing_done_mut);
   this->processing_done_cond.wait(done_lock, [this](){return this->processed;});
   //done_lock.unlock();
 }
 
 void Event::Object::done()
 {
-  std::unique_lock done_lock(this->processing_done_mut);
+  std::unique_lock<std::mutex> done_lock(this->processing_done_mut);
   this->processed = true;
   this->success = true;
-  //done_lock.unlock();
+  done_lock.unlock();
   this->processing_done_cond.notify_all();
 }
 
 void Event::Object::notdone()
 {
-  std::unique_lock done_lock(this->processing_done_mut);
+  std::unique_lock<std::mutex> done_lock(this->processing_done_mut);
   this->processed = true;
   this->success = false;
   this->processing_done_cond.notify_all();
