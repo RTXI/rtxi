@@ -240,15 +240,14 @@ void Event::Manager::processEvents()
       ERROR_MSG("Null pointer event received by event processor. Ignoring");
       return;
     }
-    std::unique_lock<std::mutex> handlerlist_lock(this->handlerlist_mut, std::defer_lock);
-    handlerlist_lock.lock();
+    std::shared_lock<std::shared_mutex> handlerlist_lock(this->handlerlist_mut);
     for(auto* handler : this->handlerList){
       handler->receiveEvent(event);
     }
     handlerlist_lock.unlock();
     event->done();
   };
-  // TODO: Turn this into an event pool implementation for performance
+  // TODO: Turn this into a thread pool implementation for performance
   while(this->running){
     this->available_event_cond.wait(event_lock, [this]{
       return !(this->event_q.empty()); 
@@ -264,24 +263,48 @@ void Event::Manager::processEvents()
 
 void Event::Manager::registerHandler(Event::Handler* handler)
 {
-  std::lock_guard<std::mutex> lk(this->handlerlist_mut);
+  std::unique_lock<std::shared_mutex> write_lock(this->handlerlist_mut);
   auto location = std::find(handlerList.begin(), handlerList.end(), handler);
   if(location == handlerList.end()){
     handlerList.push_back(handler);
   }
+  write_lock.unlock();
 }
 
 void Event::Manager::unregisterHandler(Event::Handler* handler)
 {
-  std::lock_guard<std::mutex> lk(this->handlerlist_mut);
+  std::unique_lock<std::shared_mutex> write_lock(this->handlerlist_mut);
   auto location = std::find(handlerList.begin(), handlerList.end(), handler);
   if(location != handlerList.end()){
     handlerList.erase(location);
   }
+  write_lock.unlock();
 }
 
 bool Event::Manager::isRegistered(Event::Handler* handler)
 {
+  std::shared_lock<std::shared_mutex> read_lock(this->handlerlist_mut);
   auto location = std::find(handlerList.begin(), handlerList.end(), handler);
-  return location != handlerList.end();
+  bool result = location != handlerList.end();
+  read_lock.unlock();
+  return result;
 }
+
+// void Event::Manager::handlerListReadLock()
+// {
+//   this->empty_writersq.wait(false); 
+//   this->active_readers++;
+// }
+// 
+// void Event::Manager::handlerListReadUnlock()
+// {
+//   this->active_readers--;
+// }
+// 
+// void Event::Manager::handlerListWriteLock()
+// {
+//   this->active_writers++;
+//   this->empty_readersq.wait(false); 
+//   std::unique_lock<std::mutex> handler_list_lock(this->handlerlist_mut);
+//   wait(done_lock, [this](){return this->processed;});
+// }

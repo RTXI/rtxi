@@ -62,6 +62,9 @@ TEST_F(EventManagerTest, postEvent)
   event_manager->unregisterHandler(&event_handler);
 }
 
+// TODO: Event registration test seems to fail randomly. Seems to be caused
+// by gtest inability to handle multiple threads. Should replace EXPECT_CALL
+// with a more reliable mechanism to check expected calls to receiveEvent func
 TEST_F(EventManagerTest, Registration)
 {
   auto event_manager = std::make_unique<Event::Manager>();

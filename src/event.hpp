@@ -26,6 +26,7 @@
 #include <list>
 #include <queue>
 #include <mutex>
+#include <shared_mutex>
 #include <string>
 #include <vector>
 #include <atomic>
@@ -271,10 +272,13 @@ private:
   std::list<Handler*> handlerList;
   std::queue<Event::Object*> event_q;
   std::mutex event_mut; // Mutex for posting events
-  std::mutex handlerlist_mut; // Mutex for poping events from queue
   std::condition_variable available_event_cond;
   std::atomic<bool> running = true;
   std::thread event_thread;
+
+  // in c++20 atomic container includes wait and signal from condition 
+  // variables. However this was written with c++17 support 
+  std::shared_mutex handlerlist_mut; // Mutex for modifying event handler queue
 };  // class Manager
 
 }  // namespace Event

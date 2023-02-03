@@ -724,7 +724,7 @@ void Modules::Manager::receiveEvent(Event::Object* event)
                       std::any(&this->rtxi_factories_registry[plugin_name].createPanel));
       event->setParam("pluginPointer" , 
                       std::any(this->rtxi_modules_registry[plugin_name].get()));
-      event->done();
+      //event->done();
       // IMPORTANT!: component registration to the connector must not occur while
       // handling another event lest you risk a deadlock in the program. That is why 
       // we mark the event done so the caller can release event and run registration
