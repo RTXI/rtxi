@@ -568,7 +568,7 @@ int Modules::Plugin::setComponentComment(const std::string& parameter_name, std:
 int Modules::Plugin::setComponentState(const std::string& parameter_name, Modules::Variable::state_t value)
 {
   int result = 0;
-  Event::Object event(Event::Type::RT_MODULE_STATE_CHANGE_EVENT);
+  Event::Object event(Event::Type::RT_MODULE_PARAMETER_CHANGE_EVENT);
   event.setParam("paramName", std::any(parameter_name));
   event.setParam("paramType", std::any(Modules::Variable::STATE));
   event.setParam("paramValue", std::any(value));
