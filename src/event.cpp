@@ -145,6 +145,17 @@ std::any Event::Object::getParam(const std::string& param_name)
   return std::any();
 }
 
+bool Event::Object::paramExists(const std::string& param_name)
+{
+  bool result = false;
+  for (auto& parameter : params) {
+    if (parameter.name == param_name) {
+       result = true;
+    }
+  }
+  return result;
+}
+
 void Event::Object::setParam(const std::string& param_name, const std::any& param_value)
 {
   for (auto& parameter : params) {

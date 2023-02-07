@@ -169,6 +169,8 @@ public:
    */
   bool isdone() const;
 
+  bool paramExists(const std::string& param_name);
+
 private:
   struct param
   {
