@@ -24,6 +24,7 @@
 #include "fifo.hpp"
 #include "event.hpp"
 #include "rt.hpp"
+#include "module.hpp"
 
 int RT::Connector::connect(RT::Thread* src,
                            size_t out,
@@ -501,6 +502,32 @@ void RT::System::getPeriodTicksCMD(RT::System::CMD* cmd)
   cmd->done();
 }
 
+void RT::System::changeModuleParametersCMD(RT::System::CMD* cmd)
+{
+  auto* component = std::any_cast<Modules::Component*>(cmd->getParam("paramModule"));
+  auto param_name = std::any_cast<std::string>(cmd->getParam("paramName"));
+  auto param_type = std::any_cast<Modules::Variable::variable_t>(cmd->getParam("paramType"));
+  std::any param_value_any = cmd->getParam("paramValue");
+  switch(param_type){
+    case Modules::Variable::DOUBLE_PARAMETER :
+      component->setValue<double>(param_name, std::any_cast<double>(param_value_any));
+      break;
+    case Modules::Variable::INT_PARAMETER :
+      component->setValue<int64_t>(param_name, std::any_cast<int64_t>(param_value_any));
+      break;
+    case Modules::Variable::UINT_PARAMETER :
+      component->setValue<uint64_t>(param_name, std::any_cast<uint64_t>(param_value_any));
+      break;
+    case Modules::Variable::STATE :
+      component->setValue<Modules::Variable::state_t>(param_name, 
+                                                      std::any_cast<Modules::Variable::state_t>(param_value_any));
+      break;
+    default:
+      ERROR_MSG("Module Parameter Change event does not contain expected parameter types");
+  }
+  cmd->done();
+}
+
 void RT::System::executeCMD(RT::System::CMD* cmd)
 {
   RT::Telemitry::Response telem = RT::Telemitry::NO_TELEMITRY;
@@ -529,6 +556,9 @@ void RT::System::executeCMD(RT::System::CMD* cmd)
       telem = RT::Telemitry::RT_SHUTDOWN;
       this->postTelemitry(telem);
       cmd->done();
+      break;
+    case Event::Type::RT_MODULE_PARAMETER_CHANGE_EVENT :
+      this->changeModuleParametersCMD(cmd);
       break;
     case Event::Type::NOOP :
       telem = RT::Telemitry::RT_NOOP;
@@ -565,6 +595,9 @@ void RT::System::receiveEvent(Event::Object* event)
     case Event::Type::RT_DEVICE_REMOVE_EVENT :
       this->removeDevice(event);
       break;
+    case Event::Type::RT_MODULE_PARAMETER_CHANGE_EVENT :
+      this->changeModuleParameters(event);
+      break;
     case Event::Type::RT_SHUTDOWN_EVENT :
       this->shutdown(event);
       break;
@@ -579,9 +612,6 @@ void RT::System::receiveEvent(Event::Object* event)
       this->NOOP(event);
       break;
     default:
-      // Event manager should be the one to 
-    // let the caller know event is not processed
-      //event->notdone();
       return;
   }
 }
@@ -594,13 +624,11 @@ void RT::System::setPeriod(Event::Object* event)
   RT::System::CMD* cmd_ptr = &cmd;
   this->eventFifo->write(&cmd_ptr, sizeof(RT::System::CMD*));
   cmd.wait();
-  event->done();
 }
 
 void RT::System::getPeriodValues(Event::Object* event)
 {
   event->setParam("period", std::any(this->getPeriod()));
-  event->done();
 }
 
 void RT::System::NOOP(Event::Object* event)
@@ -609,7 +637,6 @@ void RT::System::NOOP(Event::Object* event)
   RT::System::CMD* cmd_ptr = &cmd;
   this->eventFifo->write(&cmd_ptr, sizeof(RT::System::CMD*));
   cmd.wait();
-  event->done();
   cmd_ptr = nullptr;
 }
 
@@ -627,7 +654,6 @@ void RT::System::insertDevice(Event::Object* event)
   RT::System::CMD* cmd_ptr = &cmd;
   this->eventFifo->write(&cmd_ptr, sizeof(RT::System::CMD*));
   cmd.wait();
-  event->done();
 }
 
 void RT::System::removeDevice(Event::Object* event)
@@ -646,7 +672,6 @@ void RT::System::removeDevice(Event::Object* event)
   RT::System::CMD* cmd_ptr = &cmd;
   this->eventFifo->write(&cmd_ptr, sizeof(RT::System::CMD*));
   cmd.wait();
-  event->done();
 }
 
 void RT::System::insertThread(Event::Object* event)
@@ -663,7 +688,6 @@ void RT::System::insertThread(Event::Object* event)
   RT::System::CMD* cmd_ptr = &cmd;
   this->eventFifo->write(&cmd_ptr, sizeof(RT::System::CMD*));
   cmd.wait();
-  event->done();
 }
 
 void RT::System::removeThread(Event::Object* event)
@@ -682,7 +706,6 @@ void RT::System::removeThread(Event::Object* event)
   RT::System::CMD* cmd_ptr = &cmd;
   this->eventFifo->write(&cmd_ptr, sizeof(RT::System::CMD*));
   cmd.wait();
-  event->done();
 }
 
 void RT::System::blockActivityChange(Event::Object* event)
@@ -693,7 +716,6 @@ void RT::System::blockActivityChange(Event::Object* event)
   
   this->eventFifo->write(&cmd_ptr, sizeof(RT::System::CMD*));
   cmd.wait();
-  event->done();
 }
 
 void RT::System::shutdown(Event::Object* event)
@@ -702,7 +724,6 @@ void RT::System::shutdown(Event::Object* event)
   RT::System::CMD* cmd_ptr = &cmd;
   this->eventFifo->write(&cmd_ptr, sizeof(RT::System::CMD*));
   cmd.wait();
-  event->done();
 }
 
 void RT::System::provideTimetickPointers(Event::Object* event)
@@ -728,8 +749,17 @@ void RT::System::provideTimetickPointers(Event::Object* event)
       event->notdone();
       return;
   }
-  event->done();
 }
+
+void RT::System::changeModuleParameters(Event::Object* event)
+{
+  // We will just dynamic cast since we do not make nay changes to the 
+  // event parameters themeselves
+  RT::System::CMD* cmd_ptr = static_cast<RT::System::CMD*>(event);
+  this->eventFifo->write(&cmd_ptr, sizeof(RT::System::CMD*));
+  cmd_ptr->wait();
+}
+
 
 void RT::System::execute(void* sys)
 {

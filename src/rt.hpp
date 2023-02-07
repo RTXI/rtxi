@@ -453,6 +453,7 @@ private:
   void NOOP(Event::Object* event);
   void getPeriodValues(Event::Object* event);
   void provideTimetickPointers(Event::Object* event);
+  void changeModuleParameters(Event::Object* event);
 
   void executeCMD(CMD* cmd);
   void updateDeviceList(CMD* cmd);
@@ -461,6 +462,7 @@ private:
   void setPeriod(CMD* cmd);
   void shutdown(CMD* cmd);
   void getPeriodTicksCMD(CMD* cmd);
+  void changeModuleParametersCMD(CMD* cmd);
 
   void postTelemitry(RT::Telemitry::Response& telemitry);
 
