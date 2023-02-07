@@ -107,7 +107,7 @@ public:
   void setTickPointers(int64_t* s_ticks, int64_t* e_ticks);
   private:
 
-  RunningStat timestepStat;
+  //RunningStat timestepStat;
   RunningStat latencyStat;
 
   int64_t *start_ticks; // only accessed in rt
