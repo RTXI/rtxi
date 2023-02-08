@@ -301,21 +301,3 @@ bool Event::Manager::isRegistered(Event::Handler* handler)
   return result;
 }
 
-// void Event::Manager::handlerListReadLock()
-// {
-//   this->empty_writersq.wait(false); 
-//   this->active_readers++;
-// }
-// 
-// void Event::Manager::handlerListReadUnlock()
-// {
-//   this->active_readers--;
-// }
-// 
-// void Event::Manager::handlerListWriteLock()
-// {
-//   this->active_writers++;
-//   this->empty_readersq.wait(false); 
-//   std::unique_lock<std::mutex> handler_list_lock(this->handlerlist_mut);
-//   wait(done_lock, [this](){return this->processed;});
-// }
