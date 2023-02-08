@@ -617,8 +617,7 @@ void RT::System::receiveEvent(Event::Object* event)
 void RT::System::setPeriod(Event::Object* event)
 {
   //auto period = std::any_cast<int64_t>(event->getParam("period"));
-  RT::System::CMD cmd(event->getType());
-  cmd.setParam("period", event->getParam("period"));
+  RT::System::CMD cmd(*event);
   RT::System::CMD* cmd_ptr = &cmd;
   this->eventFifo->write(&cmd_ptr, sizeof(RT::System::CMD*));
   cmd.wait();
@@ -635,7 +634,6 @@ void RT::System::NOOP(Event::Object* event)
   RT::System::CMD* cmd_ptr = &cmd;
   this->eventFifo->write(&cmd_ptr, sizeof(RT::System::CMD*));
   cmd.wait();
-  cmd_ptr = nullptr;
 }
 
 void RT::System::insertDevice(Event::Object* event)
@@ -647,7 +645,7 @@ void RT::System::insertDevice(Event::Object* event)
   }
   this->rt_connector->insertBlock(device);
   std::vector<RT::Device*> device_list = this->rt_connector->getDevices();
-  RT::System::CMD cmd(event->getType());
+  RT::System::CMD cmd(*event);
   cmd.setParam("deviceList", std::any(device_list));
   RT::System::CMD* cmd_ptr = &cmd;
   this->eventFifo->write(&cmd_ptr, sizeof(RT::System::CMD*));
@@ -665,7 +663,7 @@ void RT::System::removeDevice(Event::Object* event)
   device->setActive(false);
   this->rt_connector->removeBlock(device);
   std::vector<RT::Device*> device_list = this->rt_connector->getDevices();
-  RT::System::CMD cmd(event->getType());
+  RT::System::CMD cmd(*event);
   cmd.setParam("deviceList", std::any(device_list));
   RT::System::CMD* cmd_ptr = &cmd;
   this->eventFifo->write(&cmd_ptr, sizeof(RT::System::CMD*));
@@ -681,7 +679,7 @@ void RT::System::insertThread(Event::Object* event)
   }
   this->rt_connector->insertBlock(thread);
   std::vector<RT::Thread*> thread_list = this->rt_connector->getThreads();
-  RT::System::CMD cmd(event->getType());
+  RT::System::CMD cmd(*event);
   cmd.setParam("threadList", std::any(thread_list));
   RT::System::CMD* cmd_ptr = &cmd;
   this->eventFifo->write(&cmd_ptr, sizeof(RT::System::CMD*));
@@ -699,7 +697,7 @@ void RT::System::removeThread(Event::Object* event)
   thread->setActive(false);
   this->rt_connector->removeBlock(thread);
   std::vector<RT::Thread*> thread_list = this->rt_connector->getThreads();
-  RT::System::CMD cmd(event->getType());
+  RT::System::CMD cmd(*event);
   cmd.setParam("threadList", std::any(thread_list));
   RT::System::CMD* cmd_ptr = &cmd;
   this->eventFifo->write(&cmd_ptr, sizeof(RT::System::CMD*));
@@ -708,7 +706,7 @@ void RT::System::removeThread(Event::Object* event)
 
 void RT::System::blockActivityChange(Event::Object* event)
 {
-  RT::System::CMD cmd(event->getType());
+  RT::System::CMD cmd(*event);
   cmd.setParam("block", std::any(event->getParam("block")));
   RT::System::CMD* cmd_ptr = &cmd;
   
@@ -718,7 +716,7 @@ void RT::System::blockActivityChange(Event::Object* event)
 
 void RT::System::shutdown(Event::Object* event)
 {
-  RT::System::CMD cmd(event->getType());
+  RT::System::CMD cmd(*event);
   RT::System::CMD* cmd_ptr = &cmd;
   this->eventFifo->write(&cmd_ptr, sizeof(RT::System::CMD*));
   cmd.wait();
@@ -726,7 +724,7 @@ void RT::System::shutdown(Event::Object* event)
 
 void RT::System::provideTimetickPointers(Event::Object* event)
 {
-  RT::System::CMD cmd(event->getType());
+  RT::System::CMD cmd(*event);
   RT::System::CMD* cmd_ptr = &cmd;
   this->eventFifo->write(&cmd_ptr, sizeof(RT::System::CMD*));
   cmd.wait();
@@ -771,7 +769,7 @@ void RT::System::execute(void* sys)
     return;
   }
   auto starttime = RT::OS::getTime();
-  int64_t endtime;
+  int64_t endtime = 0;
   while (!(system->task->task_finished)) {
     // storing timing information and placing it in local variables
     endtime = RT::OS::getTime();
