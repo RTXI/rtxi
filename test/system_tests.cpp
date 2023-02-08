@@ -138,7 +138,6 @@ TEST_F(SystemTest, checkTelemitry)
 {
   Event::Object event(Event::Type::NOOP);
   this->system->receiveEvent(&event);
-  event.wait();
   ASSERT_EQ(RT::Telemitry::RT_NOOP, this->system->getTelemitry());
 }
 
@@ -146,7 +145,6 @@ TEST_F(SystemTest, shutdown)
 {
   Event::Object ev(Event::Type::RT_SHUTDOWN_EVENT);
   this->system->receiveEvent(&ev);
-  ev.wait();
   ASSERT_EQ(this->system->getTelemitry(), RT::Telemitry::RT_SHUTDOWN);
 }
 
@@ -162,12 +160,10 @@ TEST_F(SystemTest, setPeriod)
   Event::Object ev(Event::Type::RT_PERIOD_EVENT);
   ev.setParam("period", RT::OS::DEFAULT_PERIOD / 2);
   this->system->receiveEvent(&ev);
-  ev.wait();
   EXPECT_EQ(RT::Telemitry::RT_PERIOD_UPDATE, this->system->getTelemitry());
   ASSERT_EQ(RT::OS::DEFAULT_PERIOD / 2, system->getPeriod());
   ev.setParam("period", RT::OS::DEFAULT_PERIOD);
   this->system->receiveEvent(&ev);
-  ev.wait();
   EXPECT_EQ(RT::Telemitry::RT_PERIOD_UPDATE, this->system->getTelemitry());
   ASSERT_EQ(RT::OS::DEFAULT_PERIOD, system->getPeriod());
 }
@@ -201,7 +197,6 @@ TEST_F(SystemTest, updateDeviceList)
   change_activity_event.setParam("block",
                                  static_cast<IO::Block*>(&mock_device));
   this->system->receiveEvent(&change_activity_event);
-  change_activity_event.wait();
 
   // std::any_cast<RT::Device*>(std::any(static_cast<RT::Device*>(&mock_device)))->read();
   // std::any_cast<RT::Device*>(std::any(static_cast<RT::Device*>(&mock_device)))->write();
@@ -211,7 +206,6 @@ TEST_F(SystemTest, updateDeviceList)
   Event::Object insertEvent(Event::Type::RT_DEVICE_INSERT_EVENT);
   insertEvent.setParam("device", static_cast<RT::Device*>(&mock_device));
   this->system->receiveEvent(&insertEvent);
-  insertEvent.wait();
   ASSERT_EQ(this->system->getTelemitry(), RT::Telemitry::RT_DEVICE_LIST_UPDATE);
   ASSERT_TRUE(this->rt_connector->isRegistered(&mock_device));
 
@@ -219,7 +213,6 @@ TEST_F(SystemTest, updateDeviceList)
   Event::Object removeEvent(Event::Type::RT_DEVICE_REMOVE_EVENT);
   removeEvent.setParam("device", static_cast<RT::Device*>(&mock_device));
   this->system->receiveEvent(&removeEvent);
-  removeEvent.wait();
   ASSERT_EQ(this->system->getTelemitry(), RT::Telemitry::RT_DEVICE_LIST_UPDATE);
   ASSERT_FALSE(this->rt_connector->isRegistered(&mock_device));
 }
@@ -253,14 +246,12 @@ TEST_F(SystemTest, updateThreadList)
   Event::Object change_activity_event(Event::Type::RT_BLOCK_UNPAUSE_EVENT);
   change_activity_event.setParam("block", static_cast<IO::Block*>(thread_ptr));
   this->system->receiveEvent(&change_activity_event);
-  change_activity_event.wait();
 
   // insert thread
   this->rt_connector->insertBlock(thread_ptr);
   Event::Object insertEvent(Event::Type::RT_THREAD_INSERT_EVENT);
   insertEvent.setParam("thread", thread_ptr);
   this->system->receiveEvent(&insertEvent);
-  insertEvent.wait();
   ASSERT_EQ(this->system->getTelemitry(), RT::Telemitry::RT_THREAD_LIST_UPDATE);
   ASSERT_TRUE(this->rt_connector->isRegistered(&mock_thread));
 
@@ -268,7 +259,6 @@ TEST_F(SystemTest, updateThreadList)
   Event::Object removeEvent(Event::Type::RT_THREAD_REMOVE_EVENT);
   removeEvent.setParam("thread", thread_ptr);
   this->system->receiveEvent(&removeEvent);
-  removeEvent.wait();
   ASSERT_EQ(this->system->getTelemitry(), RT::Telemitry::RT_THREAD_LIST_UPDATE);
   ASSERT_FALSE(this->rt_connector->isRegistered(&mock_thread));
 }
