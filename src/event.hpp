@@ -99,7 +99,7 @@ class Object
 {
 public:
   explicit Object(Event::Type et);
-  Object(const Object& obj) = delete; // copy constructor
+  Object(const Object& obj); // copy constructor
   Object& operator=(const Object& obj) = delete; //copy assignment operator
   Object(Object &&) = delete; // move constructor
   Object& operator=(Object &&) = delete; // move assignment operator
@@ -150,19 +150,6 @@ public:
   void done();
 
   /*!
-   * Marks the event object as processed but not successfully completed
-   */
-  void notdone();
-
-  /*!
-   * Checks whether the event has been proccessed. May return true if 
-   * event was processed by apropriate handler but failed completion
-   * 
-   * \returns True if handled. False otherwise
-   */
-  bool handled() const;
-
-  /*!
    * Checks whether the event object has been processed already. Events 
    * that have true value for processed are also handled. 
    * \returns true if processed. False otherwise
@@ -183,7 +170,6 @@ private:
   std::condition_variable processing_done_cond;
   const Type event_type;
   bool processed;
-  bool success;
 };  // class Object
 
 /*!

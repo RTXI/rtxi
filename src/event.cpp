@@ -126,7 +126,12 @@ std::string Event::type_to_string(Event::Type event_type)
 }
 
 Event::Object::Object(Event::Type et)
-    : event_type(et), processed(false), success(false)
+    : event_type(et), processed(false)
+{
+}
+
+Event::Object::Object(const Event::Object& obj)
+    : params(obj.params),event_type(obj.event_type), processed(false)
 {
 }
 
@@ -182,25 +187,11 @@ void Event::Object::done()
 {
   std::unique_lock<std::mutex> done_lock(this->processing_done_mut);
   this->processed = true;
-  this->success = true;
   done_lock.unlock();
-  this->processing_done_cond.notify_all();
-}
-
-void Event::Object::notdone()
-{
-  std::unique_lock<std::mutex> done_lock(this->processing_done_mut);
-  this->processed = true;
-  this->success = false;
-  this->processing_done_cond.notify_all();
+  this->processing_done_cond.notify_one();
 }
 
 bool Event::Object::isdone() const
-{
-  return this->success;
-}
-
-bool Event::Object::handled() const
 {
   return this->processed;
 }

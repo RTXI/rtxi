@@ -441,6 +441,8 @@ private:
   public:
     explicit CMD(Event::Type et)
         : Event::Object(et) {};
+    explicit CMD(const Event::Object& event)
+        : Event::Object(event) {};
   };
 
   void insertDevice(Event::Object* event);

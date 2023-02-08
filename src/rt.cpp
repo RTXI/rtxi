@@ -481,7 +481,6 @@ void RT::System::updateBlockActivity(RT::System::CMD* cmd)
       cmd->done();
       break;
     default:
-      cmd->notdone();
       break;
   }
 }
@@ -496,7 +495,6 @@ void RT::System::getPeriodTicksCMD(RT::System::CMD* cmd)
       cmd->setParam("post-period", std::any(&(this->periodEndTime)));
       break;
     default:
-      cmd->notdone();
       return;
   }
   cmd->done();
@@ -746,7 +744,6 @@ void RT::System::provideTimetickPointers(Event::Object* event)
       event->setParam("post-period", std::any(stopperiod));
       break;
     default:
-      event->notdone();
       return;
   }
 }
@@ -755,7 +752,8 @@ void RT::System::changeModuleParameters(Event::Object* event)
 {
   // We will just dynamic cast since we do not make nay changes to the 
   // event parameters themeselves
-  RT::System::CMD* cmd_ptr = static_cast<RT::System::CMD*>(event);
+  RT::System::CMD cmd(*event);
+  RT::System::CMD* cmd_ptr = &cmd;
   this->eventFifo->write(&cmd_ptr, sizeof(RT::System::CMD*));
   cmd_ptr->wait();
 }
