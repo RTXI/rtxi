@@ -239,7 +239,6 @@ void Modules::Panel::exit()
   Event::Object event(Event::Type::PLUGIN_REMOVE_EVENT);
   event.setParam("pluginName", this->getName());
   this->event_manager->postEvent(&event);
-  event.wait();
   this->subWindow->close();
 }
 
@@ -433,7 +432,6 @@ Modules::Plugin::Plugin(Event::Manager* ev_manager, MainWindow* mw, const std::s
   //Event::Object event(Event::Type::PLUGIN_INSERT_EVENT);
   //event.setParam("plugin", std::any(this));
   //this->event_manager->postEvent(&event);
-  //event.wait();
 }
 
 Modules::Plugin::~Plugin()
@@ -442,12 +440,10 @@ Modules::Plugin::~Plugin()
     Event::Object unplug_block_event(Event::Type::RT_THREAD_REMOVE_EVENT);
     unplug_block_event.setParam("thread", std::any(static_cast<RT::Thread*>(this->plugin_component.get())));
     this->event_manager->postEvent(&unplug_block_event);
-    unplug_block_event.wait();
   }
   // Event::Object remove_plugin_event(Event::Type::PLUGIN_REMOVE_EVENT);
   // remove_plugin_event.setParam("pluginName", this->getName());
   // this->event_manager->postEvent(&remove_plugin_event);
-  // remove_plugin_event.wait();
   // if (!remove_plugin_event.isdone()){
   //   ERROR_MSG("Plugin {} was not removed correctly from the Plugin registry", this->name);
   // }
@@ -461,7 +457,6 @@ void Modules::Plugin::registerComponent()
   Event::Object event = Event::Object(Event::Type::RT_THREAD_INSERT_EVENT);
   event.setParam("thread", static_cast<RT::Thread*>(this->plugin_component.get()));
   this->event_manager->postEvent(&event);
-  event.wait();
 }
 
 void Modules::Plugin::attachComponent(std::unique_ptr<Modules::Component> component)
@@ -500,7 +495,6 @@ int Modules::Plugin::setComponentIntParameter(const std::string& parameter_name,
   event.setParam("paramValue", std::any(value));
   event.setParam("paramModule", std::any(this->plugin_component.get()));
   this->event_manager->postEvent(&event);
-  event.wait();
   return result;
 }
 
@@ -513,7 +507,6 @@ int Modules::Plugin::setComponentDoubleParameter(const std::string& parameter_na
   event.setParam("paramValue", std::any(value));
   event.setParam("paramModule", std::any(this->plugin_component.get()));
   this->event_manager->postEvent(&event);
-  event.wait();
   return result;
 }
 
@@ -526,7 +519,6 @@ int Modules::Plugin::setComponentUintParameter(const std::string& parameter_name
   event.setParam("paramValue", std::any(value));
   event.setParam("paramModule", std::any(this->plugin_component.get()));
   this->event_manager->postEvent(&event);
-  event.wait();
   return result;
 }
 
@@ -539,7 +531,6 @@ int Modules::Plugin::setComponentComment(const std::string& parameter_name, std:
   event.setParam("paramValue", std::any(value));
   event.setParam("paramModule", std::any(this->plugin_component.get()));
   this->event_manager->postEvent(&event);
-  event.wait();
   return result;
 }
 
@@ -552,7 +543,6 @@ int Modules::Plugin::setComponentState(const std::string& parameter_name, Module
   event.setParam("paramValue", std::any(value));
   event.setParam("paramModule", std::any(this->plugin_component.get()));
   this->event_manager->postEvent(&event);
-  event.wait();
   return result;
 }
 
@@ -578,7 +568,6 @@ int Modules::Plugin::setActive(bool state)
   Event::Object event(event_type);
   event.setParam("block", std::any(static_cast<IO::Block*>(this->plugin_component.get())));
   this->event_manager->postEvent(&event);
-  event.wait();
   return result;
 }
 

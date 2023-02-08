@@ -218,19 +218,25 @@ Event::Manager::~Manager()
 
 void Event::Manager::postEvent(Event::Object* event)
 {
-  std::lock_guard<std::mutex> lk(this->event_mut);
+  std::unique_lock<std::mutex> lk(this->event_mut);
   this->event_q.push(event);
   this->available_event_cond.notify_all();
+  lk.unlock();
+  event->wait();
 }
 
 void Event::Manager::postEvent(const std::vector<Event::Object*>& events)
 {
   // For performance provide postEvent that accepts multiple events
-  std::lock_guard<std::mutex> lk(this->event_mut);
+  std::unique_lock<std::mutex> lk(this->event_mut);
   for(auto* event : events){
     this->event_q.push(event);
   }
   this->available_event_cond.notify_all();
+  lk.unlock();
+  for(auto* event : events){
+    event->wait();
+  }
 }
 
 void Event::Manager::processEvents()

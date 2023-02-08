@@ -196,8 +196,6 @@ PerformanceMeasurement::Plugin::Plugin(Event::Manager* ev_manager,
   events.push_back(&preperiod_event);
   events.push_back(&postperiod_event);
   this->event_manager->postEvent(events);
-  preperiod_event.wait();
-  postperiod_event.wait();
   auto* performance_measurement_component = 
     dynamic_cast<PerformanceMeasurement::Component*>(this->plugin_component.get());
   performance_measurement_component->setTickPointers(
