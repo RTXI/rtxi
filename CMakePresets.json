@@ -47,7 +47,7 @@
       "name": "clang-tidy",
       "hidden": true,
       "cacheVariables": {
-        "CMAKE_CXX_CLANG_TIDY": "clang-tidy-12;--header-filter=(?!.*moc)(?!.*test).+\\.[h][p]{0,2};--use-color"
+        "CMAKE_CXX_CLANG_TIDY": "clang-tidy;--header-filter=(?!.*moc)(?!.*test).+\\.[h][p]{0,2};--use-color"
       }
     },
     {
