@@ -35,7 +35,10 @@ This is platform and interface dependent, so the FIFO primitive used in
 posix interface will be different than Xenomai's evl interface
 
 This structure should not be used between two threads of the same priority.
-It is meant only for realtime and non-realtime thread communications.
+It is meant only for realtime and non-realtime thread communications. In the
+case where you need communication between two ui threads, consider using a 
+message queue. for communication between two RT threads, use the underlying
+OS provided IPCs.
 */
 class Fifo
 {
@@ -53,20 +56,20 @@ public:
    *
    * \param buf The buffer where the data from the buffer should be
    *     written to
-   * \param buf_size The size of the data to read from the buffer
+   * \param data_size The size of the data to read from the buffer
    * \return n Number of elements read. Same as size.
    */
-  virtual ssize_t read(void* buf, size_t buf_size) = 0;
+  virtual ssize_t read(void* buf, size_t data_size) = 0;
 
   /*!
    * Write to the FIFO storage for the RT thread. Must be run from non-rt
    * thread.
    *
    * \param buf The buffer holding the data to write to the FIFO.
-   * \param buf_size The size of the data to read from the buffer
+   * \param data_size The size of the data to read from the buffer
    * \return n Number of elements written. Same as size.
    */
-  virtual ssize_t write(void* buf, size_t buf_size) = 0;
+  virtual ssize_t write(void* buf, size_t data_size) = 0;
 
   /*!
    * Read the data stored in the FIFO written by non-RT thread. Must be run
@@ -74,20 +77,20 @@ public:
    *
    * \param buf The buffer where the data from the buffer should be
    *     written to
-   * \param buf_size The size of the data to read from the buffer
+   * \param data_size The size of the data to read from the buffer
    * \return n Number of elements read. Same as size.
    */
-  virtual ssize_t readRT(void* buf, size_t buf_size) = 0;
+  virtual ssize_t readRT(void* buf, size_t data_size) = 0;
 
   /*!
    * Write to the FIFO storage for the non-RT thread. Must be run from RT
    * thread.
    *
    * \param buf The buffer holding the data to write to the FIFO.
-   * \param buf_size The size of the data to read from the buffer
+   * \param data_size The size of the data to read from the buffer
    * \return n Number of elements written. Same as size.
    */
-  virtual ssize_t writeRT(void* buf, size_t buf_size) = 0;
+  virtual ssize_t writeRT(void* buf, size_t data_size) = 0;
 
   /*!
    * Get the memory capacity of the fifo

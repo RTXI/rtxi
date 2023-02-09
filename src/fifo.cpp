@@ -18,11 +18,9 @@
 
 */
 
-#include <unistd.h>
-#include <fcntl.h>
-#include <string.h>
-
 #include <array>
+#include <mutex>
+#include <condition_variable>
 
 #include "debug.hpp"
 #include "fifo.hpp"
@@ -30,79 +28,134 @@
 // Generic posix fifo based on pipes
 namespace RT::OS
 {
-class posixFifo : public RT::OS::Fifo 
+class xbuffFifo : public RT::OS::Fifo 
 {
   public:
-  explicit posixFifo(size_t size);
-  posixFifo(const posixFifo& fifo) = delete;
-  posixFifo& operator=(const posixFifo& fifo) = delete;
-  posixFifo(posixFifo &&) = default;
-  posixFifo& operator=(posixFifo &&) = default;
-  ~posixFifo() override;
+  explicit xbuffFifo(size_t size);
+  xbuffFifo(const xbuffFifo& fifo) = delete;
+  xbuffFifo& operator=(const xbuffFifo& fifo) = delete;
+  xbuffFifo(xbuffFifo &&) = default;
+  xbuffFifo& operator=(xbuffFifo &&) = default;
+  ~xbuffFifo() override;
 
   size_t getCapacity() override;
-  ssize_t read(void* buf, size_t buf_size) override;
-  ssize_t write(void* buf, size_t buf_size) override;
-  ssize_t readRT(void* buf, size_t buf_size) override;
-  ssize_t writeRT(void* buf, size_t buf_size) override;
+  ssize_t read(void* buf, size_t data_size) override;
+  ssize_t write(void* buf, size_t data_size) override;
+  ssize_t readRT(void* buf, size_t data_size) override;
+  ssize_t writeRT(void* buf, size_t data_size) override;
 
   private:
-  std::array<int, 2> rt_to_ui_fd; // 0 is read from rt; 1 is write to ui
-  std::array<int, 2> ui_to_rt_fd; // 0 is read from ui; 1 is write to rt
-  size_t fifo_capacity;
+  char* rt_to_ui; // 0 is read from rt; 1 is write to ui
+  char* ui_to_rt; // 0 is read from ui; 1 is write to rt
+  const uint64_t fifo_capacity;
+  std::mutex mutex_rt2ui;
+  std::mutex mutex_ui2rt;
+  uint64_t ui_rptr = 0;
+  uint64_t ui_wptr = 0;
+  uint64_t rt_rptr = 0;
+  uint64_t rt_wptr = 0;
+  uint64_t ui_available_read_bytes;
+  uint64_t ui_available_write_bytes;
+  uint64_t rt_available_read_bytes;
+  uint64_t rt_available_write_bytes;
+
 };
 }  // namespace RT::OS
 
-RT::OS::posixFifo::posixFifo(size_t size) : rt_to_ui_fd({0,1}),
-                                            ui_to_rt_fd({0,1}),
-                                            fifo_capacity(size)
+RT::OS::xbuffFifo::xbuffFifo(size_t size) : fifo_capacity(size)
 {
-  if (pipe2(this->rt_to_ui_fd.data(), O_NONBLOCK | O_CLOEXEC) != 0){
-    ERROR_MSG("RT::OS::posixFifo : failed to create rt-to-ui ipc");
+  rt_to_ui = new char[this->fifo_capacity];
+  ui_to_rt = new char[this->fifo_capacity];
+}
+
+RT::OS::xbuffFifo::~xbuffFifo()
+{
+  delete[] rt_to_ui;
+  delete[] ui_to_rt;
+}
+
+ssize_t RT::OS::xbuffFifo::read(void* buf, size_t data_size)
+{
+  if(rt_wptr == ui_rptr) { return -1; }
+  std::unique_lock<std::mutex> lock(mutex_rt2ui);
+  // return if the caller requests more data than available
+  if(ui_available_read_bytes < data_size){ return -1; }
+  if(fifo_capacity - ui_rptr < data_size){
+    uint64_t m = fifo_capacity - ui_rptr;
+    memcpy(buf, rt_to_ui + ui_rptr, m);
+    memcpy(reinterpret_cast<char *>(buf)+m, rt_to_ui, data_size - m);
+  } else {
+    memcpy(buf, rt_to_ui + ui_rptr, data_size);
   }
-  if (pipe2(this->ui_to_rt_fd.data(), O_NONBLOCK | O_CLOEXEC) != 0){
-    ERROR_MSG("RT::OS::posixFifo : failed to create ui-to-rt ipc");
+  ui_rptr = (ui_rptr+data_size) % this->fifo_capacity;
+  ui_available_read_bytes = (fifo_capacity + ui_rptr - rt_wptr) % fifo_capacity;
+  return static_cast<ssize_t>(data_size);
+}
+
+ssize_t RT::OS::xbuffFifo::write(void* buf, size_t data_size)
+{
+  if(data_size > fifo_capacity - rt_available_read_bytes){
+    ERROR_MSG("FIFO::write : Fifo full, data lost\n");
+    return -1;
   }
+
+  if(data_size > fifo_capacity - ui_wptr){
+    uint64_t m = fifo_capacity - ui_wptr;
+    memcpy(ui_to_rt+ui_wptr, buf, m);
+    memcpy(ui_to_rt, reinterpret_cast<const char *>(buf)+m, data_size-m);
+  } else {
+    memcpy(ui_to_rt+ui_wptr, buf, data_size);
+  }
+  ui_wptr = (ui_wptr + data_size) % fifo_capacity;
+  rt_available_read_bytes = (fifo_capacity + rt_rptr - ui_wptr) % fifo_capacity;
+  return static_cast<ssize_t>(data_size);
 }
 
-RT::OS::posixFifo::~posixFifo()
+ssize_t RT::OS::xbuffFifo::readRT(void* buf, size_t data_size)
 {
-  ::close(rt_to_ui_fd[0]);
-  ::close(rt_to_ui_fd[1]);
-  ::close(ui_to_rt_fd[0]);
-  ::close(ui_to_rt_fd[1]);
+  if(ui_wptr == rt_rptr) { return -1; }
+  std::unique_lock<std::mutex> lock(mutex_rt2ui);
+  // return if the caller requests more data than available
+  if(rt_available_read_bytes < data_size){ return -1; }
+  if(fifo_capacity - rt_rptr < data_size){
+    uint64_t m = fifo_capacity - rt_rptr;
+    memcpy(buf, ui_to_rt + rt_rptr, m);
+    memcpy(reinterpret_cast<char *>(buf)+m, ui_to_rt, data_size - m);
+  } else {
+    memcpy(buf, ui_to_rt + rt_rptr, data_size);
+  }
+  rt_rptr = (rt_rptr+data_size) % this->fifo_capacity;
+  rt_available_read_bytes = (fifo_capacity + rt_rptr - ui_wptr) % fifo_capacity;
+  return static_cast<ssize_t>(data_size);
 }
 
-ssize_t RT::OS::posixFifo::read(void* buf, size_t buf_size)
+ssize_t RT::OS::xbuffFifo::writeRT(void* buf, size_t data_size)
 {
-  // We need to specify to compiler that we are using read from c lib
-  return ::read(this->rt_to_ui_fd[0], buf, buf_size);
+  if(data_size > fifo_capacity - ui_available_read_bytes){
+    ERROR_MSG("FIFO::write : Fifo full, data lost\n");
+    return -1;
+  }
+
+  if(data_size > fifo_capacity - rt_wptr){
+    uint64_t m = fifo_capacity - rt_wptr;
+    memcpy(rt_to_ui+rt_wptr, buf, m);
+    memcpy(rt_to_ui, reinterpret_cast<const char *>(buf)+m, data_size-m);
+  } else {
+    memcpy(rt_to_ui+rt_wptr, buf, data_size);
+  }
+  rt_wptr = (rt_wptr + data_size) % fifo_capacity;
+  ui_available_read_bytes = (fifo_capacity + ui_rptr - rt_wptr) % fifo_capacity;
+  return static_cast<ssize_t>(data_size);
 }
 
-ssize_t RT::OS::posixFifo::write(void* buf, size_t buf_size)
-{
-  // we need to specify to compiler that we are using write from c lib
-  return ::write(this->ui_to_rt_fd[1], buf, buf_size);
-}
-
-ssize_t RT::OS::posixFifo::readRT(void* buf, size_t buf_size)
-{
-  return ::read(this->ui_to_rt_fd[0] , buf, buf_size);
-}
-
-ssize_t RT::OS::posixFifo::writeRT(void* buf, size_t buf_size)
-{
-  return ::write(this->rt_to_ui_fd[1], buf, buf_size);
-}
-
-size_t RT::OS::posixFifo::getCapacity()
+size_t RT::OS::xbuffFifo::getCapacity()
 {
   return this->fifo_capacity;
 }
 
 int RT::OS::getFifo(std::unique_ptr<Fifo>& fifo, size_t fifo_size)
 {
-  auto tmp_fifo = std::make_unique<RT::OS::posixFifo>(fifo_size);
+  auto tmp_fifo = std::make_unique<RT::OS::xbuffFifo>(fifo_size);
   fifo = std::move(tmp_fifo);
   return 0;
 }

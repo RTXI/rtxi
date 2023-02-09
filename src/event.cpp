@@ -241,7 +241,6 @@ void Event::Manager::postEvent(const std::vector<Event::Object*>& events)
 
 void Event::Manager::processEvents()
 {
-  std::unique_lock<std::mutex> event_lock(this->event_mut);
   Event::Object* tmp_event = nullptr;
   auto event_processor = [this](Event::Object* event){
     if(event == nullptr) {
@@ -255,6 +254,7 @@ void Event::Manager::processEvents()
     handlerlist_lock.unlock();
     event->done();
   };
+  std::unique_lock<std::mutex> event_lock(this->event_mut);
   // TODO: Turn this into a thread pool implementation for performance
   while(this->running){
     this->available_event_cond.wait(event_lock, [this]{
