@@ -17,11 +17,11 @@ class Recipe(ConanFile):
         self.folders.generators = "conan"
 
     def requirements(self):
-        self.requires("libiconv/1.17")
-        self.requires("fmt/8.1.1")
+        #self.requires("libiconv/1.17")
         self.requires("qt/5.15.7")
-        self.requires("hdf5/1.12.1")
-        self.requires("libgit2/1.3.0")
+        self.requires("fmt/8.1.1")
+        self.requires("hdf5/1.14.0")
+        self.requires("libgit2/1.5.0")
         self.requires("qwt/6.2.0")
         self.requires("zlib/1.2.13")
         self.requires("openssl/1.1.1q")

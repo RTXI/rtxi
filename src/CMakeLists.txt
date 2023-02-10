@@ -43,8 +43,8 @@ target_link_libraries(rtxi_lib PRIVATE
     Threads::Threads
     fmt::fmt
     Qt5::Core
-    Qt5::Widgets
     Qt5::Gui
+    Qt5::Widgets
 )
 
 # Create RTXI executable
@@ -59,16 +59,16 @@ set_target_properties(
 )
 
 # Link all of the static and dynamic libraries to rtxi
-target_link_libraries(rtxi_exe 
+target_link_libraries(rtxi_exe PRIVATE
+    rtmath_lib
+    rtos_fifo_lib
+    rtos_lib 
+    rtxi_lib
     Threads::Threads
     Qt5::Core
     Qt5::Gui
     Qt5::Widgets
     fmt::fmt
-    rtmath_lib
-    rtos_fifo_lib
-    rtos_lib 
-    rtxi_lib 
     performance_measurement_lib
     Boost::headers
     backtrace
