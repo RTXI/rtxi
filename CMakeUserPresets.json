@@ -58,7 +58,13 @@
             "name": "dev",
             "configurePreset": "dev",
             "configuration": "Debug",
-            "jobs": 4
+            "jobs": 8
+        },
+        {
+            "name": "dev-coverage",
+            "configurePreset": "dev-coverage",
+            "configuration": "Debug",
+            "jobs": 8
         }
     ],
     "testPresets": [
@@ -70,7 +76,7 @@
                 "outputOnFailure": true
             },
             "execution": {
-                "jobs": 4
+                "jobs": 8
             }
         }
     ]
