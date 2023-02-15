@@ -1,6 +1,6 @@
 set(
     FORMAT_PATTERNS
-    source/*.cpp source/*.hpp
+    src/*.cpp src/*.hpp
     test/*.cpp test/*.hpp
     plugins/*.cpp plugins/*.h
     CACHE STRING

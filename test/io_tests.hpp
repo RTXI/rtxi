@@ -44,10 +44,7 @@ public:
   std::vector<IO::channel_t> defaultChannelList;
 
 protected:
-  IOBlockTest()
-  {
-    this->defaultChannelList = generateDefaultChannelList();
-  }
+  IOBlockTest() { this->defaultChannelList = generateDefaultChannelList(); }
 };
 
 #endif

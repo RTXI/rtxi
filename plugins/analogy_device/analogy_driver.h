@@ -22,25 +22,23 @@
 #include <daq.h>
 #include <plugin.h>
 
-class AnalogyDriver : public Plugin::Object, public DAQ::Driver
+class AnalogyDriver
+    : public Plugin::Object
+    , public DAQ::Driver
 {
-
 public:
+  AnalogyDriver(void)
+      : DAQ::Driver("analogy") {};
+  virtual ~AnalogyDriver(void);
 
-    AnalogyDriver(void) : DAQ::Driver("analogy") {};
-    virtual ~AnalogyDriver(void);
-
-    virtual DAQ::Device *createDevice(const std::list<std::string> &);
+  virtual DAQ::Device* createDevice(const std::list<std::string>&);
 
 protected:
-
-    virtual void doLoad(const State &);
-    virtual void doSave(State &) const;
+  virtual void doLoad(const State&);
+  virtual void doSave(State&) const;
 
 private:
-
-    std::list<AnalogyDevice *> devices;
-
+  std::list<AnalogyDevice*> devices;
 };
 
 #endif

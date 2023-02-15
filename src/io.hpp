@@ -76,7 +76,7 @@ public:
   /*!
    * The constructor needs to be provided with a specification of the channels
    * that will be embedded in this block in the channels parameter. Fields could
-   * be IO::INPUT, IO::OUTPUT. Size should be the number of total channels, 
+   * be IO::INPUT, IO::OUTPUT. Size should be the number of total channels,
    * regardless of type.
    *
    * \param blockname The name of the block.
@@ -145,11 +145,12 @@ public:
    * \return The value of the specified output channel.
    */
   const std::vector<double>& readoutput(size_t index);
-    
-  bool dependent() const {return this->isInputDependent;}
+
+  bool dependent() const { return this->isInputDependent; }
 
   bool getActive() { return this->active; }
-  void setActive(bool act) { this->active = act; } 
+  void setActive(bool act) { this->active = act; }
+
 protected:
   // These functions are meant to be used by RT::Thread classes
 
@@ -169,7 +170,6 @@ protected:
    */
   void writeoutput(size_t index, const std::vector<double>& data);
 
-
 private:
   using port_t = struct
   {
@@ -179,7 +179,7 @@ private:
   std::string name;
   bool isInputDependent;
   std::array<std::vector<port_t>, IO::UNKNOWN> ports;
-  bool active=false;
+  bool active = false;
 };  // class Block
 
 }  // namespace IO

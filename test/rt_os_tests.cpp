@@ -51,8 +51,7 @@ TEST_F(RTOSTests, CreateAndDeleteTask)
   int result = 0;
   bool func_retval = false;
   auto test_task = std::make_unique<RT::OS::Task>();
-  result =
-      RT::OS::createTask(test_task.get(), &temp_function, &func_retval);
+  result = RT::OS::createTask(test_task.get(), &temp_function, &func_retval);
   RT::OS::deleteTask(test_task.get());
   // It is not possible to lock memory without admin privilages.
   // Either it succeeds or we don't have permissions

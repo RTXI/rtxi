@@ -1,12 +1,12 @@
 #ifndef RTOS_H
 #define RTOS_H
 
+#include <any>
 #include <functional>
 #include <thread>
 
 #include <errno.h>
 #include <string.h>
-#include <any>
 
 #include "debug.hpp"
 #include "fifo.hpp"
@@ -17,7 +17,7 @@ namespace RT::OS
 const int64_t SECONDS_TO_NANOSECONDS =
     1000000000;  // Conversion from sec to nsec
 const int64_t DEFAULT_PERIOD = 1000000;  // Default period is set to 1 msec
-const uint64_t DEFAULT_FIFO_SIZE = 255; // Default Fifo size of 255 bytes
+const uint64_t DEFAULT_FIFO_SIZE = 255;  // Default Fifo size of 255 bytes
 
 /*!
  * Object representation of a real-time loop
@@ -45,7 +45,7 @@ struct Task
  *
  * \sa RT::OS::shutdown()
  */
-int initiate(RT::OS::Task * task);
+int initiate(RT::OS::Task* task);
 
 /*!
  * Releases real-time resources from the operating system. Called when rtxi
@@ -54,7 +54,7 @@ int initiate(RT::OS::Task * task);
  * \param task the real-time structure identifying the task
  * \sa RT::OS::initiate()
  */
-void shutdown(RT::OS::Task * task);
+void shutdown(RT::OS::Task* task);
 
 /*!
  * terminates task in real-time loop

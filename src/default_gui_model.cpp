@@ -28,10 +28,7 @@ namespace
 class SyncEvent : public RT::Event
 {
 public:
-  int callback(void)
-  {
-    return 0;
-  };
+  int callback(void) { return 0; };
 };
 };  // namespace
 

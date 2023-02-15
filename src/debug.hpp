@@ -23,14 +23,16 @@
 
 #include <iostream>
 #include <string>
+
 #include <fmt/core.h>
 
 //! Prints a backtrace to standard error.
 // void PRINT_BACKTRACE(void);
 
-template <typename... Args>
-void ERROR_MSG(const std::string &errmsg, Args... args) {
-  std::cerr << fmt::format(errmsg, args...); 
+template<typename... Args>
+void ERROR_MSG(const std::string& errmsg, Args... args)
+{
+  std::cerr << fmt::format(errmsg, args...);
   std::cerr << "\n";
 }
 

@@ -19,22 +19,25 @@
 */
 
 #include <algorithm>
-#include <string>
 #include <queue>
+#include <string>
 
 #include "io.hpp"
 
 #include "debug.hpp"
 // NOLINTBEGIN(cppcoreguidelines-pro-bounds-constant-array-index)
-IO::Block::Block(std::string blockname, const std::vector<IO::channel_t>& channels, bool isdependent)
-    : name(std::move(blockname)) , isInputDependent(isdependent)
+IO::Block::Block(std::string blockname,
+                 const std::vector<IO::channel_t>& channels,
+                 bool isdependent)
+    : name(std::move(blockname))
+    , isInputDependent(isdependent)
 {
   port_t port = {};
   for (const auto& channel : channels) {
     port.channel_info = channel;
     port.values = std::vector<double>(channel.data_size, 0.0);
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
-    ports[channel.flags].push_back(port); 
+    ports[channel.flags].push_back(port);
     port = {};
   }
 }
@@ -51,7 +54,8 @@ std::string IO::Block::getChannelName(IO::flags_t type, size_t index) const
   return this->ports[type][index].channel_info.name;
 }
 
-std::string IO::Block::getChannelDescription(IO::flags_t type, size_t index) const
+std::string IO::Block::getChannelDescription(IO::flags_t type,
+                                             size_t index) const
 {
   // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
   return this->ports[type][index].channel_info.description;

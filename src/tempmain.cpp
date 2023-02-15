@@ -1,15 +1,15 @@
+#include <QApplication>
 #include <iostream>
+
+#include <boost/stacktrace.hpp>
 #include <signal.h>
 #include <string.h>
 
-#include <QApplication>
-#include <boost/stacktrace.hpp>
-
-#include "rtxiConfig.h"
 #include "debug.hpp"
-#include "rt.hpp"
-#include "module.hpp"
 #include "main_window.hpp"
+#include "module.hpp"
+#include "rt.hpp"
+#include "rtxiConfig.h"
 
 static void signal_handler(int signum)
 {
@@ -20,7 +20,7 @@ static void signal_handler(int signum)
   exit(-1);
 }
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
   signal(SIGINT, signal_handler);
   signal(SIGABRT, signal_handler);
@@ -34,7 +34,8 @@ int main(int argc, char *argv[])
   // Initializing core classes
   auto event_manager = std::make_unique<Event::Manager>();
   auto rt_connector = std::make_unique<RT::Connector>();
-  auto rt_system = std::make_unique<RT::System>(event_manager.get(), rt_connector.get());
+  auto rt_system =
+      std::make_unique<RT::System>(event_manager.get(), rt_connector.get());
 
   // Initializing GUI
   QApplication::setDesktopSettingsAware(false);
@@ -42,7 +43,8 @@ int main(int argc, char *argv[])
   app->connect(app, SIGNAL(lastWindowClosed()), app, SLOT(quit()));
 
   auto rtxi_window = std::make_unique<MainWindow>(event_manager.get());
-  auto mod_manager = std::make_unique<Modules::Manager>(event_manager.get(), rtxi_window.get());
+  auto mod_manager = std::make_unique<Modules::Manager>(event_manager.get(),
+                                                        rtxi_window.get());
   rtxi_window->loadWindow();
   int retval = app->exec();
   delete app;

@@ -17,15 +17,17 @@
 
  */
 
-#include "debug.hpp"
-#include "main_window.hpp"
-#include "rt.hpp"
-#include "module.hpp"
-#include "event.hpp"
-
 #include "performance_measurement.hpp"
 
-PerformanceMeasurement::Panel::Panel(std::string name, MainWindow* main_window, Event::Manager* ev_manager)
+#include "debug.hpp"
+#include "event.hpp"
+#include "main_window.hpp"
+#include "module.hpp"
+#include "rt.hpp"
+
+PerformanceMeasurement::Panel::Panel(std::string name,
+                                     MainWindow* main_window,
+                                     Event::Manager* ev_manager)
     : Modules::Panel(name, main_window, ev_manager)
 {
   // Make Mdi
@@ -80,8 +82,7 @@ PerformanceMeasurement::Panel::Panel(std::string name, MainWindow* main_window, 
 
   QPushButton* resetButton = new QPushButton("Reset", this);
   gridLayout->addWidget(resetButton, 7, 1);
-  QObject::connect(
-      resetButton, SIGNAL(released()), this, SLOT(reset()));
+  QObject::connect(resetButton, SIGNAL(released()), this, SLOT(reset()));
 
   // Attach child widget to parent widget
   layout->addLayout(gridLayout);
@@ -114,21 +115,23 @@ void PerformanceMeasurement::Component::execute()
   auto maxTimestep = getValue<double>("maxTimestep");
   auto maxLatency = getValue<double>("maxLatency");
   auto period = RT::OS::getPeriod();
-  if(period < 0) { period = RT::OS::DEFAULT_PERIOD; }
+  if (period < 0) {
+    period = RT::OS::DEFAULT_PERIOD;
+  }
 
   double duration = *(end_ticks) - *(start_ticks);
-  double timestep = *(start_ticks) - last_start_ticks;
+  double timestep = *(start_ticks)-last_start_ticks;
   auto latency = timestep - period;
 
   switch (getValue<Modules::Variable::state_t>("state")) {
-    case Modules::Variable::EXEC :
-      if (maxTimestep < timestep){
+    case Modules::Variable::EXEC:
+      if (maxTimestep < timestep) {
         setValue("maxTimestep", timestep);
       }
-      if (maxDuration < duration){
+      if (maxDuration < duration) {
         setValue("maxDuration", duration);
       }
-      if (maxLatency < latency){
+      if (maxLatency < latency) {
         setValue("maxLatency", latency);
       }
       setValue("latency", latency);
@@ -136,7 +139,7 @@ void PerformanceMeasurement::Component::execute()
       setValue("timestep", timestep);
       setValue("duration", duration);
       break;
-    case Modules::Variable::INIT :
+    case Modules::Variable::INIT:
       latencyStat.clear();
       setValue("maxTimestep", timestep);
       setValue("maxDuration", duration);
@@ -144,18 +147,19 @@ void PerformanceMeasurement::Component::execute()
       latencyStat.push(latency);
       setValue("state", Modules::Variable::EXEC);
       break;
-    case Modules::Variable::PERIOD :
-    case Modules::Variable::MODIFY :
-    case Modules::Variable::PAUSE :
-    case Modules::Variable::UNPAUSE :
-    case Modules::Variable::EXIT :
+    case Modules::Variable::PERIOD:
+    case Modules::Variable::MODIFY:
+    case Modules::Variable::PAUSE:
+    case Modules::Variable::UNPAUSE:
+    case Modules::Variable::EXIT:
       break;
   }
   last_start_ticks = *start_ticks;
   setValue("jitter", latencyStat.std());
 }
 
-void PerformanceMeasurement::Component::setTickPointers(int64_t* s_ticks, int64_t* e_ticks)
+void PerformanceMeasurement::Component::setTickPointers(int64_t* s_ticks,
+                                                        int64_t* e_ticks)
 {
   this->start_ticks = s_ticks;
   this->end_ticks = e_ticks;
@@ -165,11 +169,16 @@ void PerformanceMeasurement::Panel::refresh()
 {
   Modules::Plugin* hostplugin = this->getHostPlugin();
   const double nano2micro = 1e-3;
-  auto duration = hostplugin->getComponentDoubleParameter("duration") * nano2micro;
-  auto maxduration = hostplugin->getComponentDoubleParameter("maxDuration") * nano2micro;
-  auto timestep = hostplugin->getComponentDoubleParameter("timestep") * nano2micro;
-  auto maxtimestep = hostplugin->getComponentDoubleParameter("maxTimestep") * nano2micro;
-  auto timestepjitter = hostplugin->getComponentDoubleParameter("jitter") * nano2micro;
+  auto duration =
+      hostplugin->getComponentDoubleParameter("duration") * nano2micro;
+  auto maxduration =
+      hostplugin->getComponentDoubleParameter("maxDuration") * nano2micro;
+  auto timestep =
+      hostplugin->getComponentDoubleParameter("timestep") * nano2micro;
+  auto maxtimestep =
+      hostplugin->getComponentDoubleParameter("maxTimestep") * nano2micro;
+  auto timestepjitter =
+      hostplugin->getComponentDoubleParameter("jitter") * nano2micro;
 
   durationEdit->setText(QString::number(duration));
   maxDurationEdit->setText(QString::number(maxduration));
@@ -184,11 +193,12 @@ void PerformanceMeasurement::Panel::reset()
   this->getHostPlugin()->setComponentState("state", Modules::Variable::INIT);
 }
 
-PerformanceMeasurement::Plugin::Plugin(Event::Manager* ev_manager, 
-                                       MainWindow* mw) 
-  : Modules::Plugin(ev_manager, mw, "RT Benchmarks")
+PerformanceMeasurement::Plugin::Plugin(Event::Manager* ev_manager,
+                                       MainWindow* mw)
+    : Modules::Plugin(ev_manager, mw, "RT Benchmarks")
 {
-  auto plugin_component = std::make_unique<PerformanceMeasurement::Component>(this);
+  auto plugin_component =
+      std::make_unique<PerformanceMeasurement::Component>(this);
   this->attachComponent(std::move(plugin_component));
   std::vector<Event::Object*> events;
   Event::Object preperiod_event(Event::Type::RT_PREPERIOD_EVENT);
@@ -196,29 +206,34 @@ PerformanceMeasurement::Plugin::Plugin(Event::Manager* ev_manager,
   events.push_back(&preperiod_event);
   events.push_back(&postperiod_event);
   this->event_manager->postEvent(events);
-  auto* performance_measurement_component = 
-    dynamic_cast<PerformanceMeasurement::Component*>(this->plugin_component.get());
+  auto* performance_measurement_component =
+      dynamic_cast<PerformanceMeasurement::Component*>(
+          this->plugin_component.get());
   performance_measurement_component->setTickPointers(
       std::any_cast<int64_t*>(preperiod_event.getParam("pre-period")),
-      std::any_cast<int64_t*>(postperiod_event.getParam("post-period"))
-  );
+      std::any_cast<int64_t*>(postperiod_event.getParam("post-period")));
   this->setActive(true);
-  //this->attachPanel(panel);
-  // MainWindow::getInstance()->createSystemMenuItem(
-  //     "RT Benchmarks", this, SLOT(createPerformanceMeasurementPanel(void)));
+  // this->attachPanel(panel);
+  //  MainWindow::getInstance()->createSystemMenuItem(
+  //      "RT Benchmarks", this, SLOT(createPerformanceMeasurementPanel(void)));
 }
 
-std::unique_ptr<Modules::Plugin> PerformanceMeasurement::createRTXIPlugin(Event::Manager* ev_manager, MainWindow* main_window)
+std::unique_ptr<Modules::Plugin> PerformanceMeasurement::createRTXIPlugin(
+    Event::Manager* ev_manager, MainWindow* main_window)
 {
-  return std::make_unique<PerformanceMeasurement::Plugin>(ev_manager, main_window);
+  return std::make_unique<PerformanceMeasurement::Plugin>(ev_manager,
+                                                          main_window);
 }
 
-Modules::Panel* PerformanceMeasurement::createRTXIPanel(MainWindow* main_window, Event::Manager* ev_manager)
+Modules::Panel* PerformanceMeasurement::createRTXIPanel(
+    MainWindow* main_window, Event::Manager* ev_manager)
 {
-  return static_cast<Modules::Panel*>(new PerformanceMeasurement::Panel("RT Benchmarks", main_window, ev_manager));
+  return static_cast<Modules::Panel*>(new PerformanceMeasurement::Panel(
+      "RT Benchmarks", main_window, ev_manager));
 }
 
-std::unique_ptr<Modules::Component> PerformanceMeasurement::createRTXIComponent(Modules::Plugin* host_plugin)
+std::unique_ptr<Modules::Component> PerformanceMeasurement::createRTXIComponent(
+    Modules::Plugin* host_plugin)
 {
   return std::make_unique<PerformanceMeasurement::Component>(host_plugin);
 }

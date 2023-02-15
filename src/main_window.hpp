@@ -21,12 +21,12 @@
 #ifndef MAIN_WINDOW_H
 #define MAIN_WINDOW_H
 
-#include <QObject>
 #include <QAction>
 #include <QMainWindow>
-#include <QMenu>
 #include <QMdiArea>
 #include <QMdiSubWindow>
+#include <QMenu>
+#include <QObject>
 
 #include "event.hpp"
 
@@ -156,30 +156,30 @@ private slots:
 
 private:
   Event::Manager* event_manager;
-  QMdiArea* mdiArea=nullptr;
+  QMdiArea* mdiArea = nullptr;
   QList<QMdiSubWindow*> subWindows;
 
-  QMenu* fileMenu=nullptr;
-  QMenu* moduleMenu=nullptr;
-  QMenu* utilMenu=nullptr;
-  QMenu* filtersSubMenu=nullptr;
-  QMenu* signalsSubMenu=nullptr;
-  QMenu* utilitiesSubMenu=nullptr;
-  QMenu* systemMenu=nullptr;
-  QMenu* windowsMenu=nullptr;
-  QMenu* helpMenu=nullptr;
+  QMenu* fileMenu = nullptr;
+  QMenu* moduleMenu = nullptr;
+  QMenu* utilMenu = nullptr;
+  QMenu* filtersSubMenu = nullptr;
+  QMenu* signalsSubMenu = nullptr;
+  QMenu* utilitiesSubMenu = nullptr;
+  QMenu* systemMenu = nullptr;
+  QMenu* windowsMenu = nullptr;
+  QMenu* helpMenu = nullptr;
 
-  QAction* load=nullptr;
-  QAction* save=nullptr;
-  QAction* reset=nullptr;
-  QAction* quit=nullptr;
-  QAction* artxi=nullptr;
-  QAction* axeno=nullptr;
-  QAction* aqt=nullptr;
-  QAction* adocs=nullptr;
-  QAction* sub_issue=nullptr;
-  QAction* utilItem=nullptr;
-  QAction* openRTBenchmarks=nullptr;
+  QAction* load = nullptr;
+  QAction* save = nullptr;
+  QAction* reset = nullptr;
+  QAction* quit = nullptr;
+  QAction* artxi = nullptr;
+  QAction* axeno = nullptr;
+  QAction* aqt = nullptr;
+  QAction* adocs = nullptr;
+  QAction* sub_issue = nullptr;
+  QAction* utilItem = nullptr;
+  QAction* openRTBenchmarks = nullptr;
 
   void createFileMenu();
   void createModuleMenu();

@@ -19,11 +19,13 @@
  */
 
 #include <iostream>
+
+#include "rtxiTests.h"
+
 #include <boost/stacktrace.hpp>
 #include <signal.h>
 
 #include "debug.hpp"
-#include "rtxiTests.h"
 
 void TestEnvironment::SetUp()
 {

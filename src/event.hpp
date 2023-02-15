@@ -22,15 +22,15 @@
 #define EVENT_H
 
 #include <any>
+#include <atomic>
 #include <condition_variable>
 #include <list>
-#include <queue>
 #include <mutex>
+#include <queue>
 #include <shared_mutex>
 #include <string>
-#include <vector>
-#include <atomic>
 #include <thread>
+#include <vector>
 
 #include "fifo.hpp"
 
@@ -38,7 +38,7 @@
  * Event Oriented Classes
  *
  * Objects contained within this namespace are responsible
- *   for dispatching signals. 
+ *   for dispatching signals.
  */
 namespace Event
 {
@@ -81,7 +81,7 @@ enum Type
  * converts the event type to a human readable name of event
  *
  * \param event_type type of event that was emitted
- * 
+ *
  * \returns A string representation of the event type
  */
 std::string type_to_string(Type event_type);
@@ -90,19 +90,19 @@ std::string type_to_string(Type event_type);
 
 /*!
  * Token used to signal event
- * 
+ *
  * This object is able to hold metadata information about the event for
- * handlers to use. In order to properly use the token, the caller must 
+ * handlers to use. In order to properly use the token, the caller must
  * wait for handlers to mark the event processed with wait()
  */
 class Object
 {
 public:
   explicit Object(Event::Type et);
-  Object(const Object& obj); // copy constructor
-  Object& operator=(const Object& obj) = delete; //copy assignment operator
-  Object(Object &&) = delete; // move constructor
-  Object& operator=(Object &&) = delete; // move assignment operator
+  Object(const Object& obj);  // copy constructor
+  Object& operator=(const Object& obj) = delete;  // copy assignment operator
+  Object(Object&&) = delete;  // move constructor
+  Object& operator=(Object&&) = delete;  // move assignment operator
   ~Object() = default;
 
   /*!
@@ -139,7 +139,7 @@ public:
    * Forces caller to wait for the event to be processed. This is needed for
    * events that carry metadata information for the handlers. This function
    * will block until the event is handled (marked done by handler)
-   * 
+   *
    * \sa Event::Object::done()
    */
   void wait();
@@ -150,8 +150,8 @@ public:
   void done();
 
   /*!
-   * Checks whether the event object has been processed already. Events 
-   * that have true value for processed are also handled. 
+   * Checks whether the event object has been processed already. Events
+   * that have true value for processed are also handled.
    * \returns true if processed. False otherwise
    */
   bool isdone() const;
@@ -191,7 +191,7 @@ public:
    * \sa Event::Object
    * \sa Event::Manager::postEvent()
    */
-  virtual void receiveEvent(Object* event)=0;
+  virtual void receiveEvent(Object* event) = 0;
 };  // class Handler
 
 /*
@@ -202,10 +202,11 @@ class Manager
 {
 public:
   Manager();
-  Manager(const Manager& manager) = delete; // copy constructor
-  Manager& operator=(const Manager& manager) = delete; //copy assignment operator
-  Manager(Manager &&) = delete; // move constructor
-  Manager& operator=(Manager &&) = delete; // move assignment operator
+  Manager(const Manager& manager) = delete;  // copy constructor
+  Manager& operator=(const Manager& manager) =
+      delete;  // copy assignment operator
+  Manager(Manager&&) = delete;  // move constructor
+  Manager& operator=(Manager&&) = delete;  // move assignment operator
   ~Manager();
 
   /*!
@@ -221,11 +222,11 @@ public:
 
   /*!
    * Function for posting multiple events at the same time. The order
-   * at which these events are posted are preserved. This is more 
+   * at which these events are posted are preserved. This is more
    * efficient for situations where multiple events can be generated
    * from a single action(loading multiple plugins, loading settings
    * file that changes many parameters, unregister module, etc.)
-   * 
+   *
    * \param events A vector of event pointers that will be published
    */
   void postEvent(const std::vector<Object*>& events);
@@ -235,7 +236,7 @@ public:
    * loop responsible for routing events to handlers. Will mark the
    * event as done automatically regardless if it is handled or
    * not to prevent caller from waiting indefinitely.
-   * 
+   *
    * \sa  Event::Object
    */
   void processEvents();
@@ -250,7 +251,7 @@ public:
   /*!
    * Removes handler from registry
    *
-   * \param handler pointer of handler to remove from registry 
+   * \param handler pointer of handler to remove from registry
    */
   void unregisterHandler(Handler* handler);
 
@@ -259,13 +260,13 @@ public:
 private:
   std::list<Handler*> handlerList;
   std::queue<Event::Object*> event_q;
-  std::mutex event_mut; // Mutex for posting events
+  std::mutex event_mut;  // Mutex for posting events
   std::condition_variable available_event_cond;
   std::atomic<bool> running = true;
   std::thread event_thread;
 
   // Shared mutex allows for multiple reader single writer scenarios.
-  std::shared_mutex handlerlist_mut; // Mutex for modifying event handler queue
+  std::shared_mutex handlerlist_mut;  // Mutex for modifying event handler queue
 };  // class Manager
 
 }  // namespace Event

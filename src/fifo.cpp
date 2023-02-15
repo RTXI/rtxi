@@ -19,23 +19,24 @@
 */
 
 #include <array>
-#include <mutex>
 #include <condition_variable>
+#include <mutex>
+
+#include "fifo.hpp"
 
 #include "debug.hpp"
-#include "fifo.hpp"
 
 // Generic posix fifo based on pipes
 namespace RT::OS
 {
-class xbuffFifo : public RT::OS::Fifo 
+class xbuffFifo : public RT::OS::Fifo
 {
-  public:
+public:
   explicit xbuffFifo(size_t size);
   xbuffFifo(const xbuffFifo& fifo) = delete;
   xbuffFifo& operator=(const xbuffFifo& fifo) = delete;
-  xbuffFifo(xbuffFifo &&) = default;
-  xbuffFifo& operator=(xbuffFifo &&) = default;
+  xbuffFifo(xbuffFifo&&) = default;
+  xbuffFifo& operator=(xbuffFifo&&) = default;
   ~xbuffFifo() override;
 
   size_t getCapacity() override;
@@ -44,9 +45,9 @@ class xbuffFifo : public RT::OS::Fifo
   ssize_t readRT(void* buf, size_t data_size) override;
   ssize_t writeRT(void* buf, size_t data_size) override;
 
-  private:
-  char* rt_to_ui; // 0 is read from rt; 1 is write to ui
-  char* ui_to_rt; // 0 is read from ui; 1 is write to rt
+private:
+  char* rt_to_ui;  // 0 is read from rt; 1 is write to ui
+  char* ui_to_rt;  // 0 is read from ui; 1 is write to rt
   const uint64_t fifo_capacity;
   std::mutex mutex_rt2ui;
   std::mutex mutex_ui2rt;
@@ -58,11 +59,11 @@ class xbuffFifo : public RT::OS::Fifo
   uint64_t ui_available_write_bytes;
   uint64_t rt_available_read_bytes;
   uint64_t rt_available_write_bytes;
-
 };
 }  // namespace RT::OS
 
-RT::OS::xbuffFifo::xbuffFifo(size_t size) : fifo_capacity(size)
+RT::OS::xbuffFifo::xbuffFifo(size_t size)
+    : fifo_capacity(size)
 {
   rt_to_ui = new char[this->fifo_capacity];
   ui_to_rt = new char[this->fifo_capacity];
@@ -76,35 +77,39 @@ RT::OS::xbuffFifo::~xbuffFifo()
 
 ssize_t RT::OS::xbuffFifo::read(void* buf, size_t data_size)
 {
-  if(rt_wptr == ui_rptr) { return -1; }
+  if (rt_wptr == ui_rptr) {
+    return -1;
+  }
   std::unique_lock<std::mutex> lock(mutex_rt2ui);
   // return if the caller requests more data than available
-  if(ui_available_read_bytes < data_size){ return -1; }
-  if(fifo_capacity - ui_rptr < data_size){
+  if (ui_available_read_bytes < data_size) {
+    return -1;
+  }
+  if (fifo_capacity - ui_rptr < data_size) {
     uint64_t m = fifo_capacity - ui_rptr;
     memcpy(buf, rt_to_ui + ui_rptr, m);
-    memcpy(reinterpret_cast<char *>(buf)+m, rt_to_ui, data_size - m);
+    memcpy(reinterpret_cast<char*>(buf) + m, rt_to_ui, data_size - m);
   } else {
     memcpy(buf, rt_to_ui + ui_rptr, data_size);
   }
-  ui_rptr = (ui_rptr+data_size) % this->fifo_capacity;
+  ui_rptr = (ui_rptr + data_size) % this->fifo_capacity;
   ui_available_read_bytes = (fifo_capacity + ui_rptr - rt_wptr) % fifo_capacity;
   return static_cast<ssize_t>(data_size);
 }
 
 ssize_t RT::OS::xbuffFifo::write(void* buf, size_t data_size)
 {
-  if(data_size > fifo_capacity - rt_available_read_bytes){
+  if (data_size > fifo_capacity - rt_available_read_bytes) {
     ERROR_MSG("FIFO::write : Fifo full, data lost\n");
     return -1;
   }
 
-  if(data_size > fifo_capacity - ui_wptr){
+  if (data_size > fifo_capacity - ui_wptr) {
     uint64_t m = fifo_capacity - ui_wptr;
-    memcpy(ui_to_rt+ui_wptr, buf, m);
-    memcpy(ui_to_rt, reinterpret_cast<const char *>(buf)+m, data_size-m);
+    memcpy(ui_to_rt + ui_wptr, buf, m);
+    memcpy(ui_to_rt, reinterpret_cast<const char*>(buf) + m, data_size - m);
   } else {
-    memcpy(ui_to_rt+ui_wptr, buf, data_size);
+    memcpy(ui_to_rt + ui_wptr, buf, data_size);
   }
   ui_wptr = (ui_wptr + data_size) % fifo_capacity;
   rt_available_read_bytes = (fifo_capacity + rt_rptr - ui_wptr) % fifo_capacity;
@@ -113,35 +118,39 @@ ssize_t RT::OS::xbuffFifo::write(void* buf, size_t data_size)
 
 ssize_t RT::OS::xbuffFifo::readRT(void* buf, size_t data_size)
 {
-  if(ui_wptr == rt_rptr) { return -1; }
+  if (ui_wptr == rt_rptr) {
+    return -1;
+  }
   std::unique_lock<std::mutex> lock(mutex_rt2ui);
   // return if the caller requests more data than available
-  if(rt_available_read_bytes < data_size){ return -1; }
-  if(fifo_capacity - rt_rptr < data_size){
+  if (rt_available_read_bytes < data_size) {
+    return -1;
+  }
+  if (fifo_capacity - rt_rptr < data_size) {
     uint64_t m = fifo_capacity - rt_rptr;
     memcpy(buf, ui_to_rt + rt_rptr, m);
-    memcpy(reinterpret_cast<char *>(buf)+m, ui_to_rt, data_size - m);
+    memcpy(reinterpret_cast<char*>(buf) + m, ui_to_rt, data_size - m);
   } else {
     memcpy(buf, ui_to_rt + rt_rptr, data_size);
   }
-  rt_rptr = (rt_rptr+data_size) % this->fifo_capacity;
+  rt_rptr = (rt_rptr + data_size) % this->fifo_capacity;
   rt_available_read_bytes = (fifo_capacity + rt_rptr - ui_wptr) % fifo_capacity;
   return static_cast<ssize_t>(data_size);
 }
 
 ssize_t RT::OS::xbuffFifo::writeRT(void* buf, size_t data_size)
 {
-  if(data_size > fifo_capacity - ui_available_read_bytes){
+  if (data_size > fifo_capacity - ui_available_read_bytes) {
     ERROR_MSG("FIFO::write : Fifo full, data lost\n");
     return -1;
   }
 
-  if(data_size > fifo_capacity - rt_wptr){
+  if (data_size > fifo_capacity - rt_wptr) {
     uint64_t m = fifo_capacity - rt_wptr;
-    memcpy(rt_to_ui+rt_wptr, buf, m);
-    memcpy(rt_to_ui, reinterpret_cast<const char *>(buf)+m, data_size-m);
+    memcpy(rt_to_ui + rt_wptr, buf, m);
+    memcpy(rt_to_ui, reinterpret_cast<const char*>(buf) + m, data_size - m);
   } else {
-    memcpy(rt_to_ui+rt_wptr, buf, data_size);
+    memcpy(rt_to_ui + rt_wptr, buf, data_size);
   }
   rt_wptr = (rt_wptr + data_size) % fifo_capacity;
   ui_available_read_bytes = (fifo_capacity + ui_rptr - rt_wptr) % fifo_capacity;

@@ -46,7 +46,7 @@ TEST_F(FifoTest, roundtrip)
   auto task = std::make_unique<RT::OS::Task>();
   auto message_size = this->default_message.size();
   // char output[this->default_buffer_size];
-  char output[message_size]; 
+  char output[message_size];
   char input[message_size];
   strcpy(input, this->default_message.c_str());
   auto echo = [&fifo](RT::OS::Task* tsk, size_t bufsize)

@@ -36,18 +36,18 @@ posix interface will be different than Xenomai's evl interface
 
 This structure should not be used between two threads of the same priority.
 It is meant only for realtime and non-realtime thread communications. In the
-case where you need communication between two ui threads, consider using a 
+case where you need communication between two ui threads, consider using a
 message queue. for communication between two RT threads, use the underlying
 OS provided IPCs.
 */
 class Fifo
 {
 public:
-  Fifo() = default; // default constructor
-  Fifo(const Fifo& fifo) = delete; // copy constructor
-  Fifo& operator=(const Fifo& fifo) = delete; //copy assignment operator
-  Fifo(Fifo &&) = default; // move constructor
-  Fifo& operator=(Fifo &&) = default; // move assignment operator
+  Fifo() = default;  // default constructor
+  Fifo(const Fifo& fifo) = delete;  // copy constructor
+  Fifo& operator=(const Fifo& fifo) = delete;  // copy assignment operator
+  Fifo(Fifo&&) = default;  // move constructor
+  Fifo& operator=(Fifo&&) = default;  // move assignment operator
   virtual ~Fifo() = default;
 
   /*!

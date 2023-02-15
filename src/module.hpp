@@ -1,25 +1,24 @@
 #ifndef MODULE_HPP
 #define MODULE_HPP
 
-#include <optional>
-#include <string>
-#include <vector>
-#include <map>
-#include <variant>
-#include <unordered_map>
-#include <memory>
-
+#include <QGridLayout>
+#include <QGroupBox>
 #include <QLabel>
 #include <QLineEdit>
-#include <QGridLayout>
 #include <QPushButton>
-#include <QGroupBox>
 #include <QValidator>
+#include <map>
+#include <memory>
+#include <optional>
+#include <string>
+#include <unordered_map>
+#include <variant>
+#include <vector>
 
 #include "event.hpp"
 #include "io.hpp"
-#include "rt.hpp"
 #include "main_window.hpp"
+#include "rt.hpp"
 
 namespace Modules
 {
@@ -37,10 +36,10 @@ enum variable_t : size_t
 };
 
 /*!
-  * Flag passed to DefaultGUIModel::update to signal the kind of update.
-  *
-  * \sa DefaultGUIModel::update()
-  */
+ * Flag passed to DefaultGUIModel::update to signal the kind of update.
+ *
+ * \sa DefaultGUIModel::update()
+ */
 enum state_t : int64_t
 {
   INIT, /*!< The parameters need to be initialized.         */
@@ -77,24 +76,22 @@ struct Info
 
 class DefaultGUILineEdit : public QLineEdit
 {
-
   Q_OBJECT
 
 public:
-  DefaultGUILineEdit(QWidget * parent);
+  DefaultGUILineEdit(QWidget* parent);
 
   void blacken();
   QPalette palette;
 
 public slots:
   void redden();
-}; // class DefaultGUILineEdi
+};  // class DefaultGUILineEdi
 
 // Forward declare plugin class for the component and panel private pointers
 class Plugin;
 
-class Component
-    : public RT::Thread
+class Component : public RT::Thread
 {
 public:
   Component(Modules::Plugin* hplugin,
@@ -117,26 +114,27 @@ public:
   std::string getDescription(const std::string& varname);
   std::string getValueString(const std::string& varname);
 
- 
   // Here are a list of functions inherited from RT::Thread
 
   void execute() override;
 
-  //virtual void input(size_t channel, const std::vector<double>& data) override;
-  //virtual const std::vector<double>& output(size_t channel) override;
-  
+  // virtual void input(size_t channel, const std::vector<double>& data)
+  // override; virtual const std::vector<double>& output(size_t channel)
+  // override;
+
 private:
   std::unordered_map<std::string, Modules::Variable::Info> parameter;
   Modules::Plugin* hostPlugin;
   bool active;
-
 };
 
 class Panel : public QWidget
 {
   Q_OBJECT
 public:
-  Panel(const std::string& mod_name, MainWindow* mw, Event::Manager* event_manager);
+  Panel(const std::string& mod_name,
+        MainWindow* mw,
+        Event::Manager* event_manager);
 
   /*
    * Getter function go allow customization of
@@ -159,7 +157,8 @@ public:
    *
    * \sa DefaultGUIModel::update_flags_t
    */
-  virtual void createGUI(const std::vector<Modules::Variable::Info>& vars, MainWindow* mw);
+  virtual void createGUI(const std::vector<Modules::Variable::Info>& vars,
+                         MainWindow* mw);
 
   void setHostPlugin(Modules::Plugin* hplugin) { this->hostPlugin = hplugin; }
 
@@ -195,8 +194,6 @@ public slots:
   virtual void pause(bool);
 
 protected:
-
-
   /*!
    * Get the value of the parameter in the GUI, and update the value
    *   within the Workspace.
@@ -205,7 +202,7 @@ protected:
    * \return The value of the parameter.
    */
   QString getParameter(const QString& var_name);
-  
+
   /*!
    * Set the value of this parameter within the Workspace and GUI.
    *
@@ -238,27 +235,26 @@ protected:
    */
   void setState(const QString& name, Modules::Variable::state_t ref);
 
-  std::string getName(){ return this->name; }
-  Modules::Plugin* getHostPlugin(){ return this->hostPlugin; }
+  std::string getName() { return this->name; }
+  Modules::Plugin* getHostPlugin() { return this->hostPlugin; }
 
   MainWindow* getMainWindowPtr() { return this->main_window; }
   Event::Manager* getRTXIEventManager() { return this->event_manager; }
 
 private:
-
-  MainWindow* main_window=nullptr;
-  QWidget* gridBox=nullptr;
-  QGroupBox* buttonGroup=nullptr;
+  MainWindow* main_window = nullptr;
+  QWidget* gridBox = nullptr;
+  QGroupBox* buttonGroup = nullptr;
   std::string name;
-  QMdiSubWindow* subWindow=nullptr;
-  Modules::Plugin* hostPlugin=nullptr;
-  QGridLayout* layout=nullptr;
-  Event::Manager* event_manager=nullptr;
+  QMdiSubWindow* subWindow = nullptr;
+  Modules::Plugin* hostPlugin = nullptr;
+  QGridLayout* layout = nullptr;
+  Event::Manager* event_manager = nullptr;
 
   // Default buttons
-  QPushButton* pauseButton=nullptr;
-  QPushButton* modifyButton=nullptr;
-  QPushButton* unloadButton=nullptr;
+  QPushButton* pauseButton = nullptr;
+  QPushButton* modifyButton = nullptr;
+  QPushButton* unloadButton = nullptr;
 
   struct param_t
   {
@@ -274,11 +270,14 @@ private:
 class Plugin : public Event::Handler
 {
 public:
-  Plugin(Event::Manager* ev_manager, MainWindow* mw, const std::string& mod_name);
-  Plugin(const Plugin& plugin) = delete; // copy constructor
-  Plugin& operator=(const Plugin& plugin) = delete; // copy assignment noperator
-  Plugin(Plugin &&) = delete; // move constructor
-  Plugin& operator=(Plugin &&) = delete; // move assignment operator
+  Plugin(Event::Manager* ev_manager,
+         MainWindow* mw,
+         const std::string& mod_name);
+  Plugin(const Plugin& plugin) = delete;  // copy constructor
+  Plugin& operator=(const Plugin& plugin) =
+      delete;  // copy assignment noperator
+  Plugin(Plugin&&) = delete;  // move constructor
+  Plugin& operator=(Plugin&&) = delete;  // move assignment operator
   virtual ~Plugin();
 
   void attachComponent(std::unique_ptr<Modules::Component> component);
@@ -287,11 +286,15 @@ public:
   uint64_t getComponentUIntParameter(const std::string& parameter_name);
   double getComponentDoubleParameter(const std::string& parameter_name);
 
-  int setComponentIntParameter(const std::string& parameter_name, int64_t value);
-  int setComponentDoubleParameter(const std::string& parameter_name, double value);
-  int setComponentUintParameter(const std::string& parameter_name, uint64_t value);
+  int setComponentIntParameter(const std::string& parameter_name,
+                               int64_t value);
+  int setComponentDoubleParameter(const std::string& parameter_name,
+                                  double value);
+  int setComponentUintParameter(const std::string& parameter_name,
+                                uint64_t value);
   int setComponentComment(const std::string& parameter_name, std::string value);
-  int setComponentState(const std::string& parameter_name, Modules::Variable::state_t value);
+  int setComponentState(const std::string& parameter_name,
+                        Modules::Variable::state_t value);
 
   std::string getName() { return this->name; }
   bool getActive();
@@ -299,20 +302,19 @@ public:
   void receiveEvent(Event::Object* event) override;
   void* getHandle() { return this->handle; }
 
-
   /*!
-  * Get the name of the library from which the object was loaded.
-  *
-  * \return The library file the object from which the object was created.
-  */
+   * Get the name of the library from which the object was loaded.
+   *
+   * \return The library file the object from which the object was created.
+   */
   std::string getLibrary() const;
 
   std::unique_ptr<Modules::Plugin> load();
 
   /*!
-    * A mechanism which an object can use to unload itself. Should only be
-    *   called from within the GUI thread.
-    */
+   * A mechanism which an object can use to unload itself. Should only be
+   *   called from within the GUI thread.
+   */
   void unload();
 
   // These functions are here in order to have backwards compatibility
@@ -326,21 +328,24 @@ protected:
   std::unique_ptr<Modules::Component> plugin_component;
 
   // not owned pointers (managed by external objects)
-  Event::Manager* event_manager=nullptr;
-  MainWindow* main_window=nullptr; // Qt handles this lifetime
-  Modules::Panel* widget_panel=nullptr; // Qt handles this lifetime
+  Event::Manager* event_manager = nullptr;
+  MainWindow* main_window = nullptr;  // Qt handles this lifetime
+  Modules::Panel* widget_panel = nullptr;  // Qt handles this lifetime
 
 private:
   std::string library;
-  void* handle=nullptr; // if it is a shared object then this will not be null
+  void* handle =
+      nullptr;  // if it is a shared object then this will not be null
   std::string name;
 };
 
 struct FactoryMethods
 {
-  std::unique_ptr<Modules::Plugin>(*createPlugin)(Event::Manager*, MainWindow*) = nullptr;
-  std::unique_ptr<Modules::Component>(*createComponent)(Modules::Plugin*) = nullptr;
-  Modules::Panel*(*createPanel)(MainWindow*, Event::Manager*) = nullptr;
+  std::unique_ptr<Modules::Plugin> (*createPlugin)(Event::Manager*,
+                                                   MainWindow*) = nullptr;
+  std::unique_ptr<Modules::Component> (*createComponent)(Modules::Plugin*) =
+      nullptr;
+  Modules::Panel* (*createPanel)(MainWindow*, Event::Manager*) = nullptr;
 };
 
 class Manager : public Event::Handler
@@ -359,12 +364,12 @@ private:
   void registerFactories(std::string module_name, Modules::FactoryMethods);
   void unregisterFactories(std::string module_name);
 
-
-  std::unordered_map<std::string, std::unique_ptr<Modules::Plugin>> rtxi_modules_registry;
-  std::unordered_map<std::string, Modules::FactoryMethods> rtxi_factories_registry;
+  std::unordered_map<std::string, std::unique_ptr<Modules::Plugin>>
+      rtxi_modules_registry;
+  std::unordered_map<std::string, Modules::FactoryMethods>
+      rtxi_factories_registry;
   Event::Manager* event_manager;
   MainWindow* main_window;
-
 };
 
 }  // namespace Modules

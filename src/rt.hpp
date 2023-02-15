@@ -21,8 +21,8 @@
 #ifndef RT_H
 #define RT_H
 
-#include <vector>
 #include <unordered_map>
+#include <vector>
 
 #include "event.hpp"
 #include "fifo.hpp"
@@ -98,8 +98,8 @@ public:
    */
   virtual void execute() = 0;
 
-  //virtual void input(const std::vector<double>& data) = 0;
-  //virtual const std::vector<double>& output() = 0;
+  // virtual void input(const std::vector<double>& data) = 0;
+  // virtual const std::vector<double>& output() = 0;
 };  // class Thread
 
 typedef struct
@@ -118,7 +118,7 @@ typedef struct
  * Information about the outputs of a particular block. This is
  * meant to be used along with a block pointer for the source and
  * should not be used alone.
- * 
+ *
  * \param src_port Index of the source channel generating the output
  * \param dest Pointer to IO::Block to send the output to
  * \param dest_port Index of the destination channel taking the input
@@ -127,7 +127,7 @@ typedef struct
 {
   std::vector<thread_connection_t> output_threads;
   std::vector<device_connection_t> output_devices;
-}outputs_info;
+} outputs_info;
 
 /*!
  * Acts as a central meeting point between Blocks. Provides
@@ -257,7 +257,7 @@ public:
    * \sa IO::Block::output()
    */
   void disconnect(RT::Device* src, size_t out, RT::Device* dest, size_t in);
-  
+
   /*!
    * Determine whether source thread and destination thread are connected.
    *
@@ -317,11 +317,11 @@ public:
    */
   void insertBlock(RT::Thread* thread);
 
-   /*!
+  /*!
    * Register the device in order to access connection services
    *
    * \param device Pointer to block object to register
-   */ 
+   */
   void insertBlock(RT::Device* device);
 
   /*!
@@ -365,7 +365,7 @@ public:
 
   /*!
    * Get a lsit of threads that are registered with connector class. To
-   * the connector class threads are blocks that are dependent of other 
+   * the connector class threads are blocks that are dependent of other
    * blocks when connected. They are topologically sorted.
    *
    * \returns List of RT::Thread pointers representing registered threads
@@ -391,21 +391,21 @@ public:
   std::vector<RT::outputs_info> getOutputs(RT::Device* src);
 
   /*!
-   * Copies outputs of the given device object to the inputs of 
+   * Copies outputs of the given device object to the inputs of
    * connected thread and device objects
-   * 
+   *
    * \param device Pointer to device that is the source of the output.
    */
   void propagate(RT::Device* device);
 
-
   /*!
-   * Copies outputs of the given thread object to the inputs of 
+   * Copies outputs of the given thread object to the inputs of
    * connected thread and device objects
-   * 
+   *
    * \param thread Pointer to thraed that is the source of the output.
    */
   void propagate(RT::Thread* thread);
+
 private:
   std::vector<RT::Thread*> topological_sort();
   std::unordered_map<RT::Thread*, std::vector<outputs_info>> thread_registry;
@@ -421,12 +421,10 @@ class System : public Event::Handler
 public:
   explicit System(Event::Manager* em, RT::Connector* rtc);
   System(const System& system) = delete;  // copy constructor
-  System& operator=(const System& system) =
-      delete;  // copy assignment operator
+  System& operator=(const System& system) = delete;  // copy assignment operator
   System(System&&) = delete;  // move constructor
   System& operator=(System&&) = delete;  // move assignment operator
   ~System();
-
 
   int64_t getPeriod();
   RT::Telemitry::Response getTelemitry();

@@ -96,10 +96,7 @@ TEST_F(IOBlockTest, writeinput)
         : IO::Block(n, c, true)
     {
     }
-    void echo()
-    {
-      this->writeoutput(0, this->readinput(0));
-    }
+    void echo() { this->writeoutput(0, this->readinput(0)); }
   };
   testBlock tempblock("TEST:BLOCK:NAME", this->defaultChannelList);
   tempblock.writeinput(0, values);

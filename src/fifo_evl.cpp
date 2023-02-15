@@ -1,12 +1,13 @@
 
 
-#include <evl/evl.h>
-#include <unistd.h>
-#include <string.h>
+#include "fifo.hpp"
+
 #include <errno.h>
+#include <evl/evl.h>
+#include <string.h>
+#include <unistd.h>
 
 #include "debug.hpp"
-#include "fifo.hpp"
 
 // First let's define an evl specific Fifo class.
 namespace RT::OS
@@ -15,10 +16,10 @@ class evlFifo : public Fifo
 {
 public:
   explicit evlFifo(size_t size);
-  evlFifo(const evlFifo& fifo) = delete; // copy constructor
-  evlFifo& operator=(const evlFifo& fifo) = delete; //copy assignment operator
-  evlFifo(evlFifo &&) = default; // move constructor
-  evlFifo& operator=(evlFifo &&) = default; // move assignment operator
+  evlFifo(const evlFifo& fifo) = delete;  // copy constructor
+  evlFifo& operator=(const evlFifo& fifo) = delete;  // copy assignment operator
+  evlFifo(evlFifo&&) = default;  // move constructor
+  evlFifo& operator=(evlFifo&&) = default;  // move assignment operator
   ~evlFifo() override;
 
   int buffer_fd() const;

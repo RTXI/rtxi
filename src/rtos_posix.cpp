@@ -20,33 +20,35 @@
 
 #include <iostream>
 
+#include "rtos.hpp"
+
 #include <errno.h>
+#include <fcntl.h>
+#include <pthread.h>
+#include <string.h>
 #include <sys/mman.h>
 #include <sys/resource.h>
 #include <sys/time.h>
 #include <sys/types.h>
-#include <pthread.h>
 #include <time.h>
 #include <unistd.h>
-#include <fcntl.h>
-#include <string.h>
 
 #include "debug.hpp"
-#include "rtos.hpp"
 
 thread_local bool realtime_key = false;
 thread_local int64_t* RT_PERIOD = nullptr;
 
-int RT::OS::initiate(RT::OS::Task * task)
+int RT::OS::initiate(RT::OS::Task* task)
 {
   /*
    * I want users to be very much aware that they aren't running in realtime.
    */
   std::cout << "***WARNING*** You are using the POSIX compatibility layer, "
                "RTXI is NOT running in realtime!!!\n";
-  int retval = mlockall(MCL_CURRENT | MCL_FUTURE); // NOLINT
+  int retval = mlockall(MCL_CURRENT | MCL_FUTURE);  // NOLINT
   if (retval != 0) {
-    ERROR_MSG("RT::OS(POSIX)::initiate : failed to lock memory : %s", strerror(errno));
+    ERROR_MSG("RT::OS(POSIX)::initiate : failed to lock memory : %s",
+              strerror(errno));
   }
   realtime_key = true;
   task->period = RT::OS::DEFAULT_PERIOD;
@@ -55,7 +57,7 @@ int RT::OS::initiate(RT::OS::Task * task)
   return retval;
 }
 
-void RT::OS::shutdown(RT::OS::Task * task)
+void RT::OS::shutdown(RT::OS::Task* task)
 {
   munlockall();
   realtime_key = false;
@@ -70,7 +72,7 @@ int RT::OS::createTask(Task* task, void (*func)(void*), void* arg)
     ERROR_MSG("RT::OS::createTask : Task cannot be created from rt context");
     return -1;
   }
-  auto wrapper = [](RT::OS::Task * tsk, void(*fn)(void*), void* args)
+  auto wrapper = [](RT::OS::Task* tsk, void (*fn)(void*), void* args)
   {
     auto resval = RT::OS::initiate(tsk);
     if (resval != 0) {
@@ -99,8 +101,8 @@ void RT::OS::deleteTask(RT::OS::Task* task)
     ERROR_MSG("RT::OS::createTask : Task cannot be deleted from rt context");
     return;
   }
-  //task->task_finished = true;
-  if (task->rt_thread.joinable()){
+  // task->task_finished = true;
+  if (task->rt_thread.joinable()) {
     task->rt_thread.join();
   }
 }
@@ -112,7 +114,7 @@ bool RT::OS::isRealtime()
 
 int64_t RT::OS::getTime()
 {
-  timespec tp = { };
+  timespec tp = {};
 
   clock_gettime(CLOCK_MONOTONIC, &tp);
 
@@ -128,23 +130,22 @@ int RT::OS::setPeriod(RT::OS::Task* task, int64_t period)
 int64_t RT::OS::getPeriod()
 {
   // This function should only ever be accessed withint a real-tim context
-  if(RT_PERIOD == nullptr || !RT::OS::isRealtime()) { return -1; };
+  if (RT_PERIOD == nullptr || !RT::OS::isRealtime()) {
+    return -1;
+  };
   return *(RT_PERIOD);
 }
 
 void RT::OS::sleepTimestep(RT::OS::Task* task)
 {
-  if (task->next_t < RT::OS::DEFAULT_PERIOD)
-  {
+  if (task->next_t < RT::OS::DEFAULT_PERIOD) {
     task->next_t = RT::OS::getTime() + task->period;
   }
   int64_t sleep_time = task->next_t;
   task->next_t += task->period;
 
-  const struct timespec ts = {
-      sleep_time / RT::OS::SECONDS_TO_NANOSECONDS,
-      sleep_time % RT::OS::SECONDS_TO_NANOSECONDS
-  };
+  const struct timespec ts = {sleep_time / RT::OS::SECONDS_TO_NANOSECONDS,
+                              sleep_time % RT::OS::SECONDS_TO_NANOSECONDS};
 
   clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &ts, nullptr);
 }
@@ -163,22 +164,25 @@ double RT::OS::getCpuUsage()
   int64_t cpu_time_elapsed = 0;
   int64_t proc_time_elapsed = 0;
 
-  timespec clock_time = { };
-  timespec proc_time = { };
+  timespec clock_time = {};
+  timespec proc_time = {};
   // rusage resource_usage;
 
   clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &proc_time);
   clock_gettime(CLOCK_REALTIME, &clock_time);
   // getrusage(RUSAGE_SELF, &resource_usage);
 
-  cpu_time_elapsed = RT::OS::SECONDS_TO_NANOSECONDS * (clock_time.tv_sec - last_clock_read.tv_sec)
+  cpu_time_elapsed = RT::OS::SECONDS_TO_NANOSECONDS
+          * (clock_time.tv_sec - last_clock_read.tv_sec)
       + (clock_time.tv_nsec - last_clock_read.tv_nsec);
   if (cpu_time_elapsed <= 0) {
     return 0.0;
   }
-  proc_time_elapsed = RT::OS::SECONDS_TO_NANOSECONDS * (proc_time.tv_sec - last_proc_time.tv_sec)
+  proc_time_elapsed = RT::OS::SECONDS_TO_NANOSECONDS
+          * (proc_time.tv_sec - last_proc_time.tv_sec)
       + (proc_time.tv_nsec - last_proc_time.tv_nsec);
-  cpu_percent = 100.0 * (static_cast<double>(proc_time_elapsed)) / static_cast<double>(cpu_time_elapsed);
+  cpu_percent = 100.0 * (static_cast<double>(proc_time_elapsed))
+      / static_cast<double>(cpu_time_elapsed);
 
   last_proc_time = proc_time;
   last_clock_read = clock_time;

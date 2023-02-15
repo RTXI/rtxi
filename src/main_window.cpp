@@ -35,14 +35,13 @@
 #include <fmt/core.h>
 
 #include "debug.hpp"
-#include "rtxiConfig.h"
 #include "event.hpp"
-
 #include "performance_measurement/performance_measurement.hpp"
+#include "rtxiConfig.h"
 
 MainWindow::MainWindow(Event::Manager* ev_manager)
-    : QMainWindow(nullptr, Qt::Window),
-      event_manager(ev_manager)
+    : QMainWindow(nullptr, Qt::Window)
+    , event_manager(ev_manager)
 {
   // Make central RTXI parent widget
   mdiArea = new QMdiArea;
@@ -77,7 +76,7 @@ MainWindow::MainWindow(Event::Manager* ev_manager)
   /* Initialize Help Menu */
   createHelpActions();
   createHelpMenu();
- }
+}
 
 QAction* MainWindow::insertModuleMenuSeparator()
 {
@@ -185,17 +184,15 @@ void MainWindow::createUtilMenu()
   libsDir.setNameFilters(QStringList("*.so"));
   for (const auto& entryItem : libsDir.entryList()) {
     utilItem = new QAction(entryItem, this);
-    if (entryItem.contains("analysis") ||
-        entryItem.contains("sync") ||
-        entryItem.contains("mimic")) {
+    if (entryItem.contains("analysis") || entryItem.contains("sync")
+        || entryItem.contains("mimic"))
+    {
       utilitiesSubMenu->addAction(utilItem);
-    } else if (entryItem.contains("iir") ||
-               entryItem.contains("fir")) {
+    } else if (entryItem.contains("iir") || entryItem.contains("fir")) {
       filtersSubMenu->addAction(utilItem);
-    } else if (entryItem.contains("signal")|| 
-               entryItem.contains("noise") ||
-               entryItem.contains("ttl") ||
-               entryItem.contains("maker")) {
+    } else if (entryItem.contains("signal") || entryItem.contains("noise")
+               || entryItem.contains("ttl") || entryItem.contains("maker"))
+    {
       signalsSubMenu->addAction(utilItem);
     } else {
       delete utilItem;
@@ -207,9 +204,9 @@ void MainWindow::createSystemMenu()
 {
   systemMenu = menuBar()->addMenu(tr("&System"));
   systemMenu->addAction(openRTBenchmarks);
-  connect(systemMenu, 
-          SIGNAL(triggered(QAction*)), 
-          this, 
+  connect(systemMenu,
+          SIGNAL(triggered(QAction*)),
+          this,
           SLOT(systemMenuActivated(QAction*)));
 }
 
@@ -284,7 +281,6 @@ void MainWindow::createHelpActions()
 void MainWindow::createSystemActions()
 {
   openRTBenchmarks = new QAction(tr("RT Benchmarks"), this);
-
 }
 
 void MainWindow::about()
@@ -409,9 +405,13 @@ void MainWindow::systemMenuActivated(QAction* id)
   Event::Object event(Event::Type::PLUGIN_INSERT_EVENT);
   event.setParam("pluginName", std::any(id->text().toStdString()));
   this->event_manager->postEvent(&event);
-  auto create_rtxi_panel_func = std::any_cast<Modules::Panel*(*)(MainWindow*, Event::Manager*)>(event.getParam("createRTXIPanel"));
-  auto rtxi_plugin_pointer = std::any_cast<Modules::Plugin*>(event.getParam("pluginPointer"));
-  rtxi_plugin_pointer->attachPanel(create_rtxi_panel_func(this, this->event_manager)); 
+  auto create_rtxi_panel_func =
+      std::any_cast<Modules::Panel* (*)(MainWindow*, Event::Manager*)>(
+          event.getParam("createRTXIPanel"));
+  auto rtxi_plugin_pointer =
+      std::any_cast<Modules::Plugin*>(event.getParam("pluginPointer"));
+  rtxi_plugin_pointer->attachPanel(
+      create_rtxi_panel_func(this, this->event_manager));
 }
 
 void MainWindow::windowsMenuAboutToShow()

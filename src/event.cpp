@@ -50,7 +50,7 @@ std::string Event::type_to_string(Event::Type event_type)
     case Event::Type::RT_DEVICE_INSERT_EVENT:
       return_string = "SYSTEM : device insert";
       break;
-    case Event::Type::RT_SHUTDOWN_EVENT :
+    case Event::Type::RT_SHUTDOWN_EVENT:
       return_string = "SYSTEM : shutdown";
       break;
     case Event::Type::RT_DEVICE_REMOVE_EVENT:
@@ -126,12 +126,15 @@ std::string Event::type_to_string(Event::Type event_type)
 }
 
 Event::Object::Object(Event::Type et)
-    : event_type(et), processed(false)
+    : event_type(et)
+    , processed(false)
 {
 }
 
 Event::Object::Object(const Event::Object& obj)
-    : params(obj.params),event_type(obj.event_type), processed(false)
+    : params(obj.params)
+    , event_type(obj.event_type)
+    , processed(false)
 {
 }
 
@@ -155,13 +158,14 @@ bool Event::Object::paramExists(const std::string& param_name)
   bool result = false;
   for (auto& parameter : params) {
     if (parameter.name == param_name) {
-       result = true;
+      result = true;
     }
   }
   return result;
 }
 
-void Event::Object::setParam(const std::string& param_name, const std::any& param_value)
+void Event::Object::setParam(const std::string& param_name,
+                             const std::any& param_value)
 {
   for (auto& parameter : params) {
     if (parameter.name == param_name) {
@@ -179,8 +183,9 @@ void Event::Object::setParam(const std::string& param_name, const std::any& para
 void Event::Object::wait()
 {
   std::unique_lock<std::mutex> done_lock(this->processing_done_mut);
-  this->processing_done_cond.wait(done_lock, [this](){return this->processed;});
-  //done_lock.unlock();
+  this->processing_done_cond.wait(done_lock,
+                                  [this]() { return this->processed; });
+  // done_lock.unlock();
 }
 
 void Event::Object::done()
@@ -213,7 +218,9 @@ Event::Manager::~Manager()
   this->running = false;
   Event::Object event(Event::Type::RT_SHUTDOWN_EVENT);
   this->postEvent(&event);
-  if(this->event_thread.joinable()) { this->event_thread.join(); };
+  if (this->event_thread.joinable()) {
+    this->event_thread.join();
+  };
 }
 
 void Event::Manager::postEvent(Event::Object* event)
@@ -229,12 +236,12 @@ void Event::Manager::postEvent(const std::vector<Event::Object*>& events)
 {
   // For performance provide postEvent that accepts multiple events
   std::unique_lock<std::mutex> lk(this->event_mut);
-  for(auto* event : events){
+  for (auto* event : events) {
     this->event_q.push(event);
   }
   this->available_event_cond.notify_all();
   lk.unlock();
-  for(auto* event : events){
+  for (auto* event : events) {
     event->wait();
   }
 }
@@ -242,13 +249,14 @@ void Event::Manager::postEvent(const std::vector<Event::Object*>& events)
 void Event::Manager::processEvents()
 {
   Event::Object* tmp_event = nullptr;
-  auto event_processor = [this](Event::Object* event){
-    if(event == nullptr) {
+  auto event_processor = [this](Event::Object* event)
+  {
+    if (event == nullptr) {
       ERROR_MSG("Null pointer event received by event processor. Ignoring");
       return;
     }
     std::shared_lock<std::shared_mutex> handlerlist_lock(this->handlerlist_mut);
-    for(auto* handler : this->handlerList){
+    for (auto* handler : this->handlerList) {
       handler->receiveEvent(event);
     }
     handlerlist_lock.unlock();
@@ -256,11 +264,10 @@ void Event::Manager::processEvents()
   };
   std::unique_lock<std::mutex> event_lock(this->event_mut);
   // TODO: Turn this into a thread pool implementation for performance
-  while(this->running){
-    this->available_event_cond.wait(event_lock, [this]{
-      return !(this->event_q.empty()); 
-    });
-    while(!event_q.empty()){
+  while (this->running) {
+    this->available_event_cond.wait(
+        event_lock, [this] { return !(this->event_q.empty()); });
+    while (!event_q.empty()) {
       tmp_event = event_q.front();
       std::thread(event_processor, tmp_event).detach();
       this->event_q.pop();
@@ -273,7 +280,7 @@ void Event::Manager::registerHandler(Event::Handler* handler)
 {
   std::unique_lock<std::shared_mutex> write_lock(this->handlerlist_mut);
   auto location = std::find(handlerList.begin(), handlerList.end(), handler);
-  if(location == handlerList.end()){
+  if (location == handlerList.end()) {
     handlerList.push_back(handler);
   }
   write_lock.unlock();
@@ -283,7 +290,7 @@ void Event::Manager::unregisterHandler(Event::Handler* handler)
 {
   std::unique_lock<std::shared_mutex> write_lock(this->handlerlist_mut);
   auto location = std::find(handlerList.begin(), handlerList.end(), handler);
-  if(location != handlerList.end()){
+  if (location != handlerList.end()) {
     handlerList.erase(location);
   }
   write_lock.unlock();
@@ -297,4 +304,3 @@ bool Event::Manager::isRegistered(Event::Handler* handler)
   read_lock.unlock();
   return result;
 }
-
