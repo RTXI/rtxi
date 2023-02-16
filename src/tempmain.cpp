@@ -39,14 +39,15 @@ int main(int argc, char* argv[])
 
   // Initializing GUI
   QApplication::setDesktopSettingsAware(false);
-  QApplication* app = new QApplication(argc, argv);
+  auto* app = new QApplication(argc, argv);
   app->connect(app, SIGNAL(lastWindowClosed()), app, SLOT(quit()));
 
-  auto rtxi_window = std::make_unique<MainWindow>(event_manager.get());
+  MainWindow* rtxi_window = new MainWindow(event_manager.get());
   auto mod_manager = std::make_unique<Modules::Manager>(event_manager.get(),
-                                                        rtxi_window.get());
+                                                        rtxi_window);
   rtxi_window->loadWindow();
   int retval = app->exec();
+  delete rtxi_window;
   delete app;
   return retval;
 }

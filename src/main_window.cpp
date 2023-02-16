@@ -44,7 +44,7 @@ MainWindow::MainWindow(Event::Manager* ev_manager)
     , event_manager(ev_manager)
 {
   // Make central RTXI parent widget
-  mdiArea = new QMdiArea;
+  mdiArea = new QMdiArea(this);
   setCentralWidget(mdiArea);
 
   /* Initialize Window Settings */
@@ -433,8 +433,7 @@ void MainWindow::windowsMenuAboutToShow()
   }
   // Create windows list based off of what's open
   for (auto* subwin : subWindows) {
-    // QAction* item =
-    //     new QAction(subWindows.at(i)->widget()->windowTitle(), this);
+    auto* item = new QAction(subwin->widget()->windowTitle(), this);
     windowsMenu->addAction(new QAction(subwin->widget()->windowTitle(), this));
   }
   connect(windowsMenu,
