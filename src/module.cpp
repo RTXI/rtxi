@@ -458,10 +458,7 @@ Modules::Plugin::Plugin(Event::Manager* ev_manager,
     , main_window(mw)
     , name(mod_name)
 {
-  // this->event_manager->registerHandler(this);
-  // Event::Object event(Event::Type::PLUGIN_INSERT_EVENT);
-  // event.setParam("plugin", std::any(this));
-  // this->event_manager->postEvent(&event);
+
 }
 
 Modules::Plugin::~Plugin()
@@ -473,15 +470,10 @@ Modules::Plugin::~Plugin()
         std::any(static_cast<RT::Thread*>(this->plugin_component.get())));
     this->event_manager->postEvent(&unplug_block_event);
   }
-  // Event::Object remove_plugin_event(Event::Type::PLUGIN_REMOVE_EVENT);
-  // remove_plugin_event.setParam("pluginName", this->getName());
-  // this->event_manager->postEvent(&remove_plugin_event);
-  // if (!remove_plugin_event.isdone()){
-  //   ERROR_MSG("Plugin {} was not removed correctly from the Plugin registry",
-  //   this->name);
-  // }
 
-  // this->event_manager->unregisterHandler(this);
+  if (this->handle != nullptr){
+    dlclose(handle);
+  }
 }
 
 void Modules::Plugin::registerComponent()
@@ -621,18 +613,40 @@ Modules::Manager::Manager(Event::Manager* event_manager, MainWindow* mw)
     : event_manager(event_manager)
     , main_window(mw)
 {
-  this->rtxi_modules_registry =
-      std::unordered_map<std::string, std::unique_ptr<Modules::Plugin>>();
   this->event_manager->registerHandler(this);
+}
+
+Modules::Manager::~Manager()
+{
+  for(const auto& plugin_list : this->rtxi_modules_registry){
+    for(const auto& plugin : plugin_list.second){
+      this->event_manager->unregisterHandler(plugin.get());
+    }
+  }
+  this->event_manager->unregisterHandler(this);
+}
+
+bool Modules::Manager::isRegistered(const Modules::Plugin* plugin)
+{
+  std::string plugin_name = plugin->getName();
+  auto start_iter = this->rtxi_modules_registry[plugin_name].begin();
+  auto end_iter = this->rtxi_modules_registry[plugin_name].end();
+  return std::any_of(start_iter,
+                     end_iter,
+                     [plugin](const std::unique_ptr<Modules::Plugin>& module){
+                       return plugin == module.get();
+                     });
 }
 
 int Modules::Manager::loadPlugin(const std::string& library)
 {
   if (library == std::string("RT Benchmarks")) {
-    Modules::FactoryMethods fact_methods =
-        PerformanceMeasurement::getFactories();
-    this->registerModule(fact_methods.createPlugin(event_manager, main_window));
-    this->registerFactories(library, fact_methods);
+    if(this->rtxi_factories_registry.find(library) == this->rtxi_factories_registry.end()){
+      Modules::FactoryMethods fact_methods =
+          PerformanceMeasurement::getFactories();
+      this->registerFactories(library, fact_methods);
+    }
+    this->registerModule(this->rtxi_factories_registry[library].createPlugin(event_manager, main_window));
   } else {
     void* handle = dlopen(library.c_str(), RTLD_GLOBAL | RTLD_NOW);
     if (!handle) {
@@ -682,31 +696,34 @@ int Modules::Manager::loadPlugin(const std::string& library)
   return 0;
 }
 
-void Modules::Manager::unloadPlugin(const std::string& library)
+void Modules::Manager::unloadPlugin(Modules::Plugin* plugin)
 {
-  this->unregisterModule(library);
-  this->unregisterFactories(library);
-  if (this->rtxi_modules_registry.find(library)
-      != this->rtxi_modules_registry.end())
-  {
-    void* handle = this->rtxi_modules_registry[library]->getHandle();
-    if (handle != nullptr) {
-      dlclose(handle);
-    }
+  std::string library = plugin->getName();
+  this->unregisterModule(plugin);
+  if(this->rtxi_modules_registry[library].empty()){
+    this->unregisterFactories(library);
   }
 }
 
 void Modules::Manager::registerModule(std::unique_ptr<Modules::Plugin> module)
 {
-  this->rtxi_modules_registry[module->getName()] = std::move(module);
+  this->rtxi_modules_registry[module->getName()].push_back(std::move(module));
 }
 
-void Modules::Manager::unregisterModule(const std::string& module_name)
+void Modules::Manager::unregisterModule(Modules::Plugin* plugin)
 {
-  if (this->rtxi_modules_registry.find(module_name)
-      != this->rtxi_modules_registry.end())
-  {
-    this->rtxi_modules_registry.erase(module_name);
+  std::string plugin_name = plugin->getName();
+  auto start_iter = this->rtxi_modules_registry[plugin_name].begin();
+  auto end_iter = this->rtxi_modules_registry[plugin_name].end();
+  auto loc = std::find_if(start_iter,
+                          end_iter,
+                          [plugin](const std::unique_ptr<Modules::Plugin>& module){
+                            return plugin == module.get();
+                          });
+  void* handle = loc->get()->getHandle();
+  this->rtxi_modules_registry[plugin_name].erase(loc);
+  if (handle != nullptr) {
+    dlclose(handle);
   }
 }
 
@@ -728,11 +745,11 @@ void Modules::Manager::unregisterFactories(std::string module_name)
 void Modules::Manager::receiveEvent(Event::Object* event)
 {
   std::string plugin_name;
+  Modules::Plugin* plugin = nullptr;
   switch (event->getType()) {
     case Event::Type::PLUGIN_REMOVE_EVENT:
-      plugin_name = std::any_cast<std::string>(event->getParam("pluginName"));
-      this->unloadPlugin(plugin_name);
-      // event->done();
+      plugin = std::any_cast<Modules::Plugin*>(event->getParam("pluginPointer"));
+      this->unloadPlugin(plugin);
       break;
     case Event::Type::PLUGIN_INSERT_EVENT:
       plugin_name = std::any_cast<std::string>(event->getParam("pluginName"));
@@ -741,8 +758,7 @@ void Modules::Manager::receiveEvent(Event::Object* event)
           "createRTXIPanel",
           std::any(this->rtxi_factories_registry[plugin_name].createPanel));
       event->setParam("pluginPointer",
-                      std::any(this->rtxi_modules_registry[plugin_name].get()));
-      // this->rtxi_modules_registry[plugin_name]->registerComponent();
+                      std::any(this->rtxi_modules_registry[plugin_name].back().get()));
     default:
       return;
   }

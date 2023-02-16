@@ -296,7 +296,7 @@ public:
   int setComponentState(const std::string& parameter_name,
                         Modules::Variable::state_t value);
 
-  std::string getName() { return this->name; }
+  std::string getName() const { return this->name; }
   bool getActive();
   int setActive(bool state);
   void receiveEvent(Event::Object* event) override;
@@ -307,7 +307,7 @@ public:
    *
    * \return The library file the object from which the object was created.
    */
-  std::string getLibrary() const;
+  std::string getLibrary() const { return this->library; }
 
   std::unique_ptr<Modules::Plugin> load();
 
@@ -352,19 +352,21 @@ class Manager : public Event::Handler
 {
 public:
   Manager(Event::Manager* event_manager, MainWindow* mw);
+  ~Manager();
 
   int loadPlugin(const std::string& library);
-  void unloadPlugin(const std::string& library);
+  void unloadPlugin(Modules::Plugin* plugin);
   void receiveEvent(Event::Object* event) override;
+  bool isRegistered(const Modules::Plugin* plugin);
 
 private:
   void registerModule(std::unique_ptr<Modules::Plugin> module);
-  void unregisterModule(const std::string& module_name);
+  void unregisterModule(Modules::Plugin* plugin);
 
   void registerFactories(std::string module_name, Modules::FactoryMethods);
   void unregisterFactories(std::string module_name);
 
-  std::unordered_map<std::string, std::unique_ptr<Modules::Plugin>>
+  std::unordered_map<std::string, std::vector<std::unique_ptr<Modules::Plugin>>>
       rtxi_modules_registry;
   std::unordered_map<std::string, Modules::FactoryMethods>
       rtxi_factories_registry;
