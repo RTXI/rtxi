@@ -137,6 +137,12 @@ Modules::Panel::Panel(const std::string& mod_name,
   QObject::connect(timer, SIGNAL(timeout()), this, SLOT(refresh()));
 }
 
+void Modules::Panel::closeEvent(QCloseEvent* event)
+{
+  this->exit();
+  event->accept();
+}
+
 void Modules::Panel::createGUI(const std::vector<Modules::Variable::Info>& vars,
                                MainWindow* mw)
 {
@@ -253,9 +259,9 @@ void Modules::Panel::exit()
 {
   this->event_manager->unregisterHandler(this->hostPlugin);
   Event::Object event(Event::Type::PLUGIN_REMOVE_EVENT);
-  event.setParam("pluginName", this->getName());
+  event.setParam("pluginPointer", std::any(static_cast<Modules::Plugin*>(this->hostPlugin)));
   this->event_manager->postEvent(&event);
-  this->subWindow->close();
+  //this->subWindow->close();
 }
 
 void Modules::Panel::refresh()

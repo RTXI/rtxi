@@ -235,6 +235,7 @@ protected:
    */
   void setState(const QString& name, Modules::Variable::state_t ref);
 
+  void closeEvent(QCloseEvent* event) override;
   std::string getName() { return this->name; }
   Modules::Plugin* getHostPlugin() { return this->hostPlugin; }
 
