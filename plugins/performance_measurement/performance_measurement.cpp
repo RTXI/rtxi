@@ -141,10 +141,10 @@ void PerformanceMeasurement::Component::execute()
       break;
     case Modules::Variable::INIT:
       latencyStat.clear();
-      setValue("maxTimestep", timestep);
-      setValue("maxDuration", duration);
-      setValue("maxLatency", timestep - period);
-      latencyStat.push(latency);
+      setValue("maxTimestep", 0.0);
+      setValue("maxDuration", 0.0);
+      setValue("maxLatency", 0.0);
+      latencyStat.push(0.0);
       setValue("state", Modules::Variable::EXEC);
       break;
     case Modules::Variable::PERIOD:
