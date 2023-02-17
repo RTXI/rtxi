@@ -19,6 +19,7 @@
 */
 
 #include <iostream>
+#include <chrono>
 
 #include "rtos.hpp"
 
@@ -114,11 +115,7 @@ bool RT::OS::isRealtime()
 
 int64_t RT::OS::getTime()
 {
-  timespec tp = {};
-
-  clock_gettime(CLOCK_MONOTONIC, &tp);
-
-  return RT::OS::SECONDS_TO_NANOSECONDS * tp.tv_sec + tp.tv_nsec;
+  return std::chrono::steady_clock::now().time_since_epoch().count();
 }
 
 int RT::OS::setPeriod(RT::OS::Task* task, int64_t period)
