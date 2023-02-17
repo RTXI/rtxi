@@ -826,7 +826,6 @@ void RT::System::execute(void* sys)
   int64_t endtime = 0;
   while (!(system->task->task_finished)) {
     // storing timing information and placing it in local variables
-    endtime = RT::OS::getTime();
 
     // store period timing values for previous period
     system->periodStartTime = starttime;
@@ -849,6 +848,7 @@ void RT::System::execute(void* sys)
         system->rt_connector->propagate(iThread);
       }
     }
+    endtime = RT::OS::getTime();
 
     for (auto* iDevice : system->devices) {
       if (iDevice->getActive()) {

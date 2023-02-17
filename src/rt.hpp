@@ -21,7 +21,7 @@
 #ifndef RT_H
 #define RT_H
 
-#include <unordered_map>
+#include <map>
 #include <vector>
 
 #include "event.hpp"
@@ -408,8 +408,8 @@ public:
 
 private:
   std::vector<RT::Thread*> topological_sort();
-  std::unordered_map<RT::Thread*, std::vector<outputs_info>> thread_registry;
-  std::unordered_map<RT::Device*, std::vector<outputs_info>> device_registry;
+  std::map<RT::Thread*, std::vector<outputs_info>> thread_registry;
+  std::map<RT::Device*, std::vector<outputs_info>> device_registry;
 };  // class Connector
 
 /*!
