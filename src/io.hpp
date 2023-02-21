@@ -148,7 +148,7 @@ public:
 
   bool dependent() const { return this->isInputDependent; }
 
-  bool getActive() { return this->active; }
+  bool getActive() const { return this->active; }
   void setActive(bool act) { this->active = act; }
 
 protected:

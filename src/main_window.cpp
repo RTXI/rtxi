@@ -36,7 +36,7 @@
 
 #include "debug.hpp"
 #include "event.hpp"
-#include "performance_measurement/performance_measurement.hpp"
+#include "module.hpp"
 #include "rtxiConfig.h"
 
 MainWindow::MainWindow(Event::Manager* ev_manager)

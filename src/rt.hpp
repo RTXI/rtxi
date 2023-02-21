@@ -21,7 +21,7 @@
 #ifndef RT_H
 #define RT_H
 
-#include <map>
+#include <unordered_map>
 #include <vector>
 
 #include "event.hpp"
@@ -396,7 +396,7 @@ public:
    *
    * \param device Pointer to device that is the source of the output.
    */
-  void propagate(RT::Device* device);
+  void propagateDeviceConnections(RT::Device* device);
 
   /*!
    * Copies outputs of the given thread object to the inputs of
@@ -404,12 +404,12 @@ public:
    *
    * \param thread Pointer to thraed that is the source of the output.
    */
-  void propagate(RT::Thread* thread);
+  void propagateThreadConnections(RT::Thread* thread);
 
 private:
   std::vector<RT::Thread*> topological_sort();
-  std::map<RT::Thread*, std::vector<outputs_info>> thread_registry;
-  std::map<RT::Device*, std::vector<outputs_info>> device_registry;
+  std::unordered_map<RT::Thread*, std::vector<outputs_info>> thread_registry;
+  std::unordered_map<RT::Device*, std::vector<outputs_info>> device_registry;
 };  // class Connector
 
 /*!

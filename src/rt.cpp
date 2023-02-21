@@ -410,7 +410,7 @@ std::vector<RT::outputs_info> RT::Connector::getOutputs(RT::Device* src)
   return result;
 }
 
-void RT::Connector::propagate(RT::Device* device)
+void RT::Connector::propagateDeviceConnections(RT::Device* device)
 {
   for (size_t out_ch = 0; out_ch < this->device_registry[device].size();
        out_ch++) {
@@ -427,16 +427,16 @@ void RT::Connector::propagate(RT::Device* device)
   }
 }
 
-void RT::Connector::propagate(RT::Thread* thread)
+void RT::Connector::propagateThreadConnections(RT::Thread* thread)
 {
   for (size_t out_ch = 0; out_ch < this->thread_registry[thread].size();
        out_ch++) {
-    for (auto dest_info : this->thread_registry[thread][out_ch].output_devices)
+    for (auto& dest_info : this->thread_registry[thread][out_ch].output_devices)
     {
       dest_info.dest->writeinput(dest_info.dest_port,
                                  thread->readoutput(out_ch));
     }
-    for (auto dest_info : this->thread_registry[thread][out_ch].output_threads)
+    for (auto& dest_info : this->thread_registry[thread][out_ch].output_threads)
     {
       dest_info.dest->writeinput(dest_info.dest_port,
                                  thread->readoutput(out_ch));
@@ -838,14 +838,14 @@ void RT::System::execute(void* sys)
     for (auto* iDevice : system->devices) {
       if (iDevice->getActive()) {
         iDevice->read();
-        system->rt_connector->propagate(iDevice);
+        system->rt_connector->propagateDeviceConnections(iDevice);
       }
     }
 
     for (auto* iThread : system->threads) {
       if (iThread->getActive()) {
         iThread->execute();
-        system->rt_connector->propagate(iThread);
+        system->rt_connector->propagateThreadConnections(iThread);
       }
     }
     endtime = RT::OS::getTime();
