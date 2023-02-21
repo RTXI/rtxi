@@ -78,34 +78,38 @@ Modules::Component::Component(
     , active(false)
 {
   for (const auto& var : variables) {
-    this->parameter[var.name] = var;
+    if(var.id != variables.size()){
+      ERROR_MSG("Error parsing variables in module {} loading", this->getName());
+      return;
+    }
+    this->parameters.push_back(var);
   }
 }
 
-std::string Modules::Component::getDescription(const std::string& varname)
+std::string Modules::Component::getDescription(const size_t& var_id)
 {
-  return this->parameter[varname].description;
+  return this->parameters[var_id].description;
 }
 
-std::string Modules::Component::getValueString(const std::string& varname)
+std::string Modules::Component::getValueString(const size_t& var_id)
 {
   std::string value;
-  switch (this->parameter[varname].vartype) {
+  switch (this->parameters[var_id].vartype) {
     case Modules::Variable::UINT_PARAMETER:
       value =
-          std::to_string(std::get<uint64_t>(this->parameter[varname].value));
+          std::to_string(std::get<uint64_t>(this->parameters[var_id].value));
       break;
     case Modules::Variable::INT_PARAMETER:
-      value = std::to_string(std::get<int64_t>(this->parameter[varname].value));
+      value = std::to_string(std::get<int64_t>(this->parameters[var_id].value));
       break;
     case Modules::Variable::DOUBLE_PARAMETER:
-      value = std::to_string(std::get<double>(this->parameter[varname].value));
+      value = std::to_string(std::get<double>(this->parameters[var_id].value));
       break;
     case Modules::Variable::STATE:
       value = "";
       break;
     case Modules::Variable::COMMENT:
-      value = std::get<std::string>(this->parameter[varname].value);
+      value = std::get<std::string>(this->parameters[var_id].value);
       break;
     case Modules::Variable::UNKNOWN:
       value = "UNKNOWN";
@@ -181,6 +185,7 @@ void Modules::Panel::createGUI(const std::vector<Modules::Variable::Info>& vars,
     param.str_value = QString();
     param.label = new QLabel;
     param.type = varinfo.vartype;
+    param.info = varinfo;
     switch (varinfo.vartype) {
       case Modules::Variable::DOUBLE_PARAMETER:
         param.edit->setValidator(new QDoubleValidator(param.edit));
@@ -284,19 +289,18 @@ void Modules::Panel::refresh()
         break;
       case Modules::Variable::UINT_PARAMETER:
         uint_value =
-            this->hostPlugin->getComponentUIntParameter(i.first.toStdString());
+            this->hostPlugin->getComponentUIntParameter(i.second.info.id);
         sstream << uint_value;
         i.second.edit->setText(QString::fromStdString(sstream.str()));
         break;
       case Modules::Variable::INT_PARAMETER:
         int_value =
-            this->hostPlugin->getComponentIntParameter(i.first.toStdString());
+            this->hostPlugin->getComponentIntParameter(i.second.info.id);
         sstream << int_value;
         i.second.edit->setText(QString::fromStdString(sstream.str()));
         break;
       case Modules::Variable::DOUBLE_PARAMETER:
-        double_value = this->hostPlugin->getComponentDoubleParameter(
-            i.first.toStdString());
+        double_value = this->hostPlugin->getComponentDoubleParameter(i.second.info.id);
         sstream << double_value;
         i.second.edit->setText(QString::fromStdString(sstream.str()));
         break;
@@ -336,7 +340,7 @@ void Modules::Panel::setComment(const QString& var_name, const QString& comment)
     n->second.edit->setText(comment);
     QByteArray textData = comment.toLatin1();
     const char* text = textData.constData();
-    this->hostPlugin->setComponentComment(n->first.toStdString(), text);
+    this->hostPlugin->setComponentComment(n->second.info.id, text);
   }
 }
 
@@ -348,7 +352,7 @@ void Modules::Panel::setParameter(const QString& var_name, double value)
   {
     n->second.edit->setText(QString::number(value));
     n->second.str_value = n->second.edit->text();
-    this->hostPlugin->setComponentDoubleParameter(n->first.toStdString(),
+    this->hostPlugin->setComponentDoubleParameter(n->second.info.id,
                                                   value);
     // setValue(n->second.index, n->second.edit->text().toDouble());
   }
@@ -362,7 +366,7 @@ void Modules::Panel::setParameter(const QString& var_name, int value)
   {
     n->second.edit->setText(QString::number(value));
     n->second.str_value = n->second.edit->text();
-    this->hostPlugin->setComponentIntParameter(n->first.toStdString(), value);
+    this->hostPlugin->setComponentIntParameter(n->second.info.id, value);
     // setValue(n->second.index, n->second.edit->text().toDouble());
   }
 }
@@ -375,7 +379,7 @@ void Modules::Panel::setParameter(const QString& var_name, uint64_t value)
   {
     n->second.edit->setText(QString::number(value));
     n->second.str_value = n->second.edit->text();
-    this->hostPlugin->setComponentUintParameter(n->first.toStdString(), value);
+    this->hostPlugin->setComponentUintParameter(n->second.info.id, value);
     // setValue(n->second.index, n->second.edit->text().toDouble());
   }
 }
@@ -388,7 +392,7 @@ void Modules::Panel::setState(const QString& var_name,
     // setData(Workspace::STATE, n->second.index, &ref);
 
     n->second.edit->setText(QString::number(ref));
-    this->hostPlugin->setComponentState(n->first.toStdString(), ref);
+    this->hostPlugin->setComponentState(n->second.info.id, ref);
   }
 }
 
@@ -507,29 +511,29 @@ void Modules::Plugin::attachPanel(Modules::Panel* panel)
 }
 
 int64_t Modules::Plugin::getComponentIntParameter(
-    const std::string& parameter_name)
+    const size_t& parameter_id)
 {
-  return this->plugin_component->getValue<int64_t>(parameter_name);
+  return this->plugin_component->getValue<int64_t>(parameter_id);
 }
 
 uint64_t Modules::Plugin::getComponentUIntParameter(
-    const std::string& parameter_name)
+    const size_t& parameter_id)
 {
-  return this->plugin_component->getValue<uint64_t>(parameter_name);
+  return this->plugin_component->getValue<uint64_t>(parameter_id);
 }
 
 double Modules::Plugin::getComponentDoubleParameter(
-    const std::string& parameter_name)
+    const size_t& parameter_id)
 {
-  return this->plugin_component->getValue<double>(parameter_name);
+  return this->plugin_component->getValue<double>(parameter_id);
 }
 
-int Modules::Plugin::setComponentIntParameter(const std::string& parameter_name,
+int Modules::Plugin::setComponentIntParameter(const size_t& parameter_id,
                                               int64_t value)
 {
   int result = 0;
   Event::Object event(Event::Type::RT_MODULE_PARAMETER_CHANGE_EVENT);
-  event.setParam("paramName", std::any(parameter_name));
+  event.setParam("paramID", std::any(parameter_id));
   event.setParam("paramType", std::any(Modules::Variable::INT_PARAMETER));
   event.setParam("paramValue", std::any(value));
   event.setParam("paramModule", std::any(this->plugin_component.get()));
@@ -538,11 +542,11 @@ int Modules::Plugin::setComponentIntParameter(const std::string& parameter_name,
 }
 
 int Modules::Plugin::setComponentDoubleParameter(
-    const std::string& parameter_name, double value)
+    const size_t& parameter_id, double value)
 {
   int result = 0;
   Event::Object event(Event::Type::RT_MODULE_PARAMETER_CHANGE_EVENT);
-  event.setParam("paramName", std::any(parameter_name));
+  event.setParam("paramID", std::any(parameter_id));
   event.setParam("paramType", std::any(Modules::Variable::DOUBLE_PARAMETER));
   event.setParam("paramValue", std::any(value));
   event.setParam("paramModule", std::any(this->plugin_component.get()));
@@ -551,11 +555,11 @@ int Modules::Plugin::setComponentDoubleParameter(
 }
 
 int Modules::Plugin::setComponentUintParameter(
-    const std::string& parameter_name, uint64_t value)
+    const size_t& parameter_id, uint64_t value)
 {
   int result = 0;
   Event::Object event(Event::Type::RT_MODULE_PARAMETER_CHANGE_EVENT);
-  event.setParam("paramName", std::any(parameter_name));
+  event.setParam("paramID", std::any(parameter_id));
   event.setParam("paramType", std::any(Modules::Variable::UINT_PARAMETER));
   event.setParam("paramValue", std::any(value));
   event.setParam("paramModule", std::any(this->plugin_component.get()));
@@ -563,12 +567,12 @@ int Modules::Plugin::setComponentUintParameter(
   return result;
 }
 
-int Modules::Plugin::setComponentComment(const std::string& parameter_name,
+int Modules::Plugin::setComponentComment(const size_t& parameter_id,
                                          std::string value)
 {
   int result = 0;
   Event::Object event(Event::Type::RT_MODULE_PARAMETER_CHANGE_EVENT);
-  event.setParam("paramName", std::any(parameter_name));
+  event.setParam("paramID", std::any(parameter_id));
   event.setParam("paramType", std::any(Modules::Variable::INT_PARAMETER));
   event.setParam("paramValue", std::any(value));
   event.setParam("paramModule", std::any(this->plugin_component.get()));
@@ -576,12 +580,12 @@ int Modules::Plugin::setComponentComment(const std::string& parameter_name,
   return result;
 }
 
-int Modules::Plugin::setComponentState(const std::string& parameter_name,
+int Modules::Plugin::setComponentState(const size_t& parameter_id,
                                        Modules::Variable::state_t value)
 {
   int result = 0;
   Event::Object event(Event::Type::RT_MODULE_PARAMETER_CHANGE_EVENT);
-  event.setParam("paramName", std::any(parameter_name));
+  event.setParam("paramID", std::any(parameter_id));
   event.setParam("paramType", std::any(Modules::Variable::STATE));
   event.setParam("paramValue", std::any(value));
   event.setParam("paramModule", std::any(this->plugin_component.get()));

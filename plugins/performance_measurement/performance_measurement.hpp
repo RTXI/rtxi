@@ -36,51 +36,70 @@
 namespace PerformanceMeasurement
 {
 
+enum PARAMETER : size_t {
+  STATE = 0,
+  DURATION,
+  TIMESTEP,
+  LATENCY,
+  MAX_DURATION,
+  MAX_TIMESTEP,
+  MAX_LATENCY,
+  JITTER
+};
+
 const std::vector<Modules::Variable::Info> performance_measurement_vars 
 {
   {
+    PARAMETER::STATE,
     "state",
     "RT Benchmarks State",
     Modules::Variable::STATE,
     Modules::Variable::INIT
   },
   {
+    PARAMETER::DURATION,
     "duration",
     "Average time in nanoseconds for Real-Time loop computations",
     Modules::Variable::DOUBLE_PARAMETER,
     0.0
   },
   {
+    PARAMETER::TIMESTEP,
     "timestep",
     "Average time in nanoseconds for Real-Time period",
     Modules::Variable::DOUBLE_PARAMETER,
     0.0
   },
   {
+    PARAMETER::LATENCY,
     "latency",
     "Average time in nanoseconds for latency between expected wakeup and period start",
     Modules::Variable::DOUBLE_PARAMETER,
     0.0
   },
   {
+    PARAMETER::MAX_DURATION,
     "maxDuration",
     "Maximum duration stat recorded in nanoseconds",
     Modules::Variable::DOUBLE_PARAMETER,
     0.0
   },
   {
+    PARAMETER::MAX_TIMESTEP,
     "maxTimestep",
     "maximum real-time period recorded in nanoseconds",
     Modules::Variable::DOUBLE_PARAMETER,
     0.0
   },
-  {
+  { 
+    PARAMETER::MAX_LATENCY,
     "maxLatency",
     "Maximum latency stat recorded in nanoseconds",
     Modules::Variable::DOUBLE_PARAMETER,
     0.0
   },
   {
+    PARAMETER::JITTER,
     "jitter",
     "",
     Modules::Variable::DOUBLE_PARAMETER,

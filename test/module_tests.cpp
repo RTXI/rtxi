@@ -24,30 +24,35 @@ std::vector<Modules::Variable::Info> generateDefaultComponentVariables()
 {
   std::vector<Modules::Variable::Info> default_variable_list;
   Modules::Variable::Info tempvarinfo;
+  tempvarinfo.id = TEST_PARAMETER_ID::TESTINT;
   tempvarinfo.name = std::string("testint");
   tempvarinfo.description = std::string("TEST INTEGER");
   tempvarinfo.vartype = Modules::Variable::INT_PARAMETER;
   tempvarinfo.value = static_cast<int64_t>(0);
   default_variable_list.push_back(tempvarinfo);
 
+  tempvarinfo.id = TEST_PARAMETER_ID::TESTDOUBLE;
   tempvarinfo.name = std::string("testdouble");
   tempvarinfo.description = std::string("TEST DOUBLE");
   tempvarinfo.vartype = Modules::Variable::DOUBLE_PARAMETER;
   tempvarinfo.value = 0.0;
   default_variable_list.push_back(tempvarinfo);
 
+  tempvarinfo.id = TEST_PARAMETER_ID::TESTUINT;
   tempvarinfo.name = std::string("testuint");
   tempvarinfo.description = std::string("TEST UNSIGNED INTEGER");
   tempvarinfo.vartype = Modules::Variable::UINT_PARAMETER;
   tempvarinfo.value = static_cast<uint64_t>(0);
   default_variable_list.push_back(tempvarinfo);
 
+  tempvarinfo.id = TEST_PARAMETER_ID::TESTCOMMENT;
   tempvarinfo.name = std::string("teststring");
   tempvarinfo.description = std::string("TEST STRING");
   tempvarinfo.vartype = Modules::Variable::COMMENT;
   tempvarinfo.value = std::string("");
   default_variable_list.push_back(tempvarinfo);
 
+  tempvarinfo.id = TEST_PARAMETER_ID::TESTSTATE;
   tempvarinfo.name = std::string("teststate");
   tempvarinfo.description = std::string("TEST STATE");
   tempvarinfo.vartype = Modules::Variable::STATE;
@@ -71,12 +76,12 @@ TEST_F(ModulePluginTests, ComponentParameters)
   std::vector<Modules::Variable::Info> variable_list =
       generateDefaultComponentVariables();
   ASSERT_EQ(std::get<int64_t>(variable_list[0].value),
-            this->plugin->getComponentIntParameter(variable_list[0].name));
+            this->plugin->getComponentIntParameter(variable_list[0].id));
   ASSERT_DOUBLE_EQ(
       std::get<double>(variable_list[1].value),
-      this->plugin->getComponentDoubleParameter(variable_list[1].name));
+      this->plugin->getComponentDoubleParameter(variable_list[1].id));
   ASSERT_EQ(std::get<uint64_t>(variable_list[2].value),
-            this->plugin->getComponentUIntParameter(variable_list[2].name));
+            this->plugin->getComponentUIntParameter(variable_list[2].id));
 }
 
 TEST_F(ModulePluginTests, getName)

@@ -30,6 +30,14 @@
 #include "main_window.hpp"
 #include "module.hpp"
 
+enum TEST_PARAMETER_ID : size_t {
+  TESTINT = 0,
+  TESTDOUBLE,
+  TESTUINT,
+  TESTCOMMENT,
+  TESTSTATE,
+};
+
 std::vector<Modules::Variable::Info> generateDefaultComponentVariables();
 
 class mockModuleComponent : public Modules::Component

@@ -66,6 +66,7 @@ std::string state2string(state_t state);
  */
 struct Info
 {
+  size_t id=0;
   std::string name;
   std::string description;
   Modules::Variable::variable_t vartype;
@@ -100,19 +101,19 @@ public:
             const std::vector<Modules::Variable::Info>& variables);
 
   template<typename T>
-  T getValue(const std::string& varname)
+  T getValue(const size_t& var_id)
   {
-    return std::get<T>(this->parameter[varname].value);
+    return std::get<T>(this->parameters.at(var_id).value);
   }
 
   template<typename T>
-  void setValue(const std::string& varname, T value)
+  void setValue(const size_t& var_id, T value)
   {
-    this->parameter[varname].value = value;
+    this->parameters.at(var_id).value = value;
   }
 
-  std::string getDescription(const std::string& varname);
-  std::string getValueString(const std::string& varname);
+  std::string getDescription(const size_t& var_id);
+  std::string getValueString(const size_t& var_id);
 
   // Here are a list of functions inherited from RT::Thread
 
@@ -123,7 +124,7 @@ public:
   // override;
 
 private:
-  std::unordered_map<std::string, Modules::Variable::Info> parameter;
+  std::vector<Modules::Variable::Info> parameters;
   Modules::Plugin* hostPlugin;
   bool active;
 };
@@ -263,6 +264,7 @@ private:
     QString str_value;
     DefaultGUILineEdit* edit;
     Modules::Variable::variable_t type = Modules::Variable::UNKNOWN;
+    Modules::Variable::Info info;
   };
   std::unordered_map<QString, param_t> parameter;
   QPalette palette;
@@ -283,18 +285,18 @@ public:
 
   void attachComponent(std::unique_ptr<Modules::Component> component);
   void attachPanel(Modules::Panel* panel);
-  int64_t getComponentIntParameter(const std::string& parameter_name);
-  uint64_t getComponentUIntParameter(const std::string& parameter_name);
-  double getComponentDoubleParameter(const std::string& parameter_name);
+  int64_t getComponentIntParameter(const size_t& parameter_id);
+  uint64_t getComponentUIntParameter(const size_t& parameter_id);
+  double getComponentDoubleParameter(const size_t& parameter_id);
 
-  int setComponentIntParameter(const std::string& parameter_name,
+  int setComponentIntParameter(const size_t& parameter_id,
                                int64_t value);
-  int setComponentDoubleParameter(const std::string& parameter_name,
+  int setComponentDoubleParameter(const size_t& parameter_id,
                                   double value);
-  int setComponentUintParameter(const std::string& parameter_name,
+  int setComponentUintParameter(const size_t& parameter_id,
                                 uint64_t value);
-  int setComponentComment(const std::string& parameter_name, std::string value);
-  int setComponentState(const std::string& parameter_name,
+  int setComponentComment(const size_t& parameter_id, std::string value);
+  int setComponentState(const size_t& parameter_id,
                         Modules::Variable::state_t value);
 
   std::string getName() const { return this->name; }

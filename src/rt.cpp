@@ -551,26 +551,26 @@ void RT::System::changeModuleParametersCMD(RT::System::CMD* cmd)
 {
   auto* component =
       std::any_cast<Modules::Component*>(cmd->getParam("paramModule"));
-  auto param_name = std::any_cast<std::string>(cmd->getParam("paramName"));
+  auto param_id = std::any_cast<size_t>(cmd->getParam("paramID"));
   auto param_type =
       std::any_cast<Modules::Variable::variable_t>(cmd->getParam("paramType"));
   std::any param_value_any = cmd->getParam("paramValue");
   switch (param_type) {
     case Modules::Variable::DOUBLE_PARAMETER:
-      component->setValue<double>(param_name,
+      component->setValue<double>(param_id,
                                   std::any_cast<double>(param_value_any));
       break;
     case Modules::Variable::INT_PARAMETER:
-      component->setValue<int64_t>(param_name,
+      component->setValue<int64_t>(param_id,
                                    std::any_cast<int64_t>(param_value_any));
       break;
     case Modules::Variable::UINT_PARAMETER:
-      component->setValue<uint64_t>(param_name,
+      component->setValue<uint64_t>(param_id,
                                     std::any_cast<uint64_t>(param_value_any));
       break;
     case Modules::Variable::STATE:
       component->setValue<Modules::Variable::state_t>(
-          param_name,
+          param_id,
           std::any_cast<Modules::Variable::state_t>(param_value_any));
       break;
     default:
