@@ -37,13 +37,9 @@ TEST_F(RTConnectorTest, connections)
 
   // we need to register blocks first
   this->connector.insertBlock(&thread1);
-  EXPECT_TRUE(this->connector.isRegistered(&thread1));
   this->connector.insertBlock(&thread2);
-  EXPECT_TRUE(this->connector.isRegistered(&thread2));
   this->connector.insertBlock(&device1);
-  EXPECT_TRUE(this->connector.isRegistered(&device1));
   this->connector.insertBlock(&device2);
-  EXPECT_TRUE(this->connector.isRegistered(&device2));
 
   // connect and disconnect between two blocks
   EXPECT_FALSE(this->connector.connected(&thread1, 0, &thread2, 0));

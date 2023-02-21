@@ -50,8 +50,6 @@ const Response RT_ERROR = -1;
 const Response NO_TELEMITRY = -2;
 }  // namespace Telemitry
 
-class Connector;
-
 /*!
  * Base class for devices that are to interface with System.
  *
@@ -59,7 +57,6 @@ class Connector;
  */
 class Device : public IO::Block
 {
-  friend Connector;
 public:
   Device(std::string n, const std::vector<IO::channel_t>& c)
       : IO::Block(std::move(n), c, /*isdependent=*/false)
@@ -79,12 +76,6 @@ public:
    * \sa RT::System
    */
   virtual void write() = 0;
-
-  size_t getID() const { return this->device_id; }
-
-  private:
-  void setID(size_t id) { this->device_id = id; }
-  size_t device_id;
 };  // class Device
 
 /*!
@@ -94,7 +85,6 @@ public:
  */
 class Thread : public IO::Block
 {
-  friend Connector;
 public:
   Thread(std::string n, const std::vector<IO::channel_t>& c)
       : IO::Block(std::move(n), c, /*isdependent=*/true)
@@ -110,12 +100,6 @@ public:
 
   // virtual void input(const std::vector<double>& data) = 0;
   // virtual const std::vector<double>& output() = 0;
-
-  size_t getID() const { return this->thread_id; }
-
-  private:
-  void setID(size_t id) { this->thread_id = id; }
-  size_t thread_id;
 };  // class Thread
 
 typedef struct
@@ -154,7 +138,7 @@ typedef struct
 class Connector
 {
 public:
-  Connector();  // default constructor
+  Connector() = default;  // default constructor
   Connector(const Connector& connector) = delete;  // copy constructor
   Connector& operator=(const Connector& connector) =
       delete;  // copy assignment operator
@@ -422,17 +406,10 @@ public:
    */
   void propagate(RT::Thread* thread);
 
-  void assignID(RT::Thread* thread);
-  void assignID(RT::Device* device);
-
 private:
-  std::map<size_t, RT::Thread*> id_to_thread;
-  std::map<size_t, RT::Device*> id_to_device;
   std::vector<RT::Thread*> topological_sort();
-  std::vector<std::vector<outputs_info>> thread_registry;
-  std::queue<size_t> available_thread_ids;
-  std::vector<std::vector<outputs_info>> device_registry;
-  std::queue<size_t> available_device_ids;
+  std::map<RT::Thread*, std::vector<outputs_info>> thread_registry;
+  std::map<RT::Device*, std::vector<outputs_info>> device_registry;
 };  // class Connector
 
 /*!
