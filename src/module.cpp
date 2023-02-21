@@ -78,8 +78,12 @@ Modules::Component::Component(
     , active(false)
 {
   for (const auto& var : variables) {
-    if(var.id != variables.size()){
-      ERROR_MSG("Error parsing variables in module {} loading", this->getName());
+    if(var.id != parameters.size()){
+      ERROR_MSG("Error parsing variables in module \"{}\" while loading", this->getName());
+      ERROR_MSG("Variable {} has id {} but was inserted in position {}", 
+                var.name, 
+                var.id, 
+                parameters.size());
       return;
     }
     this->parameters.push_back(var);
