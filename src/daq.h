@@ -1,6 +1,6 @@
 /*
  	 The Real-Time eXperiment Interface (RTXI)
-	 Copyright (C) 2011 Georgia Institute of Technology, University of Utah, Weill Cornell Medical College
+	 Copyright (C) 2011 Georgia Institute of Technology, University of Utah, Will Cornell Medical College
 
 	 This program is free software: you can redistribute it and/or modify
 	 it under the terms of the GNU General Public License as published by
@@ -217,7 +217,7 @@ public:
      */
     virtual std::string getAnalogReferenceString(type_t type,index_t index,index_t reference) const=0;
     /*!
-     * Get a string representation of the specifed units.
+     * Get a string representation of the specified units.
      *
      * \param type The channel's type.
      * \param index The channel's index.

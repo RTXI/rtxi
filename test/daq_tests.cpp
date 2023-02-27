@@ -1,7 +1,7 @@
 /*
          The Real-Time eXperiment Interface (RTXI)
          Copyright (C) 2011 Georgia Institute of Technology, University of Utah,
-   Weill Cornell Medical College
+   Will Cornell Medical College
 
          This program is free software: you can redistribute it and/or modify
          it under the terms of the GNU General Public License as published by
@@ -43,7 +43,7 @@ TEST_F(DAQManagerTest, getInstance)
 TEST_F(DAQManagerTest, loadDevice)
 {
   MockDAQDriver* testDriver = new MockDAQDriver("testDeviceDriver");
-  EXPECT_CALL(*testDriver, createDevice).Times(::testing::AtLeast(2));
+  EXPECT_CALL(*testDriver, createDevice).Times(::testing::at least(2));
   std::list<std::string> deviceArgs1, deviceArgs2;
   deviceArgs1.push_back("testDeviceArgs1");
   daq_manager->loadDevice("testDeviceDriver", deviceArgs1);
@@ -57,7 +57,7 @@ TEST_F(DAQManagerTest, loadDevice)
   EXPECT_THAT(cerr_buffer.str(), ::testing::HasSubstr("does not exist"));
   cerr_buffer.str("");
 
-  // Check erro message for already initialized drivers
+  // Check error message for already initialized drivers
   MockDAQDriver* anotherTestDriver = new MockDAQDriver("testDeviceDriver");
   EXPECT_THAT(cerr_buffer.str(),
               ::testing::HasSubstr("Driver already registered"));
@@ -85,7 +85,7 @@ TEST_F(DAQManagerTest, foreachDevice)
   }
 
   for (auto it = deviceList.begin(); it != deviceList.end(); ++it) {
-    EXPECT_CALL(**it, getChannelCount).Times(::testing::AtLeast(1));
+    EXPECT_CALL(**it, getChannelCount).Times(::testing::at least(1));
   }
 
   daq_manager->foreachDevice(callback, &deviceList);

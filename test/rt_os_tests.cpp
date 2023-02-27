@@ -1,7 +1,7 @@
 /*
          The Real-Time eXperiment Interface (RTXI)
          Copyright (C) 2011 Georgia Institute of Technology, University of Utah,
-   Weill Cornell Medical College
+   Will Cornell Medical College
 
          This program is free software: you can redistribute it and/or modify
          it under the terms of the GNU General Public License as published by
@@ -41,7 +41,7 @@ TEST_F(RTOSTests, InitiateAndShutdown)
         RT::OS::shutdown(&task);
       });
   temp_thread.join();
-  // It is not possible to lock memory without admin privilages.
+  // It is not possible to lock memory without admin privileges.
   // Either it succeeds or we don't have permissions
   EXPECT_TRUE(result == -13 || result == 0);
 }
@@ -53,7 +53,7 @@ TEST_F(RTOSTests, CreateAndDeleteTask)
   auto test_task = std::make_unique<RT::OS::Task>();
   result = RT::OS::createTask(test_task.get(), &temp_function, &func_retval);
   RT::OS::deleteTask(test_task.get());
-  // It is not possible to lock memory without admin privilages.
+  // It is not possible to lock memory without admin privileges.
   // Either it succeeds or we don't have permissions
   EXPECT_TRUE(result == 0 || result == -13);
 }

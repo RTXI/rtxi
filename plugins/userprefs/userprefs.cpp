@@ -1,7 +1,7 @@
 /*
          The Real-Time eXperiment Interface (RTXI)
          Copyright (C) 2011 Georgia Institute of Technology, University of Utah,
-   Weill Cornell Medical College
+   Will Cornell Medical College
 
          This program is free software: you can redistribute it and/or modify
          it under the terms of the GNU General Public License as published by
@@ -23,12 +23,18 @@
  * is destructed. So all Reset, Apply, and Cancel buttons all close the panel.
  */
 
-#include <debug.h>
-#include <main_window.h>
-#include <userprefs.h>
+#include "userprefs.h"
 
-UserPrefs::Panel::Panel(QWidget* parent)
-    : QWidget(parent)
+#include "debug.hpp"
+#include "main_window.hpp"
+
+UserPrefs::Plugin::Plugin(Event::Manager* ev_manager, MainWindow* mw)
+    : Modules::Plugin(ev_manager, mw, "User Preferences")
+{
+}
+
+UserPrefs::Panel::Panel(MainWindow* main_window, Event::Manager* ev_manager)
+    : Modules::Panel("User Preferences", main_window, ev_manager)
 {
   // Make Mdi
   subWindow = new QMdiSubWindow;
@@ -36,7 +42,7 @@ UserPrefs::Panel::Panel(QWidget* parent)
   subWindow->setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint
                             | Qt::WindowMinimizeButtonHint);
   subWindow->setAttribute(Qt::WA_DeleteOnClose);
-  MainWindow::getInstance()->createMdi(subWindow);
+  main_window->createMdi(subWindow);
 
   // Preferences structure
   QSettings userprefs;
@@ -131,7 +137,7 @@ UserPrefs::Panel::Panel(QWidget* parent)
 
   // Attach layout to widget
   setLayout(layout);
-  setWindowTitle("User Preferences");
+  setWindowTitle(QString::fromStdString(this->getName()));
 
   // Set layout to Mdi
   subWindow->setWidget(this);
@@ -139,12 +145,7 @@ UserPrefs::Panel::Panel(QWidget* parent)
   show();
 }
 
-UserPrefs::Panel::~Panel(void)
-{
-  Prefs::getInstance()->panel = 0;
-}
-
-void UserPrefs::Panel::reset(void)
+void UserPrefs::Panel::reset()
 {
   settingsDirEdit->setText(getenv("HOME"));
   dataDirEdit->setText(getenv("HOME"));
@@ -157,7 +158,7 @@ void UserPrefs::Panel::reset(void)
   status->setText("Preferences \nreset");
 }
 
-void UserPrefs::Panel::apply(void)
+void UserPrefs::Panel::apply()
 {
   userprefs.setValue("/dirs/setfiles", settingsDirEdit->text());
   userprefs.setValue("/dirs/data", dataDirEdit->text());
@@ -167,7 +168,7 @@ void UserPrefs::Panel::apply(void)
   status->setText("Preferences \napplied");
 }
 
-void UserPrefs::Panel::chooseSettingsDir(void)
+void UserPrefs::Panel::chooseSettingsDir()
 {
   QString dir_name = QFileDialog::getExistingDirectory(
       this,
@@ -177,7 +178,7 @@ void UserPrefs::Panel::chooseSettingsDir(void)
   settingsDirEdit->setText(dir_name);
 }
 
-void UserPrefs::Panel::chooseDataDir(void)
+void UserPrefs::Panel::chooseDataDir()
 {
   QString dir_name = QFileDialog::getExistingDirectory(
       this,
@@ -187,49 +188,30 @@ void UserPrefs::Panel::chooseDataDir(void)
   dataDirEdit->setText(dir_name);
 }
 
-extern "C" Plugin::Object* createRTXIPlugin(void*)
+std::unique_ptr<Modules::Plugin> UserPrefs::createRTXIPlugin(
+    Event::Manager* ev_manager, MainWindow* main_window)
 {
-  return UserPrefs::Prefs::getInstance();
+  return std::make_unique<UserPrefs::Plugin>(ev_manager, main_window);
 }
 
-UserPrefs::Prefs::Prefs(void)
-    : panel(0)
+Modules::Panel* UserPrefs::createRTXIPanel(MainWindow* main_window,
+                                           Event::Manager* ev_manager)
 {
-  MainWindow::getInstance()->createSystemMenuItem(
-      "Preferences", this, SLOT(createPrefsPanel(void)));
+  return static_cast<Modules::Panel*>(
+      new UserPrefs::Panel(main_window, ev_manager));
 }
 
-UserPrefs::Prefs::~Prefs(void)
+std::unique_ptr<Modules::Component> UserPrefs::createRTXIComponent(
+    Modules::Plugin* host_plugin)
 {
-  if (panel)
-    delete panel;
-  instance = 0;
-  panel = 0;
+  return std::unique_ptr<Modules::Component>(nullptr);
 }
 
-void UserPrefs::Prefs::createPrefsPanel(void)
+Modules::FactoryMethods UserPrefs::getFactories()
 {
-  if (!panel)
-    panel = new Panel(MainWindow::getInstance()->centralWidget());
-  panel->show();
-}
-
-static Mutex mutex;
-UserPrefs::Prefs* UserPrefs::Prefs::instance = 0;
-
-UserPrefs::Prefs* UserPrefs::Prefs::getInstance(void)
-{
-  if (instance)
-    return instance;
-
-  /*************************************************************************
-   * Seems like alot of hoops to jump through, but allocation isn't        *
-   *   thread-safe. So effort must be taken to ensure mutual exclusion.    *
-   *************************************************************************/
-
-  Mutex::Locker lock(&::mutex);
-  if (!instance)
-    instance = new Prefs();
-
-  return instance;
+  Modules::FactoryMethods fact;
+  fact.createPanel = &UserPrefs::createRTXIPanel;
+  fact.createComponent = &UserPrefs::createRTXIComponent;
+  fact.createPlugin = &UserPrefs::createRTXIPlugin;
+  return fact;
 }

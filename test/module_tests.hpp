@@ -1,7 +1,7 @@
 /*
          The Real-Time eXperiment Interface (RTXI)
          Copyright (C) 2011 Georgia Institute of Technology, University of Utah,
-   Weill Cornell Medical College
+   Will Cornell Medical College
 
          This program is free software: you can redistribute it and/or modify
          it under the terms of the GNU General Public License as published by
@@ -30,7 +30,8 @@
 #include "main_window.hpp"
 #include "module.hpp"
 
-enum TEST_PARAMETER_ID : size_t {
+enum TEST_PARAMETER_ID : size_t
+{
   TESTINT = 0,
   TESTDOUBLE,
   TESTUINT,

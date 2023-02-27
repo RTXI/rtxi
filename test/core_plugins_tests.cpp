@@ -1,7 +1,7 @@
 /*
          The Real-Time eXperiment Interface (RTXI)
          Copyright (C) 2011 Georgia Institute of Technology, University of Utah,
-   Weill Cornell Medical College
+   Will Cornell Medical College
 
          This program is free software: you can redistribute it and/or modify
          it under the terms of the GNU General Public License as published by
@@ -37,7 +37,7 @@ TEST_F(PerformanceMeasurementPluginTests, getInstance)
 {
   // TODO: decouple PerformanceMeasurement::Plugin class from qt gui framework.
   // TODO: change PerformanceMeasurement::Plugin::getInstance function to
-  // virutal for late linkage
+  // virtual for late linkage
   // auto testplugin = reinterpret_cast<PerformanceMeasurement::Plugin
   // *>(plugin); ASSERT_EQ(testplugin,
   // PerformanceMeasurement::Plugin::getInstance()); ASSERT_EQ(testplugin,

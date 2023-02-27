@@ -1,7 +1,7 @@
 /*
          The Real-Time eXperiment Interface (RTXI)
          Copyright (C) 2011 Georgia Institute of Technology, University of Utah,
-   Weill Cornell Medical College
+   Will Cornell Medical College
 
          This program is free software: you can redistribute it and/or modify
          it under the terms of the GNU General Public License as published by
@@ -23,65 +23,56 @@
 
 #include <QtWidgets>
 
-#include <plugin.h>
-#include <rt.h>
+#include "module.hpp"
 
 namespace UserPrefs
 {
 
-class Panel;
-class Prefs
-    : public QObject
-    , public ::Plugin::Object
+class Plugin : public Modules::Plugin
 {
-  Q_OBJECT
-
-  friend class Panel;
-
 public:
-  static Prefs* getInstance(void);
+  Plugin(Event::Manager* ev_manager, MainWindow* mw);
 
-public slots:
-  void createPrefsPanel(void);
-
-private:
-  Prefs(void);
-  ~Prefs(void);
-  Prefs(const Prefs&)
-      : QObject() {};
-  Prefs& operator=(const Prefs&) { return *getInstance(); };
-
-  static Prefs* instance;
-  Panel* panel;
 };  // class Prefs
 
-class Panel : public QWidget
+class Panel : public Modules::Panel
 {
   Q_OBJECT
 
 public:
-  Panel(QWidget*);
-  virtual ~Panel(void);
-  QLabel* status;
+  Panel(MainWindow* main_window, Event::Manager* ev_manager);
 
 public slots:
-  void apply(void);  // save and close
-  void reset(void);  // reset to defaults
+  void apply();  // save and close
+  void reset();  // reset to defaults
 
-  void chooseSettingsDir(void);
-  void chooseDataDir(void);
+  void chooseSettingsDir();
+  void chooseDataDir();
 
 private:
-  QMdiSubWindow* subWindow;
+  QLabel* status = nullptr;
+  QMdiSubWindow* subWindow = nullptr;
   QSettings userprefs;
 
-  QGroupBox* dirGroup;
-  QGroupBox* HDF;
-  QGroupBox* buttons;
+  QGroupBox* dirGroup = nullptr;
+  QGroupBox* HDF = nullptr;
+  QGroupBox* buttons = nullptr;
 
-  QLineEdit* settingsDirEdit;  // directory for settings files
-  QLineEdit* dataDirEdit;  // directory of most recent data file
-  QLineEdit* HDFBufferEdit;  // buffer size for HDF Data Recorder
+  QLineEdit* settingsDirEdit = nullptr;  // directory for settings files
+  QLineEdit* dataDirEdit = nullptr;  // directory of most recent data file
+  QLineEdit* HDFBufferEdit = nullptr;  // buffer size for HDF Data Recorder
 };  // class Panel
+
+std::unique_ptr<Modules::Plugin> createRTXIPlugin(Event::Manager* ev_manager,
+                                                  MainWindow* main_window);
+
+Modules::Panel* createRTXIPanel(MainWindow* main_window,
+                                Event::Manager* ev_manager);
+
+std::unique_ptr<Modules::Component> createRTXIComponent(
+    Modules::Plugin* host_plugin);
+
+Modules::FactoryMethods getFactories();
+
 };  // namespace UserPrefs
 #endif /* USERPREFS */

@@ -19,6 +19,7 @@ target_link_libraries(rtxiTests PRIVATE
     rtos_fifo_lib
     rtxi_lib 
     performance_measurement_lib
+    userprefs_lib
     GTest::gtest GTest::gtest_main
     GTest::gmock GTest::gmock_main 
     Qt5::Core Qt5::Widgets Qt5::Gui

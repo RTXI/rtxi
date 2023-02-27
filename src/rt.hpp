@@ -1,7 +1,7 @@
 /*
          The Real-Time eXperiment Interface (RTXI)
          Copyright (C) 2011 Georgia Institute of Technology, University of Utah,
-   Weill Cornell Medical College
+   Will Cornell Medical College
 
          This program is free software: you can redistribute it and/or modify
          it under the terms of the GNU General Public License as published by
@@ -359,7 +359,7 @@ public:
    * To the connector class devices are io blocks that are independent
    * of other blocks when connected.
    *
-   * \returns List of RT::Device pointers representing registred devices
+   * \returns List of RT::Device pointers representing registered devices
    */
   std::vector<RT::Device*> getDevices();
 
@@ -472,7 +472,7 @@ private:
   int64_t periodEndTime = 1;
   int64_t lastperiodStartTime = 1;
 
-  // System owns the task objet and the pipe used to communicate with it
+  // System owns the task object and the pipe used to communicate with it
   std::unique_ptr<RT::OS::Task> task;
   std::unique_ptr<RT::OS::Fifo> eventFifo;
 

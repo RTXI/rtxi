@@ -1,7 +1,7 @@
 /*
          The Real-Time eXperiment Interface (RTXI)
          Copyright (C) 2011 Georgia Institute of Technology, University of Utah,
-   Weill Cornell Medical College
+   Will Cornell Medical College
 
          This program is free software: you can redistribute it and/or modify
          it under the terms of the GNU General Public License as published by
@@ -120,7 +120,7 @@ public:
   Event::Type getType();
 
   /*!
-   * Retrieves the paramaters values attached to the event
+   * Retrieves the parameters values attached to the event
    *
    * \param Name The parameter name for which to retrieve the value of event
    * \return The value connected with the input key
@@ -183,7 +183,7 @@ class Handler
 {
 public:
   /*!
-   * Function that is called in non-realtime everytime an non-realtime
+   * Function that is called in non-realtime every time an non-realtime
    *  event is posted.
    *
    * \param event The the event being posted.
@@ -244,7 +244,7 @@ public:
   /*!
    * Registers handler in the registry
    *
-   * \param handler pointer of handler to add to registy
+   * \param handler pointer of handler to add to registry
    */
   void registerHandler(Handler* handler);
 

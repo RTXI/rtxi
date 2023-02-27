@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2011 Georgia Institute of Technology, University of Utah, Weill
+ Copyright (C) 2011 Georgia Institute of Technology, University of Utah, Will
  Cornell Medical College
 
  This program is free software: you can redistribute it and/or modify
@@ -111,9 +111,12 @@ PerformanceMeasurement::Panel::Panel(std::string name,
 
 void PerformanceMeasurement::Component::execute()
 {
-  auto maxDuration = getValue<double>(PerformanceMeasurement::PARAMETER::MAX_DURATION);
-  auto maxTimestep = getValue<double>(PerformanceMeasurement::PARAMETER::MAX_TIMESTEP);
-  auto maxLatency = getValue<double>(PerformanceMeasurement::PARAMETER::MAX_LATENCY);
+  auto maxDuration =
+      getValue<double>(PerformanceMeasurement::PARAMETER::MAX_DURATION);
+  auto maxTimestep =
+      getValue<double>(PerformanceMeasurement::PARAMETER::MAX_TIMESTEP);
+  auto maxLatency =
+      getValue<double>(PerformanceMeasurement::PARAMETER::MAX_LATENCY);
   auto period = RT::OS::getPeriod();
   if (period < 0) {
     period = RT::OS::DEFAULT_PERIOD;
@@ -123,7 +126,9 @@ void PerformanceMeasurement::Component::execute()
   double timestep = *(start_ticks)-last_start_ticks;
   auto latency = timestep - period;
 
-  switch (getValue<Modules::Variable::state_t>(PerformanceMeasurement::PARAMETER::STATE)) {
+  switch (getValue<Modules::Variable::state_t>(
+      PerformanceMeasurement::PARAMETER::STATE))
+  {
     case Modules::Variable::EXEC:
       if (maxTimestep < timestep) {
         setValue(PerformanceMeasurement::PARAMETER::MAX_TIMESTEP, timestep);
@@ -145,7 +150,8 @@ void PerformanceMeasurement::Component::execute()
       setValue(PerformanceMeasurement::PARAMETER::MAX_TIMESTEP, 0.0);
       setValue(PerformanceMeasurement::PARAMETER::MAX_DURATION, 0.0);
       setValue(PerformanceMeasurement::PARAMETER::MAX_LATENCY, 0.0);
-      setValue(PerformanceMeasurement::PARAMETER::STATE, Modules::Variable::EXEC);
+      setValue(PerformanceMeasurement::PARAMETER::STATE,
+               Modules::Variable::EXEC);
       break;
     case Modules::Variable::PERIOD:
     case Modules::Variable::MODIFY:
@@ -169,16 +175,21 @@ void PerformanceMeasurement::Panel::refresh()
 {
   Modules::Plugin* hostplugin = this->getHostPlugin();
   const double nano2micro = 1e-3;
-  auto duration =
-      hostplugin->getComponentDoubleParameter(PerformanceMeasurement::PARAMETER::DURATION) * nano2micro;
-  auto maxduration =
-      hostplugin->getComponentDoubleParameter(PerformanceMeasurement::PARAMETER::MAX_DURATION) * nano2micro;
-  auto timestep =
-      hostplugin->getComponentDoubleParameter(PerformanceMeasurement::PARAMETER::TIMESTEP) * nano2micro;
-  auto maxtimestep =
-      hostplugin->getComponentDoubleParameter(PerformanceMeasurement::PARAMETER::MAX_TIMESTEP) * nano2micro;
-  auto timestepjitter =
-      hostplugin->getComponentDoubleParameter(PerformanceMeasurement::PARAMETER::JITTER) * nano2micro;
+  auto duration = hostplugin->getComponentDoubleParameter(
+                      PerformanceMeasurement::PARAMETER::DURATION)
+      * nano2micro;
+  auto maxduration = hostplugin->getComponentDoubleParameter(
+                         PerformanceMeasurement::PARAMETER::MAX_DURATION)
+      * nano2micro;
+  auto timestep = hostplugin->getComponentDoubleParameter(
+                      PerformanceMeasurement::PARAMETER::TIMESTEP)
+      * nano2micro;
+  auto maxtimestep = hostplugin->getComponentDoubleParameter(
+                         PerformanceMeasurement::PARAMETER::MAX_TIMESTEP)
+      * nano2micro;
+  auto timestepjitter = hostplugin->getComponentDoubleParameter(
+                            PerformanceMeasurement::PARAMETER::JITTER)
+      * nano2micro;
 
   durationEdit->setText(QString::number(duration));
   maxDurationEdit->setText(QString::number(maxduration));
@@ -190,8 +201,8 @@ void PerformanceMeasurement::Panel::refresh()
 
 void PerformanceMeasurement::Panel::reset()
 {
-  this->getHostPlugin()->setComponentState(PerformanceMeasurement::PARAMETER::STATE, 
-                                           Modules::Variable::INIT);
+  this->getHostPlugin()->setComponentState(
+      PerformanceMeasurement::PARAMETER::STATE, Modules::Variable::INIT);
 }
 
 PerformanceMeasurement::Plugin::Plugin(Event::Manager* ev_manager,

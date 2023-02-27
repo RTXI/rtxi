@@ -1,7 +1,7 @@
 /*
          The Real-Time eXperiment Interface (RTXI)
          Copyright (C) 2011 Georgia Institute of Technology, University of Utah,
-   Weill Cornell Medical College
+   Will Cornell Medical College
 
          This program is free software: you can redistribute it and/or modify
          it under the terms of the GNU General Public License as published by
@@ -64,7 +64,7 @@ typedef struct
   std::string name;
   std::string description;
   IO::flags_t flags = IO::UNKNOWN;  // IO::INPUT or IO::OUTPUT
-  size_t data_size = 0;  // For those channels that accept arays of values
+  size_t data_size = 0;  // For those channels that accept arrays of values
 } channel_t;
 
 /*!
@@ -97,7 +97,7 @@ public:
   /*!
    * Get the name of the block.
    *
-   * \return Tbe name of the block.
+   * \return The name of the block.
    */
   std::string getName() const { return name; };
 

@@ -63,7 +63,7 @@ enum state_t : int64_t
 
 /*!
  * Converts state code to human readable string
- * 
+ *
  * \param code the state code to convert
  *
  * \returns A string describing the code
@@ -84,7 +84,7 @@ std::string state2string(state_t state);
  */
 struct Info
 {
-  size_t id=0;
+  size_t id = 0;
   std::string name;
   std::string description;
   Modules::Variable::variable_t vartype;
@@ -112,8 +112,9 @@ class Plugin;
 
 /*!
  * This is where the magic happens. This class contains the low level logic to
- * interface with the real-time loop, as well as low level facilities for parameter
- * and input/output update. Inherit this class to run a periodic real-time function
+ * interface with the real-time loop, as well as low level facilities for
+ * parameter and input/output update. Inherit this class to run a periodic
+ * real-time function
  */
 class Component : public RT::Thread
 {
@@ -124,8 +125,8 @@ public:
             const std::vector<Modules::Variable::Info>& variables);
 
   /*!
-   * Retreives value from the component. Typically this function is only called by
-   * the real time loop and should not be called from the gui thread.
+   * Retrieves value from the component. Typically this function is only called
+   * by the real time loop and should not be called from the gui thread.
    *
    * \param var_id The parameter identification number
    *
@@ -209,7 +210,7 @@ public:
                          MainWindow* mw);
 
   /*!
-   * Assigns a plugin to this panel. Typically used during construction of the 
+   * Assigns a plugin to this panel. Typically used during construction of the
    * module and should not be used beyond initialization.
    *
    * \param hplugin A pointer to the host plugin this panel belongs to.
@@ -312,7 +313,7 @@ protected:
   std::string getName() { return this->name; }
 
   /*!
-   * retreive the host plugin that controls this panel
+   * retrieve the host plugin that controls this panel
    *
    * \return pointer to host plugin
    */
@@ -326,7 +327,7 @@ protected:
   MainWindow* getMainWindowPtr() { return this->main_window; }
 
   /*!
-   * Obtain the event manager attached to thsi session of the RTXI application.
+   * Obtain the event manager attached to this session of the RTXI application.
    * This is useful for lower level control of RTXI events.
    *
    * \return Pointer to the RTXI event manager
@@ -361,12 +362,14 @@ private:
 };
 
 /*!
- * This class handles the isntantiation and deletion of Component and Plugin classes.
- * 
- * The responsibility is mainly the proper creation and deletion of the Component and
- * Plugin classes, as well as the communication between the two. This class acts as 
- * a mediator between the two objects. Finally, it handles events pertaining to the 
- * module. This class, together with the Component and Panel classes, forms the Module.
+ * This class handles the isntantiation and deletion of Component and Plugin
+ * classes.
+ *
+ * The responsibility is mainly the proper creation and deletion of the
+ * Component and Plugin classes, as well as the communication between the two.
+ * This class acts as a mediator between the two objects. Finally, it handles
+ * events pertaining to the module. This class, together with the Component and
+ * Panel classes, forms the Module.
  */
 class Plugin : public Event::Handler
 {
@@ -430,50 +433,47 @@ public:
    *
    * \param parameter_id Identification number of the parameter
    * \param value the new value
-   * 
+   *
    * \return 0 if successful -1 otherwise
    */
-  int setComponentIntParameter(const size_t& parameter_id,
-                               int64_t value);
+  int setComponentIntParameter(const size_t& parameter_id, int64_t value);
 
   /*!
    * Assigns a new double value to the parameter
    *
    * \param parameter_id Identification number of the parameter
    * \param value the new value
-   * 
+   *
    * \return 0 if successful -1 otherwise
    */
-  int setComponentDoubleParameter(const size_t& parameter_id,
-                                  double value);
+  int setComponentDoubleParameter(const size_t& parameter_id, double value);
 
   /*!
    * Assigns a new unsigned integer value to the parameter
    *
    * \param parameter_id Identification number of the parameter
    * \param value the new value
-   * 
+   *
    * \return 0 if successful -1 otherwise
    */
-  int setComponentUintParameter(const size_t& parameter_id,
-                                uint64_t value);
+  int setComponentUintParameter(const size_t& parameter_id, uint64_t value);
 
   /*!
    * Assigns a new comment value to the parameter
    *
    * \param parameter_id Identification number of the parameter
    * \param value the new value
-   * 
+   *
    * \return 0 if successful -1 otherwise
    */
   int setComponentComment(const size_t& parameter_id, std::string value);
 
   /*!
-   * Assigns a new state value to the component 
+   * Assigns a new state value to the component
    *
    * \param parameter_id Identification number of the parameter
    * \param value the new value
-   * 
+   *
    * \return 0 if successful -1 otherwise
    */
   int setComponentState(const size_t& parameter_id,
@@ -568,8 +568,8 @@ struct FactoryMethods
 };
 
 /*!
-  * This class is responsible for managing module loading and unloading
-  */
+ * This class is responsible for managing module loading and unloading
+ */
 class Manager : public Event::Handler
 {
 public:
@@ -577,23 +577,23 @@ public:
   ~Manager();
 
   /*!
-    * loads plugin
-    */
+   * loads plugin
+   */
   int loadPlugin(const std::string& library);
 
   /*!
-    * unloads plugin
-    */
+   * unloads plugin
+   */
   void unloadPlugin(Modules::Plugin* plugin);
 
   /*!
-    * Handles plugin loading/unloadin gevents from gui thread
-    */
+   * Handles plugin loading/unloadin gevents from gui thread
+   */
   void receiveEvent(Event::Object* event) override;
 
   /*!
-    * Checks whether plugin is registered
-    */
+   * Checks whether plugin is registered
+   */
   bool isRegistered(const Modules::Plugin* plugin);
 
 private:

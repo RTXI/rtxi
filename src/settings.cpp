@@ -1,7 +1,7 @@
 /*
          The Real-Time eXperiment Interface (RTXI)
          Copyright (C) 2011 Georgia Institute of Technology, University of Utah,
-   Weill Cornell Medical College
+   Will Cornell Medical College
 
          This program is free software: you can redistribute it and/or modify
          it under the terms of the GNU General Public License as published by
@@ -293,7 +293,8 @@ int Settings::Manager::load(const std::string& filename)
     // Load plugin info
     if (e2.attribute("component") == "plugin") {
       if ((plugin =
-               Plugin::Manager::getInstance()->load(e2.attribute("library")))) {
+               Plugin::Manager::getInstance()->load(e2.attribute("library"))))
+      {
         defer_t defer = {plugin, s};
         deferList.push_back(defer);
         plugin->load(s);

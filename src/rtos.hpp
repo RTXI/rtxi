@@ -23,7 +23,7 @@ const uint64_t DEFAULT_FIFO_SIZE = 255;  // Default Fifo size of 255 bytes
  * Object representation of a real-time loop
  *
  * \param period The period for the real-time loop in nanoseconds.
- * \param next_t Next wakup time in absolute clock time (nanoseconds).
+ * \param next_t Next wakeup time in absolute clock time (nanoseconds).
  * \param task_finished Bool field used by real-time loop to signal end.
  * \param rt_thread a std::thread object representing the rt loop.
  */

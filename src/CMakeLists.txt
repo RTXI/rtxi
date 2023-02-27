@@ -70,6 +70,7 @@ target_link_libraries(rtxi_exe PRIVATE
     Qt5::Widgets
     fmt::fmt
     performance_measurement_lib
+    userprefs_lib
     Boost::headers
     backtrace
     l

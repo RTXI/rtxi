@@ -43,8 +43,8 @@ int main(int argc, char* argv[])
   app->connect(app, SIGNAL(lastWindowClosed()), app, SLOT(quit()));
 
   MainWindow* rtxi_window = new MainWindow(event_manager.get());
-  auto mod_manager = std::make_unique<Modules::Manager>(event_manager.get(),
-                                                        rtxi_window);
+  auto mod_manager =
+      std::make_unique<Modules::Manager>(event_manager.get(), rtxi_window);
   rtxi_window->loadWindow();
   int retval = app->exec();
   delete rtxi_window;

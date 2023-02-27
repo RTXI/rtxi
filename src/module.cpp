@@ -15,6 +15,7 @@
 
 #include "debug.hpp"
 #include "performance_measurement/performance_measurement.hpp"
+#include "userprefs/userprefs.h"
 
 std::string Modules::Variable::state2string(Modules::Variable::state_t state)
 {
@@ -78,11 +79,12 @@ Modules::Component::Component(
     , active(false)
 {
   for (const auto& var : variables) {
-    if(var.id != parameters.size()){
-      ERROR_MSG("Error parsing variables in module \"{}\" while loading", this->getName());
-      ERROR_MSG("Variable {} has id {} but was inserted in position {}", 
-                var.name, 
-                var.id, 
+    if (var.id != parameters.size()) {
+      ERROR_MSG("Error parsing variables in module \"{}\" while loading",
+                this->getName());
+      ERROR_MSG("Variable {} has id {} but was inserted in position {}",
+                var.name,
+                var.id,
                 parameters.size());
       return;
     }
@@ -268,9 +270,10 @@ void Modules::Panel::exit()
 {
   this->event_manager->unregisterHandler(this->hostPlugin);
   Event::Object event(Event::Type::PLUGIN_REMOVE_EVENT);
-  event.setParam("pluginPointer", std::any(static_cast<Modules::Plugin*>(this->hostPlugin)));
+  event.setParam("pluginPointer",
+                 std::any(static_cast<Modules::Plugin*>(this->hostPlugin)));
   this->event_manager->postEvent(&event);
-  //this->subWindow->close();
+  // this->subWindow->close();
 }
 
 void Modules::Panel::refresh()
@@ -304,7 +307,8 @@ void Modules::Panel::refresh()
         i.second.edit->setText(QString::fromStdString(sstream.str()));
         break;
       case Modules::Variable::DOUBLE_PARAMETER:
-        double_value = this->hostPlugin->getComponentDoubleParameter(i.second.info.id);
+        double_value =
+            this->hostPlugin->getComponentDoubleParameter(i.second.info.id);
         sstream << double_value;
         i.second.edit->setText(QString::fromStdString(sstream.str()));
         break;
@@ -313,7 +317,11 @@ void Modules::Panel::refresh()
                   this->getName());
     }
   }
-  pauseButton->setChecked(!(this->hostPlugin->getActive()));
+
+  // Make sure we actually have a pauseButton object (default constructed)
+  if (this->pauseButton != nullptr) {
+    pauseButton->setChecked(!(this->hostPlugin->getActive()));
+  }
 }
 
 void Modules::Panel::modify()
@@ -356,8 +364,7 @@ void Modules::Panel::setParameter(const QString& var_name, double value)
   {
     n->second.edit->setText(QString::number(value));
     n->second.str_value = n->second.edit->text();
-    this->hostPlugin->setComponentDoubleParameter(n->second.info.id,
-                                                  value);
+    this->hostPlugin->setComponentDoubleParameter(n->second.info.id, value);
     // setValue(n->second.index, n->second.edit->text().toDouble());
   }
 }
@@ -472,7 +479,6 @@ Modules::Plugin::Plugin(Event::Manager* ev_manager,
     , main_window(mw)
     , name(mod_name)
 {
-
 }
 
 Modules::Plugin::~Plugin()
@@ -485,7 +491,7 @@ Modules::Plugin::~Plugin()
     this->event_manager->postEvent(&unplug_block_event);
   }
 
-  if (this->handle != nullptr){
+  if (this->handle != nullptr) {
     dlclose(handle);
   }
 }
@@ -514,20 +520,17 @@ void Modules::Plugin::attachPanel(Modules::Panel* panel)
   panel->setHostPlugin(this);
 }
 
-int64_t Modules::Plugin::getComponentIntParameter(
-    const size_t& parameter_id)
+int64_t Modules::Plugin::getComponentIntParameter(const size_t& parameter_id)
 {
   return this->plugin_component->getValue<int64_t>(parameter_id);
 }
 
-uint64_t Modules::Plugin::getComponentUIntParameter(
-    const size_t& parameter_id)
+uint64_t Modules::Plugin::getComponentUIntParameter(const size_t& parameter_id)
 {
   return this->plugin_component->getValue<uint64_t>(parameter_id);
 }
 
-double Modules::Plugin::getComponentDoubleParameter(
-    const size_t& parameter_id)
+double Modules::Plugin::getComponentDoubleParameter(const size_t& parameter_id)
 {
   return this->plugin_component->getValue<double>(parameter_id);
 }
@@ -545,8 +548,8 @@ int Modules::Plugin::setComponentIntParameter(const size_t& parameter_id,
   return result;
 }
 
-int Modules::Plugin::setComponentDoubleParameter(
-    const size_t& parameter_id, double value)
+int Modules::Plugin::setComponentDoubleParameter(const size_t& parameter_id,
+                                                 double value)
 {
   int result = 0;
   Event::Object event(Event::Type::RT_MODULE_PARAMETER_CHANGE_EVENT);
@@ -558,8 +561,8 @@ int Modules::Plugin::setComponentDoubleParameter(
   return result;
 }
 
-int Modules::Plugin::setComponentUintParameter(
-    const size_t& parameter_id, uint64_t value)
+int Modules::Plugin::setComponentUintParameter(const size_t& parameter_id,
+                                               uint64_t value)
 {
   int result = 0;
   Event::Object event(Event::Type::RT_MODULE_PARAMETER_CHANGE_EVENT);
@@ -604,7 +607,12 @@ void Modules::Plugin::receiveEvent(Event::Object* event)
 
 bool Modules::Plugin::getActive()
 {
-  return this->plugin_component->getActive();
+  bool active = false;
+  // some plugins may not have a valid component pointer
+  if (this->plugin_component != nullptr) {
+    active = this->plugin_component->getActive();
+  }
+  return active;
 }
 
 int Modules::Plugin::setActive(bool state)
@@ -632,8 +640,8 @@ Modules::Manager::Manager(Event::Manager* event_manager, MainWindow* mw)
 
 Modules::Manager::~Manager()
 {
-  for(const auto& plugin_list : this->rtxi_modules_registry){
-    for(const auto& plugin : plugin_list.second){
+  for (const auto& plugin_list : this->rtxi_modules_registry) {
+    for (const auto& plugin : plugin_list.second) {
       this->event_manager->unregisterHandler(plugin.get());
     }
   }
@@ -647,20 +655,31 @@ bool Modules::Manager::isRegistered(const Modules::Plugin* plugin)
   auto end_iter = this->rtxi_modules_registry[plugin_name].end();
   return std::any_of(start_iter,
                      end_iter,
-                     [plugin](const std::unique_ptr<Modules::Plugin>& module){
-                       return plugin == module.get();
-                     });
+                     [plugin](const std::unique_ptr<Modules::Plugin>& module)
+                     { return plugin == module.get(); });
 }
 
 int Modules::Manager::loadPlugin(const std::string& library)
 {
   if (library == std::string("RT Benchmarks")) {
-    if(this->rtxi_factories_registry.find(library) == this->rtxi_factories_registry.end()){
+    if (this->rtxi_factories_registry.find(library)
+        == this->rtxi_factories_registry.end())
+    {
       Modules::FactoryMethods fact_methods =
           PerformanceMeasurement::getFactories();
       this->registerFactories(library, fact_methods);
     }
-    this->registerModule(this->rtxi_factories_registry[library].createPlugin(event_manager, main_window));
+    this->registerModule(this->rtxi_factories_registry[library].createPlugin(
+        event_manager, main_window));
+  } else if (library == std::string("User Preferences")) {
+    if (this->rtxi_factories_registry.find(library)
+        == this->rtxi_factories_registry.end())
+    {
+      Modules::FactoryMethods fact_methods = UserPrefs::getFactories();
+      this->registerFactories(library, fact_methods);
+    }
+    this->registerModule(this->rtxi_factories_registry[library].createPlugin(
+        event_manager, main_window));
   } else {
     void* handle = dlopen(library.c_str(), RTLD_GLOBAL | RTLD_NOW);
     if (!handle) {
@@ -714,7 +733,7 @@ void Modules::Manager::unloadPlugin(Modules::Plugin* plugin)
 {
   std::string library = plugin->getName();
   this->unregisterModule(plugin);
-  if(this->rtxi_modules_registry[library].empty()){
+  if (this->rtxi_modules_registry[library].empty()) {
     this->unregisterFactories(library);
   }
 }
@@ -729,11 +748,11 @@ void Modules::Manager::unregisterModule(Modules::Plugin* plugin)
   std::string plugin_name = plugin->getName();
   auto start_iter = this->rtxi_modules_registry[plugin_name].begin();
   auto end_iter = this->rtxi_modules_registry[plugin_name].end();
-  auto loc = std::find_if(start_iter,
-                          end_iter,
-                          [plugin](const std::unique_ptr<Modules::Plugin>& module){
-                            return plugin == module.get();
-                          });
+  auto loc =
+      std::find_if(start_iter,
+                   end_iter,
+                   [plugin](const std::unique_ptr<Modules::Plugin>& module)
+                   { return plugin == module.get(); });
   void* handle = loc->get()->getHandle();
   this->rtxi_modules_registry[plugin_name].erase(loc);
   if (handle != nullptr) {
@@ -762,7 +781,8 @@ void Modules::Manager::receiveEvent(Event::Object* event)
   Modules::Plugin* plugin = nullptr;
   switch (event->getType()) {
     case Event::Type::PLUGIN_REMOVE_EVENT:
-      plugin = std::any_cast<Modules::Plugin*>(event->getParam("pluginPointer"));
+      plugin =
+          std::any_cast<Modules::Plugin*>(event->getParam("pluginPointer"));
       this->unloadPlugin(plugin);
       break;
     case Event::Type::PLUGIN_INSERT_EVENT:
@@ -771,8 +791,9 @@ void Modules::Manager::receiveEvent(Event::Object* event)
       event->setParam(
           "createRTXIPanel",
           std::any(this->rtxi_factories_registry[plugin_name].createPanel));
-      event->setParam("pluginPointer",
-                      std::any(this->rtxi_modules_registry[plugin_name].back().get()));
+      event->setParam(
+          "pluginPointer",
+          std::any(this->rtxi_modules_registry[plugin_name].back().get()));
     default:
       return;
   }

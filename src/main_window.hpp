@@ -1,7 +1,7 @@
 /*
          The Real-Time eXperiment Interface (RTXI)
          Copyright (C) 2011 Georgia Institute of Technology, University of Utah,
-   Weill Cornell Medical College
+   Will Cornell Medical College
 
          This program is free software: you can redistribute it and/or modify
          it under the terms of the GNU General Public License as published by
@@ -180,6 +180,7 @@ private:
   QAction* sub_issue = nullptr;
   QAction* utilItem = nullptr;
   QAction* openRTBenchmarks = nullptr;
+  QAction* openUserPrefs = nullptr;
 
   void createFileMenu();
   void createModuleMenu();

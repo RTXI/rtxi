@@ -1,7 +1,7 @@
 /*
                         The Real-Time eXperiment Interface (RTXI)
                         Copyright (C) 2011 Georgia Institute of Technology,
-   University of Utah, Weill Cornell Medical College
+   University of Utah, Will Cornell Medical College
 
                         This program is free software: you can redistribute it
    and/or modify it under the terms of the GNU General Public License as
@@ -25,9 +25,9 @@
 #include <pthread.h>
 #include <rt.h>
 #include <signal.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <studio.h>
 #include <sys/mman.h>
 #include <sys/resource.h>
 #include <unistd.h>
@@ -266,7 +266,7 @@ double RT::OS::getCpuUsage()
       + (proc_time.tv_nsec - last_proc_time.tv_nsec);
   cpu_user_percent = 100.0 * (proc_time_elapsed) / cpu_time_elapsed;
 
-  // calcualte cpu usage by real-time therad
+  // calculate cpu usage by real-time therad
   rt_time_elapsed = task_info.stat.xtime - last_rt_clock;
   cpu_rt_percent = 100.0 * rt_time_elapsed / cpu_time_elapsed;
 
