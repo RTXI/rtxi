@@ -61,9 +61,9 @@ set_target_properties(
 # Link all of the static and dynamic libraries to rtxi
 target_link_libraries(rtxi_exe PUBLIC 
     rtxi_lib
-    rtmath_lib
     rtos_fifo_lib
     rtos_lib 
+    rtmath_lib
     performance_measurement_lib
     userprefs_lib
     Boost::headers

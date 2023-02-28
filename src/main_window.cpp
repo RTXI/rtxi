@@ -326,7 +326,7 @@ void MainWindow::loadWindow()
   QSettings userprefs;
   QSettings::setPath(QSettings::NativeFormat,
                      QSettings::SystemScope,
-                     "/usr/local/share/rtxi/");
+                     QString::fromStdString(RTXI_DEFAULT_SETTINGS_DIR));
   userprefs.beginGroup("MainWindow");
   restoreGeometry(userprefs.value("geometry", saveGeometry()).toByteArray());
   move(userprefs.value("pos", pos()).toPoint());
@@ -343,7 +343,7 @@ void MainWindow::loadSettings()
   QSettings userprefs;
   QSettings::setPath(QSettings::NativeFormat,
                      QSettings::SystemScope,
-                     "/usr/local/share/rtxi/");
+                     QString::fromStdString(RTXI_DEFAULT_SETTINGS_DIR));
 
   QString filename = QFileDialog::getOpenFileName(
       this,
@@ -363,7 +363,7 @@ void MainWindow::saveSettings()
   QSettings userprefs;
   QSettings::setPath(QSettings::NativeFormat,
                      QSettings::SystemScope,
-                     "/usr/local/share/rtxi/");
+                     QString::fromStdString(RTXI_DEFAULT_SETTINGS_DIR));
 
   QString filename = QFileDialog::getSaveFileName(
       this,
@@ -500,7 +500,7 @@ void MainWindow::closeEvent(QCloseEvent* event)
   QSettings userprefs;
   QSettings::setPath(QSettings::NativeFormat,
                      QSettings::SystemScope,
-                     "/usr/local/share/rtxi/");
+                     QString::fromStdString(RTXI_DEFAULT_SETTINGS_DIR));
   userprefs.beginGroup("MainWindow");
   userprefs.setValue("geometry", saveGeometry());
   userprefs.setValue("maximized", isMaximized());

@@ -1,3 +1,5 @@
+#include <string>
 constexpr int RTXI_VERSION_MAJOR = @rtxi_VERSION_MAJOR@;
 constexpr int RTXI_VERSION_MINOR = @rtxi_VERSION_MINOR@;
 constexpr int RTXI_VERSION_PATCH = @rtxi_VERSION_PATCH@;
+const std::string RTXI_DEFAULT_SETTINGS_DIR = "@RTXI_SETTINGS_DIR@";
