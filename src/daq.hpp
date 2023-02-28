@@ -20,9 +20,9 @@
 #ifndef DAQ_DEVICE_H
 #define DAQ_DEVICE_H
 
-#include <io.h>
 #include <map>
-#include <rt.h>
+#include "io.hpp"
+#include "rt.hpp"
 
 //! DAQ Oriented Classes
 /*!
@@ -43,14 +43,18 @@ enum type_t
     DI,  /*!< Digital Input Interface         */
     DO,  /*!< Digital Output Interface        */
 };
+
 /*!
  * Used to specify indexes for channel number, range, reference, and units.
  */
 typedef unsigned long index_t;
+
 /*!
  * Flag to indicate error from a function returning an index.
  */
+
 static const index_t INVALID = (0-1);
+
 /*!
  * Used to specify  digital interface direction.
  */
@@ -60,83 +64,10 @@ enum direction_t
     OUTPUT, /*!< Digital Output */
 };
 
-class Device;
-class Driver;
-
-/*!
- * Provides a central meeting point for interfacing with all DAQ objects
- *   available in the system.
- *
- * \sa DAQ::Device
- * \sa DAQ::Driver
- */
-class Manager
-{
-
-    friend class Device;
-    friend class Driver;
-
-public:
-
-    /*!
-     * Manager is a Singleton, which means that there can only be one
-     *   instance. This function returns a pointer to that single instance.
-     *
-     * \return The instance of Manager.
-     */
-    static Manager *getInstance(void);
-
-    /*!
-     * Loop through each Device and execute a callback.
-     * The callback takes two parameters, a Device pointer and param,
-     *   the second parameter to  foreachDevice.
-     *
-     * \param callback The callback function
-     * \param param A parameter to the callback function.
-     *
-     * \sa DAQ::Device
-     */
-    void foreachDevice(void (*callback)(Device *,void *),void *param);
-
-    /*!
-     * Function for creating a device from the specified driver.
-     *
-     * \param driver The driver for the device.
-     * \param params Parameters to the driver.
-     *
-     * \sa DAQ::Device
-     * \sa DAQ::Driver
-     */
-    Device *loadDevice(const std::string &driver,const std::list<std::string> &params);
-
-private:
-
-    Manager(void) : mutex(Mutex::RECURSIVE) {};
-    ~Manager(void) {};
-    Manager(const Manager &) {};
-    Manager &operator=(const Manager &)
-    {
-        return *getInstance();
-    };
-
-    static Manager *instance;
-
-    void insertDevice(Device *);
-    void removeDevice(Device *);
-
-    void registerDriver(Driver *,const std::string &);
-    void unregisterDriver(const std::string &);
-
-    Mutex mutex;
-    std::list<Device *> devices;
-    std::map<std::string,Driver *> driverMap;
-
-}; // class Manager
-
 /*!
  * Object that represents a single DAQ card.
  */
-class Device : public RT::Device, public IO::Block
+class Device : public RT::Device 
 {
 
 public:
@@ -147,8 +78,8 @@ public:
      *
      * \sa IO::Block
      */
-    Device(std::string,IO::channel_t *,size_t);
-    virtual ~Device(void);
+    Device(std::string name, const std::vector<IO::channel_t> channels): 
+        RT::Device(name, channels) {}
 
     /*!
      * Get the number of channels of the specified type.
@@ -157,6 +88,7 @@ public:
      * \return The number of channels of the specified type.
      */
     virtual size_t getChannelCount(type_t type) const=0;
+
     /*!
      * Get the channel's active state.
      *
@@ -404,8 +336,7 @@ public:
      *
      * \param name The name of the driver.
      */
-    Driver(const std::string &name);
-    virtual ~Driver(void);
+    Driver(const std::string &name): name(name) { }
 
     /*!
      * A factory function for create a DAQ::Device with the provided args.
@@ -422,6 +353,43 @@ private:
     std::string name;
 
 }; // class Driver
+
+
+/*!
+ * Provides a central meeting point for interfacing with all DAQ objects
+ *   available in the system.
+ *
+ * \sa DAQ::Device
+ * \sa DAQ::Driver
+ */
+class Manager: public Event::Handler
+{
+
+public:
+
+    /*!
+     * Function for creating a device from the specified driver.
+     *
+     * \param driver The driver for the device.
+     * \param params Parameters to the driver.
+     *
+     * \sa DAQ::Device
+     * \sa DAQ::Driver
+     */
+    Device *loadDevice(const std::string &driver,const std::list<std::string> &params);
+
+private:
+
+    void insertDevice(Device *);
+    void removeDevice(Device *);
+
+    void registerDriver(Driver *,const std::string &);
+    void unregisterDriver(const std::string &);
+
+    std::vector<Device *> devices;
+    std::map<std::string,Driver *> driverMap;
+
+}; // class Manager
 
 }; // namespace DAQ
 
