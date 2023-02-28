@@ -39,7 +39,7 @@ add_library(rtxi_lib OBJECT
     module.hpp module.cpp
 )
 
-target_link_libraries(rtxi_lib PRIVATE 
+target_link_libraries(rtxi_lib PUBLIC 
     Threads::Threads
     fmt::fmt
     Qt5::Core
@@ -59,16 +59,11 @@ set_target_properties(
 )
 
 # Link all of the static and dynamic libraries to rtxi
-target_link_libraries(rtxi_exe PRIVATE
+target_link_libraries(rtxi_exe PUBLIC 
+    rtxi_lib
     rtmath_lib
     rtos_fifo_lib
     rtos_lib 
-    rtxi_lib
-    Threads::Threads
-    Qt5::Core
-    Qt5::Gui
-    Qt5::Widgets
-    fmt::fmt
     performance_measurement_lib
     userprefs_lib
     Boost::headers

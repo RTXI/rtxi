@@ -5,9 +5,7 @@ add_library(userprefs_lib OBJECT
 	userprefs.cpp
 )
 
-target_link_libraries(userprefs_lib PRIVATE
+target_link_libraries(userprefs_lib PUBLIC
 	rtxi_lib
-	Qt5::Core Qt5::Widgets Qt5::Gui
-	fmt::fmt
 )
 
