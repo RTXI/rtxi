@@ -31,7 +31,7 @@ DAQ::Device* DAQ::Manager::loadDevice(const std::string& driver,
     return nullptr;
   }
 
-  DAQ::Device* device = driverMap[name]->createDevice(params);
+  DAQ::Device* device = driverMap[driver]->createDevice(params);
   return device;
 }
 

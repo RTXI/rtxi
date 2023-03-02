@@ -386,7 +386,7 @@ private:
     void registerDriver(Driver *,const std::string &);
     void unregisterDriver(const std::string &);
 
-    std::vector<Device *> devices;
+    std::list<Device *> devices;
     std::map<std::string,Driver *> driverMap;
 
 }; // class Manager
