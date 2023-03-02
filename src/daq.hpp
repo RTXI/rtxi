@@ -78,7 +78,7 @@ public:
      *
      * \sa IO::Block
      */
-    Device(std::string name, const std::vector<IO::channel_t> channels): 
+    Device(const std::string& name, const std::vector<IO::channel_t>& channels): 
         RT::Device(name, channels) {}
 
     /*!
@@ -336,7 +336,12 @@ public:
      *
      * \param name The name of the driver.
      */
-    Driver(const std::string &name): name(name) { }
+    explicit Driver(std::string name): name(std::move(name)) { } 
+    Driver(const Driver& connector) = default;  // copy constructor
+    Driver& operator=(const Driver& connector) = default;  // copy assignment operator
+    Driver(Driver&&) = default;  // move constructor
+    Driver& operator=(Driver&&) = default;  // move assignment operator
+    virtual ~Driver() = default;
 
     /*!
      * A factory function for create a DAQ::Device with the provided args.
@@ -364,8 +369,13 @@ private:
  */
 class Manager: public Event::Handler
 {
-
 public:
+    Manager()=default;
+    Manager(const Manager& connector) = default;  // copy constructor
+    Manager& operator=(const Manager& connector) = default;  // copy assignment operator
+    Manager(Manager&&) = default;  // move constructor
+    Manager& operator=(Manager&&) = default;  // move assignment operator
+    virtual ~Manager() = default;
 
     /*!
      * Function for creating a device from the specified driver.
