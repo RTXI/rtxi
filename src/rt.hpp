@@ -62,6 +62,11 @@ public:
       : IO::Block(std::move(n), c, /*isdependent=*/false)
   {
   }
+  Device(const Device& connector) = default;  // copy constructor
+  Device& operator=(const Device& connector) = default;  // copy assignment operator
+  Device(Device&&) = delete;  // move constructor
+  Device& operator=(Device&&) = delete;  // move assignment operator
+  virtual ~Device() = default;
 
   /*! \fn virtual void read(void)
    * Function called by the realtime task at the beginning of each period.
@@ -90,6 +95,11 @@ public:
       : IO::Block(std::move(n), c, /*isdependent=*/true)
   {
   }
+  Thread(const Thread& connector) = default;  // copy constructor
+  Thread& operator=(const Thread& connector) = default;  // copy assignment operator
+  Thread(Thread&&) = delete;  // move constructor
+  Thread& operator=(Thread&&) = delete;  // move assignment operator
+  virtual ~Thread() = default;
 
   /*! \fn virtual void execute(void)
    * Function called periodically by the realtime task.
