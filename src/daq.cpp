@@ -76,11 +76,9 @@ void DAQ::Manager::registerDriver(Driver* driver, const std::string& name)
 
 void DAQ::Manager::unregisterDriver(const std::string& name)
 {
-
   if (driverMap.find(name) == driverMap.end()) {
     ERROR_MSG("DAQ::Manager::unregisterDriver : Driver not registered\n");
     return;
   }
   driverMap.erase(name);
 }
-
