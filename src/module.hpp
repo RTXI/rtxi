@@ -15,6 +15,7 @@
 #include <variant>
 #include <vector>
 
+#include "daq.hpp"
 #include "event.hpp"
 #include "io.hpp"
 #include "main_window.hpp"
@@ -541,6 +542,7 @@ public:
 protected:
   // owned pointers
   std::unique_ptr<Modules::Component> plugin_component;
+  std::unique_ptr<DAQ::Device> plugin_device;
 
   // not owned pointers (managed by external objects)
   Event::Manager* event_manager = nullptr;
