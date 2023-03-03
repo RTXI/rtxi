@@ -23,61 +23,61 @@
 
 #include <QtWidgets>
 
-#include <event.h>
+#include "event.hpp"
+#include "main_window.hpp"
+#include "module.hpp"
 
-class SystemControlPanel
-    : public QWidget
-    , public Event::Handler
+class SystemControlPanel : public Modules::Panel
 {
   Q_OBJECT
 
 public:
-  SystemControlPanel(QWidget*);
-  virtual ~SystemControlPanel(void);
+  SystemControlPanel(MainWindow* mw, QWidget* parent);
+  virtual ~SystemControlPanel();
 
 public slots:
-  void apply(void);
-  void display(void);
-  void updateDevice(void);
-  void updateFreq(void);
-  void updatePeriod(void);
+  void apply();
+  void display();
+  void updateDevice();
+  void updateFreq();
+  void updatePeriod();
 
 private:
-  void __display(void);
+  void __display();
   void receiveEvent(const Event::Object*);
 
-  QGroupBox* deviceGroup;
-  QGroupBox* analogGroup;
-  QGroupBox* digitalGroup;
-  QGroupBox* buttonGroup;
+  QGroupBox* deviceGroup = nullptr;
+  QGroupBox* analogGroup = nullptr;
+  QGroupBox* digitalGroup = nullptr;
+  QGroupBox* buttonGroup = nullptr;
 
-  QMdiSubWindow* subWindow;
+  QMdiSubWindow* subWindow = nullptr;
 
-  QComboBox* deviceList;
-  QComboBox* analogChannelList;
-  QComboBox* analogRangeList;
-  QComboBox* analogDownsampleList;
-  QComboBox* analogReferenceList;
-  QComboBox* analogSubdeviceList;
-  QComboBox* analogUnitPrefixList;
-  QComboBox* analogUnitList;
-  QComboBox* analogUnitPrefixList2;
-  QComboBox* analogUnitList2;
-  QLineEdit* analogGainEdit;
-  QLineEdit* analogZeroOffsetEdit;
-  QPushButton* analogActiveButton;
-  QPushButton* analogCalibrationButton;
+  QComboBox* deviceList = nullptr;
+  QComboBox* analogChannelList = nullptr;
+  QComboBox* analogRangeList = nullptr;
+  QComboBox* analogDownsampleList = nullptr;
+  QComboBox* analogReferenceList = nullptr;
+  QComboBox* analogSubdeviceList = nullptr;
+  QComboBox* analogUnitPrefixList = nullptr;
+  QComboBox* analogUnitList = nullptr;
+  QComboBox* analogUnitPrefixList2 = nullptr;
+  QComboBox* analogUnitList2 = nullptr;
+  QLineEdit* analogGainEdit = nullptr;
+  QLineEdit* analogZeroOffsetEdit = nullptr;
+  QPushButton* analogActiveButton = nullptr;
+  QPushButton* analogCalibrationButton = nullptr;
 
-  QComboBox* digitalChannelList;
-  QComboBox* digitalDirectionList;
-  QComboBox* digitalSubdeviceList;
-  QPushButton* digitalActiveButton;
+  QComboBox* digitalChannelList = nullptr;
+  QComboBox* digitalDirectionList = nullptr;
+  QComboBox* digitalSubdeviceList = nullptr;
+  QPushButton* digitalActiveButton = nullptr;
 
   bool rateUpdate;
-  QComboBox* freqUnitList;
-  QComboBox* periodUnitList;
-  QLineEdit* freqEdit;
-  QLineEdit* periodEdit;
+  QComboBox* freqUnitList = nullptr;
+  QComboBox* periodUnitList = nullptr;
+  QLineEdit* freqEdit = nullptr;
+  QLineEdit* periodEdit = nullptr;
 };
 
 #endif /* SYSTEM_CONTROL_PANEL_H */

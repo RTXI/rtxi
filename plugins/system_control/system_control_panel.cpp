@@ -18,13 +18,15 @@
 
  */
 
-#include <daq.h>
-#include <debug.h>
-#include <main_window.h>
+#include "system_control.h"
+
 #include <math.h>
-#include <rt.h>
-#include <system_control.h>
-#include <system_control_panel.h>
+
+#include "daq.hpp"
+#include "debug.hpp"
+#include "main_window.hpp"
+#include "rt.h"
+#include "system_control_panel.h"
 
 struct find_daq_t
 {
@@ -46,7 +48,7 @@ static void buildDAQDeviceList(DAQ::Device* dev, void* arg)
   deviceList->addItem(QString::fromStdString(dev->getName()));
 }
 
-SystemControlPanel::SystemControlPanel(QWidget* parent)
+SystemControlPanel::SystemControlPanel(MainWindow* mw, QWidget* parent)
     : QWidget(parent)
 {
   setWhatsThis(
@@ -80,7 +82,7 @@ SystemControlPanel::SystemControlPanel(QWidget* parent)
   subWindow->setAttribute(Qt::WA_DeleteOnClose);
   subWindow->setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint
                             | Qt::WindowMinimizeButtonHint);
-  MainWindow::getInstance()->createMdi(subWindow);
+  mw->createMdi(subWindow);
 
   // Create main layout
   QGridLayout* layout = new QGridLayout;

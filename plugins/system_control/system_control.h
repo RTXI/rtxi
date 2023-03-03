@@ -21,32 +21,77 @@
 #ifndef SYSTEM_CONTROL_H
 #define SYSTEM_CONTROL_H
 
-#include <plugin.h>
-#include <qobject.h>
-#include <system_control_panel.h>
+#include <QtWidgets>
 
-class SystemControl
-    : public QObject
-    , public Plugin::Object
+#include "event.hpp"
+#include "main_window.hpp"
+#include "module.hpp"
+
+class SystemControlPanel : public Modules::Panel
 {
   Q_OBJECT
 
-  friend class SystemControlPanel;
+public:
+  SystemControlPanel(MainWindow* mw, Event::Manager* ev_manager);
+
+public slots:
+  void apply();
+  void display();
+  void updateDevice();
+  void updateFreq();
+  void updatePeriod();
+
+private:
+  void __display();
+  void receiveEvent(const Event::Object*);
+
+  QGroupBox* deviceGroup = nullptr;
+  QGroupBox* analogGroup = nullptr;
+  QGroupBox* digitalGroup = nullptr;
+  QGroupBox* buttonGroup = nullptr;
+
+  QMdiSubWindow* subWindow = nullptr;
+
+  QComboBox* deviceList = nullptr;
+  QComboBox* analogChannelList = nullptr;
+  QComboBox* analogRangeList = nullptr;
+  QComboBox* analogDownsampleList = nullptr;
+  QComboBox* analogReferenceList = nullptr;
+  QComboBox* analogSubdeviceList = nullptr;
+  QComboBox* analogUnitPrefixList = nullptr;
+  QComboBox* analogUnitList = nullptr;
+  QComboBox* analogUnitPrefixList2 = nullptr;
+  QComboBox* analogUnitList2 = nullptr;
+  QLineEdit* analogGainEdit = nullptr;
+  QLineEdit* analogZeroOffsetEdit = nullptr;
+  QPushButton* analogActiveButton = nullptr;
+  QPushButton* analogCalibrationButton = nullptr;
+
+  QComboBox* digitalChannelList = nullptr;
+  QComboBox* digitalDirectionList = nullptr;
+  QComboBox* digitalSubdeviceList = nullptr;
+  QPushButton* digitalActiveButton = nullptr;
+
+  bool rateUpdate;
+  QComboBox* freqUnitList = nullptr;
+  QComboBox* periodUnitList = nullptr;
+  QLineEdit* freqEdit = nullptr;
+  QLineEdit* periodEdit = nullptr;
+};
+
+class SystemControl : public Modules::Plugin
+{
+  Q_OBJECT
 
 public:
-  static SystemControl* getInstance(void);
+  SystemControl();
+  ~SystemControl();
 
 public slots:
 
   void createControlPanel(void);
 
 private:
-  SystemControl(void);
-  ~SystemControl(void);
-  SystemControl(const SystemControl&)
-      : QObject() {};
-  SystemControl& operator=(const SystemControl&) { return *getInstance(); };
-
   static SystemControl* instance;
 
   void removeControlPanel(SystemControlPanel*);
