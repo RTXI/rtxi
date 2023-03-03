@@ -35,6 +35,7 @@ add_library(rtxi_lib OBJECT
     event.hpp event.cpp
     io.hpp io.cpp
     rt.hpp rt.cpp
+    daq.hpp daq.cpp
     main_window.hpp main_window.cpp
     module.hpp module.cpp
 )

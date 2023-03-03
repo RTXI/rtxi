@@ -63,7 +63,8 @@ public:
   {
   }
   Device(const Device& connector) = default;  // copy constructor
-  Device& operator=(const Device& connector) = default;  // copy assignment operator
+  Device& operator=(const Device& connector) =
+      default;  // copy assignment operator
   Device(Device&&) = delete;  // move constructor
   Device& operator=(Device&&) = delete;  // move assignment operator
   virtual ~Device() = default;
@@ -96,7 +97,8 @@ public:
   {
   }
   Thread(const Thread& connector) = default;  // copy constructor
-  Thread& operator=(const Thread& connector) = default;  // copy assignment operator
+  Thread& operator=(const Thread& connector) =
+      default;  // copy assignment operator
   Thread(Thread&&) = delete;  // move constructor
   Thread& operator=(Thread&&) = delete;  // move assignment operator
   virtual ~Thread() = default;
