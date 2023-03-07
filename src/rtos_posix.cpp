@@ -63,6 +63,7 @@ void RT::OS::shutdown(RT::OS::Task* task)
   munlockall();
   realtime_key = false;
   task->task_finished = true;
+  RT_PERIOD = nullptr;
 }
 
 int RT::OS::createTask(Task* task, void (*func)(void*), void* arg)

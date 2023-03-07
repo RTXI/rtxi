@@ -29,7 +29,11 @@
 
 #include "fifo.hpp"
 
-int RT::OS::initiate()
+thread_local bool realtime_key = false;
+thread_local int64_t* RT_PERIOD = nullptr;
+
+
+int RT::OS::initiate(RT::OS::Task* task)
 {
   int retval = evl_init();
   if (retval != 0) {
@@ -41,10 +45,14 @@ int RT::OS::initiate()
     ERROR_MSG("RT::OS(EVL)::initiate : evl_attach_self() : {}",
               strerror(errno));
   }
+  realtime_key = true;
+  task->period = RT::OS::DEFAULT_PERIOD;
+  RT_PERIOD = &(task->period);
+  task->thread_id = std::any(thread_fd);
   return retval;
 }
 
-void RT::OS::shutdown()
+void RT::OS::shutdown(RT::OS::Task* task)
 {
   int retval = evl_detach_self();
   if (retval != 0) {
@@ -52,6 +60,39 @@ void RT::OS::shutdown()
     ERROR_MSG("RT::OS(EVL)::shutdown : evl_detach_self() : {}",
               strerror(errno));
   }
+  realtime_key = false;
+  task->task_finished = true;
+  RT_PERIOD = nullptr;
+}
+
+int RT::OS::createTask(Task* task, void (*func)(void*), void* arg)
+{
+  int result = 0;
+  // Should not be creating real-time tasks from another real-time task
+  if (RT::OS::isRealtime()) {
+    ERROR_MSG("RT::OS::createTask : Task cannot be created from rt context");
+    return -1;
+  }
+  auto wrapper = [](RT::OS::Task* tsk, void (*fn)(void*), void* args)
+  {
+    auto resval = RT::OS::initiate(tsk);
+    if (resval != 0) {
+      ERROR_MSG("RT::OS::createTask : RT::OS::initiate() : {}",
+                strerror(errno));
+      // In the event that we fail to initiate real-time environment let's just
+      // quit
+      return;
+    }
+    fn(args);
+    RT::OS::shutdown(tsk);
+  };
+  std::thread thread_obj(wrapper, task, func, arg);
+  if (thread_obj.joinable()) {
+    task->rt_thread = std::move(thread_obj);
+  } else {
+    result = -1;
+  }
+  return result;
 }
 
 void RT::OS::deleteTask(RT::OS::Task* task)
@@ -69,7 +110,7 @@ void RT::OS::deleteTask(RT::OS::Task* task)
 
 bool RT::OS::isRealtime()
 {
-  return !evl_is_inband();
+  return realtime_key;
 }
 
 int64_t RT::OS::getTime()
@@ -86,6 +127,16 @@ int RT::OS::setPeriod(RT::OS::Task* task, int64_t period)
   task->period = period;
   return 0;
 }
+
+int64_t RT::OS::getPeriod()
+{
+  // This function should only ever be accessed withint a real-tim context
+  if (RT_PERIOD == nullptr || !RT::OS::isRealtime()) {
+    return -1;
+  };
+  return *(RT_PERIOD);
+}
+
 
 void RT::OS::sleepTimestep(RT::OS::Task* task)
 {
