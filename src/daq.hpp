@@ -409,6 +409,7 @@ public:
   Device* loadDevice(const std::string& driver,
                      const std::list<std::string>& params);
 
+  Device* getDevice(const std::string& device_name);
 private:
   void insertDevice(Device*);
   void removeDevice(Device*);
@@ -416,7 +417,7 @@ private:
   void registerDriver(Driver*, const std::string&);
   void unregisterDriver(const std::string&);
 
-  std::list<Device*> devices;
+  std::unordered_map<std::string, Device*> devices;
   std::map<std::string, Driver*> driverMap;
 
 };  // class Manager

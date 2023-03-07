@@ -35,6 +35,12 @@ DAQ::Device* DAQ::Manager::loadDevice(const std::string& driver,
   return device;
 }
 
+DAQ::Device* DAQ::Manager::getDevice(const std::string& device_name)
+{
+  if(devices.find(device_name) == devices.end()) { return nullptr; }
+  return this->devices[device_name];
+}
+
 void DAQ::Manager::insertDevice(DAQ::Device* device)
 {
   if (device == nullptr) {
@@ -47,7 +53,7 @@ void DAQ::Manager::insertDevice(DAQ::Device* device)
     return;
   }
 
-  devices.push_back(device);
+  devices[device->getName()] = device;
 }
 
 void DAQ::Manager::removeDevice(DAQ::Device* device)
@@ -57,7 +63,7 @@ void DAQ::Manager::removeDevice(DAQ::Device* device)
     return;
   }
 
-  devices.remove(device);
+  devices.erase(device->getName());
 }
 
 void DAQ::Manager::registerDriver(Driver* driver, const std::string& name)
