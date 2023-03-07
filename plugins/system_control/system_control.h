@@ -32,18 +32,19 @@ class SystemControlPanel : public Modules::Panel
   Q_OBJECT
 
 public:
-  SystemControlPanel(MainWindow* mw, Event::Manager* ev_manager);
+  SystemControlPanel(MainWindow* mw, Event::Manager* ev_manager, DAQ::Manager* dev_manager);
+
+  void receiveEvent(const Event::Object* event);
 
 public slots:
-  void apply();
+  void apply(DAQ::Device* dev);
   void display();
   void updateDevice();
   void updateFreq();
   void updatePeriod();
 
 private:
-  void __display();
-  void receiveEvent(const Event::Object*);
+  DAQ::Manager* daq_manager = nullptr;
 
   QGroupBox* deviceGroup = nullptr;
   QGroupBox* analogGroup = nullptr;
@@ -81,22 +82,12 @@ private:
 
 class SystemControl : public Modules::Plugin
 {
-  Q_OBJECT
-
 public:
   SystemControl();
-  ~SystemControl();
-
-public slots:
-
-  void createControlPanel(void);
-
+  
 private:
-  static SystemControl* instance;
-
-  void removeControlPanel(SystemControlPanel*);
-
-  std::list<SystemControlPanel*> panelList;
+  std::vector<DAQ::Device *> deviceList;
+  DAQ::Manager* daq_manager;
 };
 
 #endif /* SYSTEM_CONTROL_H */

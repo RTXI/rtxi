@@ -54,7 +54,6 @@ typedef unsigned long index_t;
 /*!
  * Flag to indicate error from a function returning an index.
  */
-
 static const index_t INVALID = (0 - 1);
 
 /*!
