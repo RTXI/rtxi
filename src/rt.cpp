@@ -849,7 +849,6 @@ void RT::System::execute(void* sys)
         system->rt_connector->propagateThreadConnections(iThread);
       }
     }
-    endtime = RT::OS::getTime();
 
     for (auto* iDevice : system->devices) {
       if (iDevice->getActive()) {
@@ -860,6 +859,7 @@ void RT::System::execute(void* sys)
     while (system->eventFifo->readRT(&cmd, sizeof(RT::System::CMD*)) != -1) {
       system->executeCMD(cmd);
     }
+    endtime = RT::OS::getTime();
     cmd = nullptr;
   }
 }
