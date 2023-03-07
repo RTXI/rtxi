@@ -25,7 +25,6 @@ target_link_libraries(rtxiTests PRIVATE
     GTest::gmock GTest::gmock_main 
     Boost::headers
     dl
-    l
     backtrace
 )
 
