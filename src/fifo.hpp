@@ -21,8 +21,9 @@
 #ifndef FIFO_H
 #define FIFO_H
 
-#include <sys/types.h>
 #include <memory>
+
+#include <sys/types.h>
 
 namespace RT::OS
 {

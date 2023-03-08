@@ -15,8 +15,8 @@
 
 #include "debug.hpp"
 #include "performance_measurement/performance_measurement.hpp"
-#include "userprefs/userprefs.h"
 #include "system_control/system_control.h"
+#include "userprefs/userprefs.h"
 
 std::string Modules::Variable::state2string(Modules::Variable::state_t state)
 {
@@ -689,11 +689,11 @@ int Modules::Manager::loadCorePlugin(const std::string& library)
       this->registerFactories(library, fact_methods);
     }
     this->registerModule(this->rtxi_factories_registry[library].createPlugin(
-        event_manager, main_window));   
+        event_manager, main_window));
   } else {
     return -1;
   }
-  
+
   return 0;
 }
 

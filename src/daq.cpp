@@ -37,7 +37,9 @@ DAQ::Device* DAQ::Manager::loadDevice(const std::string& driver,
 
 DAQ::Device* DAQ::Manager::getDevice(const std::string& device_name)
 {
-  if(devices.find(device_name) == devices.end()) { return nullptr; }
+  if (devices.find(device_name) == devices.end()) {
+    return nullptr;
+  }
   return this->devices[device_name];
 }
 
@@ -92,14 +94,13 @@ void DAQ::Manager::unregisterDriver(const std::string& name)
 void DAQ::Manager::receiveEvent(Event::Object* event)
 {
   switch (event->getType()) {
-    case Event::Type::DAQ_DEVICE_QUERY_EVENT : {
+    case Event::Type::DAQ_DEVICE_QUERY_EVENT: {
       auto device_name = std::any_cast<std::string>(event->getParam("name"));
       auto* dev = this->getDevice(device_name);
       event->setParam("device", std::any(dev));
       break;
     }
-    default :
+    default:
       return;
   }
-
 }

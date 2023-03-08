@@ -86,18 +86,22 @@ private:
 class Plugin : public Modules::Plugin
 {
 public:
-  Plugin(Event::Manager* ev_manager, MainWindow* main_window): 
-      Modules::Plugin(ev_manager, main_window, std::string(MODULE_NAME)) {}
-  
+  Plugin(Event::Manager* ev_manager, MainWindow* main_window)
+      : Modules::Plugin(ev_manager, main_window, std::string(MODULE_NAME))
+  {
+  }
 };
 
-std::unique_ptr<Modules::Plugin> createRTXIPlugin(Event::Manager* ev_manager, MainWindow* main_window);
+std::unique_ptr<Modules::Plugin> createRTXIPlugin(Event::Manager* ev_manager,
+                                                  MainWindow* main_window);
 
-Modules::Panel* createRTXIPanel(MainWindow* main_window, Event::Manager* ev_manager);
+Modules::Panel* createRTXIPanel(MainWindow* main_window,
+                                Event::Manager* ev_manager);
 
-std::unique_ptr<Modules::Component> createRTXIComponent(Modules::Plugin* host_plugin);
+std::unique_ptr<Modules::Component> createRTXIComponent(
+    Modules::Plugin* host_plugin);
 
 Modules::FactoryMethods getFactories();
 
-} // namespace SystemControl
+}  // namespace SystemControl
 #endif /* SYSTEM_CONTROL_H */

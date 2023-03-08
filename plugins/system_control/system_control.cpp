@@ -18,39 +18,39 @@
 
 */
 
-
 //#include <math.h>
 
 #include <memory>
-#include "debug.hpp"
-#include "daq.hpp"
-#include "rt.hpp"
-#include "main_window.hpp"
+
 #include "system_control.h"
 
-//struct find_daq_t
-//{
-//  int index;
-//  DAQ::Device* device;
-//};
+#include "daq.hpp"
+#include "debug.hpp"
+#include "main_window.hpp"
+#include "rt.hpp"
 
-//static void findDAQDevice(DAQ::Device* dev, void* arg)
+// struct find_daq_t
 //{
-//  struct find_daq_t* info = static_cast<struct find_daq_t*>(arg);
-//  if (!info->index){
-//    info->device = dev;
-//  }
-//  info->index--;
-//}
+//   int index;
+//   DAQ::Device* device;
+// };
 
-//static void buildDAQDeviceList(DAQ::Device* dev, void* arg)
+// static void findDAQDevice(DAQ::Device* dev, void* arg)
 //{
-//  QComboBox* deviceList = static_cast<QComboBox*>(arg);
-//  deviceList->addItem(QString::fromStdString(dev->getName()));
-//}
+//   struct find_daq_t* info = static_cast<struct find_daq_t*>(arg);
+//   if (!info->index){
+//     info->device = dev;
+//   }
+//   info->index--;
+// }
 
-SystemControl::Panel::Panel(MainWindow* mw,
-                            Event::Manager* ev_manager)
+// static void buildDAQDeviceList(DAQ::Device* dev, void* arg)
+//{
+//   QComboBox* deviceList = static_cast<QComboBox*>(arg);
+//   deviceList->addItem(QString::fromStdString(dev->getName()));
+// }
+
+SystemControl::Panel::Panel(MainWindow* mw, Event::Manager* ev_manager)
     : Modules::Panel(std::string(SystemControl::MODULE_NAME), mw, ev_manager)
 {
   setWhatsThis(
@@ -99,10 +99,8 @@ SystemControl::Panel::Panel(MainWindow* mw,
   deviceList = new QComboBox;
   deviceLayout->addWidget(deviceList, 0, 1, 1, 5);
   // DAQ::Manager::getInstance()->foreachDevice(buildDAQDeviceList, deviceList);
-  QObject::connect(deviceList, 
-                   SIGNAL(activated(int)), 
-                   this, 
-                   SLOT(updateDevice(void)));
+  QObject::connect(
+      deviceList, SIGNAL(activated(int)), this, SLOT(updateDevice(void)));
 
   // Frequency box
   deviceLayout->addWidget(new QLabel(tr("Frequency:")), 1, 0);
@@ -317,14 +315,14 @@ SystemControl::Panel::Panel(MainWindow* mw,
 void SystemControl::Panel::apply()
 {
   int index = this->deviceList->currentIndex();
-  if(index == -1) { 
+  if (index == -1) {
     // Even if there is no valid device we should still change rt period
     double period = periodEdit->text().toDouble();
     period *= pow(10, 3 * (3 - periodUnitList->currentIndex()));
     Event::Object event(Event::Type::RT_PERIOD_EVENT);
     event.setParam("period", std::any(static_cast<int64_t>(period)));
     this->getRTXIEventManager()->postEvent(&event);
-    return; 
+    return;
   }
 
   QString dev_name = deviceList->itemText(index);
@@ -334,16 +332,16 @@ void SystemControl::Panel::apply()
   DAQ::Device* dev = nullptr;
   try {
     dev = std::any_cast<DAQ::Device*>(device_query_event.getParam("device"));
-  }
-  catch (std::bad_any_cast&) {
+  } catch (std::bad_any_cast&) {
     ERROR_MSG("The device {} was not found", dev_name.toStdString());
     return;
   }
 
   // Make sure we aren't getting a phony device
-  if(dev == nullptr) { 
-    ERROR_MSG("DAQ device manager returned a nullptr for {}", dev_name.toStdString());
-    return; 
+  if (dev == nullptr) {
+    ERROR_MSG("DAQ device manager returned a nullptr for {}",
+              dev_name.toStdString());
+    return;
   }
 
   auto a_chan = static_cast<DAQ::index_t>(analogChannelList->currentIndex());
@@ -356,28 +354,35 @@ void SystemControl::Panel::apply()
   dev->setChannelActive(a_type, a_chan, analogActiveButton->isChecked());
   dev->setAnalogGain(a_type, a_chan, a_gain);
   dev->setAnalogZeroOffset(a_type, a_chan, a_zerooffset);
-  dev->setAnalogRange(a_type, 
-                      a_chan, 
-                      static_cast<DAQ::index_t>(analogRangeList->currentIndex()));
-  dev->setAnalogReference(a_type, 
-                          a_chan, 
-                          static_cast<DAQ::index_t>(analogReferenceList->currentIndex()));
-  dev->setAnalogUnits(a_type, 
-                      a_chan, 
-                      static_cast<DAQ::index_t>(analogUnitList->currentIndex()));
-  dev->setAnalogDownsample(a_type, 
-                           a_chan,
-                           (analogDownsampleList->itemData(analogDownsampleList->currentIndex(),
-                              Qt::DisplayRole)).toInt());
+  dev->setAnalogRange(
+      a_type,
+      a_chan,
+      static_cast<DAQ::index_t>(analogRangeList->currentIndex()));
+  dev->setAnalogReference(
+      a_type,
+      a_chan,
+      static_cast<DAQ::index_t>(analogReferenceList->currentIndex()));
+  dev->setAnalogUnits(
+      a_type,
+      a_chan,
+      static_cast<DAQ::index_t>(analogUnitList->currentIndex()));
+  dev->setAnalogDownsample(
+      a_type,
+      a_chan,
+      (analogDownsampleList->itemData(analogDownsampleList->currentIndex(),
+                                      Qt::DisplayRole))
+          .toInt());
   dev->setAnalogCounter(a_type, a_chan);
 
   auto d_chan = static_cast<DAQ::index_t>(digitalChannelList->currentIndex());
-  auto d_type = static_cast<DAQ::type_t>(digitalSubdeviceList->currentIndex() + DAQ::DIO);
-  auto d_dir = static_cast<DAQ::direction_t>(digitalDirectionList->currentIndex());
+  auto d_type =
+      static_cast<DAQ::type_t>(digitalSubdeviceList->currentIndex() + DAQ::DIO);
+  auto d_dir =
+      static_cast<DAQ::direction_t>(digitalDirectionList->currentIndex());
 
   // Write digital channel configuration to DAQ
   dev->setChannelActive(d_type, d_chan, digitalActiveButton->isChecked());
-  if (d_type == DAQ::DIO){
+  if (d_type == DAQ::DIO) {
     dev->setDigitalDirection(d_chan, d_dir);
   }
 
@@ -405,7 +410,9 @@ void SystemControl::Panel::updateDevice()
   // }
 
   int index = this->deviceList->currentIndex();
-  if(index == -1) { return; }
+  if (index == -1) {
+    return;
+  }
 
   QString dev_name = deviceList->itemText(index);
   Event::Object device_query_event(Event::Type::DAQ_DEVICE_QUERY_EVENT);
@@ -414,17 +421,21 @@ void SystemControl::Panel::updateDevice()
   DAQ::Device* dev = nullptr;
   try {
     dev = std::any_cast<DAQ::Device*>(device_query_event.getParam("device"));
-  }
-  catch (std::bad_any_cast&) {
-    ERROR_MSG("SystemContrlo::Panel::updateDevice : The device {} was not found", dev_name.toStdString());
+  } catch (std::bad_any_cast&) {
+    ERROR_MSG(
+        "SystemContrlo::Panel::updateDevice : The device {} was not found",
+        dev_name.toStdString());
     return;
   }
 
   // Make sure we aren't getting a phony device
-  if(dev == nullptr) { 
-    ERROR_MSG("SystemControl::Panel::updateDevice : DAQ device manager returned a nullptr for {}", dev_name.toStdString());
-    return; 
-  }  
+  if (dev == nullptr) {
+    ERROR_MSG(
+        "SystemControl::Panel::updateDevice : DAQ device manager returned a "
+        "nullptr for {}",
+        dev_name.toStdString());
+    return;
+  }
 
   analogChannelList->clear();
   digitalChannelList->clear();
@@ -446,7 +457,9 @@ void SystemControl::Panel::updateDevice()
 void SystemControl::Panel::updateFreq()
 {
   /* This is to prevent recursive updates, not to provide mutual exclusion */
-  if (rateUpdate) { return; }
+  if (rateUpdate) {
+    return;
+  }
 
   rateUpdate = true;
   int index = 0;
@@ -468,14 +481,18 @@ void SystemControl::Panel::updateFreq()
 
 void SystemControl::Panel::updatePeriod()
 {
-  if (rateUpdate) { return; }
+  if (rateUpdate) {
+    return;
+  }
 
   rateUpdate = true;
   int index = 0;
 
   // Determine the Frequency
   auto freq = freqEdit->text().toDouble();
-  if (freqUnitList->currentIndex()) { freq *= 1000; }
+  if (freqUnitList->currentIndex()) {
+    freq *= 1000;
+  }
 
   auto period = 1 / freq;
 
@@ -503,7 +520,9 @@ void SystemControl::Panel::display()
   // }
 
   int index = this->deviceList->currentIndex();
-  if(index == -1) { return; }
+  if (index == -1) {
+    return;
+  }
 
   QString dev_name = deviceList->itemText(index);
   Event::Object device_query_event(Event::Type::DAQ_DEVICE_QUERY_EVENT);
@@ -512,9 +531,9 @@ void SystemControl::Panel::display()
   DAQ::Device* dev = nullptr;
   try {
     dev = std::any_cast<DAQ::Device*>(device_query_event.getParam("device"));
-  }
-  catch (std::bad_any_cast&) {
-    ERROR_MSG("SystemContrlo::Panel::display : The device {} was not found", dev_name.toStdString());
+  } catch (std::bad_any_cast&) {
+    ERROR_MSG("SystemContrlo::Panel::display : The device {} was not found",
+              dev_name.toStdString());
     return;
   }
 
@@ -544,8 +563,11 @@ void SystemControl::Panel::display()
     auto chan = static_cast<DAQ::index_t>(analogChannelList->currentIndex());
 
     // Downsample is only enabled for AI
-    if (type == DAQ::AI) { analogDownsampleList->setEnabled(true); }
-    else { analogDownsampleList->setEnabled(false); }
+    if (type == DAQ::AI) {
+      analogDownsampleList->setEnabled(true);
+    } else {
+      analogDownsampleList->setEnabled(false);
+    }
 
     analogActiveButton->setEnabled(true);
     analogChannelList->setEnabled(true);
@@ -558,13 +580,13 @@ void SystemControl::Panel::display()
     analogUnitList->setEnabled(true);
 
     analogRangeList->clear();
-    for (size_t i = 0; i < dev->getAnalogRangeCount(type, chan); ++i){
+    for (size_t i = 0; i < dev->getAnalogRangeCount(type, chan); ++i) {
       analogRangeList->addItem(
           QString::fromStdString(dev->getAnalogRangeString(type, chan, i)));
     }
 
     analogReferenceList->clear();
-    for (size_t i = 0; i < dev->getAnalogReferenceCount(type, chan); ++i){
+    for (size_t i = 0; i < dev->getAnalogReferenceCount(type, chan); ++i) {
       analogReferenceList->addItem(
           QString::fromStdString(dev->getAnalogReferenceString(type, chan, i)));
     }
@@ -586,7 +608,9 @@ void SystemControl::Panel::display()
     int index = 8;
     double tmp;
     bool sign = true;
-    if (dev->getAnalogGain(type, chan) < 0.0) { sign = false; }  // Negative value
+    if (dev->getAnalogGain(type, chan) < 0.0) {
+      sign = false;
+    }  // Negative value
     tmp = fabs(dev->getAnalogGain(type, chan));
     while (((tmp >= 1000) && (index > 0)) || ((tmp < 1) && (index < 16))) {
       if (tmp >= 1000) {
@@ -609,7 +633,9 @@ void SystemControl::Panel::display()
     // Determine the correct prefix for analog offset
     index = 8;
     sign = true;
-    if (dev->getAnalogZeroOffset(type, chan) < 0.0) { sign = false; }  // Negative value
+    if (dev->getAnalogZeroOffset(type, chan) < 0.0) {
+      sign = false;
+    }  // Negative value
     tmp = fabs(dev->getAnalogZeroOffset(type, chan));
     while (((tmp >= 1000) && (index > 0)) || ((tmp < 1) && (index < 16))) {
       if (tmp >= 1000) {
@@ -636,7 +662,8 @@ void SystemControl::Panel::display()
     digitalChannelList->setEnabled(false);
     digitalDirectionList->setEnabled(false);
   } else {
-    auto type = static_cast<DAQ::type_t>(digitalSubdeviceList->currentIndex() + DAQ::DIO);
+    auto type = static_cast<DAQ::type_t>(digitalSubdeviceList->currentIndex()
+                                         + DAQ::DIO);
     auto chan = static_cast<DAQ::index_t>(digitalChannelList->currentIndex());
 
     digitalActiveButton->setEnabled(true);
@@ -662,8 +689,8 @@ void SystemControl::Panel::display()
   Event::Object get_period_event(Event::Type::RT_GET_PERIOD_EVENT);
   this->getRTXIEventManager()->postEvent(&get_period_event);
   auto tmp = std::any_cast<int64_t>(get_period_event.getParam("period"));
-  //auto tmp = static_cast<long long>(wrapped_tmp);
-  //long long tmp = RT::System::getInstance()->getPeriod();
+  // auto tmp = static_cast<long long>(wrapped_tmp);
+  // long long tmp = RT::System::getInstance()->getPeriod();
   while ((tmp >= 1000) && (index)) {
     tmp /= 1000;
     index--;
@@ -679,14 +706,15 @@ std::unique_ptr<Modules::Plugin> SystemControl::createRTXIPlugin(
   return std::make_unique<SystemControl::Plugin>(ev_manager, main_window);
 }
 
-Modules::Panel* SystemControl::createRTXIPanel(
-    MainWindow* main_window, Event::Manager* ev_manager)
+Modules::Panel* SystemControl::createRTXIPanel(MainWindow* main_window,
+                                               Event::Manager* ev_manager)
 {
-  return static_cast<Modules::Panel*>(new SystemControl::Panel(main_window, ev_manager));
+  return static_cast<Modules::Panel*>(
+      new SystemControl::Panel(main_window, ev_manager));
 }
 
 std::unique_ptr<Modules::Component> SystemControl::createRTXIComponent(
-    Modules::Plugin* )
+    Modules::Plugin*)
 {
   return std::unique_ptr<Modules::Component>(nullptr);
 }
@@ -705,7 +733,7 @@ Modules::FactoryMethods SystemControl::getFactories()
 //       new SystemControl::Panel(MainWindow::getInstance()->centralWidget());
 //   panelList.push_back(panel);
 // }
-// 
+//
 // void SystemControl::removeControlPanel(SystemControl::Panel* panel)
 // {
 //   panelList.remove(panel);

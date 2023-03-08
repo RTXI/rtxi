@@ -60,8 +60,7 @@ AnalogyDevice::AnalogyDevice(a4l_desc_t* d,
     else if (((sbinfo->flags & A4L_SUBD_TYPES) == A4L_SUBD_AO) && (idx_ao < 0))
       idx_ao = i;
     else if (((sbinfo->flags & A4L_SUBD_TYPES) == A4L_SUBD_DIO)
-             && (idx_dio < 0))
-    {
+             && (idx_dio < 0)) {
       idx_dio = i;
     }
   }

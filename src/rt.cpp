@@ -413,8 +413,7 @@ std::vector<RT::outputs_info> RT::Connector::getOutputs(RT::Device* src)
 void RT::Connector::propagateDeviceConnections(RT::Device* device)
 {
   for (size_t out_ch = 0; out_ch < this->device_registry[device].size();
-       out_ch++)
-  {
+       out_ch++) {
     for (auto dest_info : this->device_registry[device][out_ch].output_devices)
     {
       dest_info.dest->writeinput(dest_info.dest_port,
@@ -431,8 +430,7 @@ void RT::Connector::propagateDeviceConnections(RT::Device* device)
 void RT::Connector::propagateThreadConnections(RT::Thread* thread)
 {
   for (size_t out_ch = 0; out_ch < this->thread_registry[thread].size();
-       out_ch++)
-  {
+       out_ch++) {
     for (auto& dest_info : this->thread_registry[thread][out_ch].output_devices)
     {
       dest_info.dest->writeinput(dest_info.dest_port,

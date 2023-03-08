@@ -34,7 +34,8 @@ UserPrefs::Plugin::Plugin(Event::Manager* ev_manager, MainWindow* mw)
 }
 
 UserPrefs::Panel::Panel(MainWindow* main_window, Event::Manager* ev_manager)
-    : Modules::Panel(std::string(UserPrefs::MODULE_NAME), main_window, ev_manager)
+    : Modules::Panel(
+        std::string(UserPrefs::MODULE_NAME), main_window, ev_manager)
 {
   // Make Mdi
   subWindow = new QMdiSubWindow;

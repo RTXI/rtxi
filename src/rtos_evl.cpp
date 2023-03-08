@@ -32,7 +32,6 @@
 thread_local bool realtime_key = false;
 thread_local int64_t* RT_PERIOD = nullptr;
 
-
 int RT::OS::initiate(RT::OS::Task* task)
 {
   int retval = evl_init();
@@ -136,7 +135,6 @@ int64_t RT::OS::getPeriod()
   };
   return *(RT_PERIOD);
 }
-
 
 void RT::OS::sleepTimestep(RT::OS::Task* task)
 {

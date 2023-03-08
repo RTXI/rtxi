@@ -207,7 +207,8 @@ void PerformanceMeasurement::Panel::reset()
 
 PerformanceMeasurement::Plugin::Plugin(Event::Manager* ev_manager,
                                        MainWindow* mw)
-    : Modules::Plugin(ev_manager, mw, std::string(PerformanceMeasurement::MODULE_NAME))
+    : Modules::Plugin(
+        ev_manager, mw, std::string(PerformanceMeasurement::MODULE_NAME))
 {
   auto plugin_component =
       std::make_unique<PerformanceMeasurement::Component>(this);
@@ -241,7 +242,9 @@ Modules::Panel* PerformanceMeasurement::createRTXIPanel(
     MainWindow* main_window, Event::Manager* ev_manager)
 {
   return static_cast<Modules::Panel*>(new PerformanceMeasurement::Panel(
-      std::string(PerformanceMeasurement::MODULE_NAME), main_window, ev_manager));
+      std::string(PerformanceMeasurement::MODULE_NAME),
+      main_window,
+      ev_manager));
 }
 
 std::unique_ptr<Modules::Component> PerformanceMeasurement::createRTXIComponent(
