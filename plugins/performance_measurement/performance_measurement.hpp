@@ -36,6 +36,8 @@
 namespace PerformanceMeasurement
 {
 
+constexpr std::string_view MODULE_NAME = "RT Benchmarks";
+
 enum PARAMETER : size_t {
   STATE = 0,
   DURATION,
@@ -118,7 +120,7 @@ class Component : public Modules::Component
 public: 
   Component(Modules::Plugin* hplugin) : 
             Modules::Component(hplugin,
-                               "RT Benchmarks",
+                               std::string(MODULE_NAME),
                                std::vector<IO::channel_t>(),
                                PerformanceMeasurement::performance_measurement_vars){}
   void execute() override;
