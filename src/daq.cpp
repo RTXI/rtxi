@@ -48,7 +48,7 @@ void DAQ::Manager::insertDevice(DAQ::Device* device)
     return;
   }
 
-  if (std::find(devices.begin(), devices.end(), device) != devices.end()) {
+  if (devices.find(device->getName()) != devices.end()) {
     ERROR_MSG("DAQ::Device::insertDevice : Device already present\n");
     return;
   }
@@ -87,4 +87,19 @@ void DAQ::Manager::unregisterDriver(const std::string& name)
     return;
   }
   driverMap.erase(name);
+}
+
+void DAQ::Manager::receiveEvent(Event::Object* event)
+{
+  switch (event->getType()) {
+    case Event::Type::DAQ_DEVICE_QUERY_EVENT : {
+      auto device_name = std::any_cast<std::string>(event->getParam("name"));
+      auto* dev = this->getDevice(device_name);
+      event->setParam("device", std::any(dev));
+      break;
+    }
+    default :
+      return;
+  }
+
 }

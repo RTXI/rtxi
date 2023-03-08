@@ -410,6 +410,9 @@ public:
                      const std::list<std::string>& params);
 
   Device* getDevice(const std::string& device_name);
+
+  void receiveEvent(Event::Object* event) override;
+
 private:
   void insertDevice(Device*);
   void removeDevice(Device*);
