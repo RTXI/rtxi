@@ -29,12 +29,12 @@
 #include "main_window.hpp"
 
 UserPrefs::Plugin::Plugin(Event::Manager* ev_manager, MainWindow* mw)
-    : Modules::Plugin(ev_manager, mw, "User Preferences")
+    : Modules::Plugin(ev_manager, mw, std::string(UserPrefs::MODULE_NAME))
 {
 }
 
 UserPrefs::Panel::Panel(MainWindow* main_window, Event::Manager* ev_manager)
-    : Modules::Panel("User Preferences", main_window, ev_manager)
+    : Modules::Panel(std::string(UserPrefs::MODULE_NAME), main_window, ev_manager)
 {
   // Make Mdi
   subWindow = new QMdiSubWindow;

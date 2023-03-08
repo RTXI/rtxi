@@ -28,6 +28,8 @@
 namespace UserPrefs
 {
 
+constexpr std::string_view MODULE_NAME = "User Preferences";
+
 class Plugin : public Modules::Plugin
 {
 public:
