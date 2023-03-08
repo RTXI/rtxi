@@ -21,6 +21,7 @@ target_link_libraries(rtxiTests PRIVATE
     rtmath_lib
     performance_measurement_lib
     userprefs_lib
+    system_control_lib
     GTest::gtest GTest::gtest_main
     GTest::gmock GTest::gmock_main 
     Boost::headers

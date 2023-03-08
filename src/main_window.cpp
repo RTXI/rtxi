@@ -38,6 +38,9 @@
 #include "event.hpp"
 #include "module.hpp"
 #include "rtxiConfig.h"
+#include "performance_measurement/performance_measurement.hpp"
+#include "userprefs/userprefs.h"
+#include "system_control/system_control.h"
 
 MainWindow::MainWindow(Event::Manager* ev_manager)
     : QMainWindow(nullptr, Qt::Window)
@@ -205,6 +208,7 @@ void MainWindow::createSystemMenu()
   systemMenu = menuBar()->addMenu(tr("&System"));
   systemMenu->addAction(openRTBenchmarks);
   systemMenu->addAction(openUserPrefs);
+  systemMenu->addAction(openControlPanel);
   connect(systemMenu,
           SIGNAL(triggered(QAction*)),
           this,
@@ -281,8 +285,9 @@ void MainWindow::createHelpActions()
 
 void MainWindow::createSystemActions()
 {
-  openRTBenchmarks = new QAction(tr("RT Benchmarks"), this);
-  openUserPrefs = new QAction(tr("User Preferences"), this);
+  openRTBenchmarks = new QAction(tr(std::string(PerformanceMeasurement::MODULE_NAME).c_str()), this);
+  openUserPrefs = new QAction(tr(std::string(UserPrefs::MODULE_NAME).c_str()), this);
+  openControlPanel = new QAction(tr(std::string(SystemControl::MODULE_NAME).c_str()), this);
 }
 
 void MainWindow::about()

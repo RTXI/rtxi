@@ -27,25 +27,28 @@
 #include "main_window.hpp"
 #include "module.hpp"
 
-class SystemControlPanel : public Modules::Panel
+namespace SystemControl
+{
+
+constexpr std::string_view MODULE_NAME = "Control Panel";
+
+class Panel : public Modules::Panel
 {
   Q_OBJECT
 
 public:
-  SystemControlPanel(MainWindow* mw, Event::Manager* ev_manager, DAQ::Manager* dev_manager);
+  Panel(MainWindow* mw, Event::Manager* ev_manager);
 
   void receiveEvent(const Event::Object* event);
 
 public slots:
-  void apply(DAQ::Device* dev);
+  void apply();
   void display();
   void updateDevice();
   void updateFreq();
   void updatePeriod();
 
 private:
-  DAQ::Manager* daq_manager = nullptr;
-
   QGroupBox* deviceGroup = nullptr;
   QGroupBox* analogGroup = nullptr;
   QGroupBox* digitalGroup = nullptr;
@@ -80,14 +83,21 @@ private:
   QLineEdit* periodEdit = nullptr;
 };
 
-class SystemControl : public Modules::Plugin
+class Plugin : public Modules::Plugin
 {
 public:
-  SystemControl();
+  Plugin(Event::Manager* ev_manager, MainWindow* main_window): 
+      Modules::Plugin(ev_manager, main_window, std::string(MODULE_NAME)) {}
   
-private:
-  std::vector<DAQ::Device *> deviceList;
-  DAQ::Manager* daq_manager;
 };
 
+std::unique_ptr<Modules::Plugin> createRTXIPlugin(Event::Manager* ev_manager, MainWindow* main_window);
+
+Modules::Panel* createRTXIPanel(MainWindow* main_window, Event::Manager* ev_manager);
+
+std::unique_ptr<Modules::Component> createRTXIComponent(Modules::Plugin* host_plugin);
+
+Modules::FactoryMethods getFactories();
+
+} // namespace SystemControl
 #endif /* SYSTEM_CONTROL_H */

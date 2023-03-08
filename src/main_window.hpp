@@ -181,6 +181,7 @@ private:
   QAction* utilItem = nullptr;
   QAction* openRTBenchmarks = nullptr;
   QAction* openUserPrefs = nullptr;
+  QAction* openControlPanel = nullptr;
 
   void createFileMenu();
   void createModuleMenu();

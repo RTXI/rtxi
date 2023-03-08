@@ -21,6 +21,7 @@
 
 //#include <math.h>
 
+#include <memory>
 #include "debug.hpp"
 #include "daq.hpp"
 #include "rt.hpp"
@@ -48,10 +49,9 @@
 //  deviceList->addItem(QString::fromStdString(dev->getName()));
 //}
 
-SystemControlPanel::SystemControlPanel(MainWindow* mw,
-                                       Event::Manager* ev_manager,
-                                       DAQ::Manager* dev_manager)
-    : Modules::Panel("Control Panel", mw, ev_manager), daq_manager(dev_manager)
+SystemControl::Panel::Panel(MainWindow* mw,
+                            Event::Manager* ev_manager)
+    : Modules::Panel(std::string(SystemControl::MODULE_NAME), mw, ev_manager)
 {
   setWhatsThis(
       "<p><b>System Control Panel:</b><br>This control panel allows you to "
@@ -314,10 +314,37 @@ SystemControlPanel::SystemControlPanel(MainWindow* mw,
   show();
 }
 
-void SystemControlPanel::apply(DAQ::Device* dev)
+void SystemControl::Panel::apply()
 {
+  int index = this->deviceList->currentIndex();
+  if(index == -1) { 
+    // Even if there is no valid device we should still change rt period
+    double period = periodEdit->text().toDouble();
+    period *= pow(10, 3 * (3 - periodUnitList->currentIndex()));
+    Event::Object event(Event::Type::RT_PERIOD_EVENT);
+    event.setParam("period", std::any(static_cast<int64_t>(period)));
+    this->getRTXIEventManager()->postEvent(&event);
+    return; 
+  }
+
+  QString dev_name = deviceList->itemText(index);
+  Event::Object device_query_event(Event::DAQ_DEVICE_QUERY_EVENT);
+  device_query_event.setParam("name", std::any(dev_name.toStdString()));
+  this->getRTXIEventManager()->postEvent(&device_query_event);
+  DAQ::Device* dev = nullptr;
+  try {
+    dev = std::any_cast<DAQ::Device*>(device_query_event.getParam("device"));
+  }
+  catch (std::bad_any_cast&) {
+    ERROR_MSG("The device {} was not found", dev_name.toStdString());
+    return;
+  }
+
   // Make sure we aren't getting a phony device
-  if(dev == nullptr) { return; }
+  if(dev == nullptr) { 
+    ERROR_MSG("DAQ device manager returned a nullptr for {}", dev_name.toStdString());
+    return; 
+  }
 
   auto a_chan = static_cast<DAQ::index_t>(analogChannelList->currentIndex());
   auto a_type = static_cast<DAQ::type_t>(analogSubdeviceList->currentIndex());
@@ -359,12 +386,12 @@ void SystemControlPanel::apply(DAQ::Device* dev)
   period *= pow(10, 3 * (3 - periodUnitList->currentIndex()));
 
   Event::Object event(Event::Type::RT_PERIOD_EVENT);
-  event.setParam("period", period);
+  event.setParam("period", std::any(static_cast<int64_t>(period)));
   this->getRTXIEventManager()->postEvent(&event);
   display();
 }
 
-void SystemControlPanel::updateDevice(DAQ::Device* dev)
+void SystemControl::Panel::updateDevice()
 {
   // DAQ::Device* dev;
   // DAQ::type_t type;
@@ -377,7 +404,27 @@ void SystemControlPanel::updateDevice(DAQ::Device* dev)
   //   dev = info.device;
   // }
 
-  if (dev == nullptr) { return; }
+  int index = this->deviceList->currentIndex();
+  if(index == -1) { return; }
+
+  QString dev_name = deviceList->itemText(index);
+  Event::Object device_query_event(Event::Type::DAQ_DEVICE_QUERY_EVENT);
+  device_query_event.setParam("name", std::any(dev_name.toStdString()));
+  this->getRTXIEventManager()->postEvent(&device_query_event);
+  DAQ::Device* dev = nullptr;
+  try {
+    dev = std::any_cast<DAQ::Device*>(device_query_event.getParam("device"));
+  }
+  catch (std::bad_any_cast&) {
+    ERROR_MSG("SystemContrlo::Panel::updateDevice : The device {} was not found", dev_name.toStdString());
+    return;
+  }
+
+  // Make sure we aren't getting a phony device
+  if(dev == nullptr) { 
+    ERROR_MSG("SystemControl::Panel::updateDevice : DAQ device manager returned a nullptr for {}", dev_name.toStdString());
+    return; 
+  }  
 
   analogChannelList->clear();
   digitalChannelList->clear();
@@ -396,7 +443,7 @@ void SystemControlPanel::updateDevice(DAQ::Device* dev)
   display();
 }
 
-void SystemControlPanel::updateFreq()
+void SystemControl::Panel::updateFreq()
 {
   /* This is to prevent recursive updates, not to provide mutual exclusion */
   if (rateUpdate) { return; }
@@ -419,7 +466,7 @@ void SystemControlPanel::updateFreq()
   rateUpdate = false;
 }
 
-void SystemControlPanel::updatePeriod()
+void SystemControl::Panel::updatePeriod()
 {
   if (rateUpdate) { return; }
 
@@ -442,7 +489,7 @@ void SystemControlPanel::updatePeriod()
   rateUpdate = false;
 }
 
-void SystemControlPanel::display(DAQ::Device* dev)
+void SystemControl::Panel::display()
 {
   // Display channel info
   // DAQ::Device* dev;
@@ -454,6 +501,22 @@ void SystemControlPanel::display(DAQ::Device* dev)
   //   DAQ::Manager::getInstance()->foreachDevice(findDAQDevice, &info);
   //   dev = info.device;
   // }
+
+  int index = this->deviceList->currentIndex();
+  if(index == -1) { return; }
+
+  QString dev_name = deviceList->itemText(index);
+  Event::Object device_query_event(Event::Type::DAQ_DEVICE_QUERY_EVENT);
+  device_query_event.setParam("name", std::any(dev_name.toStdString()));
+  this->getRTXIEventManager()->postEvent(&device_query_event);
+  DAQ::Device* dev = nullptr;
+  try {
+    dev = std::any_cast<DAQ::Device*>(device_query_event.getParam("device"));
+  }
+  catch (std::bad_any_cast&) {
+    ERROR_MSG("SystemContrlo::Panel::display : The device {} was not found", dev_name.toStdString());
+    return;
+  }
 
   // Check to make sure DAQ is of the right type
   // if not, disable functions, else set
@@ -525,16 +588,15 @@ void SystemControlPanel::display(DAQ::Device* dev)
     bool sign = true;
     if (dev->getAnalogGain(type, chan) < 0.0) { sign = false; }  // Negative value
     tmp = fabs(dev->getAnalogGain(type, chan));
-    if (tmp != 0.0)
-      while (((tmp >= 1000) && (index > 0)) || ((tmp < 1) && (index < 16))) {
-        if (tmp >= 1000) {
-          tmp /= 1000;
-          index--;
-        } else {
-          tmp *= 1000;
-          index++;
-        }
+    while (((tmp >= 1000) && (index > 0)) || ((tmp < 1) && (index < 16))) {
+      if (tmp >= 1000) {
+        tmp /= 1000;
+        index--;
+      } else {
+        tmp *= 1000;
+        index++;
       }
+    }
     if (sign) {
       analogGainEdit->setText(QString::number(tmp));
     } else {
@@ -549,16 +611,15 @@ void SystemControlPanel::display(DAQ::Device* dev)
     sign = true;
     if (dev->getAnalogZeroOffset(type, chan) < 0.0) { sign = false; }  // Negative value
     tmp = fabs(dev->getAnalogZeroOffset(type, chan));
-    if (tmp != 0.0)
-      while (((tmp >= 1000) && (index > 0)) || ((tmp < 1) && (index < 16))) {
-        if (tmp >= 1000) {
-          tmp /= 1000;
-          index--;
-        } else {
-          tmp *= 1000;
-          index++;
-        }
+    while (((tmp >= 1000) && (index > 0)) || ((tmp < 1) && (index < 16))) {
+      if (tmp >= 1000) {
+        tmp /= 1000;
+        index--;
+      } else {
+        tmp *= 1000;
+        index++;
       }
+    }
     if (sign) {
       analogZeroOffsetEdit->setText(QString::number(tmp));
     } else {
@@ -597,7 +658,7 @@ void SystemControlPanel::display(DAQ::Device* dev)
   }
 
   // Display thread info
-  int index = 3;
+  index = 3;
   Event::Object get_period_event(Event::Type::RT_GET_PERIOD_EVENT);
   this->getRTXIEventManager()->postEvent(&get_period_event);
   auto tmp = std::any_cast<int64_t>(get_period_event.getParam("period"));
@@ -612,19 +673,40 @@ void SystemControlPanel::display(DAQ::Device* dev)
   updateFreq();
 }
 
-void SystemControlPanel::receiveEvent(const Event::Object* event)
+std::unique_ptr<Modules::Plugin> SystemControl::createRTXIPlugin(
+    Event::Manager* ev_manager, MainWindow* main_window)
 {
-
+  return std::make_unique<SystemControl::Plugin>(ev_manager, main_window);
 }
 
+Modules::Panel* SystemControl::createRTXIPanel(
+    MainWindow* main_window, Event::Manager* ev_manager)
+{
+  return static_cast<Modules::Panel*>(new SystemControl::Panel(main_window, ev_manager));
+}
+
+std::unique_ptr<Modules::Component> SystemControl::createRTXIComponent(
+    Modules::Plugin* )
+{
+  return std::unique_ptr<Modules::Component>(nullptr);
+}
+
+Modules::FactoryMethods SystemControl::getFactories()
+{
+  Modules::FactoryMethods fact;
+  fact.createPanel = &SystemControl::createRTXIPanel;
+  fact.createComponent = &SystemControl::createRTXIComponent;
+  fact.createPlugin = &SystemControl::createRTXIPlugin;
+  return fact;
+}
 // void SystemControl::createControlPanel(void)
 // {
-//   SystemControlPanel* panel =
-//       new SystemControlPanel(MainWindow::getInstance()->centralWidget());
+//   SystemControl::Panel* panel =
+//       new SystemControl::Panel(MainWindow::getInstance()->centralWidget());
 //   panelList.push_back(panel);
 // }
 // 
-// void SystemControl::removeControlPanel(SystemControlPanel* panel)
+// void SystemControl::removeControlPanel(SystemControl::Panel* panel)
 // {
 //   panelList.remove(panel);
 // }
