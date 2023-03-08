@@ -16,6 +16,7 @@
 #include "debug.hpp"
 #include "performance_measurement/performance_measurement.hpp"
 #include "userprefs/userprefs.h"
+#include "system_control/system_control.h"
 
 std::string Modules::Variable::state2string(Modules::Variable::state_t state)
 {
@@ -659,9 +660,9 @@ bool Modules::Manager::isRegistered(const Modules::Plugin* plugin)
                      { return plugin == module.get(); });
 }
 
-int Modules::Manager::loadPlugin(const std::string& library)
+int Modules::Manager::loadCorePlugin(const std::string& library)
 {
-  if (library == std::string("RT Benchmarks")) {
+  if (library == std::string(PerformanceMeasurement::MODULE_NAME)) {
     if (this->rtxi_factories_registry.find(library)
         == this->rtxi_factories_registry.end())
     {
@@ -671,7 +672,7 @@ int Modules::Manager::loadPlugin(const std::string& library)
     }
     this->registerModule(this->rtxi_factories_registry[library].createPlugin(
         event_manager, main_window));
-  } else if (library == std::string("User Preferences")) {
+  } else if (library == std::string(UserPrefs::MODULE_NAME)) {
     if (this->rtxi_factories_registry.find(library)
         == this->rtxi_factories_registry.end())
     {
@@ -680,7 +681,25 @@ int Modules::Manager::loadPlugin(const std::string& library)
     }
     this->registerModule(this->rtxi_factories_registry[library].createPlugin(
         event_manager, main_window));
+  } else if (library == std::string(SystemControl::MODULE_NAME)) {
+    if (this->rtxi_factories_registry.find(library)
+        == this->rtxi_factories_registry.end())
+    {
+      Modules::FactoryMethods fact_methods = SystemControl::getFactories();
+      this->registerFactories(library, fact_methods);
+    }
+    this->registerModule(this->rtxi_factories_registry[library].createPlugin(
+        event_manager, main_window));   
   } else {
+    return -1;
+  }
+  
+  return 0;
+}
+
+int Modules::Manager::loadPlugin(const std::string& library)
+{
+  if (this->loadCorePlugin(library) != 0) {
     void* handle = dlopen(library.c_str(), RTLD_GLOBAL | RTLD_NOW);
     if (!handle) {
       // ERROR_MSG("Plugin::load : failed to load library: {}", dlerror());

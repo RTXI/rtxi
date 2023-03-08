@@ -570,7 +570,7 @@ struct FactoryMethods
 };
 
 /*!
- * This class is responsible for managing module loading and unloading
+ * This class is responsible for managing DAQ device loading and unloading
  */
 class Manager : public Event::Handler
 {
@@ -604,6 +604,7 @@ private:
 
   void registerFactories(std::string module_name, Modules::FactoryMethods);
   void unregisterFactories(std::string module_name);
+  int loadCorePlugin(const std::string& library);
 
   std::unordered_map<std::string, std::vector<std::unique_ptr<Modules::Plugin>>>
       rtxi_modules_registry;
