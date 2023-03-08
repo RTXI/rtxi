@@ -10,7 +10,7 @@
 # -cppcoreguidelines-owning-memory: Qt uses parent widget relationships. 
 # -readability-identifier-nanme: shorter names can make sense in some cases.
 Checks: "*,\
-  -readability-identifier-name,\
+  -readability-identifier-length,\
   -cppcoreguidelines-owning-memory,\
   -hicpp-signed-bitwise,\
   -hicpp-deprecated-headers,\
