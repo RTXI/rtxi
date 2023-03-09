@@ -50,8 +50,8 @@ public:
       : RT::Device(name, channel_list)
   {
   }
-  MOCK_METHOD(void, read, (), (override));
-  MOCK_METHOD(void, write, (), (override));
+  MOCK_METHOD(void, read, (), ());
+  MOCK_METHOD(void, write, (), ());
 };
 
 class MockRTThread : public RT::Thread
@@ -61,7 +61,7 @@ public:
       : RT::Thread(name, channel_list)
   {
   }
-  MOCK_METHOD(void, execute, (), (override));
+  MOCK_METHOD(void, execute, (), ());
   // MOCK_METHOD(void, input, (const std::vector<double>&), (override));
   // MOCK_METHOD(const std::vector<double>&, output, (), (override));
 };

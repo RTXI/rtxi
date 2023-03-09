@@ -170,8 +170,6 @@ public:
    */
   std::string getValueString(const size_t& var_id);
 
-  void execute() override;
-
 private:
   std::vector<Modules::Variable::Info> parameters;
   Modules::Plugin* hostPlugin;

@@ -19,14 +19,45 @@
  */
 
 #include <queue>
+#include <functional>
 
 #include "rt.hpp"
 
 #include "debug.hpp"
 #include "event.hpp"
 #include "fifo.hpp"
-#include "module.hpp"
 #include "rtos.hpp"
+#include "module.hpp"
+
+void RT::Device::read()
+{
+  this->read_callback();
+}
+
+void RT::Device::write()
+{
+  this->write_callback();
+}
+
+void RT::Device::bind_read_callback(std::function<void(void)> callback)
+{
+  this->read_callback = std::move(callback);
+}
+
+void RT::Device::bind_write_callback(std::function<void(void)> callback)
+{
+  this->write_callback = std::move(callback);
+}
+
+void RT::Thread::execute()
+{
+  this->execute_callback();
+}
+
+void RT::Thread::bind_execute_callback(std::function<void(void)> callback)
+{
+  this->execute_callback = std::move(callback);
+}
 
 int RT::Connector::connect(RT::Thread* src,
                            size_t out,

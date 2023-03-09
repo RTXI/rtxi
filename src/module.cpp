@@ -128,11 +128,6 @@ std::string Modules::Component::getValueString(const size_t& var_id)
   return value;
 }
 
-void Modules::Component::execute()
-{
-  // This is defined by the user
-}
-
 Modules::Panel::Panel(const std::string& mod_name,
                       MainWindow* mw,
                       Event::Manager* ev_manager)
