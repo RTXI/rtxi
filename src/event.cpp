@@ -62,11 +62,17 @@ std::string Event::type_to_string(Event::Type event_type)
     case Event::Type::IO_LINK_REMOVE_EVENT:
       return_string = "SYSTEM : link remove";
       break;
-    case Event::Type::RT_BLOCK_PAUSE_EVENT:
-      return_string = "SYSTEM : block paused";
+    case Event::Type::RT_THREAD_PAUSE_EVENT:
+      return_string = "SYSTEM : Thread paused";
       break;
-    case Event::Type::RT_BLOCK_UNPAUSE_EVENT:
-      return_string = "SYSTEM : block unpaused";
+    case Event::Type::RT_THREAD_UNPAUSE_EVENT:
+      return_string = "SYSTEM : Thread unpaused";
+      break;
+    case Event::Type::RT_DEVICE_PAUSE_EVENT:
+      return_string = "SYSTEM : Device paused";
+      break;
+    case Event::Type::RT_DEVICE_UNPAUSE_EVENT:
+      return_string = "SYSTEM : Device unpaused";
       break;
     case Event::Type::RT_MODULE_PARAMETER_CHANGE_EVENT:
       return_string = "SYSTEM : parameter change";

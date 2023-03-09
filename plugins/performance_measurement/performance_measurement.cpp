@@ -238,8 +238,8 @@ PerformanceMeasurement::Plugin::Plugin(Event::Manager* ev_manager,
       std::any_cast<int64_t*>(preperiod_event.getParam("pre-period")),
       std::any_cast<int64_t*>(postperiod_event.getParam("post-period")));
   
-  Event::Object activation_event(Event::Type::RT_BLOCK_UNPAUSE_EVENT);
-  activation_event.setParam("block", std::any(static_cast<IO::Block*>(this->plugin_component.get()))); 
+  Event::Object activation_event(Event::Type::RT_THREAD_UNPAUSE_EVENT);
+  activation_event.setParam("thread", std::any(static_cast<RT::Thread*>(this->plugin_component.get()))); 
   this->event_manager->postEvent(&activation_event);
 }
 

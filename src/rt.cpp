@@ -406,14 +406,23 @@ std::vector<RT::Thread*> RT::Connector::topological_sort()
     }
   }
 
-  return sorted_blocks;
+  // System only cares about active blocks
+  std::vector<RT::Thread*> sorted_active_blocks;
+  for(auto& active_thread : sorted_blocks){
+    if(active_thread->getActive()) {
+      sorted_active_blocks.push_back(active_thread);
+    }
+  }
+  return sorted_active_blocks;
 }
 
 std::vector<RT::Device*> RT::Connector::getDevices()
 {
   std::vector<RT::Device*> devices;
   for (const auto& block_info : this->device_registry) {
-    devices.push_back(block_info.first);
+    if (block_info.first->getActive()) {
+      devices.push_back(block_info.first);
+    }
   }
   return devices;
 }
@@ -546,22 +555,22 @@ void RT::System::updateThreadList(RT::System::CMD* cmd)
   cmd->done();
 }
 
-void RT::System::updateBlockActivity(RT::System::CMD* cmd)
-{
-  auto block = std::any_cast<IO::Block*>(cmd->getParam("block"));
-  switch (cmd->getType()) {
-    case Event::Type::RT_BLOCK_PAUSE_EVENT:
-      block->setActive(false);
-      cmd->done();
-      break;
-    case Event::Type::RT_BLOCK_UNPAUSE_EVENT:
-      block->setActive(true);
-      cmd->done();
-      break;
-    default:
-      break;
-  }
-}
+//void RT::System::updateBlockActivity(RT::System::CMD* cmd)
+//{
+//  auto block = std::any_cast<IO::Block*>(cmd->getParam("block"));
+//  switch (cmd->getType()) {
+//    case Event::Type::RT_BLOCK_PAUSE_EVENT:
+//      block->setActive(false);
+//      cmd->done();
+//      break;
+//    case Event::Type::RT_BLOCK_UNPAUSE_EVENT:
+//      block->setActive(true);
+//      cmd->done();
+//      break;
+//    default:
+//      break;
+//  }
+//}
 
 void RT::System::getPeriodTicksCMD(RT::System::CMD* cmd)
 {
@@ -624,15 +633,15 @@ void RT::System::executeCMD(RT::System::CMD* cmd)
       break;
     case Event::Type::RT_DEVICE_INSERT_EVENT:
     case Event::Type::RT_DEVICE_REMOVE_EVENT:
+    case Event::Type::RT_DEVICE_PAUSE_EVENT:
+    case Event::Type::RT_DEVICE_UNPAUSE_EVENT:
       this->updateDeviceList(cmd);
       break;
     case Event::Type::RT_THREAD_INSERT_EVENT:
     case Event::Type::RT_THREAD_REMOVE_EVENT:
+    case Event::Type::RT_THREAD_PAUSE_EVENT:
+    case Event::Type::RT_THREAD_UNPAUSE_EVENT:
       this->updateThreadList(cmd);
-      break;
-    case Event::Type::RT_BLOCK_PAUSE_EVENT:
-    case Event::Type::RT_BLOCK_UNPAUSE_EVENT:
-      this->updateBlockActivity(cmd);
       break;
     case Event::Type::RT_SHUTDOWN_EVENT:
       this->task->task_finished = true;
@@ -668,9 +677,13 @@ void RT::System::receiveEvent(Event::Object* event)
     case Event::Type::RT_THREAD_REMOVE_EVENT:
       this->removeThread(event);
       break;
-    case Event::Type::RT_BLOCK_PAUSE_EVENT:
-    case Event::Type::RT_BLOCK_UNPAUSE_EVENT:
-      this->blockActivityChange(event);
+    case Event::Type::RT_THREAD_PAUSE_EVENT:
+    case Event::Type::RT_THREAD_UNPAUSE_EVENT:
+      this->threadActivityChange(event);
+      break;
+    case Event::Type::RT_DEVICE_PAUSE_EVENT:
+    case Event::Type::RT_DEVICE_UNPAUSE_EVENT:
+      this->deviceActivityChange(event);
       break;
     case Event::Type::RT_DEVICE_INSERT_EVENT:
       this->insertDevice(event);
@@ -789,12 +802,28 @@ void RT::System::removeThread(Event::Object* event)
   cmd.wait();
 }
 
-void RT::System::blockActivityChange(Event::Object* event)
+void RT::System::threadActivityChange(Event::Object* event)
 {
+  auto isactive = event->getType() == Event::Type::RT_THREAD_UNPAUSE_EVENT;
   RT::System::CMD cmd(*event);
-  cmd.setParam("block", std::any(event->getParam("block")));
   RT::System::CMD* cmd_ptr = &cmd;
+  auto* thread = std::any_cast<RT::Thread*>(event->getParam("thread"));
+  thread->setActive(isactive);
+  auto thread_list = this->rt_connector->getThreads();
+  cmd.setParam("threadList", std::any(thread_list));
+  this->eventFifo->write(&cmd_ptr, sizeof(RT::System::CMD*));
+  cmd.wait();
+}
 
+void RT::System::deviceActivityChange(Event::Object* event)
+{
+  auto isactive = event->getType() == Event::Type::RT_DEVICE_UNPAUSE_EVENT;
+  RT::System::CMD cmd(*event);
+  RT::System::CMD* cmd_ptr = &cmd;
+  auto* device = std::any_cast<RT::Device*>(event->getParam("device"));
+  device->setActive(isactive);
+  auto device_list = this->rt_connector->getDevices();
+  cmd.setParam("deviceList", std::any(device_list));
   this->eventFifo->write(&cmd_ptr, sizeof(RT::System::CMD*));
   cmd.wait();
 }
@@ -866,23 +895,17 @@ void RT::System::execute(void* sys)
     starttime = RT::OS::getTime();
 
     for (auto* iDevice : system->devices) {
-      if (iDevice->getActive()) {
-        iDevice->read();
-        system->rt_connector->propagateDeviceConnections(iDevice);
-      }
+      iDevice->read();
+      system->rt_connector->propagateDeviceConnections(iDevice);
     }
 
     for (auto* iThread : system->threads) {
-      if (iThread->getActive()) {
-        iThread->execute();
-        system->rt_connector->propagateThreadConnections(iThread);
-      }
+      iThread->execute();
+      system->rt_connector->propagateThreadConnections(iThread);
     }
 
     for (auto* iDevice : system->devices) {
-      if (iDevice->getActive()) {
-        iDevice->write();
-      }
+      iDevice->write();
     }
 
     while (system->eventFifo->readRT(&cmd, sizeof(RT::System::CMD*)) != -1) {

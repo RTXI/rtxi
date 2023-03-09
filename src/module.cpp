@@ -616,13 +616,13 @@ int Modules::Plugin::setActive(bool state)
   int result = 0;
   Event::Type event_type;
   if (state) {
-    event_type = Event::Type::RT_BLOCK_UNPAUSE_EVENT;
+    event_type = Event::Type::RT_THREAD_UNPAUSE_EVENT;
   } else {
-    event_type = Event::Type::RT_BLOCK_PAUSE_EVENT;
+    event_type = Event::Type::RT_THREAD_PAUSE_EVENT;
   }
   Event::Object event(event_type);
   event.setParam(
-      "block", std::any(static_cast<IO::Block*>(this->plugin_component.get())));
+      "thread", std::any(static_cast<RT::Thread*>(this->plugin_component.get())));
   this->event_manager->postEvent(&event);
   return result;
 }

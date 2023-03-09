@@ -469,7 +469,8 @@ private:
   void removeDevice(Event::Object* event);
   void insertThread(Event::Object* event);
   void removeThread(Event::Object* event);
-  void blockActivityChange(Event::Object* event);
+  void threadActivityChange(Event::Object* event);
+  void deviceActivityChange(Event::Object* event);
   void setPeriod(Event::Object* event);
   void shutdown(Event::Object* event);
   void NOOP(Event::Object* event);

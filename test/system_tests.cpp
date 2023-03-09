@@ -99,8 +99,10 @@ TEST_F(RTConnectorTest, getBlocks)
   for (int i = 0; i < 50; i++) {
     devices[i] =
         std::make_unique<MockRTDevice>("randdevice", this->defaultChannelList);
+    devices[i]->setActive(true);
     threads[i] =
         std::make_unique<MockRTThread>("randthread", this->defaultChannelList);
+    threads[i]->setActive(true);
     this->connector.insertBlock(threads[i].get());
     this->connector.insertBlock(devices[i].get());
   }
@@ -193,9 +195,9 @@ TEST_F(SystemTest, updateDeviceList)
   defaultChannelList.push_back(defaultOutputChannel);
 
   MockRTDevice mock_device("mockdevice", defaultChannelList);
-  Event::Object change_activity_event(Event::Type::RT_BLOCK_UNPAUSE_EVENT);
-  change_activity_event.setParam("block",
-                                 static_cast<IO::Block*>(&mock_device));
+  Event::Object change_activity_event(Event::Type::RT_DEVICE_UNPAUSE_EVENT);
+  change_activity_event.setParam("device",
+                                 static_cast<RT::Device*>(&mock_device));
   this->system->receiveEvent(&change_activity_event);
 
   // std::any_cast<RT::Device*>(std::any(static_cast<RT::Device*>(&mock_device)))->read();
@@ -243,8 +245,8 @@ TEST_F(SystemTest, updateThreadList)
 
   MockRTThread mock_thread("mockthread", defaultChannelList);
   RT::Thread* thread_ptr = &mock_thread;
-  Event::Object change_activity_event(Event::Type::RT_BLOCK_UNPAUSE_EVENT);
-  change_activity_event.setParam("block", static_cast<IO::Block*>(thread_ptr));
+  Event::Object change_activity_event(Event::Type::RT_THREAD_UNPAUSE_EVENT);
+  change_activity_event.setParam("thread", static_cast<RT::Thread*>(thread_ptr));
   this->system->receiveEvent(&change_activity_event);
 
   // insert thread
