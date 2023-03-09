@@ -150,6 +150,8 @@ public:
 
   bool getActive() const { return this->active; }
   void setActive(bool act) { this->active = act; }
+  void assignID(size_t block_id) { this->id = block_id; }
+  size_t getID() const { return this->id; }
 
 protected:
   // These functions are meant to be used by RT::Thread classes
@@ -171,6 +173,7 @@ protected:
   void writeoutput(size_t index, const std::vector<double>& data);
 
 private:
+  size_t id;
   using port_t = struct
   {
     IO::channel_t channel_info;

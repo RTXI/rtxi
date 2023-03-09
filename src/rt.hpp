@@ -428,10 +428,21 @@ public:
    */
   void propagateThreadConnections(RT::Thread* thread);
 
+  void assignID(IO::Block* block);
 private:
+  typedef struct {
+    RT::Thread* thread_ptr;
+    std::vector<outputs_info> outbound_con;
+  } thread_entry_t;
+
+  typedef struct {
+    RT::Device* device_ptr;
+    std::vector<outputs_info> outbound_con;
+  } device_entry_t;
+
   std::vector<RT::Thread*> topological_sort();
-  std::unordered_map<RT::Thread*, std::vector<outputs_info>> thread_registry;
-  std::unordered_map<RT::Device*, std::vector<outputs_info>> device_registry;
+  std::vector<thread_entry_t> thread_registry;
+  std::vector<device_entry_t> device_registry;
 };  // class Connector
 
 /*!
@@ -469,6 +480,7 @@ private:
   void removeDevice(Event::Object* event);
   void insertThread(Event::Object* event);
   void removeThread(Event::Object* event);
+  //void blockActivityChange(Event::Object* event);
   void threadActivityChange(Event::Object* event);
   void deviceActivityChange(Event::Object* event);
   void setPeriod(Event::Object* event);
