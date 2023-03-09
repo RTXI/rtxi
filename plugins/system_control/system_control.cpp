@@ -727,14 +727,4 @@ Modules::FactoryMethods SystemControl::getFactories()
   fact.createPlugin = &SystemControl::createRTXIPlugin;
   return fact;
 }
-// void SystemControl::createControlPanel(void)
-// {
-//   SystemControl::Panel* panel =
-//       new SystemControl::Panel(MainWindow::getInstance()->centralWidget());
-//   panelList.push_back(panel);
-// }
-//
-// void SystemControl::removeControlPanel(SystemControl::Panel* panel)
-// {
-//   panelList.remove(panel);
-// }
+

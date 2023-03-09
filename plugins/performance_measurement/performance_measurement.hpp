@@ -118,14 +118,10 @@ public:
 class Component : public Modules::Component
 {
 public: 
-  Component(Modules::Plugin* hplugin) : 
-            Modules::Component(hplugin,
-                               std::string(MODULE_NAME),
-                               std::vector<IO::channel_t>(),
-                               PerformanceMeasurement::performance_measurement_vars){}
-  void execute() override;
+  explicit Component(Modules::Plugin* hplugin); 
 
   void setTickPointers(int64_t* s_ticks, int64_t* e_ticks);
+  void callback();
   private:
 
   //RunningStat timestepStat;

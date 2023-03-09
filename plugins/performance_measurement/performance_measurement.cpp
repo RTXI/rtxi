@@ -17,13 +17,15 @@
 
  */
 
-#include "performance_measurement.hpp"
+#include <functional>
 
 #include "debug.hpp"
 #include "event.hpp"
 #include "main_window.hpp"
 #include "module.hpp"
 #include "rt.hpp"
+
+#include "performance_measurement.hpp"
 
 PerformanceMeasurement::Panel::Panel(std::string name,
                                      MainWindow* main_window,
@@ -109,7 +111,17 @@ PerformanceMeasurement::Panel::Panel(std::string name,
   // setData(Modules::Variable::UINT_PARAMETER, 4ull, &jitter);
 }
 
-void PerformanceMeasurement::Component::execute()
+PerformanceMeasurement::Component::Component(Modules::Plugin* hplugin) : 
+                                  Modules::Component(hplugin, 
+                                                     std::string(MODULE_NAME),
+                                                     std::vector<IO::channel_t>(),
+                                                     PerformanceMeasurement::performance_measurement_vars)
+{
+  this->bind_execute_callback([&](){ this->callback(); });
+}
+
+
+void PerformanceMeasurement::Component::callback()
 {
   auto maxDuration =
       getValue<double>(PerformanceMeasurement::PARAMETER::MAX_DURATION);
@@ -225,10 +237,10 @@ PerformanceMeasurement::Plugin::Plugin(Event::Manager* ev_manager,
   performance_measurement_component->setTickPointers(
       std::any_cast<int64_t*>(preperiod_event.getParam("pre-period")),
       std::any_cast<int64_t*>(postperiod_event.getParam("post-period")));
-  this->setActive(true);
-  // this->attachPanel(panel);
-  //  MainWindow::getInstance()->createSystemMenuItem(
-  //      "RT Benchmarks", this, SLOT(createPerformanceMeasurementPanel(void)));
+  
+  Event::Object activation_event(Event::Type::RT_BLOCK_UNPAUSE_EVENT);
+  activation_event.setParam("block", std::any(static_cast<IO::Block*>(this->plugin_component.get()))); 
+  this->event_manager->postEvent(&activation_event);
 }
 
 std::unique_ptr<Modules::Plugin> PerformanceMeasurement::createRTXIPlugin(
