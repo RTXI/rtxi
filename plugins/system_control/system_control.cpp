@@ -18,7 +18,7 @@
 
 */
 
-//#include <math.h>
+// #include <math.h>
 
 #include <memory>
 
@@ -727,4 +727,3 @@ Modules::FactoryMethods SystemControl::getFactories()
   fact.createPlugin = &SystemControl::createRTXIPlugin;
   return fact;
 }
-

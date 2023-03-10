@@ -19,13 +19,13 @@
 
 #include <functional>
 
+#include "performance_measurement.hpp"
+
 #include "debug.hpp"
 #include "event.hpp"
 #include "main_window.hpp"
 #include "module.hpp"
 #include "rt.hpp"
-
-#include "performance_measurement.hpp"
 
 PerformanceMeasurement::Panel::Panel(std::string name,
                                      MainWindow* main_window,
@@ -111,15 +111,14 @@ PerformanceMeasurement::Panel::Panel(std::string name,
   // setData(Modules::Variable::UINT_PARAMETER, 4ull, &jitter);
 }
 
-PerformanceMeasurement::Component::Component(Modules::Plugin* hplugin) : 
-                                  Modules::Component(hplugin, 
-                                                     std::string(MODULE_NAME),
-                                                     std::vector<IO::channel_t>(),
-                                                     PerformanceMeasurement::performance_measurement_vars)
+PerformanceMeasurement::Component::Component(Modules::Plugin* hplugin)
+    : Modules::Component(hplugin,
+                         std::string(MODULE_NAME),
+                         std::vector<IO::channel_t>(),
+                         PerformanceMeasurement::performance_measurement_vars)
 {
-  this->bind_execute_callback([&](){ this->callback(); });
+  this->bind_execute_callback([&]() { this->callback(); });
 }
-
 
 void PerformanceMeasurement::Component::callback()
 {
@@ -237,9 +236,11 @@ PerformanceMeasurement::Plugin::Plugin(Event::Manager* ev_manager,
   performance_measurement_component->setTickPointers(
       std::any_cast<int64_t*>(preperiod_event.getParam("pre-period")),
       std::any_cast<int64_t*>(postperiod_event.getParam("post-period")));
-  
+
   Event::Object activation_event(Event::Type::RT_THREAD_UNPAUSE_EVENT);
-  activation_event.setParam("thread", std::any(static_cast<RT::Thread*>(this->plugin_component.get()))); 
+  activation_event.setParam(
+      "thread",
+      std::any(static_cast<RT::Thread*>(this->plugin_component.get())));
   this->event_manager->postEvent(&activation_event);
 }
 

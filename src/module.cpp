@@ -622,7 +622,8 @@ int Modules::Plugin::setActive(bool state)
   }
   Event::Object event(event_type);
   event.setParam(
-      "thread", std::any(static_cast<RT::Thread*>(this->plugin_component.get())));
+      "thread",
+      std::any(static_cast<RT::Thread*>(this->plugin_component.get())));
   this->event_manager->postEvent(&event);
   return result;
 }

@@ -246,7 +246,8 @@ TEST_F(SystemTest, updateThreadList)
   MockRTThread mock_thread("mockthread", defaultChannelList);
   RT::Thread* thread_ptr = &mock_thread;
   Event::Object change_activity_event(Event::Type::RT_THREAD_UNPAUSE_EVENT);
-  change_activity_event.setParam("thread", static_cast<RT::Thread*>(thread_ptr));
+  change_activity_event.setParam("thread",
+                                 static_cast<RT::Thread*>(thread_ptr));
   this->system->receiveEvent(&change_activity_event);
 
   // insert thread

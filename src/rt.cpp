@@ -18,16 +18,16 @@
 
  */
 
-#include <queue>
 #include <functional>
+#include <queue>
 
 #include "rt.hpp"
 
 #include "debug.hpp"
 #include "event.hpp"
 #include "fifo.hpp"
-#include "rtos.hpp"
 #include "module.hpp"
+#include "rtos.hpp"
 
 void RT::Device::read()
 {
@@ -59,10 +59,7 @@ void RT::Thread::bind_execute_callback(std::function<void(void)> callback)
   this->execute_callback = std::move(callback);
 }
 
-int RT::Connector::connect(Thread* src,
-                           size_t out,
-                           RT::Thread* dest,
-                           size_t in)
+int RT::Connector::connect(Thread* src, size_t out, RT::Thread* dest, size_t in)
 {
   // Let's remind our users to register their block first
   if (!(this->isRegistered(src) && this->isRegistered(dest))) {
@@ -84,7 +81,9 @@ int RT::Connector::connect(Thread* src,
     if (loc != connected_blocks.end()) {
       return -1;
     }
-    for (const auto& connections : this->thread_registry[processing.front()->getID()].outbound_con) {
+    for (const auto& connections :
+         this->thread_registry[processing.front()->getID()].outbound_con)
+    {
       for (auto thread_connection : connections.output_threads) {
         processing.push(thread_connection.dest);
       }
@@ -94,7 +93,9 @@ int RT::Connector::connect(Thread* src,
 
   if (!(this->connected(src, out, dest, in))) {
     thread_connection_t tempcon = {dest, in};
-    this->thread_registry[src->getID()].outbound_con[out].output_threads.push_back(tempcon);
+    this->thread_registry[src->getID()]
+        .outbound_con[out]
+        .output_threads.push_back(tempcon);
   }
   return 0;
 }
@@ -113,7 +114,9 @@ int RT::Connector::connect(RT::Thread* src,
 
   if (!(this->connected(src, out, dest, in))) {
     device_connection_t tempcon = {dest, in};
-    this->thread_registry[src->getID()].outbound_con[out].output_devices.push_back(tempcon);
+    this->thread_registry[src->getID()]
+        .outbound_con[out]
+        .output_devices.push_back(tempcon);
   }
   return 0;
 }
@@ -132,7 +135,9 @@ int RT::Connector::connect(RT::Device* src,
 
   if (!(this->connected(src, out, dest, in))) {
     thread_connection_t tempcon = {dest, in};
-    this->device_registry[src->getID()].outbound_con[out].output_threads.push_back(tempcon);
+    this->device_registry[src->getID()]
+        .outbound_con[out]
+        .output_threads.push_back(tempcon);
   }
   return 0;
 }
@@ -151,7 +156,9 @@ int RT::Connector::connect(RT::Device* src,
 
   if (!(this->connected(src, out, dest, in))) {
     device_connection_t tempcon = {dest, in};
-    this->device_registry[src->getID()].outbound_con[out].output_devices.push_back(tempcon);
+    this->device_registry[src->getID()]
+        .outbound_con[out]
+        .output_devices.push_back(tempcon);
   }
   return 0;
 }
@@ -165,7 +172,8 @@ bool RT::Connector::connected(RT::Thread* src,
     return false;
   }
 
-  auto outputThreadList = this->thread_registry[src->getID()].outbound_con[out].output_threads;
+  auto outputThreadList =
+      this->thread_registry[src->getID()].outbound_con[out].output_threads;
   auto outloc = std::find_if(
       outputThreadList.begin(),
       outputThreadList.end(),
@@ -184,7 +192,8 @@ bool RT::Connector::connected(RT::Thread* src,
   }
 
   // now create connection object and save it
-  auto outputDeviceList = this->thread_registry[src->getID()].outbound_con[out].output_devices;
+  auto outputDeviceList =
+      this->thread_registry[src->getID()].outbound_con[out].output_devices;
   auto outloc = std::find_if(
       outputDeviceList.begin(),
       outputDeviceList.end(),
@@ -203,7 +212,8 @@ bool RT::Connector::connected(RT::Device* src,
   }
 
   // now create connection object and save it
-  auto outputThreadList = this->device_registry[src->getID()].outbound_con[out].output_threads;
+  auto outputThreadList =
+      this->device_registry[src->getID()].outbound_con[out].output_threads;
   auto outloc = std::find_if(
       outputThreadList.begin(),
       outputThreadList.end(),
@@ -221,7 +231,8 @@ bool RT::Connector::connected(RT::Device* src,
     return false;
   }
   // now create connection object and save it
-  auto outputDeviceList = this->device_registry[src->getID()].outbound_con[out].output_devices;
+  auto outputDeviceList =
+      this->device_registry[src->getID()].outbound_con[out].output_devices;
   auto outloc = std::find_if(
       outputDeviceList.begin(),
       outputDeviceList.end(),
@@ -247,7 +258,9 @@ void RT::Connector::disconnect(RT::Thread* src,
       this->thread_registry[src_id].outbound_con[out].output_threads.end(),
       [&dest, &in](RT::thread_connection_t endthread_con)
       { return endthread_con.dest == dest && endthread_con.dest_port == in; });
-  if (loc == this->thread_registry[src_id].outbound_con[out].output_threads.end()) {
+  if (loc
+      == this->thread_registry[src_id].outbound_con[out].output_threads.end())
+  {
     return;
   }
   this->thread_registry[src_id].outbound_con[out].output_threads.erase(loc);
@@ -270,7 +283,9 @@ void RT::Connector::disconnect(RT::Thread* src,
       this->thread_registry[src_id].outbound_con[out].output_devices.end(),
       [&dest, &in](RT::device_connection_t enddevice_con)
       { return enddevice_con.dest == dest && enddevice_con.dest_port == in; });
-  if (loc == this->thread_registry[src_id].outbound_con[out].output_devices.end()) {
+  if (loc
+      == this->thread_registry[src_id].outbound_con[out].output_devices.end())
+  {
     return;
   }
   this->thread_registry[src_id].outbound_con[out].output_devices.erase(loc);
@@ -293,7 +308,9 @@ void RT::Connector::disconnect(RT::Device* src,
       this->device_registry[src_id].outbound_con[out].output_threads.end(),
       [&dest, &in](RT::thread_connection_t endthread_con)
       { return endthread_con.dest == dest && endthread_con.dest_port == in; });
-  if (loc == this->device_registry[src_id].outbound_con[out].output_threads.end()) {
+  if (loc
+      == this->device_registry[src_id].outbound_con[out].output_threads.end())
+  {
     return;
   }
   this->device_registry[src_id].outbound_con[out].output_threads.erase(loc);
@@ -316,7 +333,9 @@ void RT::Connector::disconnect(RT::Device* src,
       this->device_registry[src_id].outbound_con[out].output_devices.end(),
       [&dest, &in](RT::device_connection_t enddevice_con)
       { return enddevice_con.dest == dest && enddevice_con.dest_port == in; });
-  if (loc == this->device_registry[src_id].outbound_con[out].output_devices.end()) {
+  if (loc
+      == this->device_registry[src_id].outbound_con[out].output_devices.end())
+  {
     return;
   }
   this->device_registry[src_id].outbound_con[out].output_devices.erase(loc);
@@ -331,7 +350,7 @@ void RT::Connector::insertBlock(RT::Thread* thread)
   auto output_channels = std::vector<RT::outputs_info>(n_output_channels);
   size_t newid = 0;
   bool inserted = false;
-  for(auto& thread_entry : this->thread_registry) {
+  for (auto& thread_entry : this->thread_registry) {
     if (thread_entry.thread_ptr == nullptr) {
       thread_entry.thread_ptr = thread;
       thread_entry.outbound_con = output_channels;
@@ -344,7 +363,7 @@ void RT::Connector::insertBlock(RT::Thread* thread)
   }
   if (!inserted) {
     thread->assignID(this->thread_registry.size());
-    this->thread_registry.push_back({ thread, output_channels });
+    this->thread_registry.push_back({thread, output_channels});
   }
 }
 
@@ -357,7 +376,7 @@ void RT::Connector::insertBlock(RT::Device* device)
   auto output_channels = std::vector<RT::outputs_info>(n_output_channels);
   size_t newid = 0;
   bool inserted = false;
-  for(auto& device_entry : this->device_registry) {
+  for (auto& device_entry : this->device_registry) {
     if (device_entry.device_ptr == nullptr) {
       device_entry.device_ptr = device;
       device_entry.outbound_con = output_channels;
@@ -369,7 +388,7 @@ void RT::Connector::insertBlock(RT::Device* device)
   }
   if (!inserted) {
     device->assignID(this->device_registry.size());
-    this->device_registry.push_back({ device, output_channels });
+    this->device_registry.push_back({device, output_channels});
   }
 }
 
@@ -378,11 +397,8 @@ void RT::Connector::removeBlock(RT::Thread* thread)
   if (thread == nullptr || !(this->isRegistered(thread))) {
     return;
   }
-  this->thread_registry[thread->getID()] = 
-    {
-      nullptr,
-      std::vector<RT::outputs_info>()
-    };
+  this->thread_registry[thread->getID()] = {nullptr,
+                                            std::vector<RT::outputs_info>()};
 
   std::cout << "removed new thread with id " << thread->getID() << "\n";
 }
@@ -392,21 +408,20 @@ void RT::Connector::removeBlock(RT::Device* device)
   if (device == nullptr || !(this->isRegistered(device))) {
     return;
   }
-  this->device_registry[device->getID()] = 
-    {
-      nullptr,
-      std::vector<RT::outputs_info>()
-    };
+  this->device_registry[device->getID()] = {nullptr,
+                                            std::vector<RT::outputs_info>()};
 }
 
 bool RT::Connector::isRegistered(RT::Thread* thread)
 {
-  return thread->getID() < this->thread_registry.size() && this->thread_registry[thread->getID()].thread_ptr == thread;
+  return thread->getID() < this->thread_registry.size()
+      && this->thread_registry[thread->getID()].thread_ptr == thread;
 }
 
 bool RT::Connector::isRegistered(RT::Device* device)
 {
-  return device->getID() < this->device_registry.size() && this->device_registry[device->getID()].device_ptr == device;
+  return device->getID() < this->device_registry.size()
+      && this->device_registry[device->getID()].device_ptr == device;
 }
 
 std::vector<RT::Thread*> RT::Connector::topological_sort()
@@ -418,13 +433,17 @@ std::vector<RT::Thread*> RT::Connector::topological_sort()
 
   // initialize counts
   for (const auto& block : this->thread_registry) {
-    if(block.thread_ptr == nullptr) { continue; }
+    if (block.thread_ptr == nullptr) {
+      continue;
+    }
     sources_per_block[block.thread_ptr] = 0;
   }
 
   // Calculate number of sources per block
   for (const auto& outputs : this->thread_registry) {
-    if(outputs.thread_ptr == nullptr) { continue; }
+    if (outputs.thread_ptr == nullptr) {
+      continue;
+    }
     for (const auto& destination_con : outputs.outbound_con) {
       for (auto dest_thread : destination_con.output_threads) {
         sources_per_block[dest_thread.dest] += 1;
@@ -444,7 +463,8 @@ std::vector<RT::Thread*> RT::Connector::topological_sort()
     sorted_blocks.push_back(processing_q.front());
     processing_q.pop();
     auto block_id = sorted_blocks.back()->getID();
-    for (const auto& connections : this->thread_registry[block_id].outbound_con){
+    for (const auto& connections : this->thread_registry[block_id].outbound_con)
+    {
       for (auto endthread_con : connections.output_threads) {
         sources_per_block[endthread_con.dest] -= 1;
         if (sources_per_block[endthread_con.dest] == 0) {
@@ -456,8 +476,8 @@ std::vector<RT::Thread*> RT::Connector::topological_sort()
 
   // System only cares about active blocks
   std::vector<RT::Thread*> sorted_active_blocks;
-  for(auto& active_thread : sorted_blocks){
-    if(active_thread->getActive()) {
+  for (auto& active_thread : sorted_blocks) {
+    if (active_thread->getActive()) {
       sorted_active_blocks.push_back(active_thread);
     }
   }
@@ -501,14 +521,18 @@ std::vector<RT::outputs_info> RT::Connector::getOutputs(RT::Device* src)
 void RT::Connector::propagateDeviceConnections(RT::Device* device)
 {
   auto dev_id = device->getID();
-  for (size_t out_ch = 0; out_ch < this->device_registry[dev_id].outbound_con.size();
-       out_ch++) {
-    for (auto dest_info : this->device_registry[dev_id].outbound_con[out_ch].output_devices)
+  for (size_t out_ch = 0;
+       out_ch < this->device_registry[dev_id].outbound_con.size();
+       out_ch++)
+  {
+    for (auto dest_info :
+         this->device_registry[dev_id].outbound_con[out_ch].output_devices)
     {
       dest_info.dest->writeinput(dest_info.dest_port,
                                  device->readoutput(out_ch));
     }
-    for (auto dest_info : this->device_registry[dev_id].outbound_con[out_ch].output_threads)
+    for (auto dest_info :
+         this->device_registry[dev_id].outbound_con[out_ch].output_threads)
     {
       dest_info.dest->writeinput(dest_info.dest_port,
                                  device->readoutput(out_ch));
@@ -519,14 +543,18 @@ void RT::Connector::propagateDeviceConnections(RT::Device* device)
 void RT::Connector::propagateThreadConnections(RT::Thread* thread)
 {
   auto thread_id = thread->getID();
-  for (size_t out_ch = 0; out_ch < this->thread_registry[thread_id].outbound_con.size();
-       out_ch++) {
-    for (auto& dest_info : this->thread_registry[thread_id].outbound_con[out_ch].output_devices)
+  for (size_t out_ch = 0;
+       out_ch < this->thread_registry[thread_id].outbound_con.size();
+       out_ch++)
+  {
+    for (auto& dest_info :
+         this->thread_registry[thread_id].outbound_con[out_ch].output_devices)
     {
       dest_info.dest->writeinput(dest_info.dest_port,
                                  thread->readoutput(out_ch));
     }
-    for (auto& dest_info : this->thread_registry[thread_id].outbound_con[out_ch].output_threads)
+    for (auto& dest_info :
+         this->thread_registry[thread_id].outbound_con[out_ch].output_threads)
     {
       dest_info.dest->writeinput(dest_info.dest_port,
                                  thread->readoutput(out_ch));
@@ -605,22 +633,22 @@ void RT::System::updateThreadList(RT::System::CMD* cmd)
   cmd->done();
 }
 
-//void RT::System::updateBlockActivity(RT::System::CMD* cmd)
+// void RT::System::updateBlockActivity(RT::System::CMD* cmd)
 //{
-//  auto block = std::any_cast<IO::Block*>(cmd->getParam("block"));
-//  switch (cmd->getType()) {
-//    case Event::Type::RT_BLOCK_PAUSE_EVENT:
-//      block->setActive(false);
-//      cmd->done();
-//      break;
-//    case Event::Type::RT_BLOCK_UNPAUSE_EVENT:
-//      block->setActive(true);
-//      cmd->done();
-//      break;
-//    default:
-//      break;
-//  }
-//}
+//   auto block = std::any_cast<IO::Block*>(cmd->getParam("block"));
+//   switch (cmd->getType()) {
+//     case Event::Type::RT_BLOCK_PAUSE_EVENT:
+//       block->setActive(false);
+//       cmd->done();
+//       break;
+//     case Event::Type::RT_BLOCK_UNPAUSE_EVENT:
+//       block->setActive(true);
+//       cmd->done();
+//       break;
+//     default:
+//       break;
+//   }
+// }
 
 void RT::System::getPeriodTicksCMD(RT::System::CMD* cmd)
 {

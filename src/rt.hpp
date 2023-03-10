@@ -117,6 +117,7 @@ public:
    * \sa RT::System
    */
   void execute();
+
 protected:
   void bind_execute_callback(std::function<void(void)> callback);
 
@@ -429,13 +430,16 @@ public:
   void propagateThreadConnections(RT::Thread* thread);
 
   void assignID(IO::Block* block);
+
 private:
-  typedef struct {
+  typedef struct
+  {
     RT::Thread* thread_ptr;
     std::vector<outputs_info> outbound_con;
   } thread_entry_t;
 
-  typedef struct {
+  typedef struct
+  {
     RT::Device* device_ptr;
     std::vector<outputs_info> outbound_con;
   } device_entry_t;
@@ -480,7 +484,7 @@ private:
   void removeDevice(Event::Object* event);
   void insertThread(Event::Object* event);
   void removeThread(Event::Object* event);
-  //void blockActivityChange(Event::Object* event);
+  // void blockActivityChange(Event::Object* event);
   void threadActivityChange(Event::Object* event);
   void deviceActivityChange(Event::Object* event);
   void setPeriod(Event::Object* event);
