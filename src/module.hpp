@@ -383,6 +383,7 @@ public:
   Plugin& operator=(Plugin&&) = delete;  // move assignment operator
   virtual ~Plugin();
 
+  size_t getID();
   /*!
    * Attaches a component to this plugin
    *
