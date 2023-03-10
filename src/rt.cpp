@@ -398,12 +398,12 @@ void RT::Connector::removeBlock(RT::Device* device)
 
 bool RT::Connector::isRegistered(RT::Thread* thread)
 {
-  return this->thread_registry[thread->getID()].thread_ptr == thread;
+  return thread->getID() < this->thread_registry.size() && this->thread_registry[thread->getID()].thread_ptr == thread;
 }
 
 bool RT::Connector::isRegistered(RT::Device* device)
 {
-  return this->device_registry[device->getID()].device_ptr == device;
+  return device->getID() < this->device_registry.size() && this->device_registry[device->getID()].device_ptr == device;
 }
 
 std::vector<RT::Thread*> RT::Connector::topological_sort()
@@ -495,14 +495,15 @@ std::vector<RT::outputs_info> RT::Connector::getOutputs(RT::Device* src)
 
 void RT::Connector::propagateDeviceConnections(RT::Device* device)
 {
-  for (size_t out_ch = 0; out_ch < this->device_registry[device].size();
+  auto dev_id = device->getID();
+  for (size_t out_ch = 0; out_ch < this->device_registry[dev_id].outbound_con.size();
        out_ch++) {
-    for (auto dest_info : this->device_registry[device][out_ch].output_devices)
+    for (auto dest_info : this->device_registry[dev_id].outbound_con[out_ch].output_devices)
     {
       dest_info.dest->writeinput(dest_info.dest_port,
                                  device->readoutput(out_ch));
     }
-    for (auto dest_info : this->device_registry[device][out_ch].output_threads)
+    for (auto dest_info : this->device_registry[dev_id].outbound_con[out_ch].output_threads)
     {
       dest_info.dest->writeinput(dest_info.dest_port,
                                  device->readoutput(out_ch));
@@ -512,14 +513,15 @@ void RT::Connector::propagateDeviceConnections(RT::Device* device)
 
 void RT::Connector::propagateThreadConnections(RT::Thread* thread)
 {
-  for (size_t out_ch = 0; out_ch < this->thread_registry[thread].size();
+  auto thread_id = thread->getID();
+  for (size_t out_ch = 0; out_ch < this->thread_registry[thread_id].outbound_con.size();
        out_ch++) {
-    for (auto& dest_info : this->thread_registry[thread][out_ch].output_devices)
+    for (auto& dest_info : this->thread_registry[thread_id].outbound_con[out_ch].output_devices)
     {
       dest_info.dest->writeinput(dest_info.dest_port,
                                  thread->readoutput(out_ch));
     }
-    for (auto& dest_info : this->thread_registry[thread][out_ch].output_threads)
+    for (auto& dest_info : this->thread_registry[thread_id].outbound_con[out_ch].output_threads)
     {
       dest_info.dest->writeinput(dest_info.dest_port,
                                  thread->readoutput(out_ch));
