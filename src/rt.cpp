@@ -331,12 +331,13 @@ void RT::Connector::insertBlock(RT::Thread* thread)
   auto output_channels = std::vector<RT::outputs_info>(n_output_channels);
   size_t newid = 0;
   bool inserted = false;
-  for(auto thread_entry : this->thread_registry) {
+  for(auto& thread_entry : this->thread_registry) {
     if (thread_entry.thread_ptr == nullptr) {
       thread_entry.thread_ptr = thread;
       thread_entry.outbound_con = output_channels;
       inserted = true;
       thread->assignID(newid);
+      std::cout << "added new thread with id " << newid << "\n";
       break;
     }
     newid++;
@@ -356,7 +357,7 @@ void RT::Connector::insertBlock(RT::Device* device)
   auto output_channels = std::vector<RT::outputs_info>(n_output_channels);
   size_t newid = 0;
   bool inserted = false;
-  for(auto device_entry : this->device_registry) {
+  for(auto& device_entry : this->device_registry) {
     if (device_entry.device_ptr == nullptr) {
       device_entry.device_ptr = device;
       device_entry.outbound_con = output_channels;
@@ -382,6 +383,8 @@ void RT::Connector::removeBlock(RT::Thread* thread)
       nullptr,
       std::vector<RT::outputs_info>()
     };
+
+  std::cout << "removed new thread with id " << thread->getID() << "\n";
 }
 
 void RT::Connector::removeBlock(RT::Device* device)
@@ -411,14 +414,17 @@ std::vector<RT::Thread*> RT::Connector::topological_sort()
   auto processing_q = std::queue<RT::Thread*>();
   auto sorted_blocks = std::vector<RT::Thread*>();
   auto sources_per_block = std::unordered_map<RT::Thread*, int>();
+  auto valid_threads = std::vector<thread_entry_t>();
 
   // initialize counts
   for (const auto& block : this->thread_registry) {
+    if(block.thread_ptr == nullptr) { continue; }
     sources_per_block[block.thread_ptr] = 0;
   }
 
   // Calculate number of sources per block
   for (const auto& outputs : this->thread_registry) {
+    if(outputs.thread_ptr == nullptr) { continue; }
     for (const auto& destination_con : outputs.outbound_con) {
       for (auto dest_thread : destination_con.output_threads) {
         sources_per_block[dest_thread.dest] += 1;
@@ -438,8 +444,7 @@ std::vector<RT::Thread*> RT::Connector::topological_sort()
     sorted_blocks.push_back(processing_q.front());
     processing_q.pop();
     auto block_id = sorted_blocks.back()->getID();
-    for (const auto& connections : this->thread_registry[block_id].outbound_con)
-    {
+    for (const auto& connections : this->thread_registry[block_id].outbound_con){
       for (auto endthread_con : connections.output_threads) {
         sources_per_block[endthread_con.dest] -= 1;
         if (sources_per_block[endthread_con.dest] == 0) {
