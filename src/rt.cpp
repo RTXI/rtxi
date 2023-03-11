@@ -356,7 +356,6 @@ void RT::Connector::insertBlock(RT::Thread* thread)
       thread_entry.outbound_con = output_channels;
       inserted = true;
       thread->assignID(newid);
-      std::cout << "added new thread with id " << newid << "\n";
       break;
     }
     newid++;
@@ -399,8 +398,6 @@ void RT::Connector::removeBlock(RT::Thread* thread)
   }
   this->thread_registry[thread->getID()] = {nullptr,
                                             std::vector<RT::outputs_info>()};
-
-  std::cout << "removed new thread with id " << thread->getID() << "\n";
 }
 
 void RT::Connector::removeBlock(RT::Device* device)
