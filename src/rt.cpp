@@ -519,7 +519,7 @@ std::vector<RT::Device*> RT::Connector::getDevices()
 {
   std::vector<RT::Device*> devices;
   for (const auto& block_info : this->device_registry) {
-    if (block_info.device_ptr->getActive()) {
+    if (block_info.device_ptr != nullptr && block_info.device_ptr->getActive()) {
       devices.push_back(block_info.device_ptr);
     }
   }
@@ -614,6 +614,8 @@ RT::System::System(Event::Manager* em, RT::Connector* rtc)
     return;
   }
 
+  this->threads.reserve(100);
+  this->devices.reserve(100);
   this->event_manager->registerHandler(this);
 }
 
