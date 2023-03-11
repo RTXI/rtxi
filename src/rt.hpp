@@ -435,13 +435,13 @@ private:
   typedef struct
   {
     RT::Thread* thread_ptr;
-    std::vector<outputs_info> outbound_con;
+    std::vector<outputs_info> channels_outbound_con;
   } thread_entry_t;
 
   typedef struct
   {
     RT::Device* device_ptr;
-    std::vector<outputs_info> outbound_con;
+    std::vector<outputs_info> channels_outbound_con;
   } device_entry_t;
 
   std::vector<RT::Thread*> topological_sort();
