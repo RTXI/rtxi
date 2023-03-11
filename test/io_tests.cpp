@@ -102,4 +102,8 @@ TEST_F(IOBlockTest, writeinput)
   tempblock.writeinput(0, values);
   tempblock.echo();
   EXPECT_DOUBLE_EQ(values[0], tempblock.readoutput(0)[0]);
+  tempblock.writeinput(0, values);
+  tempblock.writeinput(0, values);
+  tempblock.echo();
+  EXPECT_DOUBLE_EQ(values[0]+values[0], tempblock.readoutput(0)[0]);
 }

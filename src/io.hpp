@@ -154,7 +154,6 @@ public:
   size_t getID() const { return this->id; }
 
 protected:
-  // These functions are meant to be used by RT::Thread classes
 
   /*!
    * Read the input sent to this block. Only the block itself has access.
@@ -178,6 +177,7 @@ private:
   {
     IO::channel_t channel_info;
     std::vector<double> values;
+    std::vector<double> buff_values;
   };
   std::string name;
   bool isInputDependent;

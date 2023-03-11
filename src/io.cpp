@@ -36,6 +36,7 @@ IO::Block::Block(std::string blockname,
   for (const auto& channel : channels) {
     port.channel_info = channel;
     port.values = std::vector<double>(channel.data_size, 0.0);
+    port.buff_values = std::vector<double>(channel.data_size, 0.0);
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
     ports[channel.flags].push_back(port);
     port = {};
@@ -69,13 +70,25 @@ size_t IO::Block::getChannelSize(IO::flags_t type, size_t channel)
 
 void IO::Block::writeinput(size_t index, const std::vector<double>& data)
 {
-  std::copy(
-      data.begin(), data.end(), this->ports[IO::INPUT][index].values.begin());
+  //std::copy(
+  //    data.begin(), data.end(), this->ports[IO::INPUT][index].values.begin());
+  size_t value_index = 0;
+  while(value_index < data.size()){
+    this->ports[IO::INPUT][index].values[value_index] += data[value_index];
+    value_index++;
+  }
 }
 
 const std::vector<double>& IO::Block::readinput(size_t index)
 {
-  return this->ports[IO::INPUT][index].values;
+  // We must reset input values to zero so that the next cycle doesn't use these values
+  std::copy(this->ports[IO::INPUT][index].values.begin(),
+            this->ports[IO::INPUT][index].values.end(),
+            this->ports[IO::INPUT][index].buff_values.begin());
+  std::fill(this->ports[IO::INPUT][index].values.begin(),
+            this->ports[IO::INPUT][index].values.end(),
+            0.0);
+  return this->ports[IO::INPUT][index].buff_values;
 }
 
 void IO::Block::writeoutput(size_t index, const std::vector<double>& data)
