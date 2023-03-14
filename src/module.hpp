@@ -550,8 +550,7 @@ protected:
 
 private:
   std::string library;
-  void* handle =
-      nullptr;  // if it is a shared object then this will not be null
+  void* handle = nullptr;  
   std::string name;
 };
 
@@ -580,7 +579,7 @@ public:
   /*!
    * loads plugin
    */
-  int loadPlugin(const std::string& library);
+  Modules::Plugin* loadPlugin(const std::string& library);
 
   /*!
    * unloads plugin
@@ -603,7 +602,7 @@ private:
 
   void registerFactories(std::string module_name, Modules::FactoryMethods);
   void unregisterFactories(std::string module_name);
-  int loadCorePlugin(const std::string& library);
+  Modules::Plugin* loadCorePlugin(const std::string& library);
 
   std::unordered_map<std::string, std::vector<std::unique_ptr<Modules::Plugin>>>
       rtxi_modules_registry;

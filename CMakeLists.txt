@@ -12,6 +12,7 @@ project(
 
 set(RTXI_USER_HOMEDIR $ENV{HOME})
 set(RTXI_SETTINGS_DIR ${RTXI_USER_HOMEDIR}/rtxi/)
+set(RTXI_PLUGIN_DIR ${CMAKE_INSTALL_PREFIX}/rtxi/modules/)
 configure_file(rtxiConfig.h.in rtxiConfig.h)
 include(cmake/project-is-top-level.cmake)
 include(cmake/variables.cmake)
