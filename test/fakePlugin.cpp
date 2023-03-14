@@ -20,12 +20,33 @@
 
 #include "fakePlugin.h"
 
-extern "C"
+//std::unique_ptr<Modules::Plugin> createRTXIPlugin(Event::Manager* ev_manager,
+//                                                  MainWindow* mw)
+//{
+//  return std::make_unique<fakePlugin>(ev_manager, mw);
+//}
+//
+//std::unique_ptr<Modules::Component> createRTXIComponent(
+//    Modules::Plugin* host_plugin)
+//{
+//  return std::make_unique<fakeComponent>(host_plugin);
+//}
+//
+//Modules::Panel* createRTXIPanel(MainWindow* mw, Event::Manager* ev_manager)
+//{
+//  return nullptr;
+//}
+
+std::unique_ptr<Modules::Plugin> createRTXIPlugin(
+    Event::Manager* ev_manager, MainWindow* main_window)
 {
-std::unique_ptr<Modules::Plugin> createRTXIPlugin(Event::Manager* ev_manager,
-                                                  MainWindow* mw)
+  return std::make_unique<fakePlugin>(ev_manager, main_window);
+}
+
+Modules::Panel* createRTXIPanel(
+    MainWindow* main_window, Event::Manager* ev_manager)
 {
-  return std::make_unique<fakePlugin>(ev_manager, mw);
+  return nullptr;
 }
 
 std::unique_ptr<Modules::Component> createRTXIComponent(
@@ -34,8 +55,15 @@ std::unique_ptr<Modules::Component> createRTXIComponent(
   return std::make_unique<fakeComponent>(host_plugin);
 }
 
-Modules::Panel* createRTXIPanel(MainWindow* mw, Event::Manager* ev_manager)
+Modules::FactoryMethods fact;
+
+extern "C"
 {
-  return nullptr;
+Modules::FactoryMethods* getFactories()
+{
+  fact.createPanel = &createRTXIPanel;
+  fact.createComponent = &createRTXIComponent;
+  fact.createPlugin = &createRTXIPlugin;
+  return &fact;
 }
 }

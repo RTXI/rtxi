@@ -8,6 +8,7 @@ add_executable(rtxiTests
     io_tests.hpp io_tests.cpp
     system_tests.hpp system_tests.cpp
     module_tests.hpp module_tests.cpp
+    plugin_tests.hpp plugin_tests.cpp
     rtxiTests.cpp
 )
 
@@ -27,6 +28,14 @@ target_link_libraries(rtxiTests PRIVATE
     Boost::headers
     dl
     backtrace
+)
+
+add_library(fakePlugin_lib MODULE fakePlugin.h fakePlugin.cpp)
+
+target_link_libraries(fakePlugin_lib PRIVATE 
+    rtxi_lib
+    GTest::gtest GTest::gtest_main
+    GTest::gmock GTest::gmock_main 
 )
 
 target_compile_definitions(rtxiTests PRIVATE BOOST_STACKTRACE_USE_ADDR2LINE)

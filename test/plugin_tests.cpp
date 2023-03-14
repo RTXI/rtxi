@@ -23,79 +23,27 @@
 #include <typeinfo>
 
 #include <dlfcn.h>
-#include <fakePlugin.h>
-#include <plugin_tests.h>
+#include "plugin_tests.hpp"
 
-TEST_F(PluginManagerTest, getInstance)
+TEST_F(PluginManagerTest, LoadandUnload)
 {
-  manager = Plugin::Manager::getInstance();
-  ASSERT_EQ(manager, Plugin::Manager::getInstance());
-  ASSERT_EQ(manager, manager->getInstance());
+  std::string libraryPath(std::filesystem::current_path().string());
+  libraryPath += "libfakePlugin.so";
+  Modules::Plugin* plugin= this->mod_manager->loadPlugin(libraryPath);
+  ASSERT_NE(plugin, nullptr);
+  this->mod_manager->unloadPlugin(plugin);
+  ASSERT_FALSE(this->mod_manager->isRegistered(plugin));
 }
 
-TEST_F(PluginManagerTest, load)
-{
-  manager = Plugin::Manager::getInstance();
-  QString libraryPath(std::filesystem::current_path().string().c_str());
-  libraryPath += "/.libs/fakePlugin.so";
-  Plugin::Object* testobject = new Plugin::Object();
-  ASSERT_EQ(typeid(testobject).name(),
-            typeid(manager->load(libraryPath)).name());
-  delete testobject;
-}
-
-TEST_F(PluginManagerTest, unload)
-{
-  manager = Plugin::Manager::getInstance();
-  Plugin::Object* plugin;
-  QString libraryPath(std::filesystem::current_path().string().c_str());
-  libraryPath += "/.libs/fakePlugin.so";
-  plugin = manager->load(libraryPath);
-  manager->unload(plugin);
-  delete plugin;
-  // Plugin::Manager uses QEvents from QT to tell itself that it needs to unload
-  // plugins... why?
-  // TODO: eliminate the need to use QEvents in this instance
-  // TODO: How can I tell if a single plugin has been unloaded? answer: you
-  // can't *face palm*
-}
-
-TEST_F(PluginManagerTest, unloadAll)
-{
-  manager = Plugin::Manager::getInstance();
-  Plugin::Object** plugins = new Plugin::Object*[5];
-  QString libraryPath(std::filesystem::current_path().string().c_str());
-  libraryPath += "/.libs/fakePlugin.so";
-  for (int i = 0; i < 5; ++i) {
-    plugins[i] = manager->load(libraryPath);
-  }
-  manager->unloadAll();
-  delete[] plugins;
-}
-
-TEST_F(PluginManagerTest, foreachPlugin)
-{
-  manager = Plugin::Manager::getInstance();
-  // TODO: create a test plugin for testing foreachPlugin function in
-  // Plugin::Manager
-}
-
-TEST_F(PluginObjectTest, getLibrary)
+TEST_F(PluginManagerTest, getLibrary)
 {
   // TODO: Decouple Plugin::Object from Plugin::Manager and test getLibrary
   // function
-  Plugin::Manager* manager = Plugin::Manager::getInstance();
-  QString libraryPath(std::filesystem::current_path().string().c_str());
-  libraryPath += "/.libs/fakePlugin.so";
-  object = manager->load(libraryPath);
-  EXPECT_EQ(libraryPath.toStdString(), object->getLibrary());
-  manager->unload(object);
-  delete object;
+  std::string libraryPath(std::filesystem::current_path().string());
+  libraryPath += "libfakePlugin.so";
+  Modules::Plugin* plugin= this->mod_manager->loadPlugin(libraryPath);
+  EXPECT_EQ(libraryPath, plugin->getLibrary());
+  this->mod_manager->unloadPlugin(plugin);
 }
 
-TEST_F(PluginObjectTest, unload)
-{
-  // Its impossible to test this. No interface provided in order to check
-  // loading and unloading status. Mainly tied to the manager class.
-  // TODO: Decouple Plugin::Object from Plugin::Manager and test unload function
-}
+

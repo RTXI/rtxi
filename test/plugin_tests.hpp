@@ -21,24 +21,27 @@
 #define PLUGIN_TESTS_H
 
 #include <gtest/gtest.h>
-#include <plugin.h>
+
+#include "module.hpp"
 
 class PluginObjectTest : public ::testing::Test
 {
 protected:
-    PluginObjectTest() { }
-    ~PluginObjectTest() { }
-
-    Plugin::Object *object;
+    PluginObjectTest()=default; 
+    ~PluginObjectTest()=default;
 };
 
 class PluginManagerTest : public ::testing::Test
 {
 protected:
-    PluginManagerTest() { }
-    ~PluginManagerTest() { }
+    PluginManagerTest() { 
+        this->ev_manager = std::make_unique<Event::Manager>();
+        this->mod_manager = std::make_unique<Modules::Manager>(ev_manager.get(), nullptr);
+    }
+    ~PluginManagerTest()=default;
 
-    Plugin::Manager *manager;
+    std::unique_ptr<Modules::Manager> mod_manager;
+    std::unique_ptr<Event::Manager> ev_manager;
 };
 
 #endif

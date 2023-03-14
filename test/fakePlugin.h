@@ -20,7 +20,6 @@
 #ifndef FAKE_PLUGIN_H
 #define FAKE_PLUGIN_H
 
-#include <gmock/gmock.h>
 #include <iostream>
 
 #include "module.hpp"
