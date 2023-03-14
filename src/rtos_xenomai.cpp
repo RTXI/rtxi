@@ -24,9 +24,9 @@
 #include "rtos.hpp"
 
 #include <errno.h>
-#include <evl/evl.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/mman.h>
 
 #include "fifo.hpp"
 
@@ -38,67 +38,11 @@
 #  include <native/timer.h>
 #endif
 
-struct Xenomai_Task : RT::OS::Task
-{
-  RT_TASK task;
-};
+thread_local bool realtime_key = false;
+thread_local int64_t* RT_PERIOD = nullptr;
 
-// static bool init_rt = false;
-// static pthread_key_t is_rt_key;
-// static char* RT_TASK_NAME = "RTXI RT Thread";
 
-static const char* sigdebug_reasons[] = {
-    [SIGDEBUG_UNDEFINED] = "latency: received SIGXCPU for unknown reason",
-    [SIGDEBUG_MIGRATE_SIGNAL] = "received signal",
-    [SIGDEBUG_MIGRATE_SYSCALL] = "invoked syscall",
-    [SIGDEBUG_MIGRATE_FAULT] = "triggered fault",
-    [SIGDEBUG_MIGRATE_PRIOINV] = "affected by priority inversion",
-    [SIGDEBUG_NOMLOCK] =
-        "Xenomai: process memory not locked "
-        "(missing mlockall?)",
-    [SIGDEBUG_WATCHDOG] =
-        "Xenomai: watchdog triggered "
-        "(period too short?)",
-};
-
-void sigdebug_handler(int sig, siginfo_t* si, void*)
-{
-  const char fmt[] = "Mode switch (reason: %s), aborting. Backtrace:\n";
-  unsigned int reason = si->si_value.sival_int;
-  static char buffer[256];
-  static void* bt[200];
-  unsigned int n;
-
-  if (reason > SIGDEBUG_WATCHDOG)
-    reason = SIGDEBUG_UNDEFINED;
-
-  switch (reason) {
-    case SIGDEBUG_UNDEFINED:
-      n = snprintf(buffer, sizeof(buffer), "%s\n", sigdebug_reasons[reason]);
-      write(STDERR_FILENO, buffer, n);
-      break;
-    case SIGDEBUG_MIGRATE_SIGNAL:
-      n = snprintf(buffer, sizeof(buffer), "%s\n", sigdebug_reasons[reason]);
-      write(STDERR_FILENO, buffer, n);
-      break;
-    case SIGDEBUG_WATCHDOG:
-      /* These errors are lethal, something went really wrong. */
-      n = snprintf(buffer, sizeof(buffer), "%s\n", sigdebug_reasons[reason]);
-      write(STDERR_FILENO, buffer, n);
-      exit(EXIT_FAILURE);
-  }
-
-  /* Retrieve the current backtrace, and decode it to stdout. */
-  n = snprintf(buffer, sizeof(buffer), fmt, sigdebug_reasons[reason]);
-  n = write(STDERR_FILENO, buffer, n);
-  n = backtrace(bt, sizeof(bt) / sizeof(bt[0]));
-  backtrace_symbols_fd(bt, n, STDERR_FILENO);
-
-  signal(sig, SIG_DFL);
-  kill(getpid(), sig);
-}
-
-int RT::OS::initiate(void)
+int RT::OS::initiate(RT::OS::Task* task)
 {
   // Kernel limitations on memory lock are no longer present, however
   // still a useful (for performance) method for preventing paging
@@ -111,71 +55,70 @@ int RT::OS::initiate(void)
     return -EPERM;
   }
 
+  realtime_key = true;
+  task->period = RT::OS::DEFAULT_PERIOD;
+  RT_PERIOD = &(task->period);
   return 0;
 }
 
-void RT::OS::shutdown(void)
+void RT::OS::shutdown(RT::OS::Task* task)
 {
-  pthread_key_delete(is_rt_key);
+  realtime_key = false;
+  task->task_finished = true;
+  RT_PERIOD = nullptr;
 }
 
 int RT::OS::createTask(RT::OS::Task* task,
-                       void* (*entry)(void*),
-                       void* arg,
-                       int prio)
+                       void* (*func)(void*),
+                       void* arg)
 {
   int retval = 0;
-  xenomai_task_t* t = new xenomai_task_t;
-  int priority = 99;
-
-  // Assign signal handler
-  struct sigaction sa;
-  sigemptyset(&sa.sa_mask);
-  sa.sa_sigaction = sigdebug_handler;
-  sa.sa_flags = SA_SIGINFO;
-  sigaction(SIGDEBUG, &sa, NULL);
+  RT_TASK xenomai_task;
 
   // Tell Xenomai to report mode issues
   rt_task_set_mode(0, T_WARNSW, NULL);
 
-  // Invert priority, default prio=0 but max priority for xenomai task is 99
-  if ((prio >= 0) && (prio <= 99))
-    priority -= prio;
-
-  if ((retval = rt_task_create(&t->task, RT_TASK_NAME, 0, priority, 0))) {
+  if ((retval = rt_task_create(&xenomai_task, "Real-Time Task", 0, 50, 0))) {
     ERROR_MSG("RT::OS::createTask : failed to create task\n");
     return retval;
   }
 
-  t->period = -1;
+  auto wrapper = [](RT::OS::Task* tsk, void (*fn)(void*), void* args)
+  {
+    auto resval = RT::OS::initiate(tsk);
+    if (resval != 0) {
+      ERROR_MSG("RT::OS::createTask : RT::OS::initiate() : {}",
+                strerror(errno));
+      // In the event that we fail to initiate real-time environment let's just
+      // quit
+      return;
+    }
+    fn(args);
+    RT::OS::shutdown(tsk);
+  };
 
-  *task = t;
-  pthread_setspecific(is_rt_key, reinterpret_cast<const void*>(t));
-
-  if ((retval = rt_task_start(
-           &t->task, reinterpret_cast<void (*)(void*)>(entry), arg)))
+  if ((retval = rt_task_start(&xenomai_task, reinterpret_cast<void (*)(void*)>(wrapper), arg)))
   {
     ERROR_MSG("RT::OS::createTask : failed to start task\n");
     return retval;
   }
 
+  task->thread_id = std::any(xenomai_task);
   return 0;
 }
 
 void RT::OS::deleteTask(RT::OS::Task task)
 {
-  xenomai_task_t* t = reinterpret_cast<xenomai_task_t*>(task);
-  rt_task_delete(&t->task);
+  auto xenomai_task = std::any_cast<RT_TASK>(task);
+  rt_task_delete(task);
 }
 
 bool RT::OS::isRealtime(void)
 {
-  if (init_rt && rt_task_self() != NULL)
-    return true;
-  return false;
+  return (realtime_key && rt_task_self() != nullptr);
 }
 
-long long RT::OS::getTime(void)
+int64_t RT::OS::getTime(void)
 {
 #if CONFIG_XENO_VERSION_MAJOR >= 3
   return rt_timer_read();
@@ -184,31 +127,35 @@ long long RT::OS::getTime(void)
 #endif
 }
 
-int RT::OS::setPeriod(RT::OS::Task task, long long period)
+int RT::OS::setPeriod(RT::OS::Task* task, int64_t period)
 {
-  // Retrieve task struct
-  xenomai_task_t* t = reinterpret_cast<xenomai_task_t*>(task);
-
   // Set wake up limits
   if (period / 10 > 50000ll)
-    t->wakeup_t = rt_timer_ns2ticks(50000ll);
+    task->next_t = rt_timer_ns2ticks(50000ll);
   else
-    t->wakeup_t = rt_timer_ns2ticks(period / 10);
+    task->next_t = rt_timer_ns2ticks(period / 10);
 
   // Setup timing bounds for oneshot operation
-  t->period = rt_timer_ns2ticks(period);
-  t->next_t = rt_timer_read() + t->period;
+  task->period = rt_timer_ns2ticks(period);
+  task->next_t = rt_timer_read() + t->period;
 
   return 0;
 }
 
-void RT::OS::sleepTimestep(RT::OS::Task task)
+int64_t RT::OS::getPeriod()
 {
-  xenomai_task_t* t = reinterpret_cast<xenomai_task_t*>(task);
+  // This function should only ever be accessed withint a real-tim context
+  if (RT_PERIOD == nullptr || !RT::OS::isRealtime()) {
+    return -1;
+  };
+  return *(RT_PERIOD);
 
-  // Prevent significant early wake up from happening and drying the Linux
-  // system
-  rt_task_sleep_until(t->next_t - t->wakeup_t);
+}
+
+void RT::OS::sleepTimestep(RT::OS::Task* task)
+{
+  auto xenomai_task = std::any_cast<RT_TASK>(task->thread_d);
+  rt_task_sleep_until(task->next_t);
 
   // Busy sleep until ready for the next cycle
   rt_timer_spin(rt_timer_ticks2ns(t->next_t - rt_timer_read()));
