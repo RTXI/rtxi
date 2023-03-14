@@ -24,6 +24,14 @@ cmake_policy(SET CMP0135 NEW)
 # Find EVL Core library
 include(FindPkgConfig)
 pkg_check_modules(evl evl)
+if(EXISTS /usr/xenomai/bin/xeno-config)
+	set(xenomai3_FOUND)
+	execute_process(
+		COMMAND /usr/xenomai/bin/xeno-config --skin=alchemy --cflags 
+		OUTPUT_VARIABLE xenomai3_ALCHEMY_CFLAGS
+		COMMAND /usr/xenomai/bin/xeno-config --skin=alchemy --ldflags
+		OUTPUT_VARIABLE xenomai3_ALCHEMY_LDFLAGS)
+endif()
 
 # Make sure we can find the rtxiConfig.h generated file in binary directory
 include_directories(${PROJECT_BINARY_DIR})

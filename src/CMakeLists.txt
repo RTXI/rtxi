@@ -17,6 +17,24 @@ if(${evl_FOUND})
     fmt::fmt
   )
   target_include_directories(rtos_lib SYSTEM PRIVATE ${evl_INCLUDE_DIRS})
+elseif(xenomai3_FOUND)
+  list(APPEND CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES ${xenomai_ALCHEMY_CFLAGS})
+  add_library(rtos_fifo_lib OBJECT "fifo.hpp" "fifo_xenomai.cpp")
+  target_link_libraries(rtos_fifo_lib 
+    PRIVATE 
+      Threads::Threads
+      ${xenomai_ALCHEMY_LDFLAGS}
+      fmt::fmt
+  )
+  target_include_directories(rtos_fifo_lib SYSTEM PRIVATE ${xenomai_ALCHEMY_CFLAGS})
+  add_library(rtos_lib OBJECT "rtos.hpp" "rtos_evl.cpp")
+  target_link_libraries(rtos_lib PRIVATE 
+    ${xenomai_ALCHEMY_LDFLAGS}
+    rtos_fifo_lib
+    fmt::fmt
+  )
+  target_include_directories(rtos_lib SYSTEM PRIVATE ${xenomai_ALCHEMY_CFLAGS})
+
 else()
   message("EVL Library not found. Reverting to posix Interface.")
   add_library(rtos_fifo_lib OBJECT "fifo.hpp" "fifo.cpp")
