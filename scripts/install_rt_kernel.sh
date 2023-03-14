@@ -30,79 +30,65 @@ fi
 
 # Export environment variables
 echo  "-----> Setting up variables."
-export linux_version=5.4.198
+export linux_version=5.10
 export xenomai_version=3.2
-export xenomai_root=/opt/xenomai-$xenomai_version
+export xenomai_root=~/git/xenomai-$xenomai_version
 export scripts_dir=`pwd`
 export build_root=/opt/build
 export opt=/opt
-export ipipe_patch_digit=9
-export ipipe_cip_str=
-if [ -z $ipipe_cip_str ]; then
-    export linux_tree=/opt/linux-$linux_version;
-else
-    export linux_tree=/opt/linux-cip-${linux_version}${ipipe_cip_str};
-fi
 
 rm -rf $build_root
 mkdir $build_root
 echo  "-----> Environment configuration complete."
 
 # Download essentials
-echo  "-----> Downloading Linux kernel."
 cd $opt
-if [ -z $ipipe_cip_str ]; then
-    echo "-----> Downloading main line kernel"
-    wget --no-clobber --no-check-certificate https://www.kernel.org/pub/linux/kernel/v${linux_version:0:1}.x/linux-$linux_version.tar.xz;
-    tar xf linux-$linux_version.tar.xz
-else
-    echo "-----> Downloading CIP kernel"
-    wget --no-clobber --no-check-certificate https://git.kernel.org/pub/scm/linux/kernel/git/cip/linux-cip.git/snapshot/linux-cip-${linux_version}${ipipe_cip_str}.tar.gz;
-    tar xf linux-cip-${linux_version}${ipipe_cip_str}.tar.gz
-fi
- 
+echo "-----> Downloading main line kernel"
+if [ ! -d linux-dovetail ] ; then
+  git clone https://source.denx.de/Xenomai/linux-dovetail.git
+  git checkout -b v5.15.y-dovetail-rebase
+fi 
 
 echo  "-----> Downloading Xenomai."
 #wget --no-clobber --no-check-certificate https://xenomai.org/downloads/xenomai/stable/xenomai-$xenomai_version.tar.bz2
 if [ ! -d /opt/xenomai-$xenomai_version ] ; then
   git clone --branch stable/v3.2.x https://source.denx.de/Xenomai/xenomai.git xenomai-$xenomai_version
 fi
-
-echo "------> Downloading linux ipipe patch."
-wget --no-clobber --no-check-certificate https://xenomai.org/downloads/ipipe/v${linux_version:0:1}.x/x86/ipipe-core-${linux_version}${ipipe_cip_str}-x86-${ipipe_patch_digit}.patch
-
-#tar xf xenomai-$xenomai_version.tar.bz2
 echo  "-----> Downloads complete."
 
 # Patch kernel
 echo  "-----> Patching kernel."
 cd $linux_tree
+git clean -f -d
+git reset --hard
+make clean
+make mrproper
+make distclean
 $xenomai_root/scripts/prepare-kernel.sh \
-	--arch=x86 \
-	--ipipe=$opt/ipipe-core-${linux_version}${ipipe_cip_str}-x86-${ipipe_patch_digit}.patch \
+	--arch=x86_64 \
 	--linux=$linux_tree \
 	--verbose
+
 #yes "" | make oldconfig
-make defconfig
-make localmodconfig
+yes "" | make localmodconfig
 make menuconfig
+scripts/config --disable SYSTEM_TRUSTED_KEYS
+scripts/config --disable SYSTEM_REVOCATION_KEYS
+scripts/config --disable DEBUG_INFO
 echo  "-----> Patching complete."
 
 # Compile kernel
 echo  "-----> Compiling kernel."
 cd $linux_tree
-export CONCURRENCY_LEVEL=$(grep -c ^processor /proc/cpuinfo)
-fakeroot make-kpkg \
-	--append-to-version=-xenomai-$xenomai_version \
-	--revision $(date +%Y%m%d) \
-	kernel-image kernel-headers modules
+#export CONCURRENCY_LEVEL=$(grep -c ^processor /proc/cpuinfo)
+make -j`nproc` bindeb-pkg LOCALVERSION=xenomai-$xenomai_version
 echo  "-----> Kernel compilation complete."
 
 # Install compiled kernel
 echo  "-----> Installing compiled kernel"
-cd $opt
-dpkg -i linux-image-$linux_version-xenomai-$xenomai_version*.deb
-dpkg -i linux-headers-$linux_version-xenomai-$xenomai_version*.deb
+sudo dpkg -i ../linux-image*.deb
+sudo dpkg -i ../linux-headers*.deb
+sudo dpkg -i ../linux-glibc*.deb
 echo  "-----> Kernel installation complete."
 
 # Update
