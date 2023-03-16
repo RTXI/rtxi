@@ -20,12 +20,14 @@
 
 #include <iostream>
 
-#include "rtos.hpp"
-
 #include <errno.h>
 #include <evl/evl.h>
 #include <string.h>
 #include <unistd.h>
+#include <pthread.h>
+#include <sched.h>
+
+#include "rtos.hpp"
 
 #include "fifo.hpp"
 
@@ -39,6 +41,16 @@ int RT::OS::initiate(RT::OS::Task* task)
     ERROR_MSG("RT::OS(EVL)::initiate : evl_init() : {}", strerror(errno));
     return retval;
   }
+
+  // set high affinity to obtain real-time guarantees
+  struct sched_param param{};
+  param.sched_priority = 90;
+  retval = pthread_setschedparam(pthread_self(), SCHED_FIFO, &param);
+  if(retval != 0) {
+    ERROR_MSG("RT::OS(EVL)::initiate : Unable to set scheduling parameters");
+    return retval;
+  }
+
   int thread_fd = evl_attach_self("RTXI-RT-Thread:%d", getpid());  // NOLINT
   if (thread_fd < 0) {
     ERROR_MSG("RT::OS(EVL)::initiate : evl_attach_self() : {}",
