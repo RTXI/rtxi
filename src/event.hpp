@@ -120,7 +120,7 @@ public:
    *
    * \return The type of event
    */
-  Event::Type getType();
+  Event::Type getType() const;
 
   /*!
    * Retrieves the parameters values attached to the event
@@ -128,7 +128,7 @@ public:
    * \param Name The parameter name for which to retrieve the value of event
    * \return The value connected with the input key
    */
-  std::any getParam(const std::string& param_name);
+  std::any getParam(const std::string& param_name) const;
 
   /*!
    * Stores a key and value inside event object

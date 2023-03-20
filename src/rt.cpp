@@ -645,7 +645,7 @@ RT::Telemitry::Response RT::System::getTelemitry()
 
 void RT::System::setPeriod(RT::System::CMD* cmd)
 {
-  auto period = std::any_cast<int64_t>(cmd->getParam("period"));
+  auto period = std::get<int64_t>(cmd->getRTParam("period"));
   this->task->period = period;
   auto telem = RT::Telemitry::RT_PERIOD_UPDATE;
   this->postTelemitry(telem);
@@ -655,7 +655,7 @@ void RT::System::setPeriod(RT::System::CMD* cmd)
 void RT::System::updateDeviceList(RT::System::CMD* cmd)
 {
   this->devices =
-      std::any_cast<std::vector<RT::Device*>>(cmd->getParam("deviceList"));
+      std::get<std::vector<RT::Device*>>(cmd->getRTParam("deviceList"));
   auto telem = RT::Telemitry::RT_DEVICE_LIST_UPDATE;
   this->postTelemitry(telem);
   cmd->done();
@@ -664,7 +664,7 @@ void RT::System::updateDeviceList(RT::System::CMD* cmd)
 void RT::System::updateThreadList(RT::System::CMD* cmd)
 {
   this->threads =
-      std::any_cast<std::vector<RT::Thread*>>(cmd->getParam("threadList"));
+      std::get<std::vector<RT::Thread*>>(cmd->getRTParam("threadList"));
   auto telem = RT::Telemitry::RT_THREAD_LIST_UPDATE;
   this->postTelemitry(telem);
   cmd->done();
@@ -689,12 +689,15 @@ void RT::System::updateThreadList(RT::System::CMD* cmd)
 
 void RT::System::getPeriodTicksCMD(RT::System::CMD* cmd)
 {
+  RT::command_param_t value;
   switch (cmd->getType()) {
     case Event::Type::RT_PREPERIOD_EVENT:
-      cmd->setParam("pre-period", std::any(&(this->periodStartTime)));
+      value = &(this->periodStartTime);
+      cmd->setRTParam("pre-period", value);
       break;
     case Event::Type::RT_POSTPERIOD_EVENT:
-      cmd->setParam("post-period", std::any(&(this->periodEndTime)));
+      value = &(this->periodEndTime);
+      cmd->setRTParam("post-period", value);
       break;
     default:
       return;
@@ -705,27 +708,28 @@ void RT::System::getPeriodTicksCMD(RT::System::CMD* cmd)
 void RT::System::changeModuleParametersCMD(RT::System::CMD* cmd)
 {
   auto* component =
-      std::any_cast<Modules::Component*>(cmd->getParam("paramModule"));
-  auto param_id = std::any_cast<size_t>(cmd->getParam("paramID"));
-  auto param_type =
-      std::any_cast<Modules::Variable::variable_t>(cmd->getParam("paramType"));
-  std::any param_value_any = cmd->getParam("paramValue");
+      std::get<Modules::Component*>(cmd->getRTParam("paramModule"));
+  auto param_id = std::get<size_t>(cmd->getRTParam("paramID"));
+  auto param_type_num = std::get<uint64_t>(cmd->getRTParam("paramType"));
+  auto param_type = static_cast<Modules::Variable::variable_t>(param_type_num);
+  RT::command_param_t param_value_any = cmd->getRTParam("paramValue");
   switch (param_type) {
     case Modules::Variable::DOUBLE_PARAMETER:
       component->setValue<double>(param_id,
-                                  std::any_cast<double>(param_value_any));
+                                  std::get<double>(param_value_any));
       break;
     case Modules::Variable::INT_PARAMETER:
       component->setValue<int64_t>(param_id,
-                                   std::any_cast<int64_t>(param_value_any));
+                                   std::get<int64_t>(param_value_any));
       break;
     case Modules::Variable::UINT_PARAMETER:
       component->setValue<uint64_t>(param_id,
-                                    std::any_cast<uint64_t>(param_value_any));
+                                    std::get<uint64_t>(param_value_any));
       break;
     case Modules::Variable::STATE:
       component->setValue<Modules::Variable::state_t>(
-          param_id, std::any_cast<Modules::Variable::state_t>(param_value_any));
+          param_id, 
+          static_cast<Modules::Variable::state_t>(std::get<int64_t>(param_value_any)));
       break;
     default:
       ERROR_MSG(
@@ -830,7 +834,9 @@ void RT::System::receiveEvent(Event::Object* event)
 void RT::System::setPeriod(Event::Object* event)
 {
   // auto period = std::any_cast<int64_t>(event->getParam("period"));
-  RT::System::CMD cmd(*event);
+  RT::System::CMD cmd(event->getType());
+  auto period = std::any_cast<int64_t>(event->getParam("period"));
+  cmd.setRTParam("period", period);
   RT::System::CMD* cmd_ptr = &cmd;
   this->eventFifo->write(&cmd_ptr, sizeof(RT::System::CMD*));
   cmd.wait();
@@ -858,8 +864,8 @@ void RT::System::insertDevice(Event::Object* event)
   }
   this->rt_connector->insertBlock(device);
   std::vector<RT::Device*> device_list = this->rt_connector->getDevices();
-  RT::System::CMD cmd(*event);
-  cmd.setParam("deviceList", std::any(device_list));
+  RT::System::CMD cmd(event->getType());
+  cmd.setRTParam("deviceList", device_list);
   RT::System::CMD* cmd_ptr = &cmd;
   this->eventFifo->write(&cmd_ptr, sizeof(RT::System::CMD*));
   cmd.wait();
@@ -876,8 +882,8 @@ void RT::System::removeDevice(Event::Object* event)
   device->setActive(false);
   this->rt_connector->removeBlock(device);
   std::vector<RT::Device*> device_list = this->rt_connector->getDevices();
-  RT::System::CMD cmd(*event);
-  cmd.setParam("deviceList", std::any(device_list));
+  RT::System::CMD cmd(event->getType());
+  cmd.setRTParam("deviceList", device_list);
   RT::System::CMD* cmd_ptr = &cmd;
   this->eventFifo->write(&cmd_ptr, sizeof(RT::System::CMD*));
   cmd.wait();
@@ -892,8 +898,8 @@ void RT::System::insertThread(Event::Object* event)
   }
   this->rt_connector->insertBlock(thread);
   std::vector<RT::Thread*> thread_list = this->rt_connector->getThreads();
-  RT::System::CMD cmd(*event);
-  cmd.setParam("threadList", std::any(thread_list));
+  RT::System::CMD cmd(event->getType());
+  cmd.setRTParam("threadList", thread_list);
   RT::System::CMD* cmd_ptr = &cmd;
   this->eventFifo->write(&cmd_ptr, sizeof(RT::System::CMD*));
   cmd.wait();
@@ -910,8 +916,8 @@ void RT::System::removeThread(Event::Object* event)
   thread->setActive(false);
   this->rt_connector->removeBlock(thread);
   std::vector<RT::Thread*> thread_list = this->rt_connector->getThreads();
-  RT::System::CMD cmd(*event);
-  cmd.setParam("threadList", std::any(thread_list));
+  RT::System::CMD cmd(event->getType());
+  cmd.setRTParam("threadList", thread_list);
   RT::System::CMD* cmd_ptr = &cmd;
   this->eventFifo->write(&cmd_ptr, sizeof(RT::System::CMD*));
   cmd.wait();
@@ -920,12 +926,12 @@ void RT::System::removeThread(Event::Object* event)
 void RT::System::threadActivityChange(Event::Object* event)
 {
   auto isactive = event->getType() == Event::Type::RT_THREAD_UNPAUSE_EVENT;
-  RT::System::CMD cmd(*event);
+  RT::System::CMD cmd(event->getType());
   RT::System::CMD* cmd_ptr = &cmd;
   auto* thread = std::any_cast<RT::Thread*>(event->getParam("thread"));
   thread->setActive(isactive);
   auto thread_list = this->rt_connector->getThreads();
-  cmd.setParam("threadList", std::any(thread_list));
+  cmd.setRTParam("threadList", thread_list);
   this->eventFifo->write(&cmd_ptr, sizeof(RT::System::CMD*));
   cmd.wait();
 }
@@ -933,19 +939,19 @@ void RT::System::threadActivityChange(Event::Object* event)
 void RT::System::deviceActivityChange(Event::Object* event)
 {
   auto isactive = event->getType() == Event::Type::RT_DEVICE_UNPAUSE_EVENT;
-  RT::System::CMD cmd(*event);
+  RT::System::CMD cmd(event->getType());
   RT::System::CMD* cmd_ptr = &cmd;
   auto* device = std::any_cast<RT::Device*>(event->getParam("device"));
   device->setActive(isactive);
   auto device_list = this->rt_connector->getDevices();
-  cmd.setParam("deviceList", std::any(device_list));
+  cmd.setRTParam("deviceList", device_list);
   this->eventFifo->write(&cmd_ptr, sizeof(RT::System::CMD*));
   cmd.wait();
 }
 
 void RT::System::shutdown(Event::Object* event)
 {
-  RT::System::CMD cmd(*event);
+  RT::System::CMD cmd(event->getType());
   RT::System::CMD* cmd_ptr = &cmd;
   this->eventFifo->write(&cmd_ptr, sizeof(RT::System::CMD*));
   cmd.wait();
@@ -953,7 +959,7 @@ void RT::System::shutdown(Event::Object* event)
 
 void RT::System::provideTimetickPointers(Event::Object* event)
 {
-  RT::System::CMD cmd(*event);
+  RT::System::CMD cmd(event->getType());
   RT::System::CMD* cmd_ptr = &cmd;
   this->eventFifo->write(&cmd_ptr, sizeof(RT::System::CMD*));
   cmd.wait();
@@ -963,11 +969,11 @@ void RT::System::provideTimetickPointers(Event::Object* event)
   // transfer values to event for poster to use
   switch (event->getType()) {
     case Event::Type::RT_PREPERIOD_EVENT:
-      startperiod = std::any_cast<int64_t*>(cmd.getParam("pre-period"));
+      startperiod = std::get<int64_t*>(cmd.getRTParam("pre-period"));
       event->setParam("pre-period", std::any(startperiod));
       break;
     case Event::Type::RT_POSTPERIOD_EVENT:
-      stopperiod = std::any_cast<int64_t*>(cmd.getParam("post-period"));
+      stopperiod = std::get<int64_t*>(cmd.getRTParam("post-period"));
       event->setParam("post-period", std::any(stopperiod));
       break;
     default:
@@ -977,13 +983,74 @@ void RT::System::provideTimetickPointers(Event::Object* event)
 
 void RT::System::changeModuleParameters(Event::Object* event)
 {
-  // We will just dynamic cast since we do not make nay changes to the
-  // event parameters themeselves
-  RT::System::CMD cmd(*event);
+  // we must convert event object to cmd object
+  RT::System::CMD cmd(event->getType());
+  auto* component = std::any_cast<Modules::Component*>(event->getParam("paramModule"));
+  cmd.setRTParam("paramModule", component);
+  auto param_id = std::any_cast<size_t>(event->getParam("paramID"));
+  cmd.setRTParam("paramID", param_id);
+  auto param_type = std::any_cast<Modules::Variable::variable_t>(event->getParam("paramType"));
+  cmd.setRTParam("paramType", param_type);
+  std::any param_value_any = event->getParam("paramValue");
+  switch (param_type) {
+    case Modules::Variable::DOUBLE_PARAMETER:
+      cmd.setRTParam("paramValue", 
+                     std::any_cast<double>(param_value_any));
+      break;
+    case Modules::Variable::INT_PARAMETER:
+      cmd.setRTParam("paramValue", 
+                     std::any_cast<int64_t>(param_value_any));
+
+      break;
+    case Modules::Variable::UINT_PARAMETER:
+      cmd.setRTParam("paramValue", 
+                     std::any_cast<uint64_t>(param_value_any));
+      break;
+    case Modules::Variable::STATE:
+      cmd.setRTParam("paramValue", 
+                     std::any_cast<Modules::Variable::state_t>(param_value_any));
+      break;
+    default:
+      ERROR_MSG(
+          "Module Parameter Change event does not contain expected parameter "
+          "types");
+  }
+
   RT::System::CMD* cmd_ptr = &cmd;
   this->eventFifo->write(&cmd_ptr, sizeof(RT::System::CMD*));
   cmd_ptr->wait();
 }
+
+RT::System::CMD::CMD(Event::Type et) : Event::Object(et)
+{
+}
+
+RT::command_param_t RT::System::CMD::getRTParam(const std::string_view& param_name)
+{
+  for (auto& parameter : rt_params) {
+    if (parameter.name == param_name) {
+      return parameter.value;
+    }
+  }
+  return std::monostate();
+}
+
+void RT::System::CMD::setRTParam(const std::string_view& param_name, 
+                                 const RT::command_param_t& value)
+{
+  for (auto& parameter : rt_params) {
+    if (parameter.name == param_name) {
+      parameter.value = value;
+      return;
+    }
+  }
+
+  rt_param temp = {};
+  temp.name = param_name;
+  temp.value = value;
+  rt_params.push_back(temp);
+}
+
 
 void RT::System::execute(void* sys)
 {

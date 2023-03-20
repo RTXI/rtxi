@@ -149,14 +149,14 @@ std::string Event::Object::getName()
   return Event::type_to_string(this->event_type);
 }
 
-std::any Event::Object::getParam(const std::string& param_name)
+std::any Event::Object::getParam(const std::string& param_name) const
 {
-  for (auto& parameter : params) {
+  for (const auto& parameter : params) {
     if (parameter.name == param_name) {
       return parameter.value;
     }
   }
-  return std::any();
+  return std::any{};
 }
 
 bool Event::Object::paramExists(const std::string& param_name)
@@ -207,7 +207,7 @@ bool Event::Object::isdone() const
   return this->processed;
 }
 
-Event::Type Event::Object::getType()
+Event::Type Event::Object::getType() const
 {
   return this->event_type;
 }

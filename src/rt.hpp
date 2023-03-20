@@ -23,11 +23,18 @@
 
 #include <unordered_map>
 #include <vector>
+#include <variant>
 
 #include "event.hpp"
 #include "fifo.hpp"
 #include "io.hpp"
 #include "rtos.hpp"
+
+// forward declaration
+namespace Modules {
+class Component;
+}; // namespace Modules
+
 
 // forward declare important performance measurement
 //! Realtime Oriented Classes
@@ -449,6 +456,11 @@ private:
   std::vector<device_entry_t> device_registry;
 };  // class Connector
 
+using command_param_t = std::variant<std::monostate, 
+                                     int64_t, int64_t*, uint64_t, double,
+                                     RT::Thread*, std::vector<RT::Thread*>,
+                                     RT::Device*, std::vector<RT::Device*>,
+                                     Modules::Component*, std::string>;
 /*!
  * Manages the RTOS as well as all objects that require
  *   realtime execution.
@@ -474,10 +486,16 @@ private:
   class CMD : public Event::Object
   {
   public:
-    explicit CMD(Event::Type et)
-        : Event::Object(et) {};
-    explicit CMD(const Event::Object& event)
-        : Event::Object(event) {};
+    explicit CMD(Event::Type et);
+    command_param_t getRTParam(const std::string_view& param_name);
+    void setRTParam(const std::string_view& param_name, 
+                    const command_param_t& value);
+  private:
+    struct rt_param {
+      std::string_view name;
+      RT::command_param_t value;
+    };
+    std::vector<rt_param> rt_params;
   };
 
   void insertDevice(Event::Object* event);
