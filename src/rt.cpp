@@ -631,14 +631,14 @@ int64_t RT::System::getPeriod()
   return this->task->period;
 }
 
-void RT::System::postTelemitry(RT::Telemitry::Response& telemitry)
+void RT::System::postTelemitry(RT::Telemitry::Response telemitry)
 {
   this->eventFifo->writeRT(&telemitry, sizeof(RT::Telemitry::Response));
 }
 
 RT::Telemitry::Response RT::System::getTelemitry()
 {
-  RT::Telemitry::Response telemitry = RT::Telemitry::NO_TELEMITRY;
+  RT::Telemitry::Response telemitry; 
   this->eventFifo->read(&telemitry, sizeof(RT::Telemitry::Response));
   return telemitry;
 }
@@ -647,27 +647,38 @@ void RT::System::setPeriod(RT::System::CMD* cmd)
 {
   auto period = std::get<int64_t>(cmd->getRTParam("period"));
   this->task->period = period;
-  auto telem = RT::Telemitry::RT_PERIOD_UPDATE;
+  RT::Telemitry::Response telem = {
+    RT::Telemitry::RT_PERIOD_UPDATE,
+    cmd
+  };
   this->postTelemitry(telem);
-  cmd->done();
+  
 }
 
 void RT::System::updateDeviceList(RT::System::CMD* cmd)
 {
-  this->devices =
-      std::get<std::vector<RT::Device*>>(cmd->getRTParam("deviceList"));
-  auto telem = RT::Telemitry::RT_DEVICE_LIST_UPDATE;
+  std::vector<RT::Device*>* vec_ptr = std::get<std::vector<RT::Device*>*>(cmd->getRTParam("deviceList"));
+  this->devices.clear();
+  this->devices.assign(vec_ptr->begin(), vec_ptr->end());
+  RT::Telemitry::Response telem = {
+    RT::Telemitry::RT_DEVICE_LIST_UPDATE,
+    cmd
+  };
   this->postTelemitry(telem);
-  cmd->done();
+  
 }
 
 void RT::System::updateThreadList(RT::System::CMD* cmd)
 {
-  this->threads =
-      std::get<std::vector<RT::Thread*>>(cmd->getRTParam("threadList"));
-  auto telem = RT::Telemitry::RT_THREAD_LIST_UPDATE;
+  std::vector<RT::Thread*>* vec_ptr = std::get<std::vector<RT::Thread*>*>(cmd->getRTParam("threadList"));
+  this->threads.clear();
+  this->threads.assign(vec_ptr->begin(), vec_ptr->end());
+  RT::Telemitry::Response telem = {
+    RT::Telemitry::RT_THREAD_LIST_UPDATE,
+    cmd
+  };
   this->postTelemitry(telem);
-  cmd->done();
+  
 }
 
 // void RT::System::updateBlockActivity(RT::System::CMD* cmd)
@@ -676,11 +687,11 @@ void RT::System::updateThreadList(RT::System::CMD* cmd)
 //   switch (cmd->getType()) {
 //     case Event::Type::RT_BLOCK_PAUSE_EVENT:
 //       block->setActive(false);
-//       cmd->done();
+//       
 //       break;
 //     case Event::Type::RT_BLOCK_UNPAUSE_EVENT:
 //       block->setActive(true);
-//       cmd->done();
+//       
 //       break;
 //     default:
 //       break;
@@ -702,11 +713,18 @@ void RT::System::getPeriodTicksCMD(RT::System::CMD* cmd)
     default:
       return;
   }
-  cmd->done();
+  RT::Telemitry::Response telem = {
+    RT::Telemitry::RT_PERIOD_UPDATE,
+    cmd
+  };
+  this->postTelemitry(telem);
 }
 
 void RT::System::changeModuleParametersCMD(RT::System::CMD* cmd)
 {
+  RT::Telemitry::Response telem;
+  telem.cmd = cmd;
+  telem.type = RT::Telemitry::RT_MODULE_PARAM_UPDATE;
   auto* component =
       std::get<Modules::Component*>(cmd->getRTParam("paramModule"));
   auto param_id = std::get<size_t>(cmd->getRTParam("paramID"));
@@ -735,13 +753,15 @@ void RT::System::changeModuleParametersCMD(RT::System::CMD* cmd)
       ERROR_MSG(
           "Module Parameter Change event does not contain expected parameter "
           "types");
+      telem.type = RT::Telemitry::RT_ERROR;
   }
-  cmd->done();
+  this->postTelemitry(telem);
 }
 
 void RT::System::executeCMD(RT::System::CMD* cmd)
 {
-  RT::Telemitry::Response telem = RT::Telemitry::NO_TELEMITRY;
+  RT::Telemitry::Response telem;
+  telem.cmd = cmd;
   switch (cmd->getType()) {
     case Event::Type::RT_PERIOD_EVENT:
       this->setPeriod(cmd);
@@ -764,23 +784,21 @@ void RT::System::executeCMD(RT::System::CMD* cmd)
       break;
     case Event::Type::RT_SHUTDOWN_EVENT:
       this->task->task_finished = true;
-      telem = RT::Telemitry::RT_SHUTDOWN;
+      telem.type = RT::Telemitry::RT_SHUTDOWN;
       this->postTelemitry(telem);
-      cmd->done();
+      
       break;
     case Event::Type::RT_MODULE_PARAMETER_CHANGE_EVENT:
       this->changeModuleParametersCMD(cmd);
       break;
     case Event::Type::NOOP:
-      telem = RT::Telemitry::RT_NOOP;
+      telem.type = RT::Telemitry::RT_NOOP;
       this->postTelemitry(telem);
-      cmd->done();
       break;
     default:
-      telem = RT::Telemitry::RT_ERROR;
+      telem.type = RT::Telemitry::RT_ERROR;
       RT::System::postTelemitry(telem);
       // make sure the command is handled so caller can continue
-      cmd->done();
   }
 }
 
@@ -865,7 +883,7 @@ void RT::System::insertDevice(Event::Object* event)
   this->rt_connector->insertBlock(device);
   std::vector<RT::Device*> device_list = this->rt_connector->getDevices();
   RT::System::CMD cmd(event->getType());
-  cmd.setRTParam("deviceList", device_list);
+  cmd.setRTParam("deviceList", &device_list);
   RT::System::CMD* cmd_ptr = &cmd;
   this->eventFifo->write(&cmd_ptr, sizeof(RT::System::CMD*));
   cmd.wait();
@@ -883,7 +901,7 @@ void RT::System::removeDevice(Event::Object* event)
   this->rt_connector->removeBlock(device);
   std::vector<RT::Device*> device_list = this->rt_connector->getDevices();
   RT::System::CMD cmd(event->getType());
-  cmd.setRTParam("deviceList", device_list);
+  cmd.setRTParam("deviceList", &device_list);
   RT::System::CMD* cmd_ptr = &cmd;
   this->eventFifo->write(&cmd_ptr, sizeof(RT::System::CMD*));
   cmd.wait();
@@ -899,7 +917,7 @@ void RT::System::insertThread(Event::Object* event)
   this->rt_connector->insertBlock(thread);
   std::vector<RT::Thread*> thread_list = this->rt_connector->getThreads();
   RT::System::CMD cmd(event->getType());
-  cmd.setRTParam("threadList", thread_list);
+  cmd.setRTParam("threadList", &thread_list);
   RT::System::CMD* cmd_ptr = &cmd;
   this->eventFifo->write(&cmd_ptr, sizeof(RT::System::CMD*));
   cmd.wait();
@@ -917,7 +935,7 @@ void RT::System::removeThread(Event::Object* event)
   this->rt_connector->removeBlock(thread);
   std::vector<RT::Thread*> thread_list = this->rt_connector->getThreads();
   RT::System::CMD cmd(event->getType());
-  cmd.setRTParam("threadList", thread_list);
+  cmd.setRTParam("threadList", &thread_list);
   RT::System::CMD* cmd_ptr = &cmd;
   this->eventFifo->write(&cmd_ptr, sizeof(RT::System::CMD*));
   cmd.wait();
@@ -931,7 +949,7 @@ void RT::System::threadActivityChange(Event::Object* event)
   auto* thread = std::any_cast<RT::Thread*>(event->getParam("thread"));
   thread->setActive(isactive);
   auto thread_list = this->rt_connector->getThreads();
-  cmd.setRTParam("threadList", thread_list);
+  cmd.setRTParam("threadList", &thread_list);
   this->eventFifo->write(&cmd_ptr, sizeof(RT::System::CMD*));
   cmd.wait();
 }
@@ -944,7 +962,7 @@ void RT::System::deviceActivityChange(Event::Object* event)
   auto* device = std::any_cast<RT::Device*>(event->getParam("device"));
   device->setActive(isactive);
   auto device_list = this->rt_connector->getDevices();
-  cmd.setRTParam("deviceList", device_list);
+  cmd.setRTParam("deviceList", &device_list);
   this->eventFifo->write(&cmd_ptr, sizeof(RT::System::CMD*));
   cmd.wait();
 }

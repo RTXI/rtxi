@@ -35,9 +35,6 @@ namespace Modules {
 class Component;
 }; // namespace Modules
 
-
-// forward declare important performance measurement
-//! Realtime Oriented Classes
 /*!
  * Objects contained within this namespace are responsible
  *   for managing realtime execution.
@@ -45,17 +42,24 @@ class Component;
 namespace RT
 {
 
+
 namespace Telemitry
 {
-typedef int Response;
-const Response RT_PERIOD_UPDATE = 0;
-const Response RT_THREAD_LIST_UPDATE = 1;
-const Response RT_DEVICE_LIST_UPDATE = 2;
-const Response RT_NOOP = 3;
-const Response RT_SHUTDOWN = 4;
-const Response RT_ERROR = -1;
-const Response NO_TELEMITRY = -2;
-}  // namespace Telemitry
+typedef int response_t;
+const response_t RT_PERIOD_UPDATE = 0;
+const response_t RT_THREAD_LIST_UPDATE = 1;
+const response_t RT_DEVICE_LIST_UPDATE = 2;
+const response_t RT_NOOP = 3;
+const response_t RT_SHUTDOWN = 4;
+const response_t RT_MODULE_PARAM_UPDATE = 5;
+const response_t RT_ERROR = -1;
+const response_t NO_TELEMITRY = -2;
+
+struct Response {
+  response_t type = NO_TELEMITRY;
+  Event::Object* cmd = nullptr;
+};
+};  // namespace Telemitry
 
 /*!
  * Base class for devices that are to interface with System.
@@ -458,8 +462,8 @@ private:
 
 using command_param_t = std::variant<std::monostate, 
                                      int64_t, int64_t*, uint64_t, double,
-                                     RT::Thread*, std::vector<RT::Thread*>,
-                                     RT::Device*, std::vector<RT::Device*>,
+                                     RT::Thread*, std::vector<RT::Thread*>*,
+                                     RT::Device*, std::vector<RT::Device*>*,
                                      Modules::Component*, std::string>;
 /*!
  * Manages the RTOS as well as all objects that require
@@ -521,7 +525,7 @@ private:
   void getPeriodTicksCMD(CMD* cmd);
   void changeModuleParametersCMD(CMD* cmd);
 
-  void postTelemitry(RT::Telemitry::Response& telemitry);
+  void postTelemitry(RT::Telemitry::Response telemitry);
 
   static void execute(void* sys);
 

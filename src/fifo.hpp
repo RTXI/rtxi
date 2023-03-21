@@ -100,6 +100,9 @@ public:
    * \returns The maximum amount of memory the fifo can hold
    */
   virtual size_t getCapacity() = 0;
+
+  virtual bool dataAvailable() = 0;
+  virtual bool dataAvailableRT() = 0;
 };
 
 /*!
