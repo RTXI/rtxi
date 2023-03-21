@@ -526,6 +526,7 @@ private:
   void changeModuleParametersCMD(CMD* cmd);
 
   void postTelemitry(RT::Telemitry::Response telemitry);
+  void createTelemitryProcessor();
 
   static void execute(void* sys);
 

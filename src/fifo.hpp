@@ -101,8 +101,8 @@ public:
    */
   virtual size_t getCapacity() = 0;
 
-  virtual bool dataAvailable() = 0;
-  virtual bool dataAvailableRT() = 0;
+  virtual void poll() = 0;
+  virtual void pollRT() = 0;
 };
 
 /*!

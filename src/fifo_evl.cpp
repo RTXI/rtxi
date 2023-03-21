@@ -27,6 +27,8 @@ public:
   ssize_t write(void* buf, size_t buf_size) override;
   ssize_t readRT(void* buf, size_t buf_size) override;
   ssize_t writeRT(void* buf, size_t buf_size) override;
+  void poll() override;
+  void pollRT() override;
   size_t getCapacity() override;
 
 private:
@@ -69,6 +71,16 @@ ssize_t RT::OS::evlFifo::readRT(void* buf, size_t buf_size)
 ssize_t RT::OS::evlFifo::writeRT(void* buf, size_t buf_size)
 {
   return oob_write(this->xbuf_fd, buf, buf_size);
+}
+
+void RT::OS::evlFifo::poll()
+{
+  
+}
+
+void RT::OS::evlFifo::pollRT()
+{
+
 }
 
 int RT::OS::evlFifo::buffer_fd() const
