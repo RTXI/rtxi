@@ -138,16 +138,26 @@ TEST_F(RTConnectorTest, getBlocks)
 
 TEST_F(SystemTest, checkTelemitry)
 {
-  Event::Object event(Event::Type::NOOP);
-  this->system->receiveEvent(&event);
-  ASSERT_EQ(RT::Telemitry::RT_NOOP, this->system->getTelemitry());
+  auto sendevent = [&](){
+    Event::Object event(Event::Type::NOOP);
+    this->system->receiveEvent(&event);
+  };
+  std::thread(sendevent).detach();
+  RT::Telemitry::Response response = this->system->getTelemitry();
+  response.cmd->done();
+  ASSERT_EQ(RT::Telemitry::RT_NOOP, response.type);
 }
 
 TEST_F(SystemTest, shutdown)
 {
-  Event::Object ev(Event::Type::RT_SHUTDOWN_EVENT);
-  this->system->receiveEvent(&ev);
-  ASSERT_EQ(this->system->getTelemitry(), RT::Telemitry::RT_SHUTDOWN);
+  auto sendevent = [&](){
+    Event::Object ev(Event::Type::RT_SHUTDOWN_EVENT);
+    this->system->receiveEvent(&ev);
+  };
+  std::thread(sendevent).detach();
+  RT::Telemitry::Response response = this->system->getTelemitry();
+  response.cmd->done();
+  ASSERT_EQ(response.type, RT::Telemitry::RT_SHUTDOWN);
 }
 
 TEST_F(SystemTest, getPeriod)
@@ -159,14 +169,26 @@ TEST_F(SystemTest, getPeriod)
 
 TEST_F(SystemTest, setPeriod)
 {
-  Event::Object ev(Event::Type::RT_PERIOD_EVENT);
-  ev.setParam("period", RT::OS::DEFAULT_PERIOD / 2);
-  this->system->receiveEvent(&ev);
-  EXPECT_EQ(RT::Telemitry::RT_PERIOD_UPDATE, this->system->getTelemitry());
+  RT::Telemitry::Response response;
+  auto sendperiodevent = [&](){
+    Event::Object ev(Event::Type::RT_PERIOD_EVENT);
+    ev.setParam("period", RT::OS::DEFAULT_PERIOD / 2);
+    this->system->receiveEvent(&ev);
+  };
+  std::thread(sendperiodevent).detach();
+  response = this->system->getTelemitry();
+  response.cmd->done();
+  EXPECT_EQ(RT::Telemitry::RT_PERIOD_UPDATE, response.type);
   ASSERT_EQ(RT::OS::DEFAULT_PERIOD / 2, system->getPeriod());
-  ev.setParam("period", RT::OS::DEFAULT_PERIOD);
-  this->system->receiveEvent(&ev);
-  EXPECT_EQ(RT::Telemitry::RT_PERIOD_UPDATE, this->system->getTelemitry());
+  auto sendtwiceperiodevent = [&](){
+    Event::Object ev(Event::Type::RT_PERIOD_EVENT);
+    ev.setParam("period", RT::OS::DEFAULT_PERIOD);
+    this->system->receiveEvent(&ev);
+  };
+  std::thread(sendtwiceperiodevent).detach();
+  response = this->system->getTelemitry();
+  response.cmd->done();
+  EXPECT_EQ(RT::Telemitry::RT_PERIOD_UPDATE, response.type);
   ASSERT_EQ(RT::OS::DEFAULT_PERIOD, system->getPeriod());
 }
 
@@ -193,29 +215,40 @@ TEST_F(SystemTest, updateDeviceList)
   defaultOutputChannel.data_size = 1;
   defaultChannelList.push_back(defaultInputChannel);
   defaultChannelList.push_back(defaultOutputChannel);
-
+  
   MockRTDevice mock_device("mockdevice", defaultChannelList);
   Event::Object change_activity_event(Event::Type::RT_DEVICE_UNPAUSE_EVENT);
   change_activity_event.setParam("device",
                                  static_cast<RT::Device*>(&mock_device));
-  this->system->receiveEvent(&change_activity_event);
+  auto senddeviceevent = [&](){
+    this->system->receiveEvent(&change_activity_event);
+  };
+  std::thread(senddeviceevent).detach();
 
-  // std::any_cast<RT::Device*>(std::any(static_cast<RT::Device*>(&mock_device)))->read();
-  // std::any_cast<RT::Device*>(std::any(static_cast<RT::Device*>(&mock_device)))->write();
-
+  RT::Telemitry::Response response;
   // insert device
   this->rt_connector->insertBlock(&mock_device);
   Event::Object insertEvent(Event::Type::RT_DEVICE_INSERT_EVENT);
   insertEvent.setParam("device", static_cast<RT::Device*>(&mock_device));
-  this->system->receiveEvent(&insertEvent);
-  ASSERT_EQ(this->system->getTelemitry(), RT::Telemitry::RT_DEVICE_LIST_UPDATE);
+  auto sendinsertblockevent = [&](){
+    this->system->receiveEvent(&insertEvent);
+  };
+  std::thread(sendinsertblockevent).detach();
+  response = this->system->getTelemitry();
+  response.cmd->done();
+  ASSERT_EQ(response.type, RT::Telemitry::RT_DEVICE_LIST_UPDATE);
   ASSERT_TRUE(this->rt_connector->isRegistered(&mock_device));
 
   // remove device
   Event::Object removeEvent(Event::Type::RT_DEVICE_REMOVE_EVENT);
   removeEvent.setParam("device", static_cast<RT::Device*>(&mock_device));
-  this->system->receiveEvent(&removeEvent);
-  ASSERT_EQ(this->system->getTelemitry(), RT::Telemitry::RT_DEVICE_LIST_UPDATE);
+  auto sendremoveblockevent = [&](){
+    this->system->receiveEvent(&removeEvent);
+  };
+  std::thread(sendremoveblockevent).detach();
+  response = this->system->getTelemitry();
+  response.cmd->done();
+  ASSERT_EQ(response.type, RT::Telemitry::RT_DEVICE_LIST_UPDATE);
   ASSERT_FALSE(this->rt_connector->isRegistered(&mock_device));
 }
 
@@ -248,20 +281,34 @@ TEST_F(SystemTest, updateThreadList)
   Event::Object change_activity_event(Event::Type::RT_THREAD_UNPAUSE_EVENT);
   change_activity_event.setParam("thread",
                                  static_cast<RT::Thread*>(thread_ptr));
-  this->system->receiveEvent(&change_activity_event);
+  auto sendthreadunpauseevent = [&](){
+    this->system->receiveEvent(&change_activity_event);
+  };
+  std::thread(sendthreadunpauseevent).detach();
+  RT::Telemitry::Response response = this->system->getTelemitry();
+  response.cmd->done();
 
   // insert thread
   this->rt_connector->insertBlock(thread_ptr);
   Event::Object insertEvent(Event::Type::RT_THREAD_INSERT_EVENT);
   insertEvent.setParam("thread", thread_ptr);
-  this->system->receiveEvent(&insertEvent);
-  ASSERT_EQ(this->system->getTelemitry(), RT::Telemitry::RT_THREAD_LIST_UPDATE);
+  auto sendinsertblockevent = [&](){
+    this->system->receiveEvent(&insertEvent);
+  };
+  std::thread(sendinsertblockevent).detach();
+  response = this->system->getTelemitry();
+  response.cmd->done();
+  ASSERT_EQ(response.type, RT::Telemitry::RT_THREAD_LIST_UPDATE);
   ASSERT_TRUE(this->rt_connector->isRegistered(&mock_thread));
 
   // remove thread
   Event::Object removeEvent(Event::Type::RT_THREAD_REMOVE_EVENT);
-  removeEvent.setParam("thread", thread_ptr);
-  this->system->receiveEvent(&removeEvent);
-  ASSERT_EQ(this->system->getTelemitry(), RT::Telemitry::RT_THREAD_LIST_UPDATE);
+  auto sendthreadremoveevent = [&](){
+    removeEvent.setParam("thread", thread_ptr);
+  };
+  std::thread(sendthreadremoveevent).detach();
+  response = this->system->getTelemitry();
+  response.cmd->done();
+  ASSERT_EQ(response.type, RT::Telemitry::RT_THREAD_LIST_UPDATE);
   ASSERT_FALSE(this->rt_connector->isRegistered(&mock_thread));
 }
