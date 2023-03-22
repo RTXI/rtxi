@@ -636,8 +636,21 @@ void RT::System::postTelemitry(RT::Telemitry::Response telemitry)
   this->eventFifo->writeRT(&telemitry, sizeof(RT::Telemitry::Response));
 }
 
+void RT::System::createTelemitryProcessor()
+{
+  RT::Telemitry::Response telem;
+  auto proc = [&](){
+    while(!this->task->task_finished){
+      telem = this->getTelemitry();
+      telem.cmd->done();
+    }
+  };
+  std::thread(proc).detach();
+}
+
 RT::Telemitry::Response RT::System::getTelemitry()
 {
+  this->eventFifo->poll();
   RT::Telemitry::Response telemitry; 
   this->eventFifo->read(&telemitry, sizeof(RT::Telemitry::Response));
   return telemitry;
