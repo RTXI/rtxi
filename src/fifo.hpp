@@ -101,8 +101,14 @@ public:
    */
   virtual size_t getCapacity() = 0;
 
+  /*!
+   * Checks whether there is available data to read on the non-rt side
+   *
+   * This function is primarily for non-rt threads to wait on available
+   * data from the rt thread. It blocks (sleeps) the calling thread until
+   * woken by data availability. SHOULD NOT RUN IN REAL TIME!!
+   */
   virtual void poll() = 0;
-  virtual void pollRT() = 0;
 };
 
 /*!

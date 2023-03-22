@@ -4,8 +4,11 @@
 
 #include <errno.h>
 #include <evl/evl.h>
+#include <evl/poll.h>
 #include <string.h>
+#include <sys/poll.h>
 #include <unistd.h>
+#include <poll.h>
 
 #include "debug.hpp"
 
@@ -34,6 +37,8 @@ public:
 private:
   int xbuf_fd;
   size_t fifo_capacity;
+  struct pollfd xbuf_poll_fd;
+  int xbuf_pollrt_fd;
 };
 }  // namespace RT::OS
 
@@ -44,6 +49,13 @@ RT::OS::evlFifo::evlFifo(size_t size)
                                   fifo_capacity,
                                   EVL_CLONE_PRIVATE | EVL_CLONE_NONBLOCK,
                                   "RTXI Fifo");
+  if(this->xbuf_fd <= 0) {
+    ERROR_MSG("RT::OS::FIFO(evl) : Unable to create real-time buffer\n");
+    ERROR_MSG("evl core : {}", strerror(this->xbuf_fd));
+    return; 
+  }
+  this->xbuf_poll_fd.fd = this->xbuf_fd;
+  this->xbuf_poll_fd.events = POLLIN;
 }
 
 RT::OS::evlFifo::~evlFifo()
@@ -75,12 +87,11 @@ ssize_t RT::OS::evlFifo::writeRT(void* buf, size_t buf_size)
 
 void RT::OS::evlFifo::poll()
 {
-  
-}
-
-void RT::OS::evlFifo::pollRT()
-{
-
+  int errcode = ::poll(&this->xbuf_poll_fd, 1, -1);
+  if(errcode < 0){
+    ERROR_MSG("RT::OS::FIFO(evl)::poll : returned with failure code {} : ", errcode); 
+    ERROR_MSG("{}", strerror(errcode));
+  }
 }
 
 int RT::OS::evlFifo::buffer_fd() const

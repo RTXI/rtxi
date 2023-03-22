@@ -44,6 +44,7 @@ public:
   ssize_t write(void* buf, size_t data_size) override;
   ssize_t readRT(void* buf, size_t data_size) override;
   ssize_t writeRT(void* buf, size_t data_size) override;
+  void poll() override;
 
 private:
   char* rt_to_ui;  // 0 is read from rt; 1 is write to ui
@@ -59,6 +60,10 @@ private:
   uint64_t ui_available_write_bytes;
   uint64_t rt_available_read_bytes;
   uint64_t rt_available_write_bytes;
+
+  // synchronization primitives specific to poll function
+  std::mutex ui_read_mut;
+  std::condition_variable available_read_cond;
 };
 }  // namespace RT::OS
 
@@ -154,7 +159,19 @@ ssize_t RT::OS::xbuffFifo::writeRT(void* buf, size_t data_size)
   }
   rt_wptr = (rt_wptr + data_size) % fifo_capacity;
   ui_available_read_bytes = (fifo_capacity + ui_rptr - rt_wptr) % fifo_capacity;
+  this->available_read_cond.notify_one();
   return static_cast<ssize_t>(data_size);
+}
+
+void RT::OS::xbuffFifo::poll()
+{
+  std::unique_lock<std::mutex> lk(this->ui_read_mut);
+  if(ui_available_read_bytes == 0) {
+    this->available_read_cond.wait(
+      lk, 
+      [this](){return ui_available_read_bytes != 0;}
+    );
+  }
 }
 
 size_t RT::OS::xbuffFifo::getCapacity()
