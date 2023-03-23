@@ -10,6 +10,7 @@ project(
     LANGUAGES CXX
 )
 
+set(RTXI_RT_CORE "posix")
 set(RTXI_USER_HOMEDIR $ENV{HOME})
 set(RTXI_SETTINGS_DIR ${RTXI_USER_HOMEDIR}/rtxi/)
 set(RTXI_PLUGIN_DIR ${CMAKE_INSTALL_PREFIX}/rtxi/modules/)

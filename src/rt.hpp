@@ -482,6 +482,7 @@ public:
   int64_t getPeriod();
   RT::Telemitry::Response getTelemitry();
 
+  void createTelemitryProcessor();
   void receiveEvent(Event::Object* event) override;
 
 private:
@@ -526,7 +527,6 @@ private:
   void changeModuleParametersCMD(CMD* cmd);
 
   void postTelemitry(RT::Telemitry::Response telemitry);
-  void createTelemitryProcessor();
 
   static void execute(void* sys);
 

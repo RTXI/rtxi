@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.24)
 
-if(${evl_FOUND})
+if(${evl_FOUND} AND RTXI_RT_CORE STREQUAL "evl")
   list(APPEND CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES ${evl_INCLUDE_DIRS})
   add_library(rtos_fifo_lib OBJECT "fifo.hpp" "fifo_evl.cpp")
   target_link_libraries(rtos_fifo_lib 
@@ -17,7 +17,7 @@ if(${evl_FOUND})
     fmt::fmt
   )
   target_include_directories(rtos_lib SYSTEM PRIVATE ${evl_INCLUDE_DIRS})
-elseif(xenomai3_FOUND)
+elseif(xenomai3_FOUND AND RTXI_RT_CORE STREQUAL "xenomai")
   list(APPEND CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES ${xenomai_ALCHEMY_CFLAGS})
   add_library(rtos_fifo_lib OBJECT "fifo.hpp" "fifo_xenomai.cpp")
   target_link_libraries(rtos_fifo_lib 

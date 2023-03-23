@@ -623,6 +623,7 @@ RT::System::~System()
 {
   this->task->task_finished = true;
   RT::OS::deleteTask(this->task.get());
+
   this->event_manager->unregisterHandler(this);
 }
 
@@ -638,11 +639,17 @@ void RT::System::postTelemitry(RT::Telemitry::Response telemitry)
 
 void RT::System::createTelemitryProcessor()
 {
-  RT::Telemitry::Response telem;
   auto proc = [&](){
+    RT::Telemitry::Response telem;
     while(!this->task->task_finished){
+      this->eventFifo->poll();
       telem = this->getTelemitry();
-      telem.cmd->done();
+      if(telem.cmd != nullptr) {
+        telem.cmd->done();
+      }
+      if(telem.type == RT::Telemitry::RT_SHUTDOWN) { 
+        break; 
+      }
     }
   };
   std::thread(proc).detach();
@@ -798,18 +805,20 @@ void RT::System::executeCMD(RT::System::CMD* cmd)
     case Event::Type::RT_SHUTDOWN_EVENT:
       this->task->task_finished = true;
       telem.type = RT::Telemitry::RT_SHUTDOWN;
+      telem.cmd = cmd;
       this->postTelemitry(telem);
-      
       break;
     case Event::Type::RT_MODULE_PARAMETER_CHANGE_EVENT:
       this->changeModuleParametersCMD(cmd);
       break;
     case Event::Type::NOOP:
       telem.type = RT::Telemitry::RT_NOOP;
+      telem.cmd = cmd;
       this->postTelemitry(telem);
       break;
     default:
       telem.type = RT::Telemitry::RT_ERROR;
+      telem.cmd = nullptr;
       RT::System::postTelemitry(telem);
       // make sure the command is handled so caller can continue
   }
@@ -817,6 +826,13 @@ void RT::System::executeCMD(RT::System::CMD* cmd)
 
 void RT::System::receiveEvent(Event::Object* event)
 {
+  // funnily enough it may be that real-time loop
+  // is already shutting down before unregistering 
+  // system from the list of event handlers. 
+  // In that case we shouldn't attempt to send commands 
+  // or process events
+  if(this->task->task_finished) { return; }
+
   switch (event->getType()) {
     case Event::Type::RT_PERIOD_EVENT:
       this->setPeriod(event);
@@ -1127,4 +1143,5 @@ void RT::System::execute(void* sys)
     endtime = RT::OS::getTime();
     cmd = nullptr;
   }
+
 }

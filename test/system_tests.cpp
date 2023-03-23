@@ -194,6 +194,9 @@ TEST_F(SystemTest, setPeriod)
 
 TEST_F(SystemTest, updateDeviceList)
 {
+  // Typically we use another thread to handle cmd completion however we
+  // need to check whether the rt loop is sending the correct telemitry
+  // therefore we handle telemitry ourselves
   std::string defaultInputChannelName = "CHANNEL INPUT";
   std::string defaultInputChannelDescription =
       "DEFAULT INPUT CHANNEL DESCRIPTION";
@@ -224,8 +227,11 @@ TEST_F(SystemTest, updateDeviceList)
     this->system->receiveEvent(&change_activity_event);
   };
   std::thread(senddeviceevent).detach();
-
+  // we have to manually flush telemitry stream
   RT::Telemitry::Response response;
+  response = this->system->getTelemitry();
+  response.cmd->done();
+
   // insert device
   this->rt_connector->insertBlock(&mock_device);
   Event::Object insertEvent(Event::Type::RT_DEVICE_INSERT_EVENT);
@@ -254,6 +260,9 @@ TEST_F(SystemTest, updateDeviceList)
 
 TEST_F(SystemTest, updateThreadList)
 {
+  // Typically we use another thread to handle cmd completion however we
+  // need to check whether the rt loop is sending the correct telemitry
+  // therefore we handle telemitry ourselves
   std::string defaultInputChannelName = "CHANNEL INPUT";
   std::string defaultInputChannelDescription =
       "DEFAULT INPUT CHANNEL DESCRIPTION";
@@ -303,8 +312,9 @@ TEST_F(SystemTest, updateThreadList)
 
   // remove thread
   Event::Object removeEvent(Event::Type::RT_THREAD_REMOVE_EVENT);
+  removeEvent.setParam("thread", thread_ptr);
   auto sendthreadremoveevent = [&](){
-    removeEvent.setParam("thread", thread_ptr);
+    this->system->receiveEvent(&removeEvent);
   };
   std::thread(sendthreadremoveevent).detach();
   response = this->system->getTelemitry();
