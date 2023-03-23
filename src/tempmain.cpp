@@ -38,7 +38,7 @@ int main(int argc, char* argv[])
   auto rt_connector = std::make_unique<RT::Connector>();
   auto rt_system =
       std::make_unique<RT::System>(event_manager.get(), rt_connector.get());
-
+  rt_system->createTelemitryProcessor();
   // Initializing GUI
   QApplication::setDesktopSettingsAware(false);
   auto* app = new QApplication(argc, argv);
