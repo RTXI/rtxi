@@ -31,14 +31,12 @@ public:
   ssize_t readRT(void* buf, size_t buf_size) override;
   ssize_t writeRT(void* buf, size_t buf_size) override;
   void poll() override;
-  void pollRT() override;
   size_t getCapacity() override;
 
 private:
   int xbuf_fd;
   size_t fifo_capacity;
   struct pollfd xbuf_poll_fd;
-  int xbuf_pollrt_fd;
 };
 }  // namespace RT::OS
 
