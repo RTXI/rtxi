@@ -480,7 +480,7 @@ public:
   ~System();
 
   int64_t getPeriod();
-  RT::Telemitry::Response getTelemitry();
+  std::vector<RT::Telemitry::Response> getTelemitry();
 
   void createTelemitryProcessor();
   void receiveEvent(Event::Object* event) override;

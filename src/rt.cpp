@@ -640,27 +640,32 @@ void RT::System::postTelemitry(RT::Telemitry::Response telemitry)
 void RT::System::createTelemitryProcessor()
 {
   auto proc = [&](){
-    RT::Telemitry::Response telem;
-    while(!this->task->task_finished){
-      this->eventFifo->poll();
-      telem = this->getTelemitry();
-      if(telem.cmd != nullptr) {
-        telem.cmd->done();
-      }
-      if(telem.type == RT::Telemitry::RT_SHUTDOWN) { 
-        break; 
+    bool running = true;
+    std::vector<RT::Telemitry::Response> responses;
+    while(!this->task->task_finished && running){
+      responses = this->getTelemitry();
+      for(auto telem : responses){
+        if(telem.cmd != nullptr) {
+          telem.cmd->done();
+        }
+        if(telem.type == RT::Telemitry::RT_SHUTDOWN) { 
+          running = false; 
+        }
       }
     }
   };
   std::thread(proc).detach();
 }
 
-RT::Telemitry::Response RT::System::getTelemitry()
+std::vector<RT::Telemitry::Response> RT::System::getTelemitry()
 {
   this->eventFifo->poll();
+  std::vector<RT::Telemitry::Response> responses;
   RT::Telemitry::Response telemitry; 
-  this->eventFifo->read(&telemitry, sizeof(RT::Telemitry::Response));
-  return telemitry;
+  while(this->eventFifo->read(&telemitry, sizeof(RT::Telemitry::Response)) > 0){
+    responses.push_back(telemitry);
+  }
+  return responses;
 }
 
 void RT::System::setPeriod(RT::System::CMD* cmd)

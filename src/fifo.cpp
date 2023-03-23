@@ -64,6 +64,8 @@ private:
   // synchronization primitives specific to poll function
   std::mutex ui_read_mut;
   std::condition_variable available_read_cond;
+  bool rt_closed = false;
+  void flush_buff();
 };
 }  // namespace RT::OS
 
@@ -76,6 +78,7 @@ RT::OS::xbuffFifo::xbuffFifo(size_t size)
 
 RT::OS::xbuffFifo::~xbuffFifo()
 {
+  this->flush_buff();
   delete[] rt_to_ui;
   delete[] ui_to_rt;
 }
@@ -169,9 +172,15 @@ void RT::OS::xbuffFifo::poll()
   if(ui_available_read_bytes == 0) {
     this->available_read_cond.wait(
       lk, 
-      [this](){return ui_available_read_bytes != 0;}
+      [this](){return ui_available_read_bytes != 0 || rt_closed;}
     );
   }
+}
+
+void RT::OS::xbuffFifo::flush_buff()
+{
+  this->rt_closed = true;
+  this->available_read_cond.notify_all();
 }
 
 size_t RT::OS::xbuffFifo::getCapacity()
