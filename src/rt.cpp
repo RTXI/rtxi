@@ -20,6 +20,7 @@
 
 #include <functional>
 #include <queue>
+#include <iostream>
 
 #include "rt.hpp"
 
@@ -626,7 +627,9 @@ RT::System::~System()
   this->event_manager->unregisterHandler(this);
   this->telemitry_processing_thread_running = false;
   this->eventFifo->close();
-  this->telemitry_processing_thread.join();
+  if(this->telemitry_processing_thread.joinable()){
+    this->telemitry_processing_thread.join();
+  }
 }
 
 int64_t RT::System::getPeriod()

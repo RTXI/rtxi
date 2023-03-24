@@ -141,9 +141,14 @@ TEST_F(SystemTest, checkTelemitry)
   auto sendevent = [&](){
     Event::Object event(Event::Type::NOOP);
     this->system->receiveEvent(&event);
+    event.wait();
   };
   std::thread(sendevent).detach();
-  std::vector<RT::Telemitry::Response> responses = this->system->getTelemitry();
+  std::vector<RT::Telemitry::Response> responses;
+  while(responses.empty()){
+    responses = this->system->getTelemitry();
+  }
+
   for(const auto& response : responses) { response.cmd->done(); }
   ASSERT_EQ(RT::Telemitry::RT_NOOP, responses.back().type);
 }
@@ -155,7 +160,10 @@ TEST_F(SystemTest, shutdown)
     this->system->receiveEvent(&ev);
   };
   std::thread(sendevent).detach();
-  std::vector<RT::Telemitry::Response> responses = this->system->getTelemitry();
+  std::vector<RT::Telemitry::Response> responses;
+  while(responses.empty()){
+    responses = this->system->getTelemitry();
+  }
   for(const auto& response : responses) { response.cmd->done(); }
   ASSERT_EQ(responses.back().type, RT::Telemitry::RT_SHUTDOWN);
 }
