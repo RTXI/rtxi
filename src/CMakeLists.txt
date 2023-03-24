@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.24)
 
-if(${evl_FOUND} AND RTXI_RT_CORE STREQUAL "evl")
+if(DEFINED evl_FOUND AND RTXI_RT_CORE STREQUAL "evl")
   list(APPEND CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES ${evl_INCLUDE_DIRS})
   add_library(rtos_fifo_lib OBJECT "fifo.hpp" "fifo_evl.cpp")
   target_link_libraries(rtos_fifo_lib 

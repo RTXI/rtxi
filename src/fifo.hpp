@@ -109,6 +109,11 @@ public:
    * woken by data availability. SHOULD NOT RUN IN REAL TIME!!
    */
   virtual void poll() = 0;
+
+  /*!
+   * Closes the handle stored and prevents reading from the ui side
+   */
+  virtual void close() = 0;
 };
 
 /*!

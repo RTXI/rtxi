@@ -537,6 +537,8 @@ private:
   // System owns the task object and the pipe used to communicate with it
   std::unique_ptr<RT::OS::Task> task;
   std::unique_ptr<RT::OS::Fifo> eventFifo;
+  std::thread telemitry_processing_thread;
+  std::atomic<bool> telemitry_processing_thread_running = true;
 
   // system doesn't own any of the below variables. That's why they are
   // only pointers.

@@ -623,8 +623,10 @@ RT::System::~System()
 {
   this->task->task_finished = true;
   RT::OS::deleteTask(this->task.get());
-
   this->event_manager->unregisterHandler(this);
+  this->telemitry_processing_thread_running = false;
+  this->eventFifo->close();
+  this->telemitry_processing_thread.join();
 }
 
 int64_t RT::System::getPeriod()
@@ -640,21 +642,21 @@ void RT::System::postTelemitry(RT::Telemitry::Response telemitry)
 void RT::System::createTelemitryProcessor()
 {
   auto proc = [&](){
-    bool running = true;
     std::vector<RT::Telemitry::Response> responses;
-    while(!this->task->task_finished && running){
+    while(!this->task->task_finished && 
+          this->telemitry_processing_thread_running){
       responses = this->getTelemitry();
       for(auto telem : responses){
         if(telem.cmd != nullptr) {
           telem.cmd->done();
         }
         if(telem.type == RT::Telemitry::RT_SHUTDOWN) { 
-          running = false; 
+          this->telemitry_processing_thread_running = false; 
         }
       }
     }
   };
-  std::thread(proc).detach();
+  this->telemitry_processing_thread = std::thread(proc);
 }
 
 std::vector<RT::Telemitry::Response> RT::System::getTelemitry()

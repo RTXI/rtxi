@@ -45,6 +45,7 @@ public:
   ssize_t readRT(void* buf, size_t data_size) override;
   ssize_t writeRT(void* buf, size_t data_size) override;
   void poll() override;
+  void close() override;
 
 private:
   char* rt_to_ui;  // 0 is read from rt; 1 is write to ui
@@ -78,7 +79,6 @@ RT::OS::xbuffFifo::xbuffFifo(size_t size)
 
 RT::OS::xbuffFifo::~xbuffFifo()
 {
-  this->flush_buff();
   delete[] rt_to_ui;
   delete[] ui_to_rt;
 }
@@ -181,6 +181,11 @@ void RT::OS::xbuffFifo::flush_buff()
 {
   this->rt_closed = true;
   this->available_read_cond.notify_all();
+}
+
+void RT::OS::xbuffFifo::close()
+{
+  this->flush_buff();
 }
 
 size_t RT::OS::xbuffFifo::getCapacity()
