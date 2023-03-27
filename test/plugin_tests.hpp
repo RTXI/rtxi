@@ -40,8 +40,8 @@ protected:
     }
     ~PluginManagerTest()=default;
 
-    std::unique_ptr<Modules::Manager> mod_manager;
     std::unique_ptr<Event::Manager> ev_manager;
+    std::unique_ptr<Modules::Manager> mod_manager;
 };
 
 #endif

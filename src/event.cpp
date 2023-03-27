@@ -228,7 +228,7 @@ Event::Manager::~Manager()
 
 void Event::Manager::postEvent(Event::Object* event)
 {
-  // Make sure the vent processor is running
+  // Make sure the event processor is running
   if(!this->running) { return; } 
 
   std::unique_lock<std::mutex> lk(this->event_mut);
@@ -240,7 +240,7 @@ void Event::Manager::postEvent(Event::Object* event)
 
 void Event::Manager::postEvent(const std::vector<Event::Object*>& events)
 {
-  // Make sure the vent processor is running
+  // Make sure the event processor is running
   if(!this->running) { return; } 
 
   // For performance provide postEvent that accepts multiple events
@@ -276,7 +276,6 @@ void Event::Manager::processEvents()
   while (this->running) {
     this->available_event_cond.wait(
         event_lock, [this] { return !(this->event_q.empty()); });
-    // Make sure that we turn off event handler if shutting down
     
     while (!event_q.empty()) {
       tmp_event = event_q.front();

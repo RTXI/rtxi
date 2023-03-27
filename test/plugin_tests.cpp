@@ -43,7 +43,7 @@ TEST_F(PluginManagerTest, getLibrary)
   std::filesystem::path libraryPath = std::filesystem::canonical("/proc/self/exe").parent_path();
   std::filesystem::path library(libraryPath/"libfakePlugin.so");
   Modules::Plugin* plugin= this->mod_manager->loadPlugin(library.string());
-  EXPECT_EQ(libraryPath, plugin->getLibrary());
+  EXPECT_EQ(library, plugin->getLibrary());
   this->mod_manager->unloadPlugin(plugin);
 }
 

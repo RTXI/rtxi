@@ -629,6 +629,19 @@ int Modules::Plugin::setActive(bool state)
   return result;
 }
 
+void Modules::Plugin::setLibraryInfo(void * lib_handle, Modules::FactoryMethods fact_methods)
+{
+  if (lib_handle == nullptr) { return; }
+  Dl_info libinfo;
+  const void* createPlugin = reinterpret_cast<const void*>(fact_methods.createPlugin);
+  if(::dladdr(createPlugin, &libinfo) == 0) {
+    return;
+  }
+
+  this->handle = lib_handle;
+  this->library = std::string(libinfo.dli_fname);
+}
+
 Modules::Manager::Manager(Event::Manager* event_manager, MainWindow* mw)
     : event_manager(event_manager)
     , main_window(mw)
@@ -698,14 +711,14 @@ Modules::Plugin* Modules::Manager::loadPlugin(const std::string& library)
   if (plugin_ptr != nullptr) { return plugin_ptr; }
 
   // TODO: This only works on linux. Make a cross-platform solution
-  void* handle = dlopen(library.c_str(), RTLD_GLOBAL | RTLD_NOW);
-  if (handle == nullptr) {
+  void* lib_handle = dlopen(library.c_str(), RTLD_GLOBAL | RTLD_NOW);
+  if (lib_handle == nullptr) {
     // We try to load it from another location besides locally
     ERROR_MSG("Modules::Plugin::loadPlugin : could not load module locally : {}", dlerror());
     auto plugin_dir = RTXI_DEFAULT_PLUGIN_DIR + library;
-    handle = dlopen((plugin_dir + library).c_str(), RTLD_GLOBAL | RTLD_NOW);
+    lib_handle = dlopen((plugin_dir + library).c_str(), RTLD_GLOBAL | RTLD_NOW);
   }
-  if (!handle) {
+  if (!lib_handle) {
     ERROR_MSG(
         "Plugin::load : failed to load {}: {}\n", library.c_str(), dlerror());
     return nullptr;
@@ -716,14 +729,15 @@ Modules::Plugin* Modules::Manager::loadPlugin(const std::string& library)
    *pointer * But what the hell do they know? It is probably safe here... *
    *********************************************************************************/
 
-  auto* fact_methods = static_cast<Modules::FactoryMethods*>(::dlsym(handle, "getFactories")); 
+  auto* gen_fact_methods = reinterpret_cast<Modules::FactoryMethods*(*)()>(::dlsym(lib_handle, "getFactories")); 
 
-  if (fact_methods == nullptr) {
+  if (gen_fact_methods == nullptr) {
     ERROR_MSG("Plugin::load : failed to load {} : {}\n", library, dlerror());
-    dlclose(handle);
+    dlclose(lib_handle);
     return nullptr;
   }
 
+  Modules::FactoryMethods* fact_methods = gen_fact_methods(); 
   this->rtxi_factories_registry[library] = *fact_methods;
   std::unique_ptr<Modules::Plugin> plugin = fact_methods->createPlugin(this->event_manager, 
                                                                        this->main_window);
@@ -731,9 +745,11 @@ Modules::Plugin* Modules::Manager::loadPlugin(const std::string& library)
     ERROR_MSG(
         "Plugin::load : failed to load {} : failed to create instance\n",
         library);
-    dlclose(handle);
+    dlclose(lib_handle);
     return nullptr;
   }
+
+  plugin->setLibraryInfo(lib_handle, *fact_methods);
   // if (plugin->magic_number != Plugin::Object::MAGIC_NUMBER) {
   //   ERROR_MSG(
   //       "Plugin::load : the pointer returned from {}::createRTXIPlugin()

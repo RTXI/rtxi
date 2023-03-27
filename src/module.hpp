@@ -110,6 +110,21 @@ public slots:
 
 // Forward declare plugin class for the component and panel private pointers
 class Plugin;
+class Panel;
+
+/*!
+ * This structure contains functions for creating instances. It is used when
+ * loading and unloading RTXI modules dynamically
+ */
+struct FactoryMethods
+{
+  std::unique_ptr<Modules::Plugin> (*createPlugin)(Event::Manager*,
+                                                   MainWindow*) = nullptr;
+  std::unique_ptr<Modules::Component> (*createComponent)(Modules::Plugin*) =
+      nullptr;
+  Modules::Panel* (*createPanel)(MainWindow*, Event::Manager*) = nullptr;
+};
+
 
 /*!
  * This is where the magic happens. This class contains the low level logic to
@@ -379,8 +394,8 @@ public:
   Plugin(const Plugin& plugin) = delete;  // copy constructor
   Plugin& operator=(const Plugin& plugin) =
       delete;  // copy assignment noperator
-  Plugin(Plugin&&) = delete;  // move constructor
-  Plugin& operator=(Plugin&&) = delete;  // move assignment operator
+  Plugin(Plugin&&) = default;  // move constructor
+  Plugin& operator=(Plugin&&) = default;  // move assignment operator
   virtual ~Plugin();
 
   size_t getID();
@@ -509,6 +524,7 @@ public:
    */
   void receiveEvent(Event::Object* event) override;
 
+  void setLibraryInfo(void* lib_handle, Modules::FactoryMethods fact_methods);
   /*!
    * For dynamically loadable modules in RTXI, this function is called
    * to obtain a handle to the shared library.
@@ -523,14 +539,6 @@ public:
    * \return The library file the object from which the object was created.
    */
   std::string getLibrary() const { return this->library; }
-
-  std::unique_ptr<Modules::Plugin> load();
-
-  /*!
-   * A mechanism which an object can use to unload itself. Should only be
-   *   called from within the GUI thread.
-   */
-  void unload();
 
   // These functions are here in order to have backwards compatibility
   // with previous versions of RTXI that used DefaultGuiModel
@@ -552,19 +560,6 @@ private:
   std::string library;
   void* handle = nullptr;  
   std::string name;
-};
-
-/*!
- * This structure contains functions for creating instances. It is used when
- * loading and unloading RTXI modules dynamically
- */
-struct FactoryMethods
-{
-  std::unique_ptr<Modules::Plugin> (*createPlugin)(Event::Manager*,
-                                                   MainWindow*) = nullptr;
-  std::unique_ptr<Modules::Component> (*createComponent)(Modules::Plugin*) =
-      nullptr;
-  Modules::Panel* (*createPanel)(MainWindow*, Event::Manager*) = nullptr;
 };
 
 /*!
