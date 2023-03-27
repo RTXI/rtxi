@@ -2,53 +2,53 @@ cmake_minimum_required(VERSION 3.24)
 
 if(DEFINED evl_FOUND AND RTXI_RT_CORE STREQUAL "evl")
   list(APPEND CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES ${evl_INCLUDE_DIRS})
-  add_library(rtos_fifo_lib OBJECT "fifo.hpp" "fifo_evl.cpp")
-  target_link_libraries(rtos_fifo_lib 
+  add_library(xfifo SHARED "fifo.hpp" "fifo_evl.cpp")
+  target_link_libraries(xfifo 
     PRIVATE 
       Threads::Threads
       ${evl_LINK_LIBRARIES}
       fmt::fmt
   )
-  target_include_directories(rtos_fifo_lib SYSTEM PRIVATE ${evl_INCLUDE_DIRS})
-  add_library(rtos_lib OBJECT "rtos.hpp" "rtos_evl.cpp")
-  target_link_libraries(rtos_lib PRIVATE 
+  target_include_directories(xfifo SYSTEM PRIVATE ${evl_INCLUDE_DIRS})
+  add_library(rtos SHARED "rtos.hpp" "rtos_evl.cpp")
+  target_link_libraries(rtos PRIVATE 
     ${evl_LINK_LIBRARIES}
-    rtos_fifo_lib
+    xfifo
     fmt::fmt
   )
-  target_include_directories(rtos_lib SYSTEM PRIVATE ${evl_INCLUDE_DIRS})
+  target_include_directories(rtos SYSTEM PRIVATE ${evl_INCLUDE_DIRS})
 elseif(xenomai3_FOUND AND RTXI_RT_CORE STREQUAL "xenomai")
   list(APPEND CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES ${xenomai_ALCHEMY_CFLAGS})
-  add_library(rtos_fifo_lib OBJECT "fifo.hpp" "fifo_xenomai.cpp")
-  target_link_libraries(rtos_fifo_lib 
+  add_library(xfifo SHARED "fifo.hpp" "fifo_xenomai.cpp")
+  target_link_libraries(xfifo 
     PRIVATE 
       Threads::Threads
       ${xenomai_ALCHEMY_LDFLAGS}
       fmt::fmt
   )
-  target_include_directories(rtos_fifo_lib SYSTEM PRIVATE ${xenomai_ALCHEMY_CFLAGS})
-  add_library(rtos_lib OBJECT "rtos.hpp" "rtos_evl.cpp")
-  target_link_libraries(rtos_lib PRIVATE 
+  target_include_directories(xfifo SYSTEM PRIVATE ${xenomai_ALCHEMY_CFLAGS})
+  add_library(rtos SHARED "rtos.hpp" "rtos_evl.cpp")
+  target_link_libraries(rtos PRIVATE 
     ${xenomai_ALCHEMY_LDFLAGS}
-    rtos_fifo_lib
+    xfifo
     fmt::fmt
   )
-  target_include_directories(rtos_lib SYSTEM PRIVATE ${xenomai_ALCHEMY_CFLAGS})
+  target_include_directories(rtos SYSTEM PRIVATE ${xenomai_ALCHEMY_CFLAGS})
 
 else()
   message("EVL Library not found. Reverting to posix Interface.")
-  add_library(rtos_fifo_lib OBJECT "fifo.hpp" "fifo.cpp")
-  target_link_libraries(rtos_fifo_lib PRIVATE fmt::fmt)
-  add_library(rtos_lib OBJECT "rtos.hpp" "rtos_posix.cpp")
-  target_link_libraries(rtos_lib PRIVATE 
-      rtos_fifo_lib
+  add_library(xfifo SHARED "fifo.hpp" "fifo.cpp")
+  target_link_libraries(xfifo PRIVATE fmt::fmt)
+  add_library(rtos SHARED "rtos.hpp" "rtos_posix.cpp")
+  target_link_libraries(rtos PRIVATE 
+      xfifo
       fmt::fmt
   )
 endif()
 
 
 # Create static library for rtxi core components
-add_library(rtxi_lib OBJECT
+add_library(rtxi SHARED 
     debug.hpp debug.cpp
     event.hpp event.cpp
     io.hpp io.cpp
@@ -58,12 +58,13 @@ add_library(rtxi_lib OBJECT
     module.hpp module.cpp
 )
 
-target_link_libraries(rtxi_lib PUBLIC 
+target_link_libraries(rtxi PUBLIC 
     Threads::Threads
     fmt::fmt
     Qt5::Core
     Qt5::Gui
     Qt5::Widgets
+    xfifo
 )
 
 # Create RTXI executable
@@ -79,9 +80,9 @@ set_target_properties(
 
 # Link all of the static and dynamic libraries to rtxi
 target_link_libraries(rtxi_exe PUBLIC 
-    rtxi_lib
-    rtos_fifo_lib
-    rtos_lib 
+    rtxi
+    xfifo
+    rtos 
     rtmath_lib
     performance_measurement_lib
     userprefs_lib

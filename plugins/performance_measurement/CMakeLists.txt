@@ -6,6 +6,6 @@ add_library(performance_measurement_lib OBJECT
 )
 
 target_link_libraries(performance_measurement_lib PUBLIC
-    rtxi_lib
+    rtxi
     rtmath_lib
 )

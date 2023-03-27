@@ -6,5 +6,5 @@ add_library(system_control_lib OBJECT
 )
 
 target_link_libraries(system_control_lib PUBLIC
-    rtxi_lib
+    rtxi
 )

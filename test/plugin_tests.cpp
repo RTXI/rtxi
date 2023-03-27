@@ -27,9 +27,10 @@
 
 TEST_F(PluginManagerTest, LoadandUnload)
 {
-  std::string libraryPath(std::filesystem::current_path().string());
-  libraryPath += "libfakePlugin.so";
-  Modules::Plugin* plugin= this->mod_manager->loadPlugin(libraryPath);
+
+  std::filesystem::path libraryPath = std::filesystem::canonical("/proc/self/exe").parent_path();
+  std::filesystem::path library(libraryPath/"libfakePlugin.so");
+  Modules::Plugin* plugin= this->mod_manager->loadPlugin(library.string());
   ASSERT_NE(plugin, nullptr);
   this->mod_manager->unloadPlugin(plugin);
   ASSERT_FALSE(this->mod_manager->isRegistered(plugin));
@@ -39,9 +40,9 @@ TEST_F(PluginManagerTest, getLibrary)
 {
   // TODO: Decouple Plugin::Object from Plugin::Manager and test getLibrary
   // function
-  std::string libraryPath(std::filesystem::current_path().string());
-  libraryPath += "libfakePlugin.so";
-  Modules::Plugin* plugin= this->mod_manager->loadPlugin(libraryPath);
+  std::filesystem::path libraryPath = std::filesystem::canonical("/proc/self/exe").parent_path();
+  std::filesystem::path library(libraryPath/"libfakePlugin.so");
+  Modules::Plugin* plugin= this->mod_manager->loadPlugin(library.string());
   EXPECT_EQ(libraryPath, plugin->getLibrary());
   this->mod_manager->unloadPlugin(plugin);
 }

@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.24)
 project(rtxiTests LANGUAGES CXX)
 
-add_executable(rtxiTests
+add_library(testing_lib OBJECT
     rt_os_tests.hpp rt_os_tests.cpp
     fifo_tests.hpp fifo_tests.cpp
     event_tests.hpp event_tests.cpp
@@ -9,16 +9,12 @@ add_executable(rtxiTests
     system_tests.hpp system_tests.cpp
     module_tests.hpp module_tests.cpp
     plugin_tests.hpp plugin_tests.cpp
-    rtxiTests.cpp
 )
 
-target_include_directories(rtxiTests PRIVATE
-    ${CMAKE_SOURCE_DIR}/src
-)
-target_link_libraries(rtxiTests PRIVATE
-    rtos_lib
-    rtos_fifo_lib
-    rtxi_lib 
+target_link_libraries(testing_lib PUBLIC 
+    rtos
+    xfifo
+    rtxi
     rtmath_lib
     performance_measurement_lib
     userprefs_lib
@@ -30,12 +26,36 @@ target_link_libraries(rtxiTests PRIVATE
     backtrace
 )
 
-add_library(fakePlugin_lib MODULE fakePlugin.h fakePlugin.cpp)
+add_executable(rtxiTests
+        rtxiTests.cpp
+)
 
-target_link_libraries(fakePlugin_lib PRIVATE 
-    rtxi_lib
-    GTest::gtest GTest::gtest_main
-    GTest::gmock GTest::gmock_main 
+target_include_directories(rtxiTests PRIVATE
+    ${CMAKE_SOURCE_DIR}/src
+)
+
+target_link_libraries(rtxiTests PRIVATE
+    testing_lib
+    rtos
+    xfifo
+    rtxi
+    rtmath_lib
+    performance_measurement_lib
+    userprefs_lib
+    system_control_lib
+)
+
+add_library(fakePlugin MODULE fakePlugin.h fakePlugin.cpp)
+
+target_include_directories(fakePlugin PRIVATE ${CMAKE_SOURCE_DIR})
+
+target_link_libraries(fakePlugin PRIVATE 
+    testing_lib
+    rtxi
+    rtos
+    Qt5::Core
+    Qt5::Gui
+    Qt5::Widgets
 )
 
 target_compile_definitions(rtxiTests PRIVATE BOOST_STACKTRACE_USE_ADDR2LINE)

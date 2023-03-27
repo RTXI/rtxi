@@ -698,11 +698,10 @@ Modules::Plugin* Modules::Manager::loadPlugin(const std::string& library)
   if (plugin_ptr != nullptr) { return plugin_ptr; }
 
   // TODO: This only works on linux. Make a cross-platform solution
-  std::cout << library << "\n";
   void* handle = dlopen(library.c_str(), RTLD_GLOBAL | RTLD_NOW);
-  std::cout << dlerror() << "\n";
   if (handle == nullptr) {
     // We try to load it from another location besides locally
+    ERROR_MSG("Modules::Plugin::loadPlugin : could not load module locally : {}", dlerror());
     auto plugin_dir = RTXI_DEFAULT_PLUGIN_DIR + library;
     handle = dlopen((plugin_dir + library).c_str(), RTLD_GLOBAL | RTLD_NOW);
   }

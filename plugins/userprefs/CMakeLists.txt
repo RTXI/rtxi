@@ -6,6 +6,6 @@ add_library(userprefs_lib OBJECT
 )
 
 target_link_libraries(userprefs_lib PUBLIC
-	rtxi_lib
+	rtxi
 )
 
