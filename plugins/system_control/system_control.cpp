@@ -106,7 +106,11 @@ SystemControl::Panel::Panel(MainWindow* mw, Event::Manager* ev_manager)
   deviceLayout->addWidget(new QLabel(tr("Frequency:")), 1, 0);
   freqEdit = new QLineEdit;
   deviceLayout->addWidget(freqEdit, 1, 1);
-  freqEdit->setText("1000");
+
+  Event::Object get_period_event(Event::Type::RT_GET_PERIOD_EVENT);
+  this->getRTXIEventManager()->postEvent(&get_period_event);
+  auto period = std::any_cast<int64_t>(get_period_event.getParam("period"));
+  freqEdit->setText(std::to_string(RT::OS::SECONDS_TO_NANOSECONDS/period).c_str());;
   QObject::connect(freqEdit,
                    SIGNAL(textChanged(const QString&)),
                    this,
