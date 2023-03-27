@@ -110,8 +110,8 @@ protected:
   }
   ~ModulePluginTests()
   {
-    Event::Object shutdown_event(Event::Type::RT_SHUTDOWN_EVENT);
-    this->event_manager->postEvent(&shutdown_event);
+    //Event::Object shutdown_event(Event::Type::RT_SHUTDOWN_EVENT);
+    //this->event_manager->postEvent(&shutdown_event);
   }
 
   std::unique_ptr<RT::Connector> connector;

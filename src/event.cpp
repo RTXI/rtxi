@@ -219,10 +219,7 @@ Event::Manager::Manager()
 
 Event::Manager::~Manager()
 {
-  // clear pointers and terminate event thread. We don't have to wait for
-  // NOOP event to be handled as there won't be anything to do so.
-  this->running = false;
-  Event::Object event(Event::Type::RT_SHUTDOWN_EVENT);
+  Event::Object event(Event::Type::MANAGER_SHUTDOWN_EVENT);
   this->postEvent(&event);
   if (this->event_thread.joinable()) {
     this->event_thread.join();
@@ -231,6 +228,9 @@ Event::Manager::~Manager()
 
 void Event::Manager::postEvent(Event::Object* event)
 {
+  // Make sure the vent processor is running
+  if(!this->running) { return; } 
+
   std::unique_lock<std::mutex> lk(this->event_mut);
   this->event_q.push(event);
   this->available_event_cond.notify_all();
@@ -240,6 +240,9 @@ void Event::Manager::postEvent(Event::Object* event)
 
 void Event::Manager::postEvent(const std::vector<Event::Object*>& events)
 {
+  // Make sure the vent processor is running
+  if(!this->running) { return; } 
+
   // For performance provide postEvent that accepts multiple events
   std::unique_lock<std::mutex> lk(this->event_mut);
   for (auto* event : events) {
@@ -273,8 +276,13 @@ void Event::Manager::processEvents()
   while (this->running) {
     this->available_event_cond.wait(
         event_lock, [this] { return !(this->event_q.empty()); });
+    // Make sure that we turn off event handler if shutting down
+    
     while (!event_q.empty()) {
       tmp_event = event_q.front();
+      if(tmp_event->getType() == Event::Type::MANAGER_SHUTDOWN_EVENT){
+        this->running = false;
+      }
       std::thread(event_processor, tmp_event).detach();
       this->event_q.pop();
       tmp_event = nullptr;
