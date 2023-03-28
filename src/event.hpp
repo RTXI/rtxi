@@ -31,8 +31,12 @@
 #include <string>
 #include <thread>
 #include <vector>
+#include <sstream>
+#include <filesystem>
 
 #include "fifo.hpp"
+
+class eventLogger;
 
 /*!
  * Event Oriented Classes
@@ -198,6 +202,7 @@ public:
   virtual void receiveEvent(Object* event) = 0;
 };  // class Handler
 
+
 /*
  * Managaes the collection of all objects waiting to
  *   receive signals from events.
@@ -261,6 +266,8 @@ public:
 
   bool isRegistered(Handler* handler);
 
+  eventLogger* getLogger() { return this->logger.get(); }
+
 private:
   std::list<Handler*> handlerList;
   std::queue<Event::Object*> event_q;
@@ -271,6 +278,8 @@ private:
 
   // Shared mutex allows for multiple reader single writer scenarios.
   std::shared_mutex handlerlist_mut;  // Mutex for modifying event handler queue
+
+  std::unique_ptr<eventLogger> logger;
 };  // class Manager
 
 }  // namespace Event

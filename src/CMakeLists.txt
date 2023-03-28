@@ -56,6 +56,7 @@ add_library(rtxi SHARED
     daq.hpp daq.cpp
     main_window.hpp main_window.cpp
     module.hpp module.cpp
+    logger.hpp logger.cpp
 )
 
 target_link_libraries(rtxi PUBLIC 

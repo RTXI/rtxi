@@ -29,6 +29,7 @@
 #include "fifo.hpp"
 #include "module.hpp"
 #include "rtos.hpp"
+#include "logger.hpp"
 
 void RT::Device::read()
 {
@@ -645,6 +646,7 @@ void RT::System::postTelemitry(RT::Telemitry::Response telemitry)
 void RT::System::createTelemitryProcessor()
 {
   auto proc = [&](){
+    eventLogger* logger = this->event_manager->getLogger();
     std::vector<RT::Telemitry::Response> responses;
     while(!this->task->task_finished && 
           this->telemitry_processing_thread_running){
@@ -656,6 +658,8 @@ void RT::System::createTelemitryProcessor()
         if(telem.type == RT::Telemitry::RT_SHUTDOWN) { 
           this->telemitry_processing_thread_running = false; 
         }
+        // let's log this telemitry
+        logger->log(telem);
       }
     }
   };

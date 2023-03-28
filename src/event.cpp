@@ -25,6 +25,8 @@
 
 #include "debug.hpp"
 
+#include "logger.hpp"
+
 std::string Event::type_to_string(Event::Type event_type)
 {
   std::string return_string;
@@ -122,6 +124,9 @@ std::string Event::type_to_string(Event::Type event_type)
     case Event::Type::GENERIC_MODULE_EVENT:
       return_string = "MODULE : Generic Module Event";
       break;
+    case Event::Type::MANAGER_SHUTDOWN_EVENT:
+      return_string = "MANAGER : UI Manager shutdown event";
+      break;
     case Event::Type::NOOP:
       return_string = "SYSTEM : no operation";
       break;
@@ -215,6 +220,7 @@ Event::Type Event::Object::getType() const
 Event::Manager::Manager()
 {
   this->event_thread = std::thread(&Event::Manager::processEvents, this);
+  this->logger = std::make_unique<eventLogger>();
 }
 
 Event::Manager::~Manager()
@@ -282,6 +288,7 @@ void Event::Manager::processEvents()
       if(tmp_event->getType() == Event::Type::MANAGER_SHUTDOWN_EVENT){
         this->running = false;
       }
+      this->logger->log(event_q.front());
       std::thread(event_processor, tmp_event).detach();
       this->event_q.pop();
       tmp_event = nullptr;
