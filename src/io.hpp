@@ -92,7 +92,7 @@ public:
   Block& operator=(const Block& block) = default;  // copy assignment operator
   Block(Block&&) = delete;  // move constructor
   Block& operator=(Block&&) = delete;  // move assignment operator
-  ~Block() = default;
+  virtual ~Block() = default;
 
   /*!
    * Get the name of the block.

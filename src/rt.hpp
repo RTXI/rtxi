@@ -136,32 +136,22 @@ private:
   std::function<void(void)> execute_callback;
 };  // class Thread
 
-typedef struct
-{
-  RT::Device* dest;
-  size_t dest_port;
-} device_connection_t;
-
-typedef struct
-{
-  RT::Thread* dest;
-  size_t dest_port;
-} thread_connection_t;
-
 /*!
  * Information about the outputs of a particular block. This is
- * meant to be used along with a block pointer for the source and
- * should not be used alone.
+ * meant to connection information about blocks and channels.
  *
+ * \param src IO::Block pointer representing the source of data
  * \param src_port Index of the source channel generating the output
- * \param dest Pointer to IO::Block to send the output to
- * \param dest_port Index of the destination channel taking the input
+ * \param dest IO::Block pointer representing who to send the output to
+ * \param dest_port Index of the destination channel taking the output as input
  */
 typedef struct
 {
-  std::vector<thread_connection_t> output_threads;
-  std::vector<device_connection_t> output_devices;
-} outputs_info;
+  IO::Block* src;
+  size_t src_port;
+  IO::Block* dest;
+  size_t dest_port;
+} block_connection_t;
 
 /*!
  * Acts as a central meeting point between Blocks. Provides
@@ -181,7 +171,7 @@ public:
   ~Connector() = default;
 
   /*!
-   * Create a connection between source thread and destination thread.
+   * Create a connection between source and destination block.
    *
    * \param src The source of the data.
    * \param out The source channel of the data.
@@ -192,52 +182,10 @@ public:
    *
    * \sa IO::Block
    */
-  int connect(RT::Thread* src, size_t out, RT::Thread* dest, size_t in);
+  int connect(IO::Block* src, size_t out, IO::Block* dest, size_t in);
 
   /*!
-   * Create a connection between source thread and destination device.
-   *
-   * \param src The source of the data.
-   * \param out The source channel of the data.
-   * \param dest The destination of the data.
-   * \param in The destination channel of the data.
-   *
-   * \returns 0 if successfully connected, -1 otherwise
-   *
-   * \sa IO::Block
-   */
-  int connect(RT::Thread* src, size_t out, RT::Device* dest, size_t in);
-
-  /*!
-   * Create a connection between source device and destination thread.
-   *
-   * \param src The source of the data.
-   * \param out The source channel of the data.
-   * \param dest The destination of the data.
-   * \param in The destination channel of the data.
-   *
-   * \returns 0 if successfully connected, -1 otherwise
-   *
-   * \sa IO::Block
-   */
-  int connect(RT::Device* src, size_t out, RT::Thread* dest, size_t in);
-
-  /*!
-   * Create a connection between source device and destination device.
-   *
-   * \param src The source of the data.
-   * \param out The source channel of the data.
-   * \param dest The destination of the data.
-   * \param in The destination channel of the data.
-   *
-   * \returns 0 if successfully connected, -1 otherwise
-   *
-   * \sa IO::Block
-   */
-  int connect(RT::Device* src, size_t out, RT::Device* dest, size_t in);
-
-  /*!
-   * Break a connection between source thread and destination thread.
+   * Break a connection between source and destination blocks.
    *
    * \param src The source of the data.
    * \param out The source channel of the data.
@@ -248,52 +196,10 @@ public:
    * \sa IO::Block::input()
    * \sa IO::Block::output()
    */
-  void disconnect(RT::Thread* src, size_t out, RT::Thread* dest, size_t in);
+  void disconnect(IO::Block* src, size_t out, IO::Block* dest, size_t in);
 
   /*!
-   * Break a connection between source thread and destination device.
-   *
-   * \param src The source of the data.
-   * \param out The source channel of the data.
-   * \param dest The destination of the data.
-   * \param in The destination channel of the data.
-   *
-   * \sa IO::Block
-   * \sa IO::Block::input()
-   * \sa IO::Block::output()
-   */
-  void disconnect(RT::Thread* src, size_t out, RT::Device* dest, size_t in);
-
-  /*!
-   * Break a connection between source device and destination thread.
-   *
-   * \param src The source of the data.
-   * \param out The source channel of the data.
-   * \param dest The destination of the data.
-   * \param in The destination channel of the data.
-   *
-   * \sa IO::Block
-   * \sa IO::Block::input()
-   * \sa IO::Block::output()
-   */
-  void disconnect(RT::Device* src, size_t out, RT::Thread* dest, size_t in);
-
-  /*!
-   * Break a connection between source device and destination device.
-   *
-   * \param src The source of the data.
-   * \param out The source channel of the data.
-   * \param dest The destination of the data.
-   * \param in The destination channel of the data.
-   *
-   * \sa IO::Block
-   * \sa IO::Block::input()
-   * \sa IO::Block::output()
-   */
-  void disconnect(RT::Device* src, size_t out, RT::Device* dest, size_t in);
-
-  /*!
-   * Determine whether source thread and destination thread are connected.
+   * Determine whether source and destination blocks are connected.
    *
    * \param src The source of the data.
    * \param out The source channel of the data.
@@ -303,90 +209,29 @@ public:
    * \sa IO::Block::connect()
    * \sa IO::Block::disconnect()
    */
-  bool connected(RT::Thread* src, size_t out, RT::Thread* dest, size_t in);
+  bool connected(IO::Block* src, size_t out, IO::Block* dest, size_t in);
 
   /*!
-   * Determine whether source thread and destination device are connected.
-   *
-   * \param src The source of the data.
-   * \param out The source channel of the data.
-   * \param dest The destination of the data.
-   * \param in The destination channel of the data.
-   *
-   * \sa IO::Block::connect()
-   * \sa IO::Block::disconnect()
-   */
-  bool connected(RT::Thread* src, size_t out, RT::Device* dest, size_t in);
-
-  /*!
-   * Determine whether source device and destination thread are connected.
-   *
-   * \param src The source of the data.
-   * \param out The source channel of the data.
-   * \param dest The destination of the data.
-   * \param in The destination channel of the data.
-   *
-   * \sa IO::Block::connect()
-   * \sa IO::Block::disconnect()
-   */
-  bool connected(RT::Device* src, size_t out, RT::Thread* dest, size_t in);
-
-  /*!
-   * Determine whether source device and destination device are connected.
-   *
-   * \param src The source of the data.
-   * \param out The source channel of the data.
-   * \param dest The destination of the data.
-   * \param in The destination channel of the data.
-   *
-   * \sa IO::Block::connect()
-   * \sa IO::Block::disconnect()
-   */
-  bool connected(RT::Device* src, size_t out, RT::Device* dest, size_t in);
-
-  /*!
-   * Register the thread in order to access connection services
+   * Register the block in order to access connection services
    *
    * \param thread Pointer to block object to register
    */
-  void insertBlock(RT::Thread* thread);
+  void insertBlock(IO::Block* block);
 
   /*!
-   * Register the device in order to access connection services
+   * Unregister the block from the registry
    *
-   * \param device Pointer to block object to register
+   * \param block Pointer to block to unregister
    */
-  void insertBlock(RT::Device* device);
+  void removeBlock(IO::Block* block);
 
   /*!
-   * Unregister the thraed from the registry
+   * Checks whether block is registered with the connector
    *
-   * \param thread Pointer to block to unregister
-   */
-  void removeBlock(RT::Thread* thread);
-
-  /*!
-   * Unregister the device from the registry
-   *
-   * \param device Pointer to block to unregister
-   */
-  void removeBlock(RT::Device* device);
-
-  /*!
-   * Checks whether thread is registered with the connector
-   *
-   * \param thread Pointer to thread
+   * \param IO::Block Pointer to block
    * \returns true if registered, false otherwise
    */
-  bool isRegistered(RT::Thread* thread);
-
-  /*!
-   * Checks whether device is registered with the connector
-   *
-   * \param device Pointer to thread
-   * \returns true if registered, false otherwise
-   */
-  bool isRegistered(RT::Device* device);
+  bool isRegistered(IO::Block* block);
 
   /*!
    * Get the list of devices that are registered with connector class.
@@ -407,22 +252,13 @@ public:
   std::vector<RT::Thread*> getThreads();
 
   /*!
-   * Returns a list of outputs for the input thread
+   * Returns a list of connections for the input device
    *
-   * \param src Source RT::Thread pointer to find the outputs for
-   * \returns A vector of RT::outputs_info containing connection info
-   * \sa RT::outputs_info
+   * \param src Source IO::Block pointer to find the connections for
+   * \returns A vector of RT::block_connection_t containing connection info
+   * \sa RT::block_connection_t
    */
-  std::vector<RT::outputs_info> getOutputs(RT::Thread* src);
-
-  /*!
-   * Returns a list of outputs for the input device
-   *
-   * \param src Source RT::Device pointer to find the outputs for
-   * \returns A vector of RT::outputs_info containing connection info
-   * \sa RT::outputs_info
-   */
-  std::vector<RT::outputs_info> getOutputs(RT::Device* src);
+  std::vector<RT::block_connection_t> getConnections(IO::Block* src);
 
   /*!
    * Copies outputs of the given device object to the inputs of
@@ -443,21 +279,10 @@ public:
   void assignID(IO::Block* block);
 
 private:
-  typedef struct
-  {
-    RT::Thread* thread_ptr;
-    std::vector<outputs_info> channels_outbound_con;
-  } thread_entry_t;
-
-  typedef struct
-  {
-    RT::Device* device_ptr;
-    std::vector<outputs_info> channels_outbound_con;
-  } device_entry_t;
-
+  int find_cycle(RT::block_connection_t conn, IO::Block* ref_block);
   std::vector<RT::Thread*> topological_sort();
-  std::vector<thread_entry_t> thread_registry;
-  std::vector<device_entry_t> device_registry;
+  std::vector<IO::Block*> block_registry;
+  std::vector<RT::block_connection_t> connections;
 };  // class Connector
 
 using command_param_t = std::variant<std::monostate, 
