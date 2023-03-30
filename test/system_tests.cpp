@@ -80,11 +80,11 @@ TEST_F(RTConnectorTest, getOutputs)
       this->connector.connect(&outputThread, 0, inputThreads[i].get(), 0);
     }
   }
-  std::vector<RT::outputs_info> output_connections =
+  std::vector<RT::block_connection_t> output_connections =
       this->connector.getOutputs(&outputThread);
   int num_of_connections = std::accumulate(randvals.begin(), randvals.end(), 0);
-  EXPECT_EQ(output_connections[0].output_threads.size(), num_of_connections);
-  for (auto con : output_connections[0].output_threads) {
+  EXPECT_EQ(output_connections.size(), num_of_connections);
+  for (auto con : output_connections) {
     ASSERT_TRUE(this->connector.connected(&outputThread, 0, con.dest, 0));
   }
 }
@@ -120,17 +120,16 @@ TEST_F(RTConnectorTest, getBlocks)
   ASSERT_EQ(received_devices.size(), 50);
 
   // verify that thread objects are in topological order
-  RT::outputs_info tempinfo {};
+  std::vector<RT::block_connection_t> outputs;
   for (auto thread_iter = received_threads.begin();
        thread_iter != received_threads.end();
-       thread_iter++)
-  {
-    tempinfo = this->connector.getOutputs(*thread_iter)[0];
-    for (auto output_thread : tempinfo.output_threads) {
+       thread_iter++){
+    outputs = this->connector.getOutputs(*thread_iter);
+    for (auto output_conn : outputs) {
       auto loc = std::find_if(received_threads.begin(),
                               thread_iter,
-                              [&output_thread](RT::Thread* current_thread)
-                              { return current_thread == output_thread.dest; });
+                              [&output_conn](RT::Thread* current_thread)
+                              { return current_thread == output_conn.dest; });
       ASSERT_EQ(loc, thread_iter);
     }
   }

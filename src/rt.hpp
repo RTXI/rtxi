@@ -258,7 +258,7 @@ public:
    * \returns A vector of RT::block_connection_t containing connection info
    * \sa RT::block_connection_t
    */
-  std::vector<RT::block_connection_t> getConnections(IO::Block* src);
+  std::vector<RT::block_connection_t> getOutputs(IO::Block* src);
 
   /*!
    * Copies outputs of the given device object to the inputs of
@@ -266,17 +266,7 @@ public:
    *
    * \param device Pointer to device that is the source of the output.
    */
-  void propagateDeviceConnections(RT::Device* device);
-
-  /*!
-   * Copies outputs of the given thread object to the inputs of
-   * connected thread and device objects
-   *
-   * \param thread Pointer to thraed that is the source of the output.
-   */
-  void propagateThreadConnections(RT::Thread* thread);
-
-  void assignID(IO::Block* block);
+  void propagateBlockConnections(IO::Block* block);
 
 private:
   int find_cycle(RT::block_connection_t conn, IO::Block* ref_block);

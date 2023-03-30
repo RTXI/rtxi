@@ -125,13 +125,29 @@ void RT::Connector::disconnect(IO::Block* src,
   }
 }
 
-// TODO: correctly insert and register blocks and assign IDs
 void RT::Connector::insertBlock(IO::Block* block)
 {
   if (block == nullptr || this->isRegistered(block)) {
     return;
   }
-  this->block_registry.push_back(block);
+
+  // first find a valid slot to store the block in the registry
+  size_t id = 0;
+  bool stored = false;
+  for(id = 0; id < this->block_registry.size(); id++) {
+    if (this->block_registry[id] == nullptr) {
+      this->block_registry[id] = block;
+      block->assignID(id);
+      stored = true;
+      break;
+    }
+  }
+
+  // if all slots are taken then append
+  if(!stored) {
+    block->assignID(this->block_registry.size());
+    this->block_registry.push_back(block);
+  }
 }
 
 void RT::Connector::removeBlock(IO::Block* block)
@@ -145,9 +161,11 @@ void RT::Connector::removeBlock(IO::Block* block)
       this->connections.erase(iter);
     }
   }
-  for(auto it=this->block_registry.begin(); it != this->block_registry.end(); it++){
-    if(block == *it){ 
-      this->block_registry.erase(it);
+
+  // remove block from registry
+  for(auto& block_slot : this->block_registry){
+    if(block == block_slot){ 
+      block_slot = nullptr;
       break;
     }
   }
@@ -155,10 +173,9 @@ void RT::Connector::removeBlock(IO::Block* block)
 
 bool RT::Connector::isRegistered(IO::Block* block)
 {
-  auto iter = std::find_if(this->block_registry.begin(),
-                           this->block_registry.end(),
-                           [&block](IO::Block* blk){ return blk == block; });
-  return iter == this->block_registry.end();
+  if (block == nullptr) { return false; }
+  if (block->getID() >= this->block_registry.size()) { return false; }
+  return block == this->block_registry[block->getID()];
 }
 
 std::vector<RT::Thread*> RT::Connector::topological_sort()
@@ -169,7 +186,7 @@ std::vector<RT::Thread*> RT::Connector::topological_sort()
   //auto valid_threads = std::vector<thread_entry_t>();
 
   // initialize counts
-  for(auto block : this->block_registry){
+  for(auto* block : this->block_registry){
     sources_per_block[block] = 0;
   }
 
@@ -199,7 +216,7 @@ std::vector<RT::Thread*> RT::Connector::topological_sort()
 
   // System only cares about active threads 
   std::vector<RT::Thread*> sorted_active_threads;
-  for (auto block : sorted_blocks) {
+  for (auto* block : sorted_blocks) {
     if (block->getActive() && block->dependent()) {
       sorted_active_threads.push_back(dynamic_cast<RT::Thread*>(block));
     }
@@ -210,7 +227,7 @@ std::vector<RT::Thread*> RT::Connector::topological_sort()
 std::vector<RT::Device*> RT::Connector::getDevices()
 {
   std::vector<RT::Device*> devices;
-  for (auto block : this->block_registry) {
+  for (auto* block : this->block_registry) {
     if (block->getActive() && !block->dependent()) {
       devices.push_back(dynamic_cast<RT::Device*>(block));
     }
@@ -223,68 +240,20 @@ std::vector<RT::Thread*> RT::Connector::getThreads()
   return this->topological_sort();
 }
 
-// std::vector<std::pair<IO::Block*, size_t>> RT::Connector::getOutputs(RT::Thread* src)
-// {
-//   auto result = std::vector<RT::outputs_info>();
-//   if (this->isRegistered(src)) {
-//     result = this->thread_registry[src->getID()].channels_outbound_con;
-//   }
-//   return result;
-// }
-// 
-// std::vector<RT::outputs_info> RT::Connector::getOutputs(RT::Device* src)
-// {
-//   auto result = std::vector<RT::outputs_info>();
-//   if (this->isRegistered(src)) {
-//     result = this->device_registry[src->getID()].channels_outbound_con;
-//   }
-//   return result;
-// }
-
-void RT::Connector::propagateDeviceConnections(RT::Device* device)
+std::vector<RT::block_connection_t> RT::Connector::getOutputs(IO::Block* src)
 {
-  auto dev_id = device->getID();
-  for (size_t out_ch = 0;
-       out_ch < this->device_registry[dev_id].channels_outbound_con.size();
-       out_ch++)
-  {
-    for (auto dest_info : this->device_registry[dev_id]
-                              .channels_outbound_con[out_ch]
-                              .output_devices)
-    {
-      dest_info.dest->writeinput(dest_info.dest_port,
-                                 device->readoutput(out_ch));
-    }
-    for (auto dest_info : this->device_registry[dev_id]
-                              .channels_outbound_con[out_ch]
-                              .output_threads)
-    {
-      dest_info.dest->writeinput(dest_info.dest_port,
-                                 device->readoutput(out_ch));
-    }
+  auto result = std::vector<RT::block_connection_t>();
+  for(auto conn : this->connections){
+    if(conn.src == src) { result.push_back(conn); }
   }
+  return result;
 }
 
-void RT::Connector::propagateThreadConnections(RT::Thread* thread)
+void RT::Connector::propagateBlockConnections(IO::Block* block)
 {
-  auto thread_id = thread->getID();
-  for (size_t out_ch = 0;
-       out_ch < this->thread_registry[thread_id].channels_outbound_con.size();
-       out_ch++)
-  {
-    for (auto& dest_info : this->thread_registry[thread_id]
-                               .channels_outbound_con[out_ch]
-                               .output_devices)
-    {
-      dest_info.dest->writeinput(dest_info.dest_port,
-                                 thread->readoutput(out_ch));
-    }
-    for (auto& dest_info : this->thread_registry[thread_id]
-                               .channels_outbound_con[out_ch]
-                               .output_threads)
-    {
-      dest_info.dest->writeinput(dest_info.dest_port,
-                                 thread->readoutput(out_ch));
+  for (auto conn : this->connections){
+    if (conn.src == block){
+      conn.dest->writeinput(conn.dest_port, conn.src->readoutput(conn.src_port));
     }
   }
 }
@@ -829,12 +798,12 @@ void RT::System::execute(void* sys)
 
     for (auto* iDevice : system->devices) {
       iDevice->read();
-      system->rt_connector->propagateDeviceConnections(iDevice);
+      system->rt_connector->propagateBlockConnections(iDevice);
     }
 
     for (auto* iThread : system->threads) {
       iThread->execute();
-      system->rt_connector->propagateThreadConnections(iThread);
+      system->rt_connector->propagateBlockConnections(iThread);
     }
 
     for (auto* iDevice : system->devices) {
