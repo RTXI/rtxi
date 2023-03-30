@@ -4,9 +4,9 @@
 
 #include <errno.h>
 #include <evl/evl.h>
-#include <evl/poll.h>
 #include <string.h>
 #include <sys/poll.h>
+#include <sys/eventfd.h>
 #include <unistd.h>
 #include <poll.h>
 
@@ -31,12 +31,15 @@ public:
   ssize_t readRT(void* buf, size_t buf_size) override;
   ssize_t writeRT(void* buf, size_t buf_size) override;
   void poll() override;
+  void close() override;
   size_t getCapacity() override;
 
 private:
   int xbuf_fd;
+  int close_event_fd;
   size_t fifo_capacity;
-  struct pollfd xbuf_poll_fd;
+  struct pollfd xbuf_poll_fd[2];
+  bool closed = false;
 };
 }  // namespace RT::OS
 
@@ -52,8 +55,11 @@ RT::OS::evlFifo::evlFifo(size_t size)
     ERROR_MSG("evl core : {}", strerror(this->xbuf_fd));
     return; 
   }
-  this->xbuf_poll_fd.fd = this->xbuf_fd;
-  this->xbuf_poll_fd.events = POLLIN;
+  this->xbuf_poll_fd[0].fd = this->xbuf_fd;
+  this->xbuf_poll_fd[0].events = POLLIN;
+  this->close_event_fd = eventfd(0, EFD_NONBLOCK);
+  this->xbuf_poll_fd[1].fd = this->close_event_fd;
+  this->xbuf_poll_fd[1].events = POLLIN;
 }
 
 RT::OS::evlFifo::~evlFifo()
@@ -85,16 +91,25 @@ ssize_t RT::OS::evlFifo::writeRT(void* buf, size_t buf_size)
 
 void RT::OS::evlFifo::poll()
 {
-  int errcode = ::poll(&this->xbuf_poll_fd, 1, -1);
+  int errcode = ::poll(this->xbuf_poll_fd, 2, -1);
   if(errcode < 0){
     ERROR_MSG("RT::OS::FIFO(evl)::poll : returned with failure code {} : ", errcode); 
     ERROR_MSG("{}", strerror(errcode));
+  } else if (this->xbuf_poll_fd[1].revents & POLLIN) {
+    this->closed = true;
   }
 }
 
 int RT::OS::evlFifo::buffer_fd() const
 {
   return this->xbuf_fd;
+}
+
+void RT::OS::evlFifo::close()
+{
+  int64_t buf[1];
+  buf[0] = 1;
+  ::write(this->close_event_fd, buf, sizeof(int64_t));
 }
 
 size_t RT::OS::evlFifo::getCapacity()
