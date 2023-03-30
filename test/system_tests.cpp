@@ -121,9 +121,11 @@ TEST_F(RTConnectorTest, getBlocks)
 
   // verify that thread objects are in topological order
   std::vector<RT::block_connection_t> outputs;
+  bool isthread = false;
   for (auto thread_iter = received_threads.begin();
        thread_iter != received_threads.end();
        thread_iter++){
+    isthread = (*thread_iter)->dependent();
     outputs = this->connector.getOutputs(*thread_iter);
     for (auto output_conn : outputs) {
       auto loc = std::find_if(received_threads.begin(),

@@ -183,10 +183,11 @@ std::vector<RT::Thread*> RT::Connector::topological_sort()
   auto processing_q = std::queue<IO::Block*>();
   auto sorted_blocks = std::vector<IO::Block*>();
   auto sources_per_block = std::unordered_map<IO::Block*, int>();
-  //auto valid_threads = std::vector<thread_entry_t>();
+  //auto valid_threads = std::vector<IO::Block*>();
 
   // initialize counts
   for(auto* block : this->block_registry){
+    if(block == nullptr) { continue; }
     sources_per_block[block] = 0;
   }
 
@@ -205,13 +206,15 @@ std::vector<RT::Thread*> RT::Connector::topological_sort()
   // Process the graph nodes.
   while (!processing_q.empty()) {
     sorted_blocks.push_back(processing_q.front());
-    processing_q.pop();
     for (const auto& conn: this->connections) {
-      sources_per_block[conn.dest] -= 1;
-      if (sources_per_block[conn.dest] == 0) {
-        processing_q.push(conn.dest);
+      if (processing_q.front() == conn.src) {
+        sources_per_block[conn.dest] -= 1;
+        if (sources_per_block[conn.dest] == 0) {
+          processing_q.push(conn.dest);
+        }
       }
     }
+    processing_q.pop();
   }
 
   // System only cares about active threads 
@@ -228,6 +231,7 @@ std::vector<RT::Device*> RT::Connector::getDevices()
 {
   std::vector<RT::Device*> devices;
   for (auto* block : this->block_registry) {
+    if (block == nullptr) { continue; }
     if (block->getActive() && !block->dependent()) {
       devices.push_back(dynamic_cast<RT::Device*>(block));
     }
