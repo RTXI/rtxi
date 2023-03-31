@@ -10,6 +10,9 @@ project(
     LANGUAGES CXX
 )
 
+if(NOT rtxi_DEVELOPER_MODE)
+  list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/scripts/cmake)
+endif()
 set(RTXI_RT_CORE "posix")
 set(RTXI_USER_HOMEDIR $ENV{HOME})
 set(RTXI_SETTINGS_DIR ${RTXI_USER_HOMEDIR}/rtxi/)
