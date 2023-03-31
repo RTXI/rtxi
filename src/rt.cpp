@@ -262,6 +262,24 @@ void RT::Connector::propagateBlockConnections(IO::Block* block)
   }
 }
 
+std::vector<IO::Block*> RT::Connector::getRegisteredBlocks()
+{
+  std::vector<IO::Block*> blocks;
+  for(auto* block : this->block_registry){
+    if(block != nullptr) { blocks.push_back(block); }
+  }
+  return blocks;
+}
+
+std::vector<RT::block_connection_t> RT::Connector::getAllConnections()
+{
+  std::vector<RT::block_connection_t> all_connections;
+  for(auto conn: this->connections){
+    if(conn.src != nullptr) { all_connections.push_back(conn); }
+  }
+  return all_connections;
+}
+
 RT::System::System(Event::Manager* em, RT::Connector* rtc)
     : event_manager(em)
     , rt_connector(rtc)
@@ -376,6 +394,33 @@ void RT::System::updateThreadList(RT::System::CMD* cmd)
   };
   this->postTelemitry(telem);
   
+}
+
+void RT::System::ioLinkUpdateCMD(RT::System::CMD* cmd)
+{
+  auto conn = std::get<RT::block_connection_t>(cmd->getRTParam("connection"));
+  RT::Telemitry::Response telem;
+  telem.cmd = cmd;
+  switch (cmd->getType()) {
+    case Event::Type::IO_LINK_INSERT_EVENT:
+      this->rt_connector->connect(conn.src,
+                                  conn.src_port,
+                                  conn.dest,
+                                  conn.dest_port);
+      telem.type = RT::Telemitry::IO_LINK_UPDATED;
+      break;
+    case Event::Type::IO_LINK_REMOVE_EVENT:
+      this->rt_connector->disconnect(conn.src,
+                                     conn.src_port,
+                                     conn.dest,
+                                     conn.dest_port);
+      telem.type = RT::Telemitry::IO_LINK_UPDATED;
+      break;
+    default:
+      telem.type = RT::Telemitry::RT_NOOP;
+      break;
+  }
+  this->postTelemitry(telem);
 }
 
 // void RT::System::updateBlockActivity(RT::System::CMD* cmd)
@@ -671,6 +716,35 @@ void RT::System::deviceActivityChange(Event::Object* event)
   cmd.setRTParam("deviceList", &device_list);
   this->eventFifo->write(&cmd_ptr, sizeof(RT::System::CMD*));
   cmd.wait();
+}
+
+void RT::System::ioLinkChange(Event::Object* event)
+{
+  RT::System::CMD cmd(event->getType());
+  cmd.setRTParam("connection", 
+                 std::any_cast<RT::block_connection_t>(event->getParam("connection")));
+  RT::System::CMD* cmd_ptr = &cmd;
+  this->eventFifo->write(&cmd_ptr, sizeof(RT::System::CMD*));
+  cmd.wait();
+}
+
+void RT::System::connectionsInfoRequest(Event::Object* event)
+{
+  auto* source = std::any_cast<IO::Block*>(event->getParam("block"));
+  std::vector<RT::block_connection_t> outputs = this->rt_connector->getOutputs(source);
+  event->setParam("outputs", std::any(outputs));
+}
+
+void RT::System::allConnectionsInfoRequest(Event::Object* event)
+{
+  std::vector<RT::block_connection_t> all_conn = this->rt_connector->getAllConnections();
+  event->setParam("connections", std::any(all_conn));
+}
+
+void RT::System::blockInfoRequest(Event::Object* event)
+{
+  std::vector<IO::Block*> blocks = this->rt_connector->getRegisteredBlocks();
+  event->setParam("blockList", std::any(blocks));
 }
 
 void RT::System::shutdown(Event::Object* event)

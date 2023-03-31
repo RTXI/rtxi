@@ -52,6 +52,7 @@ const response_t RT_DEVICE_LIST_UPDATE = 2;
 const response_t RT_NOOP = 3;
 const response_t RT_SHUTDOWN = 4;
 const response_t RT_MODULE_PARAM_UPDATE = 5;
+const response_t IO_LINK_UPDATED = 6;
 const response_t RT_ERROR = -1;
 const response_t NO_TELEMITRY = -2;
 
@@ -252,7 +253,7 @@ public:
   std::vector<RT::Thread*> getThreads();
 
   /*!
-   * Returns a list of connections for the input device
+   * Returns a list of connections for the given block 
    *
    * \param src Source IO::Block pointer to find the connections for
    * \returns A vector of RT::block_connection_t containing connection info
@@ -264,9 +265,12 @@ public:
    * Copies outputs of the given device object to the inputs of
    * connected thread and device objects
    *
-   * \param device Pointer to device that is the source of the output.
+   * \param Pointer to block that is the source of the output.
    */
   void propagateBlockConnections(IO::Block* block);
+
+  std::vector<IO::Block*> getRegisteredBlocks();
+  std::vector<RT::block_connection_t> getAllConnections();
 
 private:
   int find_cycle(RT::block_connection_t conn, IO::Block* ref_block);
@@ -279,6 +283,7 @@ using command_param_t = std::variant<std::monostate,
                                      int64_t, int64_t*, uint64_t, double,
                                      RT::Thread*, std::vector<RT::Thread*>*,
                                      RT::Device*, std::vector<RT::Device*>*,
+                                     IO::Block*, RT::block_connection_t,
                                      Modules::Component*, std::string>;
 /*!
  * Manages the RTOS as well as all objects that require
@@ -325,6 +330,10 @@ private:
   // void blockActivityChange(Event::Object* event);
   void threadActivityChange(Event::Object* event);
   void deviceActivityChange(Event::Object* event);
+  void ioLinkChange(Event::Object* event);
+  void connectionsInfoRequest(Event::Object* event);
+  void allConnectionsInfoRequest(Event::Object* event);
+  void blockInfoRequest(Event::Object* event);
   void setPeriod(Event::Object* event);
   void shutdown(Event::Object* event);
   void NOOP(Event::Object* event);
@@ -335,6 +344,7 @@ private:
   void executeCMD(CMD* cmd);
   void updateDeviceList(CMD* cmd);
   void updateThreadList(CMD* cmd);
+  void ioLinkUpdateCMD(CMD* cmd);
   void updateBlockActivity(CMD* cmd);
   void setPeriod(CMD* cmd);
   void shutdown(CMD* cmd);

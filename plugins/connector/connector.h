@@ -21,47 +21,38 @@
 #ifndef CONNECTOR_H
 #define CONNECTOR_H
 
+#include <vector>
+
 #include <QMdiArea>
 #include <QWidget>
 #include <QtWidgets>
-#include <vector>
 
-#include <event.h>
-#include <fifo.h>
-#include <io.h>
-#include <plugin.h>
+#include "io.hpp"
+#include "fifo.hpp"
+#include "event.hpp"
+#include "module.hpp"
 
 namespace Connector
 {
-class Panel
-    : public QWidget
-    , Event::Handler
+constexpr std::string_view MODULE_NAME = "Connector";
+
+class Panel : public Modules::Panel
 {
   Q_OBJECT
 
 public:
-  Panel(QWidget*);
-  ~Panel(void);
-  void receiveEvent(const Event::Object*);
+  Panel(MainWindow* mw, Event::Manager* event_manager);
 
 private slots:
-  void buildInputChannelList(void);
-  void buildOutputChannelList(void);
+  void buildInputChannelList();
+  void buildOutputChannelList();
   void highlightConnectionBox(QListWidgetItem*);
   void toggleConnection(bool);
-  void updateConnectionButton(void);
+  void updateConnectionButton();
 
 private:
-  static void buildConnectionList(
-      IO::Block*, size_t, IO::Block*, size_t, void*);
-
-  struct link_t
-  {
-    IO::Block* src;
-    size_t src_idx;
-    IO::Block* dest;
-    size_t dest_idx;
-  };
+  void buildConnectionList();
+  void buildBlockList();
 
   QMdiSubWindow* subWindow;
 
@@ -76,31 +67,24 @@ private:
   QListWidget* connectionBox;
   QPushButton* connectionButton;
   std::vector<IO::Block*> blocks;
-  std::vector<link_t> links;
+  std::vector<RT::block_connection_t> links;
 };  // class Panel
 
-class Plugin
-    : public QObject
-    , public ::Plugin::Object
+class Plugin : public Modules::Plugin
 {
-  Q_OBJECT
-  friend class Panel;
-
 public:
-  static Plugin* getInstance(void);
+  Plugin(Event::Manager* ev_manager, MainWindow* mw);
+  void receiveEvent(Event::Object* event) override;
 
-public slots:
-  void showConnectorPanel(void);
-
-private:
-  void removeConnectorPanel(Panel*);
-  Plugin(void);
-  ~Plugin(void);
-  Plugin(const Plugin&)
-      : QObject() {};
-  Plugin& operator=(const Plugin&) { return *getInstance(); };
-  static Plugin* instance;
-  Panel* panel;
 };  // class Plugin
+
+std::unique_ptr<Modules::Plugin> createRTXIPlugin(Event::Manager* ev_manager, MainWindow* main_window);
+
+Modules::Panel* createRTXIPanel(MainWindow* main_window, Event::Manager* ev_manager);
+
+std::unique_ptr<Modules::Component> createRTXIComponent(Modules::Plugin* host_plugin);
+
+Modules::FactoryMethods getFactories();
+
 };  // namespace Connector
 #endif  // CONNECTOR_H
