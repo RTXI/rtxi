@@ -171,9 +171,9 @@ Connector::Panel::Panel(MainWindow* mw, Event::Manager* event_manager)
   this->buildBlockList();
   this->buildConnectionList();
 
-  if (blocks.size() >= 1) {
-    buildInputChannelList();
-    buildOutputChannelList();
+  if (!blocks.empty()) {
+    this->buildInputChannelList();
+    this->buildOutputChannelList();
   }
 
   for (auto conn : this->links) {
@@ -368,10 +368,20 @@ void Connector::Panel::highlightConnectionBox(QListWidgetItem* item)
 void Connector::Panel::toggleConnection(bool on)
 {
   RT::block_connection_t connection;
-  connection.src = blocks[outputBlock->currentIndex()];
-  connection.dest = blocks[inputBlock->currentIndex()];
-  connection.src_port = outputChannel->currentIndex();
-  connection.dest_port = inputChannel->currentIndex();
+  int src_id = outputBlock->currentIndex();
+  int dest_id = inputBlock->currentIndex();
+  int src_port_id = outputChannel->currentIndex();
+  int dest_port_id = inputChannel->currentIndex();
+
+  // If no valid selection then do nothing
+  if(src_id == -1 || dest_id == -1 || src_port_id == -1 || dest_port_id == -1){
+    return;
+  }
+
+  connection.src = blocks[static_cast<size_t>(src_id)];
+  connection.dest = blocks[static_cast<size_t>(dest_id)];
+  connection.src_port = static_cast<size_t>(src_port_id);
+  connection.dest_port = static_cast<size_t>(dest_port_id);
   
   //if (IO::Connector::getInstance()->connected(src, src_num, dest, dest_num)
   //    == on)
@@ -415,3 +425,31 @@ Connector::Plugin::Plugin(Event::Manager* ev_manager, MainWindow* mw)
 {
 }
 
+std::unique_ptr<Modules::Plugin> Connector::createRTXIPlugin(
+    Event::Manager* ev_manager, MainWindow* main_window)
+{
+  return std::make_unique<Connector::Plugin>(ev_manager, main_window);
+}
+
+Modules::Panel* Connector::createRTXIPanel(
+    MainWindow* main_window, Event::Manager* ev_manager)
+{
+  return static_cast<Modules::Panel*>(new Connector::Panel(
+      main_window,
+      ev_manager));
+}
+
+std::unique_ptr<Modules::Component> Connector::createRTXIComponent(
+    Modules::Plugin* )
+{
+  return std::unique_ptr<Modules::Component>(nullptr);
+}
+
+Modules::FactoryMethods Connector::getFactories()
+{
+  Modules::FactoryMethods fact;
+  fact.createPanel = &Connector::createRTXIPanel;
+  fact.createComponent = &Connector::createRTXIComponent;
+  fact.createPlugin = &Connector::createRTXIPlugin;
+  return fact;
+}

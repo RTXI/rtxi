@@ -88,6 +88,7 @@ target_link_libraries(rtxi_exe PUBLIC
     performance_measurement_lib
     userprefs_lib
     system_control_lib
+    connector_lib
     Boost::headers
     backtrace
     dl

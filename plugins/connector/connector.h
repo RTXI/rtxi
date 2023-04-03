@@ -74,7 +74,7 @@ class Plugin : public Modules::Plugin
 {
 public:
   Plugin(Event::Manager* ev_manager, MainWindow* mw);
-  void receiveEvent(Event::Object* event) override;
+  //void receiveEvent(Event::Object* event) override;
 
 };  // class Plugin
 

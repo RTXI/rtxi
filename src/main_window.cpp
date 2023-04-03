@@ -41,6 +41,7 @@
 #include "rtxiConfig.h"
 #include "system_control/system_control.h"
 #include "userprefs/userprefs.h"
+#include "connector/connector.h"
 
 MainWindow::MainWindow(Event::Manager* ev_manager)
     : QMainWindow(nullptr, Qt::Window)
@@ -205,10 +206,11 @@ void MainWindow::createUtilMenu()
 
 void MainWindow::createSystemMenu()
 {
-  systemMenu = menuBar()->addMenu(tr("&System"));
-  systemMenu->addAction(openRTBenchmarks);
-  systemMenu->addAction(openUserPrefs);
-  systemMenu->addAction(openControlPanel);
+  this->systemMenu = menuBar()->addMenu(tr("&System"));
+  this->systemMenu->addAction(this->openRTBenchmarks);
+  this->systemMenu->addAction(this->openUserPrefs);
+  this->systemMenu->addAction(this->openControlPanel);
+  this->systemMenu->addAction(this->openConnector);
   connect(systemMenu,
           SIGNAL(triggered(QAction*)),
           this,
@@ -224,35 +226,35 @@ void MainWindow::createWindowsMenu()
 
 void MainWindow::createHelpMenu()
 {
-  helpMenu = menuBar()->addMenu(tr("&Help"));
-  helpMenu->addSeparator();
-  helpMenu->addAction(artxi);
-  helpMenu->addAction(axeno);
-  helpMenu->addAction(aqt);
-  helpMenu->addSeparator();
-  helpMenu->addAction(adocs);
-  helpMenu->addAction(sub_issue);
+  this->helpMenu = menuBar()->addMenu(tr("&Help"));
+  this->helpMenu->addSeparator();
+  this->helpMenu->addAction(artxi);
+  this->helpMenu->addAction(axeno);
+  this->helpMenu->addAction(aqt);
+  this->helpMenu->addSeparator();
+  this->helpMenu->addAction(adocs);
+  this->helpMenu->addAction(sub_issue);
 }
 
 void MainWindow::createFileActions()
 {
-  load = new QAction(tr("&Load Workspace"), this);
-  load->setShortcuts(QKeySequence::Open);
-  load->setStatusTip(tr("Load a saved workspace"));
+  this->load = new QAction(tr("&Load Workspace"), this);
+  this->load->setShortcuts(QKeySequence::Open);
+  this->load->setStatusTip(tr("Load a saved workspace"));
   connect(load, SIGNAL(triggered()), this, SLOT(loadSettings()));
 
-  save = new QAction(tr("&Save Workspace"), this);
-  save->setShortcuts(QKeySequence::Save);
-  save->setStatusTip(tr("Save current workspace"));
+  this->save = new QAction(tr("&Save Workspace"), this);
+  this->save->setShortcuts(QKeySequence::Save);
+  this->save->setStatusTip(tr("Save current workspace"));
   connect(save, SIGNAL(triggered()), this, SLOT(saveSettings()));
 
-  reset = new QAction(tr("&Reset Workspace"), this);
-  reset->setStatusTip(tr("Reset to default RTXI workspace"));
+  this->reset = new QAction(tr("&Reset Workspace"), this);
+  this->reset->setStatusTip(tr("Reset to default RTXI workspace"));
   connect(reset, SIGNAL(triggered()), this, SLOT(resetSettings()));
 
-  quit = new QAction(tr("&Quit"), this);
-  quit->setShortcut(tr("Ctrl+Q"));
-  quit->setStatusTip(tr("Quit RTXI"));
+  this->quit = new QAction(tr("&Quit"), this);
+  this->quit->setShortcut(tr("Ctrl+Q"));
+  this->quit->setStatusTip(tr("Quit RTXI"));
   connect(QCoreApplication::instance(),
           SIGNAL(aboutToQuit()),
           mdiArea,
@@ -285,12 +287,14 @@ void MainWindow::createHelpActions()
 
 void MainWindow::createSystemActions()
 {
-  openRTBenchmarks = new QAction(
+  this->openRTBenchmarks = new QAction(
       tr(std::string(PerformanceMeasurement::MODULE_NAME).c_str()), this);
-  openUserPrefs =
+  this->openUserPrefs =
       new QAction(tr(std::string(UserPrefs::MODULE_NAME).c_str()), this);
-  openControlPanel =
+  this->openControlPanel =
       new QAction(tr(std::string(SystemControl::MODULE_NAME).c_str()), this);
+  this->openConnector = 
+      new QAction(tr(std::string(Connector::MODULE_NAME).c_str()), this);
 }
 
 void MainWindow::about()

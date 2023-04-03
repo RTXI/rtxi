@@ -16,9 +16,6 @@ target_link_libraries(testing_lib PUBLIC
     xfifo
     rtxi
     rtmath_lib
-    performance_measurement_lib
-    userprefs_lib
-    system_control_lib
     GTest::gtest GTest::gtest_main
     GTest::gmock GTest::gmock_main 
     Boost::headers
@@ -43,6 +40,7 @@ target_link_libraries(rtxiTests PRIVATE
     performance_measurement_lib
     userprefs_lib
     system_control_lib
+    connector_lib
 )
 
 add_library(fakePlugin MODULE fakePlugin.h fakePlugin.cpp)

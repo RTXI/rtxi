@@ -508,6 +508,10 @@ void RT::System::executeCMD(RT::System::CMD* cmd)
     case Event::Type::RT_PERIOD_EVENT:
       this->setPeriod(cmd);
       break;
+    case Event::Type::IO_LINK_REMOVE_EVENT:
+    case Event::Type::IO_LINK_INSERT_EVENT:
+      this->ioLinkUpdateCMD(cmd);
+      break;
     case Event::Type::RT_PREPERIOD_EVENT:
     case Event::Type::RT_POSTPERIOD_EVENT:
       this->getPeriodTicksCMD(cmd);
@@ -558,6 +562,19 @@ void RT::System::receiveEvent(Event::Object* event)
   switch (event->getType()) {
     case Event::Type::RT_PERIOD_EVENT:
       this->setPeriod(event);
+      break;
+    case Event::Type::IO_BLOCK_QUERY_EVENT:
+      this->blockInfoRequest(event);
+      break;
+    case Event::Type::IO_BLOCK_OUTPUTS_QUERY_EVENT:
+      this->connectionsInfoRequest(event);
+      break;
+    case Event::Type::IO_ALL_CONNECTIONS_QUERY_EVENT:
+      this->allConnectionsInfoRequest(event);
+      break;
+    case Event::Type::IO_LINK_INSERT_EVENT:
+    case Event::Type::IO_LINK_REMOVE_EVENT:
+      this->ioLinkChange(event);
       break;
     case Event::Type::RT_THREAD_INSERT_EVENT:
       this->insertThread(event);

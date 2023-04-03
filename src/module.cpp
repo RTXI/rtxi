@@ -18,6 +18,7 @@
 #include "performance_measurement/performance_measurement.hpp"
 #include "system_control/system_control.h"
 #include "userprefs/userprefs.h"
+#include "connector/connector.h"
 
 std::string Modules::Variable::state2string(Modules::Variable::state_t state)
 {
@@ -680,6 +681,8 @@ Modules::Plugin* Modules::Manager::loadCorePlugin(const std::string& library)
     fact_methods = UserPrefs::getFactories();
   } else if (library == std::string(SystemControl::MODULE_NAME)) {
     fact_methods = SystemControl::getFactories();
+  } else if (library == std::string(Connector::MODULE_NAME)) {
+    fact_methods = Connector::getFactories();
   } else {
     return nullptr;
   }

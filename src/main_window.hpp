@@ -182,6 +182,7 @@ private:
   QAction* openRTBenchmarks = nullptr;
   QAction* openUserPrefs = nullptr;
   QAction* openControlPanel = nullptr;
+  QAction* openConnector = nullptr;
 
   void createFileMenu();
   void createModuleMenu();
