@@ -17,56 +17,53 @@
          along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <stdlib.h>
 #include <cmath>
 
+#include <qwt_abstract_scale_draw.h>
+
+#include "rt.hpp"
+#include "main_window.h"
 #include "scope.h"
 
-#include <debug.h>
-#include <main_window.h>
-#include <qwt_abstract_scale_draw.h>
-#include <rt.h>
-#include <stdlib.h>
-
-#define fs 1 / (period * 1e-3)
-
 // Constructor for a channel
-Scope::Channel::Channel(void) {}
+Scope::Channel::Channel() {}
 
 // Destructor for a channel
-Scope::Channel::~Channel(void) {}
+Scope::Channel::~Channel() {}
 
 // Returns channel information
-void* Scope::Channel::getInfo(void)
+void* Scope::Channel::getInfo()
 {
   return info;
 }
 
 // Return read-only version of channel information
-const void* Scope::Channel::getInfo(void) const
+const void* Scope::Channel::getInfo() const
 {
   return info;
 }
 
 // Returns channel pen
-QPen Scope::Channel::getPen(void) const
+QPen Scope::Channel::getPen() const
 {
   return this->curve->pen();
 }
 
 // Returns channel scale
-double Scope::Channel::getScale(void) const
+double Scope::Channel::getScale() const
 {
   return scale;
 }
 
 // Returns channel offset
-double Scope::Channel::getOffset(void) const
+double Scope::Channel::getOffset() const
 {
   return offset;
 }
 
 // Returns channel label
-QString Scope::Channel::getLabel(void) const
+QString Scope::Channel::getLabel() const
 {
   return label;
 }
@@ -152,25 +149,25 @@ Scope::Scope(QWidget* parent)
   timer = new QTimer;
   timer->setTimerType(Qt::PreciseTimer);
   QObject::connect(
-      timer, SIGNAL(timeout(void)), this, SLOT(timeoutEvent(void)));
+      timer, SIGNAL(timeout()), this, SLOT(timeoutEvent()));
   timer->start(refresh);
   resize(sizeHint());
 }
 
 // Kill me
-Scope::~Scope(void)
+Scope::~Scope()
 {
   delete d_directPainter;
 }
 
 // Returns pause status of scope
-bool Scope::paused(void) const
+bool Scope::paused() const
 {
   return isPaused;
 }
 
 // Timeout event slot
-void Scope::timeoutEvent(void)
+void Scope::timeoutEvent()
 {
   if (!triggering)
     drawCurves();
@@ -218,37 +215,37 @@ void Scope::resizeEvent(QResizeEvent* event)
 }
 
 // Returns count of number of active channels
-size_t Scope::getChannelCount(void) const
+size_t Scope::getChannelCount() const
 {
   return channels.size();
 }
 
 // Returns beginning of channels list
-std::list<Scope::Channel>::iterator Scope::getChannelsBegin(void)
+std::list<Scope::Channel>::iterator Scope::getChannelsBegin()
 {
   return channels.begin();
 }
 
 // Returns end of channels list
-std::list<Scope::Channel>::iterator Scope::getChannelsEnd(void)
+std::list<Scope::Channel>::iterator Scope::getChannelsEnd()
 {
   return channels.end();
 }
 
 // Returns read-only pointer to beginning of channel list
-std::list<Scope::Channel>::const_iterator Scope::getChannelsBegin(void) const
+std::list<Scope::Channel>::const_iterator Scope::getChannelsBegin() const
 {
   return channels.begin();
 }
 
 // Returns read-only pointer to end of channels list
-std::list<Scope::Channel>::const_iterator Scope::getChannelsEnd(void) const
+std::list<Scope::Channel>::const_iterator Scope::getChannelsEnd() const
 {
   return channels.end();
 }
 
 // Zeros data
-void Scope::clearData(void)
+void Scope::clearData()
 {
   for (std::list<Channel>::iterator i = channels.begin(), end = channels.end();
        i != end;
@@ -299,7 +296,7 @@ void Scope::setData(double data[], size_t size)
 }
 
 // Returns the data size
-size_t Scope::getDataSize(void) const
+size_t Scope::getDataSize() const
 {
   return data_size;
 }
@@ -315,22 +312,22 @@ void Scope::setDataSize(size_t size)
   triggerQueue.clear();
 }
 
-Scope::trig_t Scope::getTriggerDirection(void)
+Scope::trig_t Scope::getTriggerDirection()
 {
   return triggerDirection;
 }
 
-double Scope::getTriggerThreshold(void)
+double Scope::getTriggerThreshold()
 {
   return triggerThreshold;
 }
 
-double Scope::getTriggerWindow(void)
+double Scope::getTriggerWindow()
 {
   return triggerWindow;
 }
 
-std::list<Scope::Channel>::iterator Scope::getTriggerChannel(void)
+std::list<Scope::Channel>::iterator Scope::getTriggerChannel()
 {
   return triggerChannel;
 }
@@ -360,7 +357,7 @@ void Scope::setTrigger(trig_t direction,
   triggerWindow = window;
 }
 
-double Scope::getDivT(void) const
+double Scope::getDivT() const
 {
   return hScl;
 }
@@ -386,19 +383,19 @@ void Scope::setPeriod(double p)
 }
 
 // Get number of x divisions on scope
-size_t Scope::getDivX(void) const
+size_t Scope::getDivX() const
 {
   return divX;
 }
 
 // Get number of y divisions on scope
-size_t Scope::getDivY(void) const
+size_t Scope::getDivY() const
 {
   return divY;
 }
 
 // Get current refresh rate
-size_t Scope::getRefresh(void) const
+size_t Scope::getRefresh() const
 {
   return refresh;
 }
@@ -437,7 +434,7 @@ void Scope::setChannelLabel(std::list<Channel>::iterator channel,
 }
 
 // Draw data on the scope
-void Scope::drawCurves(void)
+void Scope::drawCurves()
 {
   if (isPaused)
     return;

@@ -29,13 +29,11 @@
 
 #include <QtWidgets>
 
-#include <event.h>
-#include <fifo.h>
-#include <io.h>
-#include <mutex.h>
-#include <plugin.h>
-#include <rt.h>
-#include <settings.h>
+#include "fifo.hpp"
+#include "io.hpp"
+#include "rt.hpp"
+#include "event.hpp"
+#include "module.hpp"
 
 #include "scope.h"
 
@@ -47,72 +45,46 @@ class CheckBox;
 class Panel;
 
 class Plugin
-    : public QObject
-    , public ::Plugin::Object
-    , public RT::Thread
+    : public Modules::Plugin
 {
-  Q_OBJECT
 
-  friend class Panel;
-
-public:
-  static Plugin* getInstance(void);
 
 public slots:
-  void createOscilloscopePanel(void);
-
-protected:
-  virtual void doDeferred(const Settings::Object::State&);
-  virtual void doLoad(const Settings::Object::State&);
-  virtual void doSave(Settings::Object::State&) const;
+  void createOscilloscopePanel();
 
 private:
-  Plugin(void);
-  ~Plugin(void);
-  Plugin(const Plugin&)
-      : QObject()
-      , RT::Thread() {};
-  Plugin& operator=(const Plugin&) { return *getInstance(); };
-  static Plugin* instance;
-  void removeOscilloscopePanel(Panel*);
 
   // List to maintain multiple scopes
   std::list<Panel*> panelList;
 };  // Plugin
 
-class Panel
-    : public QWidget
-    , public RT::Thread
-    , public virtual Settings::Object
-    , public Event::Handler
+class Panel : public Modules::Panel 
 {
   Q_OBJECT
 
-  friend class Scope;
-
 public:
   Panel(QWidget* = NULL);
-  virtual ~Panel(void);
-  void execute(void);
-  bool setInactiveSync(void);
-  void flushFifo(void);
-  void adjustDataSize(void);
+  virtual ~Panel();
+  void execute();
+  bool setInactiveSync();
+  void flushFifo();
+  void adjustDataSize();
   void doDeferred(const Settings::Object::State&);
   void doLoad(const Settings::Object::State&);
   void doSave(Settings::Object::State&) const;
   void receiveEvent(const ::Event::Object*);
 
 public slots:
-  void timeoutEvent(void);
-  void togglePause(void);
+  void timeoutEvent();
+  void togglePause();
 
 protected:
 private slots:
-  void showChannelTab(void);
-  void showDisplayTab(void);
-  void buildChannelList(void);
-  void screenshot(void);
-  void apply(void);
+  void showChannelTab();
+  void showDisplayTab();
+  void buildChannelList();
+  void screenshot();
+  void apply();
   void showTab(int);
   void activateChannel(bool);
 
@@ -130,8 +102,8 @@ private:
 
   // Functions to initialize and
   // apply changes made in tabs
-  void applyChannelTab(void);
-  void applyDisplayTab(void);
+  void applyChannelTab();
+  void applyDisplayTab();
   QWidget* createChannelTab(QWidget* parent);
   QWidget* createDisplayTab(QWidget* parent);
 
