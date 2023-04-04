@@ -168,10 +168,14 @@ Connector::Panel::Panel(MainWindow* mw, Event::Manager* event_manager)
 
   // populate field with block and connection info
   this->syncBlockInfo();
+
+  QObject::connect(this, SIGNAL(updateBlockInfo(void)), this, SLOT(syncBlockInfo(void)));
 }
 
 void Connector::Panel::buildBlockList()
 {
+  inputBlock->clear();
+  outputBlock->clear();
   Event::Object event(Event::Type::IO_BLOCK_QUERY_EVENT);
   this->getRTXIEventManager()->postEvent(&event);
   this->blocks = std::any_cast<std::vector<IO::Block*>>(event.getParam("blockList"));
@@ -224,6 +228,7 @@ void Connector::Panel::syncBlockInfo()
     this->buildOutputChannelList();
   }
 
+  connectionBox->clear();
   for (auto conn : this->links) {
     connectionBox->addItem(QString::number(conn.src->getID()) + " "
                            + QString::fromStdString(conn.src->getName())

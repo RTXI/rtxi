@@ -431,6 +431,8 @@ void MainWindow::systemMenuActivated(QAction* id)
       std::any_cast<Modules::Plugin*>(event.getParam("pluginPointer"));
   rtxi_plugin_pointer->attachPanel(
       create_rtxi_panel_func(this, this->event_manager));
+  // finally plugins can also receive events so make sure to register them
+  this->event_manager->registerHandler(rtxi_plugin_pointer);
 }
 
 void MainWindow::windowsMenuAboutToShow()
