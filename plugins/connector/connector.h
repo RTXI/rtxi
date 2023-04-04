@@ -43,12 +43,16 @@ class Panel : public Modules::Panel
 public:
   Panel(MainWindow* mw, Event::Manager* event_manager);
 
+signals:
+  void updateBlockInfo();
+
 private slots:
   void buildInputChannelList();
   void buildOutputChannelList();
   void highlightConnectionBox(QListWidgetItem*);
   void toggleConnection(bool);
   void updateConnectionButton();
+  void syncBlockInfo();
 
 private:
   void buildConnectionList();
@@ -74,6 +78,10 @@ class Plugin : public Modules::Plugin
 {
 public:
   Plugin(Event::Manager* ev_manager, MainWindow* mw);
+  void receiveEvent(Event::Object* event) override;
+
+private:
+  void updatePanelInfo();
   //void receiveEvent(Event::Object* event) override;
 
 };  // class Plugin
