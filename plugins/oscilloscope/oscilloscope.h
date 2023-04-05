@@ -40,17 +40,8 @@
 namespace Oscilloscope
 {
 
-class SpinBox;
-class CheckBox;
-class Panel;
-
-class Plugin
-    : public Modules::Plugin
+class Plugin : public Modules::Plugin
 {
-
-
-public slots:
-  void createOscilloscopePanel();
 
 private:
 
@@ -69,9 +60,9 @@ public:
   bool setInactiveSync();
   void flushFifo();
   void adjustDataSize();
-  void doDeferred(const Settings::Object::State&);
-  void doLoad(const Settings::Object::State&);
-  void doSave(Settings::Object::State&) const;
+  //void doDeferred(const Settings::Object::State&);
+  //void doLoad(const Settings::Object::State&);
+  //void doSave(Settings::Object::State&) const;
   void receiveEvent(const ::Event::Object*);
 
 public slots:

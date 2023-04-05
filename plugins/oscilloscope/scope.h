@@ -49,142 +49,123 @@
 #include <qwt_scale_engine.h>
 #include <qwt_system_clock.h>
 
+#include "io.hpp"
+
+namespace Oscilloscope {
+
+namespace Trigger{
+enum trig_t
+{
+  NONE,
+  POS,
+  NEG,
+};
+}; // namespace Trigger
+
+struct scope_channel
+{
+  QString label;
+  double scale;
+  double offset;
+  std::vector<double> data;
+  QwtPlotCurve* curve;
+  IO::channel_t info;
+};
+
+class LegendItem : public QwtPlotLegendItem
+{
+public:
+  LegendItem()
+  {
+    setRenderHint(QwtPlotItem::RenderAntialiased);
+    QColor color(Qt::black);
+    setTextPen(color);
+  }
+};  // LegendItem
+
+class Canvas : public QwtPlotCanvas
+{
+public:
+  Canvas(QwtPlot* plot = nullptr) : QwtPlotCanvas(plot)
+  {
+    setPaintAttribute(QwtPlotCanvas::BackingStore, false);
+    if (QwtPainter::isX11GraphicsSystem()) {
+      if (testPaintAttribute(QwtPlotCanvas::BackingStore)) {
+        setAttribute(Qt::WA_PaintOnScreen, true);
+        setAttribute(Qt::WA_NoSystemBackground, true);
+      }
+    }
+    setupPalette();
+  }
+
+private:
+  void setupPalette()
+  {
+    QPalette pal = palette();
+    QLinearGradient gradient;
+    gradient.setCoordinateMode(QGradient::StretchToDeviceMode);
+    gradient.setColorAt(1.0, QColor(Qt::white));
+    pal.setBrush(QPalette::Window, QBrush(gradient));
+    pal.setColor(QPalette::WindowText, Qt::green);
+    setPalette(pal);
+  }
+};  // Canvas
+
+
 class Scope : public QwtPlot
 {
-  Q_OBJECT
-
-  friend class Panel;
-
 public:
-  class Channel
-  {
-    friend class Scope;
+  explicit Scope(QWidget* = nullptr);
+  ~Scope();
 
-  public:
-    Channel(void);
-    virtual ~Channel(void);
-    void* getInfo(void);
-    const void* getInfo(void) const;
-    double getScale(void) const;
-    double getOffset(void) const;
-    QPen getPen(void) const;
-    QString getLabel(void) const;
+  bool paused() const;
+  std::list<scope_channel>::iterator insertChannel(
+      QString label, double scale, double offset, const QPen& pen, QwtPlotCurve* curve, IO::channel_t info);
+  void removeChannel(std::list<scope_channel>::iterator);
+  size_t getChannel() const;
+  size_t getChannelCount() const;
+  std::list<scope_channel>::iterator getChannelsBegin();
+  std::list<scope_channel>::iterator getChannelsEnd();
 
-  private:
-    QString label;
-    double scale;
-    double offset;
-    std::vector<double> data;
-    QwtPlotCurve* curve;
-    void* info;
-  };  // Channel
+  std::list<scope_channel>::const_iterator getChannelsBegin() const;
+  std::list<scope_channel>::const_iterator getChannelsEnd() const;
 
-  class LegendItem : public QwtPlotLegendItem
-  {
-  public:
-    LegendItem()
-    {
-      setRenderHint(QwtPlotItem::RenderAntialiased);
-      QColor color(Qt::black);
-      setTextPen(color);
-    }
-  };  // LegendItem
-
-  class Canvas : public QwtPlotCanvas
-  {
-  public:
-    Canvas(QwtPlot* plot = NULL)
-        : QwtPlotCanvas(plot)
-    {
-      setPaintAttribute(QwtPlotCanvas::BackingStore, false);
-
-      if (QwtPainter::isX11GraphicsSystem()) {
-#if QT_VERSION < 0x050000
-        setAttribute(Qt::WA_PaintOutsidePaintEvent, true);
-#endif
-        if (testPaintAttribute(QwtPlotCanvas::BackingStore)) {
-          setAttribute(Qt::WA_PaintOnScreen, true);
-          setAttribute(Qt::WA_NoSystemBackground, true);
-        }
-      }
-      setupPalette();
-    }
-
-  private:
-    void setupPalette()
-    {
-      QPalette pal = palette();
-
-#if QT_VERSION >= 0x040400
-      QLinearGradient gradient;
-      gradient.setCoordinateMode(QGradient::StretchToDeviceMode);
-      gradient.setColorAt(1.0, QColor(Qt::white));
-      pal.setBrush(QPalette::Window, QBrush(gradient));
-#else
-      pal.setBrush(QPalette::Window, QBrush(color));
-#endif
-      pal.setColor(QPalette::WindowText, Qt::green);
-      setPalette(pal);
-    }
-  };  // Canvas
-
-  enum trig_t
-  {
-    NONE,
-    POS,
-    NEG,
-  };
-
-  Scope(QWidget* = NULL);
-  virtual ~Scope(void);
-
-  bool paused(void) const;
-  std::list<Channel>::iterator insertChannel(
-      QString, double, double, const QPen&, QwtPlotCurve*, void*);
-  void* removeChannel(std::list<Channel>::iterator);
-  size_t getChannelCount(void) const;
-  std::list<Channel>::iterator getChannelsBegin(void);
-  std::list<Channel>::iterator getChannelsEnd(void);
-
-  std::list<Channel>::const_iterator getChannelsBegin(void) const;
-  std::list<Channel>::const_iterator getChannelsEnd(void) const;
-
-  void clearData(void);
+  void clearData();
   void setData(double*, size_t);
-  size_t getDataSize(void) const;
+  size_t getDataSize() const;
   void setDataSize(size_t);
 
-  trig_t getTriggerDirection(void);
-  double getTriggerThreshold(void);
-  double getTriggerWindow(void);
-  std::list<Channel>::iterator getTriggerChannel(void);
-  void setTrigger(trig_t, double, std::list<Channel>::iterator, double);
+  Trigger::trig_t getTriggerDirection();
+  double getTriggerThreshold();
+  double getTriggerWindow();
+  std::list<scope_channel>::iterator getTriggerChannel();
+  void setTrigger(Trigger::trig_t, double, std::list<scope_channel>::iterator, double);
 
-  double getDivT(void) const;
+  double getDivT() const;
   void setDivT(double);
 
   void setPeriod(double);
-  size_t getDivX(void) const;
-  size_t getDivY(void) const;
+  size_t getDivX() const;
+  size_t getDivY() const;
 
-  size_t getRefresh(void) const;
+  size_t getRefresh() const;
   void setRefresh(size_t);
 
   bool isPaused;
 
-  void setChannelScale(std::list<Channel>::iterator, double);
-  void setChannelOffset(std::list<Channel>::iterator, double);
-  void setChannelPen(std::list<Channel>::iterator, const QPen&);
-  void setChannelLabel(std::list<Channel>::iterator, const QString&);
-
-private slots:
-  void timeoutEvent(void);
+  void setChannelScale(std::list<scope_channel>::iterator, double);
+  void setChannelOffset(std::list<scope_channel>::iterator, double);
+  void setChannelPen(std::list<scope_channel>::iterator, const QPen&);
+  void setChannelLabel(std::list<scope_channel>::iterator, const QString&);
 
 protected:
   void resizeEvent(QResizeEvent*);
 
+private slots:
+  void timeoutEvent();
+
 private:
-  void drawCurves(void);
+  void drawCurves();
   size_t divX;
   size_t divY;
   size_t data_idx;
@@ -193,11 +174,11 @@ private:
   double period;  // real-time period of system (ms)
   size_t refresh;
   bool triggering;
-  trig_t triggerDirection;
+  Trigger::trig_t triggerDirection;
   double triggerThreshold;
   double triggerWindow;
   std::list<size_t> triggerQueue;
-  std::list<Channel>::iterator triggerChannel;
+  std::list<scope_channel>::iterator triggerChannel;
 
   // Scope primary paint element
   QwtPlotDirectPainter* d_directPainter;
@@ -215,7 +196,9 @@ private:
 
   QTimer* timer;
   QString dtLabel;
-  std::list<Channel> channels;
+  std::list<scope_channel> channels;
 };  // Scope
+
+}; // namespace Oscilloscope
 
 #endif  // SCOPE_H

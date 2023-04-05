@@ -21,76 +21,34 @@
 #include <cmath>
 
 #include <qwt_abstract_scale_draw.h>
+#include <qwt_scale_map.h>
 
 #include "rt.hpp"
-#include "main_window.h"
 #include "scope.h"
 
-// Constructor for a channel
-Scope::Channel::Channel() {}
-
-// Destructor for a channel
-Scope::Channel::~Channel() {}
-
-// Returns channel information
-void* Scope::Channel::getInfo()
-{
-  return info;
-}
-
-// Return read-only version of channel information
-const void* Scope::Channel::getInfo() const
-{
-  return info;
-}
-
-// Returns channel pen
-QPen Scope::Channel::getPen() const
-{
-  return this->curve->pen();
-}
-
-// Returns channel scale
-double Scope::Channel::getScale() const
-{
-  return scale;
-}
-
-// Returns channel offset
-double Scope::Channel::getOffset() const
-{
-  return offset;
-}
-
-// Returns channel label
-QString Scope::Channel::getLabel() const
-{
-  return label;
-}
-
 // Scope constructor; inherits from QwtPlot
-Scope::Scope(QWidget* parent)
+Oscilloscope::Scope::Scope(QWidget* parent)
     : QwtPlot(parent)
-    , legendItem(NULL)
+    , legendItem(nullptr)
 {
   // Initialize vars
-  isPaused = false;
-  divX = 10;
-  divY = 10;
-  data_idx = 0;
-  data_size = 100;
-  hScl = 1.0;
-  period = 1.0;
-  dtLabel = "1ms";
-  refresh = 250;
-  triggering = false;
-  triggerDirection = Scope::NONE;
-  triggerThreshold = 0.0;
-  triggerChannel = channels.end();
-  triggerWindow = 10.0;
+  this->isPaused = false;
+  this->divX = 10;
+  this->divY = 10;
+  this->data_idx = 0;
+  this->data_size = 100;
+  this->hScl = 1.0;
+  this->period = 1.0;
+  this->dtLabel = "1ms";
+  this->refresh = 250;
+  this->triggering = false;
+  this->triggerDirection = Oscilloscope::Trigger::NONE;
+  this->triggerThreshold = 0.0;
+  this->triggerChannel = channels.end();
+  this->triggerWindow = 10.0;
 
   // Initialize director
-  d_directPainter = new QwtPlotDirectPainter();
+  this->d_directPainter = new QwtPlotDirectPainter();
   plotLayout()->setAlignCanvasToScales(true);
   setAutoReplot(false);
 
@@ -98,9 +56,9 @@ Scope::Scope(QWidget* parent)
   setCanvas(new Canvas());
 
   // Setup grid
-  grid = new QwtPlotGrid();
-  grid->setPen(Qt::gray, 0, Qt::DotLine);
-  grid->attach(this);
+  this->grid = new QwtPlotGrid();
+  this->grid->setPen(Qt::gray, 0, Qt::DotLine);
+  this->grid->attach(this);
 
   // Set division limits on the scope
   setAxisMaxMajor(QwtPlot::xBottom, divX);
@@ -119,55 +77,55 @@ Scope::Scope(QWidget* parent)
   setAxisAutoScale(QwtPlot::xBottom, false);
 
   // Set origin markers
-  origin = new QwtPlotMarker();
-  origin->setLineStyle(QwtPlotMarker::Cross);
-  origin->setValue(500.0, 0.0);
-  origin->setLinePen(Qt::gray, 2.0, Qt::DashLine);
-  origin->attach(this);
+  this->origin = new QwtPlotMarker();
+  this->origin->setLineStyle(QwtPlotMarker::Cross);
+  this->origin->setValue(500.0, 0.0);
+  this->origin->setLinePen(Qt::gray, 2.0, Qt::DashLine);
+  this->origin->attach(this);
 
   // Setup scaling map
-  scaleMapY = new QwtScaleMap();
-  scaleMapY->setPaintInterval(-1.0, 1.0);
-  scaleMapX = new QwtScaleMap();
-  scaleMapX->setPaintInterval(0.0, 1000.0);
+  this->scaleMapY = new QwtScaleMap();
+  this->scaleMapY->setPaintInterval(-1.0, 1.0);
+  this->scaleMapX = new QwtScaleMap();
+  this->scaleMapX->setPaintInterval(0.0, 1000.0);
 
   // Create and attach legend
-  legendItem = new LegendItem();
-  legendItem->attach(this);
-  legendItem->setMaxColumns(1);
-  legendItem->setAlignment(Qt::Alignment(Qt::AlignTop | Qt::AlignRight));
-  legendItem->setBorderRadius(8);
-  legendItem->setMargin(4);
-  legendItem->setSpacing(2);
-  legendItem->setItemMargin(0);
-  legendItem->setBackgroundBrush(QBrush(QColor(225, 225, 225)));
+  this->legendItem = new LegendItem();
+  this->legendItem->attach(this);
+  this->legendItem->setMaxColumns(1);
+  this->legendItem->setAlignmentInCanvas(Qt::Alignment(Qt::AlignTop | Qt::AlignRight));
+  this->legendItem->setBorderRadius(8);
+  this->legendItem->setMargin(4);
+  this->legendItem->setSpacing(2);
+  this->legendItem->setItemMargin(0);
+  this->legendItem->setBackgroundBrush(QBrush(QColor(225, 225, 225)));
 
   // Update scope background/scales/axes
   replot();
 
   // Timer controls refresh rate of scope
-  timer = new QTimer;
-  timer->setTimerType(Qt::PreciseTimer);
+  this->timer = new QTimer;
+  this->timer->setTimerType(Qt::PreciseTimer);
   QObject::connect(
       timer, SIGNAL(timeout()), this, SLOT(timeoutEvent()));
-  timer->start(refresh);
+  this->timer->start(this->refresh);
   resize(sizeHint());
 }
 
 // Kill me
-Scope::~Scope()
+Oscilloscope::Scope::~Scope()
 {
   delete d_directPainter;
 }
 
 // Returns pause status of scope
-bool Scope::paused() const
+bool Oscilloscope::Scope::paused() const
 {
   return isPaused;
 }
 
 // Timeout event slot
-void Scope::timeoutEvent()
+void Oscilloscope::Scope::timeoutEvent()
 {
   if (!triggering)
     drawCurves();
@@ -175,14 +133,14 @@ void Scope::timeoutEvent()
 
 // Insert user specified channel into active list of channels with specified
 // settings
-std::list<Scope::Channel>::iterator Scope::insertChannel(QString label,
-                                                         double scale,
-                                                         double offset,
-                                                         const QPen& pen,
-                                                         QwtPlotCurve* curve,
-                                                         void* info)
+std::list<Oscilloscope::scope_channel>::iterator Oscilloscope::Scope::insertChannel(QString label,
+                                                                                    double scale,
+                                                                                    double offset,
+                                                                                    const QPen& pen,
+                                                                                    QwtPlotCurve* curve,
+                                                                                    IO::channel_t info)
 {
-  struct Channel channel;
+  struct scope_channel channel;
   channel.label = label;
   channel.scale = scale;
   channel.offset = offset;
@@ -194,60 +152,58 @@ std::list<Scope::Channel>::iterator Scope::insertChannel(QString label,
   channel.curve->setRenderHint(QwtPlotItem::RenderAntialiased, false);
   channel.curve->attach(this);
   channels.push_back(channel);
-  return --channels.end();
+  return --(this->channels.end());
 }
 
 // Remove user specified channel from active channels list
-void* Scope::removeChannel(std::list<Scope::Channel>::iterator channel)
+void Oscilloscope::Scope::removeChannel(std::list<Oscilloscope::scope_channel>::iterator channel)
 {
   channel->curve->detach();
   replot();
-  void* info = channel->info;
   channels.erase(channel);
-  return info;
 }
 
 // Resize event for scope
-void Scope::resizeEvent(QResizeEvent* event)
+void Oscilloscope::Scope::resizeEvent(QResizeEvent* event)
 {
-  d_directPainter->reset();
+  this->d_directPainter->reset();
   QwtPlot::resizeEvent(event);
 }
 
 // Returns count of number of active channels
-size_t Scope::getChannelCount() const
+size_t Oscilloscope::Scope::getChannelCount() const
 {
   return channels.size();
 }
 
 // Returns beginning of channels list
-std::list<Scope::Channel>::iterator Scope::getChannelsBegin()
+std::list<Oscilloscope::scope_channel>::iterator Oscilloscope::Scope::getChannelsBegin()
 {
   return channels.begin();
 }
 
 // Returns end of channels list
-std::list<Scope::Channel>::iterator Scope::getChannelsEnd()
+std::list<Oscilloscope::scope_channel>::iterator Oscilloscope::Scope::getChannelsEnd()
 {
   return channels.end();
 }
 
 // Returns read-only pointer to beginning of channel list
-std::list<Scope::Channel>::const_iterator Scope::getChannelsBegin() const
+std::list<Oscilloscope::scope_channel>::const_iterator Oscilloscope::Scope::getChannelsBegin() const
 {
   return channels.begin();
 }
 
 // Returns read-only pointer to end of channels list
-std::list<Scope::Channel>::const_iterator Scope::getChannelsEnd() const
+std::list<Oscilloscope::scope_channel>::const_iterator Oscilloscope::Scope::getChannelsEnd() const
 {
   return channels.end();
 }
 
 // Zeros data
-void Scope::clearData()
+void Oscilloscope::Scope::clearData()
 {
-  for (std::list<Channel>::iterator i = channels.begin(), end = channels.end();
+  for (std::list<Oscilloscope::scope_channel>::iterator i = channels.begin(), end = channels.end();
        i != end;
        ++i)
   {
@@ -256,8 +212,9 @@ void Scope::clearData()
 }
 
 // Scales data based upon desired settings for the channel
-void Scope::setData(double data[], size_t size)
+void Oscilloscope::Scope::setData(double data[], size_t size)
 {
+  // femtoseconds 
   if (isPaused)
     return;
 
@@ -267,16 +224,16 @@ void Scope::setData(double data[], size_t size)
   }
 
   size_t index = 0;
-  for (std::list<Channel>::iterator i = channels.begin(), end = channels.end();
+  for (std::list<Oscilloscope::scope_channel>::iterator i = channels.begin(), end = channels.end();
        i != end;
        ++i)
   {
     i->data[data_idx] = data[index++];
 
     if (triggering && i == triggerChannel
-        && ((triggerDirection == POS && i->data[data_idx - 1] < triggerThreshold
+        && ((triggerDirection == Oscilloscope::Trigger::POS && i->data[data_idx - 1] < triggerThreshold
              && i->data[data_idx] > triggerThreshold)
-            || (triggerDirection == NEG
+            || (triggerDirection == Oscilloscope::Trigger::NEG
                 && i->data[data_idx - 1] > triggerThreshold
                 && i->data[data_idx] < triggerThreshold)))
     {
@@ -327,7 +284,7 @@ double Scope::getTriggerWindow()
   return triggerWindow;
 }
 
-std::list<Scope::Channel>::iterator Scope::getTriggerChannel()
+std::list<Oscilloscope::scope_channel>::iterator Scope::getTriggerChannel()
 {
   return triggerChannel;
 }
