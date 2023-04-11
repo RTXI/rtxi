@@ -81,18 +81,18 @@ struct channel_info
 //     s.saveState(QString::number(n++).toStdString(), (*i)->save());
 // }
 
-void Oscilloscope::Panel::receiveEvent(const ::Event::Object* event)
+void Oscilloscope::Plugin::receiveEvent(Event::Object* event)
 {
-  if (event->getName() == Event::IO_BLOCK_INSERT_EVENT) {
-    IO::Block* block = reinterpret_cast<IO::Block*>(event->getParam("block"));
-    if (block) {
-      // Update the list of blocks
-      blocksList->addItem(QString::fromStdString(block->getName()) + " "
-                          + QString::number(block->getID()));
-      blocks.push_back(block);
-      if (blocksList->count() == 1)
-        buildChannelList();
-    }
+  switch(event->getType()){
+    case Event::Type::IO_BLOCK_INSERT_EVENT) :
+      IO::Block* block = reinterpret_cast<IO::Block*>(event->getParam("block"));
+      if (block) {
+        // Update the list of blocks
+        blocksList->addItem(QString::fromStdString(block->getName()) + " "
+                            + QString::number(block->getID()));
+        blocks.push_back(block);
+        if (blocksList->count() == 1)
+          buildChannelList();
   } else if (event->getName() == Event::IO_BLOCK_REMOVE_EVENT) {
     IO::Block* block = reinterpret_cast<IO::Block*>(event->getParam("block"));
     if (block) {

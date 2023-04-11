@@ -59,7 +59,7 @@ enum flags_t : size_t
  *
  * \sa IO::Block::Block()
  */
-typedef struct
+typedef struct channel_t
 {
   std::string name;
   std::string description;

@@ -31,7 +31,6 @@
 #define SCOPE_H
 
 #include <QtWidgets>
-#include <list>
 #include <vector>
 
 #include <qwt.h>
@@ -62,13 +61,20 @@ enum trig_t
 };
 }; // namespace Trigger
 
+typedef struct sample {
+  double value;
+  int64_t time;
+} sample;
+
 struct scope_channel
 {
   QString label;
   double scale;
   double offset;
-  std::vector<double> data;
+  std::vector<sample> data;
   QwtPlotCurve* curve;
+  IO::Block* block;
+  int port;
   IO::channel_t info;
 };
 
@@ -119,16 +125,9 @@ public:
   ~Scope();
 
   bool paused() const;
-  std::list<scope_channel>::iterator insertChannel(
-      QString label, double scale, double offset, const QPen& pen, QwtPlotCurve* curve, IO::channel_t info);
-  void removeChannel(std::list<scope_channel>::iterator);
-  size_t getChannel() const;
+  void insertChannel(scope_channel channel);
+  void removeChannel(IO::Block* block, int port);
   size_t getChannelCount() const;
-  //std::list<scope_channel>::iterator getChannelsBegin();
-  //std::list<scope_channel>::iterator getChannelsEnd();
-
-  //std::list<scope_channel>::const_iterator getChannelsBegin() const;
-  //std::list<scope_channel>::const_iterator getChannelsEnd() const;
 
   void clearData();
   void setData(double*, size_t);
@@ -152,36 +151,37 @@ public:
   void setRefresh(size_t);
 
 
-  void setChannelScale(std::list<scope_channel>::iterator, double);
-  void setChannelOffset(std::list<scope_channel>::iterator, double);
-  void setChannelPen(std::list<scope_channel>::iterator, const QPen&);
-  void setChannelLabel(std::list<scope_channel>::iterator, const QString&);
+  void setChannelScale(IO::Block* block, int port, double chan_scale);
+  void setChannelOffset(IO::Block* block, int port, double chan_offset);
+  void setChannelPen(IO::Block* block, int port, const QPen& pen);
+  void setChannelLabel(IO::Block* block, int port, const QString& pen);
 
 protected:
-  void resizeEvent(QResizeEvent*);
+  void resizeEvent(QResizeEvent* event);
 
 private slots:
   void timeoutEvent();
 
 private:
-  bool isPaused;
   void drawCurves();
-  size_t divX;
-  size_t divY;
-  size_t data_idx;
-  size_t data_size;
-  double hScl;  // horizontal scale for time (ms)
+
+  bool isPaused = false;
+  int divX=10;
+  int divY=10;
+  int data_idx=0;
+  size_t data_size=100;
+  int refresh=250;
+  double hScl=1.0;  // horizontal scale for time (ms)
   double period;  // real-time period of system (ms)
-  size_t refresh;
-  bool triggering;
-  Trigger::trig_t triggerDirection;
-  double triggerThreshold;
-  double triggerWindow;
+  bool triggering=false;
+  Trigger::trig_t triggerDirection=Oscilloscope::Trigger::NONE;
+  double triggerThreshold=0.0;
+  double triggerWindow=10.0;
   std::list<size_t> triggerQueue;
-  std::list<scope_channel>::iterator triggerChannel;
+  scope_channel* triggerChannel=nullptr;
 
   // Scope primary paint element
-  QwtPlotDirectPainter* d_directPainter;
+  QwtPlotDirectPainter* d_directPainter=nullptr;
 
   // Scope painter elements
   QwtPlotGrid* grid;
@@ -196,7 +196,7 @@ private:
 
   QTimer* timer;
   QString dtLabel;
-  std::list<scope_channel> channels;
+  std::vector<scope_channel> channels;
 };  // Scope
 
 }; // namespace Oscilloscope

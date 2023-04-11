@@ -60,7 +60,6 @@ public slots:
   void timeoutEvent();
   void togglePause();
 
-protected:
 private slots:
   void showChannelTab();
   void showDisplayTab();
@@ -131,6 +130,9 @@ private:
 
 class Plugin : public Modules::Plugin
 {
+public:
+  void receiveEvent(Event::Object* event) override;
+
 private:
   // List to maintain multiple scopes
   std::list<std::unique_ptr<Oscilloscope::Panel>> panelList;

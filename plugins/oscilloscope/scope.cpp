@@ -27,28 +27,16 @@
 #include "scope.h"
 
 // Scope constructor; inherits from QwtPlot
-Oscilloscope::Scope::Scope(QWidget* parent)
-    : QwtPlot(parent)
-    , legendItem(nullptr)
+Oscilloscope::Scope::Scope(QWidget* parent): QwtPlot(parent), 
+  d_directPainter(new QwtPlotDirectPainter()),
+  grid(new QwtPlotGrid()),
+  origin(new QwtPlotMarker()),
+  scaleMapY(new QwtScaleMap()),
+  scaleMapX(new QwtScaleMap()),
+  legendItem(new LegendItem()),
+  timer(new QTimer())
 {
-  // Initialize vars
-  this->isPaused = false;
-  this->divX = 10;
-  this->divY = 10;
-  this->data_idx = 0;
-  this->data_size = 100;
-  this->hScl = 1.0;
-  this->period = 1.0;
-  this->dtLabel = "1ms";
-  this->refresh = 250;
-  this->triggering = false;
-  this->triggerDirection = Oscilloscope::Trigger::NONE;
-  this->triggerThreshold = 0.0;
-  this->triggerChannel = channels.end();
-  this->triggerWindow = 10.0;
-
   // Initialize director
-  this->d_directPainter = new QwtPlotDirectPainter();
   plotLayout()->setAlignCanvasToScales(true);
   setAutoReplot(false);
 
@@ -56,7 +44,6 @@ Oscilloscope::Scope::Scope(QWidget* parent)
   setCanvas(new Oscilloscope::Canvas());
 
   // Setup grid
-  this->grid = new QwtPlotGrid();
   this->grid->setPen(Qt::gray, 0, Qt::DotLine);
   this->grid->attach(this);
 
@@ -77,20 +64,16 @@ Oscilloscope::Scope::Scope(QWidget* parent)
   setAxisAutoScale(QwtPlot::xBottom, false);
 
   // Set origin markers
-  this->origin = new QwtPlotMarker();
   this->origin->setLineStyle(QwtPlotMarker::Cross);
   this->origin->setValue(500.0, 0.0);
   this->origin->setLinePen(Qt::gray, 2.0, Qt::DashLine);
   this->origin->attach(this);
 
   // Setup scaling map
-  this->scaleMapY = new QwtScaleMap();
   this->scaleMapY->setPaintInterval(-1.0, 1.0);
-  this->scaleMapX = new QwtScaleMap();
   this->scaleMapX->setPaintInterval(0.0, 1000.0);
 
   // Create and attach legend
-  this->legendItem = new LegendItem();
   this->legendItem->attach(this);
   this->legendItem->setMaxColumns(1);
   this->legendItem->setAlignmentInCanvas(Qt::Alignment(Qt::AlignTop | Qt::AlignRight));
@@ -104,7 +87,6 @@ Oscilloscope::Scope::Scope(QWidget* parent)
   replot();
 
   // Timer controls refresh rate of scope
-  this->timer = new QTimer;
   this->timer->setTimerType(Qt::PreciseTimer);
   QObject::connect(
       timer, SIGNAL(timeout()), this, SLOT(timeoutEvent()));
@@ -133,35 +115,38 @@ void Oscilloscope::Scope::timeoutEvent()
 
 // Insert user specified channel into active list of channels with specified
 // settings
-std::list<Oscilloscope::scope_channel>::iterator 
-Oscilloscope::Scope::insertChannel(QString label,
-                                   double scale,
-                                   double offset,
-                                   const QPen& pen,
-                                   QwtPlotCurve* curve,
-                                   IO::channel_t info)
+void Oscilloscope::Scope::insertChannel(Oscilloscope::scope_channel channel)
 {
-  struct scope_channel channel;
-  channel.label = label;
-  channel.scale = scale;
-  channel.offset = offset;
-  channel.info = info;
-  channel.data.resize(data_size, 0.0);
-  channel.curve = curve;
-  channel.curve->setPen(pen);
-  channel.curve->setStyle(QwtPlotCurve::Lines);
-  channel.curve->setRenderHint(QwtPlotItem::RenderAntialiased, false);
-  channel.curve->attach(this);
+  //struct scope_channel channel;
+  //channel.label = label;
+  //channel.scale = scale;
+  //channel.offset = offset;
+  //channel.info = info;
+  //channel.data.resize(data_size, 0.0);
+  //channel.curve = curve;
+  //channel.curve->setPen(pen);
+  //channel.curve->setStyle(QwtPlotCurve::Lines);
+  //channel.curve->setRenderHint(QwtPlotItem::RenderAntialiased, false);
+  //channel.curve->attach(this);
   channels.push_back(channel);
-  return --(this->channels.end());
+  //return --(this->channels.end());
 }
 
 // Remove user specified channel from active channels list
-void Oscilloscope::Scope::removeChannel(std::list<Oscilloscope::scope_channel>::iterator channel)
+void Oscilloscope::Scope::removeChannel(IO::Block* block, int port)
 {
-  channel->curve->detach();
+  auto iter = std::find_if(this->channels.begin(),
+                           this->channels.end(),
+                           [&](Oscilloscope::scope_channel channel_info){
+                             return block == channel_info.block && 
+                                    port == channel_info.port;
+                           });
+  if(iter == this->channels.end()) {
+    return;
+  }
+  iter->curve->detach();
+  channels.erase(iter);
   replot();
-  channels.erase(channel);
 }
 
 // Resize event for scope
@@ -177,48 +162,20 @@ size_t Oscilloscope::Scope::getChannelCount() const
   return channels.size();
 }
 
-//// Returns beginning of channels list
-//std::list<Oscilloscope::scope_channel>::iterator Oscilloscope::Scope::getChannelsBegin()
-//{
-//  return channels.begin();
-//}
-//
-//// Returns end of channels list
-//std::list<Oscilloscope::scope_channel>::iterator Oscilloscope::Scope::getChannelsEnd()
-//{
-//  return channels.end();
-//}
-//
-//// Returns read-only pointer to beginning of channel list
-//std::list<Oscilloscope::scope_channel>::const_iterator Oscilloscope::Scope::getChannelsBegin() const
-//{
-//  return channels.begin();
-//}
-//
-//// Returns read-only pointer to end of channels list
-//std::list<Oscilloscope::scope_channel>::const_iterator Oscilloscope::Scope::getChannelsEnd() const
-//{
-//  return channels.end();
-//}
-
-// Zeros data
 void Oscilloscope::Scope::clearData()
 {
-  for (std::list<Oscilloscope::scope_channel>::iterator i = channels.begin(), end = channels.end();
-       i != end;
-       ++i)
+  for (auto& chan : this->channels)
   {
-    i->data.assign(data_size, 0);
+    chan.data.assign(data_size, 0);
   }
 }
 
 // Scales data based upon desired settings for the channel
 void Oscilloscope::Scope::setData(double data[], size_t size)
 {
-  // femtoseconds 
   if (isPaused)
     return;
-
+  double fs = 1/(this->period * 1e-3);
   if (size < getChannelCount()) {
     ERROR_MSG("Scope::setData() : data size mismatch detected\n");
     return;
@@ -254,14 +211,14 @@ void Oscilloscope::Scope::setData(double data[], size_t size)
 }
 
 // Returns the data size
-size_t Scope::getDataSize() const
+size_t Oscilloscope::Scope::getDataSize() const
 {
   return data_size;
 }
 
-void Scope::setDataSize(size_t size)
+void Oscilloscope::Scope::setDataSize(size_t size)
 {
-  for (std::list<Channel>::iterator i = channels.begin(), end = channels.end();
+  for (std::list<Oscilloscope::scope_channel>::iterator i = channels.begin(), end = channels.end();
        i != end;
        ++i)
     i->data.resize(size, 0.0);
@@ -270,39 +227,37 @@ void Scope::setDataSize(size_t size)
   triggerQueue.clear();
 }
 
-Scope::trig_t Scope::getTriggerDirection()
+Oscilloscope::Trigger::trig_t Oscilloscope::Scope::getTriggerDirection()
 {
   return triggerDirection;
 }
 
-double Scope::getTriggerThreshold()
+double Oscilloscope::Scope::getTriggerThreshold()
 {
   return triggerThreshold;
 }
 
-double Scope::getTriggerWindow()
+double Oscilloscope::Scope::getTriggerWindow()
 {
   return triggerWindow;
 }
 
-std::list<Oscilloscope::scope_channel>::iterator Scope::getTriggerChannel()
+std::list<Oscilloscope::scope_channel>::iterator Oscilloscope::Scope::getTriggerChannel()
 {
   return triggerChannel;
 }
 
-void Scope::setTrigger(trig_t direction,
-                       double threshold,
-                       std::list<Channel>::iterator channel,
-                       double window)
+void Oscilloscope::Scope::setTrigger(Oscilloscope::Trigger::trig_t direction,
+                                     double threshold,
+                                     std::list<Oscilloscope::scope_channel>::iterator channel,
+                                     double window)
 {
-  if (triggerChannel != channel || triggerThreshold != threshold) {
-    triggerChannel = channel;
-    triggerThreshold = threshold;
-  }
+  triggerChannel = channel;
+  triggerThreshold = threshold;
 
   // Update if direction has changed
   if (triggerDirection != direction) {
-    if (direction == Scope::NONE) {
+    if (direction == Oscilloscope::Trigger::NONE) {
       triggering = false;
       timer->start(refresh);
       triggerQueue.clear();
@@ -315,13 +270,13 @@ void Scope::setTrigger(trig_t direction,
   triggerWindow = window;
 }
 
-double Scope::getDivT() const
+double Oscilloscope::Scope::getDivT() const
 {
   return hScl;
 }
 
 // Set x divisions
-void Scope::setDivT(double divT)
+void Oscilloscope::Scope::setDivT(double divT)
 {
   hScl = divT;
   if (divT >= 1000.)
@@ -335,90 +290,89 @@ void Scope::setDivT(double divT)
 }
 
 // Set period
-void Scope::setPeriod(double p)
+void Oscilloscope::Scope::setPeriod(double p)
 {
   period = p;
 }
 
 // Get number of x divisions on scope
-size_t Scope::getDivX() const
+size_t Oscilloscope::Scope::getDivX() const
 {
   return divX;
 }
 
 // Get number of y divisions on scope
-size_t Scope::getDivY() const
+size_t Oscilloscope::Scope::getDivY() const
 {
   return divY;
 }
 
 // Get current refresh rate
-size_t Scope::getRefresh() const
+size_t Oscilloscope::Scope::getRefresh() const
 {
   return refresh;
 }
 
 // Set new refresh rate
-void Scope::setRefresh(size_t r)
+void Oscilloscope::Scope::setRefresh(size_t r)
 {
   refresh = r;
   timer->setInterval(refresh);
 }
 
 // Set channel scale
-void Scope::setChannelScale(std::list<Channel>::iterator channel, double scale)
+void Oscilloscope::Scope::setChannelScale(std::list<Oscilloscope::scope_channel>::iterator channel, double scale)
 {
   channel->scale = scale;
 }
 
 // Set channel offset
-void Scope::setChannelOffset(std::list<Channel>::iterator channel,
+void Oscilloscope::Scope::setChannelOffset(std::list<Oscilloscope::scope_channel>::iterator channel,
                              double offset)
 {
   channel->offset = offset;
 }
 
 // Set pen for channel specified by user
-void Scope::setChannelPen(std::list<Channel>::iterator channel, const QPen& pen)
+void Oscilloscope::Scope::setChannelPen(std::list<Oscilloscope::scope_channel>::iterator channel, const QPen& pen)
 {
   channel->curve->setPen(pen);
 }
 
 // Set channel label
-void Scope::setChannelLabel(std::list<Channel>::iterator channel,
+void Oscilloscope::Scope::setChannelLabel(std::list<Oscilloscope::scope_channel>::iterator channel,
                             const QString& label)
 {
   channel->curve->setTitle(label);
 }
 
 // Draw data on the scope
-void Scope::drawCurves()
+void Oscilloscope::Scope::drawCurves()
 {
-  if (isPaused)
+  if (isPaused) {
     return;
+  }
 
   // Set X scale map is same for all channels
   scaleMapX->setScaleInterval(0, hScl * divX);
-  for (std::list<Channel>::iterator i = channels.begin(), iend = channels.end();
-       i != iend;
-       ++i)
+  for (auto& channel : this->channels)
   {
     // Set data for channel
-    std::vector<double> x(i->data.size());
-    std::vector<double> y(i->data.size());
+    std::vector<double> x(channel.data.size());
+    std::vector<double> y(channel.data.size());
     double* x_loc = x.data();
     double* y_loc = y.data();
 
     // Set Y scale map for channel
     // TODO this should not happen each iteration, instead build into channel
     // struct
-    scaleMapY->setScaleInterval(-i->scale * divY / 2, i->scale * divY / 2);
+    scaleMapY->setScaleInterval(-channel.scale * divY / 2, channel.scale * divY / 2);
 
     // Scale data to pixel coordinates
-    for (size_t j = 0; j < i->data.size(); ++j) {
+    for (size_t j = 0; j < channel.data.size(); ++j) {
       *x_loc = scaleMapX->transform(j * period);
-      *y_loc = scaleMapY->transform(i->data[(data_idx + j) % i->data.size()]
-                                    + i->offset);
+      *y_loc = scaleMapY->transform(channel.data[(data_idx + j) % channel.data.size()]
+                                    + channel.offset);
       ++x_loc;
       ++y_loc;
     }
@@ -426,7 +380,7 @@ void Scope::drawCurves()
     // Append data to curve
     // Makes deep copy - which is not optimal
     // TODO: change to pointer based method
-    i->curve->setSamples(x.data(), y.data(), i->data.size());
+    channel.curve->setSamples(x.data(), y.data(), channel.data.size());
   }
 
   // Update plot
