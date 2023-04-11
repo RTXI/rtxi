@@ -53,7 +53,7 @@ Oscilloscope::Scope::Scope(QWidget* parent)
   setAutoReplot(false);
 
   // Set scope canvas
-  setCanvas(new Canvas());
+  setCanvas(new Oscilloscope::Canvas());
 
   // Setup grid
   this->grid = new QwtPlotGrid();
@@ -133,12 +133,13 @@ void Oscilloscope::Scope::timeoutEvent()
 
 // Insert user specified channel into active list of channels with specified
 // settings
-std::list<Oscilloscope::scope_channel>::iterator Oscilloscope::Scope::insertChannel(QString label,
-                                                                                    double scale,
-                                                                                    double offset,
-                                                                                    const QPen& pen,
-                                                                                    QwtPlotCurve* curve,
-                                                                                    IO::channel_t info)
+std::list<Oscilloscope::scope_channel>::iterator 
+Oscilloscope::Scope::insertChannel(QString label,
+                                   double scale,
+                                   double offset,
+                                   const QPen& pen,
+                                   QwtPlotCurve* curve,
+                                   IO::channel_t info)
 {
   struct scope_channel channel;
   channel.label = label;
@@ -176,29 +177,29 @@ size_t Oscilloscope::Scope::getChannelCount() const
   return channels.size();
 }
 
-// Returns beginning of channels list
-std::list<Oscilloscope::scope_channel>::iterator Oscilloscope::Scope::getChannelsBegin()
-{
-  return channels.begin();
-}
-
-// Returns end of channels list
-std::list<Oscilloscope::scope_channel>::iterator Oscilloscope::Scope::getChannelsEnd()
-{
-  return channels.end();
-}
-
-// Returns read-only pointer to beginning of channel list
-std::list<Oscilloscope::scope_channel>::const_iterator Oscilloscope::Scope::getChannelsBegin() const
-{
-  return channels.begin();
-}
-
-// Returns read-only pointer to end of channels list
-std::list<Oscilloscope::scope_channel>::const_iterator Oscilloscope::Scope::getChannelsEnd() const
-{
-  return channels.end();
-}
+//// Returns beginning of channels list
+//std::list<Oscilloscope::scope_channel>::iterator Oscilloscope::Scope::getChannelsBegin()
+//{
+//  return channels.begin();
+//}
+//
+//// Returns end of channels list
+//std::list<Oscilloscope::scope_channel>::iterator Oscilloscope::Scope::getChannelsEnd()
+//{
+//  return channels.end();
+//}
+//
+//// Returns read-only pointer to beginning of channel list
+//std::list<Oscilloscope::scope_channel>::const_iterator Oscilloscope::Scope::getChannelsBegin() const
+//{
+//  return channels.begin();
+//}
+//
+//// Returns read-only pointer to end of channels list
+//std::list<Oscilloscope::scope_channel>::const_iterator Oscilloscope::Scope::getChannelsEnd() const
+//{
+//  return channels.end();
+//}
 
 // Zeros data
 void Oscilloscope::Scope::clearData()

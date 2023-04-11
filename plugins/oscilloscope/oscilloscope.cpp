@@ -27,13 +27,12 @@
 #include <cmath>
 #include <sstream>
 
-#include "oscilloscope.h"
-
-#include <debug.h>
-#include <main_window.h>
 #include <qwt_plot_renderer.h>
-#include <rt.h>
-#include <workspace.h>
+
+#include "debug.hpp"
+#include "main_window.hpp"
+#include "rt.hpp"
+#include "oscilloscope.h"
 
 struct channel_info
 {
@@ -46,11 +45,11 @@ struct channel_info
 
 
 // Kill me
-Oscilloscope::Plugin::~Plugin(void)
-{
-  while (panelList.size())
-    delete panelList.front();
-}
+//Oscilloscope::Plugin::~Plugin(void)
+//{
+//  while (panelList.size())
+//    delete panelList.front();
+//}
 
 // void Oscilloscope::Plugin::doDeferred(const Settings::Object::State& s)
 // {

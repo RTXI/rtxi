@@ -124,11 +124,11 @@ public:
   void removeChannel(std::list<scope_channel>::iterator);
   size_t getChannel() const;
   size_t getChannelCount() const;
-  std::list<scope_channel>::iterator getChannelsBegin();
-  std::list<scope_channel>::iterator getChannelsEnd();
+  //std::list<scope_channel>::iterator getChannelsBegin();
+  //std::list<scope_channel>::iterator getChannelsEnd();
 
-  std::list<scope_channel>::const_iterator getChannelsBegin() const;
-  std::list<scope_channel>::const_iterator getChannelsEnd() const;
+  //std::list<scope_channel>::const_iterator getChannelsBegin() const;
+  //std::list<scope_channel>::const_iterator getChannelsEnd() const;
 
   void clearData();
   void setData(double*, size_t);
@@ -138,7 +138,7 @@ public:
   Trigger::trig_t getTriggerDirection();
   double getTriggerThreshold();
   double getTriggerWindow();
-  std::list<scope_channel>::iterator getTriggerChannel();
+  //std::list<scope_channel>::iterator getTriggerChannel();
   void setTrigger(Trigger::trig_t, double, std::list<scope_channel>::iterator, double);
 
   double getDivT() const;
@@ -151,7 +151,6 @@ public:
   size_t getRefresh() const;
   void setRefresh(size_t);
 
-  bool isPaused;
 
   void setChannelScale(std::list<scope_channel>::iterator, double);
   void setChannelOffset(std::list<scope_channel>::iterator, double);
@@ -165,6 +164,7 @@ private slots:
   void timeoutEvent();
 
 private:
+  bool isPaused;
   void drawCurves();
   size_t divX;
   size_t divY;

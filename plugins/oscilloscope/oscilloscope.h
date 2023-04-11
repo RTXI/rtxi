@@ -40,15 +40,6 @@
 namespace Oscilloscope
 {
 
-class Plugin : public Modules::Plugin
-{
-
-private:
-
-  // List to maintain multiple scopes
-  std::list<Panel*> panelList;
-};  // Plugin
-
 class Panel : public Modules::Panel 
 {
   Q_OBJECT
@@ -132,11 +123,20 @@ private:
   QPushButton* applyButton;
   QPushButton* activateButton;
 
-  Fifo fifo;
+  std::unique_ptr<RT::OS::Fifo> fifo;
   std::vector<IO::Block*> blocks;
   size_t counter;
   size_t downsample_rate;
 };  // Panel
+
+class Plugin : public Modules::Plugin
+{
+private:
+  // List to maintain multiple scopes
+  std::list<std::unique_ptr<Oscilloscope::Panel>> panelList;
+};  // Plugin
+
+
 };  // namespace Oscilloscope
 
 #endif  // OSCILLOSCOPE_H
