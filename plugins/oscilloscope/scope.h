@@ -52,6 +52,14 @@
 
 namespace Oscilloscope {
 
+// values meant to be used with qt timer for redrawing the screen
+// values are in milliseconds 
+namespace FrameRates {
+constexpr int HZ60 = 17;
+constexpr int HZ120 = 8;
+constexpr int HZ240 = 4;
+}; // namespace FrameRates 
+
 namespace Trigger{
 enum trig_t
 {
@@ -71,7 +79,9 @@ struct scope_channel
   QString label;
   double scale;
   double offset;
-  std::vector<sample> data;
+  std::vector<int64_t> xbuffer;
+  std::vector<double> ybuffer;
+  size_t end_data_indx;
   QwtPlotCurve* curve;
   IO::Block* block;
   int port;
@@ -125,12 +135,12 @@ public:
   ~Scope();
 
   bool paused() const;
-  void insertChannel(scope_channel channel);
+  void insertChannel(const scope_channel& channel);
   void removeChannel(IO::Block* block, int port);
   size_t getChannelCount() const;
 
   void clearData();
-  void setData(double*, size_t);
+  void setData(IO::Block* block, int port, std::vector<sample> data);
   size_t getDataSize() const;
   void setDataSize(size_t);
 
@@ -138,7 +148,7 @@ public:
   double getTriggerThreshold();
   double getTriggerWindow();
   //std::list<scope_channel>::iterator getTriggerChannel();
-  void setTrigger(Trigger::trig_t, double, std::list<scope_channel>::iterator, double);
+  void setTrigger(Trigger::trig_t direction, double threshold, IO::Block* block, int port);
 
   double getDivT() const;
   void setDivT(double);
@@ -172,7 +182,7 @@ private:
   size_t data_size=100;
   int refresh=250;
   double hScl=1.0;  // horizontal scale for time (ms)
-  double period;  // real-time period of system (ms)
+  int64_t period;  // real-time period of system (ms)
   bool triggering=false;
   Trigger::trig_t triggerDirection=Oscilloscope::Trigger::NONE;
   double triggerThreshold=0.0;
