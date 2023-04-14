@@ -55,9 +55,9 @@ namespace Oscilloscope {
 // values meant to be used with qt timer for redrawing the screen
 // values are in milliseconds 
 namespace FrameRates {
-constexpr int HZ60 = 17;
-constexpr int HZ120 = 8;
-constexpr int HZ240 = 4;
+constexpr size_t HZ60 = 17;
+constexpr size_t HZ120 = 8;
+constexpr size_t HZ240 = 4;
 }; // namespace FrameRates 
 
 namespace Trigger{
@@ -67,6 +67,13 @@ enum trig_t
   POS,
   NEG,
 };
+
+typedef struct Info {
+  IO::Block* block;
+  size_t port;
+  Trigger::trig_t direction;
+  double threshold;
+}Info;
 }; // namespace Trigger
 
 typedef struct sample {
@@ -74,19 +81,19 @@ typedef struct sample {
   int64_t time;
 } sample;
 
-struct scope_channel
+typedef struct scope_channel
 {
   QString label;
   double scale;
   double offset;
-  std::vector<int64_t> xbuffer;
+  std::vector<double> xbuffer;
   std::vector<double> ybuffer;
   size_t end_data_indx;
   QwtPlotCurve* curve;
   IO::Block* block;
-  int port;
+  size_t port;
   IO::channel_t info;
-};
+}scope_channel;
 
 class LegendItem : public QwtPlotLegendItem
 {
@@ -136,19 +143,18 @@ public:
 
   bool paused() const;
   void insertChannel(const scope_channel& channel);
-  void removeChannel(IO::Block* block, int port);
+  void removeChannel(IO::Block* block, size_t port);
   size_t getChannelCount() const;
 
   void clearData();
-  void setData(IO::Block* block, int port, std::vector<sample> data);
+  void setData(IO::Block* block, size_t port, std::vector<sample> data);
   size_t getDataSize() const;
   void setDataSize(size_t);
 
   Trigger::trig_t getTriggerDirection();
   double getTriggerThreshold();
-  double getTriggerWindow();
   //std::list<scope_channel>::iterator getTriggerChannel();
-  void setTrigger(Trigger::trig_t direction, double threshold, IO::Block* block, int port);
+  void setTrigger(Trigger::Info trigger_info);
 
   double getDivT() const;
   void setDivT(double);
@@ -161,10 +167,10 @@ public:
   void setRefresh(size_t);
 
 
-  void setChannelScale(IO::Block* block, int port, double chan_scale);
-  void setChannelOffset(IO::Block* block, int port, double chan_offset);
-  void setChannelPen(IO::Block* block, int port, const QPen& pen);
-  void setChannelLabel(IO::Block* block, int port, const QString& pen);
+  void setChannelScale(IO::Block* block, size_t port, double scale);
+  void setChannelOffset(IO::Block* block, size_t port, double offset);
+  void setChannelPen(IO::Block* block, size_t port, const QPen& pen);
+  void setChannelLabel(IO::Block* block, size_t port, const QString& label);
 
 protected:
   void resizeEvent(QResizeEvent* event);
@@ -178,17 +184,10 @@ private:
   bool isPaused = false;
   int divX=10;
   int divY=10;
-  int data_idx=0;
-  size_t data_size=100;
-  int refresh=250;
+  size_t refresh=Oscilloscope::FrameRates::HZ60;
   double hScl=1.0;  // horizontal scale for time (ms)
-  int64_t period;  // real-time period of system (ms)
   bool triggering=false;
-  Trigger::trig_t triggerDirection=Oscilloscope::Trigger::NONE;
-  double triggerThreshold=0.0;
-  double triggerWindow=10.0;
-  std::list<size_t> triggerQueue;
-  scope_channel* triggerChannel=nullptr;
+  Trigger::Info capture_trigger;
 
   // Scope primary paint element
   QwtPlotDirectPainter* d_directPainter=nullptr;

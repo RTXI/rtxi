@@ -114,27 +114,12 @@ void Oscilloscope::Scope::timeoutEvent()
   }
 }
 
-// Insert user specified channel into active list of channels with specified
-// settings
 void Oscilloscope::Scope::insertChannel(const Oscilloscope::scope_channel& channel)
 {
-  //struct scope_channel channel;
-  //channel.label = label;
-  //channel.scale = scale;
-  //channel.offset = offset;
-  //channel.info = info;
-  //channel.data.resize(data_size, 0.0);
-  //channel.curve = curve;
-  //channel.curve->setPen(pen);
-  //channel.curve->setStyle(QwtPlotCurve::Lines);
-  //channel.curve->setRenderHint(QwtPlotItem::RenderAntialiased, false);
-  //channel.curve->attach(this);
   channels.push_back(channel);
-  //return --(this->channels.end());
 }
 
-// Remove user specified channel from active channels list
-void Oscilloscope::Scope::removeChannel(IO::Block* block, int port)
+void Oscilloscope::Scope::removeChannel(IO::Block* block, size_t port)
 {
   auto iter = std::find_if(this->channels.begin(),
                            this->channels.end(),
@@ -145,19 +130,19 @@ void Oscilloscope::Scope::removeChannel(IO::Block* block, int port)
   if(iter == this->channels.end()) {
     return;
   }
+  // Make sure we aren't triggering a non-existent oscilloscope channel
+  this->capture_trigger.direction = Oscilloscope::Trigger::NONE;
   iter->curve->detach();
   channels.erase(iter);
   replot();
 }
 
-// Resize event for scope
 void Oscilloscope::Scope::resizeEvent(QResizeEvent* event)
 {
   this->d_directPainter->reset();
   QwtPlot::resizeEvent(event);
 }
 
-// Returns count of number of active channels
 size_t Oscilloscope::Scope::getChannelCount() const
 {
   return channels.size();
@@ -165,20 +150,21 @@ size_t Oscilloscope::Scope::getChannelCount() const
 
 void Oscilloscope::Scope::clearData()
 {
+  size_t data_size = 0;
   for (auto& chan : this->channels)
   {
+    data_size = chan.xbuffer.size();
     chan.xbuffer.assign(data_size, 0);
     chan.ybuffer.assign(data_size, 0);
   }
 }
 
-void Oscilloscope::Scope::setData(IO::Block* block, int port, std::vector<sample> data)
+void Oscilloscope::Scope::setData(IO::Block* block, size_t port, std::vector<sample> data)
 {
   if (isPaused){
     return;
   }
 
-  double sample_freq_ghz = (1.0 * RT::OS::SECONDS_TO_NANOSECONDS)/(this->period);
   auto iter = std::find_if(this->channels.begin(),
                            this->channels.end(),
                            [&](const Oscilloscope::scope_channel& chan){
@@ -186,56 +172,37 @@ void Oscilloscope::Scope::setData(IO::Block* block, int port, std::vector<sample
                            });
   if(iter == this->channels.end()) { return; }
 
-  iter->xbuffer.resize(data.size());
-  iter->ybuffer.resize(data.size());
+  if (data.size() != iter->xbuffer.size()) {
+    iter->xbuffer.assign(data.size(), 0);
+    iter->ybuffer.assign(data.size(), 0);
+  }
   for(size_t i=0; i<data.size(); i++) {
-    iter->xbuffer[i] = data[i].time;
+    iter->xbuffer[i] = static_cast<double>(data[i].time);
     iter->ybuffer[i] = data[i].value;
   }
 }
 
-Oscilloscope::Trigger::trig_t Oscilloscope::Scope::getTriggerDirection()
-{
-  return triggerDirection;
-}
-
-double Oscilloscope::Scope::getTriggerThreshold()
-{
-  return triggerThreshold;
-}
-
-double Oscilloscope::Scope::getTriggerWindow()
-{
-  return triggerWindow;
-}
-
-void Oscilloscope::Scope::setTrigger(Oscilloscope::Trigger::trig_t direction,
-                                     double threshold,
-                                     IO::Block* block,
-                                     int port)
+void Oscilloscope::Scope::setTrigger(Oscilloscope::Trigger::Info trigger_info)
 {
   auto chan_loc = std::find_if(this->channels.begin(),
                                this->channels.end(),
                                [&](const Oscilloscope::scope_channel& chann){
-                                 return chann.block == block && chann.port == port;
+                                 return chann.block == trigger_info.block && 
+                                        chann.port == trigger_info.port;
                                });
   if(chan_loc == this->channels.end()) { 
     ERROR_MSG("Oscilloscope::Scope::setTrigger : The given channel was not found!");
     return; 
   }
-  triggerChannel = &*chan_loc;
-  triggerThreshold = threshold;
 
+  this->capture_trigger = trigger_info;
   // Update if direction has changed
-  if (triggerDirection != direction) {
-    if (direction == Oscilloscope::Trigger::NONE) {
-      triggering = false;
-      timer->start(refresh);
-    } else {
-      triggering = true;
-      timer->stop();
-    }
-    triggerDirection = direction;
+  if (trigger_info.direction == Oscilloscope::Trigger::NONE) {
+    triggering = false;
+    timer->start(refresh);
+  } else {
+    triggering = true;
+    timer->stop();
   }
 }
 
@@ -257,12 +224,6 @@ void Oscilloscope::Scope::setDivT(double divT)
     dtLabel = QString::number(divT * 1e6) + "ns";
 }
 
-// Set period
-void Oscilloscope::Scope::setPeriod(int64_t per)
-{
-  this->period = per;
-}
-
 size_t Oscilloscope::Scope::getDivX() const
 {
   return divX;
@@ -278,37 +239,58 @@ size_t Oscilloscope::Scope::getRefresh() const
   return refresh;
 }
 
-// Set new refresh rate
 void Oscilloscope::Scope::setRefresh(size_t r)
 {
   refresh = r;
-  timer->setInterval(refresh);
+  timer->setInterval(static_cast<int>(refresh));
 }
 
-// Set channel scale
-void Oscilloscope::Scope::setChannelScale(std::list<Oscilloscope::scope_channel>::iterator channel, double scale)
+void Oscilloscope::Scope::setChannelScale(IO::Block* block, size_t port, double scale)
 {
-  channel->scale = scale;
+  auto chan_loc = std::find_if(this->channels.begin(),
+                               this->channels.end(),
+                               [&](const Oscilloscope::scope_channel& chann){
+                                 return chann.block == block && 
+                                        chann.port == port;
+                               });
+  if(chan_loc == channels.end()) { return; }
+  chan_loc->scale = scale;
 }
 
-// Set channel offset
-void Oscilloscope::Scope::setChannelOffset(std::list<Oscilloscope::scope_channel>::iterator channel,
-                             double offset)
+void Oscilloscope::Scope::setChannelOffset(IO::Block* block, size_t port, double offset)
 {
-  channel->offset = offset;
+  auto chan_loc = std::find_if(this->channels.begin(),
+                               this->channels.end(),
+                               [&](const Oscilloscope::scope_channel& chann){
+                                 return chann.block == block && 
+                                        chann.port == port;
+                               });
+  if(chan_loc == channels.end()) { return; }
+  chan_loc->offset = offset;
 }
 
-// Set pen for channel specified by user
-void Oscilloscope::Scope::setChannelPen(std::list<Oscilloscope::scope_channel>::iterator channel, const QPen& pen)
+void Oscilloscope::Scope::setChannelPen(IO::Block* block, size_t port, const QPen& pen)
 {
-  channel->curve->setPen(pen);
+  auto chan_loc = std::find_if(this->channels.begin(),
+                               this->channels.end(),
+                               [&](const Oscilloscope::scope_channel& chann){
+                                 return chann.block == block && 
+                                        chann.port == port;
+                               });
+  if(chan_loc == channels.end()) { return; }
+  chan_loc->curve->setPen(pen);
 }
 
-// Set channel label
-void Oscilloscope::Scope::setChannelLabel(std::list<Oscilloscope::scope_channel>::iterator channel,
-                            const QString& label)
+void Oscilloscope::Scope::setChannelLabel(IO::Block* block, size_t port, const QString& label)
 {
-  channel->curve->setTitle(label);
+  auto chan_loc = std::find_if(this->channels.begin(),
+                               this->channels.end(),
+                               [&](const Oscilloscope::scope_channel& chann){
+                                 return chann.block == block && 
+                                        chann.port == port;
+                               });
+  if(chan_loc == channels.end()) { return; }
+  chan_loc->curve->setTitle(label);
 }
 
 // Draw data on the scope

@@ -40,6 +40,24 @@
 namespace Oscilloscope
 {
 
+typedef struct channel_info
+{
+  QString name;
+  IO::Block* block;
+  IO::flags_t type;
+  size_t index;
+} channel_info;  // channel_info
+
+class Component : public Modules::Component
+{
+public:
+  Component();
+  void execute();
+
+private:
+  std::unique_ptr<RT::OS::Fifo> fifo;
+};
+
 class Panel : public Modules::Panel 
 {
   Q_OBJECT
@@ -47,14 +65,12 @@ class Panel : public Modules::Panel
 public:
   Panel(QWidget* = NULL);
   virtual ~Panel();
-  void execute();
   bool setInactiveSync();
   void flushFifo();
-  void adjustDataSize();
+  //void adjustDataSize();
   //void doDeferred(const Settings::Object::State&);
   //void doLoad(const Settings::Object::State&);
   //void doSave(Settings::Object::State&) const;
-  void receiveEvent(const ::Event::Object*);
 
 public slots:
   void timeoutEvent();
@@ -122,7 +138,6 @@ private:
   QPushButton* applyButton;
   QPushButton* activateButton;
 
-  std::unique_ptr<RT::OS::Fifo> fifo;
   std::vector<IO::Block*> blocks;
   size_t counter;
   size_t downsample_rate;
@@ -135,7 +150,7 @@ public:
 
 private:
   // List to maintain multiple scopes
-  std::list<std::unique_ptr<Oscilloscope::Panel>> panelList;
+  std::vector<std::unique_ptr<Oscilloscope::Component>> componentList;
 };  // Plugin
 
 

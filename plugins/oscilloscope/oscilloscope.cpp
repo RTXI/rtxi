@@ -34,134 +34,21 @@
 #include "rt.hpp"
 #include "oscilloscope.h"
 
-struct channel_info
-{
-  QString name;
-  IO::Block* block;
-  IO::flags_t type;
-  size_t index;
-  double previous;  // stores previous value for trigger and downsample buffer
-};  // channel_info
-
-
-// Kill me
-//Oscilloscope::Plugin::~Plugin(void)
-//{
-//  while (panelList.size())
-//    delete panelList.front();
-//}
-
-// void Oscilloscope::Plugin::doDeferred(const Settings::Object::State& s)
-// {
-//   size_t i = 0;
-//   for (std::list<Panel*>::iterator j = panelList.begin(), end = panelList.end();
-//        j != end;
-//        ++j)
-//     (*j)->deferred(s.loadState(QString::number(i++).toStdString()));
-// }
-// 
-// void Oscilloscope::Plugin::doLoad(const Settings::Object::State& s)
-// {
-//   for (size_t i = 0; i < static_cast<size_t>(s.loadInteger("Num Panels")); ++i)
-//   {
-//     Panel* d_panel = new Panel(MainWindow::getInstance()->centralWidget());
-//     panelList.push_back(d_panel);
-//     d_panel->load(s.loadState(QString::number(i).toStdString()));
-//   }
-// }
-// 
-// void Oscilloscope::Plugin::doSave(Settings::Object::State& s) const
-// {
-//   s.saveInteger("Num Panels", panelList.size());
-//   size_t n = 0;
-//   for (std::list<Panel*>::const_iterator i = panelList.begin(),
-//                                          end = panelList.end();
-//        i != end;
-//        ++i)
-//     s.saveState(QString::number(n++).toStdString(), (*i)->save());
-// }
-
+// TODO: complete handling of events by oscilloscope plugin
 void Oscilloscope::Plugin::receiveEvent(Event::Object* event)
 {
-  switch(event->getType()){
-    case Event::Type::IO_BLOCK_INSERT_EVENT) :
-      IO::Block* block = reinterpret_cast<IO::Block*>(event->getParam("block"));
-      if (block) {
-        // Update the list of blocks
-        blocksList->addItem(QString::fromStdString(block->getName()) + " "
-                            + QString::number(block->getID()));
-        blocks.push_back(block);
-        if (blocksList->count() == 1)
-          buildChannelList();
-  } else if (event->getName() == Event::IO_BLOCK_REMOVE_EVENT) {
-    IO::Block* block = reinterpret_cast<IO::Block*>(event->getParam("block"));
-    if (block) {
-      // Find the index of the block in the blocks vector
-      size_t index;
-      for (index = 0; index < blocks.size() && blocks[index] != block; ++index)
-        ;
-
-      if (index < blocks.size()) {
-        // Stop displaying channels coming from the removed block
-        for (std::list<Scope::Channel>::iterator
-                 i = scopeWindow->getChannelsBegin(),
-                 end = scopeWindow->getChannelsEnd();
-             i != end;)
-        {
-          struct channel_info* info =
-              reinterpret_cast<struct channel_info*>(i->getInfo());
-          if (info->block == block) {
-            // If triggering on this channel disable triggering
-            if (trigsChanList->currentText() != "<None>")
-              if (i->getLabel() == scopeWindow->getTriggerChannel()->getLabel())
-              {
-                scopeWindow->setTrigger(Scope::NONE,
-                                        scopeWindow->getTriggerThreshold(),
-                                        scopeWindow->getChannelsEnd(),
-                                        scopeWindow->getTriggerWindow());
-                showDisplayTab();
-              }
-
-            struct channel_info* info =
-                reinterpret_cast<struct channel_info*>(i->getInfo());
-            std::list<Scope::Channel>::iterator chan = i++;
-            bool active = setInactiveSync();
-            scopeWindow->removeChannel(chan);
-            flushFifo();
-            setActive(active);
-            delete info;
-          } else
-            ++i;
-        }
-
-        // Update the list of blocks
-        size_t current = blocksList->currentIndex();
-        blocksList->removeItem(index);
-        blocks.erase(blocks.begin() + index);
-
-        if (current == index) {
-          blocksList->setCurrentIndex(0);
-          buildChannelList();
-        }
-        showTab(0);
-      } else
-        std::cout << "Oscilloscope::Panel::receiveEvent : removed block never "
-                     "inserted\n";
-    }
-  } else if (event->getName() == Event::RT_POSTPERIOD_EVENT) {
-    scopeWindow->setPeriod(RT::System::getInstance()->getPeriod() * 1e-6);
-    adjustDataSize();
-    showTab(0);
+  switch (event->getType()){
+    case Event::Type::RT_THREAD_INSERT_EVENT :
+    case Event::Type::RT_DEVICE_INSERT_EVENT :
+      Event::Object update_blocklist_event(Event::Type::IO_BLOCK_QUERY_EVENT);
   }
 }
 
-// Slot for enabling user specified channel
 void Oscilloscope::Panel::activateChannel(bool active)
 {
   bool enable = active && blocksList->count() && channelsList->count();
   scalesList->setEnabled(enable);
   offsetsEdit->setEnabled(enable);
-  ;
   offsetsList->setEnabled(enable);
   colorsList->setEnabled(enable);
   widthsList->setEnabled(enable);
@@ -185,35 +72,30 @@ void Oscilloscope::Panel::apply(void)
 void Oscilloscope::Panel::buildChannelList(void)
 {
   channelsList->clear();
-  if (!blocksList->count())
+  if (blocksList->count() <= 0) {
     return;
+  }
 
-  if (blocksList->currentIndex() < 0)
+  if (blocksList->currentIndex() < 0){
     blocksList->setCurrentIndex(0);
+  }
 
-  IO::Block* block = blocks[blocksList->currentIndex()];
-  IO::flags_t type;
+  IO::Block* block = blocks[static_cast<size_t>(blocksList->currentIndex())];
+  IO::flags_t type = IO::UNKNOWN;
   switch (typesList->currentIndex()) {
     case 0:
-      type = Workspace::INPUT;
+      type = IO::INPUT;
       break;
     case 1:
-      type = Workspace::OUTPUT;
-      break;
-    case 2:
-      type = Workspace::PARAMETER;
-      break;
-    case 3:
-      type = Workspace::STATE;
+      type = IO::OUTPUT;
       break;
     default:
       ERROR_MSG(
           "Oscilloscope::Panel::buildChannelList : invalid type selection\n");
-      type = Workspace::INPUT;
   }
 
   for (size_t i = 0; i < block->getCount(type); ++i)
-    channelsList->addItem(QString::fromStdString(block->getName(type, i)));
+    channelsList->addItem(QString::fromStdString(block->getChannelName(type, i)));
 
   showChannelTab();
 }
@@ -238,37 +120,20 @@ void Oscilloscope::Panel::applyChannelTab(void)
     return;
 
   IO::Block* block = blocks[blocksList->currentIndex()];
-  IO::flags_t type;
+  IO::flags_t type = IO::UNKNOWN;
   switch (typesList->currentIndex()) {
     case 0:
-      type = Workspace::INPUT;
+      type = IO::INPUT;
       break;
     case 1:
-      type = Workspace::OUTPUT;
-      break;
-    case 2:
-      type = Workspace::PARAMETER;
-      break;
-    case 3:
-      type = Workspace::STATE;
+      type = IO::OUTPUT;
       break;
     default:
       ERROR_MSG("Oscilloscope::Panel::applyChannelTab : invalid type\n");
       typesList->setCurrentIndex(0);
-      type = Workspace::INPUT;
   }
 
-  struct channel_info* info;
-  std::list<Scope::Channel>::iterator i = scopeWindow->getChannelsBegin();
-  for (std::list<Scope::Channel>::iterator end = scopeWindow->getChannelsEnd();
-       i != end;
-       ++i)
-  {
-    info = reinterpret_cast<struct channel_info*>(i->getInfo());
-    if (info->block == block && info->type == type
-        && info->index == static_cast<size_t>(channelsList->currentIndex()))
-      break;
-  }
+  Oscilloscope::channel_info info;
 
   if (!activateButton->isChecked()) {
     if (i != scopeWindow->getChannelsEnd()) {
