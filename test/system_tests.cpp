@@ -42,20 +42,20 @@ TEST_F(RTConnectorTest, connections)
   this->connector.insertBlock(&device2);
 
   // connect and disconnect between two blocks
-  EXPECT_FALSE(this->connector.connected(&thread1, 0, &thread2, 0));
-  EXPECT_FALSE(this->connector.connected(&thread1, 0, &device1, 0));
-  EXPECT_FALSE(this->connector.connected(&thread1, 0, &device2, 0));
-  EXPECT_FALSE(this->connector.connected(&device1, 0, &device2, 0));
+  EXPECT_FALSE(this->connector.connected({&thread1, IO::OUTPUT, 0, &thread2, 0}));
+  EXPECT_FALSE(this->connector.connected({&thread1, IO::OUTPUT, 0, &device1, 0}));
+  EXPECT_FALSE(this->connector.connected({&thread1, IO::OUTPUT, 0, &device2, 0}));
+  EXPECT_FALSE(this->connector.connected({&device1, IO::OUTPUT, 0, &device2, 0}));
   int result = 0;
-  result = this->connector.connect(&thread1, 0, &thread2, 0);
+  result = this->connector.connect({&thread1, IO::OUTPUT, 0, &thread2, 0});
   ASSERT_EQ(result, 0);
   // for threads make sure it avoids cycles
-  result = this->connector.connect(&thread2, 0, &thread1, 0);
+  result = this->connector.connect({&thread2, IO::OUTPUT, 0, &thread1, 0});
   ASSERT_EQ(result, -1);
-  EXPECT_TRUE(this->connector.connected(&thread1, 0, &thread2, 0));
-  EXPECT_FALSE(this->connector.connected(&device1, 0, &device2, 0));
-  this->connector.disconnect(&thread1, 0, &thread2, 0);
-  EXPECT_FALSE(this->connector.connected(&thread1, 0, &thread2, 0));
+  EXPECT_TRUE(this->connector.connected({&thread1, IO::OUTPUT, 0, &thread2, 0}));
+  EXPECT_FALSE(this->connector.connected({&device1, IO::OUTPUT, 0, &device2, 0}));
+  this->connector.disconnect({&thread1, IO::OUTPUT, 0, &thread2, 0});
+  EXPECT_FALSE(this->connector.connected({&thread1, IO::OUTPUT, 0, &thread2, 0}));
 }
 
 TEST_F(RTConnectorTest, getOutputs)
@@ -77,7 +77,7 @@ TEST_F(RTConnectorTest, getOutputs)
   }
   for (int i = 0; i < 100; i++) {
     if (randvals[i] == 1) {
-      this->connector.connect(&outputThread, 0, inputThreads[i].get(), 0);
+      this->connector.connect({&outputThread, IO::OUTPUT, 0, inputThreads[i].get(), 0});
     }
   }
   std::vector<RT::block_connection_t> output_connections =
@@ -85,7 +85,7 @@ TEST_F(RTConnectorTest, getOutputs)
   int num_of_connections = std::accumulate(randvals.begin(), randvals.end(), 0);
   EXPECT_EQ(output_connections.size(), num_of_connections);
   for (auto con : output_connections) {
-    ASSERT_TRUE(this->connector.connected(&outputThread, 0, con.dest, 0));
+    ASSERT_TRUE(this->connector.connected({&outputThread, IO::OUTPUT, 0, con.dest, 0}));
   }
 }
 
@@ -108,11 +108,11 @@ TEST_F(RTConnectorTest, getBlocks)
   }
   for (int iter = 0; iter < 50; iter++) {
     this->connector.connect(
-        threads[iter].get(), 0, threads[distribution(gen)].get(), 0);
+        {threads[iter].get(), IO::OUTPUT, 0, threads[distribution(gen)].get(), 0});
     this->connector.connect(
-        devices[iter].get(), 0, threads[distribution(gen)].get(), 0);
+        {devices[iter].get(), IO::OUTPUT, 0, threads[distribution(gen)].get(), 0});
     this->connector.connect(
-        threads[iter].get(), 0, devices[distribution(gen)].get(), 0);
+        {threads[iter].get(), IO::OUTPUT, 0, devices[distribution(gen)].get(), 0});
   }
   std::vector<RT::Thread*> received_threads = this->connector.getThreads();
   std::vector<RT::Device*> received_devices = this->connector.getDevices();

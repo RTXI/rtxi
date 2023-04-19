@@ -74,7 +74,7 @@ void IO::Block::writeinput(size_t index, const std::vector<double>& data)
   //    data.begin(), data.end(), this->ports[IO::INPUT][index].values.begin());
   size_t value_index = 0;
   while(value_index < data.size()){
-    this->ports[IO::INPUT][index].values[value_index] += data[value_index];
+    this->ports[IO::INPUT][index].buff_values[value_index] += data[value_index];
     value_index++;
   }
 }
@@ -82,13 +82,13 @@ void IO::Block::writeinput(size_t index, const std::vector<double>& data)
 const std::vector<double>& IO::Block::readinput(size_t index)
 {
   // We must reset input values to zero so that the next cycle doesn't use these values
-  std::copy(this->ports[IO::INPUT][index].values.begin(),
-            this->ports[IO::INPUT][index].values.end(),
-            this->ports[IO::INPUT][index].buff_values.begin());
-  std::fill(this->ports[IO::INPUT][index].values.begin(),
-            this->ports[IO::INPUT][index].values.end(),
+  std::copy(this->ports[IO::INPUT][index].buff_values.begin(),
+            this->ports[IO::INPUT][index].buff_values.end(),
+            this->ports[IO::INPUT][index].values.begin());
+  std::fill(this->ports[IO::INPUT][index].buff_values.begin(),
+            this->ports[IO::INPUT][index].buff_values.end(),
             0.0);
-  return this->ports[IO::INPUT][index].buff_values;
+  return this->ports[IO::INPUT][index].values;
 }
 
 void IO::Block::writeoutput(size_t index, const std::vector<double>& data)
@@ -97,8 +97,8 @@ void IO::Block::writeoutput(size_t index, const std::vector<double>& data)
       data.begin(), data.end(), this->ports[IO::OUTPUT][index].values.begin());
 }
 
-const std::vector<double>& IO::Block::readoutput(size_t index)
+const std::vector<double>& IO::Block::readPort(IO::flags_t direction, size_t index)
 {
-  return this->ports[IO::OUTPUT][index].values;
+  return this->ports[direction][index].values;
 }
 // NOLINTEND(cppcoreguidelines-pro-bounds-constant-array-index)

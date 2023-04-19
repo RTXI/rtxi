@@ -79,11 +79,11 @@ TEST_F(IOBlockTest, getDescription)
             defaultOutputChannelDescription);
 }
 
-TEST_F(IOBlockTest, readoutput)
+TEST_F(IOBlockTest, readPort)
 {
   IO::Block block(this->defaultBlockName, this->defaultChannelList, true);
   std::vector<double> defaultval = {0.0};
-  EXPECT_DOUBLE_EQ(defaultval[0], block.readoutput(0)[0]);
+  EXPECT_DOUBLE_EQ(defaultval[0], block.readPort(IO::OUTPUT, 0)[0]);
 }
 
 TEST_F(IOBlockTest, writeinput)
@@ -101,9 +101,9 @@ TEST_F(IOBlockTest, writeinput)
   testBlock tempblock("TEST:BLOCK:NAME", this->defaultChannelList);
   tempblock.writeinput(0, values);
   tempblock.echo();
-  EXPECT_DOUBLE_EQ(values[0], tempblock.readoutput(0)[0]);
+  EXPECT_DOUBLE_EQ(values[0], tempblock.readPort(IO::OUTPUT, 0)[0]);
   tempblock.writeinput(0, values);
   tempblock.writeinput(0, values);
   tempblock.echo();
-  EXPECT_DOUBLE_EQ(values[0]+values[0], tempblock.readoutput(0)[0]);
+  EXPECT_DOUBLE_EQ(values[0]+values[0], tempblock.readPort(IO::OUTPUT, 0)[0]);
 }

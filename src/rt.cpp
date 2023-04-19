@@ -72,53 +72,51 @@ int RT::Connector::find_cycle(RT::block_connection_t conn, IO::Block* ref_block)
   return 0;
 }
 
-int RT::Connector::connect(IO::Block* src, size_t out, IO::Block* dest, size_t in)
+int RT::Connector::connect(RT::block_connection_t connection)
 {
   // Let's remind our users to register their block first
-  if (!(this->isRegistered(src) && this->isRegistered(dest))) {
+  if (!(this->isRegistered(connection.src) && this->isRegistered(connection.dest))) {
     ERROR_MSG(
         "RT::Connector : source or destination blocks are not registered");
     return -1;
   }
-  RT::block_connection_t conn = {src, out, dest, in};
-  if(this->find_cycle(conn, src) == -1) { return -1; }
+  if(this->find_cycle(connection, connection.src) == -1) { return -1; }
 
-  if (!(this->connected(src, out, dest, in))) {
-    this->connections.push_back(conn);
+  if (!(this->connected(connection))) {
+    this->connections.push_back(connection);
   }
   return 0;
 }
 
-bool RT::Connector::connected(IO::Block* src,
-                              size_t out,
-                              IO::Block* dest,
-                              size_t in)
+bool RT::Connector::connected(RT::block_connection_t connection)
 {
-  if (!(this->isRegistered(src) && this->isRegistered(dest))) {
+  if (!(this->isRegistered(connection.src) && this->isRegistered(connection.dest))) {
     return false;
   }
 
   bool connected = false;
   for(const auto& conn : this->connections){
-    connected = src == conn.src && 
-                out == conn.src_port &&
-                dest == conn.dest &&
-                in == conn.dest_port;
+    connected = connection.src == conn.src && 
+                connection.src_port_type == conn.src_port_type &&
+                connection.src_port == conn.src_port &&
+                connection.dest == conn.dest &&
+                connection.dest_port == conn.dest_port;
     if (connected) { break; }
   }
   return connected;
 }
 
-void RT::Connector::disconnect(IO::Block* src,
-                               size_t out,
-                               IO::Block* dest,
-                               size_t in)
+void RT::Connector::disconnect(RT::block_connection_t connection)
 {
-  if (!(this->isRegistered(src) && this->isRegistered(dest))) {
+  if (!(this->isRegistered(connection.src) && this->isRegistered(connection.dest))) {
     return;
   }
   for(auto it = this->connections.begin(); it != this->connections.end(); it++){
-    if(src == it->src && out == it->src_port && dest == it->dest && in == it->dest_port){
+    if(connection.src == it->src && 
+       connection.src_port_type == it->src_port_type &&
+       connection.src_port == it->src_port && 
+       connection.dest == it->dest && 
+       connection.dest_port == it->dest_port){
       this->connections.erase(it);
       break;
     }
@@ -257,7 +255,8 @@ void RT::Connector::propagateBlockConnections(IO::Block* block)
 {
   for (auto conn : this->connections){
     if (conn.src == block){
-      conn.dest->writeinput(conn.dest_port, conn.src->readoutput(conn.src_port));
+      conn.dest->writeinput(conn.dest_port, 
+                            conn.src->readPort(conn.src_port_type, conn.src_port));
     }
   }
 }
@@ -403,17 +402,11 @@ void RT::System::ioLinkUpdateCMD(RT::System::CMD* cmd)
   telem.cmd = cmd;
   switch (cmd->getType()) {
     case Event::Type::IO_LINK_INSERT_EVENT:
-      this->rt_connector->connect(conn.src,
-                                  conn.src_port,
-                                  conn.dest,
-                                  conn.dest_port);
+      this->rt_connector->connect(conn);
       telem.type = RT::Telemitry::IO_LINK_UPDATED;
       break;
     case Event::Type::IO_LINK_REMOVE_EVENT:
-      this->rt_connector->disconnect(conn.src,
-                                     conn.src_port,
-                                     conn.dest,
-                                     conn.dest_port);
+      this->rt_connector->disconnect(conn);
       telem.type = RT::Telemitry::IO_LINK_UPDATED;
       break;
     default:

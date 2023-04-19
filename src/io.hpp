@@ -144,7 +144,7 @@ public:
    * \param index The output channel's index.
    * \return The value of the specified output channel.
    */
-  const std::vector<double>& readoutput(size_t index);
+  const std::vector<double>& readPort(IO::flags_t direction, size_t index);
 
   bool dependent() const { return this->isInputDependent; }
 

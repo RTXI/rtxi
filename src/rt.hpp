@@ -146,9 +146,10 @@ private:
  * \param dest IO::Block pointer representing who to send the output to
  * \param dest_port Index of the destination channel taking the output as input
  */
-typedef struct
+typedef struct block_connection_t
 {
   IO::Block* src;
+  IO::flags_t src_port_type;
   size_t src_port;
   IO::Block* dest;
   size_t dest_port;
@@ -183,7 +184,7 @@ public:
    *
    * \sa IO::Block
    */
-  int connect(IO::Block* src, size_t out, IO::Block* dest, size_t in);
+  int connect(block_connection_t connection);
 
   /*!
    * Break a connection between source and destination blocks.
@@ -197,7 +198,7 @@ public:
    * \sa IO::Block::input()
    * \sa IO::Block::output()
    */
-  void disconnect(IO::Block* src, size_t out, IO::Block* dest, size_t in);
+  void disconnect(block_connection_t connection);
 
   /*!
    * Determine whether source and destination blocks are connected.
@@ -210,7 +211,7 @@ public:
    * \sa IO::Block::connect()
    * \sa IO::Block::disconnect()
    */
-  bool connected(IO::Block* src, size_t out, IO::Block* dest, size_t in);
+  bool connected(block_connection_t connection);
 
   /*!
    * Register the block in order to access connection services
