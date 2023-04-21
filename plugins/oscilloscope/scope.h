@@ -84,15 +84,14 @@ typedef struct sample {
 typedef struct scope_channel
 {
   QString label;
-  double scale;
-  double offset;
+  double scale=1;
+  double offset=0;
   std::vector<double> xbuffer;
   std::vector<double> ybuffer;
-  size_t end_data_indx;
-  QwtPlotCurve* curve;
-  IO::Block* block;
-  size_t port;
-  IO::channel_t info;
+  QwtPlotCurve* curve = nullptr;
+  IO::Block* block = nullptr;
+  size_t port = 0;
+  IO::channel_t info {};
 }scope_channel;
 
 class LegendItem : public QwtPlotLegendItem
@@ -145,6 +144,7 @@ public:
   void insertChannel(const scope_channel& channel);
   void removeChannel(IO::Block* block, size_t port);
   size_t getChannelCount() const;
+  scope_channel getChannel(IO::Block* block, size_t port);
 
   void clearData();
   void setData(IO::Block* block, size_t port, std::vector<sample> data);
@@ -153,8 +153,6 @@ public:
 
   Trigger::trig_t getTriggerDirection();
   double getTriggerThreshold();
-  //std::list<scope_channel>::iterator getTriggerChannel();
-  void setTrigger(Trigger::Info trigger_info);
 
   double getDivT() const;
   void setDivT(double);
@@ -171,6 +169,7 @@ public:
   void setChannelOffset(IO::Block* block, size_t port, double offset);
   void setChannelPen(IO::Block* block, size_t port, const QPen& pen);
   void setChannelLabel(IO::Block* block, size_t port, const QString& label);
+  Trigger::Info capture_trigger;
 
 protected:
   void resizeEvent(QResizeEvent* event);
@@ -187,7 +186,6 @@ private:
   size_t refresh=Oscilloscope::FrameRates::HZ60;
   double hScl=1.0;  // horizontal scale for time (ms)
   bool triggering=false;
-  Trigger::Info capture_trigger;
 
   // Scope primary paint element
   QwtPlotDirectPainter* d_directPainter=nullptr;

@@ -48,6 +48,7 @@ signals:
 
 private slots:
   void buildInputChannelList();
+  void buildOutputFlagList();
   void buildOutputChannelList();
   void highlightConnectionBox(QListWidgetItem*);
   void toggleConnection(bool);
@@ -67,6 +68,7 @@ private:
   QComboBox* inputBlock;
   QComboBox* inputChannel;
   QComboBox* outputBlock;
+  QComboBox* outputFlag;
   QComboBox* outputChannel;
   QListWidget* connectionBox;
   QPushButton* connectionButton;

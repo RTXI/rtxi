@@ -116,40 +116,41 @@ void Oscilloscope::Panel::showTab(int index)
 
 void Oscilloscope::Panel::applyChannelTab(void)
 {
-  if (blocksList->count() <= 0 || channelsList->count() <= 0)
+  if (this->blocksList->count() <= 0 || this->channelsList->count() <= 0)
     return;
 
-  IO::Block* block = blocks[blocksList->currentIndex()];
-  IO::flags_t type = IO::UNKNOWN;
-  switch (typesList->currentIndex()) {
-    case 0:
-      type = IO::INPUT;
-      break;
-    case 1:
-      type = IO::OUTPUT;
-      break;
-    default:
-      ERROR_MSG("Oscilloscope::Panel::applyChannelTab : invalid type\n");
-      typesList->setCurrentIndex(0);
+  int block_index = this->blocksList->currentIndex();
+  int port_index = this->channelsList->currentIndex();
+  int flags_index = this->typesList->currentIndex();
+  if(block_index < 0 || port_index < 0) { return; }
+
+  IO::Block* block = blocks[static_cast<size_t>(block_index)];
+  auto port = static_cast<size_t>(this->channelsList->currentIndex());
+  IO::flags_t type = static_cast<IO::flags_t>(flags_index);
+  Oscilloscope::scope_channel channel_info = this->scopeWindow->getChannel(block, port);
+  if (block == nullptr) {
+    ERROR_MSG("Oscilloscope::Panel::applyChannelTab : Could not find block in channel list");
+    return;
   }
 
-  Oscilloscope::channel_info info;
+  if (trigsChanList->currentText() != "<None>"){
+    this->scopeWindow->capture_trigger.direction = Oscilloscope::Trigger::NONE;
+  }
 
   if (!activateButton->isChecked()) {
     if (i != scopeWindow->getChannelsEnd()) {
       // If triggering on this channel disable triggering
-      if (trigsChanList->currentText() != "<None>")
-        if (i->getLabel() == scopeWindow->getTriggerChannel()->getLabel())
-          scopeWindow->setTrigger(Scope::NONE,
-                                  scopeWindow->getTriggerThreshold(),
-                                  scopeWindow->getChannelsEnd(),
-                                  scopeWindow->getTriggerWindow());
+      //if (trigsChanList->currentText() != "<None>")
+      //  if (i->getLabel() == scopeWindow->getTriggerChannel()->getLabel())
+      //    scopeWindow->setTrigger(Scope::NONE,
+      //                            scopeWindow->getTriggerThreshold(),
+      //                            scopeWindow->getChannelsEnd(),
+      //                            scopeWindow->getTriggerWindow());
 
       bool active = setInactiveSync();
       scopeWindow->removeChannel(i);
       flushFifo();
       setActive(active);
-      delete info;
     }
   } else {
     if (i == scopeWindow->getChannelsEnd()) {
@@ -1065,14 +1066,14 @@ void Oscilloscope::Panel::togglePause(void)
   scopeWindow->isPaused = !(scopeWindow->isPaused);
 }
 
-bool Oscilloscope::Panel::setInactiveSync(void)
-{
-  bool active = getActive();
-  setActive(false);
-  SyncEvent event;
-  RT::System::getInstance()->postEvent(&event);
-  return active;
-}
+//bool Oscilloscope::Panel::setInactiveSync(void)
+//{
+//  bool active = getActive();
+//  setActive(false);
+//  SyncEvent event;
+//  RT::System::getInstance()->postEvent(&event);
+//  return active;
+//}
 
 void Oscilloscope::Panel::flushFifo(void)
 {

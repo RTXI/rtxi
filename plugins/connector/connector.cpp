@@ -75,12 +75,21 @@ Connector::Panel::Panel(MainWindow* mw, Event::Manager* event_manager)
   outputLayout->addWidget(new QLabel(tr("Block:")), 1, 0);
   outputBlock = new QComboBox;
   outputLayout->addWidget(outputBlock);
-  QObject::connect(outputBlock,
+  //QObject::connect(outputBlock,
+  //                 SIGNAL(activated(int)),
+  //                 this,
+  //                 SLOT(buildOutputFlagList(void)));
+
+  outputLayout->addWidget(new QLabel(tr("Flag:")), 2, 0);
+  outputFlag = new QComboBox;
+  outputLayout->addWidget(outputFlag);
+  buildOutputFlagList();
+  QObject::connect(outputFlag,
                    SIGNAL(activated(int)),
                    this,
                    SLOT(buildOutputChannelList(void)));
 
-  outputLayout->addWidget(new QLabel(tr("Channel:")), 2, 0);
+  outputLayout->addWidget(new QLabel(tr("Channel:")), 3, 0);
   outputChannel = new QComboBox;
   outputLayout->addWidget(outputChannel);
   QObject::connect(outputChannel,
@@ -277,6 +286,12 @@ void Connector::Panel::buildOutputChannelList(void)
   updateConnectionButton();
 }
 
+void Connector::Panel::buildOutputFlagList()
+{
+  outputFlag->addItem(QString("INPUT"));
+  outputFlag->addItem(QString("OUTPUT"));
+}
+
 void Connector::Panel::highlightConnectionBox(QListWidgetItem* item)
 {
   int link_index = this->connectionBox->selectionModel()->selectedIndexes()[0].row();
@@ -320,10 +335,11 @@ void Connector::Panel::toggleConnection(bool on)
   int src_id = outputBlock->currentIndex();
   int dest_id = inputBlock->currentIndex();
   int src_port_id = outputChannel->currentIndex();
+  int src_port_flag = outputFlag->currentIndex();
   int dest_port_id = inputChannel->currentIndex();
 
   // If no valid selection then do nothing
-  if(src_id == -1 || dest_id == -1 || src_port_id == -1 || dest_port_id == -1){
+  if(src_id == -1 || dest_id == -1 || src_port_id == -1 || dest_port_id == -1 || src_port_flag == -1){
     this->connectionButton->setDown(false);
     return;
   }
@@ -332,11 +348,8 @@ void Connector::Panel::toggleConnection(bool on)
   connection.dest = blocks[static_cast<size_t>(dest_id)];
   connection.src_port = static_cast<size_t>(src_port_id);
   connection.dest_port = static_cast<size_t>(dest_port_id);
+  connection.src_port_type = static_cast<IO::flags_t>(src_port_flag);
   
-  //if (IO::Connector::getInstance()->connected(src, src_num, dest, dest_num)
-  //    == on)
-  //  return;
-
   if (on) {
     Event::Object event(Event::Type::IO_LINK_INSERT_EVENT);
     event.setParam("connection", std::any(connection));

@@ -148,6 +148,18 @@ size_t Oscilloscope::Scope::getChannelCount() const
   return channels.size();
 }
 
+Oscilloscope::scope_channel Oscilloscope::Scope::getChannel(IO::Block* block, size_t port)
+{
+  Oscilloscope::scope_channel result;
+  auto iter = std::find_if(this->channels.begin(),
+                           this->channels.end(),
+                           [&](const Oscilloscope::scope_channel& chan){
+                             return chan.block == block && chan.port == port;
+                           });
+  if(iter != this->channels.end()) { result = *iter; }
+  return result;
+}
+
 void Oscilloscope::Scope::clearData()
 {
   size_t data_size = 0;
