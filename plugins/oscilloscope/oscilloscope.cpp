@@ -114,6 +114,22 @@ void Oscilloscope::Panel::showTab(int index)
   }
 }
 
+void Oscilloscope::Panel::setActivity(Modules::Component* comp, bool activity)
+{
+  Event::Type event_type = Event::Type::NOOP; 
+  switch(activity){
+    case true:
+      event_type = Event::Type::RT_THREAD_UNPAUSE_EVENT;
+      break;
+    default:
+      event_type = Event::Type::RT_THREAD_PAUSE_EVENT;
+      break;
+  }     
+  Event::Object event(event_type);
+  event.setParam("thread", std::any(static_cast<RT::Thread*>(comp)));
+  this->getRTXIEventManager()->postEvent(&event);
+}
+
 void Oscilloscope::Panel::applyChannelTab(void)
 {
   if (this->blocksList->count() <= 0 || this->channelsList->count() <= 0)
@@ -127,149 +143,122 @@ void Oscilloscope::Panel::applyChannelTab(void)
   IO::Block* block = blocks[static_cast<size_t>(block_index)];
   auto port = static_cast<size_t>(this->channelsList->currentIndex());
   IO::flags_t type = static_cast<IO::flags_t>(flags_index);
-  Oscilloscope::scope_channel channel_info = this->scopeWindow->getChannel(block, port);
-  if (block == nullptr) {
-    ERROR_MSG("Oscilloscope::Panel::applyChannelTab : Could not find block in channel list");
-    return;
-  }
-
-  if (trigsChanList->currentText() != "<None>"){
-    this->scopeWindow->capture_trigger.direction = Oscilloscope::Trigger::NONE;
-  }
-
+  auto host_plugin = dynamic_cast<Oscilloscope::Plugin*>(this->getHostPlugin());
+  Oscilloscope::Component* probe = host_plugin->getProbe(block, port, type);
   if (!activateButton->isChecked()) {
-    if (i != scopeWindow->getChannelsEnd()) {
-      // If triggering on this channel disable triggering
-      //if (trigsChanList->currentText() != "<None>")
-      //  if (i->getLabel() == scopeWindow->getTriggerChannel()->getLabel())
-      //    scopeWindow->setTrigger(Scope::NONE,
-      //                            scopeWindow->getTriggerThreshold(),
-      //                            scopeWindow->getChannelsEnd(),
-      //                            scopeWindow->getTriggerWindow());
-
-      bool active = setInactiveSync();
-      scopeWindow->removeChannel(i);
-      flushFifo();
-      setActive(active);
-    }
+    if (probe == nullptr) { return; }
+    this->setActivity(probe, false);
+    scopeWindow->removeChannel(block, port, type);
+    flushFifo();
   } else {
-    if (i == scopeWindow->getChannelsEnd()) {
-      info = new struct channel_info;
+    //channel_info info;
 
-      info->block = block;
-      info->type = type;
-      info->index = channelsList->currentIndex();
-      info->previous = 0.0;
-      info->name = QString::number(block->getID()) + " "
-          + QString::fromStdString(
-                       block->getName(type, channelsList->currentIndex()));
-
-      bool active = setInactiveSync();
-      QwtPlotCurve* curve = new QwtPlotCurve(info->name);
-      i = scopeWindow->insertChannel(
-          info->name + " 50 mV/div",
-          2.0,
-          0.0,
-          QPen(QColor(255, 0, 16, 255), 1, Qt::SolidLine),
-          curve,
-          info);
-      flushFifo();
-      setActive(active);
-    }
-
-    double scale;
-    switch (scalesList->currentIndex() % 4) {
-      case 0:
-        scale = pow(10, 1 - scalesList->currentIndex() / 4);
-        break;
-      case 1:
-        scale = 5 * pow(10, -scalesList->currentIndex() / 4);
-        break;
-      case 2:
-        scale = 2.5 * pow(10, -scalesList->currentIndex() / 4);
-        break;
-      case 3:
-        scale = 2 * pow(10, -scalesList->currentIndex() / 4);
-        break;
-      default:
-        ERROR_MSG(
-            "Oscilloscope::Panel::applyChannelTab : invalid scale selection\n");
-        scale = 1.0;
-    }
-    if (scale != i->getScale()) {
-      scopeWindow->setChannelScale(i, scale);
-      scopeWindow->setChannelLabel(
-          i, info->name + " - " + scalesList->currentText().simplified());
-    }
-    scopeWindow->setChannelOffset(
-        i,
-        offsetsEdit->text().toDouble()
-            * pow(10, -3 * offsetsList->currentIndex()));
-
-    QPen pen;
-    switch (colorsList->currentIndex()) {
-      case 0:
-        pen.setColor(QColor(255, 0, 16, 255));
-        break;
-      case 1:
-        pen.setColor(QColor(255, 164, 5, 255));
-        break;
-      case 2:
-        pen.setColor(QColor(43, 206, 72, 255));
-        break;
-      case 3:
-        pen.setColor(QColor(0, 117, 220, 255));
-        break;
-      case 4:
-        pen.setColor(QColor(178, 102, 255, 255));
-        break;
-      case 5:
-        pen.setColor(QColor(0, 153, 143, 255));
-        break;
-      case 6:
-        pen.setColor(QColor(83, 81, 84, 255));
-        break;
-      default:
-        ERROR_MSG(
-            "Oscilloscope::Panel::applyChannelTab : invalid color selection\n");
-        pen.setColor(QColor(255, 0, 16, 255));
-    }
-    pen.setWidth(widthsList->currentIndex() + 1);
-    switch (stylesList->currentIndex()) {
-      case 0:
-        pen.setStyle(Qt::SolidLine);
-        break;
-      case 1:
-        pen.setStyle(Qt::DashLine);
-        break;
-      case 2:
-        pen.setStyle(Qt::DotLine);
-        break;
-      case 3:
-        pen.setStyle(Qt::DashDotLine);
-        break;
-      case 4:
-        pen.setStyle(Qt::DashDotDotLine);
-        break;
-      default:
-        ERROR_MSG(
-            "Oscilloscope::Panel::applyChannelTab : invalid style selection\n");
-        pen.setStyle(Qt::SolidLine);
-    }
-    scopeWindow->setChannelPen(i, pen);
+    //info.block = block;
+    //info.type = type;
+    //info.port = port;
+    //info.name = QString::number(block->getID()) + 
+    //            " " + 
+    //            QString::fromStdString(block->getName());
+    //QwtPlotCurve* curve = new QwtPlotCurve(info.name);
+    //channel
+    //i = scopeWindow->insertChannel(
+    //    info.name + " 50 mV/div",
+    //    2.0,
+    //    0.0,
+    //    QPen(QColor(255, 0, 16, 255), 1, Qt::SolidLine),
+    //    curve,
+    //    info);
+    host_plugin->addProbe(block, port, type);
+    flushFifo();
   }
+
+  //  double scale;
+  //  switch (scalesList->currentIndex() % 4) {
+  //    case 0:
+  //      scale = pow(10, 1 - scalesList->currentIndex() / 4);
+  //      break;
+  //    case 1:
+  //      scale = 5 * pow(10, -scalesList->currentIndex() / 4);
+  //      break;
+  //    case 2:
+  //      scale = 2.5 * pow(10, -scalesList->currentIndex() / 4);
+  //      break;
+  //    case 3:
+  //      scale = 2 * pow(10, -scalesList->currentIndex() / 4);
+  //      break;
+  //    default:
+  //      ERROR_MSG(
+  //          "Oscilloscope::Panel::applyChannelTab : invalid scale selection\n");
+  //      scale = 1.0;
+  //  }
+  //  if (scale != i->getScale()) {
+  //    scopeWindow->setChannelScale(i, scale);
+  //    scopeWindow->setChannelLabel(
+  //        i, info->name + " - " + scalesList->currentText().simplified());
+  //  }
+  //  scopeWindow->setChannelOffset(
+  //      i,
+  //      offsetsEdit->text().toDouble()
+  //          * pow(10, -3 * offsetsList->currentIndex()));
+
+  //  QPen pen;
+  //  switch (colorsList->currentIndex()) {
+  //    case 0:
+  //      pen.setColor(QColor(255, 0, 16, 255));
+  //      break;
+  //    case 1:
+  //      pen.setColor(QColor(255, 164, 5, 255));
+  //      break;
+  //    case 2:
+  //      pen.setColor(QColor(43, 206, 72, 255));
+  //      break;
+  //    case 3:
+  //      pen.setColor(QColor(0, 117, 220, 255));
+  //      break;
+  //    case 4:
+  //      pen.setColor(QColor(178, 102, 255, 255));
+  //      break;
+  //    case 5:
+  //      pen.setColor(QColor(0, 153, 143, 255));
+  //      break;
+  //    case 6:
+  //      pen.setColor(QColor(83, 81, 84, 255));
+  //      break;
+  //    default:
+  //      ERROR_MSG(
+  //          "Oscilloscope::Panel::applyChannelTab : invalid color selection\n");
+  //      pen.setColor(QColor(255, 0, 16, 255));
+  //  }
+  //  pen.setWidth(widthsList->currentIndex() + 1);
+  //  switch (stylesList->currentIndex()) {
+  //    case 0:
+  //      pen.setStyle(Qt::SolidLine);
+  //      break;
+  //    case 1:
+  //      pen.setStyle(Qt::DashLine);
+  //      break;
+  //    case 2:
+  //      pen.setStyle(Qt::DotLine);
+  //      break;
+  //    case 3:
+  //      pen.setStyle(Qt::DashDotLine);
+  //      break;
+  //    case 4:
+  //      pen.setStyle(Qt::DashDotDotLine);
+  //      break;
+  //    default:
+  //      ERROR_MSG(
+  //          "Oscilloscope::Panel::applyChannelTab : invalid style selection\n");
+  //      pen.setStyle(Qt::SolidLine);
+  //  }
+  //  scopeWindow->setChannelPen(i, pen);
+  //}
   scopeWindow->replot();
   showChannelTab();
 }
 
 void Oscilloscope::Panel::applyDisplayTab(void)
 {
-  // Update downsample rate
-  downsample_rate = ratesSpin->value();
-
-  // Update refresh rate for oscillscope
-  scopeWindow->setRefresh(refreshsSpin->value());
-
   // Update X divisions
   double divT;
   if (timesList->currentIndex() % 3 == 1)
@@ -279,54 +268,51 @@ void Oscilloscope::Panel::applyDisplayTab(void)
   else
     divT = 5 * pow(10, 3 - timesList->currentIndex() / 3);
   scopeWindow->setDivT(divT);
-  scopeWindow->setPeriod(RT::System::getInstance()->getPeriod() * 1e-6);
-  adjustDataSize();
+  //scopeWindow->setPeriod(RT::System::getInstance()->getPeriod() * 1e-6);
+  this->adjustDataSize();
 
   // Update trigger direction
-  Scope::trig_t trigDirection =
-      static_cast<Scope::trig_t>(trigsGroup->id(trigsGroup->checkedButton()));
-
+  updateTrigger();
+  
   // Update trigger threshold
-  double trigThreshold = trigsThreshEdit->text().toDouble()
-      * pow(10, -3 * trigsThreshList->currentIndex());
+  //double trigThreshold = trigsThreshEdit->text().toDouble()
+  //    * pow(10, -3 * trigsThreshList->currentIndex());
 
-  // Update pre-trigger window for displaying
-  double trigWindow = trigWindowEdit->text().toDouble()
-      * pow(10, -3 * trigWindowList->currentIndex());
+  //// Update pre-trigger window for displaying
+  //double trigWindow = trigWindowEdit->text().toDouble()
+  //    * pow(10, -3 * trigWindowList->currentIndex());
 
-  std::list<Scope::Channel>::iterator trigChannel =
-      scopeWindow->getChannelsEnd();
-  for (std::list<Scope::Channel>::iterator i = scopeWindow->getChannelsBegin(),
-                                           end = scopeWindow->getChannelsEnd();
-       i != end;
-       ++i)
-    if (i->getLabel() == trigsChanList->currentText()) {
-      trigChannel = i;
-      break;
-    }
-  if (trigChannel == scopeWindow->getChannelsEnd())
-    trigDirection = Scope::NONE;
+  //std::list<Scope::Channel>::iterator trigChannel =
+  //    scopeWindow->getChannelsEnd();
+  //for (std::list<Scope::Channel>::iterator i = scopeWindow->getChannelsBegin(),
+  //                                         end = scopeWindow->getChannelsEnd();
+  //     i != end;
+  //     ++i)
+  //  if (i->getLabel() == trigsChanList->currentText()) {
+  //    trigChannel = i;
+  //    break;
+  //  }
+  //if (trigChannel == scopeWindow->getChannelsEnd())
+  //  trigDirection = Scope::NONE;
 
-  scopeWindow->setTrigger(
-      trigDirection, trigThreshold, trigChannel, trigWindow);
+  //scopeWindow->setTrigger(
+  //    trigDirection, trigThreshold, trigChannel, trigWindow);
 
   adjustDataSize();
   scopeWindow->replot();
   showDisplayTab();
 }
 
-struct block_list_info_t
+void Oscilloscope::Panel::buildBlockList()
 {
-  QComboBox* blockList;
-  std::vector<IO::Block*>* blocks;
-};
-
-static void buildBlockList(IO::Block* block, void* arg)
-{
-  block_list_info_t* info = static_cast<block_list_info_t*>(arg);
-  info->blockList->addItem(QString::fromStdString(block->getName()) + " "
-                           + QString::number(block->getID()));
-  info->blocks->push_back(block);
+  Event::Object event(Event::Type::IO_BLOCK_QUERY_EVENT);
+  this->getRTXIEventManager()->postEvent(&event);
+  auto blocklist = std::any_cast<std::vector<IO::Block*>>(event.getParam("blockList"));
+  for(auto block : blocklist) {
+    this->blocksListDropdown->addItem(QString::fromStdString(block->getName()) + " " + 
+                                      QString::number(block->getID()));
+  }
+  this->blocks = blocklist;
 }
 
 QWidget* Oscilloscope::Panel::createChannelTab(QWidget* parent)
@@ -349,14 +335,12 @@ QWidget* Oscilloscope::Panel::createChannelTab(QWidget* parent)
   QHBoxLayout* row1Layout = new QHBoxLayout;
   QLabel* channelLabel = new QLabel(tr("Channel:"), page);
   row1Layout->addWidget(channelLabel);
-  blocksList = new QComboBox(page);
-  blocksList->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-  blocksList->setSizeAdjustPolicy(QComboBox::AdjustToContents);
-  block_list_info_t info = {blocksList, &this->blocks};
-  IO::Connector::getInstance()->foreachBlock(::buildBlockList, &info);
+  blocksListDropdown = new QComboBox(page);
+  blocksListDropdown->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+  blocksListDropdown->setSizeAdjustPolicy(QComboBox::AdjustToContents);
   QObject::connect(
-      blocksList, SIGNAL(activated(int)), this, SLOT(buildChannelList(void)));
-  row1Layout->addWidget(blocksList);
+      blocksListDropdown, SIGNAL(activated(int)), this, SLOT(buildChannelList(void)));
+  row1Layout->addWidget(blocksListDropdown);
 
   // Create Type box
   typesList = new QComboBox(page);
@@ -364,8 +348,8 @@ QWidget* Oscilloscope::Panel::createChannelTab(QWidget* parent)
   typesList->setSizeAdjustPolicy(QComboBox::AdjustToContents);
   typesList->addItem("Input");
   typesList->addItem("Output");
-  typesList->addItem("Parameter");
-  typesList->addItem("State");
+  //typesList->addItem("Parameter");
+  //typesList->addItem("State");
   QObject::connect(
       typesList, SIGNAL(activated(int)), this, SLOT(buildChannelList(void)));
   row1Layout->addWidget(typesList);
@@ -633,13 +617,13 @@ QWidget* Oscilloscope::Panel::createDisplayTab(QWidget* parent)
   trigsGroup = new QButtonGroup(page);
 
   QRadioButton* off = new QRadioButton(tr("Off"), page);
-  trigsGroup->addButton(off, Scope::NONE);
+  trigsGroup->addButton(off, Oscilloscope::Trigger::NONE);
   row2Layout->addWidget(off);
   QRadioButton* plus = new QRadioButton(tr("+"), page);
-  trigsGroup->addButton(plus, Scope::POS);
+  trigsGroup->addButton(plus, Oscilloscope::Trigger::POS);
   row2Layout->addWidget(plus);
   QRadioButton* minus = new QRadioButton(tr("-"), page);
-  trigsGroup->addButton(minus, Scope::NEG);
+  trigsGroup->addButton(minus, Oscilloscope::Trigger::NEG);
   row2Layout->addWidget(minus);
 
   row2Layout->addWidget(new QLabel(tr("Channel:"), page));
@@ -666,7 +650,7 @@ QWidget* Oscilloscope::Panel::createDisplayTab(QWidget* parent)
 
   row2Layout->addWidget(new QLabel(tr("Window:"), page));
   trigWindowEdit = new QLineEdit(page);
-  trigWindowEdit->setText(QString::number(scopeWindow->getTriggerWindow()));
+  trigWindowEdit->setText(QString::number(scopeWindow->getWindowTimewidth()));
   trigWindowEdit->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Fixed);
   trigWindowEdit->setMaximumWidth(trigWindowEdit->minimumSizeHint().width()
                                   * 3);
@@ -1075,7 +1059,7 @@ void Oscilloscope::Panel::togglePause(void)
 //  return active;
 //}
 
-void Oscilloscope::Panel::flushFifo(void)
+void Oscilloscope::Component::flushFifo(void)
 {
   char yogi;
   while (fifo.read(&yogi, sizeof(yogi), false))

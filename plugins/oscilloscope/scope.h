@@ -60,22 +60,6 @@ constexpr size_t HZ120 = 8;
 constexpr size_t HZ240 = 4;
 }; // namespace FrameRates 
 
-namespace Trigger{
-enum trig_t
-{
-  NONE,
-  POS,
-  NEG,
-};
-
-typedef struct Info {
-  IO::Block* block;
-  size_t port;
-  Trigger::trig_t direction;
-  double threshold;
-}Info;
-}; // namespace Trigger
-
 typedef struct sample {
   double value;
   int64_t time;
@@ -88,9 +72,11 @@ typedef struct scope_channel
   double offset=0;
   std::vector<double> xbuffer;
   std::vector<double> ybuffer;
+  size_t data_indx=0;
   QwtPlotCurve* curve = nullptr;
   IO::Block* block = nullptr;
   size_t port = 0;
+  IO::flags_t direction;
   IO::channel_t info {};
 }scope_channel;
 
@@ -142,17 +128,17 @@ public:
 
   bool paused() const;
   void insertChannel(const scope_channel& channel);
-  void removeChannel(IO::Block* block, size_t port);
+  void removeChannel(IO::Block* block, size_t port, IO::flags_t type);
   size_t getChannelCount() const;
-  scope_channel getChannel(IO::Block* block, size_t port);
+  //scope_channel getChannel(IO::Block* block, size_t port);
 
   void clearData();
   void setData(IO::Block* block, size_t port, std::vector<sample> data);
   size_t getDataSize() const;
   void setDataSize(size_t);
 
-  Trigger::trig_t getTriggerDirection();
-  double getTriggerThreshold();
+  //Trigger::trig_t getTriggerDirection();
+  //double getTriggerThreshold();
 
   double getDivT() const;
   void setDivT(double);
@@ -169,8 +155,10 @@ public:
   void setChannelOffset(IO::Block* block, size_t port, double offset);
   void setChannelPen(IO::Block* block, size_t port, const QPen& pen);
   void setChannelLabel(IO::Block* block, size_t port, const QString& label);
-  Trigger::Info capture_trigger;
+  //Trigger::Info capture_trigger;
 
+  int64_t getWindowTimewidth();
+  void setWindowTimewidth();
 protected:
   void resizeEvent(QResizeEvent* event);
 
@@ -179,6 +167,7 @@ private slots:
 
 private:
   void drawCurves();
+  double window_timewidth;
 
   bool isPaused = false;
   int divX=10;
@@ -203,7 +192,7 @@ private:
 
   QTimer* timer;
   QString dtLabel;
-  std::vector<scope_channel> channels;
+  std::list<scope_channel> channels;
 };  // Scope
 
 }; // namespace Oscilloscope

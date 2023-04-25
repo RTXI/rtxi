@@ -40,12 +40,46 @@
 namespace Oscilloscope
 {
 
+constexpr std::string_view MODULE_NAME = "Oscilloscope";
+
+enum PARAMETER : size_t {
+  TRIGGERING = 0
+};
+
+const std::vector<Modules::Variable::Info> oscilloscope_vars
+{
+  {
+    PARAMETER::TRIGGERING,
+    "Trigger State",
+    "Trigger activity for the oscilloscope",
+    Modules::Variable::STATE,
+    Modules::Variable::INIT
+  }
+};
+
+namespace Trigger{
+enum trig_t
+{
+  NONE,
+  POS,
+  NEG,
+};
+
+typedef struct Info {
+  IO::Block* block;
+  size_t port;
+  Trigger::trig_t direction;
+  double threshold;
+}Info;
+}; // namespace Trigger
+
+
 typedef struct channel_info
 {
   QString name;
   IO::Block* block;
   IO::flags_t type;
-  size_t index;
+  size_t port;
 } channel_info;  // channel_info
 
 class Component : public Modules::Component
@@ -65,9 +99,12 @@ class Panel : public Modules::Panel
 public:
   Panel(QWidget* = NULL);
   virtual ~Panel();
-  bool setInactiveSync();
+  //bool setInactiveSync();
   void flushFifo();
-  //void adjustDataSize();
+  void setActivity(Oscilloscope::Component* comp, bool activity);
+  void adjustDataSize();
+  void updateTrigger();
+  void buildBlockList();
   //void doDeferred(const Settings::Object::State&);
   //void doLoad(const Settings::Object::State&);
   //void doSave(Settings::Object::State&) const;
@@ -122,7 +159,7 @@ private:
   QComboBox* trigWindowList;
 
   // Lists
-  QComboBox* blocksList;
+  QComboBox* blocksListDropdown;
   QComboBox* typesList;
   QComboBox* channelsList;
   QComboBox* colorsList;
@@ -147,10 +184,13 @@ class Plugin : public Modules::Plugin
 {
 public:
   void receiveEvent(Event::Object* event) override;
+  Oscilloscope::Component* getProbe(IO::Block* source, size_t port, IO::flags_t type);
+  void addProbe(IO::Block* source, size_t port, IO::flags_t direction);
+  void removeProbe(IO::Block* source, size_t port, IO::flags_t direction);
 
 private:
   // List to maintain multiple scopes
-  std::vector<std::unique_ptr<Oscilloscope::Component>> componentList;
+  std::list<Oscilloscope::Component> componentList;
 };  // Plugin
 
 

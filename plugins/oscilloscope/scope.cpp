@@ -19,6 +19,7 @@
 
 #include <stdlib.h>
 #include <cmath>
+#include <algorithm>
 
 #include <qwt_abstract_scale_draw.h>
 #include <qwt_scale_map.h>
@@ -119,19 +120,20 @@ void Oscilloscope::Scope::insertChannel(const Oscilloscope::scope_channel& chann
   channels.push_back(channel);
 }
 
-void Oscilloscope::Scope::removeChannel(IO::Block* block, size_t port)
+void Oscilloscope::Scope::removeChannel(IO::Block* block, size_t port, IO::flags_t type)
 {
   auto iter = std::find_if(this->channels.begin(),
                            this->channels.end(),
                            [&](const Oscilloscope::scope_channel& channel_info){
                              return block == channel_info.block && 
-                                    port == channel_info.port;
+                                    port == channel_info.port &&
+                                    type == channel_info.direction;
                            });
   if(iter == this->channels.end()) {
     return;
   }
   // Make sure we aren't triggering a non-existent oscilloscope channel
-  this->capture_trigger.direction = Oscilloscope::Trigger::NONE;
+  //this->capture_trigger.direction = Oscilloscope::Trigger::NONE;
   iter->curve->detach();
   channels.erase(iter);
   replot();
@@ -148,17 +150,17 @@ size_t Oscilloscope::Scope::getChannelCount() const
   return channels.size();
 }
 
-Oscilloscope::scope_channel Oscilloscope::Scope::getChannel(IO::Block* block, size_t port)
-{
-  Oscilloscope::scope_channel result;
-  auto iter = std::find_if(this->channels.begin(),
-                           this->channels.end(),
-                           [&](const Oscilloscope::scope_channel& chan){
-                             return chan.block == block && chan.port == port;
-                           });
-  if(iter != this->channels.end()) { result = *iter; }
-  return result;
-}
+//Oscilloscope::scope_channel Oscilloscope::Scope::getChannel(IO::Block* block, size_t port)
+//{
+//  Oscilloscope::scope_channel result;
+//  auto iter = std::find_if(this->channels.begin(),
+//                           this->channels.end(),
+//                           [&](const Oscilloscope::scope_channel& chan){
+//                             return chan.block == block && chan.port == port;
+//                           });
+//  if(iter != this->channels.end()) { result = *iter; }
+//  return result;
+//}
 
 void Oscilloscope::Scope::clearData()
 {
@@ -168,6 +170,7 @@ void Oscilloscope::Scope::clearData()
     data_size = chan.xbuffer.size();
     chan.xbuffer.assign(data_size, 0);
     chan.ybuffer.assign(data_size, 0);
+    chan.data_indx = 0;
   }
 }
 
@@ -188,35 +191,36 @@ void Oscilloscope::Scope::setData(IO::Block* block, size_t port, std::vector<sam
     iter->xbuffer.assign(data.size(), 0);
     iter->ybuffer.assign(data.size(), 0);
   }
-  for(size_t i=0; i<data.size(); i++) {
+  for(size_t i=iter->data_indx; i<data.size(); i++) {
+    if(i >= iter->xbuffer.size()) { i = 0; }
     iter->xbuffer[i] = static_cast<double>(data[i].time);
     iter->ybuffer[i] = data[i].value;
   }
 }
 
-void Oscilloscope::Scope::setTrigger(Oscilloscope::Trigger::Info trigger_info)
-{
-  auto chan_loc = std::find_if(this->channels.begin(),
-                               this->channels.end(),
-                               [&](const Oscilloscope::scope_channel& chann){
-                                 return chann.block == trigger_info.block && 
-                                        chann.port == trigger_info.port;
-                               });
-  if(chan_loc == this->channels.end()) { 
-    ERROR_MSG("Oscilloscope::Scope::setTrigger : The given channel was not found!");
-    return; 
-  }
-
-  this->capture_trigger = trigger_info;
-  // Update if direction has changed
-  if (trigger_info.direction == Oscilloscope::Trigger::NONE) {
-    triggering = false;
-    timer->start(refresh);
-  } else {
-    triggering = true;
-    timer->stop();
-  }
-}
+//void Oscilloscope::Scope::setTrigger(Oscilloscope::Trigger::Info trigger_info)
+//{
+//  auto chan_loc = std::find_if(this->channels.begin(),
+//                               this->channels.end(),
+//                               [&](const Oscilloscope::scope_channel& chann){
+//                                 return chann.block == trigger_info.block && 
+//                                        chann.port == trigger_info.port;
+//                               });
+//  if(chan_loc == this->channels.end()) { 
+//    ERROR_MSG("Oscilloscope::Scope::setTrigger : The given channel was not found!");
+//    return; 
+//  }
+//
+//  this->capture_trigger = trigger_info;
+//  // Update if direction has changed
+//  if (trigger_info.direction == Oscilloscope::Trigger::NONE) {
+//    triggering = false;
+//    timer->start(refresh);
+//  } else {
+//    triggering = true;
+//    timer->stop();
+//  }
+//}
 
 double Oscilloscope::Scope::getDivT() const
 {
@@ -311,9 +315,18 @@ void Oscilloscope::Scope::drawCurves()
   if (isPaused) {
     return;
   }
-
+  double max_val = 0;
+  double local_max_val = 0;
+  for(auto chan : this->channels){
+    if(chan.xbuffer.size() == 0) { continue; }
+    local_max_val = *std::max_element(chan.xbuffer.begin(),
+                                      chan.xbuffer.end());
+    if(local_max_val > max_val) { max_val = local_max_val; }
+  }
   // Set X scale map is same for all channels
-  scaleMapX->setScaleInterval(0, hScl * divX);
+  double max_window_time = local_max_val;
+  double min_window_time = max_window_time - hScl * divX;
+  scaleMapX->setScaleInterval(min_window_time , max_window_time);
   for (auto& channel : this->channels)
   {
     // Set data for channel
