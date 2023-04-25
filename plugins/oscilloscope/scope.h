@@ -80,6 +80,17 @@ typedef struct scope_channel
   IO::channel_t info {};
 }scope_channel;
 
+constexpr std::array<QColor, 7> penColors = 
+  {
+    QColor(255, 0, 16, 255),
+    QColor(255, 164, 5, 255),
+    QColor(43, 206, 72, 255),
+    QColor(0, 117, 220, 255),
+    QColor(178, 102, 255, 255),
+    QColor(0, 153, 143, 255),
+    QColor(83, 81, 84, 255)
+  };
+
 class LegendItem : public QwtPlotLegendItem
 {
 public:
@@ -151,14 +162,16 @@ public:
   void setRefresh(size_t);
 
 
-  void setChannelScale(IO::Block* block, size_t port, double scale);
-  void setChannelOffset(IO::Block* block, size_t port, double offset);
-  void setChannelPen(IO::Block* block, size_t port, const QPen& pen);
-  void setChannelLabel(IO::Block* block, size_t port, const QString& label);
+  void setChannelScale(IO::Block* block, size_t port, IO::flags_t direction, double scale);
+  double getChannelScale(IO::Block* block, size_t port, IO::flags_t direction);
+  void setChannelOffset(IO::Block* block, size_t port, IO::flags_t direction, double offset);
+  double getChannelOffset(IO::Block* block, size_t port, IO::flags_t direction);
+  void setChannelPen(IO::Block* block, size_t port, IO::flags_t direction, const QPen& pen);
+  QPen* getChannelPen(IO::Block* block, size_t port, IO::flags_t direction);
+  void setChannelLabel(IO::Block* block, size_t port, IO::flags_t direction, const QString& label);
   //Trigger::Info capture_trigger;
 
   int64_t getWindowTimewidth();
-  void setWindowTimewidth();
 protected:
   void resizeEvent(QResizeEvent* event);
 

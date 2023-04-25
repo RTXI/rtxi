@@ -46,7 +46,7 @@ void Oscilloscope::Plugin::receiveEvent(Event::Object* event)
 
 void Oscilloscope::Panel::activateChannel(bool active)
 {
-  bool enable = active && blocksList->count() && channelsList->count();
+  bool enable = active && blocksListDropdown->count() > 0 && channelsList->count() > 0;
   scalesList->setEnabled(enable);
   offsetsEdit->setEnabled(enable);
   offsetsList->setEnabled(enable);
@@ -72,15 +72,15 @@ void Oscilloscope::Panel::apply(void)
 void Oscilloscope::Panel::buildChannelList(void)
 {
   channelsList->clear();
-  if (blocksList->count() <= 0) {
+  if (blocksListDropdown->count() <= 0) {
     return;
   }
 
-  if (blocksList->currentIndex() < 0){
-    blocksList->setCurrentIndex(0);
+  if (blocksListDropdown->currentIndex() < 0){
+    blocksListDropdown->setCurrentIndex(0);
   }
 
-  IO::Block* block = blocks[static_cast<size_t>(blocksList->currentIndex())];
+  IO::Block* block = blocks[static_cast<size_t>(blocksListDropdown->currentIndex())];
   IO::flags_t type = IO::UNKNOWN;
   switch (typesList->currentIndex()) {
     case 0:
@@ -114,7 +114,7 @@ void Oscilloscope::Panel::showTab(int index)
   }
 }
 
-void Oscilloscope::Panel::setActivity(Modules::Component* comp, bool activity)
+void Oscilloscope::Panel::setActivity(Oscilloscope::Component* comp, bool activity)
 {
   Event::Type event_type = Event::Type::NOOP; 
   switch(activity){
@@ -132,10 +132,10 @@ void Oscilloscope::Panel::setActivity(Modules::Component* comp, bool activity)
 
 void Oscilloscope::Panel::applyChannelTab(void)
 {
-  if (this->blocksList->count() <= 0 || this->channelsList->count() <= 0)
+  if (this->blocksListDropdown->count() <= 0 || this->channelsList->count() <= 0)
     return;
 
-  int block_index = this->blocksList->currentIndex();
+  int block_index = this->blocksListDropdown->currentIndex();
   int port_index = this->channelsList->currentIndex();
   int flags_index = this->typesList->currentIndex();
   if(block_index < 0 || port_index < 0) { return; }
@@ -346,8 +346,8 @@ QWidget* Oscilloscope::Panel::createChannelTab(QWidget* parent)
   typesList = new QComboBox(page);
   typesList->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
   typesList->setSizeAdjustPolicy(QComboBox::AdjustToContents);
-  typesList->addItem("Input");
   typesList->addItem("Output");
+  typesList->addItem("Input");
   //typesList->addItem("Parameter");
   //typesList->addItem("State");
   QObject::connect(
@@ -585,19 +585,22 @@ QWidget* Oscilloscope::Panel::createDisplayTab(QWidget* parent)
 
   QLabel* refreshLabel = new QLabel(tr("Refresh:"), page);
   row1Layout->addWidget(refreshLabel);
-  refreshsSpin = new QSpinBox(page);
-  row1Layout->addWidget(refreshsSpin);
-  refreshsSpin->setRange(100, 10000);
-  refreshsSpin->setValue(250);
+  refreshDropdown = new QComboBox(page);
+  row1Layout->addWidget(refreshDropdown);
+  refreshDropdown->addItem("60 Hz");
+  refreshDropdown->addItem("120 Hz");
+  refreshDropdown->addItem("240 Hz");
+  //refreshsSpin->setRange(100, 10000);
+  //refreshsSpin->setValue(250);
 
-  QLabel* downsampleLabel = new QLabel(tr("Downsample:"), page);
-  row1Layout->addWidget(downsampleLabel);
-  ratesSpin = new QSpinBox(page);
-  row1Layout->addWidget(ratesSpin);
-  ratesSpin->setValue(downsample_rate);
-  ratesSpin->setEnabled(true);
-  ratesSpin->setRange(1, 2);
-  ratesSpin->setValue(1);
+  //QLabel* downsampleLabel = new QLabel(tr("Downsample:"), page);
+  //row1Layout->addWidget(downsampleLabel);
+  //ratesSpin = new QSpinBox(page);
+  //row1Layout->addWidget(ratesSpin);
+  //ratesSpin->setValue(downsample_rate);
+  //ratesSpin->setEnabled(true);
+  //ratesSpin->setRange(1, 2);
+  //ratesSpin->setValue(1);
 
   // Display box for Buffer bit. Push it to the right.
   row1Layout->addSpacerItem(
@@ -674,140 +677,99 @@ QWidget* Oscilloscope::Panel::createDisplayTab(QWidget* parent)
 // in the display tab
 void Oscilloscope::Panel::showChannelTab(void)
 {
-  IO::flags_t type;
-  switch (typesList->currentIndex()) {
-    case 0:
-      type = Workspace::INPUT;
-      break;
-    case 1:
-      type = Workspace::OUTPUT;
-      break;
-    case 2:
-      type = Workspace::PARAMETER;
-      break;
-    case 3:
-      type = Workspace::STATE;
-      break;
-    default:
-      ERROR_MSG("Oscilloscope::Panel::showChannelTab : invalid type\n");
-      typesList->setCurrentIndex(0);
-      type = Workspace::OUTPUT;
+  int type_index = this->typesList->currentIndex();
+  if (type_index < 0) {
+    ERROR_MSG("Oscilloscope::Panel::showChannelTab : invalid type\n");
+    typesList->setCurrentIndex(0);
+    type_index = 0;
   }
+  IO::flags_t type = static_cast<IO::flags_t>(type_index);  
 
-  bool found = false;
-
-  for (std::list<Scope::Channel>::iterator i = scopeWindow->getChannelsBegin(),
-                                           end = scopeWindow->getChannelsEnd();
-       i != end;
-       ++i)
-  {
-    struct channel_info* info =
-        reinterpret_cast<struct channel_info*>(i->getInfo());
-    if (!info)
-      continue;
-    if (info->block && info->block == blocks[blocksList->currentIndex()]
-        && info->type == type
-        && info->index == static_cast<size_t>(channelsList->currentIndex()))
-    {
-      found = true;
-
-      scalesList->setCurrentIndex(
-          static_cast<int>(round(4 * (log10(1 / i->getScale()) + 1))));
-
-      double offset = i->getOffset();
-      int offsetUnits = 0;
-      if (offset)
-        while (fabs(offset) < 1) {
-          offset *= 1000;
-          offsetUnits++;
-        }
-      offsetsEdit->setText(QString::number(offset));
-      offsetsList->setCurrentIndex(offsetUnits);
-
-      if (i->getPen().color() == QColor(255, 0, 16, 255))
-        colorsList->setCurrentIndex(0);
-      else if (i->getPen().color() == QColor(255, 164, 5, 255))
-        colorsList->setCurrentIndex(1);
-      else if (i->getPen().color() == QColor(43, 206, 72, 255))
-        colorsList->setCurrentIndex(2);
-      else if (i->getPen().color() == QColor(0, 117, 220, 255))
-        colorsList->setCurrentIndex(3);
-      else if (i->getPen().color() == QColor(178, 102, 255, 255))
-        colorsList->setCurrentIndex(4);
-      else if (i->getPen().color() == QColor(0, 153, 143, 255))
-        colorsList->setCurrentIndex(5);
-      else if (i->getPen().color() == QColor(83, 81, 84, 255))
-        colorsList->setCurrentIndex(6);
-      else {
-        ERROR_MSG(
-            "Oscilloscope::Panel::displayChannelTab : invalid color "
-            "selection\n");
-        colorsList->setCurrentIndex(0);
-      }
-
-      switch (i->getPen().width()) {
-        case 1:
-          widthsList->setCurrentIndex(0);
-          break;
-        case 2:
-          widthsList->setCurrentIndex(1);
-          break;
-        case 3:
-          widthsList->setCurrentIndex(2);
-          break;
-        case 4:
-          widthsList->setCurrentIndex(3);
-          break;
-        case 5:
-          widthsList->setCurrentIndex(4);
-          break;
-        default:
-          ERROR_MSG(
-              "Oscilloscope::Panel::displayChannelTab : invalid width "
-              "selection\n");
-          widthsList->setCurrentIndex(0);
-      }
-
-      switch (i->getPen().style()) {
-        case Qt::SolidLine:
-          stylesList->setCurrentIndex(0);
-          break;
-        case Qt::DashLine:
-          stylesList->setCurrentIndex(1);
-          break;
-        case Qt::DotLine:
-          stylesList->setCurrentIndex(2);
-          break;
-        case Qt::DashDotLine:
-          stylesList->setCurrentIndex(3);
-          break;
-        case Qt::DashDotDotLine:
-          stylesList->setCurrentIndex(4);
-          break;
-        default:
-          ERROR_MSG(
-              "Oscilloscope::Panel::displayChannelTab : invalid style "
-              "selection\n");
-          stylesList->setCurrentIndex(0);
-      }
-      break;
-    }
-  }
-
-  activateButton->setChecked(found);
-  scalesList->setEnabled(found);
-  offsetsEdit->setEnabled(found);
-  offsetsList->setEnabled(found);
-  colorsList->setEnabled(found);
-  widthsList->setEnabled(found);
-  stylesList->setEnabled(found);
-  if (!found) {
+  int block_index = this->blocksListDropdown->currentIndex();
+  if (block_index < 0 || block_index >= blocks.size()){
+    activateButton->setChecked(false);
+    scalesList->setEnabled(false);
+    offsetsEdit->setEnabled(false);
+    offsetsList->setEnabled(false);
+    colorsList->setEnabled(false);
+    widthsList->setEnabled(false);
+    stylesList->setEnabled(false);
     scalesList->setCurrentIndex(9);
     offsetsEdit->setText(QString::number(0));
     offsetsList->setCurrentIndex(0);
     colorsList->setCurrentIndex(0);
     widthsList->setCurrentIndex(0);
     stylesList->setCurrentIndex(0);
+    return;
+  }
+
+  auto* block = static_cast<IO::Block*>(blocks[static_cast<size_t>(block_index)]);
+  size_t port=0;
+  if(this->channelsList->count() != 0) {
+    port = static_cast<size_t>(this->channelsList->currentIndex());
+  }
+  double scale = this->scopeWindow->getChannelScale(block, port, type);
+  double offset = this->scopeWindow->getChannelOffset(block, port, type);
+  scalesList->setCurrentIndex(static_cast<int>(round(4 * (log10(1 / scale) + 1))));
+  int offsetUnits = 0;
+  if(offset*std::pow(10, -1*offsetsList->count()-3) < 1) {
+    offset = 0;
+    offsetUnits = 0;
+  } else {
+    while (fabs(offset) < 1 && offsetUnits < offsetsList->count()) {
+    offset *= 1000;
+    offsetUnits++;
+    }
+  }
+  offsetsEdit->setText(QString::number(offset));
+  offsetsList->setCurrentIndex(offsetUnits);
+
+  // set color
+  QPen* pen = this->scopeWindow->getChannelPen(block, port, type);
+  const auto* color_loc = std::find(Oscilloscope::penColors.begin(),
+                                    Oscilloscope::penColors.end(),
+                                    pen->color());
+  if (color_loc == Oscilloscope::penColors.end()){
+    ERROR_MSG(
+        "Oscilloscope::Panel::displayChannelTab : invalid color "
+        "selection\n");
+    colorsList->setCurrentIndex(0);
+  } else {
+    colorsList->setCurrentIndex(static_cast<int>(color_loc - Oscilloscope::penColors.begin()));
+  }
+
+  // set width
+  if(pen->width() < 0 || pen->width() > widthsList->count()){
+    ERROR_MSG(
+          "Oscilloscope::Panel::displayChannelTab : invalid width "
+          "selection\n");
+      widthsList->setCurrentIndex(0);
+  } else {
+    widthsList->setCurrentIndex(pen->width());
+  }
+
+  // set style
+  switch (pen->style()) {
+    case Qt::SolidLine:
+      stylesList->setCurrentIndex(0);
+      break;
+    case Qt::DashLine:
+      stylesList->setCurrentIndex(1);
+      break;
+    case Qt::DotLine:
+      stylesList->setCurrentIndex(2);
+      break;
+    case Qt::DashDotLine:
+      stylesList->setCurrentIndex(3);
+      break;
+    case Qt::DashDotDotLine:
+      stylesList->setCurrentIndex(4);
+      break;
+    default:
+      ERROR_MSG(
+          "Oscilloscope::Panel::displayChannelTab : invalid style "
+          "selection\n");
+      stylesList->setCurrentIndex(0);
   }
 }
 
@@ -816,12 +778,10 @@ void Oscilloscope::Panel::showDisplayTab(void)
   timesList->setCurrentIndex(
       static_cast<int>(round(3 * log10(1 / scopeWindow->getDivT()) + 11)));
 
-  refreshsSpin->setValue(scopeWindow->getRefresh());
+  //refreshsSpin->setValue(scopeWindow->getRefresh());
 
   // Find current trigger value and update gui
-  static_cast<QRadioButton*>(
-      trigsGroup->button(static_cast<int>(scopeWindow->getTriggerDirection())))
-      ->setChecked(true);
+  static_cast<QRadioButton*>(trigsGroup->button(static_cast<int>(this->trigger_info.direction)))->setChecked(true);
 
   trigsChanList->clear();
   for (std::list<Scope::Channel>::iterator i = scopeWindow->getChannelsBegin(),

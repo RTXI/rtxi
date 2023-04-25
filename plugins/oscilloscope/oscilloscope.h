@@ -58,9 +58,9 @@ const std::vector<Modules::Variable::Info> oscilloscope_vars
 };
 
 namespace Trigger{
-enum trig_t
+enum trig_t : int
 {
-  NONE,
+  NONE = 0,
   POS,
   NEG,
 };
@@ -147,13 +147,13 @@ private:
   QGroupBox* setBttnGroup;
 
   // Properties
-  QSpinBox* ratesSpin;
+  //QSpinBox* ratesSpin;
   QLineEdit* sizesEdit;
   QButtonGroup* trigsGroup;
   QComboBox* timesList;
   QComboBox* trigsChanList;
   QComboBox* trigsThreshList;
-  QSpinBox* refreshsSpin;
+  QComboBox* refreshDropdown;
   QLineEdit* trigsThreshEdit;
   QLineEdit* trigWindowEdit;
   QComboBox* trigWindowList;
@@ -177,7 +177,8 @@ private:
 
   std::vector<IO::Block*> blocks;
   size_t counter;
-  size_t downsample_rate;
+  Trigger::Info trigger_info;
+  //size_t downsample_rate;
 };  // Panel
 
 class Plugin : public Modules::Plugin

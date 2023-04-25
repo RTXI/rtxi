@@ -261,48 +261,78 @@ void Oscilloscope::Scope::setRefresh(size_t r)
   timer->setInterval(static_cast<int>(refresh));
 }
 
-void Oscilloscope::Scope::setChannelScale(IO::Block* block, size_t port, double scale)
+void Oscilloscope::Scope::setChannelScale(IO::Block* block, size_t port, IO::flags_t direction, double scale)
 {
   auto chan_loc = std::find_if(this->channels.begin(),
                                this->channels.end(),
                                [&](const Oscilloscope::scope_channel& chann){
-                                 return chann.block == block && 
+                                 return chann.block == block &&
+                                        chann.direction == direction &&
                                         chann.port == port;
                                });
   if(chan_loc == channels.end()) { return; }
   chan_loc->scale = scale;
 }
 
-void Oscilloscope::Scope::setChannelOffset(IO::Block* block, size_t port, double offset)
+double Oscilloscope::Scope::getChannelScale(IO::Block* block, size_t port, IO::flags_t direction)
 {
   auto chan_loc = std::find_if(this->channels.begin(),
                                this->channels.end(),
                                [&](const Oscilloscope::scope_channel& chann){
                                  return chann.block == block && 
+                                        chann.direction == direction &&
+                                        chann.port == port;
+                               });
+  if(chan_loc == channels.end()) { return 0.0; }
+  return chan_loc->scale;
+}
+
+void Oscilloscope::Scope::setChannelOffset(IO::Block* block, size_t port, IO::flags_t direction, double offset)
+{
+  auto chan_loc = std::find_if(this->channels.begin(),
+                               this->channels.end(),
+                               [&](const Oscilloscope::scope_channel& chann){
+                                 return chann.block == block &&
+                                        chann.direction == direction &&
                                         chann.port == port;
                                });
   if(chan_loc == channels.end()) { return; }
   chan_loc->offset = offset;
 }
 
-void Oscilloscope::Scope::setChannelPen(IO::Block* block, size_t port, const QPen& pen)
+double Oscilloscope::Scope::getChannelOffset(IO::Block* block, size_t port, IO::flags_t direction)
 {
   auto chan_loc = std::find_if(this->channels.begin(),
                                this->channels.end(),
                                [&](const Oscilloscope::scope_channel& chann){
                                  return chann.block == block && 
+                                        chann.direction == direction &&
+                                        chann.port == port;
+                               });
+  if(chan_loc == channels.end()) { return 0.0; }
+  return chan_loc->offset;
+}
+
+void Oscilloscope::Scope::setChannelPen(IO::Block* block, size_t port, IO::flags_t direction, const QPen& pen)
+{
+  auto chan_loc = std::find_if(this->channels.begin(),
+                               this->channels.end(),
+                               [&](const Oscilloscope::scope_channel& chann){
+                                 return chann.block == block && 
+                                        chann.direction == direction &&
                                         chann.port == port;
                                });
   if(chan_loc == channels.end()) { return; }
   chan_loc->curve->setPen(pen);
 }
 
-void Oscilloscope::Scope::setChannelLabel(IO::Block* block, size_t port, const QString& label)
+void Oscilloscope::Scope::setChannelLabel(IO::Block* block, size_t port, IO::flags_t direction, const QString& label)
 {
   auto chan_loc = std::find_if(this->channels.begin(),
                                this->channels.end(),
                                [&](const Oscilloscope::scope_channel& chann){
                                  return chann.block == block && 
+                                        chann.direction == direction &&
                                         chann.port == port;
                                });
   if(chan_loc == channels.end()) { return; }
