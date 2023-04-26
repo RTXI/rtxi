@@ -80,6 +80,12 @@ typedef struct scope_channel
   IO::channel_t info {};
 }scope_channel;
 
+typedef struct probe {
+  IO::Block* block=nullptr;
+  size_t port=0;
+  IO::flags_t direction=IO::UNKNOWN;
+}probe;
+
 constexpr std::array<QColor, 7> penColors = 
   {
     QColor(255, 0, 16, 255),
@@ -162,15 +168,15 @@ public:
   void setRefresh(size_t);
 
 
-  void setChannelScale(IO::Block* block, size_t port, IO::flags_t direction, double scale);
-  double getChannelScale(IO::Block* block, size_t port, IO::flags_t direction);
-  void setChannelOffset(IO::Block* block, size_t port, IO::flags_t direction, double offset);
-  double getChannelOffset(IO::Block* block, size_t port, IO::flags_t direction);
-  void setChannelPen(IO::Block* block, size_t port, IO::flags_t direction, const QPen& pen);
-  QPen* getChannelPen(IO::Block* block, size_t port, IO::flags_t direction);
-  void setChannelLabel(IO::Block* block, size_t port, IO::flags_t direction, const QString& label);
+  void setChannelScale(probe channel, double scale);
+  double getChannelScale(probe channel);
+  void setChannelOffset(probe channel, double offset);
+  double getChannelOffset(probe channel);
+  void setChannelPen(probe channel, const QPen& pen);
+  QPen* getChannelPen(probe channel);
+  void setChannelLabel(probe channel, const QString& label);
   //Trigger::Info capture_trigger;
-
+  
   int64_t getWindowTimewidth();
 protected:
   void resizeEvent(QResizeEvent* event);

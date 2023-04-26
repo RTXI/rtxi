@@ -708,11 +708,12 @@ void Oscilloscope::Panel::showChannelTab(void)
   if(this->channelsList->count() != 0) {
     port = static_cast<size_t>(this->channelsList->currentIndex());
   }
-  double scale = this->scopeWindow->getChannelScale(block, port, type);
-  double offset = this->scopeWindow->getChannelOffset(block, port, type);
+  Oscilloscope::probe chan {block, port, type};
+  double scale = this->scopeWindow->getChannelScale(chan);
+  double offset = this->scopeWindow->getChannelOffset(chan);
   scalesList->setCurrentIndex(static_cast<int>(round(4 * (log10(1 / scale) + 1))));
   int offsetUnits = 0;
-  if(offset*std::pow(10, -1*offsetsList->count()-3) < 1) {
+  if(offset*std::pow(10, -3*offsetsList->count()-3) < 1) {
     offset = 0;
     offsetUnits = 0;
   } else {
@@ -725,7 +726,7 @@ void Oscilloscope::Panel::showChannelTab(void)
   offsetsList->setCurrentIndex(offsetUnits);
 
   // set color
-  QPen* pen = this->scopeWindow->getChannelPen(block, port, type);
+  QPen* pen = this->scopeWindow->getChannelPen(chan);
   const auto* color_loc = std::find(Oscilloscope::penColors.begin(),
                                     Oscilloscope::penColors.end(),
                                     pen->color());
@@ -781,29 +782,42 @@ void Oscilloscope::Panel::showDisplayTab(void)
   //refreshsSpin->setValue(scopeWindow->getRefresh());
 
   // Find current trigger value and update gui
-  static_cast<QRadioButton*>(trigsGroup->button(static_cast<int>(this->trigger_info.direction)))->setChecked(true);
+  auto* oscilloscope_plugin = dynamic_cast<Oscilloscope::Plugin*>(this->getHostPlugin());
+  Oscilloscope::Trigger::Info trigInfo = oscilloscope_plugin->getTriggerInfo();
+  static_cast<QRadioButton*>(trigsGroup->button(static_cast<int>(trigInfo.trigger_direction)))->setChecked(true);
 
   trigsChanList->clear();
-  for (std::list<Scope::Channel>::iterator i = scopeWindow->getChannelsBegin(),
-                                           end = scopeWindow->getChannelsEnd();
-       i != end;
-       ++i)
-  {
-    trigsChanList->addItem(i->getLabel());
-    if (i == scopeWindow->getTriggerChannel())
-      trigsChanList->setCurrentIndex(trigsChanList->count() - 1);
+  std::vector<Oscilloscope::channel_info> channelList = oscilloscope_plugin->getChannelsList();
+  std::string direction_str = "";
+  for (auto chanInfo : channelList){
+    direction_str = chanInfo.probe.direction == IO::INPUT ? "INPUT" : "OUTPUT";
+    trigsChanList->addItem(chanInfo.name + 
+                           " " + QString::fromStdString(direction_str) +
+                           " " + QString::number(chanInfo.probe.port));
   }
   trigsChanList->addItem("<None>");
-  if (scopeWindow->getTriggerChannel() == scopeWindow->getChannelsEnd())
-    trigsChanList->setCurrentIndex(trigsChanList->count() - 1);
+  auto trig_list_iter = std::find_if(channelList.begin(),
+                                     channelList.end(),
+                                     [&](const Oscilloscope::channel_info& chan_info){
+                                       return chan_info.probe.block == trigInfo.block &&
+                                              chan_info.probe.port == trigInfo.port &&
+                                              chan_info.probe.direction == trigInfo.io_direction;
+                                     });
+  if(trig_list_iter != channelList.end()){
+    trigsChanList->setCurrentIndex(static_cast<int>(trig_list_iter - channelList.begin() + 1));
+  }
 
   int trigThreshUnits = 0;
-  double trigThresh = scopeWindow->getTriggerThreshold();
-  if (trigThresh != 0.0)
-    while (fabs(trigThresh) < 1) {
+  double trigThresh = trigInfo.threshold;
+  if (trigThresh*std::pow(10, -3*this->trigsThreshList->count()-1) < 1){
+    trigThreshUnits = 0;
+    trigThresh = 0;
+  } else {
+    while (fabs(trigThresh) < 1 && trigThreshUnits < this->trigsThreshList->count()) {
       trigThresh *= 1000;
       ++trigThreshUnits;
     }
+  }
   trigsThreshList->setCurrentIndex(trigThreshUnits);
   trigsThreshEdit->setText(QString::number(trigThresh));
 

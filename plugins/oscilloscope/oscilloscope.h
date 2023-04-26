@@ -68,18 +68,19 @@ enum trig_t : int
 typedef struct Info {
   IO::Block* block;
   size_t port;
-  Trigger::trig_t direction;
+  IO::flags_t io_direction;
+  Trigger::trig_t trigger_direction;
   double threshold;
 }Info;
 }; // namespace Trigger
 
+class Component;
 
 typedef struct channel_info
 {
   QString name;
-  IO::Block* block;
-  IO::flags_t type;
-  size_t port;
+  Oscilloscope::probe probe;
+  Oscilloscope::Component* measuring_component;
 } channel_info;  // channel_info
 
 class Component : public Modules::Component
@@ -177,7 +178,6 @@ private:
 
   std::vector<IO::Block*> blocks;
   size_t counter;
-  Trigger::Info trigger_info;
   //size_t downsample_rate;
 };  // Panel
 
@@ -188,10 +188,14 @@ public:
   Oscilloscope::Component* getProbe(IO::Block* source, size_t port, IO::flags_t type);
   void addProbe(IO::Block* source, size_t port, IO::flags_t direction);
   void removeProbe(IO::Block* source, size_t port, IO::flags_t direction);
+  std::vector<Oscilloscope::channel_info> getChannelsList(){ return this->chanInfoList; }
+  Oscilloscope::Trigger::Info getTriggerInfo(){ return this->trigger_info; }
 
 private:
   // List to maintain multiple scopes
   std::list<Oscilloscope::Component> componentList;
+  std::vector<channel_info> chanInfoList;
+  Trigger::Info trigger_info;
 };  // Plugin
 
 
