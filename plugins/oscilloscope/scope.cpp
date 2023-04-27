@@ -88,10 +88,10 @@ Oscilloscope::Scope::Scope(QWidget* parent): QwtPlot(parent),
   replot();
 
   // Timer controls refresh rate of scope
-  this->timer->setTimerType(Qt::PreciseTimer);
-  QObject::connect(
-      timer, SIGNAL(timeout()), this, SLOT(timeoutEvent()));
-  this->timer->start(this->refresh);
+  //this->timer->setTimerType(Qt::PreciseTimer);
+  //QObject::connect(
+  //    timer, SIGNAL(timeout()), this, SLOT(timeoutEvent()));
+  //this->timer->start(this->refresh);
   resize(sizeHint());
 }
 
@@ -105,14 +105,6 @@ Oscilloscope::Scope::~Scope()
 bool Oscilloscope::Scope::paused() const
 {
   return isPaused;
-}
-
-// Timeout event slot
-void Oscilloscope::Scope::timeoutEvent()
-{
-  if (!triggering){
-    drawCurves();
-  }
 }
 
 void Oscilloscope::Scope::insertChannel(const Oscilloscope::scope_channel& channel)
@@ -174,7 +166,7 @@ void Oscilloscope::Scope::clearData()
   }
 }
 
-void Oscilloscope::Scope::setData(IO::Block* block, size_t port, std::vector<sample> data)
+void Oscilloscope::Scope::setData(Oscilloscope::probe channel, std::vector<sample> data)
 {
   if (isPaused){
     return;
@@ -183,7 +175,9 @@ void Oscilloscope::Scope::setData(IO::Block* block, size_t port, std::vector<sam
   auto iter = std::find_if(this->channels.begin(),
                            this->channels.end(),
                            [&](const Oscilloscope::scope_channel& chan){
-                             return chan.block == block && chan.port == port;
+                             return chan.block == channel.block && 
+                                    chan.direction == channel.direction &&
+                                    chan.port == channel.port;
                            });
   if(iter == this->channels.end()) { return; }
 

@@ -240,9 +240,9 @@ public:
    * from a single action(loading multiple plugins, loading settings
    * file that changes many parameters, unregister module, etc.)
    *
-   * \param events A vector of event pointers that will be published
+   * \param events A vector of events that will be published
    */
-  void postEvent(const std::vector<Object*>& events);
+  void postEvent(const std::vector<Object>& events);
 
   /*!
    * The main processing thread driver. It starts the event processing

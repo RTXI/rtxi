@@ -43,11 +43,19 @@ namespace Oscilloscope
 constexpr std::string_view MODULE_NAME = "Oscilloscope";
 
 enum PARAMETER : size_t {
-  TRIGGERING = 0
+  STATE = 0,
+  TRIGGERING,
 };
 
 const std::vector<Modules::Variable::Info> oscilloscope_vars
 {
+  {
+    PARAMETER::STATE,
+    "Oscilloscope Probe State",
+    "State of the probing component within the oscilloscope",
+    Modules::Variable::STATE,
+    Modules::Variable::INIT
+  },
   {
     PARAMETER::TRIGGERING,
     "Trigger State",
@@ -81,15 +89,17 @@ typedef struct channel_info
   QString name;
   Oscilloscope::probe probe;
   Oscilloscope::Component* measuring_component;
+  RT::OS::Fifo* fifo;
 } channel_info;  // channel_info
 
 class Component : public Modules::Component
 {
 public:
   Component();
-  void execute();
+  void flushFifo();
 
 private:
+  void callback();
   std::unique_ptr<RT::OS::Fifo> fifo;
 };
 

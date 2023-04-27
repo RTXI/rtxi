@@ -150,7 +150,7 @@ public:
   //scope_channel getChannel(IO::Block* block, size_t port);
 
   void clearData();
-  void setData(IO::Block* block, size_t port, std::vector<sample> data);
+  void setData(probe channel, std::vector<sample> data);
   size_t getDataSize() const;
   void setDataSize(size_t);
 
@@ -178,14 +178,11 @@ public:
   //Trigger::Info capture_trigger;
   
   int64_t getWindowTimewidth();
+  void drawCurves();
 protected:
   void resizeEvent(QResizeEvent* event);
 
-private slots:
-  void timeoutEvent();
-
 private:
-  void drawCurves();
   double window_timewidth;
 
   bool isPaused = false;

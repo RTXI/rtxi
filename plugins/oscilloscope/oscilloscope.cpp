@@ -55,7 +55,7 @@ void Oscilloscope::Panel::activateChannel(bool active)
   stylesList->setEnabled(enable);
 }
 
-void Oscilloscope::Panel::apply(void)
+void Oscilloscope::Panel::apply()
 {
   switch (tabWidget->currentIndex()) {
     case 0:
@@ -69,7 +69,7 @@ void Oscilloscope::Panel::apply(void)
   }
 }
 
-void Oscilloscope::Panel::buildChannelList(void)
+void Oscilloscope::Panel::buildChannelList()
 {
   channelsList->clear();
   if (blocksListDropdown->count() <= 0) {
@@ -130,7 +130,7 @@ void Oscilloscope::Panel::setActivity(Oscilloscope::Component* comp, bool activi
   this->getRTXIEventManager()->postEvent(&event);
 }
 
-void Oscilloscope::Panel::applyChannelTab(void)
+void Oscilloscope::Panel::applyChannelTab()
 {
   if (this->blocksListDropdown->count() <= 0 || this->channelsList->count() <= 0)
     return;
@@ -257,7 +257,7 @@ void Oscilloscope::Panel::applyChannelTab(void)
   showChannelTab();
 }
 
-void Oscilloscope::Panel::applyDisplayTab(void)
+void Oscilloscope::Panel::applyDisplayTab()
 {
   // Update X divisions
   double divT;
@@ -339,7 +339,7 @@ QWidget* Oscilloscope::Panel::createChannelTab(QWidget* parent)
   blocksListDropdown->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
   blocksListDropdown->setSizeAdjustPolicy(QComboBox::AdjustToContents);
   QObject::connect(
-      blocksListDropdown, SIGNAL(activated(int)), this, SLOT(buildChannelList(void)));
+      blocksListDropdown, SIGNAL(activated(int)), this, SLOT(buildChannelList()));
   row1Layout->addWidget(blocksListDropdown);
 
   // Create Type box
@@ -351,7 +351,7 @@ QWidget* Oscilloscope::Panel::createChannelTab(QWidget* parent)
   //typesList->addItem("Parameter");
   //typesList->addItem("State");
   QObject::connect(
-      typesList, SIGNAL(activated(int)), this, SLOT(buildChannelList(void)));
+      typesList, SIGNAL(activated(int)), this, SLOT(buildChannelList()));
   row1Layout->addWidget(typesList);
 
   // Create Channels box
@@ -359,7 +359,7 @@ QWidget* Oscilloscope::Panel::createChannelTab(QWidget* parent)
   channelsList->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
   channelsList->setSizeAdjustPolicy(QComboBox::AdjustToContents);
   QObject::connect(
-      channelsList, SIGNAL(activated(int)), this, SLOT(showChannelTab(void)));
+      channelsList, SIGNAL(activated(int)), this, SLOT(showChannelTab()));
   row1Layout->addWidget(channelsList);
 
   // Create elements for display box
@@ -675,7 +675,7 @@ QWidget* Oscilloscope::Panel::createDisplayTab(QWidget* parent)
 
 // Aggregates all channel information to show for configuration
 // in the display tab
-void Oscilloscope::Panel::showChannelTab(void)
+void Oscilloscope::Panel::showChannelTab()
 {
   int type_index = this->typesList->currentIndex();
   if (type_index < 0) {
@@ -774,7 +774,7 @@ void Oscilloscope::Panel::showChannelTab(void)
   }
 }
 
-void Oscilloscope::Panel::showDisplayTab(void)
+void Oscilloscope::Panel::showDisplayTab()
 {
   timesList->setCurrentIndex(
       static_cast<int>(round(3 * log10(1 / scopeWindow->getDivT()) + 11)));
@@ -890,15 +890,15 @@ Oscilloscope::Panel::Panel(QWidget* parent)
   pauseButton = new QPushButton("Pause");
   pauseButton->setCheckable(true);
   QObject::connect(
-      pauseButton, SIGNAL(released(void)), this, SLOT(togglePause(void)));
+      pauseButton, SIGNAL(released()), this, SLOT(togglePause()));
   setBttnLayout->addWidget(pauseButton);
   applyButton = new QPushButton("Apply");
   QObject::connect(
-      applyButton, SIGNAL(released(void)), this, SLOT(apply(void)));
+      applyButton, SIGNAL(released()), this, SLOT(apply()));
   setBttnLayout->addWidget(applyButton);
   settingsButton = new QPushButton("Screenshot");
   QObject::connect(
-      settingsButton, SIGNAL(released(void)), this, SLOT(screenshot(void)));
+      settingsButton, SIGNAL(released()), this, SLOT(screenshot()));
   setBttnLayout->addWidget(settingsButton);
 
   // Attach layout
@@ -926,91 +926,47 @@ Oscilloscope::Panel::Panel(QWidget* parent)
   subWindow->resize(subWindow->minimumSizeHint().width() + 50, 600);
 
   // Initialize vars
-  counter = 0;
-  downsample_rate = 1;
-  setActive(true);
-  setWindowTitle(QString::number(getID()) + " Oscilloscope");
+  setWindowTitle("Oscilloscope");
 
   QTimer* otimer = new QTimer;
   otimer->setTimerType(Qt::PreciseTimer);
   QObject::connect(
-      otimer, SIGNAL(timeout(void)), this, SLOT(timeoutEvent(void)));
+      otimer, SIGNAL(timeout()), this, SLOT(timeoutEvent()));
   otimer->start(25);
 
   scopeWindow->replot();
   show();
 }
 
-Oscilloscope::Panel::~Panel(void)
+// TODO: Handle trigger synchronization bettween oscilloscope components 
+void Oscilloscope::Component::callback()
 {
-  while (scopeWindow->getChannelsBegin() != scopeWindow->getChannelsEnd())
-    delete reinterpret_cast<struct channel_info*>(
-        scopeWindow->removeChannel(scopeWindow->getChannelsBegin()));
-
-  Oscilloscope::Plugin::getInstance()->removeOscilloscopePanel(this);
-}
-
-void Oscilloscope::Panel::execute(void)
-{
-  size_t nchans = scopeWindow->getChannelCount();
-
-  if (nchans) {
-    size_t idx = 0;
-    size_t token = nchans;
-    double data[nchans];
-
-    if (!counter++) {
-      for (std::list<Scope::Channel>::iterator
-               i = scopeWindow->getChannelsBegin(),
-               end = scopeWindow->getChannelsEnd();
-           i != end;
-           ++i)
-      {
-        struct channel_info* info =
-            reinterpret_cast<struct channel_info*>(i->getInfo());
-
-        double value = info->block->getValue(info->type, info->index);
-
-        if (i == scopeWindow->getTriggerChannel()) {
-          double thresholdValue = scopeWindow->getTriggerThreshold();
-
-          if ((thresholdValue > value && thresholdValue < info->previous)
-              || (thresholdValue < value && thresholdValue > info->previous))
-          {
-            Event::Object event(Event::THRESHOLD_CROSSING_EVENT);
-            int direction = (thresholdValue > value) ? 1 : -1;
-
-            event.setParam("block", info->block);
-            event.setParam("type", &info->type);
-            event.setParam("index", &info->index);
-            event.setParam("direction", &direction);
-            event.setParam("threshold", &thresholdValue);
-
-            Event::Manager::getInstance()->postEventRT(&event);
-          }
-        }
-        info->previous = value;  // automatically buffers a single value
-        data[idx++] = value;  // sample from DAQ
-      }
-      fifo.write(&token, sizeof(token));
-      fifo.write(data, sizeof(data));
-    } else {
-      double prevdata[nchans];
-      for (std::list<Scope::Channel>::iterator
-               i = scopeWindow->getChannelsBegin(),
-               end = scopeWindow->getChannelsEnd();
-           i != end;
-           ++i)
-      {
-        struct channel_info* info =
-            reinterpret_cast<struct channel_info*>(i->getInfo());
-        prevdata[idx++] = info->previous;
-      }
-      fifo.write(&token, sizeof(token));
-      fifo.write(prevdata, sizeof(prevdata));
+  Oscilloscope::sample sample {};
+  auto state = getValue<Modules::Variable::state_t>(Oscilloscope::PARAMETER::STATE);
+  switch(state)
+  {
+    case Modules::Variable::INIT:{
+      this->setValue(Oscilloscope::PARAMETER::STATE, Modules::Variable::EXEC);
+      break;
     }
+    case Modules::Variable::EXEC:{
+      auto triggering = getValue<Modules::Variable::state_t>(Oscilloscope::PARAMETER::TRIGGERING);
+      sample.time = RT::OS::getTime();
+      std::vector<double> value = this->readinput(0);
+      sample.value = value[0];
+      this->fifo->writeRT(&sample, sizeof(Oscilloscope::sample));
+      break;
+    }
+    case Modules::Variable::UNPAUSE:{
+      this->setValue(Oscilloscope::PARAMETER::STATE, Modules::Variable::EXEC);
+      break;
+    }
+    case Modules::Variable::PAUSE :
+    case Modules::Variable::MODIFY :
+    case Modules::Variable::EXIT :
+    case Modules::Variable::PERIOD :
+      break;
   }
-  counter %= downsample_rate;
 }
 
 void Oscilloscope::Panel::screenshot()
@@ -1019,44 +975,61 @@ void Oscilloscope::Panel::screenshot()
   renderer.exportTo(scopeWindow, "screenshot.pdf");
 }
 
-void Oscilloscope::Panel::togglePause(void)
+void Oscilloscope::Panel::togglePause()
 {
-  scopeWindow->isPaused = !(scopeWindow->isPaused);
+  Event::Type event_type = Event::Type::NOOP;
+  if(this->pauseButton->isChecked()) {
+    event_type = Event::Type::RT_THREAD_PAUSE_EVENT;
+  } else {
+    event_type = Event::Type::RT_THREAD_UNPAUSE_EVENT;
+  }
+  auto* oscilloscope_plugin = dynamic_cast<Oscilloscope::Plugin*>(this->getHostPlugin());
+  std::vector<Oscilloscope::channel_info> channelList = oscilloscope_plugin->getChannelsList();
+  std::vector<Event::Object> events;
+  for(auto channel : channelList){
+    events.push_back(Event::Object(event_type));
+    events.back().setParam("thread", static_cast<RT::Thread*>(channel.measuring_component));
+  }
+  this->getRTXIEventManager()->postEvent(events);
 }
 
-//bool Oscilloscope::Panel::setInactiveSync(void)
-//{
-//  bool active = getActive();
-//  setActive(false);
-//  SyncEvent event;
-//  RT::System::getInstance()->postEvent(&event);
-//  return active;
-//}
-
-void Oscilloscope::Component::flushFifo(void)
+void Oscilloscope::Component::flushFifo()
 {
-  char yogi;
-  while (fifo.read(&yogi, sizeof(yogi), false))
-    ;
+  Oscilloscope::sample sample;
+  while(this->fifo->read(&sample, sizeof(Oscilloscope::sample)) > 0) {}
 }
 
-void Oscilloscope::Panel::adjustDataSize(void)
+void Oscilloscope::Panel::adjustDataSize()
 {
-  double period = RT::System::getInstance()->getPeriod() * 1e-6;  // ms
+  Event::Object event(Event::Type::RT_GET_PERIOD_EVENT);
+  this->getRTXIEventManager()->postEvent(&event);
+  auto period = std::any_cast<int64_t>(event.getParam("period"));
   size_t size =
       ceil(scopeWindow->getDivT() * scopeWindow->getDivX() / period) + 1;
   scopeWindow->setDataSize(size);
   sizesEdit->setText(QString::number(scopeWindow->getDataSize()));
 }
 
-void Oscilloscope::Panel::timeoutEvent(void)
+void Oscilloscope::Panel::timeoutEvent()
 {
-  size_t size;
-  while (fifo.read(&size, sizeof(size), false)) {
-    double data[size];
-    if (fifo.read(data, sizeof(data)))
-      scopeWindow->setData(data, size);
+  Oscilloscope::sample sample;
+  std::vector<Oscilloscope::sample> sample_vector;
+  size_t sample_count = this->scopeWindow->getDataSize();
+  auto* oscilloscope_plugin = dynamic_cast<Oscilloscope::Plugin*>(this->getHostPlugin());
+  for(auto channel : oscilloscope_plugin->getChannelsList()){
+    while(channel.fifo->read(&sample, sizeof(Oscilloscope::sample)) > 0){
+      sample_vector.push_back(sample);
+    }
+    this->scopeWindow->setData(channel.probe, sample_vector);
+    sample_vector.assign(sample_count, {0.0, 0}); 
   }
+  this->scopeWindow->drawCurves();
+  //size_t size;
+  //while (fifo.read(&size, sizeof(size), false)) {
+  //  double data[size];
+  //  if (fifo.read(data, sizeof(data)))
+  //    scopeWindow->setData(data, size);
+  //}
 }
 
 // void Oscilloscope::Panel::doDeferred(const Settings::Object::State& s)
