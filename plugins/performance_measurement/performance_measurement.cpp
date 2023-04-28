@@ -224,18 +224,16 @@ PerformanceMeasurement::Plugin::Plugin(Event::Manager* ev_manager,
   auto plugin_component =
       std::make_unique<PerformanceMeasurement::Component>(this);
   this->attachComponent(std::move(plugin_component));
-  std::vector<Event::Object*> events;
-  Event::Object preperiod_event(Event::Type::RT_PREPERIOD_EVENT);
-  Event::Object postperiod_event(Event::Type::RT_POSTPERIOD_EVENT);
-  events.push_back(&preperiod_event);
-  events.push_back(&postperiod_event);
+  std::vector<Event::Object> events;
+  events.emplace_back(Event::Type::RT_PREPERIOD_EVENT);
+  events.emplace_back(Event::Type::RT_POSTPERIOD_EVENT);
   this->event_manager->postEvent(events);
   auto* performance_measurement_component =
       dynamic_cast<PerformanceMeasurement::Component*>(
           this->plugin_component.get());
   performance_measurement_component->setTickPointers(
-      std::any_cast<int64_t*>(preperiod_event.getParam("pre-period")),
-      std::any_cast<int64_t*>(postperiod_event.getParam("post-period")));
+      std::any_cast<int64_t*>(events[0].getParam("pre-period")),
+      std::any_cast<int64_t*>(events[1].getParam("post-period")));
 
   Event::Object activation_event(Event::Type::RT_THREAD_UNPAUSE_EVENT);
   activation_event.setParam(
