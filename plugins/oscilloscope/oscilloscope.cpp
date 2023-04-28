@@ -34,13 +34,17 @@
 #include "rt.hpp"
 #include "oscilloscope.h"
 
-// TODO: complete handling of events by oscilloscope plugin
 void Oscilloscope::Plugin::receiveEvent(Event::Object* event)
 {
   switch (event->getType()){
     case Event::Type::RT_THREAD_INSERT_EVENT :
     case Event::Type::RT_DEVICE_INSERT_EVENT :
-      Event::Object update_blocklist_event(Event::Type::IO_BLOCK_QUERY_EVENT);
+    case Event::Type::RT_THREAD_REMOVE_EVENT :
+    case Event::Type::RT_DEVICE_REMOVE_EVENT :
+      dynamic_cast<Oscilloscope::Panel*>(this->widget_panel)->updateBlockInfo();
+      break;
+    default :
+      break;
   }
 }
 
@@ -308,7 +312,8 @@ void Oscilloscope::Panel::buildBlockList()
   Event::Object event(Event::Type::IO_BLOCK_QUERY_EVENT);
   this->getRTXIEventManager()->postEvent(&event);
   auto blocklist = std::any_cast<std::vector<IO::Block*>>(event.getParam("blockList"));
-  for(auto block : blocklist) {
+  blocksListDropdown->clear();
+  for(auto* block : blocklist) {
     this->blocksListDropdown->addItem(QString::fromStdString(block->getName()) + " " + 
                                       QString::number(block->getID()));
   }
@@ -326,14 +331,14 @@ QWidget* Oscilloscope::Panel::createChannelTab(QWidget* parent)
       "the signal, apply a DC offset, and change the color and style of the "
       "line.</p>");
 
-  QWidget* page = new QWidget(parent);
+  auto* page = new QWidget(parent);
 
   // Create group and layout for buttons at bottom of scope
-  QGridLayout* bttnLayout = new QGridLayout(page);
+  auto* bttnLayout = new QGridLayout(page);
 
   // Create Channel box
-  QHBoxLayout* row1Layout = new QHBoxLayout;
-  QLabel* channelLabel = new QLabel(tr("Channel:"), page);
+  auto* row1Layout = new QHBoxLayout;
+  auto* channelLabel = new QLabel(tr("Channel:"), page);
   row1Layout->addWidget(channelLabel);
   blocksListDropdown = new QComboBox(page);
   blocksListDropdown->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
@@ -365,7 +370,7 @@ QWidget* Oscilloscope::Panel::createChannelTab(QWidget* parent)
   // Create elements for display box
   row1Layout->addSpacerItem(
       new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
-  QLabel* scaleLabel = new QLabel(tr("Scale:"), page);
+  auto* scaleLabel = new QLabel(tr("Scale:"), page);
   row1Layout->addWidget(scaleLabel);
   scalesList = new QComboBox(page);
   row1Layout->addWidget(scalesList);
@@ -438,7 +443,7 @@ QWidget* Oscilloscope::Panel::createChannelTab(QWidget* parent)
   scalesList->addItem("1 fV/div");
 
   // Offset items
-  QLabel* offsetLabel = new QLabel(tr("Offset:"), page);
+  auto* offsetLabel = new QLabel(tr("Offset:"), page);
   row1Layout->addWidget(offsetLabel);
   offsetsEdit = new QLineEdit(page);
   offsetsEdit->setMaximumWidth(offsetsEdit->minimumSizeHint().width() * 2);
@@ -453,9 +458,9 @@ QWidget* Oscilloscope::Panel::createChannelTab(QWidget* parent)
   offsetsList->addItem("pV");
 
   // Create elements for graphic
-  QHBoxLayout* row2Layout = new QHBoxLayout;  //(page);
+  auto* row2Layout = new QHBoxLayout;  //(page);
   row2Layout->setAlignment(Qt::AlignLeft);
-  QLabel* colorLabel = new QLabel(tr("Color:"), page);
+  auto* colorLabel = new QLabel(tr("Color:"), page);
   row2Layout->addWidget(colorLabel);
   colorsList = new QComboBox(page);
   colorsList->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
@@ -477,7 +482,7 @@ QWidget* Oscilloscope::Panel::createChannelTab(QWidget* parent)
   tmp.fill(QColor(83, 81, 84, 255));
   colorsList->addItem(tmp, " Black");
 
-  QLabel* widthLabel = new QLabel(tr("Width:"), page);
+  auto* widthLabel = new QLabel(tr("Width:"), page);
   row2Layout->addWidget(widthLabel);
   widthsList = new QComboBox(page);
   widthsList->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
@@ -673,6 +678,11 @@ QWidget* Oscilloscope::Panel::createDisplayTab(QWidget* parent)
   return page;
 }
 
+void Oscilloscope::Panel::syncBlockInfo()
+{
+  this->buildBlockList();
+}
+
 // Aggregates all channel information to show for configuration
 // in the display tab
 void Oscilloscope::Panel::showChannelTab()
@@ -824,20 +834,22 @@ void Oscilloscope::Panel::showDisplayTab()
   sizesEdit->setText(QString::number(scopeWindow->getDataSize()));
 }
 
-////////// #Panel
-Oscilloscope::Panel::Panel(QWidget* parent)
-    : QWidget(parent)
-    , RT::Thread(0)
-    , fifo(25 * 1048576)
+Oscilloscope::Panel::Panel(MainWindow* mw, Event::Manager* event_manager) 
+  : Modules::Panel(std::string(Oscilloscope::MODULE_NAME), mw, event_manager),
+    subWindow(new QMdiSubWindow),
+    tabWidget(new QTabWidget),
+    scopeWindow(new Scope(this)),
+    layout(new QVBoxLayout),
+    scopeGroup(new QWidget(this)),
+    setBttnGroup(new QGroupBox(this))
 {
   // Make Mdi
-  subWindow = new QMdiSubWindow;
   subWindow->setWindowIcon(QIcon("/usr/local/share/rtxi/RTXI-widget-icon.png"));
   subWindow->setAttribute(Qt::WA_DeleteOnClose);
   subWindow->setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint
                             | Qt::WindowMinimizeButtonHint
                             | Qt::WindowMaximizeButtonHint);
-  MainWindow::getInstance()->createMdi(subWindow);
+  mw->createMdi(subWindow);
 
   setWhatsThis(
       "<p><b>Oscilloscope:</b><br>The Oscilloscope allows you to plot any "
@@ -861,30 +873,14 @@ Oscilloscope::Panel::Panel(QWidget* parent)
       "allows you to start and stop real-time plotting.</p>");
 
   // Create tab widget
-  tabWidget = new QTabWidget;
   tabWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
   QObject::connect(
       tabWidget, SIGNAL(currentChanged(int)), this, SLOT(showTab(int)));
 
-  // Create main layout
-  layout = new QVBoxLayout;
-
-  // Create scope group
-  scopeGroup = new QWidget(this);
-  QHBoxLayout* scopeLayout = new QHBoxLayout(this);
-
-  // Create scope
-  scopeWindow = new Scope(this);
-
-  // Attach scope to layout
+  auto* scopeLayout = new QHBoxLayout(this);
   scopeLayout->addWidget(scopeWindow);
-
-  // Attach to layout
   scopeGroup->setLayout(scopeLayout);
-
-  // Create group
-  setBttnGroup = new QGroupBox(this);
-  QHBoxLayout* setBttnLayout = new QHBoxLayout(this);
+  auto* setBttnLayout = new QHBoxLayout(this);
 
   // Creat buttons
   pauseButton = new QPushButton("Pause");
@@ -926,14 +922,15 @@ Oscilloscope::Panel::Panel(QWidget* parent)
   subWindow->resize(subWindow->minimumSizeHint().width() + 50, 600);
 
   // Initialize vars
-  setWindowTitle("Oscilloscope");
+  setWindowTitle(QString::fromStdString(this->getName()));
 
-  QTimer* otimer = new QTimer;
+  auto* otimer = new QTimer;
   otimer->setTimerType(Qt::PreciseTimer);
   QObject::connect(
       otimer, SIGNAL(timeout()), this, SLOT(timeoutEvent()));
-  otimer->start(25);
+  otimer->start(Oscilloscope::FrameRates::HZ60);
 
+  QObject::connect(this, SIGNAL(updateBlockInfo()), this, SLOT(syncBlockInfo()));
   scopeWindow->replot();
   show();
 }
@@ -987,7 +984,7 @@ void Oscilloscope::Panel::togglePause()
   std::vector<Oscilloscope::channel_info> channelList = oscilloscope_plugin->getChannelsList();
   std::vector<Event::Object> events;
   for(auto channel : channelList){
-    events.push_back(Event::Object(event_type));
+    events.emplace_back(event_type);
     events.back().setParam("thread", static_cast<RT::Thread*>(channel.measuring_component));
   }
   this->getRTXIEventManager()->postEvent(events);

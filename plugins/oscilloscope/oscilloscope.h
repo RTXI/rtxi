@@ -108,23 +108,26 @@ class Panel : public Modules::Panel
   Q_OBJECT
 
 public:
-  Panel(QWidget* = NULL);
+  Panel(MainWindow* mw, Event::Manager* event_manager);
   virtual ~Panel();
   //bool setInactiveSync();
   void flushFifo();
   void setActivity(Oscilloscope::Component* comp, bool activity);
   void adjustDataSize();
   void updateTrigger();
-  void buildBlockList();
   //void doDeferred(const Settings::Object::State&);
   //void doLoad(const Settings::Object::State&);
   //void doSave(Settings::Object::State&) const;
+
+signals:
+  void updateBlockInfo();
 
 public slots:
   void timeoutEvent();
   void togglePause();
 
 private slots:
+  void syncBlockInfo();
   void showChannelTab();
   void showDisplayTab();
   void buildChannelList();
@@ -134,16 +137,17 @@ private slots:
   void activateChannel(bool);
 
 private:
-  QMdiSubWindow* subWindow;
+  void buildBlockList();
+  QMdiSubWindow* subWindow=nullptr;
 
   // Tab Widget
-  QTabWidget* tabWidget;
+  QTabWidget* tabWidget=nullptr;
 
   // Create scope
-  Scope* scopeWindow;
+  Scope* scopeWindow=nullptr;
 
   // Create curve element
-  QwtPlotCurve* curve;
+  QwtPlotCurve* curve=nullptr;
 
   // Functions to initialize and
   // apply changes made in tabs
@@ -153,38 +157,38 @@ private:
   QWidget* createDisplayTab(QWidget* parent);
 
   // Group and layout information
-  QVBoxLayout* layout;
-  QWidget* scopeGroup;
-  QGroupBox* setBttnGroup;
+  QVBoxLayout* layout=nullptr;
+  QWidget* scopeGroup=nullptr;
+  QGroupBox* setBttnGroup=nullptr;
 
   // Properties
-  //QSpinBox* ratesSpin;
-  QLineEdit* sizesEdit;
-  QButtonGroup* trigsGroup;
-  QComboBox* timesList;
-  QComboBox* trigsChanList;
-  QComboBox* trigsThreshList;
-  QComboBox* refreshDropdown;
-  QLineEdit* trigsThreshEdit;
-  QLineEdit* trigWindowEdit;
-  QComboBox* trigWindowList;
+  //QSpinBox* ratesSpin=nullptr;
+  QLineEdit* sizesEdit=nullptr;
+  QButtonGroup* trigsGroup=nullptr;
+  QComboBox* timesList=nullptr;
+  QComboBox* trigsChanList=nullptr;
+  QComboBox* trigsThreshList=nullptr;
+  QComboBox* refreshDropdown=nullptr;
+  QLineEdit* trigsThreshEdit=nullptr;
+  QLineEdit* trigWindowEdit=nullptr;
+  QComboBox* trigWindowList=nullptr;
 
   // Lists
-  QComboBox* blocksListDropdown;
-  QComboBox* typesList;
-  QComboBox* channelsList;
-  QComboBox* colorsList;
-  QComboBox* offsetsList;
-  QComboBox* scalesList;
-  QComboBox* stylesList;
-  QComboBox* widthsList;
-  QLineEdit* offsetsEdit;
+  QComboBox* blocksListDropdown=nullptr;
+  QComboBox* typesList=nullptr;
+  QComboBox* channelsList=nullptr;
+  QComboBox* colorsList=nullptr;
+  QComboBox* offsetsList=nullptr;
+  QComboBox* scalesList=nullptr;
+  QComboBox* stylesList=nullptr;
+  QComboBox* widthsList=nullptr;
+  QLineEdit* offsetsEdit=nullptr;
 
   // Buttons
-  QPushButton* pauseButton;
-  QPushButton* settingsButton;
-  QPushButton* applyButton;
-  QPushButton* activateButton;
+  QPushButton* pauseButton=nullptr;
+  QPushButton* settingsButton=nullptr;
+  QPushButton* applyButton=nullptr;
+  QPushButton* activateButton=nullptr;
 
   std::vector<IO::Block*> blocks;
   size_t counter;
