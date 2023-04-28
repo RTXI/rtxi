@@ -183,6 +183,7 @@ private:
   QAction* openUserPrefs = nullptr;
   QAction* openControlPanel = nullptr;
   QAction* openConnector = nullptr;
+  QAction* openOscilloscope = nullptr;
 
   void createFileMenu();
   void createModuleMenu();

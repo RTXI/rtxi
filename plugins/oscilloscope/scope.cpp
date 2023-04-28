@@ -112,14 +112,14 @@ void Oscilloscope::Scope::insertChannel(const Oscilloscope::scope_channel& chann
   channels.push_back(channel);
 }
 
-void Oscilloscope::Scope::removeChannel(IO::Block* block, size_t port, IO::flags_t type)
+void Oscilloscope::Scope::removeChannel(Oscilloscope::probe probeInfo)
 {
   auto iter = std::find_if(this->channels.begin(),
                            this->channels.end(),
                            [&](const Oscilloscope::scope_channel& channel_info){
-                             return block == channel_info.block && 
-                                    port == channel_info.port &&
-                                    type == channel_info.direction;
+                             return probeInfo.block == channel_info.block && 
+                                    probeInfo.port == channel_info.port &&
+                                    probeInfo.direction == channel_info.direction;
                            });
   if(iter == this->channels.end()) {
     return;

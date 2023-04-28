@@ -145,7 +145,7 @@ public:
 
   bool paused() const;
   void insertChannel(const scope_channel& channel);
-  void removeChannel(IO::Block* block, size_t port, IO::flags_t type);
+  void removeChannel(Oscilloscope::probe probeInfo);
   size_t getChannelCount() const;
   //scope_channel getChannel(IO::Block* block, size_t port);
 

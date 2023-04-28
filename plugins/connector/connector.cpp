@@ -188,7 +188,7 @@ void Connector::Panel::buildBlockList()
   Event::Object event(Event::Type::IO_BLOCK_QUERY_EVENT);
   this->getRTXIEventManager()->postEvent(&event);
   this->blocks = std::any_cast<std::vector<IO::Block*>>(event.getParam("blockList"));
-  for(auto* block : this->blocks){
+  for(auto block : this->blocks){
     this->inputBlock->addItem(QString::fromStdString(block->getName()) + " " + 
                               QString::number(block->getID()));
     this->outputBlock->addItem(QString::fromStdString(block->getName()) + " " + 

@@ -37,11 +37,12 @@
 #include "debug.hpp"
 #include "event.hpp"
 #include "module.hpp"
-#include "performance_measurement/performance_measurement.hpp"
 #include "rtxiConfig.h"
+#include "performance_measurement/performance_measurement.hpp"
 #include "system_control/system_control.h"
 #include "userprefs/userprefs.h"
 #include "connector/connector.h"
+#include "oscilloscope/oscilloscope.h"
 
 MainWindow::MainWindow(Event::Manager* ev_manager)
     : QMainWindow(nullptr, Qt::Window)
@@ -211,6 +212,7 @@ void MainWindow::createSystemMenu()
   this->systemMenu->addAction(this->openUserPrefs);
   this->systemMenu->addAction(this->openControlPanel);
   this->systemMenu->addAction(this->openConnector);
+  this->systemMenu->addAction(this->openOscilloscope);
   connect(systemMenu,
           SIGNAL(triggered(QAction*)),
           this,
@@ -295,6 +297,8 @@ void MainWindow::createSystemActions()
       new QAction(tr(std::string(SystemControl::MODULE_NAME).c_str()), this);
   this->openConnector = 
       new QAction(tr(std::string(Connector::MODULE_NAME).c_str()), this);
+  this->openOscilloscope = 
+      new QAction(tr(std::string(Oscilloscope::MODULE_NAME).c_str()), this);
 }
 
 void MainWindow::about()

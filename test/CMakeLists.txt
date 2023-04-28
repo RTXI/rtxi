@@ -41,6 +41,7 @@ target_link_libraries(rtxiTests PRIVATE
     userprefs_lib
     system_control_lib
     connector_lib
+    oscilloscope_lib
 )
 
 add_library(fakePlugin MODULE fakePlugin.h fakePlugin.cpp)

@@ -109,7 +109,7 @@ class Panel : public Modules::Panel
 
 public:
   Panel(MainWindow* mw, Event::Manager* event_manager);
-  virtual ~Panel();
+
   //bool setInactiveSync();
   void flushFifo();
   void setActivity(Oscilloscope::Component* comp, bool activity);
@@ -138,6 +138,8 @@ private slots:
 
 private:
   void buildBlockList();
+  void addProbe(Oscilloscope::probe probeInfo);
+  void removeProbe(Oscilloscope::probe probeInfo);
   QMdiSubWindow* subWindow=nullptr;
 
   // Tab Widget
@@ -198,10 +200,12 @@ private:
 class Plugin : public Modules::Plugin
 {
 public:
+  Plugin(Event::Manager* ev_manager, MainWindow* main_window);
+  ~Plugin() override;
+
   void receiveEvent(Event::Object* event) override;
-  Oscilloscope::Component* getProbe(IO::Block* source, size_t port, IO::flags_t type);
-  void addProbe(IO::Block* source, size_t port, IO::flags_t direction);
-  void removeProbe(IO::Block* source, size_t port, IO::flags_t direction);
+  Oscilloscope::Component* getProbeComponent(probe probeInfo);
+
   std::vector<Oscilloscope::channel_info> getChannelsList(){ return this->chanInfoList; }
   Oscilloscope::Trigger::Info getTriggerInfo(){ return this->trigger_info; }
 
@@ -212,7 +216,13 @@ private:
   Trigger::Info trigger_info;
 };  // Plugin
 
+std::unique_ptr<Modules::Plugin> createRTXIPlugin(Event::Manager* ev_manager, MainWindow* main_window);
 
+Modules::Panel* createRTXIPanel(MainWindow* main_window, Event::Manager* ev_manager);
+
+std::unique_ptr<Modules::Component> createRTXIComponent(Modules::Plugin* host_plugin);
+
+Modules::FactoryMethods getFactories();
 };  // namespace Oscilloscope
 
 #endif  // OSCILLOSCOPE_H

@@ -54,9 +54,9 @@ add_library(rtxi SHARED
     io.hpp io.cpp
     rt.hpp rt.cpp
     daq.hpp daq.cpp
-    main_window.hpp main_window.cpp
     module.hpp module.cpp
     logger.hpp logger.cpp
+    main_window.hpp main_window.cpp
 )
 
 target_link_libraries(rtxi PUBLIC 
@@ -65,6 +65,7 @@ target_link_libraries(rtxi PUBLIC
     Qt5::Core
     Qt5::Gui
     Qt5::Widgets
+    qwt::qwt
     xfifo
 )
 
@@ -89,6 +90,7 @@ target_link_libraries(rtxi_exe PUBLIC
     userprefs_lib
     system_control_lib
     connector_lib
+    oscilloscope_lib
     Boost::headers
     backtrace
     dl

@@ -48,6 +48,44 @@ void Oscilloscope::Plugin::receiveEvent(Event::Object* event)
   }
 }
 
+Oscilloscope::Component* Oscilloscope::Plugin::getProbeComponent(Oscilloscope::probe probeInfo)
+{
+  Oscilloscope::Component* component=nullptr;
+  auto probe_loc = std::find_if(this->chanInfoList.begin(),
+                                this->chanInfoList.end(),
+                                [&](const Oscilloscope::channel_info& chan){
+                                  return chan.probe.block == probeInfo.block &&
+                                         chan.probe.port == probeInfo.port &&
+                                         chan.probe.direction == probeInfo.direction;
+                                });
+  if(probe_loc != this->chanInfoList.end()){
+    component = probe_loc->measuring_component;
+  }
+  return component;
+}
+
+void Oscilloscope::Panel::addProbe(Oscilloscope::probe probeInfo)
+{
+  scope_channel chan;
+  chan.block= probeInfo.block;
+  chan.port = probeInfo.port;
+  chan.direction = probeInfo.direction;
+  chan.label = QString::number(probeInfo.block->getID()) + 
+               " " + 
+               QString::fromStdString(probeInfo.block->getName()) +
+               " " +
+               this->scalesList->currentText();
+  chan.curve = new QwtPlotCurve(chan.label);
+  chan.scale
+  //this->scopeWindow->insertChannel(
+}
+
+void Oscilloscope::Panel::removeProbe(Oscilloscope::probe probeInfo)
+{
+
+}
+
+
 void Oscilloscope::Panel::activateChannel(bool active)
 {
   bool enable = active && blocksListDropdown->count() > 0 && channelsList->count() > 0;
@@ -147,32 +185,17 @@ void Oscilloscope::Panel::applyChannelTab()
   IO::Block* block = blocks[static_cast<size_t>(block_index)];
   auto port = static_cast<size_t>(this->channelsList->currentIndex());
   IO::flags_t type = static_cast<IO::flags_t>(flags_index);
-  auto host_plugin = dynamic_cast<Oscilloscope::Plugin*>(this->getHostPlugin());
-  Oscilloscope::Component* probe = host_plugin->getProbe(block, port, type);
+  auto* host_plugin = dynamic_cast<Oscilloscope::Plugin*>(this->getHostPlugin());
+  Oscilloscope::probe probeInfo {block, port, type};
+  Oscilloscope::Component* component = host_plugin->getProbeComponent(probeInfo);
   if (!activateButton->isChecked()) {
-    if (probe == nullptr) { return; }
-    this->setActivity(probe, false);
-    scopeWindow->removeChannel(block, port, type);
+    if (component == nullptr) { return; }
+    this->setActivity(component, false);
+    scopeWindow->removeChannel(probeInfo);
     flushFifo();
   } else {
-    //channel_info info;
 
-    //info.block = block;
-    //info.type = type;
-    //info.port = port;
-    //info.name = QString::number(block->getID()) + 
-    //            " " + 
-    //            QString::fromStdString(block->getName());
-    //QwtPlotCurve* curve = new QwtPlotCurve(info.name);
-    //channel
-    //i = scopeWindow->insertChannel(
-    //    info.name + " 50 mV/div",
-    //    2.0,
-    //    0.0,
-    //    QPen(QColor(255, 0, 16, 255), 1, Qt::SolidLine),
-    //    curve,
-    //    info);
-    host_plugin->addProbe(block, port, type);
+    host_plugin->addProbe(probeInfo);
     flushFifo();
   }
 
@@ -1027,6 +1050,50 @@ void Oscilloscope::Panel::timeoutEvent()
   //  if (fifo.read(data, sizeof(data)))
   //    scopeWindow->setData(data, size);
   //}
+}
+
+Oscilloscope::Plugin::Plugin(Event::Manager* ev_manager, MainWindow* main_window)
+  : Modules::Plugin(ev_manager, main_window, std::string(Oscilloscope::MODULE_NAME))
+{}
+
+Oscilloscope::Plugin::~Plugin()
+{
+  std::vector<Event::Object> unloadEvents;
+  for(auto& oscilloscope_component : this->componentList){
+    unloadEvents.emplace_back(Event::Type::RT_THREAD_REMOVE_EVENT);
+    unloadEvents.back().setParam("thread", std::any(static_cast<RT::Thread*>(&oscilloscope_component)));
+  }
+  this->event_manager->postEvent(unloadEvents);
+}
+
+std::unique_ptr<Modules::Plugin> Oscilloscope::createRTXIPlugin(
+    Event::Manager* ev_manager, MainWindow* main_window)
+{
+  return std::make_unique<Oscilloscope::Plugin>(ev_manager,
+                                                main_window);
+}
+
+Modules::Panel* Oscilloscope::createRTXIPanel(
+    MainWindow* main_window, Event::Manager* ev_manager)
+{
+  return static_cast<Modules::Panel*>(new Oscilloscope::Panel(
+      main_window,
+      ev_manager));
+}
+
+std::unique_ptr<Modules::Component> Oscilloscope::createRTXIComponent(
+    Modules::Plugin* host_plugin)
+{
+  return std::unique_ptr<Oscilloscope::Component>(nullptr);
+}
+
+Modules::FactoryMethods Oscilloscope::getFactories()
+{
+  Modules::FactoryMethods fact;
+  fact.createPanel = &Oscilloscope::createRTXIPanel;
+  fact.createComponent = &Oscilloscope::createRTXIComponent;
+  fact.createPlugin = &Oscilloscope::createRTXIPlugin;
+  return fact;
 }
 
 // void Oscilloscope::Panel::doDeferred(const Settings::Object::State& s)
