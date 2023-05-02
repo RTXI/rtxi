@@ -138,8 +138,8 @@ private slots:
 
 private:
   void buildBlockList();
-  void addProbe(Oscilloscope::probe probeInfo);
-  void removeProbe(Oscilloscope::probe probeInfo);
+  void enableChannel();
+  void disableChannel();
   QMdiSubWindow* subWindow=nullptr;
 
   // Tab Widget
@@ -207,6 +207,8 @@ public:
   Oscilloscope::Component* getProbeComponent(probe probeInfo);
 
   std::vector<Oscilloscope::channel_info> getChannelsList(){ return this->chanInfoList; }
+  void addProbe(channel_info chaninfo);
+  void removeProbe(channel_info chaninfo);
   Oscilloscope::Trigger::Info getTriggerInfo(){ return this->trigger_info; }
 
 private:

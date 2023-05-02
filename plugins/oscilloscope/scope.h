@@ -33,6 +33,7 @@
 #include <QtWidgets>
 #include <vector>
 
+#include <qnamespace.h>
 #include <qwt.h>
 #include <qwt_curve_fitter.h>
 #include <qwt_interval.h>
@@ -95,6 +96,15 @@ constexpr std::array<QColor, 7> penColors =
     QColor(178, 102, 255, 255),
     QColor(0, 153, 143, 255),
     QColor(83, 81, 84, 255)
+  };
+
+constexpr std::array<Qt::PenStyle, 5> penStyles = 
+  {
+    Qt::SolidLine,
+    Qt::DashLine,
+    Qt::DotLine,
+    Qt::DashDotLine,
+    Qt::DashDotDotLine
   };
 
 class LegendItem : public QwtPlotLegendItem

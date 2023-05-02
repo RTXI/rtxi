@@ -64,23 +64,52 @@ Oscilloscope::Component* Oscilloscope::Plugin::getProbeComponent(Oscilloscope::p
   return component;
 }
 
-void Oscilloscope::Panel::addProbe(Oscilloscope::probe probeInfo)
+void Oscilloscope::Panel::enableChannel()
 {
+  if(!this->activateButton->isChecked()) { return; }
+  int block_list_index = this->blocksListDropdown->currentIndex();
+  int port_list_index = this->channelsList->currentIndex();
+  int direction_list_index = this->typesList->currentIndex();
+  if(block_list_index < 0 || port_list_index < 0 || direction_list_index < 0) { return; }
   scope_channel chan;
-  chan.block= probeInfo.block;
-  chan.port = probeInfo.port;
-  chan.direction = probeInfo.direction;
-  chan.label = QString::number(probeInfo.block->getID()) + 
+  chan.block = this->blocks[static_cast<size_t>(this->blocksListDropdown->currentIndex())];
+  chan.port = static_cast<size_t>(port_list_index);
+  chan.direction = static_cast<IO::flags_t>(direction_list_index);
+  chan.label = QString::number(chan.block->getID()) + 
                " " + 
-               QString::fromStdString(probeInfo.block->getName()) +
+               QString::fromStdString(chan.block->getName()) +
                " " +
                this->scalesList->currentText();
   chan.curve = new QwtPlotCurve(chan.label);
-  chan.scale
-  //this->scopeWindow->insertChannel(
+  int scale_index = this->scalesList->currentIndex();
+  switch (scale_index % 4){
+    case 0:
+      chan.scale = pow(10, 1 - scale_index / 4);
+      break;
+    case 1:
+      chan.scale = 5 * pow(10, -scale_index / 4);
+      break;
+    case 2:
+      chan.scale = 2.5 * pow(10, -scale_index / 4);
+      break;
+    case 3:
+      chan.scale = 2 * pow(10, -scale_index / 4);
+      break;
+    default:
+      ERROR_MSG("Oscilloscope::Panel::applyChannelTab : invalid chan.scale selection\n");
+      chan.scale = 1.0;
+    } 
+  chan.offset = this->offsetsEdit->text().toDouble() * pow(10, -3*offsetsList->currentIndex());
+  chan.curve->setPen(Oscilloscope::penColors[this->colorsList->currentIndex()],
+                     this->widthsList->currentIndex() + 1,
+                     Oscilloscope::penStyles[this->stylesList->currentIndex()]);
+
+  Oscilloscope::probe probe {chan.block, chan.port, chan.direction};
+  auto* oscilloscope_plugin = dynamic_cast<Oscilloscope::Plugin*>(this->getHostPlugin());
+  oscilloscope_plugin->addProbe(chan);
 }
 
-void Oscilloscope::Panel::removeProbe(Oscilloscope::probe probeInfo)
+void Oscilloscope::Panel::disableChannel()
 {
 
 }
