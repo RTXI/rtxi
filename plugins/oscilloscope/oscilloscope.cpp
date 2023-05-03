@@ -64,49 +64,73 @@ Oscilloscope::Component* Oscilloscope::Plugin::getProbeComponent(Oscilloscope::p
   return component;
 }
 
+void Oscilloscope::Panel::updateChannelScale(Oscilloscope::probe probe_info)
+{
+  int scale_index = this->scalesList->currentIndex();
+  double chanscale = 1.0;
+  switch (scale_index % 4){
+    case 0:
+      chanscale = pow(10, 1 - scale_index / 4);
+      break;
+    case 1:
+      chanscale = 5 * pow(10, -scale_index / 4);
+      break;
+    case 2:
+      chanscale = 2.5 * pow(10, -scale_index / 4);
+      break;
+    case 3:
+      chanscale = 2 * pow(10, -scale_index / 4);
+      break;
+    default:
+      ERROR_MSG("Oscilloscope::Panel::applyChannelTab : invalid chan.scale selection\n");
+    }
+  this->scopeWindow->setChannelScale(probe_info, chanscale);
+}
+
+void Oscilloscope::Panel::updateChannelOffset(Oscilloscope::probe probe_info)
+{
+  double chanoffset = this->offsetsEdit->text().toDouble() * pow(10, -3*offsetsList->currentIndex());
+  this->scopeWindow->setChannelOffset(probe_info, chanoffset);
+}
+
+void Oscilloscope::Panel::updateChannelLineWidth(Oscilloscope::probe probe_info)
+{
+
+}
+
 void Oscilloscope::Panel::enableChannel()
 {
+  // make some initial checks
   if(!this->activateButton->isChecked()) { return; }
   int block_list_index = this->blocksListDropdown->currentIndex();
   int port_list_index = this->channelsList->currentIndex();
   int direction_list_index = this->typesList->currentIndex();
   if(block_list_index < 0 || port_list_index < 0 || direction_list_index < 0) { return; }
-  scope_channel chan;
-  chan.block = this->blocks[static_cast<size_t>(this->blocksListDropdown->currentIndex())];
-  chan.port = static_cast<size_t>(port_list_index);
-  chan.direction = static_cast<IO::flags_t>(direction_list_index);
-  chan.label = QString::number(chan.block->getID()) + 
-               " " + 
-               QString::fromStdString(chan.block->getName()) +
-               " " +
-               this->scalesList->currentText();
-  chan.curve = new QwtPlotCurve(chan.label);
-  int scale_index = this->scalesList->currentIndex();
-  switch (scale_index % 4){
-    case 0:
-      chan.scale = pow(10, 1 - scale_index / 4);
-      break;
-    case 1:
-      chan.scale = 5 * pow(10, -scale_index / 4);
-      break;
-    case 2:
-      chan.scale = 2.5 * pow(10, -scale_index / 4);
-      break;
-    case 3:
-      chan.scale = 2 * pow(10, -scale_index / 4);
-      break;
-    default:
-      ERROR_MSG("Oscilloscope::Panel::applyChannelTab : invalid chan.scale selection\n");
-      chan.scale = 1.0;
-    } 
-  chan.offset = this->offsetsEdit->text().toDouble() * pow(10, -3*offsetsList->currentIndex());
+
+  // create component before we create the channel proper
+  auto* oscilloscope_plugin = dynamic_cast<Oscilloscope::Plugin*>(this->getHostPlugin());
+  IO::Block* chanblock = this->blocks[static_cast<size_t>(this->blocksListDropdown->currentIndex())];
+  auto chanport = static_cast<size_t>(port_list_index);
+  auto chandirection = static_cast<IO::flags_t>(direction_list_index);
+  QString chanlabel = QString::number(chanblock->getID()) + 
+                      " " + 
+                      QString::fromStdString(chanblock->getName()) +
+                      " " +
+                      this->scalesList->currentText();
+  Oscilloscope::probe probe {chanblock, chanport, chandirection};
+  if(!oscilloscope_plugin->addProbe(probe)){
+    ERROR_MSG("Unable to create probing channel {}", chanlabel.toStdString());
+    return;
+  }
+
+  // populate channel with settings
+  auto* chancurve = new QwtPlotCurve(chanlabel);
+   
+  double chanoffset = this->offsetsEdit->text().toDouble() * pow(10, -3*offsetsList->currentIndex());
   chan.curve->setPen(Oscilloscope::penColors[this->colorsList->currentIndex()],
                      this->widthsList->currentIndex() + 1,
                      Oscilloscope::penStyles[this->stylesList->currentIndex()]);
 
-  Oscilloscope::probe probe {chan.block, chan.port, chan.direction};
-  auto* oscilloscope_plugin = dynamic_cast<Oscilloscope::Plugin*>(this->getHostPlugin());
-  oscilloscope_plugin->addProbe(chan);
 }
 
 void Oscilloscope::Panel::disableChannel()
@@ -213,7 +237,7 @@ void Oscilloscope::Panel::applyChannelTab()
 
   IO::Block* block = blocks[static_cast<size_t>(block_index)];
   auto port = static_cast<size_t>(this->channelsList->currentIndex());
-  IO::flags_t type = static_cast<IO::flags_t>(flags_index);
+  auto type = static_cast<IO::flags_t>(flags_index);
   auto* host_plugin = dynamic_cast<Oscilloscope::Plugin*>(this->getHostPlugin());
   Oscilloscope::probe probeInfo {block, port, type};
   Oscilloscope::Component* component = host_plugin->getProbeComponent(probeInfo);
@@ -223,7 +247,6 @@ void Oscilloscope::Panel::applyChannelTab()
     scopeWindow->removeChannel(probeInfo);
     flushFifo();
   } else {
-
     host_plugin->addProbe(probeInfo);
     flushFifo();
   }

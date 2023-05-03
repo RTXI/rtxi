@@ -140,6 +140,13 @@ private:
   void buildBlockList();
   void enableChannel();
   void disableChannel();
+  
+  // some utility functions
+  void updateChannelScale(Oscilloscope::probe probe_info);
+  void updateChannelOffset(Oscilloscope::probe probe_info);
+  void updateChannelLineWidth(Oscilloscope::probe probe_info);
+  void updateChannelPenColor(Oscilloscope::probe probe_info);
+
   QMdiSubWindow* subWindow=nullptr;
 
   // Tab Widget
@@ -207,8 +214,8 @@ public:
   Oscilloscope::Component* getProbeComponent(probe probeInfo);
 
   std::vector<Oscilloscope::channel_info> getChannelsList(){ return this->chanInfoList; }
-  void addProbe(channel_info chaninfo);
-  void removeProbe(channel_info chaninfo);
+  bool addProbe(Oscilloscope::probe probeinfo);
+  void removeProbe(Oscilloscope::probe probeinfo);
   Oscilloscope::Trigger::Info getTriggerInfo(){ return this->trigger_info; }
 
 private:
