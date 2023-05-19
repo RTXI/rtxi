@@ -107,7 +107,27 @@ bool Oscilloscope::Scope::paused() const
   return isPaused;
 }
 
-void Oscilloscope::Scope::insertChannel(const Oscilloscope::scope_channel& channel)
+void Oscilloscope::Scope::createChannel(Oscilloscope::probe probeInfo)
+{
+  auto iter = std::find_if(this->channels.begin(),
+                           this->channels.end(),
+                           [&](const Oscilloscope::scope_channel& channel_info){
+                             return probeInfo.block == channel_info.block && 
+                                    probeInfo.port == channel_info.port &&
+                                    probeInfo.direction == channel_info.direction;
+                           });
+  if(iter != this->channels.end()){
+    return;
+  }
+  Oscilloscope::scope_channel chan;
+  chan.curve = new QwtPlotCurve;
+  chan.block = probeInfo.block;
+  chan.port = probeInfo.port;
+  chan.direction = probeInfo.direction;
+  this->insertChannel(chan);
+}
+
+void Oscilloscope::Scope::insertChannel(Oscilloscope::scope_channel channel)
 {
   channels.push_back(channel);
 }
@@ -127,6 +147,7 @@ void Oscilloscope::Scope::removeChannel(Oscilloscope::probe probeInfo)
   // Make sure we aren't triggering a non-existent oscilloscope channel
   //this->capture_trigger.direction = Oscilloscope::Trigger::NONE;
   iter->curve->detach();
+  delete iter->curve;
   channels.erase(iter);
   replot();
 }

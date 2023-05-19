@@ -78,7 +78,6 @@ typedef struct scope_channel
   IO::Block* block = nullptr;
   size_t port = 0;
   IO::flags_t direction;
-  IO::channel_t info {};
 }scope_channel;
 
 typedef struct probe {
@@ -154,7 +153,7 @@ public:
   ~Scope();
 
   bool paused() const;
-  void insertChannel(const scope_channel& channel);
+  void createChannel(Oscilloscope::probe probeInfo);
   void removeChannel(Oscilloscope::probe probeInfo);
   size_t getChannelCount() const;
   //scope_channel getChannel(IO::Block* block, size_t port);
@@ -193,6 +192,7 @@ protected:
   void resizeEvent(QResizeEvent* event);
 
 private:
+  void insertChannel(scope_channel channel);
   double window_timewidth;
 
   bool isPaused = false;

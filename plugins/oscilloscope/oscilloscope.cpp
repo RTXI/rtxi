@@ -124,8 +124,8 @@ void Oscilloscope::Panel::enableChannel()
   }
 
   // populate channel with settings
-  auto* chancurve = new QwtPlotCurve(chanlabel);
-   
+  auto* chancurve = new QwtPlotCurve(chanlabel); 
+  this->scopeWindow->setChannelPen(new QPen);
   double chanoffset = this->offsetsEdit->text().toDouble() * pow(10, -3*offsetsList->currentIndex());
   chan.curve->setPen(Oscilloscope::penColors[this->colorsList->currentIndex()],
                      this->widthsList->currentIndex() + 1,
@@ -211,15 +211,7 @@ void Oscilloscope::Panel::showTab(int index)
 
 void Oscilloscope::Panel::setActivity(Oscilloscope::Component* comp, bool activity)
 {
-  Event::Type event_type = Event::Type::NOOP; 
-  switch(activity){
-    case true:
-      event_type = Event::Type::RT_THREAD_UNPAUSE_EVENT;
-      break;
-    default:
-      event_type = Event::Type::RT_THREAD_PAUSE_EVENT;
-      break;
-  }     
+  Event::Type event_type = activity ? Event::Type::RT_THREAD_UNPAUSE_EVENT : Event::Type::RT_THREAD_PAUSE_EVENT; 
   Event::Object event(event_type);
   event.setParam("thread", std::any(static_cast<RT::Thread*>(comp)));
   this->getRTXIEventManager()->postEvent(&event);
@@ -1116,6 +1108,17 @@ Oscilloscope::Plugin::~Plugin()
     unloadEvents.back().setParam("thread", std::any(static_cast<RT::Thread*>(&oscilloscope_component)));
   }
   this->event_manager->postEvent(unloadEvents);
+}
+
+// TODO: implement addprobe to the oscilloscope plugin
+bool Oscilloscope::Plugin::addProbe(Oscilloscope::probe probe)
+{
+
+}
+
+void Oscilloscope::Plugin::removeProbe(Oscilloscope::probe probe)
+{
+
 }
 
 std::unique_ptr<Modules::Plugin> Oscilloscope::createRTXIPlugin(
