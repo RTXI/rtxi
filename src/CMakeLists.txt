@@ -92,6 +92,7 @@ target_link_libraries(rtxi_exe PUBLIC
     connector_lib
     oscilloscope_lib
     Boost::headers
+    qwt::qwt
     backtrace
     dl
 )

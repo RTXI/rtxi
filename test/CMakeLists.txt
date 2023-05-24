@@ -42,6 +42,7 @@ target_link_libraries(rtxiTests PRIVATE
     system_control_lib
     connector_lib
     oscilloscope_lib
+    qwt::qwt
 )
 
 add_library(fakePlugin MODULE fakePlugin.h fakePlugin.cpp)

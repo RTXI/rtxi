@@ -65,6 +65,16 @@ const std::vector<Modules::Variable::Info> oscilloscope_vars
   }
 };
 
+const std::vector<IO::channel_t> DEFAULT_OSCILLOSCOPE_CHANNELS =
+{
+  {
+    "Probing Channel",
+    "This is the channel used by the osciloscope to probe on other inputs and output ports",
+    IO::INPUT,
+    0
+   }
+};
+
 namespace Trigger{
 enum trig_t : int
 {
@@ -95,8 +105,9 @@ typedef struct channel_info
 class Component : public Modules::Component
 {
 public:
-  Component();
+  Component(Modules::Plugin* hplugin, std::string probe_name);
   void flushFifo();
+  RT::OS::Fifo* getFifoPtr() { return this->fifo.get(); }
 
 private:
   void callback();
@@ -110,8 +121,6 @@ class Panel : public Modules::Panel
 public:
   Panel(MainWindow* mw, Event::Manager* event_manager);
 
-  //bool setInactiveSync();
-  void flushFifo();
   void setActivity(Oscilloscope::Component* comp, bool activity);
   void adjustDataSize();
   void updateTrigger();
@@ -142,9 +151,11 @@ private:
   void disableChannel();
   
   // some utility functions
+  void updateChannelLabel(Oscilloscope::probe probe_info);
   void updateChannelScale(Oscilloscope::probe probe_info);
   void updateChannelOffset(Oscilloscope::probe probe_info);
   void updateChannelLineWidth(Oscilloscope::probe probe_info);
+  void updateChannelLineStyle(Oscilloscope::probe probe_info);
   void updateChannelPenColor(Oscilloscope::probe probe_info);
 
   QMdiSubWindow* subWindow=nullptr;

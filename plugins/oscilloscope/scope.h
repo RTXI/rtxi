@@ -61,6 +61,7 @@ constexpr size_t HZ120 = 8;
 constexpr size_t HZ240 = 4;
 }; // namespace FrameRates 
 
+constexpr size_t DEFAULT_BUFFER_SIZE = 10000;
 typedef struct sample {
   double value;
   int64_t time;
@@ -75,6 +76,7 @@ typedef struct scope_channel
   std::vector<double> ybuffer;
   size_t data_indx=0;
   QwtPlotCurve* curve = nullptr;
+  QPen* pen = nullptr;
   IO::Block* block = nullptr;
   size_t port = 0;
   IO::flags_t direction;
@@ -109,40 +111,16 @@ constexpr std::array<Qt::PenStyle, 5> penStyles =
 class LegendItem : public QwtPlotLegendItem
 {
 public:
-  LegendItem()
-  {
-    setRenderHint(QwtPlotItem::RenderAntialiased);
-    QColor color(Qt::black);
-    setTextPen(color);
-  }
+  LegendItem();
 };  // LegendItem
 
 class Canvas : public QwtPlotCanvas
 {
 public:
-  Canvas(QwtPlot* plot = nullptr) : QwtPlotCanvas(plot)
-  {
-    setPaintAttribute(QwtPlotCanvas::BackingStore, false);
-    if (QwtPainter::isX11GraphicsSystem()) {
-      if (testPaintAttribute(QwtPlotCanvas::BackingStore)) {
-        setAttribute(Qt::WA_PaintOnScreen, true);
-        setAttribute(Qt::WA_NoSystemBackground, true);
-      }
-    }
-    setupPalette();
-  }
+  explicit Canvas(QwtPlot* plot);
 
 private:
-  void setupPalette()
-  {
-    QPalette pal = palette();
-    QLinearGradient gradient;
-    gradient.setCoordinateMode(QGradient::StretchToDeviceMode);
-    gradient.setColorAt(1.0, QColor(Qt::white));
-    pal.setBrush(QPalette::Window, QBrush(gradient));
-    pal.setColor(QPalette::WindowText, Qt::green);
-    setPalette(pal);
-  }
+  void setupPalette();
 };  // Canvas
 
 
@@ -150,7 +128,7 @@ class Scope : public QwtPlot
 {
 public:
   explicit Scope(QWidget* = nullptr);
-  ~Scope();
+  ~Scope() override;
 
   bool paused() const;
   void createChannel(Oscilloscope::probe probeInfo);
@@ -181,19 +159,17 @@ public:
   double getChannelScale(probe channel);
   void setChannelOffset(probe channel, double offset);
   double getChannelOffset(probe channel);
-  void setChannelPen(probe channel, const QPen& pen);
+  void setChannelPen(probe channel, QPen* pen);
   QPen* getChannelPen(probe channel);
   void setChannelLabel(probe channel, const QString& label);
   //Trigger::Info capture_trigger;
   
-  int64_t getWindowTimewidth();
   void drawCurves();
 protected:
-  void resizeEvent(QResizeEvent* event);
+  void resizeEvent(QResizeEvent* event) override;
 
 private:
-  void insertChannel(scope_channel channel);
-  double window_timewidth;
+  size_t buffer_size = DEFAULT_BUFFER_SIZE;
 
   bool isPaused = false;
   int divX=10;

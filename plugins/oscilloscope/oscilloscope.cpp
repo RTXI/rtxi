@@ -95,7 +95,50 @@ void Oscilloscope::Panel::updateChannelOffset(Oscilloscope::probe probe_info)
 
 void Oscilloscope::Panel::updateChannelLineWidth(Oscilloscope::probe probe_info)
 {
+  int width_indx = this->widthsList->currentIndex();
+  QPen* pen = this->scopeWindow->getChannelPen(probe_info);
+  if(width_indx < 0) { 
+    ERROR_MSG("Oscilloscope::Panel::applyChannelTab : invalid style selection\n");
+    pen->setStyle(Qt::SolidLine);
+    return; 
+  }
+  Qt::PenStyle style = Oscilloscope::penStyles[static_cast<size_t>(width_indx)];
+  pen->setStyle(style);
+}
 
+void Oscilloscope::Panel::updateChannelLineStyle(Oscilloscope::probe probe_info)
+{
+  QPen* pen = this->scopeWindow->getChannelPen(probe_info);
+  int style_indx = this->stylesList->currentIndex();
+  if(style_indx < 0){
+    ERROR_MSG("Oscilloscope::Panel::applyChannelTab : invalid style selection\n");
+    pen->setStyle(Oscilloscope::penStyles[0]);
+  } else {
+    pen->setStyle(Oscilloscope::penStyles[style_indx]);
+  }
+}
+
+void Oscilloscope::Panel::updateChannelPenColor(Oscilloscope::probe probe_info)
+{
+  QPen* pen = this->scopeWindow->getChannelPen(probe_info);
+  int color_indx = this->colorsList->currentIndex();
+  if(color_indx < 0){
+    ERROR_MSG("Oscilloscope::Panel::applyChannelTab : invalid color selection\n");
+    pen->setColor(Oscilloscope::penColors[0]);
+  } else {
+    pen->setColor(Oscilloscope::penColors[color_indx]);
+  }
+}
+
+void Oscilloscope::Panel::updateChannelLabel(Oscilloscope::probe probe_info)
+{
+  QString chanlabel = QString::number(probe_info.block->getID()) + 
+                      " " + 
+                      QString::fromStdString(probe_info.block->getName()) +
+                      " " +
+                      this->scalesList->currentText();
+
+  this->scopeWindow->setChannelLabel(probe_info, chanlabel);
 }
 
 void Oscilloscope::Panel::enableChannel()
@@ -112,32 +155,42 @@ void Oscilloscope::Panel::enableChannel()
   IO::Block* chanblock = this->blocks[static_cast<size_t>(this->blocksListDropdown->currentIndex())];
   auto chanport = static_cast<size_t>(port_list_index);
   auto chandirection = static_cast<IO::flags_t>(direction_list_index);
-  QString chanlabel = QString::number(chanblock->getID()) + 
-                      " " + 
-                      QString::fromStdString(chanblock->getName()) +
-                      " " +
-                      this->scalesList->currentText();
+
+  // this will try to create the probing component first. return if something goes wrong
   Oscilloscope::probe probe {chanblock, chanport, chandirection};
   if(!oscilloscope_plugin->addProbe(probe)){
-    ERROR_MSG("Unable to create probing channel {}", chanlabel.toStdString());
+    ERROR_MSG("Unable to create probing channel for block {}", chanblock->getName());
     return;
   }
 
-  // populate channel with settings
-  auto* chancurve = new QwtPlotCurve(chanlabel); 
-  this->scopeWindow->setChannelPen(new QPen);
-  double chanoffset = this->offsetsEdit->text().toDouble() * pow(10, -3*offsetsList->currentIndex());
-  chan.curve->setPen(Oscilloscope::penColors[this->colorsList->currentIndex()],
-                     this->widthsList->currentIndex() + 1,
-                     Oscilloscope::penStyles[this->stylesList->currentIndex()]);
-
+  this->scopeWindow->createChannel(probe);
+  // we were able to create the probe, so we should populate metainfo about it in scope window
+  this->updateChannelOffset(probe);
+  this->updateChannelScale(probe);
+  this->updateChannelLineWidth(probe);
+  this->updateChannelLineStyle(probe);
+  this->updateChannelPenColor(probe);
 }
 
 void Oscilloscope::Panel::disableChannel()
 {
+  // make some initial checks
+  if(!this->activateButton->isChecked()) { return; }
+  int block_list_index = this->blocksListDropdown->currentIndex();
+  int port_list_index = this->channelsList->currentIndex();
+  int direction_list_index = this->typesList->currentIndex();
+  if(block_list_index < 0 || port_list_index < 0 || direction_list_index < 0) { return; }
 
+  auto* oscilloscope_plugin = dynamic_cast<Oscilloscope::Plugin*>(this->getHostPlugin());
+  IO::Block* chanblock = this->blocks[static_cast<size_t>(this->blocksListDropdown->currentIndex())];
+  auto chanport = static_cast<size_t>(port_list_index);
+  auto chandirection = static_cast<IO::flags_t>(direction_list_index);
+
+  Oscilloscope::probe probe {chanblock, chanport, chandirection};
+  // we should remove the scope channel before we attempt to remove block
+  this->scopeWindow->removeChannel(probe);
+  oscilloscope_plugin->removeProbe(probe);
 }
-
 
 void Oscilloscope::Panel::activateChannel(bool active)
 {
@@ -189,8 +242,9 @@ void Oscilloscope::Panel::buildChannelList()
           "Oscilloscope::Panel::buildChannelList : invalid type selection\n");
   }
 
-  for (size_t i = 0; i < block->getCount(type); ++i)
+  for (size_t i = 0; i < block->getCount(type); ++i) {
     channelsList->addItem(QString::fromStdString(block->getChannelName(type, i)));
+  }
 
   showChannelTab();
 }
@@ -219,8 +273,9 @@ void Oscilloscope::Panel::setActivity(Oscilloscope::Component* comp, bool activi
 
 void Oscilloscope::Panel::applyChannelTab()
 {
-  if (this->blocksListDropdown->count() <= 0 || this->channelsList->count() <= 0)
+  if (this->blocksListDropdown->count() <= 0 || this->channelsList->count() <= 0) {
     return;
+  }
 
   int block_index = this->blocksListDropdown->currentIndex();
   int port_index = this->channelsList->currentIndex();
@@ -233,97 +288,17 @@ void Oscilloscope::Panel::applyChannelTab()
   auto* host_plugin = dynamic_cast<Oscilloscope::Plugin*>(this->getHostPlugin());
   Oscilloscope::probe probeInfo {block, port, type};
   Oscilloscope::Component* component = host_plugin->getProbeComponent(probeInfo);
+  auto* oscilloscope_plugin = dynamic_cast<Oscilloscope::Plugin*>(this->getHostPlugin());
   if (!activateButton->isChecked()) {
     if (component == nullptr) { return; }
-    this->setActivity(component, false);
+    this->setActivity(component, /*activity=*/false);
     scopeWindow->removeChannel(probeInfo);
-    flushFifo();
+    oscilloscope_plugin->removeProbe(probeInfo);
   } else {
     host_plugin->addProbe(probeInfo);
-    flushFifo();
+    this->scopeWindow->createChannel(probeInfo);
   }
 
-  //  double scale;
-  //  switch (scalesList->currentIndex() % 4) {
-  //    case 0:
-  //      scale = pow(10, 1 - scalesList->currentIndex() / 4);
-  //      break;
-  //    case 1:
-  //      scale = 5 * pow(10, -scalesList->currentIndex() / 4);
-  //      break;
-  //    case 2:
-  //      scale = 2.5 * pow(10, -scalesList->currentIndex() / 4);
-  //      break;
-  //    case 3:
-  //      scale = 2 * pow(10, -scalesList->currentIndex() / 4);
-  //      break;
-  //    default:
-  //      ERROR_MSG(
-  //          "Oscilloscope::Panel::applyChannelTab : invalid scale selection\n");
-  //      scale = 1.0;
-  //  }
-  //  if (scale != i->getScale()) {
-  //    scopeWindow->setChannelScale(i, scale);
-  //    scopeWindow->setChannelLabel(
-  //        i, info->name + " - " + scalesList->currentText().simplified());
-  //  }
-  //  scopeWindow->setChannelOffset(
-  //      i,
-  //      offsetsEdit->text().toDouble()
-  //          * pow(10, -3 * offsetsList->currentIndex()));
-
-  //  QPen pen;
-  //  switch (colorsList->currentIndex()) {
-  //    case 0:
-  //      pen.setColor(QColor(255, 0, 16, 255));
-  //      break;
-  //    case 1:
-  //      pen.setColor(QColor(255, 164, 5, 255));
-  //      break;
-  //    case 2:
-  //      pen.setColor(QColor(43, 206, 72, 255));
-  //      break;
-  //    case 3:
-  //      pen.setColor(QColor(0, 117, 220, 255));
-  //      break;
-  //    case 4:
-  //      pen.setColor(QColor(178, 102, 255, 255));
-  //      break;
-  //    case 5:
-  //      pen.setColor(QColor(0, 153, 143, 255));
-  //      break;
-  //    case 6:
-  //      pen.setColor(QColor(83, 81, 84, 255));
-  //      break;
-  //    default:
-  //      ERROR_MSG(
-  //          "Oscilloscope::Panel::applyChannelTab : invalid color selection\n");
-  //      pen.setColor(QColor(255, 0, 16, 255));
-  //  }
-  //  pen.setWidth(widthsList->currentIndex() + 1);
-  //  switch (stylesList->currentIndex()) {
-  //    case 0:
-  //      pen.setStyle(Qt::SolidLine);
-  //      break;
-  //    case 1:
-  //      pen.setStyle(Qt::DashLine);
-  //      break;
-  //    case 2:
-  //      pen.setStyle(Qt::DotLine);
-  //      break;
-  //    case 3:
-  //      pen.setStyle(Qt::DashDotLine);
-  //      break;
-  //    case 4:
-  //      pen.setStyle(Qt::DashDotDotLine);
-  //      break;
-  //    default:
-  //      ERROR_MSG(
-  //          "Oscilloscope::Panel::applyChannelTab : invalid style selection\n");
-  //      pen.setStyle(Qt::SolidLine);
-  //  }
-  //  scopeWindow->setChannelPen(i, pen);
-  //}
   scopeWindow->replot();
   showChannelTab();
 }
@@ -723,12 +698,13 @@ QWidget* Oscilloscope::Panel::createDisplayTab(QWidget* parent)
   trigsThreshList->addItem("nV");
   trigsThreshList->addItem("pV");
 
-  row2Layout->addWidget(new QLabel(tr("Window:"), page));
-  trigWindowEdit = new QLineEdit(page);
-  trigWindowEdit->setText(QString::number(scopeWindow->getWindowTimewidth()));
-  trigWindowEdit->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Fixed);
-  trigWindowEdit->setMaximumWidth(trigWindowEdit->minimumSizeHint().width()
-                                  * 3);
+  // TODO: determine the proper implementation of trigger windows
+  // row2Layout->addWidget(new QLabel(tr("Window:"), page));
+  // trigWindowEdit = new QLineEdit(page);
+  // trigWindowEdit->setText(QString::number(scopeWindow->getWindowTimewidth()));
+  // trigWindowEdit->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Fixed);
+  // trigWindowEdit->setMaximumWidth(trigWindowEdit->minimumSizeHint().width() * 3);
+  
   trigWindowEdit->setValidator(new QDoubleValidator(trigWindowEdit));
   row2Layout->addWidget(trigWindowEdit);
   trigWindowList = new QComboBox(page);
@@ -1002,6 +978,15 @@ Oscilloscope::Panel::Panel(MainWindow* mw, Event::Manager* event_manager)
   show();
 }
 
+Oscilloscope::Component::Component(Modules::Plugin* hplugin, std::string probe_name)
+  : Modules::Component(hplugin,
+                       probe_name,
+                       Oscilloscope::DEFAULT_OSCILLOSCOPE_CHANNELS,
+                       Oscilloscope::oscilloscope_vars)
+{
+  this->bind_execute_callback([&]() { this->callback(); });
+}
+
 // TODO: Handle trigger synchronization bettween oscilloscope components 
 void Oscilloscope::Component::callback()
 {
@@ -1074,6 +1059,11 @@ void Oscilloscope::Panel::adjustDataSize()
   sizesEdit->setText(QString::number(scopeWindow->getDataSize()));
 }
 
+void Oscilloscope::Panel::updateTrigger()
+{
+
+}
+
 void Oscilloscope::Panel::timeoutEvent()
 {
   Oscilloscope::sample sample;
@@ -1110,15 +1100,36 @@ Oscilloscope::Plugin::~Plugin()
   this->event_manager->postEvent(unloadEvents);
 }
 
-// TODO: implement addprobe to the oscilloscope plugin
-bool Oscilloscope::Plugin::addProbe(Oscilloscope::probe probe)
+bool Oscilloscope::Plugin::addProbe(Oscilloscope::probe probe_info)
 {
-
+  Oscilloscope::channel_info chan_info;
+  chan_info.name = QString::number(probe_info.block->getID()) + " " +
+                   QString::fromStdString(probe_info.direction == IO::OUTPUT ? "Output " : "Input ") +  
+                   QString::fromStdString(probe_info.block->getName()) + " port: " +
+                   QString::number(probe_info.port);
+  this->componentList.emplace_back(this, chan_info.name.toStdString());
+  chan_info.probe = probe_info;
+  chan_info.measuring_component = &this->componentList.back();
+  Event::Object event(Event::Type::RT_THREAD_INSERT_EVENT);
+  event.setParam("thread", std::any(static_cast<RT::Thread*>(chan_info.measuring_component)));
+  this->event_manager->postEvent(&event);
+  return true;
+  // TODO: complete proper handling of errors if not able to register probe thread
 }
 
-void Oscilloscope::Plugin::removeProbe(Oscilloscope::probe probe)
+void Oscilloscope::Plugin::removeProbe(Oscilloscope::probe probeinfo)
 {
-
+  auto probe_loc = std::find_if(this->chanInfoList.begin(),
+                                this->chanInfoList.end(),
+                                [&](const Oscilloscope::channel_info& chann){
+                                  return chann.probe.block == probeinfo.block && 
+                                         chann.probe.direction == probeinfo.direction &&
+                                         chann.probe.port == probeinfo.port;
+                                });
+  if(probe_loc == this->chanInfoList.end()) { return; }
+  Event::Object event(Event::Type::RT_THREAD_REMOVE_EVENT);
+  event.setParam("thread", std::any(static_cast<RT::Thread*>(probe_loc->measuring_component)));
+  this->event_manager->postEvent(&event);
 }
 
 std::unique_ptr<Modules::Plugin> Oscilloscope::createRTXIPlugin(

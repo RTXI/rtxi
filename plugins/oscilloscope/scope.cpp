@@ -17,6 +17,7 @@
          along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <qwt_plot_legenditem.h>
 #include <stdlib.h>
 #include <cmath>
 #include <algorithm>
@@ -26,6 +27,36 @@
 
 #include "rt.hpp"
 #include "scope.h"
+
+Oscilloscope::LegendItem::LegendItem()
+{
+  setRenderHint(QwtPlotItem::RenderAntialiased);
+  QColor color(Qt::black);
+  setTextPen(color);
+}
+
+Oscilloscope::Canvas::Canvas(QwtPlot* plot) : QwtPlotCanvas(plot)
+{
+  setPaintAttribute(QwtPlotCanvas::BackingStore, false);
+  if (QwtPainter::isX11GraphicsSystem()) {
+    if (testPaintAttribute(QwtPlotCanvas::BackingStore)) {
+      setAttribute(Qt::WA_PaintOnScreen, true);
+      setAttribute(Qt::WA_NoSystemBackground, true);
+    }
+  }
+  setupPalette();
+}
+
+void Oscilloscope::Canvas::setupPalette()
+{
+  QPalette pal = palette();
+  QLinearGradient gradient;
+  gradient.setCoordinateMode(QGradient::StretchToDeviceMode);
+  gradient.setColorAt(1.0, QColor(Qt::white));
+  pal.setBrush(QPalette::Window, QBrush(gradient));
+  pal.setColor(QPalette::WindowText, Qt::green);
+  setPalette(pal);
+}
 
 // Scope constructor; inherits from QwtPlot
 Oscilloscope::Scope::Scope(QWidget* parent): QwtPlot(parent), 
@@ -42,7 +73,7 @@ Oscilloscope::Scope::Scope(QWidget* parent): QwtPlot(parent),
   setAutoReplot(false);
 
   // Set scope canvas
-  setCanvas(new Oscilloscope::Canvas());
+  setCanvas(new Oscilloscope::Canvas(nullptr));
 
   // Setup grid
   this->grid->setPen(Qt::gray, 0, Qt::DotLine);
@@ -107,6 +138,7 @@ bool Oscilloscope::Scope::paused() const
   return isPaused;
 }
 
+// TODO: make this thread-safe
 void Oscilloscope::Scope::createChannel(Oscilloscope::probe probeInfo)
 {
   auto iter = std::find_if(this->channels.begin(),
@@ -124,14 +156,12 @@ void Oscilloscope::Scope::createChannel(Oscilloscope::probe probeInfo)
   chan.block = probeInfo.block;
   chan.port = probeInfo.port;
   chan.direction = probeInfo.direction;
-  this->insertChannel(chan);
+  chan.xbuffer.assign(this->buffer_size, 0.0);
+  chan.ybuffer.assign(this->buffer_size, 0.0);
+  this->channels.push_back(chan);
 }
 
-void Oscilloscope::Scope::insertChannel(Oscilloscope::scope_channel channel)
-{
-  channels.push_back(channel);
-}
-
+// TODO: make this thread-safe
 void Oscilloscope::Scope::removeChannel(Oscilloscope::probe probeInfo)
 {
   auto iter = std::find_if(this->channels.begin(),
@@ -144,10 +174,9 @@ void Oscilloscope::Scope::removeChannel(Oscilloscope::probe probeInfo)
   if(iter == this->channels.end()) {
     return;
   }
-  // Make sure we aren't triggering a non-existent oscilloscope channel
-  //this->capture_trigger.direction = Oscilloscope::Trigger::NONE;
   iter->curve->detach();
   delete iter->curve;
+  iter->curve = nullptr;
   channels.erase(iter);
   replot();
 }
@@ -175,14 +204,13 @@ size_t Oscilloscope::Scope::getChannelCount() const
 //  return result;
 //}
 
+// TODO: make this thread-safe
 void Oscilloscope::Scope::clearData()
 {
-  size_t data_size = 0;
   for (auto& chan : this->channels)
   {
-    data_size = chan.xbuffer.size();
-    chan.xbuffer.assign(data_size, 0);
-    chan.ybuffer.assign(data_size, 0);
+    chan.xbuffer.assign(this->buffer_size, 0);
+    chan.ybuffer.assign(this->buffer_size, 0);
     chan.data_indx = 0;
   }
 }
@@ -211,6 +239,18 @@ void Oscilloscope::Scope::setData(Oscilloscope::probe channel, std::vector<sampl
     iter->xbuffer[i] = static_cast<double>(data[i].time);
     iter->ybuffer[i] = data[i].value;
   }
+}
+
+// TODO: make this thread-safe
+void Oscilloscope::Scope::setDataSize(size_t size)
+{
+  this->buffer_size = size;
+}
+
+// TODO: make this thread-safe
+size_t Oscilloscope::Scope::getDataSize() const
+{
+  return this->buffer_size;
 }
 
 //void Oscilloscope::Scope::setTrigger(Oscilloscope::Trigger::Info trigger_info)
@@ -245,14 +285,15 @@ double Oscilloscope::Scope::getDivT() const
 void Oscilloscope::Scope::setDivT(double divT)
 {
   hScl = divT;
-  if (divT >= 1000.)
+  if (divT >= 1000.) {
     dtLabel = QString::number(divT * 1e-3) + "s";
-  else if (divT >= 1.)
+  } else if (divT >= 1.) {
     dtLabel = QString::number(divT) + "ms";
-  else if (divT >= 1e-3)
+  } else if (divT >= 1e-3) {
     dtLabel = QString::number(divT * 1e3) + "µs";
-  else
+  } else {
     dtLabel = QString::number(divT * 1e6) + "ns";
+  }
 }
 
 size_t Oscilloscope::Scope::getDivX() const
@@ -328,7 +369,7 @@ double Oscilloscope::Scope::getChannelOffset(probe channel)
   return chan_loc->offset;
 }
 
-void Oscilloscope::Scope::setChannelPen(probe channel, const QPen& pen)
+void Oscilloscope::Scope::setChannelPen(probe channel, QPen* pen)
 {
   auto chan_loc = std::find_if(this->channels.begin(),
                                this->channels.end(),
@@ -338,8 +379,23 @@ void Oscilloscope::Scope::setChannelPen(probe channel, const QPen& pen)
                                         chann.port == channel.port;
                                });
   if(chan_loc == channels.end()) { return; }
-  chan_loc->curve->setPen(pen);
+  chan_loc->curve->setPen(*pen);
+  chan_loc->pen = pen;
 }
+
+QPen* Oscilloscope::Scope::getChannelPen(Oscilloscope::probe channel)
+{
+  auto chan_loc = std::find_if(this->channels.begin(),
+                               this->channels.end(),
+                               [&](const Oscilloscope::scope_channel& chann){
+                                 return chann.block == channel.block && 
+                                        chann.direction == channel.direction &&
+                                        chann.port == channel.port;
+                               });
+  if(chan_loc == channels.end()) { return nullptr; }
+  return chan_loc->pen;
+}
+
 
 void Oscilloscope::Scope::setChannelLabel(probe channel, const QString& label)
 {
@@ -363,7 +419,7 @@ void Oscilloscope::Scope::drawCurves()
   double max_val = 0;
   double local_max_val = 0;
   for(auto chan : this->channels){
-    if(chan.xbuffer.size() == 0) { continue; }
+    if(chan.xbuffer.empty()) { continue; }
     local_max_val = *std::max_element(chan.xbuffer.begin(),
                                       chan.xbuffer.end());
     if(local_max_val > max_val) { max_val = local_max_val; }
@@ -374,25 +430,8 @@ void Oscilloscope::Scope::drawCurves()
   scaleMapX->setScaleInterval(min_window_time , max_window_time);
   for (auto& channel : this->channels)
   {
-    // Set data for channel
-    //std::vector<double> x(channel.data.size());
-    //std::vector<double> y(channel.data.size());
-    //double* x_loc = x.data();
-    //double* y_loc = y.data();
-
-    // Set Y scale map for channel
     // TODO this should not happen each iteration, instead build into channel
-    // struct
     scaleMapY->setScaleInterval(-channel.scale * divY / 2, channel.scale * divY / 2);
-    // Scale data to pixel coordinates
-    //for (size_t j = 0; j < channel.data.size(); ++j) {
-    //  *x_loc = scaleMapX->transform(j * period);
-    //  *y_loc = scaleMapY->transform(channel.data[(data_idx + j) % channel.data.size()]
-    //                                + channel.offset);
-    //  ++x_loc;
-    //  ++y_loc;
-    //}
-
     // Append data to curve
     // Makes deep copy - which is not optimal
     // TODO: change to pointer based method
