@@ -256,19 +256,19 @@ void Event::Manager::postEvent(Event::Object* event)
   event->wait();
 }
 
-void Event::Manager::postEvent(const std::vector<Event::Object>& events)
+void Event::Manager::postEvent(std::vector<Event::Object>& events)
 {
   // Make sure the event processor is running
   if(!this->running) { return; } 
 
   // For performance provide postEvent that accepts multiple events
   std::unique_lock<std::mutex> lk(this->event_mut);
-  for (auto event : events) {
+  for (auto& event : events) {
     this->event_q.push(&event);
   }
-  this->available_event_cond.notify_all();
   lk.unlock();
-  for (auto event : events) {
+  this->available_event_cond.notify_all();
+  for (auto& event : events) {
     event.wait();
   }
 }
