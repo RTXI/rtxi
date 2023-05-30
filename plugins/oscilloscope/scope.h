@@ -126,8 +126,10 @@ private:
 
 class Scope : public QwtPlot
 {
+  Q_OBJECT
+
 public:
-  explicit Scope(QWidget* = nullptr);
+  explicit Scope(QWidget* parent);
   ~Scope() override;
 
   bool paused() const;

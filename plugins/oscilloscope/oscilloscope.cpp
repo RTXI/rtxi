@@ -881,11 +881,10 @@ Oscilloscope::Panel::Panel(MainWindow* mw, Event::Manager* event_manager)
   : Modules::Panel(std::string(Oscilloscope::MODULE_NAME), mw, event_manager),
     subWindow(new QMdiSubWindow),
     tabWidget(new QTabWidget),
-    scopeWindow(new Scope(this)),
-    layout(new QVBoxLayout),
-    scopeGroup(new QWidget(this)),
-    setBttnGroup(new QGroupBox(this))
+    layout(new QVBoxLayout)
 {
+  scopeGroup = new QWidget(this);
+  setBttnGroup = new QGroupBox(this);
   // Make Mdi
   subWindow->setWindowIcon(QIcon("/usr/local/share/rtxi/RTXI-widget-icon.png"));
   subWindow->setAttribute(Qt::WA_DeleteOnClose);
@@ -921,6 +920,7 @@ Oscilloscope::Panel::Panel(MainWindow* mw, Event::Manager* event_manager)
       tabWidget, SIGNAL(currentChanged(int)), this, SLOT(showTab(int)));
 
   auto* scopeLayout = new QHBoxLayout(this);
+  this->scopeWindow = new Scope(this);
   scopeLayout->addWidget(scopeWindow);
   scopeGroup->setLayout(scopeLayout);
   auto* setBttnLayout = new QHBoxLayout(this);
