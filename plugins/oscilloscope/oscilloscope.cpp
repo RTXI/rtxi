@@ -835,14 +835,20 @@ void Oscilloscope::Panel::showDisplayTab()
   //refreshsSpin->setValue(scopeWindow->getRefresh());
 
   // Find current trigger value and update gui
+  Oscilloscope::Trigger::Info trigInfo;
   auto* oscilloscope_plugin = dynamic_cast<Oscilloscope::Plugin*>(this->getHostPlugin());
-  Oscilloscope::Trigger::Info trigInfo = oscilloscope_plugin->getTriggerInfo();
-  static_cast<QRadioButton*>(trigsGroup->button(static_cast<int>(trigInfo.trigger_direction)))->setChecked(true);
+  if(oscilloscope_plugin != nullptr){
+    trigInfo = oscilloscope_plugin->getTriggerInfo();
+  }
+  this->trigsGroup->button(static_cast<int>(trigInfo.trigger_direction))->setChecked(true);
 
   trigsChanList->clear();
-  std::vector<Oscilloscope::channel_info> channelList = oscilloscope_plugin->getChannelsList();
-  std::string direction_str = "";
-  for (auto chanInfo : channelList){
+  std::vector<Oscilloscope::channel_info> channelList;
+  if (oscilloscope_plugin != nullptr) {
+    channelList = oscilloscope_plugin->getChannelsList();
+  }
+  std::string direction_str;
+  for (const auto& chanInfo : channelList){
     direction_str = chanInfo.probe.direction == IO::INPUT ? "INPUT" : "OUTPUT";
     trigsChanList->addItem(chanInfo.name + 
                            " " + QString::fromStdString(direction_str) +

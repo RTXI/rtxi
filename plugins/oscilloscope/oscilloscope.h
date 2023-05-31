@@ -84,11 +84,11 @@ enum trig_t : int
 };
 
 typedef struct Info {
-  IO::Block* block;
-  size_t port;
-  IO::flags_t io_direction;
-  Trigger::trig_t trigger_direction;
-  double threshold;
+  IO::Block* block = nullptr;
+  size_t port = 0;
+  IO::flags_t io_direction = IO::UNKNOWN;
+  Trigger::trig_t trigger_direction = NONE;
+  double threshold = 0.0;
 }Info;
 }; // namespace Trigger
 
@@ -227,7 +227,7 @@ public:
   std::vector<Oscilloscope::channel_info> getChannelsList(){ return this->chanInfoList; }
   bool addProbe(Oscilloscope::probe probeinfo);
   void removeProbe(Oscilloscope::probe probeinfo);
-  Oscilloscope::Trigger::Info getTriggerInfo(){ return this->trigger_info; }
+  Oscilloscope::Trigger::Info getTriggerInfo() { return this->trigger_info; }
 
 private:
   // List to maintain multiple scopes
