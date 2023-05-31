@@ -1,57 +1,88 @@
-# Find Qwt
-# ~~~~~~~~
-# Copyright (c) 2010, Tim Sutton <tim at linfiniti.com>
-# Redistribution and use is allowed according to the terms of the BSD license.
-# For details see the accompanying COPYING-CMAKE-SCRIPTS file.
+# Qt Widgets for Technical Applications
+# available at http://www.http://qwt.sourceforge.net/
 #
-# Once run this will define:
+# The module defines the following variables:
+#  Qwt_FOUND - the system has Qwt
+#  QWT_INCLUDE_DIR - where to find qwt_plot.h
+#  QWT_INCLUDE_DIRS - qwt includes
+#  QWT_LIBRARY - where to find the Qwt library
+#  QWT_LIBRARIES - aditional libraries
+#  QWT_VERSION_STRING - version (ex. 5.2.1)
 #
-# QWT_FOUND       = system has QWT lib
-# QWT_LIBRARY     = full path to the QWT library
-# QWT_INCLUDE_DIR = where to find headers
+# It also defines this imported target:
+#  Qwt::Qwt
+
+#=============================================================================
+# Copyright 2010-2013, Julien Schueller
+# Copyright 2018-2020, Rolf Eike Beer
+# All rights reserved.
+# 
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met: 
+# 
+# 1. Redistributions of source code must retain the above copyright notice, this
+#    list of conditions and the following disclaimer. 
+# 2. Redistributions in binary form must reproduce the above copyright notice,
+#    this list of conditions and the following disclaimer in the documentation
+#    and/or other materials provided with the distribution. 
 #
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+# ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+# (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+# ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+# SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+# The views and conclusions contained in the software and documentation are those
+# of the authors and should not be interpreted as representing official policies, 
+# either expressed or implied, of the FreeBSD Project.
+#=============================================================================
 
-set(QWT_LIBRARY_NAMES qwt-${QT_VERSION_BASE_LOWER} qwt qwt6)
+if (Qt5Gui_FOUND)
+  get_target_property(QT_INCLUDE_DIR Qt5::Gui INTERFACE_INCLUDE_DIRECTORIES)
+endif ()
 
-find_library(QWT_LIBRARY
-  NAMES ${QWT_LIBRARY_NAMES}
-  PATHS
-    /usr/lib
-    /usr/local/lib
-    /usr/local/lib/${QT_VERSION_BASE_LOWER}
-    "$ENV{LIB_DIR}/lib"
-    "$ENV{LIB}"
+find_path ( QWT_INCLUDE_DIR
+  NAMES qwt_plot.h
+  HINTS ${QT_INCLUDE_DIR}
+  PATH_SUFFIXES qwt qwt-qt5 qwt6
 )
 
-set(_qwt_fw)
-if(QWT_LIBRARY MATCHES "/qwt.*\\.framework")
-  string(REGEX REPLACE "^(.*/qwt.*\\.framework).*$" "\\1" _qwt_fw "${QWT_LIBRARY}")
-endif()
+set ( QWT_INCLUDE_DIRS ${QWT_INCLUDE_DIR} )
 
-FIND_PATH(QWT_INCLUDE_DIR NAMES qwt.h PATHS
-  "${_qwt_fw}/Headers"
-  /usr/include
-  /usr/include/${QT_VERSION_BASE_LOWER}
-  /usr/local/include
-  /usr/local/include/${QT_VERSION_BASE_LOWER}
-  "$ENV{LIB_DIR}/include"
-  "$ENV{INCLUDE}"
-  PATH_SUFFIXES qwt-${QT_VERSION_BASE_LOWER} ${QT_VERSION_BASE_LOWER}/qwt qwt qwt6
+# version
+set ( _VERSION_FILE ${QWT_INCLUDE_DIR}/qwt_global.h )
+if ( EXISTS ${_VERSION_FILE} )
+  file ( STRINGS ${_VERSION_FILE} _VERSION_LINE REGEX "define[ ]+QWT_VERSION_STR" )
+  if ( _VERSION_LINE )
+    string ( REGEX REPLACE ".*define[ ]+QWT_VERSION_STR[ ]+\"([^\"]*)\".*" "\\1" QWT_VERSION_STRING "${_VERSION_LINE}" )
+  endif ()
+endif ()
+unset ( _VERSION_FILE )
+
+find_library ( QWT_LIBRARY
+  NAMES qwt qwt-qt5
+  #HINTS ${QT_LIBRARY_DIR}
 )
 
-IF (QWT_INCLUDE_DIR AND QWT_LIBRARY)
-  SET(QWT_FOUND TRUE)
-ENDIF (QWT_INCLUDE_DIR AND QWT_LIBRARY)
+set ( QWT_LIBRARIES ${QWT_LIBRARY} )
 
-IF (QWT_FOUND)
-  FILE(READ ${QWT_INCLUDE_DIR}/qwt_global.h qwt_header)
-  STRING(REGEX REPLACE "^.*QWT_VERSION_STR +\"([^\"]+)\".*$" "\\1" QWT_VERSION_STR "${qwt_header}")
-  IF (NOT QWT_FIND_QUIETLY)
-    MESSAGE(STATUS "Found Qwt: ${QWT_LIBRARY} (${QWT_VERSION_STR})")
-  ENDIF (NOT QWT_FIND_QUIETLY)
-ELSE (QWT_FOUND)
-  IF (QWT_FIND_REQUIRED)
-    MESSAGE(FATAL_ERROR "Could not find Qwt")
-  ENDIF (QWT_FIND_REQUIRED)
-ENDIF (QWT_FOUND)
+include ( FindPackageHandleStandardArgs )
+find_package_handle_standard_args( qwt REQUIRED_VARS QWT_LIBRARY QWT_INCLUDE_DIR VERSION_VAR QWT_VERSION_STRING )
+
+if (qwt_FOUND AND NOT TARGET qwt::qwt)
+  add_library(qwt::qwt UNKNOWN IMPORTED)
+  set_target_properties(qwt::qwt PROPERTIES
+                        INTERFACE_INCLUDE_DIRECTORIES "${QWT_INCLUDE_DIRS}"
+                        IMPORTED_LOCATION "${QWT_LIBRARIES}")
+endif ()
+
+mark_as_advanced (
+  QWT_LIBRARY
+  QWT_INCLUDE_DIR
+)
+

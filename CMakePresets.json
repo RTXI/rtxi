@@ -30,13 +30,6 @@
       }
     },
     {
-      "name": "conan",
-      "hidden": true,
-      "cacheVariables": {
-        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/conan/conan_toolchain.cmake"
-      }
-    },
-    {
       "name": "cppcheck",
       "hidden": true,
       "cacheVariables": {
@@ -107,7 +100,7 @@
     },
     {
       "name": "ci-coverage",
-      "inherits": ["coverage-unix", "dev-mode", "conan"],
+      "inherits": ["coverage-unix", "dev-mode"],
       "cacheVariables": {
         "COVERAGE_HTML_COMMAND": ""
       }
@@ -115,7 +108,7 @@
     {
       "name": "ci-sanitize",
       "binaryDir": "${sourceDir}/build/sanitize",
-      "inherits": ["ci-unix", "dev-mode", "conan"],
+      "inherits": ["ci-unix", "dev-mode"],
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Sanitize",
         "CMAKE_CXX_FLAGS_SANITIZE": "-O2 -g -fsanitize=address,undefined -fno-omit-frame-pointer -fno-common",
@@ -129,15 +122,15 @@
     },
     {
       "name": "ci-macos",
-      "inherits": ["ci-build", "ci-unix", "dev-mode", "conan"]
+      "inherits": ["ci-build", "ci-unix", "dev-mode"]
     },
     {
       "name": "ci-ubuntu",
-      "inherits": ["ci-build", "ci-unix", "clang-tidy", "conan", "cppcheck", "dev-mode"]
+      "inherits": ["ci-build", "ci-unix", "clang-tidy", "cppcheck", "dev-mode"]
     },
     {
       "name": "ci-windows",
-      "inherits": ["ci-build", "ci-win64", "dev-mode", "conan"]
+      "inherits": ["ci-build", "ci-win64", "dev-mode"]
     }
   ]
 }

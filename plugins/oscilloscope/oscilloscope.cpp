@@ -705,15 +705,15 @@ QWidget* Oscilloscope::Panel::createDisplayTab(QWidget* parent)
   // trigWindowEdit->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Fixed);
   // trigWindowEdit->setMaximumWidth(trigWindowEdit->minimumSizeHint().width() * 3);
   
-  trigWindowEdit->setValidator(new QDoubleValidator(trigWindowEdit));
-  row2Layout->addWidget(trigWindowEdit);
-  trigWindowList = new QComboBox(page);
-  trigWindowList->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-  row2Layout->addWidget(trigWindowList);
-  trigWindowList->addItem("s");
-  trigWindowList->addItem("ms");
-  trigWindowList->addItem(QString::fromUtf8("µs"));
-  trigWindowList->setCurrentIndex(1);
+  //trigWindowEdit->setValidator(new QDoubleValidator(trigWindowEdit));
+  //row2Layout->addWidget(trigWindowEdit);
+  //trigWindowList = new QComboBox(page);
+  //trigWindowList->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+  //row2Layout->addWidget(trigWindowList);
+  //trigWindowList->addItem("s");
+  //trigWindowList->addItem("ms");
+  //trigWindowList->addItem(QString::fromUtf8("µs"));
+  //trigWindowList->setCurrentIndex(1);
 
   displayTabLayout->addLayout(row1Layout, 0, 0);
   displayTabLayout->addLayout(row2Layout, 1, 0);

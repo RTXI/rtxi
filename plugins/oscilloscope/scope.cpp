@@ -108,7 +108,7 @@ Oscilloscope::Scope::Scope(QWidget* parent): QwtPlot(parent),
   // Create and attach legend
   this->legendItem->attach(this);
   this->legendItem->setMaxColumns(1);
-  this->legendItem->setAlignmentInCanvas(Qt::Alignment(Qt::AlignTop | Qt::AlignRight));
+  this->legendItem->setAlignment(Qt::Alignment(Qt::AlignTop | Qt::AlignRight));
   this->legendItem->setBorderRadius(8);
   this->legendItem->setMargin(4);
   this->legendItem->setSpacing(2);
