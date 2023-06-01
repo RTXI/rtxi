@@ -739,7 +739,7 @@ void Oscilloscope::Panel::showChannelTab()
   IO::flags_t type = static_cast<IO::flags_t>(type_index);  
 
   int block_index = this->blocksListDropdown->currentIndex();
-  if (block_index < 0 || block_index >= blocks.size()){
+  if (block_index < 0 || block_index >= blocks.size() || !this->activateButton->isChecked()){
     activateButton->setChecked(false);
     scalesList->setEnabled(false);
     offsetsEdit->setEnabled(false);
