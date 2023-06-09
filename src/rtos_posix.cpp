@@ -88,6 +88,7 @@ int RT::OS::createTask(Task* task, void (*func)(void*), void* arg)
     RT::OS::shutdown(tsk);
   };
   std::thread thread_obj(wrapper, task, func, arg);
+  RT::OS::renameOSThread(thread_obj, std::string("RealTimeThread"));
   if (thread_obj.joinable()) {
     task->rt_thread = std::move(thread_obj);
   } else {
@@ -146,6 +147,13 @@ void RT::OS::sleepTimestep(RT::OS::Task* task)
                               sleep_time % RT::OS::SECONDS_TO_NANOSECONDS};
 
   clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &ts, nullptr);
+}
+
+void RT::OS::renameOSThread(std::thread& thread, const std::string& name)
+{
+  if(pthread_setname_np(thread.native_handle(), name.c_str()) != 0){
+    ERROR_MSG("RT::OS::renameOSThread : unable to set name to thread");
+  }
 }
 
 timespec last_clock_read;

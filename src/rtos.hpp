@@ -146,6 +146,13 @@ double getCpuUsage();
  */
 int createTask(Task* task, void (*func)(void*), void* arg);
 
+/*!
+ * Renames a thread. This is useful for debugging and developer sanity 
+ *
+ * \param thread Standard thread object 
+ * \param name String holding the name to assign to thread
+ */
+void renameOSThread(std::thread& thread, const std::string& name);
 }  // namespace RT::OS
 
 #endif
