@@ -29,7 +29,8 @@
 IO::Block::Block(std::string blockname,
                  const std::vector<IO::channel_t>& channels,
                  bool isdependent)
-    : name(std::move(blockname))
+    : id(0)
+    , name(std::move(blockname))
     , isInputDependent(isdependent)
 {
   port_t port = {};

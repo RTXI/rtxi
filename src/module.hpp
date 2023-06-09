@@ -99,7 +99,7 @@ class DefaultGUILineEdit : public QLineEdit
   Q_OBJECT
 
 public:
-  DefaultGUILineEdit(QWidget* parent);
+  explicit DefaultGUILineEdit(QWidget* parent);
 
   void blacken();
   QPalette palette;
@@ -394,9 +394,9 @@ public:
   Plugin(const Plugin& plugin) = delete;  // copy constructor
   Plugin& operator=(const Plugin& plugin) =
       delete;  // copy assignment noperator
-  Plugin(Plugin&&) = default;  // move constructor
-  Plugin& operator=(Plugin&&) = default;  // move assignment operator
-  virtual ~Plugin();
+  Plugin(Plugin&&) = delete;  // move constructor
+  Plugin& operator=(Plugin&&) = delete;  // move assignment operator
+   ~Plugin() override;
 
   size_t getID();
   /*!
@@ -568,8 +568,12 @@ private:
 class Manager : public Event::Handler
 {
 public:
+  Manager(const Manager&) = default;
+  Manager(Manager&&) = delete;
+  Manager& operator=(const Manager&) = default;
+  Manager& operator=(Manager&&) = delete;
   Manager(Event::Manager* event_manager, MainWindow* mw);
-  ~Manager();
+  ~Manager() override;
 
   /*!
    * loads plugin

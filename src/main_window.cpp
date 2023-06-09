@@ -46,10 +46,10 @@
 
 MainWindow::MainWindow(Event::Manager* ev_manager)
     : QMainWindow(nullptr, Qt::Window)
-    , event_manager(ev_manager)
+    , event_manager(ev_manager), mdiArea(new QMdiArea(this))
 {
   // Make central RTXI parent widget
-  mdiArea = new QMdiArea(this);
+  
   setCentralWidget(mdiArea);
 
   /* Initialize Window Settings */
@@ -413,7 +413,7 @@ void MainWindow::resetSettings()
   // Settings::Manager::getInstance()->load("/usr/local/share/rtxi/rtxi.conf");
 }
 
-void MainWindow::utilitiesMenuActivated(QAction* id)
+void MainWindow::utilitiesMenuActivated(QAction*  /*unused*/)
 {
   // Plugin::Manager::getInstance()->load(id->text());
 }
@@ -458,7 +458,7 @@ void MainWindow::windowsMenuAboutToShow()
   }
   // Create windows list based off of what's open
   for (auto* subwin : subWindows) {
-    auto* item = new QAction(subwin->widget()->windowTitle(), this);
+    //auto* item = new QAction(subwin->widget()->windowTitle(), this);
     windowsMenu->addAction(new QAction(subwin->widget()->windowTitle(), this));
   }
   connect(windowsMenu,
@@ -483,7 +483,7 @@ void MainWindow::windowsMenuActivated(QAction* id)
   }
 }
 
-void MainWindow::modulesMenuActivated(QAction* id)
+void MainWindow::modulesMenuActivated(QAction*  /*unused*/)
 {
   // // Annoying but the best way to do it is to tie an action to the entire
   // menu
@@ -515,7 +515,7 @@ void MainWindow::fileMenuActivated(QAction* id)
   // 3).toStdString());
 }
 
-void MainWindow::closeEvent(QCloseEvent* event)
+void MainWindow::closeEvent(QCloseEvent*  /*event*/)
 {
   /*
    * Save MainWindow settings

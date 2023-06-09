@@ -70,16 +70,16 @@ void Oscilloscope::Panel::updateChannelScale(Oscilloscope::probe probe_info)
   double chanscale = 1.0;
   switch (scale_index % 4){
     case 0:
-      chanscale = pow(10, 1 - scale_index / 4);
+      chanscale = pow(10, 1 - scale_index / 4.0);
       break;
     case 1:
-      chanscale = 5 * pow(10, -scale_index / 4);
+      chanscale = 5 * pow(10, -scale_index / 4.0);
       break;
     case 2:
-      chanscale = 2.5 * pow(10, -scale_index / 4);
+      chanscale = 2.5 * pow(10, -scale_index / 4.0);
       break;
     case 3:
-      chanscale = 2 * pow(10, -scale_index / 4);
+      chanscale = 2 * pow(10, -scale_index / 4.0);
       break;
     default:
       ERROR_MSG("Oscilloscope::Panel::applyChannelTab : invalid chan.scale selection\n");
@@ -102,7 +102,7 @@ void Oscilloscope::Panel::updateChannelLineWidth(Oscilloscope::probe probe_info)
     pen->setStyle(Qt::SolidLine);
     return; 
   }
-  Qt::PenStyle style = Oscilloscope::penStyles[static_cast<size_t>(width_indx)];
+  Qt::PenStyle style = Oscilloscope::penStyles.at(static_cast<size_t>(width_indx));
   pen->setStyle(style);
 }
 
@@ -114,7 +114,7 @@ void Oscilloscope::Panel::updateChannelLineStyle(Oscilloscope::probe probe_info)
     ERROR_MSG("Oscilloscope::Panel::applyChannelTab : invalid style selection\n");
     pen->setStyle(Oscilloscope::penStyles[0]);
   } else {
-    pen->setStyle(Oscilloscope::penStyles[style_indx]);
+    pen->setStyle(Oscilloscope::penStyles.at(static_cast<size_t>(style_indx)));
   }
 }
 
@@ -126,7 +126,7 @@ void Oscilloscope::Panel::updateChannelPenColor(Oscilloscope::probe probe_info)
     ERROR_MSG("Oscilloscope::Panel::applyChannelTab : invalid color selection\n");
     pen->setColor(Oscilloscope::penColors[0]);
   } else {
-    pen->setColor(Oscilloscope::penColors[color_indx]);
+    pen->setColor(Oscilloscope::penColors.at(static_cast<size_t>(color_indx)));
   }
 }
 
@@ -306,13 +306,14 @@ void Oscilloscope::Panel::applyChannelTab()
 void Oscilloscope::Panel::applyDisplayTab()
 {
   // Update X divisions
-  double divT;
-  if (timesList->currentIndex() % 3 == 1)
-    divT = 2 * pow(10, 3 - timesList->currentIndex() / 3);
-  else if (timesList->currentIndex() % 3 == 2)
-    divT = pow(10, 3 - timesList->currentIndex() / 3);
-  else
-    divT = 5 * pow(10, 3 - timesList->currentIndex() / 3);
+  double divT = NAN;
+  if (timesList->currentIndex() % 3 == 1) {
+    divT = 2 * pow(10, 3 - timesList->currentIndex() / 3.0);
+  } else if (timesList->currentIndex() % 3 == 2) {
+    divT = pow(10, 3 - timesList->currentIndex() / 3.0);
+  } else {
+    divT = 5 * pow(10, 3 - timesList->currentIndex() / 3.0);
+  }
   scopeWindow->setDivT(divT);
   //scopeWindow->setPeriod(RT::System::getInstance()->getPeriod() * 1e-6);
   this->adjustDataSize();
@@ -539,7 +540,7 @@ QWidget* Oscilloscope::Panel::createChannelTab(QWidget* parent)
   }
 
   // Create styles list
-  QLabel* styleLabel = new QLabel(tr("Style:"), page);
+  auto* styleLabel = new QLabel(tr("Style:"), page);
   row2Layout->addWidget(styleLabel);
   stylesList = new QComboBox(page);
   stylesList->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
@@ -594,13 +595,13 @@ QWidget* Oscilloscope::Panel::createDisplayTab(QWidget* parent)
       "yellow "
       "line will appear at the trigger threshold.</p>");
 
-  QWidget* page = new QWidget(parent);
+  auto* page = new QWidget(parent);
 
   // Scope properties
-  QGridLayout* displayTabLayout = new QGridLayout(page);
+  auto* displayTabLayout = new QGridLayout(page);
 
   // Create elements for time settings
-  QHBoxLayout* row1Layout = new QHBoxLayout;
+  auto* row1Layout = new QHBoxLayout;
   row1Layout->addWidget(new QLabel(tr("Time/Div:"), page));
   timesList = new QComboBox(page);
   row1Layout->addWidget(timesList);
@@ -630,7 +631,7 @@ QWidget* Oscilloscope::Panel::createDisplayTab(QWidget* parent)
   timesList->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
   timesList->setSizeAdjustPolicy(QComboBox::AdjustToContents);
 
-  QLabel* refreshLabel = new QLabel(tr("Refresh:"), page);
+  auto* refreshLabel = new QLabel(tr("Refresh:"), page);
   row1Layout->addWidget(refreshLabel);
   refreshDropdown = new QComboBox(page);
   row1Layout->addWidget(refreshDropdown);
@@ -652,7 +653,7 @@ QWidget* Oscilloscope::Panel::createDisplayTab(QWidget* parent)
   // Display box for Buffer bit. Push it to the right.
   row1Layout->addSpacerItem(
       new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
-  QLabel* bufferLabel = new QLabel(tr("Buffer Size (MB):"), page);
+  auto* bufferLabel = new QLabel(tr("Buffer Size (MB):"), page);
   row1Layout->addWidget(bufferLabel);
   sizesEdit = new QLineEdit(page);
   sizesEdit->setMaximumWidth(sizesEdit->minimumSizeHint().width() * 3);
@@ -662,17 +663,17 @@ QWidget* Oscilloscope::Panel::createDisplayTab(QWidget* parent)
   sizesEdit->setEnabled(false);
 
   // Trigger box
-  QHBoxLayout* row2Layout = new QHBoxLayout;
+  auto* row2Layout = new QHBoxLayout;
   row2Layout->addWidget(new QLabel(tr("Edge:"), page));
   trigsGroup = new QButtonGroup(page);
 
-  QRadioButton* off = new QRadioButton(tr("Off"), page);
+  auto* off = new QRadioButton(tr("Off"), page);
   trigsGroup->addButton(off, Oscilloscope::Trigger::NONE);
   row2Layout->addWidget(off);
-  QRadioButton* plus = new QRadioButton(tr("+"), page);
+  auto* plus = new QRadioButton(tr("+"), page);
   trigsGroup->addButton(plus, Oscilloscope::Trigger::POS);
   row2Layout->addWidget(plus);
-  QRadioButton* minus = new QRadioButton(tr("-"), page);
+  auto* minus = new QRadioButton(tr("-"), page);
   trigsGroup->addButton(minus, Oscilloscope::Trigger::NEG);
   row2Layout->addWidget(minus);
 
@@ -736,10 +737,12 @@ void Oscilloscope::Panel::showChannelTab()
     typesList->setCurrentIndex(0);
     type_index = 0;
   }
-  IO::flags_t type = static_cast<IO::flags_t>(type_index);  
+  auto type = static_cast<IO::flags_t>(type_index);
 
   int block_index = this->blocksListDropdown->currentIndex();
-  if (block_index < 0 || block_index >= blocks.size() || !this->activateButton->isChecked()){
+  if (block_index < 0 || 
+      static_cast<size_t>(block_index) >= blocks.size() || 
+      !this->activateButton->isChecked()){
     activateButton->setChecked(false);
     scalesList->setEnabled(false);
     offsetsEdit->setEnabled(false);
@@ -887,10 +890,11 @@ Oscilloscope::Panel::Panel(MainWindow* mw, Event::Manager* event_manager)
   : Modules::Panel(std::string(Oscilloscope::MODULE_NAME), mw, event_manager),
     subWindow(new QMdiSubWindow),
     tabWidget(new QTabWidget),
-    layout(new QVBoxLayout)
+    scopeWindow(new Scope(this)), layout(new QVBoxLayout), 
+    scopeGroup(new QWidget(this)), 
+    setBttnGroup(new QGroupBox(this))
 {
-  scopeGroup = new QWidget(this);
-  setBttnGroup = new QGroupBox(this);
+  
   // Make Mdi
   subWindow->setWindowIcon(QIcon("/usr/local/share/rtxi/RTXI-widget-icon.png"));
   subWindow->setAttribute(Qt::WA_DeleteOnClose);
@@ -926,7 +930,6 @@ Oscilloscope::Panel::Panel(MainWindow* mw, Event::Manager* event_manager)
       tabWidget, SIGNAL(currentChanged(int)), this, SLOT(showTab(int)));
 
   auto* scopeLayout = new QHBoxLayout(this);
-  this->scopeWindow = new Scope(this);
   scopeLayout->addWidget(scopeWindow);
   scopeGroup->setLayout(scopeLayout);
   auto* setBttnLayout = new QHBoxLayout(this);
@@ -985,7 +988,7 @@ Oscilloscope::Panel::Panel(MainWindow* mw, Event::Manager* event_manager)
   show();
 }
 
-Oscilloscope::Component::Component(Modules::Plugin* hplugin, std::string probe_name)
+Oscilloscope::Component::Component(Modules::Plugin* hplugin, const std::string& probe_name)
   : Modules::Component(hplugin,
                        probe_name,
                        Oscilloscope::DEFAULT_OSCILLOSCOPE_CHANNELS,
@@ -1006,7 +1009,7 @@ void Oscilloscope::Component::callback()
       break;
     }
     case Modules::Variable::EXEC:{
-      auto triggering = getValue<Modules::Variable::state_t>(Oscilloscope::PARAMETER::TRIGGERING);
+      //auto triggering = getValue<Modules::Variable::state_t>(Oscilloscope::PARAMETER::TRIGGERING);
       sample.time = RT::OS::getTime();
       std::vector<double> value = this->readinput(0);
       sample.value = value[0];
@@ -1061,7 +1064,7 @@ void Oscilloscope::Panel::adjustDataSize()
   this->getRTXIEventManager()->postEvent(&event);
   auto period = std::any_cast<int64_t>(event.getParam("period"));
   size_t size =
-      ceil(scopeWindow->getDivT() * scopeWindow->getDivX() / period) + 1;
+      ceil(scopeWindow->getDivT() * scopeWindow->getDivX() / period) + 1.0;
   scopeWindow->setDataSize(size);
   sizesEdit->setText(QString::number(scopeWindow->getDataSize()));
 }
@@ -1124,14 +1127,14 @@ bool Oscilloscope::Plugin::addProbe(Oscilloscope::probe probe_info)
   // TODO: complete proper handling of errors if not able to register probe thread
 }
 
-void Oscilloscope::Plugin::removeProbe(Oscilloscope::probe probeinfo)
+void Oscilloscope::Plugin::removeProbe(Oscilloscope::probe probe_info)
 {
   auto probe_loc = std::find_if(this->chanInfoList.begin(),
                                 this->chanInfoList.end(),
                                 [&](const Oscilloscope::channel_info& chann){
-                                  return chann.probe.block == probeinfo.block && 
-                                         chann.probe.direction == probeinfo.direction &&
-                                         chann.probe.port == probeinfo.port;
+                                  return chann.probe.block == probe_info.block && 
+                                         chann.probe.direction == probe_info.direction &&
+                                         chann.probe.port == probe_info.port;
                                 });
   if(probe_loc == this->chanInfoList.end()) { return; }
   Event::Object event(Event::Type::RT_THREAD_REMOVE_EVENT);
@@ -1155,7 +1158,7 @@ Modules::Panel* Oscilloscope::createRTXIPanel(
 }
 
 std::unique_ptr<Modules::Component> Oscilloscope::createRTXIComponent(
-    Modules::Plugin* host_plugin)
+    Modules::Plugin*  /*host_plugin*/)
 {
   return std::unique_ptr<Oscilloscope::Component>(nullptr);
 }

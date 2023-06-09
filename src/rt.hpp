@@ -79,7 +79,7 @@ public:
       default;  // copy assignment operator
   Device(Device&&) = delete;  // move constructor
   Device& operator=(Device&&) = delete;  // move assignment operator
-  virtual ~Device() = default;
+   ~Device() override = default;
 
   /*! \fn virtual void read(void)
    * Function called by the realtime task at the beginning of each period.
@@ -121,7 +121,7 @@ public:
       default;  // copy assignment operator
   Thread(Thread&&) = delete;  // move constructor
   Thread& operator=(Thread&&) = delete;  // move assignment operator
-  virtual ~Thread() = default;
+   ~Thread() override = default;
 
   /*! \fn virtual void execute(void)
    * Function called periodically by the realtime task.
@@ -298,7 +298,7 @@ public:
   System& operator=(const System& system) = delete;  // copy assignment operator
   System(System&&) = delete;  // move constructor
   System& operator=(System&&) = delete;  // move assignment operator
-  ~System();
+  ~System() override;
 
   int64_t getPeriod();
   std::vector<RT::Telemitry::Response> getTelemitry();

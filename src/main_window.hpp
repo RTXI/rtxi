@@ -37,7 +37,7 @@ class MainWindow : public QMainWindow
 {
   Q_OBJECT
 public:
-  MainWindow(Event::Manager* ev_manager);
+  explicit MainWindow(Event::Manager* ev_manager);
 
   /*!
    * Add an item to the File menu.

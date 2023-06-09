@@ -105,7 +105,7 @@ typedef struct channel_info
 class Component : public Modules::Component
 {
 public:
-  Component(Modules::Plugin* hplugin, std::string probe_name);
+  Component(Modules::Plugin* hplugin, const std::string& probe_name);
   void flushFifo();
   RT::OS::Fifo* getFifoPtr() { return this->fifo.get(); }
 
@@ -211,13 +211,16 @@ private:
   QPushButton* activateButton=nullptr;
 
   std::vector<IO::Block*> blocks;
-  size_t counter;
   //size_t downsample_rate;
 };  // Panel
 
 class Plugin : public Modules::Plugin
 {
 public:
+  Plugin(const Plugin&) = delete;
+  Plugin(Plugin&&) = delete;
+  Plugin& operator=(const Plugin&) = delete;
+  Plugin& operator=(Plugin&&) = delete;
   Plugin(Event::Manager* ev_manager, MainWindow* main_window);
   ~Plugin() override;
 
@@ -225,8 +228,8 @@ public:
   Oscilloscope::Component* getProbeComponent(probe probeInfo);
 
   std::vector<Oscilloscope::channel_info> getChannelsList(){ return this->chanInfoList; }
-  bool addProbe(Oscilloscope::probe probeinfo);
-  void removeProbe(Oscilloscope::probe probeinfo);
+  bool addProbe(Oscilloscope::probe probe_info);
+  void removeProbe(Oscilloscope::probe probe_info);
   Oscilloscope::Trigger::Info getTriggerInfo() { return this->trigger_info; }
 
 private:
