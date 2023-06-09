@@ -18,7 +18,7 @@ const int64_t SECONDS_TO_NANOSECONDS =
     1000000000;  // Conversion from sec to nsec
 const int64_t DEFAULT_PERIOD = 1000000;  // Default period is set to 1 msec
 const uint64_t DEFAULT_FIFO_SIZE = 255;  // Default Fifo size of 255 bytes
-
+const size_t PROCESSOR_COUNT = std::thread::hardware_concurrency();
 /*!
  * Object representation of a real-time loop
  *
