@@ -971,7 +971,7 @@ Oscilloscope::Panel::Panel(MainWindow* mw, Event::Manager* event_manager)
   subWindow->resize(subWindow->minimumSizeHint().width() + 50, 600);
 
   // Initialize vars
-  setWindowTitle(QString::fromStdString(this->getName()));
+  setWindowTitle(tr(std::string(Oscilloscope::MODULE_NAME).c_str()));
 
   auto* otimer = new QTimer;
   otimer->setTimerType(Qt::PreciseTimer);
