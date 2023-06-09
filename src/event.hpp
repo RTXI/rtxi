@@ -194,6 +194,12 @@ private:
 class Handler
 {
 public:
+  Handler()=default;
+  Handler(const Handler&) = default;
+  Handler(Handler&&) = delete;
+  Handler& operator=(const Handler&) = default;
+  Handler& operator=(Handler&&) = delete;
+  virtual ~Handler() = default;
   /*!
    * Function that is called in non-realtime every time an non-realtime
    *  event is posted.
@@ -252,7 +258,7 @@ public:
    *
    * \sa  Event::Object
    */
-  void processEvents();
+  //void processEvents();
 
   /*!
    * Registers handler in the registry
@@ -279,6 +285,7 @@ private:
   std::condition_variable available_event_cond;
   std::atomic<bool> running = true;
   std::thread event_thread;
+  std::vector<std::thread> thread_pool;
 
   // Shared mutex allows for multiple reader single writer scenarios.
   std::shared_mutex handlerlist_mut;  // Mutex for modifying event handler queue

@@ -20,6 +20,7 @@
 
 #include <algorithm>
 #include <future>
+#include <mutex>
 
 #include "event.hpp"
 
@@ -231,17 +232,56 @@ Event::Type Event::Object::getType() const
 
 Event::Manager::Manager()
 {
-  this->event_thread = std::thread(&Event::Manager::processEvents, this);
+  // initialize logger before creating event processing workers
   this->logger = std::make_unique<eventLogger>();
+
+  auto task = [this]{
+    Event::Object* event=nullptr;
+    while (this->running) {
+      // check if there are available events
+      {
+        std::unique_lock<std::mutex> event_lock(this->event_mut);
+        this->available_event_cond.wait(
+          event_lock, [this] { return !(this->event_q.empty()) || !this->running; });
+        event = this->event_q.front();
+        this->event_q.pop();
+        event_lock.unlock();
+        if (event == nullptr || !this->running) {
+          continue;
+        }
+      }
+
+      // route the event to all handlers
+      {
+        std::shared_lock<std::shared_mutex> handlerlist_lock(this->handlerlist_mut);
+        for (auto* handler : this->handlerList) {
+          handler->receiveEvent(event);
+        }
+        handlerlist_lock.unlock();
+        
+        // mark event as processed
+        event->done();
+      }
+    }
+  };
+
+  //create event processing workers in the thread pool
+  for(size_t count=0; count < RT::OS::PROCESSOR_COUNT; count++){
+    this->thread_pool.emplace_back(task);
+  }
 }
 
 Event::Manager::~Manager()
 {
   Event::Object event(Event::Type::MANAGER_SHUTDOWN_EVENT);
   this->postEvent(&event);
-  if (this->event_thread.joinable()) {
-    this->event_thread.join();
-  };
+  this->running = false;
+  this->available_event_cond.notify_all();
+  for(auto& thread : this->thread_pool){
+    if (thread.joinable()) {
+      thread.join();
+    }
+  }
 }
 
 void Event::Manager::postEvent(Event::Object* event)
@@ -251,7 +291,7 @@ void Event::Manager::postEvent(Event::Object* event)
 
   std::unique_lock<std::mutex> lk(this->event_mut);
   this->event_q.push(event);
-  this->available_event_cond.notify_all();
+  this->available_event_cond.notify_one();
   lk.unlock();
   event->wait();
 }
@@ -273,40 +313,28 @@ void Event::Manager::postEvent(std::vector<Event::Object>& events)
   }
 }
 
-void Event::Manager::processEvents()
-{
-  Event::Object* tmp_event = nullptr;
-  auto event_processor = [this](Event::Object* event)
-  {
-    if (event == nullptr) {
-      ERROR_MSG("Null pointer event received by event processor. Ignoring");
-      return;
-    }
-    std::shared_lock<std::shared_mutex> handlerlist_lock(this->handlerlist_mut);
-    for (auto* handler : this->handlerList) {
-      handler->receiveEvent(event);
-    }
-    handlerlist_lock.unlock();
-    event->done();
-  };
-  std::unique_lock<std::mutex> event_lock(this->event_mut);
-  // TODO: Turn this into a thread pool implementation for performance
-  while (this->running) {
-    this->available_event_cond.wait(
-        event_lock, [this] { return !(this->event_q.empty()); });
-    
-    while (!event_q.empty()) {
-      tmp_event = event_q.front();
-      if(tmp_event->getType() == Event::Type::MANAGER_SHUTDOWN_EVENT){
-        this->running = false;
-      }
-      this->logger->log(event_q.front());
-      std::thread(event_processor, tmp_event).detach();
-      this->event_q.pop();
-      tmp_event = nullptr;
-    }
-  }
-}
+//void Event::Manager::processEvents()
+//{
+//  Event::Object* tmp_event = nullptr;
+//  auto event_processor = 
+//  std::unique_lock<std::mutex> event_lock(this->event_mut);
+//  // TODO: Turn this into a thread pool implementation for performance
+//  while (this->running) {
+//    this->available_event_cond.wait(
+//        event_lock, [this] { return !(this->event_q.empty()); });
+//    
+//    while (!event_q.empty()) {
+//      tmp_event = event_q.front();
+//      if(tmp_event->getType() == Event::Type::MANAGER_SHUTDOWN_EVENT){
+//        this->running = false;
+//      }
+//      this->logger->log(event_q.front());
+//      std::thread(event_processor, tmp_event).detach();
+//      this->event_q.pop();
+//      tmp_event = nullptr;
+//    }
+//  }
+//}
 
 void Event::Manager::registerHandler(Event::Handler* handler)
 {
