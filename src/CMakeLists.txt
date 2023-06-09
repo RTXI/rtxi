@@ -37,7 +37,7 @@ elseif(xenomai3_FOUND AND RTXI_RT_CORE STREQUAL "xenomai")
 
 else()
   message("EVL Library not found. Reverting to posix Interface.")
-  add_library(xfifo SHARED "fifo.hpp" "fifo.cpp")
+  add_library(xfifo SHARED "fifo.hpp" "fifo_posix.cpp")
   target_link_libraries(xfifo PRIVATE fmt::fmt)
   add_library(rtos SHARED "rtos.hpp" "rtos_posix.cpp")
   target_link_libraries(rtos PRIVATE 
