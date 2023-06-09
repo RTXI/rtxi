@@ -980,6 +980,7 @@ Oscilloscope::Panel::Panel(MainWindow* mw, Event::Manager* event_manager)
   otimer->start(Oscilloscope::FrameRates::HZ60);
 
   QObject::connect(this, SIGNAL(updateBlockInfo()), this, SLOT(syncBlockInfo()));
+  this->updateBlockInfo();
   scopeWindow->replot();
   show();
 }
