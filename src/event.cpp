@@ -269,6 +269,12 @@ Event::Manager::Manager()
   for(size_t count=0; count < RT::OS::PROCESSOR_COUNT; count++){
     this->thread_pool.emplace_back(task);
   }
+  size_t count=0;
+  for(auto& thread : this->thread_pool){
+    RT::OS::renameOSThread(thread, 
+                           std::string("RTXIEventWorker"));
+    count++;
+  }
 }
 
 Event::Manager::~Manager()

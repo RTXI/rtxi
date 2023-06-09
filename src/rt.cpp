@@ -344,6 +344,7 @@ void RT::System::createTelemitryProcessor()
     }
   };
   this->telemitry_processing_thread = std::thread(proc);
+  RT::OS::renameOSThread(this->telemitry_processing_thread, std::string("TelemitryWorker"));
 }
 
 std::vector<RT::Telemitry::Response> RT::System::getTelemitry()
