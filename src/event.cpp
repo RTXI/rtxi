@@ -25,7 +25,6 @@
 #include "event.hpp"
 
 #include "debug.hpp"
-
 #include "logger.hpp"
 
 std::string Event::type_to_string(Event::Type event_type)
@@ -174,7 +173,7 @@ std::any Event::Object::getParam(const std::string& param_name) const
       return parameter.value;
     }
   }
-  return std::any{};
+  return std::any {};
 }
 
 bool Event::Object::paramExists(const std::string& param_name)
@@ -235,14 +234,16 @@ Event::Manager::Manager()
   // initialize logger before creating event processing workers
   this->logger = std::make_unique<eventLogger>();
 
-  auto task = [this]{
-    Event::Object* event=nullptr;
+  auto task = [this]
+  {
+    Event::Object* event = nullptr;
     while (this->running) {
       // check if there are available events
       {
         std::unique_lock<std::mutex> event_lock(this->event_mut);
         this->available_event_cond.wait(
-          event_lock, [this] { return !(this->event_q.empty()) || !this->running; });
+            event_lock,
+            [this] { return !(this->event_q.empty()) || !this->running; });
         event = this->event_q.front();
         this->event_q.pop();
         event_lock.unlock();
@@ -253,26 +254,26 @@ Event::Manager::Manager()
 
       // route the event to all handlers
       {
-        std::shared_lock<std::shared_mutex> handlerlist_lock(this->handlerlist_mut);
+        std::shared_lock<std::shared_mutex> handlerlist_lock(
+            this->handlerlist_mut);
         for (auto* handler : this->handlerList) {
           handler->receiveEvent(event);
         }
         handlerlist_lock.unlock();
-        
+
         // mark event as processed
         event->done();
       }
     }
   };
 
-  //create event processing workers in the thread pool
-  for(size_t count=0; count < RT::OS::PROCESSOR_COUNT; count++){
+  // create event processing workers in the thread pool
+  for (size_t count = 0; count < RT::OS::PROCESSOR_COUNT; count++) {
     this->thread_pool.emplace_back(task);
   }
-  size_t count=0;
-  for(auto& thread : this->thread_pool){
-    RT::OS::renameOSThread(thread, 
-                           std::string("RTXIEventWorker"));
+  size_t count = 0;
+  for (auto& thread : this->thread_pool) {
+    RT::OS::renameOSThread(thread, std::string("RTXIEventWorker"));
     count++;
   }
 }
@@ -283,7 +284,7 @@ Event::Manager::~Manager()
   this->postEvent(&event);
   this->running = false;
   this->available_event_cond.notify_all();
-  for(auto& thread : this->thread_pool){
+  for (auto& thread : this->thread_pool) {
     if (thread.joinable()) {
       thread.join();
     }
@@ -293,7 +294,9 @@ Event::Manager::~Manager()
 void Event::Manager::postEvent(Event::Object* event)
 {
   // Make sure the event processor is running
-  if(!this->running) { return; } 
+  if (!this->running) {
+    return;
+  }
 
   std::unique_lock<std::mutex> lk(this->event_mut);
   this->event_q.push(event);
@@ -305,7 +308,9 @@ void Event::Manager::postEvent(Event::Object* event)
 void Event::Manager::postEvent(std::vector<Event::Object>& events)
 {
   // Make sure the event processor is running
-  if(!this->running) { return; } 
+  if (!this->running) {
+    return;
+  }
 
   // For performance provide postEvent that accepts multiple events
   std::unique_lock<std::mutex> lk(this->event_mut);
@@ -319,28 +324,28 @@ void Event::Manager::postEvent(std::vector<Event::Object>& events)
   }
 }
 
-//void Event::Manager::processEvents()
+// void Event::Manager::processEvents()
 //{
-//  Event::Object* tmp_event = nullptr;
-//  auto event_processor = 
-//  std::unique_lock<std::mutex> event_lock(this->event_mut);
-//  // TODO: Turn this into a thread pool implementation for performance
-//  while (this->running) {
-//    this->available_event_cond.wait(
-//        event_lock, [this] { return !(this->event_q.empty()); });
-//    
-//    while (!event_q.empty()) {
-//      tmp_event = event_q.front();
-//      if(tmp_event->getType() == Event::Type::MANAGER_SHUTDOWN_EVENT){
-//        this->running = false;
-//      }
-//      this->logger->log(event_q.front());
-//      std::thread(event_processor, tmp_event).detach();
-//      this->event_q.pop();
-//      tmp_event = nullptr;
-//    }
-//  }
-//}
+//   Event::Object* tmp_event = nullptr;
+//   auto event_processor =
+//   std::unique_lock<std::mutex> event_lock(this->event_mut);
+//   // TODO: Turn this into a thread pool implementation for performance
+//   while (this->running) {
+//     this->available_event_cond.wait(
+//         event_lock, [this] { return !(this->event_q.empty()); });
+//
+//     while (!event_q.empty()) {
+//       tmp_event = event_q.front();
+//       if(tmp_event->getType() == Event::Type::MANAGER_SHUTDOWN_EVENT){
+//         this->running = false;
+//       }
+//       this->logger->log(event_q.front());
+//       std::thread(event_processor, tmp_event).detach();
+//       this->event_q.pop();
+//       tmp_event = nullptr;
+//     }
+//   }
+// }
 
 void Event::Manager::registerHandler(Event::Handler* handler)
 {

@@ -19,17 +19,17 @@
  */
 
 #include <functional>
-#include <queue>
 #include <iostream>
+#include <queue>
 
 #include "rt.hpp"
 
 #include "debug.hpp"
 #include "event.hpp"
 #include "fifo.hpp"
+#include "logger.hpp"
 #include "module.hpp"
 #include "rtos.hpp"
-#include "logger.hpp"
 
 void RT::Device::read()
 {
@@ -63,10 +63,14 @@ void RT::Thread::bind_execute_callback(std::function<void(void)> callback)
 
 int RT::Connector::find_cycle(RT::block_connection_t conn, IO::Block* ref_block)
 {
-  if(conn.dest == ref_block) { return -1; }
-  for(const auto& temp_conn : this->connections) {
-    if (conn.dest == temp_conn.src && this->find_cycle(temp_conn, ref_block) == -1){ 
-      return -1; 
+  if (conn.dest == ref_block) {
+    return -1;
+  }
+  for (const auto& temp_conn : this->connections) {
+    if (conn.dest == temp_conn.src
+        && this->find_cycle(temp_conn, ref_block) == -1)
+    {
+      return -1;
     }
   }
   return 0;
@@ -75,12 +79,16 @@ int RT::Connector::find_cycle(RT::block_connection_t conn, IO::Block* ref_block)
 int RT::Connector::connect(RT::block_connection_t connection)
 {
   // Let's remind our users to register their block first
-  if (!(this->isRegistered(connection.src) && this->isRegistered(connection.dest))) {
+  if (!(this->isRegistered(connection.src)
+        && this->isRegistered(connection.dest)))
+  {
     ERROR_MSG(
         "RT::Connector : source or destination blocks are not registered");
     return -1;
   }
-  if(this->find_cycle(connection, connection.src) == -1) { return -1; }
+  if (this->find_cycle(connection, connection.src) == -1) {
+    return -1;
+  }
 
   if (!(this->connected(connection))) {
     this->connections.push_back(connection);
@@ -90,33 +98,39 @@ int RT::Connector::connect(RT::block_connection_t connection)
 
 bool RT::Connector::connected(RT::block_connection_t connection)
 {
-  if (!(this->isRegistered(connection.src) && this->isRegistered(connection.dest))) {
+  if (!(this->isRegistered(connection.src)
+        && this->isRegistered(connection.dest)))
+  {
     return false;
   }
 
   bool connected = false;
-  for(const auto& conn : this->connections){
-    connected = connection.src == conn.src && 
-                connection.src_port_type == conn.src_port_type &&
-                connection.src_port == conn.src_port &&
-                connection.dest == conn.dest &&
-                connection.dest_port == conn.dest_port;
-    if (connected) { break; }
+  for (const auto& conn : this->connections) {
+    connected = connection.src == conn.src
+        && connection.src_port_type == conn.src_port_type
+        && connection.src_port == conn.src_port && connection.dest == conn.dest
+        && connection.dest_port == conn.dest_port;
+    if (connected) {
+      break;
+    }
   }
   return connected;
 }
 
 void RT::Connector::disconnect(RT::block_connection_t connection)
 {
-  if (!(this->isRegistered(connection.src) && this->isRegistered(connection.dest))) {
+  if (!(this->isRegistered(connection.src)
+        && this->isRegistered(connection.dest)))
+  {
     return;
   }
-  for(auto it = this->connections.begin(); it != this->connections.end(); it++){
-    if(connection.src == it->src && 
-       connection.src_port_type == it->src_port_type &&
-       connection.src_port == it->src_port && 
-       connection.dest == it->dest && 
-       connection.dest_port == it->dest_port){
+  for (auto it = this->connections.begin(); it != this->connections.end(); it++)
+  {
+    if (connection.src == it->src
+        && connection.src_port_type == it->src_port_type
+        && connection.src_port == it->src_port && connection.dest == it->dest
+        && connection.dest_port == it->dest_port)
+    {
       this->connections.erase(it);
       break;
     }
@@ -132,7 +146,7 @@ void RT::Connector::insertBlock(IO::Block* block)
   // first find a valid slot to store the block in the registry
   size_t id = 0;
   bool stored = false;
-  for(id = 0; id < this->block_registry.size(); id++) {
+  for (id = 0; id < this->block_registry.size(); id++) {
     if (this->block_registry[id] == nullptr) {
       this->block_registry[id] = block;
       block->assignID(id);
@@ -142,7 +156,7 @@ void RT::Connector::insertBlock(IO::Block* block)
   }
 
   // if all slots are taken then append
-  if(!stored) {
+  if (!stored) {
     block->assignID(this->block_registry.size());
     this->block_registry.push_back(block);
   }
@@ -154,15 +168,17 @@ void RT::Connector::removeBlock(IO::Block* block)
     return;
   }
   // first remove all connections
-  for(auto iter = this->connections.begin(); iter != this->connections.end(); iter++){
-    if(iter->src == block || iter->dest == block) {
+  for (auto iter = this->connections.begin(); iter != this->connections.end();
+       iter++)
+  {
+    if (iter->src == block || iter->dest == block) {
       this->connections.erase(iter);
     }
   }
 
   // remove block from registry
-  for(auto& block_slot : this->block_registry){
-    if(block == block_slot){ 
+  for (auto& block_slot : this->block_registry) {
+    if (block == block_slot) {
       block_slot = nullptr;
       break;
     }
@@ -171,8 +187,12 @@ void RT::Connector::removeBlock(IO::Block* block)
 
 bool RT::Connector::isRegistered(IO::Block* block)
 {
-  if (block == nullptr) { return false; }
-  if (block->getID() >= this->block_registry.size()) { return false; }
+  if (block == nullptr) {
+    return false;
+  }
+  if (block->getID() >= this->block_registry.size()) {
+    return false;
+  }
   return block == this->block_registry[block->getID()];
 }
 
@@ -181,11 +201,13 @@ std::vector<RT::Thread*> RT::Connector::topological_sort()
   auto processing_q = std::queue<IO::Block*>();
   auto sorted_blocks = std::vector<IO::Block*>();
   auto sources_per_block = std::unordered_map<IO::Block*, int>();
-  //auto valid_threads = std::vector<IO::Block*>();
+  // auto valid_threads = std::vector<IO::Block*>();
 
   // initialize counts
-  for(auto* block : this->block_registry){
-    if(block == nullptr) { continue; }
+  for (auto* block : this->block_registry) {
+    if (block == nullptr) {
+      continue;
+    }
     sources_per_block[block] = 0;
   }
 
@@ -204,7 +226,7 @@ std::vector<RT::Thread*> RT::Connector::topological_sort()
   // Process the graph nodes.
   while (!processing_q.empty()) {
     sorted_blocks.push_back(processing_q.front());
-    for (const auto& conn: this->connections) {
+    for (const auto& conn : this->connections) {
       if (processing_q.front() == conn.src) {
         sources_per_block[conn.dest] -= 1;
         if (sources_per_block[conn.dest] == 0) {
@@ -215,7 +237,7 @@ std::vector<RT::Thread*> RT::Connector::topological_sort()
     processing_q.pop();
   }
 
-  // System only cares about active threads 
+  // System only cares about active threads
   std::vector<RT::Thread*> sorted_active_threads;
   for (auto* block : sorted_blocks) {
     if (block->getActive() && block->dependent()) {
@@ -229,7 +251,9 @@ std::vector<RT::Device*> RT::Connector::getDevices()
 {
   std::vector<RT::Device*> devices;
   for (auto* block : this->block_registry) {
-    if (block == nullptr) { continue; }
+    if (block == nullptr) {
+      continue;
+    }
     if (block->getActive() && !block->dependent()) {
       devices.push_back(dynamic_cast<RT::Device*>(block));
     }
@@ -245,18 +269,21 @@ std::vector<RT::Thread*> RT::Connector::getThreads()
 std::vector<RT::block_connection_t> RT::Connector::getOutputs(IO::Block* src)
 {
   auto result = std::vector<RT::block_connection_t>();
-  for(auto conn : this->connections){
-    if(conn.src == src) { result.push_back(conn); }
+  for (auto conn : this->connections) {
+    if (conn.src == src) {
+      result.push_back(conn);
+    }
   }
   return result;
 }
 
 void RT::Connector::propagateBlockConnections(IO::Block* block)
 {
-  for (auto conn : this->connections){
-    if (conn.src == block){
-      conn.dest->writeinput(conn.dest_port, 
-                            conn.src->readPort(conn.src_port_type, conn.src_port));
+  for (auto conn : this->connections) {
+    if (conn.src == block) {
+      conn.dest->writeinput(
+          conn.dest_port,
+          conn.src->readPort(conn.src_port_type, conn.src_port));
     }
   }
 }
@@ -264,8 +291,10 @@ void RT::Connector::propagateBlockConnections(IO::Block* block)
 std::vector<IO::Block*> RT::Connector::getRegisteredBlocks()
 {
   std::vector<IO::Block*> blocks;
-  for(auto* block : this->block_registry){
-    if(block != nullptr) { blocks.push_back(block); }
+  for (auto* block : this->block_registry) {
+    if (block != nullptr) {
+      blocks.push_back(block);
+    }
   }
   return blocks;
 }
@@ -273,8 +302,10 @@ std::vector<IO::Block*> RT::Connector::getRegisteredBlocks()
 std::vector<RT::block_connection_t> RT::Connector::getAllConnections()
 {
   std::vector<RT::block_connection_t> all_connections;
-  for(auto conn: this->connections){
-    if(conn.src != nullptr) { all_connections.push_back(conn); }
+  for (auto conn : this->connections) {
+    if (conn.src != nullptr) {
+      all_connections.push_back(conn);
+    }
   }
   return all_connections;
 }
@@ -308,7 +339,7 @@ RT::System::~System()
   this->event_manager->unregisterHandler(this);
   this->telemitry_processing_thread_running = false;
   this->eventFifo->close();
-  if(this->telemitry_processing_thread.joinable()){
+  if (this->telemitry_processing_thread.joinable()) {
     this->telemitry_processing_thread.join();
   }
 }
@@ -325,18 +356,20 @@ void RT::System::postTelemitry(RT::Telemitry::Response telemitry)
 
 void RT::System::createTelemitryProcessor()
 {
-  auto proc = [&](){
+  auto proc = [&]()
+  {
     eventLogger* logger = this->event_manager->getLogger();
     std::vector<RT::Telemitry::Response> responses;
-    while(!this->task->task_finished && 
-          this->telemitry_processing_thread_running){
+    while (!this->task->task_finished
+           && this->telemitry_processing_thread_running)
+    {
       responses = this->getTelemitry();
-      for(auto telem : responses){
-        if(telem.cmd != nullptr) {
+      for (auto telem : responses) {
+        if (telem.cmd != nullptr) {
           telem.cmd->done();
         }
-        if(telem.type == RT::Telemitry::RT_SHUTDOWN) { 
-          this->telemitry_processing_thread_running = false; 
+        if (telem.type == RT::Telemitry::RT_SHUTDOWN) {
+          this->telemitry_processing_thread_running = false;
         }
         // let's log this telemitry
         logger->log(telem);
@@ -344,15 +377,17 @@ void RT::System::createTelemitryProcessor()
     }
   };
   this->telemitry_processing_thread = std::thread(proc);
-  RT::OS::renameOSThread(this->telemitry_processing_thread, std::string("TelemitryWorker"));
+  RT::OS::renameOSThread(this->telemitry_processing_thread,
+                         std::string("TelemitryWorker"));
 }
 
 std::vector<RT::Telemitry::Response> RT::System::getTelemitry()
 {
   this->eventFifo->poll();
   std::vector<RT::Telemitry::Response> responses;
-  RT::Telemitry::Response telemitry; 
-  while(this->eventFifo->read(&telemitry, sizeof(RT::Telemitry::Response)) > 0){
+  RT::Telemitry::Response telemitry;
+  while (this->eventFifo->read(&telemitry, sizeof(RT::Telemitry::Response)) > 0)
+  {
     responses.push_back(telemitry);
   }
   return responses;
@@ -362,38 +397,28 @@ void RT::System::setPeriod(RT::System::CMD* cmd)
 {
   auto period = std::get<int64_t>(cmd->getRTParam("period"));
   this->task->period = period;
-  RT::Telemitry::Response telem = {
-    RT::Telemitry::RT_PERIOD_UPDATE,
-    cmd
-  };
+  RT::Telemitry::Response telem = {RT::Telemitry::RT_PERIOD_UPDATE, cmd};
   this->postTelemitry(telem);
-  
 }
 
 void RT::System::updateDeviceList(RT::System::CMD* cmd)
 {
-  std::vector<RT::Device*>* vec_ptr = std::get<std::vector<RT::Device*>*>(cmd->getRTParam("deviceList"));
+  std::vector<RT::Device*>* vec_ptr =
+      std::get<std::vector<RT::Device*>*>(cmd->getRTParam("deviceList"));
   this->devices.clear();
   this->devices.assign(vec_ptr->begin(), vec_ptr->end());
-  RT::Telemitry::Response telem = {
-    RT::Telemitry::RT_DEVICE_LIST_UPDATE,
-    cmd
-  };
+  RT::Telemitry::Response telem = {RT::Telemitry::RT_DEVICE_LIST_UPDATE, cmd};
   this->postTelemitry(telem);
-  
 }
 
 void RT::System::updateThreadList(RT::System::CMD* cmd)
 {
-  std::vector<RT::Thread*>* vec_ptr = std::get<std::vector<RT::Thread*>*>(cmd->getRTParam("threadList"));
+  std::vector<RT::Thread*>* vec_ptr =
+      std::get<std::vector<RT::Thread*>*>(cmd->getRTParam("threadList"));
   this->threads.clear();
   this->threads.assign(vec_ptr->begin(), vec_ptr->end());
-  RT::Telemitry::Response telem = {
-    RT::Telemitry::RT_THREAD_LIST_UPDATE,
-    cmd
-  };
+  RT::Telemitry::Response telem = {RT::Telemitry::RT_THREAD_LIST_UPDATE, cmd};
   this->postTelemitry(telem);
-  
 }
 
 void RT::System::ioLinkUpdateCMD(RT::System::CMD* cmd)
@@ -423,11 +448,11 @@ void RT::System::ioLinkUpdateCMD(RT::System::CMD* cmd)
 //   switch (cmd->getType()) {
 //     case Event::Type::RT_BLOCK_PAUSE_EVENT:
 //       block->setActive(false);
-//       
+//
 //       break;
 //     case Event::Type::RT_BLOCK_UNPAUSE_EVENT:
 //       block->setActive(true);
-//       
+//
 //       break;
 //     default:
 //       break;
@@ -449,10 +474,7 @@ void RT::System::getPeriodTicksCMD(RT::System::CMD* cmd)
     default:
       return;
   }
-  RT::Telemitry::Response telem = {
-    RT::Telemitry::RT_PERIOD_UPDATE,
-    cmd
-  };
+  RT::Telemitry::Response telem = {RT::Telemitry::RT_PERIOD_UPDATE, cmd};
   this->postTelemitry(telem);
 }
 
@@ -469,8 +491,7 @@ void RT::System::changeModuleParametersCMD(RT::System::CMD* cmd)
   RT::command_param_t param_value_any = cmd->getRTParam("paramValue");
   switch (param_type) {
     case Modules::Variable::DOUBLE_PARAMETER:
-      component->setValue<double>(param_id,
-                                  std::get<double>(param_value_any));
+      component->setValue<double>(param_id, std::get<double>(param_value_any));
       break;
     case Modules::Variable::INT_PARAMETER:
       component->setValue<int64_t>(param_id,
@@ -482,8 +503,9 @@ void RT::System::changeModuleParametersCMD(RT::System::CMD* cmd)
       break;
     case Modules::Variable::STATE:
       component->setValue<Modules::Variable::state_t>(
-          param_id, 
-          static_cast<Modules::Variable::state_t>(std::get<int64_t>(param_value_any)));
+          param_id,
+          static_cast<Modules::Variable::state_t>(
+              std::get<int64_t>(param_value_any)));
       break;
     default:
       ERROR_MSG(
@@ -547,11 +569,13 @@ void RT::System::executeCMD(RT::System::CMD* cmd)
 void RT::System::receiveEvent(Event::Object* event)
 {
   // funnily enough it may be that real-time loop
-  // is already shutting down before unregistering 
-  // system from the list of event handlers. 
-  // In that case we shouldn't attempt to send commands 
+  // is already shutting down before unregistering
+  // system from the list of event handlers.
+  // In that case we shouldn't attempt to send commands
   // or process events
-  if(this->task->task_finished) { return; }
+  if (this->task->task_finished) {
+    return;
+  }
 
   switch (event->getType()) {
     case Event::Type::RT_PERIOD_EVENT:
@@ -732,8 +756,9 @@ void RT::System::deviceActivityChange(Event::Object* event)
 void RT::System::ioLinkChange(Event::Object* event)
 {
   RT::System::CMD cmd(event->getType());
-  cmd.setRTParam("connection", 
-                 std::any_cast<RT::block_connection_t>(event->getParam("connection")));
+  cmd.setRTParam(
+      "connection",
+      std::any_cast<RT::block_connection_t>(event->getParam("connection")));
   RT::System::CMD* cmd_ptr = &cmd;
   this->eventFifo->write(&cmd_ptr, sizeof(RT::System::CMD*));
   cmd.wait();
@@ -742,13 +767,15 @@ void RT::System::ioLinkChange(Event::Object* event)
 void RT::System::connectionsInfoRequest(Event::Object* event)
 {
   auto* source = std::any_cast<IO::Block*>(event->getParam("block"));
-  std::vector<RT::block_connection_t> outputs = this->rt_connector->getOutputs(source);
+  std::vector<RT::block_connection_t> outputs =
+      this->rt_connector->getOutputs(source);
   event->setParam("outputs", std::any(outputs));
 }
 
 void RT::System::allConnectionsInfoRequest(Event::Object* event)
 {
-  std::vector<RT::block_connection_t> all_conn = this->rt_connector->getAllConnections();
+  std::vector<RT::block_connection_t> all_conn =
+      this->rt_connector->getAllConnections();
   event->setParam("connections", std::any(all_conn));
 }
 
@@ -794,30 +821,30 @@ void RT::System::changeModuleParameters(Event::Object* event)
 {
   // we must convert event object to cmd object
   RT::System::CMD cmd(event->getType());
-  auto* component = std::any_cast<Modules::Component*>(event->getParam("paramModule"));
+  auto* component =
+      std::any_cast<Modules::Component*>(event->getParam("paramModule"));
   cmd.setRTParam("paramModule", component);
   auto param_id = std::any_cast<size_t>(event->getParam("paramID"));
   cmd.setRTParam("paramID", param_id);
-  auto param_type = std::any_cast<Modules::Variable::variable_t>(event->getParam("paramType"));
+  auto param_type = std::any_cast<Modules::Variable::variable_t>(
+      event->getParam("paramType"));
   cmd.setRTParam("paramType", param_type);
   std::any param_value_any = event->getParam("paramValue");
   switch (param_type) {
     case Modules::Variable::DOUBLE_PARAMETER:
-      cmd.setRTParam("paramValue", 
-                     std::any_cast<double>(param_value_any));
+      cmd.setRTParam("paramValue", std::any_cast<double>(param_value_any));
       break;
     case Modules::Variable::INT_PARAMETER:
-      cmd.setRTParam("paramValue", 
-                     std::any_cast<int64_t>(param_value_any));
+      cmd.setRTParam("paramValue", std::any_cast<int64_t>(param_value_any));
 
       break;
     case Modules::Variable::UINT_PARAMETER:
-      cmd.setRTParam("paramValue", 
-                     std::any_cast<uint64_t>(param_value_any));
+      cmd.setRTParam("paramValue", std::any_cast<uint64_t>(param_value_any));
       break;
     case Modules::Variable::STATE:
-      cmd.setRTParam("paramValue", 
-                     std::any_cast<Modules::Variable::state_t>(param_value_any));
+      cmd.setRTParam(
+          "paramValue",
+          std::any_cast<Modules::Variable::state_t>(param_value_any));
       break;
     default:
       ERROR_MSG(
@@ -830,11 +857,13 @@ void RT::System::changeModuleParameters(Event::Object* event)
   cmd_ptr->wait();
 }
 
-RT::System::CMD::CMD(Event::Type et) : Event::Object(et)
+RT::System::CMD::CMD(Event::Type et)
+    : Event::Object(et)
 {
 }
 
-RT::command_param_t RT::System::CMD::getRTParam(const std::string_view& param_name)
+RT::command_param_t RT::System::CMD::getRTParam(
+    const std::string_view& param_name)
 {
   for (auto& parameter : rt_params) {
     if (parameter.name == param_name) {
@@ -844,7 +873,7 @@ RT::command_param_t RT::System::CMD::getRTParam(const std::string_view& param_na
   return std::monostate();
 }
 
-void RT::System::CMD::setRTParam(const std::string_view& param_name, 
+void RT::System::CMD::setRTParam(const std::string_view& param_name,
                                  const RT::command_param_t& value)
 {
   for (auto& parameter : rt_params) {
@@ -859,7 +888,6 @@ void RT::System::CMD::setRTParam(const std::string_view& param_name,
   temp.value = value;
   rt_params.push_back(temp);
 }
-
 
 void RT::System::execute(void* sys)
 {
@@ -905,5 +933,4 @@ void RT::System::execute(void* sys)
     endtime = RT::OS::getTime();
     cmd = nullptr;
   }
-
 }

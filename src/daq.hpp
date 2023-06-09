@@ -49,7 +49,7 @@ enum type_t
 /*!
  * Used to specify indexes for channel number, range, reference, and units.
  */
-typedef unsigned long index_t;
+typedef uint64_t index_t;
 
 /*!
  * Flag to indicate error from a function returning an index.
@@ -393,9 +393,9 @@ public:
   Manager(const Manager& connector) = default;  // copy constructor
   Manager& operator=(const Manager& connector) =
       default;  // copy assignment operator
-  Manager(Manager&&) = default;  // move constructor
-  Manager& operator=(Manager&&) = default;  // move assignment operator
-  virtual ~Manager() = default;
+  Manager(Manager&&) = delete;  // move constructor
+  Manager& operator=(Manager&&) = delete;  // move assignment operator
+  ~Manager() override = default;
 
   /*!
    * Function for creating a device from the specified driver.

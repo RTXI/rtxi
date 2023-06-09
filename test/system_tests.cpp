@@ -42,20 +42,27 @@ TEST_F(RTConnectorTest, connections)
   this->connector.insertBlock(&device2);
 
   // connect and disconnect between two blocks
-  EXPECT_FALSE(this->connector.connected({&thread1, IO::OUTPUT, 0, &thread2, 0}));
-  EXPECT_FALSE(this->connector.connected({&thread1, IO::OUTPUT, 0, &device1, 0}));
-  EXPECT_FALSE(this->connector.connected({&thread1, IO::OUTPUT, 0, &device2, 0}));
-  EXPECT_FALSE(this->connector.connected({&device1, IO::OUTPUT, 0, &device2, 0}));
+  EXPECT_FALSE(
+      this->connector.connected({&thread1, IO::OUTPUT, 0, &thread2, 0}));
+  EXPECT_FALSE(
+      this->connector.connected({&thread1, IO::OUTPUT, 0, &device1, 0}));
+  EXPECT_FALSE(
+      this->connector.connected({&thread1, IO::OUTPUT, 0, &device2, 0}));
+  EXPECT_FALSE(
+      this->connector.connected({&device1, IO::OUTPUT, 0, &device2, 0}));
   int result = 0;
   result = this->connector.connect({&thread1, IO::OUTPUT, 0, &thread2, 0});
   ASSERT_EQ(result, 0);
   // for threads make sure it avoids cycles
   result = this->connector.connect({&thread2, IO::OUTPUT, 0, &thread1, 0});
   ASSERT_EQ(result, -1);
-  EXPECT_TRUE(this->connector.connected({&thread1, IO::OUTPUT, 0, &thread2, 0}));
-  EXPECT_FALSE(this->connector.connected({&device1, IO::OUTPUT, 0, &device2, 0}));
+  EXPECT_TRUE(
+      this->connector.connected({&thread1, IO::OUTPUT, 0, &thread2, 0}));
+  EXPECT_FALSE(
+      this->connector.connected({&device1, IO::OUTPUT, 0, &device2, 0}));
   this->connector.disconnect({&thread1, IO::OUTPUT, 0, &thread2, 0});
-  EXPECT_FALSE(this->connector.connected({&thread1, IO::OUTPUT, 0, &thread2, 0}));
+  EXPECT_FALSE(
+      this->connector.connected({&thread1, IO::OUTPUT, 0, &thread2, 0}));
 }
 
 TEST_F(RTConnectorTest, getOutputs)
@@ -77,7 +84,8 @@ TEST_F(RTConnectorTest, getOutputs)
   }
   for (int i = 0; i < 100; i++) {
     if (randvals[i] == 1) {
-      this->connector.connect({&outputThread, IO::OUTPUT, 0, inputThreads[i].get(), 0});
+      this->connector.connect(
+          {&outputThread, IO::OUTPUT, 0, inputThreads[i].get(), 0});
     }
   }
   std::vector<RT::block_connection_t> output_connections =
@@ -85,7 +93,8 @@ TEST_F(RTConnectorTest, getOutputs)
   int num_of_connections = std::accumulate(randvals.begin(), randvals.end(), 0);
   EXPECT_EQ(output_connections.size(), num_of_connections);
   for (auto con : output_connections) {
-    ASSERT_TRUE(this->connector.connected({&outputThread, IO::OUTPUT, 0, con.dest, 0}));
+    ASSERT_TRUE(
+        this->connector.connected({&outputThread, IO::OUTPUT, 0, con.dest, 0}));
   }
 }
 
@@ -107,12 +116,21 @@ TEST_F(RTConnectorTest, getBlocks)
     this->connector.insertBlock(devices[i].get());
   }
   for (int iter = 0; iter < 50; iter++) {
-    this->connector.connect(
-        {threads[iter].get(), IO::OUTPUT, 0, threads[distribution(gen)].get(), 0});
-    this->connector.connect(
-        {devices[iter].get(), IO::OUTPUT, 0, threads[distribution(gen)].get(), 0});
-    this->connector.connect(
-        {threads[iter].get(), IO::OUTPUT, 0, devices[distribution(gen)].get(), 0});
+    this->connector.connect({threads[iter].get(),
+                             IO::OUTPUT,
+                             0,
+                             threads[distribution(gen)].get(),
+                             0});
+    this->connector.connect({devices[iter].get(),
+                             IO::OUTPUT,
+                             0,
+                             threads[distribution(gen)].get(),
+                             0});
+    this->connector.connect({threads[iter].get(),
+                             IO::OUTPUT,
+                             0,
+                             devices[distribution(gen)].get(),
+                             0});
   }
   std::vector<RT::Thread*> received_threads = this->connector.getThreads();
   std::vector<RT::Device*> received_devices = this->connector.getDevices();
@@ -124,7 +142,8 @@ TEST_F(RTConnectorTest, getBlocks)
   bool isthread = false;
   for (auto thread_iter = received_threads.begin();
        thread_iter != received_threads.end();
-       thread_iter++){
+       thread_iter++)
+  {
     isthread = (*thread_iter)->dependent();
     outputs = this->connector.getOutputs(*thread_iter);
     for (auto output_conn : outputs) {
@@ -139,33 +158,39 @@ TEST_F(RTConnectorTest, getBlocks)
 
 TEST_F(SystemTest, checkTelemitry)
 {
-  auto sendevent = [&](){
+  auto sendevent = [&]()
+  {
     Event::Object event(Event::Type::NOOP);
     this->system->receiveEvent(&event);
     event.wait();
   };
   std::thread(sendevent).detach();
   std::vector<RT::Telemitry::Response> responses;
-  while(responses.empty()){
+  while (responses.empty()) {
     responses = this->system->getTelemitry();
   }
 
-  for(const auto& response : responses) { response.cmd->done(); }
+  for (const auto& response : responses) {
+    response.cmd->done();
+  }
   ASSERT_EQ(RT::Telemitry::RT_NOOP, responses.back().type);
 }
 
 TEST_F(SystemTest, shutdown)
 {
-  auto sendevent = [&](){
+  auto sendevent = [&]()
+  {
     Event::Object ev(Event::Type::RT_SHUTDOWN_EVENT);
     this->system->receiveEvent(&ev);
   };
   std::thread(sendevent).detach();
   std::vector<RT::Telemitry::Response> responses;
-  while(responses.empty()){
+  while (responses.empty()) {
     responses = this->system->getTelemitry();
   }
-  for(const auto& response : responses) { response.cmd->done(); }
+  for (const auto& response : responses) {
+    response.cmd->done();
+  }
   ASSERT_EQ(responses.back().type, RT::Telemitry::RT_SHUTDOWN);
 }
 
@@ -179,24 +204,30 @@ TEST_F(SystemTest, getPeriod)
 TEST_F(SystemTest, setPeriod)
 {
   std::vector<RT::Telemitry::Response> responses;
-  auto sendperiodevent = [&](){
+  auto sendperiodevent = [&]()
+  {
     Event::Object ev(Event::Type::RT_PERIOD_EVENT);
     ev.setParam("period", RT::OS::DEFAULT_PERIOD / 2);
     this->system->receiveEvent(&ev);
   };
   std::thread(sendperiodevent).detach();
   responses = this->system->getTelemitry();
-  for(const auto& response : responses) { response.cmd->done(); }
+  for (const auto& response : responses) {
+    response.cmd->done();
+  }
   EXPECT_EQ(RT::Telemitry::RT_PERIOD_UPDATE, responses.back().type);
   ASSERT_EQ(RT::OS::DEFAULT_PERIOD / 2, system->getPeriod());
-  auto sendtwiceperiodevent = [&](){
+  auto sendtwiceperiodevent = [&]()
+  {
     Event::Object ev(Event::Type::RT_PERIOD_EVENT);
     ev.setParam("period", RT::OS::DEFAULT_PERIOD);
     this->system->receiveEvent(&ev);
   };
   std::thread(sendtwiceperiodevent).detach();
   responses = this->system->getTelemitry();
-  for(const auto& response : responses){ response.cmd->done(); }
+  for (const auto& response : responses) {
+    response.cmd->done();
+  }
   EXPECT_EQ(RT::Telemitry::RT_PERIOD_UPDATE, responses.back().type);
   ASSERT_EQ(RT::OS::DEFAULT_PERIOD, system->getPeriod());
 }
@@ -227,42 +258,45 @@ TEST_F(SystemTest, updateDeviceList)
   defaultOutputChannel.data_size = 1;
   defaultChannelList.push_back(defaultInputChannel);
   defaultChannelList.push_back(defaultOutputChannel);
-  
+
   MockRTDevice mock_device("mockdevice", defaultChannelList);
   Event::Object change_activity_event(Event::Type::RT_DEVICE_UNPAUSE_EVENT);
   change_activity_event.setParam("device",
                                  static_cast<RT::Device*>(&mock_device));
-  auto senddeviceevent = [&](){
-    this->system->receiveEvent(&change_activity_event);
-  };
+  auto senddeviceevent = [&]()
+  { this->system->receiveEvent(&change_activity_event); };
   std::thread(senddeviceevent).detach();
   // we have to manually flush telemitry stream
   std::vector<RT::Telemitry::Response> responses;
   responses = this->system->getTelemitry();
-  for(const auto& response : responses){ response.cmd->done(); }
+  for (const auto& response : responses) {
+    response.cmd->done();
+  }
 
   // insert device
   this->rt_connector->insertBlock(&mock_device);
   Event::Object insertEvent(Event::Type::RT_DEVICE_INSERT_EVENT);
   insertEvent.setParam("device", static_cast<RT::Device*>(&mock_device));
-  auto sendinsertblockevent = [&](){
-    this->system->receiveEvent(&insertEvent);
-  };
+  auto sendinsertblockevent = [&]()
+  { this->system->receiveEvent(&insertEvent); };
   std::thread(sendinsertblockevent).detach();
   responses = this->system->getTelemitry();
-  for(const auto& response : responses){ response.cmd->done(); }
+  for (const auto& response : responses) {
+    response.cmd->done();
+  }
   ASSERT_EQ(responses.back().type, RT::Telemitry::RT_DEVICE_LIST_UPDATE);
   ASSERT_TRUE(this->rt_connector->isRegistered(&mock_device));
 
   // remove device
   Event::Object removeEvent(Event::Type::RT_DEVICE_REMOVE_EVENT);
   removeEvent.setParam("device", static_cast<RT::Device*>(&mock_device));
-  auto sendremoveblockevent = [&](){
-    this->system->receiveEvent(&removeEvent);
-  };
+  auto sendremoveblockevent = [&]()
+  { this->system->receiveEvent(&removeEvent); };
   std::thread(sendremoveblockevent).detach();
   responses = this->system->getTelemitry();
-  for(const auto& response : responses){ response.cmd->done(); }
+  for (const auto& response : responses) {
+    response.cmd->done();
+  }
   ASSERT_EQ(responses.back().type, RT::Telemitry::RT_DEVICE_LIST_UPDATE);
   ASSERT_FALSE(this->rt_connector->isRegistered(&mock_device));
 }
@@ -299,35 +333,38 @@ TEST_F(SystemTest, updateThreadList)
   Event::Object change_activity_event(Event::Type::RT_THREAD_UNPAUSE_EVENT);
   change_activity_event.setParam("thread",
                                  static_cast<RT::Thread*>(thread_ptr));
-  auto sendthreadunpauseevent = [&](){
-    this->system->receiveEvent(&change_activity_event);
-  };
+  auto sendthreadunpauseevent = [&]()
+  { this->system->receiveEvent(&change_activity_event); };
   std::thread(sendthreadunpauseevent).detach();
   std::vector<RT::Telemitry::Response> responses = this->system->getTelemitry();
-  for(const auto& response : responses){ response.cmd->done(); }
+  for (const auto& response : responses) {
+    response.cmd->done();
+  }
 
   // insert thread
   this->rt_connector->insertBlock(thread_ptr);
   Event::Object insertEvent(Event::Type::RT_THREAD_INSERT_EVENT);
   insertEvent.setParam("thread", thread_ptr);
-  auto sendinsertblockevent = [&](){
-    this->system->receiveEvent(&insertEvent);
-  };
+  auto sendinsertblockevent = [&]()
+  { this->system->receiveEvent(&insertEvent); };
   std::thread(sendinsertblockevent).detach();
   responses = this->system->getTelemitry();
-  for(const auto& response : responses){ response.cmd->done(); }
+  for (const auto& response : responses) {
+    response.cmd->done();
+  }
   ASSERT_EQ(responses.back().type, RT::Telemitry::RT_THREAD_LIST_UPDATE);
   ASSERT_TRUE(this->rt_connector->isRegistered(&mock_thread));
 
   // remove thread
   Event::Object removeEvent(Event::Type::RT_THREAD_REMOVE_EVENT);
   removeEvent.setParam("thread", thread_ptr);
-  auto sendthreadremoveevent = [&](){
-    this->system->receiveEvent(&removeEvent);
-  };
+  auto sendthreadremoveevent = [&]()
+  { this->system->receiveEvent(&removeEvent); };
   std::thread(sendthreadremoveevent).detach();
   responses = this->system->getTelemitry();
-  for(const auto& response : responses){ response.cmd->done(); }
+  for (const auto& response : responses) {
+    response.cmd->done();
+  }
   ASSERT_EQ(responses.back().type, RT::Telemitry::RT_THREAD_LIST_UPDATE);
   ASSERT_FALSE(this->rt_connector->isRegistered(&mock_thread));
 }

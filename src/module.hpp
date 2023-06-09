@@ -125,7 +125,6 @@ struct FactoryMethods
   Modules::Panel* (*createPanel)(MainWindow*, Event::Manager*) = nullptr;
 };
 
-
 /*!
  * This is where the magic happens. This class contains the low level logic to
  * interface with the real-time loop, as well as low level facilities for
@@ -396,7 +395,7 @@ public:
       delete;  // copy assignment noperator
   Plugin(Plugin&&) = delete;  // move constructor
   Plugin& operator=(Plugin&&) = delete;  // move assignment operator
-   ~Plugin() override;
+  ~Plugin() override;
 
   size_t getID();
   /*!
@@ -558,7 +557,7 @@ protected:
 
 private:
   std::string library;
-  void* handle = nullptr;  
+  void* handle = nullptr;
   std::string name;
 };
 

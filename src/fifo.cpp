@@ -169,11 +169,9 @@ ssize_t RT::OS::xbuffFifo::writeRT(void* buf, size_t data_size)
 void RT::OS::xbuffFifo::poll()
 {
   std::unique_lock<std::mutex> lk(this->ui_read_mut);
-  if(ui_available_read_bytes == 0) {
+  if (ui_available_read_bytes == 0) {
     this->available_read_cond.wait(
-      lk, 
-      [this](){return ui_available_read_bytes != 0 || rt_closed;}
-    );
+        lk, [this]() { return ui_available_read_bytes != 0 || rt_closed; });
   }
 }
 

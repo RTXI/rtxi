@@ -1,13 +1,11 @@
 /*
-         The Real-Time eXperiment Interface (RTXI)
-         Copyright (C) 2011 Georgia Institute of Technology, University of Utah,
-   Weill Cornell Medical College
-
-         This program is free software: you can redistribute it and/or modify
-         it under the terms of the GNU General Public License as published by
-         the Free Software Foundation, either version 3 of the License, or
-         (at your option) any later version.
-
+  The Real-Time eXperiment Interface (RTXI)
+  Copyright (C) 2011 Georgia Institute of Technology, University of Utah,
+  Weill Cornell Medical College
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
          This program is distributed in the hope that it will be useful,
          but WITHOUT ANY WARRANTY; without even the implied warranty of
          MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -20,6 +18,7 @@
 
 // #include <math.h>
 
+#include <cmath>
 #include <memory>
 
 #include "system_control.h"
@@ -29,29 +28,29 @@
 #include "main_window.hpp"
 #include "rt.hpp"
 
-// struct find_daq_t
-//{
-//   int index;
-//   DAQ::Device* device;
-// };
-
-// static void findDAQDevice(DAQ::Device* dev, void* arg)
-//{
-//   struct find_daq_t* info = static_cast<struct find_daq_t*>(arg);
-//   if (!info->index){
-//     info->device = dev;
-//   }
-//   info->index--;
-// }
-
-// static void buildDAQDeviceList(DAQ::Device* dev, void* arg)
-//{
-//   QComboBox* deviceList = static_cast<QComboBox*>(arg);
-//   deviceList->addItem(QString::fromStdString(dev->getName()));
-// }
-
 SystemControl::Panel::Panel(MainWindow* mw, Event::Manager* ev_manager)
     : Modules::Panel(std::string(SystemControl::MODULE_NAME), mw, ev_manager)
+    , buttonGroup(new QGroupBox)
+    , subWindow(new QMdiSubWindow)
+    , deviceList(new QComboBox)
+    , analogChannelList(new QComboBox)
+    , analogRangeList(new QComboBox)
+    , analogDownsampleList(new QComboBox)
+    , analogReferenceList(new QComboBox)
+    , analogSubdeviceList(new QComboBox)
+    , analogUnitPrefixList(new QComboBox)
+    , analogUnitList(new QComboBox)
+    , analogUnitPrefixList2(new QComboBox)
+    , analogGainEdit(new QLineEdit)
+    , analogZeroOffsetEdit(new QLineEdit)
+    , digitalChannelList(new QComboBox)
+    , digitalDirectionList(new QComboBox)
+    , digitalSubdeviceList(new QComboBox)
+    , rateUpdate(false)
+    , freqUnitList(new QComboBox)
+    , periodUnitList(new QComboBox)
+    , freqEdit(new QLineEdit)
+    , periodEdit(new QLineEdit)
 {
   setWhatsThis(
       "<p><b>System Control Panel:</b><br>This control panel allows you to "
@@ -76,10 +75,6 @@ SystemControl::Panel::Panel(MainWindow* mw, Event::Manager* ev_manager)
       "execute special code when the real-time period is changed using the "
       "update(PERIOD) "
       "flag.</p>");
-  rateUpdate = false;
-
-  // Make Mdi
-  subWindow = new QMdiSubWindow;
   subWindow->setWindowIcon(QIcon("/usr/local/share/rtxi/RTXI-widget-icon.png"));
   subWindow->setAttribute(Qt::WA_DeleteOnClose);
   subWindow->setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint
@@ -96,7 +91,6 @@ SystemControl::Panel::Panel(MainWindow* mw, Event::Manager* ev_manager)
   // Create elements for device block
   deviceLayout->addWidget(new QLabel(tr("Device:")), 0, 0);
 
-  deviceList = new QComboBox;
   deviceLayout->addWidget(deviceList, 0, 1, 1, 5);
   // DAQ::Manager::getInstance()->foreachDevice(buildDAQDeviceList, deviceList);
   QObject::connect(
@@ -104,18 +98,18 @@ SystemControl::Panel::Panel(MainWindow* mw, Event::Manager* ev_manager)
 
   // Frequency box
   deviceLayout->addWidget(new QLabel(tr("Frequency:")), 1, 0);
-  freqEdit = new QLineEdit;
   deviceLayout->addWidget(freqEdit, 1, 1);
 
   Event::Object get_period_event(Event::Type::RT_GET_PERIOD_EVENT);
   this->getRTXIEventManager()->postEvent(&get_period_event);
   auto period = std::any_cast<int64_t>(get_period_event.getParam("period"));
-  freqEdit->setText(std::to_string(RT::OS::SECONDS_TO_NANOSECONDS/period).c_str());;
+  freqEdit->setText(
+      std::to_string(RT::OS::SECONDS_TO_NANOSECONDS / period).c_str());
+  ;
   QObject::connect(freqEdit,
                    SIGNAL(textChanged(const QString&)),
                    this,
                    SLOT(updatePeriod(void)));
-  freqUnitList = new QComboBox;
   freqUnitList->setFixedWidth(50);
   freqUnitList->addItem(" Hz");
   freqUnitList->addItem("kHz");
@@ -125,13 +119,11 @@ SystemControl::Panel::Panel(MainWindow* mw, Event::Manager* ev_manager)
 
   // Period box
   deviceLayout->addWidget(new QLabel(tr("Period:")), 1, 3);
-  periodEdit = new QLineEdit;
   deviceLayout->addWidget(periodEdit, 1, 4);
   QObject::connect(periodEdit,
                    SIGNAL(textChanged(const QString&)),
                    this,
                    SLOT(updateFreq(void)));
-  periodUnitList = new QComboBox;
   deviceLayout->addWidget(periodUnitList, 1, 5);
   periodUnitList->setFixedWidth(50);
   periodUnitList->addItem(" s");
@@ -147,12 +139,11 @@ SystemControl::Panel::Panel(MainWindow* mw, Event::Manager* ev_manager)
 
   // Create child widget and layout for Analog block
   analogGroup = new QGroupBox(tr("Analog Channels"));
-  QGridLayout* analogLayout = new QGridLayout;
+  auto* analogLayout = new QGridLayout;
 
   // Create elements for analog block
   analogLayout->addWidget(new QLabel(tr("Channel:")), 1, 0);
 
-  analogSubdeviceList = new QComboBox;
   analogSubdeviceList->addItem("Input");
   analogSubdeviceList->addItem("Output");
   QObject::connect(analogSubdeviceList,
@@ -161,7 +152,6 @@ SystemControl::Panel::Panel(MainWindow* mw, Event::Manager* ev_manager)
                    SLOT(updateDevice(void)));
   analogLayout->addWidget(analogSubdeviceList, 1, 1);
 
-  analogChannelList = new QComboBox;
   QObject::connect(
       analogChannelList, SIGNAL(activated(int)), this, SLOT(display(void)));
   analogLayout->addWidget(analogChannelList, 1, 2);
@@ -171,18 +161,14 @@ SystemControl::Panel::Panel(MainWindow* mw, Event::Manager* ev_manager)
   analogLayout->addWidget(analogActiveButton, 1, 3);
 
   analogLayout->addWidget(new QLabel(tr("Range:")), 2, 0, 1, 1);
-  analogRangeList = new QComboBox;
   analogLayout->addWidget(analogRangeList, 2, 1, 1, 2);
 
-  analogReferenceList = new QComboBox;
   analogLayout->addWidget(analogReferenceList, 2, 3, 1, 2);
-
   analogLayout->addWidget(new QLabel(tr("Scale:")), 3, 0);
-  analogGainEdit = new QLineEdit;
+
   analogGainEdit->setAlignment(Qt::AlignRight);
   analogLayout->addWidget(analogGainEdit, 3, 1);
 
-  analogUnitPrefixList = new QComboBox;
   analogUnitPrefixList->addItem("yotta-");
   analogUnitPrefixList->addItem("zetta-");
   analogUnitPrefixList->addItem("exa-");
@@ -202,18 +188,14 @@ SystemControl::Panel::Panel(MainWindow* mw, Event::Manager* ev_manager)
   analogUnitPrefixList->addItem("yocto-");
   analogLayout->addWidget(analogUnitPrefixList, 3, 2);
 
-  analogUnitList = new QComboBox;
   analogLayout->addWidget(analogUnitList, 3, 3);
   analogLayout->addWidget(new QLabel(tr(" / Volt")), 3, 4);
-
   analogLayout->addWidget(new QLabel(tr("Offset:")), 4, 0);
-  analogZeroOffsetEdit = new QLineEdit;
   analogZeroOffsetEdit->setText("0");
   analogZeroOffsetEdit->setAlignment(Qt::AlignRight);
   analogLayout->addWidget(analogZeroOffsetEdit, 4, 1);
 
   // Prefixes for offset
-  analogUnitPrefixList2 = new QComboBox;
   analogUnitPrefixList2->addItem("yotta-");
   analogUnitPrefixList2->addItem("zetta-");
   analogUnitPrefixList2->addItem("exa-");
@@ -231,11 +213,10 @@ SystemControl::Panel::Panel(MainWindow* mw, Event::Manager* ev_manager)
   analogUnitPrefixList2->addItem("atto-");
   analogUnitPrefixList2->addItem("zepto-");
   analogUnitPrefixList2->addItem("yocto-");
+
   analogLayout->addWidget(analogUnitPrefixList2, 4, 2, 1, 1);
   analogLayout->addWidget(new QLabel(tr(" Volt/Amps")), 4, 3);
-
   analogLayout->addWidget(new QLabel(tr("Downsample:")), 5, 0);
-  analogDownsampleList = new QComboBox;
   analogDownsampleList->addItem("1");
   analogDownsampleList->addItem("2");
   analogDownsampleList->addItem("4");
@@ -249,12 +230,11 @@ SystemControl::Panel::Panel(MainWindow* mw, Event::Manager* ev_manager)
 
   // Create child widget and layout for digital block
   digitalGroup = new QGroupBox(tr("Digital I/O"));
-  QGridLayout* digitalLayout = new QGridLayout;
+  auto* digitalLayout = new QGridLayout;
 
   // Create elements for digital block
   digitalLayout->addWidget(new QLabel(tr("Channel:")), 1, 0, 1, 1);
 
-  digitalSubdeviceList = new QComboBox;
   digitalSubdeviceList->addItem("I/O");
   QObject::connect(digitalSubdeviceList,
                    SIGNAL(activated(int)),
@@ -262,12 +242,10 @@ SystemControl::Panel::Panel(MainWindow* mw, Event::Manager* ev_manager)
                    SLOT(updateDevice(void)));
   digitalLayout->addWidget(digitalSubdeviceList, 1, 1, 1, 1);
 
-  digitalChannelList = new QComboBox;
   QObject::connect(
       digitalChannelList, SIGNAL(activated(int)), this, SLOT(display(void)));
   digitalLayout->addWidget(digitalChannelList, 1, 2, 1, 1);
 
-  digitalDirectionList = new QComboBox;
   digitalDirectionList->addItem("Input");
   digitalDirectionList->addItem("Output");
   digitalLayout->addWidget(digitalDirectionList, 1, 3, 1, 1);
@@ -280,15 +258,14 @@ SystemControl::Panel::Panel(MainWindow* mw, Event::Manager* ev_manager)
   digitalGroup->setLayout(digitalLayout);
 
   // Create child widget
-  buttonGroup = new QGroupBox;
-  QHBoxLayout* buttonLayout = new QHBoxLayout;
+  auto* buttonLayout = new QHBoxLayout;
 
   // Create elements for buttons
-  QPushButton* applyButton = new QPushButton("Apply");
+  auto* applyButton = new QPushButton("Apply");
   QObject::connect(
       applyButton, SIGNAL(released(void)), this, SLOT(apply(void)));
   buttonLayout->addWidget(applyButton);
-  QPushButton* cancelButton = new QPushButton("Close");
+  auto* cancelButton = new QPushButton("Close");
   QObject::connect(
       cancelButton, SIGNAL(released(void)), subWindow, SLOT(close()));
   buttonLayout->addWidget(cancelButton);
@@ -373,8 +350,8 @@ void SystemControl::Panel::apply()
   dev->setAnalogDownsample(
       a_type,
       a_chan,
-      (analogDownsampleList->itemData(analogDownsampleList->currentIndex(),
-                                      Qt::DisplayRole))
+      analogDownsampleList
+          ->itemData(analogDownsampleList->currentIndex(), Qt::DisplayRole)
           .toInt());
   dev->setAnalogCounter(a_type, a_chan);
 
@@ -494,7 +471,7 @@ void SystemControl::Panel::updatePeriod()
 
   // Determine the Frequency
   auto freq = freqEdit->text().toDouble();
-  if (freqUnitList->currentIndex()) {
+  if (freqUnitList->currentIndex() != 0) {
     freq *= 1000;
   }
 
@@ -512,17 +489,6 @@ void SystemControl::Panel::updatePeriod()
 
 void SystemControl::Panel::display()
 {
-  // Display channel info
-  // DAQ::Device* dev;
-  // {
-  //   struct find_daq_t info = {
-  //       deviceList->currentIndex(),
-  //       0,
-  //   };
-  //   DAQ::Manager::getInstance()->foreachDevice(findDAQDevice, &info);
-  //   dev = info.device;
-  // }
-
   int index = this->deviceList->currentIndex();
   if (index == -1) {
     return;
@@ -609,20 +575,20 @@ void SystemControl::Panel::display()
     analogUnitList->setCurrentIndex(dev->getAnalogUnits(type, chan));
 
     // Determine the correct prefix for analog gain
-    int index = 8;
-    double tmp;
+    int indx = 8;
+    double tmp = NAN;
     bool sign = true;
     if (dev->getAnalogGain(type, chan) < 0.0) {
       sign = false;
     }  // Negative value
     tmp = fabs(dev->getAnalogGain(type, chan));
-    while (((tmp >= 1000) && (index > 0)) || ((tmp < 1) && (index < 16))) {
+    while (((tmp >= 1000) && (indx > 0)) || ((tmp < 1) && (indx < 16))) {
       if (tmp >= 1000) {
         tmp /= 1000;
-        index--;
+        indx--;
       } else {
         tmp *= 1000;
-        index++;
+        indx++;
       }
     }
     if (sign) {
@@ -632,22 +598,22 @@ void SystemControl::Panel::display()
     }
 
     // Set gain prefix to computed index
-    analogUnitPrefixList->setCurrentIndex(index);
+    analogUnitPrefixList->setCurrentIndex(indx);
 
     // Determine the correct prefix for analog offset
-    index = 8;
+    indx = 8;
     sign = true;
     if (dev->getAnalogZeroOffset(type, chan) < 0.0) {
       sign = false;
     }  // Negative value
     tmp = fabs(dev->getAnalogZeroOffset(type, chan));
-    while (((tmp >= 1000) && (index > 0)) || ((tmp < 1) && (index < 16))) {
+    while (((tmp >= 1000) && (indx > 0)) || ((tmp < 1) && (indx < 16))) {
       if (tmp >= 1000) {
         tmp /= 1000;
-        index--;
+        indx--;
       } else {
         tmp *= 1000;
-        index++;
+        indx++;
       }
     }
     if (sign) {
@@ -657,7 +623,7 @@ void SystemControl::Panel::display()
     }
 
     // Set offset prefix to computed index
-    analogUnitPrefixList2->setCurrentIndex(index);
+    analogUnitPrefixList2->setCurrentIndex(indx);
   }
 
   if (dev == nullptr || digitalChannelList->count() == 0) {
@@ -695,11 +661,11 @@ void SystemControl::Panel::display()
   auto tmp = std::any_cast<int64_t>(get_period_event.getParam("period"));
   // auto tmp = static_cast<long long>(wrapped_tmp);
   // long long tmp = RT::System::getInstance()->getPeriod();
-  while ((tmp >= 1000) && (index)) {
+  while ((tmp >= 1000) && ((index) != 0)) {
     tmp /= 1000;
     index--;
   }
-  periodEdit->setText(QString::number(static_cast<unsigned long>(tmp)));
+  periodEdit->setText(QString::number(static_cast<int64_t>(tmp)));
   periodUnitList->setCurrentIndex(index);
   updateFreq();
 }
@@ -718,9 +684,9 @@ Modules::Panel* SystemControl::createRTXIPanel(MainWindow* main_window,
 }
 
 std::unique_ptr<Modules::Component> SystemControl::createRTXIComponent(
-    Modules::Plugin*)
+    Modules::Plugin* /*unused*/)
 {
-  return std::unique_ptr<Modules::Component>(nullptr);
+  return {nullptr};
 }
 
 Modules::FactoryMethods SystemControl::getFactories()

@@ -20,31 +20,31 @@
 
 #include "fakePlugin.h"
 
-//std::unique_ptr<Modules::Plugin> createRTXIPlugin(Event::Manager* ev_manager,
-//                                                  MainWindow* mw)
+// std::unique_ptr<Modules::Plugin> createRTXIPlugin(Event::Manager* ev_manager,
+//                                                   MainWindow* mw)
 //{
-//  return std::make_unique<fakePlugin>(ev_manager, mw);
-//}
+//   return std::make_unique<fakePlugin>(ev_manager, mw);
+// }
 //
-//std::unique_ptr<Modules::Component> createRTXIComponent(
-//    Modules::Plugin* host_plugin)
+// std::unique_ptr<Modules::Component> createRTXIComponent(
+//     Modules::Plugin* host_plugin)
 //{
-//  return std::make_unique<fakeComponent>(host_plugin);
-//}
+//   return std::make_unique<fakeComponent>(host_plugin);
+// }
 //
-//Modules::Panel* createRTXIPanel(MainWindow* mw, Event::Manager* ev_manager)
+// Modules::Panel* createRTXIPanel(MainWindow* mw, Event::Manager* ev_manager)
 //{
-//  return nullptr;
-//}
+//   return nullptr;
+// }
 
-std::unique_ptr<Modules::Plugin> createRTXIPlugin(
-    Event::Manager* ev_manager, MainWindow* main_window)
+std::unique_ptr<Modules::Plugin> createRTXIPlugin(Event::Manager* ev_manager,
+                                                  MainWindow* main_window)
 {
   return std::make_unique<fakePlugin>(ev_manager, main_window);
 }
 
-Modules::Panel* createRTXIPanel(
-    MainWindow* main_window, Event::Manager* ev_manager)
+Modules::Panel* createRTXIPanel(MainWindow* main_window,
+                                Event::Manager* ev_manager)
 {
   return nullptr;
 }

@@ -34,22 +34,23 @@
 
 #include <fmt/core.h>
 
+#include "connector/connector.h"
 #include "debug.hpp"
 #include "event.hpp"
 #include "module.hpp"
-#include "rtxiConfig.h"
+#include "oscilloscope/oscilloscope.h"
 #include "performance_measurement/performance_measurement.hpp"
+#include "rtxiConfig.h"
 #include "system_control/system_control.h"
 #include "userprefs/userprefs.h"
-#include "connector/connector.h"
-#include "oscilloscope/oscilloscope.h"
 
 MainWindow::MainWindow(Event::Manager* ev_manager)
     : QMainWindow(nullptr, Qt::Window)
-    , event_manager(ev_manager), mdiArea(new QMdiArea(this))
+    , event_manager(ev_manager)
+    , mdiArea(new QMdiArea(this))
 {
   // Make central RTXI parent widget
-  
+
   setCentralWidget(mdiArea);
 
   /* Initialize Window Settings */
@@ -295,9 +296,9 @@ void MainWindow::createSystemActions()
       new QAction(tr(std::string(UserPrefs::MODULE_NAME).c_str()), this);
   this->openControlPanel =
       new QAction(tr(std::string(SystemControl::MODULE_NAME).c_str()), this);
-  this->openConnector = 
+  this->openConnector =
       new QAction(tr(std::string(Connector::MODULE_NAME).c_str()), this);
-  this->openOscilloscope = 
+  this->openOscilloscope =
       new QAction(tr(std::string(Oscilloscope::MODULE_NAME).c_str()), this);
 }
 
@@ -413,7 +414,7 @@ void MainWindow::resetSettings()
   // Settings::Manager::getInstance()->load("/usr/local/share/rtxi/rtxi.conf");
 }
 
-void MainWindow::utilitiesMenuActivated(QAction*  /*unused*/)
+void MainWindow::utilitiesMenuActivated(QAction* /*unused*/)
 {
   // Plugin::Manager::getInstance()->load(id->text());
 }
@@ -423,10 +424,12 @@ void MainWindow::systemMenuActivated(QAction* id)
   Event::Object event(Event::Type::PLUGIN_INSERT_EVENT);
   event.setParam("pluginName", std::any(id->text().toStdString()));
   this->event_manager->postEvent(&event);
-  
+
   // If something goes wrong just give up
   auto status = std::any_cast<std::string>(event.getParam("status"));
-  if (status == "failure") { return; }
+  if (status == "failure") {
+    return;
+  }
 
   auto create_rtxi_panel_func =
       std::any_cast<Modules::Panel* (*)(MainWindow*, Event::Manager*)>(
@@ -458,7 +461,7 @@ void MainWindow::windowsMenuAboutToShow()
   }
   // Create windows list based off of what's open
   for (auto* subwin : subWindows) {
-    //auto* item = new QAction(subwin->widget()->windowTitle(), this);
+    // auto* item = new QAction(subwin->widget()->windowTitle(), this);
     windowsMenu->addAction(new QAction(subwin->widget()->windowTitle(), this));
   }
   connect(windowsMenu,
@@ -483,7 +486,7 @@ void MainWindow::windowsMenuActivated(QAction* id)
   }
 }
 
-void MainWindow::modulesMenuActivated(QAction*  /*unused*/)
+void MainWindow::modulesMenuActivated(QAction* /*unused*/)
 {
   // // Annoying but the best way to do it is to tie an action to the entire
   // menu
@@ -515,7 +518,7 @@ void MainWindow::fileMenuActivated(QAction* id)
   // 3).toStdString());
 }
 
-void MainWindow::closeEvent(QCloseEvent*  /*event*/)
+void MainWindow::closeEvent(QCloseEvent* /*event*/)
 {
   /*
    * Save MainWindow settings

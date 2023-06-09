@@ -51,18 +51,21 @@
 
 #include "io.hpp"
 
-namespace Oscilloscope {
+namespace Oscilloscope
+{
 
 // values meant to be used with qt timer for redrawing the screen
-// values are in milliseconds 
-namespace FrameRates {
+// values are in milliseconds
+namespace FrameRates
+{
 constexpr size_t HZ60 = 17;
 constexpr size_t HZ120 = 8;
 constexpr size_t HZ240 = 4;
-}; // namespace FrameRates 
+};  // namespace FrameRates
 
 constexpr size_t DEFAULT_BUFFER_SIZE = 10000;
-typedef struct sample {
+typedef struct sample
+{
   double value;
   int64_t time;
 } sample;
@@ -70,43 +73,38 @@ typedef struct sample {
 typedef struct scope_channel
 {
   QString label;
-  double scale=1;
-  double offset=0;
+  double scale = 1;
+  double offset = 0;
   std::vector<double> xbuffer;
   std::vector<double> ybuffer;
-  size_t data_indx=0;
+  size_t data_indx = 0;
   QwtPlotCurve* curve = nullptr;
   QPen* pen = nullptr;
   IO::Block* block = nullptr;
   size_t port = 0;
   IO::flags_t direction;
-}scope_channel;
+} scope_channel;
 
-typedef struct probe {
-  IO::Block* block=nullptr;
-  size_t port=0;
-  IO::flags_t direction=IO::UNKNOWN;
-}probe;
+typedef struct probe
+{
+  IO::Block* block = nullptr;
+  size_t port = 0;
+  IO::flags_t direction = IO::UNKNOWN;
+} probe;
 
-constexpr std::array<QColor, 7> penColors = 
-  {
-    QColor(255, 0, 16, 255),
-    QColor(255, 164, 5, 255),
-    QColor(43, 206, 72, 255),
-    QColor(0, 117, 220, 255),
-    QColor(178, 102, 255, 255),
-    QColor(0, 153, 143, 255),
-    QColor(83, 81, 84, 255)
-  };
+constexpr std::array<QColor, 7> penColors = {QColor(255, 0, 16, 255),
+                                             QColor(255, 164, 5, 255),
+                                             QColor(43, 206, 72, 255),
+                                             QColor(0, 117, 220, 255),
+                                             QColor(178, 102, 255, 255),
+                                             QColor(0, 153, 143, 255),
+                                             QColor(83, 81, 84, 255)};
 
-constexpr std::array<Qt::PenStyle, 5> penStyles = 
-  {
-    Qt::SolidLine,
-    Qt::DashLine,
-    Qt::DotLine,
-    Qt::DashDotLine,
-    Qt::DashDotDotLine
-  };
+constexpr std::array<Qt::PenStyle, 5> penStyles = {Qt::SolidLine,
+                                                   Qt::DashLine,
+                                                   Qt::DotLine,
+                                                   Qt::DashDotLine,
+                                                   Qt::DashDotDotLine};
 
 class LegendItem : public QwtPlotLegendItem
 {
@@ -123,7 +121,6 @@ private:
   void setupPalette();
 };  // Canvas
 
-
 class Scope : public QwtPlot
 {
   Q_OBJECT
@@ -136,15 +133,15 @@ public:
   void createChannel(Oscilloscope::probe probeInfo);
   void removeChannel(Oscilloscope::probe probeInfo);
   size_t getChannelCount() const;
-  //scope_channel getChannel(IO::Block* block, size_t port);
+  // scope_channel getChannel(IO::Block* block, size_t port);
 
   void clearData();
   void setData(probe channel, std::vector<sample> data);
   size_t getDataSize() const;
   void setDataSize(size_t);
 
-  //Trigger::trig_t getTriggerDirection();
-  //double getTriggerThreshold();
+  // Trigger::trig_t getTriggerDirection();
+  // double getTriggerThreshold();
 
   double getDivT() const;
   void setDivT(double);
@@ -156,7 +153,6 @@ public:
   size_t getRefresh() const;
   void setRefresh(size_t);
 
-
   void setChannelScale(probe channel, double scale);
   double getChannelScale(probe channel);
   void setChannelOffset(probe channel, double offset);
@@ -164,9 +160,10 @@ public:
   void setChannelPen(probe channel, QPen* pen);
   QPen* getChannelPen(probe channel);
   void setChannelLabel(probe channel, const QString& label);
-  //Trigger::Info capture_trigger;
-  
+  // Trigger::Info capture_trigger;
+
   void drawCurves();
+
 protected:
   void resizeEvent(QResizeEvent* event) override;
 
@@ -174,14 +171,14 @@ private:
   size_t buffer_size = DEFAULT_BUFFER_SIZE;
 
   bool isPaused = false;
-  int divX=10;
-  int divY=10;
-  size_t refresh=Oscilloscope::FrameRates::HZ60;
-  double hScl=1.0;  // horizontal scale for time (ms)
-  bool triggering=false;
+  int divX = 10;
+  int divY = 10;
+  size_t refresh = Oscilloscope::FrameRates::HZ60;
+  double hScl = 1.0;  // horizontal scale for time (ms)
+  bool triggering = false;
 
   // Scope primary paint element
-  QwtPlotDirectPainter* d_directPainter=nullptr;
+  QwtPlotDirectPainter* d_directPainter = nullptr;
 
   // Scope painter elements
   QwtPlotGrid* grid;
@@ -199,6 +196,6 @@ private:
   std::list<scope_channel> channels;
 };  // Scope
 
-}; // namespace Oscilloscope
+};  // namespace Oscilloscope
 
 #endif  // SCOPE_H

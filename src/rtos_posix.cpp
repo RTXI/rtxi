@@ -151,7 +151,7 @@ void RT::OS::sleepTimestep(RT::OS::Task* task)
 
 void RT::OS::renameOSThread(std::thread& thread, const std::string& name)
 {
-  if(pthread_setname_np(thread.native_handle(), name.c_str()) != 0){
+  if (pthread_setname_np(thread.native_handle(), name.c_str()) != 0) {
     ERROR_MSG("RT::OS::renameOSThread : unable to set name to thread");
   }
 }

@@ -22,8 +22,8 @@
 #define RT_H
 
 #include <unordered_map>
-#include <vector>
 #include <variant>
+#include <vector>
 
 #include "event.hpp"
 #include "fifo.hpp"
@@ -31,9 +31,10 @@
 #include "rtos.hpp"
 
 // forward declaration
-namespace Modules {
+namespace Modules
+{
 class Component;
-}; // namespace Modules
+};  // namespace Modules
 
 /*!
  * Objects contained within this namespace are responsible
@@ -41,7 +42,6 @@ class Component;
  */
 namespace RT
 {
-
 
 namespace Telemitry
 {
@@ -56,7 +56,8 @@ const response_t IO_LINK_UPDATED = 6;
 const response_t RT_ERROR = -1;
 const response_t NO_TELEMITRY = -2;
 
-struct Response {
+struct Response
+{
   response_t type = NO_TELEMITRY;
   Event::Object* cmd = nullptr;
 };
@@ -79,7 +80,7 @@ public:
       default;  // copy assignment operator
   Device(Device&&) = delete;  // move constructor
   Device& operator=(Device&&) = delete;  // move assignment operator
-   ~Device() override = default;
+  ~Device() override = default;
 
   /*! \fn virtual void read(void)
    * Function called by the realtime task at the beginning of each period.
@@ -121,7 +122,7 @@ public:
       default;  // copy assignment operator
   Thread(Thread&&) = delete;  // move constructor
   Thread& operator=(Thread&&) = delete;  // move assignment operator
-   ~Thread() override = default;
+  ~Thread() override = default;
 
   /*! \fn virtual void execute(void)
    * Function called periodically by the realtime task.
@@ -254,7 +255,7 @@ public:
   std::vector<RT::Thread*> getThreads();
 
   /*!
-   * Returns a list of connections for the given block 
+   * Returns a list of connections for the given block
    *
    * \param src Source IO::Block pointer to find the connections for
    * \returns A vector of RT::block_connection_t containing connection info
@@ -280,12 +281,19 @@ private:
   std::vector<RT::block_connection_t> connections;
 };  // class Connector
 
-using command_param_t = std::variant<std::monostate, 
-                                     int64_t, int64_t*, uint64_t, double,
-                                     RT::Thread*, std::vector<RT::Thread*>*,
-                                     RT::Device*, std::vector<RT::Device*>*,
-                                     IO::Block*, RT::block_connection_t,
-                                     Modules::Component*, std::string>;
+using command_param_t = std::variant<std::monostate,
+                                     int64_t,
+                                     int64_t*,
+                                     uint64_t,
+                                     double,
+                                     RT::Thread*,
+                                     std::vector<RT::Thread*>*,
+                                     RT::Device*,
+                                     std::vector<RT::Device*>*,
+                                     IO::Block*,
+                                     RT::block_connection_t,
+                                     Modules::Component*,
+                                     std::string>;
 /*!
  * Manages the RTOS as well as all objects that require
  *   realtime execution.
@@ -314,10 +322,12 @@ private:
   public:
     explicit CMD(Event::Type et);
     command_param_t getRTParam(const std::string_view& param_name);
-    void setRTParam(const std::string_view& param_name, 
+    void setRTParam(const std::string_view& param_name,
                     const command_param_t& value);
+
   private:
-    struct rt_param {
+    struct rt_param
+    {
       std::string_view name;
       RT::command_param_t value;
     };

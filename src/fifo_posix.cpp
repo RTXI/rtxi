@@ -18,15 +18,15 @@
 
 */
 
+#include "fifo.hpp"
+
 #include <errno.h>
-#include <sys/poll.h>
-#include <sys/eventfd.h>
 #include <fcntl.h>
+#include <sys/eventfd.h>
+#include <sys/poll.h>
 #include <unistd.h>
 
 #include "debug.hpp"
-#include "fifo.hpp"
-
 
 // Generic posix fifo based on pipes
 namespace RT::OS
@@ -54,23 +54,24 @@ private:
   int ui_to_rt[2];
   int rt_to_ui[2];
 
-  size_t fifo_capacity=0;
+  size_t fifo_capacity = 0;
   int close_event_fd;
   struct pollfd xbuf_poll_fd[2];
   bool closed = false;
-  int errcode=0;
+  int errcode = 0;
 };
 }  // namespace RT::OS
 
 RT::OS::posixFifo::posixFifo(size_t size)
-    : fifo_capacity(size), errcode(pipe(this->rt_to_ui))
+    : fifo_capacity(size)
+    , errcode(pipe(this->rt_to_ui))
 {
-  if(this->errcode != 0){
+  if (this->errcode != 0) {
     ERROR_MSG("RT::OS::posixFifo : Unable to create RT to UI buffer");
     return;
   }
   this->errcode = pipe2(this->ui_to_rt, O_CLOEXEC);
-  if(this->errcode != 0){
+  if (this->errcode != 0) {
     ERROR_MSG("RT::OS::posixFifo : Unable to create UI to RT buffer");
     return;
   }
@@ -117,8 +118,9 @@ ssize_t RT::OS::posixFifo::writeRT(void* buf, size_t data_size)
 void RT::OS::posixFifo::poll()
 {
   this->errcode = ::poll(this->xbuf_poll_fd, 2, -1);
-  if(errcode < 0){
-    ERROR_MSG("RT::OS::FIFO(evl)::poll : returned with failure code {} : ", errcode); 
+  if (errcode < 0) {
+    ERROR_MSG("RT::OS::FIFO(evl)::poll : returned with failure code {} : ",
+              errcode);
     ERROR_MSG("{}", strerror(this->errcode));
   } else if ((this->xbuf_poll_fd[1].revents & POLLIN) != 0) {
     this->closed = true;
@@ -146,7 +148,7 @@ int RT::OS::getFifo(std::unique_ptr<Fifo>& fifo, size_t fifo_size)
 {
   auto tmp_fifo = std::make_unique<RT::OS::posixFifo>(fifo_size);
   int errcode = tmp_fifo->getErrorCode();
-  if(errcode != 0){
+  if (errcode != 0) {
     ERROR_MSG("RT::OS::posixFifo : {}", strerror(errcode));
   } else {
     fifo = std::move(tmp_fifo);

@@ -105,5 +105,5 @@ TEST_F(IOBlockTest, writeinput)
   tempblock.writeinput(0, values);
   tempblock.writeinput(0, values);
   tempblock.echo();
-  EXPECT_DOUBLE_EQ(values[0]+values[0], tempblock.readPort(IO::OUTPUT, 0)[0]);
+  EXPECT_DOUBLE_EQ(values[0] + values[0], tempblock.readPort(IO::OUTPUT, 0)[0]);
 }

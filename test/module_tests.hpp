@@ -100,7 +100,8 @@ protected:
     this->system = std::make_unique<RT::System>(this->event_manager.get(),
                                                 this->connector.get());
     this->system->createTelemitryProcessor();
-    this->mod_manager = std::make_unique<Modules::Manager>(this->event_manager.get(), nullptr);
+    this->mod_manager =
+        std::make_unique<Modules::Manager>(this->event_manager.get(), nullptr);
     auto component = std::make_unique<mockModuleComponent>();
     this->plugin = std::make_unique<Modules::Plugin>(
         this->event_manager.get(), this->main_window, "testname");
@@ -110,8 +111,8 @@ protected:
   }
   ~ModulePluginTests()
   {
-    //Event::Object shutdown_event(Event::Type::RT_SHUTDOWN_EVENT);
-    //this->event_manager->postEvent(&shutdown_event);
+    // Event::Object shutdown_event(Event::Type::RT_SHUTDOWN_EVENT);
+    // this->event_manager->postEvent(&shutdown_event);
   }
 
   std::unique_ptr<RT::Connector> connector;

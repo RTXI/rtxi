@@ -29,12 +29,11 @@
 
 #include <QtWidgets>
 
+#include "event.hpp"
 #include "fifo.hpp"
 #include "io.hpp"
-#include "rt.hpp"
-#include "event.hpp"
 #include "module.hpp"
-
+#include "rt.hpp"
 #include "scope.h"
 
 namespace Oscilloscope
@@ -42,40 +41,33 @@ namespace Oscilloscope
 
 constexpr std::string_view MODULE_NAME = "Oscilloscope";
 
-enum PARAMETER : size_t {
+enum PARAMETER : size_t
+{
   STATE = 0,
   TRIGGERING,
 };
 
-const std::vector<Modules::Variable::Info> oscilloscope_vars
-{
-  {
-    PARAMETER::STATE,
-    "Oscilloscope Probe State",
-    "State of the probing component within the oscilloscope",
-    Modules::Variable::STATE,
-    Modules::Variable::INIT
-  },
-  {
-    PARAMETER::TRIGGERING,
-    "Trigger State",
-    "Trigger activity for the oscilloscope",
-    Modules::Variable::STATE,
-    Modules::Variable::INIT
-  }
-};
+const std::vector<Modules::Variable::Info> oscilloscope_vars {
+    {PARAMETER::STATE,
+     "Oscilloscope Probe State",
+     "State of the probing component within the oscilloscope",
+     Modules::Variable::STATE,
+     Modules::Variable::INIT},
+    {PARAMETER::TRIGGERING,
+     "Trigger State",
+     "Trigger activity for the oscilloscope",
+     Modules::Variable::STATE,
+     Modules::Variable::INIT}};
 
-const std::vector<IO::channel_t> DEFAULT_OSCILLOSCOPE_CHANNELS =
-{
-  {
-    "Probing Channel",
-    "This is the channel used by the osciloscope to probe on other inputs and output ports",
-    IO::INPUT,
-    0
-   }
-};
+const std::vector<IO::channel_t> DEFAULT_OSCILLOSCOPE_CHANNELS = {
+    {"Probing Channel",
+     "This is the channel used by the osciloscope to probe on other inputs and "
+     "output ports",
+     IO::INPUT,
+     0}};
 
-namespace Trigger{
+namespace Trigger
+{
 enum trig_t : int
 {
   NONE = 0,
@@ -83,14 +75,15 @@ enum trig_t : int
   NEG,
 };
 
-typedef struct Info {
+typedef struct Info
+{
   IO::Block* block = nullptr;
   size_t port = 0;
   IO::flags_t io_direction = IO::UNKNOWN;
   Trigger::trig_t trigger_direction = NONE;
   double threshold = 0.0;
-}Info;
-}; // namespace Trigger
+} Info;
+};  // namespace Trigger
 
 class Component;
 
@@ -114,7 +107,7 @@ private:
   std::unique_ptr<RT::OS::Fifo> fifo;
 };
 
-class Panel : public Modules::Panel 
+class Panel : public Modules::Panel
 {
   Q_OBJECT
 
@@ -124,9 +117,9 @@ public:
   void setActivity(Oscilloscope::Component* comp, bool activity);
   void adjustDataSize();
   void updateTrigger();
-  //void doDeferred(const Settings::Object::State&);
-  //void doLoad(const Settings::Object::State&);
-  //void doSave(Settings::Object::State&) const;
+  // void doDeferred(const Settings::Object::State&);
+  // void doLoad(const Settings::Object::State&);
+  // void doSave(Settings::Object::State&) const;
 
 signals:
   void updateBlockInfo();
@@ -149,7 +142,7 @@ private:
   void buildBlockList();
   void enableChannel();
   void disableChannel();
-  
+
   // some utility functions
   void updateChannelLabel(Oscilloscope::probe probe_info);
   void updateChannelScale(Oscilloscope::probe probe_info);
@@ -158,16 +151,16 @@ private:
   void updateChannelLineStyle(Oscilloscope::probe probe_info);
   void updateChannelPenColor(Oscilloscope::probe probe_info);
 
-  QMdiSubWindow* subWindow=nullptr;
+  QMdiSubWindow* subWindow = nullptr;
 
   // Tab Widget
-  QTabWidget* tabWidget=nullptr;
+  QTabWidget* tabWidget = nullptr;
 
   // Create scope
-  Scope* scopeWindow=nullptr;
+  Scope* scopeWindow = nullptr;
 
   // Create curve element
-  QwtPlotCurve* curve=nullptr;
+  QwtPlotCurve* curve = nullptr;
 
   // Functions to initialize and
   // apply changes made in tabs
@@ -177,41 +170,41 @@ private:
   QWidget* createDisplayTab(QWidget* parent);
 
   // Group and layout information
-  QVBoxLayout* layout=nullptr;
-  QWidget* scopeGroup=nullptr;
-  QGroupBox* setBttnGroup=nullptr;
+  QVBoxLayout* layout = nullptr;
+  QWidget* scopeGroup = nullptr;
+  QGroupBox* setBttnGroup = nullptr;
 
   // Properties
-  //QSpinBox* ratesSpin=nullptr;
-  QLineEdit* sizesEdit=nullptr;
-  QButtonGroup* trigsGroup=nullptr;
-  QComboBox* timesList=nullptr;
-  QComboBox* trigsChanList=nullptr;
-  QComboBox* trigsThreshList=nullptr;
-  QComboBox* refreshDropdown=nullptr;
-  QLineEdit* trigsThreshEdit=nullptr;
-  QLineEdit* trigWindowEdit=nullptr;
-  QComboBox* trigWindowList=nullptr;
+  // QSpinBox* ratesSpin=nullptr;
+  QLineEdit* sizesEdit = nullptr;
+  QButtonGroup* trigsGroup = nullptr;
+  QComboBox* timesList = nullptr;
+  QComboBox* trigsChanList = nullptr;
+  QComboBox* trigsThreshList = nullptr;
+  QComboBox* refreshDropdown = nullptr;
+  QLineEdit* trigsThreshEdit = nullptr;
+  QLineEdit* trigWindowEdit = nullptr;
+  QComboBox* trigWindowList = nullptr;
 
   // Lists
-  QComboBox* blocksListDropdown=nullptr;
-  QComboBox* typesList=nullptr;
-  QComboBox* channelsList=nullptr;
-  QComboBox* colorsList=nullptr;
-  QComboBox* offsetsList=nullptr;
-  QComboBox* scalesList=nullptr;
-  QComboBox* stylesList=nullptr;
-  QComboBox* widthsList=nullptr;
-  QLineEdit* offsetsEdit=nullptr;
+  QComboBox* blocksListDropdown = nullptr;
+  QComboBox* typesList = nullptr;
+  QComboBox* channelsList = nullptr;
+  QComboBox* colorsList = nullptr;
+  QComboBox* offsetsList = nullptr;
+  QComboBox* scalesList = nullptr;
+  QComboBox* stylesList = nullptr;
+  QComboBox* widthsList = nullptr;
+  QLineEdit* offsetsEdit = nullptr;
 
   // Buttons
-  QPushButton* pauseButton=nullptr;
-  QPushButton* settingsButton=nullptr;
-  QPushButton* applyButton=nullptr;
-  QPushButton* activateButton=nullptr;
+  QPushButton* pauseButton = nullptr;
+  QPushButton* settingsButton = nullptr;
+  QPushButton* applyButton = nullptr;
+  QPushButton* activateButton = nullptr;
 
   std::vector<IO::Block*> blocks;
-  //size_t downsample_rate;
+  // size_t downsample_rate;
 };  // Panel
 
 class Plugin : public Modules::Plugin
@@ -227,7 +220,10 @@ public:
   void receiveEvent(Event::Object* event) override;
   Oscilloscope::Component* getProbeComponent(probe probeInfo);
 
-  std::vector<Oscilloscope::channel_info> getChannelsList(){ return this->chanInfoList; }
+  std::vector<Oscilloscope::channel_info> getChannelsList()
+  {
+    return this->chanInfoList;
+  }
   bool addProbe(Oscilloscope::probe probe_info);
   void removeProbe(Oscilloscope::probe probe_info);
   Oscilloscope::Trigger::Info getTriggerInfo() { return this->trigger_info; }
@@ -239,11 +235,14 @@ private:
   Trigger::Info trigger_info;
 };  // Plugin
 
-std::unique_ptr<Modules::Plugin> createRTXIPlugin(Event::Manager* ev_manager, MainWindow* main_window);
+std::unique_ptr<Modules::Plugin> createRTXIPlugin(Event::Manager* ev_manager,
+                                                  MainWindow* main_window);
 
-Modules::Panel* createRTXIPanel(MainWindow* main_window, Event::Manager* ev_manager);
+Modules::Panel* createRTXIPanel(MainWindow* main_window,
+                                Event::Manager* ev_manager);
 
-std::unique_ptr<Modules::Component> createRTXIComponent(Modules::Plugin* host_plugin);
+std::unique_ptr<Modules::Component> createRTXIComponent(
+    Modules::Plugin* host_plugin);
 
 Modules::FactoryMethods getFactories();
 };  // namespace Oscilloscope

@@ -18,8 +18,9 @@
 
 */
 
-#include "main_window.hpp"
 #include "connector.h"
+
+#include "main_window.hpp"
 
 // struct block_list_info_t
 // {
@@ -75,10 +76,10 @@ Connector::Panel::Panel(MainWindow* mw, Event::Manager* event_manager)
   outputLayout->addWidget(new QLabel(tr("Block:")), 1, 0);
   outputBlock = new QComboBox;
   outputLayout->addWidget(outputBlock);
-  //QObject::connect(outputBlock,
-  //                 SIGNAL(activated(int)),
-  //                 this,
-  //                 SLOT(buildOutputFlagList(void)));
+  // QObject::connect(outputBlock,
+  //                  SIGNAL(activated(int)),
+  //                  this,
+  //                  SLOT(buildOutputFlagList(void)));
 
   outputLayout->addWidget(new QLabel(tr("Flag:")), 2, 0);
   outputFlag = new QComboBox;
@@ -178,7 +179,8 @@ Connector::Panel::Panel(MainWindow* mw, Event::Manager* event_manager)
   // populate field with block and connection info
   this->syncBlockInfo();
 
-  QObject::connect(this, SIGNAL(updateBlockInfo(void)), this, SLOT(syncBlockInfo(void)));
+  QObject::connect(
+      this, SIGNAL(updateBlockInfo(void)), this, SLOT(syncBlockInfo(void)));
 }
 
 void Connector::Panel::buildBlockList()
@@ -187,12 +189,13 @@ void Connector::Panel::buildBlockList()
   outputBlock->clear();
   Event::Object event(Event::Type::IO_BLOCK_QUERY_EVENT);
   this->getRTXIEventManager()->postEvent(&event);
-  this->blocks = std::any_cast<std::vector<IO::Block*>>(event.getParam("blockList"));
-  for(auto block : this->blocks){
-    this->inputBlock->addItem(QString::fromStdString(block->getName()) + " " + 
-                              QString::number(block->getID()));
-    this->outputBlock->addItem(QString::fromStdString(block->getName()) + " " + 
-                               QString::number(block->getID()));
+  this->blocks =
+      std::any_cast<std::vector<IO::Block*>>(event.getParam("blockList"));
+  for (auto block : this->blocks) {
+    this->inputBlock->addItem(QString::fromStdString(block->getName()) + " "
+                              + QString::number(block->getID()));
+    this->outputBlock->addItem(QString::fromStdString(block->getName()) + " "
+                               + QString::number(block->getID()));
   }
 }
 
@@ -200,8 +203,8 @@ void Connector::Panel::buildConnectionList()
 {
   Event::Object event(Event::Type::IO_ALL_CONNECTIONS_QUERY_EVENT);
   this->getRTXIEventManager()->postEvent(&event);
-  this->links = 
-    std::any_cast<std::vector<RT::block_connection_t>>(event.getParam("connections"));
+  this->links = std::any_cast<std::vector<RT::block_connection_t>>(
+      event.getParam("connections"));
 }
 
 void Connector::Plugin::receiveEvent(Event::Object* event)
@@ -240,12 +243,11 @@ void Connector::Panel::syncBlockInfo()
   connectionBox->clear();
   for (auto conn : this->links) {
     connectionBox->addItem(QString::number(conn.src->getID()) + " "
-                           + QString::fromStdString(conn.src->getName())
-                           + " : " + QString::number(conn.src_port) + " "
+                           + QString::fromStdString(conn.src->getName()) + " : "
+                           + QString::number(conn.src_port) + " "
                            + QString::fromStdString(conn.src->getChannelName(
                                IO::OUTPUT, conn.src_port))
-                           + " ==> " + QString::number(conn.dest->getID())
-                           + " "
+                           + " ==> " + QString::number(conn.dest->getID()) + " "
                            + QString::fromStdString(conn.dest->getName())
                            + " : " + QString::number(conn.dest_port) + " "
                            + QString::fromStdString(conn.dest->getChannelName(
@@ -264,7 +266,8 @@ void Connector::Panel::buildInputChannelList()
 
   // Get list of channels from specific block
   for (size_t i = 0; i < block->getCount(IO::INPUT); ++i)
-    inputChannel->addItem(QString::fromStdString(block->getChannelName(IO::INPUT, i)));
+    inputChannel->addItem(
+        QString::fromStdString(block->getChannelName(IO::INPUT, i)));
 
   updateConnectionButton();
 }
@@ -294,8 +297,11 @@ void Connector::Panel::buildOutputFlagList()
 
 void Connector::Panel::highlightConnectionBox(QListWidgetItem* item)
 {
-  int link_index = this->connectionBox->selectionModel()->selectedIndexes()[0].row();
-  if (link_index < 0 || link_index >= this->links.size()) { return; }
+  int link_index =
+      this->connectionBox->selectionModel()->selectedIndexes()[0].row();
+  if (link_index < 0 || link_index >= this->links.size()) {
+    return;
+  }
 
   // Find out selected src block
   IO::Block* src = this->links[static_cast<size_t>(link_index)].src;
@@ -308,7 +314,7 @@ void Connector::Panel::highlightConnectionBox(QListWidgetItem* item)
   // build info in the output group
   this->outputBlock->setCurrentIndex(src_index);
   buildOutputChannelList();
-  size_t src_port= this->links[static_cast<size_t>(link_index)].src_port;
+  size_t src_port = this->links[static_cast<size_t>(link_index)].src_port;
   outputChannel->setCurrentIndex(static_cast<int>(src_port));
 
   // find out selected dest block
@@ -316,13 +322,14 @@ void Connector::Panel::highlightConnectionBox(QListWidgetItem* item)
   auto dest_iter = std::find(this->blocks.begin(), this->blocks.end(), dest);
   int dest_index = -1;
   if (dest_iter != this->blocks.end()) {
-    dest_index = static_cast<int>(std::distance(this->blocks.begin(), dest_iter));
+    dest_index =
+        static_cast<int>(std::distance(this->blocks.begin(), dest_iter));
   }
 
   // build info in the input group
   this->inputBlock->setCurrentIndex(dest_index);
   buildInputChannelList();
-  size_t dest_port= this->links[static_cast<size_t>(link_index)].dest_port;
+  size_t dest_port = this->links[static_cast<size_t>(link_index)].dest_port;
   inputChannel->setCurrentIndex(static_cast<int>(dest_port));
 
   // update connection button state
@@ -339,7 +346,9 @@ void Connector::Panel::toggleConnection(bool on)
   int dest_port_id = inputChannel->currentIndex();
 
   // If no valid selection then do nothing
-  if(src_id == -1 || dest_id == -1 || src_port_id == -1 || dest_port_id == -1 || src_port_flag == -1){
+  if (src_id == -1 || dest_id == -1 || src_port_id == -1 || dest_port_id == -1
+      || src_port_flag == -1)
+  {
     this->connectionButton->setDown(false);
     return;
   }
@@ -349,7 +358,7 @@ void Connector::Panel::toggleConnection(bool on)
   connection.src_port = static_cast<size_t>(src_port_id);
   connection.dest_port = static_cast<size_t>(dest_port_id);
   connection.src_port_type = static_cast<IO::flags_t>(src_port_flag);
-  
+
   if (on) {
     Event::Object event(Event::Type::IO_LINK_INSERT_EVENT);
     event.setParam("connection", std::any(connection));
@@ -374,17 +383,19 @@ void Connector::Panel::updateConnectionButton()
 
     auto iter = std::find_if(this->links.begin(),
                              this->links.end(),
-                             [&](RT::block_connection_t registered_conn) {
-                               return registered_conn.src == src &&
-                                      registered_conn.src_port == src_num &&
-                                      registered_conn.dest == dest &&
-                                      registered_conn.dest_port == dest_num;});
+                             [&](RT::block_connection_t registered_conn)
+                             {
+                               return registered_conn.src == src
+                                   && registered_conn.src_port == src_num
+                                   && registered_conn.dest == dest
+                                   && registered_conn.dest_port == dest_num;
+                             });
     connectionButton->setChecked(iter != this->links.end());
   }
 }
 
-Connector::Plugin::Plugin(Event::Manager* ev_manager, MainWindow* mw) 
-  : Modules::Plugin(ev_manager, mw, std::string(Connector::MODULE_NAME))
+Connector::Plugin::Plugin(Event::Manager* ev_manager, MainWindow* mw)
+    : Modules::Plugin(ev_manager, mw, std::string(Connector::MODULE_NAME))
 {
 }
 
@@ -394,16 +405,15 @@ std::unique_ptr<Modules::Plugin> Connector::createRTXIPlugin(
   return std::make_unique<Connector::Plugin>(ev_manager, main_window);
 }
 
-Modules::Panel* Connector::createRTXIPanel(
-    MainWindow* main_window, Event::Manager* ev_manager)
+Modules::Panel* Connector::createRTXIPanel(MainWindow* main_window,
+                                           Event::Manager* ev_manager)
 {
-  return static_cast<Modules::Panel*>(new Connector::Panel(
-      main_window,
-      ev_manager));
+  return static_cast<Modules::Panel*>(
+      new Connector::Panel(main_window, ev_manager));
 }
 
 std::unique_ptr<Modules::Component> Connector::createRTXIComponent(
-    Modules::Plugin* )
+    Modules::Plugin*)
 {
   return std::unique_ptr<Modules::Component>(nullptr);
 }

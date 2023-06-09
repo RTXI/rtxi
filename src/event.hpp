@@ -24,15 +24,15 @@
 #include <any>
 #include <atomic>
 #include <condition_variable>
+#include <filesystem>
 #include <list>
 #include <mutex>
 #include <queue>
 #include <shared_mutex>
+#include <sstream>
 #include <string>
 #include <thread>
 #include <vector>
-#include <sstream>
-#include <filesystem>
 
 #include "fifo.hpp"
 
@@ -194,7 +194,7 @@ private:
 class Handler
 {
 public:
-  Handler()=default;
+  Handler() = default;
   Handler(const Handler&) = default;
   Handler(Handler&&) = delete;
   Handler& operator=(const Handler&) = default;
@@ -211,7 +211,6 @@ public:
    */
   virtual void receiveEvent(Object* event) = 0;
 };  // class Handler
-
 
 /*
  * Managaes the collection of all objects waiting to
@@ -258,7 +257,7 @@ public:
    *
    * \sa  Event::Object
    */
-  //void processEvents();
+  // void processEvents();
 
   /*!
    * Registers handler in the registry

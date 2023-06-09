@@ -154,7 +154,6 @@ public:
   size_t getID() const { return this->id; }
 
 protected:
-
   /*!
    * Read the input sent to this block. Only the block itself has access.
    *

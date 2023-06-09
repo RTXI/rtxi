@@ -9,17 +9,17 @@
 #include <memory>
 #include <sstream>
 
-#include "rtxiConfig.h"
 #include "module.hpp"
 
 #include <dlfcn.h>
 
+#include "connector/connector.h"
 #include "debug.hpp"
+#include "oscilloscope/oscilloscope.h"
 #include "performance_measurement/performance_measurement.hpp"
+#include "rtxiConfig.h"
 #include "system_control/system_control.h"
 #include "userprefs/userprefs.h"
-#include "connector/connector.h"
-#include "oscilloscope/oscilloscope.h"
 
 std::string Modules::Variable::state2string(Modules::Variable::state_t state)
 {
@@ -631,12 +631,16 @@ int Modules::Plugin::setActive(bool state)
   return result;
 }
 
-void Modules::Plugin::setLibraryInfo(void * lib_handle, Modules::FactoryMethods fact_methods)
+void Modules::Plugin::setLibraryInfo(void* lib_handle,
+                                     Modules::FactoryMethods fact_methods)
 {
-  if (lib_handle == nullptr) { return; }
+  if (lib_handle == nullptr) {
+    return;
+  }
   Dl_info libinfo;
-  const void* createPlugin = reinterpret_cast<const void*>(fact_methods.createPlugin);
-  if(::dladdr(createPlugin, &libinfo) == 0) {
+  const void* createPlugin =
+      reinterpret_cast<const void*>(fact_methods.createPlugin);
+  if (::dladdr(createPlugin, &libinfo) == 0) {
     return;
   }
 
@@ -692,7 +696,7 @@ Modules::Plugin* Modules::Manager::loadCorePlugin(const std::string& library)
 
   std::unique_ptr<Modules::Plugin> plugin;
   this->registerFactories(library, fact_methods);
-  plugin = this->rtxi_factories_registry[library].createPlugin(event_manager, 
+  plugin = this->rtxi_factories_registry[library].createPlugin(event_manager,
                                                                main_window);
   plugin_ptr = plugin.get();
   this->registerModule(std::move(plugin));
@@ -703,10 +707,12 @@ Modules::Plugin* Modules::Manager::loadPlugin(const std::string& library)
 {
   Modules::Plugin* plugin_ptr = nullptr;
   // if module factory is already registered then all we have to do is run it
-  if(this->rtxi_factories_registry.find(library) != this->rtxi_factories_registry.end()){
-    std::unique_ptr<Modules::Plugin> plugin = 
-      this->rtxi_factories_registry[library].createPlugin(
-                                this->event_manager, this->main_window);
+  if (this->rtxi_factories_registry.find(library)
+      != this->rtxi_factories_registry.end())
+  {
+    std::unique_ptr<Modules::Plugin> plugin =
+        this->rtxi_factories_registry[library].createPlugin(this->event_manager,
+                                                            this->main_window);
     plugin_ptr = plugin.get();
     this->registerModule(std::move(plugin));
     return plugin_ptr;
@@ -714,13 +720,17 @@ Modules::Plugin* Modules::Manager::loadPlugin(const std::string& library)
 
   plugin_ptr = this->loadCorePlugin(library);
   // If it is just a core plugin then handle that elsewhere and return
-  if (plugin_ptr != nullptr) { return plugin_ptr; }
+  if (plugin_ptr != nullptr) {
+    return plugin_ptr;
+  }
 
   // TODO: This only works on linux. Make a cross-platform solution
   void* lib_handle = dlopen(library.c_str(), RTLD_GLOBAL | RTLD_NOW);
   if (lib_handle == nullptr) {
     // We try to load it from another location besides locally
-    ERROR_MSG("Modules::Plugin::loadPlugin : could not load module locally : {}", dlerror());
+    ERROR_MSG(
+        "Modules::Plugin::loadPlugin : could not load module locally : {}",
+        dlerror());
     auto plugin_dir = RTXI_DEFAULT_PLUGIN_DIR + library;
     lib_handle = dlopen((plugin_dir + library).c_str(), RTLD_GLOBAL | RTLD_NOW);
   }
@@ -735,7 +745,8 @@ Modules::Plugin* Modules::Manager::loadPlugin(const std::string& library)
    *pointer * But what the hell do they know? It is probably safe here... *
    *********************************************************************************/
 
-  auto* gen_fact_methods = reinterpret_cast<Modules::FactoryMethods*(*)()>(::dlsym(lib_handle, "getFactories")); 
+  auto* gen_fact_methods = reinterpret_cast<Modules::FactoryMethods* (*)()>(
+      ::dlsym(lib_handle, "getFactories"));
 
   if (gen_fact_methods == nullptr) {
     ERROR_MSG("Plugin::load : failed to load {} : {}\n", library, dlerror());
@@ -743,14 +754,13 @@ Modules::Plugin* Modules::Manager::loadPlugin(const std::string& library)
     return nullptr;
   }
 
-  Modules::FactoryMethods* fact_methods = gen_fact_methods(); 
+  Modules::FactoryMethods* fact_methods = gen_fact_methods();
   this->rtxi_factories_registry[library] = *fact_methods;
-  std::unique_ptr<Modules::Plugin> plugin = fact_methods->createPlugin(this->event_manager, 
-                                                                       this->main_window);
+  std::unique_ptr<Modules::Plugin> plugin =
+      fact_methods->createPlugin(this->event_manager, this->main_window);
   if (plugin == nullptr) {
-    ERROR_MSG(
-        "Plugin::load : failed to load {} : failed to create instance\n",
-        library);
+    ERROR_MSG("Plugin::load : failed to load {} : failed to create instance\n",
+              library);
     dlclose(lib_handle);
     return nullptr;
   }
@@ -785,7 +795,9 @@ void Modules::Manager::registerModule(std::unique_ptr<Modules::Plugin> module)
 
 void Modules::Manager::unregisterModule(Modules::Plugin* plugin)
 {
-  if(plugin == nullptr) { return; }
+  if (plugin == nullptr) {
+    return;
+  }
   std::string plugin_name = plugin->getName();
   auto start_iter = this->rtxi_modules_registry[plugin_name].begin();
   auto end_iter = this->rtxi_modules_registry[plugin_name].end();
@@ -794,7 +806,9 @@ void Modules::Manager::unregisterModule(Modules::Plugin* plugin)
                    end_iter,
                    [plugin](const std::unique_ptr<Modules::Plugin>& module)
                    { return plugin == module.get(); });
-  if (loc == end_iter) { return; }
+  if (loc == end_iter) {
+    return;
+  }
   void* handle = loc->get()->getHandle();
   this->rtxi_modules_registry[plugin_name].erase(loc);
   if (handle != nullptr) {
@@ -830,14 +844,12 @@ void Modules::Manager::receiveEvent(Event::Object* event)
     case Event::Type::PLUGIN_INSERT_EVENT:
       plugin_name = std::any_cast<std::string>(event->getParam("pluginName"));
       plugin_ptr = this->loadPlugin(plugin_name);
-      if(plugin_ptr != nullptr) {
+      if (plugin_ptr != nullptr) {
         event->setParam("status", std::any(std::string("success")));
         event->setParam(
             "createRTXIPanel",
             std::any(this->rtxi_factories_registry[plugin_name].createPanel));
-        event->setParam(
-            "pluginPointer",
-            std::any(plugin_ptr));
+        event->setParam("pluginPointer", std::any(plugin_ptr));
       } else {
         event->setParam("status", std::any(std::string("failure")));
       }

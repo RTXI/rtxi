@@ -17,16 +17,17 @@
          along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <qwt_plot_legenditem.h>
-#include <stdlib.h>
-#include <cmath>
 #include <algorithm>
+#include <cmath>
+
+#include "scope.h"
 
 #include <qwt_abstract_scale_draw.h>
+#include <qwt_plot_legenditem.h>
 #include <qwt_scale_map.h>
+#include <stdlib.h>
 
 #include "rt.hpp"
-#include "scope.h"
 
 Oscilloscope::LegendItem::LegendItem()
 {
@@ -35,7 +36,8 @@ Oscilloscope::LegendItem::LegendItem()
   setTextPen(color);
 }
 
-Oscilloscope::Canvas::Canvas(QwtPlot* plot) : QwtPlotCanvas(plot)
+Oscilloscope::Canvas::Canvas(QwtPlot* plot)
+    : QwtPlotCanvas(plot)
 {
   setPaintAttribute(QwtPlotCanvas::BackingStore, false);
   if (QwtPainter::isX11GraphicsSystem()) {
@@ -59,14 +61,15 @@ void Oscilloscope::Canvas::setupPalette()
 }
 
 // Scope constructor; inherits from QwtPlot
-Oscilloscope::Scope::Scope(QWidget* parent): QwtPlot(parent), 
-  d_directPainter(new QwtPlotDirectPainter()),
-  grid(new QwtPlotGrid()),
-  origin(new QwtPlotMarker()),
-  scaleMapY(new QwtScaleMap()),
-  scaleMapX(new QwtScaleMap()),
-  legendItem(new LegendItem()),
-  timer(new QTimer())
+Oscilloscope::Scope::Scope(QWidget* parent)
+    : QwtPlot(parent)
+    , d_directPainter(new QwtPlotDirectPainter())
+    , grid(new QwtPlotGrid())
+    , origin(new QwtPlotMarker())
+    , scaleMapY(new QwtScaleMap())
+    , scaleMapX(new QwtScaleMap())
+    , legendItem(new LegendItem())
+    , timer(new QTimer())
 {
   // Initialize director
   plotLayout()->setAlignCanvasToScales(true);
@@ -119,10 +122,10 @@ Oscilloscope::Scope::Scope(QWidget* parent): QwtPlot(parent),
   replot();
 
   // Timer controls refresh rate of scope
-  //this->timer->setTimerType(Qt::PreciseTimer);
-  //QObject::connect(
+  // this->timer->setTimerType(Qt::PreciseTimer);
+  // QObject::connect(
   //    timer, SIGNAL(timeout()), this, SLOT(timeoutEvent()));
-  //this->timer->start(this->refresh);
+  // this->timer->start(this->refresh);
   resize(sizeHint());
 }
 
@@ -141,14 +144,16 @@ bool Oscilloscope::Scope::paused() const
 // TODO: make this thread-safe
 void Oscilloscope::Scope::createChannel(Oscilloscope::probe probeInfo)
 {
-  auto iter = std::find_if(this->channels.begin(),
-                           this->channels.end(),
-                           [&](const Oscilloscope::scope_channel& channel_info){
-                             return probeInfo.block == channel_info.block && 
-                                    probeInfo.port == channel_info.port &&
-                                    probeInfo.direction == channel_info.direction;
-                           });
-  if(iter != this->channels.end()){
+  auto iter =
+      std::find_if(this->channels.begin(),
+                   this->channels.end(),
+                   [&](const Oscilloscope::scope_channel& channel_info)
+                   {
+                     return probeInfo.block == channel_info.block
+                         && probeInfo.port == channel_info.port
+                         && probeInfo.direction == channel_info.direction;
+                   });
+  if (iter != this->channels.end()) {
     return;
   }
   Oscilloscope::scope_channel chan;
@@ -164,14 +169,16 @@ void Oscilloscope::Scope::createChannel(Oscilloscope::probe probeInfo)
 // TODO: make this thread-safe
 void Oscilloscope::Scope::removeChannel(Oscilloscope::probe probeInfo)
 {
-  auto iter = std::find_if(this->channels.begin(),
-                           this->channels.end(),
-                           [&](const Oscilloscope::scope_channel& channel_info){
-                             return probeInfo.block == channel_info.block && 
-                                    probeInfo.port == channel_info.port &&
-                                    probeInfo.direction == channel_info.direction;
-                           });
-  if(iter == this->channels.end()) {
+  auto iter =
+      std::find_if(this->channels.begin(),
+                   this->channels.end(),
+                   [&](const Oscilloscope::scope_channel& channel_info)
+                   {
+                     return probeInfo.block == channel_info.block
+                         && probeInfo.port == channel_info.port
+                         && probeInfo.direction == channel_info.direction;
+                   });
+  if (iter == this->channels.end()) {
     return;
   }
   iter->curve->detach();
@@ -192,50 +199,56 @@ size_t Oscilloscope::Scope::getChannelCount() const
   return channels.size();
 }
 
-//Oscilloscope::scope_channel Oscilloscope::Scope::getChannel(IO::Block* block, size_t port)
+// Oscilloscope::scope_channel Oscilloscope::Scope::getChannel(IO::Block* block,
+// size_t port)
 //{
-//  Oscilloscope::scope_channel result;
-//  auto iter = std::find_if(this->channels.begin(),
-//                           this->channels.end(),
-//                           [&](const Oscilloscope::scope_channel& chan){
-//                             return chan.block == block && chan.port == port;
-//                           });
-//  if(iter != this->channels.end()) { result = *iter; }
-//  return result;
-//}
+//   Oscilloscope::scope_channel result;
+//   auto iter = std::find_if(this->channels.begin(),
+//                            this->channels.end(),
+//                            [&](const Oscilloscope::scope_channel& chan){
+//                              return chan.block == block && chan.port == port;
+//                            });
+//   if(iter != this->channels.end()) { result = *iter; }
+//   return result;
+// }
 
 // TODO: make this thread-safe
 void Oscilloscope::Scope::clearData()
 {
-  for (auto& chan : this->channels)
-  {
+  for (auto& chan : this->channels) {
     chan.xbuffer.assign(this->buffer_size, 0);
     chan.ybuffer.assign(this->buffer_size, 0);
     chan.data_indx = 0;
   }
 }
 
-void Oscilloscope::Scope::setData(Oscilloscope::probe channel, std::vector<sample> data)
+void Oscilloscope::Scope::setData(Oscilloscope::probe channel,
+                                  std::vector<sample> data)
 {
-  if (isPaused){
+  if (isPaused) {
     return;
   }
 
   auto iter = std::find_if(this->channels.begin(),
                            this->channels.end(),
-                           [&](const Oscilloscope::scope_channel& chan){
-                             return chan.block == channel.block && 
-                                    chan.direction == channel.direction &&
-                                    chan.port == channel.port;
+                           [&](const Oscilloscope::scope_channel& chan)
+                           {
+                             return chan.block == channel.block
+                                 && chan.direction == channel.direction
+                                 && chan.port == channel.port;
                            });
-  if(iter == this->channels.end()) { return; }
+  if (iter == this->channels.end()) {
+    return;
+  }
 
   if (data.size() != iter->xbuffer.size()) {
     iter->xbuffer.assign(data.size(), 0);
     iter->ybuffer.assign(data.size(), 0);
   }
-  for(size_t i=iter->data_indx; i<data.size(); i++) {
-    if(i >= iter->xbuffer.size()) { i = 0; }
+  for (size_t i = iter->data_indx; i < data.size(); i++) {
+    if (i >= iter->xbuffer.size()) {
+      i = 0;
+    }
     iter->xbuffer[i] = static_cast<double>(data[i].time);
     iter->ybuffer[i] = data[i].value;
   }
@@ -253,29 +266,30 @@ size_t Oscilloscope::Scope::getDataSize() const
   return this->buffer_size;
 }
 
-//void Oscilloscope::Scope::setTrigger(Oscilloscope::Trigger::Info trigger_info)
+// void Oscilloscope::Scope::setTrigger(Oscilloscope::Trigger::Info
+// trigger_info)
 //{
-//  auto chan_loc = std::find_if(this->channels.begin(),
-//                               this->channels.end(),
-//                               [&](const Oscilloscope::scope_channel& chann){
-//                                 return chann.block == trigger_info.block && 
-//                                        chann.port == trigger_info.port;
-//                               });
-//  if(chan_loc == this->channels.end()) { 
-//    ERROR_MSG("Oscilloscope::Scope::setTrigger : The given channel was not found!");
-//    return; 
-//  }
+//   auto chan_loc = std::find_if(this->channels.begin(),
+//                                this->channels.end(),
+//                                [&](const Oscilloscope::scope_channel& chann){
+//                                  return chann.block == trigger_info.block &&
+//                                         chann.port == trigger_info.port;
+//                                });
+//   if(chan_loc == this->channels.end()) {
+//     ERROR_MSG("Oscilloscope::Scope::setTrigger : The given channel was not
+//     found!"); return;
+//   }
 //
-//  this->capture_trigger = trigger_info;
-//  // Update if direction has changed
-//  if (trigger_info.direction == Oscilloscope::Trigger::NONE) {
-//    triggering = false;
-//    timer->start(refresh);
-//  } else {
-//    triggering = true;
-//    timer->stop();
-//  }
-//}
+//   this->capture_trigger = trigger_info;
+//   // Update if direction has changed
+//   if (trigger_info.direction == Oscilloscope::Trigger::NONE) {
+//     triggering = false;
+//     timer->start(refresh);
+//   } else {
+//     triggering = true;
+//     timer->stop();
+//   }
+// }
 
 double Oscilloscope::Scope::getDivT() const
 {
@@ -321,12 +335,15 @@ void Oscilloscope::Scope::setChannelScale(probe channel, double scale)
 {
   auto chan_loc = std::find_if(this->channels.begin(),
                                this->channels.end(),
-                               [&](const Oscilloscope::scope_channel& chann){
-                                 return chann.block == channel.block &&
-                                        chann.direction == channel.direction &&
-                                        chann.port == channel.port;
+                               [&](const Oscilloscope::scope_channel& chann)
+                               {
+                                 return chann.block == channel.block
+                                     && chann.direction == channel.direction
+                                     && chann.port == channel.port;
                                });
-  if(chan_loc == channels.end()) { return; }
+  if (chan_loc == channels.end()) {
+    return;
+  }
   chan_loc->scale = scale;
 }
 
@@ -334,12 +351,15 @@ double Oscilloscope::Scope::getChannelScale(probe channel)
 {
   auto chan_loc = std::find_if(this->channels.begin(),
                                this->channels.end(),
-                               [&](const Oscilloscope::scope_channel& chann){
-                                 return chann.block == channel.block && 
-                                        chann.direction == channel.direction &&
-                                        chann.port == channel.port;
+                               [&](const Oscilloscope::scope_channel& chann)
+                               {
+                                 return chann.block == channel.block
+                                     && chann.direction == channel.direction
+                                     && chann.port == channel.port;
                                });
-  if(chan_loc == channels.end()) { return 0.0; }
+  if (chan_loc == channels.end()) {
+    return 0.0;
+  }
   return chan_loc->scale;
 }
 
@@ -347,12 +367,15 @@ void Oscilloscope::Scope::setChannelOffset(probe channel, double offset)
 {
   auto chan_loc = std::find_if(this->channels.begin(),
                                this->channels.end(),
-                               [&](const Oscilloscope::scope_channel& chann){
-                                 return chann.block == channel.block &&
-                                        chann.direction == channel.direction &&
-                                        chann.port == channel.port;
+                               [&](const Oscilloscope::scope_channel& chann)
+                               {
+                                 return chann.block == channel.block
+                                     && chann.direction == channel.direction
+                                     && chann.port == channel.port;
                                });
-  if(chan_loc == channels.end()) { return; }
+  if (chan_loc == channels.end()) {
+    return;
+  }
   chan_loc->offset = offset;
 }
 
@@ -360,12 +383,15 @@ double Oscilloscope::Scope::getChannelOffset(probe channel)
 {
   auto chan_loc = std::find_if(this->channels.begin(),
                                this->channels.end(),
-                               [&](const Oscilloscope::scope_channel& chann){
-                                 return chann.block == channel.block && 
-                                        chann.direction == channel.direction &&
-                                        chann.port == channel.port;
+                               [&](const Oscilloscope::scope_channel& chann)
+                               {
+                                 return chann.block == channel.block
+                                     && chann.direction == channel.direction
+                                     && chann.port == channel.port;
                                });
-  if(chan_loc == channels.end()) { return 0.0; }
+  if (chan_loc == channels.end()) {
+    return 0.0;
+  }
   return chan_loc->offset;
 }
 
@@ -373,12 +399,15 @@ void Oscilloscope::Scope::setChannelPen(probe channel, QPen* pen)
 {
   auto chan_loc = std::find_if(this->channels.begin(),
                                this->channels.end(),
-                               [&](const Oscilloscope::scope_channel& chann){
-                                 return chann.block == channel.block && 
-                                        chann.direction == channel.direction &&
-                                        chann.port == channel.port;
+                               [&](const Oscilloscope::scope_channel& chann)
+                               {
+                                 return chann.block == channel.block
+                                     && chann.direction == channel.direction
+                                     && chann.port == channel.port;
                                });
-  if(chan_loc == channels.end()) { return; }
+  if (chan_loc == channels.end()) {
+    return;
+  }
   chan_loc->curve->setPen(*pen);
   chan_loc->pen = pen;
 }
@@ -387,26 +416,31 @@ QPen* Oscilloscope::Scope::getChannelPen(Oscilloscope::probe channel)
 {
   auto chan_loc = std::find_if(this->channels.begin(),
                                this->channels.end(),
-                               [&](const Oscilloscope::scope_channel& chann){
-                                 return chann.block == channel.block && 
-                                        chann.direction == channel.direction &&
-                                        chann.port == channel.port;
+                               [&](const Oscilloscope::scope_channel& chann)
+                               {
+                                 return chann.block == channel.block
+                                     && chann.direction == channel.direction
+                                     && chann.port == channel.port;
                                });
-  if(chan_loc == channels.end()) { return nullptr; }
+  if (chan_loc == channels.end()) {
+    return nullptr;
+  }
   return chan_loc->pen;
 }
-
 
 void Oscilloscope::Scope::setChannelLabel(probe channel, const QString& label)
 {
   auto chan_loc = std::find_if(this->channels.begin(),
                                this->channels.end(),
-                               [&](const Oscilloscope::scope_channel& chann){
-                                 return chann.block == channel.block && 
-                                        chann.direction == channel.direction &&
-                                        chann.port == channel.port;
+                               [&](const Oscilloscope::scope_channel& chann)
+                               {
+                                 return chann.block == channel.block
+                                     && chann.direction == channel.direction
+                                     && chann.port == channel.port;
                                });
-  if(chan_loc == channels.end()) { return; }
+  if (chan_loc == channels.end()) {
+    return;
+  }
   chan_loc->curve->setTitle(label);
 }
 
@@ -418,24 +452,28 @@ void Oscilloscope::Scope::drawCurves()
   }
   double max_val = 0;
   double local_max_val = 0;
-  for(auto chan : this->channels){
-    if(chan.xbuffer.empty()) { continue; }
-    local_max_val = *std::max_element(chan.xbuffer.begin(),
-                                      chan.xbuffer.end());
-    if(local_max_val > max_val) { max_val = local_max_val; }
+  for (auto chan : this->channels) {
+    if (chan.xbuffer.empty()) {
+      continue;
+    }
+    local_max_val = *std::max_element(chan.xbuffer.begin(), chan.xbuffer.end());
+    if (local_max_val > max_val) {
+      max_val = local_max_val;
+    }
   }
   // Set X scale map is same for all channels
   double max_window_time = local_max_val;
   double min_window_time = max_window_time - hScl * divX;
-  scaleMapX->setScaleInterval(min_window_time , max_window_time);
-  for (auto& channel : this->channels)
-  {
+  scaleMapX->setScaleInterval(min_window_time, max_window_time);
+  for (auto& channel : this->channels) {
     // TODO this should not happen each iteration, instead build into channel
-    scaleMapY->setScaleInterval(-channel.scale * divY / 2, channel.scale * divY / 2);
+    scaleMapY->setScaleInterval(-channel.scale * divY / 2,
+                                channel.scale * divY / 2);
     // Append data to curve
     // Makes deep copy - which is not optimal
     // TODO: change to pointer based method
-    channel.curve->setSamples(channel.xbuffer.data(), channel.ybuffer.data(), channel.xbuffer.size());
+    channel.curve->setSamples(
+        channel.xbuffer.data(), channel.ybuffer.data(), channel.xbuffer.size());
   }
 
   // Update plot

@@ -71,10 +71,11 @@ size_t IO::Block::getChannelSize(IO::flags_t type, size_t channel)
 
 void IO::Block::writeinput(size_t index, const std::vector<double>& data)
 {
-  //std::copy(
-  //    data.begin(), data.end(), this->ports[IO::INPUT][index].values.begin());
+  // std::copy(
+  //     data.begin(), data.end(),
+  //     this->ports[IO::INPUT][index].values.begin());
   size_t value_index = 0;
-  while(value_index < data.size()){
+  while (value_index < data.size()) {
     this->ports[IO::INPUT][index].buff_values[value_index] += data[value_index];
     value_index++;
   }
@@ -82,7 +83,8 @@ void IO::Block::writeinput(size_t index, const std::vector<double>& data)
 
 const std::vector<double>& IO::Block::readinput(size_t index)
 {
-  // We must reset input values to zero so that the next cycle doesn't use these values
+  // We must reset input values to zero so that the next cycle doesn't use these
+  // values
   std::copy(this->ports[IO::INPUT][index].buff_values.begin(),
             this->ports[IO::INPUT][index].buff_values.end(),
             this->ports[IO::INPUT][index].values.begin());
@@ -98,7 +100,8 @@ void IO::Block::writeoutput(size_t index, const std::vector<double>& data)
       data.begin(), data.end(), this->ports[IO::OUTPUT][index].values.begin());
 }
 
-const std::vector<double>& IO::Block::readPort(IO::flags_t direction, size_t index)
+const std::vector<double>& IO::Block::readPort(IO::flags_t direction,
+                                               size_t index)
 {
   return this->ports[direction][index].values;
 }

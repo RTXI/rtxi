@@ -49,8 +49,8 @@ public:
   MockRTDevice(std::string name, std::vector<IO::channel_t> channel_list)
       : RT::Device(name, channel_list)
   {
-    this->bind_read_callback([&](){ return; });
-    this->bind_write_callback([&](){ return; });
+    this->bind_read_callback([&]() { return; });
+    this->bind_write_callback([&]() { return; });
   }
   MOCK_METHOD(void, read, (), ());
   MOCK_METHOD(void, write, (), ());
@@ -62,7 +62,7 @@ public:
   MockRTThread(std::string name, std::vector<IO::channel_t> channel_list)
       : RT::Thread(name, channel_list)
   {
-    this->bind_execute_callback([&](){ return; });
+    this->bind_execute_callback([&]() { return; });
   }
   MOCK_METHOD(void, execute, (), ());
   // MOCK_METHOD(void, input, (const std::vector<double>&), (override));

@@ -21,15 +21,14 @@
 #ifndef CONNECTOR_H
 #define CONNECTOR_H
 
-#include <vector>
-
 #include <QMdiArea>
 #include <QWidget>
 #include <QtWidgets>
+#include <vector>
 
-#include "io.hpp"
-#include "fifo.hpp"
 #include "event.hpp"
+#include "fifo.hpp"
+#include "io.hpp"
 #include "module.hpp"
 
 namespace Connector
@@ -84,15 +83,18 @@ public:
 
 private:
   void updatePanelInfo();
-  //void receiveEvent(Event::Object* event) override;
+  // void receiveEvent(Event::Object* event) override;
 
 };  // class Plugin
 
-std::unique_ptr<Modules::Plugin> createRTXIPlugin(Event::Manager* ev_manager, MainWindow* main_window);
+std::unique_ptr<Modules::Plugin> createRTXIPlugin(Event::Manager* ev_manager,
+                                                  MainWindow* main_window);
 
-Modules::Panel* createRTXIPanel(MainWindow* main_window, Event::Manager* ev_manager);
+Modules::Panel* createRTXIPanel(MainWindow* main_window,
+                                Event::Manager* ev_manager);
 
-std::unique_ptr<Modules::Component> createRTXIComponent(Modules::Plugin* host_plugin);
+std::unique_ptr<Modules::Component> createRTXIComponent(
+    Modules::Plugin* host_plugin);
 
 Modules::FactoryMethods getFactories();
 

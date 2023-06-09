@@ -25,8 +25,8 @@
 
 #include <errno.h>
 #include <string.h>
-#include <unistd.h>
 #include <sys/mman.h>
+#include <unistd.h>
 
 #include "fifo.hpp"
 
@@ -40,7 +40,6 @@
 
 thread_local bool realtime_key = false;
 thread_local int64_t* RT_PERIOD = nullptr;
-
 
 int RT::OS::initiate(RT::OS::Task* task)
 {
@@ -68,9 +67,7 @@ void RT::OS::shutdown(RT::OS::Task* task)
   RT_PERIOD = nullptr;
 }
 
-int RT::OS::createTask(RT::OS::Task* task,
-                       void* (*func)(void*),
-                       void* arg)
+int RT::OS::createTask(RT::OS::Task* task, void* (*func)(void*), void* arg)
 {
   int retval = 0;
   RT_TASK xenomai_task;
@@ -97,7 +94,8 @@ int RT::OS::createTask(RT::OS::Task* task,
     RT::OS::shutdown(tsk);
   };
 
-  if ((retval = rt_task_start(&xenomai_task, reinterpret_cast<void (*)(void*)>(wrapper), arg)))
+  if ((retval = rt_task_start(
+           &xenomai_task, reinterpret_cast<void (*)(void*)>(wrapper), arg)))
   {
     ERROR_MSG("RT::OS::createTask : failed to start task\n");
     return retval;
@@ -149,7 +147,6 @@ int64_t RT::OS::getPeriod()
     return -1;
   };
   return *(RT_PERIOD);
-
 }
 
 void RT::OS::sleepTimestep(RT::OS::Task* task)
