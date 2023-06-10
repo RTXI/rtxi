@@ -39,8 +39,18 @@
 //   info->blocks->push_back(block);
 // }
 
+using IO::Block;
+
 Connector::Panel::Panel(MainWindow* mw, Event::Manager* event_manager)
     : Modules::Panel(std::string(Connector::MODULE_NAME), mw, event_manager)
+    , subWindow(new QMdiSubWindow)
+    , buttonGroup(new QGroupBox)
+    , inputBlock(new QComboBox)
+    , inputChannel(new QComboBox)
+    , outputBlock(new QComboBox)
+    , outputFlag(new QComboBox)
+    , outputChannel(new QComboBox)
+    , connectionBox(new QListWidget)
 {
   setWhatsThis(
       "<p><b>Connector:</b><br>The Connector panel allows you to make "
@@ -58,7 +68,6 @@ Connector::Panel::Panel(MainWindow* mw, Event::Manager* event_manager)
       "are listed in the \"Connections\" box.</p>");
 
   // Make Mdi
-  subWindow = new QMdiSubWindow;
   subWindow->setWindowIcon(QIcon("/usr/local/share/rtxi/RTXI-widget-icon.png"));
   subWindow->setAttribute(Qt::WA_DeleteOnClose);
   subWindow->setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint
@@ -66,23 +75,21 @@ Connector::Panel::Panel(MainWindow* mw, Event::Manager* event_manager)
   this->getMainWindowPtr()->createMdi(subWindow);
 
   // Create main layout
-  QGridLayout* layout = new QGridLayout;
+  auto* layout = new QGridLayout;
 
   // Create child widget and layout for output block
   outputGroup = new QGroupBox(tr("Source"));
-  QVBoxLayout* outputLayout = new QVBoxLayout;
+  auto* outputLayout = new QVBoxLayout;
 
   // Create elements for output
-  outputLayout->addWidget(new QLabel(tr("Block:")), 1, 0);
-  outputBlock = new QComboBox;
+  outputLayout->addWidget(new QLabel(tr("Block:")), 1, Qt::Alignment());
   outputLayout->addWidget(outputBlock);
   // QObject::connect(outputBlock,
   //                  SIGNAL(activated(int)),
   //                  this,
   //                  SLOT(buildOutputFlagList(void)));
 
-  outputLayout->addWidget(new QLabel(tr("Flag:")), 2, 0);
-  outputFlag = new QComboBox;
+  outputLayout->addWidget(new QLabel(tr("Flag:")), 2, Qt::Alignment());
   outputLayout->addWidget(outputFlag);
   buildOutputFlagList();
   QObject::connect(outputFlag,
@@ -90,8 +97,7 @@ Connector::Panel::Panel(MainWindow* mw, Event::Manager* event_manager)
                    this,
                    SLOT(buildOutputChannelList(void)));
 
-  outputLayout->addWidget(new QLabel(tr("Channel:")), 3, 0);
-  outputChannel = new QComboBox;
+  outputLayout->addWidget(new QLabel(tr("Channel:")), 3, Qt::Alignment());
   outputLayout->addWidget(outputChannel);
   QObject::connect(outputChannel,
                    SIGNAL(activated(int)),
@@ -102,8 +108,7 @@ Connector::Panel::Panel(MainWindow* mw, Event::Manager* event_manager)
   outputGroup->setLayout(outputLayout);
 
   // Create child widget and layout for connection button
-  buttonGroup = new QGroupBox;
-  QVBoxLayout* buttonLayout = new QVBoxLayout;
+  auto* buttonLayout = new QVBoxLayout;
 
   // Create elements for button
   connectionButton = new QPushButton("Connect");
@@ -119,19 +124,17 @@ Connector::Panel::Panel(MainWindow* mw, Event::Manager* event_manager)
 
   // Create child widget and layout for input block
   inputGroup = new QGroupBox(tr("Destination"));
-  QVBoxLayout* inputLayout = new QVBoxLayout;
+  auto* inputLayout = new QVBoxLayout;
 
   // Create elements for output
-  inputLayout->addWidget(new QLabel(tr("Block:")), 1, 0);
-  inputBlock = new QComboBox;
+  inputLayout->addWidget(new QLabel(tr("Block:")), 1, Qt::Alignment());
   inputLayout->addWidget(inputBlock);
   QObject::connect(inputBlock,
                    SIGNAL(activated(int)),
                    this,
                    SLOT(buildInputChannelList(void)));
 
-  inputLayout->addWidget(new QLabel(tr("Channel:")), 2, 0);
-  inputChannel = new QComboBox;
+  inputLayout->addWidget(new QLabel(tr("Channel:")), 2, Qt::Alignment());
   inputLayout->addWidget(inputChannel);
   QObject::connect(inputChannel,
                    SIGNAL(activated(int)),
@@ -143,10 +146,9 @@ Connector::Panel::Panel(MainWindow* mw, Event::Manager* event_manager)
 
   // Create child widget and layout for connections box
   connectionGroup = new QGroupBox(tr("Connections"));
-  QVBoxLayout* connectionLayout = new QVBoxLayout;
+  auto* connectionLayout = new QVBoxLayout;
 
   // Create elements for connection box
-  connectionBox = new QListWidget;
   connectionLayout->addWidget(connectionBox);
   QObject::connect(connectionBox,
                    SIGNAL(itemClicked(QListWidgetItem*)),
@@ -191,7 +193,7 @@ void Connector::Panel::buildBlockList()
   this->getRTXIEventManager()->postEvent(&event);
   this->blocks =
       std::any_cast<std::vector<IO::Block*>>(event.getParam("blockList"));
-  for (auto block : this->blocks) {
+  for (auto* block : this->blocks) {
     this->inputBlock->addItem(QString::fromStdString(block->getName()) + " "
                               + QString::number(block->getID()));
     this->outputBlock->addItem(QString::fromStdString(block->getName()) + " "
@@ -258,33 +260,37 @@ void Connector::Panel::syncBlockInfo()
 void Connector::Panel::buildInputChannelList()
 {
   inputChannel->clear();
-  if (!inputBlock->count())
+  if (inputBlock->count() == 0) {
     return;
+  }
 
   // Get specific block
-  IO::Block* block = blocks[inputBlock->currentIndex()];
+  Block* block = blocks[static_cast<size_t>(inputBlock->currentIndex())];
 
   // Get list of channels from specific block
-  for (size_t i = 0; i < block->getCount(IO::INPUT); ++i)
+  for (size_t i = 0; i < block->getCount(IO::INPUT); ++i) {
     inputChannel->addItem(
         QString::fromStdString(block->getChannelName(IO::INPUT, i)));
+  }
 
   updateConnectionButton();
 }
 
-void Connector::Panel::buildOutputChannelList(void)
+void Connector::Panel::buildOutputChannelList()
 {
   outputChannel->clear();
-  if (!outputBlock->count())
+  if (outputBlock->count() == 0) {
     return;
+  }
 
   // Get specific block
-  IO::Block* block = blocks[outputBlock->currentIndex()];
+  IO::Block* block = blocks[static_cast<size_t>(outputBlock->currentIndex())];
 
   // Get list of channels from specific block
-  for (size_t i = 0; i < block->getCount(IO::OUTPUT); ++i)
+  for (size_t i = 0; i < block->getCount(IO::OUTPUT); ++i) {
     outputChannel->addItem(
         QString::fromStdString(block->getChannelName(IO::OUTPUT, i)));
+  }
 
   updateConnectionButton();
 }
@@ -295,11 +301,11 @@ void Connector::Panel::buildOutputFlagList()
   outputFlag->addItem(QString("OUTPUT"));
 }
 
-void Connector::Panel::highlightConnectionBox(QListWidgetItem* item)
+void Connector::Panel::highlightConnectionBox(QListWidgetItem* /*item*/)
 {
   int link_index =
       this->connectionBox->selectionModel()->selectedIndexes()[0].row();
-  if (link_index < 0 || link_index >= this->links.size()) {
+  if (link_index < 0 || static_cast<size_t>(link_index) >= this->links.size()) {
     return;
   }
 
@@ -376,10 +382,10 @@ void Connector::Panel::updateConnectionButton()
     connectionButton->setEnabled(false);
   } else {
     connectionButton->setEnabled(true);
-    IO::Block* src = blocks[outputBlock->currentIndex()];
-    IO::Block* dest = blocks[inputBlock->currentIndex()];
-    size_t src_num = outputChannel->currentIndex();
-    size_t dest_num = inputChannel->currentIndex();
+    IO::Block* src = blocks[static_cast<size_t>(outputBlock->currentIndex())];
+    IO::Block* dest = blocks[static_cast<size_t>(inputBlock->currentIndex())];
+    auto src_num = static_cast<size_t>(outputChannel->currentIndex());
+    auto dest_num = static_cast<size_t>(inputChannel->currentIndex());
 
     auto iter = std::find_if(this->links.begin(),
                              this->links.end(),
@@ -413,9 +419,9 @@ Modules::Panel* Connector::createRTXIPanel(MainWindow* main_window,
 }
 
 std::unique_ptr<Modules::Component> Connector::createRTXIComponent(
-    Modules::Plugin*)
+    Modules::Plugin* /*unused*/)
 {
-  return std::unique_ptr<Modules::Component>(nullptr);
+  return {nullptr};
 }
 
 Modules::FactoryMethods Connector::getFactories()
