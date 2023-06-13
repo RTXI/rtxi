@@ -111,7 +111,8 @@ Oscilloscope::Scope::Scope(QWidget* parent)
   // Create and attach legend
   this->legendItem->attach(this);
   this->legendItem->setMaxColumns(1);
-  this->legendItem->setAlignment(static_cast<Qt::Alignment>(Qt::AlignTop | Qt::AlignRight));
+  this->legendItem->setAlignment(
+      static_cast<Qt::Alignment>(Qt::AlignTop | Qt::AlignRight));
   this->legendItem->setBorderRadius(8);
   this->legendItem->setMargin(4);
   this->legendItem->setSpacing(2);
@@ -469,7 +470,8 @@ void Oscilloscope::Scope::drawCurves()
   }
   // Set X scale map is same for all channels
   const double max_window_time = local_max_val;
-  const double min_window_time = max_window_time - hScl * static_cast<double>(divX);
+  const double min_window_time =
+      max_window_time - hScl * static_cast<double>(divX);
   scaleMapX->setScaleInterval(min_window_time, max_window_time);
   for (auto& channel : this->channels) {
     // TODO this should not happen each iteration, instead build into channel
@@ -478,8 +480,8 @@ void Oscilloscope::Scope::drawCurves()
     // Append data to curve
     // Makes deep copy - which is not optimal
     // TODO: change to pointer based method
-    channel.curve->setSamples(channel.xbuffer.data(), 
-                              channel.ybuffer.data(), 
+    channel.curve->setSamples(channel.xbuffer.data(),
+                              channel.ybuffer.data(),
                               static_cast<int>(channel.xbuffer.size()));
   }
 

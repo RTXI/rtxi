@@ -34,18 +34,18 @@ UserPrefs::Plugin::Plugin(Event::Manager* ev_manager, MainWindow* mw)
 }
 
 UserPrefs::Panel::Panel(MainWindow* mwindow, Event::Manager* ev_manager)
-    : Modules::Panel(std::string(UserPrefs::MODULE_NAME), mwindow, ev_manager), 
-    status(new QLabel), 
-    subWindow(new QMdiSubWindow), 
-    dirGroup(new QGroupBox), 
-    HDF(new QGroupBox), 
-    buttons(new QGroupBox), 
-    settingsDirEdit(new QLineEdit(dirGroup)), 
-    dataDirEdit(new QLineEdit(dirGroup)), 
-    HDFBufferEdit(new QLineEdit(HDF))
+    : Modules::Panel(std::string(UserPrefs::MODULE_NAME), mwindow, ev_manager)
+    , status(new QLabel)
+    , subWindow(new QMdiSubWindow)
+    , dirGroup(new QGroupBox)
+    , HDF(new QGroupBox)
+    , buttons(new QGroupBox)
+    , settingsDirEdit(new QLineEdit(dirGroup))
+    , dataDirEdit(new QLineEdit(dirGroup))
+    , HDFBufferEdit(new QLineEdit(HDF))
 {
   // Make Mdi
-  
+
   subWindow->setWindowIcon(QIcon("/usr/local/share/rtxi/RTXI-widget-icon.png"));
   subWindow->setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint
                             | Qt::WindowMinimizeButtonHint);
@@ -55,8 +55,8 @@ UserPrefs::Panel::Panel(MainWindow* mwindow, Event::Manager* ev_manager)
   // Preferences structure
   const QSettings user_preferences;
   QSettings::setPath(QSettings::NativeFormat,
-                    QSettings::SystemScope,
-                    "/usr/local/share/rtxi/");
+                     QSettings::SystemScope,
+                     "/usr/local/share/rtxi/");
 
   // Main layout
   auto* box_layout = new QVBoxLayout;
@@ -119,9 +119,9 @@ UserPrefs::Panel::Panel(MainWindow* mwindow, Event::Manager* ev_manager)
   auto* cancelButton = new QPushButton("Close");
   QObject::connect(
       cancelButton, SIGNAL(released(void)), subWindow, SLOT(close(void)));
-  
+
   status->setText("Defaults \nloaded");
-  //NOLINTNEXTLINE
+  // NOLINTNEXTLINE
   status->setFrameStyle(QFrame::Panel | QFrame::Sunken);
   status->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
 
@@ -209,7 +209,7 @@ Modules::Panel* UserPrefs::createRTXIPanel(MainWindow* main_window,
 }
 
 std::unique_ptr<Modules::Component> UserPrefs::createRTXIComponent(
-    Modules::Plugin*  /*host_plugin*/)
+    Modules::Plugin* /*host_plugin*/)
 {
   return {nullptr};
 }

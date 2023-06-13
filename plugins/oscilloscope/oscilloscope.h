@@ -49,37 +49,26 @@ enum PARAMETER : size_t
 
 inline std::vector<Modules::Variable::Info> get_default_vars()
 {
-  return 
-  {
-    {
-      PARAMETER::STATE,
-      "Oscilloscope Probe State",
-      "State of the probing component within the oscilloscope",
-      Modules::Variable::STATE,
-      Modules::Variable::INIT
-    },
-    {
-      PARAMETER::TRIGGERING,
-      "Trigger State",
-      "Trigger activity for the oscilloscope",
-      Modules::Variable::STATE,
-      Modules::Variable::INIT
-    }
-  };
+  return {{PARAMETER::STATE,
+           "Oscilloscope Probe State",
+           "State of the probing component within the oscilloscope",
+           Modules::Variable::STATE,
+           Modules::Variable::INIT},
+          {PARAMETER::TRIGGERING,
+           "Trigger State",
+           "Trigger activity for the oscilloscope",
+           Modules::Variable::STATE,
+           Modules::Variable::INIT}};
 }
 
 inline std::vector<IO::channel_t> get_default_channels()
 {
-  return
-  {
-    {
-      "Probing Channel",
-      "This is the channel used by the osciloscope to probe on other inputs and "
-      "output ports",
-      IO::INPUT,
-      0
-    }
-  };
+  return {{"Probing Channel",
+           "This is the channel used by the osciloscope to probe on other "
+           "inputs and "
+           "output ports",
+           IO::INPUT,
+           0}};
 }
 
 namespace Trigger

@@ -7,6 +7,7 @@
 #include <QLineEdit>
 #include <QPushButton>
 #include <QValidator>
+#include <limits>
 #include <map>
 #include <memory>
 #include <optional>
@@ -14,7 +15,6 @@
 #include <unordered_map>
 #include <variant>
 #include <vector>
-#include <limits>
 
 #include "daq.hpp"
 #include "event.hpp"
@@ -391,9 +391,7 @@ private:
 class Plugin : public Event::Handler
 {
 public:
-  Plugin(Event::Manager* ev_manager,
-         MainWindow* mw,
-         std::string mod_name);
+  Plugin(Event::Manager* ev_manager, MainWindow* mw, std::string mod_name);
   Plugin(const Plugin& plugin) = delete;  // copy constructor
   Plugin& operator=(const Plugin& plugin) =
       delete;  // copy assignment noperator
@@ -451,18 +449,20 @@ public:
   {
     const int result = 0;
     Modules::Variable::variable_t param_type = Modules::Variable::UNKNOWN;
-    if(typeid(T) == typeid(int)){
+    if (typeid(T) == typeid(int)) {
       param_type = Modules::Variable::INT_PARAMETER;
-    } else if (typeid(T) == typeid(double)){
+    } else if (typeid(T) == typeid(double)) {
       param_type = Modules::Variable::DOUBLE_PARAMETER;
-    } else if (typeid(T) == typeid(uint64_t)){
+    } else if (typeid(T) == typeid(uint64_t)) {
       param_type = Modules::Variable::UINT_PARAMETER;
-    } else if (typeid(T) == typeid(std::string)){
+    } else if (typeid(T) == typeid(std::string)) {
       param_type = Modules::Variable::COMMENT;
-    } else if (typeid(T) == typeid(Modules::Variable::state_t)){
+    } else if (typeid(T) == typeid(Modules::Variable::state_t)) {
       param_type = Modules::Variable::STATE;
     } else {
-      ERROR_MSG("Modules::Plugin::setComponentParameter : Parameter type not supported");
+      ERROR_MSG(
+          "Modules::Plugin::setComponentParameter : Parameter type not "
+          "supported");
       return -1;
     }
     Event::Object event(Event::Type::RT_MODULE_PARAMETER_CHANGE_EVENT);
@@ -482,7 +482,8 @@ public:
   // *
   // * \return 0 if successful -1 otherwise
   // */
-  //int setComponentIntParameter(const Variable::Id& parameter_id, int64_t value);
+  // int setComponentIntParameter(const Variable::Id& parameter_id, int64_t
+  // value);
 
   ///*!
   // * Assigns a new double value to the parameter
@@ -492,7 +493,8 @@ public:
   // *
   // * \return 0 if successful -1 otherwise
   // */
-  //int setComponentDoubleParameter(const Variable::Id& parameter_id, double value);
+  // int setComponentDoubleParameter(const Variable::Id& parameter_id, double
+  // value);
 
   ///*!
   // * Assigns a new unsigned integer value to the parameter
@@ -502,7 +504,8 @@ public:
   // *
   // * \return 0 if successful -1 otherwise
   // */
-  //int setComponentUintParameter(const Variable::Id& parameter_id, uint64_t value);
+  // int setComponentUintParameter(const Variable::Id& parameter_id, uint64_t
+  // value);
 
   ///*!
   // * Assigns a new comment value to the parameter
@@ -512,7 +515,8 @@ public:
   // *
   // * \return 0 if successful -1 otherwise
   // */
-  //int setComponentComment(const Variable::Id& parameter_id, const std::string& value);
+  // int setComponentComment(const Variable::Id& parameter_id, const
+  // std::string& value);
 
   ///*!
   // * Assigns a new state value to the component
@@ -522,7 +526,7 @@ public:
   // *
   // * \return 0 if successful -1 otherwise
   // */
-  //int setComponentState(const Variable::Id& parameter_id,
+  // int setComponentState(const Variable::Id& parameter_id,
   //                      Modules::Variable::state_t value);
 
   /*!
@@ -633,11 +637,12 @@ public:
   bool isRegistered(const Modules::Plugin* plugin);
 
 private:
-  [[nodiscard]]
-  Modules::Plugin* registerModule(std::unique_ptr<Modules::Plugin> module);
+  [[nodiscard]] Modules::Plugin* registerModule(
+      std::unique_ptr<Modules::Plugin> module);
   void unregisterModule(Modules::Plugin* plugin);
 
-  void registerFactories(const std::string& module_name, Modules::FactoryMethods);
+  void registerFactories(const std::string& module_name,
+                         Modules::FactoryMethods);
   void unregisterFactories(const std::string& module_name);
   Modules::Plugin* loadCorePlugin(const std::string& library);
 

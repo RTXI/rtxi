@@ -34,10 +34,11 @@ PerformanceMeasurement::Panel::Panel(const std::string& mod_name,
 {
   // Make Mdi
   auto* sub_window = new QMdiSubWindow;
-  sub_window->setWindowIcon(QIcon("/usr/local/share/rtxi/RTXI-widget-icon.png"));
+  sub_window->setWindowIcon(
+      QIcon("/usr/local/share/rtxi/RTXI-widget-icon.png"));
   sub_window->setAttribute(Qt::WA_DeleteOnClose);
   sub_window->setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint
-                            | Qt::WindowMinimizeButtonHint);
+                             | Qt::WindowMinimizeButtonHint);
   this->getMainWindowPtr()->createMdi(sub_window);
 
   // Create main layout
@@ -221,24 +222,21 @@ PerformanceMeasurement::Plugin::Plugin(Event::Manager* ev_manager,
     : Modules::Plugin(
         ev_manager, mw, std::string(PerformanceMeasurement::MODULE_NAME))
 {
-  auto component =
-      std::make_unique<PerformanceMeasurement::Component>(this);
+  auto component = std::make_unique<PerformanceMeasurement::Component>(this);
   this->attachComponent(std::move(component));
   std::vector<Event::Object> events;
   events.emplace_back(Event::Type::RT_PREPERIOD_EVENT);
   events.emplace_back(Event::Type::RT_POSTPERIOD_EVENT);
   this->getEventManager()->postEvent(events);
   auto* performance_measurement_component =
-      dynamic_cast<PerformanceMeasurement::Component*>(
-          this->getComponent());
+      dynamic_cast<PerformanceMeasurement::Component*>(this->getComponent());
   performance_measurement_component->setTickPointers(
       std::any_cast<int64_t*>(events[0].getParam("pre-period")),
       std::any_cast<int64_t*>(events[1].getParam("post-period")));
 
   Event::Object activation_event(Event::Type::RT_THREAD_UNPAUSE_EVENT);
   activation_event.setParam(
-      "thread",
-      std::any(static_cast<RT::Thread*>(this->getComponent())));
+      "thread", std::any(static_cast<RT::Thread*>(this->getComponent())));
   this->getEventManager()->postEvent(&activation_event);
 }
 

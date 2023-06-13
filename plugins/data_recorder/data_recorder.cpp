@@ -907,8 +907,7 @@ void DataRecorder::Panel::insertChannel(void)
       channel->block->getName(channel->type, channel->index).c_str());
 
   if (selectionBox->findItems(QString(channel->name), Qt::MatchExactly)
-          .isEmpty())
-  {
+          .isEmpty()) {
     InsertChannelEvent RTevent(recording, channels, channels.end(), *channel);
     if (!RT::System::getInstance()->postEvent(&RTevent))
       selectionBox->addItem(channel->name);

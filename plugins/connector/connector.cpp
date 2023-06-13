@@ -316,7 +316,8 @@ void Connector::Panel::highlightConnectionBox(QListWidgetItem* /*item*/)
   // build info in the input group
   this->inputBlock->setCurrentIndex(dest_index);
   buildInputChannelList();
-  const size_t dest_port = this->links[static_cast<size_t>(link_index)].dest_port;
+  const size_t dest_port =
+      this->links[static_cast<size_t>(link_index)].dest_port;
   inputChannel->setCurrentIndex(static_cast<int>(dest_port));
 
   // update connection button state

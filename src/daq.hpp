@@ -78,7 +78,8 @@ public:
    *
    * \sa IO::Block
    */
-  Device(const std::string& dev_name, const std::vector<IO::channel_t>& channels)
+  Device(const std::string& dev_name,
+         const std::vector<IO::channel_t>& channels)
       : RT::Device(dev_name, channels)
   {
   }

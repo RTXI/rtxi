@@ -294,7 +294,7 @@ void Oscilloscope::Panel::setActivity(Oscilloscope::Component* comp,
                                       bool activity)
 {
   const Event::Type event_type = activity ? Event::Type::RT_THREAD_UNPAUSE_EVENT
-                                    : Event::Type::RT_THREAD_PAUSE_EVENT;
+                                          : Event::Type::RT_THREAD_PAUSE_EVENT;
   Event::Object event(event_type);
   event.setParam("thread", std::any(static_cast<RT::Thread*>(comp)));
   this->getRTXIEventManager()->postEvent(&event);
@@ -303,8 +303,7 @@ void Oscilloscope::Panel::setActivity(Oscilloscope::Component* comp,
 void Oscilloscope::Panel::applyChannelTab()
 {
   if (this->blocksListDropdown->count() <= 0
-      || this->channelsList->count() <= 0)
-  {
+      || this->channelsList->count() <= 0) {
     return;
   }
 
@@ -928,8 +927,7 @@ void Oscilloscope::Panel::showDisplayTab()
     trigThresh = 0;
   } else {
     while (fabs(trigThresh) < 1
-           && trigThreshUnits < this->trigsThreshList->count())
-    {
+           && trigThreshUnits < this->trigsThreshList->count()) {
       trigThresh *= 1000;
       ++trigThreshUnits;
     }
@@ -1122,7 +1120,8 @@ void Oscilloscope::Panel::adjustDataSize()
   this->getRTXIEventManager()->postEvent(&event);
   auto period = std::any_cast<int64_t>(event.getParam("period"));
   const double timedivs = scopeWindow->getDivT();
-  const double xdivs = static_cast<double>(scopeWindow->getDivX())/static_cast<double>(period);
+  const double xdivs =
+      static_cast<double>(scopeWindow->getDivX()) / static_cast<double>(period);
   const size_t size = static_cast<size_t>(ceil(timedivs + xdivs)) + 1;
   scopeWindow->setDataSize(size);
   sizesEdit->setText(QString::number(scopeWindow->getDataSize()));
@@ -1153,8 +1152,7 @@ void Oscilloscope::Panel::timeoutEvent()
   // }
 }
 
-Oscilloscope::Plugin::Plugin(Event::Manager* ev_manager,
-                             MainWindow* mwindow)
+Oscilloscope::Plugin::Plugin(Event::Manager* ev_manager, MainWindow* mwindow)
     : Modules::Plugin(
         ev_manager, mwindow, std::string(Oscilloscope::MODULE_NAME))
 {

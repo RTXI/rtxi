@@ -69,8 +69,7 @@ int RT::Connector::find_cycle(RT::block_connection_t conn, IO::Block* ref_block)
   }
   for (const auto& temp_conn : this->connections) {
     if (conn.dest == temp_conn.src
-        && this->find_cycle(temp_conn, ref_block) == -1)
-    {
+        && this->find_cycle(temp_conn, ref_block) == -1) {
       return -1;
     }
   }
@@ -362,8 +361,7 @@ void RT::System::createTelemitryProcessor()
     eventLogger* logger = this->event_manager->getLogger();
     std::vector<RT::Telemitry::Response> responses;
     while (!this->task->task_finished
-           && this->telemitry_processing_thread_running)
-    {
+           && this->telemitry_processing_thread_running) {
       responses = this->getTelemitry();
       for (auto telem : responses) {
         if (telem.cmd != nullptr) {
@@ -408,7 +406,8 @@ void RT::System::updateDeviceList(RT::System::CMD* cmd)
       std::get<std::vector<RT::Device*>*>(cmd->getRTParam("deviceList"));
   this->devices.clear();
   this->devices.assign(vec_ptr->begin(), vec_ptr->end());
-  const RT::Telemitry::Response telem = {RT::Telemitry::RT_DEVICE_LIST_UPDATE, cmd};
+  const RT::Telemitry::Response telem = {RT::Telemitry::RT_DEVICE_LIST_UPDATE,
+                                         cmd};
   this->postTelemitry(telem);
 }
 
@@ -418,7 +417,8 @@ void RT::System::updateThreadList(RT::System::CMD* cmd)
       std::get<std::vector<RT::Thread*>*>(cmd->getRTParam("threadList"));
   this->threads.clear();
   this->threads.assign(vec_ptr->begin(), vec_ptr->end());
-  const RT::Telemitry::Response telem = {RT::Telemitry::RT_THREAD_LIST_UPDATE, cmd};
+  const RT::Telemitry::Response telem = {RT::Telemitry::RT_THREAD_LIST_UPDATE,
+                                         cmd};
   this->postTelemitry(telem);
 }
 
@@ -652,7 +652,7 @@ void RT::System::getPeriodValues(Event::Object* event)
   event->setParam("period", std::any(this->getPeriod()));
 }
 
-void RT::System::NOOP(Event::Object*  /*event*/)
+void RT::System::NOOP(Event::Object* /*event*/)
 {
   RT::System::CMD cmd(Event::Type::NOOP);
   RT::System::CMD* cmd_ptr = &cmd;
@@ -782,7 +782,8 @@ void RT::System::allConnectionsInfoRequest(Event::Object* event)
 
 void RT::System::blockInfoRequest(Event::Object* event)
 {
-  const std::vector<IO::Block*> blocks = this->rt_connector->getRegisteredBlocks();
+  const std::vector<IO::Block*> blocks =
+      this->rt_connector->getRegisteredBlocks();
   event->setParam("blockList", std::any(blocks));
 }
 

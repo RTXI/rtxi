@@ -18,7 +18,6 @@
 
 */
 
-
 #include <QApplication>
 #include <QDesktopServices>
 #include <QDir>

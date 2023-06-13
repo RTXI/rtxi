@@ -19,6 +19,9 @@
 */
 
 #include <array>
+
+#include "fifo.hpp"
+
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/eventfd.h>
@@ -26,7 +29,6 @@
 #include <unistd.h>
 
 #include "debug.hpp"
-#include "fifo.hpp"
 
 // Generic posix fifo based on pipes
 namespace RT::OS
@@ -51,12 +53,12 @@ public:
   int getErrorCode() const;
 
 private:
-  std::array<int,2> ui_to_rt{};
-  std::array<int,2> rt_to_ui{};
+  std::array<int, 2> ui_to_rt {};
+  std::array<int, 2> rt_to_ui {};
 
   size_t fifo_capacity = 0;
   int close_event_fd;
-  std::array<struct pollfd, 2> xbuf_poll_fd{};
+  std::array<struct pollfd, 2> xbuf_poll_fd {};
   bool closed = false;
   int errcode = 0;
 };
@@ -119,7 +121,7 @@ void RT::OS::posixFifo::poll()
 {
   this->errcode = ::poll(this->xbuf_poll_fd.data(), 2, -1);
   if (errcode < 0) {
-    std::string errbuff (255, '\0');
+    std::string errbuff(255, '\0');
     ERROR_MSG("RT::OS::FIFO(evl)::poll : returned with failure code {} : ",
               errcode);
     ERROR_MSG("{}", strerror_r(this->errcode, errbuff.data(), errbuff.size()));
@@ -150,8 +152,9 @@ int RT::OS::getFifo(std::unique_ptr<Fifo>& fifo, size_t fifo_size)
   auto tmp_fifo = std::make_unique<RT::OS::posixFifo>(fifo_size);
   const int errcode = tmp_fifo->getErrorCode();
   if (errcode != 0) {
-    std::string errbuff (255, '\0');
-    ERROR_MSG("RT::OS::posixFifo : {}", strerror_r(errcode, errbuff.data(), errbuff.size()));
+    std::string errbuff(255, '\0');
+    ERROR_MSG("RT::OS::posixFifo : {}",
+              strerror_r(errcode, errbuff.data(), errbuff.size()));
   } else {
     fifo = std::move(tmp_fifo);
   }

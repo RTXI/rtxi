@@ -348,12 +348,11 @@ void SystemControl::Panel::apply()
       a_type,
       a_chan,
       static_cast<DAQ::index_t>(analogUnitList->currentIndex()));
-  const int value = analogDownsampleList->itemData(analogDownsampleList->currentIndex(), 
-                                                      Qt::DisplayRole).toInt();
-  dev->setAnalogDownsample(
-      a_type,
-      a_chan,
-      static_cast<size_t>(value));
+  const int value =
+      analogDownsampleList
+          ->itemData(analogDownsampleList->currentIndex(), Qt::DisplayRole)
+          .toInt();
+  dev->setAnalogDownsample(a_type, a_chan, static_cast<size_t>(value));
   dev->setAnalogCounter(a_type, a_chan);
 
   auto d_chan = static_cast<DAQ::index_t>(digitalChannelList->currentIndex());
@@ -569,12 +568,15 @@ void SystemControl::Panel::display()
           QString::fromStdString(dev->getAnalogUnitsString(type, chan, i)));
     }
     analogActiveButton->setChecked(dev->getChannelActive(type, chan));
-    analogRangeList->setCurrentIndex(static_cast<int>(dev->getAnalogRange(type, chan)));
+    analogRangeList->setCurrentIndex(
+        static_cast<int>(dev->getAnalogRange(type, chan)));
     analogDownsampleList->setCurrentIndex(analogDownsampleList->findData(
         QVariant::fromValue(dev->getAnalogDownsample(type, chan)),
         Qt::DisplayRole));
-    analogReferenceList->setCurrentIndex(static_cast<int>(dev->getAnalogReference(type, chan)));
-    analogUnitList->setCurrentIndex(static_cast<int>(dev->getAnalogUnits(type, chan)));
+    analogReferenceList->setCurrentIndex(
+        static_cast<int>(dev->getAnalogReference(type, chan)));
+    analogUnitList->setCurrentIndex(
+        static_cast<int>(dev->getAnalogUnits(type, chan)));
 
     // Determine the correct prefix for analog gain
     int indx = 8;
