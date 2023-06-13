@@ -22,27 +22,8 @@
 
 #include "main_window.hpp"
 
-// struct block_list_info_t
-// {
-//   QComboBox* blockList0;
-//   QComboBox* blockList1;
-//   std::vector<IO::Block*>* blocks;
-// };
-
-// static void buildBlockList(IO::Block* block, void* arg)
-// {
-//   block_list_info_t* info = static_cast<block_list_info_t*>(arg);
-//   info->blockList0->addItem(QString::fromStdString(block->getName()) + " "
-//                             + QString::number(block->getID()));
-//   info->blockList1->addItem(QString::fromStdString(block->getName()) + " "
-//                             + QString::number(block->getID()));
-//   info->blocks->push_back(block);
-// }
-
-using IO::Block;
-
-Connector::Panel::Panel(MainWindow* mw, Event::Manager* event_manager)
-    : Modules::Panel(std::string(Connector::MODULE_NAME), mw, event_manager)
+Connector::Panel::Panel(MainWindow* mw, Event::Manager* ev_manager)
+    : Modules::Panel(std::string(Connector::MODULE_NAME), mw, ev_manager)
     , subWindow(new QMdiSubWindow)
     , buttonGroup(new QGroupBox)
     , inputBlock(new QComboBox)
@@ -227,7 +208,7 @@ void Connector::Plugin::receiveEvent(Event::Object* event)
 
 void Connector::Plugin::updatePanelInfo()
 {
-  dynamic_cast<Connector::Panel*>(this->widget_panel)->updateBlockInfo();
+  dynamic_cast<Connector::Panel*>(this->getPanel())->updateBlockInfo();
 }
 
 // This slot will be called by the plugin to update block list and connection
@@ -265,7 +246,7 @@ void Connector::Panel::buildInputChannelList()
   }
 
   // Get specific block
-  Block* block = blocks[static_cast<size_t>(inputBlock->currentIndex())];
+  IO::Block* block = blocks[static_cast<size_t>(inputBlock->currentIndex())];
 
   // Get list of channels from specific block
   for (size_t i = 0; i < block->getCount(IO::INPUT); ++i) {
@@ -303,7 +284,7 @@ void Connector::Panel::buildOutputFlagList()
 
 void Connector::Panel::highlightConnectionBox(QListWidgetItem* /*item*/)
 {
-  int link_index =
+  const int link_index =
       this->connectionBox->selectionModel()->selectedIndexes()[0].row();
   if (link_index < 0 || static_cast<size_t>(link_index) >= this->links.size()) {
     return;
@@ -320,7 +301,7 @@ void Connector::Panel::highlightConnectionBox(QListWidgetItem* /*item*/)
   // build info in the output group
   this->outputBlock->setCurrentIndex(src_index);
   buildOutputChannelList();
-  size_t src_port = this->links[static_cast<size_t>(link_index)].src_port;
+  const size_t src_port = this->links[static_cast<size_t>(link_index)].src_port;
   outputChannel->setCurrentIndex(static_cast<int>(src_port));
 
   // find out selected dest block
@@ -335,7 +316,7 @@ void Connector::Panel::highlightConnectionBox(QListWidgetItem* /*item*/)
   // build info in the input group
   this->inputBlock->setCurrentIndex(dest_index);
   buildInputChannelList();
-  size_t dest_port = this->links[static_cast<size_t>(link_index)].dest_port;
+  const size_t dest_port = this->links[static_cast<size_t>(link_index)].dest_port;
   inputChannel->setCurrentIndex(static_cast<int>(dest_port));
 
   // update connection button state
@@ -345,11 +326,11 @@ void Connector::Panel::highlightConnectionBox(QListWidgetItem* /*item*/)
 void Connector::Panel::toggleConnection(bool on)
 {
   RT::block_connection_t connection;
-  int src_id = outputBlock->currentIndex();
-  int dest_id = inputBlock->currentIndex();
-  int src_port_id = outputChannel->currentIndex();
-  int src_port_flag = outputFlag->currentIndex();
-  int dest_port_id = inputChannel->currentIndex();
+  const int src_id = outputBlock->currentIndex();
+  const int dest_id = inputBlock->currentIndex();
+  const int src_port_id = outputChannel->currentIndex();
+  const int src_port_flag = outputFlag->currentIndex();
+  const int dest_port_id = inputChannel->currentIndex();
 
   // If no valid selection then do nothing
   if (src_id == -1 || dest_id == -1 || src_port_id == -1 || dest_port_id == -1

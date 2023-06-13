@@ -126,6 +126,10 @@ class Scope : public QwtPlot
   Q_OBJECT
 
 public:
+  Scope(const Scope&) = delete;
+  Scope(Scope&&) = delete;
+  Scope& operator=(const Scope&) = delete;
+  Scope& operator=(Scope&&) = delete;
   explicit Scope(QWidget* parent);
   ~Scope() override;
 
@@ -136,7 +140,7 @@ public:
   // scope_channel getChannel(IO::Block* block, size_t port);
 
   void clearData();
-  void setData(probe channel, std::vector<sample> data);
+  void setData(probe channel, std::vector<sample> probe_data);
   size_t getDataSize() const;
   void setDataSize(size_t);
 
@@ -171,8 +175,8 @@ private:
   size_t buffer_size = DEFAULT_BUFFER_SIZE;
 
   bool isPaused = false;
-  int divX = 10;
-  int divY = 10;
+  size_t divX = 10;
+  size_t divY = 10;
   size_t refresh = Oscilloscope::FrameRates::HZ60;
   double hScl = 1.0;  // horizontal scale for time (ms)
   bool triggering = false;

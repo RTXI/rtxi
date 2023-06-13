@@ -33,52 +33,57 @@ UserPrefs::Plugin::Plugin(Event::Manager* ev_manager, MainWindow* mw)
 {
 }
 
-UserPrefs::Panel::Panel(MainWindow* main_window, Event::Manager* ev_manager)
-    : Modules::Panel(
-        std::string(UserPrefs::MODULE_NAME), main_window, ev_manager)
+UserPrefs::Panel::Panel(MainWindow* mwindow, Event::Manager* ev_manager)
+    : Modules::Panel(std::string(UserPrefs::MODULE_NAME), mwindow, ev_manager), 
+    status(new QLabel), 
+    subWindow(new QMdiSubWindow), 
+    dirGroup(new QGroupBox), 
+    HDF(new QGroupBox), 
+    buttons(new QGroupBox), 
+    settingsDirEdit(new QLineEdit(dirGroup)), 
+    dataDirEdit(new QLineEdit(dirGroup)), 
+    HDFBufferEdit(new QLineEdit(HDF))
 {
   // Make Mdi
-  subWindow = new QMdiSubWindow;
+  
   subWindow->setWindowIcon(QIcon("/usr/local/share/rtxi/RTXI-widget-icon.png"));
   subWindow->setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint
                             | Qt::WindowMinimizeButtonHint);
   subWindow->setAttribute(Qt::WA_DeleteOnClose);
-  main_window->createMdi(subWindow);
+  mwindow->createMdi(subWindow);
 
   // Preferences structure
-  QSettings userprefs;
-  userprefs.setPath(QSettings::NativeFormat,
+  const QSettings user_preferences;
+  QSettings::setPath(QSettings::NativeFormat,
                     QSettings::SystemScope,
                     "/usr/local/share/rtxi/");
 
   // Main layout
-  QVBoxLayout* layout = new QVBoxLayout;
+  auto* box_layout = new QVBoxLayout;
 
   // Create child widget and layout
-  dirGroup = new QGroupBox;
-  QGridLayout* dirLayout = new QGridLayout;
+  auto* dirLayout = new QGridLayout;
 
   // Create elements for directory paths
-  settingsDirEdit = new QLineEdit(dirGroup);
+  const QString env_var = QString::fromLocal8Bit(qgetenv("HOME"));
   settingsDirEdit->setText(
-      userprefs.value("/dirs/setfiles", getenv("HOME")).toString());
+      user_preferences.value("/dirs/setfiles", env_var).toString());
   dirLayout->addWidget(
       new QLabel(tr("Default settings directory:")), 0, 0, 1, 1);
   dirLayout->addWidget(settingsDirEdit, 0, 1, 1, 1);
-  QPushButton* chooseSettingsDirButton = new QPushButton("Browse", this);
+  auto* chooseSettingsDirButton = new QPushButton("Browse", this);
   dirLayout->addWidget(chooseSettingsDirButton, 0, 2, 1, 2);
   QObject::connect(chooseSettingsDirButton,
                    SIGNAL(released(void)),
                    this,
                    SLOT(chooseSettingsDir(void)));
 
-  dataDirEdit = new QLineEdit(dirGroup);
   dataDirEdit->setText(
-      userprefs.value("/dirs/data", getenv("HOME")).toString());
+      user_preferences.value("/dirs/data", env_var).toString());
   dirLayout->addWidget(
       new QLabel(tr("Default HDF5 data directory:")), 1, 0, 1, 1);
   dirLayout->addWidget(dataDirEdit, 1, 1, 1, 1);
-  QPushButton* chooseDataDirButton = new QPushButton("Browse", this);
+  auto* chooseDataDirButton = new QPushButton("Browse", this);
   dirLayout->addWidget(chooseDataDirButton, 1, 2, 1, 2);
   QObject::connect(chooseDataDirButton,
                    SIGNAL(released(void)),
@@ -89,36 +94,34 @@ UserPrefs::Panel::Panel(MainWindow* main_window, Event::Manager* ev_manager)
   dirGroup->setLayout(dirLayout);
 
   // Create new child widget and layout
-  HDF = new QGroupBox;
-  QGridLayout* hdfLayout = new QGridLayout;
+  auto* hdfLayout = new QGridLayout;
 
   // Create elements for child widget
-  HDFBufferEdit = new QLineEdit(HDF);
   hdfLayout->addWidget(
       new QLabel(tr("HDF Data Recorder Buffer Size (MB):")), 0, 0, 1, 1);
   hdfLayout->addWidget(HDFBufferEdit, 0, 1, 1, 1);
   HDFBufferEdit->setText(
-      QString::number(userprefs.value("/system/HDFbuffer", 10).toInt()));
+      QString::number(user_preferences.value("/system/HDFbuffer", 10).toInt()));
 
   // Attach child to parent
   HDF->setLayout(hdfLayout);
 
   // Create new child widget
-  buttons = new QGroupBox;
-  QHBoxLayout* buttonLayout = new QHBoxLayout;
+  auto* buttonLayout = new QHBoxLayout;
 
   // Create elements for child widget
-  QPushButton* resetButton = new QPushButton("Reset");
+  auto* resetButton = new QPushButton("Reset");
   QObject::connect(
       resetButton, SIGNAL(released(void)), this, SLOT(reset(void)));
-  QPushButton* applyButton = new QPushButton("Save");
+  auto* applyButton = new QPushButton("Save");
   QObject::connect(
       applyButton, SIGNAL(released(void)), this, SLOT(apply(void)));
-  QPushButton* cancelButton = new QPushButton("Close");
+  auto* cancelButton = new QPushButton("Close");
   QObject::connect(
       cancelButton, SIGNAL(released(void)), subWindow, SLOT(close(void)));
-  status = new QLabel;
+  
   status->setText("Defaults \nloaded");
+  //NOLINTNEXTLINE
   status->setFrameStyle(QFrame::Panel | QFrame::Sunken);
   status->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
 
@@ -132,12 +135,12 @@ UserPrefs::Panel::Panel(MainWindow* main_window, Event::Manager* ev_manager)
   buttons->setLayout(buttonLayout);
 
   // Attach child widget to parent widget
-  layout->addWidget(dirGroup);
-  layout->addWidget(HDF);
-  layout->addWidget(buttons);
+  box_layout->addWidget(dirGroup);
+  box_layout->addWidget(HDF);
+  box_layout->addWidget(buttons);
 
   // Attach layout to widget
-  setLayout(layout);
+  setLayout(box_layout);
   setWindowTitle(QString::fromStdString(this->getName()));
 
   // Set layout to Mdi
@@ -148,13 +151,14 @@ UserPrefs::Panel::Panel(MainWindow* main_window, Event::Manager* ev_manager)
 
 void UserPrefs::Panel::reset()
 {
-  settingsDirEdit->setText(getenv("HOME"));
-  dataDirEdit->setText(getenv("HOME"));
+  const QString env_var = QString::fromLocal8Bit(qgetenv("HOME"));
+  settingsDirEdit->setText(env_var);
+  dataDirEdit->setText(env_var);
   HDFBufferEdit->setText(QString::number(10));
   userprefs.setValue("/dirs/setfiles", settingsDirEdit->text());
   userprefs.setValue("/dirs/data", dataDirEdit->text());
-  bool ok;
-  QString buffer = HDFBufferEdit->text();
+  bool ok = false;
+  const QString buffer = HDFBufferEdit->text();
   userprefs.setValue("/system/HDFbuffer", buffer.toInt(&ok));
   status->setText("Preferences \nreset");
 }
@@ -163,28 +167,30 @@ void UserPrefs::Panel::apply()
 {
   userprefs.setValue("/dirs/setfiles", settingsDirEdit->text());
   userprefs.setValue("/dirs/data", dataDirEdit->text());
-  bool ok;
-  QString buffer = HDFBufferEdit->text();
+  bool ok = false;
+  const QString buffer = HDFBufferEdit->text();
   userprefs.setValue("/system/HDFbuffer", buffer.toInt(&ok));
   status->setText("Preferences \napplied");
 }
 
 void UserPrefs::Panel::chooseSettingsDir()
 {
-  QString dir_name = QFileDialog::getExistingDirectory(
+  const QString env_var = QString::fromLocal8Bit(qgetenv("HOME"));
+  const QString dir_name = QFileDialog::getExistingDirectory(
       this,
       tr("Choose default directory for settings files"),
-      userprefs.value("/dirs/setfiles", getenv("HOME")).toString(),
+      userprefs.value("/dirs/setfiles", env_var).toString(),
       QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
   settingsDirEdit->setText(dir_name);
 }
 
 void UserPrefs::Panel::chooseDataDir()
 {
-  QString dir_name = QFileDialog::getExistingDirectory(
+  const QString env_var = QString::fromLocal8Bit(qgetenv("HOME"));
+  const QString dir_name = QFileDialog::getExistingDirectory(
       this,
       tr("Choose default directory for HDF5 data files"),
-      userprefs.value("/dirs/data", getenv("HOME")).toString(),
+      userprefs.value("/dirs/data", env_var).toString(),
       QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
   dataDirEdit->setText(dir_name);
 }
@@ -203,9 +209,9 @@ Modules::Panel* UserPrefs::createRTXIPanel(MainWindow* main_window,
 }
 
 std::unique_ptr<Modules::Component> UserPrefs::createRTXIComponent(
-    Modules::Plugin* host_plugin)
+    Modules::Plugin*  /*host_plugin*/)
 {
-  return std::unique_ptr<Modules::Component>(nullptr);
+  return {nullptr};
 }
 
 Modules::FactoryMethods UserPrefs::getFactories()

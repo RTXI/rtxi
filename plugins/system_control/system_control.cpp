@@ -296,7 +296,7 @@ SystemControl::Panel::Panel(MainWindow* mw, Event::Manager* ev_manager)
 
 void SystemControl::Panel::apply()
 {
-  int index = this->deviceList->currentIndex();
+  const int index = this->deviceList->currentIndex();
   if (index == -1) {
     // Even if there is no valid device we should still change rt period
     double period = periodEdit->text().toDouble();
@@ -307,7 +307,7 @@ void SystemControl::Panel::apply()
     return;
   }
 
-  QString dev_name = deviceList->itemText(index);
+  const QString dev_name = deviceList->itemText(index);
   Event::Object device_query_event(Event::DAQ_DEVICE_QUERY_EVENT);
   device_query_event.setParam("name", std::any(dev_name.toStdString()));
   this->getRTXIEventManager()->postEvent(&device_query_event);
@@ -328,9 +328,9 @@ void SystemControl::Panel::apply()
 
   auto a_chan = static_cast<DAQ::index_t>(analogChannelList->currentIndex());
   auto a_type = static_cast<DAQ::type_t>(analogSubdeviceList->currentIndex());
-  double a_gain = analogGainEdit->text().toDouble()
+  const double a_gain = analogGainEdit->text().toDouble()
       * pow(10, -3 * (analogUnitPrefixList->currentIndex() - 8));
-  double a_zerooffset = analogZeroOffsetEdit->text().toDouble()
+  const double a_zerooffset = analogZeroOffsetEdit->text().toDouble()
       * pow(10, -3 * (analogUnitPrefixList2->currentIndex() - 8));
 
   dev->setChannelActive(a_type, a_chan, analogActiveButton->isChecked());
@@ -348,12 +348,12 @@ void SystemControl::Panel::apply()
       a_type,
       a_chan,
       static_cast<DAQ::index_t>(analogUnitList->currentIndex()));
+  const int value = analogDownsampleList->itemData(analogDownsampleList->currentIndex(), 
+                                                      Qt::DisplayRole).toInt();
   dev->setAnalogDownsample(
       a_type,
       a_chan,
-      analogDownsampleList
-          ->itemData(analogDownsampleList->currentIndex(), Qt::DisplayRole)
-          .toInt());
+      static_cast<size_t>(value));
   dev->setAnalogCounter(a_type, a_chan);
 
   auto d_chan = static_cast<DAQ::index_t>(digitalChannelList->currentIndex());
@@ -391,12 +391,12 @@ void SystemControl::Panel::updateDevice()
   //   dev = info.device;
   // }
 
-  int index = this->deviceList->currentIndex();
+  const int index = this->deviceList->currentIndex();
   if (index == -1) {
     return;
   }
 
-  QString dev_name = deviceList->itemText(index);
+  const QString dev_name = deviceList->itemText(index);
   Event::Object device_query_event(Event::Type::DAQ_DEVICE_QUERY_EVENT);
   device_query_event.setParam("name", std::any(dev_name.toStdString()));
   this->getRTXIEventManager()->postEvent(&device_query_event);
@@ -488,6 +488,7 @@ void SystemControl::Panel::updatePeriod()
   rateUpdate = false;
 }
 
+// TODO: improve simplicity of display function
 void SystemControl::Panel::display()
 {
   int index = this->deviceList->currentIndex();
@@ -495,7 +496,7 @@ void SystemControl::Panel::display()
     return;
   }
 
-  QString dev_name = deviceList->itemText(index);
+  const QString dev_name = deviceList->itemText(index);
   Event::Object device_query_event(Event::Type::DAQ_DEVICE_QUERY_EVENT);
   device_query_event.setParam("name", std::any(dev_name.toStdString()));
   this->getRTXIEventManager()->postEvent(&device_query_event);
@@ -568,12 +569,12 @@ void SystemControl::Panel::display()
           QString::fromStdString(dev->getAnalogUnitsString(type, chan, i)));
     }
     analogActiveButton->setChecked(dev->getChannelActive(type, chan));
-    analogRangeList->setCurrentIndex(dev->getAnalogRange(type, chan));
+    analogRangeList->setCurrentIndex(static_cast<int>(dev->getAnalogRange(type, chan)));
     analogDownsampleList->setCurrentIndex(analogDownsampleList->findData(
         QVariant::fromValue(dev->getAnalogDownsample(type, chan)),
         Qt::DisplayRole));
-    analogReferenceList->setCurrentIndex(dev->getAnalogReference(type, chan));
-    analogUnitList->setCurrentIndex(dev->getAnalogUnits(type, chan));
+    analogReferenceList->setCurrentIndex(static_cast<int>(dev->getAnalogReference(type, chan)));
+    analogUnitList->setCurrentIndex(static_cast<int>(dev->getAnalogUnits(type, chan)));
 
     // Determine the correct prefix for analog gain
     int indx = 8;

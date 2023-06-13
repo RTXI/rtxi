@@ -85,8 +85,8 @@ private:
 class Plugin : public Modules::Plugin
 {
 public:
-  Plugin(Event::Manager* ev_manager, MainWindow* main_window)
-      : Modules::Plugin(ev_manager, main_window, std::string(MODULE_NAME))
+  Plugin(Event::Manager* ev_manager, MainWindow* mainwindow)
+      : Modules::Plugin(ev_manager, mainwindow, std::string(MODULE_NAME))
   {
   }
 };

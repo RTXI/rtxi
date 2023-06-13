@@ -271,10 +271,8 @@ Event::Manager::Manager()
   for (size_t count = 0; count < RT::OS::PROCESSOR_COUNT; count++) {
     this->thread_pool.emplace_back(task);
   }
-  size_t count = 0;
   for (auto& thread : this->thread_pool) {
     RT::OS::renameOSThread(thread, std::string("RTXIEventWorker"));
-    count++;
   }
 }
 
@@ -369,9 +367,7 @@ void Event::Manager::unregisterHandler(Event::Handler* handler)
 
 bool Event::Manager::isRegistered(Event::Handler* handler)
 {
-  std::shared_lock<std::shared_mutex> read_lock(this->handlerlist_mut);
+  const std::shared_lock<std::shared_mutex> read_lock(this->handlerlist_mut);
   auto location = std::find(handlerList.begin(), handlerList.end(), handler);
-  bool result = location != handlerList.end();
-  read_lock.unlock();
-  return result;
+  return location != handlerList.end();
 }

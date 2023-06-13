@@ -27,78 +27,78 @@
 #include "module.hpp"
 #include "rt.hpp"
 
-PerformanceMeasurement::Panel::Panel(std::string name,
-                                     MainWindow* main_window,
+PerformanceMeasurement::Panel::Panel(const std::string& mod_name,
+                                     MainWindow* mwindow,
                                      Event::Manager* ev_manager)
-    : Modules::Panel(name, main_window, ev_manager)
+    : Modules::Panel(mod_name, mwindow, ev_manager)
 {
   // Make Mdi
-  QMdiSubWindow* subWindow = new QMdiSubWindow;
-  subWindow->setWindowIcon(QIcon("/usr/local/share/rtxi/RTXI-widget-icon.png"));
-  subWindow->setAttribute(Qt::WA_DeleteOnClose);
-  subWindow->setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint
+  auto* sub_window = new QMdiSubWindow;
+  sub_window->setWindowIcon(QIcon("/usr/local/share/rtxi/RTXI-widget-icon.png"));
+  sub_window->setAttribute(Qt::WA_DeleteOnClose);
+  sub_window->setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint
                             | Qt::WindowMinimizeButtonHint);
-  this->getMainWindowPtr()->createMdi(subWindow);
+  this->getMainWindowPtr()->createMdi(sub_window);
 
   // Create main layout
-  QVBoxLayout* layout = new QVBoxLayout;
-  QString suffix = QString("s)").prepend(QChar(0x3BC));
+  auto* box_layout = new QVBoxLayout;
+  const QString suffix = QString("s)").prepend(QChar(0x3BC));
 
   // Create child widget and gridLayout
-  QGridLayout* gridLayout = new QGridLayout;
+  auto* gridLayout = new QGridLayout;
 
-  durationEdit = new QLineEdit(subWindow);
+  durationEdit = new QLineEdit(sub_window);
   durationEdit->setReadOnly(true);
   gridLayout->addWidget(
       new QLabel(tr("Computation Time (").append(suffix)), 1, 0);
   gridLayout->addWidget(durationEdit, 1, 1);
 
-  maxDurationEdit = new QLineEdit(subWindow);
+  maxDurationEdit = new QLineEdit(sub_window);
   maxDurationEdit->setReadOnly(true);
   gridLayout->addWidget(
       new QLabel(tr("Peak Computation Time (").append(suffix)), 2, 0);
   gridLayout->addWidget(maxDurationEdit, 2, 1);
 
-  timestepEdit = new QLineEdit(subWindow);
+  timestepEdit = new QLineEdit(sub_window);
   timestepEdit->setReadOnly(true);
   gridLayout->addWidget(
       new QLabel(tr("Real-time Period (").append(suffix)), 3, 0);
   gridLayout->addWidget(timestepEdit, 3, 1);
 
-  maxTimestepEdit = new QLineEdit(subWindow);
+  maxTimestepEdit = new QLineEdit(sub_window);
   maxTimestepEdit->setReadOnly(true);
   gridLayout->addWidget(
       new QLabel(tr("Peak Real-time Period (").append(suffix)), 4, 0);
   gridLayout->addWidget(maxTimestepEdit, 4, 1);
 
-  timestepJitterEdit = new QLineEdit(subWindow);
+  timestepJitterEdit = new QLineEdit(sub_window);
   timestepJitterEdit->setReadOnly(true);
   gridLayout->addWidget(
       new QLabel(tr("Real-time Jitter (").append(suffix)), 5, 0);
   gridLayout->addWidget(timestepJitterEdit, 5, 1);
 
-  AppCpuPercentEdit = new QLineEdit(subWindow);
+  AppCpuPercentEdit = new QLineEdit(sub_window);
   AppCpuPercentEdit->setReadOnly(true);
   gridLayout->addWidget(new QLabel("RTXI App Cpu Usage(%)"), 6, 0);
   gridLayout->addWidget(AppCpuPercentEdit, 6, 1);
 
-  QPushButton* resetButton = new QPushButton("Reset", this);
+  auto* resetButton = new QPushButton("Reset", this);
   gridLayout->addWidget(resetButton, 7, 1);
   QObject::connect(resetButton, SIGNAL(released()), this, SLOT(reset()));
 
   // Attach child widget to parent widget
-  layout->addLayout(gridLayout);
+  box_layout->addLayout(gridLayout);
 
   // Attach gridLayout to Widget
-  setLayout(layout);
+  setLayout(box_layout);
   setWindowTitle(tr(std::string(PerformanceMeasurement::MODULE_NAME).c_str()));
 
   // Set layout to Mdi
-  subWindow->setWidget(this);
-  subWindow->setFixedSize(subWindow->minimumSizeHint());
+  sub_window->setWidget(this);
+  sub_window->setFixedSize(sub_window->minimumSizeHint());
   show();
 
-  QTimer* timer = new QTimer(this);
+  auto* timer = new QTimer(this);
   timer->setTimerType(Qt::PreciseTimer);
   timer->start(1000);
   QObject::connect(timer, SIGNAL(timeout(void)), this, SLOT(update(void)));
@@ -115,7 +115,7 @@ PerformanceMeasurement::Component::Component(Modules::Plugin* hplugin)
     : Modules::Component(hplugin,
                          std::string(MODULE_NAME),
                          std::vector<IO::channel_t>(),
-                         PerformanceMeasurement::performance_measurement_vars)
+                         PerformanceMeasurement::get_default_vars())
 {
   this->bind_execute_callback([&]() { this->callback(); });
 }
@@ -133,9 +133,9 @@ void PerformanceMeasurement::Component::callback()
     period = RT::OS::DEFAULT_PERIOD;
   }
 
-  double duration = *(end_ticks) - *(start_ticks);
-  double timestep = *(start_ticks)-last_start_ticks;
-  auto latency = timestep - period;
+  auto duration = static_cast<double>(*(end_ticks) - *(start_ticks));
+  auto timestep = static_cast<double>(*(start_ticks)-last_start_ticks);
+  const double latency = timestep - static_cast<double>(period);
 
   switch (getValue<Modules::Variable::state_t>(
       PerformanceMeasurement::PARAMETER::STATE))
@@ -212,7 +212,7 @@ void PerformanceMeasurement::Panel::refresh()
 
 void PerformanceMeasurement::Panel::reset()
 {
-  this->getHostPlugin()->setComponentState(
+  this->getHostPlugin()->setComponentParameter<Modules::Variable::state_t>(
       PerformanceMeasurement::PARAMETER::STATE, Modules::Variable::INIT);
 }
 
@@ -221,16 +221,16 @@ PerformanceMeasurement::Plugin::Plugin(Event::Manager* ev_manager,
     : Modules::Plugin(
         ev_manager, mw, std::string(PerformanceMeasurement::MODULE_NAME))
 {
-  auto plugin_component =
+  auto component =
       std::make_unique<PerformanceMeasurement::Component>(this);
-  this->attachComponent(std::move(plugin_component));
+  this->attachComponent(std::move(component));
   std::vector<Event::Object> events;
   events.emplace_back(Event::Type::RT_PREPERIOD_EVENT);
   events.emplace_back(Event::Type::RT_POSTPERIOD_EVENT);
-  this->event_manager->postEvent(events);
+  this->getEventManager()->postEvent(events);
   auto* performance_measurement_component =
       dynamic_cast<PerformanceMeasurement::Component*>(
-          this->plugin_component.get());
+          this->getComponent());
   performance_measurement_component->setTickPointers(
       std::any_cast<int64_t*>(events[0].getParam("pre-period")),
       std::any_cast<int64_t*>(events[1].getParam("post-period")));
@@ -238,8 +238,8 @@ PerformanceMeasurement::Plugin::Plugin(Event::Manager* ev_manager,
   Event::Object activation_event(Event::Type::RT_THREAD_UNPAUSE_EVENT);
   activation_event.setParam(
       "thread",
-      std::any(static_cast<RT::Thread*>(this->plugin_component.get())));
-  this->event_manager->postEvent(&activation_event);
+      std::any(static_cast<RT::Thread*>(this->getComponent())));
+  this->getEventManager()->postEvent(&activation_event);
 }
 
 std::unique_ptr<Modules::Plugin> PerformanceMeasurement::createRTXIPlugin(

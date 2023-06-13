@@ -156,18 +156,18 @@ void Modules::Panel::createGUI(const std::vector<Modules::Variable::Info>& vars,
                                MainWindow* mw)
 {
   // Make Mdi
-  this->subWindow = new QMdiSubWindow;
-  this->subWindow->setAttribute(Qt::WA_DeleteOnClose);
-  // subWindow->setWindowIcon(QIcon("/usr/local/share/rtxi/RTXI-widget-icon.png"));
-  this->subWindow->setWindowFlags(Qt::CustomizeWindowHint
+  this->m_subwindow = new QMdiSubWindow;
+  this->m_subwindow->setAttribute(Qt::WA_DeleteOnClose);
+  // m_subwindow->setWindowIcon(QIcon("/usr/local/share/rtxi/RTXI-widget-icon.png"));
+  this->m_subwindow->setWindowFlags(Qt::CustomizeWindowHint
                                   | Qt::WindowCloseButtonHint
                                   | Qt::WindowMinimizeButtonHint);
-  this->subWindow->setOption(QMdiSubWindow::RubberBandResize, true);
-  this->subWindow->setOption(QMdiSubWindow::RubberBandMove, true);
-  mw->createMdi(subWindow);
+  this->m_subwindow->setOption(QMdiSubWindow::RubberBandResize, true);
+  this->m_subwindow->setOption(QMdiSubWindow::RubberBandMove, true);
+  mw->createMdi(m_subwindow);
 
   // Create main layout
-  this->layout = new QGridLayout;
+  this->m_layout = new QGridLayout;
 
   // Create child widget and gridLayout
   auto* gridArea = new QScrollArea;
@@ -181,8 +181,8 @@ void Modules::Panel::createGUI(const std::vector<Modules::Variable::Info>& vars,
     param_t param;
 
     param.label = new QLabel(QString::fromStdString(varinfo.name), gridBox);
-    gridLayout->addWidget(param.label, this->parameter.size(), 0);
-    gridLayout->addWidget(param.edit, this->parameter.size(), 1);
+    gridLayout->addWidget(param.label, static_cast<int>(this->parameter.size()), 0);
+    gridLayout->addWidget(param.edit, static_cast<int>(this->parameter.size()), 1);
 
     param.label->setToolTip(QString::fromStdString(varinfo.description));
     param.edit->setToolTip(QString::fromStdString(varinfo.description));
@@ -243,18 +243,18 @@ void Modules::Panel::createGUI(const std::vector<Modules::Variable::Info>& vars,
   buttonGroup->setLayout(buttonLayout);
 
   // Keep one row of space above for users to place in grid
-  layout->addWidget(gridArea, 1, 0);
+  m_layout->addWidget(gridArea, 1, 0);
 
   // Attempt to put these at the bottom at all times
-  layout->addWidget(buttonGroup, 10, 0);
+  m_layout->addWidget(buttonGroup, 10, 0);
 
   // Set layout to Mdi and show
-  setLayout(layout);
-  subWindow->setWidget(this);
-  subWindow->show();
+  setLayout(m_layout);
+  m_subwindow->setWidget(this);
+  m_subwindow->show();
 }
 
-void Modules::Panel::update(Modules::Variable::state_t flag)
+void Modules::Panel::update(Modules::Variable::state_t  /*unused*/)
 {
   // TODO: Update function needs to have default functionality for derived
   // classes
@@ -262,7 +262,7 @@ void Modules::Panel::update(Modules::Variable::state_t flag)
 
 void Modules::Panel::resizeMe()
 {
-  subWindow->adjustSize();
+  m_subwindow->adjustSize();
 }
 
 void Modules::Panel::exit()
@@ -272,21 +272,17 @@ void Modules::Panel::exit()
   event.setParam("pluginPointer",
                  std::any(static_cast<Modules::Plugin*>(this->hostPlugin)));
   this->event_manager->postEvent(&event);
-  // this->subWindow->close();
+  // this->m_subwindow->close();
 }
 
 void Modules::Panel::refresh()
 {
+  Modules::Variable::Id param_id = Modules::Variable::INVALID_ID;
   double double_value = 0.0;
   int64_t int_value = 0;
   uint64_t uint_value = 0ULL;
   std::stringstream sstream;
   for (auto i : this->parameter) {
-    double_value = 0.0;
-    int_value = 0;
-    uint_value = 0ULL;
-    sstream.str("");
-
     switch (i.second.type) {
       case Modules::Variable::STATE:
         i.second.edit->setText(i.second.str_value);
@@ -294,20 +290,20 @@ void Modules::Panel::refresh()
         i.second.edit->setPalette(palette);
         break;
       case Modules::Variable::UINT_PARAMETER:
-        uint_value =
-            this->hostPlugin->getComponentUIntParameter(i.second.info.id);
+        param_id = static_cast<Modules::Variable::Id>(i.second.info.id);
+        uint_value = this->hostPlugin->getComponentUIntParameter(param_id);
         sstream << uint_value;
         i.second.edit->setText(QString::fromStdString(sstream.str()));
         break;
       case Modules::Variable::INT_PARAMETER:
-        int_value =
-            this->hostPlugin->getComponentIntParameter(i.second.info.id);
+        param_id = static_cast<Modules::Variable::Id>(i.second.info.id);
+        int_value = this->hostPlugin->getComponentIntParameter(param_id);
         sstream << int_value;
         i.second.edit->setText(QString::fromStdString(sstream.str()));
         break;
       case Modules::Variable::DOUBLE_PARAMETER:
-        double_value =
-            this->hostPlugin->getComponentDoubleParameter(i.second.info.id);
+        param_id = static_cast<Modules::Variable::Id>(i.second.info.id);
+        double_value = this->hostPlugin->getComponentDoubleParameter(param_id);
         sstream << double_value;
         i.second.edit->setText(QString::fromStdString(sstream.str()));
         break;
@@ -344,14 +340,16 @@ void Modules::Panel::modify()
   // }
 }
 
+//NOLINTNEXTLINE
 void Modules::Panel::setComment(const QString& var_name, const QString& comment)
 {
   auto n = parameter.find(var_name);
   if (n != parameter.end() && (n->second.type == Modules::Variable::COMMENT)) {
     n->second.edit->setText(comment);
-    QByteArray textData = comment.toLatin1();
+    const QByteArray textData = comment.toLatin1();
     const char* text = textData.constData();
-    this->hostPlugin->setComponentComment(n->second.info.id, text);
+    auto param_id = static_cast<Modules::Variable::Id>(n->second.info.id);
+    this->hostPlugin->setComponentParameter<std::string>(param_id, text);
   }
 }
 
@@ -363,7 +361,8 @@ void Modules::Panel::setParameter(const QString& var_name, double value)
   {
     n->second.edit->setText(QString::number(value));
     n->second.str_value = n->second.edit->text();
-    this->hostPlugin->setComponentDoubleParameter(n->second.info.id, value);
+    auto param_id = static_cast<Modules::Variable::Id>(n->second.info.id);
+    this->hostPlugin->setComponentParameter<double>(param_id, value);
     // setValue(n->second.index, n->second.edit->text().toDouble());
   }
 }
@@ -376,7 +375,8 @@ void Modules::Panel::setParameter(const QString& var_name, int value)
   {
     n->second.edit->setText(QString::number(value));
     n->second.str_value = n->second.edit->text();
-    this->hostPlugin->setComponentIntParameter(n->second.info.id, value);
+    auto param_id = static_cast<Modules::Variable::Id>(n->second.info.id);
+    this->hostPlugin->setComponentParameter<int>(param_id, value);
     // setValue(n->second.index, n->second.edit->text().toDouble());
   }
 }
@@ -389,7 +389,8 @@ void Modules::Panel::setParameter(const QString& var_name, uint64_t value)
   {
     n->second.edit->setText(QString::number(value));
     n->second.str_value = n->second.edit->text();
-    this->hostPlugin->setComponentUintParameter(n->second.info.id, value);
+    auto param_id = static_cast<Modules::Variable::Id>(n->second.info.id);
+    this->hostPlugin->setComponentParameter<uint64_t>(param_id, value);
     // setValue(n->second.index, n->second.edit->text().toDouble());
   }
 }
@@ -402,7 +403,8 @@ void Modules::Panel::setState(const QString& var_name,
     // setData(Workspace::STATE, n->second.index, &ref);
 
     n->second.edit->setText(QString::number(ref));
-    this->hostPlugin->setComponentState(n->second.info.id, ref);
+    auto param_id = static_cast<Modules::Variable::Id>(n->second.info.id);
+    this->hostPlugin->setComponentParameter<Modules::Variable::state_t>(param_id, ref);
   }
 }
 
@@ -411,7 +413,7 @@ void Modules::Panel::pause(bool p)
   if (pauseButton->isChecked() != p) {
     pauseButton->setDown(p);
   }
-  int result = this->hostPlugin->setActive(!p);
+  const int result = this->hostPlugin->setActive(!p);
   if (result != 0) {
     ERROR_MSG("Unable to pause/Unpause Plugin {} ", this->getName());
     return;
@@ -473,10 +475,10 @@ void Modules::Panel::pause(bool p)
 
 Modules::Plugin::Plugin(Event::Manager* ev_manager,
                         MainWindow* mw,
-                        const std::string& mod_name)
+                        std::string mod_name)
     : event_manager(ev_manager)
     , main_window(mw)
-    , name(mod_name)
+    , name(std::move(mod_name))
 {
 }
 
@@ -519,87 +521,87 @@ void Modules::Plugin::attachPanel(Modules::Panel* panel)
   panel->setHostPlugin(this);
 }
 
-int64_t Modules::Plugin::getComponentIntParameter(const size_t& parameter_id)
+int64_t Modules::Plugin::getComponentIntParameter(const Modules::Variable::Id& parameter_id)
 {
   return this->plugin_component->getValue<int64_t>(parameter_id);
 }
 
-uint64_t Modules::Plugin::getComponentUIntParameter(const size_t& parameter_id)
+uint64_t Modules::Plugin::getComponentUIntParameter(const Modules::Variable::Id& parameter_id)
 {
   return this->plugin_component->getValue<uint64_t>(parameter_id);
 }
 
-double Modules::Plugin::getComponentDoubleParameter(const size_t& parameter_id)
+double Modules::Plugin::getComponentDoubleParameter(const Modules::Variable::Id& parameter_id)
 {
   return this->plugin_component->getValue<double>(parameter_id);
 }
 
-int Modules::Plugin::setComponentIntParameter(const size_t& parameter_id,
-                                              int64_t value)
-{
-  int result = 0;
-  Event::Object event(Event::Type::RT_MODULE_PARAMETER_CHANGE_EVENT);
-  event.setParam("paramID", std::any(parameter_id));
-  event.setParam("paramType", std::any(Modules::Variable::INT_PARAMETER));
-  event.setParam("paramValue", std::any(value));
-  event.setParam("paramModule", std::any(this->plugin_component.get()));
-  this->event_manager->postEvent(&event);
-  return result;
-}
+//int Modules::Plugin::setComponentIntParameter(const Modules::Variable::Id& parameter_id,
+//                                              int64_t value)
+//{
+//  const int result = 0;
+//  Event::Object event(Event::Type::RT_MODULE_PARAMETER_CHANGE_EVENT);
+//  event.setParam("paramID", std::any(parameter_id));
+//  event.setParam("paramType", std::any(Modules::Variable::INT_PARAMETER));
+//  event.setParam("paramValue", std::any(value));
+//  event.setParam("paramModule", std::any(this->plugin_component.get()));
+//  this->event_manager->postEvent(&event);
+//  return result;
+//}
+//
+//int Modules::Plugin::setComponentDoubleParameter(const Modules::Variable::Id& parameter_id,
+//                                                 double value)
+//{
+//  const int result = 0;
+//  Event::Object event(Event::Type::RT_MODULE_PARAMETER_CHANGE_EVENT);
+//  event.setParam("paramID", std::any(parameter_id));
+//  event.setParam("paramType", std::any(Modules::Variable::DOUBLE_PARAMETER));
+//  event.setParam("paramValue", std::any(value));
+//  event.setParam("paramModule", std::any(this->plugin_component.get()));
+//  this->event_manager->postEvent(&event);
+//  return result;
+//}
+//
+//int Modules::Plugin::setComponentUintParameter(const Modules::Variable::Id& parameter_id,
+//                                               uint64_t value)
+//{
+//  const int result = 0;
+//  Event::Object event(Event::Type::RT_MODULE_PARAMETER_CHANGE_EVENT);
+//  event.setParam("paramID", std::any(parameter_id));
+//  event.setParam("paramType", std::any(Modules::Variable::UINT_PARAMETER));
+//  event.setParam("paramValue", std::any(value));
+//  event.setParam("paramModule", std::any(this->plugin_component.get()));
+//  this->event_manager->postEvent(&event);
+//  return result;
+//}
+//
+//int Modules::Plugin::setComponentComment(const Modules::Variable::Id& parameter_id,
+//                                         const std::string& value)
+//{
+//  const int result = 0;
+//  Event::Object event(Event::Type::RT_MODULE_PARAMETER_CHANGE_EVENT);
+//  event.setParam("paramID", std::any(parameter_id));
+//  event.setParam("paramType", std::any(Modules::Variable::INT_PARAMETER));
+//  event.setParam("paramValue", std::any(value));
+//  event.setParam("paramModule", std::any(this->plugin_component.get()));
+//  this->event_manager->postEvent(&event);
+//  return result;
+//}
+//
+//int Modules::Plugin::setComponentState(const Modules::Variable::Id& parameter_id,
+//                                       Modules::Variable::state_t value)
+//{
+//  const int result = 0;
+//  Event::Object event(Event::Type::RT_MODULE_PARAMETER_CHANGE_EVENT);
+//  event.setParam("paramID", std::any(parameter_id));
+//  event.setParam("paramType", std::any(Modules::Variable::STATE));
+//  event.setParam("paramValue", std::any(value));
+//  event.setParam("paramModule", std::any(this->plugin_component.get()));
+//  this->event_manager->postEvent(&event);
+//  return result;
+//}
 
-int Modules::Plugin::setComponentDoubleParameter(const size_t& parameter_id,
-                                                 double value)
-{
-  int result = 0;
-  Event::Object event(Event::Type::RT_MODULE_PARAMETER_CHANGE_EVENT);
-  event.setParam("paramID", std::any(parameter_id));
-  event.setParam("paramType", std::any(Modules::Variable::DOUBLE_PARAMETER));
-  event.setParam("paramValue", std::any(value));
-  event.setParam("paramModule", std::any(this->plugin_component.get()));
-  this->event_manager->postEvent(&event);
-  return result;
-}
-
-int Modules::Plugin::setComponentUintParameter(const size_t& parameter_id,
-                                               uint64_t value)
-{
-  int result = 0;
-  Event::Object event(Event::Type::RT_MODULE_PARAMETER_CHANGE_EVENT);
-  event.setParam("paramID", std::any(parameter_id));
-  event.setParam("paramType", std::any(Modules::Variable::UINT_PARAMETER));
-  event.setParam("paramValue", std::any(value));
-  event.setParam("paramModule", std::any(this->plugin_component.get()));
-  this->event_manager->postEvent(&event);
-  return result;
-}
-
-int Modules::Plugin::setComponentComment(const size_t& parameter_id,
-                                         std::string value)
-{
-  int result = 0;
-  Event::Object event(Event::Type::RT_MODULE_PARAMETER_CHANGE_EVENT);
-  event.setParam("paramID", std::any(parameter_id));
-  event.setParam("paramType", std::any(Modules::Variable::INT_PARAMETER));
-  event.setParam("paramValue", std::any(value));
-  event.setParam("paramModule", std::any(this->plugin_component.get()));
-  this->event_manager->postEvent(&event);
-  return result;
-}
-
-int Modules::Plugin::setComponentState(const size_t& parameter_id,
-                                       Modules::Variable::state_t value)
-{
-  int result = 0;
-  Event::Object event(Event::Type::RT_MODULE_PARAMETER_CHANGE_EVENT);
-  event.setParam("paramID", std::any(parameter_id));
-  event.setParam("paramType", std::any(Modules::Variable::STATE));
-  event.setParam("paramValue", std::any(value));
-  event.setParam("paramModule", std::any(this->plugin_component.get()));
-  this->event_manager->postEvent(&event);
-  return result;
-}
-
-void Modules::Plugin::receiveEvent(Event::Object* event)
+void Modules::Plugin::receiveEvent(Event::Object*  /*event*/)
 {
   // Set by users who want to handle events
 }
@@ -616,8 +618,8 @@ bool Modules::Plugin::getActive()
 
 int Modules::Plugin::setActive(bool state)
 {
-  int result = 0;
-  Event::Type event_type;
+  const int result = 0;
+  Event::Type event_type = Event::Type::NOOP;
   if (state) {
     event_type = Event::Type::RT_THREAD_UNPAUSE_EVENT;
   } else {
@@ -648,8 +650,33 @@ void Modules::Plugin::setLibraryInfo(void* lib_handle,
   this->library = std::string(libinfo.dli_fname);
 }
 
-Modules::Manager::Manager(Event::Manager* event_manager, MainWindow* mw)
-    : event_manager(event_manager)
+Modules::Component* Modules::Plugin::getComponent()
+{
+  return this->plugin_component.get();
+}
+
+DAQ::Device* Modules::Plugin::getDevice()
+{
+  return this->plugin_device.get();
+}
+
+Event::Manager* Modules::Plugin::getEventManager()
+{
+  return this->event_manager;
+}
+
+MainWindow* Modules::Plugin::getMainWindow()
+{
+  return this->main_window;
+}
+
+Modules::Panel* Modules::Plugin::getPanel()
+{
+  return this->widget_panel;
+}
+
+Modules::Manager::Manager(Event::Manager* ev_manager, MainWindow* mw)
+    : event_manager(ev_manager)
     , main_window(mw)
 {
   this->event_manager->registerHandler(this);
@@ -667,7 +694,7 @@ Modules::Manager::~Manager()
 
 bool Modules::Manager::isRegistered(const Modules::Plugin* plugin)
 {
-  std::string plugin_name = plugin->getName();
+  const std::string plugin_name = plugin->getName();
   auto start_iter = this->rtxi_modules_registry[plugin_name].begin();
   auto end_iter = this->rtxi_modules_registry[plugin_name].end();
   return std::any_of(start_iter,
@@ -698,11 +725,11 @@ Modules::Plugin* Modules::Manager::loadCorePlugin(const std::string& library)
   this->registerFactories(library, fact_methods);
   plugin = this->rtxi_factories_registry[library].createPlugin(event_manager,
                                                                main_window);
-  plugin_ptr = plugin.get();
-  this->registerModule(std::move(plugin));
+  plugin_ptr = this->registerModule(std::move(plugin));
   return plugin_ptr;
 }
 
+// TODO: extract plugin dynamic loading to another class
 Modules::Plugin* Modules::Manager::loadPlugin(const std::string& library)
 {
   Modules::Plugin* plugin_ptr = nullptr;
@@ -713,8 +740,7 @@ Modules::Plugin* Modules::Manager::loadPlugin(const std::string& library)
     std::unique_ptr<Modules::Plugin> plugin =
         this->rtxi_factories_registry[library].createPlugin(this->event_manager,
                                                             this->main_window);
-    plugin_ptr = plugin.get();
-    this->registerModule(std::move(plugin));
+    plugin_ptr = this->registerModule(std::move(plugin));
     return plugin_ptr;
   }
 
@@ -734,7 +760,7 @@ Modules::Plugin* Modules::Manager::loadPlugin(const std::string& library)
     auto plugin_dir = RTXI_DEFAULT_PLUGIN_DIR + library;
     lib_handle = dlopen((plugin_dir + library).c_str(), RTLD_GLOBAL | RTLD_NOW);
   }
-  if (!lib_handle) {
+  if (lib_handle == nullptr) {
     ERROR_MSG(
         "Plugin::load : failed to load {}: {}\n", library.c_str(), dlerror());
     return nullptr;
@@ -745,6 +771,7 @@ Modules::Plugin* Modules::Manager::loadPlugin(const std::string& library)
    *pointer * But what the hell do they know? It is probably safe here... *
    *********************************************************************************/
 
+  //NOLINTNEXTLINE
   auto* gen_fact_methods = reinterpret_cast<Modules::FactoryMethods* (*)()>(
       ::dlsym(lib_handle, "getFactories"));
 
@@ -774,23 +801,24 @@ Modules::Plugin* Modules::Manager::loadPlugin(const std::string& library)
   //   dlclose(handle);
   //   return 0;
   // }
-  plugin_ptr = plugin.get();
-  this->registerModule(std::move(plugin));
+  plugin_ptr = this->registerModule(std::move(plugin));
   return plugin_ptr;
 }
 
 void Modules::Manager::unloadPlugin(Modules::Plugin* plugin)
 {
-  std::string library = plugin->getName();
+  const std::string library = plugin->getName();
   this->unregisterModule(plugin);
   if (this->rtxi_modules_registry[library].empty()) {
     this->unregisterFactories(library);
   }
 }
 
-void Modules::Manager::registerModule(std::unique_ptr<Modules::Plugin> module)
+Modules::Plugin* Modules::Manager::registerModule(std::unique_ptr<Modules::Plugin> module)
 {
-  this->rtxi_modules_registry[module->getName()].push_back(std::move(module));
+  const std::string mod_name = module->getName();
+  this->rtxi_modules_registry[mod_name].push_back(std::move(module));
+  return this->rtxi_modules_registry[mod_name].back().get();
 }
 
 void Modules::Manager::unregisterModule(Modules::Plugin* plugin)
@@ -798,7 +826,7 @@ void Modules::Manager::unregisterModule(Modules::Plugin* plugin)
   if (plugin == nullptr) {
     return;
   }
-  std::string plugin_name = plugin->getName();
+  const std::string plugin_name = plugin->getName();
   auto start_iter = this->rtxi_modules_registry[plugin_name].begin();
   auto end_iter = this->rtxi_modules_registry[plugin_name].end();
   auto loc =
@@ -816,13 +844,13 @@ void Modules::Manager::unregisterModule(Modules::Plugin* plugin)
   }
 }
 
-void Modules::Manager::registerFactories(std::string module_name,
+void Modules::Manager::registerFactories(const std::string& module_name,
                                          Modules::FactoryMethods fact)
 {
   this->rtxi_factories_registry[module_name] = fact;
 }
 
-void Modules::Manager::unregisterFactories(std::string module_name)
+void Modules::Manager::unregisterFactories(const std::string& module_name)
 {
   if (this->rtxi_factories_registry.find(module_name)
       != this->rtxi_factories_registry.end())

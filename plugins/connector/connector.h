@@ -40,7 +40,7 @@ class Panel : public Modules::Panel
   Q_OBJECT
 
 public:
-  Panel(MainWindow* mw, Event::Manager* event_manager);
+  Panel(MainWindow* mw, Event::Manager* ev_manager);
 
 signals:
   void updateBlockInfo();

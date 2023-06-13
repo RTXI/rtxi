@@ -21,6 +21,7 @@
 #ifndef USERPREFS_H
 #define USERPREFS_H
 
+#include <QObject>
 #include <QtWidgets>
 
 #include "module.hpp"
@@ -42,7 +43,7 @@ class Panel : public Modules::Panel
   Q_OBJECT
 
 public:
-  Panel(MainWindow* main_window, Event::Manager* ev_manager);
+  Panel(MainWindow* mwindow, Event::Manager* ev_manager);
 
 public slots:
   void apply();  // save and close

@@ -38,7 +38,7 @@ namespace PerformanceMeasurement
 
 constexpr std::string_view MODULE_NAME = "RT Benchmarks";
 
-enum PARAMETER : size_t {
+enum PARAMETER : Modules::Variable::Id {
   STATE = 0,
   DURATION,
   TIMESTEP,
@@ -49,65 +49,69 @@ enum PARAMETER : size_t {
   JITTER
 };
 
-const std::vector<Modules::Variable::Info> performance_measurement_vars 
-{
+
+inline std::vector<Modules::Variable::Info> get_default_vars()
+{ 
+  return 
   {
-    PARAMETER::STATE,
-    "state",
-    "RT Benchmarks State",
-    Modules::Variable::STATE,
-    Modules::Variable::INIT
-  },
-  {
-    PARAMETER::DURATION,
-    "duration",
-    "Average time in nanoseconds for Real-Time loop computations",
-    Modules::Variable::DOUBLE_PARAMETER,
-    0.0
-  },
-  {
-    PARAMETER::TIMESTEP,
-    "timestep",
-    "Average time in nanoseconds for Real-Time period",
-    Modules::Variable::DOUBLE_PARAMETER,
-    0.0
-  },
-  {
-    PARAMETER::LATENCY,
-    "latency",
-    "Average time in nanoseconds for latency between expected wakeup and period start",
-    Modules::Variable::DOUBLE_PARAMETER,
-    0.0
-  },
-  {
-    PARAMETER::MAX_DURATION,
-    "maxDuration",
-    "Maximum duration stat recorded in nanoseconds",
-    Modules::Variable::DOUBLE_PARAMETER,
-    0.0
-  },
-  {
-    PARAMETER::MAX_TIMESTEP,
-    "maxTimestep",
-    "maximum real-time period recorded in nanoseconds",
-    Modules::Variable::DOUBLE_PARAMETER,
-    0.0
-  },
-  { 
-    PARAMETER::MAX_LATENCY,
-    "maxLatency",
-    "Maximum latency stat recorded in nanoseconds",
-    Modules::Variable::DOUBLE_PARAMETER,
-    0.0
-  },
-  {
-    PARAMETER::JITTER,
-    "jitter",
-    "",
-    Modules::Variable::DOUBLE_PARAMETER,
-    0.0
-  }
-};
+    {
+      PARAMETER::STATE,
+      "state",
+      "RT Benchmarks State",
+      Modules::Variable::STATE,
+      Modules::Variable::INIT
+    },
+    {
+      PARAMETER::DURATION,
+      "duration",
+      "Average time in nanoseconds for Real-Time loop computations",
+      Modules::Variable::DOUBLE_PARAMETER,
+      0.0
+    },
+    {
+      PARAMETER::TIMESTEP,
+      "timestep",
+      "Average time in nanoseconds for Real-Time period",
+      Modules::Variable::DOUBLE_PARAMETER,
+      0.0
+    },
+    {
+      PARAMETER::LATENCY,
+      "latency",
+      "Average time in nanoseconds for latency between expected wakeup and period start",
+      Modules::Variable::DOUBLE_PARAMETER,
+      0.0
+    },
+    {
+      PARAMETER::MAX_DURATION,
+      "maxDuration",
+      "Maximum duration stat recorded in nanoseconds",
+      Modules::Variable::DOUBLE_PARAMETER,
+      0.0
+    },
+    {
+      PARAMETER::MAX_TIMESTEP,
+      "maxTimestep",
+      "maximum real-time period recorded in nanoseconds",
+      Modules::Variable::DOUBLE_PARAMETER,
+      0.0
+    },
+    { 
+      PARAMETER::MAX_LATENCY,
+      "maxLatency",
+      "Maximum latency stat recorded in nanoseconds",
+      Modules::Variable::DOUBLE_PARAMETER,
+      0.0
+    },
+    {
+      PARAMETER::JITTER,
+      "jitter",
+      "",
+      Modules::Variable::DOUBLE_PARAMETER,
+      0.0
+    }
+  };
+}
 
 class Plugin : public Modules::Plugin
 {
@@ -127,9 +131,9 @@ public:
   //RunningStat timestepStat;
   RunningStat latencyStat;
 
-  int64_t *start_ticks; // only accessed in rt
-  int64_t *end_ticks; // only accessed in rt
-  int64_t last_start_ticks;
+  int64_t *start_ticks=nullptr; // only accessed in rt
+  int64_t *end_ticks=nullptr; // only accessed in rt
+  int64_t last_start_ticks=0;
 };
 
 class Panel : public Modules::Panel
@@ -137,7 +141,7 @@ class Panel : public Modules::Panel
   Q_OBJECT
 
 public:
-  Panel(std::string name, MainWindow* main_window, Event::Manager* ev_manager);
+  Panel(const std::string& mod_name, MainWindow* mwindow, Event::Manager* ev_manager);
 
 public slots:
   /*!

@@ -12,7 +12,11 @@ class RunningStat
 {
 public:
   RunningStat();
-  ~RunningStat();
+  RunningStat(const RunningStat&) = default;
+  RunningStat(RunningStat&&) = delete;
+  RunningStat& operator=(const RunningStat&) = default;
+  RunningStat& operator=(RunningStat&&) = delete;
+  ~RunningStat()=default;
 
   void clear();
   void push(double x);

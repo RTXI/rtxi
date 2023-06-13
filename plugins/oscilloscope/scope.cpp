@@ -32,7 +32,7 @@
 Oscilloscope::LegendItem::LegendItem()
 {
   setRenderHint(QwtPlotItem::RenderAntialiased);
-  QColor color(Qt::black);
+  const QColor color(Qt::black);
   setTextPen(color);
 }
 
@@ -83,8 +83,8 @@ Oscilloscope::Scope::Scope(QWidget* parent)
   this->grid->attach(this);
 
   // Set division limits on the scope
-  setAxisMaxMajor(QwtPlot::xBottom, divX);
-  setAxisMaxMajor(QwtPlot::yLeft, divY);
+  setAxisMaxMajor(QwtPlot::xBottom, static_cast<int>(divX));
+  setAxisMaxMajor(QwtPlot::yLeft, static_cast<int>(divY));
 
   // Disable axes
   enableAxis(QwtPlot::yLeft, false);
@@ -111,7 +111,7 @@ Oscilloscope::Scope::Scope(QWidget* parent)
   // Create and attach legend
   this->legendItem->attach(this);
   this->legendItem->setMaxColumns(1);
-  this->legendItem->setAlignment(Qt::Alignment(Qt::AlignTop | Qt::AlignRight));
+  this->legendItem->setAlignment(static_cast<Qt::Alignment>(Qt::AlignTop | Qt::AlignRight));
   this->legendItem->setBorderRadius(8);
   this->legendItem->setMargin(4);
   this->legendItem->setSpacing(2);
@@ -163,6 +163,12 @@ void Oscilloscope::Scope::createChannel(Oscilloscope::probe probeInfo)
   chan.direction = probeInfo.direction;
   chan.xbuffer.assign(this->buffer_size, 0.0);
   chan.ybuffer.assign(this->buffer_size, 0.0);
+  chan.scale = 1;
+  chan.offset = 0;
+  chan.data_indx = 0;
+  chan.pen = new QPen();
+  chan.pen->setColor(Oscilloscope::penColors[0]);
+  chan.pen->setStyle(Oscilloscope::penStyles[0]);
   this->channels.push_back(chan);
 }
 
@@ -223,7 +229,7 @@ void Oscilloscope::Scope::clearData()
 }
 
 void Oscilloscope::Scope::setData(Oscilloscope::probe channel,
-                                  std::vector<sample> data)
+                                  std::vector<sample> probe_data)
 {
   if (isPaused) {
     return;
@@ -241,16 +247,16 @@ void Oscilloscope::Scope::setData(Oscilloscope::probe channel,
     return;
   }
 
-  if (data.size() != iter->xbuffer.size()) {
-    iter->xbuffer.assign(data.size(), 0);
-    iter->ybuffer.assign(data.size(), 0);
+  if (probe_data.size() != iter->xbuffer.size()) {
+    iter->xbuffer.assign(probe_data.size(), 0);
+    iter->ybuffer.assign(probe_data.size(), 0);
   }
-  for (size_t i = iter->data_indx; i < data.size(); i++) {
+  for (size_t i = iter->data_indx; i < probe_data.size(); i++) {
     if (i >= iter->xbuffer.size()) {
       i = 0;
     }
-    iter->xbuffer[i] = static_cast<double>(data[i].time);
-    iter->ybuffer[i] = data[i].value;
+    iter->xbuffer[i] = static_cast<double>(probe_data[i].time);
+    iter->ybuffer[i] = probe_data[i].value;
   }
 }
 
@@ -462,18 +468,19 @@ void Oscilloscope::Scope::drawCurves()
     }
   }
   // Set X scale map is same for all channels
-  double max_window_time = local_max_val;
-  double min_window_time = max_window_time - hScl * divX;
+  const double max_window_time = local_max_val;
+  const double min_window_time = max_window_time - hScl * static_cast<double>(divX);
   scaleMapX->setScaleInterval(min_window_time, max_window_time);
   for (auto& channel : this->channels) {
     // TODO this should not happen each iteration, instead build into channel
-    scaleMapY->setScaleInterval(-channel.scale * divY / 2,
-                                channel.scale * divY / 2);
+    scaleMapY->setScaleInterval(-channel.scale * static_cast<double>(divY) / 2,
+                                channel.scale * static_cast<double>(divY) / 2);
     // Append data to curve
     // Makes deep copy - which is not optimal
     // TODO: change to pointer based method
-    channel.curve->setSamples(
-        channel.xbuffer.data(), channel.ybuffer.data(), channel.xbuffer.size());
+    channel.curve->setSamples(channel.xbuffer.data(), 
+                              channel.ybuffer.data(), 
+                              static_cast<int>(channel.xbuffer.size()));
   }
 
   // Update plot

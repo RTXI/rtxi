@@ -23,6 +23,8 @@ class PowFast
   /// ---------------------------------------------------
 public:
   explicit PowFast(unsigned int precision = 11);
+  PowFast(PowFast&&) = delete;
+  PowFast& operator=(PowFast&&) = delete;
   ~PowFast();
 
 private:

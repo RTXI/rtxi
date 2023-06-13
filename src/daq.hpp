@@ -21,6 +21,7 @@
 #ifndef DAQ_DEVICE_H
 #define DAQ_DEVICE_H
 
+#include <cmath>
 #include <map>
 
 #include "io.hpp"
@@ -54,7 +55,7 @@ typedef uint64_t index_t;
 /*!
  * Flag to indicate error from a function returning an index.
  */
-static const index_t INVALID = (0 - 1);
+static const index_t INVALID = static_cast<index_t>(-1);
 
 /*!
  * Used to specify  digital interface direction.
@@ -77,8 +78,8 @@ public:
    *
    * \sa IO::Block
    */
-  Device(const std::string& name, const std::vector<IO::channel_t>& channels)
-      : RT::Device(name, channels)
+  Device(const std::string& dev_name, const std::vector<IO::channel_t>& channels)
+      : RT::Device(dev_name, channels)
   {
   }
 
@@ -353,8 +354,8 @@ public:
    *
    * \param name The name of the driver.
    */
-  explicit Driver(std::string name)
-      : name(std::move(name))
+  explicit Driver(std::string dev_name)
+      : name(std::move(dev_name))
   {
   }
   Driver(const Driver& connector) = default;  // copy constructor

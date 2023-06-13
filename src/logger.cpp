@@ -7,10 +7,11 @@
 #include "event.hpp"
 #include "module.hpp"
 
+// TODO: change localtime to be thread-safe
 void eventLogger::log(Event::Object* event)
 {
   try {
-    std::unique_lock<std::mutex> lk(this->log_mutex);
+    const std::unique_lock<std::mutex> lk(this->log_mutex);
     const auto time_point = std::chrono::system_clock::now();
     const std::time_t now = std::chrono::system_clock::to_time_t(time_point);
     this->ss << "[ ";
@@ -39,6 +40,7 @@ void eventLogger::log(Event::Object* event)
         this->ss << "\t SOURCE -- ";
         this->ss
             << std::any_cast<RT::Device*>(event->getParam("device"))->getName();
+        break;
       case Event::Type::IO_LINK_INSERT_EVENT:
       case Event::Type::IO_LINK_REMOVE_EVENT:
         this->ss << "\t SOURCE -- ";
@@ -72,7 +74,7 @@ void eventLogger::log(Event::Object* event)
 void eventLogger::log(RT::Telemitry::Response response)
 {
   try {
-    std::unique_lock<std::mutex> lk(this->log_mutex);
+    const std::unique_lock<std::mutex> lk(this->log_mutex);
     const auto time_point = std::chrono::system_clock::now();
     const std::time_t now = std::chrono::system_clock::to_time_t(time_point);
     this->ss << "[ ";

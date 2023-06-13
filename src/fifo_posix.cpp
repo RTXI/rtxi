@@ -18,8 +18,7 @@
 
 */
 
-#include "fifo.hpp"
-
+#include <array>
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/eventfd.h>
@@ -27,6 +26,7 @@
 #include <unistd.h>
 
 #include "debug.hpp"
+#include "fifo.hpp"
 
 // Generic posix fifo based on pipes
 namespace RT::OS
@@ -51,12 +51,12 @@ public:
   int getErrorCode() const;
 
 private:
-  int ui_to_rt[2];
-  int rt_to_ui[2];
+  std::array<int,2> ui_to_rt{};
+  std::array<int,2> rt_to_ui{};
 
   size_t fifo_capacity = 0;
   int close_event_fd;
-  struct pollfd xbuf_poll_fd[2];
+  std::array<struct pollfd, 2> xbuf_poll_fd{};
   bool closed = false;
   int errcode = 0;
 };
@@ -64,13 +64,13 @@ private:
 
 RT::OS::posixFifo::posixFifo(size_t size)
     : fifo_capacity(size)
-    , errcode(pipe(this->rt_to_ui))
+    , errcode(pipe2(this->rt_to_ui.data(), O_CLOEXEC))
 {
   if (this->errcode != 0) {
     ERROR_MSG("RT::OS::posixFifo : Unable to create RT to UI buffer");
     return;
   }
-  this->errcode = pipe2(this->ui_to_rt, O_CLOEXEC);
+  this->errcode = pipe2(this->ui_to_rt.data(), O_CLOEXEC);
   if (this->errcode != 0) {
     ERROR_MSG("RT::OS::posixFifo : Unable to create UI to RT buffer");
     return;
@@ -117,11 +117,12 @@ ssize_t RT::OS::posixFifo::writeRT(void* buf, size_t data_size)
 
 void RT::OS::posixFifo::poll()
 {
-  this->errcode = ::poll(this->xbuf_poll_fd, 2, -1);
+  this->errcode = ::poll(this->xbuf_poll_fd.data(), 2, -1);
   if (errcode < 0) {
+    std::string errbuff (255, '\0');
     ERROR_MSG("RT::OS::FIFO(evl)::poll : returned with failure code {} : ",
               errcode);
-    ERROR_MSG("{}", strerror(this->errcode));
+    ERROR_MSG("{}", strerror_r(this->errcode, errbuff.data(), errbuff.size()));
   } else if ((this->xbuf_poll_fd[1].revents & POLLIN) != 0) {
     this->closed = true;
   }
@@ -129,9 +130,9 @@ void RT::OS::posixFifo::poll()
 
 void RT::OS::posixFifo::close()
 {
-  int64_t buf[1] = {1};
+  std::array<int64_t, 1> buf = {1};
   this->closed = true;
-  ::write(this->close_event_fd, buf, sizeof(int64_t));
+  ::write(this->close_event_fd, buf.data(), sizeof(int64_t));
 }
 
 size_t RT::OS::posixFifo::getCapacity()
@@ -147,9 +148,10 @@ int RT::OS::posixFifo::getErrorCode() const
 int RT::OS::getFifo(std::unique_ptr<Fifo>& fifo, size_t fifo_size)
 {
   auto tmp_fifo = std::make_unique<RT::OS::posixFifo>(fifo_size);
-  int errcode = tmp_fifo->getErrorCode();
+  const int errcode = tmp_fifo->getErrorCode();
   if (errcode != 0) {
-    ERROR_MSG("RT::OS::posixFifo : {}", strerror(errcode));
+    std::string errbuff (255, '\0');
+    ERROR_MSG("RT::OS::posixFifo : {}", strerror_r(errcode, errbuff.data(), errbuff.size()));
   } else {
     fifo = std::move(tmp_fifo);
   }

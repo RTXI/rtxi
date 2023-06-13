@@ -61,6 +61,7 @@ void RT::Thread::bind_execute_callback(std::function<void(void)> callback)
   this->execute_callback = std::move(callback);
 }
 
+// TODO: convert cycle detection into non-recursive version
 int RT::Connector::find_cycle(RT::block_connection_t conn, IO::Block* ref_block)
 {
   if (conn.dest == ref_block) {
@@ -397,7 +398,7 @@ void RT::System::setPeriod(RT::System::CMD* cmd)
 {
   auto period = std::get<int64_t>(cmd->getRTParam("period"));
   this->task->period = period;
-  RT::Telemitry::Response telem = {RT::Telemitry::RT_PERIOD_UPDATE, cmd};
+  const RT::Telemitry::Response telem = {RT::Telemitry::RT_PERIOD_UPDATE, cmd};
   this->postTelemitry(telem);
 }
 
@@ -407,7 +408,7 @@ void RT::System::updateDeviceList(RT::System::CMD* cmd)
       std::get<std::vector<RT::Device*>*>(cmd->getRTParam("deviceList"));
   this->devices.clear();
   this->devices.assign(vec_ptr->begin(), vec_ptr->end());
-  RT::Telemitry::Response telem = {RT::Telemitry::RT_DEVICE_LIST_UPDATE, cmd};
+  const RT::Telemitry::Response telem = {RT::Telemitry::RT_DEVICE_LIST_UPDATE, cmd};
   this->postTelemitry(telem);
 }
 
@@ -417,7 +418,7 @@ void RT::System::updateThreadList(RT::System::CMD* cmd)
       std::get<std::vector<RT::Thread*>*>(cmd->getRTParam("threadList"));
   this->threads.clear();
   this->threads.assign(vec_ptr->begin(), vec_ptr->end());
-  RT::Telemitry::Response telem = {RT::Telemitry::RT_THREAD_LIST_UPDATE, cmd};
+  const RT::Telemitry::Response telem = {RT::Telemitry::RT_THREAD_LIST_UPDATE, cmd};
   this->postTelemitry(telem);
 }
 
@@ -474,7 +475,7 @@ void RT::System::getPeriodTicksCMD(RT::System::CMD* cmd)
     default:
       return;
   }
-  RT::Telemitry::Response telem = {RT::Telemitry::RT_PERIOD_UPDATE, cmd};
+  const RT::Telemitry::Response telem = {RT::Telemitry::RT_PERIOD_UPDATE, cmd};
   this->postTelemitry(telem);
 }
 
@@ -651,7 +652,7 @@ void RT::System::getPeriodValues(Event::Object* event)
   event->setParam("period", std::any(this->getPeriod()));
 }
 
-void RT::System::NOOP(Event::Object* event)
+void RT::System::NOOP(Event::Object*  /*event*/)
 {
   RT::System::CMD cmd(Event::Type::NOOP);
   RT::System::CMD* cmd_ptr = &cmd;
@@ -683,7 +684,7 @@ void RT::System::removeDevice(Event::Object* event)
     return;
   }
   // We have to make sure to deactivate device before removing
-  device->setActive(false);
+  device->setActive(/*act=*/false);
   this->rt_connector->removeBlock(device);
   std::vector<RT::Device*> device_list = this->rt_connector->getDevices();
   RT::System::CMD cmd(event->getType());
@@ -717,7 +718,7 @@ void RT::System::removeThread(Event::Object* event)
     return;
   }
   // We have to make sure to deactivate thread before removing
-  thread->setActive(false);
+  thread->setActive(/*act=*/false);
   this->rt_connector->removeBlock(thread);
   std::vector<RT::Thread*> thread_list = this->rt_connector->getThreads();
   RT::System::CMD cmd(event->getType());
@@ -767,21 +768,21 @@ void RT::System::ioLinkChange(Event::Object* event)
 void RT::System::connectionsInfoRequest(Event::Object* event)
 {
   auto* source = std::any_cast<IO::Block*>(event->getParam("block"));
-  std::vector<RT::block_connection_t> outputs =
+  const std::vector<RT::block_connection_t> outputs =
       this->rt_connector->getOutputs(source);
   event->setParam("outputs", std::any(outputs));
 }
 
 void RT::System::allConnectionsInfoRequest(Event::Object* event)
 {
-  std::vector<RT::block_connection_t> all_conn =
+  const std::vector<RT::block_connection_t> all_conn =
       this->rt_connector->getAllConnections();
   event->setParam("connections", std::any(all_conn));
 }
 
 void RT::System::blockInfoRequest(Event::Object* event)
 {
-  std::vector<IO::Block*> blocks = this->rt_connector->getRegisteredBlocks();
+  const std::vector<IO::Block*> blocks = this->rt_connector->getRegisteredBlocks();
   event->setParam("blockList", std::any(blocks));
 }
 

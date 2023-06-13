@@ -37,7 +37,7 @@ namespace {
  * [Improved (doubled accuracy) and rewritten by HXA7241, 2007.]
  */
 
-const float _2p23 = 8388608.0f;
+const float _2p23 = 8388608.0F;
 
 /*
  * Initialize powFast lookup table.
@@ -49,12 +49,12 @@ void
 powFastSetTable(unsigned int* const pTable, const unsigned int precision)
 {
   // step along table elements and x-axis positions
-  float zeroToOne = 1.0f / (static_cast<float>(1 << precision) * 2.0f);
+  float zeroToOne = 1.0F / (static_cast<float>(1 << precision) * 2.0F);
   for (int i = 0; i < (1 << precision); ++i) {
     // make y-axis value for table element
-    const float f = (::powf(2.0f, zeroToOne) - 1.0f) * _2p23;
-    pTable[i] = static_cast<unsigned int>(f < _2p23 ? f : (_2p23 - 1.0f));
-    zeroToOne += 1.0f / static_cast<float>(1 << precision);
+    const float f = (::powf(2.0F, zeroToOne) - 1.0F) * _2p23;
+    pTable[i] = static_cast<unsigned int>(f < _2p23 ? f : (_2p23 - 1.0F));
+    zeroToOne += 1.0F / static_cast<float>(1 << precision);
   }
 }
 
@@ -67,12 +67,12 @@ powFastSetTable(unsigned int* const pTable, const unsigned int precision)
  * @precision  number of mantissa bits used, >= 0 and <= 18
  */
 inline float
-powFastLookup(const float val, const float ilog2, unsigned int* const pTable,
+powFastLookup(const float val, const float ilog2, const unsigned int* const pTable,
               const unsigned int precision)
 
 {
   // build float bits
-  const int i = static_cast<int>((val * (_2p23 * ilog2)) + (127.0f * _2p23));
+  const int i = static_cast<int>((val * (_2p23 * ilog2)) + (127.0F * _2p23));
 
   // replace mantissa with lookup
   const int it = (i & 0xFF800000) | pTable[(i & 0x7FFFFF) >> (23 - precision)];
@@ -80,12 +80,12 @@ powFastLookup(const float val, const float ilog2, unsigned int* const pTable,
   // convert bits to float
   return *reinterpret_cast<const float*>(&it);
 }
-}
+} // namespace
 
 /// wrapper class --------------------------------------------------------------
 
 PowFast::PowFast(const unsigned int precision)
-  : precision_m(precision <= 18u ? precision : 18u)
+  : precision_m(precision <= 18U ? precision : 18U)
   , pTable_m(new unsigned int[1 << precision_m])
 {
   powFastSetTable(pTable_m, precision_m);
@@ -99,25 +99,25 @@ PowFast::~PowFast()
 float
 PowFast::two(const float f) const
 {
-  return powFastLookup(f, 1.0f, pTable_m, precision_m);
+  return powFastLookup(f, 1.0F, pTable_m, precision_m);
 }
 
 float
 PowFast::e(const float f) const
 {
-  return powFastLookup(f, 1.44269504088896f, pTable_m, precision_m);
+  return powFastLookup(f, 1.44269504088896F, pTable_m, precision_m);
 }
 
 float
 PowFast::ten(const float f) const
 {
-  return powFastLookup(f, 3.32192809488736f, pTable_m, precision_m);
+  return powFastLookup(f, 3.32192809488736F, pTable_m, precision_m);
 }
 
 float
 PowFast::r(const float logr, const float f) const
 {
-  return powFastLookup(f, (logr * 1.44269504088896f), pTable_m, precision_m);
+  return powFastLookup(f, (logr * 1.44269504088896F), pTable_m, precision_m);
 }
 
 unsigned int

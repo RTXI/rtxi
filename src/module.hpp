@@ -14,6 +14,7 @@
 #include <unordered_map>
 #include <variant>
 #include <vector>
+#include <limits>
 
 #include "daq.hpp"
 #include "event.hpp"
@@ -32,6 +33,9 @@ namespace Modules
  */
 namespace Variable
 {
+
+typedef size_t Id;
+constexpr Id INVALID_ID = static_cast<Id>(std::numeric_limits<size_t>::max());
 
 /*!
  * Code description of the variable type used for the parameter
@@ -196,13 +200,13 @@ class Panel : public QWidget
 public:
   Panel(const std::string& mod_name,
         MainWindow* mw,
-        Event::Manager* event_manager);
+        Event::Manager* ev_manager);
 
   /*
    * Getter function go allow customization of
    * user interface
    */
-  QGridLayout* getLayout() { return layout; };
+  QGridLayout* getLayout() { return m_layout; };
 
   /*!
    * Callback function that is called when the system state changes.
@@ -308,7 +312,7 @@ protected:
    *
    * \sa Workspace::setData()
    */
-  void setState(const QString& name, Modules::Variable::state_t ref);
+  void setState(const QString& var_name, Modules::Variable::state_t ref);
 
   /*!
    * This function overrides the base class from Qt. It handles the
@@ -352,9 +356,9 @@ private:
   QWidget* gridBox = nullptr;
   QGroupBox* buttonGroup = nullptr;
   std::string name;
-  QMdiSubWindow* subWindow = nullptr;
+  QMdiSubWindow* m_subwindow = nullptr;
   Modules::Plugin* hostPlugin = nullptr;
-  QGridLayout* layout = nullptr;
+  QGridLayout* m_layout = nullptr;
   Event::Manager* event_manager = nullptr;
 
   // Default buttons
@@ -389,7 +393,7 @@ class Plugin : public Event::Handler
 public:
   Plugin(Event::Manager* ev_manager,
          MainWindow* mw,
-         const std::string& mod_name);
+         std::string mod_name);
   Plugin(const Plugin& plugin) = delete;  // copy constructor
   Plugin& operator=(const Plugin& plugin) =
       delete;  // copy assignment noperator
@@ -420,7 +424,7 @@ public:
    *
    * \return the integer value
    */
-  int64_t getComponentIntParameter(const size_t& parameter_id);
+  int64_t getComponentIntParameter(const Variable::Id& parameter_id);
 
   /*!
    * Retrieves an unsigned integer parameter from the component object. Usually
@@ -430,7 +434,7 @@ public:
    *
    * \return the unsigned integer value
    */
-  uint64_t getComponentUIntParameter(const size_t& parameter_id);
+  uint64_t getComponentUIntParameter(const Variable::Id& parameter_id);
 
   /*!
    * Retrieves a double parameter from the component object. Usually called
@@ -440,58 +444,86 @@ public:
    *
    * \return the double value
    */
-  double getComponentDoubleParameter(const size_t& parameter_id);
+  double getComponentDoubleParameter(const Variable::Id& parameter_id);
 
-  /*!
-   * Assigns a new integer value to the parameter
-   *
-   * \param parameter_id Identification number of the parameter
-   * \param value the new value
-   *
-   * \return 0 if successful -1 otherwise
-   */
-  int setComponentIntParameter(const size_t& parameter_id, int64_t value);
+  template<typename T>
+  int setComponentParameter(const Variable::Id& parameter_id, T value)
+  {
+    const int result = 0;
+    Modules::Variable::variable_t param_type = Modules::Variable::UNKNOWN;
+    if(typeid(T) == typeid(int)){
+      param_type = Modules::Variable::INT_PARAMETER;
+    } else if (typeid(T) == typeid(double)){
+      param_type = Modules::Variable::DOUBLE_PARAMETER;
+    } else if (typeid(T) == typeid(uint64_t)){
+      param_type = Modules::Variable::UINT_PARAMETER;
+    } else if (typeid(T) == typeid(std::string)){
+      param_type = Modules::Variable::COMMENT;
+    } else if (typeid(T) == typeid(Modules::Variable::state_t)){
+      param_type = Modules::Variable::STATE;
+    } else {
+      ERROR_MSG("Modules::Plugin::setComponentParameter : Parameter type not supported");
+      return -1;
+    }
+    Event::Object event(Event::Type::RT_MODULE_PARAMETER_CHANGE_EVENT);
+    event.setParam("paramID", std::any(parameter_id));
+    event.setParam("paramType", std::any(param_type));
+    event.setParam("paramValue", std::any(value));
+    event.setParam("paramModule", std::any(this->plugin_component.get()));
+    this->event_manager->postEvent(&event);
+    return result;
+  }
 
-  /*!
-   * Assigns a new double value to the parameter
-   *
-   * \param parameter_id Identification number of the parameter
-   * \param value the new value
-   *
-   * \return 0 if successful -1 otherwise
-   */
-  int setComponentDoubleParameter(const size_t& parameter_id, double value);
+  ///*!
+  // * Assigns a new integer value to the parameter
+  // *
+  // * \param parameter_id Identification number of the parameter
+  // * \param value the new value
+  // *
+  // * \return 0 if successful -1 otherwise
+  // */
+  //int setComponentIntParameter(const Variable::Id& parameter_id, int64_t value);
 
-  /*!
-   * Assigns a new unsigned integer value to the parameter
-   *
-   * \param parameter_id Identification number of the parameter
-   * \param value the new value
-   *
-   * \return 0 if successful -1 otherwise
-   */
-  int setComponentUintParameter(const size_t& parameter_id, uint64_t value);
+  ///*!
+  // * Assigns a new double value to the parameter
+  // *
+  // * \param parameter_id Identification number of the parameter
+  // * \param value the new value
+  // *
+  // * \return 0 if successful -1 otherwise
+  // */
+  //int setComponentDoubleParameter(const Variable::Id& parameter_id, double value);
 
-  /*!
-   * Assigns a new comment value to the parameter
-   *
-   * \param parameter_id Identification number of the parameter
-   * \param value the new value
-   *
-   * \return 0 if successful -1 otherwise
-   */
-  int setComponentComment(const size_t& parameter_id, std::string value);
+  ///*!
+  // * Assigns a new unsigned integer value to the parameter
+  // *
+  // * \param parameter_id Identification number of the parameter
+  // * \param value the new value
+  // *
+  // * \return 0 if successful -1 otherwise
+  // */
+  //int setComponentUintParameter(const Variable::Id& parameter_id, uint64_t value);
 
-  /*!
-   * Assigns a new state value to the component
-   *
-   * \param parameter_id Identification number of the parameter
-   * \param value the new value
-   *
-   * \return 0 if successful -1 otherwise
-   */
-  int setComponentState(const size_t& parameter_id,
-                        Modules::Variable::state_t value);
+  ///*!
+  // * Assigns a new comment value to the parameter
+  // *
+  // * \param parameter_id Identification number of the parameter
+  // * \param value the new value
+  // *
+  // * \return 0 if successful -1 otherwise
+  // */
+  //int setComponentComment(const Variable::Id& parameter_id, const std::string& value);
+
+  ///*!
+  // * Assigns a new state value to the component
+  // *
+  // * \param parameter_id Identification number of the parameter
+  // * \param value the new value
+  // *
+  // * \return 0 if successful -1 otherwise
+  // */
+  //int setComponentState(const Variable::Id& parameter_id,
+  //                      Modules::Variable::state_t value);
 
   /*!
    * Retrieves the name of the plugin
@@ -546,6 +578,13 @@ public:
   void registerComponent();
 
 protected:
+  Modules::Component* getComponent();
+  DAQ::Device* getDevice();
+  Event::Manager* getEventManager();
+  MainWindow* getMainWindow();
+  Modules::Panel* getPanel();
+
+private:
   // owned pointers
   std::unique_ptr<Modules::Component> plugin_component;
   std::unique_ptr<DAQ::Device> plugin_device;
@@ -555,7 +594,6 @@ protected:
   MainWindow* main_window = nullptr;  // Qt handles this lifetime
   Modules::Panel* widget_panel = nullptr;  // Qt handles this lifetime
 
-private:
   std::string library;
   void* handle = nullptr;
   std::string name;
@@ -571,7 +609,7 @@ public:
   Manager(Manager&&) = delete;
   Manager& operator=(const Manager&) = default;
   Manager& operator=(Manager&&) = delete;
-  Manager(Event::Manager* event_manager, MainWindow* mw);
+  Manager(Event::Manager* ev_manager, MainWindow* mw);
   ~Manager() override;
 
   /*!
@@ -595,11 +633,12 @@ public:
   bool isRegistered(const Modules::Plugin* plugin);
 
 private:
-  void registerModule(std::unique_ptr<Modules::Plugin> module);
+  [[nodiscard]]
+  Modules::Plugin* registerModule(std::unique_ptr<Modules::Plugin> module);
   void unregisterModule(Modules::Plugin* plugin);
 
-  void registerFactories(std::string module_name, Modules::FactoryMethods);
-  void unregisterFactories(std::string module_name);
+  void registerFactories(const std::string& module_name, Modules::FactoryMethods);
+  void unregisterFactories(const std::string& module_name);
   Modules::Plugin* loadCorePlugin(const std::string& library);
 
   std::unordered_map<std::string, std::vector<std::unique_ptr<Modules::Plugin>>>

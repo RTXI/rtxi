@@ -18,6 +18,7 @@
 
 */
 
+
 #include <QApplication>
 #include <QDesktopServices>
 #include <QDir>
@@ -135,7 +136,7 @@ void MainWindow::changeModuleMenuItem(QAction* action, const QString& text)
 
 void MainWindow::removeModuleMenuItem(QAction* action)
 {
-  QList<QAction*> actionList = moduleMenu->actions();
+  const QList<QAction*> actionList = moduleMenu->actions();
   if (!actionList.empty()) {
     moduleMenu->removeAction(action);
   }
@@ -304,7 +305,7 @@ void MainWindow::createSystemActions()
 
 void MainWindow::about()
 {
-  std::string version_str = fmt::format(
+  const std::string version_str = fmt::format(
       "{}.{}.{}", RTXI_VERSION_MAJOR, RTXI_VERSION_MINOR, RTXI_VERSION_PATCH);
   QMessageBox::about(
       this,
@@ -357,27 +358,28 @@ void MainWindow::loadWindow()
 
 void MainWindow::loadSettings()
 {
-  QSettings userprefs;
+  const QSettings userprefs;
+  const QString env_var = QString::fromLocal8Bit(qgetenv("HOME"));
   QSettings::setPath(QSettings::NativeFormat,
                      QSettings::SystemScope,
                      QString::fromStdString(RTXI_DEFAULT_SETTINGS_DIR));
 
-  QString filename = QFileDialog::getOpenFileName(
+  const QString filename = QFileDialog::getOpenFileName(
       this,
       tr("Load saved workspace"),
-      userprefs.value("/dirs/setfiles", getenv("HOME")).toString(),
+      userprefs.value("/dirs/setfiles", env_var).toString(),
       tr("Settings (*.set)"));
 
   if (QFile(filename).exists()) {
     systemMenu->clear();
     mdiArea->closeAllSubWindows();
-    // Settings::Manager::getInstance()->load(filename.toStdString());
   }
 }
 
 void MainWindow::saveSettings()
 {
-  QSettings userprefs;
+  const QSettings userprefs;
+  const QString env_var = QString::fromLocal8Bit(qgetenv("HOME"));
   QSettings::setPath(QSettings::NativeFormat,
                      QSettings::SystemScope,
                      QString::fromStdString(RTXI_DEFAULT_SETTINGS_DIR));
@@ -385,7 +387,7 @@ void MainWindow::saveSettings()
   QString filename = QFileDialog::getSaveFileName(
       this,
       tr("Save current workspace"),
-      userprefs.value("/dirs/setfiles", getenv("HOME")).toString(),
+      userprefs.value("/dirs/setfiles", env_var).toString(),
       tr("Settings (*.set)"));
 
   if (!filename.isEmpty()) {

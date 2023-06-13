@@ -47,24 +47,40 @@ enum PARAMETER : size_t
   TRIGGERING,
 };
 
-const std::vector<Modules::Variable::Info> oscilloscope_vars {
-    {PARAMETER::STATE,
-     "Oscilloscope Probe State",
-     "State of the probing component within the oscilloscope",
-     Modules::Variable::STATE,
-     Modules::Variable::INIT},
-    {PARAMETER::TRIGGERING,
-     "Trigger State",
-     "Trigger activity for the oscilloscope",
-     Modules::Variable::STATE,
-     Modules::Variable::INIT}};
+inline std::vector<Modules::Variable::Info> get_default_vars()
+{
+  return 
+  {
+    {
+      PARAMETER::STATE,
+      "Oscilloscope Probe State",
+      "State of the probing component within the oscilloscope",
+      Modules::Variable::STATE,
+      Modules::Variable::INIT
+    },
+    {
+      PARAMETER::TRIGGERING,
+      "Trigger State",
+      "Trigger activity for the oscilloscope",
+      Modules::Variable::STATE,
+      Modules::Variable::INIT
+    }
+  };
+}
 
-const std::vector<IO::channel_t> DEFAULT_OSCILLOSCOPE_CHANNELS = {
-    {"Probing Channel",
-     "This is the channel used by the osciloscope to probe on other inputs and "
-     "output ports",
-     IO::INPUT,
-     0}};
+inline std::vector<IO::channel_t> get_default_channels()
+{
+  return
+  {
+    {
+      "Probing Channel",
+      "This is the channel used by the osciloscope to probe on other inputs and "
+      "output ports",
+      IO::INPUT,
+      0
+    }
+  };
+}
 
 namespace Trigger
 {
@@ -112,7 +128,7 @@ class Panel : public Modules::Panel
   Q_OBJECT
 
 public:
-  Panel(MainWindow* mw, Event::Manager* event_manager);
+  Panel(MainWindow* mw, Event::Manager* ev_manager);
 
   void setActivity(Oscilloscope::Component* comp, bool activity);
   void adjustDataSize();
@@ -214,7 +230,7 @@ public:
   Plugin(Plugin&&) = delete;
   Plugin& operator=(const Plugin&) = delete;
   Plugin& operator=(Plugin&&) = delete;
-  Plugin(Event::Manager* ev_manager, MainWindow* main_window);
+  Plugin(Event::Manager* ev_manager, MainWindow* mwindow);
   ~Plugin() override;
 
   void receiveEvent(Event::Object* event) override;

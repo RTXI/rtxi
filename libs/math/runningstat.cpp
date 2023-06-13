@@ -7,10 +7,6 @@ RunningStat::RunningStat()
 {
 }
 
-RunningStat::~RunningStat()
-{
-}
-
 void
 RunningStat::clear()
 {
