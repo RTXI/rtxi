@@ -87,22 +87,14 @@ public:
    *
    * \sa RT::System
    */
-  void read();
+  virtual void read()=0;
 
   /*! \fn virtual void write(void)
    * Function called by the realtime task at the end of each period.
    *
    * \sa RT::System
    */
-  void write();
-
-protected:
-  void bind_read_callback(std::function<void(void)> callback);
-  void bind_write_callback(std::function<void(void)> callback);
-
-private:
-  std::function<void(void)> read_callback;
-  std::function<void(void)> write_callback;
+  virtual void write()=0;
 };  // class Device
 
 /*!
@@ -129,13 +121,7 @@ public:
    *
    * \sa RT::System
    */
-  void execute();
-
-protected:
-  void bind_execute_callback(std::function<void(void)> callback);
-
-private:
-  std::function<void(void)> execute_callback;
+  virtual void execute()=0;
 };  // class Thread
 
 /*!

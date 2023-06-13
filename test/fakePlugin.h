@@ -53,6 +53,7 @@ public:
                            defaultFakeModuleVariables)
         { std::cout << "Fake Component Created\n"; } 
     ~fakeComponent() { std::cout << "Fake Component Destroyed\n"; }
+    void execute() override;
 };
 
 #endif

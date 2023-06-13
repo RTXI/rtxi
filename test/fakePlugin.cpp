@@ -37,6 +37,11 @@
 //   return nullptr;
 // }
 
+void fakeComponent::execute()
+{
+
+}
+
 std::unique_ptr<Modules::Plugin> createRTXIPlugin(Event::Manager* ev_manager,
                                                   MainWindow* main_window)
 {

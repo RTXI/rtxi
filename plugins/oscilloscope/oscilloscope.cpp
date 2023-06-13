@@ -1045,11 +1045,10 @@ Oscilloscope::Component::Component(Modules::Plugin* hplugin,
                          Oscilloscope::get_default_channels(),
                          Oscilloscope::get_default_vars())
 {
-  this->bind_execute_callback([&]() { this->callback(); });
 }
 
 // TODO: Handle trigger synchronization bettween oscilloscope components
-void Oscilloscope::Component::callback()
+void Oscilloscope::Component::execute()
 {
   Oscilloscope::sample sample {};
   auto state =

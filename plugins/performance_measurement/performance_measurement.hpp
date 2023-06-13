@@ -125,7 +125,7 @@ public:
   explicit Component(Modules::Plugin* hplugin); 
 
   void setTickPointers(int64_t* s_ticks, int64_t* e_ticks);
-  void callback();
+  void execute() override;
   private:
 
   //RunningStat timestepStat;

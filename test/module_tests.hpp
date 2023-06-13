@@ -50,10 +50,9 @@ public:
                            generateDefaultChannelList(),
                            generateDefaultComponentVariables())
   {
-    this->bind_execute_callback([&]() { this->callback(); });
   }
 
-  void callback()
+  void execute() final
   {
     std::unique_lock lck(this->mut);
     this->executed = true;

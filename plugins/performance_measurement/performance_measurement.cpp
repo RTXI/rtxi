@@ -118,10 +118,9 @@ PerformanceMeasurement::Component::Component(Modules::Plugin* hplugin)
                          std::vector<IO::channel_t>(),
                          PerformanceMeasurement::get_default_vars())
 {
-  this->bind_execute_callback([&]() { this->callback(); });
 }
 
-void PerformanceMeasurement::Component::callback()
+void PerformanceMeasurement::Component::execute()
 {
   auto maxDuration =
       getValue<double>(PerformanceMeasurement::PARAMETER::MAX_DURATION);

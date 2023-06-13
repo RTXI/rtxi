@@ -108,7 +108,7 @@ public:
   RT::OS::Fifo* getFifoPtr() { return this->fifo.get(); }
 
 private:
-  void callback();
+  void execute() override;
   std::unique_ptr<RT::OS::Fifo> fifo;
 };
 
