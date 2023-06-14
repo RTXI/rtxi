@@ -21,20 +21,28 @@
 #define DATA_RECORDER_H
 
 #include <vector>
+#include <mutex>
+#include <thread>
 
-#include <atomic_fifo.h>
-#include <daq.h>
-#include <event.h>
+#include <time.h>
+
 #include <hdf5.h>
 #include <hdf5_hl.h>
-#include <io.h>
-#include <mutex.h>
-#include <plugin.h>
-#include <time.h>
-#include <workspace.h>
+
+#include <QComboBox>
+#include <QMutex>
+#include <QListWidget>
+#include <QSpinBox>
+
+#include "io.hpp"
+#include "event.hpp"
+#include "module.hpp"
 
 namespace DataRecorder
 {
+
+constexpr std::string_view MODULE_NAME = "data_recorder";
+constexpr size_t TAG_SIZE = 1024;
 enum data_type_t
 {
   OPEN,
@@ -51,100 +59,81 @@ struct data_token_t
 {
   data_type_t type;
   size_t size;
-  long long time;
+  int64_t time;
 };
 
-struct param_change_t
+//struct param_change_t
+//{
+//  Settings::Object::ID id;
+//  size_t index;
+//  long long step;
+//  double value;
+//};
+
+typedef struct Channel 
 {
-  Settings::Object::ID id;
-  size_t index;
-  long long step;
-  double value;
-};
+  QString name;
+  std::unique_ptr<RT::OS::Fifo> fifo;
+  IO::Block* block;
+  size_t port;
+  IO::flags_t direction;
+}Channel;  // class Channel
 
-void startRecording(void);
-void stopRecording(void);
-void openFile(const QString&);
-void postAsyncData(const double*, size_t);
-
-class CustomEvent : public QEvent
+class Component : public Modules::Component
 {
 public:
-  CustomEvent(QEvent::Type);
-  virtual ~CustomEvent(void) {};
-  void setData(void* data);
-  void* getData(void);
-
-private:
-  void* data;
+  void execute() override;
 };
 
-class Channel : public RT::List<Channel>::Node
-{
-  friend class Panel;
-
-private:
-  Channel(void);
-  ~Channel(void);
-  QString name;
-  IO::Block* block;
-  IO::flags_t type;
-  size_t index;
-};  // class Channel
-
-class Panel
-    : public QWidget
-    , virtual public Settings::Object
-    , public Event::Handler
-    , public Event::RTHandler
-    , public RT::Thread
+class Panel: public Modules::Panel 
 {
   Q_OBJECT
 
 public:
-  Panel(QWidget*, size_t);
-  ~Panel(void);
+  Panel(const Panel&) = delete;
+  Panel(Panel&&) = delete;
+  Panel& operator=(const Panel&) = delete;
+  Panel& operator=(Panel&&) = delete;
+  Panel(MainWindow* mwindow, Event::Manager* ev_manager);
+  ~Panel() override;
 
-  void execute(void);
-  void receiveEvent(const Event::Object*);
-  void receiveEventRT(const Event::Object*);
+  void startRecording();
+  void stopRecording();
+  void openFile(const QString&);
 
 public slots:
-  void startRecordClicked(void);
-  void stopRecordClicked(void);
+  void startRecordClicked();
+  void stopRecordClicked();
   void updateDownsampleRate(int);
 
 private slots:
-  void buildChannelList(void);
-  void changeDataFile(void);
-  void insertChannel(void);
-  void removeChannel(void);
-  void addNewTag(void);
+  void buildChannelList();
+  void changeDataFile();
+  void insertChannel();
+  void removeChannel();
+  void addNewTag();
 
 protected:
-  void customEvent(QEvent*);
-  virtual void doDeferred(const Settings::Object::State&);
-  virtual void doLoad(const Settings::Object::State&);
-  virtual void doSave(Settings::Object::State&) const;
+  //virtual void doDeferred(const Settings::Object::State&);
+  //virtual void doLoad(const Settings::Object::State&);
+  //virtual void doSave(Settings::Object::State&) const;
 
 private:
-  static void* bounce(void*);
-  void processData(void);
+  void processData();
   int openFile(QString&);
   void closeFile(bool = false);
-  int startRecording(long long);
-  void stopRecording(long long);
+  int startRecording(int64_t);
+  void stopRecording(int64_t);
   double prev_input;
   size_t counter;
   size_t downsample_rate;
-  long long count;
-  long long fixedcount;
+  int64_t count;
+  int64_t fixedcount;
   std::vector<std::string> dataTags;
 
   QMutex mutex;
 
-  pthread_t thread;
-  AtomicFifo fifo;
+  std::thread thread;
   data_token_t _token;
   bool tokenRetrieved;
   struct timespec sleep;
@@ -155,81 +144,75 @@ private:
     hid_t trial;
     hid_t adata, cdata, pdata, sdata, tdata, sysdata;
     hid_t chandata;
-    long long idx;
+    int64_t idx;
   } file;
 
   bool recording;
 
-  QMdiSubWindow* subWindow;
+  QMdiSubWindow* subWindow=nullptr;
 
-  QGroupBox* channelGroup;
-  QGroupBox* stampGroup;
-  QGroupBox* sampleGroup;
-  QGroupBox* fileGroup;
-  QGroupBox* buttonGroup;
-  QGroupBox* listGroup;
+  QGroupBox* channelGroup=nullptr;
+  QGroupBox* stampGroup=nullptr;
+  QGroupBox* sampleGroup=nullptr;
+  QGroupBox* fileGroup=nullptr;
+  QGroupBox* buttonGroup=nullptr;
+  QGroupBox* listGroup=nullptr;
 
-  QComboBox* blockList;
-  QComboBox* channelList;
-  QComboBox* typeList;
-  QListWidget* selectionBox;
-  QLabel* recordStatus;
-  QPushButton* rButton;
-  QPushButton* lButton;
-  QPushButton* addTag;
+  QComboBox* blockList=nullptr;
+  QComboBox* channelList=nullptr;
+  QComboBox* typeList=nullptr;
+  QListWidget* selectionBox=nullptr;
+  QLabel* recordStatus=nullptr;
+  QPushButton* rButton=nullptr;
+  QPushButton* lButton=nullptr;
+  QPushButton* addTag=nullptr;
 
-  QSpinBox* downsampleSpin;
+  QSpinBox* downsampleSpin=nullptr;
 
-  QLineEdit* fileNameEdit;
-  QLineEdit* timeStampEdit;
-  QLineEdit* fileFormatEdit;
-  QLabel* fileSizeLbl;
-  QLabel* fileSize;
-  QLabel* trialLengthLbl;
-  QLabel* trialLength;
-  QLabel* trialNumLbl;
-  QLabel* trialNum;
+  QLineEdit* fileNameEdit=nullptr;
+  QLineEdit* timeStampEdit=nullptr;
+  QLineEdit* fileFormatEdit=nullptr;
+  QLabel* fileSizeLbl=nullptr;
+  QLabel* fileSize=nullptr;
+  QLabel* trialLengthLbl=nullptr;
+  QLabel* trialLength=nullptr;
+  QLabel* trialNumLbl=nullptr;
+  QLabel* trialNum=nullptr;
 
-  QPushButton* startRecordButton;
-  QPushButton* stopRecordButton;
-  QPushButton* closeButton;
+  QPushButton* startRecordButton=nullptr;
+  QPushButton* stopRecordButton=nullptr;
+  QPushButton* closeButton=nullptr;
 
-  RT::List<Channel> channels;
-  std::vector<IO::Block*> blockPtrList;
+  std::list<Channel> channels;
+  std::list<DataRecorder::Component> componentList;
 };  // class Panel
 
-class Plugin
-    : public QObject
-    , public ::Plugin::Object
+class Plugin : public Modules::Plugin
 {
   Q_OBJECT
 
-  friend class Panel;
-
-public:
-  static Plugin* getInstance(void);
-  std::list<Panel*> panelList;
-
+  void receiveEvent(Event::Object* event) override;
 public slots:
-  Panel* createDataRecorderPanel(void);
+  Panel* createDataRecorderPanel();
 
 protected:
-  virtual void doDeferred(const Settings::Object::State&);
-  virtual void doLoad(const Settings::Object::State&);
-  virtual void doSave(Settings::Object::State&) const;
+  //virtual void doDeferred(const Settings::Object::State&);
+  //virtual void doLoad(const Settings::Object::State&);
+  //virtual void doSave(Settings::Object::State&) const;
 
-private:
-  Plugin(void);
-  ~Plugin(void);
-  Plugin(const Plugin&)
-      : QObject() {};
-  Plugin& operator=(const Plugin&) { return *getInstance(); };
-  static Plugin* instance;
-
-  void removeDataRecorderPanel(Panel*);
-
-  size_t buffersize;
 };  // class Plugin
+
+std::unique_ptr<Modules::Plugin> createRTXIPlugin(Event::Manager* ev_manager,
+                                                  MainWindow* main_window);
+
+Modules::Panel* createRTXIPanel(MainWindow* main_window,
+                                Event::Manager* ev_manager);
+
+std::unique_ptr<Modules::Component> createRTXIComponent(
+    Modules::Plugin* host_plugin);
+
+Modules::FactoryMethods getFactories();
+
 };  // namespace DataRecorder
 
 #endif /* DATA_RECORDER_H */

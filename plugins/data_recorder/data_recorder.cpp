@@ -22,21 +22,11 @@
 #include <sstream>
 #include <string>
 
-#include <compiler.h>
-#include <data_recorder.h>
-#include <debug.h>
-#include <main_window.h>
-#include <pthread.h>
-#include <rtxi_config.h>
 #include <unistd.h>
-#include <workspace.h>
 
-#define QFileExistsEvent (QEvent::User + 0)
-#define QSetFileNameEditEvent (QEvent::User + 1)
-#define QDisableGroupsEvent (QEvent::User + 2)
-#define QEnableGroupsEvent (QEvent::User + 3)
-
-#define TAG_SIZE 1024
+#include "debug.hpp"
+#include "main_window.hpp"
+#include "data_recorder.h"
 
 struct param_hdf_t
 {
@@ -44,353 +34,14 @@ struct param_hdf_t
   double value;
 };
 
-// Debug for event handling
-QDebug operator<<(QDebug str, const QEvent* ev)
-{
-  static int eventEnumIndex =
-      QEvent::staticMetaObject.indexOfEnumerator("Type");
-  str << "QEvent";
-  if (ev) {
-    QString name = QEvent::staticMetaObject.enumerator(eventEnumIndex)
-                       .valueToKey(ev->type());
-    if (!name.isEmpty())
-      str << name;
-    else
-      str << ev->type();
-  } else
-    str << (void*)ev;
-  return str.maybeSpace();
-}
-
 struct find_daq_t
 {
   int index;
   DAQ::Device* device;
 };
 
-static void findDAQDevice(DAQ::Device* dev, void* arg)
-{
-  struct find_daq_t* info = static_cast<struct find_daq_t*>(arg);
-  if (!info->index)
-    info->device = dev;
-  info->index--;
-}
-
-namespace
-{
-void buildBlockPtrList(IO::Block* block, void* arg)
-{
-  std::vector<IO::Block*>* list =
-      reinterpret_cast<std::vector<IO::Block*>*>(arg);
-  list->push_back(block);
-};
-
-struct FileExistsEventData
-{
-  QString filename;
-  int response;
-  QWaitCondition done;
-};
-
-struct SetFileNameEditEventData
-{
-  QString filename;
-  QWaitCondition done;
-};
-
-class InsertChannelEvent : public RT::Event
-{
-public:
-  InsertChannelEvent(bool&,
-                     RT::List<DataRecorder::Channel>&,
-                     RT::List<DataRecorder::Channel>::iterator,
-                     DataRecorder::Channel&);
-  ~InsertChannelEvent(void);
-  int callback(void);
-
-private:
-  bool& recording;
-  RT::List<DataRecorder::Channel>& channels;
-  RT::List<DataRecorder::Channel>::iterator end;
-  DataRecorder::Channel& channel;
-};  // class InsertChannelEvent
-
-class RemoveChannelEvent : public RT::Event
-{
-public:
-  RemoveChannelEvent(bool&,
-                     RT::List<DataRecorder::Channel>&,
-                     DataRecorder::Channel&);
-  ~RemoveChannelEvent(void);
-  int callback(void);
-
-private:
-  bool& recording;
-  RT::List<DataRecorder::Channel>& channels;
-  DataRecorder::Channel& channel;
-};  // class RemoveChannelEvent
-
-class OpenFileEvent : public RT::Event
-{
-public:
-  OpenFileEvent(QString&, AtomicFifo&);
-  ~OpenFileEvent(void);
-  int callback(void);
-
-private:
-  QString& filename;
-  AtomicFifo& fifo;
-};  // class OpenFileEvent
-
-class StartRecordingEvent : public RT::Event
-{
-public:
-  StartRecordingEvent(bool&, AtomicFifo&);
-  ~StartRecordingEvent(void);
-  int callback(void);
-
-private:
-  bool& recording;
-  AtomicFifo& fifo;
-};  // class StartRecordingEvent
-
-class StopRecordingEvent : public RT::Event
-{
-public:
-  StopRecordingEvent(bool&, AtomicFifo&);
-  ~StopRecordingEvent(void);
-  int callback(void);
-
-private:
-  bool& recording;
-  AtomicFifo& fifo;
-};  // class StopRecordingEvent
-
-class AsyncDataEvent : public RT::Event
-{
-public:
-  AsyncDataEvent(const double*, size_t, AtomicFifo&);
-  ~AsyncDataEvent(void);
-  int callback(void);
-
-private:
-  const double* data;
-  size_t size;
-  AtomicFifo& fifo;
-};  // class AsyncDataEvent
-
-class DoneEvent : public RT::Event
-{
-public:
-  DoneEvent(AtomicFifo&);
-  ~DoneEvent(void);
-  int callback(void);
-
-private:
-  AtomicFifo& fifo;
-};  // class DoneEvent
-};  // namespace
-
-InsertChannelEvent::InsertChannelEvent(
-    bool& r,
-    RT::List<DataRecorder::Channel>& l,
-    RT::List<DataRecorder::Channel>::iterator e,
-    DataRecorder::Channel& c)
-    : recording(r)
-    , channels(l)
-    , end(e)
-    , channel(c)
-{
-}
-
-InsertChannelEvent::~InsertChannelEvent(void) {}
-
-int InsertChannelEvent::callback(void)
-{
-  if (recording)
-    return -1;
-  channels.insertRT(end, channel);
-  return 0;
-}
-
-RemoveChannelEvent::RemoveChannelEvent(bool& r,
-                                       RT::List<DataRecorder::Channel>& l,
-                                       DataRecorder::Channel& c)
-    : recording(r)
-    , channels(l)
-    , channel(c)
-{
-}
-
-RemoveChannelEvent::~RemoveChannelEvent(void) {}
-
-int RemoveChannelEvent::callback(void)
-{
-  if (recording)
-    return -1;
-  channels.removeRT(channel);
-  return 0;
-}
-
-OpenFileEvent::OpenFileEvent(QString& n, AtomicFifo& f)
-    : filename(n)
-    , fifo(f)
-{
-}
-
-OpenFileEvent::~OpenFileEvent(void) {}
-
-int OpenFileEvent::callback(void)
-{
-  DataRecorder::data_token_t token;
-  token.type = DataRecorder::OPEN;
-  token.size = filename.length() + 1;
-  token.time = RT::OS::getTime();
-  fifo.write(&token, sizeof(token));
-  fifo.write(filename.toLatin1().constData(), token.size);
-  return 0;
-}
-
-StartRecordingEvent::StartRecordingEvent(bool& r, AtomicFifo& f)
-    : recording(r)
-    , fifo(f)
-{
-}
-
-StartRecordingEvent::~StartRecordingEvent(void) {}
-
-int StartRecordingEvent::callback(void)
-{
-  DataRecorder::data_token_t token;
-  recording = true;
-  token.type = DataRecorder::START;
-  token.size = 0;
-  token.time = RT::OS::getTime();
-  fifo.write(&token, sizeof(token));
-  return 0;
-}
-
-StopRecordingEvent::StopRecordingEvent(bool& r, AtomicFifo& f)
-    : recording(r)
-    , fifo(f)
-{
-}
-
-StopRecordingEvent::~StopRecordingEvent(void) {}
-
-int StopRecordingEvent::callback(void)
-{
-  DataRecorder::data_token_t token;
-  recording = false;
-  token.type = DataRecorder::STOP;
-  token.size = 0;
-  token.time = RT::OS::getTime();
-  fifo.write(&token, sizeof(token));
-  return 0;
-}
-
-AsyncDataEvent::AsyncDataEvent(const double* d, size_t s, AtomicFifo& f)
-    : data(d)
-    , size(s)
-    , fifo(f)
-{
-}
-
-AsyncDataEvent::~AsyncDataEvent(void) {}
-
-int AsyncDataEvent::callback(void)
-{
-  DataRecorder::data_token_t token;
-  token.type = DataRecorder::ASYNC;
-  token.size = size * sizeof(double);
-  token.time = RT::OS::getTime();
-  fifo.write(&token, sizeof(token));
-  fifo.write(data, token.size);
-  return 1;
-}
-
-DoneEvent::DoneEvent(AtomicFifo& f)
-    : fifo(f)
-{
-}
-
-DoneEvent::~DoneEvent(void) {}
-
-int DoneEvent::callback(void)
-{
-  DataRecorder::data_token_t token;
-  token.type = DataRecorder::DONE;
-  token.size = 0;
-  token.time = RT::OS::getTime();
-  fifo.write(&token, sizeof(token));
-  return 0;
-}
-
-DataRecorder::CustomEvent::CustomEvent(QEvent::Type type)
-    : QEvent(type)
-{
-  data = 0;
-}
-
-void DataRecorder::CustomEvent::setData(void* ptr)
-{
-  data = ptr;
-}
-
-void* DataRecorder::CustomEvent::getData(void)
-{
-  return data;
-}
-
-void DataRecorder::startRecording(void)
-{
-  Event::Object event(Event::START_RECORDING_EVENT);
-  if (RT::OS::isRealtime())
-    Event::Manager::getInstance()->postEventRT(&event);
-  else
-    Event::Manager::getInstance()->postEvent(&event);
-}
-
-void DataRecorder::stopRecording(void)
-{
-  Event::Object event(Event::STOP_RECORDING_EVENT);
-  if (RT::OS::isRealtime())
-    Event::Manager::getInstance()->postEventRT(&event);
-  else
-    Event::Manager::getInstance()->postEvent(&event);
-}
-
-void DataRecorder::openFile(const QString& filename)
-{
-  Event::Object event(Event::OPEN_FILE_EVENT);
-  event.setParam("filename",
-                 const_cast<char*>(filename.toLatin1().constData()));
-  if (RT::OS::isRealtime())
-    Event::Manager::getInstance()->postEventRT(&event);
-  else
-    Event::Manager::getInstance()->postEvent(&event);
-}
-
-void DataRecorder::postAsyncData(const double* data, size_t size)
-{
-  Event::Object event(Event::ASYNC_DATA_EVENT);
-  event.setParam("data", const_cast<double*>(data));
-  event.setParam("size", &size);
-  if (RT::OS::isRealtime())
-    Event::Manager::getInstance()->postEventRT(&event);
-  else
-    Event::Manager::getInstance()->postEvent(&event);
-}
-
-DataRecorder::Channel::Channel(void) {}
-
-DataRecorder::Channel::~Channel(void) {}
-
-DataRecorder::Panel::Panel(QWidget* parent, size_t buffersize)
-    : QWidget(parent)
-    , RT::Thread(RT::Thread::MinimumPriority)
-    , fifo(buffersize)
-    , recording(false)
+DataRecorder::Panel::Panel(MainWindow* mwindow, Event::Manager* ev_manager) 
+    : Modules::Panel(std::string(DataRecorder::MODULE_NAME), mwindow, ev_manager)
 {
   setWhatsThis(
       "<p><b>Data Recorder:</b><br>The Data Recorder writes data to an HDF5 "
@@ -419,7 +70,7 @@ DataRecorder::Panel::Panel(QWidget* parent, size_t buffersize)
   subWindow->setAttribute(Qt::WA_DeleteOnClose);
   subWindow->setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint
                             | Qt::WindowMinimizeButtonHint);
-  MainWindow::getInstance()->createMdi(subWindow);
+  mwindow->createMdi(subWindow);
 
   // Create main layout
   QGridLayout* layout = new QGridLayout;
@@ -593,46 +244,30 @@ DataRecorder::Panel::Panel(QWidget* parent, size_t buffersize)
   layout->addWidget(buttonGroup, 6, 0, 1, 6);
 
   setLayout(layout);
-  setWindowTitle(QString::number(getID()) + " Data Recorder");
+  setWindowTitle(tr(std::string(DataRecorder::MODULE_NAME).c_str()));
 
   // Set layout to Mdi
   subWindow->setWidget(this);
   subWindow->setFixedSize(subWindow->minimumSizeHint());
   show();
 
-  // Register custom QEvents
-  QEvent::registerEventType(QFileExistsEvent);
-  QEvent::registerEventType(QSetFileNameEditEvent);
-  QEvent::registerEventType(QDisableGroupsEvent);
-  QEvent::registerEventType(QEnableGroupsEvent);
-
   // Build initial block list
-  IO::Connector::getInstance()->foreachBlock(buildBlockPtrList, &blockPtrList);
-  for (std::vector<IO::Block*>::const_iterator i = blockPtrList.begin(),
-                                               end = blockPtrList.end();
-       i != end;
-       ++i)
-    blockList->addItem(QString::fromStdString((*i)->getName()) + " "
-                       + QString::number((*i)->getID()));
-
-  // Setup thread sleep
-  sleep.tv_sec = 0;
-  sleep.tv_nsec = RT::System::getInstance()->getPeriod();
-
-  // Check if FIFO is truly atomic for hardware arcstartecture
-  if (!fifo.isLockFree())
-    ERROR_MSG("DataRecorder::Panel: WARNING: Atomic FIFO is not lock free\n");
+  Event::Object event(Event::Type::IO_BLOCK_QUERY_EVENT);
+  this->getRTXIEventManager()->postEvent(&event); 
+  auto blockPtrList = std::any_cast<std::vector<IO::Block*>>(event.getParam("blockList"));
+  for (auto blockptr : blockPtrList){
+    blockList->addItem(QString::fromStdString(blockptr->getName()) + " "
+                       + QString::number(blockptr->getID()));
+  }
 
   // Build initial channel list
   buildChannelList();
 
   // Launch Recording Thread
-  pthread_create(&thread, 0, bounce, this);
   counter = 0;
   downsample_rate = 1;
   prev_input = 0.0;
   count = 0;
-  setActive(true);
 }
 
 // Destructor for Panel
