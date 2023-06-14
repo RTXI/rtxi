@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.24)
 
 if(DEFINED evl_FOUND AND RTXI_RT_CORE STREQUAL "evl")
   list(APPEND CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES ${evl_INCLUDE_DIRS})
+  add_library(dlplugin SHARED "dlplugin.hpp" "dlplugin.cpp")
   add_library(xfifo SHARED "fifo.hpp" "fifo_evl.cpp")
   target_link_libraries(xfifo 
     PRIVATE 
@@ -19,6 +20,7 @@ if(DEFINED evl_FOUND AND RTXI_RT_CORE STREQUAL "evl")
   target_include_directories(rtos SYSTEM PRIVATE ${evl_INCLUDE_DIRS})
 elseif(xenomai3_FOUND AND RTXI_RT_CORE STREQUAL "xenomai")
   list(APPEND CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES ${xenomai_ALCHEMY_CFLAGS})
+  add_library(dlplugin SHARED "dlplugin.hpp" "dlplugin.cpp")
   add_library(xfifo SHARED "fifo.hpp" "fifo_xenomai.cpp")
   target_link_libraries(xfifo 
     PRIVATE 
@@ -37,6 +39,7 @@ elseif(xenomai3_FOUND AND RTXI_RT_CORE STREQUAL "xenomai")
 
 else()
   message("EVL Library not found. Reverting to posix Interface.")
+  add_library(dlplugin SHARED "dlplugin.hpp" "dlplugin.cpp")
   add_library(xfifo SHARED "fifo.hpp" "fifo_posix.cpp")
   target_link_libraries(xfifo PRIVATE fmt::fmt)
   add_library(rtos SHARED "rtos.hpp" "rtos_posix.cpp")
@@ -67,6 +70,7 @@ target_link_libraries(rtxi PUBLIC
     Qt5::Widgets
     qwt::qwt
     xfifo
+    dlplugin
 )
 
 # Create RTXI executable
@@ -82,9 +86,9 @@ set_target_properties(
 
 # Link all of the static and dynamic libraries to rtxi
 target_link_libraries(rtxi_exe PUBLIC 
-    rtxi
     xfifo
     rtos 
+    rtxi
     rtmath_lib
     performance_measurement_lib
     userprefs_lib

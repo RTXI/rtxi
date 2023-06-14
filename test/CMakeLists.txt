@@ -53,6 +53,7 @@ target_link_libraries(fakePlugin PRIVATE
     testing_lib
     rtxi
     rtos
+    dlplugin
     Qt5::Core
     Qt5::Gui
     Qt5::Widgets

@@ -10,6 +10,7 @@
 #include <sstream>
 
 #include "module.hpp"
+#include "dlplugin.hpp"
 
 #include <dlfcn.h>
 
@@ -494,10 +495,6 @@ Modules::Plugin::~Plugin()
         std::any(static_cast<RT::Thread*>(this->plugin_component.get())));
     this->event_manager->postEvent(&unplug_block_event);
   }
-
-  if (this->handle != nullptr) {
-    dlclose(handle);
-  }
 }
 
 void Modules::Plugin::registerComponent()
@@ -542,76 +539,6 @@ double Modules::Plugin::getComponentDoubleParameter(
   return this->plugin_component->getValue<double>(parameter_id);
 }
 
-// int Modules::Plugin::setComponentIntParameter(const Modules::Variable::Id&
-// parameter_id,
-//                                               int64_t value)
-//{
-//   const int result = 0;
-//   Event::Object event(Event::Type::RT_MODULE_PARAMETER_CHANGE_EVENT);
-//   event.setParam("paramID", std::any(parameter_id));
-//   event.setParam("paramType", std::any(Modules::Variable::INT_PARAMETER));
-//   event.setParam("paramValue", std::any(value));
-//   event.setParam("paramModule", std::any(this->plugin_component.get()));
-//   this->event_manager->postEvent(&event);
-//   return result;
-// }
-//
-// int Modules::Plugin::setComponentDoubleParameter(const Modules::Variable::Id&
-// parameter_id,
-//                                                  double value)
-//{
-//   const int result = 0;
-//   Event::Object event(Event::Type::RT_MODULE_PARAMETER_CHANGE_EVENT);
-//   event.setParam("paramID", std::any(parameter_id));
-//   event.setParam("paramType", std::any(Modules::Variable::DOUBLE_PARAMETER));
-//   event.setParam("paramValue", std::any(value));
-//   event.setParam("paramModule", std::any(this->plugin_component.get()));
-//   this->event_manager->postEvent(&event);
-//   return result;
-// }
-//
-// int Modules::Plugin::setComponentUintParameter(const Modules::Variable::Id&
-// parameter_id,
-//                                                uint64_t value)
-//{
-//   const int result = 0;
-//   Event::Object event(Event::Type::RT_MODULE_PARAMETER_CHANGE_EVENT);
-//   event.setParam("paramID", std::any(parameter_id));
-//   event.setParam("paramType", std::any(Modules::Variable::UINT_PARAMETER));
-//   event.setParam("paramValue", std::any(value));
-//   event.setParam("paramModule", std::any(this->plugin_component.get()));
-//   this->event_manager->postEvent(&event);
-//   return result;
-// }
-//
-// int Modules::Plugin::setComponentComment(const Modules::Variable::Id&
-// parameter_id,
-//                                          const std::string& value)
-//{
-//   const int result = 0;
-//   Event::Object event(Event::Type::RT_MODULE_PARAMETER_CHANGE_EVENT);
-//   event.setParam("paramID", std::any(parameter_id));
-//   event.setParam("paramType", std::any(Modules::Variable::INT_PARAMETER));
-//   event.setParam("paramValue", std::any(value));
-//   event.setParam("paramModule", std::any(this->plugin_component.get()));
-//   this->event_manager->postEvent(&event);
-//   return result;
-// }
-//
-// int Modules::Plugin::setComponentState(const Modules::Variable::Id&
-// parameter_id,
-//                                        Modules::Variable::state_t value)
-//{
-//   const int result = 0;
-//   Event::Object event(Event::Type::RT_MODULE_PARAMETER_CHANGE_EVENT);
-//   event.setParam("paramID", std::any(parameter_id));
-//   event.setParam("paramType", std::any(Modules::Variable::STATE));
-//   event.setParam("paramValue", std::any(value));
-//   event.setParam("paramModule", std::any(this->plugin_component.get()));
-//   this->event_manager->postEvent(&event);
-//   return result;
-// }
-
 void Modules::Plugin::receiveEvent(Event::Object* /*event*/)
 {
   // Set by users who want to handle events
@@ -644,23 +571,6 @@ int Modules::Plugin::setActive(bool state)
   return result;
 }
 
-void Modules::Plugin::setLibraryInfo(void* lib_handle,
-                                     Modules::FactoryMethods fact_methods)
-{
-  if (lib_handle == nullptr) {
-    return;
-  }
-  Dl_info libinfo;
-  const void* createPlugin =
-      reinterpret_cast<const void*>(fact_methods.createPlugin);
-  if (::dladdr(createPlugin, &libinfo) == 0) {
-    return;
-  }
-
-  this->handle = lib_handle;
-  this->library = std::string(libinfo.dli_fname);
-}
-
 Modules::Component* Modules::Plugin::getComponent()
 {
   return this->plugin_component.get();
@@ -691,6 +601,7 @@ Modules::Manager::Manager(Event::Manager* ev_manager, MainWindow* mw)
     , main_window(mw)
 {
   this->event_manager->registerHandler(this);
+  this->m_plugin_loader = std::make_unique<DLL::Loader>();
 }
 
 Modules::Manager::~Manager()
@@ -743,52 +654,44 @@ Modules::Plugin* Modules::Manager::loadCorePlugin(const std::string& library)
 // TODO: extract plugin dynamic loading to another class
 Modules::Plugin* Modules::Manager::loadPlugin(const std::string& library)
 {
+  std::string library_loc = library;
   Modules::Plugin* plugin_ptr = nullptr;
   // if module factory is already registered then all we have to do is run it
-  if (this->rtxi_factories_registry.find(library)
+  if (this->rtxi_factories_registry.find(library_loc)
       != this->rtxi_factories_registry.end())
   {
     std::unique_ptr<Modules::Plugin> plugin =
-        this->rtxi_factories_registry[library].createPlugin(this->event_manager,
+        this->rtxi_factories_registry[library_loc].createPlugin(this->event_manager,
                                                             this->main_window);
     plugin_ptr = this->registerModule(std::move(plugin));
     return plugin_ptr;
   }
 
-  plugin_ptr = this->loadCorePlugin(library);
   // If it is just a core plugin then handle that elsewhere and return
+  plugin_ptr = this->loadCorePlugin(library_loc);
   if (plugin_ptr != nullptr) {
     return plugin_ptr;
   }
 
-  // TODO: This only works on linux. Make a cross-platform solution
-  void* lib_handle = dlopen(library.c_str(), RTLD_GLOBAL | RTLD_NOW);
-  if (lib_handle == nullptr) {
+  int result = this->m_plugin_loader->load(library_loc.c_str());
+  if (result != 0) {
     // We try to load it from another location besides locally
-    ERROR_MSG(
-        "Modules::Plugin::loadPlugin : could not load module locally : {}",
-        dlerror());
-    auto plugin_dir = RTXI_DEFAULT_PLUGIN_DIR + library;
-    lib_handle = dlopen((plugin_dir + library).c_str(), RTLD_GLOBAL | RTLD_NOW);
+    ERROR_MSG("Modules::Plugin::loadPlugin : could not load module locally");
+    library_loc = RTXI_DEFAULT_PLUGIN_DIR + library;
+    result = this->m_plugin_loader->load(library_loc.c_str());
   }
-  if (lib_handle == nullptr) {
-    ERROR_MSG(
-        "Plugin::load : failed to load {}: {}\n", library.c_str(), dlerror());
+  if (result != 0) {
+    ERROR_MSG("Plugin::load : failed to load {}", library_loc.c_str());
     return nullptr;
   }
 
-  /*********************************************************************************
-   * Apparently ISO C++ forbids against casting object pointer -> function
-   *pointer * But what the hell do they know? It is probably safe here... *
-   *********************************************************************************/
-
-  // NOLINTNEXTLINE
-  auto* gen_fact_methods = reinterpret_cast<Modules::FactoryMethods* (*)()>(
-      ::dlsym(lib_handle, "getFactories"));
+  auto gen_fact_methods = this->m_plugin_loader->dlsym<Modules::FactoryMethods* (*)()>(library_loc.c_str(), "getFactories");
 
   if (gen_fact_methods == nullptr) {
-    ERROR_MSG("Plugin::load : failed to load {} : {}\n", library, dlerror());
-    dlclose(lib_handle);
+    ERROR_MSG("Plugin::load : failed to retreive getFactories symbol");
+    // If we got here it means we loaded the lirbary but not the symbol. 
+    // Let's just unload the library and exit before we regret it.
+    this->m_plugin_loader->unload(library_loc.c_str());
     return nullptr;
   }
 
@@ -797,13 +700,12 @@ Modules::Plugin* Modules::Manager::loadPlugin(const std::string& library)
   std::unique_ptr<Modules::Plugin> plugin =
       fact_methods->createPlugin(this->event_manager, this->main_window);
   if (plugin == nullptr) {
-    ERROR_MSG("Plugin::load : failed to load {} : failed to create instance\n",
+    ERROR_MSG("Plugin::load : failed to create plugin from library {} ",
               library);
-    dlclose(lib_handle);
+    this->m_plugin_loader->unload(library_loc.c_str());
     return nullptr;
   }
 
-  plugin->setLibraryInfo(lib_handle, *fact_methods);
   // if (plugin->magic_number != Plugin::Object::MAGIC_NUMBER) {
   //   ERROR_MSG(
   //       "Plugin::load : the pointer returned from {}::createRTXIPlugin()
@@ -828,6 +730,7 @@ void Modules::Manager::unloadPlugin(Modules::Plugin* plugin)
 Modules::Plugin* Modules::Manager::registerModule(
     std::unique_ptr<Modules::Plugin> module)
 {
+  std::unique_lock<std::mutex> lk(this->m_modules_mut);
   const std::string mod_name = module->getName();
   this->rtxi_modules_registry[mod_name].push_back(std::move(module));
   return this->rtxi_modules_registry[mod_name].back().get();
@@ -838,6 +741,7 @@ void Modules::Manager::unregisterModule(Modules::Plugin* plugin)
   if (plugin == nullptr) {
     return;
   }
+  std::unique_lock<std::mutex> lk(this->m_modules_mut);
   const std::string plugin_name = plugin->getName();
   auto start_iter = this->rtxi_modules_registry[plugin_name].begin();
   auto end_iter = this->rtxi_modules_registry[plugin_name].end();
@@ -849,11 +753,8 @@ void Modules::Manager::unregisterModule(Modules::Plugin* plugin)
   if (loc == end_iter) {
     return;
   }
-  void* handle = loc->get()->getHandle();
+  this->m_plugin_loader->unload(plugin->getLibrary().c_str());
   this->rtxi_modules_registry[plugin_name].erase(loc);
-  if (handle != nullptr) {
-    dlclose(handle);
-  }
 }
 
 void Modules::Manager::registerFactories(const std::string& module_name,

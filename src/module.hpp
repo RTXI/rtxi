@@ -19,8 +19,9 @@
 #include "daq.hpp"
 #include "event.hpp"
 #include "io.hpp"
-#include "main_window.hpp"
 #include "rt.hpp"
+#include "main_window.hpp"
+#include "dlplugin.hpp"
 
 /*!
  * Contains all the classes and structures relevant to Modules
@@ -559,15 +560,6 @@ public:
    */
   void receiveEvent(Event::Object* event) override;
 
-  void setLibraryInfo(void* lib_handle, Modules::FactoryMethods fact_methods);
-  /*!
-   * For dynamically loadable modules in RTXI, this function is called
-   * to obtain a handle to the shared library.
-   *
-   * \return a void pointer representing the library handle
-   */
-  void* getHandle() { return this->handle; }
-
   /*!
    * Get the name of the library from which the object was loaded.
    *
@@ -599,7 +591,6 @@ private:
   Modules::Panel* widget_panel = nullptr;  // Qt handles this lifetime
 
   std::string library;
-  void* handle = nullptr;
   std::string name;
 };
 
@@ -609,9 +600,9 @@ private:
 class Manager : public Event::Handler
 {
 public:
-  Manager(const Manager&) = default;
+  Manager(const Manager&) = delete;
   Manager(Manager&&) = delete;
-  Manager& operator=(const Manager&) = default;
+  Manager& operator=(const Manager&) = delete;
   Manager& operator=(Manager&&) = delete;
   Manager(Event::Manager* ev_manager, MainWindow* mw);
   ~Manager() override;
@@ -652,6 +643,9 @@ private:
       rtxi_factories_registry;
   Event::Manager* event_manager;
   MainWindow* main_window;
+  std::unique_ptr<DLL::Loader> m_plugin_loader;
+
+  std::mutex m_modules_mut;
 };
 
 }  // namespace Modules

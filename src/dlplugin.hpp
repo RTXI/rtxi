@@ -23,6 +23,7 @@
 #include <string>
 #include <vector>
 #include <mutex>
+#include <algorithm>
 #include <dlfcn.h>
 
 //! Classes associated with the loading/unloading of binaries at run-time.
@@ -36,15 +37,21 @@ namespace DLL
 typedef struct dll_info{
   std::string library_name;
   void* handle;
+  bool operator==(const dll_info& rhs) const {
+    return this->library_name == rhs.library_name;
+  }
+  bool operator!=(const dll_info& rhs) const {
+    return !operator==(rhs);
+  }
 }dll_info;
 
 class Loader
 {
 public:
   Loader()=default;
-  Loader(const Loader&) = default;
+  Loader(const Loader&) = delete;
   Loader(Loader&&) = delete;
-  Loader& operator=(const Loader&) = default;
+  Loader& operator=(const Loader&) = delete;
   Loader& operator=(Loader&&) = delete;
   ~Loader();
 
@@ -65,15 +72,29 @@ public:
    */
   void unload(const char* library);
 
+  /*!
+   * Returns a pointer to the requested symbol inside the given library
+   *
+   * \param library location of the loaded library.
+   * \param symbol name of the symbol to load.
+   *
+   * \return A pointer to the loaded symbol.
+   */
   template<typename T>
-  T dlsym(void* handle, const char* symbol){
-    return reinterpret_cast<T>(::dlsym(handle, symbol));
+  inline T dlsym(const char* library, const char* symbol){
+    dll_info temp = { std::string(library), nullptr};
+    auto handle_loc = std::find(this->loaded_plugins.begin(),
+                                this->loaded_plugins.end(),
+                                temp);
+    if(handle_loc == this->loaded_plugins.end()) { return nullptr; }
+    return reinterpret_cast<T>(::dlsym(handle_loc->handle, symbol)); //NOLINT
   }
   
   /*!
    * Function for unloading all Plugin::Object's in the system.
    */
   void unloadAll();
+
 
 private:
   //static const u_int32_t MAGIC_NUMBER = 0xCA24CB3F;
