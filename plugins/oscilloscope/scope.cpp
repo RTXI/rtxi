@@ -143,7 +143,7 @@ bool Oscilloscope::Scope::paused() const
 }
 
 // TODO: make this thread-safe
-void Oscilloscope::Scope::createChannel(Oscilloscope::probe probeInfo)
+void Oscilloscope::Scope::createChannel(IO::endpoint probeInfo)
 {
   auto iter =
       std::find_if(this->channels.begin(),
@@ -174,7 +174,7 @@ void Oscilloscope::Scope::createChannel(Oscilloscope::probe probeInfo)
 }
 
 // TODO: make this thread-safe
-void Oscilloscope::Scope::removeChannel(Oscilloscope::probe probeInfo)
+void Oscilloscope::Scope::removeChannel(IO::endpoint probeInfo)
 {
   auto iter =
       std::find_if(this->channels.begin(),
@@ -229,7 +229,7 @@ void Oscilloscope::Scope::clearData()
   }
 }
 
-void Oscilloscope::Scope::setData(Oscilloscope::probe channel,
+void Oscilloscope::Scope::setData(IO::endpoint channel,
                                   std::vector<sample> probe_data)
 {
   if (isPaused) {
@@ -338,7 +338,7 @@ void Oscilloscope::Scope::setRefresh(size_t r)
   timer->setInterval(static_cast<int>(refresh));
 }
 
-void Oscilloscope::Scope::setChannelScale(probe channel, double scale)
+void Oscilloscope::Scope::setChannelScale(IO::endpoint channel, double scale)
 {
   auto chan_loc = std::find_if(this->channels.begin(),
                                this->channels.end(),
@@ -354,7 +354,7 @@ void Oscilloscope::Scope::setChannelScale(probe channel, double scale)
   chan_loc->scale = scale;
 }
 
-double Oscilloscope::Scope::getChannelScale(probe channel)
+double Oscilloscope::Scope::getChannelScale(IO::endpoint channel)
 {
   auto chan_loc = std::find_if(this->channels.begin(),
                                this->channels.end(),
@@ -370,7 +370,7 @@ double Oscilloscope::Scope::getChannelScale(probe channel)
   return chan_loc->scale;
 }
 
-void Oscilloscope::Scope::setChannelOffset(probe channel, double offset)
+void Oscilloscope::Scope::setChannelOffset(IO::endpoint channel, double offset)
 {
   auto chan_loc = std::find_if(this->channels.begin(),
                                this->channels.end(),
@@ -386,7 +386,7 @@ void Oscilloscope::Scope::setChannelOffset(probe channel, double offset)
   chan_loc->offset = offset;
 }
 
-double Oscilloscope::Scope::getChannelOffset(probe channel)
+double Oscilloscope::Scope::getChannelOffset(IO::endpoint channel)
 {
   auto chan_loc = std::find_if(this->channels.begin(),
                                this->channels.end(),
@@ -402,7 +402,7 @@ double Oscilloscope::Scope::getChannelOffset(probe channel)
   return chan_loc->offset;
 }
 
-void Oscilloscope::Scope::setChannelPen(probe channel, QPen* pen)
+void Oscilloscope::Scope::setChannelPen(IO::endpoint channel, QPen* pen)
 {
   auto chan_loc = std::find_if(this->channels.begin(),
                                this->channels.end(),
@@ -419,7 +419,7 @@ void Oscilloscope::Scope::setChannelPen(probe channel, QPen* pen)
   chan_loc->pen = pen;
 }
 
-QPen* Oscilloscope::Scope::getChannelPen(Oscilloscope::probe channel)
+QPen* Oscilloscope::Scope::getChannelPen(IO::endpoint channel)
 {
   auto chan_loc = std::find_if(this->channels.begin(),
                                this->channels.end(),
@@ -435,7 +435,7 @@ QPen* Oscilloscope::Scope::getChannelPen(Oscilloscope::probe channel)
   return chan_loc->pen;
 }
 
-void Oscilloscope::Scope::setChannelLabel(probe channel, const QString& label)
+void Oscilloscope::Scope::setChannelLabel(IO::endpoint channel, const QString& label)
 {
   auto chan_loc = std::find_if(this->channels.begin(),
                                this->channels.end(),

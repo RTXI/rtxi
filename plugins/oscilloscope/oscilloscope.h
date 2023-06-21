@@ -95,7 +95,7 @@ class Component;
 typedef struct channel_info
 {
   QString name;
-  Oscilloscope::probe probe;
+  IO::endpoint probe;
   Oscilloscope::Component* measuring_component;
   RT::OS::Fifo* fifo;
 } channel_info;  // channel_info
@@ -149,12 +149,12 @@ private:
   void disableChannel();
 
   // some utility functions
-  void updateChannelLabel(Oscilloscope::probe probe_info);
-  void updateChannelScale(Oscilloscope::probe probe_info);
-  void updateChannelOffset(Oscilloscope::probe probe_info);
-  void updateChannelLineWidth(Oscilloscope::probe probe_info);
-  void updateChannelLineStyle(Oscilloscope::probe probe_info);
-  void updateChannelPenColor(Oscilloscope::probe probe_info);
+  void updateChannelLabel(IO::endpoint probe_info);
+  void updateChannelScale(IO::endpoint probe_info);
+  void updateChannelOffset(IO::endpoint probe_info);
+  void updateChannelLineWidth(IO::endpoint probe_info);
+  void updateChannelLineStyle(IO::endpoint probe_info);
+  void updateChannelPenColor(IO::endpoint probe_info);
 
   QMdiSubWindow* subWindow = nullptr;
 
@@ -223,14 +223,14 @@ public:
   ~Plugin() override;
 
   void receiveEvent(Event::Object* event) override;
-  Oscilloscope::Component* getProbeComponent(probe probeInfo);
+  Oscilloscope::Component* getProbeComponent(IO::endpoint probeInfo);
 
   std::vector<Oscilloscope::channel_info> getChannelsList()
   {
     return this->chanInfoList;
   }
-  bool addProbe(Oscilloscope::probe probe_info);
-  void removeProbe(Oscilloscope::probe probe_info);
+  bool addProbe(IO::endpoint probe_info);
+  void removeProbe(IO::endpoint probe_info);
   Oscilloscope::Trigger::Info getTriggerInfo() { return this->trigger_info; }
 
 private:

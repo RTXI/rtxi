@@ -72,17 +72,17 @@ struct data_token_t
 
 typedef struct Channel 
 {
-  QString name;
+  std::string name;
   std::unique_ptr<RT::OS::Fifo> fifo;
-  IO::Block* block;
-  size_t port;
-  IO::flags_t direction;
+  IO::endpoint endpoint; 
 }Channel;  // class Channel
 
 class Component : public Modules::Component
 {
 public:
   void execute() override;
+private:
+  RT::OS::Fifo* m_fifo;
 };
 
 class Panel: public Modules::Panel 
@@ -97,11 +97,7 @@ public:
   Panel(MainWindow* mwindow, Event::Manager* ev_manager);
   ~Panel() override;
 
-  void startRecording();
-  void stopRecording();
-  void openFile(const QString&);
-
-public slots:
+ public slots:
   void startRecordClicked();
   void stopRecordClicked();
   void updateDownsampleRate(int);
@@ -113,13 +109,7 @@ private slots:
   void removeChannel();
   void addNewTag();
 
-protected:
-  //virtual void doDeferred(const Settings::Object::State&);
-  //virtual void doLoad(const Settings::Object::State&);
-  //virtual void doSave(Settings::Object::State&) const;
-
 private:
-  void processData();
   int openFile(QString&);
   void closeFile(bool = false);
   int startRecording(int64_t);
@@ -131,9 +121,6 @@ private:
   int64_t fixedcount;
   std::vector<std::string> dataTags;
 
-  QMutex mutex;
-
-  std::thread thread;
   data_token_t _token;
   bool tokenRetrieved;
   struct timespec sleep;
@@ -184,22 +171,29 @@ private:
   QPushButton* closeButton=nullptr;
 
   std::list<Channel> channels;
-  std::list<DataRecorder::Component> componentList;
+  std::vector<IO::Block*> blockPtrList;
 };  // class Panel
 
 class Plugin : public Modules::Plugin
 {
   Q_OBJECT
-
+public:
   void receiveEvent(Event::Object* event) override;
+  void startRecording();
+  void stopRecording();
+  void openFile(const std::string& file_name);
+  void change_file(const std::string& file_name);
+  int create_component(IO::endpoint& chan); 
+
 public slots:
-  Panel* createDataRecorderPanel();
 
-protected:
-  //virtual void doDeferred(const Settings::Object::State&);
-  //virtual void doLoad(const Settings::Object::State&);
-  //virtual void doSave(Settings::Object::State&) const;
-
+private:
+  void processData();
+  std::thread m_processdata_thread;
+  std::list<DataRecorder::Component> m_components_list;
+  std::vector<DataRecorder::Channel> m_channels_list;
+  std::mutex m_channels_list_mut;
+  std::mutex m_hdf5_file_mut;
 };  // class Plugin
 
 std::unique_ptr<Modules::Plugin> createRTXIPlugin(Event::Manager* ev_manager,

@@ -50,7 +50,7 @@ void Oscilloscope::Plugin::receiveEvent(Event::Object* event)
 }
 
 Oscilloscope::Component* Oscilloscope::Plugin::getProbeComponent(
-    Oscilloscope::probe probeInfo)
+    IO::endpoint probeInfo)
 {
   Oscilloscope::Component* component = nullptr;
   auto probe_loc =
@@ -68,7 +68,7 @@ Oscilloscope::Component* Oscilloscope::Plugin::getProbeComponent(
   return component;
 }
 
-void Oscilloscope::Panel::updateChannelScale(Oscilloscope::probe probe_info)
+void Oscilloscope::Panel::updateChannelScale(IO::endpoint probe_info)
 {
   const int scale_index = this->scalesList->currentIndex();
   double chanscale = 1.0;
@@ -93,14 +93,14 @@ void Oscilloscope::Panel::updateChannelScale(Oscilloscope::probe probe_info)
   this->scopeWindow->setChannelScale(probe_info, chanscale);
 }
 
-void Oscilloscope::Panel::updateChannelOffset(Oscilloscope::probe probe_info)
+void Oscilloscope::Panel::updateChannelOffset(IO::endpoint probe_info)
 {
   const double chanoffset = this->offsetsEdit->text().toDouble()
       * pow(10, -3 * offsetsList->currentIndex());
   this->scopeWindow->setChannelOffset(probe_info, chanoffset);
 }
 
-void Oscilloscope::Panel::updateChannelLineWidth(Oscilloscope::probe probe_info)
+void Oscilloscope::Panel::updateChannelLineWidth(IO::endpoint probe_info)
 {
   const int width_indx = this->widthsList->currentIndex();
   QPen* pen = this->scopeWindow->getChannelPen(probe_info);
@@ -115,7 +115,7 @@ void Oscilloscope::Panel::updateChannelLineWidth(Oscilloscope::probe probe_info)
   pen->setStyle(style);
 }
 
-void Oscilloscope::Panel::updateChannelLineStyle(Oscilloscope::probe probe_info)
+void Oscilloscope::Panel::updateChannelLineStyle(IO::endpoint probe_info)
 {
   QPen* pen = this->scopeWindow->getChannelPen(probe_info);
   const int style_indx = this->stylesList->currentIndex();
@@ -128,7 +128,7 @@ void Oscilloscope::Panel::updateChannelLineStyle(Oscilloscope::probe probe_info)
   }
 }
 
-void Oscilloscope::Panel::updateChannelPenColor(Oscilloscope::probe probe_info)
+void Oscilloscope::Panel::updateChannelPenColor(IO::endpoint probe_info)
 {
   QPen* pen = this->scopeWindow->getChannelPen(probe_info);
   const int color_indx = this->colorsList->currentIndex();
@@ -141,7 +141,7 @@ void Oscilloscope::Panel::updateChannelPenColor(Oscilloscope::probe probe_info)
   }
 }
 
-void Oscilloscope::Panel::updateChannelLabel(Oscilloscope::probe probe_info)
+void Oscilloscope::Panel::updateChannelLabel(IO::endpoint probe_info)
 {
   const QString chanlabel = QString::number(probe_info.block->getID()) + " "
       + QString::fromStdString(probe_info.block->getName()) + " "
@@ -173,7 +173,7 @@ void Oscilloscope::Panel::enableChannel()
 
   // this will try to create the probing component first. return if something
   // goes wrong
-  const Oscilloscope::probe probe {chanblock, chanport, chandirection};
+  const IO::endpoint probe {chanblock, chanport, chandirection};
   if (!oscilloscope_plugin->addProbe(probe)) {
     ERROR_MSG("Unable to create probing channel for block {}",
               chanblock->getName());
@@ -210,7 +210,7 @@ void Oscilloscope::Panel::disableChannel()
   auto chanport = static_cast<size_t>(port_list_index);
   auto chandirection = static_cast<IO::flags_t>(direction_list_index);
 
-  const Oscilloscope::probe probe {chanblock, chanport, chandirection};
+  const IO::endpoint probe {chanblock, chanport, chandirection};
   // we should remove the scope channel before we attempt to remove block
   this->scopeWindow->removeChannel(probe);
   oscilloscope_plugin->removeProbe(probe);
@@ -319,7 +319,7 @@ void Oscilloscope::Panel::applyChannelTab()
   auto type = static_cast<IO::flags_t>(flags_index);
   auto* host_plugin =
       dynamic_cast<Oscilloscope::Plugin*>(this->getHostPlugin());
-  const Oscilloscope::probe probeInfo {block, port, type};
+  const IO::endpoint probeInfo {block, port, type};
   Oscilloscope::Component* component =
       host_plugin->getProbeComponent(probeInfo);
   auto* oscilloscope_plugin =
@@ -808,7 +808,7 @@ void Oscilloscope::Panel::showChannelTab()
   if (this->channelsList->count() != 0) {
     port = static_cast<size_t>(this->channelsList->currentIndex());
   }
-  const Oscilloscope::probe chan {block, port, type};
+  const IO::endpoint chan {block, port, type};
   const double scale = this->scopeWindow->getChannelScale(chan);
   double offset = this->scopeWindow->getChannelOffset(chan);
   scalesList->setCurrentIndex(
@@ -1168,7 +1168,7 @@ Oscilloscope::Plugin::~Plugin()
   this->getEventManager()->postEvent(unloadEvents);
 }
 
-bool Oscilloscope::Plugin::addProbe(Oscilloscope::probe probe_info)
+bool Oscilloscope::Plugin::addProbe(IO::endpoint probe_info)
 {
   Oscilloscope::channel_info chan_info;
   chan_info.name = QString::number(probe_info.block->getID()) + " "
@@ -1189,7 +1189,7 @@ bool Oscilloscope::Plugin::addProbe(Oscilloscope::probe probe_info)
   // thread
 }
 
-void Oscilloscope::Plugin::removeProbe(Oscilloscope::probe probe_info)
+void Oscilloscope::Plugin::removeProbe(IO::endpoint probe_info)
 {
   auto probe_loc =
       std::find_if(this->chanInfoList.begin(),

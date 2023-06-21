@@ -85,13 +85,6 @@ typedef struct scope_channel
   IO::flags_t direction;
 } scope_channel;
 
-typedef struct probe
-{
-  IO::Block* block = nullptr;
-  size_t port = 0;
-  IO::flags_t direction = IO::UNKNOWN;
-} probe;
-
 constexpr std::array<QColor, 7> penColors = {QColor(255, 0, 16, 255),
                                              QColor(255, 164, 5, 255),
                                              QColor(43, 206, 72, 255),
@@ -134,13 +127,13 @@ public:
   ~Scope() override;
 
   bool paused() const;
-  void createChannel(Oscilloscope::probe probeInfo);
-  void removeChannel(Oscilloscope::probe probeInfo);
+  void createChannel(IO::endpoint probeInfo);
+  void removeChannel(IO::endpoint probeInfo);
   size_t getChannelCount() const;
   // scope_channel getChannel(IO::Block* block, size_t port);
 
   void clearData();
-  void setData(probe channel, std::vector<sample> probe_data);
+  void setData(IO::endpoint channel, std::vector<sample> probe_data);
   size_t getDataSize() const;
   void setDataSize(size_t);
 
@@ -157,13 +150,13 @@ public:
   size_t getRefresh() const;
   void setRefresh(size_t);
 
-  void setChannelScale(probe channel, double scale);
-  double getChannelScale(probe channel);
-  void setChannelOffset(probe channel, double offset);
-  double getChannelOffset(probe channel);
-  void setChannelPen(probe channel, QPen* pen);
-  QPen* getChannelPen(probe channel);
-  void setChannelLabel(probe channel, const QString& label);
+  void setChannelScale(IO::endpoint channel, double scale);
+  double getChannelScale(IO::endpoint channel);
+  void setChannelOffset(IO::endpoint channel, double offset);
+  double getChannelOffset(IO::endpoint channel);
+  void setChannelPen(IO::endpoint channel, QPen* pen);
+  QPen* getChannelPen(IO::endpoint channel);
+  void setChannelLabel(IO::endpoint channel, const QString& label);
   // Trigger::Info capture_trigger;
 
   void drawCurves();

@@ -184,6 +184,23 @@ private:
   bool active = false;
 };  // class Block
 
+/*!
+ * Structure used to pass information to plugins about a connection.
+ *
+ * \param block Pointer to the block object
+ * \param port The index of the channel this object represents
+ * \param direction An IO::flags_t value stating the direction. possible
+ *                  values are: IO::INPUT, IO::OUTPUT, IO::UNKNOWN (default)
+ *
+ * \sa IO::Block::Block()
+ */
+typedef struct endpoint 
+{
+  IO::Block* block = nullptr;
+  size_t port = 0;
+  IO::flags_t direction = IO::UNKNOWN;
+} endpoint;
+
 }  // namespace IO
 
 #endif  // IO_H
