@@ -100,7 +100,7 @@ public:
  public slots:
   void startRecordClicked();
   void stopRecordClicked();
-  void updateDownsampleRate(int);
+  void updateDownsampleRate(size_t rate);
 
 private slots:
   void buildChannelList();
@@ -108,6 +108,7 @@ private slots:
   void insertChannel();
   void removeChannel();
   void addNewTag();
+  void processData();
 
 private:
   int openFile(QString&);
@@ -170,7 +171,7 @@ private:
   QPushButton* stopRecordButton=nullptr;
   QPushButton* closeButton=nullptr;
 
-  std::list<Channel> channels;
+  std::vector<Channel> channels;
   std::vector<IO::Block*> blockPtrList;
 };  // class Panel
 
@@ -184,11 +185,15 @@ public:
   void openFile(const std::string& file_name);
   void change_file(const std::string& file_name);
   int create_component(IO::endpoint& chan); 
+  int insertChannel(IO::endpoint endpoint);
+  void removeChannel(IO::endpoint endpoint);
+  std::vector<Channel> syncChannels();
+  // TODO: Implement tagging
+  int apply_tag();
 
 public slots:
 
 private:
-  void processData();
   std::thread m_processdata_thread;
   std::list<DataRecorder::Component> m_components_list;
   std::vector<DataRecorder::Channel> m_channels_list;

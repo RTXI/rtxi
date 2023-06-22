@@ -26,6 +26,7 @@
 
 #include <QFileDialog>
 #include <QSettings>
+#include <QMessageBox>
 
 #include "debug.hpp"
 #include "main_window.hpp"
@@ -366,58 +367,6 @@ void DataRecorder::Plugin::receiveEvent(Event::Object* event)
   // }
 }
 
-// RT Event Handler
-//void DataRecorder::Panel::receiveEventRT(const Event::Object* event)
-//{
-//  if (event->getName() == Event::OPEN_FILE_EVENT) {
-//    QString filename =
-//        QString(reinterpret_cast<char*>(event->getParam("filename")));
-//    data_token_t token;
-//    token.type = DataRecorder::OPEN;
-//    token.size = filename.length() + 1;
-//    token.time = RT::OS::getTime();
-//    fifo.write(&token, sizeof(token));
-//    fifo.write(filename.toLatin1().constData(), token.size);
-//  } else if (event->getName() == Event::START_RECORDING_EVENT) {
-//    data_token_t token;
-//    recording = true;
-//    token.type = DataRecorder::START;
-//    token.size = 0;
-//    token.time = RT::OS::getTime();
-//    fifo.write(&token, sizeof(token));
-//  } else if (event->getName() == Event::STOP_RECORDING_EVENT) {
-//    data_token_t token;
-//    recording = false;
-//    token.type = DataRecorder::STOP;
-//    token.size = 0;
-//    token.time = RT::OS::getTime();
-//    fifo.write(&token, sizeof(token));
-//  } else if (event->getName() == Event::ASYNC_DATA_EVENT) {
-//    size_t size = *reinterpret_cast<size_t*>(event->getParam("size"));
-//    data_token_t token;
-//    token.type = DataRecorder::ASYNC;
-//    token.size = size * sizeof(double);
-//    token.time = RT::OS::getTime();
-//    fifo.write(&token, sizeof(token));
-//    fifo.write(event->getParam("data"), token.size);
-//  } else if (event->getName() == Event::WORKSPACE_PARAMETER_CHANGE_EVENT) {
-//    data_token_t token;
-//    token.type = DataRecorder::PARAM;
-//    token.size = sizeof(param_change_t);
-//    token.time = RT::OS::getTime();
-//    param_change_t data;
-//    data.id = reinterpret_cast<Settings::Object::ID>(event->getParam("object"));
-//    data.index = reinterpret_cast<size_t>(event->getParam("index"));
-//    data.step = file.idx;
-//    data.value = *reinterpret_cast<double*>(event->getParam("value"));
-//    fifo.write(&token, sizeof(token));
-//    fifo.write(&data, sizeof(data));
-//  } else if (event->getName() == Event::RT_POSTPERIOD_EVENT) {
-//    sleep.tv_nsec = RT::System::getInstance()
-//                        ->getPeriod();  // Update recording thread sleep time
-//  }
-//}
-
 // Populate list of blocks and channels
 void DataRecorder::Panel::buildChannelList()
 {
@@ -445,7 +394,7 @@ void DataRecorder::Panel::changeDataFile()
 {
   QFileDialog fileDialog(this);
   fileDialog.setFileMode(QFileDialog::AnyFile);
-  fileDilog.setWindowTitle("Select Data File");
+  fileDialog.setWindowTitle("Select Data File");
 
   QSettings userprefs;
   userprefs.setPath(QSettings::NativeFormat,
@@ -487,27 +436,28 @@ void DataRecorder::Panel::insertChannel()
   if (!blockList->count() || !channelList->count())
     return;
 
-  Channel channel;
+  IO::endpoint endpoint;
   IO::Block* block = blockPtrList.at(static_cast<size_t>(blockList->currentIndex()));
   IO::flags_t direction = direction = static_cast<IO::flags_t>(typeList->currentIndex());
   size_t port = static_cast<size_t>(channelList->currentIndex());
 
-  channel.endpoint = {block, port, direction};
+  endpoint = {block, port, direction};
   auto* hplugin = dynamic_cast<DataRecorder::Plugin*>(this->getHostPlugin());
-  int result = hplugin->create_component(channel.endpoint);
+  int result = hplugin->insertChannel(endpoint);
 
   if(result != 0){
     ERROR_MSG("DataRecorder::Panel::insertChannel : Unable to create recording component");
     return;
   }
 
-  channel.name += block->getName();
-  channel.name += " ";
-  channel.name += std::to_string(block->getID());
-  channel.name += " : ";
-  channel.name += block->getChannelName(direction, port);
+  this->channels = hplugin->syncChannels();
+  //channel.name += block->getName();
+  //channel.name += " ";
+  //channel.name += std::to_string(block->getID());
+  //channel.name += " : ";
+  //channel.name += block->getChannelName(direction, port);
 
-  this->channels.push_back(std::move(channel));
+  //this->channels.push_back(std::move(channel));
   if (selectionBox->count()) {
     lButton->setEnabled(true);
     if (!fileNameEdit->text().isEmpty()) {
@@ -522,20 +472,17 @@ void DataRecorder::Panel::insertChannel()
 // Remove channel from recorder list
 void DataRecorder::Panel::removeChannel()
 {
-  if (!selectionBox->count() || selectionBox->selectedItems().isEmpty())
-    return;
+  if (!selectionBox->count() || selectionBox->selectedItems().isEmpty()) { return; }
 
-  for (RT::List<Channel>::iterator i = channels.begin(), end = channels.end();
-       i != end;
-       ++i)
-    if (i->name == selectionBox->selectedItems().first()->text()) {
-      RemoveChannelEvent RTevent(recording, channels, *i);
-      if (!RT::System::getInstance()->postEvent(&RTevent))
-        selectionBox->takeItem(
-            selectionBox->row(selectionBox->selectedItems().first()));
-      break;
-    }
+  size_t indx = static_cast<size_t>(this->selectionBox->currentRow());
 
+  auto iter = std::find(this->channels.begin(),
+                        this->channels.end(),
+                        this->channels.at(indx).endpoint);
+  if(iter == this->channels.end()) { return; }
+  auto* hplugin = dynamic_cast<DataRecorder::Plugin*>(this->getHostPlugin());
+  hplugin->removeChannel(iter->endpoint);
+  this->channels = hplugin->syncChannels();
   if (selectionBox->count()) {
     startRecordButton->setEnabled(true);
     lButton->setEnabled(true);
@@ -548,10 +495,14 @@ void DataRecorder::Panel::removeChannel()
 // Register new data tag/stamp
 void DataRecorder::Panel::addNewTag()
 {
-  std::string newTag(std::to_string(RT::OS::getTime()));
-  newTag += ",";
-  newTag += timeStampEdit->text().toStdString();
-  dataTags.push_back(newTag);
+  //std::string newTag(std::to_string(RT::OS::getTime()));
+  auto* hplugin = static_cast<DataRecorder::Plugin*>(this->getHostPlugin());
+  if(hplugin->apply_tag() != 0){
+    ERROR_MSG("DataRecorder::Panel::addNewTag : could not tag data with tag");
+    timeStampEdit->clear();
+    recordStatus->setText("Tagging Failed!");
+    return;
+  }
   timeStampEdit->clear();
   recordStatus->setText("Tagged");
 }
@@ -568,75 +519,75 @@ void DataRecorder::Panel::startRecordClicked()
     return;
   }
 
-  StartRecordingEvent RTevent(recording, fifo);
-  RT::System::getInstance()->postEvent(&RTevent);
+  auto* hplugin = dynamic_cast<DataRecorder::Plugin*>(this->getHostPlugin());
+  hplugin->startRecording();
 }
 
 // Stop recording slot
 void DataRecorder::Panel::stopRecordClicked()
 {
-  StopRecordingEvent RTevent(recording, fifo);
-  RT::System::getInstance()->postEvent(&RTevent);
+  auto* hplugin = dynamic_cast<DataRecorder::Plugin*>(this->getHostPlugin());
+  hplugin->stopRecording();
 }
 
 // Update downsample rate
-void DataRecorder::Panel::updateDownsampleRate(int r)
+void DataRecorder::Panel::updateDownsampleRate(size_t rate)
 {
-  downsample_rate = r;
+  this->downsample_rate = rate;
 }
 
 // Custom event handler
-void DataRecorder::Panel::customEvent(QEvent* e)
-{
-  if (e->type() == QFileExistsEvent) {
-    mutex.lock();
-    CustomEvent* event = static_cast<CustomEvent*>(e);
-    FileExistsEventData* data =
-        reinterpret_cast<FileExistsEventData*>(event->getData());
-    data->response = QMessageBox::question(
-        this,
-        "File exists",
-        "The file already exists. What would you like to do?",
-        "Append",
-        "Overwrite",
-        "Cancel",
-        0,
-        2);
-    recordStatus->setText("Not Recording");
-    data->done.wakeAll();
-    mutex.unlock();
-  } else if (e->type() == QSetFileNameEditEvent) {
-    mutex.lock();
-    CustomEvent* event = static_cast<CustomEvent*>(e);
-    SetFileNameEditEventData* data =
-        reinterpret_cast<SetFileNameEditEventData*>(event->getData());
-    fileNameEdit->setText(data->filename);
-    recordStatus->setText("Ready.");
-    if (selectionBox->count()) {
-      startRecordButton->setEnabled(true);
-    }
-    data->done.wakeAll();
-    mutex.unlock();
-  } else if (e->type() == QDisableGroupsEvent) {
-    startRecordButton->setEnabled(false);
-    stopRecordButton->setEnabled(true);
-    closeButton->setEnabled(false);
-    channelGroup->setEnabled(false);
-    sampleGroup->setEnabled(false);
-    recordStatus->setText("Recording...");
-  } else if (e->type() == QEnableGroupsEvent) {
-    startRecordButton->setEnabled(true);
-    stopRecordButton->setEnabled(false);
-    closeButton->setEnabled(true);
-    channelGroup->setEnabled(true);
-    sampleGroup->setEnabled(true);
-    recordStatus->setText("Ready.");
-    fileSize->setNum(int(QFile(fileNameEdit->text()).size()) / 1024.0 / 1024.0);
-    trialLength->setNum(
-        double(RT::System::getInstance()->getPeriod() * 1e-9 * fixedcount));
-    count = 0;
-  }
-}
+//void DataRecorder::Panel::customEvent(QEvent* e)
+//{
+//  if (e->type() == QFileExistsEvent) {
+//    mutex.lock();
+//    CustomEvent* event = static_cast<CustomEvent*>(e);
+//    FileExistsEventData* data =
+//        reinterpret_cast<FileExistsEventData*>(event->getData());
+//    data->response = QMessageBox::question(
+//        this,
+//        "File exists",
+//        "The file already exists. What would you like to do?",
+//        "Append",
+//        "Overwrite",
+//        "Cancel",
+//        0,
+//        2);
+//    recordStatus->setText("Not Recording");
+//    data->done.wakeAll();
+//    mutex.unlock();
+//  } else if (e->type() == QSetFileNameEditEvent) {
+//    mutex.lock();
+//    CustomEvent* event = static_cast<CustomEvent*>(e);
+//    SetFileNameEditEventData* data =
+//        reinterpret_cast<SetFileNameEditEventData*>(event->getData());
+//    fileNameEdit->setText(data->filename);
+//    recordStatus->setText("Ready.");
+//    if (selectionBox->count()) {
+//      startRecordButton->setEnabled(true);
+//    }
+//    data->done.wakeAll();
+//    mutex.unlock();
+//  } else if (e->type() == QDisableGroupsEvent) {
+//    startRecordButton->setEnabled(false);
+//    stopRecordButton->setEnabled(true);
+//    closeButton->setEnabled(false);
+//    channelGroup->setEnabled(false);
+//    sampleGroup->setEnabled(false);
+//    recordStatus->setText("Recording...");
+//  } else if (e->type() == QEnableGroupsEvent) {
+//    startRecordButton->setEnabled(true);
+//    stopRecordButton->setEnabled(false);
+//    closeButton->setEnabled(true);
+//    channelGroup->setEnabled(true);
+//    sampleGroup->setEnabled(true);
+//    recordStatus->setText("Ready.");
+//    fileSize->setNum(int(QFile(fileNameEdit->text()).size()) / 1024.0 / 1024.0);
+//    trialLength->setNum(
+//        double(RT::System::getInstance()->getPeriod() * 1e-9 * fixedcount));
+//    count = 0;
+//  }
+//}
 
 // void DataRecorder::Panel::doDeferred(const Settings::Object::State& s)
 // {
@@ -719,13 +670,6 @@ void DataRecorder::Panel::customEvent(QEvent* e)
 
 void DataRecorder::Panel::processData()
 {
-  enum
-  {
-    CLOSED,
-    OPENED,
-    RECORD,
-  } state = CLOSED;
-
   tokenRetrieved = false;
   for (;;) {
     if (!tokenRetrieved) {
