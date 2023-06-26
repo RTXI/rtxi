@@ -283,88 +283,13 @@ DataRecorder::Panel::~Panel()
 // Execute loop
 void DataRecorder::Component::execute()
 {
-//  if (recording && !counter++) {
-//    data_token_t token;
-//    double data[channels.size()];
-//
-//    size_t n = 0;
-//    token.type = SYNC;
-//    token.size = channels.size() * sizeof(double);
-//    for (RT::List<Channel>::iterator i = channels.begin(), end = channels.end();
-//         i != end;
-//         ++i)
-//      if (i->block)
-//        data[n++] = i->block->getValue(i->type, i->index);
-//
-//    fifo.write(&token, sizeof(token));
-//    fifo.write(data, sizeof(data));
-//  }
-//  count++;
-//  counter %= downsample_rate;
+
 }
 
 // Event handler
 void DataRecorder::Plugin::receiveEvent(Event::Object* event)
 {
-  // switch(event.getType()){
-  //   case Event::Type::RT_THREAD_INSERT_EVENT : 
-  //   case Event::Type::RT_THREAD_REMOVE_EVENT :
-  //   case Event::Type::RT_DEVICE_INSERT_EVENT : 
-  //   case Event::Type::RT_DEVICE_REMOVE_EVENT :{
-  //     auto* block = std::any_cast<RT::Thread*>(event->getParam("thread"));
-  //     blockPtrList.push_back(block);
-  //     blockList->addItem(QString::fromStdString(block->getName()) + " "
-  //                        + QString::number(block->getID()));
-  //     buildChannelList();
-  // } 
-  //   else if (event->getName() == Event::IO_BLOCK_REMOVE_EVENT) {
-  //   IO::Block* block = reinterpret_cast<IO::Block*>(event->getParam("block"));
-  //   QString name = QString::fromStdString(block->getName()) + " "
-  //       + QString::number(block->getID());
-  //   int n = 0;
-  //   for (; n < blockList->count() && blockList->itemText(n) != name; ++n)
-  //     ;
-  //   if (n < blockList->count())
-  //     blockList->removeItem(n);
-  //   blockPtrList.erase(blockPtrList.begin() + n);
 
-  //   for (RT::List<Channel>::iterator i = channels.begin(), end = channels.end();
-  //        i != end;
-  //        ++i)
-  //     if (i->block == block) {
-  //       if (recording)
-  //         i->block = 0;
-  //       RemoveChannelEvent RTevent(recording, channels, *i);
-  //       if (!RT::System::getInstance()->postEvent(&RTevent)) {
-  //         QList<QListWidgetItem*> channelItems =
-  //             selectionBox->findItems(i->name, Qt::MatchExactly);
-  //         if (!channelItems.isEmpty()) {
-  //           /* Use takeItem(row) to remove the channel item. */
-  //           selectionBox->takeItem(selectionBox->row(channelItems.takeFirst()));
-  //         }
-  //       }
-  //     }
-  //   buildChannelList();
-  // } else if (event->getName() == Event::OPEN_FILE_EVENT) {
-  //   QString filename(reinterpret_cast<char*>(event->getParam("filename")));
-  //   OpenFileEvent RTevent(filename, fifo);
-  //   RT::System::getInstance()->postEvent(&RTevent);
-  // } else if (event->getName() == Event::START_RECORDING_EVENT) {
-  //   StartRecordingEvent RTevent(recording, fifo);
-  //   RT::System::getInstance()->postEvent(&RTevent);
-  // } else if (event->getName() == Event::STOP_RECORDING_EVENT) {
-  //   StopRecordingEvent RTevent(recording, fifo);
-  //   RT::System::getInstance()->postEvent(&RTevent);
-  // } else if (event->getName() == Event::ASYNC_DATA_EVENT) {
-  //   AsyncDataEvent RTevent(reinterpret_cast<double*>(event->getParam("data")),
-  //                          *reinterpret_cast<size_t*>(event->getParam("size")),
-  //                          fifo);
-  //   RT::System::getInstance()->postEvent(&RTevent);
-  // } else if (event->getName() == Event::RT_POSTPERIOD_EVENT) {
-  //   sleep.tv_nsec = RT::System::getInstance()
-  //                       ->getPeriod();  // Update recording thread sleep time
-  //   buildChannelList();
-  // }
 }
 
 // Populate list of blocks and channels
@@ -497,8 +422,10 @@ void DataRecorder::Panel::addNewTag()
 {
   //std::string newTag(std::to_string(RT::OS::getTime()));
   auto* hplugin = static_cast<DataRecorder::Plugin*>(this->getHostPlugin());
-  if(hplugin->apply_tag() != 0){
-    ERROR_MSG("DataRecorder::Panel::addNewTag : could not tag data with tag");
+  std::string tag = this->timeStampEdit->text().toStdString();
+  if(hplugin->apply_tag(tag) != 0){
+    ERROR_MSG("DataRecorder::Panel::addNewTag : could not tag data with tag {}",
+              tag);
     timeStampEdit->clear();
     recordStatus->setText("Tagging Failed!");
     return;
@@ -588,76 +515,6 @@ void DataRecorder::Panel::updateDownsampleRate(size_t rate)
 //    count = 0;
 //  }
 //}
-
-// void DataRecorder::Panel::doDeferred(const Settings::Object::State& s)
-// {
-//   for (int i = 0; i < s.loadInteger("Num Channels"); ++i) {
-//     Channel* channel;
-//     IO::Block* block;
-//     std::ostringstream str;
-//     str << i;
-// 
-//     block =
-//         dynamic_cast<IO::Block*>(Settings::Manager::getInstance()->getObject(
-//             s.loadInteger(str.str() + " ID")));
-//     if (!block)
-//       continue;
-// 
-//     channel = new Channel();
-//     channel->block = block;
-//     channel->type = s.loadInteger(str.str() + " type");
-//     channel->index = s.loadInteger(str.str() + " index");
-//     channel->name.sprintf(
-//         "%s %ld : %s",
-//         channel->block->getName().c_str(),
-//         channel->block->getID(),
-//         channel->block->getName(channel->type, channel->index).c_str());
-// 
-//     channels.insert(channels.end(), *channel);
-//     selectionBox->addItem(channel->name);
-//     if (selectionBox->count())
-//       lButton->setEnabled(true);
-//   }
-// }
-// 
-// void DataRecorder::Panel::doLoad(const Settings::Object::State& s)
-// {
-//   if (s.loadInteger("Maximized"))
-//     showMaximized();
-//   else if (s.loadInteger("Minimized"))
-//     showMinimized();
-// 
-//   downsampleSpin->setValue(s.loadInteger("Downsample"));
-//   parentWidget()->move(s.loadInteger("X"), s.loadInteger("Y"));
-// }
-// 
-// void DataRecorder::Panel::doSave(Settings::Object::State& s) const
-// {
-//   if (isMaximized())
-//     s.saveInteger("Maximized", 1);
-//   else if (isMinimized())
-//     s.saveInteger("Minimized", 1);
-// 
-//   QPoint pos = parentWidget()->pos();
-//   s.saveInteger("X", pos.x());
-//   s.saveInteger("Y", pos.y());
-// 
-//   s.saveInteger("Downsample", downsampleSpin->value());
-//   s.saveInteger("Num Channels", channels.size());
-//   size_t n = 0;
-//   for (RT::List<Channel>::const_iterator i = channels.begin(),
-//                                          end = channels.end();
-//        i != end;
-//        ++i)
-//   {
-//     std::ostringstream str;
-//     str << n++;
-// 
-//     s.saveInteger(str.str() + " ID", i->block->getID());
-//     s.saveInteger(str.str() + " type", i->type);
-//     s.saveInteger(str.str() + " index", i->index);
-//   }
-// }
 
 //void* DataRecorder::Panel::bounce(void* param)
 //{
@@ -946,14 +803,6 @@ void DataRecorder::Panel::closeFile(bool shutdown)
 
 int DataRecorder::Panel::startRecording(long long timestamp)
 {
-#ifdef DEBUG
-  if (!pthread_equal(pthread_self(), thread)) {
-    ERROR_MSG(
-        "DataRecorder::Panel::startRecording : called by invalid thread\n");
-    PRINT_BACKTRACE();
-  }
-#endif
-
   size_t trial_num;
   QString trial_name;
 

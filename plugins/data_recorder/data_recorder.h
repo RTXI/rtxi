@@ -113,8 +113,8 @@ private slots:
 private:
   int openFile(QString&);
   void closeFile(bool = false);
-  int startRecording(int64_t);
-  void stopRecording(int64_t);
+  int startRecording();
+  void stopRecording();
   double prev_input;
   size_t counter;
   size_t downsample_rate;
@@ -125,15 +125,6 @@ private:
   data_token_t _token;
   bool tokenRetrieved;
   struct timespec sleep;
-
-  struct file_t
-  {
-    hid_t id;
-    hid_t trial;
-    hid_t adata, cdata, pdata, sdata, tdata, sysdata;
-    hid_t chandata;
-    int64_t idx;
-  } file;
 
   bool recording;
 
@@ -189,11 +180,21 @@ public:
   void removeChannel(IO::endpoint endpoint);
   std::vector<Channel> syncChannels();
   // TODO: Implement tagging
-  int apply_tag();
+  int apply_tag(const std::string& tag);
 
 public slots:
 
 private:
+  struct file_t
+  {
+    hid_t id;
+    hid_t trial;
+    hid_t adata, cdata, pdata, sdata, tdata, sysdata;
+    hid_t chandata;
+    int64_t idx;
+  } file;
+
+  std::array<int64_t*, 2> m_wall_clocks;
   std::thread m_processdata_thread;
   std::list<DataRecorder::Component> m_components_list;
   std::vector<DataRecorder::Channel> m_channels_list;
