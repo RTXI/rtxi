@@ -27,7 +27,6 @@
 #include <time.h>
 
 #include <hdf5.h>
-#include <hdf5_hl.h>
 
 #include <QComboBox>
 #include <QMutex>
@@ -41,48 +40,52 @@
 namespace DataRecorder
 {
 
-constexpr std::string_view MODULE_NAME = "data_recorder";
-constexpr size_t TAG_SIZE = 1024;
-enum data_type_t
+typedef struct data_token_t
 {
-  OPEN,
-  CLOSE,
-  START,
-  STOP,
-  SYNC,
-  ASYNC,
-  DONE,
-  PARAM,
-};
-
-struct data_token_t
-{
-  data_type_t type;
-  size_t size;
   int64_t time;
-};
+  double value;
+}data_token_t;
 
-//struct param_change_t
-//{
-//  Settings::Object::ID id;
-//  size_t index;
-//  long long step;
-//  double value;
-//};
+constexpr size_t DEFAULT_BUFFER_SIZE = 10000 * sizeof(data_token_t);
+constexpr std::string_view MODULE_NAME = "Data Recorder";
 
-typedef struct Channel 
+inline std::vector<Modules::Variable::Info> get_default_vars()
+{
+  return {};
+}
+
+inline std::vector<IO::channel_t> get_default_channels()
+{
+  return {{"Recording Channel",
+           "This is the channel used by the Data Recorder to record on other "
+           "inputs and "
+           "output ports",
+           IO::INPUT,
+           0}};
+}
+
+typedef struct record_channel 
 {
   std::string name;
-  std::unique_ptr<RT::OS::Fifo> fifo;
   IO::endpoint endpoint; 
-}Channel;  // class Channel
+  RT::OS::Fifo* data_source;
+  bool operator==(const record_channel& rhs) const {
+    return (this->endpoint == rhs.endpoint) && 
+           (this->data_source == rhs.data_source);
+  }
+  bool operator!=(const record_channel& rhs) const {
+    return !operator==(rhs);
+  }
+}record_channel; 
 
 class Component : public Modules::Component
 {
 public:
+  Component(Modules::Plugin* hplugin, const std::string& probe_name);
   void execute() override;
+  RT::OS::Fifo* get_fifo();
 private:
-  RT::OS::Fifo* m_fifo;
+  std::unique_ptr<RT::OS::Fifo> m_fifo;
 };
 
 class Panel: public Modules::Panel 
@@ -111,20 +114,13 @@ private slots:
   void processData();
 
 private:
-  int openFile(QString&);
-  void closeFile(bool = false);
-  int startRecording();
+  int openFile(QString& filename);
+  size_t m_buffer_size = DEFAULT_BUFFER_SIZE;
+  void closeFile();
+  void startRecording();
   void stopRecording();
-  double prev_input;
-  size_t counter;
   size_t downsample_rate;
-  int64_t count;
-  int64_t fixedcount;
   std::vector<std::string> dataTags;
-
-  data_token_t _token;
-  bool tokenRetrieved;
-  struct timespec sleep;
 
   bool recording;
 
@@ -162,43 +158,56 @@ private:
   QPushButton* stopRecordButton=nullptr;
   QPushButton* closeButton=nullptr;
 
-  std::vector<Channel> channels;
+  std::vector<record_channel> m_recording_channels;
   std::vector<IO::Block*> blockPtrList;
 };  // class Panel
 
 class Plugin : public Modules::Plugin
 {
-  Q_OBJECT
 public:
+  Plugin(const Plugin&) = delete;
+  Plugin(Plugin&&) = delete;
+  Plugin& operator=(const Plugin&) = delete;
+  Plugin& operator=(Plugin&&) = delete;
+  Plugin(Event::Manager* ev_manager, MainWindow* mwindow);
+  ~Plugin() override;
+
   void receiveEvent(Event::Object* event) override;
   void startRecording();
   void stopRecording();
   void openFile(const std::string& file_name);
+  void closeFile();
   void change_file(const std::string& file_name);
-  int create_component(IO::endpoint& chan); 
   int insertChannel(IO::endpoint endpoint);
   void removeChannel(IO::endpoint endpoint);
-  std::vector<Channel> syncChannels();
-  // TODO: Implement tagging
+  std::string getRecorderName(IO::endpoint endpoint);
+  DataRecorder::Component* getRecorderPtr(IO::endpoint endpoint);
+  RT::OS::Fifo* getFifo(IO::endpoint endpoint);
+  std::vector<record_channel> get_recording_channels();
   int apply_tag(const std::string& tag);
 
-public slots:
-
 private:
-  struct file_t
-  {
-    hid_t id;
-    hid_t trial;
-    hid_t adata, cdata, pdata, sdata, tdata, sysdata;
-    hid_t chandata;
-    int64_t idx;
-  } file;
-
-  std::array<int64_t*, 2> m_wall_clocks;
+  struct hdf5_handles {
+    hid_t file_handle;
+    hid_t trial_group_handle;
+    hid_t attribute_handle;
+    hid_t sync_group_handle;
+    hid_t sync_dataset_handle;
+    hid_t async_group_handle;
+    hid_t async_dataset_handle;
+    hid_t sys_data_group_handle;
+    hid_t channel_data_handle;
+  } hdf5_handles;
+  int create_component(IO::endpoint endpoint); 
+  void destroy_component(IO::endpoint endpoint);
+  void append_new_trial();
+  int trial_count=0;
+  std::string hdf5_filename;
   std::thread m_processdata_thread;
-  std::list<DataRecorder::Component> m_components_list;
-  std::vector<DataRecorder::Channel> m_channels_list;
-  std::mutex m_channels_list_mut;
+  std::list<std::unique_ptr<DataRecorder::Component>> m_components_list;
+  std::vector<record_channel> m_recording_channels_list;
+  std::shared_mutex m_channels_list_mut;
+  std::mutex m_components_list_mut;
   std::mutex m_hdf5_file_mut;
 };  // class Plugin
 
