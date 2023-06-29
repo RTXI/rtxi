@@ -34,7 +34,7 @@
 #include "data_recorder.h"
 
 DataRecorder::Panel::Panel(MainWindow* mwindow, Event::Manager* ev_manager) 
-    : Modules::Panel(std::string(DataRecorder::MODULE_NAME), mwindow, ev_manager)
+    : Modules::Panel(std::string(DataRecorder::MODULE_NAME), mwindow, ev_manager), subWindow(new QMdiSubWindow)
 {
   setWhatsThis(
       "<p><b>Data Recorder:</b><br>The Data Recorder writes data to an HDF5 "
@@ -58,26 +58,27 @@ DataRecorder::Panel::Panel(MainWindow* mwindow, Event::Manager* ev_manager)
       "the Data Recorder is shown at the bottom.</p>");
 
   // Make Mdi
-  subWindow = new QMdiSubWindow;
+  
   subWindow->setWindowIcon(QIcon("/usr/local/share/rtxi/RTXI-widget-icon.png"));
   subWindow->setAttribute(Qt::WA_DeleteOnClose);
-  subWindow->setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint
-                            | Qt::WindowMinimizeButtonHint);
+  subWindow->setWindowFlags(Qt::CustomizeWindowHint | 
+                            Qt::WindowCloseButtonHint | 
+                            Qt::WindowMinimizeButtonHint);
   mwindow->createMdi(subWindow);
 
   // Create main layout
-  QGridLayout* layout = new QGridLayout;
+  auto* layout = new QGridLayout;
 
   // Create child widget and layout for channel selection
   channelGroup = new QGroupBox(tr("Channel Selection"));
-  QVBoxLayout* channelLayout = new QVBoxLayout;
+  auto* channelLayout = new QVBoxLayout;
 
   // Create elements for channel box
   channelLayout->addWidget(new QLabel(tr("Block:")));
   blockList = new QComboBox;
   channelLayout->addWidget(blockList);
-  QObject::connect(
-      blockList, SIGNAL(activated(int)), this, SLOT(buildChannelList()));
+  //QObject::connect(
+  //    blockList, SIGNAL(activated(int)), this, SLOT(buildChannelList()));
 
   channelLayout->addWidget(new QLabel(tr("Type:")));
   typeList = new QComboBox;
@@ -87,8 +88,8 @@ DataRecorder::Panel::Panel(MainWindow* mwindow, Event::Manager* ev_manager)
   typeList->addItem("Parameter");
   typeList->addItem("State");
   typeList->addItem("Event");
-  QObject::connect(
-      typeList, SIGNAL(activated(int)), this, SLOT(buildChannelList()));
+  //QObject::connect(
+  //    typeList, SIGNAL(activated(int)), this, SLOT(buildChannelList()));
 
   channelLayout->addWidget(new QLabel(tr("Channel:")));
   channelList = new QComboBox;
@@ -100,13 +101,13 @@ DataRecorder::Panel::Panel(MainWindow* mwindow, Event::Manager* ev_manager)
   // Create elements for arrow
   rButton = new QPushButton("Add");
   channelLayout->addWidget(rButton);
-  QObject::connect(
-      rButton, SIGNAL(released()), this, SLOT(insertChannel()));
+  //QObject::connect(
+  //    rButton, SIGNAL(released()), this, SLOT(insertChannel()));
   rButton->setEnabled(false);
   lButton = new QPushButton("Remove");
   channelLayout->addWidget(lButton);
-  QObject::connect(
-      lButton, SIGNAL(released()), this, SLOT(removeChannel()));
+  //QObject::connect(
+  //    lButton, SIGNAL(released()), this, SLOT(removeChannel()));
   lButton->setEnabled(false);
 
   // Timestamp
@@ -118,7 +119,7 @@ DataRecorder::Panel::Panel(MainWindow* mwindow, Event::Manager* ev_manager)
   stampLayout->addWidget(timeStampEdit);
   addTag = new QPushButton(tr("Tag"));
   stampLayout->addWidget(addTag);
-  QObject::connect(addTag, SIGNAL(released()), this, SLOT(addNewTag()));
+  //QObject::connect(addTag, SIGNAL(released()), this, SLOT(addNewTag()));
 
   // Attach layout to child widget
   stampGroup->setLayout(stampLayout);
@@ -167,20 +168,20 @@ DataRecorder::Panel::Panel(MainWindow* mwindow, Event::Manager* ev_manager)
   fileLayout->addWidget(fileNameEdit);
   QPushButton* fileChangeButton = new QPushButton("Choose File");
   fileLayout->addWidget(fileChangeButton);
-  QObject::connect(fileChangeButton,
-                   SIGNAL(released()),
-                   this,
-                   SLOT(changeDataFile()));
+  //QObject::connect(fileChangeButton,
+  //                 SIGNAL(released()),
+  //                 this,
+  //                 SLOT(changeDataFile()));
 
   fileLayout->addWidget(new QLabel(tr("Downsample \nRate:")));
   downsampleSpin = new QSpinBox(this);
   downsampleSpin->setMinimum(1);
   downsampleSpin->setMaximum(500);
   fileLayout->addWidget(downsampleSpin);
-  QObject::connect(downsampleSpin,
-                   SIGNAL(valueChanged(int)),
-                   this,
-                   SLOT(updateDownsampleRate(int)));
+  //QObject::connect(downsampleSpin,
+  //                 SIGNAL(valueChanged(int)),
+  //                 this,
+  //                 SLOT(updateDownsampleRate(int)));
 
   // Attach layout to child
   fileGroup->setLayout(fileLayout);
@@ -202,22 +203,22 @@ DataRecorder::Panel::Panel(MainWindow* mwindow, Event::Manager* ev_manager)
 
   // Create elements for box
   startRecordButton = new QPushButton("Start Recording");
-  QObject::connect(startRecordButton,
-                   SIGNAL(released()),
-                   this,
-                   SLOT(startRecordClicked()));
+  //QObject::connect(startRecordButton,
+  //                 SIGNAL(released()),
+  //                 this,
+  //                 SLOT(startRecordClicked()));
   buttonLayout->addWidget(startRecordButton);
   startRecordButton->setEnabled(false);
   stopRecordButton = new QPushButton("Stop Recording");
-  QObject::connect(stopRecordButton,
-                   SIGNAL(released()),
-                   this,
-                   SLOT(stopRecordClicked()));
+  //QObject::connect(stopRecordButton,
+  //                 SIGNAL(released()),
+  //                 this,
+  //                 SLOT(stopRecordClicked()));
   buttonLayout->addWidget(stopRecordButton);
   stopRecordButton->setEnabled(false);
   closeButton = new QPushButton("Close");
-  QObject::connect(
-      closeButton, SIGNAL(released()), subWindow, SLOT(close()));
+  //QObject::connect(
+  //    closeButton, SIGNAL(released()), subWindow, SLOT(close()));
   buttonLayout->addWidget(closeButton);
   recordStatus = new QLabel;
   buttonLayout->addWidget(recordStatus);
@@ -373,16 +374,13 @@ void DataRecorder::Panel::insertChannel()
 // Remove channel from recorder list
 void DataRecorder::Panel::removeChannel()
 {
-  if (!selectionBox->count() || selectionBox->selectedItems().isEmpty()) { return; }
+  if ((selectionBox->count() == 0) || selectionBox->selectedItems().isEmpty()) { return; }
 
-  size_t indx = static_cast<size_t>(this->selectionBox->currentRow());
-
-  auto iter = std::find(this->m_recording_channels.begin(),
-                        this->m_recording_channels.end(),
-                        this->m_recording_channels.at(indx).endpoint);
-  if(iter == this->m_recording_channels.end()) { return; }
+  auto indx = static_cast<size_t>(this->selectionBox->currentRow());
+  DataRecorder::record_channel chan = this->m_recording_channels.at(indx);
+  IO::endpoint endpoint = chan.endpoint;
   auto* hplugin = dynamic_cast<DataRecorder::Plugin*>(this->getHostPlugin());
-  hplugin->removeChannel(iter->endpoint);
+  hplugin->removeChannel(endpoint);
   this->m_recording_channels = hplugin->get_recording_channels();
   if (selectionBox->count()) {
     startRecordButton->setEnabled(true);
@@ -597,9 +595,11 @@ void DataRecorder::Plugin::change_file(const std::string& file_name)
 int DataRecorder::Plugin::create_component(IO::endpoint endpoint)
 {
   if(endpoint.block == nullptr) { return -1; }
-  auto iter = std::find(this->m_recording_channels_list.begin(),
+  auto iter = std::find_if(this->m_recording_channels_list.begin(),
                         this->m_recording_channels_list.end(),
-                        endpoint);
+                        [endpoint](const DataRecorder::record_channel& chan){
+                           return chan.endpoint == endpoint;
+                        });
   if(iter != this->m_recording_channels_list.end()) { return 0; }
   std::unique_lock<std::mutex> lk(this->m_components_list_mut);
   std::string name = endpoint.block->getName();
@@ -607,7 +607,7 @@ int DataRecorder::Plugin::create_component(IO::endpoint endpoint)
   name += std::to_string(endpoint.block->getID());
   name += " ";
   name += "Recording Component";
-  this->m_components_list.emplace_back(this, name);
+  this->m_components_list.emplace_back(std::make_unique<DataRecorder::Component>(this, name));
   Event::Object event(Event::Type::RT_THREAD_INSERT_EVENT);
   event.setParam("thread", static_cast<RT::Thread*>(m_components_list.back().get()));
   this->getEventManager()->postEvent(&event);
@@ -626,7 +626,7 @@ void DataRecorder::Plugin::destroy_component(IO::endpoint endpoint)
   std::unique_lock<std::mutex> recorder_lock(this->m_components_list_mut);
   auto iter = std::find_if(this->m_components_list.begin(),
                            this->m_components_list.end(),
-                           [component](std::unique_ptr<DataRecorder::Component> comp){
+                           [component](const std::unique_ptr<DataRecorder::Component>& comp){
                              return comp.get() == component;
                            });
   if(iter == this->m_components_list.end()) { return; }
