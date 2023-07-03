@@ -10,12 +10,12 @@
 #include <sstream>
 
 #include "module.hpp"
-#include "dlplugin.hpp"
 
 #include <dlfcn.h>
 
 #include "connector/connector.h"
 #include "debug.hpp"
+#include "dlplugin.hpp"
 #include "oscilloscope/oscilloscope.h"
 #include "performance_measurement/performance_measurement.hpp"
 #include "rtxiConfig.h"
@@ -661,8 +661,8 @@ Modules::Plugin* Modules::Manager::loadPlugin(const std::string& library)
       != this->rtxi_factories_registry.end())
   {
     std::unique_ptr<Modules::Plugin> plugin =
-        this->rtxi_factories_registry[library_loc].createPlugin(this->event_manager,
-                                                            this->main_window);
+        this->rtxi_factories_registry[library_loc].createPlugin(
+            this->event_manager, this->main_window);
     plugin_ptr = this->registerModule(std::move(plugin));
     return plugin_ptr;
   }
@@ -685,11 +685,13 @@ Modules::Plugin* Modules::Manager::loadPlugin(const std::string& library)
     return nullptr;
   }
 
-  auto gen_fact_methods = this->m_plugin_loader->dlsym<Modules::FactoryMethods* (*)()>(library_loc.c_str(), "getFactories");
+  auto gen_fact_methods =
+      this->m_plugin_loader->dlsym<Modules::FactoryMethods* (*)()>(
+          library_loc.c_str(), "getFactories");
 
   if (gen_fact_methods == nullptr) {
     ERROR_MSG("Plugin::load : failed to retreive getFactories symbol");
-    // If we got here it means we loaded the lirbary but not the symbol. 
+    // If we got here it means we loaded the lirbary but not the symbol.
     // Let's just unload the library and exit before we regret it.
     this->m_plugin_loader->unload(library_loc.c_str());
     return nullptr;

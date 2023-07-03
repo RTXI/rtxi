@@ -17,11 +17,11 @@
 #include <vector>
 
 #include "daq.hpp"
+#include "dlplugin.hpp"
 #include "event.hpp"
 #include "io.hpp"
-#include "rt.hpp"
 #include "main_window.hpp"
-#include "dlplugin.hpp"
+#include "rt.hpp"
 
 /*!
  * Contains all the classes and structures relevant to Modules

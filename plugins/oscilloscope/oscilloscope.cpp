@@ -303,7 +303,8 @@ void Oscilloscope::Panel::setActivity(Oscilloscope::Component* comp,
 void Oscilloscope::Panel::applyChannelTab()
 {
   if (this->blocksListDropdown->count() <= 0
-      || this->channelsList->count() <= 0) {
+      || this->channelsList->count() <= 0)
+  {
     return;
   }
 
@@ -927,7 +928,8 @@ void Oscilloscope::Panel::showDisplayTab()
     trigThresh = 0;
   } else {
     while (fabs(trigThresh) < 1
-           && trigThreshUnits < this->trigsThreshList->count()) {
+           && trigThreshUnits < this->trigsThreshList->count())
+    {
       trigThresh *= 1000;
       ++trigThreshUnits;
     }
@@ -1237,4 +1239,3 @@ Modules::FactoryMethods Oscilloscope::getFactories()
   fact.createPlugin = &Oscilloscope::createRTXIPlugin;
   return fact;
 }
-

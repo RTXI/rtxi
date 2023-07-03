@@ -18,8 +18,9 @@
 
 */
 
-#include "debug.hpp"
 #include "dlplugin.hpp"
+
+#include "debug.hpp"
 
 DLL::Loader::~Loader()
 {
@@ -28,35 +29,33 @@ DLL::Loader::~Loader()
 
 int DLL::Loader::load(const char* library)
 {
-  DLL::dll_info dll { std::string(library), nullptr};
+  DLL::dll_info dll {std::string(library), nullptr};
   std::unique_lock<std::mutex> lk(this->m_dll_mutex);
-  auto loc_iter = std::find(this->loaded_plugins.begin(),
-                            this->loaded_plugins.end(),
-                            dll);
-  if(loc_iter != this->loaded_plugins.end()){
+  auto loc_iter =
+      std::find(this->loaded_plugins.begin(), this->loaded_plugins.end(), dll);
+  if (loc_iter != this->loaded_plugins.end()) {
     return 0;
   }
 
   void* handle = ::dlopen(library, RTLD_GLOBAL | RTLD_NOW);
-  if(handle == nullptr){
+  if (handle == nullptr) {
     ERROR_MSG("DLL::Loader::load : Unable to load library {}", library);
-    //NOLINTNEXTLINE
+    // NOLINTNEXTLINE
     ERROR_MSG("dlopen : {}", dlerror());
     return -1;
   }
   dll.handle = handle;
-  this->loaded_plugins.push_back(dll);   
+  this->loaded_plugins.push_back(dll);
   return 0;
 }
 
 void DLL::Loader::unload(const char* library)
 {
-  DLL::dll_info dll { std::string(library), nullptr};
+  DLL::dll_info dll {std::string(library), nullptr};
   std::unique_lock<std::mutex> lk(this->m_dll_mutex);
-  auto loc_iter = std::find(this->loaded_plugins.begin(),
-                            this->loaded_plugins.end(),
-                            dll);
-  if(loc_iter == this->loaded_plugins.end()){
+  auto loc_iter =
+      std::find(this->loaded_plugins.begin(), this->loaded_plugins.end(), dll);
+  if (loc_iter == this->loaded_plugins.end()) {
     return;
   }
   ::dlclose(loc_iter->handle);
@@ -65,7 +64,7 @@ void DLL::Loader::unload(const char* library)
 
 void DLL::Loader::unloadAll()
 {
-  for(auto& dll : this->loaded_plugins){
+  for (auto& dll : this->loaded_plugins) {
     this->unload(dll.library_name.c_str());
   }
 }

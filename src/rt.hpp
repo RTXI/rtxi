@@ -87,14 +87,14 @@ public:
    *
    * \sa RT::System
    */
-  virtual void read()=0;
+  virtual void read() = 0;
 
   /*! \fn virtual void write(void)
    * Function called by the realtime task at the end of each period.
    *
    * \sa RT::System
    */
-  virtual void write()=0;
+  virtual void write() = 0;
 };  // class Device
 
 /*!
@@ -121,7 +121,7 @@ public:
    *
    * \sa RT::System
    */
-  virtual void execute()=0;
+  virtual void execute() = 0;
 };  // class Thread
 
 /*!

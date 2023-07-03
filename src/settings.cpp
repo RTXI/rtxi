@@ -293,7 +293,8 @@ int Settings::Manager::load(const std::string& filename)
     // Load plugin info
     if (e2.attribute("component") == "plugin") {
       if ((plugin =
-               Plugin::Manager::getInstance()->load(e2.attribute("library")))) {
+               Plugin::Manager::getInstance()->load(e2.attribute("library"))))
+      {
         defer_t defer = {plugin, s};
         deferList.push_back(defer);
         plugin->load(s);

@@ -194,19 +194,17 @@ private:
  *
  * \sa IO::Block::Block()
  */
-typedef struct endpoint 
+typedef struct endpoint
 {
   IO::Block* block = nullptr;
   size_t port = 0;
   IO::flags_t direction = IO::UNKNOWN;
-  bool operator==(const endpoint& rhs) const {
-    return (this->block == rhs.block) && 
-           (this->port == rhs.port) &&
-           (this->direction == rhs.direction);
+  bool operator==(const endpoint& rhs) const
+  {
+    return (this->block == rhs.block) && (this->port == rhs.port)
+        && (this->direction == rhs.direction);
   }
-  bool operator!=(const endpoint& rhs) const {
-    return !operator==(rhs);
-  }
+  bool operator!=(const endpoint& rhs) const { return !operator==(rhs); }
 } endpoint;
 
 }  // namespace IO

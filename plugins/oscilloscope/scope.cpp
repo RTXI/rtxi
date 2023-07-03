@@ -435,7 +435,8 @@ QPen* Oscilloscope::Scope::getChannelPen(IO::endpoint channel)
   return chan_loc->pen;
 }
 
-void Oscilloscope::Scope::setChannelLabel(IO::endpoint channel, const QString& label)
+void Oscilloscope::Scope::setChannelLabel(IO::endpoint channel,
+                                          const QString& label)
 {
   auto chan_loc = std::find_if(this->channels.begin(),
                                this->channels.end(),

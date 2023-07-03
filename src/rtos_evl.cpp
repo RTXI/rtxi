@@ -31,14 +31,14 @@
 
 #include "fifo.hpp"
 
-//NOLINTNEXTLINE
+// NOLINTNEXTLINE
 thread_local bool realtime_key = false;
-//NOLINTNEXTLINE
+// NOLINTNEXTLINE
 thread_local int64_t* RT_PERIOD = nullptr;
 
 int RT::OS::initiate(RT::OS::Task* task)
 {
-  std::string strbuf (256, '\0');
+  std::string strbuf(256, '\0');
   int retval = evl_init();
   if (retval != 0) {
     strerror_r(errno, strbuf.data(), strbuf.size());
@@ -60,8 +60,7 @@ int RT::OS::initiate(RT::OS::Task* task)
   int thread_fd = evl_attach_self("RTXI-RT-Thread:%d", getpid());  // NOLINT
   if (thread_fd < 0) {
     strerror_r(errno, strbuf.data(), strbuf.size());
-    ERROR_MSG("RT::OS(EVL)::initiate : evl_attach_self() : {}",
-              strbuf);
+    ERROR_MSG("RT::OS(EVL)::initiate : evl_attach_self() : {}", strbuf);
   }
   realtime_key = true;
   task->period = RT::OS::DEFAULT_PERIOD;
@@ -73,12 +72,11 @@ int RT::OS::initiate(RT::OS::Task* task)
 void RT::OS::shutdown(RT::OS::Task* task)
 {
   int retval = evl_detach_self();
-  std::string strbuf (256, '\0');
+  std::string strbuf(256, '\0');
   if (retval != 0) {
     strerror_r(errno, strbuf.data(), strbuf.size());
     ERROR_MSG("Unable to detach thread from evl core!");
-    ERROR_MSG("RT::OS(EVL)::shutdown : evl_detach_self() : {}",
-              strbuf);
+    ERROR_MSG("RT::OS(EVL)::shutdown : evl_detach_self() : {}", strbuf);
   }
   realtime_key = false;
   task->task_finished = true;
@@ -95,12 +93,11 @@ int RT::OS::createTask(Task* task, void (*func)(void*), void* arg)
   }
   auto wrapper = [](RT::OS::Task* tsk, void (*fn)(void*), void* args)
   {
-    std::string strbuf (256, '\0');
+    std::string strbuf(256, '\0');
     auto resval = RT::OS::initiate(tsk);
     if (resval != 0) {
       strerror_r(errno, strbuf.data(), strbuf.size());
-      ERROR_MSG("RT::OS::createTask : RT::OS::initiate() : {}",
-                strbuf);
+      ERROR_MSG("RT::OS::createTask : RT::OS::initiate() : {}", strbuf);
       // In the event that we fail to initiate real-time environment let's just
       // quit
       return;
@@ -175,7 +172,7 @@ void RT::OS::sleepTimestep(RT::OS::Task* task)
 
 void RT::OS::renameOSThread(std::thread& thread, const std::string& name)
 {
-  if(RT::OS::isRealtime()){
+  if (RT::OS::isRealtime()) {
     return;
   }
 
@@ -184,9 +181,9 @@ void RT::OS::renameOSThread(std::thread& thread, const std::string& name)
   }
 }
 
-//NOLINTNEXTLINE
+// NOLINTNEXTLINE
 timespec last_clock_read;
-//NOLINTNEXTLINE
+// NOLINTNEXTLINE
 timespec last_proc_time;
 
 double RT::OS::getCpuUsage()

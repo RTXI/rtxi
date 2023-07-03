@@ -36,9 +36,9 @@
 
 #include "debug.hpp"
 
-//NOLINTNEXTLINE
+// NOLINTNEXTLINE
 thread_local bool realtime_key = false;
-//NOLINTNEXTLINE
+// NOLINTNEXTLINE
 thread_local int64_t* RT_PERIOD = nullptr;
 
 int RT::OS::initiate(RT::OS::Task* task)
@@ -48,12 +48,11 @@ int RT::OS::initiate(RT::OS::Task* task)
    */
   std::cout << "***WARNING*** You are using the POSIX compatibility layer, "
                "RTXI is NOT running in realtime!!!\n";
-  std::string strbuf (256, '\0');
+  std::string strbuf(256, '\0');
   int retval = mlockall(MCL_CURRENT | MCL_FUTURE);  // NOLINT
   strerror_r(errno, strbuf.data(), strbuf.size());
   if (retval != 0) {
-    ERROR_MSG("RT::OS(POSIX)::initiate : failed to lock memory : {}",
-              strbuf);
+    ERROR_MSG("RT::OS(POSIX)::initiate : failed to lock memory : {}", strbuf);
   }
   realtime_key = true;
   task->period = RT::OS::DEFAULT_PERIOD;
@@ -80,12 +79,11 @@ int RT::OS::createTask(Task* task, void (*func)(void*), void* arg)
   }
   auto wrapper = [](RT::OS::Task* tsk, void (*fn)(void*), void* args)
   {
-    std::string strbuf (256, '\0');
+    std::string strbuf(256, '\0');
     auto resval = RT::OS::initiate(tsk);
     strerror_r(errno, strbuf.data(), strbuf.size());
     if (resval != 0) {
-      ERROR_MSG("RT::OS::createTask : RT::OS::initiate() : {}",
-                strbuf);
+      ERROR_MSG("RT::OS::createTask : RT::OS::initiate() : {}", strbuf);
       // In the event that we fail to initiate real-time environment let's just
       // quit
       return;
@@ -162,9 +160,9 @@ void RT::OS::renameOSThread(std::thread& thread, const std::string& name)
   }
 }
 
-//NOLINTNEXTLINE
+// NOLINTNEXTLINE
 timespec last_clock_read;
-//NOLINTNEXTLINE
+// NOLINTNEXTLINE
 timespec last_proc_time;
 
 double RT::OS::getCpuUsage()
@@ -202,5 +200,3 @@ double RT::OS::getCpuUsage()
   last_clock_read = clock_time;
   return cpu_percent;
 }
-
-
