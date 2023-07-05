@@ -125,11 +125,6 @@ public:
                                 const QObject* handler,
                                 const char* slot);
 
-  /*
-   * Create a window for the widget in the main window
-   */
-  void createMdi(QMdiSubWindow*);
-
   /*!
    * Load window geometry based upon previously stored settings
    */

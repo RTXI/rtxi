@@ -940,23 +940,14 @@ void Oscilloscope::Panel::showDisplayTab()
   sizesEdit->setText(QString::number(scopeWindow->getDataSize()));
 }
 
-Oscilloscope::Panel::Panel(MainWindow* mw, Event::Manager* ev_manager)
+Oscilloscope::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
     : Modules::Panel(std::string(Oscilloscope::MODULE_NAME), mw, ev_manager)
-    , subWindow(new QMdiSubWindow)
     , tabWidget(new QTabWidget)
     , scopeWindow(new Scope(this))
     , layout(new QVBoxLayout)
     , scopeGroup(new QWidget(this))
     , setBttnGroup(new QGroupBox(this))
 {
-  // Make Mdi
-  subWindow->setWindowIcon(QIcon("/usr/local/share/rtxi/RTXI-widget-icon.png"));
-  subWindow->setAttribute(Qt::WA_DeleteOnClose);
-  subWindow->setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint
-                            | Qt::WindowMinimizeButtonHint
-                            | Qt::WindowMaximizeButtonHint);
-  mw->createMdi(subWindow);
-
   setWhatsThis(
       "<p><b>Oscilloscope:</b><br>The Oscilloscope allows you to plot any "
       "signal "
@@ -1021,9 +1012,8 @@ Oscilloscope::Panel::Panel(MainWindow* mw, Event::Manager* ev_manager)
   adjustDataSize();
   buildChannelList();
   showDisplayTab();
-  subWindow->setWidget(this);
-  subWindow->setMinimumSize(subWindow->minimumSizeHint().width(), 450);
-  subWindow->resize(subWindow->minimumSizeHint().width() + 50, 600);
+  this->getMdiWindow()->setMinimumSize(this->minimumSizeHint().width(), 450);
+  this->getMdiWindow()->resize(this->minimumSizeHint().width() + 50, 600);
 
   // Initialize vars
   setWindowTitle(tr(std::string(Oscilloscope::MODULE_NAME).c_str()));
@@ -1153,9 +1143,8 @@ void Oscilloscope::Panel::timeoutEvent()
   // }
 }
 
-Oscilloscope::Plugin::Plugin(Event::Manager* ev_manager, MainWindow* mwindow)
-    : Modules::Plugin(
-        ev_manager, mwindow, std::string(Oscilloscope::MODULE_NAME))
+Oscilloscope::Plugin::Plugin(Event::Manager* ev_manager)
+    : Modules::Plugin(ev_manager, std::string(Oscilloscope::MODULE_NAME))
 {
 }
 
@@ -1213,12 +1202,12 @@ void Oscilloscope::Plugin::removeProbe(IO::endpoint probe_info)
 }
 
 std::unique_ptr<Modules::Plugin> Oscilloscope::createRTXIPlugin(
-    Event::Manager* ev_manager, MainWindow* main_window)
+    Event::Manager* ev_manager)
 {
-  return std::make_unique<Oscilloscope::Plugin>(ev_manager, main_window);
+  return std::make_unique<Oscilloscope::Plugin>(ev_manager);
 }
 
-Modules::Panel* Oscilloscope::createRTXIPanel(MainWindow* main_window,
+Modules::Panel* Oscilloscope::createRTXIPanel(QMainWindow* main_window,
                                               Event::Manager* ev_manager)
 {
   return static_cast<Modules::Panel*>(

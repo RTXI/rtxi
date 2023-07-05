@@ -95,7 +95,7 @@ public:
   Panel(Panel&&) = delete;
   Panel& operator=(const Panel&) = delete;
   Panel& operator=(Panel&&) = delete;
-  Panel(MainWindow* mwindow, Event::Manager* ev_manager);
+  Panel(QMainWindow* mwindow, Event::Manager* ev_manager);
   ~Panel() override;
 
 public slots:
@@ -121,8 +121,6 @@ private:
   std::vector<std::string> dataTags;
 
   bool recording;
-
-  QMdiSubWindow* subWindow = nullptr;
 
   QGroupBox* channelGroup = nullptr;
   QGroupBox* stampGroup = nullptr;
@@ -167,7 +165,7 @@ public:
   Plugin(Plugin&&) = delete;
   Plugin& operator=(const Plugin&) = delete;
   Plugin& operator=(Plugin&&) = delete;
-  Plugin(Event::Manager* ev_manager, MainWindow* mwindow);
+  explicit Plugin(Event::Manager* ev_manager);
   ~Plugin() override;
 
   void receiveEvent(Event::Object* event) override;
@@ -210,10 +208,9 @@ private:
   std::mutex m_hdf5_file_mut;
 };  // class Plugin
 
-std::unique_ptr<Modules::Plugin> createRTXIPlugin(Event::Manager* ev_manager,
-                                                  MainWindow* main_window);
+std::unique_ptr<Modules::Plugin> createRTXIPlugin(Event::Manager* ev_manager);
 
-Modules::Panel* createRTXIPanel(MainWindow* main_window,
+Modules::Panel* createRTXIPanel(QMainWindow* main_window,
                                 Event::Manager* ev_manager);
 
 std::unique_ptr<Modules::Component> createRTXIComponent(

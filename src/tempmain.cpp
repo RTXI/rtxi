@@ -13,8 +13,6 @@
 
 static void signal_handler(int signum)
 {
-  static int count = 0;
-
   ERROR_MSG("signal_handler : signal type {} received\n", ::strsignal(signum));
   std::cerr << boost::stacktrace::stacktrace();
   exit(-1);
@@ -42,13 +40,13 @@ int main(int argc, char* argv[])
   // Initializing GUI
   QApplication::setDesktopSettingsAware(false);
   auto* app = new QApplication(argc, argv);
-  app->connect(app, SIGNAL(lastWindowClosed()), app, SLOT(quit()));
+  QApplication::connect(app, SIGNAL(lastWindowClosed()), app, SLOT(quit()));
 
-  MainWindow* rtxi_window = new MainWindow(event_manager.get());
+  auto* rtxi_window = new MainWindow(event_manager.get());
   auto mod_manager =
-      std::make_unique<Modules::Manager>(event_manager.get(), rtxi_window);
+      std::make_unique<Modules::Manager>(event_manager.get());
   rtxi_window->loadWindow();
-  int retval = app->exec();
+  int retval = QApplication::exec();
   delete rtxi_window;
   delete app;
   return retval;

@@ -39,7 +39,7 @@ protected:
   {
     this->ev_manager = std::make_unique<Event::Manager>();
     this->mod_manager =
-        std::make_unique<Modules::Manager>(ev_manager.get(), nullptr);
+        std::make_unique<Modules::Manager>(ev_manager.get());
   }
   ~PluginManagerTest() = default;
 

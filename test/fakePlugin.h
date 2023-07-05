@@ -37,8 +37,8 @@ const std::vector<IO::channel_t> defaultFakeChannelList =
 class fakePlugin : public Modules::Plugin 
 {
 public:
-    fakePlugin(Event::Manager* ev_manager, MainWindow* mw) : 
-            Modules::Plugin(ev_manager, mw, "fakeModule") 
+    fakePlugin(Event::Manager* ev_manager) : 
+            Modules::Plugin(ev_manager, "fakeModule") 
         { std::cout << "Fake Plugin Constructed\n"; }
     ~fakePlugin() { std::cout << "Fake Plugin Destroyed\n"; }
 };

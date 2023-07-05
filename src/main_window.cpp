@@ -30,27 +30,25 @@
 #include <algorithm>
 #include <string>
 
-#include "main_window.hpp"
-
 #include <fmt/core.h>
 
-#include "connector/connector.h"
+#include "main_window.hpp"
+#include "rtxiConfig.h"
 #include "debug.hpp"
 #include "event.hpp"
 #include "module.hpp"
+#include "connector/connector.h"
 #include "oscilloscope/oscilloscope.h"
 #include "performance_measurement/performance_measurement.hpp"
-#include "rtxiConfig.h"
 #include "system_control/system_control.h"
 #include "userprefs/userprefs.h"
 
 MainWindow::MainWindow(Event::Manager* ev_manager)
     : QMainWindow(nullptr, Qt::Window)
     , event_manager(ev_manager)
-    , mdiArea(new QMdiArea(this))
+    , mdiArea(new QMdiArea)
 {
   // Make central RTXI parent widget
-
   setCentralWidget(mdiArea);
 
   /* Initialize Window Settings */
@@ -265,10 +263,10 @@ void MainWindow::createFileActions()
   connect(quit, SIGNAL(triggered()), this, SLOT(close()));
 }
 
-void MainWindow::createMdi(QMdiSubWindow* subWindow)
-{
-  mdiArea->addSubWindow(subWindow);
-}
+//void MainWindow::createMdi(QMdiSubWindow* subWindow)
+//{
+//  mdiArea->addSubWindow(subWindow);
+//}
 
 void MainWindow::createHelpActions()
 {
@@ -433,7 +431,7 @@ void MainWindow::systemMenuActivated(QAction* id)
   }
 
   auto create_rtxi_panel_func =
-      std::any_cast<Modules::Panel* (*)(MainWindow*, Event::Manager*)>(
+      std::any_cast<Modules::Panel* (*)(QMainWindow*, Event::Manager*)>(
           event.getParam("createRTXIPanel"));
   auto* rtxi_plugin_pointer =
       std::any_cast<Modules::Plugin*>(event.getParam("pluginPointer"));

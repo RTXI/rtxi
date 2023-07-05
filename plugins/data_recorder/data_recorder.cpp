@@ -26,19 +26,17 @@
 #include <sstream>
 #include <string>
 
-#include "data_recorder.h"
-
 #include <unistd.h>
 
 #include "debug.hpp"
 #include "main_window.hpp"
+#include "data_recorder.h"
 
-DataRecorder::Panel::Panel(MainWindow* mwindow, Event::Manager* ev_manager)
+DataRecorder::Panel::Panel(QMainWindow* mwindow, Event::Manager* ev_manager)
     : Modules::Panel(
         std::string(DataRecorder::MODULE_NAME), mwindow, ev_manager)
     , downsample_rate(1)
     , recording(false)
-    , subWindow(new QMdiSubWindow)
     , buttonGroup(new QGroupBox)
     , blockList(new QComboBox)
     , channelList(new QComboBox)
@@ -78,11 +76,10 @@ DataRecorder::Panel::Panel(MainWindow* mwindow, Event::Manager* ev_manager)
 
   // Make Mdi
 
-  subWindow->setWindowIcon(QIcon("/usr/local/share/rtxi/RTXI-widget-icon.png"));
-  subWindow->setAttribute(Qt::WA_DeleteOnClose);
-  subWindow->setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint
+  this->setWindowIcon(QIcon("/usr/local/share/rtxi/RTXI-widget-icon.png"));
+  this->setAttribute(Qt::WA_DeleteOnClose);
+  this->setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint
                             | Qt::WindowMinimizeButtonHint);
-  mwindow->createMdi(subWindow);
 
   // Create main layout
   auto* layout = new QGridLayout;
@@ -233,7 +230,7 @@ DataRecorder::Panel::Panel(MainWindow* mwindow, Event::Manager* ev_manager)
   stopRecordButton->setEnabled(false);
   closeButton = new QPushButton("Close");
   // QObject::connect(
-  //     closeButton, SIGNAL(released()), subWindow, SLOT(close()));
+  //     closeButton, SIGNAL(released()), this, SLOT(close()));
   buttonLayout->addWidget(closeButton);
 
   buttonLayout->addWidget(recordStatus);
@@ -256,8 +253,7 @@ DataRecorder::Panel::Panel(MainWindow* mwindow, Event::Manager* ev_manager)
   setWindowTitle(tr(std::string(DataRecorder::MODULE_NAME).c_str()));
 
   // Set layout to Mdi
-  subWindow->setWidget(this);
-  subWindow->setFixedSize(subWindow->minimumSizeHint());
+  this->setFixedSize(this->minimumSizeHint());
   show();
 
   // Build initial block list
@@ -499,9 +495,8 @@ void DataRecorder::Panel::stopRecording()
   hplugin->stopRecording();
 }
 
-DataRecorder::Plugin::Plugin(Event::Manager* ev_manager, MainWindow* mwindow)
-    : Modules::Plugin(
-        ev_manager, mwindow, std::string(DataRecorder::MODULE_NAME))
+DataRecorder::Plugin::Plugin(Event::Manager* ev_manager)
+    : Modules::Plugin(ev_manager, std::string(DataRecorder::MODULE_NAME))
 {
 }
 
@@ -713,12 +708,12 @@ DataRecorder::Component::Component(Modules::Plugin* hplugin,
 void DataRecorder::Component::execute() {}
 
 std::unique_ptr<Modules::Plugin> DataRecorder::createRTXIPlugin(
-    Event::Manager* ev_manager, MainWindow* main_window)
+    Event::Manager* ev_manager)
 {
-  return std::make_unique<DataRecorder::Plugin>(ev_manager, main_window);
+  return std::make_unique<DataRecorder::Plugin>(ev_manager);
 }
 
-Modules::Panel* DataRecorder::createRTXIPanel(MainWindow* main_window,
+Modules::Panel* DataRecorder::createRTXIPanel(QMainWindow* main_window,
                                               Event::Manager* ev_manager)
 {
   return static_cast<Modules::Panel*>(

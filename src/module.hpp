@@ -1,6 +1,8 @@
 #ifndef MODULE_HPP
 #define MODULE_HPP
 
+#include <QMainWindow>
+#include <QMdiSubWindow>
 #include <QGridLayout>
 #include <QGroupBox>
 #include <QLabel>
@@ -20,7 +22,6 @@
 #include "dlplugin.hpp"
 #include "event.hpp"
 #include "io.hpp"
-#include "main_window.hpp"
 #include "rt.hpp"
 
 /*!
@@ -123,11 +124,10 @@ class Panel;
  */
 struct FactoryMethods
 {
-  std::unique_ptr<Modules::Plugin> (*createPlugin)(Event::Manager*,
-                                                   MainWindow*) = nullptr;
+  std::unique_ptr<Modules::Plugin> (*createPlugin)(Event::Manager*) = nullptr;
   std::unique_ptr<Modules::Component> (*createComponent)(Modules::Plugin*) =
       nullptr;
-  Modules::Panel* (*createPanel)(MainWindow*, Event::Manager*) = nullptr;
+  Modules::Panel* (*createPanel)(QMainWindow*, Event::Manager*) = nullptr;
 };
 
 /*!
@@ -200,7 +200,7 @@ class Panel : public QWidget
   Q_OBJECT
 public:
   Panel(const std::string& mod_name,
-        MainWindow* mw,
+        QMainWindow* mw,
         Event::Manager* ev_manager);
 
   /*
@@ -209,6 +209,7 @@ public:
    */
   QGridLayout* getLayout() { return m_layout; };
 
+  QMdiSubWindow* getMdiWindow() { return this->m_subwindow; }
   /*!
    * Callback function that is called when the system state changes.
    *
@@ -225,7 +226,7 @@ public:
    * \sa DefaultGUIModel::update_flags_t
    */
   virtual void createGUI(const std::vector<Modules::Variable::Info>& vars,
-                         MainWindow* mw);
+                         QMainWindow* mw);
 
   /*!
    * Assigns a plugin to this panel. Typically used during construction of the
@@ -328,7 +329,7 @@ protected:
    *
    * \return The name of the module
    */
-  std::string getName() { return this->name; }
+  std::string getName() { return this->m_name; }
 
   /*!
    * retrieve the host plugin that controls this panel
@@ -340,9 +341,9 @@ protected:
   /*!
    * Retrieve the main window for the application
    *
-   * \return pointer of type MainWindow that controls the RTXI application
+   * \return pointer of type QMainWindow that controls the RTXI application
    */
-  MainWindow* getMainWindowPtr() { return this->main_window; }
+  QMainWindow* getQMainWindowPtr() { return this->main_window; }
 
   /*!
    * Obtain the event manager attached to this session of the RTXI application.
@@ -353,10 +354,10 @@ protected:
   Event::Manager* getRTXIEventManager() { return this->event_manager; }
 
 private:
-  MainWindow* main_window = nullptr;
+  QMainWindow* main_window = nullptr;
   QWidget* gridBox = nullptr;
   QGroupBox* buttonGroup = nullptr;
-  std::string name;
+  std::string m_name;
   QMdiSubWindow* m_subwindow = nullptr;
   Modules::Plugin* hostPlugin = nullptr;
   QGridLayout* m_layout = nullptr;
@@ -392,7 +393,7 @@ private:
 class Plugin : public Event::Handler
 {
 public:
-  Plugin(Event::Manager* ev_manager, MainWindow* mw, std::string mod_name);
+  Plugin(Event::Manager* ev_manager, std::string mod_name);
   Plugin(const Plugin& plugin) = delete;  // copy constructor
   Plugin& operator=(const Plugin& plugin) =
       delete;  // copy assignment noperator
@@ -475,61 +476,6 @@ public:
     return result;
   }
 
-  ///*!
-  // * Assigns a new integer value to the parameter
-  // *
-  // * \param parameter_id Identification number of the parameter
-  // * \param value the new value
-  // *
-  // * \return 0 if successful -1 otherwise
-  // */
-  // int setComponentIntParameter(const Variable::Id& parameter_id, int64_t
-  // value);
-
-  ///*!
-  // * Assigns a new double value to the parameter
-  // *
-  // * \param parameter_id Identification number of the parameter
-  // * \param value the new value
-  // *
-  // * \return 0 if successful -1 otherwise
-  // */
-  // int setComponentDoubleParameter(const Variable::Id& parameter_id, double
-  // value);
-
-  ///*!
-  // * Assigns a new unsigned integer value to the parameter
-  // *
-  // * \param parameter_id Identification number of the parameter
-  // * \param value the new value
-  // *
-  // * \return 0 if successful -1 otherwise
-  // */
-  // int setComponentUintParameter(const Variable::Id& parameter_id, uint64_t
-  // value);
-
-  ///*!
-  // * Assigns a new comment value to the parameter
-  // *
-  // * \param parameter_id Identification number of the parameter
-  // * \param value the new value
-  // *
-  // * \return 0 if successful -1 otherwise
-  // */
-  // int setComponentComment(const Variable::Id& parameter_id, const
-  // std::string& value);
-
-  ///*!
-  // * Assigns a new state value to the component
-  // *
-  // * \param parameter_id Identification number of the parameter
-  // * \param value the new value
-  // *
-  // * \return 0 if successful -1 otherwise
-  // */
-  // int setComponentState(const Variable::Id& parameter_id,
-  //                      Modules::Variable::state_t value);
-
   /*!
    * Retrieves the name of the plugin
    *
@@ -577,7 +523,7 @@ protected:
   Modules::Component* getComponent();
   DAQ::Device* getDevice();
   Event::Manager* getEventManager();
-  MainWindow* getMainWindow();
+  QMainWindow* getQMainWindow();
   Modules::Panel* getPanel();
 
 private:
@@ -587,7 +533,7 @@ private:
 
   // not owned pointers (managed by external objects)
   Event::Manager* event_manager = nullptr;
-  MainWindow* main_window = nullptr;  // Qt handles this lifetime
+  QMainWindow* main_window = nullptr;  // Qt handles this lifetime
   Modules::Panel* widget_panel = nullptr;  // Qt handles this lifetime
 
   std::string library;
@@ -604,7 +550,7 @@ public:
   Manager(Manager&&) = delete;
   Manager& operator=(const Manager&) = delete;
   Manager& operator=(Manager&&) = delete;
-  Manager(Event::Manager* ev_manager, MainWindow* mw);
+  explicit Manager(Event::Manager* ev_manager);
   ~Manager() override;
 
   /*!
@@ -642,7 +588,6 @@ private:
   std::unordered_map<std::string, Modules::FactoryMethods>
       rtxi_factories_registry;
   Event::Manager* event_manager;
-  MainWindow* main_window;
   std::unique_ptr<DLL::Loader> m_plugin_loader;
 
   std::mutex m_modules_mut;

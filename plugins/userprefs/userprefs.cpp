@@ -28,15 +28,14 @@
 #include "debug.hpp"
 #include "main_window.hpp"
 
-UserPrefs::Plugin::Plugin(Event::Manager* ev_manager, MainWindow* mw)
-    : Modules::Plugin(ev_manager, mw, std::string(UserPrefs::MODULE_NAME))
+UserPrefs::Plugin::Plugin(Event::Manager* ev_manager)
+    : Modules::Plugin(ev_manager, std::string(UserPrefs::MODULE_NAME))
 {
 }
 
-UserPrefs::Panel::Panel(MainWindow* mwindow, Event::Manager* ev_manager)
+UserPrefs::Panel::Panel(QMainWindow* mwindow, Event::Manager* ev_manager)
     : Modules::Panel(std::string(UserPrefs::MODULE_NAME), mwindow, ev_manager)
     , status(new QLabel)
-    , subWindow(new QMdiSubWindow)
     , dirGroup(new QGroupBox)
     , HDF(new QGroupBox)
     , buttons(new QGroupBox)
@@ -44,14 +43,6 @@ UserPrefs::Panel::Panel(MainWindow* mwindow, Event::Manager* ev_manager)
     , dataDirEdit(new QLineEdit(dirGroup))
     , HDFBufferEdit(new QLineEdit(HDF))
 {
-  // Make Mdi
-
-  subWindow->setWindowIcon(QIcon("/usr/local/share/rtxi/RTXI-widget-icon.png"));
-  subWindow->setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint
-                            | Qt::WindowMinimizeButtonHint);
-  subWindow->setAttribute(Qt::WA_DeleteOnClose);
-  mwindow->createMdi(subWindow);
-
   // Preferences structure
   const QSettings user_preferences;
   QSettings::setPath(QSettings::NativeFormat,
@@ -118,7 +109,7 @@ UserPrefs::Panel::Panel(MainWindow* mwindow, Event::Manager* ev_manager)
       applyButton, SIGNAL(released(void)), this, SLOT(apply(void)));
   auto* cancelButton = new QPushButton("Close");
   QObject::connect(
-      cancelButton, SIGNAL(released(void)), subWindow, SLOT(close(void)));
+      cancelButton, SIGNAL(released(void)), this, SLOT(close(void)));
 
   status->setText("Defaults \nloaded");
   // NOLINTNEXTLINE
@@ -144,8 +135,7 @@ UserPrefs::Panel::Panel(MainWindow* mwindow, Event::Manager* ev_manager)
   setWindowTitle(QString::fromStdString(this->getName()));
 
   // Set layout to Mdi
-  subWindow->setWidget(this);
-  subWindow->setFixedSize(500, subWindow->sizeHint().height());
+  this->getMdiWindow()->setFixedSize(500, this->sizeHint().height()+50);
   show();
 }
 
@@ -196,12 +186,12 @@ void UserPrefs::Panel::chooseDataDir()
 }
 
 std::unique_ptr<Modules::Plugin> UserPrefs::createRTXIPlugin(
-    Event::Manager* ev_manager, MainWindow* main_window)
+    Event::Manager* ev_manager)
 {
-  return std::make_unique<UserPrefs::Plugin>(ev_manager, main_window);
+  return std::make_unique<UserPrefs::Plugin>(ev_manager);
 }
 
-Modules::Panel* UserPrefs::createRTXIPanel(MainWindow* main_window,
+Modules::Panel* UserPrefs::createRTXIPanel(QMainWindow* main_window,
                                            Event::Manager* ev_manager)
 {
   return static_cast<Modules::Panel*>(

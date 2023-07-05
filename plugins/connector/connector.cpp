@@ -22,9 +22,8 @@
 
 #include "main_window.hpp"
 
-Connector::Panel::Panel(MainWindow* mw, Event::Manager* ev_manager)
+Connector::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
     : Modules::Panel(std::string(Connector::MODULE_NAME), mw, ev_manager)
-    , subWindow(new QMdiSubWindow)
     , buttonGroup(new QGroupBox)
     , inputBlock(new QComboBox)
     , inputChannel(new QComboBox)
@@ -47,13 +46,6 @@ Connector::Panel::Panel(MainWindow* mw, Event::Manager* ev_manager)
       "button immediately makes a connection active or inactive in real-time. "
       "Current connections "
       "are listed in the \"Connections\" box.</p>");
-
-  // Make Mdi
-  subWindow->setWindowIcon(QIcon("/usr/local/share/rtxi/RTXI-widget-icon.png"));
-  subWindow->setAttribute(Qt::WA_DeleteOnClose);
-  subWindow->setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint
-                            | Qt::WindowMinimizeButtonHint);
-  this->getMainWindowPtr()->createMdi(subWindow);
 
   // Create main layout
   auto* layout = new QGridLayout;
@@ -155,8 +147,7 @@ Connector::Panel::Panel(MainWindow* mw, Event::Manager* ev_manager)
   setWindowTitle(QString::fromStdString(this->getName()));
 
   // Set layout to Mdi
-  subWindow->setWidget(this);
-  subWindow->resize(500, subWindow->sizeHint().height());
+  this->getMdiWindow()->resize(500, this->sizeHint().height());
   show();
 
   // populate field with block and connection info
@@ -382,18 +373,18 @@ void Connector::Panel::updateConnectionButton()
   }
 }
 
-Connector::Plugin::Plugin(Event::Manager* ev_manager, MainWindow* mw)
-    : Modules::Plugin(ev_manager, mw, std::string(Connector::MODULE_NAME))
+Connector::Plugin::Plugin(Event::Manager* ev_manager)
+    : Modules::Plugin(ev_manager, std::string(Connector::MODULE_NAME))
 {
 }
 
 std::unique_ptr<Modules::Plugin> Connector::createRTXIPlugin(
-    Event::Manager* ev_manager, MainWindow* main_window)
+    Event::Manager* ev_manager)
 {
-  return std::make_unique<Connector::Plugin>(ev_manager, main_window);
+  return std::make_unique<Connector::Plugin>(ev_manager);
 }
 
-Modules::Panel* Connector::createRTXIPanel(MainWindow* main_window,
+Modules::Panel* Connector::createRTXIPanel(QMainWindow* main_window,
                                            Event::Manager* ev_manager)
 {
   return static_cast<Modules::Panel*>(

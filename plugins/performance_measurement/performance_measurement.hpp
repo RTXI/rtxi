@@ -116,7 +116,7 @@ inline std::vector<Modules::Variable::Info> get_default_vars()
 class Plugin : public Modules::Plugin
 {
 public:
-  Plugin(Event::Manager* ev_manager, MainWindow* mw);
+  explicit Plugin(Event::Manager* ev_manager);
 };  // class Plugin
 
 class Component : public Modules::Component
@@ -141,7 +141,7 @@ class Panel : public Modules::Panel
   Q_OBJECT
 
 public:
-  Panel(const std::string& mod_name, MainWindow* mwindow, Event::Manager* ev_manager);
+  Panel(const std::string& mod_name, QMainWindow* mwindow, Event::Manager* ev_manager);
 
 public slots:
   /*!
@@ -164,9 +164,9 @@ private:
   QLineEdit* AppCpuPercentEdit;
 };  // class Panel
 
-std::unique_ptr<Modules::Plugin> createRTXIPlugin(Event::Manager* ev_manager, MainWindow* main_window);
+std::unique_ptr<Modules::Plugin> createRTXIPlugin(Event::Manager* ev_manager);
 
-Modules::Panel* createRTXIPanel(MainWindow* main_window, Event::Manager* ev_manager);
+Modules::Panel* createRTXIPanel(QMainWindow* main_window, Event::Manager* ev_manager);
 
 std::unique_ptr<Modules::Component> createRTXIComponent(Modules::Plugin* host_plugin);
 

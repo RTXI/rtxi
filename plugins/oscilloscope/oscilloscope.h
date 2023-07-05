@@ -117,7 +117,7 @@ class Panel : public Modules::Panel
   Q_OBJECT
 
 public:
-  Panel(MainWindow* mw, Event::Manager* ev_manager);
+  Panel(QMainWindow* mw, Event::Manager* ev_manager);
 
   void setActivity(Oscilloscope::Component* comp, bool activity);
   void adjustDataSize();
@@ -155,8 +155,6 @@ private:
   void updateChannelLineWidth(IO::endpoint probe_info);
   void updateChannelLineStyle(IO::endpoint probe_info);
   void updateChannelPenColor(IO::endpoint probe_info);
-
-  QMdiSubWindow* subWindow = nullptr;
 
   // Tab Widget
   QTabWidget* tabWidget = nullptr;
@@ -219,7 +217,7 @@ public:
   Plugin(Plugin&&) = delete;
   Plugin& operator=(const Plugin&) = delete;
   Plugin& operator=(Plugin&&) = delete;
-  Plugin(Event::Manager* ev_manager, MainWindow* mwindow);
+  explicit Plugin(Event::Manager* ev_manager);
   ~Plugin() override;
 
   void receiveEvent(Event::Object* event) override;
@@ -240,10 +238,9 @@ private:
   Trigger::Info trigger_info;
 };  // Plugin
 
-std::unique_ptr<Modules::Plugin> createRTXIPlugin(Event::Manager* ev_manager,
-                                                  MainWindow* main_window);
+std::unique_ptr<Modules::Plugin> createRTXIPlugin(Event::Manager* ev_manager);
 
-Modules::Panel* createRTXIPanel(MainWindow* main_window,
+Modules::Panel* createRTXIPanel(QMainWindow* main_window,
                                 Event::Manager* ev_manager);
 
 std::unique_ptr<Modules::Component> createRTXIComponent(

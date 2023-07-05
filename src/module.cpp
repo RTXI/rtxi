@@ -12,6 +12,7 @@
 #include "module.hpp"
 
 #include <dlfcn.h>
+#include <qmdisubwindow.h>
 
 #include "connector/connector.h"
 #include "debug.hpp"
@@ -133,14 +134,22 @@ std::string Modules::Component::getValueString(const size_t& var_id)
 }
 
 Modules::Panel::Panel(const std::string& mod_name,
-                      MainWindow* mw,
+                      QMainWindow* mw,
                       Event::Manager* ev_manager)
     : QWidget(mw)
     , main_window(mw)
+    , m_name(mod_name)
     , event_manager(ev_manager)
 {
   setWindowTitle(QString::fromStdString(mod_name));
-
+  
+  auto* central_widget = dynamic_cast<QMdiArea*>(mw->centralWidget());
+  this->m_subwindow = central_widget->addSubWindow(this);
+  this->m_subwindow->setWindowIcon(
+      QIcon("/usr/local/share/rtxi/RTXI-widget-icon.png"));
+  this->setAttribute(Qt::WA_DeleteOnClose);
+  this->setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint
+                             | Qt::WindowMinimizeButtonHint);
   auto* timer = new QTimer(this);
   timer->setTimerType(Qt::PreciseTimer);
   timer->start(1000);
@@ -154,10 +163,9 @@ void Modules::Panel::closeEvent(QCloseEvent* event)
 }
 
 void Modules::Panel::createGUI(const std::vector<Modules::Variable::Info>& vars,
-                               MainWindow* mw)
+                               QMainWindow* mw)
 {
   // Make Mdi
-  this->m_subwindow = new QMdiSubWindow;
   this->m_subwindow->setAttribute(Qt::WA_DeleteOnClose);
   // m_subwindow->setWindowIcon(QIcon("/usr/local/share/rtxi/RTXI-widget-icon.png"));
   this->m_subwindow->setWindowFlags(Qt::CustomizeWindowHint
@@ -165,7 +173,6 @@ void Modules::Panel::createGUI(const std::vector<Modules::Variable::Info>& vars,
                                     | Qt::WindowMinimizeButtonHint);
   this->m_subwindow->setOption(QMdiSubWindow::RubberBandResize, true);
   this->m_subwindow->setOption(QMdiSubWindow::RubberBandMove, true);
-  mw->createMdi(m_subwindow);
 
   // Create main layout
   this->m_layout = new QGridLayout;
@@ -478,10 +485,8 @@ void Modules::Panel::pause(bool p)
 // }
 
 Modules::Plugin::Plugin(Event::Manager* ev_manager,
-                        MainWindow* mw,
                         std::string mod_name)
     : event_manager(ev_manager)
-    , main_window(mw)
     , name(std::move(mod_name))
 {
 }
@@ -586,19 +591,13 @@ Event::Manager* Modules::Plugin::getEventManager()
   return this->event_manager;
 }
 
-MainWindow* Modules::Plugin::getMainWindow()
-{
-  return this->main_window;
-}
-
 Modules::Panel* Modules::Plugin::getPanel()
 {
   return this->widget_panel;
 }
 
-Modules::Manager::Manager(Event::Manager* ev_manager, MainWindow* mw)
+Modules::Manager::Manager(Event::Manager* ev_manager)
     : event_manager(ev_manager)
-    , main_window(mw)
 {
   this->event_manager->registerHandler(this);
   this->m_plugin_loader = std::make_unique<DLL::Loader>();
@@ -645,8 +644,7 @@ Modules::Plugin* Modules::Manager::loadCorePlugin(const std::string& library)
 
   std::unique_ptr<Modules::Plugin> plugin;
   this->registerFactories(library, fact_methods);
-  plugin = this->rtxi_factories_registry[library].createPlugin(event_manager,
-                                                               main_window);
+  plugin = this->rtxi_factories_registry[library].createPlugin(event_manager);
   plugin_ptr = this->registerModule(std::move(plugin));
   return plugin_ptr;
 }
@@ -662,7 +660,7 @@ Modules::Plugin* Modules::Manager::loadPlugin(const std::string& library)
   {
     std::unique_ptr<Modules::Plugin> plugin =
         this->rtxi_factories_registry[library_loc].createPlugin(
-            this->event_manager, this->main_window);
+            this->event_manager);
     plugin_ptr = this->registerModule(std::move(plugin));
     return plugin_ptr;
   }
@@ -700,7 +698,7 @@ Modules::Plugin* Modules::Manager::loadPlugin(const std::string& library)
   Modules::FactoryMethods* fact_methods = gen_fact_methods();
   this->rtxi_factories_registry[library] = *fact_methods;
   std::unique_ptr<Modules::Plugin> plugin =
-      fact_methods->createPlugin(this->event_manager, this->main_window);
+      fact_methods->createPlugin(this->event_manager);
   if (plugin == nullptr) {
     ERROR_MSG("Plugin::load : failed to create plugin from library {} ",
               library);

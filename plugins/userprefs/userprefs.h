@@ -34,7 +34,7 @@ constexpr std::string_view MODULE_NAME = "User Preferences";
 class Plugin : public Modules::Plugin
 {
 public:
-  Plugin(Event::Manager* ev_manager, MainWindow* mw);
+  explicit Plugin(Event::Manager* ev_manager);
 
 };  // class Prefs
 
@@ -43,7 +43,7 @@ class Panel : public Modules::Panel
   Q_OBJECT
 
 public:
-  Panel(MainWindow* mwindow, Event::Manager* ev_manager);
+  Panel(QMainWindow* mwindow, Event::Manager* ev_manager);
 
 public slots:
   void apply();  // save and close
@@ -54,7 +54,6 @@ public slots:
 
 private:
   QLabel* status = nullptr;
-  QMdiSubWindow* subWindow = nullptr;
   QSettings userprefs;
 
   QGroupBox* dirGroup = nullptr;
@@ -66,12 +65,10 @@ private:
   QLineEdit* HDFBufferEdit = nullptr;  // buffer size for HDF Data Recorder
 };  // class Panel
 
-std::unique_ptr<Modules::Plugin> createRTXIPlugin(Event::Manager* ev_manager,
-                                                  MainWindow* main_window);
+std::unique_ptr<Modules::Plugin> createRTXIPlugin(Event::Manager* ev_manager);
 
-Modules::Panel* createRTXIPanel(MainWindow* main_window,
+Modules::Panel* createRTXIPanel(QMainWindow* main_window,
                                 Event::Manager* ev_manager);
-
 std::unique_ptr<Modules::Component> createRTXIComponent(
     Modules::Plugin* host_plugin);
 

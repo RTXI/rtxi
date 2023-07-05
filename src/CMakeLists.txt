@@ -59,7 +59,6 @@ add_library(rtxi SHARED
     daq.hpp daq.cpp
     module.hpp module.cpp
     logger.hpp logger.cpp
-    main_window.hpp main_window.cpp
 )
 
 target_link_libraries(rtxi PUBLIC 
@@ -76,6 +75,7 @@ target_link_libraries(rtxi PUBLIC
 # Create RTXI executable
 add_executable(rtxi_exe
     tempmain.cpp
+    main_window.hpp main_window.cpp
 )
 add_executable(rtxi::exe ALIAS rtxi_exe)
 set_target_properties(

@@ -23,8 +23,8 @@
 #include <QtWidgets>
 
 #include "event.hpp"
-#include "main_window.hpp"
 #include "module.hpp"
+#include "main_window.hpp"
 
 namespace SystemControl
 {
@@ -36,7 +36,7 @@ class Panel : public Modules::Panel
   Q_OBJECT
 
 public:
-  Panel(MainWindow* mw, Event::Manager* ev_manager);
+  Panel(QMainWindow* mw, Event::Manager* ev_manager);
 
   void receiveEvent(const Event::Object* event);
 
@@ -85,16 +85,15 @@ private:
 class Plugin : public Modules::Plugin
 {
 public:
-  Plugin(Event::Manager* ev_manager, MainWindow* mainwindow)
-      : Modules::Plugin(ev_manager, mainwindow, std::string(MODULE_NAME))
+  explicit Plugin(Event::Manager* ev_manager)
+      : Modules::Plugin(ev_manager, std::string(MODULE_NAME))
   {
   }
 };
 
-std::unique_ptr<Modules::Plugin> createRTXIPlugin(Event::Manager* ev_manager,
-                                                  MainWindow* main_window);
+std::unique_ptr<Modules::Plugin> createRTXIPlugin(Event::Manager* ev_manager);
 
-Modules::Panel* createRTXIPanel(MainWindow* main_window,
+Modules::Panel* createRTXIPanel(QMainWindow* main_window,
                                 Event::Manager* ev_manager);
 
 std::unique_ptr<Modules::Component> createRTXIComponent(

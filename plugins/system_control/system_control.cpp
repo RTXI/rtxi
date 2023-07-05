@@ -29,10 +29,9 @@
 #include "main_window.hpp"
 #include "rt.hpp"
 
-SystemControl::Panel::Panel(MainWindow* mw, Event::Manager* ev_manager)
+SystemControl::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
     : Modules::Panel(std::string(SystemControl::MODULE_NAME), mw, ev_manager)
     , buttonGroup(new QGroupBox)
-    , subWindow(new QMdiSubWindow)
     , deviceList(new QComboBox)
     , analogChannelList(new QComboBox)
     , analogRangeList(new QComboBox)
@@ -76,12 +75,6 @@ SystemControl::Panel::Panel(MainWindow* mw, Event::Manager* ev_manager)
       "execute special code when the real-time period is changed using the "
       "update(PERIOD) "
       "flag.</p>");
-  subWindow->setWindowIcon(QIcon("/usr/local/share/rtxi/RTXI-widget-icon.png"));
-  subWindow->setAttribute(Qt::WA_DeleteOnClose);
-  subWindow->setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint
-                            | Qt::WindowMinimizeButtonHint);
-  mw->createMdi(subWindow);
-
   // Create main layout
   auto* layout = new QGridLayout;
 
@@ -268,7 +261,7 @@ SystemControl::Panel::Panel(MainWindow* mw, Event::Manager* ev_manager)
   buttonLayout->addWidget(applyButton);
   auto* cancelButton = new QPushButton("Close");
   QObject::connect(
-      cancelButton, SIGNAL(released(void)), subWindow, SLOT(close()));
+      cancelButton, SIGNAL(released(void)), this, SLOT(close()));
   buttonLayout->addWidget(cancelButton);
 
   // Assign layout to child widget
@@ -285,8 +278,7 @@ SystemControl::Panel::Panel(MainWindow* mw, Event::Manager* ev_manager)
   setWindowTitle("System Control Panel");
 
   // Set layout to Mdi
-  subWindow->setWidget(this);
-  subWindow->setFixedSize(subWindow->minimumSizeHint());
+  this->getMdiWindow()->setFixedSize(this->minimumSizeHint());
 
   // Updates settings for device and builds lists of channels
   updateDevice();
@@ -675,12 +667,12 @@ void SystemControl::Panel::display()
 }
 
 std::unique_ptr<Modules::Plugin> SystemControl::createRTXIPlugin(
-    Event::Manager* ev_manager, MainWindow* main_window)
+    Event::Manager* ev_manager)
 {
-  return std::make_unique<SystemControl::Plugin>(ev_manager, main_window);
+  return std::make_unique<SystemControl::Plugin>(ev_manager);
 }
 
-Modules::Panel* SystemControl::createRTXIPanel(MainWindow* main_window,
+Modules::Panel* SystemControl::createRTXIPanel(QMainWindow* main_window,
                                                Event::Manager* ev_manager)
 {
   return static_cast<Modules::Panel*>(

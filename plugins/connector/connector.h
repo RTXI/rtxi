@@ -40,7 +40,7 @@ class Panel : public Modules::Panel
   Q_OBJECT
 
 public:
-  Panel(MainWindow* mw, Event::Manager* ev_manager);
+  Panel(QMainWindow* mw, Event::Manager* ev_manager);
 
 signals:
   void updateBlockInfo();
@@ -57,8 +57,6 @@ private slots:
 private:
   void buildConnectionList();
   void buildBlockList();
-
-  QMdiSubWindow* subWindow;
 
   QGroupBox* connectionGroup;
   QGroupBox* buttonGroup;
@@ -78,7 +76,7 @@ private:
 class Plugin : public Modules::Plugin
 {
 public:
-  Plugin(Event::Manager* ev_manager, MainWindow* mw);
+  explicit Plugin(Event::Manager* ev_manager);
   void receiveEvent(Event::Object* event) override;
 
 private:
@@ -87,10 +85,9 @@ private:
 
 };  // class Plugin
 
-std::unique_ptr<Modules::Plugin> createRTXIPlugin(Event::Manager* ev_manager,
-                                                  MainWindow* main_window);
+std::unique_ptr<Modules::Plugin> createRTXIPlugin(Event::Manager* ev_manager);
 
-Modules::Panel* createRTXIPanel(MainWindow* main_window,
+Modules::Panel* createRTXIPanel(QMainWindow* main_window,
                                 Event::Manager* ev_manager);
 
 std::unique_ptr<Modules::Component> createRTXIComponent(
