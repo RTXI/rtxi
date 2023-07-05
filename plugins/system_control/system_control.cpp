@@ -260,8 +260,7 @@ SystemControl::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
       applyButton, SIGNAL(released(void)), this, SLOT(apply(void)));
   buttonLayout->addWidget(applyButton);
   auto* cancelButton = new QPushButton("Close");
-  QObject::connect(
-      cancelButton, SIGNAL(released(void)), this, SLOT(close()));
+  QObject::connect(cancelButton, SIGNAL(released(void)), this, SLOT(close()));
   buttonLayout->addWidget(cancelButton);
 
   // Assign layout to child widget

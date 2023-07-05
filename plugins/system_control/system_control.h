@@ -23,8 +23,8 @@
 #include <QtWidgets>
 
 #include "event.hpp"
-#include "module.hpp"
 #include "main_window.hpp"
+#include "module.hpp"
 
 namespace SystemControl
 {

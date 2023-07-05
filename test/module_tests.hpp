@@ -102,8 +102,8 @@ protected:
     this->mod_manager =
         std::make_unique<Modules::Manager>(this->event_manager.get());
     auto component = std::make_unique<mockModuleComponent>();
-    this->plugin = std::make_unique<Modules::Plugin>(
-        this->event_manager.get(), "testname");
+    this->plugin = std::make_unique<Modules::Plugin>(this->event_manager.get(),
+                                                     "testname");
     component->setActive(true);
     this->component_ptr = component.get();
     this->plugin->attachComponent(std::move(component));

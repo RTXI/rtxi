@@ -142,14 +142,14 @@ Modules::Panel::Panel(const std::string& mod_name,
     , event_manager(ev_manager)
 {
   setWindowTitle(QString::fromStdString(mod_name));
-  
+
   auto* central_widget = dynamic_cast<QMdiArea*>(mw->centralWidget());
   this->m_subwindow = central_widget->addSubWindow(this);
   this->m_subwindow->setWindowIcon(
       QIcon("/usr/local/share/rtxi/RTXI-widget-icon.png"));
   this->setAttribute(Qt::WA_DeleteOnClose);
   this->setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint
-                             | Qt::WindowMinimizeButtonHint);
+                       | Qt::WindowMinimizeButtonHint);
   auto* timer = new QTimer(this);
   timer->setTimerType(Qt::PreciseTimer);
   timer->start(1000);
@@ -484,8 +484,7 @@ void Modules::Panel::pause(bool p)
 //                  (i->second.edit->text()).toStdString());
 // }
 
-Modules::Plugin::Plugin(Event::Manager* ev_manager,
-                        std::string mod_name)
+Modules::Plugin::Plugin(Event::Manager* ev_manager, std::string mod_name)
     : event_manager(ev_manager)
     , name(std::move(mod_name))
 {

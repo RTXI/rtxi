@@ -30,16 +30,17 @@
 #include <algorithm>
 #include <string>
 
+#include "main_window.hpp"
+
 #include <fmt/core.h>
 
-#include "main_window.hpp"
-#include "rtxiConfig.h"
+#include "connector/connector.h"
 #include "debug.hpp"
 #include "event.hpp"
 #include "module.hpp"
-#include "connector/connector.h"
 #include "oscilloscope/oscilloscope.h"
 #include "performance_measurement/performance_measurement.hpp"
+#include "rtxiConfig.h"
 #include "system_control/system_control.h"
 #include "userprefs/userprefs.h"
 
@@ -263,10 +264,10 @@ void MainWindow::createFileActions()
   connect(quit, SIGNAL(triggered()), this, SLOT(close()));
 }
 
-//void MainWindow::createMdi(QMdiSubWindow* subWindow)
+// void MainWindow::createMdi(QMdiSubWindow* subWindow)
 //{
-//  mdiArea->addSubWindow(subWindow);
-//}
+//   mdiArea->addSubWindow(subWindow);
+// }
 
 void MainWindow::createHelpActions()
 {

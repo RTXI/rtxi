@@ -27,8 +27,8 @@ std::unique_ptr<Modules::Plugin> createRTXIPlugin(Event::Manager* ev_manager)
   return std::make_unique<fakePlugin>(ev_manager);
 }
 
-Modules::Panel* createRTXIPanel(QMainWindow*  /*main_window*/,
-                                Event::Manager*  /*ev_manager*/)
+Modules::Panel* createRTXIPanel(QMainWindow* /*main_window*/,
+                                Event::Manager* /*ev_manager*/)
 {
   return nullptr;
 }

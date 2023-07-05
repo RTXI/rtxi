@@ -43,8 +43,7 @@ int main(int argc, char* argv[])
   QApplication::connect(app, SIGNAL(lastWindowClosed()), app, SLOT(quit()));
 
   auto* rtxi_window = new MainWindow(event_manager.get());
-  auto mod_manager =
-      std::make_unique<Modules::Manager>(event_manager.get());
+  auto mod_manager = std::make_unique<Modules::Manager>(event_manager.get());
   rtxi_window->loadWindow();
   int retval = QApplication::exec();
   delete rtxi_window;

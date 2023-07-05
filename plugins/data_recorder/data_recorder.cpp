@@ -26,11 +26,12 @@
 #include <sstream>
 #include <string>
 
+#include "data_recorder.h"
+
 #include <unistd.h>
 
 #include "debug.hpp"
 #include "main_window.hpp"
-#include "data_recorder.h"
 
 DataRecorder::Panel::Panel(QMainWindow* mwindow, Event::Manager* ev_manager)
     : Modules::Panel(
@@ -79,7 +80,7 @@ DataRecorder::Panel::Panel(QMainWindow* mwindow, Event::Manager* ev_manager)
   this->setWindowIcon(QIcon("/usr/local/share/rtxi/RTXI-widget-icon.png"));
   this->setAttribute(Qt::WA_DeleteOnClose);
   this->setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint
-                            | Qt::WindowMinimizeButtonHint);
+                       | Qt::WindowMinimizeButtonHint);
 
   // Create main layout
   auto* layout = new QGridLayout;

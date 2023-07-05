@@ -135,7 +135,7 @@ UserPrefs::Panel::Panel(QMainWindow* mwindow, Event::Manager* ev_manager)
   setWindowTitle(QString::fromStdString(this->getName()));
 
   // Set layout to Mdi
-  this->getMdiWindow()->setFixedSize(500, this->sizeHint().height()+50);
+  this->getMdiWindow()->setFixedSize(500, this->sizeHint().height() + 50);
   show();
 }
 

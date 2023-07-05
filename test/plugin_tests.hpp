@@ -38,8 +38,7 @@ protected:
   PluginManagerTest()
   {
     this->ev_manager = std::make_unique<Event::Manager>();
-    this->mod_manager =
-        std::make_unique<Modules::Manager>(ev_manager.get());
+    this->mod_manager = std::make_unique<Modules::Manager>(ev_manager.get());
   }
   ~PluginManagerTest() = default;
 

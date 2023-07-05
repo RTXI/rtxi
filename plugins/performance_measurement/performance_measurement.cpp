@@ -19,19 +19,19 @@
 
 #include <functional>
 
+#include "performance_measurement.hpp"
+
 #include "debug.hpp"
 #include "event.hpp"
 #include "main_window.hpp"
 #include "module.hpp"
 #include "rt.hpp"
-#include "performance_measurement.hpp"
 
 PerformanceMeasurement::Panel::Panel(const std::string& mod_name,
                                      QMainWindow* mwindow,
                                      Event::Manager* ev_manager)
-  : Modules::Panel(mod_name, mwindow, ev_manager)
+    : Modules::Panel(mod_name, mwindow, ev_manager)
 {
-  
   // Create main layout
   auto* box_layout = new QVBoxLayout;
   const QString suffix = QString("s)").prepend(QChar(0x3BC));
@@ -200,7 +200,8 @@ void PerformanceMeasurement::Panel::reset()
 }
 
 PerformanceMeasurement::Plugin::Plugin(Event::Manager* ev_manager)
-    : Modules::Plugin(ev_manager, std::string(PerformanceMeasurement::MODULE_NAME))
+    : Modules::Plugin(ev_manager,
+                      std::string(PerformanceMeasurement::MODULE_NAME))
 {
   auto component = std::make_unique<PerformanceMeasurement::Component>(this);
   this->attachComponent(std::move(component));

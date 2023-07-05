@@ -1,12 +1,12 @@
 #ifndef MODULE_HPP
 #define MODULE_HPP
 
-#include <QMainWindow>
-#include <QMdiSubWindow>
 #include <QGridLayout>
 #include <QGroupBox>
 #include <QLabel>
 #include <QLineEdit>
+#include <QMainWindow>
+#include <QMdiSubWindow>
 #include <QPushButton>
 #include <QValidator>
 #include <limits>
