@@ -12,334 +12,230 @@
    see <http://www.gnu.org/licenses/>.
 */
 
-#include <algorithm>
-#include <sstream>
+#include <optional>
 
 #include "workspace.hpp"
 
-#include "debug.h"
-#include "event.h"
-#include "rt.h"
+#include "connector/connector.h"
+#include "data_recorder/data_recorder.h"
+#include "oscilloscope/oscilloscope.h"
+#include "performance_measurement/performance_measurement.hpp"
+#include "rtxiConfig.h"
+#include "system_control/system_control.h"
+#include "userprefs/userprefs.h"
 
-namespace
+std::optional<Modules::FactoryMethods> Workspace::get_core_plugin_factory(
+    const std::string& plugin_name)
 {
-class ParameterChangeEvent : public RT::Event
-{
-public:
-  ParameterChangeEvent(Settings::Object::ID, size_t, double, double*);
-  ~ParameterChangeEvent(void);
-  int callback(void);
-
-private:
-  Settings::Object::ID object;
-  size_t index;
-  double value;
-  double* data;
-};  // class ParameterChangeEvent
-};  // namespace
-
-ParameterChangeEvent::ParameterChangeEvent(Settings::Object::ID id,
-                                           size_t i,
-                                           double v,
-                                           double* d)
-    : object(id)
-    , index(i)
-    , value(v)
-    , data(d)
-{
-}
-
-ParameterChangeEvent::~ParameterChangeEvent(void) {}
-
-int ParameterChangeEvent::callback(void)
-{
-  if (*data == value)
-    return 0;
-
-  *data = value;
-
-  ::Event::Object event(::Event::WORKSPACE_PARAMETER_CHANGE_EVENT);
-  event.setParam("object", (void*)object);
-  event.setParam("index", (void*)index);
-  event.setParam("value", (void*)data);
-  ::Event::Manager::getInstance()->postEventRT(&event);
-
-  return 0;
-}
-
-Workspace::Instance::Instance(std::string name,
-                              Workspace::variable_t* d,
-                              size_t n)
-    : IO::Block(name, d, n)
-{
-  size_t count[] = {0, 0, 0, 0};
-  for (size_t i = 0; i < n; ++i)
-    switch (d[i].flags & (PARAMETER | STATE | EVENT | COMMENT)) {
-      case PARAMETER:
-        count[0]++;
-        break;
-      case STATE:
-        count[1]++;
-        break;
-      case EVENT:
-        count[2]++;
-        break;
-      case COMMENT:
-        count[3]++;
-        break;
-    }
-
-  parameter = std::vector<var_t>(count[0]);
-  state = std::vector<var_t>(count[1]);
-  event = std::vector<var_t>(count[2]);
-  comment = std::vector<comment_t>(count[3]);
-
-  size_t i[] = {0, 0, 0, 0};
-  for (size_t j = 0; j < n; ++j) {
-    switch (d[j].flags & (PARAMETER | STATE | EVENT | COMMENT)) {
-      case PARAMETER:
-        parameter[i[0]].name = d[j].name;
-        parameter[i[0]].description = d[j].description;
-        parameter[i[0]].data = new double;
-        i[0]++;
-        break;
-      case STATE:
-        state[i[1]].name = d[j].name;
-        state[i[1]].description = d[j].description;
-        state[i[1]].data = 0;
-        i[1]++;
-        break;
-      case EVENT:
-        event[i[2]].name = d[j].name;
-        event[i[2]].description = d[j].description;
-        event[i[2]].data = 0;
-        i[2]++;
-        break;
-      case COMMENT:
-        comment[i[3]].name = d[j].name;
-        comment[i[3]].description = d[j].description;
-        comment[i[3]].comment = "";
-        i[3]++;
-        break;
-    }
-  }
-
-  Workspace::Manager::getInstance()->insertWorkspace(this);
-}
-
-Workspace::Instance::~Instance(void)
-{
-  Workspace::Manager::getInstance()->removeWorkspace(this);
-
-  for (std::vector<var_t>::iterator i = parameter.begin(),
-                                    end = parameter.end();
-       i != end;
-       ++i)
-    delete i->data;
-}
-
-size_t Workspace::Instance::getCount(IO::flags_t type) const
-{
-  if (type & (INPUT | OUTPUT))
-    return IO::Block::getCount(type);
-  if (type & PARAMETER)
-    return parameter.size();
-  if (type & STATE)
-    return state.size();
-  if (type & EVENT)
-    return event.size();
-  if (type & COMMENT)
-    return comment.size();
-
-  return 0;
-}
-
-std::string Workspace::Instance::getName(IO::flags_t type, size_t n) const
-{
-  if (type & (INPUT | OUTPUT))
-    return IO::Block::getName(type, n);
-  if (type & PARAMETER && n < parameter.size())
-    return parameter[n].name;
-  if (type & STATE && n < state.size())
-    return state[n].name;
-  if (type & EVENT && n < event.size())
-    return event[n].name;
-  if (type & COMMENT && n < comment.size())
-    return comment[n].name;
-
-  return "";
-}
-
-std::string Workspace::Instance::getDescription(IO::flags_t type,
-                                                size_t n) const
-{
-  if (type & PARAMETER && n < parameter.size())
-    return parameter[n].description;
-  if (type & STATE && n < state.size())
-    return state[n].description;
-  if (type & EVENT && n < event.size())
-    return event[n].description;
-  if (type & COMMENT && n < comment.size())
-    return comment[n].description;
-
-  return "";
-}
-
-double Workspace::Instance::getValue(IO::flags_t type, size_t n) const
-{
-  if (type & INPUT)
-    return input(n);
-  if (type & OUTPUT)
-    return output(n);
-  if (type & PARAMETER && n < parameter.size() && parameter[n].data)
-    return *parameter[n].data;
-  if (type & STATE && n < state.size() && state[n].data)
-    return *state[n].data;
-  if (type & EVENT && n < event.size() && event[n].data)
-    return *event[n].data;
-  if (type & COMMENT && n < comment.size()) {
-    std::istringstream sstr(comment[n].comment);
-    double value;
-    sstr >> value;
-    return value;
-  }
-  return 0.0;
-}
-
-std::string Workspace::Instance::getValueString(IO::flags_t type,
-                                                size_t n) const
-{
-  if (type & (INPUT | OUTPUT | PARAMETER | STATE | EVENT)) {
-    std::ostringstream value;
-
-    if (type & INPUT)
-      value << input(n);
-    if (type & OUTPUT)
-      value << output(n);
-    if (type & PARAMETER && n < parameter.size() && parameter[n].data)
-      value << *parameter[n].data;
-    if (type & STATE && n < state.size() && state[n].data)
-      value << *state[n].data;
-    if (type & EVENT && n < event.size() && event[n].data)
-      value << *event[n].data;
-
-    return value.str();
-  }
-
-  if (type & COMMENT && n < comment.size())
-    return comment[n].comment;
-
-  return "";
-}
-
-void Workspace::Instance::setValue(size_t n, double value)
-{
-  if (n >= parameter.size() || !parameter[n].data)
-    return;
-
-  if (RT::OS::isRealtime() && *parameter[n].data != value) {
-    *parameter[n].data = value;
-
-    ::Event::Object event(::Event::WORKSPACE_PARAMETER_CHANGE_EVENT);
-    event.setParam("object", (void*)getID());
-    event.setParam("index", (void*)n);
-    event.setParam("value", (void*)parameter[n].data);
-    ::Event::Manager::getInstance()->postEventRT(&event);
+  std::optional<Modules::FactoryMethods> fact_methods;
+  if (plugin_name == std::string(PerformanceMeasurement::MODULE_NAME)) {
+    fact_methods = PerformanceMeasurement::getFactories();
+  } else if (plugin_name == std::string(UserPrefs::MODULE_NAME)) {
+    fact_methods = UserPrefs::getFactories();
+  } else if (plugin_name == std::string(SystemControl::MODULE_NAME)) {
+    fact_methods = SystemControl::getFactories();
+  } else if (plugin_name == std::string(Connector::MODULE_NAME)) {
+    fact_methods = Connector::getFactories();
+  } else if (plugin_name == std::string(Oscilloscope::MODULE_NAME)) {
+    fact_methods = Oscilloscope::getFactories();
+  } else if (plugin_name == std::string(DataRecorder::MODULE_NAME)) {
+    fact_methods = DataRecorder::getFactories();
   } else {
-    ParameterChangeEvent event(getID(), n, value, parameter[n].data);
-    RT::System::getInstance()->postEvent(&event);
+    return fact_methods;
   }
+  return fact_methods;
 }
 
-void Workspace::Instance::setComment(size_t n, std::string newComment)
+Workspace::Manager::Manager(Event::Manager* ev_manager)
+    : event_manager(ev_manager)
 {
-  if (n >= comment.size())
-    return;
-
-  comment[n].comment = newComment;
+  this->event_manager->registerHandler(this);
+  this->m_plugin_loader = std::make_unique<DLL::Loader>();
 }
 
-double* Workspace::Instance::getData(IO::flags_t type, size_t n)
+Workspace::Manager::~Manager()
 {
-  if (type & PARAMETER && n < parameter.size())
-    return parameter[n].data;
-  if (type & STATE && n < state.size())
-    return state[n].data;
-  if (type & EVENT && n < event.size())
-    return event[n].data;
-  return 0;
-}
-
-void Workspace::Instance::setData(IO::flags_t type, size_t n, double* data)
-{
-  if (type & PARAMETER && n < parameter.size())
-    parameter[n].data = data;
-  if (type & STATE && n < state.size())
-    state[n].data = data;
-  if (type & EVENT && n < event.size())
-    event[n].data = data;
-}
-
-void Workspace::Manager::foreachWorkspace(void (*callback)(Workspace::Instance*,
-                                                           void*),
-                                          void* param)
-{
-  Mutex::Locker lock(&mutex);
-  for (std::list<Instance*>::iterator i = instanceList.begin();
-       i != instanceList.end();
-       ++i)
-    callback(*i, param);
-}
-
-void Workspace::Manager::insertWorkspace(Workspace::Instance* workspace)
-{
-  if (!workspace) {
-    ERROR_MSG("Workspace::Manager::insertWorkspace : invalid workspace\n");
-    return;
+  for (const auto& plugin_list : this->rtxi_modules_registry) {
+    for (const auto& plugin : plugin_list.second) {
+      this->event_manager->unregisterHandler(plugin.get());
+    }
   }
+  this->event_manager->unregisterHandler(this);
+}
 
-  Mutex::Locker lock(&mutex);
+bool Workspace::Manager::isRegistered(const Modules::Plugin* plugin)
+{
+  const std::string plugin_name = plugin->getName();
+  auto start_iter = this->rtxi_modules_registry[plugin_name].begin();
+  auto end_iter = this->rtxi_modules_registry[plugin_name].end();
+  return std::any_of(start_iter,
+                     end_iter,
+                     [plugin](const std::unique_ptr<Modules::Plugin>& module)
+                     { return plugin == module.get(); });
+}
 
-  if (std::find(instanceList.begin(), instanceList.end(), workspace)
-      != instanceList.end())
+Modules::Plugin* Workspace::Manager::loadCorePlugin(const std::string& library)
+{
+  Modules::Plugin* plugin_ptr = nullptr;
+  std::optional<Modules::FactoryMethods> fact_methods =
+      Workspace::get_core_plugin_factory(library);
+  if (!fact_methods.has_value()) {
+    return nullptr;
+  }
+  std::unique_ptr<Modules::Plugin> plugin;
+  this->registerFactories(library, *fact_methods);
+  plugin = this->rtxi_factories_registry[library].createPlugin(event_manager);
+  plugin_ptr = this->registerModule(std::move(plugin));
+  return plugin_ptr;
+}
+
+// TODO: extract plugin dynamic loading to another class
+Modules::Plugin* Workspace::Manager::loadPlugin(const std::string& library)
+{
+  std::string library_loc = library;
+  Modules::Plugin* plugin_ptr = nullptr;
+  // if module factory is already registered then all we have to do is run it
+  if (this->rtxi_factories_registry.find(library_loc)
+      != this->rtxi_factories_registry.end())
   {
-    ERROR_MSG(
-        "Workspace::Manager::insertWorkspace : workspace already present\n");
-    return;
+    std::unique_ptr<Modules::Plugin> plugin =
+        this->rtxi_factories_registry[library_loc].createPlugin(
+            this->event_manager);
+    plugin_ptr = this->registerModule(std::move(plugin));
+    return plugin_ptr;
   }
 
-  instanceList.push_back(workspace);
+  // If it is just a core plugin then handle that elsewhere and return
+  plugin_ptr = this->loadCorePlugin(library_loc);
+  if (plugin_ptr != nullptr) {
+    return plugin_ptr;
+  }
+
+  int result = this->m_plugin_loader->load(library_loc.c_str());
+  if (result != 0) {
+    // We try to load it from another location besides locally
+    ERROR_MSG("Modules::Plugin::loadPlugin : could not load module locally");
+    library_loc = RTXI_DEFAULT_PLUGIN_DIR + library;
+    result = this->m_plugin_loader->load(library_loc.c_str());
+  }
+  if (result != 0) {
+    ERROR_MSG("Plugin::load : failed to load {}", library_loc.c_str());
+    return nullptr;
+  }
+
+  auto gen_fact_methods =
+      this->m_plugin_loader->dlsym<Modules::FactoryMethods* (*)()>(
+          library_loc.c_str(), "getFactories");
+
+  if (gen_fact_methods == nullptr) {
+    ERROR_MSG("Plugin::load : failed to retreive getFactories symbol");
+    // If we got here it means we loaded the lirbary but not the symbol.
+    // Let's just unload the library and exit before we regret it.
+    this->m_plugin_loader->unload(library_loc.c_str());
+    return nullptr;
+  }
+
+  Modules::FactoryMethods* fact_methods = gen_fact_methods();
+  this->rtxi_factories_registry[library] = *fact_methods;
+  std::unique_ptr<Modules::Plugin> plugin =
+      fact_methods->createPlugin(this->event_manager);
+  if (plugin == nullptr) {
+    ERROR_MSG("Plugin::load : failed to create plugin from library {} ",
+              library);
+    this->m_plugin_loader->unload(library_loc.c_str());
+    return nullptr;
+  }
+
+  // if (plugin->magic_number != Plugin::Object::MAGIC_NUMBER) {
+  //   ERROR_MSG(
+  //       "Plugin::load : the pointer returned from {}::createRTXIPlugin()
+  //       isn't " "a valid Plugin::Object *.\n",
+  //       library.toStdString().c_str());
+  //   dlclose(handle);
+  //   return 0;
+  // }
+  plugin_ptr = this->registerModule(std::move(plugin));
+  return plugin_ptr;
 }
 
-void Workspace::Manager::removeWorkspace(Workspace::Instance* workspace)
+void Workspace::Manager::unloadPlugin(Modules::Plugin* plugin)
 {
-  if (!workspace) {
-    ERROR_MSG("Workspace::Manager::removeWorkspace : invalid workspace\n");
-    return;
+  const std::string library = plugin->getName();
+  this->unregisterModule(plugin);
+  if (this->rtxi_modules_registry[library].empty()) {
+    this->unregisterFactories(library);
   }
-
-  Mutex::Locker lock(&mutex);
-  instanceList.remove(workspace);
 }
 
-static Mutex mutex;
-Workspace::Manager* Workspace::Manager::instance = 0;
-
-Workspace::Manager* Workspace::Manager::getInstance(void)
+Modules::Plugin* Workspace::Manager::registerModule(
+    std::unique_ptr<Modules::Plugin> module)
 {
-  if (instance)
-    return instance;
+  std::unique_lock<std::mutex> lk(this->m_modules_mut);
+  const std::string mod_name = module->getName();
+  this->rtxi_modules_registry[mod_name].push_back(std::move(module));
+  return this->rtxi_modules_registry[mod_name].back().get();
+}
 
-  /*************************************************************************
-   * Seems like alot of hoops to jump through, but static allocation isn't *
-   *   thread-safe. So effort must be taken to ensure mutual exclusion.    *
-   *************************************************************************/
-
-  Mutex::Locker lock(&::mutex);
-  if (!instance) {
-    static Manager manager;
-    instance = &manager;
+void Workspace::Manager::unregisterModule(Modules::Plugin* plugin)
+{
+  if (plugin == nullptr) {
+    return;
   }
+  std::unique_lock<std::mutex> lk(this->m_modules_mut);
+  const std::string plugin_name = plugin->getName();
+  auto start_iter = this->rtxi_modules_registry[plugin_name].begin();
+  auto end_iter = this->rtxi_modules_registry[plugin_name].end();
+  auto loc =
+      std::find_if(start_iter,
+                   end_iter,
+                   [plugin](const std::unique_ptr<Modules::Plugin>& module)
+                   { return plugin == module.get(); });
+  if (loc == end_iter) {
+    return;
+  }
+  this->m_plugin_loader->unload(plugin->getLibrary().c_str());
+  this->rtxi_modules_registry[plugin_name].erase(loc);
+}
 
-  return instance;
+void Workspace::Manager::registerFactories(const std::string& module_name,
+                                           Modules::FactoryMethods fact)
+{
+  this->rtxi_factories_registry[module_name] = fact;
+}
+
+void Workspace::Manager::unregisterFactories(const std::string& module_name)
+{
+  if (this->rtxi_factories_registry.find(module_name)
+      != this->rtxi_factories_registry.end())
+  {
+    this->rtxi_factories_registry.erase(module_name);
+  }
+}
+
+void Workspace::Manager::receiveEvent(Event::Object* event)
+{
+  std::string plugin_name;
+  Modules::Plugin* plugin_ptr = nullptr;
+  switch (event->getType()) {
+    case Event::Type::PLUGIN_REMOVE_EVENT:
+      plugin_ptr =
+          std::any_cast<Modules::Plugin*>(event->getParam("pluginPointer"));
+      this->unloadPlugin(plugin_ptr);
+      break;
+    case Event::Type::PLUGIN_INSERT_EVENT:
+      plugin_name = std::any_cast<std::string>(event->getParam("pluginName"));
+      plugin_ptr = this->loadPlugin(plugin_name);
+      if (plugin_ptr != nullptr) {
+        event->setParam("status", std::any(std::string("success")));
+        event->setParam(
+            "createRTXIPanel",
+            std::any(this->rtxi_factories_registry[plugin_name].createPanel));
+        event->setParam("pluginPointer", std::any(plugin_ptr));
+      } else {
+        event->setParam("status", std::any(std::string("failure")));
+      }
+      break;
+    default:
+      return;
+  }
 }

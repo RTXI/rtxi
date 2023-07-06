@@ -70,13 +70,17 @@ target_link_libraries(rtxi PUBLIC
     qwt::qwt
     xfifo
     dlplugin
+    backtrace
+    dl
 )
 
 # Create RTXI executable
 add_executable(rtxi_exe
-    tempmain.cpp
+    workspace.hpp workspace.cpp
     main_window.hpp main_window.cpp
+    tempmain.cpp
 )
+
 add_executable(rtxi::exe ALIAS rtxi_exe)
 set_target_properties(
     rtxi_exe PROPERTIES
@@ -95,8 +99,10 @@ target_link_libraries(rtxi_exe PUBLIC
     system_control_lib
     connector_lib
     oscilloscope_lib
+    data_recorder_lib
     Boost::headers
     qwt::qwt
+    HDF5::HDF5
     backtrace
     dl
 )

@@ -15,248 +15,78 @@
 #ifndef WORKSPACE_H
 #define WORKSPACE_H
 
-#include "io.h"
+#include "dlplugin.hpp"
+#include "event.hpp"
+#include "module.hpp"
 
-//! Internal Control Oriented Classes
+//! Internal Management Oriented Classes
 /*!
  * Objects contained within this namespace are responsible for providing
- *   standardized interface for the manipulating of IO::Block internals.
+ *   Manager objects.
  */
 namespace Workspace
 {
 
-/*!
- * Bitmask used to represent an input type variable.
+/*
+ * Returns a set of functions for generating plugin, component, and panel
+ * classes for a core RTXI modules
  *
- * \sa IO::INPUT
  */
-static const IO::flags_t INPUT = 0x01;
-/*!
- * Bitmask used to represent an output type variable.
- *
- * \sa IO::OUTPUT
- */
-static const IO::flags_t OUTPUT = 0x02;
-/*!
- * Bitmask used to represent a parameter type variable.
- */
-static const IO::flags_t PARAMETER = IO::OUTPUT << 1;
-/*!
- * Bitmask used to represent a state type variable.
- */
-static const IO::flags_t STATE = IO::OUTPUT << 2;
-/*!
- * Bitmask used to represent an event variable.
- */
-static const IO::flags_t EVENT = IO::OUTPUT << 3;
-/*!
- * Bitmask used to represent a comment variable.
- */
-static const IO::flags_t COMMENT = IO::OUTPUT << 4;
+std::optional<Modules::FactoryMethods> get_core_plugin_factory(
+    const std::string& plugin_name);
 
 /*!
- * Structure used to pass informatino to a Workspace::Instance upon creation.
- *
- * \sa Workspace::Instance::Instance()
- * \sa IO::channel_t
+ * This class is responsible for managing Plugin device loading and unloading
  */
-typedef IO::channel_t variable_t;
-
-/*!
- * An object that provides a standardized interface for accessing and
- *   manipulating both internal and external data.
- *
- * \sa IO::Block
- */
-class Instance : public IO::Block
+class Manager : public Event::Handler
 {
-  friend class Manager;
-
 public:
-  /*!
-   * The constructor needs to be provided with a specification of the variables
-   *   that will be embedded in this workspace in the variables parameter.
-   *   Fields that are not of type INPUT, OUTPUT, PARAMETER, or STATE will be
-   *   safely ignored. Size should be the number of total fields in the
-   * variables parameter, regardless of type.
-   *
-   * \param name The name of the workspace.
-   * \param variables The variable specification for this workspace.
-   * \param size The number of variables in the specification.
-   *
-   * \sa Workspace::variable_t
-   */
-  Instance(std::string name, variable_t* variables, size_t size);
-  virtual ~Instance(void);
+  Manager(const Manager&) = delete;
+  Manager(Manager&&) = delete;
+  Manager& operator=(const Manager&) = delete;
+  Manager& operator=(Manager&&) = delete;
+  explicit Manager(Event::Manager* ev_manager);
+  ~Manager() override;
 
   /*!
-   * Get the number of variables of the specified type.
-   *
-   * \param type The type of variable to be probed.
-   * \return The number of variables of the specified type.
-   *
-   * \sa IO::Block::getCount()
+   * loads plugin
    */
-  size_t getCount(IO::flags_t type) const;
-  /*!
-   * Get the name of the specified variable.
-   *
-   * \param type The type of the variable.
-   * \param index The variable's index.
-   * \return The variable's name.
-   *
-   * \sa IO::Block::getName()
-   */
-  std::string getName(IO::flags_t type, size_t index) const;
-  /*!
-   * Get the description of the specified variable.
-   *
-   * \param type The type of the variable.
-   * \param index The variable's index.
-   * \return The variable's description.
-   *
-   * \sa IO::Block::getDescription()
-   */
-  std::string getDescription(IO::flags_t type, size_t index) const;
-  /*!
-   * Get the value of the specified EVENT, PARAMETER or STATE variable.
-   *
-   * \param type The type of the specified variable.
-   * \param index The variable's index.
-   * \return The variable's value.
-   *
-   * \sa IO::Block::getValue()
-   * \sa Workspace::setData()
-   */
-  double getValue(IO::flags_t type, size_t index) const;
-  /*!
-   * Get the value of the specified EVENT, PARAMETER, STATE,
-   *   or COMMENT variable in string form.
-   *
-   * \param type The type of the specified variable.
-   * \param index The variable's index.
-   * \return The variable's value.
-   *
-   * \sa Workspace::getValue()
-   */
-  std::string getValueString(IO::flags_t type, size_t index) const;
+  Modules::Plugin* loadPlugin(const std::string& library);
 
   /*!
-   * Set the value of a PARAMETER type variable.
-   *
-   * \param index The variable's index.
-   * \param value The variable's new value.
-   *
-   * \sa Workspace::PARAMETER
+   * unloads plugin
    */
-  void setValue(size_t index, double value);
-  /*!
-   * Set the value of a COMMENT type variable
-   *
-   * \param index The variable's index.
-   * \param value The variable's new value.
-   *
-   * \sa Workspace::COMMENT
-   */
-  void setComment(size_t index, std::string comment);
-
-protected:
-  /*!
-   * Get the internal reference of the variable, for STATE types.
-   *
-   * \param type The variable's type.
-   * \param index The variable's index.
-   * \return The variable's storage location.
-   *
-   * \sa Workspace::STATE
-   */
-  double* getData(IO::flags_t type, size_t index);
+  void unloadPlugin(Modules::Plugin* plugin);
 
   /*!
-   * Set the internal reference of the variable, for STATE types.
-   *
-   * \param type The variable's type.
-   * \param index The variable's index.
-   * \param value The variable's storage location.
-   *
-   * \sa Workspace::STATE
+   * Handles plugin loading/unloadin gevents from gui thread
    */
-  void setData(IO::flags_t type, size_t index, double* value);
+  void receiveEvent(Event::Object* event) override;
+
+  /*!
+   * Checks whether plugin is registered
+   */
+  bool isRegistered(const Modules::Plugin* plugin);
 
 private:
-  typedef struct
-  {
-    std::string name;
-    std::string description;
-    double* data;
-  } var_t;
+  [[nodiscard]] Modules::Plugin* registerModule(
+      std::unique_ptr<Modules::Plugin> module);
+  void unregisterModule(Modules::Plugin* plugin);
 
-  std::vector<var_t> parameter;
-  std::vector<var_t> state;
-  std::vector<var_t> event;
+  void registerFactories(const std::string& module_name,
+                         Modules::FactoryMethods);
+  void unregisterFactories(const std::string& module_name);
+  Modules::Plugin* loadCorePlugin(const std::string& library);
 
-  typedef struct
-  {
-    std::string name;
-    std::string description;
-    std::string comment;
-  } comment_t;
+  std::unordered_map<std::string, std::vector<std::unique_ptr<Modules::Plugin>>>
+      rtxi_modules_registry;
+  std::unordered_map<std::string, Modules::FactoryMethods>
+      rtxi_factories_registry;
+  Event::Manager* event_manager;
+  std::unique_ptr<DLL::Loader> m_plugin_loader;
 
-  std::vector<comment_t> comment;
-
-};  // class Object
-
-/*!
- * Acts as a central meeting point between Instances. Provides
- *   interfaces for finding and manipulating Blocks.
- *
- * \sa Workspace::Instance
- */
-class Manager
-{
-  friend class Instance;
-
-public:
-  /*!
-   * Manager is a Singleton, which means that there can only be one instance.
-   *   This function returns a pointer to that single instance.
-   *
-   * \return The instance of Manager.
-   */
-  static Manager* getInstance(void);
-
-  /*!
-   * Loop through each Instance and execute a callback.
-   * The callback takes two parameters, an Instance pointer and param,
-   *   the second parameter to foreachWorkspace.
-   *
-   * \param callback The callback function.
-   * \param param A parameter to the callback function.
-   * \sa Workspace::Instance
-   */
-  void foreachWorkspace(void (*callback)(Instance*, void*), void* param);
-
-private:
-  /*****************************************************************
-   * The constructor, destructor, and assignment operator are made *
-   *   private to control instantiation of the class.              *
-   *****************************************************************/
-
-  Manager(void)
-      : mutex(Mutex::RECURSIVE) {};
-  ~Manager(void) {};
-  Manager(const Manager&) {};
-  Manager& operator=(const Manager&) { return *getInstance(); };
-
-  static Manager* instance;
-
-  void insertWorkspace(Instance*);
-  void removeWorkspace(Instance*);
-
-  Mutex mutex;
-  std::list<Instance*> instanceList;
-
-};  // class Manager
+  std::mutex m_modules_mut;
+};
 
 }  // namespace Workspace
 

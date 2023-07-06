@@ -179,6 +179,7 @@ private:
   QAction* openControlPanel = nullptr;
   QAction* openConnector = nullptr;
   QAction* openOscilloscope = nullptr;
+  QAction* openDataRecorder = nullptr;
 
   void createFileMenu();
   void createModuleMenu();

@@ -540,59 +540,6 @@ private:
   std::string name;
 };
 
-/*!
- * This class is responsible for managing DAQ device loading and unloading
- */
-class Manager : public Event::Handler
-{
-public:
-  Manager(const Manager&) = delete;
-  Manager(Manager&&) = delete;
-  Manager& operator=(const Manager&) = delete;
-  Manager& operator=(Manager&&) = delete;
-  explicit Manager(Event::Manager* ev_manager);
-  ~Manager() override;
-
-  /*!
-   * loads plugin
-   */
-  Modules::Plugin* loadPlugin(const std::string& library);
-
-  /*!
-   * unloads plugin
-   */
-  void unloadPlugin(Modules::Plugin* plugin);
-
-  /*!
-   * Handles plugin loading/unloadin gevents from gui thread
-   */
-  void receiveEvent(Event::Object* event) override;
-
-  /*!
-   * Checks whether plugin is registered
-   */
-  bool isRegistered(const Modules::Plugin* plugin);
-
-private:
-  [[nodiscard]] Modules::Plugin* registerModule(
-      std::unique_ptr<Modules::Plugin> module);
-  void unregisterModule(Modules::Plugin* plugin);
-
-  void registerFactories(const std::string& module_name,
-                         Modules::FactoryMethods);
-  void unregisterFactories(const std::string& module_name);
-  Modules::Plugin* loadCorePlugin(const std::string& library);
-
-  std::unordered_map<std::string, std::vector<std::unique_ptr<Modules::Plugin>>>
-      rtxi_modules_registry;
-  std::unordered_map<std::string, Modules::FactoryMethods>
-      rtxi_factories_registry;
-  Event::Manager* event_manager;
-  std::unique_ptr<DLL::Loader> m_plugin_loader;
-
-  std::mutex m_modules_mut;
-};
-
 }  // namespace Modules
 
 #endif

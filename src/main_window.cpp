@@ -35,6 +35,7 @@
 #include <fmt/core.h>
 
 #include "connector/connector.h"
+#include "data_recorder/data_recorder.h"
 #include "debug.hpp"
 #include "event.hpp"
 #include "module.hpp"
@@ -43,6 +44,7 @@
 #include "rtxiConfig.h"
 #include "system_control/system_control.h"
 #include "userprefs/userprefs.h"
+#include "workspace.hpp"
 
 MainWindow::MainWindow(Event::Manager* ev_manager)
     : QMainWindow(nullptr, Qt::Window)
@@ -213,6 +215,7 @@ void MainWindow::createSystemMenu()
   this->systemMenu->addAction(this->openControlPanel);
   this->systemMenu->addAction(this->openConnector);
   this->systemMenu->addAction(this->openOscilloscope);
+  this->systemMenu->addAction(this->openDataRecorder);
   connect(systemMenu,
           SIGNAL(triggered(QAction*)),
           this,
@@ -299,6 +302,8 @@ void MainWindow::createSystemActions()
       new QAction(tr(std::string(Connector::MODULE_NAME).c_str()), this);
   this->openOscilloscope =
       new QAction(tr(std::string(Oscilloscope::MODULE_NAME).c_str()), this);
+  this->openDataRecorder =
+      new QAction(tr(std::string(DataRecorder::MODULE_NAME).c_str()), this);
 }
 
 void MainWindow::about()

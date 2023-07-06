@@ -74,22 +74,11 @@ DataRecorder::Panel::Panel(QMainWindow* mwindow, Event::Manager* ev_manager)
       "so that you can reconstruct your data correctly. The current recording "
       "status of "
       "the Data Recorder is shown at the bottom.</p>");
-
-  // Make Mdi
-
-  this->setWindowIcon(QIcon("/usr/local/share/rtxi/RTXI-widget-icon.png"));
-  this->setAttribute(Qt::WA_DeleteOnClose);
-  this->setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint
-                       | Qt::WindowMinimizeButtonHint);
-
-  // Create main layout
   auto* layout = new QGridLayout;
 
-  // Create child widget and layout for channel selection
   channelGroup = new QGroupBox(tr("Channel Selection"));
   auto* channelLayout = new QVBoxLayout;
 
-  // Create elements for channel box
   channelLayout->addWidget(new QLabel(tr("Block:")));
   channelLayout->addWidget(blockList);
   // QObject::connect(
@@ -254,7 +243,7 @@ DataRecorder::Panel::Panel(QMainWindow* mwindow, Event::Manager* ev_manager)
   setWindowTitle(tr(std::string(DataRecorder::MODULE_NAME).c_str()));
 
   // Set layout to Mdi
-  this->setFixedSize(this->minimumSizeHint());
+  this->getMdiWindow()->setFixedSize(this->minimumSizeHint());
   show();
 
   // Build initial block list
@@ -271,14 +260,8 @@ DataRecorder::Panel::Panel(QMainWindow* mwindow, Event::Manager* ev_manager)
   buildChannelList();
 }
 
-// Destructor for Panel
-DataRecorder::Panel::~Panel()
-{
-  this->stopRecording();
-  this->closeFile();
-}
+DataRecorder::Panel::~Panel() = default;
 
-// Populate list of blocks and channels
 void DataRecorder::Panel::buildChannelList()
 {
   channelList->clear();
@@ -286,11 +269,9 @@ void DataRecorder::Panel::buildChannelList()
     return;
   }
 
-  // Get block
   IO::Block* block =
       blockPtrList.at(static_cast<size_t>(blockList->currentIndex()));
 
-  // Get type
   auto type = static_cast<IO::flags_t>(this->typeList->currentIndex());
   for (size_t i = 0; i < block->getCount(type); ++i) {
     channelList->addItem(
@@ -300,7 +281,6 @@ void DataRecorder::Panel::buildChannelList()
   rButton->setEnabled(channelList->count() != 0);
 }
 
-// Slot for changing data file
 void DataRecorder::Panel::changeDataFile()
 {
   QFileDialog fileDialog(this);
@@ -357,7 +337,7 @@ void DataRecorder::Panel::insertChannel()
 
   endpoint = {block, port, direction};
   auto* hplugin = dynamic_cast<DataRecorder::Plugin*>(this->getHostPlugin());
-  int result = hplugin->insertChannel(endpoint);
+  int result = hplugin->create_component(endpoint);
 
   if (result != 0) {
     ERROR_MSG(
@@ -396,7 +376,7 @@ void DataRecorder::Panel::removeChannel()
   DataRecorder::record_channel chan = this->m_recording_channels.at(indx);
   IO::endpoint endpoint = chan.endpoint;
   auto* hplugin = dynamic_cast<DataRecorder::Plugin*>(this->getHostPlugin());
-  hplugin->removeChannel(endpoint);
+  hplugin->destroy_component(endpoint);
   this->m_recording_channels = hplugin->get_recording_channels();
   if (selectionBox->count() != 0) {
     startRecordButton->setEnabled(true);
@@ -504,10 +484,11 @@ DataRecorder::Plugin::Plugin(Event::Manager* ev_manager)
 DataRecorder::Plugin::~Plugin()
 {
   std::vector<Event::Object> unloadEvents;
-  for (auto& component : this->m_components_list) {
+  for (auto& rec_channel : this->m_recording_channels_list) {
     unloadEvents.emplace_back(Event::Type::RT_THREAD_REMOVE_EVENT);
     unloadEvents.back().setParam(
-        "thread", std::any(static_cast<RT::Thread*>(component.get())));
+        "thread",
+        std::any(static_cast<RT::Thread*>(rec_channel.component.get())));
   }
   this->getEventManager()->postEvent(unloadEvents);
 }
@@ -518,10 +499,10 @@ void DataRecorder::Plugin::startRecording()
 {
   Event::Type event_type = Event::Type::RT_THREAD_UNPAUSE_EVENT;
   std::vector<Event::Object> start_recording_event;
-  for (auto& component : this->m_components_list) {
+  for (auto& rec_channel : this->m_recording_channels_list) {
     start_recording_event.emplace_back(event_type);
     start_recording_event.back().setParam(
-        "thread", static_cast<RT::Thread*>(component.get()));
+        "thread", static_cast<RT::Thread*>(rec_channel.component.get()));
   }
   this->getEventManager()->postEvent(start_recording_event);
 }
@@ -530,10 +511,10 @@ void DataRecorder::Plugin::stopRecording()
 {
   Event::Type event_type = Event::Type::RT_THREAD_PAUSE_EVENT;
   std::vector<Event::Object> stop_recording_event;
-  for (auto& component : this->m_components_list) {
+  for (auto& rec_chan : this->m_recording_channels_list) {
     stop_recording_event.emplace_back(event_type);
     stop_recording_event.back().setParam(
-        "thread", static_cast<RT::Thread*>(component.get()));
+        "thread", static_cast<RT::Thread*>(rec_chan.component.get()));
   }
   this->getEventManager()->postEvent(stop_recording_event);
 }
@@ -615,22 +596,27 @@ int DataRecorder::Plugin::create_component(IO::endpoint endpoint)
   }
   auto iter = std::find_if(this->m_recording_channels_list.begin(),
                            this->m_recording_channels_list.end(),
-                           [endpoint](const DataRecorder::record_channel& chan)
-                           { return chan.endpoint == endpoint; });
+                           [endpoint](const recorder& rec)
+                           { return rec.channel.endpoint == endpoint; });
   if (iter != this->m_recording_channels_list.end()) {
     return 0;
   }
-  std::unique_lock<std::mutex> lk(this->m_components_list_mut);
-  std::string name = endpoint.block->getName();
-  name += " ";
-  name += std::to_string(endpoint.block->getID());
-  name += " ";
-  name += "Recording Component";
-  this->m_components_list.emplace_back(
-      std::make_unique<DataRecorder::Component>(this, name));
+  DataRecorder::record_channel chan;
+  std::unique_lock<std::shared_mutex> lk(this->m_channels_list_mut);
+  chan.name = endpoint.block->getName();
+  chan.name += " ";
+  chan.name += std::to_string(endpoint.block->getID());
+  chan.name += " ";
+  chan.name += "Recording Component";
+  chan.endpoint = endpoint;
+  this->m_recording_channels_list.emplace_back(
+      chan, std::make_unique<DataRecorder::Component>(this, chan.name));
+  chan.data_source =
+      this->m_recording_channels_list.back().component->get_fifo();
   Event::Object event(Event::Type::RT_THREAD_INSERT_EVENT);
   event.setParam("thread",
-                 static_cast<RT::Thread*>(m_components_list.back().get()));
+                 static_cast<RT::Thread*>(
+                     m_recording_channels_list.back().component.get()));
   this->getEventManager()->postEvent(&event);
   return 0;
 }
@@ -644,55 +630,51 @@ void DataRecorder::Plugin::destroy_component(IO::endpoint endpoint)
   Event::Object unplug_event(Event::Type::RT_THREAD_REMOVE_EVENT);
   unplug_event.setParam("thread", static_cast<RT::Thread*>(component));
   this->getEventManager()->postEvent(&unplug_event);
-  std::unique_lock<std::mutex> recorder_lock(this->m_components_list_mut);
-  auto iter = std::find_if(
-      this->m_components_list.begin(),
-      this->m_components_list.end(),
-      [component](const std::unique_ptr<DataRecorder::Component>& comp)
-      { return comp.get() == component; });
-  if (iter == this->m_components_list.end()) {
+  std::unique_lock<std::shared_mutex> recorder_lock(this->m_channels_list_mut);
+  auto iter = std::find_if(this->m_recording_channels_list.begin(),
+                           this->m_recording_channels_list.end(),
+                           [component](const recorder& rec_chan)
+                           { return rec_chan.component.get() == component; });
+  if (iter == this->m_recording_channels_list.end()) {
     return;
   }
-  this->m_components_list.erase(iter);
+  this->m_recording_channels_list.erase(iter);
 }
 
-int DataRecorder::Plugin::insertChannel(IO::endpoint endpoint)
+std::string DataRecorder::Plugin::getRecorderName(IO::endpoint endpoint)
 {
-  if (this->create_component(endpoint) != 0) {
-    ERROR_MSG(
-        "DataRecorder::Plugin::insertChannel : Unable to create Recorder for "
-        "{}",
-        endpoint.block->getName());
-    return -1;
+  auto iter = std::find_if(this->m_recording_channels_list.begin(),
+                           this->m_recording_channels_list.end(),
+                           [endpoint](const recorder& rec_chan)
+                           { return rec_chan.channel.endpoint == endpoint; });
+  if (iter == this->m_recording_channels_list.end()) {
+    return "";
   }
-  DataRecorder::record_channel chan;
-  chan.name = this->getRecorderName(endpoint);
-  chan.endpoint = endpoint;
-  chan.data_source = this->getFifo(endpoint);
-  std::unique_lock<std::shared_mutex> chan_lock(this->m_channels_list_mut);
-  this->m_recording_channels_list.push_back(chan);
-  return 0;
+  return iter->channel.name;
 }
 
-void DataRecorder::Plugin::removeChannel(IO::endpoint endpoint)
+DataRecorder::Component* DataRecorder::Plugin::getRecorderPtr(
+    IO::endpoint endpoint)
 {
-  std::unique_lock<std::shared_mutex> channels_lock(this->m_channels_list_mut);
-  auto chan_iter =
-      std::find_if(this->m_recording_channels_list.begin(),
-                   this->m_recording_channels_list.end(),
-                   [endpoint](const DataRecorder::record_channel& chan)
-                   { return chan.endpoint == endpoint; });
-  if (chan_iter != this->m_recording_channels_list.end()) {
-    this->m_recording_channels_list.erase(chan_iter);
+  auto iter = std::find_if(this->m_recording_channels_list.begin(),
+                           this->m_recording_channels_list.end(),
+                           [endpoint](const recorder& rec_chan)
+                           { return rec_chan.channel.endpoint == endpoint; });
+  if (iter == this->m_recording_channels_list.end()) {
+    return nullptr;
   }
-  this->destroy_component(endpoint);
+  return iter->component.get();
 }
 
 std::vector<DataRecorder::record_channel>
 DataRecorder::Plugin::get_recording_channels()
 {
-  std::shared_lock<std::shared_mutex> lk(this->m_channels_list_mut);
-  return this->m_recording_channels_list;
+  std::vector<DataRecorder::record_channel> result(
+      this->m_recording_channels_list.size());
+  for (size_t i = 0; i < result.size(); i++) {
+    result[i] = this->m_recording_channels_list[i].channel;
+  }
+  return result;
 }
 
 int DataRecorder::Plugin::apply_tag(const std::string& tag) {}
@@ -707,6 +689,11 @@ DataRecorder::Component::Component(Modules::Plugin* hplugin,
 }
 
 void DataRecorder::Component::execute() {}
+
+RT::OS::Fifo* DataRecorder::Component::get_fifo()
+{
+  return this->m_fifo.get();
+}
 
 std::unique_ptr<Modules::Plugin> DataRecorder::createRTXIPlugin(
     Event::Manager* ev_manager)

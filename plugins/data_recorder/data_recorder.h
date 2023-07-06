@@ -25,7 +25,9 @@
 #include <QMutex>
 #include <QSpinBox>
 #include <mutex>
+#include <optional>
 #include <thread>
+#include <utility>
 #include <vector>
 
 #include <hdf5.h>
@@ -174,8 +176,8 @@ public:
   void openFile(const std::string& file_name);
   void closeFile();
   void change_file(const std::string& file_name);
-  int insertChannel(IO::endpoint endpoint);
-  void removeChannel(IO::endpoint endpoint);
+  int create_component(IO::endpoint endpoint);
+  void destroy_component(IO::endpoint endpoint);
   std::string getRecorderName(IO::endpoint endpoint);
   DataRecorder::Component* getRecorderPtr(IO::endpoint endpoint);
   RT::OS::Fifo* getFifo(IO::endpoint endpoint);
@@ -195,16 +197,24 @@ private:
     hid_t sys_data_group_handle;
     hid_t channel_data_handle;
   } hdf5_handles;
-  int create_component(IO::endpoint endpoint);
-  void destroy_component(IO::endpoint endpoint);
+
+  struct recorder
+  {
+    recorder(record_channel chan, std::unique_ptr<DataRecorder::Component> comp)
+        : channel(std::move(chan))
+        , component(std::move(comp))
+    {
+    }
+    record_channel channel;
+    std::unique_ptr<DataRecorder::Component> component;
+  };
+
   void append_new_trial();
   int trial_count = 0;
   std::string hdf5_filename;
   std::thread m_processdata_thread;
-  std::list<std::unique_ptr<DataRecorder::Component>> m_components_list;
-  std::vector<record_channel> m_recording_channels_list;
+  std::vector<recorder> m_recording_channels_list;
   std::shared_mutex m_channels_list_mut;
-  std::mutex m_components_list_mut;
   std::mutex m_hdf5_file_mut;
 };  // class Plugin
 
