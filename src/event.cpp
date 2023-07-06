@@ -252,6 +252,8 @@ Event::Manager::Manager()
         }
       }
 
+      // we should log this before letting others know we are done
+      this->logger->log(event);
       // route the event to all handlers
       {
         std::shared_lock<std::shared_mutex> handlerlist_lock(
@@ -321,29 +323,6 @@ void Event::Manager::postEvent(std::vector<Event::Object>& events)
     event.wait();
   }
 }
-
-// void Event::Manager::processEvents()
-//{
-//   Event::Object* tmp_event = nullptr;
-//   auto event_processor =
-//   std::unique_lock<std::mutex> event_lock(this->event_mut);
-//   // TODO: Turn this into a thread pool implementation for performance
-//   while (this->running) {
-//     this->available_event_cond.wait(
-//         event_lock, [this] { return !(this->event_q.empty()); });
-//
-//     while (!event_q.empty()) {
-//       tmp_event = event_q.front();
-//       if(tmp_event->getType() == Event::Type::MANAGER_SHUTDOWN_EVENT){
-//         this->running = false;
-//       }
-//       this->logger->log(event_q.front());
-//       std::thread(event_processor, tmp_event).detach();
-//       this->event_q.pop();
-//       tmp_event = nullptr;
-//     }
-//   }
-// }
 
 void Event::Manager::registerHandler(Event::Handler* handler)
 {
