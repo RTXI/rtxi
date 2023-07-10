@@ -74,9 +74,18 @@ target_link_libraries(rtxi PUBLIC
     dl
 )
 
+add_library(workspace OBJECT
+    workspace.hpp workspace.cpp
+)
+
+target_link_libraries(workspace PUBLIC
+    rtxi
+    dlplugin
+    HDF5::HDF5
+)
+
 # Create RTXI executable
 add_executable(rtxi_exe
-    workspace.hpp workspace.cpp
     main_window.hpp main_window.cpp
     tempmain.cpp
 )
@@ -93,6 +102,7 @@ target_link_libraries(rtxi_exe PUBLIC
     xfifo
     rtos 
     rtxi
+    workspace
     rtmath_lib
     performance_measurement_lib
     userprefs_lib
@@ -102,7 +112,6 @@ target_link_libraries(rtxi_exe PUBLIC
     data_recorder_lib
     Boost::headers
     qwt::qwt
-    HDF5::HDF5
     backtrace
     dl
 )

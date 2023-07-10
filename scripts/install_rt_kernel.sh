@@ -36,6 +36,7 @@ export xenomai_root=~/git/xenomai-$xenomai_version
 export scripts_dir=`pwd`
 export build_root=/opt/build
 export opt=/opt
+export linux_tree=/opt/linux-dovetail
 
 rm -rf $build_root
 mkdir $build_root
@@ -88,7 +89,7 @@ echo  "-----> Kernel compilation complete."
 echo  "-----> Installing compiled kernel"
 sudo dpkg -i ../linux-image*.deb
 sudo dpkg -i ../linux-headers*.deb
-sudo dpkg -i ../linux-glibc*.deb
+#sudo dpkg -i ../linux-glibc*.deb
 echo  "-----> Kernel installation complete."
 
 # Update

@@ -24,6 +24,7 @@
 #include <gtest/gtest.h>
 
 #include "module.hpp"
+#include "workspace.hpp"
 
 class PluginObjectTest : public ::testing::Test
 {
@@ -38,12 +39,12 @@ protected:
   PluginManagerTest()
   {
     this->ev_manager = std::make_unique<Event::Manager>();
-    this->mod_manager = std::make_unique<Modules::Manager>(ev_manager.get());
+    this->mod_manager = std::make_unique<Workspace::Manager>(ev_manager.get());
   }
   ~PluginManagerTest() = default;
 
   std::unique_ptr<Event::Manager> ev_manager;
-  std::unique_ptr<Modules::Manager> mod_manager;
+  std::unique_ptr<Workspace::Manager> mod_manager;
 };
 
 #endif

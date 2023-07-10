@@ -36,12 +36,14 @@ target_link_libraries(rtxiTests PRIVATE
     rtos
     xfifo
     rtxi
+    workspace
     rtmath_lib
     performance_measurement_lib
     userprefs_lib
     system_control_lib
     connector_lib
     oscilloscope_lib
+    data_recorder_lib
     qwt::qwt
 )
 
