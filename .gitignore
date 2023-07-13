@@ -29,3 +29,4 @@ moc_*
 *.swp
 compile_commands.json
 .cache
+_CPack_Packages/

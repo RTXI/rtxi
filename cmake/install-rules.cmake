@@ -9,34 +9,49 @@ install(
     RUNTIME COMPONENT rtxi_Runtime
 )
 
+install(
+    TARGETS rtxi xfifo rtos dlplugin
+    EXPORT rtxiLibraryTargets
+)
+
+install(
+    FILES 
+        src/debug.hpp src/event.hpp src/io.hpp src/rt.hpp 
+        src/daq.hpp src/module.hpp src/logger.hpp src/fifo.hpp
+        src/rtos.hpp src/dlplugin.hpp 
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/rtxi
+    COMPONENT rtxiLibraryTargets
+)
+
+install(
+    EXPORT rtxiLibraryTargets
+    NAMESPACE rtxi::
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/rtxi
+)
+
+#export(EXPORT rtxiLibraryTargets
+#    FILE "${CMAKE_CURRENT_BINARY_DIRECTORY}/cmake/rtxiLibraryTargets.cmake"
+#    NAMESPACE rtxi::
+#)
+
 write_basic_package_version_file(
     "${package}ConfigVersion.cmake"
     COMPATIBILITY SameMajorVersion
 )
 
-# Allow package maintainers to freely override the path for the configs
-set(
-    rtxi_INSTALL_CMAKEDIR "${CMAKE_INSTALL_DATADIR}/${package}"
-    CACHE PATH "CMake package config location relative to the install prefix"
-)
-mark_as_advanced(rtxi_INSTALL_CMAKEDIR)
-
-install(
-    FILES "${PROJECT_BINARY_DIR}/${package}ConfigVersion.cmake"
-    DESTINATION "${rtxi_INSTALL_CMAKEDIR}"
-    COMPONENT rtxi_Development
+configure_package_config_file(${CMAKE_CURRENT_SOURCE_DIR}/Config.cmake.in
+    "${CMAKE_CURRENT_BINARY_DIR}/rtxiConfig.cmake"
+    INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/rtxi
 )
 
-# Export variables for the install script to use
-install(CODE "
-set(rtxi_NAME [[$<TARGET_FILE_NAME:rtxi_exe>]])
-set(rtxi_INSTALL_CMAKEDIR [[${rtxi_INSTALL_CMAKEDIR}]])
-set(CMAKE_INSTALL_BINDIR [[${CMAKE_INSTALL_BINDIR}]])
-" COMPONENT rtxi_Development)
-
 install(
-    SCRIPT cmake/install-script.cmake
-    COMPONENT rtxi_Development
+    FILES 
+        "${PROJECT_BINARY_DIR}/${package}ConfigVersion.cmake"
+        "${PROJECT_BINARY_DIR}/${package}Config.cmake"
+    DESTINATION 
+        ${CMAKE_INSTALL_LIBDIR}/cmake/rtxi
+    COMPONENT 
+        rtxi_Development
 )
 
 if(PROJECT_IS_TOP_LEVEL)

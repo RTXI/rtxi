@@ -61,27 +61,57 @@ add_library(rtxi SHARED
     logger.hpp logger.cpp
 )
 
-target_link_libraries(rtxi PUBLIC 
+target_include_directories(rtxi 
+  PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>"
+  "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
+)
+
+target_include_directories(dlplugin
+  PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>"
+  "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
+)
+
+target_include_directories(rtos
+  PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>"
+  "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
+)
+
+target_include_directories(xfifo
+  PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>"
+  "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
+)
+
+target_link_libraries(rtxi 
+  PRIVATE 
     Threads::Threads
     fmt::fmt
-    Qt5::Core
-    Qt5::Gui
-    Qt5::Widgets
     qwt::qwt
     xfifo
     dlplugin
     backtrace
     dl
+  PUBLIC
+    Qt5::Core
+    Qt5::Gui
+    Qt5::Widgets
 )
 
 add_library(workspace OBJECT
     workspace.hpp workspace.cpp
 )
 
-target_link_libraries(workspace PUBLIC
+target_link_libraries(workspace PRIVATE 
     rtxi
     dlplugin
     HDF5::HDF5
+    Qt5::Core
+    Qt5::Gui
+    Qt5::Widgets
+    qwt::qwt
 )
 
 # Create RTXI executable
@@ -98,7 +128,7 @@ set_target_properties(
 )
 
 # Link all of the static and dynamic libraries to rtxi
-target_link_libraries(rtxi_exe PUBLIC 
+target_link_libraries(rtxi_exe PRIVATE 
     xfifo
     rtos 
     rtxi
@@ -112,6 +142,7 @@ target_link_libraries(rtxi_exe PUBLIC
     data_recorder_lib
     Boost::headers
     qwt::qwt
+    fmt::fmt
     backtrace
     dl
 )
