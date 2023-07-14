@@ -5,7 +5,8 @@ add_library(data_recorder_lib OBJECT
     data_recorder.cpp
 )
 
-target_link_libraries(data_recorder_lib PUBLIC
+target_link_libraries(data_recorder_lib PUBLIC 
     rtxi
-    HDF5::HDF5
+    hdf5::hdf5_hl
+    hdf5::hdf5
 )

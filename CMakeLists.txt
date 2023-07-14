@@ -20,6 +20,7 @@ set(RTXI_PLUGIN_DIR ${CMAKE_INSTALL_PREFIX}/rtxi/modules/)
 configure_file(rtxiConfig.h.in rtxiConfig.h)
 include(cmake/project-is-top-level.cmake)
 include(cmake/variables.cmake)
+include(GNUInstallDirs)
 
 # We need to let third-party tools know how to compile our project
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -42,7 +43,7 @@ include_directories(${PROJECT_BINARY_DIR})
 
 #Find the packages
 find_package(fmt REQUIRED)
-find_package(HDF5 REQUIRED)
+find_package(HDF5 REQUIRED COMPONENTS C HL)
 #find_package(libgit2 CONFIG REQUIRED)
 find_package(Qt5 REQUIRED COMPONENTS Core Gui Widgets)
 find_package(qwt REQUIRED)

@@ -143,6 +143,7 @@ target_link_libraries(rtxi_exe PRIVATE
     Boost::headers
     qwt::qwt
     fmt::fmt
+    HDF5::HDF5
     backtrace
     dl
 )

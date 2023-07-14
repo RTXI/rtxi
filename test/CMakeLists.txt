@@ -45,6 +45,8 @@ target_link_libraries(rtxiTests PRIVATE
     oscilloscope_lib
     data_recorder_lib
     qwt::qwt
+    fmt::fmt
+    HDF5::HDF5
 )
 
 add_library(fakePlugin MODULE fakePlugin.h fakePlugin.cpp)

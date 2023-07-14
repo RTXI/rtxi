@@ -27,7 +27,6 @@
 #include <string>
 
 #include "data_recorder.h"
-#include <hdf5_hl.h>
 #include <unistd.h>
 
 #include "debug.hpp"
@@ -559,7 +558,7 @@ void DataRecorder::Plugin::open_trial_group(const std::unique_lock<std::shared_m
   for(auto& channel : this->m_recording_channels_list){
     channel.hdf5_data_handle = 
         H5PTcreate_fl(this->hdf5_handles.sync_group_handle,
-                      "Data",
+                      channel.channel.name.c_str(),
                       this->hdf5_handles.channel_datatype_handle,
                       this->m_data_chunk_size,
                       this->m_compression_factor);
