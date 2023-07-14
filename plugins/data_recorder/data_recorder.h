@@ -185,17 +185,24 @@ public:
   int apply_tag(const std::string& tag);
 
 private:
+  void append_new_trial();
+  void close_trial_group(const std::unique_lock<std::shared_mutex>& lock);
+  void open_trial_group(const std::unique_lock<std::shared_mutex>& lock);
+  void process_data_worker();
+  void save_data(hid_t data_id, 
+                 const std::vector<data_token_t>& data,
+                 size_t packet_count);
+  hsize_t m_data_chunk_size= static_cast<hsize_t>(10000);
+  int m_compression_factor = 5;
   struct hdf5_handles
   {
     hid_t file_handle;
     hid_t trial_group_handle;
     hid_t attribute_handle;
     hid_t sync_group_handle;
-    hid_t sync_dataset_handle;
     hid_t async_group_handle;
-    hid_t async_dataset_handle;
     hid_t sys_data_group_handle;
-    hid_t channel_data_handle;
+    hid_t channel_datatype_handle;
   } hdf5_handles;
 
   struct recorder
@@ -207,15 +214,17 @@ private:
     }
     record_channel channel;
     std::unique_ptr<DataRecorder::Component> component;
+    hid_t hdf5_data_handle;
   };
 
-  void append_new_trial();
   int trial_count = 0;
   std::string hdf5_filename;
   std::thread m_processdata_thread;
   std::vector<recorder> m_recording_channels_list;
   std::shared_mutex m_channels_list_mut;
+  std::shared_mutex m_file_mut;
   std::mutex m_hdf5_file_mut;
+  std::atomic<bool> open_file=false;
 };  // class Plugin
 
 std::unique_ptr<Modules::Plugin> createRTXIPlugin(Event::Manager* ev_manager);
