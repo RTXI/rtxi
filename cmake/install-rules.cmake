@@ -31,6 +31,13 @@ install(
 )
 
 install(
+    DIRECTORY libs/gen
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/rtxi
+    COMPONENT rtxiLibraryTargets
+    FILES_MATCHING PATTERN "*.h"
+)
+
+install(
     EXPORT rtxiLibraryTargets
     NAMESPACE rtxi::
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/rtxi

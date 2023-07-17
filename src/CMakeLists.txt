@@ -148,5 +148,11 @@ target_link_libraries(rtxi_exe PRIVATE
     dl
 )
 
+target_compile_features(rtxi PUBLIC cxx_std_17)
+target_compile_features(rtos PUBLIC cxx_std_17)
+target_compile_features(xfifo PUBLIC cxx_std_17)
+target_compile_features(dlplugin PUBLIC cxx_std_17)
+target_compile_features(rtxi_exe PRIVATE cxx_std_17)
+
 target_compile_definitions(rtxi_exe PRIVATE BOOST_STACKTRACE_USE_ADDR2LINE)
 target_compile_definitions(rtxi_exe PRIVATE BOOST_STACKTRACE_USE_BACKTRACE)
