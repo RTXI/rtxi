@@ -9,11 +9,10 @@
 double
 sinc(double x)
 {
-  if (x == 0.0) {
-    return (1.0);
-  } else {
-    return (sin(x) / x);
-  }
+  if (x < std::numeric_limits<double>::epsilon()*2) {
+    return 1.0;
+  }      
+  return (sin(x) / x);
 }
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
