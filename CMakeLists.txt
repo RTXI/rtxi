@@ -50,6 +50,7 @@ find_package(qwt REQUIRED)
 find_package(GTest REQUIRED)
 find_package(Threads REQUIRED)
 find_package(Boost REQUIRED)
+find_package(GSL REQUIRED)
 
 #Handle QT and boost libraries shenanigans
 set(CMAKE_AUTOMOC ON)
