@@ -10,7 +10,7 @@ install(
 )
 
 install(
-    TARGETS rtxi xfifo rtos dlplugin rtdsp
+    TARGETS rtxi xfifo rtos dlplugin rtdsp rtgen
     EXPORT rtxiLibraryTargets
 )
 
