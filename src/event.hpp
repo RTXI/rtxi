@@ -34,8 +34,6 @@
 #include <thread>
 #include <vector>
 
-#include "fifo.hpp"
-
 class eventLogger;
 
 /*!

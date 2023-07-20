@@ -159,7 +159,7 @@ void Modules::Panel::closeEvent(QCloseEvent* event)
 }
 
 void Modules::Panel::createGUI(const std::vector<Modules::Variable::Info>& vars,
-                               QMainWindow* mw)
+                               const std::vector<Modules::Variable::Id>& skip_ids)
 {
   // Make Mdi
   this->m_subwindow->setAttribute(Qt::WA_DeleteOnClose);
@@ -180,21 +180,15 @@ void Modules::Panel::createGUI(const std::vector<Modules::Variable::Info>& vars,
   gridArea->ensureWidgetVisible(this->gridBox, 0, 0);
   gridArea->setWidgetResizable(true);
   auto* gridLayout = new QGridLayout;
-
+  int param_count = 0;
   for (const auto& varinfo : vars) {
+    // Skip any unwanted ids
+    if(std::count(skip_ids.begin(), skip_ids.end(), varinfo.id) != 0) { continue; }
     param_t param;
-
     param.label = new QLabel(QString::fromStdString(varinfo.name), gridBox);
-    gridLayout->addWidget(
-        param.label, static_cast<int>(this->parameter.size()), 0);
-    gridLayout->addWidget(
-        param.edit, static_cast<int>(this->parameter.size()), 1);
-
-    param.label->setToolTip(QString::fromStdString(varinfo.description));
-    param.edit->setToolTip(QString::fromStdString(varinfo.description));
-
-    param.str_value = QString();
-    param.label = new QLabel;
+    param.edit = new DefaultGUILineEdit(nullptr);
+        param.str_value = QString();
+    //param.label = new QLabel;
     param.type = varinfo.vartype;
     param.info = varinfo;
     switch (varinfo.vartype) {
@@ -222,7 +216,13 @@ void Modules::Panel::createGUI(const std::vector<Modules::Variable::Info>& vars,
                   varinfo.name,
                   this->getName());
     }
+    param.label->setToolTip(QString::fromStdString(varinfo.description));
+    param.edit->setToolTip(QString::fromStdString(varinfo.description));
+
     parameter[QString::fromStdString(varinfo.name)] = param;
+    gridLayout->addWidget(param.label, param_count, 0);
+    gridLayout->addWidget(param.edit, param_count, 1);
+    param_count++;
   }
 
   // Create child widget
@@ -254,9 +254,9 @@ void Modules::Panel::createGUI(const std::vector<Modules::Variable::Info>& vars,
   // Attempt to put these at the bottom at all times
   m_layout->addWidget(buttonGroup, 10, 0);
 
+  this->setLayout(this->m_layout);
   // Set layout to Mdi and show
-  setLayout(m_layout);
-  m_subwindow->setWidget(this);
+  this->getMdiWindow()->setFixedSize(this->minimumSizeHint());
   m_subwindow->show();
 }
 
@@ -278,7 +278,7 @@ void Modules::Panel::exit()
   event.setParam("pluginPointer",
                  std::any(static_cast<Modules::Plugin*>(this->hostPlugin)));
   this->event_manager->postEvent(&event);
-  // this->m_subwindow->close();
+  this->m_subwindow->close();
 }
 
 void Modules::Panel::refresh()

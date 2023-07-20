@@ -146,10 +146,10 @@ private slots:
   void modulesMenuActivated(QAction*);
   void fileMenuActivated(QAction*);
   void utilitiesMenuActivated(QAction*);
-
   void systemMenuActivated(QAction*);
 
 private:
+  void loadModule(const QString& module_name);
   Event::Manager* event_manager;
   QMdiArea* mdiArea = nullptr;
   QList<QMdiSubWindow*> subWindows;
@@ -174,12 +174,13 @@ private:
   QAction* adocs = nullptr;
   QAction* sub_issue = nullptr;
   QAction* utilItem = nullptr;
+  QAction* loadDynamicModule = nullptr;
+  QAction* openDataRecorder = nullptr;
   QAction* openRTBenchmarks = nullptr;
   QAction* openUserPrefs = nullptr;
   QAction* openControlPanel = nullptr;
   QAction* openConnector = nullptr;
   QAction* openOscilloscope = nullptr;
-  QAction* openDataRecorder = nullptr;
 
   void createFileMenu();
   void createModuleMenu();

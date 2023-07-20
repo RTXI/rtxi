@@ -22,7 +22,6 @@
 #include "dlplugin.hpp"
 #include "event.hpp"
 #include "io.hpp"
-#include "rt.hpp"
 
 /*!
  * Contains all the classes and structures relevant to Modules
@@ -220,13 +219,14 @@ public:
   /*!
    * Function that builds the Qt GUI.
    *
-   * \param var The structure defining the module's parameters, states, inputs,
-   * and outputs. \param size The size of the structure vars.
+   * \param vars The structure defining the module's parameters, states, inputs,
+   *    and outputs. 
+   * \param skip_ids A vector of IDs that this function should not consider 
+   *    building interface for.
    *
-   * \sa DefaultGUIModel::update_flags_t
    */
   virtual void createGUI(const std::vector<Modules::Variable::Info>& vars,
-                         QMainWindow* mw);
+                         const std::vector<Modules::Variable::Id>& skip_ids);
 
   /*!
    * Assigns a plugin to this panel. Typically used during construction of the
@@ -353,14 +353,16 @@ protected:
    */
   Event::Manager* getRTXIEventManager() { return this->event_manager; }
 
+protected:
+  QWidget* gridBox = nullptr;
+  QGridLayout* m_layout = nullptr;
+  QGroupBox* buttonGroup = nullptr;
+
 private:
   QMainWindow* main_window = nullptr;
-  QWidget* gridBox = nullptr;
-  QGroupBox* buttonGroup = nullptr;
   std::string m_name;
   QMdiSubWindow* m_subwindow = nullptr;
   Modules::Plugin* hostPlugin = nullptr;
-  QGridLayout* m_layout = nullptr;
   Event::Manager* event_manager = nullptr;
 
   // Default buttons

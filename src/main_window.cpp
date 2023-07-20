@@ -127,6 +127,7 @@ void MainWindow::setModuleMenuItemParameter(QAction* action, int parameter)
 void MainWindow::clearModuleMenu()
 {
   moduleMenu->clear();
+
 }
 
 void MainWindow::changeModuleMenuItem(QAction* action, const QString& text)
@@ -167,6 +168,8 @@ void MainWindow::createFileMenu()
 void MainWindow::createModuleMenu()
 {
   moduleMenu = menuBar()->addMenu(tr("&Modules"));
+  this->loadDynamicModule = new QAction("Load Plugin", this);
+  moduleMenu->addAction(this->loadDynamicModule);
   connect(moduleMenu,
           SIGNAL(triggered(QAction*)),
           this,
@@ -424,10 +427,10 @@ void MainWindow::utilitiesMenuActivated(QAction* /*unused*/)
   // Plugin::Manager::getInstance()->load(id->text());
 }
 
-void MainWindow::systemMenuActivated(QAction* id)
+void MainWindow::loadModule(const QString& module_name)
 {
   Event::Object event(Event::Type::PLUGIN_INSERT_EVENT);
-  event.setParam("pluginName", std::any(id->text().toStdString()));
+  event.setParam("pluginName", std::any(module_name.toStdString()));
   this->event_manager->postEvent(&event);
 
   // If something goes wrong just give up
@@ -445,6 +448,11 @@ void MainWindow::systemMenuActivated(QAction* id)
       create_rtxi_panel_func(this, this->event_manager));
   // finally plugins can also receive events so make sure to register them
   this->event_manager->registerHandler(rtxi_plugin_pointer);
+}
+
+void MainWindow::systemMenuActivated(QAction* id)
+{
+  this->loadModule(id->text());
 }
 
 void MainWindow::windowsMenuAboutToShow()
@@ -493,15 +501,11 @@ void MainWindow::windowsMenuActivated(QAction* id)
 
 void MainWindow::modulesMenuActivated(QAction* /*unused*/)
 {
-  // // Annoying but the best way to do it is to tie an action to the entire
-  // menu
-  // // so we have to tell it to ignore the first two modules
-  // if (id->text().contains("Load Plugin"))
-  //   return;
-
-  // // Have to trim the first three characters before loading
-  // // or else parser will include qstring formatting
-  // Plugin::Manager::getInstance()->load(id->text().remove(0, 3));
+  QString filename = QFileDialog::getOpenFileName(this, 
+                                                  tr("Load Plugin"), 
+                                                  QString::fromStdString(std::string(RTXI_DEFAULT_PLUGIN_DIR)),
+                                                  tr("Plugins (*.so);;All (*.*)"));
+  this->loadModule(filename);
 }
 
 void MainWindow::fileMenuActivated(QAction* id)
