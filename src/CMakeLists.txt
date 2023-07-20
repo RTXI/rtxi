@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.24)
 
 if(DEFINED evl_FOUND AND RTXI_RT_CORE STREQUAL "evl")
+  message("EVL library found. Using EVL rtos interface")
   list(APPEND CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES ${evl_INCLUDE_DIRS})
   add_library(dlplugin SHARED "dlplugin.hpp" "dlplugin.cpp")
   add_library(xfifo SHARED "fifo.hpp" "fifo_evl.cpp")
@@ -92,6 +93,7 @@ target_link_libraries(rtxi
     qwt::qwt
     xfifo
     dlplugin
+    Boost::headers
     backtrace
     dl
   PUBLIC
@@ -112,6 +114,9 @@ target_link_libraries(workspace PRIVATE
     Qt5::Gui
     Qt5::Widgets
     qwt::qwt
+    Boost::headers
+    backtrace
+    dl
 )
 
 # Create RTXI executable
@@ -156,3 +161,5 @@ target_compile_features(rtxi_exe PRIVATE cxx_std_17)
 
 target_compile_definitions(rtxi_exe PRIVATE BOOST_STACKTRACE_USE_ADDR2LINE)
 target_compile_definitions(rtxi_exe PRIVATE BOOST_STACKTRACE_USE_BACKTRACE)
+target_compile_definitions(rtxi PRIVATE BOOST_STACKTRACE_USE_ADDR2LINE)
+target_compile_definitions(rtxi PRIVATE BOOST_STACKTRACE_USE_BACKTRACE)
