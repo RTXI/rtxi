@@ -89,10 +89,10 @@ PerformanceMeasurement::Panel::Panel(const std::string& mod_name,
   this->getMdiWindow()->setFixedSize(this->minimumSizeHint());
   show();
 
-  auto* timer = new QTimer(this);
-  timer->setTimerType(Qt::PreciseTimer);
-  timer->start(1000);
-  QObject::connect(timer, SIGNAL(timeout(void)), this, SLOT(update(void)));
+  //auto* timer = new QTimer(this);
+  //timer->setTimerType(Qt::PreciseTimer);
+  //timer->start(1000);
+  //QObject::connect(timer, SIGNAL(timeout(void)), this, SLOT(update(void)));
 }
 
 PerformanceMeasurement::Component::Component(Modules::Plugin* hplugin)
