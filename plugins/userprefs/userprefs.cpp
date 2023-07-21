@@ -136,7 +136,6 @@ UserPrefs::Panel::Panel(QMainWindow* mwindow, Event::Manager* ev_manager)
 
   // Set layout to Mdi
   this->getMdiWindow()->setFixedSize(500, this->sizeHint().height() + 50);
-  show();
 }
 
 void UserPrefs::Panel::reset()

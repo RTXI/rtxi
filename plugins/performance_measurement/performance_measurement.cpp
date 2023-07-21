@@ -33,7 +33,7 @@ PerformanceMeasurement::Panel::Panel(const std::string& mod_name,
     : Modules::Panel(mod_name, mwindow, ev_manager)
 {
   // Create main layout
-  auto* box_layout = new QVBoxLayout;
+  //auto* box_layout = new QVBoxLayout;
   const QString suffix = QString("s)").prepend(QChar(0x3BC));
 
   // Create child widget and gridLayout
@@ -79,20 +79,14 @@ PerformanceMeasurement::Panel::Panel(const std::string& mod_name,
   QObject::connect(resetButton, SIGNAL(released()), this, SLOT(reset()));
 
   // Attach child widget to parent widget
-  box_layout->addLayout(gridLayout);
+  //box_layout->addLayout(gridLayout);
 
   // Attach gridLayout to Widget
-  setLayout(box_layout);
+  setLayout(gridLayout);
   setWindowTitle(tr(std::string(PerformanceMeasurement::MODULE_NAME).c_str()));
 
   // Set layout to Mdi
   this->getMdiWindow()->setFixedSize(this->minimumSizeHint());
-  show();
-
-  //auto* timer = new QTimer(this);
-  //timer->setTimerType(Qt::PreciseTimer);
-  //timer->start(1000);
-  //QObject::connect(timer, SIGNAL(timeout(void)), this, SLOT(update(void)));
 }
 
 PerformanceMeasurement::Component::Component(Modules::Plugin* hplugin)

@@ -148,7 +148,6 @@ Connector::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
 
   // Set layout to Mdi
   this->getMdiWindow()->resize(500, this->sizeHint().height());
-  show();
 
   // populate field with block and connection info
   this->syncBlockInfo();

@@ -282,7 +282,6 @@ SystemControl::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
   // Updates settings for device and builds lists of channels
   updateDevice();
   display();
-  show();
 }
 
 void SystemControl::Panel::apply()

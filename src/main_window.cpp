@@ -444,10 +444,13 @@ void MainWindow::loadModule(const QString& module_name)
           event.getParam("createRTXIPanel"));
   auto* rtxi_plugin_pointer =
       std::any_cast<Modules::Plugin*>(event.getParam("pluginPointer"));
-  rtxi_plugin_pointer->attachPanel(
-      create_rtxi_panel_func(this, this->event_manager));
+  auto* rtxi_panel_pointer = create_rtxi_panel_func(this, this->event_manager);
+  rtxi_plugin_pointer->attachPanel(rtxi_panel_pointer);
   // finally plugins can also receive events so make sure to register them
   this->event_manager->registerHandler(rtxi_plugin_pointer);
+
+  // show the panel please
+  rtxi_panel_pointer->show();
 }
 
 void MainWindow::systemMenuActivated(QAction* id)

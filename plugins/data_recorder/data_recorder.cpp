@@ -240,7 +240,6 @@ DataRecorder::Panel::Panel(QMainWindow* mwindow, Event::Manager* ev_manager)
 
   // Set layout to Mdi
   this->getMdiWindow()->setFixedSize(this->minimumSizeHint());
-  show();
 
   // Build initial block list
   Event::Object event(Event::Type::IO_BLOCK_QUERY_EVENT);

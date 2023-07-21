@@ -202,12 +202,6 @@ public:
         QMainWindow* mw,
         Event::Manager* ev_manager);
 
-  /*
-   * Getter function go allow customization of
-   * user interface
-   */
-  QGridLayout* getLayout() { return m_layout; };
-
   QMdiSubWindow* getMdiWindow() { return this->m_subwindow; }
   /*!
    * Callback function that is called when the system state changes.
@@ -352,11 +346,6 @@ protected:
    * \return Pointer to the RTXI event manager
    */
   Event::Manager* getRTXIEventManager() { return this->event_manager; }
-
-protected:
-  QWidget* gridBox = nullptr;
-  QGridLayout* m_layout = nullptr;
-  QGroupBox* buttonGroup = nullptr;
 
 private:
   QMainWindow* main_window = nullptr;

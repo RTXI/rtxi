@@ -145,7 +145,9 @@ Modules::Plugin* Workspace::Manager::loadPlugin(const std::string& library)
     this->m_plugin_loader->unload(library_loc.c_str());
     return nullptr;
   }
-
+  std::unique_ptr<Modules::Component> component = 
+      fact_methods->createComponent(plugin.get());
+  plugin->attachComponent(std::move(component));
   // if (plugin->magic_number != Plugin::Object::MAGIC_NUMBER) {
   //   ERROR_MSG(
   //       "Plugin::load : the pointer returned from {}::createRTXIPlugin()
@@ -155,6 +157,7 @@ Modules::Plugin* Workspace::Manager::loadPlugin(const std::string& library)
   //   return 0;
   // }
   plugin_ptr = this->registerModule(std::move(plugin));
+
   return plugin_ptr;
 }
 

@@ -1025,7 +1025,6 @@ Oscilloscope::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
       this, SIGNAL(updateBlockInfo()), this, SLOT(syncBlockInfo()));
   this->updateBlockInfo();
   scopeWindow->replot();
-  show();
 }
 
 Oscilloscope::Component::Component(Modules::Plugin* hplugin,

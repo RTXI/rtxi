@@ -162,33 +162,28 @@ void Modules::Panel::createGUI(const std::vector<Modules::Variable::Info>& vars,
                                const std::vector<Modules::Variable::Id>& skip_ids)
 {
   // Make Mdi
-  this->m_subwindow->setAttribute(Qt::WA_DeleteOnClose);
-  // m_subwindow->setWindowIcon(QIcon("/usr/local/share/rtxi/RTXI-widget-icon.png"));
-  this->m_subwindow->setWindowFlags(Qt::CustomizeWindowHint
-                                    | Qt::WindowCloseButtonHint
-                                    | Qt::WindowMinimizeButtonHint);
-  this->m_subwindow->setOption(QMdiSubWindow::RubberBandResize, true);
-  this->m_subwindow->setOption(QMdiSubWindow::RubberBandMove, true);
+  //this->m_subwindow->setAttribute(Qt::WA_DeleteOnClose);
+  //// m_subwindow->setWindowIcon(QIcon("/usr/local/share/rtxi/RTXI-widget-icon.png"));
+  //this->m_subwindow->setWindowFlags(Qt::CustomizeWindowHint
+  //                                  | Qt::WindowCloseButtonHint
+  //                                  | Qt::WindowMinimizeButtonHint);
+  //this->m_subwindow->setOption(QMdiSubWindow::RubberBandResize, true);
+  //this->m_subwindow->setOption(QMdiSubWindow::RubberBandMove, true);
 
   // Create main layout
-  this->m_layout = new QGridLayout;
+  auto* main_layout = new QVBoxLayout;
 
-  // Create child widget and gridLayout
-  auto* gridArea = new QScrollArea;
-  this->gridBox = new QWidget;
-  gridArea->setWidget(this->gridBox);
-  gridArea->ensureWidgetVisible(this->gridBox, 0, 0);
-  gridArea->setWidgetResizable(true);
-  auto* gridLayout = new QGridLayout;
+  // Create child widget and it's layout
+  auto* customParamArea = new QGroupBox;
+  auto* customParamLayout = new QGridLayout;
   int param_count = 0;
   for (const auto& varinfo : vars) {
     // Skip any unwanted ids
     if(std::count(skip_ids.begin(), skip_ids.end(), varinfo.id) != 0) { continue; }
     param_t param;
-    param.label = new QLabel(QString::fromStdString(varinfo.name), gridBox);
-    param.edit = new DefaultGUILineEdit(nullptr);
-        param.str_value = QString();
-    //param.label = new QLabel;
+    param.label = new QLabel(QString::fromStdString(varinfo.name), customParamArea);
+    param.edit = new DefaultGUILineEdit(customParamArea);
+    param.str_value = QString();
     param.type = varinfo.vartype;
     param.info = varinfo;
     switch (varinfo.vartype) {
@@ -220,13 +215,14 @@ void Modules::Panel::createGUI(const std::vector<Modules::Variable::Info>& vars,
     param.edit->setToolTip(QString::fromStdString(varinfo.description));
 
     parameter[QString::fromStdString(varinfo.name)] = param;
-    gridLayout->addWidget(param.label, param_count, 0);
-    gridLayout->addWidget(param.edit, param_count, 1);
+    customParamLayout->addWidget(param.label, param_count, 0);
+    customParamLayout->addWidget(param.edit, param_count, 1);
     param_count++;
   }
 
+  customParamArea->setLayout(customParamLayout);
   // Create child widget
-  buttonGroup = new QGroupBox;
+  auto* buttonGroup = new QGroupBox;
   auto* buttonLayout = new QHBoxLayout;
 
   // Create elements
@@ -244,20 +240,13 @@ void Modules::Panel::createGUI(const std::vector<Modules::Variable::Info>& vars,
   QObject::connect(unloadButton, SIGNAL(clicked(void)), this, SLOT(exit(void)));
   buttonLayout->addWidget(unloadButton);
 
-  // Add layout to box
-  gridBox->setLayout(gridLayout);
   buttonGroup->setLayout(buttonLayout);
 
-  // Keep one row of space above for users to place in grid
-  m_layout->addWidget(gridArea, 1, 0);
+  main_layout->addWidget(customParamArea, 0);
 
-  // Attempt to put these at the bottom at all times
-  m_layout->addWidget(buttonGroup, 10, 0);
+  main_layout->addWidget(buttonGroup, 1);
 
-  this->setLayout(this->m_layout);
-  // Set layout to Mdi and show
-  this->getMdiWindow()->setFixedSize(this->minimumSizeHint());
-  m_subwindow->show();
+  this->setLayout(main_layout);
 }
 
 void Modules::Panel::update(Modules::Variable::state_t /*unused*/)
@@ -288,7 +277,7 @@ void Modules::Panel::refresh()
   int64_t int_value = 0;
   uint64_t uint_value = 0ULL;
   std::stringstream sstream;
-  for (auto i : this->parameter) {
+  for (auto& i : this->parameter) {
     switch (i.second.type) {
       case Modules::Variable::STATE:
         i.second.edit->setText(i.second.str_value);
@@ -511,6 +500,8 @@ void Modules::Plugin::registerComponent()
 void Modules::Plugin::attachComponent(
     std::unique_ptr<Modules::Component> component)
 {
+  // If there is a component already attached then cancel attach
+  if(this->plugin_component != nullptr) { return; }
   this->plugin_component = std::move(component);
   this->registerComponent();
 }
