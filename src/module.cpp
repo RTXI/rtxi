@@ -154,22 +154,13 @@ Modules::Panel::Panel(const std::string& mod_name,
 
 void Modules::Panel::closeEvent(QCloseEvent* event)
 {
-  this->exit();
   event->accept();
+  this->exit();
 }
 
 void Modules::Panel::createGUI(const std::vector<Modules::Variable::Info>& vars,
                                const std::vector<Modules::Variable::Id>& skip_ids)
 {
-  // Make Mdi
-  //this->m_subwindow->setAttribute(Qt::WA_DeleteOnClose);
-  //// m_subwindow->setWindowIcon(QIcon("/usr/local/share/rtxi/RTXI-widget-icon.png"));
-  //this->m_subwindow->setWindowFlags(Qt::CustomizeWindowHint
-  //                                  | Qt::WindowCloseButtonHint
-  //                                  | Qt::WindowMinimizeButtonHint);
-  //this->m_subwindow->setOption(QMdiSubWindow::RubberBandResize, true);
-  //this->m_subwindow->setOption(QMdiSubWindow::RubberBandMove, true);
-
   // Create main layout
   auto* main_layout = new QVBoxLayout;
 
@@ -189,10 +180,15 @@ void Modules::Panel::createGUI(const std::vector<Modules::Variable::Info>& vars,
     switch (varinfo.vartype) {
       case Modules::Variable::DOUBLE_PARAMETER:
         param.edit->setValidator(new QDoubleValidator(param.edit));
+        param.edit->setText(QString::number(std::get<double>(varinfo.value)));
         break;
       case Modules::Variable::UINT_PARAMETER:
+        param.edit->setValidator(new QIntValidator(param.edit));
+        param.edit->setText(QString::number(std::get<uint64_t>(varinfo.value)));
+        break;
       case Modules::Variable::INT_PARAMETER:
         param.edit->setValidator(new QIntValidator(param.edit));
+        param.edit->setText(QString::number(std::get<int64_t>(varinfo.value)));
         break;
       case Modules::Variable::STATE:
         param.edit->setReadOnly(true);
@@ -213,7 +209,7 @@ void Modules::Panel::createGUI(const std::vector<Modules::Variable::Info>& vars,
     }
     param.label->setToolTip(QString::fromStdString(varinfo.description));
     param.edit->setToolTip(QString::fromStdString(varinfo.description));
-
+    param.str_value = param.edit->text();
     parameter[QString::fromStdString(varinfo.name)] = param;
     customParamLayout->addWidget(param.label, param_count, 0);
     customParamLayout->addWidget(param.edit, param_count, 1);
@@ -233,11 +229,11 @@ void Modules::Panel::createGUI(const std::vector<Modules::Variable::Info>& vars,
 
   modifyButton = new QPushButton("Modify", this);
   QObject::connect(
-      modifyButton, SIGNAL(clicked(void)), this, SLOT(modify(void)));
+      modifyButton, SIGNAL(clicked()), this, SLOT(modify()));
   buttonLayout->addWidget(modifyButton);
 
   unloadButton = new QPushButton("Unload", this);
-  QObject::connect(unloadButton, SIGNAL(clicked(void)), this, SLOT(exit(void)));
+  QObject::connect(unloadButton, SIGNAL(clicked()), parentWidget(), SLOT(close()));
   buttonLayout->addWidget(unloadButton);
 
   buttonGroup->setLayout(buttonLayout);
@@ -267,7 +263,7 @@ void Modules::Panel::exit()
   event.setParam("pluginPointer",
                  std::any(static_cast<Modules::Plugin*>(this->hostPlugin)));
   this->event_manager->postEvent(&event);
-  this->m_subwindow->close();
+  //this->m_subwindow->close();
 }
 
 void Modules::Panel::refresh()

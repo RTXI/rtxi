@@ -246,7 +246,6 @@ Event::Manager::Manager()
             [this] { return !(this->event_q.empty()) || !this->running; });
         event = this->event_q.front();
         this->event_q.pop();
-        event_lock.unlock();
         if (event == nullptr || !this->running) {
           continue;
         }
