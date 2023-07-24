@@ -405,11 +405,11 @@ void Modules::Panel::pause(bool p)
   if (pauseButton->isChecked() != p) {
     pauseButton->setDown(p);
   }
-  const int result = this->hostPlugin->setActive(!p);
-  if (result != 0) {
-    ERROR_MSG("Unable to pause/Unpause Plugin {} ", this->getName());
-    return;
-  }
+  //const int result = this->hostPlugin->setActive(!p);
+  //if (result != 0) {
+  //  ERROR_MSG("Unable to pause/Unpause Plugin {} ", this->getName());
+  //  return;
+  //}
   if (p) {
     this->update(Modules::Variable::PAUSE);
   } else {
@@ -499,6 +499,9 @@ void Modules::Plugin::attachComponent(
   // If there is a component already attached then cancel attach
   if(this->plugin_component != nullptr) { return; }
   this->plugin_component = std::move(component);
+  // Let's set the component as active before registering it to rt thread
+  // this avoids unecessary use of event firing which is much slower
+  this->plugin_component->setActive(/*act=*/true);
   this->registerComponent();
 }
 
