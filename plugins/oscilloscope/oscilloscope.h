@@ -68,7 +68,7 @@ inline std::vector<IO::channel_t> get_default_channels()
            "inputs and "
            "output ports",
            IO::INPUT,
-           0}};
+           1}};
 }
 
 namespace Trigger

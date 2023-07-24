@@ -101,6 +101,10 @@ Modules::Plugin* Workspace::Manager::loadPlugin(const std::string& library)
     std::unique_ptr<Modules::Plugin> plugin =
         this->rtxi_factories_registry[library_loc].createPlugin(
             this->event_manager);
+    std::unique_ptr<Modules::Component> component = 
+        this->rtxi_factories_registry[library_loc].createComponent(
+            plugin.get());
+    plugin->attachComponent(std::move(component));
     plugin_ptr = this->registerModule(std::move(plugin));
     return plugin_ptr;
   }

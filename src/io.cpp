@@ -100,6 +100,11 @@ void IO::Block::writeoutput(size_t index, const std::vector<double>& data)
       data.begin(), data.end(), this->ports[IO::OUTPUT][index].values.begin());
 }
 
+void IO::Block::writeoutput(size_t index, const double& data)
+{
+  this->ports[IO::OUTPUT][index].values[0] = data;
+}
+
 const std::vector<double>& IO::Block::readPort(IO::flags_t direction,
                                                size_t index)
 {

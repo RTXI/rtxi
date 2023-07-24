@@ -239,7 +239,7 @@ std::vector<RT::Thread*> RT::Connector::getThreads()
 std::vector<RT::block_connection_t> RT::Connector::getOutputs(IO::Block* src)
 {
   auto result = std::vector<RT::block_connection_t>();
-  for (auto conn : this->connections) {
+  for (const auto& conn : this->connections) {
     if (conn.src == src) {
       result.push_back(conn);
     }
@@ -249,7 +249,7 @@ std::vector<RT::block_connection_t> RT::Connector::getOutputs(IO::Block* src)
 
 void RT::Connector::propagateBlockConnections(IO::Block* block)
 {
-  for (auto conn : this->connections) {
+  for (const auto& conn : this->connections) {
     if (conn.src == block) {
       conn.dest->writeinput(
           conn.dest_port,

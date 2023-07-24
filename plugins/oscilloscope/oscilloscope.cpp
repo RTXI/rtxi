@@ -169,7 +169,7 @@ void Oscilloscope::Panel::enableChannel()
   IO::Block* chanblock = this->blocks[static_cast<size_t>(
       this->blocksListDropdown->currentIndex())];
   auto chanport = static_cast<size_t>(port_list_index);
-  auto chandirection = static_cast<IO::flags_t>(direction_list_index);
+  auto chandirection = static_cast<IO::flags_t>(this->typesList->itemData(direction_list_index).toInt());
 
   // this will try to create the probing component first. return if something
   // goes wrong
@@ -255,18 +255,7 @@ void Oscilloscope::Panel::buildChannelList()
 
   IO::Block* block =
       blocks[static_cast<size_t>(blocksListDropdown->currentIndex())];
-  IO::flags_t type = IO::UNKNOWN;
-  switch (typesList->currentIndex()) {
-    case 0:
-      type = IO::INPUT;
-      break;
-    case 1:
-      type = IO::OUTPUT;
-      break;
-    default:
-      ERROR_MSG(
-          "Oscilloscope::Panel::buildChannelList : invalid type selection\n");
-  }
+  auto type = static_cast<IO::flags_t>(this->typesList->currentData().toInt());
 
   for (size_t i = 0; i < block->getCount(type); ++i) {
     channelsList->addItem(
@@ -436,13 +425,11 @@ QWidget* Oscilloscope::Panel::createChannelTab(QWidget* parent)
   typesList = new QComboBox(page);
   typesList->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
   typesList->setSizeAdjustPolicy(QComboBox::AdjustToContents);
-  typesList->addItem("Output");
-  typesList->addItem("Input");
-  // typesList->addItem("Parameter");
-  // typesList->addItem("State");
+  typesList->addItem("Output", static_cast<int>(IO::OUTPUT));
+  typesList->addItem("Input", static_cast<int>(IO::INPUT));
+  row1Layout->addWidget(typesList);
   QObject::connect(
       typesList, SIGNAL(activated(int)), this, SLOT(buildChannelList()));
-  row1Layout->addWidget(typesList);
 
   // Create Channels box
   channelsList = new QComboBox(page);
@@ -774,13 +761,7 @@ void Oscilloscope::Panel::syncBlockInfo()
 // in the display tab
 void Oscilloscope::Panel::showChannelTab()
 {
-  int type_index = this->typesList->currentIndex();
-  if (type_index < 0) {
-    ERROR_MSG("Oscilloscope::Panel::showChannelTab : invalid type\n");
-    typesList->setCurrentIndex(0);
-    type_index = 0;
-  }
-  auto type = static_cast<IO::flags_t>(type_index);
+  auto type = static_cast<IO::flags_t>(this->typesList->currentData().toInt());
 
   const int block_index = this->blocksListDropdown->currentIndex();
   if (block_index < 0 || static_cast<size_t>(block_index) >= blocks.size()

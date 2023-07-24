@@ -169,6 +169,7 @@ protected:
    * \param data A vector of values to send to the channel
    */
   void writeoutput(size_t index, const std::vector<double>& data);
+  void writeoutput(size_t index, const double& data);
 
 private:
   size_t id;

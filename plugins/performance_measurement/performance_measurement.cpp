@@ -198,21 +198,17 @@ PerformanceMeasurement::Plugin::Plugin(Event::Manager* ev_manager)
                       std::string(PerformanceMeasurement::MODULE_NAME))
 {
   auto component = std::make_unique<PerformanceMeasurement::Component>(this);
-  this->attachComponent(std::move(component));
   std::vector<Event::Object> events;
   events.emplace_back(Event::Type::RT_PREPERIOD_EVENT);
   events.emplace_back(Event::Type::RT_POSTPERIOD_EVENT);
   this->getEventManager()->postEvent(events);
   auto* performance_measurement_component =
-      dynamic_cast<PerformanceMeasurement::Component*>(this->getComponent());
+      dynamic_cast<PerformanceMeasurement::Component*>(component.get());
   performance_measurement_component->setTickPointers(
       std::any_cast<int64_t*>(events[0].getParam("pre-period")),
       std::any_cast<int64_t*>(events[1].getParam("post-period")));
 
-  Event::Object activation_event(Event::Type::RT_THREAD_UNPAUSE_EVENT);
-  activation_event.setParam(
-      "thread", std::any(static_cast<RT::Thread*>(this->getComponent())));
-  this->getEventManager()->postEvent(&activation_event);
+  this->attachComponent(std::move(component));
 }
 
 std::unique_ptr<Modules::Plugin> PerformanceMeasurement::createRTXIPlugin(
@@ -231,9 +227,9 @@ Modules::Panel* PerformanceMeasurement::createRTXIPanel(
 }
 
 std::unique_ptr<Modules::Component> PerformanceMeasurement::createRTXIComponent(
-    Modules::Plugin* host_plugin)
+    Modules::Plugin*  /*host_plugin*/)
 {
-  return std::make_unique<PerformanceMeasurement::Component>(host_plugin);
+  return std::make_unique<PerformanceMeasurement::Component>(nullptr);
 }
 
 Modules::FactoryMethods PerformanceMeasurement::getFactories()

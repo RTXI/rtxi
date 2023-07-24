@@ -268,8 +268,8 @@ void Connector::Panel::buildOutputChannelList()
 
 void Connector::Panel::buildOutputFlagList()
 {
-  outputFlag->addItem(QString("INPUT"));
-  outputFlag->addItem(QString("OUTPUT"));
+  outputFlag->addItem(QString("OUTPUT"), static_cast<int>(IO::OUTPUT));
+  outputFlag->addItem(QString("INPUT"), static_cast<int>(IO::INPUT));
 }
 
 void Connector::Panel::highlightConnectionBox(QListWidgetItem* /*item*/)
@@ -320,7 +320,7 @@ void Connector::Panel::toggleConnection(bool on)
   const int src_id = outputBlock->currentIndex();
   const int dest_id = inputBlock->currentIndex();
   const int src_port_id = outputChannel->currentIndex();
-  const int src_port_flag = outputFlag->currentIndex();
+  const int src_port_flag = outputFlag->currentData().toInt();
   const int dest_port_id = inputChannel->currentIndex();
 
   // If no valid selection then do nothing
