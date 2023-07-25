@@ -48,6 +48,29 @@ std::string Modules::Variable::state2string(Modules::Variable::state_t state)
   return result;
 }
 
+std::string Modules::Variable::vartype2string(Modules::Variable::variable_t type)
+{
+  std::string result;
+  switch (type) {
+    case Modules::Variable::INT_PARAMETER:
+      result = std::string("INTEGER");
+      break;
+    case Modules::Variable::DOUBLE_PARAMETER:
+      result = std::string("DOUBLE");
+      break;
+    case Modules::Variable::UINT_PARAMETER:
+      result = std::string("UNSIGNED INTEGER");
+      break;
+    case Modules::Variable::STATE:
+      result = std::string("STATE");
+      break;
+    default:
+      result = std::string("UNKNOWN PARAMETER TYPE");
+      break;
+  }
+  return result;
+}
+
 Modules::DefaultGUILineEdit::DefaultGUILineEdit(QWidget* parent)
     : QLineEdit(parent)
 {

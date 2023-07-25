@@ -57,6 +57,12 @@ void eventLogger::log(Event::Object* event)
                         event->getParam("pluginPointer"))
                         ->getName();
         break;
+      case Event::Type::RT_MODULE_PARAMETER_CHANGE_EVENT:
+        this->ss << "\t SOURCE -- ";
+        this->ss << std::any_cast<Modules::Component*>(event->getParam("paramModule"))->getName();
+        this->ss << " TYPE -- ";
+        this->ss << Modules::Variable::vartype2string(std::any_cast<Modules::Variable::variable_t>(event->getParam("paramType")));
+        break;
       default:
         break;
     }

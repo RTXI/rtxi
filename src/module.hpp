@@ -77,6 +77,16 @@ enum state_t : int64_t
 std::string state2string(state_t state);
 
 /*!
+ * Converts variable type to human readable string
+ *
+ * \param code the variable type code to convert
+ *
+ * \returns A string describing the code
+ */
+
+std::string vartype2string(variable_t type);
+
+/*!
  * Structure used to store information about module upon creation.
  * It is a structure describing module specific constants and
  * variables.
