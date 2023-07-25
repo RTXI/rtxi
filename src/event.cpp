@@ -301,7 +301,7 @@ void Event::Manager::postEvent(Event::Object* event)
   this->event_q.push(event);
   this->available_event_cond.notify_one();
   lk.unlock();
-  event->wait();
+  if(!event->isdone()) { event->wait(); }
 }
 
 void Event::Manager::postEvent(std::vector<Event::Object>& events)
@@ -319,7 +319,7 @@ void Event::Manager::postEvent(std::vector<Event::Object>& events)
   lk.unlock();
   this->available_event_cond.notify_all();
   for (auto& event : events) {
-    event.wait();
+    if(!event.isdone()) { event.wait(); }
   }
 }
 
