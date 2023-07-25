@@ -156,20 +156,13 @@ void Oscilloscope::Panel::enableChannel()
   if (!this->activateButton->isChecked()) {
     return;
   }
-  const int block_list_index = this->blocksListDropdown->currentIndex();
-  const int port_list_index = this->channelsList->currentIndex();
-  const int direction_list_index = this->typesList->currentIndex();
-  if (block_list_index < 0 || port_list_index < 0 || direction_list_index < 0) {
-    return;
-  }
 
   // create component before we create the channel proper
   auto* oscilloscope_plugin =
       dynamic_cast<Oscilloscope::Plugin*>(this->getHostPlugin());
-  IO::Block* chanblock = this->blocks[static_cast<size_t>(
-      this->blocksListDropdown->currentIndex())];
-  auto chanport = static_cast<size_t>(port_list_index);
-  auto chandirection = static_cast<IO::flags_t>(this->typesList->itemData(direction_list_index).toInt());
+  auto* chanblock = this->blocksListDropdown->currentData().value<IO::Block*>();
+  auto chanport = this->channelsList->currentData().value<size_t>();
+  auto chandirection = this->typesList->currentData().value<IO::flags_t>();
 
   // this will try to create the probing component first. return if something
   // goes wrong
@@ -196,19 +189,12 @@ void Oscilloscope::Panel::disableChannel()
   if (!this->activateButton->isChecked()) {
     return;
   }
-  const int block_list_index = this->blocksListDropdown->currentIndex();
-  const int port_list_index = this->channelsList->currentIndex();
-  const int direction_list_index = this->typesList->currentIndex();
-  if (block_list_index < 0 || port_list_index < 0 || direction_list_index < 0) {
-    return;
-  }
 
   auto* oscilloscope_plugin =
       dynamic_cast<Oscilloscope::Plugin*>(this->getHostPlugin());
-  IO::Block* chanblock = this->blocks[static_cast<size_t>(
-      this->blocksListDropdown->currentIndex())];
-  auto chanport = static_cast<size_t>(port_list_index);
-  auto chandirection = static_cast<IO::flags_t>(direction_list_index);
+  auto* chanblock = this->blocksListDropdown->currentData().value<IO::Block*>();
+  auto chanport = this->channelsList->currentData().value<size_t>();
+  auto chandirection = this->typesList->currentData().value<IO::flags_t>();
 
   const IO::endpoint probe {chanblock, chanport, chandirection};
   // we should remove the scope channel before we attempt to remove block
@@ -253,13 +239,13 @@ void Oscilloscope::Panel::buildChannelList()
     blocksListDropdown->setCurrentIndex(0);
   }
 
-  IO::Block* block =
-      blocks[static_cast<size_t>(blocksListDropdown->currentIndex())];
-  auto type = static_cast<IO::flags_t>(this->typesList->currentData().toInt());
+  auto* block = this->blocksListDropdown->currentData().value<IO::Block*>();
+  auto type = this->typesList->currentData().value<IO::flags_t>();
 
   for (size_t i = 0; i < block->getCount(type); ++i) {
     channelsList->addItem(
-        QString::fromStdString(block->getChannelName(type, i)));
+        QString::fromStdString(block->getChannelName(type, i)),
+        QVariant::fromValue(i));
   }
 
   showChannelTab();
@@ -296,16 +282,9 @@ void Oscilloscope::Panel::applyChannelTab()
     return;
   }
 
-  const int block_index = this->blocksListDropdown->currentIndex();
-  const int port_index = this->channelsList->currentIndex();
-  const int flags_index = this->typesList->currentIndex();
-  if (block_index < 0 || port_index < 0) {
-    return;
-  }
-
-  IO::Block* block = blocks[static_cast<size_t>(block_index)];
-  auto port = static_cast<size_t>(this->channelsList->currentIndex());
-  auto type = static_cast<IO::flags_t>(flags_index);
+  auto* block = this->blocksListDropdown->currentData().value<IO::Block*>();
+  auto port = this->channelsList->currentData().value<size_t>();
+  auto type = this->typesList->currentData().value<IO::flags_t>();
   auto* host_plugin =
       dynamic_cast<Oscilloscope::Plugin*>(this->getHostPlugin());
   const IO::endpoint probeInfo {block, port, type};
@@ -387,9 +366,8 @@ void Oscilloscope::Panel::buildBlockList()
   blocksListDropdown->clear();
   for (auto* block : blocklist) {
     this->blocksListDropdown->addItem(QString::fromStdString(block->getName())
-                                      + " " + QString::number(block->getID()));
+                                      + " " + QString::number(block->getID()), QVariant::fromValue(block));
   }
-  this->blocks = blocklist;
 }
 
 QWidget* Oscilloscope::Panel::createChannelTab(QWidget* parent)
@@ -425,8 +403,8 @@ QWidget* Oscilloscope::Panel::createChannelTab(QWidget* parent)
   typesList = new QComboBox(page);
   typesList->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
   typesList->setSizeAdjustPolicy(QComboBox::AdjustToContents);
-  typesList->addItem("Output", static_cast<int>(IO::OUTPUT));
-  typesList->addItem("Input", static_cast<int>(IO::INPUT));
+  typesList->addItem("Output", QVariant::fromValue(IO::OUTPUT));
+  typesList->addItem("Input", QVariant::fromValue(IO::INPUT));
   row1Layout->addWidget(typesList);
   QObject::connect(
       typesList, SIGNAL(activated(int)), this, SLOT(buildChannelList()));
@@ -447,72 +425,92 @@ QWidget* Oscilloscope::Panel::createChannelTab(QWidget* parent)
   scalesList = new QComboBox(page);
   row1Layout->addWidget(scalesList);
   const QFont scalesListFont("DejaVu Sans Mono");
+  QString postfix = "/div";
+  std::array<std::string, 6> unit_array = {"V", "mV", "µV", "nV", "pV", "fV"};
+  size_t unit_array_index = 0;
+  std::array<double, 4> fixed_values = {10, 5, 2.5, 2};
+  double value_scale = 1.0;
   scalesList->setFont(scalesListFont);
-  scalesList->addItem("10 V/div");  // 0  case 0
-  scalesList->addItem("5 V/div");  // 1  case 1
-  scalesList->addItem("2.5 V/div");  // 2  case 2
-  scalesList->addItem("2 V/div");  // 3  case 3
-  scalesList->addItem("1 V/div");  // 4  case 0
-  scalesList->addItem("500 mV/div");  // 5  case 1
-  scalesList->addItem("250 mV/div");  // 6  case 2
-  scalesList->addItem("200 mV/div");  // 7  case 3
-  scalesList->addItem("100 mV/div");  // 8  case 0
-  scalesList->addItem("50 mV/div");  // 9  case 1
-  scalesList->addItem("25 mV/div");
-  scalesList->addItem("20 mV/div");
-  scalesList->addItem("10 mV/div");
-  scalesList->addItem("5 mV/div");
-  scalesList->addItem("2.5 mV/div");
-  scalesList->addItem("2 mV/div");
-  scalesList->addItem("1 mV/div");
-  scalesList->addItem(QString::fromUtf8("500 µV/div"));
-  scalesList->addItem(QString::fromUtf8("250 µV/div"));
-  scalesList->addItem(QString::fromUtf8("200 µV/div"));
-  scalesList->addItem(QString::fromUtf8("100 µV/div"));
-  scalesList->addItem(QString::fromUtf8("50 µV/div"));
-  scalesList->addItem(QString::fromUtf8("25 µV/div"));
-  scalesList->addItem(QString::fromUtf8("20 µV/div"));
-  scalesList->addItem(QString::fromUtf8("10 µV/div"));
-  scalesList->addItem(QString::fromUtf8("5 µV/div"));
-  scalesList->addItem(QString::fromUtf8("2.5 µV/div"));
-  scalesList->addItem(QString::fromUtf8("2 µV/div"));
-  scalesList->addItem(QString::fromUtf8("1 µV/div"));
-  scalesList->addItem("500 nV/div");
-  scalesList->addItem("250 nV/div");
-  scalesList->addItem("200 nV/div");
-  scalesList->addItem("100 nV/div");
-  scalesList->addItem("50 nV/div");
-  scalesList->addItem("25 nV/div");
-  scalesList->addItem("20 nV/div");
-  scalesList->addItem("10 nV/div");
-  scalesList->addItem("5 nV/div");
-  scalesList->addItem("2.5 nV/div");
-  scalesList->addItem("2 nV/div");
-  scalesList->addItem("1 nV/div");
-  scalesList->addItem("500 pV/div");
-  scalesList->addItem("250 pV/div");
-  scalesList->addItem("200 pV/div");
-  scalesList->addItem("100 pV/div");
-  scalesList->addItem("50 pV/div");
-  scalesList->addItem("25 pV/div");
-  scalesList->addItem("20 pV/div");
-  scalesList->addItem("10 pV/div");
-  scalesList->addItem("5 pV/div");
-  scalesList->addItem("2.5 pV/div");
-  scalesList->addItem("2 pV/div");
-  scalesList->addItem("1 pV/div");
-  scalesList->addItem("500 fV/div");
-  scalesList->addItem("250 fV/div");
-  scalesList->addItem("200 fV/div");
-  scalesList->addItem("100 fV/div");
-  scalesList->addItem("50 fV/div");
-  scalesList->addItem("25 fV/div");
-  scalesList->addItem("20 fV/div");
-  scalesList->addItem("10 fV/div");
-  scalesList->addItem("5 fV/div");
-  scalesList->addItem("2.5 fV/div");
-  scalesList->addItem("2 fV/div");
-  scalesList->addItem("1 fV/div");
+  std::string formatting = "{:.1f} {}/div";
+  double temp_value = 0.0;
+  while(unit_array_index < unit_array.size()){
+    for(auto current_fixed_value : fixed_values){
+      temp_value = current_fixed_value*std::pow(1e3,unit_array_index)*value_scale;
+      if(temp_value < 1){
+        unit_array_index++;
+        if(unit_array_index >= 6) { break; }
+        temp_value = current_fixed_value*std::pow(1e3,unit_array_index)*value_scale;
+      }
+      scalesList->addItem(QString::fromStdString(fmt::format(formatting, temp_value, unit_array.at(unit_array_index))),
+                          temp_value/value_scale);
+    }
+    value_scale = value_scale/10.0;
+  }
+  //scalesList->addItem("10 V/div");  // 0  case 0
+  //scalesList->addItem("5 V/div");  // 1  case 1
+  //scalesList->addItem("2.5 V/div");  // 2  case 2
+  //scalesList->addItem("2 V/div");  // 3  case 3
+  //scalesList->addItem("1 V/div");  // 4  case 0
+  //scalesList->addItem("500 mV/div");  // 5  case 1
+  //scalesList->addItem("250 mV/div");  // 6  case 2
+  //scalesList->addItem("200 mV/div");  // 7  case 3
+  //scalesList->addItem("100 mV/div");  // 8  case 0
+  //scalesList->addItem("50 mV/div");  // 9  case 1
+  //scalesList->addItem("25 mV/div");
+  //scalesList->addItem("20 mV/div");
+  //scalesList->addItem("10 mV/div");
+  //scalesList->addItem("5 mV/div");
+  //scalesList->addItem("2.5 mV/div");
+  //scalesList->addItem("2 mV/div");
+  //scalesList->addItem("1 mV/div");
+  //scalesList->addItem(QString::fromUtf8("500 µV/div"));
+  //scalesList->addItem(QString::fromUtf8("250 µV/div"));
+  //scalesList->addItem(QString::fromUtf8("200 µV/div"));
+  //scalesList->addItem(QString::fromUtf8("100 µV/div"));
+  //scalesList->addItem(QString::fromUtf8("50 µV/div"));
+  //scalesList->addItem(QString::fromUtf8("25 µV/div"));
+  //scalesList->addItem(QString::fromUtf8("20 µV/div"));
+  //scalesList->addItem(QString::fromUtf8("10 µV/div"));
+  //scalesList->addItem(QString::fromUtf8("5 µV/div"));
+  //scalesList->addItem(QString::fromUtf8("2.5 µV/div"));
+  //scalesList->addItem(QString::fromUtf8("2 µV/div"));
+  //scalesList->addItem(QString::fromUtf8("1 µV/div"));
+  //scalesList->addItem("500 nV/div");
+  //scalesList->addItem("250 nV/div");
+  //scalesList->addItem("200 nV/div");
+  //scalesList->addItem("100 nV/div");
+  //scalesList->addItem("50 nV/div");
+  //scalesList->addItem("25 nV/div");
+  //scalesList->addItem("20 nV/div");
+  //scalesList->addItem("10 nV/div");
+  //scalesList->addItem("5 nV/div");
+  //scalesList->addItem("2.5 nV/div");
+  //scalesList->addItem("2 nV/div");
+  //scalesList->addItem("1 nV/div");
+  //scalesList->addItem("500 pV/div");
+  //scalesList->addItem("250 pV/div");
+  //scalesList->addItem("200 pV/div");
+  //scalesList->addItem("100 pV/div");
+  //scalesList->addItem("50 pV/div");
+  //scalesList->addItem("25 pV/div");
+  //scalesList->addItem("20 pV/div");
+  //scalesList->addItem("10 pV/div");
+  //scalesList->addItem("5 pV/div");
+  //scalesList->addItem("2.5 pV/div");
+  //scalesList->addItem("2 pV/div");
+  //scalesList->addItem("1 pV/div");
+  //scalesList->addItem("500 fV/div");
+  //scalesList->addItem("250 fV/div");
+  //scalesList->addItem("200 fV/div");
+  //scalesList->addItem("100 fV/div");
+  //scalesList->addItem("50 fV/div");
+  //scalesList->addItem("25 fV/div");
+  //scalesList->addItem("20 fV/div");
+  //scalesList->addItem("10 fV/div");
+  //scalesList->addItem("5 fV/div");
+  //scalesList->addItem("2.5 fV/div");
+  //scalesList->addItem("2 fV/div");
+  //scalesList->addItem("1 fV/div");
 
   // Offset items
   auto* offsetLabel = new QLabel(tr("Offset:"), page);
@@ -636,27 +634,27 @@ QWidget* Oscilloscope::Panel::createDisplayTab(QWidget* parent)
   row1Layout->addWidget(timesList);
   const QFont timeListFont("DejaVu Sans Mono");
   timesList->setFont(timeListFont);
-  timesList->addItem("5 s/div");
-  timesList->addItem("2 s/div");
-  timesList->addItem("1 s/div");
-  timesList->addItem("500 ms/div");
-  timesList->addItem("200 ms/div");
-  timesList->addItem("100 ms/div");
-  timesList->addItem("50 ms/div");
-  timesList->addItem("20 ms/div");
-  timesList->addItem("10 ms/div");
-  timesList->addItem("5 ms/div");
-  timesList->addItem("2 ms/div");
-  timesList->addItem("1 ms/div");
-  timesList->addItem(QString::fromUtf8("500 µs/div"));
-  timesList->addItem(QString::fromUtf8("200 µs/div"));
-  timesList->addItem(QString::fromUtf8("100 µs/div"));
-  timesList->addItem(QString::fromUtf8("50 µs/div"));
-  timesList->addItem(QString::fromUtf8("20 µs/div"));
-  timesList->addItem(QString::fromUtf8("10 µs/div"));
-  timesList->addItem(QString::fromUtf8("5 µs/div"));
-  timesList->addItem(QString::fromUtf8("2 µs/div"));
-  timesList->addItem(QString::fromUtf8("1 µs/div"));
+  timesList->addItem("5 s/div", 5.0);
+  timesList->addItem("2 s/div", 2.0);
+  timesList->addItem("1 s/div", 1.0);
+  timesList->addItem("500 ms/div", 0.5);
+  timesList->addItem("200 ms/div", 0.2);
+  timesList->addItem("100 ms/div", 0.1);
+  timesList->addItem("50 ms/div", 0.05);
+  timesList->addItem("20 ms/div", 0.02);
+  timesList->addItem("10 ms/div", 0.01);
+  timesList->addItem("5 ms/div", 5e-3);
+  timesList->addItem("2 ms/div", 2e-3);
+  timesList->addItem("1 ms/div", 1e-3);
+  timesList->addItem(QString::fromUtf8("500 µs/div"), 500e-6);
+  timesList->addItem(QString::fromUtf8("200 µs/div"), 200e-6);
+  timesList->addItem(QString::fromUtf8("100 µs/div"), 100e-6);
+  timesList->addItem(QString::fromUtf8("50 µs/div"), 50e-6);
+  timesList->addItem(QString::fromUtf8("20 µs/div"), 20e-6);
+  timesList->addItem(QString::fromUtf8("10 µs/div"), 10e-6);
+  timesList->addItem(QString::fromUtf8("5 µs/div"), 5e-6);
+  timesList->addItem(QString::fromUtf8("2 µs/div"), 2e-6);
+  timesList->addItem(QString::fromUtf8("1 µs/div"), 1e-6);
   timesList->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
   timesList->setSizeAdjustPolicy(QComboBox::AdjustToContents);
 
@@ -667,17 +665,6 @@ QWidget* Oscilloscope::Panel::createDisplayTab(QWidget* parent)
   refreshDropdown->addItem("60 Hz");
   refreshDropdown->addItem("120 Hz");
   refreshDropdown->addItem("240 Hz");
-  // refreshsSpin->setRange(100, 10000);
-  // refreshsSpin->setValue(250);
-
-  // QLabel* downsampleLabel = new QLabel(tr("Downsample:"), page);
-  // row1Layout->addWidget(downsampleLabel);
-  // ratesSpin = new QSpinBox(page);
-  // row1Layout->addWidget(ratesSpin);
-  // ratesSpin->setValue(downsample_rate);
-  // ratesSpin->setEnabled(true);
-  // ratesSpin->setRange(1, 2);
-  // ratesSpin->setValue(1);
 
   // Display box for Buffer bit. Push it to the right.
   row1Layout->addSpacerItem(
@@ -722,11 +709,11 @@ QWidget* Oscilloscope::Panel::createDisplayTab(QWidget* parent)
   trigsThreshList = new QComboBox(page);
   trigsThreshList->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
   row2Layout->addWidget(trigsThreshList);
-  trigsThreshList->addItem("V");
-  trigsThreshList->addItem("mV");
-  trigsThreshList->addItem(QString::fromUtf8("µV"));
-  trigsThreshList->addItem("nV");
-  trigsThreshList->addItem("pV");
+  trigsThreshList->addItem("V", 1.0);
+  trigsThreshList->addItem("mV", 1e-3);
+  trigsThreshList->addItem(QString::fromUtf8("µV"), 1e-6);
+  trigsThreshList->addItem("nV", 1e-9);
+  trigsThreshList->addItem("pV", 1e-12);
 
   // TODO: determine the proper implementation of trigger windows
   // row2Layout->addWidget(new QLabel(tr("Window:"), page));
@@ -763,32 +750,8 @@ void Oscilloscope::Panel::showChannelTab()
 {
   auto type = static_cast<IO::flags_t>(this->typesList->currentData().toInt());
 
-  const int block_index = this->blocksListDropdown->currentIndex();
-  if (block_index < 0 || static_cast<size_t>(block_index) >= blocks.size()
-      || !this->activateButton->isChecked())
-  {
-    activateButton->setChecked(false);
-    scalesList->setEnabled(false);
-    offsetsEdit->setEnabled(false);
-    offsetsList->setEnabled(false);
-    colorsList->setEnabled(false);
-    widthsList->setEnabled(false);
-    stylesList->setEnabled(false);
-    scalesList->setCurrentIndex(9);
-    offsetsEdit->setText(QString::number(0));
-    offsetsList->setCurrentIndex(0);
-    colorsList->setCurrentIndex(0);
-    widthsList->setCurrentIndex(0);
-    stylesList->setCurrentIndex(0);
-    return;
-  }
-
-  auto* block =
-      static_cast<IO::Block*>(blocks[static_cast<size_t>(block_index)]);
-  size_t port = 0;
-  if (this->channelsList->count() != 0) {
-    port = static_cast<size_t>(this->channelsList->currentIndex());
-  }
+  auto* block = this->blocksListDropdown->currentData().value<IO::Block*>();
+  auto port = this->channelsList->currentData().value<size_t>();
   const IO::endpoint chan {block, port, type};
   const double scale = this->scopeWindow->getChannelScale(chan);
   double offset = this->scopeWindow->getChannelOffset(chan);
@@ -807,53 +770,38 @@ void Oscilloscope::Panel::showChannelTab()
   offsetsEdit->setText(QString::number(offset));
   offsetsList->setCurrentIndex(offsetUnits);
 
-  // set color
+  // set pen characteristics
   QPen* pen = this->scopeWindow->getChannelPen(chan);
-  const auto* color_loc = std::find(Oscilloscope::penColors.begin(),
-                                    Oscilloscope::penColors.end(),
-                                    pen->color());
-  if (color_loc == Oscilloscope::penColors.end()) {
-    ERROR_MSG(
-        "Oscilloscope::Panel::displayChannelTab : invalid color "
-        "selection\n");
+  if(pen == nullptr) { 
     colorsList->setCurrentIndex(0);
-  } else {
-    colorsList->setCurrentIndex(
-        static_cast<int>(color_loc - Oscilloscope::penColors.begin()));
-  }
-
-  // set width
-  if (pen->width() < 0 || pen->width() > widthsList->count()) {
-    ERROR_MSG(
-        "Oscilloscope::Panel::displayChannelTab : invalid width "
-        "selection\n");
     widthsList->setCurrentIndex(0);
+    stylesList->setCurrentIndex(0);
   } else {
+    const auto* color_loc = std::find(Oscilloscope::penColors.begin(),
+                                      Oscilloscope::penColors.end(),
+                                      pen->color());
+    colorsList->setCurrentIndex(static_cast<int>(color_loc - Oscilloscope::penColors.begin()));
     widthsList->setCurrentIndex(pen->width());
-  }
-
-  // set style
-  switch (pen->style()) {
-    case Qt::SolidLine:
-      stylesList->setCurrentIndex(0);
-      break;
-    case Qt::DashLine:
-      stylesList->setCurrentIndex(1);
-      break;
-    case Qt::DotLine:
-      stylesList->setCurrentIndex(2);
-      break;
-    case Qt::DashDotLine:
-      stylesList->setCurrentIndex(3);
-      break;
-    case Qt::DashDotDotLine:
-      stylesList->setCurrentIndex(4);
-      break;
-    default:
-      ERROR_MSG(
-          "Oscilloscope::Panel::displayChannelTab : invalid style "
-          "selection\n");
-      stylesList->setCurrentIndex(0);
+    // set style
+    switch (pen->style()) {
+      case Qt::SolidLine:
+        stylesList->setCurrentIndex(0);
+        break;
+      case Qt::DashLine:
+        stylesList->setCurrentIndex(1);
+        break;
+      case Qt::DotLine:
+        stylesList->setCurrentIndex(2);
+        break;
+      case Qt::DashDotLine:
+        stylesList->setCurrentIndex(3);
+        break;
+      case Qt::DashDotDotLine:
+        stylesList->setCurrentIndex(4);
+        break;
+      default:
+        stylesList->setCurrentIndex(0);
+    }
   }
 }
 
@@ -989,10 +937,9 @@ Oscilloscope::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
 
   // Show stuff
   adjustDataSize();
-  buildChannelList();
   showDisplayTab();
-  this->getMdiWindow()->setMinimumSize(this->minimumSizeHint().width(), 450);
-  this->getMdiWindow()->resize(this->minimumSizeHint().width() + 50, 600);
+  getMdiWindow()->setMinimumSize(this->minimumSizeHint().width(), 450);
+  getMdiWindow()->resize(this->minimumSizeHint().width() + 50, 600);
 
   // Initialize vars
   setWindowTitle(tr(std::string(Oscilloscope::MODULE_NAME).c_str()));
@@ -1005,6 +952,7 @@ Oscilloscope::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
   QObject::connect(
       this, SIGNAL(updateBlockInfo()), this, SLOT(syncBlockInfo()));
   this->updateBlockInfo();
+  this->buildChannelList();
   scopeWindow->replot();
 }
 
@@ -1029,11 +977,8 @@ void Oscilloscope::Component::execute()
       break;
     }
     case Modules::Variable::EXEC: {
-      // auto triggering =
-      // getValue<Modules::Variable::state_t>(Oscilloscope::PARAMETER::TRIGGERING);
       sample.time = RT::OS::getTime();
-      std::vector<double> value = this->readinput(0);
-      sample.value = value[0];
+      sample.value = this->readinput(0)[0];
       this->fifo->writeRT(&sample, sizeof(Oscilloscope::sample));
       break;
     }
@@ -1085,15 +1030,15 @@ void Oscilloscope::Component::flushFifo()
 
 void Oscilloscope::Panel::adjustDataSize()
 {
-  Event::Object event(Event::Type::RT_GET_PERIOD_EVENT);
-  this->getRTXIEventManager()->postEvent(&event);
-  auto period = std::any_cast<int64_t>(event.getParam("period"));
-  const double timedivs = scopeWindow->getDivT();
-  const double xdivs =
-      static_cast<double>(scopeWindow->getDivX()) / static_cast<double>(period);
-  const size_t size = static_cast<size_t>(ceil(timedivs + xdivs)) + 1;
-  scopeWindow->setDataSize(size);
-  sizesEdit->setText(QString::number(scopeWindow->getDataSize()));
+  //Event::Object event(Event::Type::RT_GET_PERIOD_EVENT);
+  //this->getRTXIEventManager()->postEvent(&event);
+  //auto period = std::any_cast<int64_t>(event.getParam("period"));
+  //const double timedivs = scopeWindow->getDivT();
+  //const double xdivs =
+  //    static_cast<double>(scopeWindow->getDivX()) / static_cast<double>(period);
+  //const size_t size = static_cast<size_t>(ceil(timedivs + xdivs)) + 1;
+  //scopeWindow->setDataSize(size);
+  //sizesEdit->setText(QString::number(scopeWindow->getDataSize()));
 }
 
 void Oscilloscope::Panel::updateTrigger() {}

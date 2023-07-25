@@ -206,8 +206,6 @@ private:
   QPushButton* applyButton = nullptr;
   QPushButton* activateButton = nullptr;
 
-  std::vector<IO::Block*> blocks;
-  // size_t downsample_rate;
 };  // Panel
 
 class Plugin : public Modules::Plugin
