@@ -104,7 +104,7 @@ struct Info
   std::string name;
   std::string description;
   Modules::Variable::variable_t vartype;
-  std::variant<int64_t, double, uint64_t, std::string, state_t> value;
+  std::variant<state_t, int64_t, double, uint64_t, std::string> value;
 };
 
 }  // namespace Variable
