@@ -442,76 +442,11 @@ QWidget* Oscilloscope::Panel::createChannelTab(QWidget* parent)
         temp_value = current_fixed_value*std::pow(1e3,unit_array_index)*value_scale;
       }
       scalesList->addItem(QString::fromStdString(fmt::format(formatting, temp_value, unit_array.at(unit_array_index))),
-                          temp_value/value_scale);
+                          current_fixed_value*value_scale);
+      std::cout << current_fixed_value*value_scale << "\n";
     }
     value_scale = value_scale/10.0;
   }
-  //scalesList->addItem("10 V/div");  // 0  case 0
-  //scalesList->addItem("5 V/div");  // 1  case 1
-  //scalesList->addItem("2.5 V/div");  // 2  case 2
-  //scalesList->addItem("2 V/div");  // 3  case 3
-  //scalesList->addItem("1 V/div");  // 4  case 0
-  //scalesList->addItem("500 mV/div");  // 5  case 1
-  //scalesList->addItem("250 mV/div");  // 6  case 2
-  //scalesList->addItem("200 mV/div");  // 7  case 3
-  //scalesList->addItem("100 mV/div");  // 8  case 0
-  //scalesList->addItem("50 mV/div");  // 9  case 1
-  //scalesList->addItem("25 mV/div");
-  //scalesList->addItem("20 mV/div");
-  //scalesList->addItem("10 mV/div");
-  //scalesList->addItem("5 mV/div");
-  //scalesList->addItem("2.5 mV/div");
-  //scalesList->addItem("2 mV/div");
-  //scalesList->addItem("1 mV/div");
-  //scalesList->addItem(QString::fromUtf8("500 µV/div"));
-  //scalesList->addItem(QString::fromUtf8("250 µV/div"));
-  //scalesList->addItem(QString::fromUtf8("200 µV/div"));
-  //scalesList->addItem(QString::fromUtf8("100 µV/div"));
-  //scalesList->addItem(QString::fromUtf8("50 µV/div"));
-  //scalesList->addItem(QString::fromUtf8("25 µV/div"));
-  //scalesList->addItem(QString::fromUtf8("20 µV/div"));
-  //scalesList->addItem(QString::fromUtf8("10 µV/div"));
-  //scalesList->addItem(QString::fromUtf8("5 µV/div"));
-  //scalesList->addItem(QString::fromUtf8("2.5 µV/div"));
-  //scalesList->addItem(QString::fromUtf8("2 µV/div"));
-  //scalesList->addItem(QString::fromUtf8("1 µV/div"));
-  //scalesList->addItem("500 nV/div");
-  //scalesList->addItem("250 nV/div");
-  //scalesList->addItem("200 nV/div");
-  //scalesList->addItem("100 nV/div");
-  //scalesList->addItem("50 nV/div");
-  //scalesList->addItem("25 nV/div");
-  //scalesList->addItem("20 nV/div");
-  //scalesList->addItem("10 nV/div");
-  //scalesList->addItem("5 nV/div");
-  //scalesList->addItem("2.5 nV/div");
-  //scalesList->addItem("2 nV/div");
-  //scalesList->addItem("1 nV/div");
-  //scalesList->addItem("500 pV/div");
-  //scalesList->addItem("250 pV/div");
-  //scalesList->addItem("200 pV/div");
-  //scalesList->addItem("100 pV/div");
-  //scalesList->addItem("50 pV/div");
-  //scalesList->addItem("25 pV/div");
-  //scalesList->addItem("20 pV/div");
-  //scalesList->addItem("10 pV/div");
-  //scalesList->addItem("5 pV/div");
-  //scalesList->addItem("2.5 pV/div");
-  //scalesList->addItem("2 pV/div");
-  //scalesList->addItem("1 pV/div");
-  //scalesList->addItem("500 fV/div");
-  //scalesList->addItem("250 fV/div");
-  //scalesList->addItem("200 fV/div");
-  //scalesList->addItem("100 fV/div");
-  //scalesList->addItem("50 fV/div");
-  //scalesList->addItem("25 fV/div");
-  //scalesList->addItem("20 fV/div");
-  //scalesList->addItem("10 fV/div");
-  //scalesList->addItem("5 fV/div");
-  //scalesList->addItem("2.5 fV/div");
-  //scalesList->addItem("2 fV/div");
-  //scalesList->addItem("1 fV/div");
-
   // Offset items
   auto* offsetLabel = new QLabel(tr("Offset:"), page);
   row1Layout->addWidget(offsetLabel);
@@ -521,11 +456,11 @@ QWidget* Oscilloscope::Panel::createChannelTab(QWidget* parent)
   row1Layout->addWidget(offsetsEdit);  //, Qt::AlignRight);
   offsetsList = new QComboBox(page);
   row1Layout->addWidget(offsetsList);  //, Qt::AlignRight);
-  offsetsList->addItem("V");
-  offsetsList->addItem("mV");
-  offsetsList->addItem(QString::fromUtf8("µV"));
-  offsetsList->addItem("nV");
-  offsetsList->addItem("pV");
+  offsetsList->addItem("V", 1.0);
+  offsetsList->addItem("mV", 1e-3);
+  offsetsList->addItem(QString::fromUtf8("µV"), 1e-6);
+  offsetsList->addItem("nV", 1e-9);
+  offsetsList->addItem("pV", 1e-12);
 
   // Create elements for graphic
   auto* row2Layout = new QHBoxLayout;  //(page);
