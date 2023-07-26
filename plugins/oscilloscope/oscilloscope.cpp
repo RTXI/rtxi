@@ -33,6 +33,7 @@
 
 #include "debug.hpp"
 #include "main_window.hpp"
+#include "oscilloscope/scope.h"
 #include "rt.hpp"
 
 void Oscilloscope::Plugin::receiveEvent(Event::Object* event)
@@ -443,7 +444,6 @@ QWidget* Oscilloscope::Panel::createChannelTab(QWidget* parent)
       }
       scalesList->addItem(QString::fromStdString(fmt::format(formatting, temp_value, unit_array.at(unit_array_index))),
                           current_fixed_value*value_scale);
-      std::cout << current_fixed_value*value_scale << "\n";
     }
     value_scale = value_scale/10.0;
   }
@@ -472,20 +472,13 @@ QWidget* Oscilloscope::Panel::createChannelTab(QWidget* parent)
   colorsList->setSizeAdjustPolicy(QComboBox::AdjustToContents);
   row2Layout->addWidget(colorsList);
   QPixmap tmp(25, 25);
-  tmp.fill(QColor(255, 0, 16, 255));
-  colorsList->addItem(tmp, " Red");
-  tmp.fill(QColor(255, 164, 5, 255));
-  colorsList->addItem(tmp, " Orange");
-  tmp.fill(QColor(43, 206, 72, 255));
-  colorsList->addItem(tmp, " Green");
-  tmp.fill(QColor(0, 117, 220, 255));
-  colorsList->addItem(tmp, " Blue");
-  tmp.fill(QColor(178, 102, 255, 255));
-  colorsList->addItem(tmp, " Purple");
-  tmp.fill(QColor(0, 153, 143, 255));
-  colorsList->addItem(tmp, " Teal");
-  tmp.fill(QColor(83, 81, 84, 255));
-  colorsList->addItem(tmp, " Black");
+  std::string color_name;
+  for(size_t i=0; i<penColors.size(); i++) {
+    tmp.fill(penColors.at(i));
+    color_name = Oscilloscope::color2string.at(i);
+    colorsList->addItem(tmp, 
+                        QString::fromStdString(color_name));
+  }
 
   auto* widthLabel = new QLabel(tr("Width:"), page);
   row2Layout->addWidget(widthLabel);
@@ -496,9 +489,9 @@ QWidget* Oscilloscope::Panel::createChannelTab(QWidget* parent)
   tmp.fill(Qt::white);
   QPainter painter(&tmp);
   for (int i = 1; i < 6; i++) {
-    painter.setPen(QPen(QColor(83, 81, 84, 255), i));
+    painter.setPen(QPen(Oscilloscope::penColors.at(Oscilloscope::ColorID::Black), i));
     painter.drawLine(0, 12, 25, 12);
-    widthsList->addItem(tmp, QString::number(i) + QString(" Pixels"));
+    widthsList->addItem(tmp, QString::number(i) + QString(" Pixels"), i);
   }
 
   // Create styles list
@@ -508,26 +501,16 @@ QWidget* Oscilloscope::Panel::createChannelTab(QWidget* parent)
   stylesList->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
   stylesList->setSizeAdjustPolicy(QComboBox::AdjustToContents);
   row2Layout->addWidget(stylesList);
-  tmp.fill(Qt::white);
-  painter.setPen(QPen(QColor(83, 81, 84, 255), 3, Qt::SolidLine));
-  painter.drawLine(0, 12, 25, 12);
-  stylesList->addItem(tmp, QString(" Solid"));
-  tmp.fill(Qt::white);
-  painter.setPen(QPen(QColor(83, 81, 84, 255), 3, Qt::DashLine));
-  painter.drawLine(0, 12, 25, 12);
-  stylesList->addItem(tmp, QString(" Dash"));
-  tmp.fill(Qt::white);
-  painter.setPen(QPen(QColor(83, 81, 84, 255), 3, Qt::DotLine));
-  painter.drawLine(0, 12, 25, 12);
-  stylesList->addItem(tmp, QString(" Dot"));
-  tmp.fill(Qt::white);
-  painter.setPen(QPen(QColor(83, 81, 84, 255), 3, Qt::DashDotLine));
-  painter.drawLine(0, 12, 25, 12);
-  stylesList->addItem(tmp, QString(" Dash Dot"));
-  tmp.fill(Qt::white);
-  painter.setPen(QPen(QColor(83, 81, 84, 255), 3, Qt::DashDotDotLine));
-  painter.drawLine(0, 12, 25, 12);
-  stylesList->addItem(tmp, QString(" Dash Dot Dot"));
+  std::string temp_name;
+  for(size_t i=0; i<Oscilloscope::penStyles.size(); i++){
+    temp_name = Oscilloscope::penstyles2string.at(i);
+    tmp.fill(Qt::white);
+    painter.setPen(QPen(Oscilloscope::penColors.at(Oscilloscope::ColorID::Black), 
+                        3, 
+                        Oscilloscope::penStyles.at(i)));
+    painter.drawLine(0, 12, 25, 12);
+    stylesList->addItem(tmp, QString::fromStdString(temp_name));
+  }
 
   // Activate button
   row2Layout->addSpacerItem(
@@ -538,6 +521,7 @@ QWidget* Oscilloscope::Panel::createChannelTab(QWidget* parent)
   activateButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
   QObject::connect(
       activateButton, SIGNAL(toggled(bool)), this, SLOT(activateChannel(bool)));
+  activateChannel(false);
 
   bttnLayout->addLayout(row1Layout, 0, 0);
   bttnLayout->addLayout(row2Layout, 1, 0);
@@ -825,7 +809,7 @@ Oscilloscope::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
       "for plotting, "
       "use the right-click context \"Panel\" menu item. After selecting a "
       "signal, you must "
-      "click the \"Active\" button for it to appear in the window. To change "
+      "click the \"Enable\" button for it to appear in the window. To change "
       "signal settings, "
       "you must click the \"Apply\" button. The right-click context \"Pause\" "
       "menu item "
@@ -907,20 +891,16 @@ void Oscilloscope::Component::execute()
   auto state =
       getValue<Modules::Variable::state_t>(Oscilloscope::PARAMETER::STATE);
   switch (state) {
-    case Modules::Variable::INIT: {
-      this->setValue(Oscilloscope::PARAMETER::STATE, Modules::Variable::EXEC);
-      break;
-    }
     case Modules::Variable::EXEC: {
       sample.time = RT::OS::getTime();
       sample.value = this->readinput(0)[0];
       this->fifo->writeRT(&sample, sizeof(Oscilloscope::sample));
       break;
     }
-    case Modules::Variable::UNPAUSE: {
+    case Modules::Variable::INIT: 
+    case Modules::Variable::UNPAUSE: 
       this->setValue(Oscilloscope::PARAMETER::STATE, Modules::Variable::EXEC);
       break;
-    }
     case Modules::Variable::PAUSE:
     case Modules::Variable::MODIFY:
     case Modules::Variable::EXIT:
@@ -965,15 +945,15 @@ void Oscilloscope::Component::flushFifo()
 
 void Oscilloscope::Panel::adjustDataSize()
 {
-  //Event::Object event(Event::Type::RT_GET_PERIOD_EVENT);
-  //this->getRTXIEventManager()->postEvent(&event);
-  //auto period = std::any_cast<int64_t>(event.getParam("period"));
-  //const double timedivs = scopeWindow->getDivT();
-  //const double xdivs =
-  //    static_cast<double>(scopeWindow->getDivX()) / static_cast<double>(period);
-  //const size_t size = static_cast<size_t>(ceil(timedivs + xdivs)) + 1;
-  //scopeWindow->setDataSize(size);
-  //sizesEdit->setText(QString::number(scopeWindow->getDataSize()));
+  Event::Object event(Event::Type::RT_GET_PERIOD_EVENT);
+  this->getRTXIEventManager()->postEvent(&event);
+  auto period = std::any_cast<int64_t>(event.getParam("period"));
+  const double timedivs = scopeWindow->getDivT();
+  const double xdivs =
+      static_cast<double>(scopeWindow->getDivX()) / static_cast<double>(period);
+  const size_t size = static_cast<size_t>(ceil(timedivs + xdivs)) + 1;
+  scopeWindow->setDataSize(size);
+  sizesEdit->setText(QString::number(scopeWindow->getDataSize()));
 }
 
 void Oscilloscope::Panel::updateTrigger() {}

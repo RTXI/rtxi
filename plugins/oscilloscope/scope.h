@@ -31,6 +31,7 @@
 #define SCOPE_H
 
 #include <QtWidgets>
+#include <cstddef>
 #include <vector>
 
 #include <qnamespace.h>
@@ -85,6 +86,20 @@ typedef struct scope_channel
   IO::flags_t direction;
 } scope_channel;
 
+namespace ColorID {
+enum color_id : size_t
+{
+  Red=0,
+  Orange,
+  Green,
+  Blue,
+  Purple,
+  Teal,
+  Black
+};
+} // namespace ColorID
+
+
 constexpr std::array<QColor, 7> penColors = {QColor(255, 0, 16, 255),
                                              QColor(255, 164, 5, 255),
                                              QColor(43, 206, 72, 255),
@@ -93,11 +108,42 @@ constexpr std::array<QColor, 7> penColors = {QColor(255, 0, 16, 255),
                                              QColor(0, 153, 143, 255),
                                              QColor(83, 81, 84, 255)};
 
+constexpr std::array<std::string_view,7> color2string
+{
+  "Red",
+  "Orange",
+  "Green",
+  "Blue",
+  "Purple",
+  "Teal",
+  "Black"
+};
+
 constexpr std::array<Qt::PenStyle, 5> penStyles = {Qt::SolidLine,
                                                    Qt::DashLine,
                                                    Qt::DotLine,
                                                    Qt::DashDotLine,
                                                    Qt::DashDotDotLine};
+
+constexpr std::array<std::string_view, 5> penstyles2string
+{
+  "Solid",
+  "Dash",
+  "Dot",
+  "Dash Dot",
+  "Dash Dot Dot"
+};
+
+namespace PennStyleID{
+enum pennstyle_id : size_t
+{
+  SolidLine=0,
+  DashLine,
+  DotLine,
+  DashDotLine,
+  DashDotDotLine 
+};
+} // namespace PennStyleID
 
 class LegendItem : public QwtPlotLegendItem
 {
