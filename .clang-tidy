@@ -12,7 +12,9 @@
 # -cppcoreguidelines-avoid-magic-numbers: Qt design is littered with these unfortunately.
 # -readability-magic-numbers: Same reason as above - cannot be helped due to Qt
 # -readability-redundant-access-specifiers: Qt's slot specifier produces this warning
+# -abseil-string-find-str-contains: we don't use abseil strings in this project 
 Checks: "*,\
+  -abseil-string-find-str-contains,\
   -readability-redundant-access-specifiers,\
   -readability-magic-numbers,\
   -cppcoreguidelines-avoid-magic-numbers,\
