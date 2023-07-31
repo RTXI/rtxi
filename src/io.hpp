@@ -188,6 +188,10 @@ private:
 /*!
  * Structure used to pass information to plugins about a connection.
  *
+ * This structure holds details that identifies a connection end. it is
+ * guaranteed to be unique and has comparison functions implemented to 
+ * allow for ease of equality checks in higher level algorithms
+ *
  * \param block Pointer to the block object
  * \param port The index of the channel this object represents
  * \param direction An IO::flags_t value stating the direction. possible

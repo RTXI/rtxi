@@ -38,35 +38,17 @@
 
 void Oscilloscope::Plugin::receiveEvent(Event::Object* event)
 {
+  auto* hplugin = dynamic_cast<Oscilloscope::Panel*>(this->getPanel());
   switch (event->getType()) {
     case Event::Type::RT_THREAD_INSERT_EVENT:
     case Event::Type::RT_DEVICE_INSERT_EVENT:
     case Event::Type::RT_THREAD_REMOVE_EVENT:
     case Event::Type::RT_DEVICE_REMOVE_EVENT:
-      dynamic_cast<Oscilloscope::Panel*>(this->getPanel())->updateBlockInfo();
+      hplugin->updateBlockInfo();
       break;
     default:
       break;
   }
-}
-
-Oscilloscope::Component* Oscilloscope::Plugin::getProbeComponent(
-    IO::endpoint probeInfo)
-{
-  Oscilloscope::Component* component = nullptr;
-  auto probe_loc =
-      std::find_if(this->chanInfoList.begin(),
-                   this->chanInfoList.end(),
-                   [&](const Oscilloscope::channel_info& chan)
-                   {
-                     return chan.probe.block == probeInfo.block
-                         && chan.probe.port == probeInfo.port
-                         && chan.probe.direction == probeInfo.direction;
-                   });
-  if (probe_loc != this->chanInfoList.end()) {
-    component = probe_loc->measuring_component;
-  }
-  return component;
 }
 
 void Oscilloscope::Panel::updateChannelScale(IO::endpoint probe_info)
@@ -167,21 +149,22 @@ void Oscilloscope::Panel::enableChannel()
 
   // this will try to create the probing component first. return if something
   // goes wrong
-  const IO::endpoint probe {chanblock, chanport, chandirection};
-  if (!oscilloscope_plugin->addProbe(probe)) {
+  const IO::endpoint endpoint {chanblock, chanport, chandirection};
+  RT::OS::Fifo* probe_fifo = oscilloscope_plugin->createProbe(endpoint);
+  if (probe_fifo == nullptr) {
     ERROR_MSG("Unable to create probing channel for block {}",
               chanblock->getName());
     return;
   }
 
-  this->scopeWindow->createChannel(probe);
+  this->scopeWindow->createChannel(endpoint, probe_fifo);
   // we were able to create the probe, so we should populate metainfo about it
   // in scope window
-  this->updateChannelOffset(probe);
-  this->updateChannelScale(probe);
-  this->updateChannelLineWidth(probe);
-  this->updateChannelLineStyle(probe);
-  this->updateChannelPenColor(probe);
+  this->updateChannelOffset(endpoint);
+  this->updateChannelScale(endpoint);
+  this->updateChannelLineWidth(endpoint);
+  this->updateChannelLineStyle(endpoint);
+  this->updateChannelPenColor(endpoint);
 }
 
 void Oscilloscope::Panel::disableChannel()
@@ -200,7 +183,7 @@ void Oscilloscope::Panel::disableChannel()
   const IO::endpoint probe {chanblock, chanport, chandirection};
   // we should remove the scope channel before we attempt to remove block
   this->scopeWindow->removeChannel(probe);
-  oscilloscope_plugin->removeProbe(probe);
+  oscilloscope_plugin->deleteProbe(probe);
 }
 
 void Oscilloscope::Panel::activateChannel(bool active)
@@ -266,14 +249,11 @@ void Oscilloscope::Panel::showTab(int index)
   }
 }
 
-void Oscilloscope::Panel::setActivity(Oscilloscope::Component* comp,
+void Oscilloscope::Panel::setActivity(IO::endpoint endpoint,
                                       bool activity)
 {
-  const Event::Type event_type = activity ? Event::Type::RT_THREAD_UNPAUSE_EVENT
-                                          : Event::Type::RT_THREAD_PAUSE_EVENT;
-  Event::Object event(event_type);
-  event.setParam("thread", std::any(static_cast<RT::Thread*>(comp)));
-  this->getRTXIEventManager()->postEvent(&event);
+  auto* hplugin = dynamic_cast<Oscilloscope::Plugin*>(this->getHostPlugin()); 
+  hplugin->setProbeActivity(endpoint, activity);
 }
 
 void Oscilloscope::Panel::applyChannelTab()
@@ -289,22 +269,14 @@ void Oscilloscope::Panel::applyChannelTab()
   auto* host_plugin =
       dynamic_cast<Oscilloscope::Plugin*>(this->getHostPlugin());
   const IO::endpoint probeInfo {block, port, type};
-  Oscilloscope::Component* component =
-      host_plugin->getProbeComponent(probeInfo);
-  auto* oscilloscope_plugin =
-      dynamic_cast<Oscilloscope::Plugin*>(this->getHostPlugin());
   if (!activateButton->isChecked()) {
-    if (component == nullptr) {
-      return;
-    }
-    this->setActivity(component, /*activity=*/false);
     scopeWindow->removeChannel(probeInfo);
-    oscilloscope_plugin->removeProbe(probeInfo);
+    host_plugin->deleteProbe(probeInfo);
   } else {
-    host_plugin->addProbe(probeInfo);
-    this->scopeWindow->createChannel(probeInfo);
+    RT::OS::Fifo* fifo = host_plugin->createProbe(probeInfo);
+    if(fifo == nullptr) { return; }
+    this->scopeWindow->createChannel(probeInfo, fifo);
   }
-
   scopeWindow->replot();
   showChannelTab();
 }
@@ -426,13 +398,13 @@ QWidget* Oscilloscope::Panel::createChannelTab(QWidget* parent)
   scalesList = new QComboBox(page);
   row1Layout->addWidget(scalesList);
   const QFont scalesListFont("DejaVu Sans Mono");
-  QString postfix = "/div";
+  const QString postfix = "/div";
   std::array<std::string, 6> unit_array = {"V", "mV", "µV", "nV", "pV", "fV"};
   size_t unit_array_index = 0;
-  std::array<double, 4> fixed_values = {10, 5, 2.5, 2};
+  const std::array<double, 4> fixed_values = {10, 5, 2.5, 2};
   double value_scale = 1.0;
   scalesList->setFont(scalesListFont);
-  std::string formatting = "{:.1f} {}/div";
+  const std::string formatting = "{:.1f} {}/div";
   double temp_value = 0.0;
   while(unit_array_index < unit_array.size()){
     for(auto current_fixed_value : fixed_values){
@@ -668,7 +640,6 @@ void Oscilloscope::Panel::syncBlockInfo()
 void Oscilloscope::Panel::showChannelTab()
 {
   auto type = static_cast<IO::flags_t>(this->typesList->currentData().toInt());
-
   auto* block = this->blocksListDropdown->currentData().value<IO::Block*>();
   auto port = this->channelsList->currentData().value<size_t>();
   const IO::endpoint chan {block, port, type};
@@ -729,47 +700,34 @@ void Oscilloscope::Panel::showDisplayTab()
   timesList->setCurrentIndex(
       static_cast<int>(round(3 * log10(1 / scopeWindow->getDivT()) + 11)));
 
-  // refreshsSpin->setValue(scopeWindow->getRefresh());
-
   // Find current trigger value and update gui
-  Oscilloscope::Trigger::Info trigInfo;
+  IO::endpoint trigger_endpoint;
   auto* oscilloscope_plugin =
       dynamic_cast<Oscilloscope::Plugin*>(this->getHostPlugin());
-  if (oscilloscope_plugin != nullptr) {
-    trigInfo = oscilloscope_plugin->getTriggerInfo();
-  }
-  this->trigsGroup->button(static_cast<int>(trigInfo.trigger_direction))
+  trigger_endpoint = this->scopeWindow->getTriggerEndpoint();
+  this->trigsGroup->button(static_cast<int>(trigger_endpoint.direction))
       ->setChecked(true);
 
   trigsChanList->clear();
-  std::vector<Oscilloscope::channel_info> channelList;
+  std::vector<IO::endpoint> endpoint_list;
   if (oscilloscope_plugin != nullptr) {
-    channelList = oscilloscope_plugin->getChannelsList();
+    endpoint_list = oscilloscope_plugin->getTrackedEndpoints();
   }
   std::string direction_str;
-  for (const auto& chanInfo : channelList) {
-    direction_str = chanInfo.probe.direction == IO::INPUT ? "INPUT" : "OUTPUT";
-    trigsChanList->addItem(chanInfo.name + " "
+  for (const auto& endpoint : endpoint_list) {
+    direction_str = endpoint.direction == IO::INPUT ? "INPUT" : "OUTPUT";
+    trigsChanList->addItem(QString::fromStdString(endpoint.block->getName()) + " "
                            + QString::fromStdString(direction_str) + " "
-                           + QString::number(chanInfo.probe.port));
+                           + QString::number(endpoint.port),
+                           QVariant::fromValue(endpoint));
   }
   trigsChanList->addItem("<None>");
-  auto trig_list_iter =
-      std::find_if(channelList.begin(),
-                   channelList.end(),
-                   [&](const Oscilloscope::channel_info& chan_info)
-                   {
-                     return chan_info.probe.block == trigInfo.block
-                         && chan_info.probe.port == trigInfo.port
-                         && chan_info.probe.direction == trigInfo.io_direction;
-                   });
-  if (trig_list_iter != channelList.end()) {
-    trigsChanList->setCurrentIndex(
-        static_cast<int>(trig_list_iter - channelList.begin() + 1));
-  }
+  
+  const int triglist_index = trigsChanList->findData(QVariant::fromValue(trigger_endpoint));
+  trigsChanList->setCurrentIndex(triglist_index);
 
   int trigThreshUnits = 0;
-  double trigThresh = trigInfo.threshold;
+  double trigThresh = this->scopeWindow->getTriggerThreshold();
   if (trigThresh * std::pow(10, -3 * this->trigsThreshList->count() - 1) < 1) {
     trigThreshUnits = 0;
     trigThresh = 0;
@@ -873,6 +831,12 @@ Oscilloscope::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
   this->updateBlockInfo();
   this->buildChannelList();
   scopeWindow->replot();
+  
+  //QObject::connect(
+  //    this->m_opengl_widget,
+  //    &QOpenGLWidget::frameSwapped,
+  //    this,
+  //    &Oscilloscope::Panel::timeoutEvent);
 }
 
 Oscilloscope::Component::Component(Modules::Plugin* hplugin,
@@ -882,6 +846,10 @@ Oscilloscope::Component::Component(Modules::Plugin* hplugin,
                          Oscilloscope::get_default_channels(),
                          Oscilloscope::get_default_vars())
 {
+  if(RT::OS::getFifo(this->fifo, Oscilloscope::DEFAULT_BUFFER_SIZE) != 0){
+    ERROR_MSG("Unable to create xfifo for Oscilloscope Component {}",
+              probe_name);
+  }
 }
 
 // TODO: Handle trigger synchronization bettween oscilloscope components
@@ -917,23 +885,8 @@ void Oscilloscope::Panel::screenshot()
 
 void Oscilloscope::Panel::togglePause()
 {
-  Event::Type event_type = Event::Type::NOOP;
-  if (this->pauseButton->isChecked()) {
-    event_type = Event::Type::RT_THREAD_PAUSE_EVENT;
-  } else {
-    event_type = Event::Type::RT_THREAD_UNPAUSE_EVENT;
-  }
-  auto* oscilloscope_plugin =
-      dynamic_cast<Oscilloscope::Plugin*>(this->getHostPlugin());
-  const std::vector<Oscilloscope::channel_info> channelList =
-      oscilloscope_plugin->getChannelsList();
-  std::vector<Event::Object> events;
-  for (const auto& channel : channelList) {
-    events.emplace_back(event_type);
-    events.back().setParam(
-        "thread", static_cast<RT::Thread*>(channel.measuring_component));
-  }
-  this->getRTXIEventManager()->postEvent(events);
+  auto* hplugin = dynamic_cast<Oscilloscope::Plugin*>(this->getHostPlugin());
+  hplugin->setAllProbesActivity(!this->pauseButton->isChecked());
 }
 
 void Oscilloscope::Component::flushFifo()
@@ -958,29 +911,6 @@ void Oscilloscope::Panel::adjustDataSize()
 
 void Oscilloscope::Panel::updateTrigger() {}
 
-void Oscilloscope::Panel::timeoutEvent()
-{
-  Oscilloscope::sample sample;
-  std::vector<Oscilloscope::sample> sample_vector;
-  const size_t sample_count = this->scopeWindow->getDataSize();
-  auto* oscilloscope_plugin =
-      dynamic_cast<Oscilloscope::Plugin*>(this->getHostPlugin());
-  for (auto channel : oscilloscope_plugin->getChannelsList()) {
-    while (channel.fifo->read(&sample, sizeof(Oscilloscope::sample)) > 0) {
-      sample_vector.push_back(sample);
-    }
-    this->scopeWindow->setData(channel.probe, sample_vector);
-    sample_vector.assign(sample_count, {0.0, 0});
-  }
-  this->scopeWindow->drawCurves();
-  // size_t size;
-  // while (fifo.read(&size, sizeof(size), false)) {
-  //   double data[size];
-  //   if (fifo.read(data, sizeof(data)))
-  //     scopeWindow->setData(data, size);
-  // }
-}
-
 Oscilloscope::Plugin::Plugin(Event::Manager* ev_manager)
     : Modules::Plugin(ev_manager, std::string(Oscilloscope::MODULE_NAME))
 {
@@ -989,54 +919,102 @@ Oscilloscope::Plugin::Plugin(Event::Manager* ev_manager)
 Oscilloscope::Plugin::~Plugin()
 {
   std::vector<Event::Object> unloadEvents;
-  for (auto& oscilloscope_component : this->componentList) {
+  for (auto& registry_entry : this->m_component_registry) {
     unloadEvents.emplace_back(Event::Type::RT_THREAD_REMOVE_EVENT);
     unloadEvents.back().setParam(
-        "thread", std::any(static_cast<RT::Thread*>(&oscilloscope_component)));
+        "thread", 
+      std::any(static_cast<RT::Thread*>(registry_entry.component.get())));
   }
   this->getEventManager()->postEvent(unloadEvents);
 }
 
-bool Oscilloscope::Plugin::addProbe(IO::endpoint probe_info)
+// TODO:make this thread safe
+RT::OS::Fifo* Oscilloscope::Plugin::createProbe(IO::endpoint probe_info)
 {
-  Oscilloscope::channel_info chan_info;
-  chan_info.name = QString::number(probe_info.block->getID()) + " "
-      + QString::fromStdString(probe_info.direction == IO::OUTPUT ? "Output "
-                                                                  : "Input ")
-      + QString::fromStdString(probe_info.block->getName())
-      + " port: " + QString::number(probe_info.port);
-  this->componentList.emplace_back(this, chan_info.name.toStdString());
-  chan_info.probe = probe_info;
-  chan_info.measuring_component = &this->componentList.back();
+  auto probe_loc = std::find_if(this->m_component_registry.begin(),
+                                this->m_component_registry.end(),
+                                [&](const registry_entry_t& entry){
+                                   return entry.endpoint == probe_info;
+                                });
+  if(probe_loc != this->m_component_registry.end()) {
+    return probe_loc->component->getFifoPtr();
+  }
+  const std::string comp_name = 
+    fmt::format("{} {} {} port: {}", probe_info.block->getID(),
+                                     probe_info.block->getName(),
+                                     probe_info.direction == IO::OUTPUT ? "Output "
+                                                                        : "Input ",
+                                     probe_info.port);
+  this->m_component_registry.push_back({probe_info, 
+                                        std::make_unique<Oscilloscope::Component>(this,comp_name)});
+  Oscilloscope::Component* measuring_component = 
+    this->m_component_registry.back().component.get();
   Event::Object event(Event::Type::RT_THREAD_INSERT_EVENT);
   event.setParam(
       "thread",
-      std::any(static_cast<RT::Thread*>(chan_info.measuring_component)));
+      std::any(static_cast<RT::Thread*>(measuring_component)));
   this->getEventManager()->postEvent(&event);
-  return true;
+  return measuring_component->getFifoPtr();
   // TODO: complete proper handling of errors if not able to register probe
   // thread
 }
 
-void Oscilloscope::Plugin::removeProbe(IO::endpoint probe_info)
+void Oscilloscope::Plugin::deleteProbe(IO::endpoint probe_info)
 {
-  auto probe_loc =
-      std::find_if(this->chanInfoList.begin(),
-                   this->chanInfoList.end(),
-                   [&](const Oscilloscope::channel_info& chann)
-                   {
-                     return chann.probe.block == probe_info.block
-                         && chann.probe.direction == probe_info.direction
-                         && chann.probe.port == probe_info.port;
-                   });
-  if (probe_loc == this->chanInfoList.end()) {
+  auto probe_loc = std::find_if(this->m_component_registry.begin(),
+                                this->m_component_registry.end(),
+                                [&](const registry_entry_t& entry){
+                                  return entry.endpoint == probe_info;
+                                });
+  if (probe_loc == this->m_component_registry.end()) {
     return;
   }
+  Oscilloscope::Component* measuring_component = probe_loc->component.get();
   Event::Object event(Event::Type::RT_THREAD_REMOVE_EVENT);
   event.setParam(
       "thread",
-      std::any(static_cast<RT::Thread*>(probe_loc->measuring_component)));
+      std::any(static_cast<RT::Thread*>(measuring_component)));
   this->getEventManager()->postEvent(&event);
+  this->m_component_registry.erase(probe_loc);
+}
+
+void Oscilloscope::Plugin::setProbeActivity(IO::endpoint endpoint, bool activity)
+{
+  auto probe_loc = std::find_if(this->m_component_registry.begin(),
+                                this->m_component_registry.end(),
+                                [&](const registry_entry_t& entry){
+                                  return entry.endpoint == endpoint;
+                                });
+  if(probe_loc == this->m_component_registry.end()) { return; }
+  const Event::Type event_type = activity ? Event::Type::RT_THREAD_PAUSE_EVENT :
+                                            Event::Type::RT_THREAD_UNPAUSE_EVENT;
+  Event::Object activity_event(event_type);
+  activity_event.setParam("thread", 
+                          static_cast<RT::Thread*>(probe_loc->component.get()));
+  this->getEventManager()->postEvent(&activity_event);
+}
+
+std::vector<IO::endpoint> Oscilloscope::Plugin::getTrackedEndpoints()
+{
+  std::vector<IO::endpoint> result;
+  result.reserve(this->m_component_registry.size());
+  for(const auto& entry : this->m_component_registry){
+    result.push_back(entry.endpoint);
+  }
+  return result;
+}
+
+void Oscilloscope::Plugin::setAllProbesActivity(bool activity)
+{
+  std::vector<Event::Object> events;
+  events.reserve(this->m_component_registry.size());
+  const Event::Type event_type = activity ? Event::Type::RT_THREAD_PAUSE_EVENT :
+                                            Event::Type::RT_THREAD_UNPAUSE_EVENT;
+  for(const auto& entry : this->m_component_registry){
+    events.emplace_back(event_type);
+    events.back().setParam("thread", entry.component.get());
+  }
+  this->getEventManager()->postEvent(events);
 }
 
 std::unique_ptr<Modules::Plugin> Oscilloscope::createRTXIPlugin(

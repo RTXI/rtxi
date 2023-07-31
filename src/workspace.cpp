@@ -177,7 +177,7 @@ void Workspace::Manager::unloadPlugin(Modules::Plugin* plugin)
 Modules::Plugin* Workspace::Manager::registerModule(
     std::unique_ptr<Modules::Plugin> module)
 {
-  std::unique_lock<std::mutex> lk(this->m_modules_mut);
+  const std::unique_lock<std::mutex> lk(this->m_modules_mut);
   const std::string mod_name = module->getName();
   this->rtxi_modules_registry[mod_name].push_back(std::move(module));
   return this->rtxi_modules_registry[mod_name].back().get();
@@ -188,7 +188,7 @@ void Workspace::Manager::unregisterModule(Modules::Plugin* plugin)
   if (plugin == nullptr) {
     return;
   }
-  std::unique_lock<std::mutex> lk(this->m_modules_mut);
+  const std::unique_lock<std::mutex> lk(this->m_modules_mut);
   const std::string plugin_name = plugin->getName();
   auto start_iter = this->rtxi_modules_registry[plugin_name].begin();
   auto end_iter = this->rtxi_modules_registry[plugin_name].end();

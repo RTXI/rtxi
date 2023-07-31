@@ -28,6 +28,7 @@
 // unecessary repetiotion in panel construction
 Q_DECLARE_METATYPE(IO::Block*)
 Q_DECLARE_METATYPE(IO::flags_t)
+Q_DECLARE_METATYPE(IO::endpoint)
 
 /*!
  * Contains all the classes and structures relevant to Modules

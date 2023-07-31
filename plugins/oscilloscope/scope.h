@@ -51,9 +51,28 @@
 #include <qwt_system_clock.h>
 
 #include "io.hpp"
+#include "fifo.hpp"
 
 namespace Oscilloscope
 {
+
+namespace Trigger
+{
+enum trig_t : int
+{
+  NONE = 0,
+  POS,
+  NEG,
+};
+
+typedef struct Info
+{
+  IO::endpoint endpoint;
+  Trigger::trig_t trigger_direction = NONE;
+  double threshold = 0.0;
+} Info;
+};  // namespace Trigger
+
 
 // values meant to be used with qt timer for redrawing the screen
 // values are in milliseconds
@@ -67,13 +86,15 @@ constexpr size_t HZ240 = 4;
 constexpr size_t DEFAULT_BUFFER_SIZE = 10000;
 typedef struct sample
 {
-  double value;
   int64_t time;
+  double value;
 } sample;
 
 typedef struct scope_channel
 {
   QString label;
+  IO::endpoint endpoint; 
+  RT::OS::Fifo* fifo = nullptr;
   double scale = 1;
   double offset = 0;
   std::vector<double> xbuffer;
@@ -81,9 +102,6 @@ typedef struct scope_channel
   size_t data_indx = 0;
   QwtPlotCurve* curve = nullptr;
   QPen* pen = nullptr;
-  IO::Block* block = nullptr;
-  size_t port = 0;
-  IO::flags_t direction;
 } scope_channel;
 
 namespace ColorID {
@@ -134,8 +152,8 @@ constexpr std::array<std::string_view, 5> penstyles2string
   "Dash Dot Dot"
 };
 
-namespace PennStyleID{
-enum pennstyle_id : size_t
+namespace PenStyleID{
+enum penstyle_id : size_t
 {
   SolidLine=0,
   DashLine,
@@ -143,7 +161,7 @@ enum pennstyle_id : size_t
   DashDotLine,
   DashDotDotLine 
 };
-} // namespace PennStyleID
+} // namespace PenStyleID
 
 class LegendItem : public QwtPlotLegendItem
 {
@@ -173,18 +191,13 @@ public:
   ~Scope() override;
 
   bool paused() const;
-  void createChannel(IO::endpoint probeInfo);
+  void createChannel(IO::endpoint probeInfo, RT::OS::Fifo* fifo);
   void removeChannel(IO::endpoint probeInfo);
   size_t getChannelCount() const;
-  // scope_channel getChannel(IO::Block* block, size_t port);
 
   void clearData();
-  void setData(IO::endpoint channel, std::vector<sample> probe_data);
   size_t getDataSize() const;
   void setDataSize(size_t);
-
-  // Trigger::trig_t getTriggerDirection();
-  // double getTriggerThreshold();
 
   double getDivT() const;
   void setDivT(double);
@@ -196,21 +209,28 @@ public:
   size_t getRefresh() const;
   void setRefresh(size_t);
 
-  void setChannelScale(IO::endpoint channel, double scale);
-  double getChannelScale(IO::endpoint channel);
-  void setChannelOffset(IO::endpoint channel, double offset);
-  double getChannelOffset(IO::endpoint channel);
-  void setChannelPen(IO::endpoint channel, QPen* pen);
-  QPen* getChannelPen(IO::endpoint channel);
-  void setChannelLabel(IO::endpoint channel, const QString& label);
-  // Trigger::Info capture_trigger;
+  void setChannelScale(IO::endpoint endpoint, double scale);
+  double getChannelScale(IO::endpoint endpoint);
+  void setChannelOffset(IO::endpoint endpoint, double offset);
+  double getChannelOffset(IO::endpoint endpoint);
+  void setChannelPen(IO::endpoint endpoint, QPen* pen);
+  QPen* getChannelPen(IO::endpoint endpoint);
+  void setChannelLabel(IO::endpoint endpoint, const QString& label);
+  double getTriggerThreshold() const;
+  void setTriggerThreshold(double threshold);
+  Trigger::trig_t getTriggerDirection();
+  void setTriggerDirection(Trigger::trig_t direction);
 
   void drawCurves();
+  IO::endpoint getTriggerEndpoint() const{ return this->m_trigger_info.endpoint; }
+public slots:
+  void process_data();
 
 protected:
   void resizeEvent(QResizeEvent* event) override;
 
 private:
+  Oscilloscope::Trigger::Info m_trigger_info;
   size_t buffer_size = DEFAULT_BUFFER_SIZE;
 
   bool isPaused = false;

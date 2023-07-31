@@ -28,6 +28,7 @@
 #define OSCILLOSCOPE_H
 
 #include <QtWidgets>
+#include <qopenglwidget.h>
 
 #include "event.hpp"
 #include "fifo.hpp"
@@ -71,44 +72,17 @@ inline std::vector<IO::channel_t> get_default_channels()
            1}};
 }
 
-namespace Trigger
-{
-enum trig_t : int
-{
-  NONE = 0,
-  POS,
-  NEG,
-};
-
-typedef struct Info
-{
-  IO::Block* block = nullptr;
-  size_t port = 0;
-  IO::flags_t io_direction = IO::UNKNOWN;
-  Trigger::trig_t trigger_direction = NONE;
-  double threshold = 0.0;
-} Info;
-};  // namespace Trigger
-
-class Component;
-
-typedef struct channel_info
-{
-  QString name;
-  IO::endpoint probe;
-  Oscilloscope::Component* measuring_component;
-  RT::OS::Fifo* fifo;
-} channel_info;  // channel_info
-
 class Component : public Modules::Component
 {
 public:
+  // We are forced to have a default constructor for Oscilloscope probes
+  // if we wish to be able to have them as values in a c++ standard map
   Component(Modules::Plugin* hplugin, const std::string& probe_name);
   void flushFifo();
   RT::OS::Fifo* getFifoPtr() { return this->fifo.get(); }
+  void execute() override;
 
 private:
-  void execute() override;
   std::unique_ptr<RT::OS::Fifo> fifo;
 };
 
@@ -119,18 +93,14 @@ class Panel : public Modules::Panel
 public:
   Panel(QMainWindow* mw, Event::Manager* ev_manager);
 
-  void setActivity(Oscilloscope::Component* comp, bool activity);
+  void setActivity(IO::endpoint endpoint, bool activity);
   void adjustDataSize();
   void updateTrigger();
-  // void doDeferred(const Settings::Object::State&);
-  // void doLoad(const Settings::Object::State&);
-  // void doSave(Settings::Object::State&) const;
 
 signals:
   void updateBlockInfo();
 
 public slots:
-  void timeoutEvent();
   void togglePause();
 
 private slots:
@@ -211,28 +181,28 @@ private:
 class Plugin : public Modules::Plugin
 {
 public:
+  explicit Plugin(Event::Manager* ev_manager);
   Plugin(const Plugin&) = delete;
   Plugin(Plugin&&) = delete;
   Plugin& operator=(const Plugin&) = delete;
   Plugin& operator=(Plugin&&) = delete;
-  explicit Plugin(Event::Manager* ev_manager);
   ~Plugin() override;
 
   void receiveEvent(Event::Object* event) override;
-  Oscilloscope::Component* getProbeComponent(IO::endpoint probeInfo);
-
-  std::vector<Oscilloscope::channel_info> getChannelsList()
-  {
-    return this->chanInfoList;
-  }
-  bool addProbe(IO::endpoint probe_info);
-  void removeProbe(IO::endpoint probe_info);
+  RT::OS::Fifo* createProbe(IO::endpoint probe_info);
+  void deleteProbe(IO::endpoint probe_info);
   Oscilloscope::Trigger::Info getTriggerInfo() { return this->trigger_info; }
+  void setProbeActivity(IO::endpoint endpoint, bool activity);
+  std::vector<IO::endpoint> getTrackedEndpoints();
+  void setAllProbesActivity(bool activity);
 
 private:
+  struct registry_entry_t {
+    IO::endpoint endpoint;
+    std::unique_ptr<Oscilloscope::Component> component;
+  };
   // List to maintain multiple scopes
-  std::list<Oscilloscope::Component> componentList;
-  std::vector<channel_info> chanInfoList;
+  std::vector<registry_entry_t> m_component_registry;
   Trigger::Info trigger_info;
 };  // Plugin
 

@@ -504,10 +504,11 @@ void MainWindow::windowsMenuActivated(QAction* id)
 
 void MainWindow::modulesMenuActivated(QAction* /*unused*/)
 {
-  QString filename = QFileDialog::getOpenFileName(this, 
-                                                  tr("Load Plugin"), 
-                                                  QString::fromStdString(std::string(RTXI_DEFAULT_PLUGIN_DIR)),
-                                                  tr("Plugins (*.so);;All (*.*)"));
+  const QString filename = 
+    QFileDialog::getOpenFileName(this, 
+                                 tr("Load Plugin"), 
+                                 QString::fromStdString(std::string(RTXI_DEFAULT_PLUGIN_DIR)),
+                                 tr("Plugins (*.so);;All (*.*)"));
   this->loadModule(filename);
 }
 
