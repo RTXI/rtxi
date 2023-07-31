@@ -126,9 +126,10 @@ public:
 
 /*!
  * Information about the outputs of a particular block. This is
- * meant to connection information about blocks and channels.
+ * meant to represent connection information about blocks and channels.
  *
  * \param src IO::Block pointer representing the source of data
+ * \param src_port_type IO::flags_t for source. Either IO::INPUT, IO::OUTPUT or IO::UNKNOWN
  * \param src_port Index of the source channel generating the output
  * \param dest IO::Block pointer representing who to send the output to
  * \param dest_port Index of the destination channel taking the output as input
@@ -140,6 +141,15 @@ typedef struct block_connection_t
   size_t src_port;
   IO::Block* dest;
   size_t dest_port;
+  bool operator==(const block_connection_t& rhs) const
+  {
+    return (this->src == rhs.src) && 
+           (this->src_port_type == rhs.src_port_type) && 
+           (this->src_port == rhs.src_port) && 
+           (this->dest == rhs.dest) && 
+           (this->dest_port == rhs.dest_port);
+  }
+  bool operator!=(const block_connection_t& rhs) const { return !operator==(rhs); }
 } block_connection_t;
 
 /*!

@@ -57,11 +57,6 @@ Connector::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
   // Create elements for output
   outputLayout->addWidget(new QLabel(tr("Block:")), 1, Qt::Alignment());
   outputLayout->addWidget(outputBlock);
-  // QObject::connect(outputBlock,
-  //                  SIGNAL(activated(int)),
-  //                  this,
-  //                  SLOT(buildOutputFlagList(void)));
-
   outputLayout->addWidget(new QLabel(tr("Flag:")), 2, Qt::Alignment());
   outputLayout->addWidget(outputFlag);
   buildOutputFlagList();
@@ -165,10 +160,13 @@ void Connector::Panel::buildBlockList()
   this->blocks =
       std::any_cast<std::vector<IO::Block*>>(event.getParam("blockList"));
   for (auto* block : this->blocks) {
+    if(block->getName().find("Probe") != std::string::npos) { continue; }
     this->inputBlock->addItem(QString::fromStdString(block->getName()) + " "
-                              + QString::number(block->getID()));
+                              + QString::number(block->getID()),
+                              QVariant::fromValue(block));
     this->outputBlock->addItem(QString::fromStdString(block->getName()) + " "
-                               + QString::number(block->getID()));
+                               + QString::number(block->getID()),
+                               QVariant::fromValue(block));
   }
 }
 
@@ -214,17 +212,20 @@ void Connector::Panel::syncBlockInfo()
   }
 
   connectionBox->clear();
+  QString temp_list_text;
+  QListWidgetItem* temp_list_item = nullptr;
   for (auto conn : this->links) {
-    connectionBox->addItem(QString::number(conn.src->getID()) + " "
-                           + QString::fromStdString(conn.src->getName()) + " : "
-                           + QString::number(conn.src_port) + " "
-                           + QString::fromStdString(conn.src->getChannelName(
-                               IO::OUTPUT, conn.src_port))
-                           + " ==> " + QString::number(conn.dest->getID()) + " "
-                           + QString::fromStdString(conn.dest->getName())
-                           + " : " + QString::number(conn.dest_port) + " "
-                           + QString::fromStdString(conn.dest->getChannelName(
-                               IO::INPUT, conn.dest_port)));
+    if(conn.dest->getName().find("Probe") != std::string::npos) { continue; }
+    temp_list_text = QString::number(conn.src->getID()) + " "
+                     + QString::fromStdString(conn.src->getName()) + " "
+                     + QString::fromStdString(conn.src->getChannelName(conn.src_port_type, conn.src_port))
+                     + " ==> " 
+                     + QString::number(conn.dest->getID()) + " "
+                     + QString::fromStdString(conn.dest->getName()) + " "
+                     + QString::fromStdString(conn.dest->getChannelName(IO::INPUT, conn.dest_port));
+    temp_list_item = new QListWidgetItem(temp_list_text);
+    temp_list_item->setData(Qt::UserRole, QVariant::fromValue(conn));
+    connectionBox->addItem(temp_list_item);
   }
 }
 
@@ -236,12 +237,14 @@ void Connector::Panel::buildInputChannelList()
   }
 
   // Get specific block
-  IO::Block* block = blocks[static_cast<size_t>(inputBlock->currentIndex())];
+  if(!inputBlock->currentData().isValid()){ return; }
+  auto* block = inputBlock->currentData().value<IO::Block*>();
 
   // Get list of channels from specific block
   for (size_t i = 0; i < block->getCount(IO::INPUT); ++i) {
     inputChannel->addItem(
-        QString::fromStdString(block->getChannelName(IO::INPUT, i)));
+        QString::fromStdString(block->getChannelName(IO::INPUT, i)),
+        QVariant::fromValue(i));
   }
 
   updateConnectionButton();
@@ -255,12 +258,15 @@ void Connector::Panel::buildOutputChannelList()
   }
 
   // Get specific block
-  IO::Block* block = blocks[static_cast<size_t>(outputBlock->currentIndex())];
+  if(!outputBlock->currentData().isValid() || !outputFlag->currentData().isValid()){ return; }
+  auto* block = outputBlock->currentData().value<IO::Block*>();
+  auto direction = outputFlag->currentData().value<IO::flags_t>();
 
   // Get list of channels from specific block
-  for (size_t i = 0; i < block->getCount(IO::OUTPUT); ++i) {
+  for (size_t i = 0; i < block->getCount(direction); ++i) {
     outputChannel->addItem(
-        QString::fromStdString(block->getChannelName(IO::OUTPUT, i)));
+        QString::fromStdString(block->getChannelName(direction, i)),
+        QVariant::fromValue(i));
   }
 
   updateConnectionButton();
@@ -268,76 +274,56 @@ void Connector::Panel::buildOutputChannelList()
 
 void Connector::Panel::buildOutputFlagList()
 {
-  outputFlag->addItem(QString("OUTPUT"), static_cast<int>(IO::OUTPUT));
-  outputFlag->addItem(QString("INPUT"), static_cast<int>(IO::INPUT));
+  outputFlag->addItem(QString("OUTPUT"), QVariant::fromValue(IO::OUTPUT));
+  outputFlag->addItem(QString("INPUT"), QVariant::fromValue(IO::INPUT));
 }
 
 void Connector::Panel::highlightConnectionBox(QListWidgetItem* /*item*/)
 {
-  const int link_index =
-      this->connectionBox->selectionModel()->selectedIndexes()[0].row();
-  if (link_index < 0 || static_cast<size_t>(link_index) >= this->links.size()) {
-    return;
-  }
-
-  // Find out selected src block
-  IO::Block* src = this->links[static_cast<size_t>(link_index)].src;
-  auto src_iter = std::find(this->blocks.begin(), this->blocks.end(), src);
-  int src_index = -1;
-  if (src_iter != this->blocks.end()) {
-    src_index = static_cast<int>(std::distance(this->blocks.begin(), src_iter));
-  }
+  QVariant connection_variant = this->connectionBox->currentItem()->data(Qt::UserRole);
+  if (!connection_variant.isValid()) { return; }
+  auto conn = connection_variant.value<RT::block_connection_t>();
 
   // build info in the output group
+  const int src_index = this->outputBlock->findData(QVariant::fromValue(conn.src));
+  const int src_type_index = this->outputBlock->findData(QVariant::fromValue(conn.src_port_type));
+  const int dest_index = this->outputBlock->findData(QVariant::fromValue(conn.dest));
+  if(src_index < 0 || src_type_index < 0 || dest_index < 0){ return; }
+
   this->outputBlock->setCurrentIndex(src_index);
-  buildOutputChannelList();
-  const size_t src_port = this->links[static_cast<size_t>(link_index)].src_port;
-  outputChannel->setCurrentIndex(static_cast<int>(src_port));
-
-  // find out selected dest block
-  IO::Block* dest = this->links[static_cast<size_t>(link_index)].dest;
-  auto dest_iter = std::find(this->blocks.begin(), this->blocks.end(), dest);
-  int dest_index = -1;
-  if (dest_iter != this->blocks.end()) {
-    dest_index =
-        static_cast<int>(std::distance(this->blocks.begin(), dest_iter));
-  }
-
-  // build info in the input group
+  this->outputFlag->setCurrentIndex(src_type_index);
   this->inputBlock->setCurrentIndex(dest_index);
+  buildOutputChannelList();
   buildInputChannelList();
-  const size_t dest_port =
-      this->links[static_cast<size_t>(link_index)].dest_port;
-  inputChannel->setCurrentIndex(static_cast<int>(dest_port));
+
+  const int src_port_index = this->outputBlock->findData(QVariant::fromValue(conn.src_port));
+  const int dest_port_index = this->outputBlock->findData(QVariant::fromValue(conn.dest_port));
+  if(src_port_index < 0 || dest_port_index < 0){ return; }
+  outputChannel->setCurrentIndex(src_port_index);
+  inputChannel->setCurrentIndex(dest_port_index);
 
   // update connection button state
   updateConnectionButton();
 }
 
-void Connector::Panel::toggleConnection(bool on)
+void Connector::Panel::toggleConnection(bool down)
 {
   RT::block_connection_t connection;
-  const int src_id = outputBlock->currentIndex();
-  const int dest_id = inputBlock->currentIndex();
-  const int src_port_id = outputChannel->currentIndex();
-  const int src_port_flag = outputFlag->currentData().toInt();
-  const int dest_port_id = inputChannel->currentIndex();
-
-  // If no valid selection then do nothing
-  if (src_id == -1 || dest_id == -1 || src_port_id == -1 || dest_port_id == -1
-      || src_port_flag == -1)
-  {
-    this->connectionButton->setDown(false);
+  QVariant src_block = outputBlock->currentData(); 
+  QVariant src_type = outputFlag->currentData(); 
+  QVariant src_port = outputChannel->currentData(); 
+  QVariant dest_block = inputBlock->currentData(); 
+  QVariant dest_port = inputChannel->currentData(); 
+  if(!src_block.isValid() || !src_type.isValid() || !src_port.isValid() || !dest_block.isValid() || !dest_port.isValid()){
     return;
   }
+  connection.src = src_block.value<IO::Block*>(); 
+  connection.src_port_type = src_type.value<IO::flags_t>();
+  connection.src_port = src_port.value<size_t>();
+  connection.dest = dest_block.value<IO::Block*>();
+  connection.dest_port = dest_port.value<size_t>();
 
-  connection.src = blocks[static_cast<size_t>(src_id)];
-  connection.dest = blocks[static_cast<size_t>(dest_id)];
-  connection.src_port = static_cast<size_t>(src_port_id);
-  connection.dest_port = static_cast<size_t>(dest_port_id);
-  connection.src_port_type = static_cast<IO::flags_t>(src_port_flag);
-
-  if (on) {
+  if (down) {
     Event::Object event(Event::Type::IO_LINK_INSERT_EVENT);
     event.setParam("connection", std::any(connection));
     this->getRTXIEventManager()->postEvent(&event);
@@ -346,29 +332,40 @@ void Connector::Panel::toggleConnection(bool on)
     event.setParam("connection", std::any(connection));
     this->getRTXIEventManager()->postEvent(&event);
   }
+  syncBlockInfo();
 }
 
 void Connector::Panel::updateConnectionButton()
 {
+  RT::block_connection_t connection;
   if (inputChannel->count() == 0 || outputChannel->count() == 0) {
     connectionButton->setEnabled(false);
-  } else {
-    connectionButton->setEnabled(true);
-    IO::Block* src = blocks[static_cast<size_t>(outputBlock->currentIndex())];
-    IO::Block* dest = blocks[static_cast<size_t>(inputBlock->currentIndex())];
-    auto src_num = static_cast<size_t>(outputChannel->currentIndex());
-    auto dest_num = static_cast<size_t>(inputChannel->currentIndex());
+    return;
+  }
+  //QVariant connection_variant = this->connectionBox->currentItem()->data(Qt::UserRole);
+  QVariant src_block = outputBlock->currentData(); 
+  QVariant src_type = outputFlag->currentData(); 
+  QVariant src_port = outputChannel->currentData(); 
+  QVariant dest_block = inputBlock->currentData(); 
+  QVariant dest_port = inputChannel->currentData(); 
+  if(!src_block.isValid() || !src_type.isValid() || !src_port.isValid() || !dest_block.isValid() || !dest_port.isValid()){
+    connectionButton->setEnabled(false);
+    return;
+  }
+  connectionButton->setEnabled(true);
+  connection.src = src_block.value<IO::Block*>();
+  connection.src_port_type = src_type.value<IO::flags_t>();
+  connection.src_port = src_port.value<size_t>();
+  connection.dest = dest_block.value<IO::Block*>();
+  connection.dest_port = dest_port.value<size_t>();
 
-    auto iter = std::find_if(this->links.begin(),
-                             this->links.end(),
-                             [&](RT::block_connection_t registered_conn)
-                             {
-                               return registered_conn.src == src
-                                   && registered_conn.src_port == src_num
-                                   && registered_conn.dest == dest
-                                   && registered_conn.dest_port == dest_num;
-                             });
-    connectionButton->setChecked(iter != this->links.end());
+  QListWidgetItem* temp_item = nullptr;
+  for(int i=0; i<connectionBox->count(); i++){
+    temp_item = connectionBox->item(i);
+    if(temp_item->data(Qt::UserRole).value<RT::block_connection_t>() == connection){
+      connectionBox->setCurrentRow(i);
+      break;
+    }
   }
 }
 

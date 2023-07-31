@@ -29,6 +29,7 @@
 Q_DECLARE_METATYPE(IO::Block*)
 Q_DECLARE_METATYPE(IO::flags_t)
 Q_DECLARE_METATYPE(IO::endpoint)
+Q_DECLARE_METATYPE(RT::block_connection_t)
 
 /*!
  * Contains all the classes and structures relevant to Modules
