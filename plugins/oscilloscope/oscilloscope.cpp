@@ -953,11 +953,12 @@ RT::OS::Fifo* Oscilloscope::Plugin::createProbe(IO::endpoint probe_info)
     return probe_loc->component->getFifoPtr();
   }
   const std::string comp_name =
-      fmt::format("{} {} {} port: {}",
-                  probe_info.block->getID(),
+      fmt::format("{} Probe for Block {} Channel {} {} with Id {} ",
+                  std::string(Oscilloscope::MODULE_NAME),
                   probe_info.block->getName(),
                   probe_info.direction == IO::OUTPUT ? "Output " : "Input ",
-                  probe_info.port);
+                  probe_info.port,
+                  probe_info.block->getID());
   this->m_component_registry.push_back(
       {probe_info, std::make_unique<Oscilloscope::Component>(this, comp_name)});
   Oscilloscope::Component* measuring_component =
