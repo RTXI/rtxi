@@ -231,8 +231,8 @@ public:
    * Function that builds the Qt GUI.
    *
    * \param vars The structure defining the module's parameters, states, inputs,
-   *    and outputs. 
-   * \param skip_ids A vector of IDs that this function should not consider 
+   *    and outputs.
+   * \param skip_ids A vector of IDs that this function should not consider
    *    building interface for.
    *
    */

@@ -28,6 +28,7 @@
 #define OSCILLOSCOPE_H
 
 #include <QtWidgets>
+
 #include <qopenglwidget.h>
 
 #include "event.hpp"
@@ -197,7 +198,8 @@ public:
   void setAllProbesActivity(bool activity);
 
 private:
-  struct registry_entry_t {
+  struct registry_entry_t
+  {
     IO::endpoint endpoint;
     std::unique_ptr<Oscilloscope::Component> component;
   };

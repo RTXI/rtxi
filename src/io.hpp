@@ -189,7 +189,7 @@ private:
  * Structure used to pass information to plugins about a connection.
  *
  * This structure holds details that identifies a connection end. it is
- * guaranteed to be unique and has comparison functions implemented to 
+ * guaranteed to be unique and has comparison functions implemented to
  * allow for ease of equality checks in higher level algorithms
  *
  * \param block Pointer to the block object

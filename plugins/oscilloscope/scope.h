@@ -50,8 +50,8 @@
 #include <qwt_scale_engine.h>
 #include <qwt_system_clock.h>
 
-#include "io.hpp"
 #include "fifo.hpp"
+#include "io.hpp"
 
 namespace Oscilloscope
 {
@@ -73,7 +73,6 @@ typedef struct Info
 } Info;
 };  // namespace Trigger
 
-
 // values meant to be used with qt timer for redrawing the screen
 // values are in milliseconds
 namespace FrameRates
@@ -93,7 +92,7 @@ typedef struct sample
 typedef struct scope_channel
 {
   QString label;
-  IO::endpoint endpoint; 
+  IO::endpoint endpoint;
   RT::OS::Fifo* fifo = nullptr;
   double scale = 1;
   double offset = 0;
@@ -104,10 +103,11 @@ typedef struct scope_channel
   QPen* pen = nullptr;
 } scope_channel;
 
-namespace ColorID {
+namespace ColorID
+{
 enum color_id : size_t
 {
-  Red=0,
+  Red = 0,
   Orange,
   Green,
   Blue,
@@ -115,8 +115,7 @@ enum color_id : size_t
   Teal,
   Black
 };
-} // namespace ColorID
-
+}  // namespace ColorID
 
 constexpr std::array<QColor, 7> penColors = {QColor(255, 0, 16, 255),
                                              QColor(255, 164, 5, 255),
@@ -126,16 +125,8 @@ constexpr std::array<QColor, 7> penColors = {QColor(255, 0, 16, 255),
                                              QColor(0, 153, 143, 255),
                                              QColor(83, 81, 84, 255)};
 
-constexpr std::array<std::string_view,7> color2string
-{
-  "Red",
-  "Orange",
-  "Green",
-  "Blue",
-  "Purple",
-  "Teal",
-  "Black"
-};
+constexpr std::array<std::string_view, 7> color2string {
+    "Red", "Orange", "Green", "Blue", "Purple", "Teal", "Black"};
 
 constexpr std::array<Qt::PenStyle, 5> penStyles = {Qt::SolidLine,
                                                    Qt::DashLine,
@@ -143,25 +134,20 @@ constexpr std::array<Qt::PenStyle, 5> penStyles = {Qt::SolidLine,
                                                    Qt::DashDotLine,
                                                    Qt::DashDotDotLine};
 
-constexpr std::array<std::string_view, 5> penstyles2string
-{
-  "Solid",
-  "Dash",
-  "Dot",
-  "Dash Dot",
-  "Dash Dot Dot"
-};
+constexpr std::array<std::string_view, 5> penstyles2string {
+    "Solid", "Dash", "Dot", "Dash Dot", "Dash Dot Dot"};
 
-namespace PenStyleID{
+namespace PenStyleID
+{
 enum penstyle_id : size_t
 {
-  SolidLine=0,
+  SolidLine = 0,
   DashLine,
   DotLine,
   DashDotLine,
-  DashDotDotLine 
+  DashDotDotLine
 };
-} // namespace PenStyleID
+}  // namespace PenStyleID
 
 class LegendItem : public QwtPlotLegendItem
 {
@@ -222,7 +208,10 @@ public:
   void setTriggerDirection(Trigger::trig_t direction);
 
   void drawCurves();
-  IO::endpoint getTriggerEndpoint() const{ return this->m_trigger_info.endpoint; }
+  IO::endpoint getTriggerEndpoint() const
+  {
+    return this->m_trigger_info.endpoint;
+  }
 public slots:
   void process_data();
 

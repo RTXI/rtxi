@@ -125,8 +125,7 @@ Oscilloscope::Scope::Scope(QWidget* parent)
   resize(sizeHint());
   // Timer controls refresh rate of scope
   this->timer->setTimerType(Qt::PreciseTimer);
-  QObject::connect(
-     timer, SIGNAL(timeout()), this, SLOT(timeoutEvent()));
+  QObject::connect(timer, SIGNAL(timeout()), this, SLOT(timeoutEvent()));
   this->timer->start(static_cast<int>(this->refresh));
 }
 
@@ -148,9 +147,8 @@ void Oscilloscope::Scope::createChannel(IO::endpoint probeInfo,
 {
   auto iter = std::find_if(this->channels.begin(),
                            this->channels.end(),
-                           [&](const scope_channel& chan){
-                            return chan.endpoint == probeInfo;
-                           });
+                           [&](const scope_channel& chan)
+                           { return chan.endpoint == probeInfo; });
   if (iter != this->channels.end()) {
     return;
   }
@@ -174,9 +172,8 @@ void Oscilloscope::Scope::removeChannel(IO::endpoint probeInfo)
 {
   auto iter = std::find_if(this->channels.begin(),
                            this->channels.end(),
-                           [&](const scope_channel& chan){
-                            return chan.endpoint == probeInfo;
-                           });
+                           [&](const scope_channel& chan)
+                           { return chan.endpoint == probeInfo; });
   if (iter == this->channels.end()) {
     return;
   }
@@ -265,9 +262,7 @@ void Oscilloscope::Scope::setChannelScale(IO::endpoint endpoint, double scale)
   auto chan_loc = std::find_if(this->channels.begin(),
                                this->channels.end(),
                                [&](const Oscilloscope::scope_channel& chann)
-                               {
-                                 return chann.endpoint == endpoint;
-                               });
+                               { return chann.endpoint == endpoint; });
   if (chan_loc == channels.end()) {
     return;
   }
@@ -279,9 +274,7 @@ double Oscilloscope::Scope::getChannelScale(IO::endpoint endpoint)
   auto chan_loc = std::find_if(this->channels.begin(),
                                this->channels.end(),
                                [&](const Oscilloscope::scope_channel& chann)
-                               {
-                                 return chann.endpoint == endpoint; 
-                               });
+                               { return chann.endpoint == endpoint; });
   if (chan_loc == channels.end()) {
     return 0.0;
   }
@@ -293,9 +286,7 @@ void Oscilloscope::Scope::setChannelOffset(IO::endpoint endpoint, double offset)
   auto chan_loc = std::find_if(this->channels.begin(),
                                this->channels.end(),
                                [&](const Oscilloscope::scope_channel& chann)
-                               {
-                                 return chann.endpoint == endpoint;
-                               });
+                               { return chann.endpoint == endpoint; });
   if (chan_loc == channels.end()) {
     return;
   }
@@ -307,9 +298,7 @@ double Oscilloscope::Scope::getChannelOffset(IO::endpoint endpoint)
   auto chan_loc = std::find_if(this->channels.begin(),
                                this->channels.end(),
                                [&](const Oscilloscope::scope_channel& chann)
-                               {
-                                 return chann.endpoint == endpoint;
-                               });
+                               { return chann.endpoint == endpoint; });
   if (chan_loc == channels.end()) {
     return 0.0;
   }
@@ -321,9 +310,7 @@ void Oscilloscope::Scope::setChannelPen(IO::endpoint endpoint, QPen* pen)
   auto chan_loc = std::find_if(this->channels.begin(),
                                this->channels.end(),
                                [&](const Oscilloscope::scope_channel& chann)
-                               {
-                                 return chann.endpoint == endpoint; 
-                               });
+                               { return chann.endpoint == endpoint; });
   if (chan_loc == channels.end()) {
     return;
   }
@@ -336,9 +323,7 @@ QPen* Oscilloscope::Scope::getChannelPen(IO::endpoint endpoint)
   auto chan_loc = std::find_if(this->channels.begin(),
                                this->channels.end(),
                                [&](const Oscilloscope::scope_channel& chann)
-                               {
-                                 return chann.endpoint == endpoint;
-                               });
+                               { return chann.endpoint == endpoint; });
   if (chan_loc == channels.end()) {
     return nullptr;
   }
@@ -351,9 +336,7 @@ void Oscilloscope::Scope::setChannelLabel(IO::endpoint endpoint,
   auto chan_loc = std::find_if(this->channels.begin(),
                                this->channels.end(),
                                [&](const Oscilloscope::scope_channel& chann)
-                               {
-                                 return chann.endpoint == endpoint;
-                               });
+                               { return chann.endpoint == endpoint; });
   if (chan_loc == channels.end()) {
     return;
   }
@@ -414,23 +397,27 @@ void Oscilloscope::Scope::process_data()
   ssize_t count = 0;
   size_t sample_count = 0;
   size_t array_indx = 0;
-  const size_t sample_capacity = sample_vector.capacity()*sizeof(Oscilloscope::sample);
+  const size_t sample_capacity =
+      sample_vector.capacity() * sizeof(Oscilloscope::sample);
   for (auto& channel : this->channels) {
-    // Read as many samples as possible in chunks of buffer size or less. overwrite old 
-    // samples from previous write if available
-    while(count = channel.fifo->read(sample_vector.data(), sample_capacity), count > 0){
+    // Read as many samples as possible in chunks of buffer size or less.
+    // overwrite old samples from previous write if available
+    while (count = channel.fifo->read(sample_vector.data(), sample_capacity),
+           count > 0)
+    {
       sample_count = static_cast<size_t>(count);
-      for(size_t i=0; i<sample_count; i++){
-        array_indx = (i+channel.data_indx)%this->buffer_size;
-        channel.xbuffer[array_indx] = static_cast<double>(sample_vector[i].time);
+      for (size_t i = 0; i < sample_count; i++) {
+        array_indx = (i + channel.data_indx) % this->buffer_size;
+        channel.xbuffer[array_indx] =
+            static_cast<double>(sample_vector[i].time);
         channel.ybuffer[array_indx] = sample_vector[i].value;
       }
-      channel.data_indx = (channel.data_indx+sample_count) % this->buffer_size;
+      channel.data_indx =
+          (channel.data_indx + sample_count) % this->buffer_size;
     };
-   
+
     // zero out so the buffer so it doesn't spill over to the next channel
-    sample_vector.assign(this->buffer_size, {0,0.0});
+    sample_vector.assign(this->buffer_size, {0, 0.0});
   }
   this->drawCurves();
 }
-

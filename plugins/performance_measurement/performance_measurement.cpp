@@ -33,7 +33,7 @@ PerformanceMeasurement::Panel::Panel(const std::string& mod_name,
     : Modules::Panel(mod_name, mwindow, ev_manager)
 {
   // Create main layout
-  //auto* box_layout = new QVBoxLayout;
+  // auto* box_layout = new QVBoxLayout;
   const QString suffix = QString("s)").prepend(QChar(0x3BC));
 
   // Create child widget and gridLayout
@@ -79,7 +79,7 @@ PerformanceMeasurement::Panel::Panel(const std::string& mod_name,
   QObject::connect(resetButton, SIGNAL(released()), this, SLOT(reset()));
 
   // Attach child widget to parent widget
-  //box_layout->addLayout(gridLayout);
+  // box_layout->addLayout(gridLayout);
 
   // Attach gridLayout to Widget
   setLayout(gridLayout);
@@ -227,7 +227,7 @@ Modules::Panel* PerformanceMeasurement::createRTXIPanel(
 }
 
 std::unique_ptr<Modules::Component> PerformanceMeasurement::createRTXIComponent(
-    Modules::Plugin*  /*host_plugin*/)
+    Modules::Plugin* /*host_plugin*/)
 {
   return std::make_unique<PerformanceMeasurement::Component>(nullptr);
 }

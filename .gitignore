@@ -30,3 +30,6 @@ moc_*
 compile_commands.json
 .cache
 _CPack_Packages/
+
+#Ignore development script outputs
+scripts/all_plugins/

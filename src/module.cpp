@@ -48,7 +48,8 @@ std::string Modules::Variable::state2string(Modules::Variable::state_t state)
   return result;
 }
 
-std::string Modules::Variable::vartype2string(Modules::Variable::variable_t type)
+std::string Modules::Variable::vartype2string(
+    Modules::Variable::variable_t type)
 {
   std::string result;
   switch (type) {
@@ -181,8 +182,9 @@ void Modules::Panel::closeEvent(QCloseEvent* event)
   this->exit();
 }
 
-void Modules::Panel::createGUI(const std::vector<Modules::Variable::Info>& vars,
-                               const std::vector<Modules::Variable::Id>& skip_ids)
+void Modules::Panel::createGUI(
+    const std::vector<Modules::Variable::Info>& vars,
+    const std::vector<Modules::Variable::Id>& skip_ids)
 {
   // Create main layout
   auto* main_layout = new QVBoxLayout;
@@ -193,9 +195,12 @@ void Modules::Panel::createGUI(const std::vector<Modules::Variable::Info>& vars,
   int param_count = 0;
   for (const auto& varinfo : vars) {
     // Skip any unwanted ids
-    if(std::count(skip_ids.begin(), skip_ids.end(), varinfo.id) != 0) { continue; }
+    if (std::count(skip_ids.begin(), skip_ids.end(), varinfo.id) != 0) {
+      continue;
+    }
     param_t param;
-    param.label = new QLabel(QString::fromStdString(varinfo.name), customParamArea);
+    param.label =
+        new QLabel(QString::fromStdString(varinfo.name), customParamArea);
     param.edit = new DefaultGUILineEdit(customParamArea);
     param.str_value = QString();
     param.type = varinfo.vartype;
@@ -251,12 +256,12 @@ void Modules::Panel::createGUI(const std::vector<Modules::Variable::Info>& vars,
   buttonLayout->addWidget(pauseButton);
 
   modifyButton = new QPushButton("Modify", this);
-  QObject::connect(
-      modifyButton, SIGNAL(clicked()), this, SLOT(modify()));
+  QObject::connect(modifyButton, SIGNAL(clicked()), this, SLOT(modify()));
   buttonLayout->addWidget(modifyButton);
 
   unloadButton = new QPushButton("Unload", this);
-  QObject::connect(unloadButton, SIGNAL(clicked()), parentWidget(), SLOT(close()));
+  QObject::connect(
+      unloadButton, SIGNAL(clicked()), parentWidget(), SLOT(close()));
   buttonLayout->addWidget(unloadButton);
 
   buttonGroup->setLayout(buttonLayout);
@@ -286,7 +291,7 @@ void Modules::Panel::exit()
   event.setParam("pluginPointer",
                  std::any(static_cast<Modules::Plugin*>(this->hostPlugin)));
   this->event_manager->postEvent(&event);
-  //this->m_subwindow->close();
+  // this->m_subwindow->close();
 }
 
 void Modules::Panel::refresh()
@@ -428,11 +433,11 @@ void Modules::Panel::pause(bool p)
   if (pauseButton->isChecked() != p) {
     pauseButton->setDown(p);
   }
-  //const int result = this->hostPlugin->setActive(!p);
-  //if (result != 0) {
-  //  ERROR_MSG("Unable to pause/Unpause Plugin {} ", this->getName());
-  //  return;
-  //}
+  // const int result = this->hostPlugin->setActive(!p);
+  // if (result != 0) {
+  //   ERROR_MSG("Unable to pause/Unpause Plugin {} ", this->getName());
+  //   return;
+  // }
   if (p) {
     this->update(Modules::Variable::PAUSE);
   } else {
@@ -520,7 +525,9 @@ void Modules::Plugin::attachComponent(
     std::unique_ptr<Modules::Component> component)
 {
   // If there is a component already attached then cancel attach
-  if(this->plugin_component != nullptr) { return; }
+  if (this->plugin_component != nullptr) {
+    return;
+  }
   this->plugin_component = std::move(component);
   // Let's set the component as active before registering it to rt thread
   // this avoids unecessary use of event firing which is much slower

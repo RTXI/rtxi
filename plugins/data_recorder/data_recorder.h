@@ -189,10 +189,10 @@ private:
   void close_trial_group(const std::unique_lock<std::shared_mutex>& lock);
   void open_trial_group(const std::unique_lock<std::shared_mutex>& lock);
   void process_data_worker();
-  void save_data(hid_t data_id, 
+  void save_data(hid_t data_id,
                  const std::vector<data_token_t>& data,
                  size_t packet_count);
-  hsize_t m_data_chunk_size= static_cast<hsize_t>(10000);
+  hsize_t m_data_chunk_size = static_cast<hsize_t>(10000);
   int m_compression_factor = 5;
   struct hdf5_handles
   {
@@ -224,7 +224,7 @@ private:
   std::shared_mutex m_channels_list_mut;
   std::shared_mutex m_file_mut;
   std::mutex m_hdf5_file_mut;
-  std::atomic<bool> open_file=false;
+  std::atomic<bool> open_file = false;
 };  // class Plugin
 
 std::unique_ptr<Modules::Plugin> createRTXIPlugin(Event::Manager* ev_manager);

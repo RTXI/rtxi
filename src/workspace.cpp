@@ -101,7 +101,7 @@ Modules::Plugin* Workspace::Manager::loadPlugin(const std::string& library)
     std::unique_ptr<Modules::Plugin> plugin =
         this->rtxi_factories_registry[library_loc].createPlugin(
             this->event_manager);
-    std::unique_ptr<Modules::Component> component = 
+    std::unique_ptr<Modules::Component> component =
         this->rtxi_factories_registry[library_loc].createComponent(
             plugin.get());
     plugin->attachComponent(std::move(component));
@@ -149,7 +149,7 @@ Modules::Plugin* Workspace::Manager::loadPlugin(const std::string& library)
     this->m_plugin_loader->unload(library_loc.c_str());
     return nullptr;
   }
-  std::unique_ptr<Modules::Component> component = 
+  std::unique_ptr<Modules::Component> component =
       fact_methods->createComponent(plugin.get());
   plugin->attachComponent(std::move(component));
   // if (plugin->magic_number != Plugin::Object::MAGIC_NUMBER) {
