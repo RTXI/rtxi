@@ -204,12 +204,9 @@ void Connector::Plugin::updatePanelInfo()
 void Connector::Panel::syncBlockInfo()
 {
   this->buildBlockList();
+  this->buildInputChannelList();
+  this->buildOutputChannelList();
   this->buildConnectionList();
-
-  if (!blocks.empty()) {
-    this->buildInputChannelList();
-    this->buildOutputChannelList();
-  }
 
   connectionBox->clear();
   QString temp_list_text;
