@@ -196,6 +196,7 @@ public:
   void setProbeActivity(IO::endpoint endpoint, bool activity);
   std::vector<IO::endpoint> getTrackedEndpoints();
   void setAllProbesActivity(bool activity);
+  Oscilloscope::Component* getProbeComponentPtr(IO::endpoint endpoint);
 
 private:
   struct registry_entry_t

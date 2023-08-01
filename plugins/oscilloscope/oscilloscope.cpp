@@ -152,7 +152,7 @@ void Oscilloscope::Panel::enableChannel()
   const IO::endpoint endpoint {chanblock, chanport, chandirection};
   RT::OS::Fifo* probe_fifo = oscilloscope_plugin->createProbe(endpoint);
   if (probe_fifo == nullptr) {
-    ERROR_MSG("Unable to create probing channel for block {}",
+    ERROR_MSG("Oscilloscope::Panel::enableChannel Unable to create probing channel for block {}",
               chanblock->getName());
     return;
   }
@@ -837,7 +837,7 @@ Oscilloscope::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
 
   auto* otimer = new QTimer;
   otimer->setTimerType(Qt::PreciseTimer);
-  QObject::connect(otimer, SIGNAL(timeout()), this, SLOT(timeoutEvent()));
+  //QObject::connect(otimer, SIGNAL(timeout()), this, SLOT(timeoutEvent()));
   otimer->start(Oscilloscope::FrameRates::HZ60);
 
   QObject::connect(
@@ -963,10 +963,20 @@ RT::OS::Fifo* Oscilloscope::Plugin::createProbe(IO::endpoint probe_info)
       {probe_info, std::make_unique<Oscilloscope::Component>(this, comp_name)});
   Oscilloscope::Component* measuring_component =
       this->m_component_registry.back().component.get();
-  Event::Object event(Event::Type::RT_THREAD_INSERT_EVENT);
-  event.setParam("thread",
-                 std::any(static_cast<RT::Thread*>(measuring_component)));
-  this->getEventManager()->postEvent(&event);
+
+  RT::block_connection_t connection;
+  connection.src = probe_info.block;
+  connection.src_port_type = probe_info.direction;
+  connection.src_port = probe_info.port;
+  connection.dest = measuring_component;
+  connection.dest_port = 0;
+  std::vector<Event::Object> events;
+  events.emplace_back(Event::Type::RT_THREAD_INSERT_EVENT);
+  events.back().setParam("thread",
+                         std::any(static_cast<RT::Thread*>(measuring_component)));
+  events.emplace_back(Event::Type::IO_LINK_INSERT_EVENT);
+  events.back().setParam("connection", std::any(connection));
+  this->getEventManager()->postEvent(events);
   return measuring_component->getFifoPtr();
   // TODO: complete proper handling of errors if not able to register probe
   // thread
@@ -982,10 +992,19 @@ void Oscilloscope::Plugin::deleteProbe(IO::endpoint probe_info)
     return;
   }
   Oscilloscope::Component* measuring_component = probe_loc->component.get();
-  Event::Object event(Event::Type::RT_THREAD_REMOVE_EVENT);
-  event.setParam("thread",
-                 std::any(static_cast<RT::Thread*>(measuring_component)));
-  this->getEventManager()->postEvent(&event);
+  RT::block_connection_t connection;
+  connection.src = probe_info.block;
+  connection.src_port_type = probe_info.direction;
+  connection.src_port = probe_info.port;
+  connection.dest = measuring_component;
+  connection.dest_port = 0;
+  std::vector<Event::Object> events;
+  events.emplace_back(Event::Type::IO_LINK_REMOVE_EVENT);
+  events.back().setParam("connection", std::any(connection));
+  events.emplace_back(Event::Type::RT_THREAD_REMOVE_EVENT);
+  events.back().setParam("thread",
+                         std::any(static_cast<RT::Thread*>(measuring_component)));
+  this->getEventManager()->postEvent(events);
   this->m_component_registry.erase(probe_loc);
 }
 
@@ -1030,6 +1049,17 @@ void Oscilloscope::Plugin::setAllProbesActivity(bool activity)
     events.back().setParam("thread", entry.component.get());
   }
   this->getEventManager()->postEvent(events);
+}
+
+Oscilloscope::Component* Oscilloscope::Plugin::getProbeComponentPtr(IO::endpoint endpoint)
+{
+  auto iter = std::find_if(this->m_component_registry.begin(),
+                           this->m_component_registry.end(),
+                           [&](const registry_entry_t& entry){
+                             return entry.endpoint == endpoint;
+                           });
+  if(iter == this->m_component_registry.end()) { return nullptr; }
+  return iter->component.get();
 }
 
 std::unique_ptr<Modules::Plugin> Oscilloscope::createRTXIPlugin(
