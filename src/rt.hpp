@@ -136,11 +136,11 @@ public:
  */
 typedef struct block_connection_t
 {
-  IO::Block* src;
-  IO::flags_t src_port_type;
-  size_t src_port;
-  IO::Block* dest;
-  size_t dest_port;
+  IO::Block* src=nullptr;
+  IO::flags_t src_port_type=IO::UNKNOWN;
+  size_t src_port=0;
+  IO::Block* dest=nullptr;
+  size_t dest_port=0;
   bool operator==(const block_connection_t& rhs) const
   {
     return (this->src == rhs.src) && 
@@ -213,9 +213,15 @@ public:
   /*!
    * Register the block in order to access connection services
    *
+   * The caller of this function must provide a pointer to the memory
+   * that the real-time thread will use to store connections. This is
+   * an optimization that avoids memory allocations in rt-thread as
+   * much as possible
+   *
    * \param thread Pointer to block object to register
+   * \param block_connections pointer to the vector connections to use
    */
-  void insertBlock(IO::Block* block);
+  void insertBlock(IO::Block* block, std::vector<RT::block_connection_t>& block_connections);
 
   /*!
    * Unregister the block from the registry
@@ -267,6 +273,7 @@ public:
    */
   void propagateBlockConnections(IO::Block* block);
 
+  void clearAllConnections(IO::Block* block);
   std::vector<IO::Block*> getRegisteredBlocks();
   std::vector<RT::block_connection_t> getAllConnections();
 
@@ -274,7 +281,7 @@ private:
   int find_cycle(RT::block_connection_t conn, IO::Block* ref_block);
   std::vector<RT::Thread*> topological_sort();
   std::vector<IO::Block*> block_registry;
-  std::vector<RT::block_connection_t> connections;
+  std::vector<std::vector<RT::block_connection_t>> connections;
 };  // class Connector
 
 using command_param_t = std::variant<std::monostate,

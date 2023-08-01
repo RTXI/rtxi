@@ -37,7 +37,7 @@ int RT::Connector::find_cycle(RT::block_connection_t conn, IO::Block* ref_block)
   if (conn.dest == ref_block) {
     return -1;
   }
-  for (const auto& temp_conn : this->connections) {
+  for (const auto& temp_conn : this->connections[ref_block->getID()]) {
     if (conn.dest == temp_conn.src
         && this->find_cycle(temp_conn, ref_block) == -1)
     {
@@ -62,7 +62,7 @@ int RT::Connector::connect(RT::block_connection_t connection)
   }
 
   if (!(this->connected(connection))) {
-    this->connections.push_back(connection);
+    this->connections[connection.src->getID()].push_back(connection);
   }
   return 0;
 }
@@ -74,18 +74,11 @@ bool RT::Connector::connected(RT::block_connection_t connection)
   {
     return false;
   }
-
-  bool connected = false;
-  for (const auto& conn : this->connections) {
-    connected = connection.src == conn.src
-        && connection.src_port_type == conn.src_port_type
-        && connection.src_port == conn.src_port && connection.dest == conn.dest
-        && connection.dest_port == conn.dest_port;
-    if (connected) {
-      break;
-    }
-  }
-  return connected;
+  size_t src_id = connection.src->getID();
+  auto iter = std::find(this->connections[src_id].begin(),
+                        this->connections[src_id].end(),
+                        connection);
+  return iter == this->connections[src_id].end();
 }
 
 void RT::Connector::disconnect(RT::block_connection_t connection)
@@ -95,41 +88,42 @@ void RT::Connector::disconnect(RT::block_connection_t connection)
   {
     return;
   }
-  for (auto it = this->connections.begin(); it != this->connections.end(); it++)
-  {
-    if (connection.src == it->src
-        && connection.src_port_type == it->src_port_type
-        && connection.src_port == it->src_port && connection.dest == it->dest
-        && connection.dest_port == it->dest_port)
-    {
-      this->connections.erase(it);
-      break;
-    }
+  size_t src_id = connection.src->getID();
+  auto it = std::find(this->connections[src_id].begin(),
+                      this->connections[src_id].end(),
+                      connection);
+  if (it != this->connections[src_id].end()){
+    this->connections[src_id].erase(it);
   }
 }
 
-void RT::Connector::insertBlock(IO::Block* block)
+void RT::Connector::insertBlock(IO::Block* block, std::vector<RT::block_connection_t>& block_connections)
 {
   if (block == nullptr || this->isRegistered(block)) {
     return;
   }
 
-  // first find a valid slot to store the block in the registry
+  // This insertion block algorithm makes use of move semantics to insert and delete 
+  // vector items. This is mainly to avoid allocations in the real-time thead and
+  // std::move allows us to place data without having to allocate memory again.
+  // We should make sure to use reserve() memeber function on vectors in the non-rt
+  // thread so that further push_back calls are less likely to allocate memory.
   size_t id = 0;
   bool stored = false;
   for (id = 0; id < this->block_registry.size(); id++) {
     if (this->block_registry[id] == nullptr) {
       this->block_registry[id] = block;
       block->assignID(id);
+      this->connections[id].swap(block_connections);
       stored = true;
       break;
     }
   }
 
-  // if all slots are taken then append
   if (!stored) {
     block->assignID(this->block_registry.size());
     this->block_registry.push_back(block);
+    this->connections.emplace_back(std::move(block_connections));
   }
 }
 
@@ -138,22 +132,9 @@ void RT::Connector::removeBlock(IO::Block* block)
   if (block == nullptr || !(this->isRegistered(block))) {
     return;
   }
-  // first remove all connections
-  for (auto iter = this->connections.begin(); iter != this->connections.end();
-       iter++)
-  {
-    if (iter->src == block || iter->dest == block) {
-      this->connections.erase(iter);
-    }
-  }
-
   // remove block from registry
-  for (auto& block_slot : this->block_registry) {
-    if (block == block_slot) {
-      block_slot = nullptr;
-      break;
-    }
-  }
+  this->block_registry[block->getID()] = nullptr; 
+  //block->assignID(IO::INVALID_BLOCK_ID);
 }
 
 bool RT::Connector::isRegistered(IO::Block* block)
@@ -183,8 +164,10 @@ std::vector<RT::Thread*> RT::Connector::topological_sort()
   }
 
   // Calculate number of sources per block
-  for (auto conn : this->connections) {
-    sources_per_block[conn.dest] += 1;
+  for (const auto& entry : this->connections) {
+    for (const auto& conn : entry) {
+      sources_per_block[conn.dest] += 1;
+    }
   }
 
   // Initialize queue for processing nodes in graph
@@ -197,11 +180,13 @@ std::vector<RT::Thread*> RT::Connector::topological_sort()
   // Process the graph nodes.
   while (!processing_q.empty()) {
     sorted_blocks.push_back(processing_q.front());
-    for (const auto& conn : this->connections) {
-      if (processing_q.front() == conn.src) {
-        sources_per_block[conn.dest] -= 1;
-        if (sources_per_block[conn.dest] == 0) {
-          processing_q.push(conn.dest);
+    for (const auto& entry : this->connections) {
+      for (const auto& conn : entry) {
+        if (processing_q.front() == conn.src) {
+          sources_per_block[conn.dest] -= 1;
+          if (sources_per_block[conn.dest] == 0) {
+            processing_q.push(conn.dest);
+          }
         }
       }
     }
@@ -239,23 +224,27 @@ std::vector<RT::Thread*> RT::Connector::getThreads()
 
 std::vector<RT::block_connection_t> RT::Connector::getOutputs(IO::Block* src)
 {
-  auto result = std::vector<RT::block_connection_t>();
-  for (const auto& conn : this->connections) {
-    if (conn.src == src) {
-      result.push_back(conn);
-    }
-  }
-  return result;
+  if(!this->isRegistered(src)) { return {}; }
+  return this->connections[src->getID()];
 }
 
 void RT::Connector::propagateBlockConnections(IO::Block* block)
 {
-  for (const auto& conn : this->connections) {
-    if (conn.src == block) {
-      conn.dest->writeinput(
-          conn.dest_port,
-          conn.src->readPort(conn.src_port_type, conn.src_port));
-    }
+  for (const auto& conn : this->connections[block->getID()]) {
+    conn.dest->writeinput(
+        conn.dest_port,
+        conn.src->readPort(conn.src_port_type, conn.src_port));
+  }
+}
+
+void RT::Connector::clearAllConnections(IO::Block* block)
+{
+  for(auto& entry : this->connections){
+    entry.erase(std::remove_if(entry.begin(), 
+                               entry.end(),
+                               [&](RT::block_connection_t conn){
+                                 return conn.dest == block;
+                               }), entry.end());
   }
 }
 
@@ -273,10 +262,8 @@ std::vector<IO::Block*> RT::Connector::getRegisteredBlocks()
 std::vector<RT::block_connection_t> RT::Connector::getAllConnections()
 {
   std::vector<RT::block_connection_t> all_connections;
-  for (auto conn : this->connections) {
-    if (conn.src != nullptr) {
-      all_connections.push_back(conn);
-    }
+  for (auto entry : this->connections) {
+    all_connections.insert(all_connections.end(), entry.begin(), entry.end());
   }
   return all_connections;
 }
@@ -378,6 +365,11 @@ void RT::System::updateDeviceList(RT::System::CMD* cmd)
       std::get<std::vector<RT::Device*>*>(cmd->getRTParam("deviceList"));
   this->devices.clear();
   this->devices.assign(vec_ptr->begin(), vec_ptr->end());
+  if(cmd->getType() == Event::Type::RT_DEVICE_REMOVE_EVENT){
+    auto* device = std::get<RT::Device*>(cmd->getRTParam("device"));
+    this->rt_connector->clearAllConnections(device);
+    device->assignID(IO::INVALID_BLOCK_ID);
+  }
   const RT::Telemitry::Response telem = {RT::Telemitry::RT_DEVICE_LIST_UPDATE,
                                          cmd};
   this->postTelemitry(telem);
@@ -389,6 +381,11 @@ void RT::System::updateThreadList(RT::System::CMD* cmd)
       std::get<std::vector<RT::Thread*>*>(cmd->getRTParam("threadList"));
   this->threads.clear();
   this->threads.assign(vec_ptr->begin(), vec_ptr->end());
+  if(cmd->getType() == Event::Type::RT_THREAD_REMOVE_EVENT){
+    auto* thread = std::get<RT::Thread*>(cmd->getRTParam("thread"));
+    this->rt_connector->clearAllConnections(thread);
+    thread->assignID(IO::INVALID_BLOCK_ID);
+  }
   const RT::Telemitry::Response telem = {RT::Telemitry::RT_THREAD_LIST_UPDATE,
                                          cmd};
   this->postTelemitry(telem);
@@ -414,23 +411,6 @@ void RT::System::ioLinkUpdateCMD(RT::System::CMD* cmd)
   }
   this->postTelemitry(telem);
 }
-
-// void RT::System::updateBlockActivity(RT::System::CMD* cmd)
-//{
-//   auto block = std::any_cast<IO::Block*>(cmd->getParam("block"));
-//   switch (cmd->getType()) {
-//     case Event::Type::RT_BLOCK_PAUSE_EVENT:
-//       block->setActive(false);
-//
-//       break;
-//     case Event::Type::RT_BLOCK_UNPAUSE_EVENT:
-//       block->setActive(true);
-//
-//       break;
-//     default:
-//       break;
-//   }
-// }
 
 void RT::System::getPeriodTicksCMD(RT::System::CMD* cmd)
 {
@@ -635,11 +615,13 @@ void RT::System::NOOP(Event::Object* /*event*/)
 void RT::System::insertDevice(Event::Object* event)
 {
   auto* device = std::any_cast<RT::Device*>(event->getParam("device"));
+  std::vector<RT::block_connection_t> connections_memory;
+  connections_memory.reserve(10);
   if (device == nullptr) {
     ERROR_MSG("RT::System::insertDevice : invalid device pointer\n");
     return;
   }
-  this->rt_connector->insertBlock(device);
+  this->rt_connector->insertBlock(device, connections_memory);
   std::vector<RT::Device*> device_list = this->rt_connector->getDevices();
   RT::System::CMD cmd(event->getType());
   cmd.setRTParam("deviceList", &device_list);
@@ -656,11 +638,11 @@ void RT::System::removeDevice(Event::Object* event)
     return;
   }
   // We have to make sure to deactivate device before removing
-  device->setActive(/*act=*/false);
   this->rt_connector->removeBlock(device);
   std::vector<RT::Device*> device_list = this->rt_connector->getDevices();
   RT::System::CMD cmd(event->getType());
   cmd.setRTParam("deviceList", &device_list);
+  cmd.setRTParam("device", device);
   RT::System::CMD* cmd_ptr = &cmd;
   this->eventFifo->write(&cmd_ptr, sizeof(RT::System::CMD*));
   cmd.wait();
@@ -669,11 +651,13 @@ void RT::System::removeDevice(Event::Object* event)
 void RT::System::insertThread(Event::Object* event)
 {
   auto* thread = std::any_cast<RT::Thread*>(event->getParam("thread"));
+  std::vector<RT::block_connection_t> connections_memory;
+  connections_memory.reserve(10);
   if (thread == nullptr) {
     ERROR_MSG("RT::System::removeDevice : invalid device pointer\n");
     return;
   }
-  this->rt_connector->insertBlock(thread);
+  this->rt_connector->insertBlock(thread, connections_memory);
   std::vector<RT::Thread*> thread_list = this->rt_connector->getThreads();
   RT::System::CMD cmd(event->getType());
   cmd.setRTParam("threadList", &thread_list);
@@ -682,6 +666,7 @@ void RT::System::insertThread(Event::Object* event)
   cmd.wait();
 }
 
+// TODO: come back after figuring out conneciton problems
 void RT::System::removeThread(Event::Object* event)
 {
   auto* thread = std::any_cast<RT::Thread*>(event->getParam("thread"));
@@ -695,6 +680,7 @@ void RT::System::removeThread(Event::Object* event)
   std::vector<RT::Thread*> thread_list = this->rt_connector->getThreads();
   RT::System::CMD cmd(event->getType());
   cmd.setRTParam("threadList", &thread_list);
+  cmd.setRTParam("thread", thread);
   RT::System::CMD* cmd_ptr = &cmd;
   this->eventFifo->write(&cmd_ptr, sizeof(RT::System::CMD*));
   cmd.wait();

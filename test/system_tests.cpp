@@ -35,11 +35,16 @@ TEST_F(RTConnectorTest, connections)
   MockRTDevice device1("DEVICE1", this->defaultChannelList);
   MockRTDevice device2("DEVICE2", this->defaultChannelList);
 
+  std::vector<RT::block_connection_t> temp_block_memory;
   // we need to register blocks first
-  this->connector.insertBlock(&thread1);
-  this->connector.insertBlock(&thread2);
-  this->connector.insertBlock(&device1);
-  this->connector.insertBlock(&device2);
+  this->connector.insertBlock(&thread1, temp_block_memory);
+  temp_block_memory.clear();
+  this->connector.insertBlock(&thread2, temp_block_memory);
+  temp_block_memory.clear();
+  this->connector.insertBlock(&device1, temp_block_memory);
+  temp_block_memory.clear();
+  this->connector.insertBlock(&device2, temp_block_memory);
+  temp_block_memory.clear();
 
   // connect and disconnect between two blocks
   EXPECT_FALSE(
@@ -68,12 +73,15 @@ TEST_F(RTConnectorTest, connections)
 TEST_F(RTConnectorTest, getOutputs)
 {
   MockRTThread outputThread(this->defaultBlockName, this->defaultChannelList);
-  this->connector.insertBlock(&outputThread);
+  std::vector<RT::block_connection_t> connection_memory;
+  this->connector.insertBlock(&outputThread, connection_memory);
+  connection_memory.clear();
   std::vector<std::unique_ptr<RT::Thread>> inputThreads;
   for (int i = 0; i < 100; i++) {
     inputThreads.push_back(
         std::make_unique<MockRTThread>("randblock", this->defaultChannelList));
-    this->connector.insertBlock(inputThreads.back().get());
+    this->connector.insertBlock(inputThreads.back().get(), connection_memory);
+    connection_memory.clear();
   }
   std::random_device rd;
   std::mt19937 gen(rd());
@@ -105,6 +113,7 @@ TEST_F(RTConnectorTest, getBlocks)
   std::random_device rd;
   std::mt19937 gen(rd());
   std::uniform_int_distribution<> distribution(0, 49);
+  std::vector<RT::block_connection_t> connection_memory;
   for (int i = 0; i < 50; i++) {
     devices[i] =
         std::make_unique<MockRTDevice>("randdevice", this->defaultChannelList);
@@ -112,8 +121,10 @@ TEST_F(RTConnectorTest, getBlocks)
     threads[i] =
         std::make_unique<MockRTThread>("randthread", this->defaultChannelList);
     threads[i]->setActive(true);
-    this->connector.insertBlock(threads[i].get());
-    this->connector.insertBlock(devices[i].get());
+    this->connector.insertBlock(threads[i].get(), connection_memory);
+    connection_memory.clear();
+    this->connector.insertBlock(devices[i].get(), connection_memory);
+    connection_memory.clear();
   }
   for (int iter = 0; iter < 50; iter++) {
     this->connector.connect({threads[iter].get(),
@@ -274,7 +285,8 @@ TEST_F(SystemTest, updateDeviceList)
   }
 
   // insert device
-  this->rt_connector->insertBlock(&mock_device);
+  std::vector<RT::block_connection_t> connection_memory;
+  this->rt_connector->insertBlock(&mock_device, connection_memory);
   Event::Object insertEvent(Event::Type::RT_DEVICE_INSERT_EVENT);
   insertEvent.setParam("device", static_cast<RT::Device*>(&mock_device));
   auto sendinsertblockevent = [&]()
@@ -342,7 +354,8 @@ TEST_F(SystemTest, updateThreadList)
   }
 
   // insert thread
-  this->rt_connector->insertBlock(thread_ptr);
+  std::vector<RT::block_connection_t> connection_memory;
+  this->rt_connector->insertBlock(thread_ptr, connection_memory);
   Event::Object insertEvent(Event::Type::RT_THREAD_INSERT_EVENT);
   insertEvent.setParam("thread", thread_ptr);
   auto sendinsertblockevent = [&]()

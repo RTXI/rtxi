@@ -24,6 +24,7 @@
 #include <array>
 #include <string>
 #include <vector>
+#include <limits>
 
 //! Connection Oriented Classes
 /*!
@@ -37,6 +38,8 @@
  */
 namespace IO
 {
+
+constexpr size_t INVALID_BLOCK_ID = std::numeric_limits<size_t>::max();
 
 /*!
  * Variable used to specify the type of a channel.
@@ -172,7 +175,7 @@ protected:
   void writeoutput(size_t index, const double& data);
 
 private:
-  size_t id;
+  size_t id=INVALID_BLOCK_ID;
   using port_t = struct
   {
     IO::channel_t channel_info;
