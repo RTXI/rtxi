@@ -43,13 +43,15 @@ private:
 };
 }  // namespace RT::OS
 
+int COUNT=0;
+
 RT::OS::evlFifo::evlFifo(size_t size)
     : fifo_capacity(size)
 {
   this->xbuf_fd = evl_create_xbuf(fifo_capacity,
                                   fifo_capacity,
                                   EVL_CLONE_PRIVATE | EVL_CLONE_NONBLOCK,
-                                  "RTXI Fifo");
+                                  "RTXI Fifo %d", COUNT++);
   if (this->xbuf_fd <= 0) {
     ERROR_MSG("RT::OS::FIFO(evl) : Unable to create real-time buffer\n");
     ERROR_MSG("evl core : {}", strerror(this->xbuf_fd));
@@ -96,7 +98,7 @@ void RT::OS::evlFifo::poll()
     ERROR_MSG("RT::OS::FIFO(evl)::poll : returned with failure code {} : ",
               errcode);
     ERROR_MSG("{}", strerror(errcode));
-  } else if (this->xbuf_poll_fd[1].revents & POLLIN) {
+  } else if ((this->xbuf_poll_fd[1].revents & POLLIN) != 0) {
     this->closed = true;
   }
 }
