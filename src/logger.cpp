@@ -42,11 +42,17 @@ void eventLogger::log(Event::Object* event)
             << std::any_cast<RT::Device*>(event->getParam("device"))->getName();
         break;
       case Event::Type::IO_LINK_INSERT_EVENT:
-      case Event::Type::IO_LINK_REMOVE_EVENT:
-        this->ss << "\t SOURCE -- ";
-        this->ss
-            << std::any_cast<IO::Block*>(event->getParam("block"))->getName();
+      case Event::Type::IO_LINK_REMOVE_EVENT: {
+        auto connection = std::any_cast<RT::block_connection_t>(event->getParam("connection"));
+        this->ss << "\t CONNECTION -- {";
+        this->ss << "source: " << connection.src->getName();
+        this->ss << "type: " << (connection.src_port_type == IO::OUTPUT ? "Output" : "Input");
+        this->ss << "port: " << connection.src_port;
+        this->ss << "} <==> {";
+        this->ss << "destination: " << connection.dest->getName();
+        this->ss << "port; " << connection.dest_port << "}";
         break;
+      }
       case Event::Type::PLUGIN_INSERT_EVENT:
         this->ss << "\t SOURCE -- ";
         this->ss << std::any_cast<std::string>(event->getParam("pluginName"));
