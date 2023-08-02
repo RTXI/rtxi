@@ -40,13 +40,6 @@ constexpr std::string_view MODULE_NAME = "RT Benchmarks";
 
 enum PARAMETER : Modules::Variable::Id {
   STATE = 0,
-  DURATION,
-  TIMESTEP,
-  LATENCY,
-  MAX_DURATION,
-  MAX_TIMESTEP,
-  MAX_LATENCY,
-  JITTER
 };
 
 
@@ -60,63 +53,27 @@ inline std::vector<Modules::Variable::Info> get_default_vars()
       "RT Benchmarks State",
       Modules::Variable::STATE,
       Modules::Variable::INIT
-    },
-    {
-      PARAMETER::DURATION,
-      "duration",
-      "Average time in nanoseconds for Real-Time loop computations",
-      Modules::Variable::DOUBLE_PARAMETER,
-      0.0
-    },
-    {
-      PARAMETER::TIMESTEP,
-      "timestep",
-      "Average time in nanoseconds for Real-Time period",
-      Modules::Variable::DOUBLE_PARAMETER,
-      0.0
-    },
-    {
-      PARAMETER::LATENCY,
-      "latency",
-      "Average time in nanoseconds for latency between expected wakeup and period start",
-      Modules::Variable::DOUBLE_PARAMETER,
-      0.0
-    },
-    {
-      PARAMETER::MAX_DURATION,
-      "maxDuration",
-      "Maximum duration stat recorded in nanoseconds",
-      Modules::Variable::DOUBLE_PARAMETER,
-      0.0
-    },
-    {
-      PARAMETER::MAX_TIMESTEP,
-      "maxTimestep",
-      "maximum real-time period recorded in nanoseconds",
-      Modules::Variable::DOUBLE_PARAMETER,
-      0.0
-    },
-    { 
-      PARAMETER::MAX_LATENCY,
-      "maxLatency",
-      "Maximum latency stat recorded in nanoseconds",
-      Modules::Variable::DOUBLE_PARAMETER,
-      0.0
-    },
-    {
-      PARAMETER::JITTER,
-      "jitter",
-      "",
-      Modules::Variable::DOUBLE_PARAMETER,
-      0.0
     }
   };
 }
+
+struct performance_stats_t{
+  double duration=0.0;
+  double timestep=0.0;
+  double latency=0.0;
+  double max_duration=0.0;
+  double max_timestep=0.0;
+  double max_latency=0.0;
+  double jitter=0.0;
+};
 
 class Plugin : public Modules::Plugin
 {
 public:
   explicit Plugin(Event::Manager* ev_manager);
+  performance_stats_t getSampleStat();
+private:
+  RT::OS::Fifo* component_fifo;
 };  // class Plugin
 
 class Component : public Modules::Component
@@ -126,7 +83,10 @@ public:
 
   void setTickPointers(int64_t* s_ticks, int64_t* e_ticks);
   void execute() override;
-  private:
+  RT::OS::Fifo* getFIfoPtr(){ return this->fifo.get(); }
+
+private:
+  performance_stats_t stats;
 
   //RunningStat timestepStat;
   RunningStat latencyStat;
@@ -134,6 +94,7 @@ public:
   int64_t *start_ticks=nullptr; // only accessed in rt
   int64_t *end_ticks=nullptr; // only accessed in rt
   int64_t last_start_ticks=0;
+  std::unique_ptr<RT::OS::Fifo> fifo;
 };
 
 class Panel : public Modules::Panel

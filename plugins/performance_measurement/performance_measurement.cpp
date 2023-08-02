@@ -31,6 +31,12 @@ PerformanceMeasurement::Panel::Panel(const std::string& mod_name,
                                      QMainWindow* mwindow,
                                      Event::Manager* ev_manager)
     : Modules::Panel(mod_name, mwindow, ev_manager)
+    , durationEdit(new QLineEdit(this))
+    , timestepEdit(new QLineEdit(this))
+    , maxDurationEdit(new QLineEdit(this))
+    , maxTimestepEdit(new QLineEdit(this))
+    , timestepJitterEdit(new QLineEdit(this))
+    , AppCpuPercentEdit(new QLineEdit(this))
 {
   // Create main layout
   // auto* box_layout = new QVBoxLayout;
@@ -39,37 +45,31 @@ PerformanceMeasurement::Panel::Panel(const std::string& mod_name,
   // Create child widget and gridLayout
   auto* gridLayout = new QGridLayout;
 
-  durationEdit = new QLineEdit(this);
   durationEdit->setReadOnly(true);
   gridLayout->addWidget(
       new QLabel(tr("Computation Time (").append(suffix)), 1, 0);
   gridLayout->addWidget(durationEdit, 1, 1);
 
-  maxDurationEdit = new QLineEdit(this);
   maxDurationEdit->setReadOnly(true);
   gridLayout->addWidget(
       new QLabel(tr("Peak Computation Time (").append(suffix)), 2, 0);
   gridLayout->addWidget(maxDurationEdit, 2, 1);
 
-  timestepEdit = new QLineEdit(this);
   timestepEdit->setReadOnly(true);
   gridLayout->addWidget(
       new QLabel(tr("Real-time Period (").append(suffix)), 3, 0);
   gridLayout->addWidget(timestepEdit, 3, 1);
 
-  maxTimestepEdit = new QLineEdit(this);
   maxTimestepEdit->setReadOnly(true);
   gridLayout->addWidget(
       new QLabel(tr("Peak Real-time Period (").append(suffix)), 4, 0);
   gridLayout->addWidget(maxTimestepEdit, 4, 1);
 
-  timestepJitterEdit = new QLineEdit(this);
   timestepJitterEdit->setReadOnly(true);
   gridLayout->addWidget(
       new QLabel(tr("Real-time Jitter (").append(suffix)), 5, 0);
   gridLayout->addWidget(timestepJitterEdit, 5, 1);
 
-  AppCpuPercentEdit = new QLineEdit(this);
   AppCpuPercentEdit->setReadOnly(true);
   gridLayout->addWidget(new QLabel("RTXI App Cpu Usage(%)"), 6, 0);
   gridLayout->addWidget(AppCpuPercentEdit, 6, 1);
@@ -95,49 +95,38 @@ PerformanceMeasurement::Component::Component(Modules::Plugin* hplugin)
                          std::vector<IO::channel_t>(),
                          PerformanceMeasurement::get_default_vars())
 {
+  if(RT::OS::getFifo(this->fifo, 10) < 0){
+    ERROR_MSG("PerformanceMeasurement::Component::Component : Unable to craate component fifo");
+    this->setValue(PerformanceMeasurement::PARAMETER::STATE, Modules::Variable::PAUSE);
+  }
 }
 
 void PerformanceMeasurement::Component::execute()
 {
-  auto maxDuration =
-      getValue<double>(PerformanceMeasurement::PARAMETER::MAX_DURATION);
-  auto maxTimestep =
-      getValue<double>(PerformanceMeasurement::PARAMETER::MAX_TIMESTEP);
-  auto maxLatency =
-      getValue<double>(PerformanceMeasurement::PARAMETER::MAX_LATENCY);
   auto period = RT::OS::getPeriod();
   if (period < 0) {
     period = RT::OS::DEFAULT_PERIOD;
   }
 
-  auto duration = static_cast<double>(*(end_ticks) - *(start_ticks));
-  auto timestep = static_cast<double>(*(start_ticks)-last_start_ticks);
-  const double latency = timestep - static_cast<double>(period);
+  stats.duration = static_cast<double>(*(end_ticks) - *(start_ticks));
+  stats.timestep = static_cast<double>(*(start_ticks)-last_start_ticks);
+  stats.latency = stats.timestep - static_cast<double>(period);
+  stats.max_timestep = std::max(stats.max_timestep, stats.timestep);
+  stats.max_duration = std::max(stats.max_duration, stats.duration);
+  stats.max_latency = std::max(stats.max_latency, stats.latency);
+  latencyStat.push(stats.latency);
+  stats.jitter = latencyStat.std();
 
   switch (getValue<Modules::Variable::state_t>(
       PerformanceMeasurement::PARAMETER::STATE))
   {
     case Modules::Variable::EXEC:
-      if (maxTimestep < timestep) {
-        setValue(PerformanceMeasurement::PARAMETER::MAX_TIMESTEP, timestep);
-      }
-      if (maxDuration < duration) {
-        setValue(PerformanceMeasurement::PARAMETER::MAX_DURATION, duration);
-      }
-      if (maxLatency < latency) {
-        setValue(PerformanceMeasurement::PARAMETER::MAX_LATENCY, latency);
-      }
-      setValue(PerformanceMeasurement::PARAMETER::LATENCY, latency);
-      latencyStat.push(latency);
-      setValue(PerformanceMeasurement::PARAMETER::TIMESTEP, timestep);
-      setValue(PerformanceMeasurement::PARAMETER::DURATION, duration);
+      this->fifo->writeRT(&this->stats, sizeof(PerformanceMeasurement::performance_stats_t)); 
       break;
     case Modules::Variable::INIT:
       latencyStat.clear();
       latencyStat.push(0.0);
-      setValue(PerformanceMeasurement::PARAMETER::MAX_TIMESTEP, 0.0);
-      setValue(PerformanceMeasurement::PARAMETER::MAX_DURATION, 0.0);
-      setValue(PerformanceMeasurement::PARAMETER::MAX_LATENCY, 0.0);
+      this->stats = {0.0,0.0,0.0,0.0,0.0,0.0,0.0};
       setValue(PerformanceMeasurement::PARAMETER::STATE,
                Modules::Variable::EXEC);
       break;
@@ -149,7 +138,6 @@ void PerformanceMeasurement::Component::execute()
       break;
   }
   last_start_ticks = *start_ticks;
-  setValue(PerformanceMeasurement::PARAMETER::JITTER, latencyStat.std());
 }
 
 void PerformanceMeasurement::Component::setTickPointers(int64_t* s_ticks,
@@ -161,29 +149,14 @@ void PerformanceMeasurement::Component::setTickPointers(int64_t* s_ticks,
 
 void PerformanceMeasurement::Panel::refresh()
 {
-  Modules::Plugin* hostplugin = this->getHostPlugin();
+  auto* hostplugin = dynamic_cast<PerformanceMeasurement::Plugin*>(this->getHostPlugin());
   const double nano2micro = 1e-3;
-  auto duration = hostplugin->getComponentDoubleParameter(
-                      PerformanceMeasurement::PARAMETER::DURATION)
-      * nano2micro;
-  auto maxduration = hostplugin->getComponentDoubleParameter(
-                         PerformanceMeasurement::PARAMETER::MAX_DURATION)
-      * nano2micro;
-  auto timestep = hostplugin->getComponentDoubleParameter(
-                      PerformanceMeasurement::PARAMETER::TIMESTEP)
-      * nano2micro;
-  auto maxtimestep = hostplugin->getComponentDoubleParameter(
-                         PerformanceMeasurement::PARAMETER::MAX_TIMESTEP)
-      * nano2micro;
-  auto timestepjitter = hostplugin->getComponentDoubleParameter(
-                            PerformanceMeasurement::PARAMETER::JITTER)
-      * nano2micro;
-
-  durationEdit->setText(QString::number(duration));
-  maxDurationEdit->setText(QString::number(maxduration));
-  timestepEdit->setText(QString::number(timestep));
-  maxTimestepEdit->setText(QString::number(maxtimestep));
-  timestepJitterEdit->setText(QString::number(timestepjitter));
+  PerformanceMeasurement::performance_stats_t stats = hostplugin->getSampleStat();
+  durationEdit->setText(QString::number(stats.duration*nano2micro));
+  maxDurationEdit->setText(QString::number(stats.max_duration*nano2micro));
+  timestepEdit->setText(QString::number(stats.timestep*nano2micro));
+  maxTimestepEdit->setText(QString::number(stats.max_timestep*nano2micro));
+  timestepJitterEdit->setText(QString::number(stats.jitter*nano2micro));
   AppCpuPercentEdit->setText(QString::number(RT::OS::getCpuUsage()));
 }
 
@@ -208,7 +181,15 @@ PerformanceMeasurement::Plugin::Plugin(Event::Manager* ev_manager)
       std::any_cast<int64_t*>(events[0].getParam("pre-period")),
       std::any_cast<int64_t*>(events[1].getParam("post-period")));
 
+  this->component_fifo = component->getFIfoPtr();
   this->attachComponent(std::move(component));
+}
+
+PerformanceMeasurement::performance_stats_t PerformanceMeasurement::Plugin::getSampleStat()
+{
+  PerformanceMeasurement::performance_stats_t stat;  
+  while(this->component_fifo->read(&stat, sizeof(PerformanceMeasurement::performance_stats_t))>0){};
+  return stat;
 }
 
 std::unique_ptr<Modules::Plugin> PerformanceMeasurement::createRTXIPlugin(
