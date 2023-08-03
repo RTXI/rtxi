@@ -96,6 +96,7 @@ typedef struct scope_channel
   RT::OS::Fifo* fifo = nullptr;
   double scale = 1;
   double offset = 0;
+  std::vector<int64_t> timebuffer;
   std::vector<double> xbuffer;
   std::vector<double> ybuffer;
   size_t data_indx = 0;
@@ -222,11 +223,11 @@ private:
   Oscilloscope::Trigger::Info m_trigger_info;
   size_t buffer_size = DEFAULT_BUFFER_SIZE;
 
-  bool isPaused = false;
+  std::atomic<bool> isPaused = false;
   size_t divX = 10;
   size_t divY = 10;
   size_t refresh = Oscilloscope::FrameRates::HZ60;
-  double hScl = 1.0;  // horizontal scale for time (ms)
+  double horizontal_scale_ms = 1.0;  // horizontal scale for time (ms)
   bool triggering = false;
 
   // Scope primary paint element

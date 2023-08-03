@@ -910,17 +910,18 @@ void Oscilloscope::Component::flushFifo()
   }
 }
 
+// TODO: fix rt buffer size adjustements for components
 void Oscilloscope::Panel::adjustDataSize()
 {
-  Event::Object event(Event::Type::RT_GET_PERIOD_EVENT);
-  this->getRTXIEventManager()->postEvent(&event);
-  auto period = std::any_cast<int64_t>(event.getParam("period"));
-  const double timedivs = scopeWindow->getDivT();
-  const double xdivs =
-      static_cast<double>(scopeWindow->getDivX()) / static_cast<double>(period);
-  const size_t size = static_cast<size_t>(ceil(timedivs + xdivs)) + 1;
-  scopeWindow->setDataSize(size);
-  sizesEdit->setText(QString::number(scopeWindow->getDataSize()));
+  //Event::Object event(Event::Type::RT_GET_PERIOD_EVENT);
+  //this->getRTXIEventManager()->postEvent(&event);
+  //auto period = std::any_cast<int64_t>(event.getParam("period"));
+  //const double timedivs = scopeWindow->getDivT();
+  //const double xdivs =
+  //    static_cast<double>(scopeWindow->getDivX()) / static_cast<double>(period);
+  //const size_t size = static_cast<size_t>(ceil(timedivs + xdivs)) + 1;
+  //scopeWindow->setDataSize(size);
+  //sizesEdit->setText(QString::number(scopeWindow->getDataSize()));
 }
 
 void Oscilloscope::Panel::updateTrigger() {}
@@ -963,7 +964,7 @@ RT::OS::Fifo* Oscilloscope::Plugin::createProbe(IO::endpoint probe_info)
       {probe_info, std::make_unique<Oscilloscope::Component>(this, comp_name)});
   Oscilloscope::Component* measuring_component =
       this->m_component_registry.back().component.get();
-
+  measuring_component->setActive(/*act=*/true);
   RT::block_connection_t connection;
   connection.src = probe_info.block;
   connection.src_port_type = probe_info.direction;

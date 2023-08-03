@@ -155,6 +155,7 @@ void Oscilloscope::Scope::createChannel(IO::endpoint probeInfo,
   Oscilloscope::scope_channel chan;
   chan.curve = new QwtPlotCurve;
   chan.endpoint = probeInfo;
+  chan.timebuffer.assign(this->buffer_size, 0);
   chan.xbuffer.assign(this->buffer_size, 0.0);
   chan.ybuffer.assign(this->buffer_size, 0.0);
   chan.scale = 1;
@@ -219,12 +220,12 @@ size_t Oscilloscope::Scope::getDataSize() const
 
 double Oscilloscope::Scope::getDivT() const
 {
-  return hScl;
+  return horizontal_scale_ms;
 }
 
 void Oscilloscope::Scope::setDivT(double divT)
 {
-  hScl = divT;
+  horizontal_scale_ms = divT;
   if (divT >= 1000.) {
     dtLabel = QString::number(divT * 1e-3) + "s";
   } else if (divT >= 1.) {
@@ -359,23 +360,32 @@ void Oscilloscope::Scope::drawCurves()
   if (isPaused) {
     return;
   }
-  double max_val = 0;
-  double local_max_val = 0;
+  int64_t max_time = 0;
+  int64_t local_max_time = 0;
+  int64_t min_time = std::numeric_limits<int64_t>::max();
+  int64_t local_min_time = min_time;
   for (auto chan : this->channels) {
     if (chan.xbuffer.empty()) {
       continue;
     }
-    local_max_val = *std::max_element(chan.xbuffer.begin(), chan.xbuffer.end());
-    if (local_max_val > max_val) {
-      max_val = local_max_val;
+    local_max_time = *std::max_element(chan.timebuffer.begin(), chan.timebuffer.end());
+    local_min_time = *std::min_element(chan.timebuffer.begin(), chan.timebuffer.end());
+    if (local_max_time > max_time) {
+      max_time = local_max_time;
+    }
+    if (local_min_time < min_time) {
+      min_time = local_min_time;
     }
   }
   // Set X scale map is same for all channels
-  const double max_window_time = local_max_val;
-  const double min_window_time =
-      max_window_time - hScl * static_cast<double>(divX);
+  const auto max_window_time = static_cast<double>(max_time - min_time);
+  const double min_window_time = 
+      max_window_time - horizontal_scale_ms * static_cast<double>(divX);
   scaleMapX->setScaleInterval(min_window_time, max_window_time);
   for (auto& channel : this->channels) {
+    for(size_t i=0; i < channel.xbuffer.size(); i++){
+      channel.xbuffer[i] = static_cast<double>(channel.timebuffer[i] - min_time);
+    }
     // TODO this should not happen each iteration, instead build into channel
     scaleMapY->setScaleInterval(-channel.scale * static_cast<double>(divY) / 2,
                                 channel.scale * static_cast<double>(divY) / 2);
@@ -393,31 +403,30 @@ void Oscilloscope::Scope::drawCurves()
 // TODO: look into SIMD for optimize move and calculation of data
 void Oscilloscope::Scope::process_data()
 {
-  std::vector<Oscilloscope::sample> sample_vector(this->buffer_size);
-  ssize_t count = 0;
+  std::vector<Oscilloscope::sample> sample_buffer(this->buffer_size);
+  ssize_t bytes = 0;
   size_t sample_count = 0;
   size_t array_indx = 0;
-  const size_t sample_capacity =
-      sample_vector.capacity() * sizeof(Oscilloscope::sample);
+  const size_t sample_capacity_bytes =
+      sample_buffer.size() * sizeof(Oscilloscope::sample);
   for (auto& channel : this->channels) {
     // Read as many samples as possible in chunks of buffer size or less.
     // overwrite old samples from previous write if available
-    while (count = channel.fifo->read(sample_vector.data(), sample_capacity),
-           count > 0)
+    while (bytes = channel.fifo->read(sample_buffer.data(), sample_capacity_bytes),
+           bytes > 0)
     {
-      sample_count = static_cast<size_t>(count);
+      sample_count = static_cast<size_t>(bytes)/sizeof(Oscilloscope::sample);
       for (size_t i = 0; i < sample_count; i++) {
         array_indx = (i + channel.data_indx) % this->buffer_size;
-        channel.xbuffer[array_indx] =
-            static_cast<double>(sample_vector[i].time);
-        channel.ybuffer[array_indx] = sample_vector[i].value;
+        channel.timebuffer[array_indx] = sample_buffer[i].time;
+        channel.ybuffer[array_indx] = sample_buffer[i].value;
       }
       channel.data_indx =
           (channel.data_indx + sample_count) % this->buffer_size;
     };
 
     // zero out so the buffer so it doesn't spill over to the next channel
-    sample_vector.assign(this->buffer_size, {0, 0.0});
+    sample_buffer.assign(this->buffer_size, {0, 0.0});
   }
   this->drawCurves();
 }
