@@ -78,7 +78,7 @@ bool RT::Connector::connected(RT::block_connection_t connection)
   auto iter = std::find(this->connections[src_id].begin(),
                         this->connections[src_id].end(),
                         connection);
-  return iter == this->connections[src_id].end();
+  return iter != this->connections[src_id].end();
 }
 
 void RT::Connector::disconnect(RT::block_connection_t connection)
