@@ -378,7 +378,9 @@ QWidget* Oscilloscope::Panel::createChannelTab(QWidget* parent)
   for (size_t i = 0; i < penColors.size(); i++) {
     tmp.fill(penColors.at(i));
     color_name = Oscilloscope::color2string.at(i);
-    colorsList->addItem(tmp, QString::fromStdString(color_name));
+    colorsList->addItem(tmp, 
+                        QString::fromStdString(color_name),
+                        Oscilloscope::penColors.at(i));
   }
 
   auto* widthLabel = new QLabel(tr("Width:"), page);
@@ -393,7 +395,9 @@ QWidget* Oscilloscope::Panel::createChannelTab(QWidget* parent)
     painter.setPen(
         QPen(Oscilloscope::penColors.at(Oscilloscope::ColorID::Black), i));
     painter.drawLine(0, 12, 25, 12);
-    widthsList->addItem(tmp, QString::number(i) + QString(" Pixels"), i);
+    widthsList->addItem(tmp, 
+                        QString::number(i) + QString(" Pixels"), 
+                        i);
   }
 
   // Create styles list
@@ -412,7 +416,9 @@ QWidget* Oscilloscope::Panel::createChannelTab(QWidget* parent)
              3,
              Oscilloscope::penStyles.at(i)));
     painter.drawLine(0, 12, 25, 12);
-    stylesList->addItem(tmp, QString::fromStdString(temp_name));
+    stylesList->addItem(tmp,
+                        QString::fromStdString(temp_name),
+                        QVariant::fromValue(Oscilloscope::penStyles.at(i)));
   }
 
   // Activate button
@@ -598,6 +604,9 @@ void Oscilloscope::Panel::showChannelTab()
     widthsList->setCurrentIndex(0);
     stylesList->setCurrentIndex(0);
   } else {
+    fmt::print("{}, {}, {}", colorsList->findData(pen->color()),
+                             widthsList->findData(pen->width()),
+                             stylesList->findData(pen->width()));
     colorsList->setCurrentIndex(colorsList->findData(pen->color()));
     widthsList->setCurrentIndex(widthsList->findData(pen->width()));
     // set style

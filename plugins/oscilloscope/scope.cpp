@@ -374,7 +374,6 @@ void Oscilloscope::Scope::drawCurves()
   const auto max_window_time = 
     static_cast<double>(max_time - min_time);
   const double min_window_time = 0.0; 
-  std::cout << max_time << "\n";
   scaleMapX->setScaleInterval(min_window_time, max_window_time);
   for (auto& channel : this->channels) {
     for(size_t i=0; i < channel.xbuffer.size(); i++){
