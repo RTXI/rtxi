@@ -179,6 +179,7 @@ public:
 
   bool paused() const;
   void createChannel(IO::endpoint probeInfo, RT::OS::Fifo* fifo);
+  bool channelRegistered(IO::endpoint probeInfo);
   void removeChannel(IO::endpoint probeInfo);
   size_t getChannelCount() const;
 

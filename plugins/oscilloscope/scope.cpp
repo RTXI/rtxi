@@ -168,6 +168,16 @@ void Oscilloscope::Scope::createChannel(IO::endpoint probeInfo,
   this->channels.push_back(chan);
 }
 
+bool Oscilloscope::Scope::channelRegistered(IO::endpoint probeInfo)
+{
+  auto iter = std::find_if(this->channels.begin(),
+                           this->channels.end(),
+                           [&](const scope_channel& chan){
+                              return chan.endpoint == probeInfo;
+                           });
+  return iter != this->channels.end();
+}
+
 // TODO: make this thread-safe
 void Oscilloscope::Scope::removeChannel(IO::endpoint probeInfo)
 {

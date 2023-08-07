@@ -235,11 +235,23 @@ void Oscilloscope::Panel::applyChannelTab()
     scopeWindow->removeChannel(probeInfo);
     host_plugin->deleteProbe(probeInfo);
   } else {
-    RT::OS::Fifo* fifo = host_plugin->createProbe(probeInfo);
-    if (fifo == nullptr) {
-      return;
+    if(!this->scopeWindow->channelRegistered(probeInfo)){ 
+      RT::OS::Fifo* fifo = host_plugin->createProbe(probeInfo);
+      if (fifo != nullptr) {
+        this->scopeWindow->createChannel(probeInfo, fifo);
+      }
+    } else {
+      //QPen* pen = this->scopeWindow->getChannelPen(probeInfo);
+      this->updateChannelScale(probeInfo);
+      this->updateChannelOffset(probeInfo);
+      this->updateChannelPenColor(probeInfo);
+      this->updateChannelLineStyle(probeInfo);
+      this->updateChannelLineWidth(probeInfo);
+      this->updateChannelLabel(probeInfo);
+      //colorsList->setCurrentIndex(colorsList->findData(pen->color()));
+      //widthsList->setCurrentIndex(widthsList->findData(pen->width()));
+      //stylesList->setCurrentIndex(stylesList->findData(pen->width()));
     }
-    this->scopeWindow->createChannel(probeInfo, fifo);
   }
   scopeWindow->replot();
   showChannelTab();
@@ -609,8 +621,7 @@ void Oscilloscope::Panel::showChannelTab()
                              stylesList->findData(pen->width()));
     colorsList->setCurrentIndex(colorsList->findData(pen->color()));
     widthsList->setCurrentIndex(widthsList->findData(pen->width()));
-    // set style
-    stylesList->setCurrentIndex(stylesList->findData(pen->width()));
+    stylesList->setCurrentIndex(stylesList->findData(QVariant::fromValue(pen->style())));
   }
 }
 
