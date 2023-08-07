@@ -29,6 +29,7 @@
 
 #include "oscilloscope.h"
 
+#include <qnamespace.h>
 #include <qwt_plot_renderer.h>
 
 #include "debug.hpp"
@@ -53,75 +54,36 @@ void Oscilloscope::Plugin::receiveEvent(Event::Object* event)
 
 void Oscilloscope::Panel::updateChannelScale(IO::endpoint probe_info)
 {
-  const int scale_index = this->scalesList->currentIndex();
-  double chanscale = 1.0;
-  switch (scale_index % 4) {
-    case 0:
-      chanscale = pow(10, 1 - scale_index / 4.0);
-      break;
-    case 1:
-      chanscale = 5 * pow(10, -scale_index / 4.0);
-      break;
-    case 2:
-      chanscale = 2.5 * pow(10, -scale_index / 4.0);
-      break;
-    case 3:
-      chanscale = 2 * pow(10, -scale_index / 4.0);
-      break;
-    default:
-      ERROR_MSG(
-          "Oscilloscope::Panel::applyChannelTab : invalid chan.scale "
-          "selection\n");
-  }
-  this->scopeWindow->setChannelScale(probe_info, chanscale);
+  const auto scale = this->scalesList->currentData().value<double>();
+  this->scopeWindow->setChannelScale(probe_info, scale);
 }
 
 void Oscilloscope::Panel::updateChannelOffset(IO::endpoint probe_info)
 {
   const double chanoffset = this->offsetsEdit->text().toDouble()
-      * pow(10, -3 * offsetsList->currentIndex());
+      * offsetsList->currentData().value<double>();
   this->scopeWindow->setChannelOffset(probe_info, chanoffset);
 }
 
 void Oscilloscope::Panel::updateChannelLineWidth(IO::endpoint probe_info)
 {
-  const int width_indx = this->widthsList->currentIndex();
+  const auto width = this->widthsList->currentData().value<int>();
   QPen* pen = this->scopeWindow->getChannelPen(probe_info);
-  if (width_indx < 0) {
-    ERROR_MSG(
-        "Oscilloscope::Panel::applyChannelTab : invalid style selection\n");
-    pen->setStyle(Qt::SolidLine);
-    return;
-  }
-  const Qt::PenStyle style =
-      Oscilloscope::penStyles.at(static_cast<size_t>(width_indx));
-  pen->setStyle(style);
+  pen->setWidth(width);
 }
 
 void Oscilloscope::Panel::updateChannelLineStyle(IO::endpoint probe_info)
 {
   QPen* pen = this->scopeWindow->getChannelPen(probe_info);
-  const int style_indx = this->stylesList->currentIndex();
-  if (style_indx < 0) {
-    ERROR_MSG(
-        "Oscilloscope::Panel::applyChannelTab : invalid style selection\n");
-    pen->setStyle(Oscilloscope::penStyles[0]);
-  } else {
-    pen->setStyle(Oscilloscope::penStyles.at(static_cast<size_t>(style_indx)));
-  }
+  const auto style = this->stylesList->currentData().value<Qt::PenStyle>();
+  pen->setStyle(style);
 }
 
 void Oscilloscope::Panel::updateChannelPenColor(IO::endpoint probe_info)
 {
   QPen* pen = this->scopeWindow->getChannelPen(probe_info);
-  const int color_indx = this->colorsList->currentIndex();
-  if (color_indx < 0) {
-    ERROR_MSG(
-        "Oscilloscope::Panel::applyChannelTab : invalid color selection\n");
-    pen->setColor(Oscilloscope::penColors[0]);
-  } else {
-    pen->setColor(Oscilloscope::penColors.at(static_cast<size_t>(color_indx)));
-  }
+  const auto color = this->colorsList->currentData().value<QColor>();
+  pen->setColor(color);
 }
 
 void Oscilloscope::Panel::updateChannelLabel(IO::endpoint probe_info)
@@ -285,49 +247,7 @@ void Oscilloscope::Panel::applyChannelTab()
 
 void Oscilloscope::Panel::applyDisplayTab()
 {
-  // Update X divisions
-  double divT = NAN;
-  if (timesList->currentIndex() % 3 == 1) {
-    divT = 2 * pow(10, 3 - timesList->currentIndex() / 3.0);
-  } else if (timesList->currentIndex() % 3 == 2) {
-    divT = pow(10, 3 - timesList->currentIndex() / 3.0);
-  } else {
-    divT = 5 * pow(10, 3 - timesList->currentIndex() / 3.0);
-  }
-  scopeWindow->setDivT(divT);
-  // scopeWindow->setPeriod(RT::System::getInstance()->getPeriod() * 1e-6);
-  this->adjustDataSize();
-
-  // Update trigger direction
   updateTrigger();
-
-  // Update trigger threshold
-  // double trigThreshold = trigsThreshEdit->text().toDouble()
-  //    * pow(10, -3 * trigsThreshList->currentIndex());
-
-  //// Update pre-trigger window for displaying
-  // double trigWindow = trigWindowEdit->text().toDouble()
-  //     * pow(10, -3 * trigWindowList->currentIndex());
-
-  // std::list<Scope::Channel>::iterator trigChannel =
-  //     scopeWindow->getChannelsEnd();
-  // for (std::list<Scope::Channel>::iterator i =
-  // scopeWindow->getChannelsBegin(),
-  //                                          end =
-  //                                          scopeWindow->getChannelsEnd();
-  //      i != end;
-  //      ++i)
-  //   if (i->getLabel() == trigsChanList->currentText()) {
-  //     trigChannel = i;
-  //     break;
-  //   }
-  // if (trigChannel == scopeWindow->getChannelsEnd())
-  //   trigDirection = Scope::NONE;
-
-  // scopeWindow->setTrigger(
-  //     trigDirection, trigThreshold, trigChannel, trigWindow);
-
-  adjustDataSize();
   scopeWindow->replot();
   showDisplayTab();
 }
@@ -536,27 +456,24 @@ QWidget* Oscilloscope::Panel::createDisplayTab(QWidget* parent)
   row1Layout->addWidget(timesList);
   const QFont timeListFont("DejaVu Sans Mono");
   timesList->setFont(timeListFont);
-  timesList->addItem("5 s/div", 5.0);
-  timesList->addItem("2 s/div", 2.0);
-  timesList->addItem("1 s/div", 1.0);
-  timesList->addItem("500 ms/div", 0.5);
-  timesList->addItem("200 ms/div", 0.2);
-  timesList->addItem("100 ms/div", 0.1);
-  timesList->addItem("50 ms/div", 0.05);
-  timesList->addItem("20 ms/div", 0.02);
-  timesList->addItem("10 ms/div", 0.01);
-  timesList->addItem("5 ms/div", 5e-3);
-  timesList->addItem("2 ms/div", 2e-3);
-  timesList->addItem("1 ms/div", 1e-3);
-  timesList->addItem(QString::fromUtf8("500 µs/div"), 500e-6);
-  timesList->addItem(QString::fromUtf8("200 µs/div"), 200e-6);
-  timesList->addItem(QString::fromUtf8("100 µs/div"), 100e-6);
-  timesList->addItem(QString::fromUtf8("50 µs/div"), 50e-6);
-  timesList->addItem(QString::fromUtf8("20 µs/div"), 20e-6);
-  timesList->addItem(QString::fromUtf8("10 µs/div"), 10e-6);
-  timesList->addItem(QString::fromUtf8("5 µs/div"), 5e-6);
-  timesList->addItem(QString::fromUtf8("2 µs/div"), 2e-6);
-  timesList->addItem(QString::fromUtf8("1 µs/div"), 1e-6);
+  timesList->addItem("5 s/div", QVariant::fromValue(5000000000));
+  timesList->addItem("2 s/div", QVariant::fromValue(2000000000));
+  timesList->addItem("1 s/div", QVariant::fromValue(1000000000));
+  timesList->addItem("500 ms/div", QVariant::fromValue(500000000));
+  timesList->addItem("200 ms/div", QVariant::fromValue(200000000));
+  timesList->addItem("100 ms/div", QVariant::fromValue(100000000));
+  timesList->addItem("50 ms/div", QVariant::fromValue(50000000));
+  timesList->addItem("20 ms/div", QVariant::fromValue(20000000));
+  timesList->addItem("10 ms/div", QVariant::fromValue(10000000));
+  timesList->addItem("5 ms/div", QVariant::fromValue(5000000));
+  timesList->addItem("2 ms/div", QVariant::fromValue(2000000));
+  timesList->addItem("1 ms/div", QVariant::fromValue(1000000));
+  timesList->addItem(QString::fromUtf8("500 µs/div"), QVariant::fromValue(500000));
+  timesList->addItem(QString::fromUtf8("200 µs/div"), QVariant::fromValue(200000));
+  timesList->addItem(QString::fromUtf8("100 µs/div"), QVariant::fromValue(100000));
+  timesList->addItem(QString::fromUtf8("50 µs/div"), QVariant::fromValue(50000));
+  timesList->addItem(QString::fromUtf8("20 µs/div"), QVariant::fromValue(20000));
+  timesList->addItem(QString::fromUtf8("10 µs/div"), QVariant::fromValue(10000));
   timesList->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
   timesList->setSizeAdjustPolicy(QComboBox::AdjustToContents);
 
@@ -564,9 +481,12 @@ QWidget* Oscilloscope::Panel::createDisplayTab(QWidget* parent)
   row1Layout->addWidget(refreshLabel);
   refreshDropdown = new QComboBox(page);
   row1Layout->addWidget(refreshDropdown);
-  refreshDropdown->addItem("60 Hz");
-  refreshDropdown->addItem("120 Hz");
-  refreshDropdown->addItem("240 Hz");
+  refreshDropdown->addItem("60 Hz", 
+                           QVariant::fromValue(Oscilloscope::FrameRates::HZ60));
+  refreshDropdown->addItem("120 Hz",
+                           QVariant::fromValue(Oscilloscope::FrameRates::HZ120));
+  refreshDropdown->addItem("240 Hz",
+                           QVariant::fromValue(Oscilloscope::FrameRates::HZ240));
 
   // Display box for Buffer bit. Push it to the right.
   row1Layout->addSpacerItem(
@@ -678,32 +598,10 @@ void Oscilloscope::Panel::showChannelTab()
     widthsList->setCurrentIndex(0);
     stylesList->setCurrentIndex(0);
   } else {
-    const auto* color_loc = std::find(Oscilloscope::penColors.begin(),
-                                      Oscilloscope::penColors.end(),
-                                      pen->color());
-    colorsList->setCurrentIndex(
-        static_cast<int>(color_loc - Oscilloscope::penColors.begin()));
-    widthsList->setCurrentIndex(pen->width());
+    colorsList->setCurrentIndex(colorsList->findData(pen->color()));
+    widthsList->setCurrentIndex(widthsList->findData(pen->width()));
     // set style
-    switch (pen->style()) {
-      case Qt::SolidLine:
-        stylesList->setCurrentIndex(0);
-        break;
-      case Qt::DashLine:
-        stylesList->setCurrentIndex(1);
-        break;
-      case Qt::DotLine:
-        stylesList->setCurrentIndex(2);
-        break;
-      case Qt::DashDotLine:
-        stylesList->setCurrentIndex(3);
-        break;
-      case Qt::DashDotDotLine:
-        stylesList->setCurrentIndex(4);
-        break;
-      default:
-        stylesList->setCurrentIndex(0);
-    }
+    stylesList->setCurrentIndex(stylesList->findData(pen->width()));
   }
 }
 

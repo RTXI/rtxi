@@ -200,6 +200,7 @@ size_t Oscilloscope::Scope::getChannelCount() const
 void Oscilloscope::Scope::clearData()
 {
   for (auto& chan : this->channels) {
+    chan.timebuffer.assign(this->buffer_size, 0);
     chan.xbuffer.assign(this->buffer_size, 0);
     chan.ybuffer.assign(this->buffer_size, 0);
     chan.data_indx = 0;
@@ -218,22 +219,22 @@ size_t Oscilloscope::Scope::getDataSize() const
   return this->buffer_size;
 }
 
-double Oscilloscope::Scope::getDivT() const
+int64_t Oscilloscope::Scope::getDivT() const
 {
-  return horizontal_scale_ms;
+  return horizontal_scale_ns;
 }
 
-void Oscilloscope::Scope::setDivT(double divT)
+void Oscilloscope::Scope::setDivT(int64_t value)
 {
-  horizontal_scale_ms = divT;
-  if (divT >= 1000.) {
-    dtLabel = QString::number(divT * 1e-3) + "s";
-  } else if (divT >= 1.) {
-    dtLabel = QString::number(divT) + "ms";
-  } else if (divT >= 1e-3) {
-    dtLabel = QString::number(divT * 1e3) + "µs";
+  horizontal_scale_ns = value;
+  if (value >= 1000000000) {
+    dtLabel = "s";
+  } else if (value >= 1000000) {
+    dtLabel = "ms";
+  } else if (value >= 1000) {
+    dtLabel = "µs";
   } else {
-    dtLabel = QString::number(divT * 1e6) + "ns";
+    dtLabel = "ns";
   }
 }
 
@@ -357,30 +358,23 @@ double Oscilloscope::Scope::getTriggerThreshold() const
 // Draw data on the scope
 void Oscilloscope::Scope::drawCurves()
 {
-  if (isPaused) {
+  if (isPaused || this->channels.empty()) {
     return;
   }
   int64_t max_time = 0;
   int64_t local_max_time = 0;
-  int64_t min_time = std::numeric_limits<int64_t>::max();
-  int64_t local_min_time = min_time;
   for (auto chan : this->channels) {
-    if (chan.xbuffer.empty()) {
-      continue;
-    }
     local_max_time = *std::max_element(chan.timebuffer.begin(), chan.timebuffer.end());
-    local_min_time = *std::min_element(chan.timebuffer.begin(), chan.timebuffer.end());
     if (local_max_time > max_time) {
       max_time = local_max_time;
     }
-    if (local_min_time < min_time) {
-      min_time = local_min_time;
-    }
   }
+  const int64_t min_time = (max_time - horizontal_scale_ns*divX);
   // Set X scale map is same for all channels
-  const auto max_window_time = static_cast<double>(max_time - min_time);
-  const double min_window_time = 
-      max_window_time - horizontal_scale_ms * static_cast<double>(divX);
+  const auto max_window_time = 
+    static_cast<double>(max_time - min_time);
+  const double min_window_time = 0.0; 
+  std::cout << max_time << "\n";
   scaleMapX->setScaleInterval(min_window_time, max_window_time);
   for (auto& channel : this->channels) {
     for(size_t i=0; i < channel.xbuffer.size(); i++){

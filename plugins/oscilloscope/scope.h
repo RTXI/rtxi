@@ -186,8 +186,8 @@ public:
   size_t getDataSize() const;
   void setDataSize(size_t);
 
-  double getDivT() const;
-  void setDivT(double);
+  int64_t getDivT() const;
+  void setDivT(int64_t value);
 
   void setPeriod(double);
   size_t getDivX() const;
@@ -224,10 +224,10 @@ private:
   size_t buffer_size = DEFAULT_BUFFER_SIZE;
 
   std::atomic<bool> isPaused = false;
-  size_t divX = 10;
-  size_t divY = 10;
+  int64_t divX = 10;
+  int64_t divY = 10;
   size_t refresh = Oscilloscope::FrameRates::HZ60;
-  double horizontal_scale_ms = 1.0;  // horizontal scale for time (ms)
+  int64_t horizontal_scale_ns = 1000000;  // horizontal scale for time (ns)
   bool triggering = false;
 
   // Scope primary paint element
