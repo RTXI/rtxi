@@ -616,9 +616,6 @@ void Oscilloscope::Panel::showChannelTab()
     widthsList->setCurrentIndex(0);
     stylesList->setCurrentIndex(0);
   } else {
-    fmt::print("{}, {}, {}", colorsList->findData(pen->color()),
-                             widthsList->findData(pen->width()),
-                             stylesList->findData(pen->width()));
     colorsList->setCurrentIndex(colorsList->findData(pen->color()));
     widthsList->setCurrentIndex(widthsList->findData(pen->width()));
     stylesList->setCurrentIndex(stylesList->findData(QVariant::fromValue(pen->style())));
@@ -817,6 +814,7 @@ void Oscilloscope::Panel::screenshot()
 
 void Oscilloscope::Panel::togglePause()
 {
+  this->scopeWindow->setPause(!this->pauseButton->isChecked());
   auto* hplugin = dynamic_cast<Oscilloscope::Plugin*>(this->getHostPlugin());
   hplugin->setAllProbesActivity(!this->pauseButton->isChecked());
 }
@@ -965,7 +963,7 @@ void Oscilloscope::Plugin::setAllProbesActivity(bool activity)
       : Event::Type::RT_THREAD_UNPAUSE_EVENT;
   for (const auto& entry : this->m_component_registry) {
     events.emplace_back(event_type);
-    events.back().setParam("thread", entry.component.get());
+    events.back().setParam("thread", static_cast<RT::Thread*>(entry.component.get()));
   }
   this->getEventManager()->postEvent(events);
 }

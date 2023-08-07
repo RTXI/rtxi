@@ -141,6 +141,11 @@ bool Oscilloscope::Scope::paused() const
   return isPaused;
 }
 
+void Oscilloscope::Scope::setPause(bool value)
+{
+  this->isPaused.store(value);
+}
+
 // TODO: make this thread-safe
 void Oscilloscope::Scope::createChannel(IO::endpoint probeInfo,
                                         RT::OS::Fifo* fifo)
@@ -165,6 +170,7 @@ void Oscilloscope::Scope::createChannel(IO::endpoint probeInfo,
   chan.pen->setColor(Oscilloscope::penColors[0]);
   chan.pen->setStyle(Oscilloscope::penStyles[0]);
   chan.fifo = fifo;
+  chan.curve->attach(this);
   this->channels.push_back(chan);
 }
 
@@ -368,7 +374,7 @@ double Oscilloscope::Scope::getTriggerThreshold() const
 // Draw data on the scope
 void Oscilloscope::Scope::drawCurves()
 {
-  if (isPaused || this->channels.empty()) {
+  if (isPaused.load() || this->channels.empty()) {
     return;
   }
   int64_t max_time = 0;
