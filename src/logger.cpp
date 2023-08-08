@@ -80,8 +80,8 @@ void eventLogger::log(Event::Object* event)
                         event->getParam("component"))
                         ->getName();
         this->ss << " TYPE -- ";
-        this->ss << Modules::Variable::vartype2string(
-            std::any_cast<Modules::Variable::variable_t>(
+        this->ss << Modules::Variable::state2string(
+            std::any_cast<RT::State::state_t>(
                 event->getParam("state")));
         break; 
       default:
