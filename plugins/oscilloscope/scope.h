@@ -33,6 +33,7 @@
 #include <QtWidgets>
 #include <cstddef>
 #include <vector>
+#include <shared_mutex>
 
 #include <qnamespace.h>
 #include <qwt.h>
@@ -182,7 +183,7 @@ public:
   void createChannel(IO::endpoint probeInfo, RT::OS::Fifo* fifo);
   bool channelRegistered(IO::endpoint probeInfo);
   void removeChannel(IO::endpoint probeInfo);
-  size_t getChannelCount() const;
+  size_t getChannelCount();
 
   void clearData();
   size_t getDataSize() const;
@@ -223,7 +224,7 @@ protected:
 
 private:
   Oscilloscope::Trigger::Info m_trigger_info;
-  size_t buffer_size = DEFAULT_BUFFER_SIZE;
+  std::atomic<size_t> buffer_size = DEFAULT_BUFFER_SIZE;
 
   std::atomic<bool> isPaused = false;
   int64_t divX = 10;
@@ -249,6 +250,9 @@ private:
   QTimer* timer;
   QString dtLabel;
   std::list<scope_channel> channels;
+
+  // synchronization
+  std::shared_mutex m_channel_mutex;
 };  // Scope
 
 };  // namespace Oscilloscope

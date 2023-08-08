@@ -52,12 +52,12 @@ std::vector<Modules::Variable::Info> generateDefaultComponentVariables()
   tempvarinfo.value = std::string("");
   default_variable_list.push_back(tempvarinfo);
 
-  tempvarinfo.id = TEST_PARAMETER_ID::TESTSTATE;
-  tempvarinfo.name = std::string("teststate");
-  tempvarinfo.description = std::string("TEST STATE");
-  tempvarinfo.vartype = Modules::Variable::STATE;
-  tempvarinfo.value = Modules::Variable::INIT;
-  default_variable_list.push_back(tempvarinfo);
+  //tempvarinfo.id = TEST_PARAMETER_ID::TESTSTATE;
+  //tempvarinfo.name = std::string("teststate");
+  //tempvarinfo.description = std::string("TEST STATE");
+  //tempvarinfo.vartype = Modules::Variable::STATE;
+  //tempvarinfo.value = Modules::Variable::INIT;
+  //default_variable_list.push_back(tempvarinfo);
 
   return default_variable_list;
 }

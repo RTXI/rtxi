@@ -19,6 +19,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <mutex>
 
 #include "scope.h"
 
@@ -129,7 +130,6 @@ Oscilloscope::Scope::Scope(QWidget* parent)
   this->timer->start(static_cast<int>(this->refresh));
 }
 
-// Kill me
 Oscilloscope::Scope::~Scope()
 {
   delete d_directPainter;
@@ -146,10 +146,10 @@ void Oscilloscope::Scope::setPause(bool value)
   this->isPaused.store(value);
 }
 
-// TODO: make this thread-safe
 void Oscilloscope::Scope::createChannel(IO::endpoint probeInfo,
                                         RT::OS::Fifo* fifo)
 {
+  std::unique_lock<std::shared_mutex> lock(this->m_channel_mutex);
   auto iter = std::find_if(this->channels.begin(),
                            this->channels.end(),
                            [&](const scope_channel& chan)
@@ -176,6 +176,7 @@ void Oscilloscope::Scope::createChannel(IO::endpoint probeInfo,
 
 bool Oscilloscope::Scope::channelRegistered(IO::endpoint probeInfo)
 {
+  std::shared_lock<std::shared_mutex> lock(this->m_channel_mutex);
   auto iter = std::find_if(this->channels.begin(),
                            this->channels.end(),
                            [&](const scope_channel& chan){
@@ -184,9 +185,9 @@ bool Oscilloscope::Scope::channelRegistered(IO::endpoint probeInfo)
   return iter != this->channels.end();
 }
 
-// TODO: make this thread-safe
 void Oscilloscope::Scope::removeChannel(IO::endpoint probeInfo)
 {
+  std::unique_lock<std::shared_mutex> lock(this->m_channel_mutex);
   auto iter = std::find_if(this->channels.begin(),
                            this->channels.end(),
                            [&](const scope_channel& chan)
@@ -207,14 +208,15 @@ void Oscilloscope::Scope::resizeEvent(QResizeEvent* event)
   QwtPlot::resizeEvent(event);
 }
 
-size_t Oscilloscope::Scope::getChannelCount() const
+size_t Oscilloscope::Scope::getChannelCount()
 {
+  std::shared_lock<std::shared_mutex> lock(this->m_channel_mutex);
   return channels.size();
 }
 
-// TODO: make this thread-safe
 void Oscilloscope::Scope::clearData()
 {
+  std::unique_lock<std::shared_mutex> lock(this->m_channel_mutex);
   for (auto& chan : this->channels) {
     chan.timebuffer.assign(this->buffer_size, 0);
     chan.xbuffer.assign(this->buffer_size, 0);
@@ -223,16 +225,21 @@ void Oscilloscope::Scope::clearData()
   }
 }
 
-// TODO: make this thread-safe
 void Oscilloscope::Scope::setDataSize(size_t size)
 {
-  this->buffer_size = size;
+  std::unique_lock<std::shared_mutex> lock(this->m_channel_mutex);
+  this->buffer_size.store(size);
+  for (auto& chan : this->channels) {
+    chan.timebuffer.assign(this->buffer_size, 0);
+    chan.xbuffer.assign(this->buffer_size, 0);
+    chan.ybuffer.assign(this->buffer_size, 0);
+    chan.data_indx = 0;
+  }
 }
 
-// TODO: make this thread-safe
 size_t Oscilloscope::Scope::getDataSize() const
 {
-  return this->buffer_size;
+  return this->buffer_size.load();
 }
 
 int64_t Oscilloscope::Scope::getDivT() const
@@ -277,6 +284,7 @@ void Oscilloscope::Scope::setRefresh(size_t r)
 
 void Oscilloscope::Scope::setChannelScale(IO::endpoint endpoint, double scale)
 {
+  std::unique_lock<std::shared_mutex> lock(this->m_channel_mutex);
   auto chan_loc = std::find_if(this->channels.begin(),
                                this->channels.end(),
                                [&](const Oscilloscope::scope_channel& chann)
@@ -289,6 +297,7 @@ void Oscilloscope::Scope::setChannelScale(IO::endpoint endpoint, double scale)
 
 double Oscilloscope::Scope::getChannelScale(IO::endpoint endpoint)
 {
+  std::shared_lock<std::shared_mutex> lock(this->m_channel_mutex);
   auto chan_loc = std::find_if(this->channels.begin(),
                                this->channels.end(),
                                [&](const Oscilloscope::scope_channel& chann)
@@ -301,6 +310,7 @@ double Oscilloscope::Scope::getChannelScale(IO::endpoint endpoint)
 
 void Oscilloscope::Scope::setChannelOffset(IO::endpoint endpoint, double offset)
 {
+  std::unique_lock<std::shared_mutex> lock(this->m_channel_mutex);
   auto chan_loc = std::find_if(this->channels.begin(),
                                this->channels.end(),
                                [&](const Oscilloscope::scope_channel& chann)
@@ -313,6 +323,7 @@ void Oscilloscope::Scope::setChannelOffset(IO::endpoint endpoint, double offset)
 
 double Oscilloscope::Scope::getChannelOffset(IO::endpoint endpoint)
 {
+  std::shared_lock<std::shared_mutex> lock(this->m_channel_mutex);
   auto chan_loc = std::find_if(this->channels.begin(),
                                this->channels.end(),
                                [&](const Oscilloscope::scope_channel& chann)
@@ -325,6 +336,7 @@ double Oscilloscope::Scope::getChannelOffset(IO::endpoint endpoint)
 
 void Oscilloscope::Scope::setChannelPen(IO::endpoint endpoint, QPen* pen)
 {
+  std::unique_lock<std::shared_mutex> lock(this->m_channel_mutex);
   auto chan_loc = std::find_if(this->channels.begin(),
                                this->channels.end(),
                                [&](const Oscilloscope::scope_channel& chann)
@@ -338,6 +350,7 @@ void Oscilloscope::Scope::setChannelPen(IO::endpoint endpoint, QPen* pen)
 
 QPen* Oscilloscope::Scope::getChannelPen(IO::endpoint endpoint)
 {
+  std::shared_lock<std::shared_mutex> lock(this->m_channel_mutex);
   auto chan_loc = std::find_if(this->channels.begin(),
                                this->channels.end(),
                                [&](const Oscilloscope::scope_channel& chann)
@@ -351,6 +364,7 @@ QPen* Oscilloscope::Scope::getChannelPen(IO::endpoint endpoint)
 void Oscilloscope::Scope::setChannelLabel(IO::endpoint endpoint,
                                           const QString& label)
 {
+  std::unique_lock<std::shared_mutex> lock(this->m_channel_mutex);
   auto chan_loc = std::find_if(this->channels.begin(),
                                this->channels.end(),
                                [&](const Oscilloscope::scope_channel& chann)
@@ -377,6 +391,7 @@ void Oscilloscope::Scope::drawCurves()
   if (isPaused.load() || this->channels.empty()) {
     return;
   }
+  std::shared_lock<std::shared_mutex> lock(this->m_channel_mutex);
   int64_t max_time = 0;
   int64_t local_max_time = 0;
   for (auto chan : this->channels) {

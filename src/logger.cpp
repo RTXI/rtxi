@@ -6,6 +6,7 @@
 
 #include "event.hpp"
 #include "module.hpp"
+#include "rt.hpp"
 
 // TODO: change localtime to be thread-safe
 void eventLogger::log(Event::Object* event)
@@ -73,6 +74,16 @@ void eventLogger::log(Event::Object* event)
             std::any_cast<Modules::Variable::variable_t>(
                 event->getParam("paramType")));
         break;
+      case Event::Type::RT_MODULE_STATE_CHANGE_EVENT:
+        this->ss << "\t SOURCE -- ";
+        this->ss << std::any_cast<Modules::Component*>(
+                        event->getParam("component"))
+                        ->getName();
+        this->ss << " TYPE -- ";
+        this->ss << Modules::Variable::vartype2string(
+            std::any_cast<Modules::Variable::variable_t>(
+                event->getParam("state")));
+        break; 
       default:
         break;
     }
@@ -115,6 +126,12 @@ void eventLogger::log(RT::Telemitry::Response response)
         break;
       case RT::Telemitry::RT_MODULE_PARAM_UPDATE:
         this->ss << "Module Parameter Updated";
+        break;
+      case RT::Telemitry::IO_LINK_UPDATED:
+        this->ss << "IO Link Updated";
+        break;
+      case RT::Telemitry::RT_MODULE_STATE_UPDATE:
+        this->ss << "Module State Updated";
         break;
       case RT::Telemitry::RT_ERROR:
         this->ss << "Real-Time System Error";

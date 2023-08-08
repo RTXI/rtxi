@@ -38,21 +38,11 @@ namespace PerformanceMeasurement
 
 constexpr std::string_view MODULE_NAME = "RT Benchmarks";
 
-enum PARAMETER : Modules::Variable::Id {
-  STATE = 0,
-};
-
-
 inline std::vector<Modules::Variable::Info> get_default_vars()
 { 
   return 
   {
     {
-      PARAMETER::STATE,
-      "state",
-      "RT Benchmarks State",
-      Modules::Variable::STATE,
-      Modules::Variable::INIT
     }
   };
 }

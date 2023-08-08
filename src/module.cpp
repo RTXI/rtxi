@@ -19,26 +19,26 @@
 #include "debug.hpp"
 #include "rtxiConfig.h"
 
-std::string Modules::Variable::state2string(Modules::Variable::state_t state)
+std::string Modules::Variable::state2string(RT::State::state_t state)
 {
   std::string result;
   switch (state) {
-    case Modules::Variable::INIT:
+    case RT::State::INIT:
       result = std::string("INIT");
       break;
-    case Modules::Variable::MODIFY:
+    case RT::State::MODIFY:
       result = std::string("MODIFIED PARAMETERS");
       break;
-    case Modules::Variable::PERIOD:
+    case RT::State::PERIOD:
       result = std::string("PERIOD CHANGE");
       break;
-    case Modules::Variable::PAUSE:
+    case RT::State::PAUSE:
       result = std::string("PLUGIN PAUSED");
       break;
-    case Modules::Variable::UNPAUSE:
+    case RT::State::UNPAUSE:
       result = std::string("PLUGIN UNPAUSED");
       break;
-    case Modules::Variable::EXIT:
+    case RT::State::EXIT:
       result = std::string("EXIT");
       break;
     default:
@@ -273,10 +273,10 @@ void Modules::Panel::createGUI(
   this->setLayout(main_layout);
 }
 
-void Modules::Panel::update(Modules::Variable::state_t /*unused*/)
+void Modules::Panel::update_state(RT::State::state_t flag)
 {
-  // TODO: Update function needs to have default functionality for derived
-  // classes
+  Modules::Plugin* hplugin = this->getHostPlugin(); 
+  hplugin->setComponentState(flag);
 }
 
 void Modules::Panel::resizeMe()
@@ -340,23 +340,45 @@ void Modules::Panel::refresh()
 
 void Modules::Panel::modify()
 {
-  // bool active = getActive();
-  // setActive(false);
-
-  // for (auto i = parameter.begin(); i != parameter.end(); ++i) {
-  //   if (i->second.type == Modules::Variable::COMMENT) {
-  //     QByteArray textData = i->second.edit->text().toLatin1();
-  //     const char* text = textData.constData();
-  //     this->hostPlugin->setComment(i->second.index, text);
-  //   }
-  // }
-
-  // this->update(Modules::Variable::MODIFY);
-  // this->setActive(active);
-
-  // for (auto i = parameter.begin(); i != parameter.end(); ++i){
-  //   i->second.edit->blacken();
-  // }
+  Modules::Variable::Id param_id = Modules::Variable::INVALID_ID;
+  double double_value = 0.0;
+  int int_value = 0;
+  uint64_t uint_value = 0ULL;
+  std::stringstream sstream;
+  this->update_state(RT::State::PAUSE);
+  for(auto& var : this->parameter){
+    switch (var.second.type) {
+      if(!var.second.edit->isModified()){ continue; }
+      case Modules::Variable::UINT_PARAMETER:
+        param_id = static_cast<Modules::Variable::Id>(var.second.info.id);
+        uint_value = var.second.edit->text().toUInt();
+        this->hostPlugin->setComponentParameter<uint64_t>(param_id, uint_value);
+        sstream << uint_value;
+        var.second.edit->setText(QString::fromStdString(sstream.str()));
+        var.second.edit->blacken();
+        break;
+      case Modules::Variable::INT_PARAMETER:
+        param_id = static_cast<Modules::Variable::Id>(var.second.info.id);
+        int_value = var.second.edit->text().toInt();
+        this->hostPlugin->setComponentParameter<int>(param_id, int_value);
+        sstream << int_value;
+        var.second.edit->setText(QString::fromStdString(sstream.str()));
+        var.second.edit->blacken();
+        break;
+      case Modules::Variable::DOUBLE_PARAMETER:
+        param_id = static_cast<Modules::Variable::Id>(var.second.info.id);
+        double_value = var.second.edit->text().toDouble();
+        this->hostPlugin->setComponentParameter(param_id, double_value);
+        sstream << double_value;
+        var.second.edit->setText(QString::fromStdString(sstream.str()));
+        var.second.edit->blacken();
+        break;
+      default:
+        ERROR_MSG("Unable to determine refresh type for component {}",
+                  this->getName());
+    }
+  }
+  this->update_state(RT::State::UNPAUSE);
 }
 
 // NOLINTNEXTLINE
@@ -414,20 +436,6 @@ void Modules::Panel::setParameter(const QString& var_name, uint64_t value)
   }
 }
 
-void Modules::Panel::setState(const QString& var_name,
-                              Modules::Variable::state_t ref)
-{
-  auto n = parameter.find(var_name);
-  if ((n != parameter.end()) && (n->second.type == Modules::Variable::STATE)) {
-    // setData(Workspace::STATE, n->second.index, &ref);
-
-    n->second.edit->setText(QString::number(ref));
-    auto param_id = static_cast<Modules::Variable::Id>(n->second.info.id);
-    this->hostPlugin->setComponentParameter<Modules::Variable::state_t>(
-        param_id, ref);
-  }
-}
-
 void Modules::Panel::pause(bool p)
 {
   if (pauseButton->isChecked() != p) {
@@ -439,9 +447,9 @@ void Modules::Panel::pause(bool p)
   //   return;
   // }
   if (p) {
-    this->update(Modules::Variable::PAUSE);
+    this->update_state(RT::State::PAUSE);
   } else {
-    this->update(Modules::Variable::UNPAUSE);
+    this->update_state(RT::State::UNPAUSE);
   }
 }
 
@@ -518,6 +526,14 @@ void Modules::Plugin::registerComponent()
   Event::Object event = Event::Object(Event::Type::RT_THREAD_INSERT_EVENT);
   event.setParam("thread",
                  static_cast<RT::Thread*>(this->plugin_component.get()));
+  this->event_manager->postEvent(&event);
+}
+
+void Modules::Plugin::setComponentState(RT::State::state_t state)
+{
+  Event::Object event(Event::Type::RT_MODULE_STATE_CHANGE_EVENT);
+  event.setParam("component", std::any(static_cast<Modules::Component*>(this->plugin_component.get())));
+  event.setParam("state", std::any(state));
   this->event_manager->postEvent(&event);
 }
 

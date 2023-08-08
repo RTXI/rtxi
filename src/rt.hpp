@@ -43,6 +43,24 @@ class Component;
 namespace RT
 {
 
+namespace State{
+
+/*!
+ * Value used to store internal RT::Thread state 
+ *
+ */
+enum state_t : int8_t
+{
+  INIT, /*!< The parameters need to be initialized.         */
+  EXEC, /*!< The module is in execution mode                */
+  MODIFY, /*!< The parameters have been modified by the user. */
+  PERIOD, /*!< The system period has changed.                 */
+  PAUSE, /*!< The Pause button has been activated            */
+  UNPAUSE, /*!< When the pause button has been deactivated     */
+  EXIT, /*!< When the module has been told to exit        */
+};
+} // namespace State
+
 namespace Telemitry
 {
 typedef int response_t;
@@ -53,6 +71,7 @@ const response_t RT_NOOP = 3;
 const response_t RT_SHUTDOWN = 4;
 const response_t RT_MODULE_PARAM_UPDATE = 5;
 const response_t IO_LINK_UPDATED = 6;
+const response_t RT_MODULE_STATE_UPDATE = 7;
 const response_t RT_ERROR = -1;
 const response_t NO_TELEMITRY = -2;
 
@@ -296,6 +315,7 @@ using command_param_t = std::variant<std::monostate,
                                      IO::Block*,
                                      RT::block_connection_t,
                                      Modules::Component*,
+                                     State::state_t,
                                      std::string>;
 /*!
  * Manages the RTOS as well as all objects that require
@@ -354,6 +374,7 @@ private:
   void getPeriodValues(Event::Object* event);
   void provideTimetickPointers(Event::Object* event);
   void changeModuleParameters(Event::Object* event);
+  void changeModuleState(Event::Object* event);
 
   void executeCMD(CMD* cmd);
   void updateDeviceList(CMD* cmd);
@@ -364,6 +385,7 @@ private:
   void shutdown(CMD* cmd);
   void getPeriodTicksCMD(CMD* cmd);
   void changeModuleParametersCMD(CMD* cmd);
+  void changeModuleStateCMD(CMD* cmd);
 
   void postTelemitry(RT::Telemitry::Response telemitry);
 

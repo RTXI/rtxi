@@ -60,29 +60,13 @@ enum variable_t : size_t
 };
 
 /*!
- * Flag passed to DefaultGUIModel::update to signal the kind of update.
- *
- * \sa DefaultGUIModel::update()
- */
-enum state_t : int64_t
-{
-  INIT, /*!< The parameters need to be initialized.         */
-  EXEC, /*!< The module is in execution mode                */
-  MODIFY, /*!< The parameters have been modified by the user. */
-  PERIOD, /*!< The system period has changed.                 */
-  PAUSE, /*!< The Pause button has been activated            */
-  UNPAUSE, /*!< When the pause button has been deactivated     */
-  EXIT, /*!< When the module has been told to exit        */
-};
-
-/*!
  * Converts state code to human readable string
  *
  * \param code the state code to convert
  *
  * \returns A string describing the code
  */
-std::string state2string(state_t state);
+std::string state2string(RT::State::state_t state);
 
 /*!
  * Converts variable type to human readable string
@@ -112,7 +96,7 @@ struct Info
   std::string name;
   std::string description;
   Modules::Variable::variable_t vartype;
-  std::variant<state_t, int64_t, double, uint64_t, std::string> value;
+  std::variant<int64_t, double, uint64_t, std::string> value;
 };
 
 }  // namespace Variable
@@ -206,10 +190,14 @@ public:
    */
   std::string getValueString(const size_t& var_id);
 
+  RT::State::state_t getState() const { return this->component_state; }
+  void setState(RT::State::state_t state) { this->component_state = state; }
+
 private:
   std::vector<Modules::Variable::Info> parameters;
   Modules::Plugin* hostPlugin;
   bool active;
+  RT::State::state_t component_state;
 };
 
 class Panel : public QWidget
@@ -226,7 +214,7 @@ public:
    *
    * \param flag The kind of update to signal.
    */
-  virtual void update(Modules::Variable::state_t flag);
+  virtual void update_state(RT::State::state_t flag);
 
   /*!
    * Function that builds the Qt GUI.
@@ -316,17 +304,6 @@ protected:
    * \param comment The comment assigned to this parameter
    */
   void setComment(const QString& var_name, const QString& comment);
-
-  /*!
-   * Set the reference to this state within the Workspace
-   *   via Workspace::setData().
-   *
-   * \param name The state's name.
-   * \param ref A reference to the state.
-   *
-   * \sa Workspace::setData()
-   */
-  void setState(const QString& var_name, Modules::Variable::state_t ref);
 
   /*!
    * This function overrides the base class from Qt. It handles the
@@ -468,8 +445,6 @@ public:
       param_type = Modules::Variable::UINT_PARAMETER;
     } else if (typeid(T) == typeid(std::string)) {
       param_type = Modules::Variable::COMMENT;
-    } else if (typeid(T) == typeid(Modules::Variable::state_t)) {
-      param_type = Modules::Variable::STATE;
     } else {
       ERROR_MSG(
           "Modules::Plugin::setComponentParameter : Parameter type not "
@@ -527,6 +502,7 @@ public:
   // (before RTXI 3.0.0)
 
   void registerComponent();
+  void setComponentState(RT::State::state_t state);
 
 protected:
   Modules::Component* getComponent();

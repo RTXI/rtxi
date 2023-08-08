@@ -97,7 +97,7 @@ PerformanceMeasurement::Component::Component(Modules::Plugin* hplugin)
 {
   if(RT::OS::getFifo(this->fifo, 10) < 0){
     ERROR_MSG("PerformanceMeasurement::Component::Component : Unable to craate component fifo");
-    this->setValue(PerformanceMeasurement::PARAMETER::STATE, Modules::Variable::PAUSE);
+    this->setState(RT::State::PAUSE);
   }
 }
 
@@ -117,24 +117,22 @@ void PerformanceMeasurement::Component::execute()
   latencyStat.push(stats.latency);
   stats.jitter = latencyStat.std();
 
-  switch (getValue<Modules::Variable::state_t>(
-      PerformanceMeasurement::PARAMETER::STATE))
+  switch (this->getState())
   {
-    case Modules::Variable::EXEC:
+    case RT::State::EXEC:
       this->fifo->writeRT(&this->stats, sizeof(PerformanceMeasurement::performance_stats_t)); 
       break;
-    case Modules::Variable::INIT:
+    case RT::State::INIT:
       latencyStat.clear();
       latencyStat.push(0.0);
       this->stats = {0.0,0.0,0.0,0.0,0.0,0.0,0.0};
-      setValue(PerformanceMeasurement::PARAMETER::STATE,
-               Modules::Variable::EXEC);
+      this->setState(RT::State::EXEC);
       break;
-    case Modules::Variable::PERIOD:
-    case Modules::Variable::MODIFY:
-    case Modules::Variable::PAUSE:
-    case Modules::Variable::UNPAUSE:
-    case Modules::Variable::EXIT:
+    case RT::State::PERIOD:
+    case RT::State::MODIFY:
+    case RT::State::PAUSE:
+    case RT::State::UNPAUSE:
+    case RT::State::EXIT:
       break;
   }
   last_start_ticks = *start_ticks;
@@ -162,8 +160,7 @@ void PerformanceMeasurement::Panel::refresh()
 
 void PerformanceMeasurement::Panel::reset()
 {
-  this->getHostPlugin()->setComponentParameter<Modules::Variable::state_t>(
-      PerformanceMeasurement::PARAMETER::STATE, Modules::Variable::INIT);
+  this->update_state(RT::State::INIT);
 }
 
 PerformanceMeasurement::Plugin::Plugin(Event::Manager* ev_manager)

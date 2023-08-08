@@ -45,22 +45,16 @@ constexpr std::string_view MODULE_NAME = "Oscilloscope";
 
 enum PARAMETER : size_t
 {
-  STATE = 0,
-  TRIGGERING,
+  TRIGGERING=0,
 };
 
 inline std::vector<Modules::Variable::Info> get_default_vars()
 {
-  return {{PARAMETER::STATE,
-           "Oscilloscope Probe State",
-           "State of the probing component within the oscilloscope",
-           Modules::Variable::STATE,
-           Modules::Variable::INIT},
-          {PARAMETER::TRIGGERING,
+  return {{PARAMETER::TRIGGERING,
            "Trigger State",
            "Trigger activity for the oscilloscope",
            Modules::Variable::STATE,
-           Modules::Variable::INIT}};
+           RT::State::INIT}};
 }
 
 inline std::vector<IO::channel_t> get_default_channels()

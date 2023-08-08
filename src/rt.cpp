@@ -455,9 +455,9 @@ void RT::System::changeModuleParametersCMD(RT::System::CMD* cmd)
                                     std::get<uint64_t>(param_value_any));
       break;
     case Modules::Variable::STATE:
-      component->setValue<Modules::Variable::state_t>(
+      component->setValue<RT::State::state_t>(
           param_id,
-          static_cast<Modules::Variable::state_t>(
+          static_cast<RT::State::state_t>(
               std::get<int64_t>(param_value_any)));
       break;
     default:
@@ -466,6 +466,19 @@ void RT::System::changeModuleParametersCMD(RT::System::CMD* cmd)
           "types");
       telem.type = RT::Telemitry::RT_ERROR;
   }
+  this->postTelemitry(telem);
+}
+
+void RT::System::changeModuleStateCMD(RT::System::CMD* cmd)
+{
+  RT::Telemitry::Response telem;
+  telem.cmd = cmd;
+  telem.type = RT::Telemitry::RT_MODULE_STATE_UPDATE;
+  auto* component = 
+      std::get<Modules::Component*>(cmd->getRTParam("component"));
+  auto state =
+      std::get<RT::State::state_t>(cmd->getRTParam("state"));
+  component->setState(state);
   this->postTelemitry(telem);
 }
 
@@ -505,6 +518,9 @@ void RT::System::executeCMD(RT::System::CMD* cmd)
       break;
     case Event::Type::RT_MODULE_PARAMETER_CHANGE_EVENT:
       this->changeModuleParametersCMD(cmd);
+      break;
+    case Event::Type::RT_MODULE_STATE_CHANGE_EVENT:
+      this->changeModuleStateCMD(cmd);
       break;
     case Event::Type::NOOP:
       telem.type = RT::Telemitry::RT_NOOP;
@@ -569,6 +585,9 @@ void RT::System::receiveEvent(Event::Object* event)
       break;
     case Event::Type::RT_MODULE_PARAMETER_CHANGE_EVENT:
       this->changeModuleParameters(event);
+      break;
+    case Event::Type::RT_MODULE_STATE_CHANGE_EVENT:
+      this->changeModuleState(event);
       break;
     case Event::Type::RT_SHUTDOWN_EVENT:
       this->shutdown(event);
@@ -804,7 +823,7 @@ void RT::System::changeModuleParameters(Event::Object* event)
     case Modules::Variable::STATE:
       cmd.setRTParam(
           "paramValue",
-          std::any_cast<Modules::Variable::state_t>(param_value_any));
+          std::any_cast<RT::State::state_t>(param_value_any));
       break;
     default:
       ERROR_MSG(
@@ -815,6 +834,20 @@ void RT::System::changeModuleParameters(Event::Object* event)
   RT::System::CMD* cmd_ptr = &cmd;
   this->eventFifo->write(&cmd_ptr, sizeof(RT::System::CMD*));
   cmd_ptr->wait();
+}
+
+void RT::System::changeModuleState(Event::Object* event)
+{
+  RT::System::CMD cmd(event->getType());
+  auto* component =
+      std::any_cast<Modules::Component*>(event->getParam("component")); 
+  auto state = 
+      std::any_cast<RT::State::state_t>(event->getParam("state"));
+  cmd.setRTParam("component", component);
+  cmd.setRTParam("state", state);
+  RT::System::CMD* cmd_ptr = &cmd;
+  this->eventFifo->write(&cmd_ptr, sizeof(RT::System::CMD*));
+  cmd.wait();
 }
 
 RT::System::CMD::CMD(Event::Type et)

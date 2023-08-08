@@ -785,23 +785,21 @@ Oscilloscope::Component::Component(Modules::Plugin* hplugin,
 void Oscilloscope::Component::execute()
 {
   Oscilloscope::sample sample {};
-  auto state =
-      getValue<Modules::Variable::state_t>(Oscilloscope::PARAMETER::STATE);
-  switch (state) {
-    case Modules::Variable::EXEC: {
+  switch (this->getState()) {
+    case RT::State::EXEC: {
       sample.time = RT::OS::getTime();
       sample.value = this->readinput(0)[0];
       this->fifo->writeRT(&sample, sizeof(Oscilloscope::sample));
       break;
     }
-    case Modules::Variable::INIT:
-    case Modules::Variable::UNPAUSE:
-      this->setValue(Oscilloscope::PARAMETER::STATE, Modules::Variable::EXEC);
+    case RT::State::INIT:
+    case RT::State::UNPAUSE:
+      this->setState(RT::State::EXEC);
       break;
-    case Modules::Variable::PAUSE:
-    case Modules::Variable::MODIFY:
-    case Modules::Variable::EXIT:
-    case Modules::Variable::PERIOD:
+    case RT::State::PAUSE:
+    case RT::State::MODIFY:
+    case RT::State::EXIT:
+    case RT::State::PERIOD:
       break;
   }
 }
