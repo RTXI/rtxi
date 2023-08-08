@@ -103,6 +103,7 @@ Modules::Component::Component(
     : RT::Thread(mod_name, channels)
     , hostPlugin(hplugin)
     , active(false)
+    , component_state(RT::State::INIT)
 {
   for (const auto& var : variables) {
     if (var.id != parameters.size()) {
@@ -170,10 +171,10 @@ Modules::Panel::Panel(const std::string& mod_name,
   this->setAttribute(Qt::WA_DeleteOnClose);
   this->setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint
                        | Qt::WindowMinimizeButtonHint);
-  auto* timer = new QTimer(this);
-  timer->setTimerType(Qt::PreciseTimer);
-  timer->start(1000);
-  QObject::connect(timer, SIGNAL(timeout()), this, SLOT(refresh()));
+  //auto* timer = new QTimer(this);
+  //timer->setTimerType(Qt::PreciseTimer);
+  //timer->start(1000);
+  //QObject::connect(timer, SIGNAL(timeout()), this, SLOT(refresh()));
 }
 
 void Modules::Panel::closeEvent(QCloseEvent* event)
@@ -347,8 +348,8 @@ void Modules::Panel::modify()
   std::stringstream sstream;
   this->update_state(RT::State::PAUSE);
   for(auto& var : this->parameter){
+    if(!var.second.edit->isModified()){ continue; }
     switch (var.second.type) {
-      if(!var.second.edit->isModified()){ continue; }
       case Modules::Variable::UINT_PARAMETER:
         param_id = static_cast<Modules::Variable::Id>(var.second.info.id);
         uint_value = var.second.edit->text().toUInt();
@@ -378,7 +379,7 @@ void Modules::Panel::modify()
                   this->getName());
     }
   }
-  this->update_state(RT::State::UNPAUSE);
+  this->update_state(RT::State::MODIFY);
 }
 
 // NOLINTNEXTLINE
