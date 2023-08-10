@@ -171,6 +171,7 @@ Modules::Panel::Panel(const std::string& mod_name,
   this->setAttribute(Qt::WA_DeleteOnClose);
   this->setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint
                        | Qt::WindowMinimizeButtonHint);
+  qRegisterMetaType<RT::State::state_t>();
   QObject::connect(this, &Modules::Panel::signal_state_change,
                    this, &Modules::Panel::update_state);
 }
@@ -530,6 +531,7 @@ void Modules::Plugin::registerComponent()
 
 void Modules::Plugin::setComponentState(RT::State::state_t state)
 {
+  if(!this->plugin_component) { return; }
   Event::Object event(Event::Type::RT_MODULE_STATE_CHANGE_EVENT);
   event.setParam("component", std::any(static_cast<Modules::Component*>(this->plugin_component.get())));
   event.setParam("state", std::any(state));
