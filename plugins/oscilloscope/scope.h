@@ -100,6 +100,8 @@ typedef struct scope_channel
   std::vector<int64_t> timebuffer;
   std::vector<double> xbuffer;
   std::vector<double> ybuffer;
+  std::vector<double> xtransformed;
+  std::vector<double> ytransformed;
   size_t data_indx = 0;
   QwtPlotCurve* curve = nullptr;
   QPen* pen = nullptr;
@@ -189,7 +191,7 @@ public:
   size_t getDataSize() const;
   void setDataSize(size_t);
 
-  int64_t getDivT() const;
+  int64_t getDivT();
   void setDivT(int64_t value);
 
   void setPeriod(double);

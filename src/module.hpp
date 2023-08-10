@@ -30,6 +30,7 @@ Q_DECLARE_METATYPE(IO::Block*)
 Q_DECLARE_METATYPE(IO::flags_t)
 Q_DECLARE_METATYPE(IO::endpoint)
 Q_DECLARE_METATYPE(RT::block_connection_t)
+Q_DECLARE_METATYPE(RT::State::state_t)
 
 /*!
  * Contains all the classes and structures relevant to Modules
@@ -209,12 +210,6 @@ public:
         Event::Manager* ev_manager);
 
   QMdiSubWindow* getMdiWindow() { return this->m_subwindow; }
-  /*!
-   * Callback function that is called when the system state changes.
-   *
-   * \param flag The kind of update to signal.
-   */
-  virtual void update_state(RT::State::state_t flag);
 
   /*!
    * Function that builds the Qt GUI.
@@ -235,6 +230,9 @@ public:
    * \param hplugin A pointer to the host plugin this panel belongs to.
    */
   void setHostPlugin(Modules::Plugin* hplugin) { this->hostPlugin = hplugin; }
+
+signals:
+  void signal_state_change(RT::State::state_t state);
 
 public slots:
 
@@ -266,6 +264,13 @@ public slots:
    * Function that pauses/unpauses the model.
    */
   virtual void pause(bool);
+
+  /*!
+   * Callback function that is called when the system state changes.
+   *
+   * \param flag The kind of update to signal.
+   */
+  virtual void update_state(RT::State::state_t flag);
 
 protected:
   /*!

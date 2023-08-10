@@ -95,6 +95,12 @@ void Oscilloscope::Panel::updateChannelLabel(IO::endpoint probe_info)
   this->scopeWindow->setChannelLabel(probe_info, chanlabel);
 }
 
+void Oscilloscope::Panel::updateWindowTimeDiv()
+{
+  auto divt = this->timesList->currentData().value<int64_t>();
+  this->scopeWindow->setDivT(divt);
+}
+
 void Oscilloscope::Panel::enableChannel()
 {
   // make some initial checks
@@ -260,6 +266,7 @@ void Oscilloscope::Panel::applyChannelTab()
 void Oscilloscope::Panel::applyDisplayTab()
 {
   updateTrigger();
+  updateWindowTimeDiv();
   scopeWindow->replot();
   showDisplayTab();
 }
@@ -624,8 +631,7 @@ void Oscilloscope::Panel::showChannelTab()
 
 void Oscilloscope::Panel::showDisplayTab()
 {
-  timesList->setCurrentIndex(
-      static_cast<int>(round(3 * log10(1 / scopeWindow->getDivT()) + 11)));
+  timesList->setCurrentIndex(timesList->findData(QVariant::fromValue(this->scopeWindow->getDivT())));
 
   // Find current trigger value and update gui
   IO::endpoint trigger_endpoint;
@@ -752,7 +758,6 @@ Oscilloscope::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
 
   auto* otimer = new QTimer;
   otimer->setTimerType(Qt::PreciseTimer);
-  //QObject::connect(otimer, SIGNAL(timeout()), this, SLOT(timeoutEvent()));
   otimer->start(Oscilloscope::FrameRates::HZ60);
 
   QObject::connect(
@@ -760,12 +765,6 @@ Oscilloscope::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
   this->updateBlockInfo();
   this->buildChannelList();
   scopeWindow->replot();
-
-  // QObject::connect(
-  //     this->m_opengl_widget,
-  //     &QOpenGLWidget::frameSwapped,
-  //     this,
-  //     &Oscilloscope::Panel::timeoutEvent);
 }
 
 Oscilloscope::Component::Component(Modules::Plugin* hplugin,

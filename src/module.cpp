@@ -171,10 +171,8 @@ Modules::Panel::Panel(const std::string& mod_name,
   this->setAttribute(Qt::WA_DeleteOnClose);
   this->setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint
                        | Qt::WindowMinimizeButtonHint);
-  //auto* timer = new QTimer(this);
-  //timer->setTimerType(Qt::PreciseTimer);
-  //timer->start(1000);
-  //QObject::connect(timer, SIGNAL(timeout()), this, SLOT(refresh()));
+  QObject::connect(this, &Modules::Panel::signal_state_change,
+                   this, &Modules::Panel::update_state);
 }
 
 void Modules::Panel::closeEvent(QCloseEvent* event)
@@ -576,9 +574,18 @@ double Modules::Plugin::getComponentDoubleParameter(
   return this->plugin_component->getValue<double>(parameter_id);
 }
 
-void Modules::Plugin::receiveEvent(Event::Object* /*event*/)
+void Modules::Plugin::receiveEvent(Event::Object* event)
 {
-  // Set by users who want to handle events
+  // We provide base functionality for handling period changes
+  switch(event->getType()){
+    case Event::Type::RT_PERIOD_EVENT:
+      if(this->widget_panel != nullptr){
+        this->widget_panel->signal_state_change(RT::State::PERIOD);
+      }
+      break;
+    default:
+      break;
+  }
 }
 
 bool Modules::Plugin::getActive()

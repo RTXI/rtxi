@@ -163,6 +163,8 @@ void Oscilloscope::Scope::createChannel(IO::endpoint probeInfo,
   chan.timebuffer.assign(this->buffer_size, 0);
   chan.xbuffer.assign(this->buffer_size, 0.0);
   chan.ybuffer.assign(this->buffer_size, 0.0);
+  chan.xtransformed.assign(this->buffer_size, 0.0);
+  chan.ytransformed.assign(this->buffer_size, 0.0);
   chan.scale = 1;
   chan.offset = 0;
   chan.data_indx = 0;
@@ -221,6 +223,8 @@ void Oscilloscope::Scope::clearData()
     chan.timebuffer.assign(this->buffer_size, 0);
     chan.xbuffer.assign(this->buffer_size, 0);
     chan.ybuffer.assign(this->buffer_size, 0);
+    chan.xtransformed.assign(this->buffer_size, 0);
+    chan.ytransformed.assign(this->buffer_size, 0);
     chan.data_indx = 0;
   }
 }
@@ -233,6 +237,8 @@ void Oscilloscope::Scope::setDataSize(size_t size)
     chan.timebuffer.assign(this->buffer_size, 0);
     chan.xbuffer.assign(this->buffer_size, 0);
     chan.ybuffer.assign(this->buffer_size, 0);
+    chan.xtransformed.assign(this->buffer_size, 0);
+    chan.ytransformed.assign(this->buffer_size, 0);
     chan.data_indx = 0;
   }
 }
@@ -242,13 +248,15 @@ size_t Oscilloscope::Scope::getDataSize() const
   return this->buffer_size.load();
 }
 
-int64_t Oscilloscope::Scope::getDivT() const
+int64_t Oscilloscope::Scope::getDivT()
 {
+  std::shared_lock<std::shared_mutex> lock(this->m_channel_mutex);
   return horizontal_scale_ns;
 }
 
 void Oscilloscope::Scope::setDivT(int64_t value)
 {
+  std::unique_lock<std::shared_mutex> lock(this->m_channel_mutex);
   horizontal_scale_ns = value;
   if (value >= 1000000000) {
     dtLabel = "s";
@@ -278,6 +286,7 @@ size_t Oscilloscope::Scope::getRefresh() const
 
 void Oscilloscope::Scope::setRefresh(size_t r)
 {
+  std::unique_lock<std::shared_mutex> lock(this->m_channel_mutex);
   refresh = r;
   timer->setInterval(static_cast<int>(refresh));
 }
@@ -406,19 +415,27 @@ void Oscilloscope::Scope::drawCurves()
     static_cast<double>(max_time - min_time);
   const double min_window_time = 0.0; 
   scaleMapX->setScaleInterval(min_window_time, max_window_time);
+  size_t ringbuffer_index = 0;
   for (auto& channel : this->channels) {
-    for(size_t i=0; i < channel.xbuffer.size(); i++){
-      channel.xbuffer[i] = static_cast<double>(channel.timebuffer[i] - min_time);
-    }
-    // TODO this should not happen each iteration, instead build into channel
+    channel.xtransformed.assign(this->buffer_size, 0);
+    channel.ytransformed.assign(this->buffer_size, 0);
     scaleMapY->setScaleInterval(-channel.scale * static_cast<double>(divY) / 2,
                                 channel.scale * static_cast<double>(divY) / 2);
+    for(size_t i=0; i < channel.xbuffer.size(); i++){
+      ringbuffer_index = (i+channel.data_indx) % this->buffer_size;
+      channel.xbuffer[i] = static_cast<double>(channel.timebuffer[i] - min_time);
+      // Thanks to qwt's interface we need the x axis poitns to be sorted
+      // and scaled. Shenanigans alert
+      channel.xtransformed[i] = scaleMapX->transform(channel.xbuffer[ringbuffer_index]);
+      channel.ytransformed[i] = scaleMapY->transform(channel.ybuffer[ringbuffer_index]);
+    }
+    // TODO this should not happen each iteration, instead build into channel
     // Append data to curve
     // Makes deep copy - which is not optimal
     // TODO: change to pointer based method
-    channel.curve->setSamples(channel.xbuffer.data(),
-                              channel.ybuffer.data(),
-                              static_cast<int>(channel.xbuffer.size()));
+    channel.curve->setSamples(channel.xtransformed.data(),
+                              channel.ytransformed.data(),
+                              static_cast<int>(channel.ytransformed.size()));
   }
   // Update plot
   replot();

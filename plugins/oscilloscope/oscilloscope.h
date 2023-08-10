@@ -120,6 +120,7 @@ private:
   void updateChannelLineWidth(IO::endpoint probe_info);
   void updateChannelLineStyle(IO::endpoint probe_info);
   void updateChannelPenColor(IO::endpoint probe_info);
+  void updateWindowTimeDiv();
 
   // Tab Widget
   QTabWidget* tabWidget = nullptr;
