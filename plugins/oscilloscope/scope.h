@@ -83,7 +83,7 @@ constexpr size_t HZ120 = 8;
 constexpr size_t HZ240 = 4;
 };  // namespace FrameRates
 
-constexpr size_t DEFAULT_BUFFER_SIZE = 10000;
+constexpr size_t DEFAULT_BUFFER_SIZE = 100000;
 typedef struct sample
 {
   int64_t time;
@@ -194,7 +194,6 @@ public:
   int64_t getDivT();
   void setDivT(int64_t value);
 
-  void setPeriod(double);
   size_t getDivX() const;
   size_t getDivY() const;
 

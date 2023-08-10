@@ -522,7 +522,7 @@ QWidget* Oscilloscope::Panel::createDisplayTab(QWidget* parent)
   sizesEdit->setMaximumWidth(sizesEdit->minimumSizeHint().width() * 3);
   sizesEdit->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Fixed);
   row1Layout->addWidget(sizesEdit);
-  sizesEdit->setText(QString::number(scopeWindow->getDataSize()));
+  sizesEdit->setText(QString::number(scopeWindow->getDataSize()*sizeof(Oscilloscope::sample)/1000000.0));
   sizesEdit->setEnabled(false);
 
   // Trigger box
