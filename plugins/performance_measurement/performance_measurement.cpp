@@ -87,6 +87,10 @@ PerformanceMeasurement::Panel::Panel(const std::string& mod_name,
 
   // Set layout to Mdi
   this->getMdiWindow()->setFixedSize(this->minimumSizeHint());
+  auto* timer = new QTimer();
+  timer->setInterval(1000);
+  QObject::connect(timer, &QTimer::timeout, this, &PerformanceMeasurement::Panel::refresh);
+  timer->start();
 }
 
 PerformanceMeasurement::Component::Component(Modules::Plugin* hplugin)
