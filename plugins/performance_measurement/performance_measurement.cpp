@@ -133,6 +133,7 @@ void PerformanceMeasurement::Component::execute()
       this->setState(RT::State::EXEC);
       break;
     case RT::State::PERIOD:
+      this->setState(RT::State::INIT);
     case RT::State::MODIFY:
     case RT::State::PAUSE:
     case RT::State::UNPAUSE:
