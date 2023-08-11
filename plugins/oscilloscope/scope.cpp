@@ -168,10 +168,11 @@ void Oscilloscope::Scope::createChannel(IO::endpoint probeInfo,
   chan.scale = 1;
   chan.offset = 0;
   chan.data_indx = 0;
-  chan.pen = new QPen();
-  chan.pen->setColor(Oscilloscope::penColors[0]);
-  chan.pen->setStyle(Oscilloscope::penStyles[0]);
+  auto pen = QPen();
+  pen.setColor(Oscilloscope::penColors[0]);
+  pen.setStyle(Oscilloscope::penStyles[0]);
   chan.fifo = fifo;
+  chan.curve->setPen(pen);
   chan.curve->attach(this);
   this->channels.push_back(chan);
 }
@@ -202,6 +203,21 @@ void Oscilloscope::Scope::removeChannel(IO::endpoint probeInfo)
   iter->curve = nullptr;
   channels.erase(iter);
   replot();
+}
+
+void Oscilloscope::Scope::removeBlockChannels(IO::Block* block)
+{
+  std::vector<IO::endpoint> all_block_endpoints;
+  std::shared_lock<std::shared_mutex> read_lock(this->m_channel_mutex);
+  for(auto& channel : channels){
+    if(channel.endpoint.block == block){
+      all_block_endpoints.push_back(channel.endpoint);
+    }
+  }
+  read_lock.unlock();
+  for(const auto& endpoint : all_block_endpoints){
+    this->removeChannel(endpoint);
+  }
 }
 
 void Oscilloscope::Scope::resizeEvent(QResizeEvent* event)
@@ -271,12 +287,12 @@ void Oscilloscope::Scope::setDivT(int64_t value)
 
 size_t Oscilloscope::Scope::getDivX() const
 {
-  return divX;
+  return static_cast<size_t>(divX);
 }
 
 size_t Oscilloscope::Scope::getDivY() const
 {
-  return divY;
+  return static_cast<size_t>(divY);
 }
 
 size_t Oscilloscope::Scope::getRefresh() const
@@ -343,33 +359,6 @@ double Oscilloscope::Scope::getChannelOffset(IO::endpoint endpoint)
   return chan_loc->offset;
 }
 
-void Oscilloscope::Scope::setChannelPen(IO::endpoint endpoint, QPen* pen)
-{
-  std::unique_lock<std::shared_mutex> lock(this->m_channel_mutex);
-  auto chan_loc = std::find_if(this->channels.begin(),
-                               this->channels.end(),
-                               [&](const Oscilloscope::scope_channel& chann)
-                               { return chann.endpoint == endpoint; });
-  if (chan_loc == channels.end()) {
-    return;
-  }
-  chan_loc->curve->setPen(*pen);
-  chan_loc->pen = pen;
-}
-
-QPen* Oscilloscope::Scope::getChannelPen(IO::endpoint endpoint)
-{
-  std::shared_lock<std::shared_mutex> lock(this->m_channel_mutex);
-  auto chan_loc = std::find_if(this->channels.begin(),
-                               this->channels.end(),
-                               [&](const Oscilloscope::scope_channel& chann)
-                               { return chann.endpoint == endpoint; });
-  if (chan_loc == channels.end()) {
-    return nullptr;
-  }
-  return chan_loc->pen;
-}
-
 void Oscilloscope::Scope::setChannelLabel(IO::endpoint endpoint,
                                           const QString& label)
 {
@@ -382,6 +371,57 @@ void Oscilloscope::Scope::setChannelLabel(IO::endpoint endpoint,
     return;
   }
   chan_loc->curve->setTitle(label);
+}
+
+QColor Oscilloscope::Scope::getChannelColor(IO::endpoint endpoint)
+{
+  std::shared_lock<std::shared_mutex> lock(this->m_channel_mutex);
+  auto chan_loc = std::find_if(this->channels.begin(),
+                               this->channels.end(),
+                               [&](const Oscilloscope::scope_channel& chann)
+                               { return chann.endpoint == endpoint; });
+  if (chan_loc == channels.end()) {
+    return penColors[Oscilloscope::ColorID::Black];
+  }
+  return chan_loc->curve->pen().color();
+}
+
+Qt::PenStyle Oscilloscope::Scope::getChannelStyle(IO::endpoint endpoint)
+{
+  std::shared_lock<std::shared_mutex> lock(this->m_channel_mutex);
+  auto chan_loc = std::find_if(this->channels.begin(),
+                               this->channels.end(),
+                               [&](const Oscilloscope::scope_channel& chann)
+                               { return chann.endpoint == endpoint; });
+  if (chan_loc != channels.end()) {
+    return penStyles[Oscilloscope::PenStyleID::SolidLine];
+  }
+  return chan_loc->curve->pen().style();
+}
+
+int Oscilloscope::Scope::getChannelWidth(IO::endpoint endpoint)
+{
+  std::shared_lock<std::shared_mutex> lock(this->m_channel_mutex);
+  auto chan_loc = std::find_if(this->channels.begin(),
+                               this->channels.end(),
+                               [&](const Oscilloscope::scope_channel& chann)
+                               { return chann.endpoint == endpoint; });
+  if (chan_loc != channels.end()) {
+    return 1;
+  }
+  return chan_loc->curve->pen().width();
+}
+
+void Oscilloscope::Scope::setChannelPen(IO::endpoint endpoint, const QPen& pen)
+{
+  std::shared_lock<std::shared_mutex> lock(this->m_channel_mutex);
+  auto chan_loc = std::find_if(this->channels.begin(),
+                               this->channels.end(),
+                               [&](const Oscilloscope::scope_channel& chann)
+                               { return chann.endpoint == endpoint; });
+  if (chan_loc != channels.end()) {
+    chan_loc->curve->setPen(pen);
+  }
 }
 
 void Oscilloscope::Scope::setTriggerThreshold(double threshold)

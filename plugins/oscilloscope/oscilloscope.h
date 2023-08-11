@@ -94,6 +94,7 @@ public:
 
 signals:
   void updateBlockInfo();
+  void updateBlockChannels(IO::Block* block);
 
 public slots:
   void togglePause();
@@ -107,6 +108,7 @@ private slots:
   void apply();
   void showTab(int);
   void activateChannel(bool);
+  void removeBlockChannels(IO::Block* block);
 
 private:
   void buildBlockList();
@@ -117,9 +119,7 @@ private:
   void updateChannelLabel(IO::endpoint probe_info);
   void updateChannelScale(IO::endpoint probe_info);
   void updateChannelOffset(IO::endpoint probe_info);
-  void updateChannelLineWidth(IO::endpoint probe_info);
-  void updateChannelLineStyle(IO::endpoint probe_info);
-  void updateChannelPenColor(IO::endpoint probe_info);
+  void updateChannelPen(IO::endpoint endpoint);
   void updateWindowTimeDiv();
 
   // Tab Widget
@@ -187,6 +187,7 @@ public:
   void receiveEvent(Event::Object* event) override;
   RT::OS::Fifo* createProbe(IO::endpoint probe_info);
   void deleteProbe(IO::endpoint probe_info);
+  void deleteAllProbes(IO::Block* block);
   Oscilloscope::Trigger::Info getTriggerInfo() { return this->trigger_info; }
   void setProbeActivity(IO::endpoint endpoint, bool activity);
   std::vector<IO::endpoint> getTrackedEndpoints();

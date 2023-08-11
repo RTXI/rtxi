@@ -104,7 +104,6 @@ typedef struct scope_channel
   std::vector<double> ytransformed;
   size_t data_indx = 0;
   QwtPlotCurve* curve = nullptr;
-  QPen* pen = nullptr;
 } scope_channel;
 
 namespace ColorID
@@ -185,6 +184,7 @@ public:
   void createChannel(IO::endpoint probeInfo, RT::OS::Fifo* fifo);
   bool channelRegistered(IO::endpoint probeInfo);
   void removeChannel(IO::endpoint probeInfo);
+  void removeBlockChannels(IO::Block* block);
   size_t getChannelCount();
 
   void clearData();
@@ -204,13 +204,16 @@ public:
   double getChannelScale(IO::endpoint endpoint);
   void setChannelOffset(IO::endpoint endpoint, double offset);
   double getChannelOffset(IO::endpoint endpoint);
-  void setChannelPen(IO::endpoint endpoint, QPen* pen);
-  QPen* getChannelPen(IO::endpoint endpoint);
   void setChannelLabel(IO::endpoint endpoint, const QString& label);
+  QColor getChannelColor(IO::endpoint endpoint);
+  Qt::PenStyle getChannelStyle(IO::endpoint endpoint);
+  void setChannelPen(IO::endpoint endpoint, const QPen& pen);
+  int getChannelWidth(IO::endpoint endpoint);
   double getTriggerThreshold() const;
   void setTriggerThreshold(double threshold);
   Trigger::trig_t getTriggerDirection();
   void setTriggerDirection(Trigger::trig_t direction);
+
 
   void drawCurves();
   IO::endpoint getTriggerEndpoint() const
@@ -250,7 +253,7 @@ private:
 
   QTimer* timer;
   QString dtLabel;
-  std::list<scope_channel> channels;
+  std::vector<scope_channel> channels;
 
   // synchronization
   std::shared_mutex m_channel_mutex;
