@@ -95,8 +95,8 @@ typedef struct scope_channel
   QString label;
   IO::endpoint endpoint;
   RT::OS::Fifo* fifo = nullptr;
-  double scale = 1;
-  double offset = 0;
+  double scale = 1.0;
+  double offset = 0.0;
   std::vector<int64_t> timebuffer;
   std::vector<double> xbuffer;
   std::vector<double> ybuffer;

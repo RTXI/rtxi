@@ -328,7 +328,7 @@ double Oscilloscope::Scope::getChannelScale(IO::endpoint endpoint)
                                [&](const Oscilloscope::scope_channel& chann)
                                { return chann.endpoint == endpoint; });
   if (chan_loc == channels.end()) {
-    return 0.0;
+    return 1.0;
   }
   return chan_loc->scale;
 }
