@@ -174,7 +174,6 @@ void Oscilloscope::Panel::apply()
 
 void Oscilloscope::Panel::buildChannelList()
 {
-  channelsList->clear();
   if (blocksListDropdown->count() <= 0) {
     return;
   }
@@ -185,13 +184,14 @@ void Oscilloscope::Panel::buildChannelList()
 
   auto* block = this->blocksListDropdown->currentData().value<IO::Block*>();
   auto type = this->typesList->currentData().value<IO::flags_t>();
-
+  int channel_index = this->channelsList->currentIndex();
+  channelsList->clear();
   for (size_t i = 0; i < block->getCount(type); ++i) {
     channelsList->addItem(
         QString::fromStdString(block->getChannelName(type, i)),
         QVariant::fromValue(i));
   }
-
+  channelsList->setCurrentIndex(channel_index);
   showChannelTab();
 }
 
@@ -264,6 +264,7 @@ void Oscilloscope::Panel::buildBlockList()
   this->getRTXIEventManager()->postEvent(&event);
   auto blocklist =
       std::any_cast<std::vector<IO::Block*>>(event.getParam("blockList"));
+  auto* previous_block = this->blocksListDropdown->currentData().value<IO::Block*>();
   blocksListDropdown->clear();
   for (auto* block : blocklist) {
     // Ignore blocks created from oscilloscope (probing blocks)
@@ -273,6 +274,7 @@ void Oscilloscope::Panel::buildBlockList()
                                       + QString::number(block->getID()),
                                       QVariant::fromValue(block));
   }
+  blocksListDropdown->setCurrentIndex(this->blocksListDropdown->findData(QVariant::fromValue(previous_block)));
 }
 
 QWidget* Oscilloscope::Panel::createChannelTab(QWidget* parent)
@@ -605,7 +607,9 @@ void Oscilloscope::Panel::showChannelTab()
   }
   offsetsEdit->setText(QString::number(offset));
   offsetsList->setCurrentIndex(offsetUnits);
-
+  //typesList->setCurrentIndex(typesList->findData(QVariant::fromValue(type)));
+  //blocksListDropdown->setCurrentIndex(blocksListDropdown->findData(QVariant::fromValue(block)));
+  //channelsList->setCurrentIndex(channelsList->findData(QVariant::fromValue(port)));
   // set pen characteristics
   this->updateChannelPen(chan); 
 }
