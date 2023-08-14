@@ -39,7 +39,9 @@
 // NOLINTNEXTLINE
 thread_local bool realtime_key = false;
 // NOLINTNEXTLINE
-thread_local int64_t* RT_PERIOD = nullptr;
+thread_local int64_t DEFAULT_PERIOD_VALUE=0;
+// NOLINTNEXTLINE
+thread_local int64_t* RT_PERIOD = &DEFAULT_PERIOD_VALUE;
 
 int RT::OS::initiate(RT::OS::Task* task)
 {
@@ -66,7 +68,7 @@ void RT::OS::shutdown(RT::OS::Task* task)
   munlockall();
   realtime_key = false;
   task->task_finished = true;
-  RT_PERIOD = nullptr;
+  RT_PERIOD = &DEFAULT_PERIOD_VALUE;
 }
 
 int RT::OS::createTask(Task* task, void (*func)(void*), void* arg)
@@ -133,9 +135,6 @@ int RT::OS::setPeriod(RT::OS::Task* task, int64_t period)
 int64_t RT::OS::getPeriod()
 {
   // This function should only ever be accessed withint a real-tim context
-  if (RT_PERIOD == nullptr || !RT::OS::isRealtime()) {
-    return -1;
-  };
   return *(RT_PERIOD);
 }
 
