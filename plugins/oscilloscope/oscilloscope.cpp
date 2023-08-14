@@ -156,6 +156,7 @@ void Oscilloscope::Panel::activateChannel(bool active)
   colorsList->setEnabled(enable);
   widthsList->setEnabled(enable);
   stylesList->setEnabled(enable);
+  this->activateButton->setChecked(enable);
 }
 
 void Oscilloscope::Panel::apply()
@@ -184,14 +185,13 @@ void Oscilloscope::Panel::buildChannelList()
 
   auto* block = this->blocksListDropdown->currentData().value<IO::Block*>();
   auto type = this->typesList->currentData().value<IO::flags_t>();
-  int channel_index = this->channelsList->currentIndex();
   channelsList->clear();
   for (size_t i = 0; i < block->getCount(type); ++i) {
     channelsList->addItem(
         QString::fromStdString(block->getChannelName(type, i)),
         QVariant::fromValue(i));
   }
-  channelsList->setCurrentIndex(channel_index);
+  channelsList->setCurrentIndex(0);
   showChannelTab();
 }
 
@@ -581,6 +581,7 @@ void Oscilloscope::Panel::syncBlockInfo()
 {
   this->buildBlockList();
   this->buildChannelList();
+  this->showChannelTab();
 }
 
 // Aggregates all channel information to show for configuration
@@ -612,6 +613,7 @@ void Oscilloscope::Panel::showChannelTab()
   //channelsList->setCurrentIndex(channelsList->findData(QVariant::fromValue(port)));
   // set pen characteristics
   this->updateChannelPen(chan); 
+  this->activateButton->setChecked(this->scopeWindow->channelRegistered(chan)); 
 }
 
 void Oscilloscope::Panel::showDisplayTab()
