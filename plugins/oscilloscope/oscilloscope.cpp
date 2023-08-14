@@ -800,9 +800,9 @@ void Oscilloscope::Panel::screenshot()
 
 void Oscilloscope::Panel::togglePause()
 {
-  this->scopeWindow->setPause(!this->pauseButton->isChecked());
+  this->scopeWindow->setPause(this->pauseButton->isChecked());
   auto* hplugin = dynamic_cast<Oscilloscope::Plugin*>(this->getHostPlugin());
-  hplugin->setAllProbesActivity(!this->pauseButton->isChecked());
+  hplugin->setAllProbesActivity(this->pauseButton->isChecked());
 }
 
 void Oscilloscope::Component::flushFifo()
