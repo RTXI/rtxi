@@ -26,7 +26,6 @@
 #include <QSpinBox>
 #include <mutex>
 #include <optional>
-#include <thread>
 #include <utility>
 #include <vector>
 
@@ -98,14 +97,19 @@ public:
   Panel& operator=(const Panel&) = delete;
   Panel& operator=(Panel&&) = delete;
   Panel(QMainWindow* mwindow, Event::Manager* ev_manager);
-  ~Panel() override;
+  ~Panel() override = default;
+
+signals:
+  void updateBlockInfo();
 
 public slots:
   void startRecordClicked();
   void stopRecordClicked();
   void updateDownsampleRate(size_t rate);
+  void removeRecorders(IO::Block* block);
 
 private slots:
+  void buildBlockList();
   void buildChannelList();
   void changeDataFile();
   void insertChannel();
@@ -151,13 +155,11 @@ private:
   QLabel* trialLength = nullptr;
   QLabel* trialNumLbl = nullptr;
   QLabel* trialNum = nullptr;
+  QTimer* recording_timer = nullptr;
 
   QPushButton* startRecordButton = nullptr;
   QPushButton* stopRecordButton = nullptr;
   QPushButton* closeButton = nullptr;
-
-  std::vector<record_channel> m_recording_channels;
-  std::vector<IO::Block*> blockPtrList;
 };  // class Panel
 
 class Plugin : public Modules::Plugin
@@ -183,16 +185,16 @@ public:
   RT::OS::Fifo* getFifo(IO::endpoint endpoint);
   std::vector<record_channel> get_recording_channels();
   int apply_tag(const std::string& tag);
+  void process_data_worker();
 
 private:
   void append_new_trial();
   void close_trial_group(const std::unique_lock<std::shared_mutex>& lock);
   void open_trial_group(const std::unique_lock<std::shared_mutex>& lock);
-  void process_data_worker();
   void save_data(hid_t data_id,
                  const std::vector<data_token_t>& data,
                  size_t packet_count);
-  hsize_t m_data_chunk_size = static_cast<hsize_t>(10000);
+  hsize_t m_data_chunk_size = static_cast<hsize_t>(1000);
   int m_compression_factor = 5;
   struct hdf5_handles
   {
@@ -219,7 +221,6 @@ private:
 
   int trial_count = 0;
   std::string hdf5_filename;
-  std::thread m_processdata_thread;
   std::vector<recorder> m_recording_channels_list;
   std::shared_mutex m_channels_list_mut;
   std::shared_mutex m_file_mut;

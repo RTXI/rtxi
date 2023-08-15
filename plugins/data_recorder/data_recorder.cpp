@@ -20,6 +20,7 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QSettings>
+#include <QTimer>
 #include <cstring>
 #include <iostream>
 #include <mutex>
@@ -53,6 +54,7 @@ DataRecorder::Panel::Panel(QMainWindow* mwindow, Event::Manager* ev_manager)
     , trialLength(new QLabel)
     , trialNumLbl(new QLabel)
     , trialNum(new QLabel)
+    , recording_timer(new QTimer(this))
 {
   setWhatsThis(
       "<p><b>Data Recorder:</b><br>The Data Recorder writes data to an HDF5 "
@@ -87,8 +89,8 @@ DataRecorder::Panel::Panel(QMainWindow* mwindow, Event::Manager* ev_manager)
   channelLayout->addWidget(new QLabel(tr("Type:")));
 
   channelLayout->addWidget(typeList);
-  typeList->addItem("Input");
-  typeList->addItem("Output");
+  typeList->addItem("Output", QVariant::fromValue(IO::OUTPUT));
+  typeList->addItem("Input", QVariant::fromValue(IO::INPUT));
   QObject::connect(
       typeList, SIGNAL(activated(int)), this, SLOT(buildChannelList()));
 
@@ -118,7 +120,7 @@ DataRecorder::Panel::Panel(QMainWindow* mwindow, Event::Manager* ev_manager)
   stampLayout->addWidget(timeStampEdit);
   addTag = new QPushButton(tr("Tag"));
   stampLayout->addWidget(addTag);
-  // QObject::connect(addTag, SIGNAL(released()), this, SLOT(addNewTag()));
+  QObject::connect(addTag, SIGNAL(released()), this, SLOT(addNewTag()));
 
   // Attach layout to child widget
   stampGroup->setLayout(stampLayout);
@@ -165,20 +167,20 @@ DataRecorder::Panel::Panel(QMainWindow* mwindow, Event::Manager* ev_manager)
   fileLayout->addWidget(fileNameEdit);
   auto* fileChangeButton = new QPushButton("Choose File");
   fileLayout->addWidget(fileChangeButton);
-  // QObject::connect(fileChangeButton,
-  //                  SIGNAL(released()),
-  //                  this,
-  //                  SLOT(changeDataFile()));
+  QObject::connect(fileChangeButton,
+                   SIGNAL(released()),
+                   this,
+                   SLOT(changeDataFile()));
 
   fileLayout->addWidget(new QLabel(tr("Downsample \nRate:")));
 
   downsampleSpin->setMinimum(1);
   downsampleSpin->setMaximum(500);
   fileLayout->addWidget(downsampleSpin);
-  // QObject::connect(downsampleSpin,
-  //                  SIGNAL(valueChanged(int)),
-  //                  this,
-  //                  SLOT(updateDownsampleRate(int)));
+  QObject::connect(downsampleSpin,
+                   SIGNAL(valueChanged(int)),
+                   this,
+                   SLOT(updateDownsampleRate(int)));
 
   // Attach layout to child
   fileGroup->setLayout(fileLayout);
@@ -200,22 +202,22 @@ DataRecorder::Panel::Panel(QMainWindow* mwindow, Event::Manager* ev_manager)
 
   // Create elements for box
   startRecordButton = new QPushButton("Start Recording");
-  // QObject::connect(startRecordButton,
-  //                  SIGNAL(released()),
-  //                  this,
-  //                  SLOT(startRecordClicked()));
+  QObject::connect(startRecordButton,
+                   SIGNAL(released()),
+                   this,
+                   SLOT(startRecordClicked()));
   buttonLayout->addWidget(startRecordButton);
   startRecordButton->setEnabled(false);
   stopRecordButton = new QPushButton("Stop Recording");
-  // QObject::connect(stopRecordButton,
-  //                  SIGNAL(released()),
-  //                  this,
-  //                  SLOT(stopRecordClicked()));
+  QObject::connect(stopRecordButton,
+                   SIGNAL(released()),
+                   this,
+                   SLOT(stopRecordClicked()));
   buttonLayout->addWidget(stopRecordButton);
   stopRecordButton->setEnabled(false);
   closeButton = new QPushButton("Close");
-  // QObject::connect(
-  //     closeButton, SIGNAL(released()), this, SLOT(close()));
+  QObject::connect(
+      closeButton, SIGNAL(released()), this, SLOT(close()));
   buttonLayout->addWidget(closeButton);
 
   buttonLayout->addWidget(recordStatus);
@@ -240,21 +242,31 @@ DataRecorder::Panel::Panel(QMainWindow* mwindow, Event::Manager* ev_manager)
   // Set layout to Mdi
   this->getMdiWindow()->setFixedSize(this->minimumSizeHint());
 
+  this->buildBlockList();
+  this->buildChannelList();
+
+  this->recording_timer->setInterval(1000);
+  QObject::connect(this->recording_timer, SIGNAL(timeout()),
+                   this, SLOT(processData()));
+  QObject::connect(this, SIGNAL(updateBlockInfo()),
+                   this, SLOT(buildBlockList()));
+}
+
+void DataRecorder::Panel::buildBlockList()
+{
   // Build initial block list
   Event::Object event(Event::Type::IO_BLOCK_QUERY_EVENT);
   this->getRTXIEventManager()->postEvent(&event);
-  blockPtrList =
+  auto blockPtrList =
       std::any_cast<std::vector<IO::Block*>>(event.getParam("blockList"));
+  auto prev_selected_block = blockList->currentData();
   for (auto* blockptr : blockPtrList) {
     blockList->addItem(QString::fromStdString(blockptr->getName()) + " "
-                       + QString::number(blockptr->getID()));
+                       + QString::number(blockptr->getID()),
+                       QVariant::fromValue(blockptr));
   }
-
-  // Build initial channel list
-  buildChannelList();
+  blockList->setCurrentIndex(blockList->findData(prev_selected_block));
 }
-
-DataRecorder::Panel::~Panel() = default;
 
 void DataRecorder::Panel::buildChannelList()
 {
@@ -263,15 +275,13 @@ void DataRecorder::Panel::buildChannelList()
     return;
   }
 
-  IO::Block* block =
-      blockPtrList.at(static_cast<size_t>(blockList->currentIndex()));
+  auto* block = blockList->currentData().value<IO::Block*>();
 
-  auto type = static_cast<IO::flags_t>(this->typeList->currentIndex());
+  auto type = this->typeList->currentData().value<IO::flags_t>();
   for (size_t i = 0; i < block->getCount(type); ++i) {
-    channelList->addItem(
-        QString::fromStdString(block->getChannelName(type, i)));
+    channelList->addItem(QString::fromStdString(block->getChannelName(type, i)), 
+                         QVariant::fromValue(i));
   }
-
   rButton->setEnabled(channelList->count() != 0);
 }
 
@@ -323,13 +333,10 @@ void DataRecorder::Panel::insertChannel()
   }
 
   IO::endpoint endpoint;
-  IO::Block* block =
-      blockPtrList.at(static_cast<size_t>(blockList->currentIndex()));
-  IO::flags_t direction = direction =
-      static_cast<IO::flags_t>(typeList->currentIndex());
-  auto port = static_cast<size_t>(channelList->currentIndex());
+  endpoint.block = blockList->currentData().value<IO::Block*>();
+  endpoint.direction = typeList->currentData().value<IO::flags_t>();
+  endpoint.port = channelList->currentData().value<size_t>();
 
-  endpoint = {block, port, direction};
   auto* hplugin = dynamic_cast<DataRecorder::Plugin*>(this->getHostPlugin());
   int result = hplugin->create_component(endpoint);
 
@@ -340,14 +347,17 @@ void DataRecorder::Panel::insertChannel()
     return;
   }
 
-  this->m_recording_channels = hplugin->get_recording_channels();
-  // channel.name += block->getName();
-  // channel.name += " ";
-  // channel.name += std::to_string(block->getID());
-  // channel.name += " : ";
-  // channel.name += block->getChannelName(direction, port);
-
-  // this->channels.push_back(std::move(channel));
+  QListWidgetItem* temp_item = nullptr;
+  const std::string formatting = "{} {} direction: {} port: {}";
+  std::string temp_name = fmt::format(formatting,
+                                      endpoint.block->getName(),
+                                      endpoint.block->getID(),
+                                      endpoint.direction,
+                                      endpoint.port);
+  temp_item = new QListWidgetItem(QString::fromStdString(temp_name));
+  temp_item->setData(Qt::UserRole, QVariant::fromValue(endpoint));
+  selectionBox->addItem(temp_item); 
+  
   if (selectionBox->count() != 0) {
     lButton->setEnabled(true);
     if (!fileNameEdit->text().isEmpty()) {
@@ -359,19 +369,15 @@ void DataRecorder::Panel::insertChannel()
   }
 }
 
-// Remove channel from recorder list
 void DataRecorder::Panel::removeChannel()
 {
   if ((selectionBox->count() == 0) || selectionBox->selectedItems().isEmpty()) {
     return;
   }
-
-  auto indx = static_cast<size_t>(this->selectionBox->currentRow());
-  DataRecorder::record_channel chan = this->m_recording_channels.at(indx);
-  IO::endpoint endpoint = chan.endpoint;
+  auto endpoint = this->selectionBox->currentItem()->data(Qt::UserRole).value<IO::endpoint>();
+  this->selectionBox->removeItemWidget(this->selectionBox->currentItem());
   auto* hplugin = dynamic_cast<DataRecorder::Plugin*>(this->getHostPlugin());
   hplugin->destroy_component(endpoint);
-  this->m_recording_channels = hplugin->get_recording_channels();
   if (selectionBox->count() != 0) {
     startRecordButton->setEnabled(true);
     lButton->setEnabled(true);
@@ -381,7 +387,6 @@ void DataRecorder::Panel::removeChannel()
   }
 }
 
-// Register new data tag/stamp
 void DataRecorder::Panel::addNewTag()
 {
   // std::string newTag(std::to_string(RT::OS::getTime()));
@@ -427,7 +432,26 @@ void DataRecorder::Panel::updateDownsampleRate(size_t rate)
   this->downsample_rate = rate;
 }
 
-void DataRecorder::Panel::processData() {}
+void DataRecorder::Panel::removeRecorders(IO::Block* block)
+{
+  std::vector<QListWidgetItem*> all_recorders;
+  IO::endpoint temp_endpoint;
+  for(int row=0; row<this->selectionBox->count(); row++){
+    temp_endpoint = this->selectionBox->item(row)->data(Qt::UserRole).value<IO::endpoint>();
+    if(temp_endpoint.block == block){
+      all_recorders.push_back(this->selectionBox->item(row));
+    }
+  }
+  for(auto* item : all_recorders){
+    this->selectionBox->removeItemWidget(item);
+  }
+}
+
+void DataRecorder::Panel::processData() 
+{
+  auto* hplugin = dynamic_cast<DataRecorder::Plugin*>(this->getHostPlugin());
+  hplugin->process_data_worker();
+}
 
 int DataRecorder::Panel::openFile(QString& filename)
 {
@@ -487,7 +511,30 @@ DataRecorder::Plugin::~Plugin()
   this->getEventManager()->postEvent(unloadEvents);
 }
 
-void DataRecorder::Plugin::receiveEvent(Event::Object* event) {}
+void DataRecorder::Plugin::receiveEvent(Event::Object* event) 
+{
+  IO::Block* block=nullptr;
+  std::vector<IO::endpoint> endpoints;
+  switch(event->getType()){
+    case Event::Type::RT_THREAD_REMOVE_EVENT:
+    case Event::Type::RT_DEVICE_REMOVE_EVENT:
+      dynamic_cast<DataRecorder::Panel*>(this->getPanel())->removeRecorders(block);
+      for(const auto& entry: this->m_recording_channels_list){
+        if(entry.channel.endpoint.block == block){
+          endpoints.push_back(entry.channel.endpoint);
+        }
+      }
+      for(const auto& endpoint: endpoints){
+        this->destroy_component(endpoint);
+      }
+    case Event::Type::RT_THREAD_INSERT_EVENT:
+    case Event::Type::RT_DEVICE_INSERT_EVENT:
+      dynamic_cast<DataRecorder::Panel*>(this->getPanel())->updateBlockInfo();
+      break;
+    default:
+      break;
+  }
+}
 
 void DataRecorder::Plugin::startRecording()
 {
@@ -747,7 +794,27 @@ DataRecorder::Component::Component(Modules::Plugin* hplugin,
 {
 }
 
-void DataRecorder::Component::execute() {}
+void DataRecorder::Component::execute() 
+{
+  DataRecorder::data_token_t data_sample;
+  double value = readinput(0)[0];
+  switch(this->getState()){
+    case RT::State::EXEC:
+      data_sample.time = RT::OS::getTime();
+      data_sample.value = value;
+      this->m_fifo->writeRT(&data_sample, sizeof(DataRecorder::data_token_t));
+      break;
+    case RT::State::PAUSE:
+      break;
+    case RT::State::UNPAUSE:
+      this->setState(RT::State::EXEC);
+    case RT::State::INIT:
+      this->setState(RT::State::EXEC);
+      break;
+    default:
+      break;
+  }
+}
 
 RT::OS::Fifo* DataRecorder::Component::get_fifo()
 {
