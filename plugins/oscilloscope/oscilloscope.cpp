@@ -584,8 +584,6 @@ void Oscilloscope::Panel::syncBlockInfo()
   this->showChannelTab();
 }
 
-// Aggregates all channel information to show for configuration
-// in the display tab
 void Oscilloscope::Panel::showChannelTab()
 {
   auto type = static_cast<IO::flags_t>(this->typesList->currentData().toInt());
@@ -608,10 +606,6 @@ void Oscilloscope::Panel::showChannelTab()
   }
   offsetsEdit->setText(QString::number(offset));
   offsetsList->setCurrentIndex(offsetUnits);
-  //typesList->setCurrentIndex(typesList->findData(QVariant::fromValue(type)));
-  //blocksListDropdown->setCurrentIndex(blocksListDropdown->findData(QVariant::fromValue(block)));
-  //channelsList->setCurrentIndex(channelsList->findData(QVariant::fromValue(port)));
-  // set pen characteristics
   this->updateChannelPen(chan); 
   this->activateButton->setChecked(this->scopeWindow->channelRegistered(chan)); 
 }
