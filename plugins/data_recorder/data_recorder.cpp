@@ -217,7 +217,7 @@ DataRecorder::Panel::Panel(QMainWindow* mwindow, Event::Manager* ev_manager)
   stopRecordButton->setEnabled(false);
   closeButton = new QPushButton("Close");
   QObject::connect(
-      closeButton, SIGNAL(released()), this, SLOT(close()));
+      closeButton, SIGNAL(released()), parentWidget(), SLOT(close()));
   buttonLayout->addWidget(closeButton);
 
   buttonLayout->addWidget(recordStatus);
@@ -645,12 +645,21 @@ void DataRecorder::Plugin::openFile(const std::string& file_name)
   this->trial_count = 0;
   this->hdf5_handles.channel_datatype_handle =
       H5Tcreate(H5T_COMPOUND, sizeof(DataRecorder::data_token_t));
+  H5Tinsert(this->hdf5_handles.channel_datatype_handle, 
+            "time", 
+            HOFFSET(DataRecorder::data_token_t, time), 
+            H5T_STD_I64LE);
+  H5Tinsert(this->hdf5_handles.channel_datatype_handle, 
+            "value", 
+            HOFFSET(DataRecorder::data_token_t, value), 
+            H5T_IEEE_F64LE);
   this->open_trial_group(lk);
   this->open_file = true;
 }
 
 void DataRecorder::Plugin::closeFile()
 {
+  if(!this->open_file.load()){ return; }
   std::unique_lock<std::shared_mutex> lk(this->m_channels_list_mut);
   this->close_trial_group(lk);
   if (H5Fclose(this->hdf5_handles.file_handle) != 0) {
