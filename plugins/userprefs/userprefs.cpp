@@ -65,9 +65,9 @@ UserPrefs::Panel::Panel(QMainWindow* mwindow, Event::Manager* ev_manager)
   auto* chooseSettingsDirButton = new QPushButton("Browse", this);
   dirLayout->addWidget(chooseSettingsDirButton, 0, 2, 1, 2);
   QObject::connect(chooseSettingsDirButton,
-                   SIGNAL(released(void)),
+                   SIGNAL(released()),
                    this,
-                   SLOT(chooseSettingsDir(void)));
+                   SLOT(chooseSettingsDir()));
 
   dataDirEdit->setText(
       user_preferences.value("/dirs/data", env_var).toString());
@@ -77,9 +77,9 @@ UserPrefs::Panel::Panel(QMainWindow* mwindow, Event::Manager* ev_manager)
   auto* chooseDataDirButton = new QPushButton("Browse", this);
   dirLayout->addWidget(chooseDataDirButton, 1, 2, 1, 2);
   QObject::connect(chooseDataDirButton,
-                   SIGNAL(released(void)),
+                   SIGNAL(released()),
                    this,
-                   SLOT(chooseDataDir(void)));
+                   SLOT(chooseDataDir()));
 
   // Attach layout to group
   dirGroup->setLayout(dirLayout);
@@ -103,13 +103,13 @@ UserPrefs::Panel::Panel(QMainWindow* mwindow, Event::Manager* ev_manager)
   // Create elements for child widget
   auto* resetButton = new QPushButton("Reset");
   QObject::connect(
-      resetButton, SIGNAL(released(void)), this, SLOT(reset(void)));
+      resetButton, SIGNAL(released()), this, SLOT(reset()));
   auto* applyButton = new QPushButton("Save");
   QObject::connect(
-      applyButton, SIGNAL(released(void)), this, SLOT(apply(void)));
+      applyButton, SIGNAL(released()), this, SLOT(apply()));
   auto* cancelButton = new QPushButton("Close");
   QObject::connect(
-      cancelButton, SIGNAL(released(void)), this, SLOT(close(void)));
+      cancelButton, SIGNAL(released()), parentWidget(), SLOT(close()));
 
   status->setText("Defaults \nloaded");
   // NOLINTNEXTLINE
