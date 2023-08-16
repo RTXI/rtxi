@@ -271,7 +271,7 @@ void DataRecorder::Panel::buildBlockList()
 void DataRecorder::Panel::buildChannelList()
 {
   channelList->clear();
-  if (blockList->count() == 0) {
+  if (blockList->count() == 0 || blockList->currentIndex() < 0) {
     return;
   }
 
@@ -337,6 +337,13 @@ void DataRecorder::Panel::insertChannel()
   endpoint.direction = typeList->currentData().value<IO::flags_t>();
   endpoint.port = channelList->currentData().value<size_t>();
 
+  for(int row=0; row<this->selectionBox->count(); row++){
+    if(this->selectionBox->item(row)->data(Qt::UserRole).value<IO::endpoint>() == endpoint){
+      this->selectionBox->setCurrentRow(row);
+      return;
+    }
+  }
+
   auto* hplugin = dynamic_cast<DataRecorder::Plugin*>(this->getHostPlugin());
   int result = hplugin->create_component(endpoint);
 
@@ -374,10 +381,14 @@ void DataRecorder::Panel::removeChannel()
   if ((selectionBox->count() == 0) || selectionBox->selectedItems().isEmpty()) {
     return;
   }
-  auto endpoint = this->selectionBox->currentItem()->data(Qt::UserRole).value<IO::endpoint>();
-  this->selectionBox->removeItemWidget(this->selectionBox->currentItem());
+  QListWidgetItem* currentItem = this->selectionBox->takeItem(this->selectionBox->currentRow());
+  auto endpoint = currentItem->data(Qt::UserRole).value<IO::endpoint>();
+  this->selectionBox->setCurrentRow(-1);
+  this->selectionBox->removeItemWidget(currentItem);
   auto* hplugin = dynamic_cast<DataRecorder::Plugin*>(this->getHostPlugin());
   hplugin->destroy_component(endpoint);
+  // Taking an item out means we have to handle deletion ourselves
+  delete currentItem;
   if (selectionBox->count() != 0) {
     startRecordButton->setEnabled(true);
     lButton->setEnabled(true);
@@ -674,17 +685,15 @@ int DataRecorder::Plugin::create_component(IO::endpoint endpoint)
   chan.name += " ";
   chan.name += "Recording Component";
   chan.endpoint = endpoint;
-
-  chan.data_source =
-      this->m_recording_channels_list.back().component->get_fifo();
+  std::unique_ptr<DataRecorder::Component> component = 
+    std::make_unique<DataRecorder::Component>(this, chan.name);
+  chan.data_source = component->get_fifo();
   Event::Object event(Event::Type::RT_THREAD_INSERT_EVENT);
   event.setParam("thread",
-                 static_cast<RT::Thread*>(
-                     m_recording_channels_list.back().component.get()));
+                 static_cast<RT::Thread*>(component.get()));
   this->getEventManager()->postEvent(&event);
   std::unique_lock<std::shared_mutex> lk(this->m_channels_list_mut);
-  this->m_recording_channels_list.emplace_back(
-      chan, std::make_unique<DataRecorder::Component>(this, chan.name));
+  this->m_recording_channels_list.emplace_back(chan, std::move(component));
   return 0;
 }
 
