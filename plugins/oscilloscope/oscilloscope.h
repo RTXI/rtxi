@@ -45,7 +45,7 @@ constexpr std::string_view MODULE_NAME = "Oscilloscope";
 
 enum PARAMETER : size_t
 {
-  TRIGGERING=0,
+  TRIGGERING = 0,
 };
 
 inline std::vector<Modules::Variable::Info> get_default_vars()

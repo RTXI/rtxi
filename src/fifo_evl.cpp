@@ -38,9 +38,9 @@ private:
   int xbuf_fd;
   int close_event_fd;
   size_t fifo_capacity;
-  std::array<struct pollfd, 2> xbuf_poll_fd{};
+  std::array<struct pollfd, 2> xbuf_poll_fd {};
   bool closed = false;
-  int count=0;
+  int count = 0;
 };
 }  // namespace RT::OS
 
@@ -50,7 +50,8 @@ RT::OS::evlFifo::evlFifo(size_t size)
   this->xbuf_fd = evl_create_xbuf(fifo_capacity,
                                   fifo_capacity,
                                   EVL_CLONE_PRIVATE | EVL_CLONE_NONBLOCK,
-                                  "RTXI Fifo %d", count++);
+                                  "RTXI Fifo %d",
+                                  count++);
   if (this->xbuf_fd <= 0) {
     ERROR_MSG("RT::OS::FIFO(evl) : Unable to create real-time buffer\n");
     ERROR_MSG("evl core : {}", strerror(this->xbuf_fd));
@@ -109,7 +110,7 @@ int RT::OS::evlFifo::buffer_fd() const
 
 void RT::OS::evlFifo::close()
 {
-  std::array<int64_t, 1> buf{};
+  std::array<int64_t, 1> buf {};
   buf[0] = 1;
   ::write(this->close_event_fd, buf.data(), sizeof(int64_t));
 }

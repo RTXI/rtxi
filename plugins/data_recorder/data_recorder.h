@@ -125,7 +125,6 @@ private:
   size_t downsample_rate;
   std::vector<std::string> dataTags;
 
-
   QGroupBox* channelGroup = nullptr;
   QGroupBox* stampGroup = nullptr;
   QGroupBox* sampleGroup = nullptr;
@@ -210,7 +209,9 @@ private:
 
   struct recorder
   {
-    recorder(record_channel chan, std::unique_ptr<DataRecorder::Component> comp, hid_t handle)
+    recorder(record_channel chan,
+             std::unique_ptr<DataRecorder::Component> comp,
+             hid_t handle)
         : channel(std::move(chan))
         , component(std::move(comp))
         , hdf5_data_handle(handle)

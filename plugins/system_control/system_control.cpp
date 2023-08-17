@@ -140,10 +140,8 @@ SystemControl::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
 
   analogSubdeviceList->addItem("Input");
   analogSubdeviceList->addItem("Output");
-  QObject::connect(analogSubdeviceList,
-                   SIGNAL(activated(int)),
-                   this,
-                   SLOT(updateDevice()));
+  QObject::connect(
+      analogSubdeviceList, SIGNAL(activated(int)), this, SLOT(updateDevice()));
   analogLayout->addWidget(analogSubdeviceList, 1, 1);
 
   QObject::connect(
@@ -230,10 +228,8 @@ SystemControl::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
   digitalLayout->addWidget(new QLabel(tr("Channel:")), 1, 0, 1, 1);
 
   digitalSubdeviceList->addItem("I/O");
-  QObject::connect(digitalSubdeviceList,
-                   SIGNAL(activated(int)),
-                   this,
-                   SLOT(updateDevice()));
+  QObject::connect(
+      digitalSubdeviceList, SIGNAL(activated(int)), this, SLOT(updateDevice()));
   digitalLayout->addWidget(digitalSubdeviceList, 1, 1, 1, 1);
 
   QObject::connect(
@@ -256,11 +252,11 @@ SystemControl::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
 
   // Create elements for buttons
   auto* applyButton = new QPushButton("Apply");
-  QObject::connect(
-      applyButton, SIGNAL(released()), this, SLOT(apply()));
+  QObject::connect(applyButton, SIGNAL(released()), this, SLOT(apply()));
   buttonLayout->addWidget(applyButton);
   auto* cancelButton = new QPushButton("Close");
-  QObject::connect(cancelButton, SIGNAL(released()), parentWidget(), SLOT(close()));
+  QObject::connect(
+      cancelButton, SIGNAL(released()), parentWidget(), SLOT(close()));
   buttonLayout->addWidget(cancelButton);
 
   // Assign layout to child widget

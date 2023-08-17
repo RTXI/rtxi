@@ -172,8 +172,10 @@ Modules::Panel::Panel(const std::string& mod_name,
   this->setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint
                        | Qt::WindowMinimizeButtonHint);
   qRegisterMetaType<RT::State::state_t>();
-  QObject::connect(this, &Modules::Panel::signal_state_change,
-                   this, &Modules::Panel::update_state);
+  QObject::connect(this,
+                   &Modules::Panel::signal_state_change,
+                   this,
+                   &Modules::Panel::update_state);
 }
 
 void Modules::Panel::closeEvent(QCloseEvent* event)
@@ -275,7 +277,7 @@ void Modules::Panel::createGUI(
 
 void Modules::Panel::update_state(RT::State::state_t flag)
 {
-  Modules::Plugin* hplugin = this->getHostPlugin(); 
+  Modules::Plugin* hplugin = this->getHostPlugin();
   hplugin->setComponentState(flag);
 }
 
@@ -346,8 +348,10 @@ void Modules::Panel::modify()
   uint64_t uint_value = 0ULL;
   std::stringstream sstream;
   this->update_state(RT::State::PAUSE);
-  for(auto& var : this->parameter){
-    if(!var.second.edit->isModified()){ continue; }
+  for (auto& var : this->parameter) {
+    if (!var.second.edit->isModified()) {
+      continue;
+    }
     switch (var.second.type) {
       case Modules::Variable::UINT_PARAMETER:
         param_id = static_cast<Modules::Variable::Id>(var.second.info.id);
@@ -531,9 +535,13 @@ void Modules::Plugin::registerComponent()
 
 void Modules::Plugin::setComponentState(RT::State::state_t state)
 {
-  if(!this->plugin_component) { return; }
+  if (!this->plugin_component) {
+    return;
+  }
   Event::Object event(Event::Type::RT_MODULE_STATE_CHANGE_EVENT);
-  event.setParam("component", std::any(static_cast<Modules::Component*>(this->plugin_component.get())));
+  event.setParam(
+      "component",
+      std::any(static_cast<Modules::Component*>(this->plugin_component.get())));
   event.setParam("state", std::any(state));
   this->event_manager->postEvent(&event);
 }
@@ -579,9 +587,9 @@ double Modules::Plugin::getComponentDoubleParameter(
 void Modules::Plugin::receiveEvent(Event::Object* event)
 {
   // We provide base functionality for handling period changes
-  switch(event->getType()){
+  switch (event->getType()) {
     case Event::Type::RT_PERIOD_EVENT:
-      if(this->widget_panel != nullptr){
+      if (this->widget_panel != nullptr) {
         this->widget_panel->signal_state_change(RT::State::PERIOD);
       }
       break;

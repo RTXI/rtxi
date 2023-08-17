@@ -89,7 +89,8 @@ PerformanceMeasurement::Panel::Panel(const std::string& mod_name,
   this->getMdiWindow()->setFixedSize(this->minimumSizeHint());
   auto* timer = new QTimer();
   timer->setInterval(1000);
-  QObject::connect(timer, &QTimer::timeout, this, &PerformanceMeasurement::Panel::refresh);
+  QObject::connect(
+      timer, &QTimer::timeout, this, &PerformanceMeasurement::Panel::refresh);
   timer->start();
 }
 
@@ -99,8 +100,10 @@ PerformanceMeasurement::Component::Component(Modules::Plugin* hplugin)
                          std::vector<IO::channel_t>(),
                          PerformanceMeasurement::get_default_vars())
 {
-  if(RT::OS::getFifo(this->fifo, 10) < 0){
-    ERROR_MSG("PerformanceMeasurement::Component::Component : Unable to craate component fifo");
+  if (RT::OS::getFifo(this->fifo, 10) < 0) {
+    ERROR_MSG(
+        "PerformanceMeasurement::Component::Component : Unable to craate "
+        "component fifo");
     this->setState(RT::State::PAUSE);
   }
 }
@@ -121,15 +124,15 @@ void PerformanceMeasurement::Component::execute()
   latencyStat.push(stats.latency);
   stats.jitter = latencyStat.std();
 
-  switch (this->getState())
-  {
+  switch (this->getState()) {
     case RT::State::EXEC:
-      this->fifo->writeRT(&this->stats, sizeof(PerformanceMeasurement::performance_stats_t)); 
+      this->fifo->writeRT(&this->stats,
+                          sizeof(PerformanceMeasurement::performance_stats_t));
       break;
     case RT::State::INIT:
       latencyStat.clear();
       latencyStat.push(0.0);
-      this->stats = {0.0,0.0,0.0,0.0,0.0,0.0,0.0};
+      this->stats = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
       this->setState(RT::State::EXEC);
       break;
     case RT::State::PERIOD:
@@ -152,14 +155,16 @@ void PerformanceMeasurement::Component::setTickPointers(int64_t* s_ticks,
 
 void PerformanceMeasurement::Panel::refresh()
 {
-  auto* hostplugin = dynamic_cast<PerformanceMeasurement::Plugin*>(this->getHostPlugin());
+  auto* hostplugin =
+      dynamic_cast<PerformanceMeasurement::Plugin*>(this->getHostPlugin());
   const double nano2micro = 1e-3;
-  PerformanceMeasurement::performance_stats_t stats = hostplugin->getSampleStat();
-  durationEdit->setText(QString::number(stats.duration*nano2micro));
-  maxDurationEdit->setText(QString::number(stats.max_duration*nano2micro));
-  timestepEdit->setText(QString::number(stats.timestep*nano2micro));
-  maxTimestepEdit->setText(QString::number(stats.max_timestep*nano2micro));
-  timestepJitterEdit->setText(QString::number(stats.jitter*nano2micro));
+  PerformanceMeasurement::performance_stats_t stats =
+      hostplugin->getSampleStat();
+  durationEdit->setText(QString::number(stats.duration * nano2micro));
+  maxDurationEdit->setText(QString::number(stats.max_duration * nano2micro));
+  timestepEdit->setText(QString::number(stats.timestep * nano2micro));
+  maxTimestepEdit->setText(QString::number(stats.max_timestep * nano2micro));
+  timestepJitterEdit->setText(QString::number(stats.jitter * nano2micro));
   AppCpuPercentEdit->setText(QString::number(RT::OS::getCpuUsage()));
 }
 
@@ -187,10 +192,15 @@ PerformanceMeasurement::Plugin::Plugin(Event::Manager* ev_manager)
   this->attachComponent(std::move(component));
 }
 
-PerformanceMeasurement::performance_stats_t PerformanceMeasurement::Plugin::getSampleStat()
+PerformanceMeasurement::performance_stats_t
+PerformanceMeasurement::Plugin::getSampleStat()
 {
-  PerformanceMeasurement::performance_stats_t stat;  
-  while(this->component_fifo->read(&stat, sizeof(PerformanceMeasurement::performance_stats_t))>0){};
+  PerformanceMeasurement::performance_stats_t stat;
+  while (this->component_fifo->read(
+             &stat, sizeof(PerformanceMeasurement::performance_stats_t))
+         > 0)
+  {
+  };
   return stat;
 }
 

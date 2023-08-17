@@ -46,11 +46,13 @@ void Oscilloscope::Plugin::receiveEvent(Event::Object* event)
       module_panel->updateBlockInfo();
       break;
     case Event::Type::RT_THREAD_REMOVE_EVENT:
-      module_panel->updateBlockChannels(std::any_cast<RT::Thread*>(event->getParam("thread")));
+      module_panel->updateBlockChannels(
+          std::any_cast<RT::Thread*>(event->getParam("thread")));
       module_panel->updateBlockInfo();
       break;
     case Event::Type::RT_DEVICE_REMOVE_EVENT:
-      module_panel->updateBlockChannels(std::any_cast<RT::Device*>(event->getParam("device")));
+      module_panel->updateBlockChannels(
+          std::any_cast<RT::Device*>(event->getParam("device")));
       module_panel->updateBlockInfo();
       break;
     default:
@@ -114,8 +116,10 @@ void Oscilloscope::Panel::enableChannel()
   const IO::endpoint endpoint {chanblock, chanport, chandirection};
   RT::OS::Fifo* probe_fifo = oscilloscope_plugin->createProbe(endpoint);
   if (probe_fifo == nullptr) {
-    ERROR_MSG("Oscilloscope::Panel::enableChannel Unable to create probing channel for block {}",
-              chanblock->getName());
+    ERROR_MSG(
+        "Oscilloscope::Panel::enableChannel Unable to create probing channel "
+        "for block {}",
+        chanblock->getName());
     return;
   }
 
@@ -218,8 +222,7 @@ void Oscilloscope::Panel::setActivity(IO::endpoint endpoint, bool activity)
 void Oscilloscope::Panel::applyChannelTab()
 {
   if (this->blocksListDropdown->count() <= 0
-      || this->channelsList->count() <= 0)
-  {
+      || this->channelsList->count() <= 0) {
     return;
   }
 
@@ -234,12 +237,12 @@ void Oscilloscope::Panel::applyChannelTab()
     scopeWindow->removeChannel(probeInfo);
     host_plugin->deleteProbe(probeInfo);
   } else {
-    if(!this->scopeWindow->channelRegistered(probeInfo)){ 
+    if (!this->scopeWindow->channelRegistered(probeInfo)) {
       RT::OS::Fifo* fifo = host_plugin->createProbe(probeInfo);
       if (fifo != nullptr) {
         this->scopeWindow->createChannel(probeInfo, fifo);
       }
-    } 
+    }
     this->updateChannelScale(probeInfo);
     this->updateChannelOffset(probeInfo);
     this->updateChannelPen(probeInfo);
@@ -264,17 +267,21 @@ void Oscilloscope::Panel::buildBlockList()
   this->getRTXIEventManager()->postEvent(&event);
   auto blocklist =
       std::any_cast<std::vector<IO::Block*>>(event.getParam("blockList"));
-  auto* previous_block = this->blocksListDropdown->currentData().value<IO::Block*>();
+  auto* previous_block =
+      this->blocksListDropdown->currentData().value<IO::Block*>();
   blocksListDropdown->clear();
   for (auto* block : blocklist) {
     // Ignore blocks created from oscilloscope (probing blocks)
-    if(block->getName().find("Probe") != std::string::npos) { continue; }
+    if (block->getName().find("Probe") != std::string::npos) {
+      continue;
+    }
     this->blocksListDropdown->addItem(QString::fromStdString(block->getName())
-                                      + " "
-                                      + QString::number(block->getID()),
+                                          + " "
+                                          + QString::number(block->getID()),
                                       QVariant::fromValue(block));
   }
-  blocksListDropdown->setCurrentIndex(this->blocksListDropdown->findData(QVariant::fromValue(previous_block)));
+  blocksListDropdown->setCurrentIndex(
+      this->blocksListDropdown->findData(QVariant::fromValue(previous_block)));
 }
 
 QWidget* Oscilloscope::Panel::createChannelTab(QWidget* parent)
@@ -388,9 +395,8 @@ QWidget* Oscilloscope::Panel::createChannelTab(QWidget* parent)
   for (size_t i = 0; i < penColors.size(); i++) {
     tmp.fill(penColors.at(i));
     color_name = Oscilloscope::color2string.at(i);
-    colorsList->addItem(tmp, 
-                        QString::fromStdString(color_name),
-                        Oscilloscope::penColors.at(i));
+    colorsList->addItem(
+        tmp, QString::fromStdString(color_name), Oscilloscope::penColors.at(i));
   }
 
   auto* widthLabel = new QLabel(tr("Width:"), page);
@@ -405,9 +411,7 @@ QWidget* Oscilloscope::Panel::createChannelTab(QWidget* parent)
     painter.setPen(
         QPen(Oscilloscope::penColors.at(Oscilloscope::ColorID::Black), i));
     painter.drawLine(0, 12, 25, 12);
-    widthsList->addItem(tmp, 
-                        QString::number(i) + QString(" Pixels"), 
-                        i);
+    widthsList->addItem(tmp, QString::number(i) + QString(" Pixels"), i);
   }
 
   // Create styles list
@@ -484,12 +488,18 @@ QWidget* Oscilloscope::Panel::createDisplayTab(QWidget* parent)
   timesList->addItem("5 ms/div", QVariant::fromValue(5000000));
   timesList->addItem("2 ms/div", QVariant::fromValue(2000000));
   timesList->addItem("1 ms/div", QVariant::fromValue(1000000));
-  timesList->addItem(QString::fromUtf8("500 µs/div"), QVariant::fromValue(500000));
-  timesList->addItem(QString::fromUtf8("200 µs/div"), QVariant::fromValue(200000));
-  timesList->addItem(QString::fromUtf8("100 µs/div"), QVariant::fromValue(100000));
-  timesList->addItem(QString::fromUtf8("50 µs/div"), QVariant::fromValue(50000));
-  timesList->addItem(QString::fromUtf8("20 µs/div"), QVariant::fromValue(20000));
-  timesList->addItem(QString::fromUtf8("10 µs/div"), QVariant::fromValue(10000));
+  timesList->addItem(QString::fromUtf8("500 µs/div"),
+                     QVariant::fromValue(500000));
+  timesList->addItem(QString::fromUtf8("200 µs/div"),
+                     QVariant::fromValue(200000));
+  timesList->addItem(QString::fromUtf8("100 µs/div"),
+                     QVariant::fromValue(100000));
+  timesList->addItem(QString::fromUtf8("50 µs/div"),
+                     QVariant::fromValue(50000));
+  timesList->addItem(QString::fromUtf8("20 µs/div"),
+                     QVariant::fromValue(20000));
+  timesList->addItem(QString::fromUtf8("10 µs/div"),
+                     QVariant::fromValue(10000));
   timesList->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
   timesList->setSizeAdjustPolicy(QComboBox::AdjustToContents);
 
@@ -497,12 +507,12 @@ QWidget* Oscilloscope::Panel::createDisplayTab(QWidget* parent)
   row1Layout->addWidget(refreshLabel);
   refreshDropdown = new QComboBox(page);
   row1Layout->addWidget(refreshDropdown);
-  refreshDropdown->addItem("60 Hz", 
+  refreshDropdown->addItem("60 Hz",
                            QVariant::fromValue(Oscilloscope::FrameRates::HZ60));
-  refreshDropdown->addItem("120 Hz",
-                           QVariant::fromValue(Oscilloscope::FrameRates::HZ120));
-  refreshDropdown->addItem("240 Hz",
-                           QVariant::fromValue(Oscilloscope::FrameRates::HZ240));
+  refreshDropdown->addItem(
+      "120 Hz", QVariant::fromValue(Oscilloscope::FrameRates::HZ120));
+  refreshDropdown->addItem(
+      "240 Hz", QVariant::fromValue(Oscilloscope::FrameRates::HZ240));
 
   // Display box for Buffer bit. Push it to the right.
   row1Layout->addSpacerItem(
@@ -513,7 +523,8 @@ QWidget* Oscilloscope::Panel::createDisplayTab(QWidget* parent)
   sizesEdit->setMaximumWidth(sizesEdit->minimumSizeHint().width() * 3);
   sizesEdit->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Fixed);
   row1Layout->addWidget(sizesEdit);
-  sizesEdit->setText(QString::number(scopeWindow->getDataSize()*sizeof(Oscilloscope::sample)/1000000.0));
+  sizesEdit->setText(QString::number(
+      scopeWindow->getDataSize() * sizeof(Oscilloscope::sample) / 1000000.0));
   sizesEdit->setEnabled(false);
 
   // Trigger box
@@ -606,13 +617,14 @@ void Oscilloscope::Panel::showChannelTab()
   }
   offsetsEdit->setText(QString::number(offset));
   offsetsList->setCurrentIndex(offsetUnits);
-  this->updateChannelPen(chan); 
-  this->activateButton->setChecked(this->scopeWindow->channelRegistered(chan)); 
+  this->updateChannelPen(chan);
+  this->activateButton->setChecked(this->scopeWindow->channelRegistered(chan));
 }
 
 void Oscilloscope::Panel::showDisplayTab()
 {
-  timesList->setCurrentIndex(timesList->findData(QVariant::fromValue(this->scopeWindow->getDivT())));
+  timesList->setCurrentIndex(
+      timesList->findData(QVariant::fromValue(this->scopeWindow->getDivT())));
 
   // Find current trigger value and update gui
   IO::endpoint trigger_endpoint;
@@ -648,8 +660,7 @@ void Oscilloscope::Panel::showDisplayTab()
     trigThresh = 0;
   } else {
     while (fabs(trigThresh) < 1
-           && trigThreshUnits < this->trigsThreshList->count())
-    {
+           && trigThreshUnits < this->trigsThreshList->count()) {
       trigThresh *= 1000;
       ++trigThreshUnits;
     }
@@ -742,8 +753,10 @@ Oscilloscope::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
   otimer->start(Oscilloscope::FrameRates::HZ60);
 
   qRegisterMetaType<IO::Block*>("IO::Block*");
-  QObject::connect(this, &Oscilloscope::Panel::updateBlockChannels,
-                   this, &Oscilloscope::Panel::removeBlockChannels);
+  QObject::connect(this,
+                   &Oscilloscope::Panel::updateBlockChannels,
+                   this,
+                   &Oscilloscope::Panel::removeBlockChannels);
   QObject::connect(
       this, SIGNAL(updateBlockInfo()), this, SLOT(syncBlockInfo()));
 
@@ -811,15 +824,16 @@ void Oscilloscope::Component::flushFifo()
 // TODO: fix rt buffer size adjustements for components
 void Oscilloscope::Panel::adjustDataSize()
 {
-  //Event::Object event(Event::Type::RT_GET_PERIOD_EVENT);
-  //this->getRTXIEventManager()->postEvent(&event);
-  //auto period = std::any_cast<int64_t>(event.getParam("period"));
-  //const double timedivs = scopeWindow->getDivT();
-  //const double xdivs =
-  //    static_cast<double>(scopeWindow->getDivX()) / static_cast<double>(period);
-  //const size_t size = static_cast<size_t>(ceil(timedivs + xdivs)) + 1;
-  //scopeWindow->setDataSize(size);
-  //sizesEdit->setText(QString::number(scopeWindow->getDataSize()));
+  // Event::Object event(Event::Type::RT_GET_PERIOD_EVENT);
+  // this->getRTXIEventManager()->postEvent(&event);
+  // auto period = std::any_cast<int64_t>(event.getParam("period"));
+  // const double timedivs = scopeWindow->getDivT();
+  // const double xdivs =
+  //     static_cast<double>(scopeWindow->getDivX()) /
+  //     static_cast<double>(period);
+  // const size_t size = static_cast<size_t>(ceil(timedivs + xdivs)) + 1;
+  // scopeWindow->setDataSize(size);
+  // sizesEdit->setText(QString::number(scopeWindow->getDataSize()));
 }
 
 void Oscilloscope::Panel::updateTrigger() {}
@@ -878,8 +892,8 @@ RT::OS::Fifo* Oscilloscope::Plugin::createProbe(IO::endpoint probe_info)
   connection.dest_port = 0;
   std::vector<Event::Object> events;
   events.emplace_back(Event::Type::RT_THREAD_INSERT_EVENT);
-  events.back().setParam("thread",
-                         std::any(static_cast<RT::Thread*>(measuring_component)));
+  events.back().setParam(
+      "thread", std::any(static_cast<RT::Thread*>(measuring_component)));
   events.emplace_back(Event::Type::IO_LINK_INSERT_EVENT);
   events.back().setParam("connection", std::any(connection));
   this->getEventManager()->postEvent(events);
@@ -908,12 +922,12 @@ void Oscilloscope::Plugin::deleteProbe(IO::endpoint probe_info)
 void Oscilloscope::Plugin::deleteAllProbes(IO::Block* block)
 {
   std::vector<IO::endpoint> all_endpoints;
-  for(auto& entry : this->m_component_registry){
-    if(entry.endpoint.block == block){
+  for (auto& entry : this->m_component_registry) {
+    if (entry.endpoint.block == block) {
       all_endpoints.push_back(entry.endpoint);
     }
   }
-  for(auto endpoint : all_endpoints){
+  for (auto endpoint : all_endpoints) {
     this->deleteProbe(endpoint);
   }
 }
@@ -956,19 +970,22 @@ void Oscilloscope::Plugin::setAllProbesActivity(bool activity)
       : Event::Type::RT_THREAD_UNPAUSE_EVENT;
   for (const auto& entry : this->m_component_registry) {
     events.emplace_back(event_type);
-    events.back().setParam("thread", static_cast<RT::Thread*>(entry.component.get()));
+    events.back().setParam("thread",
+                           static_cast<RT::Thread*>(entry.component.get()));
   }
   this->getEventManager()->postEvent(events);
 }
 
-Oscilloscope::Component* Oscilloscope::Plugin::getProbeComponentPtr(IO::endpoint endpoint)
+Oscilloscope::Component* Oscilloscope::Plugin::getProbeComponentPtr(
+    IO::endpoint endpoint)
 {
   auto iter = std::find_if(this->m_component_registry.begin(),
                            this->m_component_registry.end(),
-                           [&](const registry_entry_t& entry){
-                             return entry.endpoint == endpoint;
-                           });
-  if(iter == this->m_component_registry.end()) { return nullptr; }
+                           [&](const registry_entry_t& entry)
+                           { return entry.endpoint == endpoint; });
+  if (iter == this->m_component_registry.end()) {
+    return nullptr;
+  }
   return iter->component.get();
 }
 

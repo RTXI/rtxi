@@ -22,9 +22,9 @@
 #define IO_H
 
 #include <array>
+#include <limits>
 #include <string>
 #include <vector>
-#include <limits>
 
 //! Connection Oriented Classes
 /*!
@@ -175,7 +175,7 @@ protected:
   void writeoutput(size_t index, const double& data);
 
 private:
-  size_t id=INVALID_BLOCK_ID;
+  size_t id = INVALID_BLOCK_ID;
   using port_t = struct
   {
     IO::channel_t channel_info;

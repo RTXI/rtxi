@@ -44,10 +44,13 @@ void eventLogger::log(Event::Object* event)
         break;
       case Event::Type::IO_LINK_INSERT_EVENT:
       case Event::Type::IO_LINK_REMOVE_EVENT: {
-        auto connection = std::any_cast<RT::block_connection_t>(event->getParam("connection"));
+        auto connection = std::any_cast<RT::block_connection_t>(
+            event->getParam("connection"));
         this->ss << "\t CONNECTION -- {";
         this->ss << "source: " << connection.src->getName();
-        this->ss << "type: " << (connection.src_port_type == IO::OUTPUT ? "Output" : "Input");
+        this->ss << "type: "
+                 << (connection.src_port_type == IO::OUTPUT ? "Output"
+                                                            : "Input");
         this->ss << "port: " << connection.src_port;
         this->ss << "} <==> {";
         this->ss << "destination: " << connection.dest->getName();
@@ -81,9 +84,8 @@ void eventLogger::log(Event::Object* event)
                         ->getName();
         this->ss << " TYPE -- ";
         this->ss << Modules::Variable::state2string(
-            std::any_cast<RT::State::state_t>(
-                event->getParam("state")));
-        break; 
+            std::any_cast<RT::State::state_t>(event->getParam("state")));
+        break;
       default:
         break;
     }

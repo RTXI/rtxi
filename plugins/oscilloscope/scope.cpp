@@ -182,9 +182,8 @@ bool Oscilloscope::Scope::channelRegistered(IO::endpoint probeInfo)
   std::shared_lock<std::shared_mutex> lock(this->m_channel_mutex);
   auto iter = std::find_if(this->channels.begin(),
                            this->channels.end(),
-                           [&](const scope_channel& chan){
-                              return chan.endpoint == probeInfo;
-                           });
+                           [&](const scope_channel& chan)
+                           { return chan.endpoint == probeInfo; });
   return iter != this->channels.end();
 }
 
@@ -209,13 +208,13 @@ void Oscilloscope::Scope::removeBlockChannels(IO::Block* block)
 {
   std::vector<IO::endpoint> all_block_endpoints;
   std::shared_lock<std::shared_mutex> read_lock(this->m_channel_mutex);
-  for(auto& channel : channels){
-    if(channel.endpoint.block == block){
+  for (auto& channel : channels) {
+    if (channel.endpoint.block == block) {
       all_block_endpoints.push_back(channel.endpoint);
     }
   }
   read_lock.unlock();
-  for(const auto& endpoint : all_block_endpoints){
+  for (const auto& endpoint : all_block_endpoints) {
     this->removeChannel(endpoint);
   }
 }
@@ -444,16 +443,16 @@ void Oscilloscope::Scope::drawCurves()
   int64_t max_time = 0;
   int64_t local_max_time = 0;
   for (auto chan : this->channels) {
-    local_max_time = *std::max_element(chan.timebuffer.begin(), chan.timebuffer.end());
+    local_max_time =
+        *std::max_element(chan.timebuffer.begin(), chan.timebuffer.end());
     if (local_max_time > max_time) {
       max_time = local_max_time;
     }
   }
-  const int64_t min_time = (max_time - horizontal_scale_ns*divX);
+  const int64_t min_time = (max_time - horizontal_scale_ns * divX);
   // Set X scale map is same for all channels
-  const auto max_window_time = 
-    static_cast<double>(max_time - min_time);
-  const double min_window_time = 0.0; 
+  const auto max_window_time = static_cast<double>(max_time - min_time);
+  const double min_window_time = 0.0;
   scaleMapX->setScaleInterval(min_window_time, max_window_time);
   size_t ringbuffer_index = 0;
   for (auto& channel : this->channels) {
@@ -461,13 +460,16 @@ void Oscilloscope::Scope::drawCurves()
     channel.ytransformed.assign(this->buffer_size, 0);
     scaleMapY->setScaleInterval(-channel.scale * static_cast<double>(divY) / 2,
                                 channel.scale * static_cast<double>(divY) / 2);
-    for(size_t i=0; i < channel.xbuffer.size(); i++){
-      ringbuffer_index = (i+channel.data_indx) % this->buffer_size;
-      channel.xbuffer[i] = static_cast<double>(channel.timebuffer[i] - min_time);
+    for (size_t i = 0; i < channel.xbuffer.size(); i++) {
+      ringbuffer_index = (i + channel.data_indx) % this->buffer_size;
+      channel.xbuffer[i] =
+          static_cast<double>(channel.timebuffer[i] - min_time);
       // Thanks to qwt's interface we need the x axis poitns to be sorted
       // and scaled. Shenanigans alert
-      channel.xtransformed[i] = scaleMapX->transform(channel.xbuffer[ringbuffer_index]);
-      channel.ytransformed[i] = scaleMapY->transform(channel.ybuffer[ringbuffer_index]);
+      channel.xtransformed[i] =
+          scaleMapX->transform(channel.xbuffer[ringbuffer_index]);
+      channel.ytransformed[i] =
+          scaleMapY->transform(channel.ybuffer[ringbuffer_index]);
     }
     // TODO this should not happen each iteration, instead build into channel
     // Append data to curve
@@ -493,10 +495,11 @@ void Oscilloscope::Scope::process_data()
   for (auto& channel : this->channels) {
     // Read as many samples as possible in chunks of buffer size or less.
     // overwrite old samples from previous write if available
-    while (bytes = channel.fifo->read(sample_buffer.data(), sample_capacity_bytes),
-           bytes > 0)
+    while (
+        bytes = channel.fifo->read(sample_buffer.data(), sample_capacity_bytes),
+        bytes > 0)
     {
-      sample_count = static_cast<size_t>(bytes)/sizeof(Oscilloscope::sample);
+      sample_count = static_cast<size_t>(bytes) / sizeof(Oscilloscope::sample);
       for (size_t i = 0; i < sample_count; i++) {
         array_indx = (i + channel.data_indx) % this->buffer_size;
         channel.timebuffer[array_indx] = sample_buffer[i].time;

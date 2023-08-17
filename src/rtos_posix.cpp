@@ -39,7 +39,7 @@
 // NOLINTNEXTLINE
 thread_local bool realtime_key = false;
 // NOLINTNEXTLINE
-thread_local int64_t DEFAULT_PERIOD_VALUE=0;
+thread_local int64_t DEFAULT_PERIOD_VALUE = 0;
 // NOLINTNEXTLINE
 thread_local int64_t* RT_PERIOD = &DEFAULT_PERIOD_VALUE;
 

@@ -43,10 +43,11 @@ class Component;
 namespace RT
 {
 
-namespace State{
+namespace State
+{
 
 /*!
- * Value used to store internal RT::Thread state 
+ * Value used to store internal RT::Thread state
  *
  */
 enum state_t : int8_t
@@ -59,7 +60,7 @@ enum state_t : int8_t
   UNPAUSE, /*!< When the pause button has been deactivated     */
   EXIT, /*!< When the module has been told to exit        */
 };
-} // namespace State
+}  // namespace State
 
 namespace Telemitry
 {
@@ -148,27 +149,28 @@ public:
  * meant to represent connection information about blocks and channels.
  *
  * \param src IO::Block pointer representing the source of data
- * \param src_port_type IO::flags_t for source. Either IO::INPUT, IO::OUTPUT or IO::UNKNOWN
- * \param src_port Index of the source channel generating the output
+ * \param src_port_type IO::flags_t for source. Either IO::INPUT, IO::OUTPUT or
+ * IO::UNKNOWN \param src_port Index of the source channel generating the output
  * \param dest IO::Block pointer representing who to send the output to
  * \param dest_port Index of the destination channel taking the output as input
  */
 typedef struct block_connection_t
 {
-  IO::Block* src=nullptr;
-  IO::flags_t src_port_type=IO::UNKNOWN;
-  size_t src_port=0;
-  IO::Block* dest=nullptr;
-  size_t dest_port=0;
+  IO::Block* src = nullptr;
+  IO::flags_t src_port_type = IO::UNKNOWN;
+  size_t src_port = 0;
+  IO::Block* dest = nullptr;
+  size_t dest_port = 0;
   bool operator==(const block_connection_t& rhs) const
   {
-    return (this->src == rhs.src) && 
-           (this->src_port_type == rhs.src_port_type) && 
-           (this->src_port == rhs.src_port) && 
-           (this->dest == rhs.dest) && 
-           (this->dest_port == rhs.dest_port);
+    return (this->src == rhs.src) && (this->src_port_type == rhs.src_port_type)
+        && (this->src_port == rhs.src_port) && (this->dest == rhs.dest)
+        && (this->dest_port == rhs.dest_port);
   }
-  bool operator!=(const block_connection_t& rhs) const { return !operator==(rhs); }
+  bool operator!=(const block_connection_t& rhs) const
+  {
+    return !operator==(rhs);
+  }
 } block_connection_t;
 
 /*!
@@ -240,7 +242,8 @@ public:
    * \param thread Pointer to block object to register
    * \param block_connections pointer to the vector connections to use
    */
-  void insertBlock(IO::Block* block, std::vector<RT::block_connection_t>& block_connections);
+  void insertBlock(IO::Block* block,
+                   std::vector<RT::block_connection_t>& block_connections);
 
   /*!
    * Unregister the block from the registry

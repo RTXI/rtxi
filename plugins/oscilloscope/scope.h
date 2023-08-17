@@ -32,8 +32,8 @@
 
 #include <QtWidgets>
 #include <cstddef>
-#include <vector>
 #include <shared_mutex>
+#include <vector>
 
 #include <qnamespace.h>
 #include <qwt.h>
@@ -213,7 +213,6 @@ public:
   void setTriggerThreshold(double threshold);
   Trigger::trig_t getTriggerDirection();
   void setTriggerDirection(Trigger::trig_t direction);
-
 
   void drawCurves();
   IO::endpoint getTriggerEndpoint() const

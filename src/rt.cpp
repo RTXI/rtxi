@@ -39,8 +39,7 @@ int RT::Connector::find_cycle(RT::block_connection_t conn, IO::Block* ref_block)
   }
   for (const auto& temp_conn : this->connections[ref_block->getID()]) {
     if (conn.dest == temp_conn.src
-        && this->find_cycle(temp_conn, ref_block) == -1)
-    {
+        && this->find_cycle(temp_conn, ref_block) == -1) {
       return -1;
     }
   }
@@ -92,22 +91,24 @@ void RT::Connector::disconnect(RT::block_connection_t connection)
   auto it = std::find(this->connections[src_id].begin(),
                       this->connections[src_id].end(),
                       connection);
-  if (it != this->connections[src_id].end()){
+  if (it != this->connections[src_id].end()) {
     this->connections[src_id].erase(it);
   }
 }
 
-void RT::Connector::insertBlock(IO::Block* block, std::vector<RT::block_connection_t>& block_connections)
+void RT::Connector::insertBlock(
+    IO::Block* block, std::vector<RT::block_connection_t>& block_connections)
 {
   if (block == nullptr || this->isRegistered(block)) {
     return;
   }
 
-  // This insertion block algorithm makes use of move semantics to insert and delete 
-  // vector items. This is mainly to avoid allocations in the real-time thead and
-  // std::move allows us to place data without having to allocate memory again.
-  // We should make sure to use reserve() memeber function on vectors in the non-rt
-  // thread so that further push_back calls are less likely to allocate memory.
+  // This insertion block algorithm makes use of move semantics to insert and
+  // delete vector items. This is mainly to avoid allocations in the real-time
+  // thead and std::move allows us to place data without having to allocate
+  // memory again. We should make sure to use reserve() memeber function on
+  // vectors in the non-rt thread so that further push_back calls are less
+  // likely to allocate memory.
   size_t id = 0;
   bool stored = false;
   for (id = 0; id < this->block_registry.size(); id++) {
@@ -133,8 +134,8 @@ void RT::Connector::removeBlock(IO::Block* block)
     return;
   }
   // remove block from registry
-  this->block_registry[block->getID()] = nullptr; 
-  //block->assignID(IO::INVALID_BLOCK_ID);
+  this->block_registry[block->getID()] = nullptr;
+  // block->assignID(IO::INVALID_BLOCK_ID);
 }
 
 bool RT::Connector::isRegistered(IO::Block* block)
@@ -224,7 +225,9 @@ std::vector<RT::Thread*> RT::Connector::getThreads()
 
 std::vector<RT::block_connection_t> RT::Connector::getOutputs(IO::Block* src)
 {
-  if(!this->isRegistered(src)) { return {}; }
+  if (!this->isRegistered(src)) {
+    return {};
+  }
   return this->connections[src->getID()];
 }
 
@@ -232,19 +235,18 @@ void RT::Connector::propagateBlockConnections(IO::Block* block)
 {
   for (const auto& conn : this->connections[block->getID()]) {
     conn.dest->writeinput(
-        conn.dest_port,
-        conn.src->readPort(conn.src_port_type, conn.src_port));
+        conn.dest_port, conn.src->readPort(conn.src_port_type, conn.src_port));
   }
 }
 
 void RT::Connector::clearAllConnections(IO::Block* block)
 {
-  for(auto& entry : this->connections){
-    entry.erase(std::remove_if(entry.begin(), 
+  for (auto& entry : this->connections) {
+    entry.erase(std::remove_if(entry.begin(),
                                entry.end(),
-                               [&](RT::block_connection_t conn){
-                                 return conn.dest == block;
-                               }), entry.end());
+                               [&](RT::block_connection_t conn)
+                               { return conn.dest == block; }),
+                entry.end());
   }
 }
 
@@ -319,8 +321,7 @@ void RT::System::createTelemitryProcessor()
     eventLogger* logger = this->event_manager->getLogger();
     std::vector<RT::Telemitry::Response> responses;
     while (!this->task->task_finished
-           && this->telemitry_processing_thread_running)
-    {
+           && this->telemitry_processing_thread_running) {
       responses = this->getTelemitry();
       for (auto telem : responses) {
         if (telem.cmd != nullptr) {
@@ -365,7 +366,7 @@ void RT::System::updateDeviceList(RT::System::CMD* cmd)
       std::get<std::vector<RT::Device*>*>(cmd->getRTParam("deviceList"));
   this->devices.clear();
   this->devices.assign(vec_ptr->begin(), vec_ptr->end());
-  if(cmd->getType() == Event::Type::RT_DEVICE_REMOVE_EVENT){
+  if (cmd->getType() == Event::Type::RT_DEVICE_REMOVE_EVENT) {
     auto* device = std::get<RT::Device*>(cmd->getRTParam("device"));
     this->rt_connector->clearAllConnections(device);
     device->assignID(IO::INVALID_BLOCK_ID);
@@ -381,7 +382,7 @@ void RT::System::updateThreadList(RT::System::CMD* cmd)
       std::get<std::vector<RT::Thread*>*>(cmd->getRTParam("threadList"));
   this->threads.clear();
   this->threads.assign(vec_ptr->begin(), vec_ptr->end());
-  if(cmd->getType() == Event::Type::RT_THREAD_REMOVE_EVENT){
+  if (cmd->getType() == Event::Type::RT_THREAD_REMOVE_EVENT) {
     auto* thread = std::get<RT::Thread*>(cmd->getRTParam("thread"));
     this->rt_connector->clearAllConnections(thread);
     thread->assignID(IO::INVALID_BLOCK_ID);
@@ -457,8 +458,7 @@ void RT::System::changeModuleParametersCMD(RT::System::CMD* cmd)
     case Modules::Variable::STATE:
       component->setValue<RT::State::state_t>(
           param_id,
-          static_cast<RT::State::state_t>(
-              std::get<int64_t>(param_value_any)));
+          static_cast<RT::State::state_t>(std::get<int64_t>(param_value_any)));
       break;
     default:
       ERROR_MSG(
@@ -474,10 +474,8 @@ void RT::System::changeModuleStateCMD(RT::System::CMD* cmd)
   RT::Telemitry::Response telem;
   telem.cmd = cmd;
   telem.type = RT::Telemitry::RT_MODULE_STATE_UPDATE;
-  auto* component = 
-      std::get<Modules::Component*>(cmd->getRTParam("component"));
-  auto state =
-      std::get<RT::State::state_t>(cmd->getRTParam("state"));
+  auto* component = std::get<Modules::Component*>(cmd->getRTParam("component"));
+  auto state = std::get<RT::State::state_t>(cmd->getRTParam("state"));
   component->setState(state);
   this->postTelemitry(telem);
 }
@@ -821,9 +819,8 @@ void RT::System::changeModuleParameters(Event::Object* event)
       cmd.setRTParam("paramValue", std::any_cast<uint64_t>(param_value_any));
       break;
     case Modules::Variable::STATE:
-      cmd.setRTParam(
-          "paramValue",
-          std::any_cast<RT::State::state_t>(param_value_any));
+      cmd.setRTParam("paramValue",
+                     std::any_cast<RT::State::state_t>(param_value_any));
       break;
     default:
       ERROR_MSG(
@@ -840,9 +837,8 @@ void RT::System::changeModuleState(Event::Object* event)
 {
   RT::System::CMD cmd(event->getType());
   auto* component =
-      std::any_cast<Modules::Component*>(event->getParam("component")); 
-  auto state = 
-      std::any_cast<RT::State::state_t>(event->getParam("state"));
+      std::any_cast<Modules::Component*>(event->getParam("component"));
+  auto state = std::any_cast<RT::State::state_t>(event->getParam("state"));
   cmd.setRTParam("component", component);
   cmd.setRTParam("state", state);
   RT::System::CMD* cmd_ptr = &cmd;

@@ -76,10 +76,8 @@ UserPrefs::Panel::Panel(QMainWindow* mwindow, Event::Manager* ev_manager)
   dirLayout->addWidget(dataDirEdit, 1, 1, 1, 1);
   auto* chooseDataDirButton = new QPushButton("Browse", this);
   dirLayout->addWidget(chooseDataDirButton, 1, 2, 1, 2);
-  QObject::connect(chooseDataDirButton,
-                   SIGNAL(released()),
-                   this,
-                   SLOT(chooseDataDir()));
+  QObject::connect(
+      chooseDataDirButton, SIGNAL(released()), this, SLOT(chooseDataDir()));
 
   // Attach layout to group
   dirGroup->setLayout(dirLayout);
@@ -102,11 +100,9 @@ UserPrefs::Panel::Panel(QMainWindow* mwindow, Event::Manager* ev_manager)
 
   // Create elements for child widget
   auto* resetButton = new QPushButton("Reset");
-  QObject::connect(
-      resetButton, SIGNAL(released()), this, SLOT(reset()));
+  QObject::connect(resetButton, SIGNAL(released()), this, SLOT(reset()));
   auto* applyButton = new QPushButton("Save");
-  QObject::connect(
-      applyButton, SIGNAL(released()), this, SLOT(apply()));
+  QObject::connect(applyButton, SIGNAL(released()), this, SLOT(apply()));
   auto* cancelButton = new QPushButton("Close");
   QObject::connect(
       cancelButton, SIGNAL(released()), parentWidget(), SLOT(close()));
