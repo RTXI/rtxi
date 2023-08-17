@@ -118,9 +118,7 @@ private slots:
   void processData();
 
 private:
-  int openFile(QString& filename);
   size_t m_buffer_size = DEFAULT_BUFFER_SIZE;
-  void closeFile();
   void startRecording();
   void stopRecording();
   size_t downsample_rate;
@@ -186,11 +184,12 @@ public:
   std::vector<record_channel> get_recording_channels();
   int apply_tag(const std::string& tag);
   void process_data_worker();
+  std::string getOpenFilename() const { return this->hdf5_filename; }
 
 private:
   void append_new_trial();
-  void close_trial_group(const std::unique_lock<std::shared_mutex>& lock);
-  void open_trial_group(const std::unique_lock<std::shared_mutex>& lock);
+  void close_trial_group();
+  void open_trial_group();
   void save_data(hid_t data_id,
                  const std::vector<data_token_t>& data,
                  size_t packet_count);
@@ -198,20 +197,21 @@ private:
   int m_compression_factor = 5;
   struct hdf5_handles
   {
-    hid_t file_handle;
-    hid_t trial_group_handle;
-    hid_t attribute_handle;
-    hid_t sync_group_handle;
-    hid_t async_group_handle;
-    hid_t sys_data_group_handle;
-    hid_t channel_datatype_handle;
+    hid_t file_handle = H5I_INVALID_HID;
+    hid_t trial_group_handle = H5I_INVALID_HID;
+    hid_t attribute_handle = H5I_INVALID_HID;
+    hid_t sync_group_handle = H5I_INVALID_HID;
+    hid_t async_group_handle = H5I_INVALID_HID;
+    hid_t sys_data_group_handle = H5I_INVALID_HID;
+    hid_t channel_datatype_handle = H5I_INVALID_HID;
   } hdf5_handles;
 
   struct recorder
   {
-    recorder(record_channel chan, std::unique_ptr<DataRecorder::Component> comp)
+    recorder(record_channel chan, std::unique_ptr<DataRecorder::Component> comp, hid_t handle)
         : channel(std::move(chan))
         , component(std::move(comp))
+        , hdf5_data_handle(handle)
     {
     }
     record_channel channel;

@@ -29,6 +29,7 @@
 
 #include "data_recorder.h"
 
+#include <H5Ipublic.h>
 #include <unistd.h>
 
 #include "debug.hpp"
@@ -260,6 +261,7 @@ void DataRecorder::Panel::buildBlockList()
   auto blockPtrList =
       std::any_cast<std::vector<IO::Block*>>(event.getParam("blockList"));
   auto prev_selected_block = blockList->currentData();
+  blockList->clear();
   for (auto* blockptr : blockPtrList) {
     blockList->addItem(QString::fromStdString(blockptr->getName()) + " "
                        + QString::number(blockptr->getID()),
@@ -323,6 +325,7 @@ void DataRecorder::Panel::changeDataFile()
 
   auto* hplugin = dynamic_cast<DataRecorder::Plugin*>(this->getHostPlugin());
   hplugin->change_file(filename.toStdString());
+  this->fileNameEdit->setText(QString::fromStdString(hplugin->getOpenFilename()));
 }
 
 // Insert channel to record into list
@@ -464,35 +467,6 @@ void DataRecorder::Panel::processData()
   hplugin->process_data_worker();
 }
 
-int DataRecorder::Panel::openFile(QString& filename)
-{
-  if (QFile::exists(filename)) {
-    QMessageBox::StandardButton response =
-        QMessageBox::question(this,
-                              "File exists",
-                              "The file already exists. Overwrite?",
-                              QMessageBox::Yes | QMessageBox::No,
-                              QMessageBox::Cancel);
-
-    switch (response) {
-      case QMessageBox::Yes:
-        break;
-      case QMessageBox::No:
-      default:
-        return -1;
-    }
-  }
-  auto* hplugin = dynamic_cast<DataRecorder::Plugin*>(this->getHostPlugin());
-  hplugin->openFile(filename.toStdString());
-  return 0;
-}
-
-void DataRecorder::Panel::closeFile()
-{
-  auto* hplugin = dynamic_cast<DataRecorder::Plugin*>(this->getHostPlugin());
-  hplugin->closeFile();
-}
-
 void DataRecorder::Panel::startRecording()
 {
   auto* hplugin = dynamic_cast<DataRecorder::Plugin*>(this->getHostPlugin());
@@ -520,6 +494,12 @@ DataRecorder::Plugin::~Plugin()
         std::any(static_cast<RT::Thread*>(rec_channel.component.get())));
   }
   this->getEventManager()->postEvent(unloadEvents);
+  std::unique_lock<std::shared_mutex> lk(this->m_channels_list_mut);
+  this->close_trial_group();
+  this->m_recording_channels_list.clear();
+  lk.unlock();
+  std::unique_lock<std::shared_mutex> file_lock(this->m_file_mut);
+  this->closeFile();
 }
 
 void DataRecorder::Plugin::receiveEvent(Event::Object* event) 
@@ -571,20 +551,25 @@ void DataRecorder::Plugin::stopRecording()
   this->getEventManager()->postEvent(stop_recording_event);
 }
 
-void DataRecorder::Plugin::close_trial_group(
-    const std::unique_lock<std::shared_mutex>& /*lock*/)
+void DataRecorder::Plugin::close_trial_group()
 {
   for (auto& channel : this->m_recording_channels_list) {
-    H5PTclose(channel.hdf5_data_handle);
+    if(channel.hdf5_data_handle != H5I_INVALID_HID){
+      H5PTclose(channel.hdf5_data_handle);
+      channel.hdf5_data_handle = H5I_INVALID_HID;
+    }
   }
   H5Gclose(this->hdf5_handles.sync_group_handle);
+  this->hdf5_handles.sync_group_handle = H5I_INVALID_HID;
   H5Gclose(this->hdf5_handles.async_group_handle);
+  this->hdf5_handles.async_group_handle = H5I_INVALID_HID;
   H5Gclose(this->hdf5_handles.sys_data_group_handle);
+  this->hdf5_handles.sys_data_group_handle = H5I_INVALID_HID;
   H5Gclose(this->hdf5_handles.trial_group_handle);
+  this->hdf5_handles.trial_group_handle = H5I_INVALID_HID;
 }
 
-void DataRecorder::Plugin::open_trial_group(
-    const std::unique_lock<std::shared_mutex>& /*lock*/)
+void DataRecorder::Plugin::open_trial_group()
 {
   this->trial_count += 1;
   std::string trial_name = "/Trial";
@@ -626,12 +611,13 @@ void DataRecorder::Plugin::open_trial_group(
 void DataRecorder::Plugin::append_new_trial()
 {
   std::unique_lock<std::shared_mutex> lk(this->m_channels_list_mut);
-  this->close_trial_group(lk);
-  this->open_trial_group(lk);
+  this->close_trial_group();
+  this->open_trial_group();
 }
 
 void DataRecorder::Plugin::openFile(const std::string& file_name)
 {
+  if(this->open_file.load()) { return; }
   std::unique_lock<std::shared_mutex> lk(this->m_channels_list_mut);
   this->hdf5_handles.file_handle =
       H5Fcreate(file_name.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -639,6 +625,7 @@ void DataRecorder::Plugin::openFile(const std::string& file_name)
     ERROR_MSG("DataRecorder::Plugin::openFile : Unable to open file {}",
               file_name);
     H5Fclose(this->hdf5_handles.file_handle);
+    this->hdf5_filename = "";
     return;
   }
   this->hdf5_filename = file_name;
@@ -653,15 +640,14 @@ void DataRecorder::Plugin::openFile(const std::string& file_name)
             "value", 
             HOFFSET(DataRecorder::data_token_t, value), 
             H5T_IEEE_F64LE);
-  this->open_trial_group(lk);
-  this->open_file = true;
+  this->open_trial_group();
+  this->open_file.store(true);
 }
 
 void DataRecorder::Plugin::closeFile()
 {
   if(!this->open_file.load()){ return; }
   std::unique_lock<std::shared_mutex> lk(this->m_channels_list_mut);
-  this->close_trial_group(lk);
   if (H5Fclose(this->hdf5_handles.file_handle) != 0) {
     ERROR_MSG("DataRecorder::Plugin::closeFile : Unable to close file {}",
               this->hdf5_filename);
@@ -701,8 +687,18 @@ int DataRecorder::Plugin::create_component(IO::endpoint endpoint)
   event.setParam("thread",
                  static_cast<RT::Thread*>(component.get()));
   this->getEventManager()->postEvent(&event);
+  hid_t data_handle = H5I_INVALID_HID;
+  if(this->hdf5_handles.file_handle != H5I_INVALID_HID){
+    data_handle = H5PTcreate_fl(this->hdf5_handles.sync_group_handle,
+                                chan.name.c_str(),
+                                this->hdf5_handles.channel_datatype_handle,
+                                this->m_data_chunk_size,
+                                this->m_compression_factor);
+  }
   std::unique_lock<std::shared_mutex> lk(this->m_channels_list_mut);
-  this->m_recording_channels_list.emplace_back(chan, std::move(component));
+  this->m_recording_channels_list.emplace_back(chan,
+                                               std::move(component),
+                                               data_handle);
   return 0;
 }
 
@@ -723,6 +719,7 @@ void DataRecorder::Plugin::destroy_component(IO::endpoint endpoint)
   if (iter == this->m_recording_channels_list.end()) {
     return;
   }
+  H5PTclose(iter->hdf5_data_handle);
   this->m_recording_channels_list.erase(iter);
 }
 
