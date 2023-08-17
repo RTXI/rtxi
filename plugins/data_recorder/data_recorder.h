@@ -60,7 +60,7 @@ inline std::vector<IO::channel_t> get_default_channels()
            "inputs and "
            "output ports",
            IO::INPUT,
-           0}};
+           1}};
 }
 
 typedef struct record_channel
@@ -116,6 +116,7 @@ private slots:
   void removeChannel();
   void addNewTag();
   void processData();
+  void syncEnableRecordingButtons(const QString&);
 
 private:
   size_t m_buffer_size = DEFAULT_BUFFER_SIZE;
@@ -124,7 +125,6 @@ private:
   size_t downsample_rate;
   std::vector<std::string> dataTags;
 
-  bool recording;
 
   QGroupBox* channelGroup = nullptr;
   QGroupBox* stampGroup = nullptr;
@@ -138,8 +138,8 @@ private:
   QComboBox* typeList = nullptr;
   QListWidget* selectionBox = nullptr;
   QLabel* recordStatus = nullptr;
-  QPushButton* rButton = nullptr;
-  QPushButton* lButton = nullptr;
+  QPushButton* addRecorderButton = nullptr;
+  QPushButton* removeRecorderButton = nullptr;
   QPushButton* addTag = nullptr;
 
   QSpinBox* downsampleSpin = nullptr;
@@ -185,14 +185,16 @@ public:
   int apply_tag(const std::string& tag);
   void process_data_worker();
   std::string getOpenFilename() const { return this->hdf5_filename; }
+  bool isFileOpen() { return this->open_file.load(); }
 
 private:
+  std::atomic<bool> recording;
   void append_new_trial();
   void close_trial_group();
   void open_trial_group();
-  void save_data(hid_t data_id,
-                 const std::vector<data_token_t>& data,
-                 size_t packet_count);
+  static void save_data(hid_t data_id,
+                        const std::vector<data_token_t>& data,
+                        size_t packet_count);
   hsize_t m_data_chunk_size = static_cast<hsize_t>(1000);
   int m_compression_factor = 5;
   struct hdf5_handles
