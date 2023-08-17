@@ -508,7 +508,7 @@ void MainWindow::modulesMenuActivated(QAction* /*unused*/)
       tr("Load Plugin"),
       QString::fromStdString(std::string(RTXI_DEFAULT_PLUGIN_DIR)),
       tr("Plugins (*.so);;All (*.*)"));
-  this->loadModule(filename);
+  if(!filename.isNull()) { this->loadModule(filename); }
 }
 
 void MainWindow::fileMenuActivated(QAction* id)
