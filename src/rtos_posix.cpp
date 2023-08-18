@@ -143,7 +143,7 @@ void RT::OS::sleepTimestep(RT::OS::Task* task)
   if (task->next_t < RT::OS::DEFAULT_PERIOD) {
     task->next_t = RT::OS::getTime() + task->period;
   }
-  int64_t sleep_time = task->next_t;
+  const int64_t sleep_time = task->next_t;
   task->next_t += task->period;
 
   const struct timespec ts = {sleep_time / RT::OS::SECONDS_TO_NANOSECONDS,

@@ -351,7 +351,7 @@ void DataRecorder::Panel::insertChannel()
   }
 
   auto* hplugin = dynamic_cast<DataRecorder::Plugin*>(this->getHostPlugin());
-  int result = hplugin->create_component(endpoint);
+  const int result = hplugin->create_component(endpoint);
 
   if (result != 0) {
     ERROR_MSG(
@@ -362,11 +362,11 @@ void DataRecorder::Panel::insertChannel()
 
   QListWidgetItem* temp_item = nullptr;
   const std::string formatting = "{} {} direction: {} port: {}";
-  std::string temp_name = fmt::format(formatting,
-                                      endpoint.block->getName(),
-                                      endpoint.block->getID(),
-                                      endpoint.direction,
-                                      endpoint.port);
+  const std::string temp_name = fmt::format(formatting,
+                                            endpoint.block->getName(),
+                                            endpoint.block->getID(),
+                                            endpoint.direction,
+                                            endpoint.port);
   temp_item = new QListWidgetItem(QString::fromStdString(temp_name));
   temp_item->setData(Qt::UserRole, QVariant::fromValue(endpoint));
   selectionBox->addItem(temp_item);
@@ -396,7 +396,7 @@ void DataRecorder::Panel::addNewTag()
 {
   // std::string newTag(std::to_string(RT::OS::getTime()));
   auto* hplugin = dynamic_cast<DataRecorder::Plugin*>(this->getHostPlugin());
-  std::string tag = this->timeStampEdit->text().toStdString();
+  const std::string tag = this->timeStampEdit->text().toStdString();
   if (hplugin->apply_tag(tag) != 0) {
     ERROR_MSG("DataRecorder::Panel::addNewTag : could not tag data with tag {}",
               tag);
@@ -462,7 +462,7 @@ void DataRecorder::Panel::processData()
 void DataRecorder::Panel::syncEnableRecordingButtons(const QString& /*unused*/)
 {
   auto* hplugin = dynamic_cast<DataRecorder::Plugin*>(getHostPlugin());
-  bool ready = hplugin->isFileOpen();
+  const bool ready = hplugin->isFileOpen();
   startRecordButton->setEnabled(ready);
   stopRecordButton->setEnabled(ready);
   this->recordStatus->setText(ready ? "ready" : "not ready");
@@ -500,7 +500,7 @@ DataRecorder::Plugin::~Plugin()
   this->close_trial_group();
   this->m_recording_channels_list.clear();
   lk.unlock();
-  std::unique_lock<std::shared_mutex> file_lock(this->m_file_mut);
+  const std::unique_lock<std::shared_mutex> file_lock(this->m_file_mut);
   this->closeFile();
 }
 
@@ -535,7 +535,7 @@ void DataRecorder::Plugin::startRecording()
   if (this->recording.load() || this->m_recording_channels_list.empty()) {
     return;
   }
-  Event::Type event_type = Event::Type::RT_THREAD_UNPAUSE_EVENT;
+  const Event::Type event_type = Event::Type::RT_THREAD_UNPAUSE_EVENT;
   std::vector<Event::Object> start_recording_event;
   for (auto& rec_channel : this->m_recording_channels_list) {
     start_recording_event.emplace_back(event_type);
@@ -551,7 +551,7 @@ void DataRecorder::Plugin::stopRecording()
   if (!this->recording.load()) {
     return;
   }
-  Event::Type event_type = Event::Type::RT_THREAD_PAUSE_EVENT;
+  const Event::Type event_type = Event::Type::RT_THREAD_PAUSE_EVENT;
   std::vector<Event::Object> stop_recording_event;
   for (auto& rec_chan : this->m_recording_channels_list) {
     stop_recording_event.emplace_back(event_type);
@@ -628,7 +628,7 @@ void DataRecorder::Plugin::open_trial_group()
 
 void DataRecorder::Plugin::append_new_trial()
 {
-  std::unique_lock<std::shared_mutex> lk(this->m_channels_list_mut);
+  const std::unique_lock<std::shared_mutex> lk(this->m_channels_list_mut);
   this->close_trial_group();
   this->open_trial_group();
 }
@@ -638,7 +638,7 @@ void DataRecorder::Plugin::openFile(const std::string& file_name)
   if (this->open_file.load()) {
     return;
   }
-  std::unique_lock<std::shared_mutex> lk(this->m_channels_list_mut);
+  const std::unique_lock<std::shared_mutex> lk(this->m_channels_list_mut);
   this->hdf5_handles.file_handle =
       H5Fcreate(file_name.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
   if (this->hdf5_handles.file_handle == H5I_INVALID_HID) {
@@ -669,7 +669,7 @@ void DataRecorder::Plugin::closeFile()
   if (!this->open_file.load()) {
     return;
   }
-  std::unique_lock<std::shared_mutex> lk(this->m_channels_list_mut);
+  const std::unique_lock<std::shared_mutex> lk(this->m_channels_list_mut);
   if (H5Fclose(this->hdf5_handles.file_handle) != 0) {
     ERROR_MSG("DataRecorder::Plugin::closeFile : Unable to close file {}",
               this->hdf5_filename);
@@ -720,7 +720,7 @@ int DataRecorder::Plugin::create_component(IO::endpoint endpoint)
   this->getEventManager()->postEvent(&connect_event);
   hid_t data_handle = H5I_INVALID_HID;
   if (this->hdf5_handles.file_handle != H5I_INVALID_HID) {
-    hid_t compression_property = H5Pcreate(H5P_DATASET_CREATE);
+    const hid_t compression_property = H5Pcreate(H5P_DATASET_CREATE);
     H5Pset_deflate(compression_property, 7);
     data_handle = H5PTcreate(this->hdf5_handles.sync_group_handle,
                              chan.name.c_str(),
@@ -728,7 +728,7 @@ int DataRecorder::Plugin::create_component(IO::endpoint endpoint)
                              this->m_data_chunk_size,
                              compression_property);
   }
-  std::unique_lock<std::shared_mutex> lk(this->m_channels_list_mut);
+  const std::unique_lock<std::shared_mutex> lk(this->m_channels_list_mut);
   this->m_recording_channels_list.emplace_back(
       chan, std::move(component), data_handle);
   return 0;
@@ -743,7 +743,8 @@ void DataRecorder::Plugin::destroy_component(IO::endpoint endpoint)
   Event::Object unplug_event(Event::Type::RT_THREAD_REMOVE_EVENT);
   unplug_event.setParam("thread", static_cast<RT::Thread*>(component));
   this->getEventManager()->postEvent(&unplug_event);
-  std::unique_lock<std::shared_mutex> recorder_lock(this->m_channels_list_mut);
+  const std::unique_lock<std::shared_mutex> recorder_lock(
+      this->m_channels_list_mut);
   auto iter = std::find_if(this->m_recording_channels_list.begin(),
                            this->m_recording_channels_list.end(),
                            [component](const recorder& rec_chan)
@@ -757,7 +758,7 @@ void DataRecorder::Plugin::destroy_component(IO::endpoint endpoint)
 
 std::string DataRecorder::Plugin::getRecorderName(IO::endpoint endpoint)
 {
-  std::shared_lock<std::shared_mutex> lk(this->m_channels_list_mut);
+  const std::shared_lock<std::shared_mutex> lk(this->m_channels_list_mut);
   auto iter = std::find_if(this->m_recording_channels_list.begin(),
                            this->m_recording_channels_list.end(),
                            [endpoint](const recorder& rec_chan)
@@ -771,7 +772,7 @@ std::string DataRecorder::Plugin::getRecorderName(IO::endpoint endpoint)
 DataRecorder::Component* DataRecorder::Plugin::getRecorderPtr(
     IO::endpoint endpoint)
 {
-  std::shared_lock<std::shared_mutex> lk(this->m_channels_list_mut);
+  const std::shared_lock<std::shared_mutex> lk(this->m_channels_list_mut);
   auto iter = std::find_if(this->m_recording_channels_list.begin(),
                            this->m_recording_channels_list.end(),
                            [endpoint](const recorder& rec_chan)
@@ -785,7 +786,7 @@ DataRecorder::Component* DataRecorder::Plugin::getRecorderPtr(
 std::vector<DataRecorder::record_channel>
 DataRecorder::Plugin::get_recording_channels()
 {
-  std::shared_lock<std::shared_mutex> lk(this->m_channels_list_mut);
+  const std::shared_lock<std::shared_mutex> lk(this->m_channels_list_mut);
   std::vector<DataRecorder::record_channel> result(
       this->m_recording_channels_list.size());
   for (size_t i = 0; i < result.size(); i++) {
@@ -805,10 +806,10 @@ void DataRecorder::Plugin::process_data_worker()
     return;
   }
   std::vector<DataRecorder::data_token_t> data_buffer(this->m_data_chunk_size);
-  size_t packet_byte_size = sizeof(DataRecorder::data_token_t);
+  const size_t packet_byte_size = sizeof(DataRecorder::data_token_t);
   ssize_t read_bytes = 0;
   size_t packet_count = 0;
-  std::shared_lock<std::shared_mutex> lk(this->m_channels_list_mut);
+  const std::shared_lock<std::shared_mutex> lk(this->m_channels_list_mut);
   for (auto& channel : this->m_recording_channels_list) {
     while (read_bytes = channel.channel.data_source->read(
                data_buffer.data(), packet_byte_size * data_buffer.size()),
@@ -826,7 +827,7 @@ void DataRecorder::Plugin::save_data(
     const std::vector<DataRecorder::data_token_t>& data,
     size_t packet_count)
 {
-  herr_t err =
+  const herr_t err =
       H5PTappend(data_id, static_cast<hsize_t>(packet_count), data.data());
   if (err < 0) {
     ERROR_MSG("Unable to write data into hdf5 file!");
@@ -849,7 +850,7 @@ DataRecorder::Component::Component(Modules::Plugin* hplugin,
 void DataRecorder::Component::execute()
 {
   DataRecorder::data_token_t data_sample;
-  double value = readinput(0)[0];
+  const double value = readinput(0)[0];
   switch (this->getState()) {
     case RT::State::EXEC:
       data_sample.time = RT::OS::getTime();

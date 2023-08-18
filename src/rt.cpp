@@ -39,7 +39,8 @@ int RT::Connector::find_cycle(RT::block_connection_t conn, IO::Block* ref_block)
   }
   for (const auto& temp_conn : this->connections[ref_block->getID()]) {
     if (conn.dest == temp_conn.src
-        && this->find_cycle(temp_conn, ref_block) == -1) {
+        && this->find_cycle(temp_conn, ref_block) == -1)
+    {
       return -1;
     }
   }
@@ -73,7 +74,7 @@ bool RT::Connector::connected(RT::block_connection_t connection)
   {
     return false;
   }
-  size_t src_id = connection.src->getID();
+  const size_t src_id = connection.src->getID();
   auto iter = std::find(this->connections[src_id].begin(),
                         this->connections[src_id].end(),
                         connection);
@@ -87,7 +88,7 @@ void RT::Connector::disconnect(RT::block_connection_t connection)
   {
     return;
   }
-  size_t src_id = connection.src->getID();
+  const size_t src_id = connection.src->getID();
   auto it = std::find(this->connections[src_id].begin(),
                       this->connections[src_id].end(),
                       connection);
@@ -321,7 +322,8 @@ void RT::System::createTelemitryProcessor()
     eventLogger* logger = this->event_manager->getLogger();
     std::vector<RT::Telemitry::Response> responses;
     while (!this->task->task_finished
-           && this->telemitry_processing_thread_running) {
+           && this->telemitry_processing_thread_running)
+    {
       responses = this->getTelemitry();
       for (auto telem : responses) {
         if (telem.cmd != nullptr) {

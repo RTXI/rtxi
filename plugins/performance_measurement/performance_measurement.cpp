@@ -158,7 +158,7 @@ void PerformanceMeasurement::Panel::refresh()
   auto* hostplugin =
       dynamic_cast<PerformanceMeasurement::Plugin*>(this->getHostPlugin());
   const double nano2micro = 1e-3;
-  PerformanceMeasurement::performance_stats_t stats =
+  const PerformanceMeasurement::performance_stats_t stats =
       hostplugin->getSampleStat();
   durationEdit->setText(QString::number(stats.duration * nano2micro));
   maxDurationEdit->setText(QString::number(stats.max_duration * nano2micro));

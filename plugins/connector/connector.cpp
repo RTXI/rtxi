@@ -288,7 +288,7 @@ void Connector::Panel::buildOutputFlagList()
 
 void Connector::Panel::highlightConnectionBox(QListWidgetItem* /*item*/)
 {
-  QVariant connection_variant =
+  const QVariant connection_variant =
       this->connectionBox->currentItem()->data(Qt::UserRole);
   if (!connection_variant.isValid()) {
     return;
@@ -329,11 +329,11 @@ void Connector::Panel::highlightConnectionBox(QListWidgetItem* /*item*/)
 void Connector::Panel::toggleConnection(bool down)
 {
   RT::block_connection_t connection;
-  QVariant src_block = outputBlock->currentData();
-  QVariant src_type = outputFlag->currentData();
-  QVariant src_port = outputChannel->currentData();
-  QVariant dest_block = inputBlock->currentData();
-  QVariant dest_port = inputChannel->currentData();
+  const QVariant src_block = outputBlock->currentData();
+  const QVariant src_type = outputFlag->currentData();
+  const QVariant src_port = outputChannel->currentData();
+  const QVariant dest_block = inputBlock->currentData();
+  const QVariant dest_port = inputChannel->currentData();
   if (!src_block.isValid() || !src_type.isValid() || !src_port.isValid()
       || !dest_block.isValid() || !dest_port.isValid())
   {
@@ -366,11 +366,11 @@ void Connector::Panel::updateConnectionButton()
   }
   // QVariant connection_variant =
   // this->connectionBox->currentItem()->data(Qt::UserRole);
-  QVariant src_block = outputBlock->currentData();
-  QVariant src_type = outputFlag->currentData();
-  QVariant src_port = outputChannel->currentData();
-  QVariant dest_block = inputBlock->currentData();
-  QVariant dest_port = inputChannel->currentData();
+  const QVariant src_block = outputBlock->currentData();
+  const QVariant src_type = outputFlag->currentData();
+  const QVariant src_port = outputChannel->currentData();
+  const QVariant dest_block = inputBlock->currentData();
+  const QVariant dest_port = inputChannel->currentData();
   if (!src_block.isValid() || !src_type.isValid() || !src_port.isValid()
       || !dest_block.isValid() || !dest_port.isValid())
   {
@@ -388,7 +388,8 @@ void Connector::Panel::updateConnectionButton()
   for (int i = 0; i < connectionBox->count(); i++) {
     temp_item = connectionBox->item(i);
     if (temp_item->data(Qt::UserRole).value<RT::block_connection_t>()
-        == connection) {
+        == connection)
+    {
       connectionBox->setCurrentRow(i);
       break;
     }
