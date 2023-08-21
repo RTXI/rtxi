@@ -422,6 +422,7 @@ void DataRecorder::Panel::startRecordClicked()
 
   auto* hplugin = dynamic_cast<DataRecorder::Plugin*>(this->getHostPlugin());
   hplugin->startRecording();
+  this->recordStatus->setText(hplugin->isRecording() ? "Recording" : "Not ready");
 }
 
 // Stop recording slot
@@ -429,6 +430,7 @@ void DataRecorder::Panel::stopRecordClicked()
 {
   auto* hplugin = dynamic_cast<DataRecorder::Plugin*>(this->getHostPlugin());
   hplugin->stopRecording();
+  this->recordStatus->setText(!hplugin->isRecording() ? "Ready" : "Recording");
 }
 
 // Update downsample rate
@@ -465,19 +467,7 @@ void DataRecorder::Panel::syncEnableRecordingButtons(const QString& /*unused*/)
   const bool ready = hplugin->isFileOpen();
   startRecordButton->setEnabled(ready);
   stopRecordButton->setEnabled(ready);
-  this->recordStatus->setText(ready ? "ready" : "not ready");
-}
-
-void DataRecorder::Panel::startRecording()
-{
-  auto* hplugin = dynamic_cast<DataRecorder::Plugin*>(this->getHostPlugin());
-  hplugin->startRecording();
-}
-
-void DataRecorder::Panel::stopRecording()
-{
-  auto* hplugin = dynamic_cast<DataRecorder::Plugin*>(this->getHostPlugin());
-  hplugin->stopRecording();
+  this->recordStatus->setText(ready ? "Ready" : "Not ready");
 }
 
 DataRecorder::Plugin::Plugin(Event::Manager* ev_manager)

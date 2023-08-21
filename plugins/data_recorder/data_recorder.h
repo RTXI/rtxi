@@ -120,8 +120,6 @@ private slots:
 
 private:
   size_t m_buffer_size = DEFAULT_BUFFER_SIZE;
-  void startRecording();
-  void stopRecording();
   size_t downsample_rate;
   std::vector<std::string> dataTags;
 
@@ -185,6 +183,7 @@ public:
   void process_data_worker();
   std::string getOpenFilename() const { return this->hdf5_filename; }
   bool isFileOpen() { return this->open_file.load(); }
+  bool isRecording() { return this->recording.load(); }
 
 private:
   std::atomic<bool> recording;
