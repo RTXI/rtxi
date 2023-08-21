@@ -226,8 +226,6 @@ private:
   std::string hdf5_filename;
   std::vector<recorder> m_recording_channels_list;
   std::shared_mutex m_channels_list_mut;
-  std::shared_mutex m_file_mut;
-  std::mutex m_hdf5_file_mut;
   std::atomic<bool> open_file = false;
 };  // class Plugin
 

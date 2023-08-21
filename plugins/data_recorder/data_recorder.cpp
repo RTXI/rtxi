@@ -488,19 +488,11 @@ DataRecorder::Plugin::Plugin(Event::Manager* ev_manager)
 
 DataRecorder::Plugin::~Plugin()
 {
-  std::vector<Event::Object> unloadEvents;
-  for (auto& rec_channel : this->m_recording_channels_list) {
-    unloadEvents.emplace_back(Event::Type::RT_THREAD_REMOVE_EVENT);
-    unloadEvents.back().setParam(
-        "thread",
-        std::any(static_cast<RT::Thread*>(rec_channel.component.get())));
-  }
-  this->getEventManager()->postEvent(unloadEvents);
+  stopRecording(); 
   std::unique_lock<std::shared_mutex> lk(this->m_channels_list_mut);
   this->close_trial_group();
   this->m_recording_channels_list.clear();
   lk.unlock();
-  const std::unique_lock<std::shared_mutex> file_lock(this->m_file_mut);
   this->closeFile();
 }
 
@@ -535,6 +527,7 @@ void DataRecorder::Plugin::startRecording()
   if (this->recording.load() || this->m_recording_channels_list.empty()) {
     return;
   }
+  const std::unique_lock<std::shared_mutex> lk(this->m_channels_list_mut);
   const Event::Type event_type = Event::Type::RT_THREAD_UNPAUSE_EVENT;
   std::vector<Event::Object> start_recording_event;
   for (auto& rec_channel : this->m_recording_channels_list) {
@@ -551,6 +544,7 @@ void DataRecorder::Plugin::stopRecording()
   if (!this->recording.load()) {
     return;
   }
+  const std::unique_lock<std::shared_mutex> lk(this->m_channels_list_mut);
   const Event::Type event_type = Event::Type::RT_THREAD_PAUSE_EVENT;
   std::vector<Event::Object> stop_recording_event;
   for (auto& rec_chan : this->m_recording_channels_list) {
@@ -628,8 +622,12 @@ void DataRecorder::Plugin::open_trial_group()
 
 void DataRecorder::Plugin::append_new_trial()
 {
-  const std::unique_lock<std::shared_mutex> lk(this->m_channels_list_mut);
   this->close_trial_group();
+  // We have to flush all of the data from the buffers that did not make it
+  std::array<data_token_t, 100> tempbuffer{};
+  for(auto& recorder: this->m_recording_channels_list){
+    while(recorder.channel.data_source->read(tempbuffer.data(), sizeof(DataRecorder::data_token_t)*tempbuffer.size()) > 0){} 
+  }
   this->open_trial_group();
 }
 
