@@ -24,6 +24,7 @@
 #include <QListWidget>
 #include <QMutex>
 #include <QSpinBox>
+#include <QTime>
 #include <mutex>
 #include <optional>
 #include <utility>
@@ -155,6 +156,8 @@ private:
   QPushButton* startRecordButton = nullptr;
   QPushButton* stopRecordButton = nullptr;
   QPushButton* closeButton = nullptr;
+
+  QTime starting_record_time;
 };  // class Panel
 
 class Plugin : public Modules::Plugin
@@ -184,6 +187,7 @@ public:
   std::string getOpenFilename() const { return this->hdf5_filename; }
   bool isFileOpen() { return this->open_file.load(); }
   bool isRecording() { return this->recording.load(); }
+  int getTrialCount() const { return this->trial_count; }
 
 private:
   std::atomic<bool> recording;
