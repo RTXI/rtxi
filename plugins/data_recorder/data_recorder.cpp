@@ -488,12 +488,16 @@ DataRecorder::Plugin::Plugin(Event::Manager* ev_manager)
 
 DataRecorder::Plugin::~Plugin()
 {
-  stopRecording(); 
-  std::unique_lock<std::shared_mutex> lk(this->m_channels_list_mut);
-  this->close_trial_group();
-  this->m_recording_channels_list.clear();
-  lk.unlock();
+  this->stopRecording(); 
   this->closeFile();
+  const Event::Type event_type = Event::Type::RT_THREAD_REMOVE_EVENT;
+  std::vector<Event::Object> unload_events;
+  for(auto& recorder : this->m_recording_channels_list){
+    unload_events.emplace_back(event_type);
+    unload_events.back().setParam("thread", 
+                                  std::any(static_cast<RT::Thread*>(recorder.component.get())));
+  }
+  this->getEventManager()->postEvent(unload_events);
 }
 
 void DataRecorder::Plugin::receiveEvent(Event::Object* event)
@@ -559,14 +563,14 @@ void DataRecorder::Plugin::stopRecording()
 
 void DataRecorder::Plugin::close_trial_group()
 {
+  if (!open_file.load()) {
+    return;
+  }
   for (auto& channel : this->m_recording_channels_list) {
     if (channel.hdf5_data_handle != H5I_INVALID_HID) {
       H5PTclose(channel.hdf5_data_handle);
       channel.hdf5_data_handle = H5I_INVALID_HID;
     }
-  }
-  if (!open_file.load()) {
-    return;
   }
   H5Gclose(this->hdf5_handles.sync_group_handle);
   this->hdf5_handles.sync_group_handle = H5I_INVALID_HID;
@@ -668,6 +672,9 @@ void DataRecorder::Plugin::closeFile()
     return;
   }
   const std::unique_lock<std::shared_mutex> lk(this->m_channels_list_mut);
+  // Attempt to close all group and dataset handles in hdf5 before closing file
+  close_trial_group();
+  H5Tclose(this->hdf5_handles.channel_datatype_handle);
   if (H5Fclose(this->hdf5_handles.file_handle) != 0) {
     ERROR_MSG("DataRecorder::Plugin::closeFile : Unable to close file {}",
               this->hdf5_filename);
@@ -717,6 +724,7 @@ int DataRecorder::Plugin::create_component(IO::endpoint endpoint)
   connect_event.setParam("connection", std::any(connection));
   this->getEventManager()->postEvent(&connect_event);
   hid_t data_handle = H5I_INVALID_HID;
+  const std::unique_lock<std::shared_mutex> lk(this->m_channels_list_mut);
   if (this->hdf5_handles.file_handle != H5I_INVALID_HID) {
     const hid_t compression_property = H5Pcreate(H5P_DATASET_CREATE);
     H5Pset_deflate(compression_property, 7);
@@ -726,7 +734,6 @@ int DataRecorder::Plugin::create_component(IO::endpoint endpoint)
                              this->m_data_chunk_size,
                              compression_property);
   }
-  const std::unique_lock<std::shared_mutex> lk(this->m_channels_list_mut);
   this->m_recording_channels_list.emplace_back(
       chan, std::move(component), data_handle);
   return 0;
