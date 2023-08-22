@@ -11,8 +11,17 @@ install(
 
 install(
     TARGETS rtxi xfifo rtos dlplugin rtdsp rtgen
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/rtxi
     EXPORT rtxiLibraryTargets
 )
+
+if(NOT nidaqmx-NOTFOUND)
+install(
+    TARGETS nidaq_driver
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/rtxi
+    EXPORT rtxiLibraryTargets
+)
+endif()
 
 install(
     FILES 

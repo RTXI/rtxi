@@ -51,6 +51,8 @@ Workspace::Manager::Manager(Event::Manager* ev_manager)
 {
   this->event_manager->registerHandler(this);
   this->m_plugin_loader = std::make_unique<DLL::Loader>();
+  this->m_driver_loader = std::make_unique<DLL::Loader>();
+  this->m_driver_loader->load("libnidaq_driver.so");
 }
 
 Workspace::Manager::~Manager()
@@ -73,6 +75,27 @@ bool Workspace::Manager::isRegistered(const Modules::Plugin* plugin)
                      [plugin](const std::unique_ptr<Modules::Plugin>& module)
                      { return plugin == module.get(); });
 }
+
+std::vector<DAQ::Device*> Workspace::Manager::getDevices(const std::string& driver)
+{
+  if (m_driver_registry.find(driver) == m_driver_registry.end()) {
+    return {};
+  }
+  return this->m_driver_registry[driver]->getDevices();
+}
+
+std::vector<DAQ::Device*> Workspace::Manager::getAllDevices()
+{
+  std::vector<DAQ::Device*> devices;
+  std::vector<DAQ::Device*> temp_driver_devices;
+  for(auto& entry : this->m_driver_registry){
+    temp_driver_devices = entry.second->getDevices();
+    devices.insert(devices.end(),
+                   temp_driver_devices.begin(),
+                   temp_driver_devices.end());
+  }
+  return devices;
+} 
 
 Modules::Plugin* Workspace::Manager::loadCorePlugin(const std::string& library)
 {
@@ -172,6 +195,26 @@ void Workspace::Manager::unloadPlugin(Modules::Plugin* plugin)
   if (this->rtxi_modules_registry[library].empty()) {
     this->unregisterFactories(library);
   }
+}
+
+void Workspace::Manager::registerDriver(const std::string& driver_location)
+{
+  if(this->m_driver_registry.find(driver_location) != this->m_driver_registry.end()){
+    return;
+  }
+  int errcode = this->m_driver_loader->load(driver_location.c_str());
+  if(errcode < 0){ return; }
+  auto getDriver = this->m_driver_loader->dlsym<DAQ::Driver* (*)()>(driver_location.c_str(), "getDriver");
+  this->m_driver_registry[driver_location] = getDriver();
+}
+
+void Workspace::Manager::unregisterDriver(const std::string& driver_location)
+{
+  if(this->m_driver_registry.find(driver_location) == this->m_driver_registry.end()){
+    return;
+  }
+  this->m_driver_registry.erase(driver_location);
+  this->m_driver_loader->unload(driver_location.c_str());
 }
 
 Modules::Plugin* Workspace::Manager::registerModule(

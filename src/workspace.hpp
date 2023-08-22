@@ -1,15 +1,15 @@
 /*
-         The Real-Time eXperiment Interface (RTXI)
-         Copyright (C) 2011 Georgia Institute of Technology, University of Utah,
-   Will Cornell Medical College This program is free software: you can
-   redistribute it and/or modify it under the terms of the GNU General Public
-   License as published by the Free Software Foundation, either version 3 of the
-   License, or (at your option) any later version. This program is distributed
-   in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even
-   the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-   See the GNU General Public License for more details. You should have received
-   a copy of the GNU General Public License along with this program.  If not,
-   see <http://www.gnu.org/licenses/>.
+  The Real-Time eXperiment Interface (RTXI)
+  Copyright (C) 2011 Georgia Institute of Technology, University of Utah,
+  Will Cornell Medical College This program is free software: you can
+  redistribute it and/or modify it under the terms of the GNU General Public
+  License as published by the Free Software Foundation, either version 3 of the
+  License, or (at your option) any later version. This program is distributed
+  in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even
+  the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+  See the GNU General Public License for more details. You should have received
+  a copy of the GNU General Public License along with this program.  If not,
+  see <http://www.gnu.org/licenses/>.
 */
 
 #ifndef WORKSPACE_H
@@ -68,7 +68,13 @@ public:
    */
   bool isRegistered(const Modules::Plugin* plugin);
 
+  std::vector<DAQ::Device*> getDevices(const std::string& driver);
+  std::vector<DAQ::Device*> getAllDevices();
+
 private:
+  void registerDriver(const std::string& driver_location);
+  void unregisterDriver(const std::string& driver_location);
+
   [[nodiscard]] Modules::Plugin* registerModule(
       std::unique_ptr<Modules::Plugin> module);
   void unregisterModule(Modules::Plugin* plugin);
@@ -80,12 +86,15 @@ private:
 
   std::unordered_map<std::string, std::vector<std::unique_ptr<Modules::Plugin>>>
       rtxi_modules_registry;
+  std::map<std::string, DAQ::Driver*> m_driver_registry;
   std::unordered_map<std::string, Modules::FactoryMethods>
       rtxi_factories_registry;
   Event::Manager* event_manager;
   std::unique_ptr<DLL::Loader> m_plugin_loader;
+  std::unique_ptr<DLL::Loader> m_driver_loader;
 
   std::mutex m_modules_mut;
+  std::mutex m_drivers_mut;
 };
 
 }  // namespace Workspace

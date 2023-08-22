@@ -359,73 +359,21 @@ public:
       : name(std::move(dev_name))
   {
   }
-  Driver(const Driver& connector) = default;  // copy constructor
-  Driver& operator=(const Driver& connector) =
-      default;  // copy assignment operator
+  Driver(const Driver&) = default;  // copy constructor
+  Driver& operator=(const Driver&) = default;  // copy assignment operator
   Driver(Driver&&) = default;  // move constructor
   Driver& operator=(Driver&&) = default;  // move assignment operator
   virtual ~Driver() = default;
 
-  /*!
-   * A factory function for create a DAQ::Device with the provided args.
-   *
-   * \param args Arguments to the new DAQ::Device.
-   * \return A new DAQ::Device.
-   *
-   * \sa DAQ::Device
-   */
-  virtual Device* createDevice(const std::list<std::string>& args) = 0;
+  virtual void loadDevices() = 0;
+  virtual void unloadDevices() = 0;
+
+  virtual std::vector<DAQ::Device*> getDevices() = 0;
+  std::string getDriverName() { return this->name; }
 
 private:
   std::string name;
-
 };  // class Driver
-
-/*!
- * Provides a central meeting point for interfacing with all DAQ objects
- *   available in the system.
- *
- * \sa DAQ::Device
- * \sa DAQ::Driver
- */
-class Manager : public Event::Handler
-{
-public:
-  Manager() = default;
-  Manager(const Manager& connector) = default;  // copy constructor
-  Manager& operator=(const Manager& connector) =
-      default;  // copy assignment operator
-  Manager(Manager&&) = delete;  // move constructor
-  Manager& operator=(Manager&&) = delete;  // move assignment operator
-  ~Manager() override = default;
-
-  /*!
-   * Function for creating a device from the specified driver.
-   *
-   * \param driver The driver for the device.
-   * \param params Parameters to the driver.
-   *
-   * \sa DAQ::Device
-   * \sa DAQ::Driver
-   */
-  Device* loadDevice(const std::string& driver,
-                     const std::list<std::string>& params);
-
-  Device* getDevice(const std::string& device_name);
-
-  void receiveEvent(Event::Object* event) override;
-
-private:
-  void insertDevice(Device*);
-  void removeDevice(Device*);
-
-  void registerDriver(Driver*, const std::string&);
-  void unregisterDriver(const std::string&);
-
-  std::unordered_map<std::string, Device*> devices;
-  std::map<std::string, Driver*> driverMap;
-
-};  // class Manager
 
 };  // namespace DAQ
 
