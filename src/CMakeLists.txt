@@ -113,6 +113,7 @@ target_link_libraries(workspace PRIVATE
     Qt5::Core
     Qt5::Gui
     Qt5::Widgets
+    Qt5::Network
     qwt::qwt
     Boost::headers
     backtrace
@@ -145,10 +146,13 @@ target_link_libraries(rtxi_exe PRIVATE
     connector_lib
     oscilloscope_lib
     data_recorder_lib
+    module_installer_lib
     Boost::headers
     qwt::qwt
     fmt::fmt
     HDF5::HDF5
+    git2
+    markdown
     backtrace
     dl
 )

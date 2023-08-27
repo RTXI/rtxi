@@ -20,91 +20,86 @@
 #define RTXI_WIZARD_H
 
 #include <QtNetwork>
+#include <QProgressDialog>
+#include <QTextEdit>
+#include <QListWidget>
 #include <map>
-
-#include <main_window.h>
-#include <plugin.h>
+#include "module.hpp"
 
 namespace RTXIWizard
 {
-class Panel : public QWidget
+
+constexpr std::string_view MODULE_NAME = "Module Wizard";
+
+class Panel : public Modules::Panel 
 {
   Q_OBJECT
 
 public:
+  Panel(QMainWindow* mwindow, Event::Manager* ev_manager);
+  void installFromString(const std::string& module_name);
+  void rebuildListWidgets();
+
+private slots:
+  void cloneModule();
+  void getRepos();
+  void getReadme();
+  void updateButton();
+  void parseRepos();
+  void parseReadme();
+
+private:
+
   struct module_t
   {
     // QListWidgetItem *listItem;
     QUrl readme_url;
     QUrl clone_url;
-    QUrl location;
+    QString location;
     QString readme;
     bool installed;
   };
+
   std::map<QString, module_t> modules;
-
-  Panel(QWidget*);
-  virtual ~Panel(void);
-  void installFromString(std::string);
-  void rebuildListWidgets(void);
-
-private slots:
-  void cloneModule(void);
-  void getRepos(void);
-  void getReadme(void);
-  void parseRepos(void);
-  void parseReadme(void);
-
-  void updateButton(void);
-
-private:
-  void initParameters(void);
-  int printGitError(int);
+  void initParameters();
+  static int printGitError(int);
   enum button_mode_t
   {
     DOWNLOAD,
     UPDATE
   } button_mode;
 
-  QMdiSubWindow* subWindow;
-
   QNetworkAccessManager qnam;
-  QNetworkReply* reply;
-  QProgressDialog* progressDialog;
+  QNetworkReply* reposNetworkReply=nullptr;
+  QNetworkReply* readmeNetworkReply=nullptr;
+  QProgressDialog* progressDialog=nullptr;
 
-  QTextEdit* readmeWindow;
-  QListWidget* availableListWidget;
-  QListWidget* installedListWidget;
+  QTextEdit* readmeWindow=nullptr;
+  QListWidget* availableListWidget=nullptr;
+  QListWidget* installedListWidget=nullptr;
 
-  QPushButton* cloneButton;
-  QPushButton* syncButton;
+  QPushButton* cloneButton=nullptr;
+  QPushButton* syncButton=nullptr;
 
   std::vector<QString> exclude_list;
 };
 
-class Plugin
-    : public QObject
-    , public ::Plugin::Object
+class Plugin : public Modules::Plugin 
 {
-  Q_OBJECT
-  friend class Panel;
-
 public:
-  static Plugin* getInstance(void);
-
-public slots:
-  void showRTXIWizardPanel(void);
-
-private:
-  void removeRTXIWizardPanel(Panel*);
-  Plugin(void);
-  ~Plugin(void);
-  Plugin(const Plugin&)
-      : QObject() {};
-  Plugin& operator=(const Plugin&) { return *getInstance(); };
-  static Plugin* instance;
-  Panel* panel;
+  explicit Plugin(Event::Manager* ev_manager)
+    : Modules::Plugin(ev_manager, std::string(RTXIWizard::MODULE_NAME)) {}
 };  // class Plugin
+
+std::unique_ptr<Modules::Plugin> createRTXIPlugin(Event::Manager* ev_manager);
+
+Modules::Panel* createRTXIPanel(QMainWindow* main_window,
+                                Event::Manager* ev_manager);
+
+std::unique_ptr<Modules::Component> createRTXIComponent(
+    Modules::Plugin* host_plugin);
+
+Modules::FactoryMethods getFactories();
 
 };  // namespace RTXIWizard
 

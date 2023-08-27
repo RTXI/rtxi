@@ -210,9 +210,9 @@ private:
     hid_t channel_datatype_handle = H5I_INVALID_HID;
   } hdf5_handles;
 
-  struct recorder
+  struct recorder_t
   {
-    recorder(record_channel chan,
+    recorder_t(record_channel chan,
              std::unique_ptr<DataRecorder::Component> comp,
              hid_t handle)
         : channel(std::move(chan))
@@ -227,14 +227,14 @@ private:
 
   int trial_count = 0;
   std::string hdf5_filename;
-  std::vector<recorder> m_recording_channels_list;
+  std::vector<recorder_t> m_recording_channels_list;
   std::shared_mutex m_channels_list_mut;
   std::atomic<bool> open_file = false;
 };  // class Plugin
 
 std::unique_ptr<Modules::Plugin> createRTXIPlugin(Event::Manager* ev_manager);
 
-Modules::Panel* createRTXIPanel(QMainWindow* main_window,
+Modules::Panel* createRTXIPanel(QMainWindow* mwindow,
                                 Event::Manager* ev_manager);
 
 std::unique_ptr<Modules::Component> createRTXIComponent(

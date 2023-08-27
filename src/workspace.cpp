@@ -20,9 +20,10 @@
 #include "data_recorder/data_recorder.h"
 #include "oscilloscope/oscilloscope.h"
 #include "performance_measurement/performance_measurement.hpp"
-#include "rtxiConfig.h"
 #include "system_control/system_control.h"
 #include "userprefs/userprefs.h"
+#include "module_installer/rtxi_wizard.h"
+#include "rtxiConfig.h"
 
 std::optional<Modules::FactoryMethods> Workspace::get_core_plugin_factory(
     const std::string& plugin_name)
@@ -40,6 +41,8 @@ std::optional<Modules::FactoryMethods> Workspace::get_core_plugin_factory(
     fact_methods = Oscilloscope::getFactories();
   } else if (plugin_name == std::string(DataRecorder::MODULE_NAME)) {
     fact_methods = DataRecorder::getFactories();
+  } else if (plugin_name == std::string(RTXIWizard::MODULE_NAME)) {
+    fact_methods = RTXIWizard::getFactories();
   } else {
     return fact_methods;
   }

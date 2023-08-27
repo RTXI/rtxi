@@ -44,6 +44,7 @@
 #include "rtxiConfig.h"
 #include "system_control/system_control.h"
 #include "userprefs/userprefs.h"
+#include "module_installer/rtxi_wizard.h"
 #include "workspace.hpp"
 
 MainWindow::MainWindow(Event::Manager* ev_manager)
@@ -218,6 +219,7 @@ void MainWindow::createSystemMenu()
   this->systemMenu->addAction(this->openConnector);
   this->systemMenu->addAction(this->openOscilloscope);
   this->systemMenu->addAction(this->openDataRecorder);
+  this->systemMenu->addAction(this->openRTXIWizard);
   connect(systemMenu,
           SIGNAL(triggered(QAction*)),
           this,
@@ -306,6 +308,8 @@ void MainWindow::createSystemActions()
       new QAction(tr(std::string(Oscilloscope::MODULE_NAME).c_str()), this);
   this->openDataRecorder =
       new QAction(tr(std::string(DataRecorder::MODULE_NAME).c_str()), this);
+  this->openRTXIWizard = 
+      new QAction(tr(std::string(RTXIWizard::MODULE_NAME).c_str()), this);
 }
 
 void MainWindow::about()

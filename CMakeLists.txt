@@ -38,19 +38,23 @@ if(EXISTS /usr/xenomai/bin/xeno-config)
 		OUTPUT_VARIABLE xenomai3_ALCHEMY_LDFLAGS)
 endif()
 
+# some libraries do not have cmake config files, so we use pkg-config for those
+pkg_check_modules(git2 REQUIRED libgit2)
+pkg_check_modules(markdown REQUIRED libmarkdown)
+
 # Make sure we can find the rtxiConfig.h generated file in binary directory
 include_directories(${PROJECT_BINARY_DIR})
 
 #Find the packages
 find_package(fmt REQUIRED)
 find_package(HDF5 REQUIRED COMPONENTS C HL)
-#find_package(libgit2 CONFIG REQUIRED)
-find_package(Qt5 REQUIRED COMPONENTS Core Gui Widgets)
+find_package(Qt5 REQUIRED COMPONENTS Core Gui Widgets Network)
 find_package(qwt REQUIRED)
 find_package(GTest REQUIRED)
 find_package(Threads REQUIRED)
 find_package(Boost REQUIRED)
 find_package(GSL REQUIRED)
+#Some libraries are harder to find as package, so this solves that
 find_library(nidaqmx NAMES libnidaqmx.so)
 
 #Handle QT and boost libraries shenanigans

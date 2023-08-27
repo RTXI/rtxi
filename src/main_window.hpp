@@ -181,6 +181,7 @@ private:
   QAction* openControlPanel = nullptr;
   QAction* openConnector = nullptr;
   QAction* openOscilloscope = nullptr;
+  QAction* openRTXIWizard = nullptr;
 
   void createFileMenu();
   void createModuleMenu();

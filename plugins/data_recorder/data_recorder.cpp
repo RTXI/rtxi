@@ -500,10 +500,10 @@ DataRecorder::Plugin::~Plugin()
   this->closeFile();
   const Event::Type event_type = Event::Type::RT_THREAD_REMOVE_EVENT;
   std::vector<Event::Object> unload_events;
-  for(auto& recorder : this->m_recording_channels_list){
+  for(auto& entry : this->m_recording_channels_list){
     unload_events.emplace_back(event_type);
     unload_events.back().setParam("thread", 
-                                  std::any(static_cast<RT::Thread*>(recorder.component.get())));
+                                  std::any(static_cast<RT::Thread*>(entry.component.get())));
   }
   this->getEventManager()->postEvent(unload_events);
 }
@@ -711,7 +711,7 @@ int DataRecorder::Plugin::create_component(IO::endpoint endpoint)
   }
   auto iter = std::find_if(this->m_recording_channels_list.begin(),
                            this->m_recording_channels_list.end(),
-                           [endpoint](const recorder& rec)
+                           [endpoint](const recorder_t& rec)
                            { return rec.channel.endpoint == endpoint; });
   if (iter != this->m_recording_channels_list.end()) {
     return 0;
@@ -769,7 +769,7 @@ void DataRecorder::Plugin::destroy_component(IO::endpoint endpoint)
       this->m_channels_list_mut);
   auto iter = std::find_if(this->m_recording_channels_list.begin(),
                            this->m_recording_channels_list.end(),
-                           [component](const recorder& rec_chan)
+                           [component](const recorder_t& rec_chan)
                            { return rec_chan.component.get() == component; });
   if (iter == this->m_recording_channels_list.end()) {
     return;
@@ -783,7 +783,7 @@ std::string DataRecorder::Plugin::getRecorderName(IO::endpoint endpoint)
   const std::shared_lock<std::shared_mutex> lk(this->m_channels_list_mut);
   auto iter = std::find_if(this->m_recording_channels_list.begin(),
                            this->m_recording_channels_list.end(),
-                           [endpoint](const recorder& rec_chan)
+                           [endpoint](const recorder_t& rec_chan)
                            { return rec_chan.channel.endpoint == endpoint; });
   if (iter == this->m_recording_channels_list.end()) {
     return "";
@@ -797,7 +797,7 @@ DataRecorder::Component* DataRecorder::Plugin::getRecorderPtr(
   const std::shared_lock<std::shared_mutex> lk(this->m_channels_list_mut);
   auto iter = std::find_if(this->m_recording_channels_list.begin(),
                            this->m_recording_channels_list.end(),
-                           [endpoint](const recorder& rec_chan)
+                           [endpoint](const recorder_t& rec_chan)
                            { return rec_chan.channel.endpoint == endpoint; });
   if (iter == this->m_recording_channels_list.end()) {
     return nullptr;
@@ -902,11 +902,11 @@ std::unique_ptr<Modules::Plugin> DataRecorder::createRTXIPlugin(
   return std::make_unique<DataRecorder::Plugin>(ev_manager);
 }
 
-Modules::Panel* DataRecorder::createRTXIPanel(QMainWindow* main_window,
+Modules::Panel* DataRecorder::createRTXIPanel(QMainWindow* mwindow,
                                               Event::Manager* ev_manager)
 {
   return static_cast<Modules::Panel*>(
-      new DataRecorder::Panel(main_window, ev_manager));
+      new DataRecorder::Panel(mwindow, ev_manager));
 }
 
 std::unique_ptr<Modules::Component> DataRecorder::createRTXIComponent(

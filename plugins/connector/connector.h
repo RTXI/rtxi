@@ -21,8 +21,6 @@
 #ifndef CONNECTOR_H
 #define CONNECTOR_H
 
-#include <QMdiArea>
-#include <QWidget>
 #include <QtWidgets>
 #include <vector>
 
