@@ -19,7 +19,8 @@
 #ifndef RTXI_WIZARD_H
 #define RTXI_WIZARD_H
 
-#include <QtNetwork>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
 #include <QProgressDialog>
 #include <QTextEdit>
 #include <QListWidget>

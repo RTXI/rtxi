@@ -24,6 +24,12 @@ extern "C" {
 #include <mkdio.h>
 }
 #include <QMessageBox>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QCoreApplication>
+#include <QDir>
+#include <QJsonObject>
+#include <QProcess>
 #include "rtxi_wizard.h"
 
 /*
