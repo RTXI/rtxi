@@ -55,7 +55,7 @@ Workspace::Manager::Manager(Event::Manager* ev_manager)
   this->event_manager->registerHandler(this);
   this->m_plugin_loader = std::make_unique<DLL::Loader>();
   this->m_driver_loader = std::make_unique<DLL::Loader>();
-  this->m_driver_loader->load("libnidaq_driver.so");
+  this->registerDriver("libnidaq_driver.so");
 }
 
 Workspace::Manager::~Manager()

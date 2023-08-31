@@ -83,6 +83,16 @@ inline std::vector<std::string> physical_channel_names(const std::string& device
   return split_string(channel_names, ", "); 
 }
 
+inline std::string physical_card_name(const std::string& device_name)
+{
+  int32_t err = DAQmxGetDevProductType(device_name.c_str(), nullptr, 0);
+  std::string result(static_cast<size_t>(err), '\0');
+  err = DAQmxGetDevProductType(device_name.c_str(), 
+                               result.data(), 
+                               static_cast<uint32_t>(result.size()));
+  return result;
+}
+
 void printError(int32_t status)
 {
   ERROR_MSG("NIDAQ ERROR : code {}", status);
@@ -193,7 +203,8 @@ class Device : public DAQ::Device
 {
 public:
   Device(const std::string& dev_name,
-         const std::vector<IO::channel_t>& channels);
+         const std::vector<IO::channel_t>& channels,
+         std::string  internal_name);
 
   size_t getChannelCount(DAQ::ChannelType::type_t type) const final;
   bool getChannelActive(DAQ::ChannelType::type_t type, DAQ::index_t index) const final;
@@ -249,6 +260,7 @@ public:
   void write() final;
 private:
   TaskHandle nidaq_task_handle;
+  std::string daq_card_name;
   std::array<std::vector<physical_channel_t>, 4> physical_channels_registry;
   std::array<std::pair<double, double>, 7> default_ranges = get_default_ranges();
   std::array<std::string, 2> default_units = get_default_units();
@@ -267,8 +279,9 @@ private:
 };
 
 Device::Device(const std::string& dev_name,
-               const std::vector<IO::channel_t>& channels) 
-  : DAQ::Device(dev_name, channels) 
+               const std::vector<IO::channel_t>& channels,
+               std::string  internal_name) 
+  : DAQ::Device(dev_name, channels), daq_card_name(std::move(internal_name))
 {
   std::vector<std::string> chan_names;
   for(size_t type=0; type < physical_channels_registry.size(); type++){
@@ -485,12 +498,14 @@ void Driver::loadDevices()
   std::vector<std::string> split_channel_names;
   size_t pos=0;
   std::string temp_channel_name;
+  std::string temp_daq_name;
   std::string description;
   int channel_id = 0;
-  for(const auto& dev_name : device_names){
+  for(const auto& internal_dev_name : device_names){
     for(size_t query_indx=0; query_indx<4; query_indx++){
-      split_channel_names = physical_channel_names(dev_name, 
+      split_channel_names = physical_channel_names(internal_dev_name, 
                                                    static_cast<DAQ::ChannelType::type_t>(query_indx)); 
+      temp_daq_name = physical_card_name(internal_dev_name);
       for(const auto& chan_name : split_channel_names){
         description = std::string(query_indx<2 ? "Analog" : "Digital");
         description += " ";
@@ -505,7 +520,7 @@ void Driver::loadDevices()
                             1});
       }
     }
-    this->nidaq_devices.emplace_back(dev_name, channels);
+    this->nidaq_devices.emplace_back(temp_daq_name, channels, internal_dev_name);
   }
 }
 

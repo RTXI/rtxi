@@ -18,6 +18,7 @@
 #include "dlplugin.hpp"
 #include "event.hpp"
 #include "module.hpp"
+#include "daq.hpp"
 
 //! Internal Management Oriented Classes
 /*!
