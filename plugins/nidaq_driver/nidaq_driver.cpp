@@ -199,12 +199,13 @@ int32_t physical_channel_t::addToTask(TaskHandle task_handle) const
   return err;
 }
 
-class Device : public DAQ::Device
+class Device final : public DAQ::Device
 {
 public:
   Device(const std::string& dev_name,
          const std::vector<IO::channel_t>& channels,
          std::string  internal_name);
+  ~Device() final;
 
   size_t getChannelCount(DAQ::ChannelType::type_t type) const final;
   bool getChannelActive(DAQ::ChannelType::type_t type, DAQ::index_t index) const final;
@@ -259,7 +260,7 @@ public:
   void read() final;
   void write() final;
 private:
-  TaskHandle nidaq_task_handle;
+  TaskHandle nidaq_task_handle{};
   std::string daq_card_name;
   std::array<std::vector<physical_channel_t>, 4> physical_channels_registry;
   std::array<std::pair<double, double>, 7> default_ranges = get_default_ranges();
@@ -283,6 +284,10 @@ Device::Device(const std::string& dev_name,
                std::string  internal_name) 
   : DAQ::Device(dev_name, channels), daq_card_name(std::move(internal_name))
 {
+  if(DAQmxCreateTask("read", &this->nidaq_task_handle) < 0) {
+    ERROR_MSG("NIDAQ::Device : Unable to create read task for device {}", dev_name);
+    return;
+  }
   std::vector<std::string> chan_names;
   for(size_t type=0; type < physical_channels_registry.size(); type++){
     chan_names = physical_channel_names(dev_name, static_cast<DAQ::ChannelType::type_t>(type));
@@ -290,6 +295,11 @@ Device::Device(const std::string& dev_name,
       physical_channels_registry.at(type).emplace_back(chan_name, static_cast<DAQ::ChannelType::type_t>(type));
     }
   }
+}
+
+Device::~Device()
+{
+  DAQmxClearTask(this->nidaq_task_handle);
 }
 
 size_t Device::getChannelCount(DAQ::ChannelType::type_t type) const  

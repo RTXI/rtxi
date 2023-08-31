@@ -4,7 +4,6 @@ cmake_minimum_required(VERSION 3.24)
 if(NOT nidaqmx-NOTFOUND)
 message("National Instruments Library found")
 add_library(nidaq_driver MODULE
-  nidaq_driver.hpp
   nidaq_driver.cpp
 )
 
