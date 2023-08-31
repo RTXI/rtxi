@@ -22,9 +22,14 @@
 
 #include <QtWidgets>
 
+#include "daq.hpp"
 #include "event.hpp"
 #include "main_window.hpp"
 #include "module.hpp"
+
+Q_DECLARE_METATYPE(DAQ::ChannelType::type_t)
+Q_DECLARE_METATYPE(DAQ::Device*)
+Q_DECLARE_METATYPE(DAQ::direction_t)
 
 namespace SystemControl
 {

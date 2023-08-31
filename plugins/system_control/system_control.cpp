@@ -101,12 +101,12 @@ SystemControl::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
       std::to_string(RT::OS::SECONDS_TO_NANOSECONDS / period).c_str());
   ;
   QObject::connect(freqEdit,
-                   SIGNAL(textChanged(const QString&)),
+                   SIGNAL(textEdited(const QString&)),
                    this,
                    SLOT(updatePeriod()));
   freqUnitList->setFixedWidth(50);
-  freqUnitList->addItem(" Hz");
-  freqUnitList->addItem("kHz");
+  freqUnitList->addItem(" Hz", 1);
+  freqUnitList->addItem("kHz", 1000);
   deviceLayout->addWidget(freqUnitList, 1, 2);
   QObject::connect(
       freqUnitList, SIGNAL(activated(int)), this, SLOT(updatePeriod()));
@@ -115,15 +115,15 @@ SystemControl::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
   deviceLayout->addWidget(new QLabel(tr("Period:")), 1, 3);
   deviceLayout->addWidget(periodEdit, 1, 4);
   QObject::connect(periodEdit,
-                   SIGNAL(textChanged(const QString&)),
+                   SIGNAL(textEdited(const QString&)),
                    this,
                    SLOT(updateFreq()));
   deviceLayout->addWidget(periodUnitList, 1, 5);
   periodUnitList->setFixedWidth(50);
-  periodUnitList->addItem(" s");
-  periodUnitList->addItem("ms");
-  periodUnitList->addItem("us");
-  periodUnitList->addItem("ns");
+  periodUnitList->addItem(" s", 1.0);
+  periodUnitList->addItem("ms", 1e-3);
+  periodUnitList->addItem("us", 1e-6);
+  periodUnitList->addItem("ns", 1e-9);
   QObject::connect(
       periodUnitList, SIGNAL(activated(int)), this, SLOT(updateFreq()));
   updatePeriod();
@@ -138,8 +138,8 @@ SystemControl::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
   // Create elements for analog block
   analogLayout->addWidget(new QLabel(tr("Channel:")), 1, 0);
 
-  analogSubdeviceList->addItem("Input");
-  analogSubdeviceList->addItem("Output");
+  analogSubdeviceList->addItem("Input", QVariant::fromValue(DAQ::ChannelType::AI));
+  analogSubdeviceList->addItem("Output", QVariant::fromValue(DAQ::ChannelType::AO));
   QObject::connect(
       analogSubdeviceList, SIGNAL(activated(int)), this, SLOT(updateDevice()));
   analogLayout->addWidget(analogSubdeviceList, 1, 1);
@@ -161,23 +161,23 @@ SystemControl::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
   analogGainEdit->setAlignment(Qt::AlignRight);
   analogLayout->addWidget(analogGainEdit, 3, 1);
 
-  analogUnitPrefixList->addItem("yotta-");
-  analogUnitPrefixList->addItem("zetta-");
-  analogUnitPrefixList->addItem("exa-");
-  analogUnitPrefixList->addItem("peta-");
-  analogUnitPrefixList->addItem("tera-");
-  analogUnitPrefixList->addItem("giga-");
-  analogUnitPrefixList->addItem("mega-");
-  analogUnitPrefixList->addItem("kilo-");
-  analogUnitPrefixList->addItem("");
-  analogUnitPrefixList->addItem("milli-");
-  analogUnitPrefixList->addItem("micro-");
-  analogUnitPrefixList->addItem("nano-");
-  analogUnitPrefixList->addItem("pico-");
-  analogUnitPrefixList->addItem("femto-");
-  analogUnitPrefixList->addItem("atto-");
-  analogUnitPrefixList->addItem("zepto-");
-  analogUnitPrefixList->addItem("yocto-");
+  analogUnitPrefixList->addItem("yotta-", 1e24);
+  analogUnitPrefixList->addItem("zetta-", 1e21);
+  analogUnitPrefixList->addItem("exa-", 1e18);
+  analogUnitPrefixList->addItem("peta-", 1e15);
+  analogUnitPrefixList->addItem("tera-", 1e12);
+  analogUnitPrefixList->addItem("giga-", 1e9);
+  analogUnitPrefixList->addItem("mega-", 1e6);
+  analogUnitPrefixList->addItem("kilo-", 1e3);
+  analogUnitPrefixList->addItem("", 1);
+  analogUnitPrefixList->addItem("milli-", 1e-3);
+  analogUnitPrefixList->addItem("micro-", 1e-6);
+  analogUnitPrefixList->addItem("nano-", 1e-9);
+  analogUnitPrefixList->addItem("pico-", 1e-12);
+  analogUnitPrefixList->addItem("femto-", 1e-15);
+  analogUnitPrefixList->addItem("atto-", 1e-18);
+  analogUnitPrefixList->addItem("zepto-", 1e-21);
+  analogUnitPrefixList->addItem("yocto-", 1e-24);
   analogLayout->addWidget(analogUnitPrefixList, 3, 2);
 
   analogLayout->addWidget(analogUnitList, 3, 3);
@@ -188,33 +188,33 @@ SystemControl::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
   analogLayout->addWidget(analogZeroOffsetEdit, 4, 1);
 
   // Prefixes for offset
-  analogUnitPrefixList2->addItem("yotta-");
-  analogUnitPrefixList2->addItem("zetta-");
-  analogUnitPrefixList2->addItem("exa-");
-  analogUnitPrefixList2->addItem("peta-");
-  analogUnitPrefixList2->addItem("tera-");
-  analogUnitPrefixList2->addItem("giga-");
-  analogUnitPrefixList2->addItem("mega-");
-  analogUnitPrefixList2->addItem("kilo-");
-  analogUnitPrefixList2->addItem("");
-  analogUnitPrefixList2->addItem("milli-");
-  analogUnitPrefixList2->addItem("micro-");
-  analogUnitPrefixList2->addItem("nano-");
-  analogUnitPrefixList2->addItem("pico-");
-  analogUnitPrefixList2->addItem("femto-");
-  analogUnitPrefixList2->addItem("atto-");
-  analogUnitPrefixList2->addItem("zepto-");
-  analogUnitPrefixList2->addItem("yocto-");
+  analogUnitPrefixList2->addItem("yotta-", 1e24);
+  analogUnitPrefixList2->addItem("zetta-", 1e21);
+  analogUnitPrefixList2->addItem("exa-", 1e18);
+  analogUnitPrefixList2->addItem("peta-", 1e15);
+  analogUnitPrefixList2->addItem("tera-", 1e12);
+  analogUnitPrefixList2->addItem("giga-", 1e9);
+  analogUnitPrefixList2->addItem("mega-", 1e6);
+  analogUnitPrefixList2->addItem("kilo-", 1e3);
+  analogUnitPrefixList2->addItem("", 1);
+  analogUnitPrefixList2->addItem("milli-", 1e-3);
+  analogUnitPrefixList2->addItem("micro-", 1e-6);
+  analogUnitPrefixList2->addItem("nano-", 1e-9);
+  analogUnitPrefixList2->addItem("pico-", 1e-12);
+  analogUnitPrefixList2->addItem("femto-", 1e-15);
+  analogUnitPrefixList2->addItem("atto-", 1e-18);
+  analogUnitPrefixList2->addItem("zepto-", 1e-21);
+  analogUnitPrefixList2->addItem("yocto-", 1e-24);
 
   analogLayout->addWidget(analogUnitPrefixList2, 4, 2, 1, 1);
   analogLayout->addWidget(new QLabel(tr(" Volt/Amps")), 4, 3);
   analogLayout->addWidget(new QLabel(tr("Downsample:")), 5, 0);
-  analogDownsampleList->addItem("1");
-  analogDownsampleList->addItem("2");
-  analogDownsampleList->addItem("4");
-  analogDownsampleList->addItem("6");
-  analogDownsampleList->addItem("8");
-  analogDownsampleList->addItem("10");
+  analogDownsampleList->addItem("1", 1);
+  analogDownsampleList->addItem("2", 2);
+  analogDownsampleList->addItem("4", 4);
+  analogDownsampleList->addItem("6", 6);
+  analogDownsampleList->addItem("8", 8);
+  analogDownsampleList->addItem("10", 10);
   analogLayout->addWidget(analogDownsampleList, 5, 1);
 
   // Assign layout to child widget
@@ -236,8 +236,8 @@ SystemControl::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
       digitalChannelList, SIGNAL(activated(int)), this, SLOT(display()));
   digitalLayout->addWidget(digitalChannelList, 1, 2, 1, 1);
 
-  digitalDirectionList->addItem("Input");
-  digitalDirectionList->addItem("Output");
+  digitalDirectionList->addItem("Input", QVariant::fromValue(DAQ::ChannelType::DI));
+  digitalDirectionList->addItem("Output", QVariant::fromValue(DAQ::ChannelType::DO));
   digitalLayout->addWidget(digitalDirectionList, 1, 3, 1, 1);
 
   digitalActiveButton = new QPushButton("Active");
@@ -286,7 +286,7 @@ void SystemControl::Panel::apply()
   if (index == -1) {
     // Even if there is no valid device we should still change rt period
     double period = periodEdit->text().toDouble();
-    period *= pow(10, 3 * (3 - periodUnitList->currentIndex()));
+    period *= periodUnitList->currentData().toDouble();
     Event::Object event(Event::Type::RT_PERIOD_EVENT);
     event.setParam("period", std::any(static_cast<int64_t>(period)));
     this->getRTXIEventManager()->postEvent(&event);
@@ -312,12 +312,10 @@ void SystemControl::Panel::apply()
     return;
   }
 
-  auto a_chan = static_cast<DAQ::index_t>(analogChannelList->currentIndex());
-  auto a_type = static_cast<DAQ::type_t>(analogSubdeviceList->currentIndex());
-  const double a_gain = analogGainEdit->text().toDouble()
-      * pow(10, -3 * (analogUnitPrefixList->currentIndex() - 8));
-  const double a_zerooffset = analogZeroOffsetEdit->text().toDouble()
-      * pow(10, -3 * (analogUnitPrefixList2->currentIndex() - 8));
+  auto a_chan = analogChannelList->currentData().value<DAQ::index_t>();
+  auto a_type = analogSubdeviceList->currentData().value<DAQ::ChannelType::type_t>();
+  const double a_gain = analogGainEdit->text().toDouble() * analogUnitPrefixList->currentData().toDouble();
+  const double a_zerooffset = analogZeroOffsetEdit->text().toDouble() * analogUnitPrefixList2->currentData().toDouble();
 
   dev->setChannelActive(a_type, a_chan, analogActiveButton->isChecked());
   dev->setAnalogGain(a_type, a_chan, a_gain);
@@ -341,21 +339,19 @@ void SystemControl::Panel::apply()
   dev->setAnalogDownsample(a_type, a_chan, static_cast<size_t>(value));
   dev->setAnalogCounter(a_type, a_chan);
 
-  auto d_chan = static_cast<DAQ::index_t>(digitalChannelList->currentIndex());
-  auto d_type =
-      static_cast<DAQ::type_t>(digitalSubdeviceList->currentIndex() + DAQ::DIO);
-  auto d_dir =
-      static_cast<DAQ::direction_t>(digitalDirectionList->currentIndex());
+  auto d_chan = digitalChannelList->currentData().value<DAQ::index_t>();
+  auto d_type = digitalSubdeviceList->currentData().value<DAQ::ChannelType::type_t>();
+  auto d_dir = digitalDirectionList->currentData().value<DAQ::direction_t>();
 
   // Write digital channel configuration to DAQ
   dev->setChannelActive(d_type, d_chan, digitalActiveButton->isChecked());
-  if (d_type == DAQ::DIO) {
+  if (d_type == DAQ::ChannelType::DI || d_type == DAQ::ChannelType::DO) {
     dev->setDigitalDirection(d_chan, d_dir);
   }
 
   // Apply thread settings
   double period = periodEdit->text().toDouble();
-  period *= pow(10, 3 * (3 - periodUnitList->currentIndex()));
+  period *= periodUnitList->currentData().toDouble();
 
   Event::Object event(Event::Type::RT_PERIOD_EVENT);
   event.setParam("period", std::any(static_cast<int64_t>(period)));
@@ -365,57 +361,21 @@ void SystemControl::Panel::apply()
 
 void SystemControl::Panel::updateDevice()
 {
-  // DAQ::Device* dev;
-  // DAQ::type_t type;
-  // {
-  //   struct find_daq_t info = {
-  //       deviceList->currentIndex(),
-  //       0,
-  //   };
-  //   DAQ::Manager::getInstance()->foreachDevice(findDAQDevice, &info);
-  //   dev = info.device;
-  // }
-
   const int index = this->deviceList->currentIndex();
-  if (index == -1) {
-    return;
-  }
+  if (index == -1) { return; }
 
-  const QString dev_name = deviceList->itemText(index);
-  Event::Object device_query_event(Event::Type::DAQ_DEVICE_QUERY_EVENT);
-  device_query_event.setParam("name", std::any(dev_name.toStdString()));
-  this->getRTXIEventManager()->postEvent(&device_query_event);
-  DAQ::Device* dev = nullptr;
-  try {
-    dev = std::any_cast<DAQ::Device*>(device_query_event.getParam("device"));
-  } catch (std::bad_any_cast&) {
-    ERROR_MSG(
-        "SystemContrlo::Panel::updateDevice : The device {} was not found",
-        dev_name.toStdString());
-    return;
-  }
-
-  // Make sure we aren't getting a phony device
-  if (dev == nullptr) {
-    ERROR_MSG(
-        "SystemControl::Panel::updateDevice : DAQ device manager returned a "
-        "nullptr for {}",
-        dev_name.toStdString());
-    return;
-  }
-
+  auto* dev = deviceList->currentData().value<DAQ::Device*>();
   analogChannelList->clear();
   digitalChannelList->clear();
 
-  auto type = static_cast<DAQ::type_t>(analogSubdeviceList->currentIndex());
+  auto type = analogSubdeviceList->currentData().value<DAQ::ChannelType::type_t>();
   for (size_t i = 0; i < dev->getChannelCount(type); ++i) {
-    analogChannelList->addItem(QString::number(i));
+    analogChannelList->addItem(QString::number(i), QVariant::fromValue(static_cast<DAQ::index_t>(i)));
   }
 
-  type =
-      static_cast<DAQ::type_t>(digitalSubdeviceList->currentIndex() + DAQ::DIO);
+  type = digitalSubdeviceList->currentData().value<DAQ::ChannelType::type_t>();
   for (size_t i = 0; i < dev->getChannelCount(type); ++i) {
-    digitalChannelList->addItem(QString::number(i));
+    digitalChannelList->addItem(QString::number(i), QVariant::fromValue(static_cast<DAQ::index_t>(i)));
   }
 
   display();
@@ -423,43 +383,27 @@ void SystemControl::Panel::updateDevice()
 
 void SystemControl::Panel::updateFreq()
 {
-  /* This is to prevent recursive updates, not to provide mutual exclusion */
-  if (rateUpdate) {
-    return;
-  }
-
-  rateUpdate = true;
-  int index = 0;
-
   /* Determine the Period */
   auto period = periodEdit->text().toDouble();
-  period *= pow(10, -3 * periodUnitList->currentIndex());
+  period *= periodUnitList->currentData().toDouble();
   auto freq = 1 / period;
-
+  int index=0;
   if (freq > 1000) {
     freq /= 1000;
-    index = 1;
+    index=1;
   }
 
   freqEdit->setText(QString::number(freq));
   freqUnitList->setCurrentIndex(index);
-  rateUpdate = false;
 }
 
 void SystemControl::Panel::updatePeriod()
 {
-  if (rateUpdate) {
-    return;
-  }
-
-  rateUpdate = true;
   int index = 0;
 
   // Determine the Frequency
   auto freq = freqEdit->text().toDouble();
-  if (freqUnitList->currentIndex() != 0) {
-    freq *= 1000;
-  }
+  freq *= freqUnitList->currentData().toDouble();
 
   auto period = 1 / freq;
 
@@ -470,7 +414,6 @@ void SystemControl::Panel::updatePeriod()
 
   periodEdit->setText(QString::number(period));
   periodUnitList->setCurrentIndex(index);
-  rateUpdate = false;
 }
 
 // TODO: improve simplicity of display function
@@ -516,11 +459,11 @@ void SystemControl::Panel::display()
     analogUnitPrefixList2->setEnabled(false);
     analogUnitList->setEnabled(false);
   } else {
-    auto type = static_cast<DAQ::type_t>(analogSubdeviceList->currentIndex());
-    auto chan = static_cast<DAQ::index_t>(analogChannelList->currentIndex());
+    auto type = analogSubdeviceList->currentData().value<DAQ::ChannelType::type_t>();
+    auto chan = analogChannelList->currentData().value<DAQ::index_t>();
 
     // Downsample is only enabled for AI
-    if (type == DAQ::AI) {
+    if (type == DAQ::ChannelType::AI) {
       analogDownsampleList->setEnabled(true);
     } else {
       analogDownsampleList->setEnabled(false);
@@ -537,21 +480,21 @@ void SystemControl::Panel::display()
     analogUnitList->setEnabled(true);
 
     analogRangeList->clear();
-    for (size_t i = 0; i < dev->getAnalogRangeCount(type, chan); ++i) {
+    for (size_t i = 0; i < dev->getAnalogRangeCount(type); ++i) {
       analogRangeList->addItem(
-          QString::fromStdString(dev->getAnalogRangeString(type, chan, i)));
+          QString::fromStdString(dev->getAnalogRangeString(type, chan, i)), QVariant::fromValue(i));
     }
 
     analogReferenceList->clear();
-    for (size_t i = 0; i < dev->getAnalogReferenceCount(type, chan); ++i) {
+    for (size_t i = 0; i < dev->getAnalogReferenceCount(type); ++i) {
       analogReferenceList->addItem(
-          QString::fromStdString(dev->getAnalogReferenceString(type, chan, i)));
+          QString::fromStdString(dev->getAnalogReferenceString(type, chan, i)), QVariant::fromValue(i));
     }
 
     analogUnitList->clear();
-    for (size_t i = 0; i < dev->getAnalogUnitsCount(type, chan); ++i) {
+    for (size_t i = 0; i < dev->getAnalogUnitsCount(type); ++i) {
       analogUnitList->addItem(
-          QString::fromStdString(dev->getAnalogUnitsString(type, chan, i)));
+          QString::fromStdString(dev->getAnalogUnitsString(type, chan, i)), QVariant::fromValue(i));
     }
     analogActiveButton->setChecked(dev->getChannelActive(type, chan));
     analogRangeList->setCurrentIndex(
@@ -560,9 +503,9 @@ void SystemControl::Panel::display()
         QVariant::fromValue(dev->getAnalogDownsample(type, chan)),
         Qt::DisplayRole));
     analogReferenceList->setCurrentIndex(
-        static_cast<int>(dev->getAnalogReference(type, chan)));
+        analogReferenceList->findData(QVariant::fromValue(dev->getAnalogReference(type, chan))));
     analogUnitList->setCurrentIndex(
-        static_cast<int>(dev->getAnalogUnits(type, chan)));
+        analogUnitList->findData(QVariant::fromValue(dev->getAnalogUnits(type, chan))));
 
     // Determine the correct prefix for analog gain
     int indx = 8;
@@ -622,26 +565,19 @@ void SystemControl::Panel::display()
     digitalChannelList->setEnabled(false);
     digitalDirectionList->setEnabled(false);
   } else {
-    auto type = static_cast<DAQ::type_t>(digitalSubdeviceList->currentIndex()
-                                         + DAQ::DIO);
-    auto chan = static_cast<DAQ::index_t>(digitalChannelList->currentIndex());
+    auto type = digitalSubdeviceList->currentData().value<DAQ::ChannelType::type_t>();
+    auto chan = digitalChannelList->currentData().value<DAQ::index_t>();
 
     digitalActiveButton->setEnabled(true);
     digitalChannelList->setEnabled(true);
-    if (type == DAQ::DIO) {
+    if (type == DAQ::ChannelType::DI || type == DAQ::ChannelType::DO) {
       digitalDirectionList->setEnabled(true);
+      digitalDirectionList->setCurrentIndex(digitalDirectionList->findData(QVariant::fromValue(type)));
     } else {
       digitalDirectionList->setEnabled(false);
     }
 
     digitalActiveButton->setChecked(dev->getChannelActive(type, chan));
-
-    if (type == DAQ::DIO) {
-      digitalDirectionList->setEnabled(true);
-      digitalDirectionList->setCurrentIndex(dev->getDigitalDirection(chan));
-    } else {
-      digitalDirectionList->setEnabled(false);
-    }
   }
 
   // Display thread info
@@ -649,8 +585,6 @@ void SystemControl::Panel::display()
   Event::Object get_period_event(Event::Type::RT_GET_PERIOD_EVENT);
   this->getRTXIEventManager()->postEvent(&get_period_event);
   auto tmp = std::any_cast<int64_t>(get_period_event.getParam("period"));
-  // auto tmp = static_cast<long long>(wrapped_tmp);
-  // long long tmp = RT::System::getInstance()->getPeriod();
   while ((tmp >= 1000) && ((index) != 0)) {
     tmp /= 1000;
     index--;
