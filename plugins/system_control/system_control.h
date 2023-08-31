@@ -53,6 +53,8 @@ public slots:
   void updatePeriod();
 
 private:
+  void buildDAQDeviceList();
+
   QGroupBox* deviceGroup = nullptr;
   QGroupBox* analogGroup = nullptr;
   QGroupBox* digitalGroup = nullptr;

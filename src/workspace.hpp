@@ -15,6 +15,7 @@
 #ifndef WORKSPACE_H
 #define WORKSPACE_H
 
+#include <utility>
 #include "dlplugin.hpp"
 #include "event.hpp"
 #include "module.hpp"
@@ -73,6 +74,7 @@ public:
   std::vector<DAQ::Device*> getAllDevices();
 
 private:
+  using driver_registry_entry = std::pair<std::string, DAQ::Driver*>;
   void registerDriver(const std::string& driver_location);
   void unregisterDriver(const std::string& driver_location);
 
@@ -87,7 +89,7 @@ private:
 
   std::unordered_map<std::string, std::vector<std::unique_ptr<Modules::Plugin>>>
       rtxi_modules_registry;
-  std::map<std::string, DAQ::Driver*> m_driver_registry;
+  std::vector<std::pair<std::string, DAQ::Driver*>> m_driver_registry;
   std::unordered_map<std::string, Modules::FactoryMethods>
       rtxi_factories_registry;
   Event::Manager* event_manager;

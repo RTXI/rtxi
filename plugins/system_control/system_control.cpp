@@ -86,7 +86,7 @@ SystemControl::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
   deviceLayout->addWidget(new QLabel(tr("Device:")), 0, 0);
 
   deviceLayout->addWidget(deviceList, 0, 1, 1, 5);
-  // DAQ::Manager::getInstance()->foreachDevice(buildDAQDeviceList, deviceList);
+  buildDAQDeviceList();
   QObject::connect(
       deviceList, SIGNAL(activated(int)), this, SLOT(updateDevice()));
 
@@ -99,7 +99,7 @@ SystemControl::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
   auto period = std::any_cast<int64_t>(get_period_event.getParam("period"));
   freqEdit->setText(
       std::to_string(RT::OS::SECONDS_TO_NANOSECONDS / period).c_str());
-  ;
+
   QObject::connect(freqEdit,
                    SIGNAL(textEdited(const QString&)),
                    this,
@@ -293,22 +293,12 @@ void SystemControl::Panel::apply()
     return;
   }
 
-  const QString dev_name = deviceList->itemText(index);
-  Event::Object device_query_event(Event::DAQ_DEVICE_QUERY_EVENT);
-  device_query_event.setParam("name", std::any(dev_name.toStdString()));
-  this->getRTXIEventManager()->postEvent(&device_query_event);
-  DAQ::Device* dev = nullptr;
-  try {
-    dev = std::any_cast<DAQ::Device*>(device_query_event.getParam("device"));
-  } catch (std::bad_any_cast&) {
-    ERROR_MSG("The device {} was not found", dev_name.toStdString());
-    return;
-  }
+  auto *dev = deviceList->currentData().value<DAQ::Device*>();
 
   // Make sure we aren't getting a phony device
   if (dev == nullptr) {
     ERROR_MSG("DAQ device manager returned a nullptr for {}",
-              dev_name.toStdString());
+              deviceList->currentText().toStdString());
     return;
   }
 
@@ -416,6 +406,16 @@ void SystemControl::Panel::updatePeriod()
   periodUnitList->setCurrentIndex(index);
 }
 
+void SystemControl::Panel::buildDAQDeviceList()
+{
+  Event::Object device_list_request(Event::Type::DAQ_DEVICE_QUERY_EVENT);
+  this->getRTXIEventManager()->postEvent(&device_list_request);
+  auto devices = std::any_cast<std::vector<DAQ::Device*>>(device_list_request.getParam("devices"));
+  for(auto* device : devices){
+    this->deviceList->addItem(QString::fromStdString(device->getName()), QVariant::fromValue(device));
+  }
+}
+
 // TODO: improve simplicity of display function
 void SystemControl::Panel::display()
 {
@@ -424,18 +424,7 @@ void SystemControl::Panel::display()
     return;
   }
 
-  const QString dev_name = deviceList->itemText(index);
-  Event::Object device_query_event(Event::Type::DAQ_DEVICE_QUERY_EVENT);
-  device_query_event.setParam("name", std::any(dev_name.toStdString()));
-  this->getRTXIEventManager()->postEvent(&device_query_event);
-  DAQ::Device* dev = nullptr;
-  try {
-    dev = std::any_cast<DAQ::Device*>(device_query_event.getParam("device"));
-  } catch (std::bad_any_cast&) {
-    ERROR_MSG("SystemContrlo::Panel::display : The device {} was not found",
-              dev_name.toStdString());
-    return;
-  }
+  auto* dev = deviceList->currentData().value<DAQ::Device*>();
 
   // Check to make sure DAQ is of the right type
   // if not, disable functions, else set

@@ -81,10 +81,13 @@ bool Workspace::Manager::isRegistered(const Modules::Plugin* plugin)
 
 std::vector<DAQ::Device*> Workspace::Manager::getDevices(const std::string& driver)
 {
-  if (m_driver_registry.find(driver) == m_driver_registry.end()) {
+  auto iter = std::find_if(m_driver_registry.begin(),
+                           m_driver_registry.end(),
+                           [&](const driver_registry_entry& entry){ return entry.second->getDriverName() == driver;}); 
+  if (iter == m_driver_registry.end()) {
     return {};
   }
-  return this->m_driver_registry[driver]->getDevices();
+  return iter->second->getDevices();
 }
 
 std::vector<DAQ::Device*> Workspace::Manager::getAllDevices()
@@ -202,21 +205,47 @@ void Workspace::Manager::unloadPlugin(Modules::Plugin* plugin)
 
 void Workspace::Manager::registerDriver(const std::string& driver_location)
 {
-  if(this->m_driver_registry.find(driver_location) != this->m_driver_registry.end()){
-    return;
-  }
+  auto iter = std::find_if(m_driver_registry.begin(),
+                           m_driver_registry.end(),
+                           [&](const driver_registry_entry& entry){ return entry.first == driver_location;}); 
+  if(iter != this->m_driver_registry.end()){ return; }
   int errcode = this->m_driver_loader->load(driver_location.c_str());
   if(errcode < 0){ return; }
   auto getDriver = this->m_driver_loader->dlsym<DAQ::Driver* (*)()>(driver_location.c_str(), "getDriver");
-  this->m_driver_registry[driver_location] = getDriver();
+  if(getDriver == nullptr) {
+    ERROR_MSG("Workspace::Manager::registerDriver : Unable to load dynamic library file {}", driver_location);
+    return;
+  }
+  DAQ::Driver* driver = getDriver();
+  if(driver == nullptr) {
+    ERROR_MSG("Workspace::Manager::registerDriver : Unable to load driver from library {}", driver_location);
+    return;
+  }
+  this->m_driver_registry.emplace_back(driver_location, driver);
+  std::vector<Event::Object> plug_device_events;
+  for(auto* device: driver->getDevices()){
+    plug_device_events.emplace_back(Event::Type::RT_DEVICE_INSERT_EVENT);
+    plug_device_events.back().setParam("device", std::any(static_cast<RT::Device*>(device)));
+  }
+  this->event_manager->postEvent(plug_device_events);
 }
 
 void Workspace::Manager::unregisterDriver(const std::string& driver_location)
 {
-  if(this->m_driver_registry.find(driver_location) == this->m_driver_registry.end()){
+  auto iter = std::find_if(m_driver_registry.begin(),
+                           m_driver_registry.end(),
+                           [&](const driver_registry_entry& entry){ return entry.first == driver_location;}); 
+
+  if(iter == this->m_driver_registry.end()){
     return;
   }
-  this->m_driver_registry.erase(driver_location);
+  std::vector<Event::Object> unplug_device_events;
+  for(auto *device : iter->second->getDevices()){
+    unplug_device_events.emplace_back(Event::Type::RT_DEVICE_REMOVE_EVENT);
+    unplug_device_events.back().setParam("device", std::any(static_cast<RT::Device*>(device)));
+  }
+  this->event_manager->postEvent(unplug_device_events);
+  this->m_driver_registry.erase(iter);
   this->m_driver_loader->unload(driver_location.c_str());
 }
 
@@ -287,6 +316,9 @@ void Workspace::Manager::receiveEvent(Event::Object* event)
       } else {
         event->setParam("status", std::any(std::string("failure")));
       }
+      break;
+    case Event::Type::DAQ_DEVICE_QUERY_EVENT : 
+      event->setParam("devices", std::any(this->getAllDevices()));
       break;
     default:
       return;
