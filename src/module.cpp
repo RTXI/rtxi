@@ -630,11 +630,6 @@ Modules::Component* Modules::Plugin::getComponent()
   return this->plugin_component.get();
 }
 
-DAQ::Device* Modules::Plugin::getDevice()
-{
-  return this->plugin_device.get();
-}
-
 Event::Manager* Modules::Plugin::getEventManager()
 {
   return this->event_manager;

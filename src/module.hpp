@@ -18,10 +18,10 @@
 #include <variant>
 #include <vector>
 
-#include "daq.hpp"
 #include "dlplugin.hpp"
 #include "event.hpp"
 #include "io.hpp"
+#include "rt.hpp"
 
 // These metatype declarations are needed by qt to store
 // the types in QVariant, which is very convenient and reduces
@@ -511,7 +511,6 @@ public:
 
 protected:
   Modules::Component* getComponent();
-  DAQ::Device* getDevice();
   Event::Manager* getEventManager();
   QMainWindow* getQMainWindow();
   Modules::Panel* getPanel();
@@ -519,7 +518,6 @@ protected:
 private:
   // owned pointers
   std::unique_ptr<Modules::Component> plugin_component;
-  std::unique_ptr<DAQ::Device> plugin_device;
 
   // not owned pointers (managed by external objects)
   Event::Manager* event_manager = nullptr;
