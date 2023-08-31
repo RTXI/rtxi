@@ -24,39 +24,3 @@
 #include "dlplugin.hpp"
 
 
-
-//void DAQ::Manager::registerDriver(const std::string& driver_location)
-//{
-//  if (driver_location.empty()) {
-//    ERROR_MSG("DAQ::Manager::registerDriver : Invalid driver\n");
-//    return;
-//  }
-//
-//  if (m_driver_registry.find(driver_location) != m_driver_registry.end()) {
-//    return;
-//  }
-//  m_driver_registry[driver_location] = driver;
-//}
-//
-//void DAQ::Manager::unregisterDriver(const std::string& name)
-//{
-//  if (driverMap.find(name) == driverMap.end()) {
-//    ERROR_MSG("DAQ::Manager::unregisterDriver : Driver not registered\n");
-//    return;
-//  }
-//  driverMap.erase(name);
-//}
-//
-//void DAQ::Manager::receiveEvent(Event::Object* event)
-//{
-//  switch (event->getType()) {
-//    case Event::Type::DAQ_DEVICE_QUERY_EVENT: {
-//      auto device_name = std::any_cast<std::string>(event->getParam("name"));
-//      auto* dev = this->getDevice(device_name);
-//      event->setParam("device", std::any(dev));
-//      break;
-//    }
-//    default:
-//      return;
-//  }
-//}
