@@ -60,8 +60,7 @@ inline std::vector<IO::channel_t> get_default_channels()
            "This is the channel used by the Data Recorder to record on other "
            "inputs and "
            "output ports",
-           IO::INPUT,
-           1}};
+           IO::INPUT}};
 }
 
 typedef struct record_channel

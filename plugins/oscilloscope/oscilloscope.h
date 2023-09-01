@@ -63,8 +63,7 @@ inline std::vector<IO::channel_t> get_default_channels()
            "This is the channel used by the osciloscope to probe on other "
            "inputs and "
            "output ports",
-           IO::INPUT,
-           1}};
+           IO::INPUT}};
 }
 
 class Component : public Modules::Component

@@ -95,8 +95,8 @@ public:
       : IO::Block(std::move(n), c, /*isdependent=*/false)
   {
   }
-  Device(const Device& connector) = default;  // copy constructor
-  Device& operator=(const Device& connector) =
+  Device(const Device&) = default;  // copy constructor
+  Device& operator=(const Device&) =
       default;  // copy assignment operator
   Device(Device&&) = delete;  // move constructor
   Device& operator=(Device&&) = delete;  // move assignment operator

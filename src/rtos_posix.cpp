@@ -140,9 +140,6 @@ int64_t RT::OS::getPeriod()
 
 void RT::OS::sleepTimestep(RT::OS::Task* task)
 {
-  if (task->next_t < RT::OS::DEFAULT_PERIOD) {
-    task->next_t = RT::OS::getTime() + task->period;
-  }
   const int64_t sleep_time = task->next_t;
   task->next_t += task->period;
 

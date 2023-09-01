@@ -872,7 +872,7 @@ DataRecorder::Component::Component(Modules::Plugin* hplugin,
 void DataRecorder::Component::execute()
 {
   DataRecorder::data_token_t data_sample;
-  const double value = readinput(0)[0];
+  const double value = readinput(0);
   switch (this->getState()) {
     case RT::State::EXEC:
       data_sample.time = RT::OS::getTime();

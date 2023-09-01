@@ -787,7 +787,7 @@ void Oscilloscope::Component::execute()
   switch (this->getState()) {
     case RT::State::EXEC: {
       sample.time = RT::OS::getTime();
-      sample.value = this->readinput(0)[0];
+      sample.value = this->readinput(0);
       this->fifo->writeRT(&sample, sizeof(Oscilloscope::sample));
       break;
     }

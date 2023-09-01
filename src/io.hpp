@@ -67,7 +67,6 @@ typedef struct channel_t
   std::string name;
   std::string description;
   IO::flags_t flags = IO::UNKNOWN;  // IO::INPUT or IO::OUTPUT
-  size_t data_size = 0;  // For those channels that accept arrays of values
 } channel_t;
 
 /*!
@@ -129,8 +128,6 @@ public:
    */
   std::string getChannelDescription(IO::flags_t type, size_t index) const;
 
-  size_t getChannelSize(IO::flags_t type, size_t channel);
-
   /*!
    * write the values of the specified input channel.
    *
@@ -139,7 +136,7 @@ public:
    *
    * \return The value of the specified input channel.
    */
-  void writeinput(size_t index, const std::vector<double>& data);
+  void writeinput(size_t index, const double& data);
 
   /*!
    * Get the values of the specified output channel.
@@ -147,7 +144,7 @@ public:
    * \param index The output channel's index.
    * \return The value of the specified output channel.
    */
-  const std::vector<double>& readPort(IO::flags_t direction, size_t index);
+  const double& readPort(IO::flags_t direction, size_t index);
 
   bool dependent() const { return this->isInputDependent; }
 
@@ -163,7 +160,7 @@ protected:
    * \param index The channel to read the sent input from
    * \returns A vector of values
    */
-  const std::vector<double>& readinput(size_t index);
+  double& readinput(size_t index);
 
   /*!
    * Writes output to specified channel. Only the block itself has access.
@@ -171,17 +168,16 @@ protected:
    * \param index The channel to write the output to
    * \param data A vector of values to send to the channel
    */
-  void writeoutput(size_t index, const std::vector<double>& data);
   void writeoutput(size_t index, const double& data);
 
 private:
   size_t id = INVALID_BLOCK_ID;
-  using port_t = struct
+  typedef struct port_t
   {
+    double buff_value=0.0;
+    double value=0.0;
     IO::channel_t channel_info;
-    std::vector<double> values;
-    std::vector<double> buff_values;
-  };
+  }port_t;
   std::string name;
   bool isInputDependent;
   std::array<std::vector<port_t>, IO::UNKNOWN> ports;
