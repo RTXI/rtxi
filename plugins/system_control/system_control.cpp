@@ -287,6 +287,7 @@ void SystemControl::Panel::apply()
     // Even if there is no valid device we should still change rt period
     double period = periodEdit->text().toDouble();
     period *= periodUnitList->currentData().toDouble();
+    period *= RT::OS::SECONDS_TO_NANOSECONDS;
     Event::Object event(Event::Type::RT_PERIOD_EVENT);
     event.setParam("period", std::any(static_cast<int64_t>(period)));
     this->getRTXIEventManager()->postEvent(&event);
