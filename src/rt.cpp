@@ -893,6 +893,7 @@ void RT::System::execute(void* sys)
   }
   auto starttime = RT::OS::getTime();
   int64_t endtime = 0;
+  system->task->next_t = starttime + system->task->period;
   while (!(system->task->task_finished)) {
     // storing timing information and placing it in local variables
 
