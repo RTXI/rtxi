@@ -44,7 +44,8 @@ RTXIWizard::Panel::Panel(QMainWindow* mwindow, Event::Manager* ev_manager)
   setWhatsThis(
       "Module Wizard enables management of all RTXI modules. You can download "
       "and install new modules directly from the GitHub site..etc");
-
+  install_prefix.setPath(QCoreApplication::applicationDirPath() 
+    + QString("/rtxi_modules/"));
   auto* customLayout = new QGridLayout;
 
   auto* buttonBox = new QGroupBox;
@@ -104,9 +105,8 @@ RTXIWizard::Panel::Panel(QMainWindow* mwindow, Event::Manager* ev_manager)
   setLayout(customLayout);
   setWindowTitle("Module Wizard");
   getRepos();
-  show();
-
   initParameters();
+  getMdiWindow()->resize(1000, 800);
 }
 
 void RTXIWizard::Panel::initParameters()
@@ -269,8 +269,7 @@ void RTXIWizard::Panel::parseRepos()
 
   const QString readmeUrlPrefix = "https://raw.githubusercontent.com/RTXI/";
   const QString readmeUrlSuffix = "/master/README.md";
-  const QString locationPrefix = QCoreApplication::applicationDirPath() 
-    + QString("../../lib/rtxi/");
+  const QString locationPrefix = install_prefix.path();
 
   for (auto && idx : jsonArr) {
     QJsonObject newObj = (idx).toObject();
@@ -288,10 +287,10 @@ void RTXIWizard::Panel::parseRepos()
       module.readme_url = QUrl(readmeUrlPrefix + newObj.value("name").toString()
                                + readmeUrlSuffix);
       module.clone_url = QUrl(newObj.value("clone_url").toString());
-      module.location = (locationPrefix + name);
+      module.install_location = (locationPrefix + name);
       module.readme = "";
 
-      module.installed = (QDir(module.location)).exists();
+      module.installed = (QDir(module.install_location)).exists();
       modules[name] = module;
     }
   }
@@ -336,14 +335,19 @@ void RTXIWizard::Panel::installFromString(const std::string& module_name)
                                        this);
   progress->setWindowModality(Qt::WindowModal);
   progress->show();
-  progress->setLabelText("Configuring...");
+  progress->setLabelText("Starting...");
   /*
    * Two QByteArray variables are needed due to the way Qt stores binary data.
    * Calling module->getCloneUrl().toString().toLatin1().data() will produce
    * an error.
    */
   const QByteArray url = modules[name].clone_url.toString().toLatin1();
-  const QByteArray path = modules[name].location.toLatin1();
+  const QByteArray installpath = modules[name].install_location.toLatin1();
+  const QString source_location = QDir::temp().absolutePath() 
+    + QString("/rtxi_modules/") 
+    + QString::fromStdString(module_name);
+  QDir(source_location).removeRecursively(); 
+  const QByteArray clonepath = source_location.toLatin1();
 
   int error = 0;
 
@@ -351,16 +355,18 @@ void RTXIWizard::Panel::installFromString(const std::string& module_name)
   progress->setValue(1);
   //QApplication::processEvents();
   // If the repo already exists, pull from master. If not, clone it.
-  if(!(QDir(modules[name].location)).exists()) {
+  if(!(QDir(source_location)).exists()) {
     git_repository* repo = nullptr;
-    error = printGitError(git_clone(&repo, url, path, nullptr));
+    git_clone_options opts = GIT_CLONE_OPTIONS_INIT;
+    opts.checkout_branch = "rtxi3";
+    error = printGitError(git_clone(&repo, url, clonepath, &opts));
     git_repository_free(repo);
     if(error != 0) { return; }
   }
 
   git_repository* repo = nullptr;
   git_remote* remote = nullptr;
-  git_repository_open(&repo, path);
+  git_repository_open(&repo, clonepath);
   error += printGitError(git_remote_lookup(&remote, repo, "origin"));
   error += printGitError(
       git_remote_connect(remote, GIT_DIRECTION_FETCH, nullptr, nullptr, nullptr));
@@ -378,18 +384,17 @@ void RTXIWizard::Panel::installFromString(const std::string& module_name)
     rebuildListWidgets();
     availableListWidget->setDisabled(false);
     installedListWidget->setDisabled(false);
+    progress->close();
     return;
   } 
-
   // Define the commands to be run.
-  const QString source_location = modules[name].location;
   const QString build_location = source_location + QString("/build");
   const QString make_cmd = "cmake";
   const QStringList make_config_args = 
-    {"-S", build_location , "-B", modules[name].location+QString("/build")};
+    {"-S", source_location , "-B", build_location};
   const QStringList make_build_args = {"--build", build_location, "-j2"};
   const QStringList make_install_args = 
-    {"--install", build_location , "--prefix", "../"};
+    {"--install", build_location , "--prefix", install_prefix.path() };
 
   progress->setLabelText("Configuring...");
   progress->setValue(2);

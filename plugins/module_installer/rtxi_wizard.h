@@ -24,6 +24,7 @@
 #include <QProgressDialog>
 #include <QTextEdit>
 #include <QListWidget>
+#include <QDir>
 #include <map>
 #include "module.hpp"
 
@@ -50,13 +51,13 @@ private slots:
   void parseReadme();
 
 private:
+  QDir install_prefix;
 
   struct module_t
   {
-    // QListWidgetItem *listItem;
     QUrl readme_url;
     QUrl clone_url;
-    QString location;
+    QString install_location;
     QString readme;
     bool installed;
   };
