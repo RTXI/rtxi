@@ -87,12 +87,10 @@ protected:
     defaultInputChannel.name = defaultInputChannelName;
     defaultInputChannel.description = defaultInputChannelDescription;
     defaultInputChannel.flags = IO::INPUT;
-    defaultInputChannel.data_size = 1;
     IO::channel_t defaultOutputChannel = {};
     defaultOutputChannel.name = defaultInputChannelName;
     defaultOutputChannel.description = defaultInputChannelDescription;
     defaultOutputChannel.flags = IO::OUTPUT;
-    defaultOutputChannel.data_size = 1;
     defaultChannelList.push_back(defaultInputChannel);
     defaultChannelList.push_back(defaultOutputChannel);
   }

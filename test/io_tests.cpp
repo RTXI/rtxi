@@ -43,12 +43,10 @@ std::vector<IO::channel_t> generateDefaultChannelList()
   defaultInputChannel.name = defaultInputChannelName;
   defaultInputChannel.description = defaultInputChannelDescription;
   defaultInputChannel.flags = IO::INPUT;
-  defaultInputChannel.data_size = 1;
   IO::channel_t defaultOutputChannel = {};
   defaultOutputChannel.name = defaultOutputChannelName;
   defaultOutputChannel.description = defaultOutputChannelDescription;
   defaultOutputChannel.flags = IO::OUTPUT;
-  defaultOutputChannel.data_size = 1;
   defaultChannelList.push_back(defaultInputChannel);
   defaultChannelList.push_back(defaultOutputChannel);
 
@@ -82,13 +80,13 @@ TEST_F(IOBlockTest, getDescription)
 TEST_F(IOBlockTest, readPort)
 {
   IO::Block block(this->defaultBlockName, this->defaultChannelList, true);
-  std::vector<double> defaultval = {0.0};
-  EXPECT_DOUBLE_EQ(defaultval[0], block.readPort(IO::OUTPUT, 0)[0]);
+  double defaultval = 0.0;
+  EXPECT_DOUBLE_EQ(defaultval, block.readPort(IO::OUTPUT, 0));
 }
 
 TEST_F(IOBlockTest, writeinput)
 {
-  std::vector<double> values = {1.0};
+  double values = 1.0;
   class testBlock : public IO::Block
   {
   public:
@@ -101,9 +99,9 @@ TEST_F(IOBlockTest, writeinput)
   testBlock tempblock("TEST:BLOCK:NAME", this->defaultChannelList);
   tempblock.writeinput(0, values);
   tempblock.echo();
-  EXPECT_DOUBLE_EQ(values[0], tempblock.readPort(IO::OUTPUT, 0)[0]);
+  EXPECT_DOUBLE_EQ(values, tempblock.readPort(IO::OUTPUT, 0));
   tempblock.writeinput(0, values);
   tempblock.writeinput(0, values);
   tempblock.echo();
-  EXPECT_DOUBLE_EQ(values[0] + values[0], tempblock.readPort(IO::OUTPUT, 0)[0]);
+  EXPECT_DOUBLE_EQ(values + values, tempblock.readPort(IO::OUTPUT, 0));
 }

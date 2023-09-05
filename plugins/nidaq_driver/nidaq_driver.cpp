@@ -526,8 +526,7 @@ void Driver::loadDevices()
         description += std::to_string(channel_id);
         channels.push_back({chan_name, 
                             description, 
-                            query_indx%2==0 ? IO::INPUT : IO::OUTPUT, 
-                            1});
+                            query_indx%2==0 ? IO::INPUT : IO::OUTPUT});
       }
     }
     this->nidaq_devices.emplace_back(temp_daq_name, channels, internal_dev_name);
