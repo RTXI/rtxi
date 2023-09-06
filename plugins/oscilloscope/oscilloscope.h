@@ -27,9 +27,7 @@
 #ifndef OSCILLOSCOPE_H
 #define OSCILLOSCOPE_H
 
-#include <QtWidgets>
-
-#include <qopenglwidget.h>
+#include <QComboBox>
 
 #include "event.hpp"
 #include "fifo.hpp"

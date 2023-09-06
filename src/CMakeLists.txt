@@ -96,7 +96,6 @@ target_link_libraries(rtxi
     Boost::headers
     backtrace
     dl
-  PUBLIC
     Qt5::Core
     Qt5::Gui
     Qt5::Widgets
@@ -109,11 +108,19 @@ add_library(workspace OBJECT
 target_link_libraries(workspace PRIVATE 
     rtxi
     dlplugin
+    rtmath_lib
+    performance_measurement_lib
+    userprefs_lib
+    system_control_lib
+    connector_lib
+    oscilloscope_lib
+    data_recorder_lib
+    module_installer_lib
     HDF5::HDF5
-    Qt5::Core
-    Qt5::Gui
-    Qt5::Widgets
-    Qt5::Network
+    Qt::Core
+    Qt::Gui
+    Qt::Widgets
+    Qt::Network
     qwt::qwt
     Boost::headers
     backtrace
@@ -138,8 +145,8 @@ target_link_libraries(rtxi_exe PRIVATE
     xfifo
     rtos 
     rtxi
-    workspace
     rtmath_lib
+    workspace
     performance_measurement_lib
     userprefs_lib
     system_control_lib
@@ -149,6 +156,10 @@ target_link_libraries(rtxi_exe PRIVATE
     module_installer_lib
     Boost::headers
     qwt::qwt
+    Qt::Core
+    Qt::Gui
+    Qt::Widgets
+    Qt::Network
     fmt::fmt
     HDF5::HDF5
     git2
@@ -156,6 +167,21 @@ target_link_libraries(rtxi_exe PRIVATE
     backtrace
     dl
 )
+
+if(NOT nidaqmx-NOTFOUND)
+message("National Instruments Library found")
+add_library(rtxinidaqdriver MODULE
+  nidaq_driver.cpp
+)
+
+target_include_directories(rtxinidaqdriver
+ 	PUBLIC	
+	"$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>"
+  	"$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
+)
+
+target_link_libraries(rtxinidaqdriver PRIVATE nidaqmx rtos)
+endif()
 
 target_compile_features(rtxi PUBLIC cxx_std_17)
 target_compile_features(rtos PUBLIC cxx_std_17)

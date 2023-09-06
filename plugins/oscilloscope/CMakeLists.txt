@@ -7,8 +7,10 @@ add_library(oscilloscope_lib OBJECT
     oscilloscope.cpp
 )
 
-target_link_libraries(oscilloscope_lib PUBLIC
+target_link_libraries(oscilloscope_lib PRIVATE 
     rtos
     rtxi
     qwt::qwt
+    Qt::Core
+    Qt::Widgets
 )

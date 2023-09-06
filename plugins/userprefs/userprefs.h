@@ -21,9 +21,7 @@
 #ifndef USERPREFS_H
 #define USERPREFS_H
 
-#include <QObject>
-#include <QtWidgets>
-
+#include <QSettings>
 #include "module.hpp"
 
 namespace UserPrefs

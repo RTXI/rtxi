@@ -25,7 +25,6 @@
 #include <cmath>
 #include <cstddef>
 #include <map>
-#include <qchar.h>
 
 #include "io.hpp"
 #include "rt.hpp"

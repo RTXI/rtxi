@@ -26,7 +26,6 @@
 #include <QMdiArea>
 #include <QMdiSubWindow>
 #include <QMenu>
-#include <QObject>
 
 #include "event.hpp"
 

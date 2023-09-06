@@ -24,18 +24,20 @@
          oscilloscope properties.
  */
 
+#include <QButtonGroup>
+#include <QRadioButton>
+#include <QTimer>
+
+#include <qwt_plot_renderer.h>
+
 #include <cmath>
 #include <sstream>
 
-#include "oscilloscope.h"
-
-#include <qnamespace.h>
-#include <qwt_plot_renderer.h>
-
 #include "debug.hpp"
 #include "main_window.hpp"
-#include "oscilloscope/scope.h"
 #include "rt.hpp"
+#include "oscilloscope/scope.h"
+#include "oscilloscope.h"
 
 void Oscilloscope::Plugin::receiveEvent(Event::Object* event)
 {

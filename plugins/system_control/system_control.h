@@ -20,7 +20,7 @@
 #ifndef SYSTEM_CONTROL_H
 #define SYSTEM_CONTROL_H
 
-#include <QtWidgets>
+#include <QComboBox>
 
 #include "daq.hpp"
 #include "event.hpp"

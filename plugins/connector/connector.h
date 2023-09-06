@@ -21,7 +21,9 @@
 #ifndef CONNECTOR_H
 #define CONNECTOR_H
 
-#include <QtWidgets>
+#include <QComboBox>
+#include <QListWidget>
+
 #include <vector>
 
 #include "event.hpp"

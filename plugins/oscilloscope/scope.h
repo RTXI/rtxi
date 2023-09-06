@@ -30,12 +30,10 @@
 #ifndef SCOPE_H
 #define SCOPE_H
 
-#include <QtWidgets>
 #include <cstddef>
 #include <shared_mutex>
 #include <vector>
 
-#include <qnamespace.h>
 #include <qwt.h>
 #include <qwt_curve_fitter.h>
 #include <qwt_interval.h>

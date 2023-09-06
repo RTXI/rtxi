@@ -11,16 +11,21 @@ add_library(testing_lib OBJECT
     plugin_tests.hpp plugin_tests.cpp
 )
 
-target_link_libraries(testing_lib PUBLIC 
+target_link_libraries(testing_lib PRIVATE 
     rtos
     xfifo
     rtxi
-    rtmath_lib
+    workspace
+    Qt::Core
+    Qt::Gui
+    Qt::Widgets
+    Qt::Network
     GTest::gtest GTest::gtest_main
     GTest::gmock GTest::gmock_main 
     Boost::headers
     dl
     backtrace
+    fmt::fmt
 )
 
 add_executable(rtxiTests
@@ -36,8 +41,8 @@ target_link_libraries(rtxiTests PRIVATE
     rtos
     xfifo
     rtxi
-    workspace
     rtmath_lib
+    workspace
     performance_measurement_lib
     userprefs_lib
     system_control_lib
@@ -45,11 +50,9 @@ target_link_libraries(rtxiTests PRIVATE
     oscilloscope_lib
     data_recorder_lib
     module_installer_lib
-    qwt::qwt
-    fmt::fmt
-    HDF5::HDF5
-    markdown
-    git2
+    Qt::Core
+    Qt::Gui
+    Qt::Widgets
 )
 
 add_library(fakePlugin MODULE fakePlugin.h fakePlugin.cpp)
@@ -61,9 +64,9 @@ target_link_libraries(fakePlugin PRIVATE
     rtxi
     rtos
     dlplugin
-    Qt5::Core
-    Qt5::Gui
-    Qt5::Widgets
+    Qt::Core
+    Qt::Gui
+    Qt::Widgets
 )
 
 target_compile_definitions(rtxiTests PRIVATE BOOST_STACKTRACE_USE_ADDR2LINE)

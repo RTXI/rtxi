@@ -5,6 +5,9 @@ add_library(connector_lib OBJECT
     connector.cpp
 )
 
-target_link_libraries(connector_lib PUBLIC
+target_link_libraries(connector_lib PRIVATE 
     rtxi
+    Qt::Core
+    Qt::Widgets
+    Qt::Gui
 )

@@ -21,11 +21,6 @@
 #ifndef PERFORMANCE_MEASUREMENT_H
 #define PERFORMANCE_MEASUREMENT_H
 
-#include <QFile>
-#include <QFileDialog>
-#include <QMessageBox>
-#include <QObject>
-#include <QTextStream>
 #include <QtWidgets>
 
 #include "math/runningstat.h"

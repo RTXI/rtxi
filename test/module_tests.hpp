@@ -29,7 +29,6 @@
 #include "io_tests.hpp"
 #include "main_window.hpp"
 #include "module.hpp"
-#include "workspace.hpp"
 
 enum TEST_PARAMETER_ID : size_t
 {
@@ -100,8 +99,6 @@ protected:
     this->system = std::make_unique<RT::System>(this->event_manager.get(),
                                                 this->connector.get());
     this->system->createTelemitryProcessor();
-    this->mod_manager =
-        std::make_unique<Workspace::Manager>(this->event_manager.get());
     auto component = std::make_unique<mockModuleComponent>();
     this->plugin = std::make_unique<Modules::Plugin>(this->event_manager.get(),
                                                      "testname");
@@ -118,7 +115,6 @@ protected:
   std::unique_ptr<RT::Connector> connector;
   std::unique_ptr<Event::Manager> event_manager;
   std::unique_ptr<RT::System> system;
-  std::unique_ptr<Workspace::Manager> mod_manager;
   // std::unique_ptr<Modules::Manager> plugin_manager;
 
   std::unique_ptr<Modules::Plugin> plugin;

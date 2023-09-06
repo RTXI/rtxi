@@ -1,6 +1,8 @@
-#include <NIDAQmx.h>
 
-#include <utility>
+extern "C" {
+#include <NIDAQmx.h>
+}
+
 #include <fmt/core.h>
 #include "daq.hpp"
 
@@ -202,9 +204,13 @@ int32_t physical_channel_t::addToTask(TaskHandle task_handle) const
 class Device final : public DAQ::Device
 {
 public:
+  Device(const Device&) = default;
+  Device(Device&&) = delete;
+  Device& operator=(const Device&) = delete;
+  Device& operator=(Device&&) = delete;
   Device(const std::string& dev_name,
          const std::vector<IO::channel_t>& channels,
-         std::string  internal_name);
+         std::string internal_name);
   ~Device() final;
 
   size_t getChannelCount(DAQ::ChannelType::type_t type) const final;
@@ -476,7 +482,7 @@ int Device::setAnalogDownsample(DAQ::ChannelType::type_t  /*type*/,
   return 0;
 }
 
-int Device::setAnalogCounter(DAQ::ChannelType::type_t  /*type*/, DAQ::index_t index) { return 0; }
+int Device::setAnalogCounter(DAQ::ChannelType::type_t  /*type*/, DAQ::index_t  /*index*/) { return 0; }
 int Device::setAnalogCalibrationValue(DAQ::ChannelType::type_t  /*type*/,
                                       DAQ::index_t  /*index*/,
                                       double  /*value*/) { return 0; }
@@ -488,7 +494,7 @@ int Device::setAnalogCalibrationActive(DAQ::ChannelType::type_t  /*type*/,
 bool Device::getAnalogCalibrationActive(DAQ::ChannelType::type_t  /*type*/, DAQ::index_t  /*index*/) const  { return false; }
 bool Device::getAnalogCalibrationState(DAQ::ChannelType::type_t  /*type*/, DAQ::index_t  /*index*/) const  { return false; }
 
-int Device::setDigitalDirection(DAQ::index_t index, DAQ::direction_t direction) {}
+int Device::setDigitalDirection(DAQ::index_t  /*index*/, DAQ::direction_t  /*direction*/) { return 0;}
 
 void Device::read(){}
 void Device::write(){}
@@ -548,20 +554,22 @@ std::vector<DAQ::Device*> Driver::getDevices()
   return devices;
 }
 
-static std::mutex driver_mut;
-static std::unique_ptr<Driver> instance;
+namespace {
+  std::mutex driver_mut;
+  Driver* instance;
+} // namespace
 
 DAQ::Driver* Driver::getInstance()
 {
+  std::unique_lock<std::mutex> lock(driver_mut);
   if(instance == nullptr){
-    std::unique_lock<std::mutex> lock(driver_mut);
-    instance = std::unique_ptr<Driver>(new Driver());
+    instance = new Driver();
   }
-  return instance.get();
+  return instance;
 }
 
 extern "C" {
-DAQ::Driver* getDriver(){
+DAQ::Driver* getRTXIDAQDriver(){
   return Driver::getInstance();
 }
 }

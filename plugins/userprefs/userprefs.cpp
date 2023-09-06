@@ -23,10 +23,12 @@
  * is destructed. So all Reset, Apply, and Cancel buttons all close the panel.
  */
 
-#include "userprefs.h"
+#include <QFileDialog>
+
 
 #include "debug.hpp"
 #include "main_window.hpp"
+#include "userprefs.h"
 
 UserPrefs::Plugin::Plugin(Event::Manager* ev_manager)
     : Modules::Plugin(ev_manager, std::string(UserPrefs::MODULE_NAME))

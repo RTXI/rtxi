@@ -21,7 +21,7 @@
 #include <cmath>
 #include <mutex>
 
-#include "scope.h"
+#include <QTimer>
 
 #include <qwt_abstract_scale_draw.h>
 #include <qwt_plot_legenditem.h>
@@ -29,6 +29,7 @@
 #include <stdlib.h>
 
 #include "rt.hpp"
+#include "scope.h"
 
 Oscilloscope::LegendItem::LegendItem()
 {

@@ -19,13 +19,12 @@
 
 #include <functional>
 
-#include "performance_measurement.hpp"
-
 #include "debug.hpp"
 #include "event.hpp"
-#include "main_window.hpp"
 #include "module.hpp"
 #include "rt.hpp"
+#include "main_window.hpp"
+#include "performance_measurement.hpp"
 
 PerformanceMeasurement::Panel::Panel(const std::string& mod_name,
                                      QMainWindow* mwindow,

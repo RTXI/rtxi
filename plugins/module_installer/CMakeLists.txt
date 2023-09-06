@@ -5,6 +5,12 @@ add_library(module_installer_lib OBJECT
     rtxi_wizard.cpp
 )
 
-target_link_libraries(module_installer_lib PUBLIC
-	rtxi Qt5::Network git2 markdown 
+target_link_libraries(module_installer_lib PRIVATE 
+    rtxi 
+    Qt::Core
+    Qt::Widgets
+    Qt::Gui
+    Qt::Network 
+    git2 
+    markdown 
 )
