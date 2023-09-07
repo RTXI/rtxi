@@ -166,8 +166,7 @@ void RTXIWizard::Panel::cloneModule()
       name = installedListWidget->currentItem()->text();
       break;
     default:
-      std::cout << "ERROR: default in switch block in cloneModule()"
-                << std::endl;
+      ERROR_MSG("ERROR: default in switch block in cloneModule()");
       break;
   }
 
@@ -243,8 +242,7 @@ void RTXIWizard::Panel::parseReadme()
       modules[installedListWidget->currentItem()->text()].readme = fileText;
       break;
     default:
-      std::cout << "ERROR: default in swtich block in cloneModule()"
-                << std::endl;
+      ERROR_MSG("ERROR: default in swtich block in cloneModule()");
       break;
   }
 
@@ -391,10 +389,10 @@ void RTXIWizard::Panel::installFromString(const std::string& module_name)
   const QString build_location = source_location + QString("/build");
   const QString make_cmd = "cmake";
   const QStringList make_config_args = 
-    {"-S", source_location , "-B", build_location, "-DRTXI_PACKAGE_PATH=", package_dir.path()};
+    {"-S", source_location , "-B", build_location, QString("-DRTXI_PACKAGE_PATH=")+package_dir.path()};
   const QStringList make_build_args = {"--build", build_location, "-j2"};
   const QStringList make_install_args = 
-    {"--install", build_location , "--prefix", install_prefix.path() };
+    {"--install", build_location};
 
   progress->setLabelText("Configuring...");
   progress->setValue(2);
