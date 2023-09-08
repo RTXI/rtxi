@@ -381,32 +381,16 @@ void MainWindow::loadSettings()
 
 void MainWindow::saveSettings()
 {
-  const QSettings userprefs;
-  const QString env_var = QString::fromLocal8Bit(qgetenv("HOME"));
-
-  QString filename = QFileDialog::getSaveFileName(
-      this,
-      tr("Save current workspace"),
-      userprefs.value("/dirs/setfiles", env_var).toString(),
-      tr("Settings (*.set)"));
-
-  if (!filename.isEmpty()) {
-    if (!filename.endsWith(".set")) {
-      filename = filename + ".set";
-    }
-    if (QFileInfo(filename).exists()
-        && QMessageBox::warning(this,
-                                "File Exists",
-                                "Do you wish to overwrite " + filename + "?",
-                                QMessageBox::Yes,
-                                QMessageBox::No)
-            != QMessageBox::Yes)
-    {
-      // DEBUG_MSG ("MainWindow::saveSettings : canceled overwrite\n");
-      return;
-    }
-    // Settings::Manager::getInstance()->save(filename.toStdString());
-  }
+  QSettings userprefs;
+  userprefs.beginGroup("Workspaces"); 
+  auto* save_settings_dialog = new QInputDialog(this);
+  save_settings_dialog->setInputMode(QInputDialog::TextInput);
+  save_settings_dialog->setComboBoxEditable(true);
+  save_settings_dialog->setComboBoxItems(userprefs.childGroups());
+  save_settings_dialog->setLabelText("Profile");
+  save_settings_dialog->setOkButtonText("Save");
+  userprefs.endGroup();
+  save_settings_dialog->exec();
 }
 
 void MainWindow::resetSettings()
