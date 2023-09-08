@@ -442,7 +442,7 @@ public:
   {
     const int result = 0;
     Modules::Variable::variable_t param_type = Modules::Variable::UNKNOWN;
-    if (typeid(T) == typeid(int)) {
+    if (typeid(T) == typeid(int64_t)) {
       param_type = Modules::Variable::INT_PARAMETER;
     } else if (typeid(T) == typeid(double)) {
       param_type = Modules::Variable::DOUBLE_PARAMETER;
