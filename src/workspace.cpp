@@ -147,12 +147,6 @@ Modules::Plugin* Workspace::Manager::loadPlugin(const std::string& library)
 
   int result = this->m_plugin_loader->load(library_loc.c_str());
   if (result != 0) {
-    // We try to load it from another location besides locally
-    ERROR_MSG("Modules::Plugin::loadPlugin : could not load module locally");
-    library_loc = RTXI_DEFAULT_PLUGIN_DIR + library;
-    result = this->m_plugin_loader->load(library_loc.c_str());
-  }
-  if (result != 0) {
     ERROR_MSG("Plugin::load : failed to load {}", library_loc.c_str());
     return nullptr;
   }

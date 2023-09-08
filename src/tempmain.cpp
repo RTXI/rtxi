@@ -30,8 +30,6 @@ int main(int argc, char* argv[])
   std::cout << RTXI_VERSION_MINOR << ".";
   std::cout << RTXI_VERSION_PATCH << "\n";
 
-  std::cout << "Defalt config location: " << RTXI_DEFAULT_SETTINGS_DIR << "\n";
-
   // Initializing core classes
   auto event_manager = std::make_unique<Event::Manager>();
   auto rt_connector = std::make_unique<RT::Connector>();

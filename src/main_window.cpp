@@ -351,9 +351,6 @@ void MainWindow::openSubIssue()
 void MainWindow::loadWindow()
 {
   QSettings userprefs;
-  QSettings::setPath(QSettings::NativeFormat,
-                     QSettings::SystemScope,
-                     QString::fromStdString(RTXI_DEFAULT_SETTINGS_DIR));
   userprefs.beginGroup("MainWindow");
   restoreGeometry(userprefs.value("geometry", saveGeometry()).toByteArray());
   move(userprefs.value("pos", pos()).toPoint());
@@ -369,9 +366,6 @@ void MainWindow::loadSettings()
 {
   const QSettings userprefs;
   const QString env_var = QString::fromLocal8Bit(qgetenv("HOME"));
-  QSettings::setPath(QSettings::NativeFormat,
-                     QSettings::SystemScope,
-                     QString::fromStdString(RTXI_DEFAULT_SETTINGS_DIR));
 
   const QString filename = QFileDialog::getOpenFileName(
       this,
@@ -389,9 +383,6 @@ void MainWindow::saveSettings()
 {
   const QSettings userprefs;
   const QString env_var = QString::fromLocal8Bit(qgetenv("HOME"));
-  QSettings::setPath(QSettings::NativeFormat,
-                     QSettings::SystemScope,
-                     QString::fromStdString(RTXI_DEFAULT_SETTINGS_DIR));
 
   QString filename = QFileDialog::getSaveFileName(
       this,
@@ -510,7 +501,7 @@ void MainWindow::modulesMenuActivated(QAction* /*unused*/)
   const QString filename = QFileDialog::getOpenFileName(
       this,
       tr("Load Plugin"),
-      QString::fromStdString(std::string(RTXI_DEFAULT_PLUGIN_DIR)),
+      QCoreApplication::applicationDirPath()+QString("/")+QString("rtxi_modules"),
       tr("Plugins (*.so);;All (*.*)"));
   if (!filename.isNull()) {
     this->loadModule(filename);
@@ -542,9 +533,6 @@ void MainWindow::closeEvent(QCloseEvent* /*event*/)
    * Save MainWindow settings
    */
   QSettings userprefs;
-  QSettings::setPath(QSettings::NativeFormat,
-                     QSettings::SystemScope,
-                     QString::fromStdString(RTXI_DEFAULT_SETTINGS_DIR));
   userprefs.beginGroup("MainWindow");
   userprefs.setValue("geometry", saveGeometry());
   userprefs.setValue("maximized", isMaximized());
