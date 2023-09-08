@@ -160,7 +160,8 @@ void Connector::Panel::buildBlockList()
   this->blocks =
       std::any_cast<std::vector<IO::Block*>>(event.getParam("blockList"));
   for (auto* block : this->blocks) {
-    if (block->getName().find("Probe") != std::string::npos) {
+    if (block->getName().find("Probe") != std::string::npos ||
+        block->getName().find("Recording") != std::string::npos) {
       continue;
     }
     this->inputBlock->addItem(QString::fromStdString(block->getName()) + " "

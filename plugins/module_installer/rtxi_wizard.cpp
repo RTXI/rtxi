@@ -38,6 +38,7 @@ extern "C" {
  */
 RTXIWizard::Panel::Panel(QMainWindow* mwindow, Event::Manager* ev_manager)
     : Modules::Panel(std::string(RTXIWizard::MODULE_NAME), mwindow, ev_manager)
+    , button_mode(DOWNLOAD)
     , readmeWindow(new QTextEdit)
     , availableListWidget(new QListWidget(this))
 {
@@ -222,9 +223,9 @@ void RTXIWizard::Panel::getReadme()
 // within a QTextWidget.
 void RTXIWizard::Panel::parseReadme()
 {
-  QByteArray data = readmeNetworkReply->readAll();
-  const char* raw_data = data.constData();
-  MMIOT* m = mkd_string(raw_data, data.size(), 0);
+  const QByteArray network_reply_data = readmeNetworkReply->readAll();
+  const char* raw_data = network_reply_data.constData();
+  MMIOT* m = mkd_string(raw_data, network_reply_data.size(), 0);
   mkd_compile(m, 0);
 
   char* text = nullptr;
@@ -407,7 +408,7 @@ void RTXIWizard::Panel::installFromString(const std::string& module_name)
         nullptr,
         "Error",
         "Could not Configure plugin. Email help@rtxi.org for assistance");
-    QByteArray err_str = command->readAllStandardError();
+    const QByteArray err_str = command->readAllStandardError();
     ERROR_MSG("{}", err_str.toStdString());
     ERROR_MSG("Configure command for module {} failed with command {}", 
               name.toStdString(),
@@ -431,7 +432,7 @@ void RTXIWizard::Panel::installFromString(const std::string& module_name)
         nullptr,
         "Error",
         "Could not build plugin. Email help@rtxi.org for assistance");
-    QByteArray err_str = command->readAllStandardError();
+    const QByteArray err_str = command->readAllStandardError();
     ERROR_MSG("{}", err_str.toStdString());
     ERROR_MSG("Build command for module {} failed with command {}", 
               name.toStdString(),
@@ -455,7 +456,7 @@ void RTXIWizard::Panel::installFromString(const std::string& module_name)
         nullptr,
         "Error",
         "Could not install plugin. Email help@rtxi.org for assistance");
-    QByteArray err_str = command->readAllStandardError();
+    const QByteArray err_str = command->readAllStandardError();
     ERROR_MSG("{}", err_str.toStdString());
     ERROR_MSG("Install command for module {} failed with command {}",
               name.toStdString(),

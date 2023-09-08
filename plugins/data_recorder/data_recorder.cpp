@@ -264,6 +264,10 @@ void DataRecorder::Panel::buildBlockList()
   auto prev_selected_block = blockList->currentData();
   blockList->clear();
   for (auto* blockptr : blockPtrList) {
+    if(blockptr->getName().find("Probe") != std::string::npos ||
+       blockptr->getName().find("Recording") != std::string::npos){
+      continue;
+    }
     blockList->addItem(QString::fromStdString(blockptr->getName()) + " "
                            + QString::number(blockptr->getID()),
                        QVariant::fromValue(blockptr));

@@ -275,7 +275,8 @@ void Oscilloscope::Panel::buildBlockList()
   blocksListDropdown->clear();
   for (auto* block : blocklist) {
     // Ignore blocks created from oscilloscope (probing blocks)
-    if (block->getName().find("Probe") != std::string::npos) {
+    if (block->getName().find("Probe") != std::string::npos ||
+        block->getName().find("Recording") != std::string::npos) {
       continue;
     }
     this->blocksListDropdown->addItem(QString::fromStdString(block->getName())
