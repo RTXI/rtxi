@@ -16,10 +16,10 @@ target_link_libraries(testing_lib PRIVATE
     xfifo
     rtxi
     workspace
-    Qt::Core
-    Qt::Gui
-    Qt::Widgets
-    Qt::Network
+    Qt5::Core
+    Qt5::Gui
+    Qt5::Widgets
+    Qt5::Network
     GTest::gtest GTest::gtest_main
     GTest::gmock GTest::gmock_main 
     Boost::headers
@@ -50,9 +50,9 @@ target_link_libraries(rtxiTests PRIVATE
     oscilloscope_lib
     data_recorder_lib
     module_installer_lib
-    Qt::Core
-    Qt::Gui
-    Qt::Widgets
+    Qt5::Core
+    Qt5::Gui
+    Qt5::Widgets
 )
 
 add_library(fakePlugin MODULE fakePlugin.h fakePlugin.cpp)
@@ -64,9 +64,9 @@ target_link_libraries(fakePlugin PRIVATE
     rtxi
     rtos
     dlplugin
-    Qt::Core
-    Qt::Gui
-    Qt::Widgets
+    Qt5::Core
+    Qt5::Gui
+    Qt5::Widgets
 )
 
 target_compile_definitions(rtxiTests PRIVATE BOOST_STACKTRACE_USE_ADDR2LINE)

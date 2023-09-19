@@ -15,7 +15,7 @@ install(
     EXPORT rtxiLibraryTargets
 )
 
-if(NOT nidaqmx-NOTFOUND)
+if(nidaqmx)
 install(
     TARGETS rtxinidaqdriver 
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/rtxi
