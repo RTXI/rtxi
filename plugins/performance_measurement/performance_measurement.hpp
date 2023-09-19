@@ -117,5 +117,5 @@ Modules::Panel* createRTXIPanel(QMainWindow* main_window, Event::Manager* ev_man
 std::unique_ptr<Modules::Component> createRTXIComponent(Modules::Plugin* host_plugin);
 
 Modules::FactoryMethods getFactories();
-};  // namespace PerformanceMeasurement
+} // namespace PerformanceMeasurement
 #endif /* PERFORMANCE_MEASUREMENT_H */

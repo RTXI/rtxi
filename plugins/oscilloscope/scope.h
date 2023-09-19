@@ -70,7 +70,7 @@ typedef struct Info
   Trigger::trig_t trigger_direction = NONE;
   double threshold = 0.0;
 } Info;
-};  // namespace Trigger
+} // namespace Trigger
 
 // values meant to be used with qt timer for redrawing the screen
 // values are in milliseconds
@@ -79,7 +79,7 @@ namespace FrameRates
 constexpr size_t HZ60 = 17;
 constexpr size_t HZ120 = 8;
 constexpr size_t HZ240 = 4;
-};  // namespace FrameRates
+} // namespace FrameRates
 
 constexpr size_t DEFAULT_BUFFER_SIZE = 100000;
 typedef struct sample
@@ -118,13 +118,13 @@ enum color_id : size_t
 };
 }  // namespace ColorID
 
-constexpr std::array<QColor, 7> penColors = {QColor(255, 0, 16, 255),
-                                             QColor(255, 164, 5, 255),
-                                             QColor(43, 206, 72, 255),
-                                             QColor(0, 117, 220, 255),
-                                             QColor(178, 102, 255, 255),
-                                             QColor(0, 153, 143, 255),
-                                             QColor(83, 81, 84, 255)};
+const std::array<QColor, 7> penColors = {QColor(255, 0, 16, 255),
+                                         QColor(255, 164, 5, 255),
+                                         QColor(43, 206, 72, 255),
+                                         QColor(0, 117, 220, 255),
+                                         QColor(178, 102, 255, 255),
+                                         QColor(0, 153, 143, 255),
+                                         QColor(83, 81, 84, 255)};
 
 constexpr std::array<std::string_view, 7> color2string {
     "Red", "Orange", "Green", "Blue", "Purple", "Teal", "Black"};
@@ -256,6 +256,6 @@ private:
   std::shared_mutex m_channel_mutex;
 };  // Scope
 
-};  // namespace Oscilloscope
+} // namespace Oscilloscope
 
 #endif  // SCOPE_H

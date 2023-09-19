@@ -72,5 +72,5 @@ std::unique_ptr<Modules::Component> createRTXIComponent(
 
 Modules::FactoryMethods getFactories();
 
-};  // namespace UserPrefs
+} // namespace UserPrefs
 #endif /* USERPREFS */

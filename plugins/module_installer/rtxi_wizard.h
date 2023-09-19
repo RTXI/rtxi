@@ -103,6 +103,6 @@ std::unique_ptr<Modules::Component> createRTXIComponent(
 
 Modules::FactoryMethods getFactories();
 
-};  // namespace RTXIWizard
+} // namespace RTXIWizard
 
 #endif

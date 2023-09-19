@@ -211,6 +211,6 @@ std::unique_ptr<Modules::Component> createRTXIComponent(
     Modules::Plugin* host_plugin);
 
 Modules::FactoryMethods getFactories();
-};  // namespace Oscilloscope
+} // namespace Oscilloscope
 
 #endif  // OSCILLOSCOPE_H

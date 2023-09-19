@@ -95,5 +95,5 @@ std::unique_ptr<Modules::Component> createRTXIComponent(
 
 Modules::FactoryMethods getFactories();
 
-};  // namespace Connector
+} // namespace Connector
 #endif  // CONNECTOR_H

@@ -7,7 +7,7 @@ add_library(connector_lib OBJECT
 
 target_link_libraries(connector_lib PRIVATE 
     rtxi
-    Qt::Core
-    Qt::Widgets
-    Qt::Gui
+    Qt5::Core
+    Qt5::Widgets
+    Qt5::Gui
 )

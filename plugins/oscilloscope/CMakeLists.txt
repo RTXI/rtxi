@@ -11,6 +11,6 @@ target_link_libraries(oscilloscope_lib PRIVATE
     rtos
     rtxi
     qwt::qwt
-    Qt::Core
-    Qt::Widgets
+    Qt5::Core
+    Qt5::Widgets
 )

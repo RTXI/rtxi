@@ -241,6 +241,6 @@ std::unique_ptr<Modules::Component> createRTXIComponent(
 
 Modules::FactoryMethods getFactories();
 
-};  // namespace DataRecorder
+} // namespace DataRecorder
 
 #endif /* DATA_RECORDER_H */
