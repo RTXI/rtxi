@@ -107,6 +107,6 @@ private:
   std::mutex m_dll_mutex;
 };  // class Loader
 
-};  // namespace DLL
+} // namespace DLL
 
 #endif  // PLUGIN_H

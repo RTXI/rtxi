@@ -97,7 +97,7 @@ struct Info
   std::string name;
   std::string description;
   Modules::Variable::variable_t vartype;
-  std::variant<int64_t, double, uint64_t, std::string> value;
+  std::variant<int64_t, double, uint64_t, std::string, RT::State::state_t> value;
 };
 
 }  // namespace Variable
@@ -367,7 +367,7 @@ private:
     Modules::Variable::variable_t type = Modules::Variable::UNKNOWN;
     Modules::Variable::Info info;
   };
-  std::unordered_map<QString, param_t> parameter;
+  std::unordered_map<std::string, param_t> parameter;
   QPalette palette;
 };
 

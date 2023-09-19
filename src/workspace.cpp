@@ -122,7 +122,7 @@ Modules::Plugin* Workspace::Manager::loadCorePlugin(const std::string& library)
 // TODO: extract plugin dynamic loading to another class
 Modules::Plugin* Workspace::Manager::loadPlugin(const std::string& library)
 {
-  std::string library_loc = library;
+  const std::string& library_loc = library;
   Modules::Plugin* plugin_ptr = nullptr;
   // if module factory is already registered then all we have to do is run it
   if (this->rtxi_factories_registry.find(library_loc)

@@ -117,10 +117,10 @@ target_link_libraries(workspace PRIVATE
     data_recorder_lib
     module_installer_lib
     HDF5::HDF5
-    Qt::Core
-    Qt::Gui
-    Qt::Widgets
-    Qt::Network
+    Qt5::Core
+    Qt5::Gui
+    Qt5::Widgets
+    Qt5::Network
     qwt::qwt
     Boost::headers
     backtrace
@@ -156,10 +156,10 @@ target_link_libraries(rtxi_exe PRIVATE
     module_installer_lib
     Boost::headers
     qwt::qwt
-    Qt::Core
-    Qt::Gui
-    Qt::Widgets
-    Qt::Network
+    Qt5::Core
+    Qt5::Gui
+    Qt5::Widgets
+    Qt5::Network
     fmt::fmt
     HDF5::HDF5
     git2
@@ -168,7 +168,7 @@ target_link_libraries(rtxi_exe PRIVATE
     dl
 )
 
-if(NOT nidaqmx-NOTFOUND)
+if(nidaqmx)
 message("National Instruments Library found")
 add_library(rtxinidaqdriver MODULE
   nidaq_driver.cpp

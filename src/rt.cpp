@@ -460,7 +460,7 @@ void RT::System::changeModuleParametersCMD(RT::System::CMD* cmd)
     case Modules::Variable::STATE:
       component->setValue<RT::State::state_t>(
           param_id,
-          static_cast<RT::State::state_t>(std::get<int64_t>(param_value_any)));
+          static_cast<RT::State::state_t>(std::get<State::state_t>(param_value_any)));
       break;
     default:
       ERROR_MSG(

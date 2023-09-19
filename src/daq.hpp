@@ -405,6 +405,6 @@ private:
   std::string name;
 };  // class Driver
 
-};  // namespace DAQ
+} // namespace DAQ
 
 #endif  // DAQ_DEVICE_H

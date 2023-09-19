@@ -240,7 +240,7 @@ void Modules::Panel::createGUI(
     param.label->setToolTip(QString::fromStdString(varinfo.description));
     param.edit->setToolTip(QString::fromStdString(varinfo.description));
     param.str_value = param.edit->text();
-    parameter[QString::fromStdString(varinfo.name)] = param;
+    parameter[varinfo.name] = param;
     customParamLayout->addWidget(param.label, param_count, 0);
     customParamLayout->addWidget(param.edit, param_count, 1);
     param_count++;
@@ -388,7 +388,7 @@ void Modules::Panel::modify()
 // NOLINTNEXTLINE
 void Modules::Panel::setComment(const QString& var_name, const QString& comment)
 {
-  auto n = parameter.find(var_name);
+  auto n = parameter.find(var_name.toStdString());
   if (n != parameter.end() && (n->second.type == Modules::Variable::COMMENT)) {
     n->second.edit->setText(comment);
     const QByteArray textData = comment.toLatin1();
@@ -400,7 +400,7 @@ void Modules::Panel::setComment(const QString& var_name, const QString& comment)
 
 void Modules::Panel::setParameter(const QString& var_name, double value)
 {
-  auto n = parameter.find(var_name);
+  auto n = parameter.find(var_name.toStdString());
   if ((n != parameter.end())
       && (n->second.type == Modules::Variable::DOUBLE_PARAMETER))
   {
@@ -414,7 +414,7 @@ void Modules::Panel::setParameter(const QString& var_name, double value)
 
 void Modules::Panel::setParameter(const QString& var_name, int value)
 {
-  auto n = parameter.find(var_name);
+  auto n = parameter.find(var_name.toStdString());
   if ((n != parameter.end())
       && (n->second.type == Modules::Variable::INT_PARAMETER))
   {
@@ -428,7 +428,7 @@ void Modules::Panel::setParameter(const QString& var_name, int value)
 
 void Modules::Panel::setParameter(const QString& var_name, uint64_t value)
 {
-  auto n = parameter.find(var_name);
+  auto n = parameter.find(var_name.toStdString());
   if ((n != parameter.end())
       && (n->second.type == Modules::Variable::UINT_PARAMETER))
   {

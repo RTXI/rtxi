@@ -34,7 +34,7 @@
 namespace Modules
 {
 class Component;
-};  // namespace Modules
+} // namespace Modules
 
 /*!
  * Objects contained within this namespace are responsible
@@ -81,7 +81,7 @@ struct Response
   response_t type = NO_TELEMITRY;
   Event::Object* cmd = nullptr;
 };
-};  // namespace Telemitry
+} // namespace Telemitry
 
 /*!
  * Base class for devices that are to interface with System.
