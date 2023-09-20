@@ -86,9 +86,6 @@ int RT::OS::createTask(Task* task, void (*func)(void*), void* arg)
     strerror_r(errno, strbuf.data(), strbuf.size());
     if (resval != 0) {
       ERROR_MSG("RT::OS::createTask : RT::OS::initiate() : {}", strbuf);
-      // In the event that we fail to initiate real-time environment let's just
-      // quit
-      return;
     }
     fn(args);
     RT::OS::shutdown(tsk);
