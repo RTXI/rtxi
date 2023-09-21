@@ -30,39 +30,38 @@ fi
 
 # Export environment variables
 echo  "-----> Setting up variables."
-export linux_version=5.10
-export xenomai_version=3.2
-export xenomai_root=~/git/xenomai-$xenomai_version
+export linux_version=$( uname -r | sed -r 's/([0-9]+\.[0-9]+).*/\1/' )
+export xenomai_version="3.2"
+export xenomai_root=/opt/xenomai-$xenomai_version
+export xenomai_build_dir="$xenomai_root/build"
 export scripts_dir=`pwd`
 export build_root=/opt/build
 export opt=/opt
 export linux_tree=/opt/linux-dovetail
+export linux_build="$linux_tree/build"
 
-rm -rf $build_root
-mkdir $build_root
+rm -rf $xenomai_build_dir
+rm -rf $linux_build
+
 echo  "-----> Environment configuration complete."
 
 # Download essentials
 cd $opt
 echo "-----> Downloading main line kernel"
-if [ ! -d linux-dovetail ] ; then
-  git clone https://source.denx.de/Xenomai/linux-dovetail.git
-  git checkout -b v5.15.y-dovetail-rebase
+if [ ! -d $linux_tree ] ; then
+  git clone --branch v$linux_version.y-dovetail-rebase https://source.denx.de/Xenomai/linux-dovetail.git
 fi 
 
 echo  "-----> Downloading Xenomai."
-if [ ! -d /opt/xenomai-$xenomai_version ] ; then
+if [ ! -d $xenomai_root ] ; then
   git clone --branch stable/v3.2.x https://source.denx.de/Xenomai/xenomai.git xenomai-$xenomai_version
 fi
 echo  "-----> Downloads complete."
 
 # Install user libraries
 echo  "-----> Installing Xenomai EVL library."
-cd $xenomai_root
-$xenomai_root/scripts/bootstrap
-cd $build_root
-$xenomai_root/configure --with-core=cobalt --enable-pshared --enable-smp --enable-dlopen-libs
-make -sj`nproc`
+mkdir $xenomai_build && cd $xenomai_build
+$xenomai_root/configure --with-core=cobalt --enable-smp --enable-pshared --enable-dlopen-libs
 make install
 echo  "-----> User library installation complete."
 
@@ -80,7 +79,7 @@ $xenomai_root/scripts/prepare-kernel.sh \
 	--linux=$linux_tree \
 	--verbose
 
-#yes "" | make oldconfig
+yes "" | make oldconfig
 yes "" | make localmodconfig
 make menuconfig
 scripts/config --disable SYSTEM_TRUSTED_KEYS
@@ -91,14 +90,13 @@ echo  "-----> Patching complete."
 # Compile kernel
 echo  "-----> Compiling kernel."
 cd $linux_tree
-#export CONCURRENCY_LEVEL=$(grep -c ^processor /proc/cpuinfo)
-make -j`nproc` bindeb-pkg LOCALVERSION=xenomai-$xenomai_version
+make -j`nproc` bindeb-pkg LOCALVERSION=-xenomai-$xenomai_version-$linux_version
 echo  "-----> Kernel compilation complete."
 
 # Install compiled kernel
 echo  "-----> Installing compiled kernel"
-sudo dpkg -i ../linux-image*.deb
-sudo dpkg -i ../linux-headers*.deb
+sudo dpkg -i ../linux-image*xenomai-$xenomai_version*.deb
+sudo dpkg -i ../linux-headers*xenomai-$xenomai_version*.deb
 #sudo dpkg -i ../linux-glibc*.deb
 echo  "-----> Kernel installation complete."
 
@@ -113,9 +111,6 @@ sed -i -e 's/quiet//g' /etc/default/grub
 sed -i -e 's/splash//g' /etc/default/grub
 update-grub
 echo  "-----> Boot loader update complete."
-
-# Add analogy_config to root path
-cp -f /usr/xenomai/sbin/analogy_config /usr/sbin/
 
 # Setting up user permissions
 echo  "-----> Setting up user/group."
