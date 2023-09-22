@@ -55,7 +55,7 @@ Workspace::Manager::Manager(Event::Manager* ev_manager)
   this->event_manager->registerHandler(this);
   this->m_plugin_loader = std::make_unique<DLL::Loader>();
   this->m_driver_loader = std::make_unique<DLL::Loader>();
-  QDir bin_dir = QCoreApplication::applicationDirPath();
+  const QDir bin_dir = QCoreApplication::applicationDirPath();
   this->registerDriver(bin_dir.path().toStdString()+std::string("/librtxinidaqdriver.so"));
 }
 
@@ -153,8 +153,7 @@ Widgets::Plugin* Workspace::Manager::loadPlugin(const std::string& library)
     return plugin_ptr;
   }
 
-  int result = this->m_plugin_loader->load(library_loc.c_str());
-  if (result != 0) {
+  if (this->m_plugin_loader->load(library_loc.c_str()) != 0) {
     ERROR_MSG("Plugin::load : failed to load {}", library_loc.c_str());
     return nullptr;
   }
@@ -212,8 +211,7 @@ void Workspace::Manager::registerDriver(const std::string& driver_location)
                            m_driver_registry.end(),
                            [&](const driver_registry_entry& entry){ return entry.first == driver_location;}); 
   if(iter != this->m_driver_registry.end()){ return; }
-  int errcode = this->m_driver_loader->load(driver_location.c_str());
-  if(errcode < 0){ return; }
+  if(this->m_driver_loader->load(driver_location.c_str()) < 0){ return; }
   auto getDriver = this->m_driver_loader->dlsym<DAQ::Driver* (*)()>(driver_location.c_str(), "getRTXIDAQDriver");
   if(getDriver == nullptr) {
     ERROR_MSG("Workspace::Manager::registerDriver : Unable to load dynamic library file {}", driver_location);
