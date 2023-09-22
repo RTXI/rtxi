@@ -57,7 +57,6 @@ private:
   {
     QUrl readme_url;
     QUrl clone_url;
-    QString install_location;
     QString readme;
     bool installed;
   };

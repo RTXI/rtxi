@@ -30,6 +30,7 @@ extern "C" {
 #include <QDir>
 #include <QJsonObject>
 #include <QProcess>
+#include <QFileInfo>
 #include "rtxi_wizard.h"
 
 /*
@@ -265,7 +266,6 @@ void RTXIWizard::Panel::parseRepos()
 
   const QString readmeUrlPrefix = "https://raw.githubusercontent.com/RTXI/";
   const QString readmeUrlSuffix = "/master/README.md";
-  const QString locationPrefix = install_prefix.path();
 
   for (auto && idx : jsonArr) {
     QJsonObject newObj = (idx).toObject();
@@ -283,10 +283,12 @@ void RTXIWizard::Panel::parseRepos()
       module.readme_url = QUrl(readmeUrlPrefix + newObj.value("name").toString()
                                + readmeUrlSuffix);
       module.clone_url = QUrl(newObj.value("clone_url").toString());
-      module.install_location = (locationPrefix + name);
       module.readme = "";
-
-      module.installed = (QDir(module.install_location)).exists();
+      module.installed = QFileInfo::exists(install_prefix.path() + 
+                                           QString("/") + 
+                                           QString("lib") + 
+                                           name + 
+                                           QString(".so"));
       modules[name] = module;
     }
   }
@@ -338,7 +340,7 @@ void RTXIWizard::Panel::installFromString(const std::string& module_name)
    * an error.
    */
   const QByteArray url = modules[name].clone_url.toString().toLatin1();
-  const QByteArray installpath = modules[name].install_location.toLatin1();
+  const QByteArray installpath = install_prefix.path().toLatin1();
   const QString source_location = QDir::temp().absolutePath() 
     + QString("/rtxi_modules/") 
     + QString(module_name.c_str());
@@ -346,7 +348,6 @@ void RTXIWizard::Panel::installFromString(const std::string& module_name)
   const QByteArray clonepath = source_location.toLatin1();
 
   int error = 0;
-
   progress->setLabelText("Downloading extension...");
   progress->setValue(1);
   //QApplication::processEvents();
