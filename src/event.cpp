@@ -238,12 +238,13 @@ Event::Manager::Manager()
   {
     Event::Object* event = nullptr;
     while (this->running) {
-      // check if there are available events
       {
+        // check if there are available events
         std::unique_lock<std::mutex> event_lock(this->event_mut);
         this->available_event_cond.wait(
             event_lock,
             [this] { return !(this->event_q.empty()) || !this->running; });
+        // Avoid undefined behaviour by checkeing whether queue is empty first
         if(this->event_q.empty()) { continue; }
         event = this->event_q.front();
         this->event_q.pop();
