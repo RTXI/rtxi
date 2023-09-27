@@ -66,6 +66,18 @@ Workspace::Manager::~Manager()
       this->event_manager->unregisterHandler(plugin.get());
     }
   }
+  const std::vector<DAQ::Device*> devices = getAllDevices();
+  std::vector<Event::Object> unregister_device_events(devices.size(), Event::Object(Event::Type::RT_DEVICE_REMOVE_EVENT));
+  for(size_t i=0; i<devices.size(); ++i){
+    unregister_device_events[i].setParam("device", std::any(static_cast<RT::Device*>(devices[i])));
+  }
+  this->event_manager->postEvent(unregister_device_events);
+  // we should unload all drivers 
+  void (*unloadDriversFunc )() = nullptr;
+  for(auto& driver : m_driver_registry){
+    unloadDriversFunc = this->m_driver_loader->dlsym<void (*)()>(driver.first.c_str(), "deleteRTXIDAQDriver");
+    unloadDriversFunc();
+  }
   this->event_manager->unregisterHandler(this);
 }
 

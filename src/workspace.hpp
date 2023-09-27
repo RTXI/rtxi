@@ -89,7 +89,7 @@ private:
 
   std::unordered_map<std::string, std::vector<std::unique_ptr<Modules::Plugin>>>
       rtxi_modules_registry;
-  std::vector<std::pair<std::string, DAQ::Driver*>> m_driver_registry;
+  std::vector<driver_registry_entry> m_driver_registry;
   std::unordered_map<std::string, Modules::FactoryMethods>
       rtxi_factories_registry;
   Event::Manager* event_manager;
