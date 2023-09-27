@@ -85,16 +85,6 @@ inline std::vector<std::string> physical_channel_names(const std::string& device
   return split_string(channel_names, ", "); 
 }
 
-inline std::string physical_card_name(const std::string& device_name)
-{
-  int32_t err = DAQmxGetDevProductType(device_name.c_str(), nullptr, 0);
-  std::string result(static_cast<size_t>(err), '\0');
-  err = DAQmxGetDevProductType(device_name.c_str(), 
-                               result.data(), 
-                               static_cast<uint32_t>(result.size()));
-  return result;
-}
-
 void printError(int32_t status)
 {
   ERROR_MSG("NIDAQ ERROR : code {}", status);
@@ -110,6 +100,16 @@ void printError(int32_t status)
     return;
   }
   ERROR_MSG("Message : {}", err_str);
+}
+
+inline std::string physical_card_name(const std::string& device_name)
+{
+  int32_t err = DAQmxGetDevProductType(device_name.c_str(), nullptr, 0);
+  std::string result(static_cast<size_t>(err), '\0');
+  DAQmxGetDevProductType(device_name.c_str(), 
+                         result.data(), 
+                         static_cast<uint32_t>(result.size()));
+  return result;
 }
 
 struct physical_channel_t 
@@ -297,7 +297,7 @@ Device::Device(const std::string& dev_name,
   std::vector<std::string> chan_names;
   for(size_t type=0; type < physical_channels_registry.size(); type++){
     chan_names = physical_channel_names(dev_name, static_cast<DAQ::ChannelType::type_t>(type));
-    for(auto chan_name : chan_names){
+    for(const auto& chan_name : chan_names){
       physical_channels_registry.at(type).emplace_back(chan_name, static_cast<DAQ::ChannelType::type_t>(type));
     }
   }
@@ -555,13 +555,11 @@ std::vector<DAQ::Device*> Driver::getDevices()
 }
 
 namespace {
-  std::mutex driver_mut;
-  Driver* instance;
+  Driver* instance=nullptr;
 } // namespace
 
 DAQ::Driver* Driver::getInstance()
 {
-  std::unique_lock<std::mutex> lock(driver_mut);
   if(instance == nullptr){
     instance = new Driver();
   }
@@ -569,7 +567,13 @@ DAQ::Driver* Driver::getInstance()
 }
 
 extern "C" {
+
 DAQ::Driver* getRTXIDAQDriver(){
   return Driver::getInstance();
 }
+
+void deleteRTXIDAQDriver(){
+  delete instance;
+}
+
 }
