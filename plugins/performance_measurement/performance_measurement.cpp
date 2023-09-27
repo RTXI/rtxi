@@ -99,7 +99,7 @@ PerformanceMeasurement::Component::Component(Modules::Plugin* hplugin)
                          std::vector<IO::channel_t>(),
                          PerformanceMeasurement::get_default_vars())
 {
-  if (RT::OS::getFifo(this->fifo, 10) < 0) {
+  if (RT::OS::getFifo(this->fifo, 10*sizeof(PerformanceMeasurement::performance_stats_t)) < 0) {
     ERROR_MSG(
         "PerformanceMeasurement::Component::Component : Unable to craate "
         "component fifo");
