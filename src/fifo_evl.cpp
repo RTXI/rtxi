@@ -12,6 +12,8 @@
 
 #include "debug.hpp"
 
+int FIFO_COUNT=0;
+
 // First let's define an evl specific Fifo class.
 namespace RT::OS
 {
@@ -40,7 +42,6 @@ private:
   size_t fifo_capacity;
   std::array<struct pollfd, 2> xbuf_poll_fd {};
   bool closed = false;
-  int count = 0;
 };
 }  // namespace RT::OS
 
@@ -51,7 +52,7 @@ RT::OS::evlFifo::evlFifo(size_t size)
                                   fifo_capacity,
                                   EVL_CLONE_PRIVATE | EVL_CLONE_NONBLOCK,
                                   "RTXI Fifo %d",
-                                  count++);
+                                  FIFO_COUNT++);
   if (this->xbuf_fd <= 0) {
     ERROR_MSG("RT::OS::FIFO(evl) : Unable to create real-time buffer\n");
     ERROR_MSG("evl core : {}", strerror(this->xbuf_fd));
