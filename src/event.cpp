@@ -244,11 +244,9 @@ Event::Manager::Manager()
         this->available_event_cond.wait(
             event_lock,
             [this] { return !(this->event_q.empty()) || !this->running; });
+        if(this->event_q.empty()) { continue; }
         event = this->event_q.front();
         this->event_q.pop();
-        if (event == nullptr || !this->running) {
-          continue;
-        }
       }
 
       // we should log this before letting others know we are done
