@@ -282,71 +282,59 @@ SystemControl::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
 
 void SystemControl::Panel::apply()
 {
-  const int index = this->deviceList->currentIndex();
-  if (index == -1) {
-    // Even if there is no valid device we should still change rt period
-    double period = periodEdit->text().toDouble();
-    period *= periodUnitList->currentData().toDouble();
-    period *= RT::OS::SECONDS_TO_NANOSECONDS;
-    Event::Object event(Event::Type::RT_PERIOD_EVENT);
-    event.setParam("period", std::any(static_cast<int64_t>(period)));
-    this->getRTXIEventManager()->postEvent(&event);
-    return;
-  }
-
-  auto *dev = deviceList->currentData().value<DAQ::Device*>();
-
-  // Make sure we aren't getting a phony device
-  if (dev == nullptr) {
-    ERROR_MSG("DAQ device manager returned a nullptr for {}",
-              deviceList->currentText().toStdString());
-    return;
-  }
-
-  auto a_chan = analogChannelList->currentData().value<DAQ::index_t>();
-  auto a_type = analogSubdeviceList->currentData().value<DAQ::ChannelType::type_t>();
-  const double a_gain = analogGainEdit->text().toDouble() * analogUnitPrefixList->currentData().toDouble();
-  const double a_zerooffset = analogZeroOffsetEdit->text().toDouble() * analogUnitPrefixList2->currentData().toDouble();
-
-  dev->setChannelActive(a_type, a_chan, analogActiveButton->isChecked());
-  dev->setAnalogGain(a_type, a_chan, a_gain);
-  dev->setAnalogZeroOffset(a_type, a_chan, a_zerooffset);
-  dev->setAnalogRange(
-      a_type,
-      a_chan,
-      static_cast<DAQ::index_t>(analogRangeList->currentIndex()));
-  dev->setAnalogReference(
-      a_type,
-      a_chan,
-      static_cast<DAQ::index_t>(analogReferenceList->currentIndex()));
-  dev->setAnalogUnits(
-      a_type,
-      a_chan,
-      static_cast<DAQ::index_t>(analogUnitList->currentIndex()));
-  const int value =
-      analogDownsampleList
-          ->itemData(analogDownsampleList->currentIndex(), Qt::DisplayRole)
-          .toInt();
-  dev->setAnalogDownsample(a_type, a_chan, static_cast<size_t>(value));
-  dev->setAnalogCounter(a_type, a_chan);
-
-  auto d_chan = digitalChannelList->currentData().value<DAQ::index_t>();
-  auto d_type = digitalSubdeviceList->currentData().value<DAQ::ChannelType::type_t>();
-  auto d_dir = digitalDirectionList->currentData().value<DAQ::direction_t>();
-
-  // Write digital channel configuration to DAQ
-  dev->setChannelActive(d_type, d_chan, digitalActiveButton->isChecked());
-  if (d_type == DAQ::ChannelType::DI || d_type == DAQ::ChannelType::DO) {
-    dev->setDigitalDirection(d_chan, d_dir);
-  }
-
-  // Apply thread settings
   double period = periodEdit->text().toDouble();
   period *= periodUnitList->currentData().toDouble();
-
+  period *= RT::OS::SECONDS_TO_NANOSECONDS;
   Event::Object event(Event::Type::RT_PERIOD_EVENT);
   event.setParam("period", std::any(static_cast<int64_t>(period)));
   this->getRTXIEventManager()->postEvent(&event);
+
+  // We don't bother continuing if no valid device info is present/selected
+  if (deviceList->count() == 0 || deviceList->currentIndex() < 0) { return; }
+
+  auto* dev = deviceList->currentData().value<DAQ::Device*>();
+  
+  if(analogActiveButton->isChecked() && analogActiveButton->isEnabled()){
+    auto a_chan = analogChannelList->currentData().value<DAQ::index_t>();
+    auto a_type = analogSubdeviceList->currentData().value<DAQ::ChannelType::type_t>();
+    const double a_gain = analogGainEdit->text().toDouble() * analogUnitPrefixList->currentData().toDouble();
+    const double a_zerooffset = analogZeroOffsetEdit->text().toDouble() * analogUnitPrefixList2->currentData().toDouble();
+
+    dev->setChannelActive(a_type, a_chan, analogActiveButton->isChecked());
+    dev->setAnalogGain(a_type, a_chan, a_gain);
+    dev->setAnalogZeroOffset(a_type, a_chan, a_zerooffset);
+    dev->setAnalogRange(
+        a_type,
+        a_chan,
+        static_cast<DAQ::index_t>(analogRangeList->currentIndex()));
+    dev->setAnalogReference(
+        a_type,
+        a_chan,
+        static_cast<DAQ::index_t>(analogReferenceList->currentIndex()));
+    dev->setAnalogUnits(
+        a_type,
+        a_chan,
+        static_cast<DAQ::index_t>(analogUnitList->currentIndex()));
+    const int value =
+        analogDownsampleList
+            ->itemData(analogDownsampleList->currentIndex(), Qt::DisplayRole)
+            .toInt();
+    dev->setAnalogDownsample(a_type, a_chan, static_cast<size_t>(value));
+    dev->setAnalogCounter(a_type, a_chan);
+  }
+
+  if(digitalActiveButton->isChecked() && digitalActiveButton->isEnabled()){
+    auto d_chan = digitalChannelList->currentData().value<DAQ::index_t>();
+    auto d_type = digitalSubdeviceList->currentData().value<DAQ::ChannelType::type_t>();
+    auto d_dir = digitalDirectionList->currentData().value<DAQ::direction_t>();
+
+    dev->setChannelActive(d_type, d_chan, digitalActiveButton->isChecked());
+    if (d_type == DAQ::ChannelType::DI || d_type == DAQ::ChannelType::DO) {
+      dev->setDigitalDirection(d_chan, d_dir);
+    }
+  }
+
+  // Display changes
   display();
 }
 
@@ -420,25 +408,18 @@ void SystemControl::Panel::buildDAQDeviceList()
 // TODO: improve simplicity of display function
 void SystemControl::Panel::display()
 {
-  int index = this->deviceList->currentIndex();
-  if (index == -1) {
+  if (deviceList->count() == 0 || deviceList->currentIndex() < 0) {
+    deviceList->setEnabled(false);
+    analogSubdeviceList->setEnabled(false);
+    digitalSubdeviceList->setEnabled(false);
     return;
   }
 
   auto* dev = deviceList->currentData().value<DAQ::Device*>();
 
-  // Check to make sure DAQ is of the right type
-  // if not, disable functions, else set
-  if (dev == nullptr) {
-    deviceList->setEnabled(false);
-    analogSubdeviceList->setEnabled(false);
-    digitalSubdeviceList->setEnabled(false);
-  }
-
-  if (dev == nullptr || analogChannelList->count() == 0) {
+  if (analogChannelList->count() == 0) {
     analogActiveButton->setChecked(false);
     analogActiveButton->setEnabled(false);
-    analogActiveButton->setChecked(false);
     analogChannelList->setEnabled(false);
     analogRangeList->setEnabled(false);
     analogDownsampleList->setEnabled(false);
@@ -549,7 +530,7 @@ void SystemControl::Panel::display()
     analogUnitPrefixList2->setCurrentIndex(indx);
   }
 
-  if (dev == nullptr || digitalChannelList->count() == 0) {
+  if (digitalChannelList->count() == 0) {
     digitalActiveButton->setChecked(false);
     digitalActiveButton->setEnabled(false);
     digitalChannelList->setEnabled(false);
@@ -571,7 +552,7 @@ void SystemControl::Panel::display()
   }
 
   // Display thread info
-  index = 3;
+  int index = 3;
   Event::Object get_period_event(Event::Type::RT_GET_PERIOD_EVENT);
   this->getRTXIEventManager()->postEvent(&get_period_event);
   auto tmp = std::any_cast<int64_t>(get_period_event.getParam("period"));
