@@ -279,12 +279,16 @@ Event::Manager::~Manager()
 {
   Event::Object event(Event::Type::MANAGER_SHUTDOWN_EVENT);
   this->postEvent(&event);
-  this->running = false;
+  this->running.store(false);
   this->available_event_cond.notify_all();
   for (auto& thread : this->thread_pool) {
     if (thread.joinable()) {
       thread.join();
     }
+  }
+  while(!this->event_q.empty()) { 
+    event_q.front()->done();
+    event_q.pop();
   }
 }
 

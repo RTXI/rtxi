@@ -71,11 +71,12 @@ Oscilloscope::Scope::Scope(QWidget* parent)
     , scaleMapY(new QwtScaleMap())
     , scaleMapX(new QwtScaleMap())
     , legendItem(new LegendItem())
-    , timer(new QTimer())
+    , timer(new QTimer(this))
 {
   // Initialize director
   plotLayout()->setAlignCanvasToScales(true);
   setAutoReplot(false);
+  setAutoDelete(true);
 
   // Set scope canvas
   setCanvas(new Oscilloscope::Canvas(nullptr));
@@ -120,6 +121,7 @@ Oscilloscope::Scope::Scope(QWidget* parent)
   this->legendItem->setSpacing(2);
   this->legendItem->setItemMargin(0);
   this->legendItem->setBackgroundBrush(QBrush(QColor(225, 225, 225)));
+  this->legendItem->attach(this);
 
   // Update scope background/scales/axes
   replot();
@@ -134,6 +136,8 @@ Oscilloscope::Scope::Scope(QWidget* parent)
 Oscilloscope::Scope::~Scope()
 {
   delete d_directPainter;
+  delete scaleMapX;
+  delete scaleMapY;
 }
 
 // Returns pause status of scope

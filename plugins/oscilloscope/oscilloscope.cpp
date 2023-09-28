@@ -753,7 +753,7 @@ Oscilloscope::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
   // Initialize vars
   setWindowTitle(tr(std::string(Oscilloscope::MODULE_NAME).c_str()));
 
-  auto* otimer = new QTimer;
+  auto* otimer = new QTimer(this);
   otimer->setTimerType(Qt::PreciseTimer);
   otimer->start(Oscilloscope::FrameRates::HZ60);
 
