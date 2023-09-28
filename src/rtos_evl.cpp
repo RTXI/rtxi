@@ -50,7 +50,7 @@ int RT::OS::initiate(RT::OS::Task* task)
   struct sched_param param
   {
   };
-  param.sched_priority = 90;
+  param.sched_priority = 8;
   retval = pthread_setschedparam(pthread_self(), SCHED_FIFO, &param);
   if (retval != 0) {
     ERROR_MSG("RT::OS(EVL)::initiate : Unable to set scheduling parameters");
@@ -158,9 +158,6 @@ int64_t RT::OS::getPeriod()
 
 void RT::OS::sleepTimestep(RT::OS::Task* task)
 {
-  if (task->next_t < RT::OS::DEFAULT_PERIOD) {
-    task->next_t = RT::OS::getTime() + task->period;
-  }
   int64_t wakeup_time = task->next_t;
   task->next_t += task->period;
 
