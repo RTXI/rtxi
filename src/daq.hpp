@@ -51,6 +51,28 @@ enum type_t : size_t
   DO, /*!< Digital Output Interface        */
   UNKNOWN
 };
+
+inline std::string type2string(type_t type){
+  std::string result;
+  switch(type){
+    case AI :
+      result = "Analog Input";
+      break;
+    case AO :
+      result = "Analog Output";
+      break;
+    case DI :
+      result = "Digital Input";
+      break;
+    case DO :
+      result = "Digital Output";
+      break;
+    default :
+      ERROR_MSG("DAQ::ChannelType::type2string : Unknown type used");
+      break;
+  }
+  return result;
+}
 } // namespace ChannelType
 
 /*!
