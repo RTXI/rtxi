@@ -67,6 +67,7 @@ std::vector<std::string> physical_channel_names(const std::string& device, DAQ::
 
 void printError(int32_t status)
 {
+  if(status == 0) { return; }
   ERROR_MSG("NIDAQ ERROR : code {}", status);
   int32_t error_size = DAQmxGetErrorString(status, nullptr, 0);
   if(error_size < 0){
@@ -94,7 +95,8 @@ std::string physical_card_name(const std::string& device_name)
 
 struct physical_channel_t 
 {
-  explicit physical_channel_t(std::string  name, DAQ::ChannelType::type_t type) : name(std::move(name)), type(type) {}
+  explicit physical_channel_t(std::string  chan_name, DAQ::ChannelType::type_t chan_type) 
+    : name(std::move(chan_name)), type(chan_type) {}
   int32_t addToTask(TaskHandle task_handle) const;
   std::string name;
   DAQ::ChannelType::type_t type=DAQ::ChannelType::UNKNOWN;
@@ -246,7 +248,7 @@ public:
   void read() final;
   void write() final;
 private:
-  TaskHandle nidaq_task_handle{};
+  std::array<TaskHandle, DAQ::ChannelType::UNKNOWN> task_list{};
   std::string internal_dev_name;
   std::array<std::vector<physical_channel_t>, 4> physical_channels_registry;
   std::array<DAQ::analog_range_t, 7> default_ranges = DAQ::get_default_ranges();
@@ -270,9 +272,12 @@ Device::Device(const std::string& dev_name,
                std::string  internal_name) 
   : DAQ::Device(dev_name, channels), internal_dev_name(std::move(internal_name))
 {
-  if(DAQmxCreateTask("read", &this->nidaq_task_handle) < 0) {
-    ERROR_MSG("NIDAQ::Device : Unable to create read task for device {}", dev_name);
-    return;
+  std::string task_name;
+  for(size_t type=0; type < DAQ::ChannelType::UNKNOWN; type++){
+    task_name = DAQ::ChannelType::type2string(static_cast<DAQ::ChannelType::type_t>(type));
+    if(DAQmxCreateTask(task_name.c_str(), &task_list.at(type)) < 0) {
+      ERROR_MSG("NIDAQ::Device : Unable to create {} task for device {}", task_name, dev_name);
+    }
   }
   std::vector<std::string> chan_names;
   for(size_t type=0; type < physical_channels_registry.size(); type++){
@@ -285,7 +290,9 @@ Device::Device(const std::string& dev_name,
 
 Device::~Device()
 {
-  DAQmxClearTask(this->nidaq_task_handle);
+  for(const auto& task : task_list) {
+    DAQmxClearTask(task);
+  }
 }
 
 size_t Device::getChannelCount(DAQ::ChannelType::type_t type) const  
@@ -300,12 +307,25 @@ bool Device::getChannelActive(DAQ::ChannelType::type_t type, DAQ::index_t index)
 
 int Device::setChannelActive(DAQ::ChannelType::type_t type, DAQ::index_t index, bool state) 
 {
+  // Unfortunately National Instruments DAQ cards under nidaqmx library best work under tasks, 
+  // which are more efficient at reading when started before any action. The bad thing is that
+  // NI does not make it easy to just remove a task. Adding is easy, but removing means clearing
+  // the task, then starting the task again, and adding all of the other tasks. 
   int32_t err = 0;
+  if(physical_channels_registry.at(type).at(index).active == state) { return err; }
   if(state) {
-    err = physical_channels_registry.at(type).at(index).addToTask(nidaq_task_handle);
+    err = physical_channels_registry.at(type).at(index).addToTask(task_list.at(type));
     physical_channels_registry.at(type).at(index).active = err == 0;
   } else {
-    physical_channels_registry.at(type).at(index).active = state;
+    physical_channels_registry.at(type).at(index).active = false;
+    DAQmxClearTask(task_list.at(type));
+    err = DAQmxCreateTask(DAQ::ChannelType::type2string(type).c_str(), &task_list.at(type));
+    if(err != 0) { return err; }
+    for(const auto& channel : physical_channels_registry.at(type)){
+      if(!channel.active) { continue; }
+      err = channel.addToTask(task_list.at(type));
+      if(err != 0) { break; }
+    }
   }
   return err;
 }
