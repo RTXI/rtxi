@@ -4,33 +4,13 @@ extern "C" {
 }
 
 #include <fmt/core.h>
+
+#include <utility>
 #include "daq.hpp"
 
 const std::string_view DEFAULT_DRIVER_NAME = "National Instruments";
 
-inline std::array<std::pair<double, double>, 7> get_default_ranges()
-{
-  return 
-  {
-    std::pair(-10.0, 10.0),
-    std::pair(-5.0, 5.0),
-    std::pair(-1.0, 1.0),
-    std::pair(-0.5, 0.5),
-    std::pair(-0.2, 0.2),
-    std::pair(-0.1, 0.1),
-  };
-}
-
-inline std::array<std::string, 2> get_default_units()
-{
-  return 
-  {
-    "volts",
-    "amps"
-  }; 
-}
-
-inline std::vector<std::string> split_string(const std::string& buffer, const std::string& delim)
+std::vector<std::string> split_string(const std::string& buffer, const std::string& delim)
 {
   if(buffer.empty()) { return {}; }
   size_t pos_start=0;
@@ -51,7 +31,7 @@ inline std::vector<std::string> split_string(const std::string& buffer, const st
   return split_tokens;
 }
 
-inline std::vector<std::string> physical_channel_names(const std::string& device, DAQ::ChannelType::type_t chan_type)
+std::vector<std::string> physical_channel_names(const std::string& device, DAQ::ChannelType::type_t chan_type)
 {
   int32_t (*func)(const char*, char*, uint32_t)=nullptr;
   switch(chan_type){
@@ -102,7 +82,7 @@ void printError(int32_t status)
   ERROR_MSG("Message : {}", err_str);
 }
 
-inline std::string physical_card_name(const std::string& device_name)
+std::string physical_card_name(const std::string& device_name)
 {
   int32_t err = DAQmxGetDevProductType(device_name.c_str(), nullptr, 0);
   std::string result(static_cast<size_t>(err), '\0');
@@ -114,7 +94,7 @@ inline std::string physical_card_name(const std::string& device_name)
 
 struct physical_channel_t 
 {
-  explicit physical_channel_t(std::string name, DAQ::ChannelType::type_t type) : name(std::move(name)), type(type) {}
+  explicit physical_channel_t(std::string  name, DAQ::ChannelType::type_t type) : name(std::move(name)), type(type) {}
   int32_t addToTask(TaskHandle task_handle) const;
   std::string name;
   DAQ::ChannelType::type_t type=DAQ::ChannelType::UNKNOWN;
@@ -129,8 +109,8 @@ struct physical_channel_t
 int32_t physical_channel_t::addToTask(TaskHandle task_handle) const
 {
   int32_t err=-1; 
-  std::string units = get_default_units().at(units_index);
-  auto [min, max] = get_default_ranges().at(range_index);
+  std::string units = DAQ::get_default_units().at(units_index);
+  auto [min, max] = DAQ::get_default_ranges().at(range_index);
   switch(type){
     case DAQ::ChannelType::AI :
       if(units == "volts"){
@@ -267,10 +247,10 @@ public:
   void write() final;
 private:
   TaskHandle nidaq_task_handle{};
-  std::string daq_card_name;
+  std::string internal_dev_name;
   std::array<std::vector<physical_channel_t>, 4> physical_channels_registry;
-  std::array<std::pair<double, double>, 7> default_ranges = get_default_ranges();
-  std::array<std::string, 2> default_units = get_default_units();
+  std::array<DAQ::analog_range_t, 7> default_ranges = DAQ::get_default_ranges();
+  std::array<std::string, 2> default_units = DAQ::get_default_units();
 };
 
 class Driver : public DAQ::Driver
@@ -288,7 +268,7 @@ private:
 Device::Device(const std::string& dev_name,
                const std::vector<IO::channel_t>& channels,
                std::string  internal_name) 
-  : DAQ::Device(dev_name, channels), daq_card_name(std::move(internal_name))
+  : DAQ::Device(dev_name, channels), internal_dev_name(std::move(internal_name))
 {
   if(DAQmxCreateTask("read", &this->nidaq_task_handle) < 0) {
     ERROR_MSG("NIDAQ::Device : Unable to create read task for device {}", dev_name);
@@ -296,7 +276,7 @@ Device::Device(const std::string& dev_name,
   }
   std::vector<std::string> chan_names;
   for(size_t type=0; type < physical_channels_registry.size(); type++){
-    chan_names = physical_channel_names(dev_name, static_cast<DAQ::ChannelType::type_t>(type));
+    chan_names = physical_channel_names(internal_dev_name, static_cast<DAQ::ChannelType::type_t>(type));
     for(const auto& chan_name : chan_names){
       physical_channels_registry.at(type).emplace_back(chan_name, static_cast<DAQ::ChannelType::type_t>(type));
     }
@@ -514,14 +494,14 @@ void Driver::loadDevices()
   std::vector<std::string> split_channel_names;
   size_t pos=0;
   std::string temp_channel_name;
-  std::string temp_daq_name;
+  std::string physical_daq_name;
   std::string description;
   int channel_id = 0;
   for(const auto& internal_dev_name : device_names){
     for(size_t query_indx=0; query_indx<4; query_indx++){
       split_channel_names = physical_channel_names(internal_dev_name, 
                                                    static_cast<DAQ::ChannelType::type_t>(query_indx)); 
-      temp_daq_name = physical_card_name(internal_dev_name);
+      physical_daq_name = physical_card_name(internal_dev_name);
       for(const auto& chan_name : split_channel_names){
         description = std::string(query_indx<2 ? "Analog" : "Digital");
         description += " ";
@@ -535,7 +515,7 @@ void Driver::loadDevices()
                             query_indx%2==0 ? IO::INPUT : IO::OUTPUT});
       }
     }
-    this->nidaq_devices.emplace_back(temp_daq_name, channels, internal_dev_name);
+    this->nidaq_devices.emplace_back(physical_daq_name, channels, internal_dev_name);
   }
 }
 

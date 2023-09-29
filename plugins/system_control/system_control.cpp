@@ -154,9 +154,22 @@ SystemControl::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
 
   analogLayout->addWidget(new QLabel(tr("Range:")), 2, 0, 1, 1);
   analogLayout->addWidget(analogRangeList, 2, 1, 1, 2);
+  analogRangeList->clear();
+  const std::string formatting = "{:.1f}";
+  std::string range_list_text;
+  for(auto range : DAQ::get_default_ranges()){
+    auto [min, max] = range;
+    range_list_text = fmt::format(formatting, min) + std::string(" to ") + fmt::format(formatting, max);
+    analogRangeList->addItem(QString::fromStdString(range_list_text), QVariant::fromValue(range));
+  }
 
   analogLayout->addWidget(analogReferenceList, 2, 3, 1, 2);
   analogLayout->addWidget(new QLabel(tr("Scale:")), 3, 0);
+  analogReferenceList->clear();
+  analogReferenceList->addItem("Ground", QVariant::fromValue(DAQ::Reference::GROUND));
+  analogReferenceList->addItem("Common", QVariant::fromValue(DAQ::Reference::COMMON));
+  analogReferenceList->addItem("Differential", QVariant::fromValue(DAQ::Reference::DIFFERENTIAL));
+  analogReferenceList->addItem("Other", QVariant::fromValue(DAQ::Reference::OTHER));
 
   analogGainEdit->setAlignment(Qt::AlignRight);
   analogLayout->addWidget(analogGainEdit, 3, 1);
@@ -181,6 +194,10 @@ SystemControl::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
   analogLayout->addWidget(analogUnitPrefixList, 3, 2);
 
   analogLayout->addWidget(analogUnitList, 3, 3);
+  analogUnitList->clear();
+  for(const auto& units : DAQ::get_default_units()){
+    analogUnitList->addItem(QString::fromStdString(units));
+  }
   analogLayout->addWidget(new QLabel(tr(" / Volt")), 3, 4);
   analogLayout->addWidget(new QLabel(tr("Offset:")), 4, 0);
   analogZeroOffsetEdit->setText("0");
@@ -294,7 +311,7 @@ void SystemControl::Panel::apply()
 
   auto* dev = deviceList->currentData().value<DAQ::Device*>();
   
-  if(analogActiveButton->isChecked() && analogActiveButton->isEnabled()){
+  if(analogActiveButton->isEnabled() && analogActiveButton->isChecked()){
     auto a_chan = analogChannelList->currentData().value<DAQ::index_t>();
     auto a_type = analogSubdeviceList->currentData().value<DAQ::ChannelType::type_t>();
     const double a_gain = analogGainEdit->text().toDouble() * analogUnitPrefixList->currentData().toDouble();
@@ -323,7 +340,7 @@ void SystemControl::Panel::apply()
     dev->setAnalogCounter(a_type, a_chan);
   }
 
-  if(digitalActiveButton->isChecked() && digitalActiveButton->isEnabled()){
+  if(digitalActiveButton->isEnabled() && digitalActiveButton->isChecked()){
     auto d_chan = digitalChannelList->currentData().value<DAQ::index_t>();
     auto d_type = digitalSubdeviceList->currentData().value<DAQ::ChannelType::type_t>();
     auto d_dir = digitalDirectionList->currentData().value<DAQ::direction_t>();
@@ -340,8 +357,7 @@ void SystemControl::Panel::apply()
 
 void SystemControl::Panel::updateDevice()
 {
-  const int index = this->deviceList->currentIndex();
-  if (index == -1) { return; }
+  if (this->deviceList->currentIndex() < 0) { return; }
 
   auto* dev = deviceList->currentData().value<DAQ::Device*>();
   analogChannelList->clear();
@@ -408,149 +424,13 @@ void SystemControl::Panel::buildDAQDeviceList()
 // TODO: improve simplicity of display function
 void SystemControl::Panel::display()
 {
-  if (deviceList->count() == 0 || deviceList->currentIndex() < 0) {
+  if (deviceList->count() == 0) {
     deviceList->setEnabled(false);
     analogSubdeviceList->setEnabled(false);
     digitalSubdeviceList->setEnabled(false);
-    return;
   }
-
-  auto* dev = deviceList->currentData().value<DAQ::Device*>();
-
-  if (analogChannelList->count() == 0) {
-    analogActiveButton->setChecked(false);
-    analogActiveButton->setEnabled(false);
-    analogChannelList->setEnabled(false);
-    analogRangeList->setEnabled(false);
-    analogDownsampleList->setEnabled(false);
-    analogReferenceList->setEnabled(false);
-    analogGainEdit->setEnabled(false);
-    analogZeroOffsetEdit->setEnabled(false);
-    analogUnitPrefixList->setEnabled(false);
-    analogUnitPrefixList2->setEnabled(false);
-    analogUnitList->setEnabled(false);
-  } else {
-    auto type = analogSubdeviceList->currentData().value<DAQ::ChannelType::type_t>();
-    auto chan = analogChannelList->currentData().value<DAQ::index_t>();
-
-    // Downsample is only enabled for AI
-    if (type == DAQ::ChannelType::AI) {
-      analogDownsampleList->setEnabled(true);
-    } else {
-      analogDownsampleList->setEnabled(false);
-    }
-
-    analogActiveButton->setEnabled(true);
-    analogChannelList->setEnabled(true);
-    analogRangeList->setEnabled(true);
-    analogReferenceList->setEnabled(true);
-    analogGainEdit->setEnabled(true);
-    analogZeroOffsetEdit->setEnabled(true);
-    analogUnitPrefixList->setEnabled(true);
-    analogUnitPrefixList2->setEnabled(true);
-    analogUnitList->setEnabled(true);
-
-    analogRangeList->clear();
-    for (size_t i = 0; i < dev->getAnalogRangeCount(type); ++i) {
-      analogRangeList->addItem(
-          QString::fromStdString(dev->getAnalogRangeString(type, chan, i)), QVariant::fromValue(i));
-    }
-
-    analogReferenceList->clear();
-    for (size_t i = 0; i < dev->getAnalogReferenceCount(type); ++i) {
-      analogReferenceList->addItem(
-          QString::fromStdString(dev->getAnalogReferenceString(type, chan, i)), QVariant::fromValue(i));
-    }
-
-    analogUnitList->clear();
-    for (size_t i = 0; i < dev->getAnalogUnitsCount(type); ++i) {
-      analogUnitList->addItem(
-          QString::fromStdString(dev->getAnalogUnitsString(type, chan, i)), QVariant::fromValue(i));
-    }
-    analogActiveButton->setChecked(dev->getChannelActive(type, chan));
-    analogRangeList->setCurrentIndex(
-        static_cast<int>(dev->getAnalogRange(type, chan)));
-    analogDownsampleList->setCurrentIndex(analogDownsampleList->findData(
-        QVariant::fromValue(dev->getAnalogDownsample(type, chan)),
-        Qt::DisplayRole));
-    analogReferenceList->setCurrentIndex(
-        analogReferenceList->findData(QVariant::fromValue(dev->getAnalogReference(type, chan))));
-    analogUnitList->setCurrentIndex(
-        analogUnitList->findData(QVariant::fromValue(dev->getAnalogUnits(type, chan))));
-
-    // Determine the correct prefix for analog gain
-    int indx = 8;
-    double tmp = NAN;
-    bool sign = true;
-    if (dev->getAnalogGain(type, chan) < 0.0) {
-      sign = false;
-    }  // Negative value
-    tmp = fabs(dev->getAnalogGain(type, chan));
-    while (((tmp >= 1000) && (indx > 0)) || ((tmp < 1) && (indx < 16))) {
-      if (tmp >= 1000) {
-        tmp /= 1000;
-        indx--;
-      } else {
-        tmp *= 1000;
-        indx++;
-      }
-    }
-    if (sign) {
-      analogGainEdit->setText(QString::number(tmp));
-    } else {
-      analogGainEdit->setText(QString::number(-tmp));
-    }
-
-    // Set gain prefix to computed index
-    analogUnitPrefixList->setCurrentIndex(indx);
-
-    // Determine the correct prefix for analog offset
-    indx = 8;
-    sign = true;
-    if (dev->getAnalogZeroOffset(type, chan) < 0.0) {
-      sign = false;
-    }  // Negative value
-    tmp = fabs(dev->getAnalogZeroOffset(type, chan));
-    while (((tmp >= 1000) && (indx > 0)) || ((tmp < 1) && (indx < 16))) {
-      if (tmp >= 1000) {
-        tmp /= 1000;
-        indx--;
-      } else {
-        tmp *= 1000;
-        indx++;
-      }
-    }
-    if (sign) {
-      analogZeroOffsetEdit->setText(QString::number(tmp));
-    } else {
-      analogZeroOffsetEdit->setText(QString::number(-tmp));
-    }
-
-    // Set offset prefix to computed index
-    analogUnitPrefixList2->setCurrentIndex(indx);
-  }
-
-  if (digitalChannelList->count() == 0) {
-    digitalActiveButton->setChecked(false);
-    digitalActiveButton->setEnabled(false);
-    digitalChannelList->setEnabled(false);
-    digitalDirectionList->setEnabled(false);
-  } else {
-    auto type = digitalSubdeviceList->currentData().value<DAQ::ChannelType::type_t>();
-    auto chan = digitalChannelList->currentData().value<DAQ::index_t>();
-
-    digitalActiveButton->setEnabled(true);
-    digitalChannelList->setEnabled(true);
-    if (type == DAQ::ChannelType::DI || type == DAQ::ChannelType::DO) {
-      digitalDirectionList->setEnabled(true);
-      digitalDirectionList->setCurrentIndex(digitalDirectionList->findData(QVariant::fromValue(type)));
-    } else {
-      digitalDirectionList->setEnabled(false);
-    }
-
-    digitalActiveButton->setChecked(dev->getChannelActive(type, chan));
-  }
-
+  displayAnalogGroup();
+  displayDigitalGroup();
   // Display thread info
   int index = 3;
   Event::Object get_period_event(Event::Type::RT_GET_PERIOD_EVENT);
@@ -563,6 +443,120 @@ void SystemControl::Panel::display()
   periodEdit->setText(QString::number(static_cast<int64_t>(tmp)));
   periodUnitList->setCurrentIndex(index);
   updateFreq();
+}
+
+void SystemControl::Panel::displayAnalogGroup()
+{
+  if(deviceList->count() == 0 || deviceList->currentIndex() < 0) { return; }
+  if (analogChannelList->count() == 0 || analogChannelList->currentIndex() < 0) {
+    analogActiveButton->setChecked(false);
+    analogActiveButton->setEnabled(false);
+    analogRangeList->setEnabled(false);
+    analogDownsampleList->setEnabled(false);
+    analogReferenceList->setEnabled(false);
+    analogGainEdit->setEnabled(false);
+    analogZeroOffsetEdit->setEnabled(false);
+    analogUnitPrefixList->setEnabled(false);
+    analogUnitPrefixList2->setEnabled(false);
+    analogUnitList->setEnabled(false);
+    return;
+  }
+  auto* dev = deviceList->currentData().value<DAQ::Device*>();
+  auto type = analogSubdeviceList->currentData().value<DAQ::ChannelType::type_t>();
+  auto chan = analogChannelList->currentData().value<DAQ::index_t>();
+
+  // Downsample is only enabled for AI
+  analogDownsampleList->setEnabled(type == DAQ::ChannelType::AI);
+  analogActiveButton->setEnabled(true);
+  analogChannelList->setEnabled(true);
+  analogRangeList->setEnabled(true);
+  analogReferenceList->setEnabled(true);
+  analogGainEdit->setEnabled(true);
+  analogZeroOffsetEdit->setEnabled(true);
+  analogUnitPrefixList->setEnabled(true);
+  analogUnitPrefixList2->setEnabled(true);
+  analogUnitList->setEnabled(true);
+
+  analogActiveButton->setChecked(dev->getChannelActive(type, chan));
+  analogRangeList->setCurrentIndex(
+      static_cast<int>(dev->getAnalogRange(type, chan)));
+  analogDownsampleList->setCurrentIndex(analogDownsampleList->findData(
+      QVariant::fromValue(dev->getAnalogDownsample(type, chan)),
+      Qt::DisplayRole));
+  analogReferenceList->setCurrentIndex(
+      analogReferenceList->findData(QVariant::fromValue(dev->getAnalogReference(type, chan))));
+  analogUnitList->setCurrentIndex(
+      analogUnitList->findData(QVariant::fromValue(dev->getAnalogUnits(type, chan))));
+
+  // Determine the correct prefix for analog gain
+  int indx = 8;
+  double tmp = NAN;
+  double gain = dev->getAnalogGain(type, chan); 
+  bool sign =  gain < 0.0;
+  tmp = fabs(gain);
+  while (((tmp >= 1000) && (indx > 0)) || ((tmp < 1) && (indx < 16))) {
+    if (tmp >= 1000) {
+      tmp /= 1000;
+      indx--;
+    } else {
+      tmp *= 1000;
+      indx++;
+    }
+  }
+  if (sign) {
+    analogGainEdit->setText(QString::number(tmp));
+  } else {
+    analogGainEdit->setText(QString::number(-tmp));
+  }
+
+  // Set gain prefix to computed index
+  analogUnitPrefixList->setCurrentIndex(indx);
+
+  // Determine the correct prefix for analog offset
+  indx = 8;
+  sign = dev->getAnalogZeroOffset(type, chan) < 0.0;
+  tmp = fabs(dev->getAnalogZeroOffset(type, chan));
+  while (((tmp >= 1000) && (indx > 0)) || ((tmp < 1) && (indx < 16))) {
+    if (tmp >= 1000) {
+      tmp /= 1000;
+      indx--;
+    } else {
+      tmp *= 1000;
+      indx++;
+    }
+  }
+  if (sign) {
+    analogZeroOffsetEdit->setText(QString::number(tmp));
+  } else {
+    analogZeroOffsetEdit->setText(QString::number(-tmp));
+  }
+  // Set offset prefix to computed index
+  analogUnitPrefixList2->setCurrentIndex(indx);
+}
+
+void SystemControl::Panel::displayDigitalGroup()
+{
+  if(deviceList->count() == 0 || deviceList->currentIndex() < 0) { return; }
+  if(digitalChannelList->count() == 0) {
+    digitalActiveButton->setChecked(false);
+    digitalActiveButton->setEnabled(false);
+    digitalChannelList->setEnabled(false);
+    digitalDirectionList->setEnabled(false);
+    return;
+  }
+  auto* dev = deviceList->currentData().value<DAQ::Device*>();
+  auto type = digitalSubdeviceList->currentData().value<DAQ::ChannelType::type_t>();
+  auto chan = digitalChannelList->currentData().value<DAQ::index_t>();
+
+  digitalActiveButton->setEnabled(true);
+  digitalChannelList->setEnabled(true);
+  if (type == DAQ::ChannelType::DI || type == DAQ::ChannelType::DO) {
+    digitalDirectionList->setEnabled(true);
+    digitalDirectionList->setCurrentIndex(digitalDirectionList->findData(QVariant::fromValue(type)));
+  } else {
+    digitalDirectionList->setEnabled(false);
+  }
+  digitalActiveButton->setChecked(dev->getChannelActive(type, chan));
 }
 
 std::unique_ptr<Modules::Plugin> SystemControl::createRTXIPlugin(

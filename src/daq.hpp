@@ -37,6 +37,8 @@
 namespace DAQ
 {
 
+using analog_range_t = std::pair<double, double>;
+
 namespace ChannelType {
 /*!
  * Used to specify the interface type.
@@ -80,6 +82,29 @@ enum reference_t : size_t
   UNKNOWN
 };
 } // namespace Reference
+
+inline std::array<analog_range_t, 7> get_default_ranges()
+{
+  return 
+  {
+    std::pair(-10.0, 10.0),
+    std::pair(-5.0, 5.0),
+    std::pair(-1.0, 1.0),
+    std::pair(-0.5, 0.5),
+    std::pair(-0.2, 0.2),
+    std::pair(-0.1, 0.1),
+  };
+}
+
+inline std::array<std::string, 2> get_default_units()
+{
+  return 
+  {
+    "volts",
+    "amps"
+  }; 
+}
+
 
 /*!
  * Object that represents a single DAQ card.
