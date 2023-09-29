@@ -60,6 +60,8 @@ public slots:
 
 private:
   void buildDAQDeviceList();
+  void submitAnalogChannelUpdate();
+  void submitDigitalChannelUpdate();
 
   QGroupBox* deviceGroup = nullptr;
   QGroupBox* analogGroup = nullptr;

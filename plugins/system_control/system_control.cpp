@@ -157,19 +157,21 @@ SystemControl::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
   analogRangeList->clear();
   const std::string formatting = "{:.1f}";
   std::string range_list_text;
+  DAQ::index_t indx = 0;
   for(auto range : DAQ::get_default_ranges()){
     auto [min, max] = range;
     range_list_text = fmt::format(formatting, min) + std::string(" to ") + fmt::format(formatting, max);
-    analogRangeList->addItem(QString::fromStdString(range_list_text), QVariant::fromValue(range));
+    analogRangeList->addItem(QString::fromStdString(range_list_text), QVariant::fromValue(indx));
+    indx++;
   }
 
   analogLayout->addWidget(analogReferenceList, 2, 3, 1, 2);
   analogLayout->addWidget(new QLabel(tr("Scale:")), 3, 0);
   analogReferenceList->clear();
-  analogReferenceList->addItem("Ground", QVariant::fromValue(DAQ::Reference::GROUND));
-  analogReferenceList->addItem("Common", QVariant::fromValue(DAQ::Reference::COMMON));
-  analogReferenceList->addItem("Differential", QVariant::fromValue(DAQ::Reference::DIFFERENTIAL));
-  analogReferenceList->addItem("Other", QVariant::fromValue(DAQ::Reference::OTHER));
+  analogReferenceList->addItem("Ground", QVariant::fromValue(static_cast<DAQ::index_t>(DAQ::Reference::GROUND)));
+  analogReferenceList->addItem("Common", QVariant::fromValue(static_cast<DAQ::index_t>(DAQ::Reference::COMMON)));
+  analogReferenceList->addItem("Differential", QVariant::fromValue(static_cast<DAQ::index_t>(DAQ::Reference::DIFFERENTIAL)));
+  analogReferenceList->addItem("Other", QVariant::fromValue(static_cast<DAQ::index_t>(DAQ::Reference::OTHER)));
 
   analogGainEdit->setAlignment(Qt::AlignRight);
   analogLayout->addWidget(analogGainEdit, 3, 1);
@@ -195,8 +197,10 @@ SystemControl::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
 
   analogLayout->addWidget(analogUnitList, 3, 3);
   analogUnitList->clear();
+  DAQ::index_t units_index=0;
   for(const auto& units : DAQ::get_default_units()){
-    analogUnitList->addItem(QString::fromStdString(units));
+    analogUnitList->addItem(QString::fromStdString(units), QVariant::fromValue(units_index));
+    units_index++;
   }
   analogLayout->addWidget(new QLabel(tr(" / Volt")), 3, 4);
   analogLayout->addWidget(new QLabel(tr("Offset:")), 4, 0);
@@ -297,6 +301,52 @@ SystemControl::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
   display();
 }
 
+void SystemControl::Panel::submitAnalogChannelUpdate()
+{
+  auto* dev = deviceList->currentData().value<DAQ::Device*>();
+  auto a_chan = analogChannelList->currentData().value<DAQ::index_t>();
+  auto a_type = analogSubdeviceList->currentData().value<DAQ::ChannelType::type_t>();
+  const double a_gain = analogGainEdit->text().toDouble() * analogUnitPrefixList->currentData().toDouble();
+  const double a_zerooffset = analogZeroOffsetEdit->text().toDouble() * analogUnitPrefixList2->currentData().toDouble();
+
+  dev->setChannelActive(a_type, a_chan, analogActiveButton->isChecked());
+  if(!analogActiveButton->isChecked()) { return; }
+  dev->setAnalogGain(a_type, a_chan, a_gain);
+  dev->setAnalogZeroOffset(a_type, a_chan, a_zerooffset);
+  dev->setAnalogRange(
+      a_type,
+      a_chan,
+      analogRangeList->currentData().value<DAQ::index_t>());
+  dev->setAnalogReference(
+      a_type,
+      a_chan,
+      analogReferenceList->currentData().value<DAQ::index_t>());
+  dev->setAnalogUnits(
+      a_type,
+      a_chan,
+      analogUnitList->currentData().value<DAQ::index_t>());
+  const int value =
+      analogDownsampleList
+          ->itemData(analogDownsampleList->currentIndex(), Qt::DisplayRole)
+          .toInt();
+  dev->setAnalogDownsample(a_type, a_chan, static_cast<size_t>(value));
+  dev->setAnalogCounter(a_type, a_chan);
+}
+
+void SystemControl::Panel::submitDigitalChannelUpdate()
+{
+  auto* dev = deviceList->currentData().value<DAQ::Device*>();
+  auto d_chan = digitalChannelList->currentData().value<DAQ::index_t>();
+  auto d_type = digitalSubdeviceList->currentData().value<DAQ::ChannelType::type_t>();
+  auto d_dir = digitalDirectionList->currentData().value<DAQ::direction_t>();
+
+  dev->setChannelActive(d_type, d_chan, digitalActiveButton->isChecked());
+  if(!digitalActiveButton->isChecked()){ return; }
+  if (d_type == DAQ::ChannelType::DI || d_type == DAQ::ChannelType::DO) {
+    dev->setDigitalDirection(d_chan, d_dir);
+  }
+}
+
 void SystemControl::Panel::apply()
 {
   double period = periodEdit->text().toDouble();
@@ -309,48 +359,13 @@ void SystemControl::Panel::apply()
   // We don't bother continuing if no valid device info is present/selected
   if (deviceList->count() == 0 || deviceList->currentIndex() < 0) { return; }
 
-  auto* dev = deviceList->currentData().value<DAQ::Device*>();
-  
-  if(analogActiveButton->isEnabled() && analogActiveButton->isChecked()){
-    auto a_chan = analogChannelList->currentData().value<DAQ::index_t>();
-    auto a_type = analogSubdeviceList->currentData().value<DAQ::ChannelType::type_t>();
-    const double a_gain = analogGainEdit->text().toDouble() * analogUnitPrefixList->currentData().toDouble();
-    const double a_zerooffset = analogZeroOffsetEdit->text().toDouble() * analogUnitPrefixList2->currentData().toDouble();
-
-    dev->setChannelActive(a_type, a_chan, analogActiveButton->isChecked());
-    dev->setAnalogGain(a_type, a_chan, a_gain);
-    dev->setAnalogZeroOffset(a_type, a_chan, a_zerooffset);
-    dev->setAnalogRange(
-        a_type,
-        a_chan,
-        static_cast<DAQ::index_t>(analogRangeList->currentIndex()));
-    dev->setAnalogReference(
-        a_type,
-        a_chan,
-        static_cast<DAQ::index_t>(analogReferenceList->currentIndex()));
-    dev->setAnalogUnits(
-        a_type,
-        a_chan,
-        static_cast<DAQ::index_t>(analogUnitList->currentIndex()));
-    const int value =
-        analogDownsampleList
-            ->itemData(analogDownsampleList->currentIndex(), Qt::DisplayRole)
-            .toInt();
-    dev->setAnalogDownsample(a_type, a_chan, static_cast<size_t>(value));
-    dev->setAnalogCounter(a_type, a_chan);
+  if(analogActiveButton->isEnabled()){
+    this->submitAnalogChannelUpdate();
   }
 
-  if(digitalActiveButton->isEnabled() && digitalActiveButton->isChecked()){
-    auto d_chan = digitalChannelList->currentData().value<DAQ::index_t>();
-    auto d_type = digitalSubdeviceList->currentData().value<DAQ::ChannelType::type_t>();
-    auto d_dir = digitalDirectionList->currentData().value<DAQ::direction_t>();
-
-    dev->setChannelActive(d_type, d_chan, digitalActiveButton->isChecked());
-    if (d_type == DAQ::ChannelType::DI || d_type == DAQ::ChannelType::DO) {
-      dev->setDigitalDirection(d_chan, d_dir);
-    }
+  if(digitalActiveButton->isEnabled()){
+    this->submitDigitalChannelUpdate();
   }
-
   // Display changes
   display();
 }
@@ -492,7 +507,6 @@ void SystemControl::Panel::displayAnalogGroup()
   int indx = 8;
   double tmp = NAN;
   double gain = dev->getAnalogGain(type, chan); 
-  bool sign =  gain < 0.0;
   tmp = fabs(gain);
   while (((tmp >= 1000) && (indx > 0)) || ((tmp < 1) && (indx < 16))) {
     if (tmp >= 1000) {
@@ -503,19 +517,15 @@ void SystemControl::Panel::displayAnalogGroup()
       indx++;
     }
   }
-  if (sign) {
-    analogGainEdit->setText(QString::number(tmp));
-  } else {
-    analogGainEdit->setText(QString::number(-tmp));
-  }
+  analogGainEdit->setText(QString::number(gain));
 
   // Set gain prefix to computed index
   analogUnitPrefixList->setCurrentIndex(indx);
 
   // Determine the correct prefix for analog offset
   indx = 8;
-  sign = dev->getAnalogZeroOffset(type, chan) < 0.0;
-  tmp = fabs(dev->getAnalogZeroOffset(type, chan));
+  double offset = dev->getAnalogZeroOffset(type, chan);
+  tmp = fabs(offset);
   while (((tmp >= 1000) && (indx > 0)) || ((tmp < 1) && (indx < 16))) {
     if (tmp >= 1000) {
       tmp /= 1000;
@@ -525,11 +535,7 @@ void SystemControl::Panel::displayAnalogGroup()
       indx++;
     }
   }
-  if (sign) {
-    analogZeroOffsetEdit->setText(QString::number(tmp));
-  } else {
-    analogZeroOffsetEdit->setText(QString::number(-tmp));
-  }
+  analogZeroOffsetEdit->setText(QString::number(offset));
   // Set offset prefix to computed index
   analogUnitPrefixList2->setCurrentIndex(indx);
 }
