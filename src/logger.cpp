@@ -5,7 +5,7 @@
 #include "logger.hpp"
 
 #include "event.hpp"
-#include "module.hpp"
+#include "widgets.hpp"
 #include "rt.hpp"
 
 // TODO: change localtime to be thread-safe
@@ -63,27 +63,27 @@ void eventLogger::log(Event::Object* event)
         break;
       case Event::Type::PLUGIN_REMOVE_EVENT:
         this->ss << "\t SOURCE -- ";
-        this->ss << std::any_cast<Modules::Plugin*>(
+        this->ss << std::any_cast<Widgets::Plugin*>(
                         event->getParam("pluginPointer"))
                         ->getName();
         break;
-      case Event::Type::RT_MODULE_PARAMETER_CHANGE_EVENT:
+      case Event::Type::RT_WIDGET_PARAMETER_CHANGE_EVENT:
         this->ss << "\t SOURCE -- ";
-        this->ss << std::any_cast<Modules::Component*>(
-                        event->getParam("paramModule"))
+        this->ss << std::any_cast<Widgets::Component*>(
+                        event->getParam("paramWidget"))
                         ->getName();
         this->ss << " TYPE -- ";
-        this->ss << Modules::Variable::vartype2string(
-            std::any_cast<Modules::Variable::variable_t>(
+        this->ss << Widgets::Variable::vartype2string(
+            std::any_cast<Widgets::Variable::variable_t>(
                 event->getParam("paramType")));
         break;
-      case Event::Type::RT_MODULE_STATE_CHANGE_EVENT:
+      case Event::Type::RT_WIDGET_STATE_CHANGE_EVENT:
         this->ss << "\t SOURCE -- ";
-        this->ss << std::any_cast<Modules::Component*>(
+        this->ss << std::any_cast<Widgets::Component*>(
                         event->getParam("component"))
                         ->getName();
         this->ss << " TYPE -- ";
-        this->ss << Modules::Variable::state2string(
+        this->ss << Widgets::Variable::state2string(
             std::any_cast<RT::State::state_t>(event->getParam("state")));
         break;
       default:
@@ -126,14 +126,14 @@ void eventLogger::log(RT::Telemitry::Response response)
       case RT::Telemitry::RT_SHUTDOWN:
         this->ss << "Real-Time System Shutdown";
         break;
-      case RT::Telemitry::RT_MODULE_PARAM_UPDATE:
-        this->ss << "Module Parameter Updated";
+      case RT::Telemitry::RT_WIDGET_PARAM_UPDATE:
+        this->ss << "Widget Parameter Updated";
         break;
       case RT::Telemitry::IO_LINK_UPDATED:
         this->ss << "IO Link Updated";
         break;
-      case RT::Telemitry::RT_MODULE_STATE_UPDATE:
-        this->ss << "Module State Updated";
+      case RT::Telemitry::RT_WIDGET_STATE_UPDATE:
+        this->ss << "Widget State Updated";
         break;
       case RT::Telemitry::RT_ERROR:
         this->ss << "Real-Time System Error";

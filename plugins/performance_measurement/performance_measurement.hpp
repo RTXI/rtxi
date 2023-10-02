@@ -24,7 +24,7 @@
 #include <QtWidgets>
 
 #include "math/runningstat.h"
-#include "module.hpp"
+#include "widgets.hpp"
 #include "rt.hpp"
 
 
@@ -33,7 +33,7 @@ namespace PerformanceMeasurement
 
 constexpr std::string_view MODULE_NAME = "RT Benchmarks";
 
-inline std::vector<Modules::Variable::Info> get_default_vars()
+inline std::vector<Widgets::Variable::Info> get_default_vars()
 { 
   return 
   {
@@ -52,7 +52,7 @@ struct performance_stats_t{
   double jitter=0.0;
 };
 
-class Plugin : public Modules::Plugin
+class Plugin : public Widgets::Plugin
 {
 public:
   explicit Plugin(Event::Manager* ev_manager);
@@ -61,10 +61,10 @@ private:
   RT::OS::Fifo* component_fifo;
 };  // class Plugin
 
-class Component : public Modules::Component
+class Component : public Widgets::Component
 {
 public: 
-  explicit Component(Modules::Plugin* hplugin); 
+  explicit Component(Widgets::Plugin* hplugin); 
 
   void setTickPointers(int64_t* s_ticks, int64_t* e_ticks);
   void execute() override;
@@ -82,7 +82,7 @@ private:
   std::unique_ptr<RT::OS::Fifo> fifo;
 };
 
-class Panel : public Modules::Panel
+class Panel : public Widgets::Panel
 {
   Q_OBJECT
 
@@ -110,12 +110,12 @@ private:
   QLineEdit* AppCpuPercentEdit;
 };  // class Panel
 
-std::unique_ptr<Modules::Plugin> createRTXIPlugin(Event::Manager* ev_manager);
+std::unique_ptr<Widgets::Plugin> createRTXIPlugin(Event::Manager* ev_manager);
 
-Modules::Panel* createRTXIPanel(QMainWindow* main_window, Event::Manager* ev_manager);
+Widgets::Panel* createRTXIPanel(QMainWindow* main_window, Event::Manager* ev_manager);
 
-std::unique_ptr<Modules::Component> createRTXIComponent(Modules::Plugin* host_plugin);
+std::unique_ptr<Widgets::Component> createRTXIComponent(Widgets::Plugin* host_plugin);
 
-Modules::FactoryMethods getFactories();
+Widgets::FactoryMethods getFactories();
 } // namespace PerformanceMeasurement
 #endif /* PERFORMANCE_MEASUREMENT_H */

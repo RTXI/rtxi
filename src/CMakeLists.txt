@@ -58,7 +58,7 @@ add_library(rtxi SHARED
     io.hpp io.cpp
     rt.hpp rt.cpp
     daq.hpp daq.cpp
-    module.hpp module.cpp
+    widgets.hpp widgets.cpp
     logger.hpp logger.cpp
 )
 

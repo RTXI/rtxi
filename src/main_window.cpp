@@ -38,7 +38,7 @@
 #include "data_recorder/data_recorder.h"
 #include "debug.hpp"
 #include "event.hpp"
-#include "module.hpp"
+#include "widgets.hpp"
 #include "oscilloscope/oscilloscope.h"
 #include "performance_measurement/performance_measurement.hpp"
 #include "rtxiConfig.h"
@@ -68,8 +68,8 @@ MainWindow::MainWindow(Event::Manager* ev_manager)
   createFileActions();
   createFileMenu();
 
-  /* Initialize Module Menu */
-  createModuleMenu();
+  /* Initialize Widget Menu */
+  createWidgetMenu();
 
   /* Initialize Utilities menu */
   createUtilMenu();
@@ -86,7 +86,7 @@ MainWindow::MainWindow(Event::Manager* ev_manager)
   createHelpMenu();
 }
 
-QAction* MainWindow::insertModuleMenuSeparator()
+QAction* MainWindow::insertWidgetMenuSeparator()
 {
   return moduleMenu->addSeparator();
 }
@@ -108,34 +108,34 @@ void MainWindow::clearFileMenu()
   fileMenu->addSeparator();
 }
 
-QAction* MainWindow::createModuleMenuItem(const QString& text)
+QAction* MainWindow::createWidgetMenuItem(const QString& text)
 {
   return moduleMenu->addAction(text);
 }
 
-QAction* MainWindow::createModuleMenuItem(const QString& text,
+QAction* MainWindow::createWidgetMenuItem(const QString& text,
                                           const QObject* receiver,
                                           const char* member)
 {
   return moduleMenu->addAction(text, receiver, member);
 }
 
-void MainWindow::setModuleMenuItemParameter(QAction* action, int parameter)
+void MainWindow::setWidgetMenuItemParameter(QAction* action, int parameter)
 {
   action->setData(parameter);
 }
 
-void MainWindow::clearModuleMenu()
+void MainWindow::clearWidgetMenu()
 {
   moduleMenu->clear();
 }
 
-void MainWindow::changeModuleMenuItem(QAction* action, const QString& text)
+void MainWindow::changeWidgetMenuItem(QAction* action, const QString& text)
 {
   action->setText(text);
 }
 
-void MainWindow::removeModuleMenuItem(QAction* action)
+void MainWindow::removeWidgetMenuItem(QAction* action)
 {
   const QList<QAction*> actionList = moduleMenu->actions();
   if (!actionList.empty()) {
@@ -165,11 +165,11 @@ void MainWindow::createFileMenu()
           SLOT(fileMenuActivated(QAction*)));
 }
 
-void MainWindow::createModuleMenu()
+void MainWindow::createWidgetMenu()
 {
-  moduleMenu = menuBar()->addMenu(tr("&Modules"));
-  this->loadDynamicModule = new QAction("Load Plugin", this);
-  moduleMenu->addAction(this->loadDynamicModule);
+  moduleMenu = menuBar()->addMenu(tr("&Widgets"));
+  this->loadDynamicWidget = new QAction("Load Plugin", this);
+  moduleMenu->addAction(this->loadDynamicWidget);
   connect(moduleMenu,
           SIGNAL(triggered(QAction*)),
           this,
@@ -405,7 +405,7 @@ void MainWindow::utilitiesMenuActivated(QAction* /*unused*/)
   // Plugin::Manager::getInstance()->load(id->text());
 }
 
-void MainWindow::loadModule(const QString& module_name)
+void MainWindow::loadWidget(const QString& module_name)
 {
   Event::Object event(Event::Type::PLUGIN_INSERT_EVENT);
   event.setParam("pluginName", std::any(module_name.toStdString()));
@@ -418,10 +418,10 @@ void MainWindow::loadModule(const QString& module_name)
   }
 
   auto create_rtxi_panel_func =
-      std::any_cast<Modules::Panel* (*)(QMainWindow*, Event::Manager*)>(
+      std::any_cast<Widgets::Panel* (*)(QMainWindow*, Event::Manager*)>(
           event.getParam("createRTXIPanel"));
   auto* rtxi_plugin_pointer =
-      std::any_cast<Modules::Plugin*>(event.getParam("pluginPointer"));
+      std::any_cast<Widgets::Plugin*>(event.getParam("pluginPointer"));
   auto* rtxi_panel_pointer = create_rtxi_panel_func(this, this->event_manager);
   rtxi_plugin_pointer->attachPanel(rtxi_panel_pointer);
   // finally plugins can also receive events so make sure to register them
@@ -433,7 +433,7 @@ void MainWindow::loadModule(const QString& module_name)
 
 void MainWindow::systemMenuActivated(QAction* id)
 {
-  this->loadModule(id->text());
+  this->loadWidget(id->text());
 }
 
 void MainWindow::windowsMenuAboutToShow()
@@ -488,7 +488,7 @@ void MainWindow::modulesMenuActivated(QAction* /*unused*/)
       QCoreApplication::applicationDirPath()+QString("/")+QString("rtxi_modules"),
       tr("Plugins (*.so);;All (*.*)"));
   if (!filename.isNull()) {
-    this->loadModule(filename);
+    this->loadWidget(filename);
   }
 }
 

@@ -37,7 +37,7 @@ extern "C" {
  * GitHub repos using GitHub's own API.
  */
 RTXIWizard::Panel::Panel(QMainWindow* mwindow, Event::Manager* ev_manager)
-    : Modules::Panel(std::string(RTXIWizard::MODULE_NAME), mwindow, ev_manager)
+    : Widgets::Panel(std::string(RTXIWizard::MODULE_NAME), mwindow, ev_manager)
     , button_mode(DOWNLOAD)
     , readmeWindow(new QTextEdit)
     , availableListWidget(new QListWidget(this))
@@ -490,28 +490,28 @@ int RTXIWizard::Panel::printGitError(int error)
   return error;
 }
 
-std::unique_ptr<Modules::Plugin> RTXIWizard::createRTXIPlugin(
+std::unique_ptr<Widgets::Plugin> RTXIWizard::createRTXIPlugin(
     Event::Manager* ev_manager)
 {
   return std::make_unique<RTXIWizard::Plugin>(ev_manager);
 }
 
-Modules::Panel* RTXIWizard::createRTXIPanel(QMainWindow* main_window,
+Widgets::Panel* RTXIWizard::createRTXIPanel(QMainWindow* main_window,
                                            Event::Manager* ev_manager)
 {
-  return static_cast<Modules::Panel*>(
+  return static_cast<Widgets::Panel*>(
       new RTXIWizard::Panel(main_window, ev_manager));
 }
 
-std::unique_ptr<Modules::Component> RTXIWizard::createRTXIComponent(
-    Modules::Plugin* /*unused*/)
+std::unique_ptr<Widgets::Component> RTXIWizard::createRTXIComponent(
+    Widgets::Plugin* /*unused*/)
 {
   return {nullptr};
 }
 
-Modules::FactoryMethods RTXIWizard::getFactories()
+Widgets::FactoryMethods RTXIWizard::getFactories()
 {
-  Modules::FactoryMethods fact;
+  Widgets::FactoryMethods fact;
   fact.createPanel = &RTXIWizard::createRTXIPanel;
   fact.createComponent = &RTXIWizard::createRTXIComponent;
   fact.createPlugin = &RTXIWizard::createRTXIPlugin;

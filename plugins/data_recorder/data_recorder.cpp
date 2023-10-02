@@ -37,7 +37,7 @@
 #include "main_window.hpp"
 
 DataRecorder::Panel::Panel(QMainWindow* mwindow, Event::Manager* ev_manager)
-    : Modules::Panel(
+    : Widgets::Panel(
         std::string(DataRecorder::MODULE_NAME), mwindow, ev_manager)
     , downsample_rate(1)
     , buttonGroup(new QGroupBox)
@@ -493,7 +493,7 @@ void DataRecorder::Panel::syncEnableRecordingButtons(const QString& /*unused*/)
 }
 
 DataRecorder::Plugin::Plugin(Event::Manager* ev_manager)
-    : Modules::Plugin(ev_manager, std::string(DataRecorder::MODULE_NAME))
+    : Widgets::Plugin(ev_manager, std::string(DataRecorder::MODULE_NAME))
     , recording(false)
 {
 }
@@ -860,9 +860,9 @@ void DataRecorder::Plugin::save_data(
   }
 }
 
-DataRecorder::Component::Component(Modules::Plugin* hplugin,
+DataRecorder::Component::Component(Widgets::Plugin* hplugin,
                                    const std::string& probe_name)
-    : Modules::Component(hplugin,
+    : Widgets::Component(hplugin,
                          probe_name,
                          DataRecorder::get_default_channels(),
                          DataRecorder::get_default_vars())
@@ -900,28 +900,28 @@ RT::OS::Fifo* DataRecorder::Component::get_fifo()
   return this->m_fifo.get();
 }
 
-std::unique_ptr<Modules::Plugin> DataRecorder::createRTXIPlugin(
+std::unique_ptr<Widgets::Plugin> DataRecorder::createRTXIPlugin(
     Event::Manager* ev_manager)
 {
   return std::make_unique<DataRecorder::Plugin>(ev_manager);
 }
 
-Modules::Panel* DataRecorder::createRTXIPanel(QMainWindow* mwindow,
+Widgets::Panel* DataRecorder::createRTXIPanel(QMainWindow* mwindow,
                                               Event::Manager* ev_manager)
 {
-  return static_cast<Modules::Panel*>(
+  return static_cast<Widgets::Panel*>(
       new DataRecorder::Panel(mwindow, ev_manager));
 }
 
-std::unique_ptr<Modules::Component> DataRecorder::createRTXIComponent(
-    Modules::Plugin* /*host_plugin*/)
+std::unique_ptr<Widgets::Component> DataRecorder::createRTXIComponent(
+    Widgets::Plugin* /*host_plugin*/)
 {
   return std::unique_ptr<DataRecorder::Component>(nullptr);
 }
 
-Modules::FactoryMethods DataRecorder::getFactories()
+Widgets::FactoryMethods DataRecorder::getFactories()
 {
-  Modules::FactoryMethods fact;
+  Widgets::FactoryMethods fact;
   fact.createPanel = &DataRecorder::createRTXIPanel;
   fact.createComponent = &DataRecorder::createRTXIComponent;
   fact.createPlugin = &DataRecorder::createRTXIPlugin;

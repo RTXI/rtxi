@@ -18,7 +18,7 @@
 #include <utility>
 #include "dlplugin.hpp"
 #include "event.hpp"
-#include "module.hpp"
+#include "widgets.hpp"
 #include "daq.hpp"
 
 //! Internal Management Oriented Classes
@@ -34,7 +34,7 @@ namespace Workspace
  * classes for a core RTXI modules
  *
  */
-std::optional<Modules::FactoryMethods> get_core_plugin_factory(
+std::optional<Widgets::FactoryMethods> get_core_plugin_factory(
     const std::string& plugin_name);
 
 /*!
@@ -53,12 +53,12 @@ public:
   /*!
    * loads plugin
    */
-  Modules::Plugin* loadPlugin(const std::string& library);
+  Widgets::Plugin* loadPlugin(const std::string& library);
 
   /*!
    * unloads plugin
    */
-  void unloadPlugin(Modules::Plugin* plugin);
+  void unloadPlugin(Widgets::Plugin* plugin);
 
   /*!
    * Handles plugin loading/unloadin gevents from gui thread
@@ -68,7 +68,7 @@ public:
   /*!
    * Checks whether plugin is registered
    */
-  bool isRegistered(const Modules::Plugin* plugin);
+  bool isRegistered(const Widgets::Plugin* plugin);
 
   std::vector<DAQ::Device*> getDevices(const std::string& driver);
   std::vector<DAQ::Device*> getAllDevices();
@@ -78,19 +78,19 @@ private:
   void registerDriver(const std::string& driver_location);
   void unregisterDriver(const std::string& driver_location);
 
-  [[nodiscard]] Modules::Plugin* registerModule(
-      std::unique_ptr<Modules::Plugin> module);
-  void unregisterModule(Modules::Plugin* plugin);
+  [[nodiscard]] Widgets::Plugin* registerWidget(
+      std::unique_ptr<Widgets::Plugin> module);
+  void unregisterWidget(Widgets::Plugin* plugin);
 
   void registerFactories(const std::string& module_name,
-                         Modules::FactoryMethods);
+                         Widgets::FactoryMethods);
   void unregisterFactories(const std::string& module_name);
-  Modules::Plugin* loadCorePlugin(const std::string& library);
+  Widgets::Plugin* loadCorePlugin(const std::string& library);
 
-  std::unordered_map<std::string, std::vector<std::unique_ptr<Modules::Plugin>>>
+  std::unordered_map<std::string, std::vector<std::unique_ptr<Widgets::Plugin>>>
       rtxi_modules_registry;
   std::vector<driver_registry_entry> m_driver_registry;
-  std::unordered_map<std::string, Modules::FactoryMethods>
+  std::unordered_map<std::string, Widgets::FactoryMethods>
       rtxi_factories_registry;
   Event::Manager* event_manager;
   std::unique_ptr<DLL::Loader> m_plugin_loader;

@@ -31,12 +31,12 @@
 #include "userprefs.h"
 
 UserPrefs::Plugin::Plugin(Event::Manager* ev_manager)
-    : Modules::Plugin(ev_manager, std::string(UserPrefs::MODULE_NAME))
+    : Widgets::Plugin(ev_manager, std::string(UserPrefs::MODULE_NAME))
 {
 }
 
 UserPrefs::Panel::Panel(QMainWindow* mwindow, Event::Manager* ev_manager)
-    : Modules::Panel(std::string(UserPrefs::MODULE_NAME), mwindow, ev_manager)
+    : Widgets::Panel(std::string(UserPrefs::MODULE_NAME), mwindow, ev_manager)
     , status(new QLabel)
     , dirGroup(new QGroupBox)
     , HDF(new QGroupBox)
@@ -182,28 +182,28 @@ void UserPrefs::Panel::chooseDataDir()
   dataDirEdit->setText(dir_name);
 }
 
-std::unique_ptr<Modules::Plugin> UserPrefs::createRTXIPlugin(
+std::unique_ptr<Widgets::Plugin> UserPrefs::createRTXIPlugin(
     Event::Manager* ev_manager)
 {
   return std::make_unique<UserPrefs::Plugin>(ev_manager);
 }
 
-Modules::Panel* UserPrefs::createRTXIPanel(QMainWindow* main_window,
+Widgets::Panel* UserPrefs::createRTXIPanel(QMainWindow* main_window,
                                            Event::Manager* ev_manager)
 {
-  return static_cast<Modules::Panel*>(
+  return static_cast<Widgets::Panel*>(
       new UserPrefs::Panel(main_window, ev_manager));
 }
 
-std::unique_ptr<Modules::Component> UserPrefs::createRTXIComponent(
-    Modules::Plugin* /*host_plugin*/)
+std::unique_ptr<Widgets::Component> UserPrefs::createRTXIComponent(
+    Widgets::Plugin* /*host_plugin*/)
 {
   return {nullptr};
 }
 
-Modules::FactoryMethods UserPrefs::getFactories()
+Widgets::FactoryMethods UserPrefs::getFactories()
 {
-  Modules::FactoryMethods fact;
+  Widgets::FactoryMethods fact;
   fact.createPanel = &UserPrefs::createRTXIPanel;
   fact.createComponent = &UserPrefs::createRTXIComponent;
   fact.createPlugin = &UserPrefs::createRTXIPlugin;

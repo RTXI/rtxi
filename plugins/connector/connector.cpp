@@ -23,7 +23,7 @@
 #include "main_window.hpp"
 
 Connector::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
-    : Modules::Panel(std::string(Connector::MODULE_NAME), mw, ev_manager)
+    : Widgets::Panel(std::string(Connector::MODULE_NAME), mw, ev_manager)
     , buttonGroup(new QGroupBox)
     , inputBlock(new QComboBox)
     , inputChannel(new QComboBox)
@@ -398,32 +398,32 @@ void Connector::Panel::updateConnectionButton()
 }
 
 Connector::Plugin::Plugin(Event::Manager* ev_manager)
-    : Modules::Plugin(ev_manager, std::string(Connector::MODULE_NAME))
+    : Widgets::Plugin(ev_manager, std::string(Connector::MODULE_NAME))
 {
 }
 
-std::unique_ptr<Modules::Plugin> Connector::createRTXIPlugin(
+std::unique_ptr<Widgets::Plugin> Connector::createRTXIPlugin(
     Event::Manager* ev_manager)
 {
   return std::make_unique<Connector::Plugin>(ev_manager);
 }
 
-Modules::Panel* Connector::createRTXIPanel(QMainWindow* main_window,
+Widgets::Panel* Connector::createRTXIPanel(QMainWindow* main_window,
                                            Event::Manager* ev_manager)
 {
-  return static_cast<Modules::Panel*>(
+  return static_cast<Widgets::Panel*>(
       new Connector::Panel(main_window, ev_manager));
 }
 
-std::unique_ptr<Modules::Component> Connector::createRTXIComponent(
-    Modules::Plugin* /*unused*/)
+std::unique_ptr<Widgets::Component> Connector::createRTXIComponent(
+    Widgets::Plugin* /*unused*/)
 {
   return {nullptr};
 }
 
-Modules::FactoryMethods Connector::getFactories()
+Widgets::FactoryMethods Connector::getFactories()
 {
-  Modules::FactoryMethods fact;
+  Widgets::FactoryMethods fact;
   fact.createPanel = &Connector::createRTXIPanel;
   fact.createComponent = &Connector::createRTXIComponent;
   fact.createPlugin = &Connector::createRTXIPlugin;

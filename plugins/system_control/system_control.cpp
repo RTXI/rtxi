@@ -30,7 +30,7 @@
 #include "rt.hpp"
 
 SystemControl::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
-    : Modules::Panel(std::string(SystemControl::MODULE_NAME), mw, ev_manager)
+    : Widgets::Panel(std::string(SystemControl::MODULE_NAME), mw, ev_manager)
     , buttonGroup(new QGroupBox)
     , deviceList(new QComboBox)
     , analogChannelList(new QComboBox)
@@ -565,28 +565,28 @@ void SystemControl::Panel::displayDigitalGroup()
   digitalActiveButton->setChecked(dev->getChannelActive(type, chan));
 }
 
-std::unique_ptr<Modules::Plugin> SystemControl::createRTXIPlugin(
+std::unique_ptr<Widgets::Plugin> SystemControl::createRTXIPlugin(
     Event::Manager* ev_manager)
 {
   return std::make_unique<SystemControl::Plugin>(ev_manager);
 }
 
-Modules::Panel* SystemControl::createRTXIPanel(QMainWindow* main_window,
+Widgets::Panel* SystemControl::createRTXIPanel(QMainWindow* main_window,
                                                Event::Manager* ev_manager)
 {
-  return static_cast<Modules::Panel*>(
+  return static_cast<Widgets::Panel*>(
       new SystemControl::Panel(main_window, ev_manager));
 }
 
-std::unique_ptr<Modules::Component> SystemControl::createRTXIComponent(
-    Modules::Plugin* /*unused*/)
+std::unique_ptr<Widgets::Component> SystemControl::createRTXIComponent(
+    Widgets::Plugin* /*unused*/)
 {
   return {nullptr};
 }
 
-Modules::FactoryMethods SystemControl::getFactories()
+Widgets::FactoryMethods SystemControl::getFactories()
 {
-  Modules::FactoryMethods fact;
+  Widgets::FactoryMethods fact;
   fact.createPanel = &SystemControl::createRTXIPanel;
   fact.createComponent = &SystemControl::createRTXIComponent;
   fact.createPlugin = &SystemControl::createRTXIPlugin;

@@ -35,7 +35,7 @@
 
 #include "event.hpp"
 #include "io.hpp"
-#include "module.hpp"
+#include "widgets.hpp"
 
 namespace DataRecorder
 {
@@ -49,7 +49,7 @@ typedef struct data_token_t
 constexpr size_t DEFAULT_BUFFER_SIZE = 10000 * sizeof(data_token_t);
 constexpr std::string_view MODULE_NAME = "Data Recorder";
 
-inline std::vector<Modules::Variable::Info> get_default_vars()
+inline std::vector<Widgets::Variable::Info> get_default_vars()
 {
   return {};
 }
@@ -76,10 +76,10 @@ typedef struct record_channel
   bool operator!=(const record_channel& rhs) const { return !operator==(rhs); }
 } record_channel;
 
-class Component : public Modules::Component
+class Component : public Widgets::Component
 {
 public:
-  Component(Modules::Plugin* hplugin, const std::string& probe_name);
+  Component(Widgets::Plugin* hplugin, const std::string& probe_name);
   void execute() override;
   RT::OS::Fifo* get_fifo();
 
@@ -87,7 +87,7 @@ private:
   std::unique_ptr<RT::OS::Fifo> m_fifo;
 };
 
-class Panel : public Modules::Panel
+class Panel : public Widgets::Panel
 {
   Q_OBJECT
 
@@ -159,7 +159,7 @@ private:
   QTime starting_record_time;
 };  // class Panel
 
-class Plugin : public Modules::Plugin
+class Plugin : public Widgets::Plugin
 {
 public:
   Plugin(const Plugin&) = delete;
@@ -231,15 +231,15 @@ private:
   std::atomic<bool> open_file = false;
 };  // class Plugin
 
-std::unique_ptr<Modules::Plugin> createRTXIPlugin(Event::Manager* ev_manager);
+std::unique_ptr<Widgets::Plugin> createRTXIPlugin(Event::Manager* ev_manager);
 
-Modules::Panel* createRTXIPanel(QMainWindow* mwindow,
+Widgets::Panel* createRTXIPanel(QMainWindow* mwindow,
                                 Event::Manager* ev_manager);
 
-std::unique_ptr<Modules::Component> createRTXIComponent(
-    Modules::Plugin* host_plugin);
+std::unique_ptr<Widgets::Component> createRTXIComponent(
+    Widgets::Plugin* host_plugin);
 
-Modules::FactoryMethods getFactories();
+Widgets::FactoryMethods getFactories();
 
 } // namespace DataRecorder
 

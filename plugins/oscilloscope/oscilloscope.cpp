@@ -677,7 +677,7 @@ void Oscilloscope::Panel::showDisplayTab()
 }
 
 Oscilloscope::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
-    : Modules::Panel(std::string(Oscilloscope::MODULE_NAME), mw, ev_manager)
+    : Widgets::Panel(std::string(Oscilloscope::MODULE_NAME), mw, ev_manager)
     , tabWidget(new QTabWidget)
     , scopeWindow(new Scope(this))
     , layout(new QVBoxLayout)
@@ -770,9 +770,9 @@ Oscilloscope::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
   scopeWindow->replot();
 }
 
-Oscilloscope::Component::Component(Modules::Plugin* hplugin,
+Oscilloscope::Component::Component(Widgets::Plugin* hplugin,
                                    const std::string& probe_name)
-    : Modules::Component(hplugin,
+    : Widgets::Component(hplugin,
                          probe_name,
                          Oscilloscope::get_default_channels(),
                          Oscilloscope::get_default_vars())
@@ -851,7 +851,7 @@ void Oscilloscope::Panel::removeBlockChannels(IO::Block* block)
 }
 
 Oscilloscope::Plugin::Plugin(Event::Manager* ev_manager)
-    : Modules::Plugin(ev_manager, std::string(Oscilloscope::MODULE_NAME))
+    : Widgets::Plugin(ev_manager, std::string(Oscilloscope::MODULE_NAME))
 {
 }
 
@@ -994,28 +994,28 @@ Oscilloscope::Component* Oscilloscope::Plugin::getProbeComponentPtr(
   return iter->component.get();
 }
 
-std::unique_ptr<Modules::Plugin> Oscilloscope::createRTXIPlugin(
+std::unique_ptr<Widgets::Plugin> Oscilloscope::createRTXIPlugin(
     Event::Manager* ev_manager)
 {
   return std::make_unique<Oscilloscope::Plugin>(ev_manager);
 }
 
-Modules::Panel* Oscilloscope::createRTXIPanel(QMainWindow* main_window,
+Widgets::Panel* Oscilloscope::createRTXIPanel(QMainWindow* main_window,
                                               Event::Manager* ev_manager)
 {
-  return static_cast<Modules::Panel*>(
+  return static_cast<Widgets::Panel*>(
       new Oscilloscope::Panel(main_window, ev_manager));
 }
 
-std::unique_ptr<Modules::Component> Oscilloscope::createRTXIComponent(
-    Modules::Plugin* /*host_plugin*/)
+std::unique_ptr<Widgets::Component> Oscilloscope::createRTXIComponent(
+    Widgets::Plugin* /*host_plugin*/)
 {
   return std::unique_ptr<Oscilloscope::Component>(nullptr);
 }
 
-Modules::FactoryMethods Oscilloscope::getFactories()
+Widgets::FactoryMethods Oscilloscope::getFactories()
 {
-  Modules::FactoryMethods fact;
+  Widgets::FactoryMethods fact;
   fact.createPanel = &Oscilloscope::createRTXIPanel;
   fact.createComponent = &Oscilloscope::createRTXIComponent;
   fact.createPlugin = &Oscilloscope::createRTXIPlugin;

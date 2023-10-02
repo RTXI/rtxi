@@ -25,10 +25,10 @@
 #include "module_installer/rtxi_wizard.h"
 #include "rtxiConfig.h"
 
-std::optional<Modules::FactoryMethods> Workspace::get_core_plugin_factory(
+std::optional<Widgets::FactoryMethods> Workspace::get_core_plugin_factory(
     const std::string& plugin_name)
 {
-  std::optional<Modules::FactoryMethods> fact_methods;
+  std::optional<Widgets::FactoryMethods> fact_methods;
   if (plugin_name == std::string(PerformanceMeasurement::MODULE_NAME)) {
     fact_methods = PerformanceMeasurement::getFactories();
   } else if (plugin_name == std::string(UserPrefs::MODULE_NAME)) {
@@ -81,14 +81,14 @@ Workspace::Manager::~Manager()
   this->event_manager->unregisterHandler(this);
 }
 
-bool Workspace::Manager::isRegistered(const Modules::Plugin* plugin)
+bool Workspace::Manager::isRegistered(const Widgets::Plugin* plugin)
 {
   const std::string plugin_name = plugin->getName();
   auto start_iter = this->rtxi_modules_registry[plugin_name].begin();
   auto end_iter = this->rtxi_modules_registry[plugin_name].end();
   return std::any_of(start_iter,
                      end_iter,
-                     [plugin](const std::unique_ptr<Modules::Plugin>& module)
+                     [plugin](const std::unique_ptr<Widgets::Plugin>& module)
                      { return plugin == module.get(); });
 }
 
@@ -116,38 +116,34 @@ std::vector<DAQ::Device*> Workspace::Manager::getAllDevices()
   return devices;
 } 
 
-Modules::Plugin* Workspace::Manager::loadCorePlugin(const std::string& library)
+Widgets::Plugin* Workspace::Manager::loadCorePlugin(const std::string& library)
 {
-  Modules::Plugin* plugin_ptr = nullptr;
-  std::optional<Modules::FactoryMethods> fact_methods =
+  Widgets::Plugin* plugin_ptr = nullptr;
+  std::optional<Widgets::FactoryMethods> fact_methods =
       Workspace::get_core_plugin_factory(library);
   if (!fact_methods.has_value()) {
     return nullptr;
   }
-  std::unique_ptr<Modules::Plugin> plugin;
+  std::unique_ptr<Widgets::Plugin> plugin;
   this->registerFactories(library, *fact_methods);
   plugin = this->rtxi_factories_registry[library].createPlugin(event_manager);
-  plugin_ptr = this->registerModule(std::move(plugin));
+  plugin_ptr = this->registerWidget(std::move(plugin));
   return plugin_ptr;
 }
 
 // TODO: extract plugin dynamic loading to another class
-Modules::Plugin* Workspace::Manager::loadPlugin(const std::string& library)
+Widgets::Plugin* Workspace::Manager::loadPlugin(const std::string& library)
 {
   const std::string& library_loc = library;
-  Modules::Plugin* plugin_ptr = nullptr;
+  Widgets::Plugin* plugin_ptr = nullptr;
   // if module factory is already registered then all we have to do is run it
   if (this->rtxi_factories_registry.find(library_loc)
       != this->rtxi_factories_registry.end())
   {
-    std::unique_ptr<Modules::Plugin> plugin =
+    std::unique_ptr<Widgets::Plugin> plugin =
         this->rtxi_factories_registry[library_loc].createPlugin(
             this->event_manager);
-    std::unique_ptr<Modules::Component> component =
-        this->rtxi_factories_registry[library_loc].createComponent(
-            plugin.get());
-    plugin->attachComponent(std::move(component));
-    plugin_ptr = this->registerModule(std::move(plugin));
+    plugin_ptr = this->registerWidget(std::move(plugin));
     return plugin_ptr;
   }
 
@@ -164,7 +160,7 @@ Modules::Plugin* Workspace::Manager::loadPlugin(const std::string& library)
   }
 
   auto gen_fact_methods =
-      this->m_plugin_loader->dlsym<Modules::FactoryMethods* (*)()>(
+      this->m_plugin_loader->dlsym<Widgets::FactoryMethods* (*)()>(
           library_loc.c_str(), "getFactories");
 
   if (gen_fact_methods == nullptr) {
@@ -175,9 +171,9 @@ Modules::Plugin* Workspace::Manager::loadPlugin(const std::string& library)
     return nullptr;
   }
 
-  Modules::FactoryMethods* fact_methods = gen_fact_methods();
+  Widgets::FactoryMethods* fact_methods = gen_fact_methods();
   this->rtxi_factories_registry[library] = *fact_methods;
-  std::unique_ptr<Modules::Plugin> plugin =
+  std::unique_ptr<Widgets::Plugin> plugin =
       fact_methods->createPlugin(this->event_manager);
   if (plugin == nullptr) {
     ERROR_MSG("Plugin::load : failed to create plugin from library {} ",
@@ -185,7 +181,7 @@ Modules::Plugin* Workspace::Manager::loadPlugin(const std::string& library)
     this->m_plugin_loader->unload(library_loc.c_str());
     return nullptr;
   }
-  std::unique_ptr<Modules::Component> component =
+  std::unique_ptr<Widgets::Component> component =
       fact_methods->createComponent(plugin.get());
   plugin->attachComponent(std::move(component));
   // if (plugin->magic_number != Plugin::Object::MAGIC_NUMBER) {
@@ -196,15 +192,15 @@ Modules::Plugin* Workspace::Manager::loadPlugin(const std::string& library)
   //   dlclose(handle);
   //   return 0;
   // }
-  plugin_ptr = this->registerModule(std::move(plugin));
+  plugin_ptr = this->registerWidget(std::move(plugin));
 
   return plugin_ptr;
 }
 
-void Workspace::Manager::unloadPlugin(Modules::Plugin* plugin)
+void Workspace::Manager::unloadPlugin(Widgets::Plugin* plugin)
 {
   const std::string library = plugin->getName();
-  this->unregisterModule(plugin);
+  this->unregisterWidget(plugin);
   if (this->rtxi_modules_registry[library].empty()) {
     this->unregisterFactories(library);
   }
@@ -256,8 +252,8 @@ void Workspace::Manager::unregisterDriver(const std::string& driver_location)
   this->m_driver_loader->unload(driver_location.c_str());
 }
 
-Modules::Plugin* Workspace::Manager::registerModule(
-    std::unique_ptr<Modules::Plugin> module)
+Widgets::Plugin* Workspace::Manager::registerWidget(
+    std::unique_ptr<Widgets::Plugin> module)
 {
   const std::unique_lock<std::mutex> lk(this->m_modules_mut);
   const std::string mod_name = module->getName();
@@ -265,7 +261,7 @@ Modules::Plugin* Workspace::Manager::registerModule(
   return this->rtxi_modules_registry[mod_name].back().get();
 }
 
-void Workspace::Manager::unregisterModule(Modules::Plugin* plugin)
+void Workspace::Manager::unregisterWidget(Widgets::Plugin* plugin)
 {
   if (plugin == nullptr) {
     return;
@@ -277,7 +273,7 @@ void Workspace::Manager::unregisterModule(Modules::Plugin* plugin)
   auto loc =
       std::find_if(start_iter,
                    end_iter,
-                   [plugin](const std::unique_ptr<Modules::Plugin>& module)
+                   [plugin](const std::unique_ptr<Widgets::Plugin>& module)
                    { return plugin == module.get(); });
   if (loc == end_iter) {
     return;
@@ -287,7 +283,7 @@ void Workspace::Manager::unregisterModule(Modules::Plugin* plugin)
 }
 
 void Workspace::Manager::registerFactories(const std::string& module_name,
-                                           Modules::FactoryMethods fact)
+                                           Widgets::FactoryMethods fact)
 {
   this->rtxi_factories_registry[module_name] = fact;
 }
@@ -304,11 +300,11 @@ void Workspace::Manager::unregisterFactories(const std::string& module_name)
 void Workspace::Manager::receiveEvent(Event::Object* event)
 {
   std::string plugin_name;
-  Modules::Plugin* plugin_ptr = nullptr;
+  Widgets::Plugin* plugin_ptr = nullptr;
   switch (event->getType()) {
     case Event::Type::PLUGIN_REMOVE_EVENT:
       plugin_ptr =
-          std::any_cast<Modules::Plugin*>(event->getParam("pluginPointer"));
+          std::any_cast<Widgets::Plugin*>(event->getParam("pluginPointer"));
       this->unloadPlugin(plugin_ptr);
       break;
     case Event::Type::PLUGIN_INSERT_EVENT:

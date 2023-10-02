@@ -32,7 +32,7 @@
 #include "event.hpp"
 #include "fifo.hpp"
 #include "io.hpp"
-#include "module.hpp"
+#include "widgets.hpp"
 #include "rt.hpp"
 #include "scope.h"
 
@@ -46,12 +46,12 @@ enum PARAMETER : size_t
   TRIGGERING = 0,
 };
 
-inline std::vector<Modules::Variable::Info> get_default_vars()
+inline std::vector<Widgets::Variable::Info> get_default_vars()
 {
   return {{PARAMETER::TRIGGERING,
            "Trigger State",
            "Trigger activity for the oscilloscope",
-           Modules::Variable::STATE,
+           Widgets::Variable::STATE,
            RT::State::INIT}};
 }
 
@@ -64,12 +64,12 @@ inline std::vector<IO::channel_t> get_default_channels()
            IO::INPUT}};
 }
 
-class Component : public Modules::Component
+class Component : public Widgets::Component
 {
 public:
   // We are forced to have a default constructor for Oscilloscope probes
   // if we wish to be able to have them as values in a c++ standard map
-  Component(Modules::Plugin* hplugin, const std::string& probe_name);
+  Component(Widgets::Plugin* hplugin, const std::string& probe_name);
   void flushFifo();
   RT::OS::Fifo* getFifoPtr() { return this->fifo.get(); }
   void execute() override;
@@ -78,7 +78,7 @@ private:
   std::unique_ptr<RT::OS::Fifo> fifo;
 };
 
-class Panel : public Modules::Panel
+class Panel : public Widgets::Panel
 {
   Q_OBJECT
 
@@ -171,7 +171,7 @@ private:
 
 };  // Panel
 
-class Plugin : public Modules::Plugin
+class Plugin : public Widgets::Plugin
 {
 public:
   explicit Plugin(Event::Manager* ev_manager);
@@ -202,15 +202,15 @@ private:
   Trigger::Info trigger_info;
 };  // Plugin
 
-std::unique_ptr<Modules::Plugin> createRTXIPlugin(Event::Manager* ev_manager);
+std::unique_ptr<Widgets::Plugin> createRTXIPlugin(Event::Manager* ev_manager);
 
-Modules::Panel* createRTXIPanel(QMainWindow* main_window,
+Widgets::Panel* createRTXIPanel(QMainWindow* main_window,
                                 Event::Manager* ev_manager);
 
-std::unique_ptr<Modules::Component> createRTXIComponent(
-    Modules::Plugin* host_plugin);
+std::unique_ptr<Widgets::Component> createRTXIComponent(
+    Widgets::Plugin* host_plugin);
 
-Modules::FactoryMethods getFactories();
+Widgets::FactoryMethods getFactories();
 } // namespace Oscilloscope
 
 #endif  // OSCILLOSCOPE_H

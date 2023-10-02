@@ -28,7 +28,7 @@
 #include "event.hpp"
 #include "io_tests.hpp"
 #include "main_window.hpp"
-#include "module.hpp"
+#include "widgets.hpp"
 
 enum TEST_PARAMETER_ID : size_t
 {
@@ -39,13 +39,13 @@ enum TEST_PARAMETER_ID : size_t
   TESTSTATE,
 };
 
-std::vector<Modules::Variable::Info> generateDefaultComponentVariables();
+std::vector<Widgets::Variable::Info> generateDefaultComponentVariables();
 
-class mockModuleComponent : public Modules::Component
+class mockModuleComponent : public Widgets::Component
 {
 public:
   mockModuleComponent()
-      : Modules::Component(nullptr,
+      : Widgets::Component(nullptr,
                            std::string("testname"),
                            generateDefaultChannelList(),
                            generateDefaultComponentVariables())
@@ -78,7 +78,7 @@ protected:
   ModuleComponetTests() = default;
   ~ModuleComponetTests() = default;
 
-  // Modules::Component componnent;
+  // Widgets::Component componnent;
 };
 
 class ModulePanelTests : public ::testing::Test
@@ -100,7 +100,7 @@ protected:
                                                 this->connector.get());
     this->system->createTelemitryProcessor();
     auto component = std::make_unique<mockModuleComponent>();
-    this->plugin = std::make_unique<Modules::Plugin>(this->event_manager.get(),
+    this->plugin = std::make_unique<Widgets::Plugin>(this->event_manager.get(),
                                                      "testname");
     component->setActive(true);
     this->component_ptr = component.get();
@@ -115,12 +115,12 @@ protected:
   std::unique_ptr<RT::Connector> connector;
   std::unique_ptr<Event::Manager> event_manager;
   std::unique_ptr<RT::System> system;
-  // std::unique_ptr<Modules::Manager> plugin_manager;
+  // std::unique_ptr<Widgets::Manager> plugin_manager;
 
-  std::unique_ptr<Modules::Plugin> plugin;
+  std::unique_ptr<Widgets::Plugin> plugin;
   mockModuleComponent* component_ptr;
   MainWindow* main_window = nullptr;
-  // Modules::Plugin plugin;
+  // Widgets::Plugin plugin;
 };
 
 class ModuleManagerTests : public ::testing::Test

@@ -70,11 +70,11 @@ std::string Event::type_to_string(Event::Type event_type)
     case Event::Type::RT_DEVICE_UNPAUSE_EVENT:
       return_string = "SYSTEM : Device unpaused";
       break;
-    case Event::Type::RT_MODULE_PARAMETER_CHANGE_EVENT:
+    case Event::Type::RT_WIDGET_PARAMETER_CHANGE_EVENT:
       return_string = "SYSTEM : parameter change";
       break;
-    case Event::Type::RT_MODULE_STATE_CHANGE_EVENT:
-      return_string = "SYSTEM : Module State change";
+    case Event::Type::RT_WIDGET_STATE_CHANGE_EVENT:
+      return_string = "SYSTEM : Widget State change";
       break;
     case Event::Type::IO_LINK_INSERT_EVENT:
       return_string = "CONNECTOR : Blocks Connected";
@@ -95,10 +95,10 @@ std::string Event::type_to_string(Event::Type event_type)
       return_string = "CONNECTOR : Request for block output info";
       break;
     case Event::Type::PLUGIN_INSERT_EVENT:
-      return_string = "MODULE : plugin insert";
+      return_string = "WIDGET : plugin insert";
       break;
     case Event::Type::PLUGIN_REMOVE_EVENT:
-      return_string = "MODULE : plugin remove";
+      return_string = "WIDGET : plugin remove";
       break;
     case Event::Type::SETTINGS_OBJECT_INSERT_EVENT:
       return_string = "SYSTEM : settings object insert";
@@ -133,8 +133,8 @@ std::string Event::type_to_string(Event::Type event_type)
     case Event::Type::GENICAM_SNAPSHOT_EVENT:
       return_string = "SYSTEM : genicam snap";
       break;
-    case Event::Type::GENERIC_MODULE_EVENT:
-      return_string = "MODULE : Generic Module Event";
+    case Event::Type::GENERIC_WIDGET_EVENT:
+      return_string = "WIDGET : Generic Widget Event";
       break;
     case Event::Type::MANAGER_SHUTDOWN_EVENT:
       return_string = "EVENT MANAGER : UI Manager shutdown event";

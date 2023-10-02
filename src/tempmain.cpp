@@ -7,7 +7,7 @@
 
 #include "debug.hpp"
 #include "main_window.hpp"
-#include "module.hpp"
+#include "widgets.hpp"
 #include "rt.hpp"
 #include "rtxiConfig.h"
 #include "workspace.hpp"

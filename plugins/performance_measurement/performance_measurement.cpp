@@ -21,7 +21,7 @@
 
 #include "debug.hpp"
 #include "event.hpp"
-#include "module.hpp"
+#include "widgets.hpp"
 #include "rt.hpp"
 #include "main_window.hpp"
 #include "performance_measurement.hpp"
@@ -29,7 +29,7 @@
 PerformanceMeasurement::Panel::Panel(const std::string& mod_name,
                                      QMainWindow* mwindow,
                                      Event::Manager* ev_manager)
-    : Modules::Panel(mod_name, mwindow, ev_manager)
+    : Widgets::Panel(mod_name, mwindow, ev_manager)
     , durationEdit(new QLineEdit(this))
     , timestepEdit(new QLineEdit(this))
     , maxDurationEdit(new QLineEdit(this))
@@ -93,8 +93,8 @@ PerformanceMeasurement::Panel::Panel(const std::string& mod_name,
   timer->start();
 }
 
-PerformanceMeasurement::Component::Component(Modules::Plugin* hplugin)
-    : Modules::Component(hplugin,
+PerformanceMeasurement::Component::Component(Widgets::Plugin* hplugin)
+    : Widgets::Component(hplugin,
                          std::string(MODULE_NAME),
                          std::vector<IO::channel_t>(),
                          PerformanceMeasurement::get_default_vars())
@@ -173,7 +173,7 @@ void PerformanceMeasurement::Panel::reset()
 }
 
 PerformanceMeasurement::Plugin::Plugin(Event::Manager* ev_manager)
-    : Modules::Plugin(ev_manager,
+    : Widgets::Plugin(ev_manager,
                       std::string(PerformanceMeasurement::MODULE_NAME))
 {
   auto component = std::make_unique<PerformanceMeasurement::Component>(this);
@@ -203,30 +203,30 @@ PerformanceMeasurement::Plugin::getSampleStat()
   return stat;
 }
 
-std::unique_ptr<Modules::Plugin> PerformanceMeasurement::createRTXIPlugin(
+std::unique_ptr<Widgets::Plugin> PerformanceMeasurement::createRTXIPlugin(
     Event::Manager* ev_manager)
 {
   return std::make_unique<PerformanceMeasurement::Plugin>(ev_manager);
 }
 
-Modules::Panel* PerformanceMeasurement::createRTXIPanel(
+Widgets::Panel* PerformanceMeasurement::createRTXIPanel(
     QMainWindow* main_window, Event::Manager* ev_manager)
 {
-  return static_cast<Modules::Panel*>(new PerformanceMeasurement::Panel(
+  return static_cast<Widgets::Panel*>(new PerformanceMeasurement::Panel(
       std::string(PerformanceMeasurement::MODULE_NAME),
       main_window,
       ev_manager));
 }
 
-std::unique_ptr<Modules::Component> PerformanceMeasurement::createRTXIComponent(
-    Modules::Plugin* /*host_plugin*/)
+std::unique_ptr<Widgets::Component> PerformanceMeasurement::createRTXIComponent(
+    Widgets::Plugin* /*host_plugin*/)
 {
   return std::make_unique<PerformanceMeasurement::Component>(nullptr);
 }
 
-Modules::FactoryMethods PerformanceMeasurement::getFactories()
+Widgets::FactoryMethods PerformanceMeasurement::getFactories()
 {
-  Modules::FactoryMethods fact;
+  Widgets::FactoryMethods fact;
   fact.createPanel = &PerformanceMeasurement::createRTXIPanel;
   fact.createComponent = &PerformanceMeasurement::createRTXIComponent;
   fact.createPlugin = &PerformanceMeasurement::createRTXIPlugin;

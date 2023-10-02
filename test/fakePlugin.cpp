@@ -22,28 +22,28 @@
 
 void fakeComponent::execute() {}
 
-std::unique_ptr<Modules::Plugin> createRTXIPlugin(Event::Manager* ev_manager)
+std::unique_ptr<Widgets::Plugin> createRTXIPlugin(Event::Manager* ev_manager)
 {
   return std::make_unique<fakePlugin>(ev_manager);
 }
 
-Modules::Panel* createRTXIPanel(QMainWindow* /*main_window*/,
+Widgets::Panel* createRTXIPanel(QMainWindow* /*main_window*/,
                                 Event::Manager* /*ev_manager*/)
 {
   return nullptr;
 }
 
-std::unique_ptr<Modules::Component> createRTXIComponent(
-    Modules::Plugin* host_plugin)
+std::unique_ptr<Widgets::Component> createRTXIComponent(
+    Widgets::Plugin* host_plugin)
 {
   return std::make_unique<fakeComponent>(host_plugin);
 }
 
-Modules::FactoryMethods fact;
+Widgets::FactoryMethods fact;
 
 extern "C"
 {
-Modules::FactoryMethods* getFactories()
+Widgets::FactoryMethods* getFactories()
 {
   fact.createPanel = &createRTXIPanel;
   fact.createComponent = &createRTXIComponent;

@@ -27,7 +27,7 @@
 #include "daq.hpp"
 #include "event.hpp"
 #include "main_window.hpp"
-#include "module.hpp"
+#include "widgets.hpp"
 
 Q_DECLARE_METATYPE(DAQ::ChannelType::type_t)
 Q_DECLARE_METATYPE(DAQ::Device*)
@@ -40,7 +40,7 @@ namespace SystemControl
 
 constexpr std::string_view MODULE_NAME = "Control Panel";
 
-class Panel : public Modules::Panel
+class Panel : public Widgets::Panel
 {
   Q_OBJECT
 
@@ -97,24 +97,24 @@ private:
   QLineEdit* periodEdit = nullptr;
 };
 
-class Plugin : public Modules::Plugin
+class Plugin : public Widgets::Plugin
 {
 public:
   explicit Plugin(Event::Manager* ev_manager)
-      : Modules::Plugin(ev_manager, std::string(MODULE_NAME))
+      : Widgets::Plugin(ev_manager, std::string(MODULE_NAME))
   {
   }
 };
 
-std::unique_ptr<Modules::Plugin> createRTXIPlugin(Event::Manager* ev_manager);
+std::unique_ptr<Widgets::Plugin> createRTXIPlugin(Event::Manager* ev_manager);
 
-Modules::Panel* createRTXIPanel(QMainWindow* main_window,
+Widgets::Panel* createRTXIPanel(QMainWindow* main_window,
                                 Event::Manager* ev_manager);
 
-std::unique_ptr<Modules::Component> createRTXIComponent(
-    Modules::Plugin* host_plugin);
+std::unique_ptr<Widgets::Component> createRTXIComponent(
+    Widgets::Plugin* host_plugin);
 
-Modules::FactoryMethods getFactories();
+Widgets::FactoryMethods getFactories();
 
 }  // namespace SystemControl
 #endif /* SYSTEM_CONTROL_H */

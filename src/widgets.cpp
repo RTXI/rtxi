@@ -11,7 +11,7 @@
 #include <memory>
 #include <sstream>
 
-#include "module.hpp"
+#include "widgets.hpp"
 
 #include <dlfcn.h>
 #include <qmdisubwindow.h>
@@ -19,7 +19,7 @@
 #include "debug.hpp"
 #include "rtxiConfig.h"
 
-std::string Modules::Variable::state2string(RT::State::state_t state)
+std::string Widgets::Variable::state2string(RT::State::state_t state)
 {
   std::string result;
   switch (state) {
@@ -48,21 +48,21 @@ std::string Modules::Variable::state2string(RT::State::state_t state)
   return result;
 }
 
-std::string Modules::Variable::vartype2string(
-    Modules::Variable::variable_t type)
+std::string Widgets::Variable::vartype2string(
+    Widgets::Variable::variable_t type)
 {
   std::string result;
   switch (type) {
-    case Modules::Variable::INT_PARAMETER:
+    case Widgets::Variable::INT_PARAMETER:
       result = std::string("INTEGER");
       break;
-    case Modules::Variable::DOUBLE_PARAMETER:
+    case Widgets::Variable::DOUBLE_PARAMETER:
       result = std::string("DOUBLE");
       break;
-    case Modules::Variable::UINT_PARAMETER:
+    case Widgets::Variable::UINT_PARAMETER:
       result = std::string("UNSIGNED INTEGER");
       break;
-    case Modules::Variable::STATE:
+    case Widgets::Variable::STATE:
       result = std::string("STATE");
       break;
     default:
@@ -72,14 +72,14 @@ std::string Modules::Variable::vartype2string(
   return result;
 }
 
-Modules::DefaultGUILineEdit::DefaultGUILineEdit(QWidget* parent)
+Widgets::DefaultGUILineEdit::DefaultGUILineEdit(QWidget* parent)
     : QLineEdit(parent)
 {
   QObject::connect(
       this, SIGNAL(textChanged(const QString&)), this, SLOT(redden()));
 }
 
-void Modules::DefaultGUILineEdit::blacken()
+void Widgets::DefaultGUILineEdit::blacken()
 {
   palette.setBrush(this->foregroundRole(),
                    QApplication::palette().color(QPalette::WindowText));
@@ -87,7 +87,7 @@ void Modules::DefaultGUILineEdit::blacken()
   setModified(false);
 }
 
-void Modules::DefaultGUILineEdit::redden()
+void Widgets::DefaultGUILineEdit::redden()
 {
   if (isModified()) {
     palette.setBrush(this->foregroundRole(), Qt::red);
@@ -95,11 +95,11 @@ void Modules::DefaultGUILineEdit::redden()
   }
 }
 
-Modules::Component::Component(
-    Modules::Plugin* hplugin,
+Widgets::Component::Component(
+    Widgets::Plugin* hplugin,
     const std::string& mod_name,
     const std::vector<IO::channel_t>& channels,
-    const std::vector<Modules::Variable::Info>& variables)
+    const std::vector<Widgets::Variable::Info>& variables)
     : RT::Thread(mod_name, channels)
     , hostPlugin(hplugin)
     , active(false)
@@ -119,32 +119,32 @@ Modules::Component::Component(
   }
 }
 
-std::string Modules::Component::getDescription(const size_t& var_id)
+std::string Widgets::Component::getDescription(const size_t& var_id)
 {
   return this->parameters[var_id].description;
 }
 
-std::string Modules::Component::getValueString(const size_t& var_id)
+std::string Widgets::Component::getValueString(const size_t& var_id)
 {
   std::string value;
   switch (this->parameters[var_id].vartype) {
-    case Modules::Variable::UINT_PARAMETER:
+    case Widgets::Variable::UINT_PARAMETER:
       value =
           std::to_string(std::get<uint64_t>(this->parameters[var_id].value));
       break;
-    case Modules::Variable::INT_PARAMETER:
+    case Widgets::Variable::INT_PARAMETER:
       value = std::to_string(std::get<int64_t>(this->parameters[var_id].value));
       break;
-    case Modules::Variable::DOUBLE_PARAMETER:
+    case Widgets::Variable::DOUBLE_PARAMETER:
       value = std::to_string(std::get<double>(this->parameters[var_id].value));
       break;
-    case Modules::Variable::STATE:
+    case Widgets::Variable::STATE:
       value = "";
       break;
-    case Modules::Variable::COMMENT:
+    case Widgets::Variable::COMMENT:
       value = std::get<std::string>(this->parameters[var_id].value);
       break;
-    case Modules::Variable::UNKNOWN:
+    case Widgets::Variable::UNKNOWN:
       value = "UNKNOWN";
       break;
     default:
@@ -154,7 +154,7 @@ std::string Modules::Component::getValueString(const size_t& var_id)
   return value;
 }
 
-Modules::Panel::Panel(const std::string& mod_name,
+Widgets::Panel::Panel(const std::string& mod_name,
                       QMainWindow* mw,
                       Event::Manager* ev_manager)
     : QWidget(mw)
@@ -173,20 +173,20 @@ Modules::Panel::Panel(const std::string& mod_name,
                        | Qt::WindowMinimizeButtonHint);
   qRegisterMetaType<RT::State::state_t>();
   QObject::connect(this,
-                   &Modules::Panel::signal_state_change,
+                   &Widgets::Panel::signal_state_change,
                    this,
-                   &Modules::Panel::update_state);
+                   &Widgets::Panel::update_state);
 }
 
-void Modules::Panel::closeEvent(QCloseEvent* event)
+void Widgets::Panel::closeEvent(QCloseEvent* event)
 {
   event->accept();
   this->exit();
 }
 
-void Modules::Panel::createGUI(
-    const std::vector<Modules::Variable::Info>& vars,
-    const std::vector<Modules::Variable::Id>& skip_ids)
+void Widgets::Panel::createGUI(
+    const std::vector<Widgets::Variable::Info>& vars,
+    const std::vector<Widgets::Variable::Id>& skip_ids)
 {
   // Create main layout
   auto* main_layout = new QVBoxLayout;
@@ -208,32 +208,32 @@ void Modules::Panel::createGUI(
     param.type = varinfo.vartype;
     param.info = varinfo;
     switch (varinfo.vartype) {
-      case Modules::Variable::DOUBLE_PARAMETER:
+      case Widgets::Variable::DOUBLE_PARAMETER:
         param.edit->setValidator(new QDoubleValidator(param.edit));
         param.edit->setText(QString::number(std::get<double>(varinfo.value)));
         break;
-      case Modules::Variable::UINT_PARAMETER:
+      case Widgets::Variable::UINT_PARAMETER:
         param.edit->setValidator(new QIntValidator(param.edit));
         param.edit->setText(QString::number(std::get<uint64_t>(varinfo.value)));
         break;
-      case Modules::Variable::INT_PARAMETER:
+      case Widgets::Variable::INT_PARAMETER:
         param.edit->setValidator(new QIntValidator(param.edit));
         param.edit->setText(QString::number(std::get<int64_t>(varinfo.value)));
         break;
-      case Modules::Variable::STATE:
+      case Widgets::Variable::STATE:
         param.edit->setReadOnly(true);
         palette.setBrush(param.edit->foregroundRole(), Qt::darkGray);
         param.edit->setPalette(palette);
         break;
-      case Modules::Variable::COMMENT:
+      case Widgets::Variable::COMMENT:
         break;
-      case Modules::Variable::UNKNOWN:
-        ERROR_MSG("Variable {} in Module {} is of category UNKNOWN",
+      case Widgets::Variable::UNKNOWN:
+        ERROR_MSG("Variable {} in Widget {} is of category UNKNOWN",
                   varinfo.name,
                   this->getName());
         break;
       default:
-        ERROR_MSG("Variable {} in Module {} has undefined or broken category",
+        ERROR_MSG("Variable {} in Widget {} has undefined or broken category",
                   varinfo.name,
                   this->getName());
     }
@@ -275,55 +275,55 @@ void Modules::Panel::createGUI(
   this->setLayout(main_layout);
 }
 
-void Modules::Panel::update_state(RT::State::state_t flag)
+void Widgets::Panel::update_state(RT::State::state_t flag)
 {
-  Modules::Plugin* hplugin = this->getHostPlugin();
+  Widgets::Plugin* hplugin = this->getHostPlugin();
   hplugin->setComponentState(flag);
 }
 
-void Modules::Panel::resizeMe()
+void Widgets::Panel::resizeMe()
 {
   m_subwindow->adjustSize();
 }
 
-void Modules::Panel::exit()
+void Widgets::Panel::exit()
 {
   this->event_manager->unregisterHandler(this->hostPlugin);
   Event::Object event(Event::Type::PLUGIN_REMOVE_EVENT);
   event.setParam("pluginPointer",
-                 std::any(static_cast<Modules::Plugin*>(this->hostPlugin)));
+                 std::any(static_cast<Widgets::Plugin*>(this->hostPlugin)));
   this->event_manager->postEvent(&event);
   // this->m_subwindow->close();
 }
 
-void Modules::Panel::refresh()
+void Widgets::Panel::refresh()
 {
-  Modules::Variable::Id param_id = Modules::Variable::INVALID_ID;
+  Widgets::Variable::Id param_id = Widgets::Variable::INVALID_ID;
   double double_value = 0.0;
   int64_t int_value = 0;
   uint64_t uint_value = 0ULL;
   std::stringstream sstream;
   for (auto& i : this->parameter) {
     switch (i.second.type) {
-      case Modules::Variable::STATE:
+      case Widgets::Variable::STATE:
         i.second.edit->setText(i.second.str_value);
         palette.setBrush(i.second.edit->foregroundRole(), Qt::darkGray);
         i.second.edit->setPalette(palette);
         break;
-      case Modules::Variable::UINT_PARAMETER:
-        param_id = static_cast<Modules::Variable::Id>(i.second.info.id);
+      case Widgets::Variable::UINT_PARAMETER:
+        param_id = static_cast<Widgets::Variable::Id>(i.second.info.id);
         uint_value = this->hostPlugin->getComponentUIntParameter(param_id);
         sstream << uint_value;
         i.second.edit->setText(QString::fromStdString(sstream.str()));
         break;
-      case Modules::Variable::INT_PARAMETER:
-        param_id = static_cast<Modules::Variable::Id>(i.second.info.id);
+      case Widgets::Variable::INT_PARAMETER:
+        param_id = static_cast<Widgets::Variable::Id>(i.second.info.id);
         int_value = this->hostPlugin->getComponentIntParameter(param_id);
         sstream << int_value;
         i.second.edit->setText(QString::fromStdString(sstream.str()));
         break;
-      case Modules::Variable::DOUBLE_PARAMETER:
-        param_id = static_cast<Modules::Variable::Id>(i.second.info.id);
+      case Widgets::Variable::DOUBLE_PARAMETER:
+        param_id = static_cast<Widgets::Variable::Id>(i.second.info.id);
         double_value = this->hostPlugin->getComponentDoubleParameter(param_id);
         sstream << double_value;
         i.second.edit->setText(QString::fromStdString(sstream.str()));
@@ -340,9 +340,9 @@ void Modules::Panel::refresh()
   }
 }
 
-void Modules::Panel::modify()
+void Widgets::Panel::modify()
 {
-  Modules::Variable::Id param_id = Modules::Variable::INVALID_ID;
+  Widgets::Variable::Id param_id = Widgets::Variable::INVALID_ID;
   double double_value = 0.0;
   int int_value = 0;
   uint64_t uint_value = 0ULL;
@@ -353,24 +353,24 @@ void Modules::Panel::modify()
       continue;
     }
     switch (var.second.type) {
-      case Modules::Variable::UINT_PARAMETER:
-        param_id = static_cast<Modules::Variable::Id>(var.second.info.id);
+      case Widgets::Variable::UINT_PARAMETER:
+        param_id = static_cast<Widgets::Variable::Id>(var.second.info.id);
         uint_value = var.second.edit->text().toUInt();
         this->hostPlugin->setComponentParameter<uint64_t>(param_id, uint_value);
         sstream << uint_value;
         var.second.edit->setText(QString::fromStdString(sstream.str()));
         var.second.edit->blacken();
         break;
-      case Modules::Variable::INT_PARAMETER:
-        param_id = static_cast<Modules::Variable::Id>(var.second.info.id);
+      case Widgets::Variable::INT_PARAMETER:
+        param_id = static_cast<Widgets::Variable::Id>(var.second.info.id);
         int_value = var.second.edit->text().toInt();
         this->hostPlugin->setComponentParameter<int>(param_id, int_value);
         sstream << int_value;
         var.second.edit->setText(QString::fromStdString(sstream.str()));
         var.second.edit->blacken();
         break;
-      case Modules::Variable::DOUBLE_PARAMETER:
-        param_id = static_cast<Modules::Variable::Id>(var.second.info.id);
+      case Widgets::Variable::DOUBLE_PARAMETER:
+        param_id = static_cast<Widgets::Variable::Id>(var.second.info.id);
         double_value = var.second.edit->text().toDouble();
         this->hostPlugin->setComponentParameter(param_id, double_value);
         sstream << double_value;
@@ -386,61 +386,61 @@ void Modules::Panel::modify()
 }
 
 // NOLINTNEXTLINE
-void Modules::Panel::setComment(const QString& var_name, const QString& comment)
+void Widgets::Panel::setComment(const QString& var_name, const QString& comment)
 {
   auto n = parameter.find(var_name.toStdString());
-  if (n != parameter.end() && (n->second.type == Modules::Variable::COMMENT)) {
+  if (n != parameter.end() && (n->second.type == Widgets::Variable::COMMENT)) {
     n->second.edit->setText(comment);
     const QByteArray textData = comment.toLatin1();
     const char* text = textData.constData();
-    auto param_id = static_cast<Modules::Variable::Id>(n->second.info.id);
+    auto param_id = static_cast<Widgets::Variable::Id>(n->second.info.id);
     this->hostPlugin->setComponentParameter<std::string>(param_id, text);
   }
 }
 
-void Modules::Panel::setParameter(const QString& var_name, double value)
+void Widgets::Panel::setParameter(const QString& var_name, double value)
 {
   auto n = parameter.find(var_name.toStdString());
   if ((n != parameter.end())
-      && (n->second.type == Modules::Variable::DOUBLE_PARAMETER))
+      && (n->second.type == Widgets::Variable::DOUBLE_PARAMETER))
   {
     n->second.edit->setText(QString::number(value));
     n->second.str_value = n->second.edit->text();
-    auto param_id = static_cast<Modules::Variable::Id>(n->second.info.id);
+    auto param_id = static_cast<Widgets::Variable::Id>(n->second.info.id);
     this->hostPlugin->setComponentParameter<double>(param_id, value);
     // setValue(n->second.index, n->second.edit->text().toDouble());
   }
 }
 
-void Modules::Panel::setParameter(const QString& var_name, int value)
+void Widgets::Panel::setParameter(const QString& var_name, int value)
 {
   auto n = parameter.find(var_name.toStdString());
   if ((n != parameter.end())
-      && (n->second.type == Modules::Variable::INT_PARAMETER))
+      && (n->second.type == Widgets::Variable::INT_PARAMETER))
   {
     n->second.edit->setText(QString::number(value));
     n->second.str_value = n->second.edit->text();
-    auto param_id = static_cast<Modules::Variable::Id>(n->second.info.id);
+    auto param_id = static_cast<Widgets::Variable::Id>(n->second.info.id);
     this->hostPlugin->setComponentParameter<int>(param_id, value);
     // setValue(n->second.index, n->second.edit->text().toDouble());
   }
 }
 
-void Modules::Panel::setParameter(const QString& var_name, uint64_t value)
+void Widgets::Panel::setParameter(const QString& var_name, uint64_t value)
 {
   auto n = parameter.find(var_name.toStdString());
   if ((n != parameter.end())
-      && (n->second.type == Modules::Variable::UINT_PARAMETER))
+      && (n->second.type == Widgets::Variable::UINT_PARAMETER))
   {
     n->second.edit->setText(QString::number(value));
     n->second.str_value = n->second.edit->text();
-    auto param_id = static_cast<Modules::Variable::Id>(n->second.info.id);
+    auto param_id = static_cast<Widgets::Variable::Id>(n->second.info.id);
     this->hostPlugin->setComponentParameter<uint64_t>(param_id, value);
     // setValue(n->second.index, n->second.edit->text().toDouble());
   }
 }
 
-void Modules::Panel::pause(bool p)
+void Widgets::Panel::pause(bool p)
 {
   if (pauseButton->isChecked() != p) {
     pauseButton->setDown(p);
@@ -457,13 +457,13 @@ void Modules::Panel::pause(bool p)
   }
 }
 
-// void Modules::Panel::doDeferred(const Settings::Object::State&)
+// void Widgets::Panel::doDeferred(const Settings::Object::State&)
 // {
 //   setWindowTitle(QString::number(getID()) + " "
 //                  + QString::fromStdString(myname));
 // }
 
-// void Modules::Panel::doLoad(const Settings::Object::State& s)
+// void Widgets::Panel::doLoad(const Settings::Object::State& s)
 // {
 //   for (std::map<QString, param_t>::iterator i = parameter.begin();
 //        i != parameter.end();
@@ -484,7 +484,7 @@ void Modules::Panel::pause(bool p)
 //   modify();
 // }
 
-// void Modules::Panel::doSave(Settings::Object::State& s) const
+// void Widgets::Panel::doSave(Settings::Object::State& s) const
 // {
 //   s.saveInteger("paused", pauseButton->isChecked());
 //   if (isMaximized())
@@ -505,13 +505,13 @@ void Modules::Panel::pause(bool p)
 //                  (i->second.edit->text()).toStdString());
 // }
 
-Modules::Plugin::Plugin(Event::Manager* ev_manager, std::string mod_name)
+Widgets::Plugin::Plugin(Event::Manager* ev_manager, std::string mod_name)
     : event_manager(ev_manager)
     , name(std::move(mod_name))
 {
 }
 
-Modules::Plugin::~Plugin()
+Widgets::Plugin::~Plugin()
 {
   if (this->plugin_component != nullptr) {
     Event::Object unplug_block_event(Event::Type::RT_THREAD_REMOVE_EVENT);
@@ -522,7 +522,7 @@ Modules::Plugin::~Plugin()
   }
 }
 
-void Modules::Plugin::registerComponent()
+void Widgets::Plugin::registerComponent()
 {
   if (this->plugin_component == nullptr) {
     return;
@@ -533,24 +533,25 @@ void Modules::Plugin::registerComponent()
   this->event_manager->postEvent(&event);
 }
 
-void Modules::Plugin::setComponentState(RT::State::state_t state)
+void Widgets::Plugin::setComponentState(RT::State::state_t state)
 {
   if (!this->plugin_component) {
     return;
   }
-  Event::Object event(Event::Type::RT_MODULE_STATE_CHANGE_EVENT);
+  Event::Object event(Event::Type::RT_WIDGET_STATE_CHANGE_EVENT);
   event.setParam(
       "component",
-      std::any(static_cast<Modules::Component*>(this->plugin_component.get())));
+      std::any(static_cast<Widgets::Component*>(this->plugin_component.get())));
   event.setParam("state", std::any(state));
   this->event_manager->postEvent(&event);
 }
 
-void Modules::Plugin::attachComponent(
-    std::unique_ptr<Modules::Component> component)
+void Widgets::Plugin::attachComponent(
+    std::unique_ptr<Widgets::Component> component)
 {
-  // If there is a component already attached then cancel attach
-  if (this->plugin_component != nullptr) {
+  // If there is a component already attached or invalid 
+  // componnet pointer provided then cancel attach
+  if (this->plugin_component != nullptr || component == nullptr) {
     return;
   }
   this->plugin_component = std::move(component);
@@ -560,31 +561,31 @@ void Modules::Plugin::attachComponent(
   this->registerComponent();
 }
 
-void Modules::Plugin::attachPanel(Modules::Panel* panel)
+void Widgets::Plugin::attachPanel(Widgets::Panel* panel)
 {
   this->widget_panel = panel;
   panel->setHostPlugin(this);
 }
 
-int64_t Modules::Plugin::getComponentIntParameter(
-    const Modules::Variable::Id& parameter_id)
+int64_t Widgets::Plugin::getComponentIntParameter(
+    const Widgets::Variable::Id& parameter_id)
 {
   return this->plugin_component->getValue<int64_t>(parameter_id);
 }
 
-uint64_t Modules::Plugin::getComponentUIntParameter(
-    const Modules::Variable::Id& parameter_id)
+uint64_t Widgets::Plugin::getComponentUIntParameter(
+    const Widgets::Variable::Id& parameter_id)
 {
   return this->plugin_component->getValue<uint64_t>(parameter_id);
 }
 
-double Modules::Plugin::getComponentDoubleParameter(
-    const Modules::Variable::Id& parameter_id)
+double Widgets::Plugin::getComponentDoubleParameter(
+    const Widgets::Variable::Id& parameter_id)
 {
   return this->plugin_component->getValue<double>(parameter_id);
 }
 
-void Modules::Plugin::receiveEvent(Event::Object* event)
+void Widgets::Plugin::receiveEvent(Event::Object* event)
 {
   // We provide base functionality for handling period changes
   switch (event->getType()) {
@@ -598,7 +599,7 @@ void Modules::Plugin::receiveEvent(Event::Object* event)
   }
 }
 
-bool Modules::Plugin::getActive()
+bool Widgets::Plugin::getActive()
 {
   bool active = false;
   // some plugins may not have a valid component pointer
@@ -608,7 +609,7 @@ bool Modules::Plugin::getActive()
   return active;
 }
 
-int Modules::Plugin::setActive(bool state)
+int Widgets::Plugin::setActive(bool state)
 {
   const int result = 0;
   Event::Type event_type = Event::Type::NOOP;
@@ -625,17 +626,17 @@ int Modules::Plugin::setActive(bool state)
   return result;
 }
 
-Modules::Component* Modules::Plugin::getComponent()
+Widgets::Component* Widgets::Plugin::getComponent()
 {
   return this->plugin_component.get();
 }
 
-Event::Manager* Modules::Plugin::getEventManager()
+Event::Manager* Widgets::Plugin::getEventManager()
 {
   return this->event_manager;
 }
 
-Modules::Panel* Modules::Plugin::getPanel()
+Widgets::Panel* Widgets::Plugin::getPanel()
 {
   return this->widget_panel;
 }

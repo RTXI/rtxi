@@ -31,10 +31,10 @@
 #include "rtos.hpp"
 
 // forward declaration
-namespace Modules
+namespace Widgets 
 {
 class Component;
-} // namespace Modules
+} // namespace Widgets
 
 /*!
  * Objects contained within this namespace are responsible
@@ -70,9 +70,9 @@ const response_t RT_THREAD_LIST_UPDATE = 1;
 const response_t RT_DEVICE_LIST_UPDATE = 2;
 const response_t RT_NOOP = 3;
 const response_t RT_SHUTDOWN = 4;
-const response_t RT_MODULE_PARAM_UPDATE = 5;
+const response_t RT_WIDGET_PARAM_UPDATE = 5;
 const response_t IO_LINK_UPDATED = 6;
-const response_t RT_MODULE_STATE_UPDATE = 7;
+const response_t RT_WIDGET_STATE_UPDATE = 7;
 const response_t RT_ERROR = -1;
 const response_t NO_TELEMITRY = -2;
 
@@ -317,7 +317,7 @@ using command_param_t = std::variant<std::monostate,
                                      std::vector<RT::Device*>*,
                                      IO::Block*,
                                      RT::block_connection_t,
-                                     Modules::Component*,
+                                     Widgets::Component*,
                                      State::state_t,
                                      std::string>;
 /*!
@@ -376,8 +376,8 @@ private:
   void NOOP(Event::Object* event);
   void getPeriodValues(Event::Object* event);
   void provideTimetickPointers(Event::Object* event);
-  void changeModuleParameters(Event::Object* event);
-  void changeModuleState(Event::Object* event);
+  void changeWidgetParameters(Event::Object* event);
+  void changeWidgetState(Event::Object* event);
 
   void executeCMD(CMD* cmd);
   void updateDeviceList(CMD* cmd);
@@ -387,8 +387,8 @@ private:
   void setPeriod(CMD* cmd);
   void shutdown(CMD* cmd);
   void getPeriodTicksCMD(CMD* cmd);
-  void changeModuleParametersCMD(CMD* cmd);
-  void changeModuleStateCMD(CMD* cmd);
+  void changeWidgetParametersCMD(CMD* cmd);
+  void changeWidgetStateCMD(CMD* cmd);
 
   void postTelemitry(RT::Telemitry::Response telemitry);
 

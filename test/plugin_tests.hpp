@@ -23,7 +23,7 @@
 
 #include <gtest/gtest.h>
 
-#include "module.hpp"
+#include "widgets.hpp"
 #include "workspace.hpp"
 
 class PluginObjectTest : public ::testing::Test

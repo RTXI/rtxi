@@ -274,7 +274,7 @@ int Settings::Manager::load(const std::string& filename)
   // Return RTXI to a startup like state.
   Plugin::Manager::getInstance()->unloadAll();
   MainWindow::getInstance()->clearFileMenu();
-  MainWindow::getInstance()->clearModuleMenu();
+  MainWindow::getInstance()->clearWidgetMenu();
 
   // Reading in the period for the system
   long long period = RT::System::getInstance()->getPeriod();

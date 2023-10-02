@@ -26,14 +26,14 @@
 #include <QListWidget>
 #include <QDir>
 #include <map>
-#include "module.hpp"
+#include "widgets.hpp"
 
 namespace RTXIWizard
 {
 
 constexpr std::string_view MODULE_NAME = "Module Wizard";
 
-class Panel : public Modules::Panel 
+class Panel : public Widgets::Panel 
 {
   Q_OBJECT
 
@@ -86,22 +86,22 @@ private:
   std::vector<QString> exclude_list;
 };
 
-class Plugin : public Modules::Plugin 
+class Plugin : public Widgets::Plugin 
 {
 public:
   explicit Plugin(Event::Manager* ev_manager)
-    : Modules::Plugin(ev_manager, std::string(RTXIWizard::MODULE_NAME)) {}
+    : Widgets::Plugin(ev_manager, std::string(RTXIWizard::MODULE_NAME)) {}
 };  // class Plugin
 
-std::unique_ptr<Modules::Plugin> createRTXIPlugin(Event::Manager* ev_manager);
+std::unique_ptr<Widgets::Plugin> createRTXIPlugin(Event::Manager* ev_manager);
 
-Modules::Panel* createRTXIPanel(QMainWindow* main_window,
+Widgets::Panel* createRTXIPanel(QMainWindow* main_window,
                                 Event::Manager* ev_manager);
 
-std::unique_ptr<Modules::Component> createRTXIComponent(
-    Modules::Plugin* host_plugin);
+std::unique_ptr<Widgets::Component> createRTXIComponent(
+    Widgets::Plugin* host_plugin);
 
-Modules::FactoryMethods getFactories();
+Widgets::FactoryMethods getFactories();
 
 } // namespace RTXIWizard
 

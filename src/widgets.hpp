@@ -1,5 +1,5 @@
-#ifndef MODULE_HPP
-#define MODULE_HPP
+#ifndef WIDGET_HPP
+#define WIDGET_HPP
 
 #include <QGridLayout>
 #include <QGroupBox>
@@ -33,9 +33,9 @@ Q_DECLARE_METATYPE(RT::block_connection_t)
 Q_DECLARE_METATYPE(RT::State::state_t)
 
 /*!
- * Contains all the classes and structures relevant to Modules
+ * Contains all the classes and structures relevant to Widgets
  */
-namespace Modules
+namespace Widgets 
 {
 
 /*!
@@ -96,7 +96,7 @@ struct Info
   size_t id = 0;
   std::string name;
   std::string description;
-  Modules::Variable::variable_t vartype;
+  Widgets::Variable::variable_t vartype;
   std::variant<int64_t, double, uint64_t, std::string, RT::State::state_t> value;
 };
 
@@ -126,10 +126,10 @@ class Panel;
  */
 struct FactoryMethods
 {
-  std::unique_ptr<Modules::Plugin> (*createPlugin)(Event::Manager*) = nullptr;
-  std::unique_ptr<Modules::Component> (*createComponent)(Modules::Plugin*) =
+  std::unique_ptr<Widgets::Plugin> (*createPlugin)(Event::Manager*) = nullptr;
+  std::unique_ptr<Widgets::Component> (*createComponent)(Widgets::Plugin*) =
       nullptr;
-  Modules::Panel* (*createPanel)(QMainWindow*, Event::Manager*) = nullptr;
+  Widgets::Panel* (*createPanel)(QMainWindow*, Event::Manager*) = nullptr;
 };
 
 /*!
@@ -141,10 +141,10 @@ struct FactoryMethods
 class Component : public RT::Thread
 {
 public:
-  Component(Modules::Plugin* hplugin,
+  Component(Widgets::Plugin* hplugin,
             const std::string& mod_name,
             const std::vector<IO::channel_t>& channels,
-            const std::vector<Modules::Variable::Info>& variables);
+            const std::vector<Widgets::Variable::Info>& variables);
 
   /*!
    * Retrieves value from the component. Typically this function is only called
@@ -195,8 +195,8 @@ public:
   void setState(RT::State::state_t state) { this->component_state = state; }
 
 private:
-  std::vector<Modules::Variable::Info> parameters;
-  Modules::Plugin* hostPlugin;
+  std::vector<Widgets::Variable::Info> parameters;
+  Widgets::Plugin* hostPlugin;
   bool active;
   RT::State::state_t component_state;
 };
@@ -220,8 +220,8 @@ public:
    *    building interface for.
    *
    */
-  virtual void createGUI(const std::vector<Modules::Variable::Info>& vars,
-                         const std::vector<Modules::Variable::Id>& skip_ids);
+  virtual void createGUI(const std::vector<Widgets::Variable::Info>& vars,
+                         const std::vector<Widgets::Variable::Id>& skip_ids);
 
   /*!
    * Assigns a plugin to this panel. Typically used during construction of the
@@ -229,7 +229,7 @@ public:
    *
    * \param hplugin A pointer to the host plugin this panel belongs to.
    */
-  void setHostPlugin(Modules::Plugin* hplugin) { this->hostPlugin = hplugin; }
+  void setHostPlugin(Widgets::Plugin* hplugin) { this->hostPlugin = hplugin; }
 
 signals:
   void signal_state_change(RT::State::state_t state);
@@ -330,7 +330,7 @@ protected:
    *
    * \return pointer to host plugin
    */
-  Modules::Plugin* getHostPlugin() { return this->hostPlugin; }
+  Widgets::Plugin* getHostPlugin() { return this->hostPlugin; }
 
   /*!
    * Retrieve the main window for the application
@@ -351,7 +351,7 @@ private:
   QMainWindow* main_window = nullptr;
   std::string m_name;
   QMdiSubWindow* m_subwindow = nullptr;
-  Modules::Plugin* hostPlugin = nullptr;
+  Widgets::Plugin* hostPlugin = nullptr;
   Event::Manager* event_manager = nullptr;
 
   // Default buttons
@@ -364,8 +364,8 @@ private:
     QLabel* label;
     QString str_value;
     DefaultGUILineEdit* edit;
-    Modules::Variable::variable_t type = Modules::Variable::UNKNOWN;
-    Modules::Variable::Info info;
+    Widgets::Variable::variable_t type = Widgets::Variable::UNKNOWN;
+    Widgets::Variable::Info info;
   };
   std::unordered_map<std::string, param_t> parameter;
   QPalette palette;
@@ -379,7 +379,7 @@ private:
  * Component and Plugin classes, as well as the communication between the two.
  * This class acts as a mediator between the two objects. Finally, it handles
  * events pertaining to the module. This class, together with the Component and
- * Panel classes, forms the Module.
+ * Panel classes, forms the Widget.
  */
 class Plugin : public Event::Handler
 {
@@ -398,14 +398,14 @@ public:
    *
    * \param component a unique pointer to the component object
    */
-  void attachComponent(std::unique_ptr<Modules::Component> component);
+  void attachComponent(std::unique_ptr<Widgets::Component> component);
 
   /*!
    * Attaches a panel to this plugin
    *
    * \param panel a pointer to the panel object
    */
-  void attachPanel(Modules::Panel* panel);
+  void attachPanel(Widgets::Panel* panel);
 
   /*!
    * Retrieves an integer parameter from the component object. Usually called
@@ -441,26 +441,26 @@ public:
   int setComponentParameter(const Variable::Id& parameter_id, T value)
   {
     const int result = 0;
-    Modules::Variable::variable_t param_type = Modules::Variable::UNKNOWN;
+    Widgets::Variable::variable_t param_type = Widgets::Variable::UNKNOWN;
     if (typeid(T) == typeid(int64_t)) {
-      param_type = Modules::Variable::INT_PARAMETER;
+      param_type = Widgets::Variable::INT_PARAMETER;
     } else if (typeid(T) == typeid(double)) {
-      param_type = Modules::Variable::DOUBLE_PARAMETER;
+      param_type = Widgets::Variable::DOUBLE_PARAMETER;
     } else if (typeid(T) == typeid(uint64_t)) {
-      param_type = Modules::Variable::UINT_PARAMETER;
+      param_type = Widgets::Variable::UINT_PARAMETER;
     } else if (typeid(T) == typeid(std::string)) {
-      param_type = Modules::Variable::COMMENT;
+      param_type = Widgets::Variable::COMMENT;
     } else {
       ERROR_MSG(
-          "Modules::Plugin::setComponentParameter : Parameter type not "
+          "Widgets::Plugin::setComponentParameter : Parameter type not "
           "supported");
       return -1;
     }
-    Event::Object event(Event::Type::RT_MODULE_PARAMETER_CHANGE_EVENT);
+    Event::Object event(Event::Type::RT_WIDGET_PARAMETER_CHANGE_EVENT);
     event.setParam("paramID", std::any(parameter_id));
     event.setParam("paramType", std::any(param_type));
     event.setParam("paramValue", std::any(value));
-    event.setParam("paramModule", std::any(this->plugin_component.get()));
+    event.setParam("paramWidget", std::any(this->plugin_component.get()));
     this->event_manager->postEvent(&event);
     return result;
   }
@@ -510,24 +510,24 @@ public:
   void setComponentState(RT::State::state_t state);
 
 protected:
-  Modules::Component* getComponent();
+  Widgets::Component* getComponent();
   Event::Manager* getEventManager();
   QMainWindow* getQMainWindow();
-  Modules::Panel* getPanel();
+  Widgets::Panel* getPanel();
 
 private:
   // owned pointers
-  std::unique_ptr<Modules::Component> plugin_component;
+  std::unique_ptr<Widgets::Component> plugin_component;
 
   // not owned pointers (managed by external objects)
   Event::Manager* event_manager = nullptr;
   QMainWindow* main_window = nullptr;  // Qt handles this lifetime
-  Modules::Panel* widget_panel = nullptr;  // Qt handles this lifetime
+  Widgets::Panel* widget_panel = nullptr;  // Qt handles this lifetime
 
   std::string library;
   std::string name;
 };
 
-}  // namespace Modules
+} // namespace Widgets
 
 #endif

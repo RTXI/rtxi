@@ -28,7 +28,7 @@
 #include "event.hpp"
 #include "fifo.hpp"
 #include "logger.hpp"
-#include "module.hpp"
+#include "widgets.hpp"
 #include "rtos.hpp"
 
 // TODO: convert cycle detection into non-recursive version
@@ -434,49 +434,49 @@ void RT::System::getPeriodTicksCMD(RT::System::CMD* cmd)
   this->postTelemitry(telem);
 }
 
-void RT::System::changeModuleParametersCMD(RT::System::CMD* cmd)
+void RT::System::changeWidgetParametersCMD(RT::System::CMD* cmd)
 {
   RT::Telemitry::Response telem;
   telem.cmd = cmd;
-  telem.type = RT::Telemitry::RT_MODULE_PARAM_UPDATE;
+  telem.type = RT::Telemitry::RT_WIDGET_PARAM_UPDATE;
   auto* component =
-      std::get<Modules::Component*>(cmd->getRTParam("paramModule"));
+      std::get<Widgets::Component*>(cmd->getRTParam("paramWidget"));
   auto param_id = std::get<size_t>(cmd->getRTParam("paramID"));
   auto param_type_num = std::get<uint64_t>(cmd->getRTParam("paramType"));
-  auto param_type = static_cast<Modules::Variable::variable_t>(param_type_num);
+  auto param_type = static_cast<Widgets::Variable::variable_t>(param_type_num);
   RT::command_param_t param_value_any = cmd->getRTParam("paramValue");
   switch (param_type) {
-    case Modules::Variable::DOUBLE_PARAMETER:
+    case Widgets::Variable::DOUBLE_PARAMETER:
       component->setValue<double>(param_id, std::get<double>(param_value_any));
       break;
-    case Modules::Variable::INT_PARAMETER:
+    case Widgets::Variable::INT_PARAMETER:
       component->setValue<int64_t>(param_id,
                                    std::get<int64_t>(param_value_any));
       break;
-    case Modules::Variable::UINT_PARAMETER:
+    case Widgets::Variable::UINT_PARAMETER:
       component->setValue<uint64_t>(param_id,
                                     std::get<uint64_t>(param_value_any));
       break;
-    case Modules::Variable::STATE:
+    case Widgets::Variable::STATE:
       component->setValue<RT::State::state_t>(
           param_id,
           static_cast<RT::State::state_t>(std::get<State::state_t>(param_value_any)));
       break;
     default:
       ERROR_MSG(
-          "Module Parameter Change event does not contain expected parameter "
+          "Widget Parameter Change event does not contain expected parameter "
           "types");
       telem.type = RT::Telemitry::RT_ERROR;
   }
   this->postTelemitry(telem);
 }
 
-void RT::System::changeModuleStateCMD(RT::System::CMD* cmd)
+void RT::System::changeWidgetStateCMD(RT::System::CMD* cmd)
 {
   RT::Telemitry::Response telem;
   telem.cmd = cmd;
-  telem.type = RT::Telemitry::RT_MODULE_STATE_UPDATE;
-  auto* component = std::get<Modules::Component*>(cmd->getRTParam("component"));
+  telem.type = RT::Telemitry::RT_WIDGET_STATE_UPDATE;
+  auto* component = std::get<Widgets::Component*>(cmd->getRTParam("component"));
   auto state = std::get<RT::State::state_t>(cmd->getRTParam("state"));
   component->setState(state);
   this->postTelemitry(telem);
@@ -516,11 +516,11 @@ void RT::System::executeCMD(RT::System::CMD* cmd)
       telem.cmd = cmd;
       this->postTelemitry(telem);
       break;
-    case Event::Type::RT_MODULE_PARAMETER_CHANGE_EVENT:
-      this->changeModuleParametersCMD(cmd);
+    case Event::Type::RT_WIDGET_PARAMETER_CHANGE_EVENT:
+      this->changeWidgetParametersCMD(cmd);
       break;
-    case Event::Type::RT_MODULE_STATE_CHANGE_EVENT:
-      this->changeModuleStateCMD(cmd);
+    case Event::Type::RT_WIDGET_STATE_CHANGE_EVENT:
+      this->changeWidgetStateCMD(cmd);
       break;
     case Event::Type::NOOP:
       telem.type = RT::Telemitry::RT_NOOP;
@@ -583,11 +583,11 @@ void RT::System::receiveEvent(Event::Object* event)
     case Event::Type::RT_DEVICE_REMOVE_EVENT:
       this->removeDevice(event);
       break;
-    case Event::Type::RT_MODULE_PARAMETER_CHANGE_EVENT:
-      this->changeModuleParameters(event);
+    case Event::Type::RT_WIDGET_PARAMETER_CHANGE_EVENT:
+      this->changeWidgetParameters(event);
       break;
-    case Event::Type::RT_MODULE_STATE_CHANGE_EVENT:
-      this->changeModuleState(event);
+    case Event::Type::RT_WIDGET_STATE_CHANGE_EVENT:
+      this->changeWidgetState(event);
       break;
     case Event::Type::RT_SHUTDOWN_EVENT:
       this->shutdown(event);
@@ -796,37 +796,37 @@ void RT::System::provideTimetickPointers(Event::Object* event)
   }
 }
 
-void RT::System::changeModuleParameters(Event::Object* event)
+void RT::System::changeWidgetParameters(Event::Object* event)
 {
   // we must convert event object to cmd object
   RT::System::CMD cmd(event->getType());
   auto* component =
-      std::any_cast<Modules::Component*>(event->getParam("paramModule"));
-  cmd.setRTParam("paramModule", component);
+      std::any_cast<Widgets::Component*>(event->getParam("paramWidget"));
+  cmd.setRTParam("paramWidget", component);
   auto param_id = std::any_cast<size_t>(event->getParam("paramID"));
   cmd.setRTParam("paramID", param_id);
-  auto param_type = std::any_cast<Modules::Variable::variable_t>(
+  auto param_type = std::any_cast<Widgets::Variable::variable_t>(
       event->getParam("paramType"));
   cmd.setRTParam("paramType", param_type);
   std::any param_value_any = event->getParam("paramValue");
   switch (param_type) {
-    case Modules::Variable::DOUBLE_PARAMETER:
+    case Widgets::Variable::DOUBLE_PARAMETER:
       cmd.setRTParam("paramValue", std::any_cast<double>(param_value_any));
       break;
-    case Modules::Variable::INT_PARAMETER:
+    case Widgets::Variable::INT_PARAMETER:
       cmd.setRTParam("paramValue", std::any_cast<int64_t>(param_value_any));
 
       break;
-    case Modules::Variable::UINT_PARAMETER:
+    case Widgets::Variable::UINT_PARAMETER:
       cmd.setRTParam("paramValue", std::any_cast<uint64_t>(param_value_any));
       break;
-    case Modules::Variable::STATE:
+    case Widgets::Variable::STATE:
       cmd.setRTParam("paramValue",
                      std::any_cast<RT::State::state_t>(param_value_any));
       break;
     default:
       ERROR_MSG(
-          "Module Parameter Change event does not contain expected parameter "
+          "Widget Parameter Change event does not contain expected parameter "
           "types");
   }
 
@@ -835,11 +835,11 @@ void RT::System::changeModuleParameters(Event::Object* event)
   cmd_ptr->wait();
 }
 
-void RT::System::changeModuleState(Event::Object* event)
+void RT::System::changeWidgetState(Event::Object* event)
 {
   RT::System::CMD cmd(event->getType());
   auto* component =
-      std::any_cast<Modules::Component*>(event->getParam("component"));
+      std::any_cast<Widgets::Component*>(event->getParam("component"));
   auto state = std::any_cast<RT::State::state_t>(event->getParam("state"));
   cmd.setRTParam("component", component);
   cmd.setRTParam("state", state);

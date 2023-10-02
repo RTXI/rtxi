@@ -22,32 +22,32 @@
 
 #include <iostream>
 
-#include "module.hpp"
+#include "widgets.hpp"
 
 #include "io_tests.hpp"
 #include "module_tests.hpp"
 
 
-const std::vector<Modules::Variable::Info> defaultFakeModuleVariables = 
+const std::vector<Widgets::Variable::Info> defaultFakeModuleVariables = 
     generateDefaultComponentVariables();
 const std::vector<IO::channel_t> defaultFakeChannelList = 
     generateDefaultChannelList();
 
 // This is a fake plugin created in order to test Plugin Manager
-class fakePlugin : public Modules::Plugin 
+class fakePlugin : public Widgets::Plugin 
 {
 public:
     fakePlugin(Event::Manager* ev_manager) : 
-            Modules::Plugin(ev_manager, "fakeModule") 
+            Widgets::Plugin(ev_manager, "fakeModule") 
         { std::cout << "Fake Plugin Constructed\n"; }
     ~fakePlugin() { std::cout << "Fake Plugin Destroyed\n"; }
 };
 
-class fakeComponent : public Modules::Component
+class fakeComponent : public Widgets::Component
 {
 public:
-    fakeComponent(Modules::Plugin* hplugin) :
-        Modules::Component(hplugin, 
+    fakeComponent(Widgets::Plugin* hplugin) :
+        Widgets::Component(hplugin, 
                            "fakeModule", 
                            defaultFakeChannelList, 
                            defaultFakeModuleVariables)
