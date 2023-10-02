@@ -130,7 +130,7 @@ UserPrefs::Panel::Panel(QMainWindow* mwindow, Event::Manager* ev_manager)
 
   // Attach layout to widget
   setLayout(box_layout);
-  setWindowTitle(QString::fromStdString(this->getName()));
+  setWindowTitle(QString(this->getName().c_str()));
 
   // Set layout to Mdi
   this->getMdiWindow()->setFixedSize(500, this->sizeHint().height() + 50);

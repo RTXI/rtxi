@@ -233,6 +233,7 @@ private:
   size_t refresh = Oscilloscope::FrameRates::HZ60;
   int64_t horizontal_scale_ns = 1000000;  // horizontal scale for time (ns)
   bool triggering = false;
+  std::vector<sample> sample_buffer;
 
   // Scope primary paint element
   QwtPlotDirectPainter* d_directPainter = nullptr;

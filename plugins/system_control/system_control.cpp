@@ -161,7 +161,7 @@ SystemControl::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
   for(auto range : DAQ::get_default_ranges()){
     auto [min, max] = range;
     range_list_text = fmt::format(formatting, min) + std::string(" to ") + fmt::format(formatting, max);
-    analogRangeList->addItem(QString::fromStdString(range_list_text), QVariant::fromValue(indx));
+    analogRangeList->addItem(QString(range_list_text.c_str()), QVariant::fromValue(indx));
     indx++;
   }
 
@@ -199,7 +199,7 @@ SystemControl::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
   analogUnitList->clear();
   DAQ::index_t units_index=0;
   for(const auto& units : DAQ::get_default_units()){
-    analogUnitList->addItem(QString::fromStdString(units), QVariant::fromValue(units_index));
+    analogUnitList->addItem(QString(units.c_str()), QVariant::fromValue(units_index));
     units_index++;
   }
   analogLayout->addWidget(new QLabel(tr(" / Volt")), 3, 4);
@@ -432,7 +432,7 @@ void SystemControl::Panel::buildDAQDeviceList()
   this->getRTXIEventManager()->postEvent(&device_list_request);
   auto devices = std::any_cast<std::vector<DAQ::Device*>>(device_list_request.getParam("devices"));
   for(auto* device : devices){
-    this->deviceList->addItem(QString::fromStdString(device->getName()), QVariant::fromValue(device));
+    this->deviceList->addItem(QString(device->getName().c_str()), QVariant::fromValue(device));
   }
 }
 

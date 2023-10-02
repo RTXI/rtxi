@@ -139,7 +139,7 @@ Connector::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
 
   // Attach layout to widget
   setLayout(layout);
-  setWindowTitle(QString::fromStdString(this->getName()));
+  setWindowTitle(QString(this->getName().c_str()));
 
   // Set layout to Mdi
   this->getMdiWindow()->resize(500, this->sizeHint().height());
@@ -164,10 +164,10 @@ void Connector::Panel::buildBlockList()
         block->getName().find("Recording") != std::string::npos) {
       continue;
     }
-    this->inputBlock->addItem(QString::fromStdString(block->getName()) + " "
+    this->inputBlock->addItem(QString(block->getName().c_str()) + " "
                                   + QString::number(block->getID()),
                               QVariant::fromValue(block));
-    this->outputBlock->addItem(QString::fromStdString(block->getName()) + " "
+    this->outputBlock->addItem(QString(block->getName().c_str()) + " "
                                    + QString::number(block->getID()),
                                QVariant::fromValue(block));
   }
@@ -219,13 +219,12 @@ void Connector::Panel::syncBlockInfo()
       continue;
     }
     temp_list_text = QString::number(conn.src->getID()) + " "
-        + QString::fromStdString(conn.src->getName()) + " "
-        + QString::fromStdString(conn.src->getChannelName(conn.src_port_type,
-                                                          conn.src_port))
+        + QString(conn.src->getName().c_str()) + " "
+        + QString(conn.src->getChannelName(conn.src_port_type,
+                                           conn.src_port).c_str())
         + " ==> " + QString::number(conn.dest->getID()) + " "
-        + QString::fromStdString(conn.dest->getName()) + " "
-        + QString::fromStdString(
-                         conn.dest->getChannelName(IO::INPUT, conn.dest_port));
+        + QString(conn.dest->getName().c_str()) + " "
+        + QString(conn.dest->getChannelName(IO::INPUT, conn.dest_port).c_str());
     temp_list_item = new QListWidgetItem(temp_list_text);
     temp_list_item->setData(Qt::UserRole, QVariant::fromValue(conn));
     connectionBox->addItem(temp_list_item);
@@ -248,7 +247,7 @@ void Connector::Panel::buildInputChannelList()
   // Get list of channels from specific block
   for (size_t i = 0; i < block->getCount(IO::INPUT); ++i) {
     inputChannel->addItem(
-        QString::fromStdString(block->getChannelName(IO::INPUT, i)),
+        QString(block->getChannelName(IO::INPUT, i).c_str()),
         QVariant::fromValue(i));
   }
 
@@ -274,7 +273,7 @@ void Connector::Panel::buildOutputChannelList()
   // Get list of channels from specific block
   for (size_t i = 0; i < block->getCount(direction); ++i) {
     outputChannel->addItem(
-        QString::fromStdString(block->getChannelName(direction, i)),
+        QString(block->getChannelName(direction, i).c_str()),
         QVariant::fromValue(i));
   }
 

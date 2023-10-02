@@ -87,7 +87,7 @@ void Oscilloscope::Panel::updateChannelPen(IO::endpoint endpoint)
 void Oscilloscope::Panel::updateChannelLabel(IO::endpoint probe_info)
 {
   const QString chanlabel = QString::number(probe_info.block->getID()) + " "
-      + QString::fromStdString(probe_info.block->getName()) + " "
+      + QString(probe_info.block->getName().c_str()) + " "
       + this->scalesList->currentText();
 
   this->scopeWindow->setChannelLabel(probe_info, chanlabel);
@@ -194,7 +194,7 @@ void Oscilloscope::Panel::buildChannelList()
   channelsList->clear();
   for (size_t i = 0; i < block->getCount(type); ++i) {
     channelsList->addItem(
-        QString::fromStdString(block->getChannelName(type, i)),
+        QString(block->getChannelName(type, i).c_str()),
         QVariant::fromValue(i));
   }
   channelsList->setCurrentIndex(0);
@@ -279,7 +279,7 @@ void Oscilloscope::Panel::buildBlockList()
         block->getName().find("Recording") != std::string::npos) {
       continue;
     }
-    this->blocksListDropdown->addItem(QString::fromStdString(block->getName())
+    this->blocksListDropdown->addItem(QString(block->getName().c_str())
                                           + " "
                                           + QString::number(block->getID()),
                                       QVariant::fromValue(block));
@@ -364,8 +364,8 @@ QWidget* Oscilloscope::Panel::createChannelTab(QWidget* parent)
             current_fixed_value * std::pow(1e3, unit_array_index) * value_scale;
       }
       scalesList->addItem(
-          QString::fromStdString(fmt::format(
-              formatting, temp_value, unit_array.at(unit_array_index))),
+          QString(fmt::format(
+              formatting, temp_value, unit_array.at(unit_array_index)).c_str()),
           current_fixed_value * value_scale);
     }
     value_scale = value_scale / 10.0;
@@ -400,7 +400,7 @@ QWidget* Oscilloscope::Panel::createChannelTab(QWidget* parent)
     tmp.fill(penColors.at(i));
     color_name = Oscilloscope::color2string.at(i);
     colorsList->addItem(
-        tmp, QString::fromStdString(color_name), Oscilloscope::penColors.at(i));
+        tmp, QString(color_name.c_str()), Oscilloscope::penColors.at(i));
   }
 
   auto* widthLabel = new QLabel(tr("Width:"), page);
@@ -435,7 +435,7 @@ QWidget* Oscilloscope::Panel::createChannelTab(QWidget* parent)
              Oscilloscope::penStyles.at(i)));
     painter.drawLine(0, 12, 25, 12);
     stylesList->addItem(tmp,
-                        QString::fromStdString(temp_name),
+                        QString(temp_name.c_str()),
                         QVariant::fromValue(Oscilloscope::penStyles.at(i)));
   }
 
@@ -646,8 +646,8 @@ void Oscilloscope::Panel::showDisplayTab()
   std::string direction_str;
   for (const auto& endpoint : endpoint_list) {
     direction_str = endpoint.direction == IO::INPUT ? "INPUT" : "OUTPUT";
-    trigsChanList->addItem(QString::fromStdString(endpoint.block->getName())
-                               + " " + QString::fromStdString(direction_str)
+    trigsChanList->addItem(QString(endpoint.block->getName().c_str())
+                               + " " + QString(direction_str.c_str())
                                + " " + QString::number(endpoint.port),
                            QVariant::fromValue(endpoint));
   }

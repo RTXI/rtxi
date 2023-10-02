@@ -233,7 +233,7 @@ void RTXIWizard::Panel::parseReadme()
   const std::string html(text, len);
 
   mkd_cleanup(m);
-  const QString fileText = QString::fromStdString(html);
+  const QString fileText = QString(html.c_str());
 
   switch (button_mode) {
     case DOWNLOAD:
@@ -322,7 +322,7 @@ void RTXIWizard::Panel::rebuildListWidgets()
  */
 void RTXIWizard::Panel::installFromString(const std::string& module_name)
 {
-  const QString name = QString::fromStdString(module_name);
+  const QString name = QString(module_name.c_str());
   // Let the user know that RTXI is installing the plugin.
   auto* progress = new QProgressDialog("Installing plugin", 
                                        "Cancel", 
@@ -341,7 +341,7 @@ void RTXIWizard::Panel::installFromString(const std::string& module_name)
   const QByteArray installpath = modules[name].install_location.toLatin1();
   const QString source_location = QDir::temp().absolutePath() 
     + QString("/rtxi_modules/") 
-    + QString::fromStdString(module_name);
+    + QString(module_name.c_str());
   QDir(source_location).removeRecursively(); 
   const QByteArray clonepath = source_location.toLatin1();
 

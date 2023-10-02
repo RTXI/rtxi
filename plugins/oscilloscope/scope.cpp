@@ -253,6 +253,7 @@ void Oscilloscope::Scope::setDataSize(size_t size)
 {
   const std::unique_lock<std::shared_mutex> lock(this->m_channel_mutex);
   this->buffer_size.store(size);
+  this->sample_buffer.assign(buffer_size, {});
   for (auto& chan : this->channels) {
     chan.timebuffer.assign(this->buffer_size, 0);
     chan.xbuffer.assign(this->buffer_size, 0);
@@ -444,7 +445,6 @@ void Oscilloscope::Scope::drawCurves()
   if (isPaused.load() || this->channels.empty()) {
     return;
   }
-  const std::shared_lock<std::shared_mutex> lock(this->m_channel_mutex);
   int64_t max_time = 0;
   int64_t local_max_time = 0;
   for (auto chan : this->channels) {
@@ -491,7 +491,7 @@ void Oscilloscope::Scope::drawCurves()
 // TODO: look into SIMD for optimize move and calculation of data
 void Oscilloscope::Scope::process_data()
 {
-  std::vector<Oscilloscope::sample> sample_buffer(this->buffer_size);
+  const std::shared_lock<std::shared_mutex> lock(this->m_channel_mutex);
   ssize_t bytes = 0;
   size_t sample_count = 0;
   size_t array_indx = 0;

@@ -268,7 +268,7 @@ void DataRecorder::Panel::buildBlockList()
        blockptr->getName().find("Recording") != std::string::npos){
       continue;
     }
-    blockList->addItem(QString::fromStdString(blockptr->getName()) + " "
+    blockList->addItem(QString(blockptr->getName().c_str()) + " "
                            + QString::number(blockptr->getID()),
                        QVariant::fromValue(blockptr));
   }
@@ -286,7 +286,7 @@ void DataRecorder::Panel::buildChannelList()
 
   auto type = this->typeList->currentData().value<IO::flags_t>();
   for (size_t i = 0; i < block->getCount(type); ++i) {
-    channelList->addItem(QString::fromStdString(block->getChannelName(type, i)),
+    channelList->addItem(QString(block->getChannelName(type, i).c_str()),
                          QVariant::fromValue(i));
   }
   addRecorderButton->setEnabled(channelList->count() != 0);
@@ -338,7 +338,7 @@ void DataRecorder::Panel::changeDataFile()
   auto* hplugin = dynamic_cast<DataRecorder::Plugin*>(this->getHostPlugin());
   hplugin->change_file(filename.toStdString());
   this->fileNameEdit->setText(
-      QString::fromStdString(hplugin->getOpenFilename()));
+      QString(hplugin->getOpenFilename().c_str()));
 }
 
 // Insert channel to record into list
@@ -379,7 +379,7 @@ void DataRecorder::Panel::insertChannel()
                                             endpoint.block->getID(),
                                             endpoint.direction,
                                             endpoint.port);
-  temp_item = new QListWidgetItem(QString::fromStdString(temp_name));
+  temp_item = new QListWidgetItem(QString(temp_name.c_str()));
   temp_item->setData(Qt::UserRole, QVariant::fromValue(endpoint));
   selectionBox->addItem(temp_item);
 

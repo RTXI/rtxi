@@ -162,7 +162,7 @@ Widgets::Panel::Panel(const std::string& mod_name,
     , m_name(mod_name)
     , event_manager(ev_manager)
 {
-  setWindowTitle(QString::fromStdString(mod_name));
+  setWindowTitle(QString(mod_name.c_str()));
 
   auto* central_widget = dynamic_cast<QMdiArea*>(mw->centralWidget());
   this->m_subwindow = central_widget->addSubWindow(this);
@@ -202,7 +202,7 @@ void Widgets::Panel::createGUI(
     }
     param_t param;
     param.label =
-        new QLabel(QString::fromStdString(varinfo.name), customParamArea);
+        new QLabel(QString(varinfo.name.c_str()), customParamArea);
     param.edit = new DefaultGUILineEdit(customParamArea);
     param.str_value = QString();
     param.type = varinfo.vartype;
@@ -237,8 +237,8 @@ void Widgets::Panel::createGUI(
                   varinfo.name,
                   this->getName());
     }
-    param.label->setToolTip(QString::fromStdString(varinfo.description));
-    param.edit->setToolTip(QString::fromStdString(varinfo.description));
+    param.label->setToolTip(QString(varinfo.description.c_str()));
+    param.edit->setToolTip(QString(varinfo.description.c_str()));
     param.str_value = param.edit->text();
     parameter[varinfo.name] = param;
     customParamLayout->addWidget(param.label, param_count, 0);
@@ -314,19 +314,19 @@ void Widgets::Panel::refresh()
         param_id = static_cast<Widgets::Variable::Id>(i.second.info.id);
         uint_value = this->hostPlugin->getComponentUIntParameter(param_id);
         sstream << uint_value;
-        i.second.edit->setText(QString::fromStdString(sstream.str()));
+        i.second.edit->setText(QString(sstream.str().c_str()));
         break;
       case Widgets::Variable::INT_PARAMETER:
         param_id = static_cast<Widgets::Variable::Id>(i.second.info.id);
         int_value = this->hostPlugin->getComponentIntParameter(param_id);
         sstream << int_value;
-        i.second.edit->setText(QString::fromStdString(sstream.str()));
+        i.second.edit->setText(QString(sstream.str().c_str()));
         break;
       case Widgets::Variable::DOUBLE_PARAMETER:
         param_id = static_cast<Widgets::Variable::Id>(i.second.info.id);
         double_value = this->hostPlugin->getComponentDoubleParameter(param_id);
         sstream << double_value;
-        i.second.edit->setText(QString::fromStdString(sstream.str()));
+        i.second.edit->setText(QString(sstream.str().c_str()));
         break;
       default:
         ERROR_MSG("Unable to determine refresh type for component {}",
@@ -358,7 +358,7 @@ void Widgets::Panel::modify()
         uint_value = var.second.edit->text().toUInt();
         this->hostPlugin->setComponentParameter<uint64_t>(param_id, uint_value);
         sstream << uint_value;
-        var.second.edit->setText(QString::fromStdString(sstream.str()));
+        var.second.edit->setText(QString(sstream.str().c_str()));
         var.second.edit->blacken();
         break;
       case Widgets::Variable::INT_PARAMETER:
@@ -366,7 +366,7 @@ void Widgets::Panel::modify()
         int_value = var.second.edit->text().toInt();
         this->hostPlugin->setComponentParameter<int>(param_id, int_value);
         sstream << int_value;
-        var.second.edit->setText(QString::fromStdString(sstream.str()));
+        var.second.edit->setText(QString(sstream.str().c_str()));
         var.second.edit->blacken();
         break;
       case Widgets::Variable::DOUBLE_PARAMETER:
@@ -374,7 +374,7 @@ void Widgets::Panel::modify()
         double_value = var.second.edit->text().toDouble();
         this->hostPlugin->setComponentParameter(param_id, double_value);
         sstream << double_value;
-        var.second.edit->setText(QString::fromStdString(sstream.str()));
+        var.second.edit->setText(QString(sstream.str().c_str()));
         var.second.edit->blacken();
         break;
       default:
@@ -456,54 +456,6 @@ void Widgets::Panel::pause(bool p)
     this->update_state(RT::State::UNPAUSE);
   }
 }
-
-// void Widgets::Panel::doDeferred(const Settings::Object::State&)
-// {
-//   setWindowTitle(QString::number(getID()) + " "
-//                  + QString::fromStdString(myname));
-// }
-
-// void Widgets::Panel::doLoad(const Settings::Object::State& s)
-// {
-//   for (std::map<QString, param_t>::iterator i = parameter.begin();
-//        i != parameter.end();
-//        ++i)
-//     i->second.edit->setText(
-//         QString::fromStdString(s.loadString((i->first).toStdString())));
-//   if (s.loadInteger("Maximized"))
-//     showMaximized();
-//   else if (s.loadInteger("Minimized"))
-//     showMinimized();
-//   // this only exists in RTXI versions >1.3
-//   if (s.loadInteger("W") != 0) {
-//     resize(s.loadInteger("W"), s.loadInteger("H"));
-//     parentWidget()->move(s.loadInteger("X"), s.loadInteger("Y"));
-//   }
-
-//   pauseButton->setChecked(s.loadInteger("paused"));
-//   modify();
-// }
-
-// void Widgets::Panel::doSave(Settings::Object::State& s) const
-// {
-//   s.saveInteger("paused", pauseButton->isChecked());
-//   if (isMaximized())
-//     s.saveInteger("Maximized", 1);
-//   else if (isMinimized())
-//     s.saveInteger("Minimized", 1);
-
-//   QPoint pos = parentWidget()->pos();
-//   s.saveInteger("X", pos.x());
-//   s.saveInteger("Y", pos.y());
-//   s.saveInteger("W", width());
-//   s.saveInteger("H", height());
-
-//   for (std::map<QString, param_t>::const_iterator i = parameter.begin();
-//        i != parameter.end();
-//        ++i)
-//     s.saveString((i->first).toStdString(),
-//                  (i->second.edit->text()).toStdString());
-// }
 
 Widgets::Plugin::Plugin(Event::Manager* ev_manager, std::string mod_name)
     : event_manager(ev_manager)
