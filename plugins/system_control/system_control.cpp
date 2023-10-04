@@ -337,8 +337,8 @@ void SystemControl::Panel::submitDigitalChannelUpdate()
 {
   auto* dev = deviceList->currentData().value<DAQ::Device*>();
   auto d_chan = digitalChannelList->currentData().value<DAQ::index_t>();
-  auto d_type = digitalSubdeviceList->currentData().value<DAQ::ChannelType::type_t>();
   auto d_dir = digitalDirectionList->currentData().value<DAQ::direction_t>();
+  auto d_type = d_dir == DAQ::INPUT ? DAQ::ChannelType::DI : DAQ::ChannelType::DO;
 
   dev->setChannelActive(d_type, d_chan, digitalActiveButton->isChecked());
   if(!digitalActiveButton->isChecked()){ return; }
@@ -551,17 +551,13 @@ void SystemControl::Panel::displayDigitalGroup()
     return;
   }
   auto* dev = deviceList->currentData().value<DAQ::Device*>();
-  auto type = digitalSubdeviceList->currentData().value<DAQ::ChannelType::type_t>();
   auto chan = digitalChannelList->currentData().value<DAQ::index_t>();
+  auto direction = digitalDirectionList->currentData().value<DAQ::direction_t>();
 
   digitalActiveButton->setEnabled(true);
   digitalChannelList->setEnabled(true);
-  if (type == DAQ::ChannelType::DI || type == DAQ::ChannelType::DO) {
-    digitalDirectionList->setEnabled(true);
-    digitalDirectionList->setCurrentIndex(digitalDirectionList->findData(QVariant::fromValue(type)));
-  } else {
-    digitalDirectionList->setEnabled(false);
-  }
+  digitalDirectionList->setCurrentIndex(digitalDirectionList->findData(QVariant::fromValue(direction)));
+  auto type = direction == DAQ::INPUT ? DAQ::ChannelType::DI : DAQ::ChannelType::DO;
   digitalActiveButton->setChecked(dev->getChannelActive(type, chan));
 }
 

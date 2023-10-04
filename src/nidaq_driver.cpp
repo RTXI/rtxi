@@ -95,11 +95,12 @@ std::string physical_card_name(const std::string& device_name)
 
 struct physical_channel_t 
 {
-  explicit physical_channel_t(std::string  chan_name, DAQ::ChannelType::type_t chan_type) 
-    : name(std::move(chan_name)), type(chan_type) {}
+  explicit physical_channel_t(std::string  chan_name, DAQ::ChannelType::type_t chan_type, size_t chan_id) 
+    : name(std::move(chan_name)), type(chan_type), id(chan_id) {}
   int32_t addToTask(TaskHandle task_handle) const;
   std::string name;
   DAQ::ChannelType::type_t type=DAQ::ChannelType::UNKNOWN;
+  size_t id;
   int32_t reference = DAQmx_Val_RSE;
   double offset=0.0;
   double gain=1.0;
@@ -110,7 +111,7 @@ struct physical_channel_t
 
 int32_t physical_channel_t::addToTask(TaskHandle task_handle) const
 {
-  int32_t err=-1; 
+  int32_t err=0; 
   std::string units = DAQ::get_default_units().at(units_index);
   auto [min, max] = DAQ::get_default_ranges().at(range_index);
   switch(type){
@@ -253,6 +254,7 @@ private:
   std::array<std::vector<physical_channel_t>, 4> physical_channels_registry;
   std::array<DAQ::analog_range_t, 7> default_ranges = DAQ::get_default_ranges();
   std::array<std::string, 2> default_units = DAQ::get_default_units();
+  std::array<std::vector<double>, DAQ::ChannelType::UNKNOWN> buffer_arrays;
 };
 
 class Driver : public DAQ::Driver
@@ -272,6 +274,8 @@ Device::Device(const std::string& dev_name,
                std::string  internal_name) 
   : DAQ::Device(dev_name, channels), internal_dev_name(std::move(internal_name))
 {
+  size_t inputs_count=0;
+  size_t outputs_count=0;
   std::string task_name;
   for(size_t type=0; type < DAQ::ChannelType::UNKNOWN; type++){
     task_name = DAQ::ChannelType::type2string(static_cast<DAQ::ChannelType::type_t>(type));
@@ -283,14 +287,25 @@ Device::Device(const std::string& dev_name,
   for(size_t type=0; type < physical_channels_registry.size(); type++){
     chan_names = physical_channel_names(internal_dev_name, static_cast<DAQ::ChannelType::type_t>(type));
     for(const auto& chan_name : chan_names){
-      physical_channels_registry.at(type).emplace_back(chan_name, static_cast<DAQ::ChannelType::type_t>(type));
+      physical_channels_registry.at(type).emplace_back(chan_name, 
+                                                       static_cast<DAQ::ChannelType::type_t>(type),
+                                                       type%2==0 ? inputs_count : outputs_count);
+      type%2 == 0 ? inputs_count++ : outputs_count++;
     }
   }
+  for(size_t i=0; i<buffer_arrays.size(); i++){
+    buffer_arrays.at(i).assign(getChannelCount(static_cast<DAQ::ChannelType::type_t>(i)), 0);
+  }
+  for(auto& task : task_list){
+    DAQmxStartTask(task);
+  }
+  this->setActive(/*act=*/true);
 }
 
 Device::~Device()
 {
   for(const auto& task : task_list) {
+    DAQmxStopTask(task);
     DAQmxClearTask(task);
   }
 }
@@ -309,8 +324,8 @@ int Device::setChannelActive(DAQ::ChannelType::type_t type, DAQ::index_t index, 
 {
   // Unfortunately National Instruments DAQ cards under nidaqmx library best work under tasks, 
   // which are more efficient at reading when started before any action. The bad thing is that
-  // NI does not make it easy to just remove a task. Adding is easy, but removing means clearing
-  // the task, then starting the task again, and adding all of the other tasks. 
+  // NI does not make it easy to just remove a channel. Adding is easy, but removing means clearing
+  // the task, then starting the task again, and adding all of the other channels. 
   int32_t err = 0;
   if(physical_channels_registry.at(type).at(index).active == state) { return err; }
   if(state) {
@@ -327,6 +342,7 @@ int Device::setChannelActive(DAQ::ChannelType::type_t type, DAQ::index_t index, 
       if(err != 0) { break; }
     }
   }
+  printError(err);
   return err;
 }
 
@@ -496,7 +512,25 @@ bool Device::getAnalogCalibrationState(DAQ::ChannelType::type_t  /*type*/, DAQ::
 
 int Device::setDigitalDirection(DAQ::index_t  /*index*/, DAQ::direction_t  /*direction*/) { return 0;}
 
-void Device::read(){}
+void Device::read()
+{
+  int samples_read = 0; 
+  DAQmxStartTask(task_list[DAQ::ChannelType::AI]);
+  DAQmxReadAnalogF64(task_list[DAQ::ChannelType::AI],
+                     DAQmx_Val_Auto,
+                     DAQmx_Val_WaitInfinitely,
+                     DAQmx_Val_GroupByScanNumber,
+                     buffer_arrays.at(DAQ::ChannelType::AI).data(),
+                     buffer_arrays.at(DAQ::ChannelType::AI).size(),
+                     &samples_read,
+                     nullptr); 
+  size_t value_index = 0;
+  for(auto& chan : this->physical_channels_registry.at(DAQ::ChannelType::AI)){
+    if(chan.active){ writeoutput(chan.id, buffer_arrays.at(DAQ::ChannelType::AI).at(value_index)); }
+    ++value_index;
+  }
+}
+
 void Device::write(){}
 
 Driver::Driver() : DAQ::Driver(std::string(DEFAULT_DRIVER_NAME))
@@ -532,7 +566,7 @@ void Driver::loadDevices()
         description += std::to_string(channel_id);
         channels.push_back({chan_name, 
                             description, 
-                            query_indx%2==0 ? IO::INPUT : IO::OUTPUT});
+                            query_indx%2==0 ? IO::OUTPUT : IO::INPUT});
       }
     }
     this->nidaq_devices.emplace_back(physical_daq_name, channels, internal_dev_name);
