@@ -26,7 +26,7 @@ endif()
 install(
     FILES 
         src/debug.hpp src/event.hpp src/io.hpp src/rt.hpp 
-        src/daq.hpp src/module.hpp src/logger.hpp src/fifo.hpp
+        src/daq.hpp src/widgets.hpp src/logger.hpp src/fifo.hpp
         src/rtos.hpp src/dlplugin.hpp  
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/rtxi
     COMPONENT rtxiLibraryTargets
