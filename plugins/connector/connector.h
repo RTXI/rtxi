@@ -23,7 +23,6 @@
 
 #include <QComboBox>
 #include <QListWidget>
-
 #include <vector>
 
 #include "event.hpp"
@@ -95,5 +94,5 @@ std::unique_ptr<Widgets::Component> createRTXIComponent(
 
 Widgets::FactoryMethods getFactories();
 
-} // namespace Connector
+}  // namespace Connector
 #endif  // CONNECTOR_H

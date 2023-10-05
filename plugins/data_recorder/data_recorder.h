@@ -212,8 +212,8 @@ private:
   struct recorder_t
   {
     recorder_t(record_channel chan,
-             std::unique_ptr<DataRecorder::Component> comp,
-             hid_t handle)
+               std::unique_ptr<DataRecorder::Component> comp,
+               hid_t handle)
         : channel(std::move(chan))
         , component(std::move(comp))
         , hdf5_data_handle(handle)
@@ -241,6 +241,6 @@ std::unique_ptr<Widgets::Component> createRTXIComponent(
 
 Widgets::FactoryMethods getFactories();
 
-} // namespace DataRecorder
+}  // namespace DataRecorder
 
 #endif /* DATA_RECORDER_H */

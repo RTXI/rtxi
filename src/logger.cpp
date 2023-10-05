@@ -5,8 +5,8 @@
 #include "logger.hpp"
 
 #include "event.hpp"
-#include "widgets.hpp"
 #include "rt.hpp"
+#include "widgets.hpp"
 
 // TODO: change localtime to be thread-safe
 void eventLogger::log(Event::Object* event)

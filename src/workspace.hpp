@@ -16,10 +16,11 @@
 #define WORKSPACE_H
 
 #include <utility>
+
+#include "daq.hpp"
 #include "dlplugin.hpp"
 #include "event.hpp"
 #include "widgets.hpp"
-#include "daq.hpp"
 
 //! Internal Management Oriented Classes
 /*!
@@ -75,6 +76,7 @@ public:
 
   void saveSettings(const QString& profile_name);
   void loadSettings(const QString& profile_name);
+
 private:
   using driver_registry_entry = std::pair<std::string, DAQ::Driver*>;
   QString settings_prefix;

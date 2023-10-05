@@ -174,10 +174,10 @@ private:
   size_t id = INVALID_BLOCK_ID;
   typedef struct port_t
   {
-    double buff_value=0.0;
-    double value=0.0;
+    double buff_value = 0.0;
+    double value = 0.0;
     IO::channel_t channel_info;
-  }port_t;
+  } port_t;
   std::string name;
   bool isInputDependent;
   std::array<std::vector<port_t>, IO::UNKNOWN> ports;

@@ -12,7 +12,7 @@
 
 #include "debug.hpp"
 
-int FIFO_COUNT=0;
+int FIFO_COUNT = 0;
 
 // First let's define an evl specific Fifo class.
 namespace RT::OS

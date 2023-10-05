@@ -160,8 +160,9 @@ void Connector::Panel::buildBlockList()
   this->blocks =
       std::any_cast<std::vector<IO::Block*>>(event.getParam("blockList"));
   for (auto* block : this->blocks) {
-    if (block->getName().find("Probe") != std::string::npos ||
-        block->getName().find("Recording") != std::string::npos) {
+    if (block->getName().find("Probe") != std::string::npos
+        || block->getName().find("Recording") != std::string::npos)
+    {
       continue;
     }
     this->inputBlock->addItem(QString(block->getName().c_str()) + " "
@@ -218,10 +219,11 @@ void Connector::Panel::syncBlockInfo()
     if (conn.dest->getName().find("Probe") != std::string::npos) {
       continue;
     }
-    temp_list_text = QString::number(conn.src->getID()) + " "
+    temp_list_text =
+        QString::number(conn.src->getID()) + " "
         + QString(conn.src->getName().c_str()) + " "
-        + QString(conn.src->getChannelName(conn.src_port_type,
-                                           conn.src_port).c_str())
+        + QString(
+            conn.src->getChannelName(conn.src_port_type, conn.src_port).c_str())
         + " ==> " + QString::number(conn.dest->getID()) + " "
         + QString(conn.dest->getName().c_str()) + " "
         + QString(conn.dest->getChannelName(IO::INPUT, conn.dest_port).c_str());
@@ -246,9 +248,8 @@ void Connector::Panel::buildInputChannelList()
 
   // Get list of channels from specific block
   for (size_t i = 0; i < block->getCount(IO::INPUT); ++i) {
-    inputChannel->addItem(
-        QString(block->getChannelName(IO::INPUT, i).c_str()),
-        QVariant::fromValue(i));
+    inputChannel->addItem(QString(block->getChannelName(IO::INPUT, i).c_str()),
+                          QVariant::fromValue(i));
   }
 
   updateConnectionButton();
@@ -272,9 +273,8 @@ void Connector::Panel::buildOutputChannelList()
 
   // Get list of channels from specific block
   for (size_t i = 0; i < block->getCount(direction); ++i) {
-    outputChannel->addItem(
-        QString(block->getChannelName(direction, i).c_str()),
-        QVariant::fromValue(i));
+    outputChannel->addItem(QString(block->getChannelName(direction, i).c_str()),
+                           QVariant::fromValue(i));
   }
 
   updateConnectionButton();

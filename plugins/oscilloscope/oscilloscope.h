@@ -32,9 +32,9 @@
 #include "event.hpp"
 #include "fifo.hpp"
 #include "io.hpp"
-#include "widgets.hpp"
 #include "rt.hpp"
 #include "scope.h"
+#include "widgets.hpp"
 
 namespace Oscilloscope
 {
@@ -211,6 +211,6 @@ std::unique_ptr<Widgets::Component> createRTXIComponent(
     Widgets::Plugin* host_plugin);
 
 Widgets::FactoryMethods getFactories();
-} // namespace Oscilloscope
+}  // namespace Oscilloscope
 
 #endif  // OSCILLOSCOPE_H

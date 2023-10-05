@@ -27,17 +27,17 @@
 #include <QButtonGroup>
 #include <QRadioButton>
 #include <QTimer>
-
-#include <qwt_plot_renderer.h>
-
 #include <cmath>
 #include <sstream>
 
+#include "oscilloscope.h"
+
+#include <qwt_plot_renderer.h>
+
 #include "debug.hpp"
 #include "main_window.hpp"
-#include "rt.hpp"
 #include "oscilloscope/scope.h"
-#include "oscilloscope.h"
+#include "rt.hpp"
 
 void Oscilloscope::Plugin::receiveEvent(Event::Object* event)
 {
@@ -193,9 +193,8 @@ void Oscilloscope::Panel::buildChannelList()
   auto type = this->typesList->currentData().value<IO::flags_t>();
   channelsList->clear();
   for (size_t i = 0; i < block->getCount(type); ++i) {
-    channelsList->addItem(
-        QString(block->getChannelName(type, i).c_str()),
-        QVariant::fromValue(i));
+    channelsList->addItem(QString(block->getChannelName(type, i).c_str()),
+                          QVariant::fromValue(i));
   }
   channelsList->setCurrentIndex(0);
   showChannelTab();
@@ -276,12 +275,12 @@ void Oscilloscope::Panel::buildBlockList()
   for (auto* block : blocklist) {
     // Ignore blocks created from oscilloscope (probing blocks),
     // and from recorder (recorder components)
-    if (block->getName().find("Probe") != std::string::npos ||
-        block->getName().find("Recording") != std::string::npos) {
+    if (block->getName().find("Probe") != std::string::npos
+        || block->getName().find("Recording") != std::string::npos)
+    {
       continue;
     }
-    this->blocksListDropdown->addItem(QString(block->getName().c_str())
-                                          + " "
+    this->blocksListDropdown->addItem(QString(block->getName().c_str()) + " "
                                           + QString::number(block->getID()),
                                       QVariant::fromValue(block));
   }
@@ -366,7 +365,8 @@ QWidget* Oscilloscope::Panel::createChannelTab(QWidget* parent)
       }
       scalesList->addItem(
           QString(fmt::format(
-              formatting, temp_value, unit_array.at(unit_array_index)).c_str()),
+                      formatting, temp_value, unit_array.at(unit_array_index))
+                      .c_str()),
           current_fixed_value * value_scale);
     }
     value_scale = value_scale / 10.0;
@@ -647,9 +647,9 @@ void Oscilloscope::Panel::showDisplayTab()
   std::string direction_str;
   for (const auto& endpoint : endpoint_list) {
     direction_str = endpoint.direction == IO::INPUT ? "INPUT" : "OUTPUT";
-    trigsChanList->addItem(QString(endpoint.block->getName().c_str())
-                               + " " + QString(direction_str.c_str())
-                               + " " + QString::number(endpoint.port),
+    trigsChanList->addItem(QString(endpoint.block->getName().c_str()) + " "
+                               + QString(direction_str.c_str()) + " "
+                               + QString::number(endpoint.port),
                            QVariant::fromValue(endpoint));
   }
   trigsChanList->addItem("<None>");

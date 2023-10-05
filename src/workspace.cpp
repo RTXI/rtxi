@@ -19,12 +19,12 @@
 
 #include "connector/connector.h"
 #include "data_recorder/data_recorder.h"
+#include "module_installer/rtxi_wizard.h"
 #include "oscilloscope/oscilloscope.h"
 #include "performance_measurement/performance_measurement.hpp"
+#include "rtxiConfig.h"
 #include "system_control/system_control.h"
 #include "userprefs/userprefs.h"
-#include "module_installer/rtxi_wizard.h"
-#include "rtxiConfig.h"
 
 std::optional<Widgets::FactoryMethods> Workspace::get_core_plugin_factory(
     const std::string& plugin_name)
@@ -57,7 +57,8 @@ Workspace::Manager::Manager(Event::Manager* ev_manager)
   this->m_plugin_loader = std::make_unique<DLL::Loader>();
   this->m_driver_loader = std::make_unique<DLL::Loader>();
   const QDir bin_dir = QCoreApplication::applicationDirPath();
-  this->registerDriver(bin_dir.path().toStdString()+std::string("/librtxinidaqdriver.so"));
+  this->registerDriver(bin_dir.path().toStdString()
+                       + std::string("/librtxinidaqdriver.so"));
 }
 
 Workspace::Manager::~Manager()
@@ -68,15 +69,18 @@ Workspace::Manager::~Manager()
     }
   }
   const std::vector<DAQ::Device*> devices = getAllDevices();
-  std::vector<Event::Object> unregister_device_events(devices.size(), Event::Object(Event::Type::RT_DEVICE_REMOVE_EVENT));
-  for(size_t i=0; i<devices.size(); ++i){
-    unregister_device_events[i].setParam("device", std::any(static_cast<RT::Device*>(devices[i])));
+  std::vector<Event::Object> unregister_device_events(
+      devices.size(), Event::Object(Event::Type::RT_DEVICE_REMOVE_EVENT));
+  for (size_t i = 0; i < devices.size(); ++i) {
+    unregister_device_events[i].setParam(
+        "device", std::any(static_cast<RT::Device*>(devices[i])));
   }
   this->event_manager->postEvent(unregister_device_events);
-  // we should unload all drivers 
-  void (*unloadDriversFunc )() = nullptr;
-  for(auto& driver : m_driver_registry){
-    unloadDriversFunc = this->m_driver_loader->dlsym<void (*)()>(driver.first.c_str(), "deleteRTXIDAQDriver");
+  // we should unload all drivers
+  void (*unloadDriversFunc)() = nullptr;
+  for (auto& driver : m_driver_registry) {
+    unloadDriversFunc = this->m_driver_loader->dlsym<void (*)()>(
+        driver.first.c_str(), "deleteRTXIDAQDriver");
     unloadDriversFunc();
   }
   this->event_manager->unregisterHandler(this);
@@ -93,11 +97,13 @@ bool Workspace::Manager::isRegistered(const Widgets::Plugin* plugin)
                      { return plugin == widget.get(); });
 }
 
-std::vector<DAQ::Device*> Workspace::Manager::getDevices(const std::string& driver)
+std::vector<DAQ::Device*> Workspace::Manager::getDevices(
+    const std::string& driver)
 {
   auto iter = std::find_if(m_driver_registry.begin(),
                            m_driver_registry.end(),
-                           [&](const driver_registry_entry& entry){ return entry.second->getDriverName() == driver;}); 
+                           [&](const driver_registry_entry& entry)
+                           { return entry.second->getDriverName() == driver; });
   if (iter == m_driver_registry.end()) {
     return {};
   }
@@ -108,36 +114,48 @@ std::vector<DAQ::Device*> Workspace::Manager::getAllDevices()
 {
   std::vector<DAQ::Device*> devices;
   std::vector<DAQ::Device*> temp_driver_devices;
-  for(auto& entry : this->m_driver_registry){
+  for (auto& entry : this->m_driver_registry) {
     temp_driver_devices = entry.second->getDevices();
-    devices.insert(devices.end(),
-                   temp_driver_devices.begin(),
-                   temp_driver_devices.end());
+    devices.insert(
+        devices.end(), temp_driver_devices.begin(), temp_driver_devices.end());
   }
   return devices;
-} 
+}
 
-template<class... Ts> struct overload : Ts... { using Ts::operator()...; };
-template<class... Ts> overload(Ts...) -> overload<Ts...>;   
+template<class... Ts>
+struct overload : Ts...
+{
+  using Ts::operator()...;
+};
+template<class... Ts>
+overload(Ts...) -> overload<Ts...>;
 void Workspace::Manager::saveSettings(const QString& profile_name)
 {
-  QSettings settings(settings_prefix+profile_name, QSettings::IniFormat);
+  QSettings settings(settings_prefix + profile_name, QSettings::IniFormat);
   settings.beginGroup("widgets");
   QString widget_name;
-  int widget_count=0;
-  for(const auto& entry : this->rtxi_widgets_registry){
+  int widget_count = 0;
+  for (const auto& entry : this->rtxi_widgets_registry) {
     widget_name = QString::fromStdString(entry.first);
     settings.beginGroup(widget_name);
-    for(const auto& plugin : entry.second){
+    for (const auto& plugin : entry.second) {
       settings.beginGroup(QString::number(widget_count));
-      for(const auto& param_info : plugin->getComponentParametersInfo()){
-        settings.setValue(QString::fromStdString(param_info.name), 
-                          std::visit(overload{
-                            [](const int64_t& val)->QString{return QString::number(val);},
-                            [](const double& val)->QString{return QString::number(val);},
-                            [](const uint64_t& val)->QString{return QString::number(val);},
-                            [](const std::string& val)->QString{return QString::fromStdString(val);},
-                            [](const RT::State::state_t& val)->QString{return QString::number(static_cast<int8_t>(val));}}, param_info.value));
+      for (const auto& param_info : plugin->getComponentParametersInfo()) {
+        settings.setValue(
+            QString::fromStdString(param_info.name),
+            std::visit(overload {[](const int64_t& val) -> QString
+                                 { return QString::number(val); },
+                                 [](const double& val) -> QString
+                                 { return QString::number(val); },
+                                 [](const uint64_t& val) -> QString
+                                 { return QString::number(val); },
+                                 [](const std::string& val) -> QString
+                                 { return QString::fromStdString(val); },
+                                 [](const RT::State::state_t& val) -> QString {
+                                   return QString::number(
+                                       static_cast<int8_t>(val));
+                                 }},
+                       param_info.value));
       }
       settings.endGroup();
       widget_count++;
@@ -180,7 +198,8 @@ Widgets::Plugin* Workspace::Manager::loadPlugin(const std::string& library)
         this->rtxi_factories_registry[library_loc].createPlugin(
             this->event_manager);
     plugin_ptr = this->registerWidget(std::move(plugin));
-    plugin_ptr->attachComponent(this->rtxi_factories_registry[library_loc].createComponent(plugin_ptr));
+    plugin_ptr->attachComponent(
+        this->rtxi_factories_registry[library_loc].createComponent(plugin_ptr));
     return plugin_ptr;
   }
 
@@ -246,24 +265,37 @@ void Workspace::Manager::registerDriver(const std::string& driver_location)
 {
   auto iter = std::find_if(m_driver_registry.begin(),
                            m_driver_registry.end(),
-                           [&](const driver_registry_entry& entry){ return entry.first == driver_location;}); 
-  if(iter != this->m_driver_registry.end()){ return; }
-  if(this->m_driver_loader->load(driver_location.c_str()) < 0){ return; }
-  auto getDriver = this->m_driver_loader->dlsym<DAQ::Driver* (*)()>(driver_location.c_str(), "getRTXIDAQDriver");
-  if(getDriver == nullptr) {
-    ERROR_MSG("Workspace::Manager::registerDriver : Unable to load dynamic library file {}", driver_location);
+                           [&](const driver_registry_entry& entry)
+                           { return entry.first == driver_location; });
+  if (iter != this->m_driver_registry.end()) {
+    return;
+  }
+  if (this->m_driver_loader->load(driver_location.c_str()) < 0) {
+    return;
+  }
+  auto getDriver = this->m_driver_loader->dlsym<DAQ::Driver* (*)()>(
+      driver_location.c_str(), "getRTXIDAQDriver");
+  if (getDriver == nullptr) {
+    ERROR_MSG(
+        "Workspace::Manager::registerDriver : Unable to load dynamic library "
+        "file {}",
+        driver_location);
     return;
   }
   DAQ::Driver* driver = getDriver();
-  if(driver == nullptr) {
-    ERROR_MSG("Workspace::Manager::registerDriver : Unable to load driver from library {}", driver_location);
+  if (driver == nullptr) {
+    ERROR_MSG(
+        "Workspace::Manager::registerDriver : Unable to load driver from "
+        "library {}",
+        driver_location);
     return;
   }
   this->m_driver_registry.emplace_back(driver_location, driver);
   std::vector<Event::Object> plug_device_events;
-  for(auto* device: driver->getDevices()){
+  for (auto* device : driver->getDevices()) {
     plug_device_events.emplace_back(Event::Type::RT_DEVICE_INSERT_EVENT);
-    plug_device_events.back().setParam("device", std::any(static_cast<RT::Device*>(device)));
+    plug_device_events.back().setParam(
+        "device", std::any(static_cast<RT::Device*>(device)));
   }
   this->event_manager->postEvent(plug_device_events);
 }
@@ -272,15 +304,17 @@ void Workspace::Manager::unregisterDriver(const std::string& driver_location)
 {
   auto iter = std::find_if(m_driver_registry.begin(),
                            m_driver_registry.end(),
-                           [&](const driver_registry_entry& entry){ return entry.first == driver_location;}); 
+                           [&](const driver_registry_entry& entry)
+                           { return entry.first == driver_location; });
 
-  if(iter == this->m_driver_registry.end()){
+  if (iter == this->m_driver_registry.end()) {
     return;
   }
   std::vector<Event::Object> unplug_device_events;
-  for(auto *device : iter->second->getDevices()){
+  for (auto* device : iter->second->getDevices()) {
     unplug_device_events.emplace_back(Event::Type::RT_DEVICE_REMOVE_EVENT);
-    unplug_device_events.back().setParam("device", std::any(static_cast<RT::Device*>(device)));
+    unplug_device_events.back().setParam(
+        "device", std::any(static_cast<RT::Device*>(device)));
   }
   this->event_manager->postEvent(unplug_device_events);
   this->m_driver_registry.erase(iter);
@@ -355,7 +389,7 @@ void Workspace::Manager::receiveEvent(Event::Object* event)
         event->setParam("status", std::any(std::string("failure")));
       }
       break;
-    case Event::Type::DAQ_DEVICE_QUERY_EVENT : 
+    case Event::Type::DAQ_DEVICE_QUERY_EVENT:
       event->setParam("devices", std::any(this->getAllDevices()));
       break;
     default:

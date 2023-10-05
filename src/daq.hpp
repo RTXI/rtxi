@@ -21,7 +21,6 @@
 #ifndef DAQ_DEVICE_H
 #define DAQ_DEVICE_H
 
-
 #include <cmath>
 #include <cstddef>
 #include <map>
@@ -39,41 +38,43 @@ namespace DAQ
 
 using analog_range_t = std::pair<double, double>;
 
-namespace ChannelType {
+namespace ChannelType
+{
 /*!
  * Used to specify the interface type.
  */
 enum type_t : size_t
 {
-  AI=0, /*!< Analog Input Interface         */
+  AI = 0, /*!< Analog Input Interface         */
   AO, /*!< Analog Output Interface        */
   DI, /*!< Digital Input Interface         */
   DO, /*!< Digital Output Interface        */
   UNKNOWN
 };
 
-inline std::string type2string(type_t type){
+inline std::string type2string(type_t type)
+{
   std::string result;
-  switch(type){
-    case AI :
+  switch (type) {
+    case AI:
       result = "Analog Input";
       break;
-    case AO :
+    case AO:
       result = "Analog Output";
       break;
-    case DI :
+    case DI:
       result = "Digital Input";
       break;
-    case DO :
+    case DO:
       result = "Digital Output";
       break;
-    default :
+    default:
       ERROR_MSG("DAQ::ChannelType::type2string : Unknown type used");
       break;
   }
   return result;
 }
-} // namespace ChannelType
+}  // namespace ChannelType
 
 /*!
  * Used to specify indexes for channel number, range, reference, and units.
@@ -94,39 +95,34 @@ enum direction_t
   OUTPUT, /*!< Digital Output */
 };
 
-namespace Reference{
+namespace Reference
+{
 enum reference_t : size_t
 {
-  GROUND=0,
+  GROUND = 0,
   COMMON,
   DIFFERENTIAL,
   OTHER,
   UNKNOWN
 };
-} // namespace Reference
+}  // namespace Reference
 
 inline std::array<analog_range_t, 7> get_default_ranges()
 {
-  return 
-  {
-    std::pair(-10.0, 10.0),
-    std::pair(-5.0, 5.0),
-    std::pair(-1.0, 1.0),
-    std::pair(-0.5, 0.5),
-    std::pair(-0.2, 0.2),
-    std::pair(-0.1, 0.1),
+  return {
+      std::pair(-10.0, 10.0),
+      std::pair(-5.0, 5.0),
+      std::pair(-1.0, 1.0),
+      std::pair(-0.5, 0.5),
+      std::pair(-0.2, 0.2),
+      std::pair(-0.1, 0.1),
   };
 }
 
 inline std::array<std::string, 2> get_default_units()
 {
-  return 
-  {
-    "volts",
-    "amps"
-  }; 
+  return {"volts", "amps"};
 }
-
 
 /*!
  * Object that represents a single DAQ card.
@@ -161,7 +157,8 @@ public:
    * \param index The channel's index.
    * \return  The channel's active state.
    */
-  virtual bool getChannelActive(ChannelType::type_t type, index_t index) const = 0;
+  virtual bool getChannelActive(ChannelType::type_t type,
+                                index_t index) const = 0;
 
   /*!
    * Set the channel's active state.
@@ -170,7 +167,9 @@ public:
    * \param index The channel's index.
    * \param state The channel's new state.
    */
-  virtual int setChannelActive(ChannelType::type_t type, index_t index, bool state) = 0;
+  virtual int setChannelActive(ChannelType::type_t type,
+                               index_t index,
+                               bool state) = 0;
 
   /*!
    * Get the number of available ranges for the specified channel.
@@ -195,7 +194,8 @@ public:
    * \return The number of available units for the channel.
    */
   virtual size_t getAnalogUnitsCount(index_t index) const = 0;
-  virtual size_t getAnalogDownsample(ChannelType::type_t type, index_t index) const = 0;
+  virtual size_t getAnalogDownsample(ChannelType::type_t type,
+                                     index_t index) const = 0;
 
   /*!
    * Get a string representation of the specified range.
@@ -240,7 +240,8 @@ public:
    * \param index The channel's index.
    * \return The gain of the selected channel.
    */
-  virtual double getAnalogGain(ChannelType::type_t type, index_t index) const = 0;
+  virtual double getAnalogGain(ChannelType::type_t type,
+                               index_t index) const = 0;
 
   /*!
    * Get the offset of the selected channel that makes the signal zero
@@ -249,7 +250,8 @@ public:
    * \param index The channel's index.
    * \return The zero offset of the selected channel.
    */
-  virtual double getAnalogZeroOffset(ChannelType::type_t type, index_t index) const = 0;
+  virtual double getAnalogZeroOffset(ChannelType::type_t type,
+                                     index_t index) const = 0;
 
   /*!
    * Get the index of the range for the selected channel.
@@ -258,7 +260,8 @@ public:
    * \param index The channel's index.
    * \return The index of the channel's range or INVALID on error.
    */
-  virtual index_t getAnalogRange(ChannelType::type_t type, index_t index) const = 0;
+  virtual index_t getAnalogRange(ChannelType::type_t type,
+                                 index_t index) const = 0;
 
   /*!
    * Get the index of the reference for the selected channel.
@@ -267,7 +270,8 @@ public:
    * \param index The channel's index.
    * \return The index of the channel's reference or INVALID on error.
    */
-  virtual index_t getAnalogReference(ChannelType::type_t type, index_t index) const = 0;
+  virtual index_t getAnalogReference(ChannelType::type_t type,
+                                     index_t index) const = 0;
 
   /*!
    * Get the index of the units for the selected channel.
@@ -276,7 +280,8 @@ public:
    * \param index The channel's index.
    * \return The index of the channel's units or INVALID on error.
    */
-  virtual index_t getAnalogUnits(ChannelType::type_t type, index_t index) const = 0;
+  virtual index_t getAnalogUnits(ChannelType::type_t type,
+                                 index_t index) const = 0;
 
   /*!
    * Get the index of the units for the selected channel zero offset.
@@ -285,7 +290,8 @@ public:
    * \param index The channel's index.
    * \return The index of the channel's offset units or INVALID on error.
    */
-  virtual index_t getAnalogOffsetUnits(ChannelType::type_t type, index_t index) const = 0;
+  virtual index_t getAnalogOffsetUnits(ChannelType::type_t type,
+                                       index_t index) const = 0;
 
   /*!
    * Set the gain of the selected channel.
@@ -295,7 +301,9 @@ public:
    * \param gain The channel's new gain.
    * \return 0 if successful or a negative value on error.
    */
-  virtual int setAnalogGain(ChannelType::type_t type, index_t index, double gain) = 0;
+  virtual int setAnalogGain(ChannelType::type_t type,
+                            index_t index,
+                            double gain) = 0;
 
   /*!
    * Set the range of the selected channel.
@@ -305,7 +313,9 @@ public:
    * \param range The channel's new range index.
    * \return 0 if successful or a negative value on error.
    */
-  virtual int setAnalogRange(ChannelType::type_t type, index_t index, index_t range) = 0;
+  virtual int setAnalogRange(ChannelType::type_t type,
+                             index_t index,
+                             index_t range) = 0;
 
   /*!
    * Set the zero offset of the selected channel.
@@ -339,7 +349,9 @@ public:
    * \param units The channel's new units index.
    * \return 0 if successful or a negative value on error.
    */
-  virtual int setAnalogUnits(ChannelType::type_t type, index_t index, index_t units) = 0;
+  virtual int setAnalogUnits(ChannelType::type_t type,
+                             index_t index,
+                             index_t units) = 0;
 
   /*!
    * Set the offset units of the selected channel.
@@ -397,7 +409,8 @@ public:
    * \param index The channel's index.
    * \return The channel's active state of using its calibration.
    */
-  virtual bool getAnalogCalibrationActive(ChannelType::type_t type, index_t index) const = 0;
+  virtual bool getAnalogCalibrationActive(ChannelType::type_t type,
+                                          index_t index) const = 0;
 
   /*!
    * Get the channel's state of calibration.
@@ -406,7 +419,8 @@ public:
    * \param index The channel's index.
    * \return The channel's active state of using its calibration.
    */
-  virtual bool getAnalogCalibrationState(ChannelType::type_t type, index_t index) const = 0;
+  virtual bool getAnalogCalibrationState(ChannelType::type_t type,
+                                         index_t index) const = 0;
 
   /*!
    * Set the direction of the specified digital channel.
@@ -452,6 +466,6 @@ private:
   std::string name;
 };  // class Driver
 
-} // namespace DAQ
+}  // namespace DAQ
 
 #endif  // DAQ_DEVICE_H

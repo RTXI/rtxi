@@ -201,8 +201,7 @@ void Widgets::Panel::createGUI(
       continue;
     }
     param_t param;
-    param.label =
-        new QLabel(QString(varinfo.name.c_str()), customParamArea);
+    param.label = new QLabel(QString(varinfo.name.c_str()), customParamArea);
     param.edit = new DefaultGUILineEdit(customParamArea);
     param.str_value = QString();
     param.type = varinfo.vartype;
@@ -498,7 +497,8 @@ void Widgets::Plugin::setComponentState(RT::State::state_t state)
   this->event_manager->postEvent(&event);
 }
 
-std::vector<Widgets::Variable::Info> Widgets::Plugin::getComponentParametersInfo()
+std::vector<Widgets::Variable::Info>
+Widgets::Plugin::getComponentParametersInfo()
 {
   return this->plugin_component->getParametersInfo();
 }
@@ -506,7 +506,7 @@ std::vector<Widgets::Variable::Info> Widgets::Plugin::getComponentParametersInfo
 void Widgets::Plugin::attachComponent(
     std::unique_ptr<Widgets::Component> component)
 {
-  // If there is a component already attached or invalid 
+  // If there is a component already attached or invalid
   // componnet pointer provided then cancel attach
   if (this->plugin_component != nullptr || component == nullptr) {
     return;

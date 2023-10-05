@@ -100,10 +100,8 @@ SystemControl::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
   freqEdit->setText(
       std::to_string(RT::OS::SECONDS_TO_NANOSECONDS / period).c_str());
 
-  QObject::connect(freqEdit,
-                   SIGNAL(textEdited(const QString&)),
-                   this,
-                   SLOT(updatePeriod()));
+  QObject::connect(
+      freqEdit, SIGNAL(textEdited(const QString&)), this, SLOT(updatePeriod()));
   freqUnitList->setFixedWidth(50);
   freqUnitList->addItem(" Hz", 1);
   freqUnitList->addItem("kHz", 1000);
@@ -114,10 +112,8 @@ SystemControl::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
   // Period box
   deviceLayout->addWidget(new QLabel(tr("Period:")), 1, 3);
   deviceLayout->addWidget(periodEdit, 1, 4);
-  QObject::connect(periodEdit,
-                   SIGNAL(textEdited(const QString&)),
-                   this,
-                   SLOT(updateFreq()));
+  QObject::connect(
+      periodEdit, SIGNAL(textEdited(const QString&)), this, SLOT(updateFreq()));
   deviceLayout->addWidget(periodUnitList, 1, 5);
   periodUnitList->setFixedWidth(50);
   periodUnitList->addItem(" s", 1.0);
@@ -138,8 +134,10 @@ SystemControl::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
   // Create elements for analog block
   analogLayout->addWidget(new QLabel(tr("Channel:")), 1, 0);
 
-  analogSubdeviceList->addItem("Input", QVariant::fromValue(DAQ::ChannelType::AI));
-  analogSubdeviceList->addItem("Output", QVariant::fromValue(DAQ::ChannelType::AO));
+  analogSubdeviceList->addItem("Input",
+                               QVariant::fromValue(DAQ::ChannelType::AI));
+  analogSubdeviceList->addItem("Output",
+                               QVariant::fromValue(DAQ::ChannelType::AO));
   QObject::connect(
       analogSubdeviceList, SIGNAL(activated(int)), this, SLOT(updateDevice()));
   analogLayout->addWidget(analogSubdeviceList, 1, 1);
@@ -158,20 +156,30 @@ SystemControl::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
   const std::string formatting = "{:.1f}";
   std::string range_list_text;
   DAQ::index_t indx = 0;
-  for(auto range : DAQ::get_default_ranges()){
+  for (auto range : DAQ::get_default_ranges()) {
     auto [min, max] = range;
-    range_list_text = fmt::format(formatting, min) + std::string(" to ") + fmt::format(formatting, max);
-    analogRangeList->addItem(QString(range_list_text.c_str()), QVariant::fromValue(indx));
+    range_list_text = fmt::format(formatting, min) + std::string(" to ")
+        + fmt::format(formatting, max);
+    analogRangeList->addItem(QString(range_list_text.c_str()),
+                             QVariant::fromValue(indx));
     indx++;
   }
 
   analogLayout->addWidget(analogReferenceList, 2, 3, 1, 2);
   analogLayout->addWidget(new QLabel(tr("Scale:")), 3, 0);
   analogReferenceList->clear();
-  analogReferenceList->addItem("Ground", QVariant::fromValue(static_cast<DAQ::index_t>(DAQ::Reference::GROUND)));
-  analogReferenceList->addItem("Common", QVariant::fromValue(static_cast<DAQ::index_t>(DAQ::Reference::COMMON)));
-  analogReferenceList->addItem("Differential", QVariant::fromValue(static_cast<DAQ::index_t>(DAQ::Reference::DIFFERENTIAL)));
-  analogReferenceList->addItem("Other", QVariant::fromValue(static_cast<DAQ::index_t>(DAQ::Reference::OTHER)));
+  analogReferenceList->addItem(
+      "Ground",
+      QVariant::fromValue(static_cast<DAQ::index_t>(DAQ::Reference::GROUND)));
+  analogReferenceList->addItem(
+      "Common",
+      QVariant::fromValue(static_cast<DAQ::index_t>(DAQ::Reference::COMMON)));
+  analogReferenceList->addItem("Differential",
+                               QVariant::fromValue(static_cast<DAQ::index_t>(
+                                   DAQ::Reference::DIFFERENTIAL)));
+  analogReferenceList->addItem(
+      "Other",
+      QVariant::fromValue(static_cast<DAQ::index_t>(DAQ::Reference::OTHER)));
 
   analogGainEdit->setAlignment(Qt::AlignRight);
   analogLayout->addWidget(analogGainEdit, 3, 1);
@@ -197,9 +205,10 @@ SystemControl::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
 
   analogLayout->addWidget(analogUnitList, 3, 3);
   analogUnitList->clear();
-  DAQ::index_t units_index=0;
-  for(const auto& units : DAQ::get_default_units()){
-    analogUnitList->addItem(QString(units.c_str()), QVariant::fromValue(units_index));
+  DAQ::index_t units_index = 0;
+  for (const auto& units : DAQ::get_default_units()) {
+    analogUnitList->addItem(QString(units.c_str()),
+                            QVariant::fromValue(units_index));
     units_index++;
   }
   analogLayout->addWidget(new QLabel(tr(" / Volt")), 3, 4);
@@ -257,8 +266,10 @@ SystemControl::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
       digitalChannelList, SIGNAL(activated(int)), this, SLOT(display()));
   digitalLayout->addWidget(digitalChannelList, 1, 2, 1, 1);
 
-  digitalDirectionList->addItem("Input", QVariant::fromValue(DAQ::ChannelType::DI));
-  digitalDirectionList->addItem("Output", QVariant::fromValue(DAQ::ChannelType::DO));
+  digitalDirectionList->addItem("Input",
+                                QVariant::fromValue(DAQ::ChannelType::DI));
+  digitalDirectionList->addItem("Output",
+                                QVariant::fromValue(DAQ::ChannelType::DO));
   digitalLayout->addWidget(digitalDirectionList, 1, 3, 1, 1);
 
   digitalActiveButton = new QPushButton("Active");
@@ -305,26 +316,25 @@ void SystemControl::Panel::submitAnalogChannelUpdate()
 {
   auto* dev = deviceList->currentData().value<DAQ::Device*>();
   auto a_chan = analogChannelList->currentData().value<DAQ::index_t>();
-  auto a_type = analogSubdeviceList->currentData().value<DAQ::ChannelType::type_t>();
-  const double a_gain = analogGainEdit->text().toDouble() * analogUnitPrefixList->currentData().toDouble();
-  const double a_zerooffset = analogZeroOffsetEdit->text().toDouble() * analogUnitPrefixList2->currentData().toDouble();
+  auto a_type =
+      analogSubdeviceList->currentData().value<DAQ::ChannelType::type_t>();
+  const double a_gain = analogGainEdit->text().toDouble()
+      * analogUnitPrefixList->currentData().toDouble();
+  const double a_zerooffset = analogZeroOffsetEdit->text().toDouble()
+      * analogUnitPrefixList2->currentData().toDouble();
 
   dev->setChannelActive(a_type, a_chan, analogActiveButton->isChecked());
-  if(!analogActiveButton->isChecked()) { return; }
+  if (!analogActiveButton->isChecked()) {
+    return;
+  }
   dev->setAnalogGain(a_type, a_chan, a_gain);
   dev->setAnalogZeroOffset(a_type, a_chan, a_zerooffset);
   dev->setAnalogRange(
-      a_type,
-      a_chan,
-      analogRangeList->currentData().value<DAQ::index_t>());
+      a_type, a_chan, analogRangeList->currentData().value<DAQ::index_t>());
   dev->setAnalogReference(
-      a_type,
-      a_chan,
-      analogReferenceList->currentData().value<DAQ::index_t>());
+      a_type, a_chan, analogReferenceList->currentData().value<DAQ::index_t>());
   dev->setAnalogUnits(
-      a_type,
-      a_chan,
-      analogUnitList->currentData().value<DAQ::index_t>());
+      a_type, a_chan, analogUnitList->currentData().value<DAQ::index_t>());
   const int value =
       analogDownsampleList
           ->itemData(analogDownsampleList->currentIndex(), Qt::DisplayRole)
@@ -338,10 +348,13 @@ void SystemControl::Panel::submitDigitalChannelUpdate()
   auto* dev = deviceList->currentData().value<DAQ::Device*>();
   auto d_chan = digitalChannelList->currentData().value<DAQ::index_t>();
   auto d_dir = digitalDirectionList->currentData().value<DAQ::direction_t>();
-  auto d_type = d_dir == DAQ::INPUT ? DAQ::ChannelType::DI : DAQ::ChannelType::DO;
+  auto d_type =
+      d_dir == DAQ::INPUT ? DAQ::ChannelType::DI : DAQ::ChannelType::DO;
 
   dev->setChannelActive(d_type, d_chan, digitalActiveButton->isChecked());
-  if(!digitalActiveButton->isChecked()){ return; }
+  if (!digitalActiveButton->isChecked()) {
+    return;
+  }
   if (d_type == DAQ::ChannelType::DI || d_type == DAQ::ChannelType::DO) {
     dev->setDigitalDirection(d_chan, d_dir);
   }
@@ -357,13 +370,15 @@ void SystemControl::Panel::apply()
   this->getRTXIEventManager()->postEvent(&event);
 
   // We don't bother continuing if no valid device info is present/selected
-  if (deviceList->count() == 0 || deviceList->currentIndex() < 0) { return; }
+  if (deviceList->count() == 0 || deviceList->currentIndex() < 0) {
+    return;
+  }
 
-  if(analogActiveButton->isEnabled()){
+  if (analogActiveButton->isEnabled()) {
     this->submitAnalogChannelUpdate();
   }
 
-  if(digitalActiveButton->isEnabled()){
+  if (digitalActiveButton->isEnabled()) {
     this->submitDigitalChannelUpdate();
   }
   // Display changes
@@ -372,20 +387,25 @@ void SystemControl::Panel::apply()
 
 void SystemControl::Panel::updateDevice()
 {
-  if (this->deviceList->currentIndex() < 0) { return; }
+  if (this->deviceList->currentIndex() < 0) {
+    return;
+  }
 
   auto* dev = deviceList->currentData().value<DAQ::Device*>();
   analogChannelList->clear();
   digitalChannelList->clear();
 
-  auto type = analogSubdeviceList->currentData().value<DAQ::ChannelType::type_t>();
+  auto type =
+      analogSubdeviceList->currentData().value<DAQ::ChannelType::type_t>();
   for (size_t i = 0; i < dev->getChannelCount(type); ++i) {
-    analogChannelList->addItem(QString::number(i), QVariant::fromValue(static_cast<DAQ::index_t>(i)));
+    analogChannelList->addItem(
+        QString::number(i), QVariant::fromValue(static_cast<DAQ::index_t>(i)));
   }
 
   type = digitalSubdeviceList->currentData().value<DAQ::ChannelType::type_t>();
   for (size_t i = 0; i < dev->getChannelCount(type); ++i) {
-    digitalChannelList->addItem(QString::number(i), QVariant::fromValue(static_cast<DAQ::index_t>(i)));
+    digitalChannelList->addItem(
+        QString::number(i), QVariant::fromValue(static_cast<DAQ::index_t>(i)));
   }
 
   display();
@@ -397,10 +417,10 @@ void SystemControl::Panel::updateFreq()
   auto period = periodEdit->text().toDouble();
   period *= periodUnitList->currentData().toDouble();
   auto freq = 1 / period;
-  int index=0;
+  int index = 0;
   if (freq > 1000) {
     freq /= 1000;
-    index=1;
+    index = 1;
   }
 
   freqEdit->setText(QString::number(freq));
@@ -430,9 +450,11 @@ void SystemControl::Panel::buildDAQDeviceList()
 {
   Event::Object device_list_request(Event::Type::DAQ_DEVICE_QUERY_EVENT);
   this->getRTXIEventManager()->postEvent(&device_list_request);
-  auto devices = std::any_cast<std::vector<DAQ::Device*>>(device_list_request.getParam("devices"));
-  for(auto* device : devices){
-    this->deviceList->addItem(QString(device->getName().c_str()), QVariant::fromValue(device));
+  auto devices = std::any_cast<std::vector<DAQ::Device*>>(
+      device_list_request.getParam("devices"));
+  for (auto* device : devices) {
+    this->deviceList->addItem(QString(device->getName().c_str()),
+                              QVariant::fromValue(device));
   }
 }
 
@@ -462,8 +484,11 @@ void SystemControl::Panel::display()
 
 void SystemControl::Panel::displayAnalogGroup()
 {
-  if(deviceList->count() == 0 || deviceList->currentIndex() < 0) { return; }
-  if (analogChannelList->count() == 0 || analogChannelList->currentIndex() < 0) {
+  if (deviceList->count() == 0 || deviceList->currentIndex() < 0) {
+    return;
+  }
+  if (analogChannelList->count() == 0 || analogChannelList->currentIndex() < 0)
+  {
     analogActiveButton->setChecked(false);
     analogActiveButton->setEnabled(false);
     analogRangeList->setEnabled(false);
@@ -477,7 +502,8 @@ void SystemControl::Panel::displayAnalogGroup()
     return;
   }
   auto* dev = deviceList->currentData().value<DAQ::Device*>();
-  auto type = analogSubdeviceList->currentData().value<DAQ::ChannelType::type_t>();
+  auto type =
+      analogSubdeviceList->currentData().value<DAQ::ChannelType::type_t>();
   auto chan = analogChannelList->currentData().value<DAQ::index_t>();
 
   // Downsample is only enabled for AI
@@ -498,15 +524,15 @@ void SystemControl::Panel::displayAnalogGroup()
   analogDownsampleList->setCurrentIndex(analogDownsampleList->findData(
       QVariant::fromValue(dev->getAnalogDownsample(type, chan)),
       Qt::DisplayRole));
-  analogReferenceList->setCurrentIndex(
-      analogReferenceList->findData(QVariant::fromValue(dev->getAnalogReference(type, chan))));
-  analogUnitList->setCurrentIndex(
-      analogUnitList->findData(QVariant::fromValue(dev->getAnalogUnits(type, chan))));
+  analogReferenceList->setCurrentIndex(analogReferenceList->findData(
+      QVariant::fromValue(dev->getAnalogReference(type, chan))));
+  analogUnitList->setCurrentIndex(analogUnitList->findData(
+      QVariant::fromValue(dev->getAnalogUnits(type, chan))));
 
   // Determine the correct prefix for analog gain
   int indx = 8;
   double tmp = NAN;
-  double gain = dev->getAnalogGain(type, chan); 
+  double gain = dev->getAnalogGain(type, chan);
   tmp = fabs(gain);
   while (((tmp >= 1000) && (indx > 0)) || ((tmp < 1) && (indx < 16))) {
     if (tmp >= 1000) {
@@ -542,8 +568,10 @@ void SystemControl::Panel::displayAnalogGroup()
 
 void SystemControl::Panel::displayDigitalGroup()
 {
-  if(deviceList->count() == 0 || deviceList->currentIndex() < 0) { return; }
-  if(digitalChannelList->count() == 0) {
+  if (deviceList->count() == 0 || deviceList->currentIndex() < 0) {
+    return;
+  }
+  if (digitalChannelList->count() == 0) {
     digitalActiveButton->setChecked(false);
     digitalActiveButton->setEnabled(false);
     digitalChannelList->setEnabled(false);
@@ -552,12 +580,15 @@ void SystemControl::Panel::displayDigitalGroup()
   }
   auto* dev = deviceList->currentData().value<DAQ::Device*>();
   auto chan = digitalChannelList->currentData().value<DAQ::index_t>();
-  auto direction = digitalDirectionList->currentData().value<DAQ::direction_t>();
+  auto direction =
+      digitalDirectionList->currentData().value<DAQ::direction_t>();
 
   digitalActiveButton->setEnabled(true);
   digitalChannelList->setEnabled(true);
-  digitalDirectionList->setCurrentIndex(digitalDirectionList->findData(QVariant::fromValue(direction)));
-  auto type = direction == DAQ::INPUT ? DAQ::ChannelType::DI : DAQ::ChannelType::DO;
+  digitalDirectionList->setCurrentIndex(
+      digitalDirectionList->findData(QVariant::fromValue(direction)));
+  auto type =
+      direction == DAQ::INPUT ? DAQ::ChannelType::DI : DAQ::ChannelType::DO;
   digitalActiveButton->setChecked(dev->getChannelActive(type, chan));
 }
 

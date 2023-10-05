@@ -70,7 +70,7 @@ typedef struct Info
   Trigger::trig_t trigger_direction = NONE;
   double threshold = 0.0;
 } Info;
-} // namespace Trigger
+}  // namespace Trigger
 
 // values meant to be used with qt timer for redrawing the screen
 // values are in milliseconds
@@ -79,7 +79,7 @@ namespace FrameRates
 constexpr size_t HZ60 = 17;
 constexpr size_t HZ120 = 8;
 constexpr size_t HZ240 = 4;
-} // namespace FrameRates
+}  // namespace FrameRates
 
 constexpr size_t DEFAULT_BUFFER_SIZE = 100000;
 typedef struct sample
@@ -257,6 +257,6 @@ private:
   std::shared_mutex m_channel_mutex;
 };  // Scope
 
-} // namespace Oscilloscope
+}  // namespace Oscilloscope
 
 #endif  // SCOPE_H

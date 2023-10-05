@@ -38,13 +38,13 @@
 #include "data_recorder/data_recorder.h"
 #include "debug.hpp"
 #include "event.hpp"
-#include "widgets.hpp"
+#include "module_installer/rtxi_wizard.h"
 #include "oscilloscope/oscilloscope.h"
 #include "performance_measurement/performance_measurement.hpp"
 #include "rtxiConfig.h"
 #include "system_control/system_control.h"
 #include "userprefs/userprefs.h"
-#include "module_installer/rtxi_wizard.h"
+#include "widgets.hpp"
 #include "workspace.hpp"
 
 MainWindow::MainWindow(Event::Manager* ev_manager)
@@ -308,7 +308,7 @@ void MainWindow::createSystemActions()
       new QAction(tr(std::string(Oscilloscope::MODULE_NAME).c_str()), this);
   this->openDataRecorder =
       new QAction(tr(std::string(DataRecorder::MODULE_NAME).c_str()), this);
-  this->openRTXIWizard = 
+  this->openRTXIWizard =
       new QAction(tr(std::string(RTXIWizard::MODULE_NAME).c_str()), this);
 }
 
@@ -382,7 +382,7 @@ void MainWindow::loadSettings()
 void MainWindow::saveSettings()
 {
   QSettings userprefs;
-  userprefs.beginGroup("Workspaces"); 
+  userprefs.beginGroup("Workspaces");
   auto* save_settings_dialog = new QInputDialog(this);
   save_settings_dialog->setInputMode(QInputDialog::TextInput);
   save_settings_dialog->setComboBoxEditable(true);
@@ -482,11 +482,12 @@ void MainWindow::windowsMenuActivated(QAction* id)
 
 void MainWindow::modulesMenuActivated(QAction* /*unused*/)
 {
-  const QString filename = QFileDialog::getOpenFileName(
-      this,
-      tr("Load Plugin"),
-      QCoreApplication::applicationDirPath()+QString("/")+QString("rtxi_modules"),
-      tr("Plugins (*.so);;All (*.*)"));
+  const QString filename =
+      QFileDialog::getOpenFileName(this,
+                                   tr("Load Plugin"),
+                                   QCoreApplication::applicationDirPath()
+                                       + QString("/") + QString("rtxi_modules"),
+                                   tr("Plugins (*.so);;All (*.*)"));
   if (!filename.isNull()) {
     this->loadWidget(filename);
   }

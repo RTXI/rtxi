@@ -19,24 +19,26 @@
 */
 
 #include <filesystem>
-#include <unistd.h>
-#include <fcntl.h>
+
+#include "fifo.hpp"
+
 #include <alchemy/pipe.h>
+#include <fcntl.h>
+#include <unistd.h>
 
 #include "debug.hpp"
-#include "fifo.hpp"
 
 // Generic xenomai fifo based on pipes
 namespace RT::OS
 {
-class xenomaiFifo : public RT::OS::Fifo 
+class xenomaiFifo : public RT::OS::Fifo
 {
-  public:
+public:
   explicit xenomaiFifo(size_t size);
   xenomaiFifo(const xenomaiFifo& fifo) = delete;
   xenomaiFifo& operator=(const xenomaiFifo& fifo) = delete;
-  xenomaiFifo(xenomaiFifo &&) = default;
-  xenomaiFifo& operator=(xenomaiFifo &&) = default;
+  xenomaiFifo(xenomaiFifo&&) = default;
+  xenomaiFifo& operator=(xenomaiFifo&&) = default;
   ~xenomaiFifo() override;
 
   size_t getCapacity() override;
@@ -45,10 +47,10 @@ class xenomaiFifo : public RT::OS::Fifo
   ssize_t readRT(void* buf, size_t buf_size) override;
   ssize_t writeRT(void* buf, size_t buf_size) override;
 
-  private:
+private:
   std::string pipeName;
-  int fd; // file descriptor for non-realtime reading and writting
-  RT_PIPE * pipe_ptr = nullptr;
+  int fd;  // file descriptor for non-realtime reading and writting
+  RT_PIPE* pipe_ptr = nullptr;
   size_t fifo_capacity;
 };
 }  // namespace RT::OS
@@ -58,13 +60,18 @@ RT::OS::xenomaiFifo::xenomaiFifo(size_t size)
   bool pipename_not_found = true;
   std::string pipename_prefix = "/proc/xenomai/registry/rtipc/xddp/RTXIPipe";
   int pipe_number = 0;
-  while (pipe_number < 1000){
-    pipename_not_found = std::filesystem::exists(pipename_prefix + std::to_string(pipe_number));
-    if(!pipename_not_found){ break; }
+  while (pipe_number < 1000) {
+    pipename_not_found =
+        std::filesystem::exists(pipename_prefix + std::to_string(pipe_number));
+    if (!pipename_not_found) {
+      break;
+    }
     pipe_number++;
   }
   this->pipeName = pipename_prefix + std::to_string(pipe_number);
-  if(!rt_pipe_create(this->pipe_ptr, this->pipeName.c_str(), P_MINOR_AUTO, size)){
+  if (!rt_pipe_create(
+          this->pipe_ptr, this->pipeName.c_str(), P_MINOR_AUTO, size))
+  {
     ERROR_MSG("Unable to open real-time X pipe");
   } else {
     this->fd = ::open(this->pipeName.c_str(), O_RDWR);
@@ -73,10 +80,10 @@ RT::OS::xenomaiFifo::xenomaiFifo(size_t size)
 
 RT::OS::xenomaiFifo::~xenomaiFifo()
 {
-  if(::close(this->fd) != 0){
+  if (::close(this->fd) != 0) {
     ERROR_MSG("Unable to close non-realtime side of X pipe");
   }
-  if(!rt_pipe_delete(this->pipe_ptr)){
+  if (!rt_pipe_delete(this->pipe_ptr)) {
     ERROR_MSG("Unable to close real-time side of X pipe");
   }
 }

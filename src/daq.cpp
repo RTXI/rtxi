@@ -21,6 +21,5 @@
 #include <algorithm>
 
 #include "daq.hpp"
+
 #include "dlplugin.hpp"
-
-

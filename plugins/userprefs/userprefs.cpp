@@ -25,10 +25,10 @@
 
 #include <QFileDialog>
 
+#include "userprefs.h"
 
 #include "debug.hpp"
 #include "main_window.hpp"
-#include "userprefs.h"
 
 UserPrefs::Plugin::Plugin(Event::Manager* ev_manager)
     : Widgets::Plugin(ev_manager, std::string(UserPrefs::MODULE_NAME))

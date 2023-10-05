@@ -7,9 +7,9 @@
 
 #include "debug.hpp"
 #include "main_window.hpp"
-#include "widgets.hpp"
 #include "rt.hpp"
 #include "rtxiConfig.h"
+#include "widgets.hpp"
 #include "workspace.hpp"
 
 static void signal_handler(int signum)
@@ -37,7 +37,7 @@ int main(int argc, char* argv[])
       std::make_unique<RT::System>(event_manager.get(), rt_connector.get());
   rt_system->createTelemitryProcessor();
   // Initializing GUI
-  //QApplication::setDesktopSettingsAware(false);
+  // QApplication::setDesktopSettingsAware(false);
   auto* app = new QApplication(argc, argv);
   QApplication::connect(app, SIGNAL(lastWindowClosed()), app, SLOT(quit()));
 

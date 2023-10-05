@@ -264,8 +264,9 @@ void DataRecorder::Panel::buildBlockList()
   auto prev_selected_block = blockList->currentData();
   blockList->clear();
   for (auto* blockptr : blockPtrList) {
-    if(blockptr->getName().find("Probe") != std::string::npos ||
-       blockptr->getName().find("Recording") != std::string::npos){
+    if (blockptr->getName().find("Probe") != std::string::npos
+        || blockptr->getName().find("Recording") != std::string::npos)
+    {
       continue;
     }
     blockList->addItem(QString(blockptr->getName().c_str()) + " "
@@ -313,10 +314,9 @@ void DataRecorder::Panel::changeDataFile()
   fileDialog.setNameFilters(filterList);
   fileDialog.selectNameFilter("HDF5 files (*.h5)");
 
-  fileDialog.selectFile(QString("rtxi_datafile_")+
-                        QDate::currentDate().toString("yyyyMMdd")+
-                        QString("_")+
-                        QTime::currentTime().toString("hhmmss"));
+  fileDialog.selectFile(
+      QString("rtxi_datafile_") + QDate::currentDate().toString("yyyyMMdd")
+      + QString("_") + QTime::currentTime().toString("hhmmss"));
   QStringList files;
   if (fileDialog.exec() != QDialog::Accepted) {
     return;
@@ -331,14 +331,12 @@ void DataRecorder::Panel::changeDataFile()
     filename += ".h5";
   }
 
-
   // Write this directory to the user prefs as most recently used
   userprefs.setValue("/dirs/data", fileDialog.directory().path());
 
   auto* hplugin = dynamic_cast<DataRecorder::Plugin*>(this->getHostPlugin());
   hplugin->change_file(filename.toStdString());
-  this->fileNameEdit->setText(
-      QString(hplugin->getOpenFilename().c_str()));
+  this->fileNameEdit->setText(QString(hplugin->getOpenFilename().c_str()));
 }
 
 // Insert channel to record into list
@@ -434,8 +432,9 @@ void DataRecorder::Panel::startRecordClicked()
 
   auto* hplugin = dynamic_cast<DataRecorder::Plugin*>(this->getHostPlugin());
   hplugin->startRecording();
-  this->recordStatus->setText(hplugin->isRecording() ? "Recording..." : "Not ready");
-  if(hplugin->isRecording()){
+  this->recordStatus->setText(hplugin->isRecording() ? "Recording..."
+                                                     : "Not ready");
+  if (hplugin->isRecording()) {
     this->starting_record_time = QTime::currentTime();
     this->trialNum->setNum(hplugin->getTrialCount());
     this->trialLength->setText("Recording...");
@@ -447,11 +446,15 @@ void DataRecorder::Panel::stopRecordClicked()
 {
   auto* hplugin = dynamic_cast<DataRecorder::Plugin*>(this->getHostPlugin());
   hplugin->stopRecording();
-  this->recordStatus->setText(!hplugin->isRecording() ? "Ready" : "Recording...");
-  if(!hplugin->isRecording()){
+  this->recordStatus->setText(!hplugin->isRecording() ? "Ready"
+                                                      : "Recording...");
+  if (!hplugin->isRecording()) {
     this->trialNum->setNum(hplugin->getTrialCount());
-    this->trialLength->setNum(this->starting_record_time.secsTo(QTime::currentTime()));
-    this->fileSize->setNum(static_cast<double>(QFile(fileNameEdit->text()).size())/(1024.0*1024.0));
+    this->trialLength->setNum(
+        this->starting_record_time.secsTo(QTime::currentTime()));
+    this->fileSize->setNum(
+        static_cast<double>(QFile(fileNameEdit->text()).size())
+        / (1024.0 * 1024.0));
   }
 }
 
@@ -500,14 +503,14 @@ DataRecorder::Plugin::Plugin(Event::Manager* ev_manager)
 
 DataRecorder::Plugin::~Plugin()
 {
-  this->stopRecording(); 
+  this->stopRecording();
   this->closeFile();
   const Event::Type event_type = Event::Type::RT_THREAD_REMOVE_EVENT;
   std::vector<Event::Object> unload_events;
-  for(auto& entry : this->m_recording_channels_list){
+  for (auto& entry : this->m_recording_channels_list) {
     unload_events.emplace_back(event_type);
-    unload_events.back().setParam("thread", 
-                                  std::any(static_cast<RT::Thread*>(entry.component.get())));
+    unload_events.back().setParam(
+        "thread", std::any(static_cast<RT::Thread*>(entry.component.get())));
   }
   this->getEventManager()->postEvent(unload_events);
 }
@@ -584,19 +587,19 @@ void DataRecorder::Plugin::close_trial_group()
       channel.hdf5_data_handle = H5I_INVALID_HID;
     }
   }
-  if(this->hdf5_handles.sync_group_handle != H5I_INVALID_HID){
+  if (this->hdf5_handles.sync_group_handle != H5I_INVALID_HID) {
     H5Gclose(this->hdf5_handles.sync_group_handle);
     this->hdf5_handles.sync_group_handle = H5I_INVALID_HID;
   }
-  if(this->hdf5_handles.async_group_handle != H5I_INVALID_HID){
+  if (this->hdf5_handles.async_group_handle != H5I_INVALID_HID) {
     H5Gclose(this->hdf5_handles.async_group_handle);
     this->hdf5_handles.async_group_handle = H5I_INVALID_HID;
   }
-  if(this->hdf5_handles.sys_data_group_handle != H5I_INVALID_HID){
+  if (this->hdf5_handles.sys_data_group_handle != H5I_INVALID_HID) {
     H5Gclose(this->hdf5_handles.sys_data_group_handle);
     this->hdf5_handles.sys_data_group_handle = H5I_INVALID_HID;
   }
-  if(this->hdf5_handles.trial_group_handle != H5I_INVALID_HID){
+  if (this->hdf5_handles.trial_group_handle != H5I_INVALID_HID) {
     H5Gclose(this->hdf5_handles.trial_group_handle);
     this->hdf5_handles.trial_group_handle = H5I_INVALID_HID;
   }
@@ -648,9 +651,14 @@ void DataRecorder::Plugin::append_new_trial()
 {
   this->close_trial_group();
   // We have to flush all of the data from the buffers that did not make it
-  std::array<data_token_t, 100> tempbuffer{};
-  for(auto& recorder: this->m_recording_channels_list){
-    while(recorder.channel.data_source->read(tempbuffer.data(), sizeof(DataRecorder::data_token_t)*tempbuffer.size()) > 0){} 
+  std::array<data_token_t, 100> tempbuffer {};
+  for (auto& recorder : this->m_recording_channels_list) {
+    while (recorder.channel.data_source->read(
+               tempbuffer.data(),
+               sizeof(DataRecorder::data_token_t) * tempbuffer.size())
+           > 0)
+    {
+    }
   }
   this->open_trial_group();
 }
@@ -682,7 +690,7 @@ void DataRecorder::Plugin::openFile(const std::string& file_name)
             "value",
             HOFFSET(DataRecorder::data_token_t, value),
             H5T_IEEE_F64LE);
-  //this->open_trial_group();
+  // this->open_trial_group();
   this->open_file.store(true);
 }
 
@@ -745,8 +753,9 @@ int DataRecorder::Plugin::create_component(IO::endpoint endpoint)
   this->getEventManager()->postEvent(&connect_event);
   hid_t data_handle = H5I_INVALID_HID;
   const std::unique_lock<std::shared_mutex> lk(this->m_channels_list_mut);
-  if (this->hdf5_handles.file_handle != H5I_INVALID_HID &&
-      this->hdf5_handles.sync_group_handle != H5I_INVALID_HID) {
+  if (this->hdf5_handles.file_handle != H5I_INVALID_HID
+      && this->hdf5_handles.sync_group_handle != H5I_INVALID_HID)
+  {
     const hid_t compression_property = H5Pcreate(H5P_DATASET_CREATE);
     H5Pset_deflate(compression_property, 7);
     data_handle = H5PTcreate(this->hdf5_handles.sync_group_handle,

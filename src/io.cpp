@@ -71,7 +71,8 @@ double& IO::Block::readinput(size_t index)
 {
   // We must reset input values to zero so that the next cycle doesn't use these
   // values
-  this->ports[IO::INPUT][index].value = this->ports[IO::INPUT][index].buff_value;
+  this->ports[IO::INPUT][index].value =
+      this->ports[IO::INPUT][index].buff_value;
   this->ports[IO::INPUT][index].buff_value = 0.0;
   return this->ports[IO::INPUT][index].value;
 }
@@ -81,8 +82,7 @@ void IO::Block::writeoutput(size_t index, const double& data)
   this->ports[IO::OUTPUT][index].value = data;
 }
 
-const double& IO::Block::readPort(IO::flags_t direction,
-                                  size_t index)
+const double& IO::Block::readPort(IO::flags_t direction, size_t index)
 {
   return this->ports[direction][index].value;
 }

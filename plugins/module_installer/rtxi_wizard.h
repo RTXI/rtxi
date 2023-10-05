@@ -19,13 +19,14 @@
 #ifndef RTXI_WIZARD_H
 #define RTXI_WIZARD_H
 
+#include <QDir>
+#include <QListWidget>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QProgressDialog>
 #include <QTextEdit>
-#include <QListWidget>
-#include <QDir>
 #include <map>
+
 #include "widgets.hpp"
 
 namespace RTXIWizard
@@ -33,7 +34,7 @@ namespace RTXIWizard
 
 constexpr std::string_view MODULE_NAME = "Module Wizard";
 
-class Panel : public Widgets::Panel 
+class Panel : public Widgets::Panel
 {
   Q_OBJECT
 
@@ -71,25 +72,27 @@ private:
   } button_mode;
 
   QNetworkAccessManager qnam;
-  QNetworkReply* reposNetworkReply=nullptr;
-  QNetworkReply* readmeNetworkReply=nullptr;
-  QProgressDialog* progressDialog=nullptr;
+  QNetworkReply* reposNetworkReply = nullptr;
+  QNetworkReply* readmeNetworkReply = nullptr;
+  QProgressDialog* progressDialog = nullptr;
 
-  QTextEdit* readmeWindow=nullptr;
-  QListWidget* availableListWidget=nullptr;
-  QListWidget* installedListWidget=nullptr;
+  QTextEdit* readmeWindow = nullptr;
+  QListWidget* availableListWidget = nullptr;
+  QListWidget* installedListWidget = nullptr;
 
-  QPushButton* cloneButton=nullptr;
-  QPushButton* syncButton=nullptr;
+  QPushButton* cloneButton = nullptr;
+  QPushButton* syncButton = nullptr;
 
   std::vector<QString> exclude_list;
 };
 
-class Plugin : public Widgets::Plugin 
+class Plugin : public Widgets::Plugin
 {
 public:
   explicit Plugin(Event::Manager* ev_manager)
-    : Widgets::Plugin(ev_manager, std::string(RTXIWizard::MODULE_NAME)) {}
+      : Widgets::Plugin(ev_manager, std::string(RTXIWizard::MODULE_NAME))
+  {
+  }
 };  // class Plugin
 
 std::unique_ptr<Widgets::Plugin> createRTXIPlugin(Event::Manager* ev_manager);
@@ -102,6 +105,6 @@ std::unique_ptr<Widgets::Component> createRTXIComponent(
 
 Widgets::FactoryMethods getFactories();
 
-} // namespace RTXIWizard
+}  // namespace RTXIWizard
 
 #endif

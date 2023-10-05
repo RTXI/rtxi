@@ -17,11 +17,12 @@
          along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <QTimer>
 #include <algorithm>
 #include <cmath>
 #include <mutex>
 
-#include <QTimer>
+#include "scope.h"
 
 #include <qwt_abstract_scale_draw.h>
 #include <qwt_plot_legenditem.h>
@@ -29,7 +30,6 @@
 #include <stdlib.h>
 
 #include "rt.hpp"
-#include "scope.h"
 
 Oscilloscope::LegendItem::LegendItem()
 {

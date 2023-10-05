@@ -245,7 +245,9 @@ Event::Manager::Manager()
             event_lock,
             [this] { return !(this->event_q.empty()) || !this->running; });
         // Avoid undefined behaviour by checkeing whether queue is empty first
-        if(this->event_q.empty()) { continue; }
+        if (this->event_q.empty()) {
+          continue;
+        }
         event = this->event_q.front();
         this->event_q.pop();
       }
@@ -287,7 +289,7 @@ Event::Manager::~Manager()
       thread.join();
     }
   }
-  while(!this->event_q.empty()) { 
+  while (!this->event_q.empty()) {
     event_q.front()->done();
     event_q.pop();
   }

@@ -28,8 +28,8 @@
 #include "event.hpp"
 #include "fifo.hpp"
 #include "logger.hpp"
-#include "widgets.hpp"
 #include "rtos.hpp"
+#include "widgets.hpp"
 
 // TODO: convert cycle detection into non-recursive version
 int RT::Connector::find_cycle(RT::block_connection_t conn, IO::Block* ref_block)
@@ -460,7 +460,8 @@ void RT::System::changeWidgetParametersCMD(RT::System::CMD* cmd)
     case Widgets::Variable::STATE:
       component->setValue<RT::State::state_t>(
           param_id,
-          static_cast<RT::State::state_t>(std::get<State::state_t>(param_value_any)));
+          static_cast<RT::State::state_t>(
+              std::get<State::state_t>(param_value_any)));
       break;
     default:
       ERROR_MSG(

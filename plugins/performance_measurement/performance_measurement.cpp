@@ -19,12 +19,13 @@
 
 #include <functional>
 
+#include "performance_measurement.hpp"
+
 #include "debug.hpp"
 #include "event.hpp"
-#include "widgets.hpp"
-#include "rt.hpp"
 #include "main_window.hpp"
-#include "performance_measurement.hpp"
+#include "rt.hpp"
+#include "widgets.hpp"
 
 PerformanceMeasurement::Panel::Panel(const std::string& mod_name,
                                      QMainWindow* mwindow,
@@ -99,7 +100,10 @@ PerformanceMeasurement::Component::Component(Widgets::Plugin* hplugin)
                          std::vector<IO::channel_t>(),
                          PerformanceMeasurement::get_default_vars())
 {
-  if (RT::OS::getFifo(this->fifo, 10*sizeof(PerformanceMeasurement::performance_stats_t)) < 0) {
+  if (RT::OS::getFifo(this->fifo,
+                      10 * sizeof(PerformanceMeasurement::performance_stats_t))
+      < 0)
+  {
     ERROR_MSG(
         "PerformanceMeasurement::Component::Component : Unable to craate "
         "component fifo");

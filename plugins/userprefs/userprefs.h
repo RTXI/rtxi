@@ -22,6 +22,7 @@
 #define USERPREFS_H
 
 #include <QSettings>
+
 #include "widgets.hpp"
 
 namespace UserPrefs
@@ -72,5 +73,5 @@ std::unique_ptr<Widgets::Component> createRTXIComponent(
 
 Widgets::FactoryMethods getFactories();
 
-} // namespace UserPrefs
+}  // namespace UserPrefs
 #endif /* USERPREFS */

@@ -28,6 +28,7 @@
 #include <QMenu>
 #include <QTextEdit>
 #include <QTextItem>
+
 #include <qdialog.h>
 
 #include "event.hpp"
@@ -35,7 +36,6 @@
 class SaveSettingsDialog : public QDialog
 {
 public:
-
 private:
   QTextItem* settings_group_desc;
   QTextEdit* settings_group_edit;

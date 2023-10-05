@@ -35,7 +35,7 @@ Q_DECLARE_METATYPE(RT::State::state_t)
 /*!
  * Contains all the classes and structures relevant to Widgets
  */
-namespace Widgets 
+namespace Widgets
 {
 
 /*!
@@ -97,7 +97,8 @@ struct Info
   std::string name;
   std::string description;
   Widgets::Variable::variable_t vartype;
-  std::variant<int64_t, double, uint64_t, std::string, RT::State::state_t> value;
+  std::variant<int64_t, double, uint64_t, std::string, RT::State::state_t>
+      value;
 };
 
 }  // namespace Variable
@@ -193,7 +194,10 @@ public:
 
   RT::State::state_t getState() const { return this->component_state; }
   void setState(RT::State::state_t state) { this->component_state = state; }
-  std::vector<Widgets::Variable::Info> getParametersInfo(){ return this->parameters; }
+  std::vector<Widgets::Variable::Info> getParametersInfo()
+  {
+    return this->parameters;
+  }
 
 private:
   std::vector<Widgets::Variable::Info> parameters;
@@ -530,6 +534,6 @@ private:
   std::string name;
 };
 
-} // namespace Widgets
+}  // namespace Widgets
 
 #endif

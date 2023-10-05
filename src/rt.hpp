@@ -31,10 +31,10 @@
 #include "rtos.hpp"
 
 // forward declaration
-namespace Widgets 
+namespace Widgets
 {
 class Component;
-} // namespace Widgets
+}  // namespace Widgets
 
 /*!
  * Objects contained within this namespace are responsible
@@ -81,7 +81,7 @@ struct Response
   response_t type = NO_TELEMITRY;
   Event::Object* cmd = nullptr;
 };
-} // namespace Telemitry
+}  // namespace Telemitry
 
 /*!
  * Base class for devices that are to interface with System.
@@ -96,8 +96,7 @@ public:
   {
   }
   Device(const Device&) = default;  // copy constructor
-  Device& operator=(const Device&) =
-      default;  // copy assignment operator
+  Device& operator=(const Device&) = default;  // copy assignment operator
   Device(Device&&) = delete;  // move constructor
   Device& operator=(Device&&) = delete;  // move assignment operator
   ~Device() override = default;
