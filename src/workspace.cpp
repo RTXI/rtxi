@@ -180,6 +180,7 @@ Widgets::Plugin* Workspace::Manager::loadPlugin(const std::string& library)
         this->rtxi_factories_registry[library_loc].createPlugin(
             this->event_manager);
     plugin_ptr = this->registerWidget(std::move(plugin));
+    plugin_ptr->attachComponent(this->rtxi_factories_registry[library_loc].createComponent(plugin_ptr));
     return plugin_ptr;
   }
 
