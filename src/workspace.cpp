@@ -13,6 +13,7 @@
 */
 
 #include <optional>
+#include <variant>
 
 #include "workspace.hpp"
 
@@ -115,6 +116,41 @@ std::vector<DAQ::Device*> Workspace::Manager::getAllDevices()
   }
   return devices;
 } 
+
+template<class... Ts> struct overload : Ts... { using Ts::operator()...; };
+template<class... Ts> overload(Ts...) -> overload<Ts...>;   
+void Workspace::Manager::saveSettings(const QString& profile_name)
+{
+  QSettings settings(settings_prefix+profile_name, QSettings::IniFormat);
+  settings.beginGroup("modules");
+  QString module_name;
+  int module_count=0;
+  for(const auto& entry : this->rtxi_modules_registry){
+    module_name = QString::fromStdString(entry.first);
+    settings.beginGroup(module_name);
+    for(const auto& plugin : entry.second){
+      settings.beginGroup(QString::number(module_count));
+      for(const auto& param_info : plugin->getComponentParametersInfo()){
+        settings.setValue(QString::fromStdString(param_info.name), 
+                          std::visit(overload{
+                            [](const int64_t& val)->QString{return QString::number(val);},
+                            [](const double& val)->QString{return QString::number(val);},
+                            [](const uint64_t& val)->QString{return QString::number(val);},
+                            [](const std::string& val)->QString{return QString::fromStdString(val);},
+                            [](const RT::State::state_t& val)->QString{return QString::number(static_cast<int8_t>(val));}}, param_info.value));
+      }
+      settings.endGroup();
+      module_count++;
+    }
+    settings.endGroup();
+  }
+  settings.endGroup();
+}
+
+void Workspace::Manager::loadSettings(const QString& profile_name)
+{
+  QSettings settings(profile_name, QSettings::IniFormat);
+}
 
 Widgets::Plugin* Workspace::Manager::loadCorePlugin(const std::string& library)
 {

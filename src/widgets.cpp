@@ -498,6 +498,11 @@ void Widgets::Plugin::setComponentState(RT::State::state_t state)
   this->event_manager->postEvent(&event);
 }
 
+std::vector<Widgets::Variable::Info> Widgets::Plugin::getComponentParametersInfo()
+{
+  return this->plugin_component->getParametersInfo();
+}
+
 void Widgets::Plugin::attachComponent(
     std::unique_ptr<Widgets::Component> component)
 {

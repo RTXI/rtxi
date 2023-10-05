@@ -193,6 +193,7 @@ public:
 
   RT::State::state_t getState() const { return this->component_state; }
   void setState(RT::State::state_t state) { this->component_state = state; }
+  std::vector<Widgets::Variable::Info> getParametersInfo(){ return this->parameters; }
 
 private:
   std::vector<Widgets::Variable::Info> parameters;
@@ -508,6 +509,7 @@ public:
 
   void registerComponent();
   void setComponentState(RT::State::state_t state);
+  virtual std::vector<Widgets::Variable::Info> getComponentParametersInfo();
 
 protected:
   Widgets::Component* getComponent();

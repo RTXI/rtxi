@@ -73,8 +73,11 @@ public:
   std::vector<DAQ::Device*> getDevices(const std::string& driver);
   std::vector<DAQ::Device*> getAllDevices();
 
+  void saveSettings(const QString& profile_name);
+  void loadSettings(const QString& profile_name);
 private:
   using driver_registry_entry = std::pair<std::string, DAQ::Driver*>;
+  QString settings_prefix;
   void registerDriver(const std::string& driver_location);
   void unregisterDriver(const std::string& driver_location);
 
