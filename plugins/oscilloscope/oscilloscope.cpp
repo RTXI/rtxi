@@ -274,7 +274,8 @@ void Oscilloscope::Panel::buildBlockList()
       this->blocksListDropdown->currentData().value<IO::Block*>();
   blocksListDropdown->clear();
   for (auto* block : blocklist) {
-    // Ignore blocks created from oscilloscope (probing blocks)
+    // Ignore blocks created from oscilloscope (probing blocks),
+    // and from recorder (recorder components)
     if (block->getName().find("Probe") != std::string::npos ||
         block->getName().find("Recording") != std::string::npos) {
       continue;

@@ -82,16 +82,16 @@ private:
   void unregisterDriver(const std::string& driver_location);
 
   [[nodiscard]] Widgets::Plugin* registerWidget(
-      std::unique_ptr<Widgets::Plugin> module);
+      std::unique_ptr<Widgets::Plugin> widget);
   void unregisterWidget(Widgets::Plugin* plugin);
 
-  void registerFactories(const std::string& module_name,
+  void registerFactories(const std::string& widget_name,
                          Widgets::FactoryMethods);
-  void unregisterFactories(const std::string& module_name);
+  void unregisterFactories(const std::string& widget_name);
   Widgets::Plugin* loadCorePlugin(const std::string& library);
 
   std::unordered_map<std::string, std::vector<std::unique_ptr<Widgets::Plugin>>>
-      rtxi_modules_registry;
+      rtxi_widgets_registry;
   std::vector<driver_registry_entry> m_driver_registry;
   std::unordered_map<std::string, Widgets::FactoryMethods>
       rtxi_factories_registry;
@@ -99,7 +99,7 @@ private:
   std::unique_ptr<DLL::Loader> m_plugin_loader;
   std::unique_ptr<DLL::Loader> m_driver_loader;
 
-  std::mutex m_modules_mut;
+  std::mutex m_widgets_mut;
   std::mutex m_drivers_mut;
 };
 

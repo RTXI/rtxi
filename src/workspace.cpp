@@ -62,7 +62,7 @@ Workspace::Manager::Manager(Event::Manager* ev_manager)
 
 Workspace::Manager::~Manager()
 {
-  for (const auto& plugin_list : this->rtxi_modules_registry) {
+  for (const auto& plugin_list : this->rtxi_widgets_registry) {
     for (const auto& plugin : plugin_list.second) {
       this->event_manager->unregisterHandler(plugin.get());
     }
@@ -85,12 +85,12 @@ Workspace::Manager::~Manager()
 bool Workspace::Manager::isRegistered(const Widgets::Plugin* plugin)
 {
   const std::string plugin_name = plugin->getName();
-  auto start_iter = this->rtxi_modules_registry[plugin_name].begin();
-  auto end_iter = this->rtxi_modules_registry[plugin_name].end();
+  auto start_iter = this->rtxi_widgets_registry[plugin_name].begin();
+  auto end_iter = this->rtxi_widgets_registry[plugin_name].end();
   return std::any_of(start_iter,
                      end_iter,
-                     [plugin](const std::unique_ptr<Widgets::Plugin>& module)
-                     { return plugin == module.get(); });
+                     [plugin](const std::unique_ptr<Widgets::Plugin>& widget)
+                     { return plugin == widget.get(); });
 }
 
 std::vector<DAQ::Device*> Workspace::Manager::getDevices(const std::string& driver)
@@ -122,14 +122,14 @@ template<class... Ts> overload(Ts...) -> overload<Ts...>;
 void Workspace::Manager::saveSettings(const QString& profile_name)
 {
   QSettings settings(settings_prefix+profile_name, QSettings::IniFormat);
-  settings.beginGroup("modules");
-  QString module_name;
-  int module_count=0;
-  for(const auto& entry : this->rtxi_modules_registry){
-    module_name = QString::fromStdString(entry.first);
-    settings.beginGroup(module_name);
+  settings.beginGroup("widgets");
+  QString widget_name;
+  int widget_count=0;
+  for(const auto& entry : this->rtxi_widgets_registry){
+    widget_name = QString::fromStdString(entry.first);
+    settings.beginGroup(widget_name);
     for(const auto& plugin : entry.second){
-      settings.beginGroup(QString::number(module_count));
+      settings.beginGroup(QString::number(widget_count));
       for(const auto& param_info : plugin->getComponentParametersInfo()){
         settings.setValue(QString::fromStdString(param_info.name), 
                           std::visit(overload{
@@ -140,7 +140,7 @@ void Workspace::Manager::saveSettings(const QString& profile_name)
                             [](const RT::State::state_t& val)->QString{return QString::number(static_cast<int8_t>(val));}}, param_info.value));
       }
       settings.endGroup();
-      module_count++;
+      widget_count++;
     }
     settings.endGroup();
   }
@@ -172,7 +172,7 @@ Widgets::Plugin* Workspace::Manager::loadPlugin(const std::string& library)
 {
   const std::string& library_loc = library;
   Widgets::Plugin* plugin_ptr = nullptr;
-  // if module factory is already registered then all we have to do is run it
+  // if widget factory is already registered then all we have to do is run it
   if (this->rtxi_factories_registry.find(library_loc)
       != this->rtxi_factories_registry.end())
   {
@@ -237,7 +237,7 @@ void Workspace::Manager::unloadPlugin(Widgets::Plugin* plugin)
 {
   const std::string library = plugin->getName();
   this->unregisterWidget(plugin);
-  if (this->rtxi_modules_registry[library].empty()) {
+  if (this->rtxi_widgets_registry[library].empty()) {
     this->unregisterFactories(library);
   }
 }
@@ -288,12 +288,12 @@ void Workspace::Manager::unregisterDriver(const std::string& driver_location)
 }
 
 Widgets::Plugin* Workspace::Manager::registerWidget(
-    std::unique_ptr<Widgets::Plugin> module)
+    std::unique_ptr<Widgets::Plugin> widget)
 {
-  const std::unique_lock<std::mutex> lk(this->m_modules_mut);
-  const std::string mod_name = module->getName();
-  this->rtxi_modules_registry[mod_name].push_back(std::move(module));
-  return this->rtxi_modules_registry[mod_name].back().get();
+  const std::unique_lock<std::mutex> lk(this->m_widgets_mut);
+  const std::string mod_name = widget->getName();
+  this->rtxi_widgets_registry[mod_name].push_back(std::move(widget));
+  return this->rtxi_widgets_registry[mod_name].back().get();
 }
 
 void Workspace::Manager::unregisterWidget(Widgets::Plugin* plugin)
@@ -301,34 +301,34 @@ void Workspace::Manager::unregisterWidget(Widgets::Plugin* plugin)
   if (plugin == nullptr) {
     return;
   }
-  const std::unique_lock<std::mutex> lk(this->m_modules_mut);
+  const std::unique_lock<std::mutex> lk(this->m_widgets_mut);
   const std::string plugin_name = plugin->getName();
-  auto start_iter = this->rtxi_modules_registry[plugin_name].begin();
-  auto end_iter = this->rtxi_modules_registry[plugin_name].end();
+  auto start_iter = this->rtxi_widgets_registry[plugin_name].begin();
+  auto end_iter = this->rtxi_widgets_registry[plugin_name].end();
   auto loc =
       std::find_if(start_iter,
                    end_iter,
-                   [plugin](const std::unique_ptr<Widgets::Plugin>& module)
-                   { return plugin == module.get(); });
+                   [plugin](const std::unique_ptr<Widgets::Plugin>& widget)
+                   { return plugin == widget.get(); });
   if (loc == end_iter) {
     return;
   }
   this->m_plugin_loader->unload(plugin->getLibrary().c_str());
-  this->rtxi_modules_registry[plugin_name].erase(loc);
+  this->rtxi_widgets_registry[plugin_name].erase(loc);
 }
 
-void Workspace::Manager::registerFactories(const std::string& module_name,
+void Workspace::Manager::registerFactories(const std::string& widget_name,
                                            Widgets::FactoryMethods fact)
 {
-  this->rtxi_factories_registry[module_name] = fact;
+  this->rtxi_factories_registry[widget_name] = fact;
 }
 
-void Workspace::Manager::unregisterFactories(const std::string& module_name)
+void Workspace::Manager::unregisterFactories(const std::string& widget_name)
 {
-  if (this->rtxi_factories_registry.find(module_name)
+  if (this->rtxi_factories_registry.find(widget_name)
       != this->rtxi_factories_registry.end())
   {
-    this->rtxi_factories_registry.erase(module_name);
+    this->rtxi_factories_registry.erase(widget_name);
   }
 }
 
