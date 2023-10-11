@@ -60,6 +60,12 @@ Connector::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
   outputLayout->addWidget(new QLabel(tr("Flag:")), 2, Qt::Alignment());
   outputLayout->addWidget(outputFlag);
   buildOutputFlagList();
+
+  QObject::connect(outputBlock,
+                   SIGNAL(activated(int)),
+                   this,
+                   SLOT(buildOutputChannelList(void)));
+
   QObject::connect(outputFlag,
                    SIGNAL(activated(int)),
                    this,
@@ -68,7 +74,7 @@ Connector::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
   outputLayout->addWidget(new QLabel(tr("Channel:")), 3, Qt::Alignment());
   outputLayout->addWidget(outputChannel);
   QObject::connect(outputChannel,
-                   SIGNAL(activated(int)),
+                   SIGNAL(currentTextChanged(const QString&)),
                    this,
                    SLOT(updateConnectionButton(void)));
 
@@ -105,7 +111,7 @@ Connector::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
   inputLayout->addWidget(new QLabel(tr("Channel:")), 2, Qt::Alignment());
   inputLayout->addWidget(inputChannel);
   QObject::connect(inputChannel,
-                   SIGNAL(activated(int)),
+                   SIGNAL(currentTextChanged(const QString&)),
                    this,
                    SLOT(updateConnectionButton(void)));
 
@@ -153,6 +159,8 @@ Connector::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
 
 void Connector::Panel::buildBlockList()
 {
+  auto prev_input_block = inputBlock->currentData();
+  auto prev_output_block = outputBlock->currentData();
   inputBlock->clear();
   outputBlock->clear();
   Event::Object event(Event::Type::IO_BLOCK_QUERY_EVENT);
@@ -172,6 +180,8 @@ void Connector::Panel::buildBlockList()
                                    + QString::number(block->getID()),
                                QVariant::fromValue(block));
   }
+  inputBlock->setCurrentIndex(inputBlock->findData(prev_input_block));
+  outputBlock->setCurrentIndex(outputBlock->findData(prev_output_block));
 }
 
 void Connector::Panel::buildConnectionList()
@@ -235,6 +245,7 @@ void Connector::Panel::syncBlockInfo()
 
 void Connector::Panel::buildInputChannelList()
 {
+  auto prev_channel = inputChannel->currentData();
   inputChannel->clear();
   if (inputBlock->count() == 0) {
     return;
@@ -251,12 +262,13 @@ void Connector::Panel::buildInputChannelList()
     inputChannel->addItem(QString(block->getChannelName(IO::INPUT, i).c_str()),
                           QVariant::fromValue(i));
   }
-
+  inputChannel->setCurrentIndex(inputChannel->findData(prev_channel));
   updateConnectionButton();
 }
 
 void Connector::Panel::buildOutputChannelList()
 {
+  auto prev_channel = outputChannel->currentData();
   outputChannel->clear();
   if (outputBlock->count() == 0) {
     return;
@@ -276,7 +288,7 @@ void Connector::Panel::buildOutputChannelList()
     outputChannel->addItem(QString(block->getChannelName(direction, i).c_str()),
                            QVariant::fromValue(i));
   }
-
+  outputChannel->setCurrentIndex(outputChannel->findData(prev_channel));
   updateConnectionButton();
 }
 

@@ -43,6 +43,7 @@ public:
 
 signals:
   void updateBlockInfo();
+  void updateConnectionInfo();
 
 private slots:
   void buildInputChannelList();
