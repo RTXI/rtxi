@@ -132,6 +132,7 @@ int32_t physical_channel_t::addToTask(TaskHandle task_handle) const
   int32_t err = 0;
   std::string units = DAQ::get_default_units().at(units_index);
   auto [min, max] = DAQ::get_default_ranges().at(range_index);
+  DAQmxStopTask(task_handle);
   switch (type) {
     case DAQ::ChannelType::AI:
       if (units == "volts") {
@@ -195,6 +196,7 @@ int32_t physical_channel_t::addToTask(TaskHandle task_handle) const
       ERROR_MSG("NIDAQ_DRIVER : Channel Type Unknown");
       break;
   }
+  DAQmxStartTask(task_handle);
   return err;
 }
 
@@ -337,7 +339,9 @@ Device::Device(const std::string& dev_name,
     buffer_arrays.at(i).assign(
         getChannelCount(static_cast<DAQ::ChannelType::type_t>(i)), 0);
   }
+
   for (auto& task : task_list) {
+    DAQmxSetSampTimingType(task, DAQmx_Val_OnDemand);
     DAQmxStartTask(task);
   }
   this->setActive(/*act=*/true);
@@ -642,7 +646,6 @@ int Device::setDigitalDirection(DAQ::index_t /*index*/,
 void Device::read()
 {
   int samples_read = 0;
-  DAQmxStartTask(task_list[DAQ::ChannelType::AI]);
   DAQmxReadAnalogF64(task_list[DAQ::ChannelType::AI],
                      DAQmx_Val_Auto,
                      DAQmx_Val_WaitInfinitely,
@@ -661,7 +664,25 @@ void Device::read()
   }
 }
 
-void Device::write() {}
+void Device::write() 
+{
+  int samples_to_write = 0;
+  int samples_written=0;
+  for (auto& chan : this->physical_channels_registry.at(DAQ::ChannelType::AO)) {
+    if (chan.active) {
+      buffer_arrays.at(DAQ::ChannelType::AO).at(samples_to_write) = readinput(chan.id);
+    }
+    ++samples_to_write;
+  }
+  DAQmxWriteAnalogF64(task_list[DAQ::ChannelType::AO],
+                      1,
+                      1U,
+                      DAQmx_Val_WaitInfinitely,
+                      DAQmx_Val_GroupByScanNumber,
+                      buffer_arrays.at(DAQ::ChannelType::AO).data(),
+                      &samples_written,
+                      nullptr);
+}
 
 Driver::Driver()
     : DAQ::Driver(std::string(DEFAULT_DRIVER_NAME))
