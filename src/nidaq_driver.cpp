@@ -323,6 +323,19 @@ Device::Device(const std::string& dev_name,
       ERROR_MSG("NIDAQ::Device : Unable to create {} task for device {}",
                 task_name,
                 dev_name);
+    } else {
+      switch(type){
+        case DAQ::ChannelType::AI:
+        case DAQ::ChannelType::DI:
+          DAQmxCfgInputBuffer(task_list.at(type), 1);
+          break;
+        case DAQ::ChannelType::AO:
+        case DAQ::ChannelType::DO:
+          DAQmxCfgOutputBuffer(task_list.at(type), 1);
+          break;
+        default:
+          break;
+      }
     }
   }
   std::vector<std::string> chan_names;
@@ -391,8 +404,24 @@ int Device::setChannelActive(DAQ::ChannelType::type_t type,
     physical_channels_registry.at(type).at(index).active = false;
     DAQmxClearTask(task_list.at(type));
     err = DAQmxCreateTask(DAQ::ChannelType::type2string(type).c_str(),
-                          &task_list.at(type));
+                         &task_list.at(type));
+    switch(type){
+      case DAQ::ChannelType::AI:
+      case DAQ::ChannelType::DI:
+        DAQmxCfgInputBuffer(task_list.at(type), 1);
+        break;
+      case DAQ::ChannelType::AO:
+      case DAQ::ChannelType::DO:
+        DAQmxCfgOutputBuffer(task_list.at(type), 1);
+        break;
+      default:
+        break;
+    }
     if (err != 0) {
+      for (auto& channel : physical_channels_registry.at(type)) {
+        channel.active = false;
+      }
+      active_channels.at(type).clear();
       return err;
     }
     for (const auto& channel : physical_channels_registry.at(type)) {
@@ -410,6 +439,9 @@ int Device::setChannelActive(DAQ::ChannelType::type_t type,
   for(auto& channel : physical_channels_registry.at(type)){
     if(channel.active){ active_channels.at(type).push_back(&channel); }
   }
+  DAQmxSetSampTimingType(task_list.at(type), DAQmx_Val_OnDemand);
+  DAQmxTaskControl(task_list.at(type), DAQmx_Val_Task_Commit);
+  DAQmxStartTask(task_list.at(type));
   printError(err);
   return err;
 }
@@ -657,9 +689,9 @@ void Device::read()
   int samples_read = 0;
   if(this->active_channels.at(DAQ::ChannelType::AI).empty()) { return; }
   DAQmxReadAnalogF64(task_list[DAQ::ChannelType::AI],
-                     DAQmx_Val_Automatic,
+                     DAQmx_Val_Auto,
                      DAQmx_Val_WaitInfinitely,
-                     DAQmx_Val_GroupByChannel,
+                     DAQmx_Val_GroupByScanNumber,
                      buffer_arrays.at(DAQ::ChannelType::AI).data(),
                      buffer_arrays.at(DAQ::ChannelType::AI).size(),
                      &samples_read,
@@ -685,7 +717,7 @@ void Device::write()
                       1,
                       1U,
                       DAQmx_Val_WaitInfinitely,
-                      DAQmx_Val_GroupByChannel,
+                      DAQmx_Val_GroupByScanNumber,
                       buffer_arrays.at(DAQ::ChannelType::AO).data(),
                       &samples_written,
                       nullptr);
