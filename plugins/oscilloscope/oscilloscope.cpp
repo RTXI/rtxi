@@ -622,7 +622,6 @@ void Oscilloscope::Panel::showChannelTab()
   }
   offsetsEdit->setText(QString::number(offset));
   offsetsList->setCurrentIndex(offsetUnits);
-  this->updateChannelPen(chan);
   this->activateButton->setChecked(this->scopeWindow->channelRegistered(chan));
 }
 
