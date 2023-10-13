@@ -362,11 +362,11 @@ void SystemControl::Panel::submitDigitalChannelUpdate()
 
 void SystemControl::Panel::apply()
 {
-  double period = periodEdit->text().toDouble();
-  period *= periodUnitList->currentData().toDouble();
-  period *= RT::OS::SECONDS_TO_NANOSECONDS;
+  int64_t freq = freqEdit->text().toInt();
+  freq *= freqUnitList->currentData().toInt();
+  int64_t period = RT::OS::SECONDS_TO_NANOSECONDS/freq;
   Event::Object event(Event::Type::RT_PERIOD_EVENT);
-  event.setParam("period", std::any(static_cast<int64_t>(period)));
+  event.setParam("period", std::any(period));
   this->getRTXIEventManager()->postEvent(&event);
 
   // We don't bother continuing if no valid device info is present/selected
@@ -374,13 +374,20 @@ void SystemControl::Panel::apply()
     return;
   }
 
+  auto* device = this->deviceList->currentData().value<DAQ::Device*>();
+  Event::Object disable_device(Event::Type::RT_DEVICE_PAUSE_EVENT);
+  disable_device.setParam("device", std::any(static_cast<RT::Device*>(device)));
+  Event::Object enable_device(Event::Type::RT_DEVICE_UNPAUSE_EVENT);
+  enable_device.setParam("device", std::any(static_cast<RT::Device*>(device)));
+
+  this->getRTXIEventManager()->postEvent(&disable_device);
   if (analogActiveButton->isEnabled()) {
     this->submitAnalogChannelUpdate();
   }
-
   if (digitalActiveButton->isEnabled()) {
     this->submitDigitalChannelUpdate();
   }
+  this->getRTXIEventManager()->postEvent(&enable_device); 
   // Display changes
   display();
 }
