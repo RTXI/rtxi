@@ -132,7 +132,7 @@ int32_t physical_channel_t::addToTask(TaskHandle task_handle) const
   int32_t err = 0;
   std::string units = DAQ::get_default_units().at(units_index);
   auto [min, max] = DAQ::get_default_ranges().at(range_index);
-  DAQmxStopTask(task_handle);
+  //DAQmxStopTask(task_handle);
   switch (type) {
     case DAQ::ChannelType::AI:
       if (units == "volts") {
@@ -196,8 +196,8 @@ int32_t physical_channel_t::addToTask(TaskHandle task_handle) const
       ERROR_MSG("NIDAQ_DRIVER : Channel Type Unknown");
       break;
   }
-  DAQmxTaskControl(task_handle, DAQmx_Val_Task_Commit);
-  DAQmxStartTask(task_handle);
+  //DAQmxTaskControl(task_handle, DAQmx_Val_Task_Commit);
+  //DAQmxStartTask(task_handle);
   return err;
 }
 
@@ -328,6 +328,7 @@ Device::Device(const std::string& dev_name,
         case DAQ::ChannelType::AI:
         case DAQ::ChannelType::DI:
           DAQmxCfgInputBuffer(task_list.at(type), 1);
+          DAQmxSetReadOverWrite(task_list.at(type), DAQmx_Val_OverwriteUnreadSamps);
           break;
         case DAQ::ChannelType::AO:
         case DAQ::ChannelType::DO:
@@ -409,6 +410,7 @@ int Device::setChannelActive(DAQ::ChannelType::type_t type,
       case DAQ::ChannelType::AI:
       case DAQ::ChannelType::DI:
         DAQmxCfgInputBuffer(task_list.at(type), 1);
+        DAQmxSetReadOverWrite(task_list.at(type), DAQmx_Val_OverwriteUnreadSamps);
         break;
       case DAQ::ChannelType::AO:
       case DAQ::ChannelType::DO:
@@ -439,9 +441,9 @@ int Device::setChannelActive(DAQ::ChannelType::type_t type,
   for(auto& channel : physical_channels_registry.at(type)){
     if(channel.active){ active_channels.at(type).push_back(&channel); }
   }
-  DAQmxSetSampTimingType(task_list.at(type), DAQmx_Val_OnDemand);
-  DAQmxTaskControl(task_list.at(type), DAQmx_Val_Task_Commit);
-  DAQmxStartTask(task_list.at(type));
+  printError(DAQmxSetSampTimingType(task_list.at(type), DAQmx_Val_OnDemand));
+  printError(DAQmxTaskControl(task_list.at(type), DAQmx_Val_Task_Commit));
+  printError(DAQmxStartTask(task_list.at(type)));
   printError(err);
   return err;
 }
@@ -706,7 +708,7 @@ void Device::read()
 
 void Device::write() 
 {
-  if(this->active_channels.at(DAQ::ChannelType::AI).empty()) { return; }
+  if(this->active_channels.at(DAQ::ChannelType::AO).empty()) { return; }
   size_t samples_to_write = 0;
   int samples_written=0;
   for (auto* chan : this->active_channels.at(DAQ::ChannelType::AO)) {
@@ -715,7 +717,7 @@ void Device::write()
   }
   DAQmxWriteAnalogF64(task_list[DAQ::ChannelType::AO],
                       1,
-                      1U,
+                      0U,
                       DAQmx_Val_WaitInfinitely,
                       DAQmx_Val_GroupByScanNumber,
                       buffer_arrays.at(DAQ::ChannelType::AO).data(),
@@ -732,6 +734,10 @@ Driver::Driver()
 void Driver::loadDevices()
 {
   int32_t device_names_buffer_size = DAQmxGetSysDevNames(nullptr, 0);
+  if(device_names_buffer_size < 0){
+    printError(device_names_buffer_size);
+    return;
+  }
   std::string string_buffer(static_cast<size_t>(device_names_buffer_size),
                             '\0');
   DAQmxGetSysDevNames(string_buffer.data(),
