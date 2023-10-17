@@ -59,9 +59,11 @@ fi
 echo  "-----> Downloads complete."
 
 # Install user libraries
-echo  "-----> Installing Xenomai EVL library."
-mkdir $xenomai_build && cd $xenomai_build
+echo  "-----> Installing Xenomai library."
+mkdir $xenomai_build_dir
+cd $xenomai_build_dir
 $xenomai_root/configure --with-core=cobalt --enable-smp --enable-pshared --enable-dlopen-libs
+make -j`nproc`
 make install
 echo  "-----> User library installation complete."
 

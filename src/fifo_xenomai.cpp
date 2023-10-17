@@ -25,13 +25,18 @@
 #include <alchemy/pipe.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <poll.h>
+#include <sys/eventfd.h>
 
 #include "debug.hpp"
+
+int FIFO_COUNT = 0;
+constexpr std::string_view pipe_filesystem_prefix = "/proc/xenomai/registry/rtipc/xddp/";
 
 // Generic xenomai fifo based on pipes
 namespace RT::OS
 {
-class xenomaiFifo : public RT::OS::Fifo
+class xenomaiFifo : public Fifo
 {
 public:
   explicit xenomaiFifo(size_t size);
@@ -41,41 +46,45 @@ public:
   xenomaiFifo& operator=(xenomaiFifo&&) = default;
   ~xenomaiFifo() override;
 
-  size_t getCapacity() override;
   ssize_t read(void* buf, size_t buf_size) override;
   ssize_t write(void* buf, size_t buf_size) override;
   ssize_t readRT(void* buf, size_t buf_size) override;
   ssize_t writeRT(void* buf, size_t buf_size) override;
+  void poll() override;
+  void close() override;
+  int buffer_fd() const;
+  size_t getCapacity() override;
 
 private:
-  std::string pipeName;
+  bool closed=false;
+  std::string pipe_name;
   int fd;  // file descriptor for non-realtime reading and writting
-  RT_PIPE* pipe_ptr = nullptr;
+  int close_event_fd;
+  int pipe_number;
+  RT_PIPE pipe_handle{};
   size_t fifo_capacity;
+  std::array<struct pollfd, 2> xbuf_poll_fd {};
 };
 }  // namespace RT::OS
 
-RT::OS::xenomaiFifo::xenomaiFifo(size_t size)
+RT::OS::xenomaiFifo::xenomaiFifo(size_t size) 
+  : pipe_name(std::string("RTXI-pipe-")+std::to_string(FIFO_COUNT++))
+  , fifo_capacity(size)
 {
-  bool pipename_not_found = true;
-  std::string pipename_prefix = "/proc/xenomai/registry/rtipc/xddp/RTXIPipe";
-  int pipe_number = 0;
-  while (pipe_number < 1000) {
-    pipename_not_found =
-        std::filesystem::exists(pipename_prefix + std::to_string(pipe_number));
-    if (!pipename_not_found) {
-      break;
-    }
-    pipe_number++;
-  }
-  this->pipeName = pipename_prefix + std::to_string(pipe_number);
-  if (!rt_pipe_create(
-          this->pipe_ptr, this->pipeName.c_str(), P_MINOR_AUTO, size))
+  pipe_number = rt_pipe_create(&this->pipe_handle, pipe_name.c_str(), P_MINOR_AUTO, fifo_capacity);
+  if (pipe_number < 0)
   {
     ERROR_MSG("Unable to open real-time X pipe");
-  } else {
-    this->fd = ::open(this->pipeName.c_str(), O_RDWR);
   }
+  const std::string filename = std::string(pipe_filesystem_prefix)+pipe_name;
+  this->fd = ::open(filename.c_str(), O_RDWR | O_NONBLOCK);
+
+  this->xbuf_poll_fd[0].fd = this->fd;
+  this->xbuf_poll_fd[0].events = POLLIN;
+  this->close_event_fd = eventfd(0, EFD_NONBLOCK);
+  this->xbuf_poll_fd[1].fd = this->close_event_fd;
+  this->xbuf_poll_fd[1].events = POLLIN;
+
 }
 
 RT::OS::xenomaiFifo::~xenomaiFifo()
@@ -83,7 +92,7 @@ RT::OS::xenomaiFifo::~xenomaiFifo()
   if (::close(this->fd) != 0) {
     ERROR_MSG("Unable to close non-realtime side of X pipe");
   }
-  if (!rt_pipe_delete(this->pipe_ptr)) {
+  if (rt_pipe_delete(&this->pipe_handle) < 0) {
     ERROR_MSG("Unable to close real-time side of X pipe");
   }
 }
@@ -102,12 +111,37 @@ ssize_t RT::OS::xenomaiFifo::write(void* buf, size_t buf_size)
 
 ssize_t RT::OS::xenomaiFifo::readRT(void* buf, size_t buf_size)
 {
-  return rt_pipe_read(this->pipe_ptr, buf, buf_size, TM_NONBLOCK);
+  return rt_pipe_read(&this->pipe_handle, buf, buf_size, TM_NONBLOCK);
 }
 
 ssize_t RT::OS::xenomaiFifo::writeRT(void* buf, size_t buf_size)
 {
-  return rt_pipe_write(this->pipe_ptr, buf, buf_size, TM_NONBLOCK);
+  return rt_pipe_write(&this->pipe_handle, buf, buf_size, P_NORMAL);
+}
+
+void RT::OS::xenomaiFifo::poll()
+{
+  int errcode = ::poll(this->xbuf_poll_fd.data(), 2, -1);
+  if (errcode < 0) {
+    ERROR_MSG("RT::OS::FIFO(evl)::poll : returned with failure code {} : ",
+              errcode);
+    ERROR_MSG("{}", strerror(errcode));
+  } else if ((this->xbuf_poll_fd[1].revents & POLLIN) != 0) {
+    this->closed = true;
+  }
+
+}
+
+int RT::OS::xenomaiFifo::buffer_fd() const
+{
+  return this->fd;
+}
+
+void RT::OS::xenomaiFifo::close()
+{
+  std::array<int64_t, 1> buf {};
+  buf[0] = 1;
+  ::write(this->close_event_fd, buf.data(), sizeof(int64_t));
 }
 
 size_t RT::OS::xenomaiFifo::getCapacity()

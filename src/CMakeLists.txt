@@ -19,27 +19,30 @@ if(DEFINED evl_FOUND AND RTXI_RT_CORE STREQUAL "evl")
     fmt::fmt
   )
   target_include_directories(rtos SYSTEM PRIVATE ${evl_INCLUDE_DIRS})
-elseif(xenomai3_FOUND AND RTXI_RT_CORE STREQUAL "xenomai")
-  list(APPEND CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES ${xenomai_ALCHEMY_CFLAGS})
+elseif(DEFINED Xenomai_FOUND AND RTXI_RT_CORE STREQUAL "xenomai")
+  message("Xenomai library found. using Cobalt Alchemy interface")
+  #list(APPEND CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES ${xenomai3_ALCHEMY_CFLAGS})
   add_library(dlplugin SHARED "dlplugin.hpp" "dlplugin.cpp")
   add_library(xfifo SHARED "fifo.hpp" "fifo_xenomai.cpp")
+  target_include_directories(xfifo PRIVATE ${XENOMAI_INCLUDE_DIRS})
   target_link_libraries(xfifo 
+    PUBLIC
+      ${XENOMAI_LIBRARIES}
     PRIVATE 
-      Threads::Threads
-      ${xenomai_ALCHEMY_LDFLAGS}
       fmt::fmt
   )
-  target_include_directories(xfifo SYSTEM PRIVATE ${xenomai_ALCHEMY_CFLAGS})
-  add_library(rtos SHARED "rtos.hpp" "rtos_evl.cpp")
+  target_compile_definitions(xfifo PRIVATE ${XENOMAI_DEFINITIONS})
+  add_library(rtos SHARED "rtos.hpp" "rtos_xenomai.cpp")
+  target_include_directories(rtos PRIVATE ${XENOMAI_INCLUDE_DIRS})
   target_link_libraries(rtos PRIVATE 
-    ${xenomai_ALCHEMY_LDFLAGS}
     xfifo
+  PUBLIC
+    ${XENOMAI_LIBRARIES}
     fmt::fmt
   )
-  target_include_directories(rtos SYSTEM PRIVATE ${xenomai_ALCHEMY_CFLAGS})
-
+  target_compile_definitions(rtos PRIVATE ${XENOMAI_DEFINITIONS})
 else()
-  message("EVL Library not found. Reverting to posix Interface.")
+  message("RT core Library not found. Reverting to posix Interface.")
   add_library(dlplugin SHARED "dlplugin.hpp" "dlplugin.cpp")
   add_library(xfifo SHARED "fifo.hpp" "fifo_posix.cpp")
   target_link_libraries(xfifo PRIVATE fmt::fmt)

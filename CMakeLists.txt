@@ -13,10 +13,11 @@ project(
 #if(NOT rtxi_DEVELOPER_MODE)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/scripts/cmake)
 #endif()
-set(RTXI_RT_CORE "posix")
+set(RTXI_RT_CORE "xenomai")
 set(RTXI_USER_HOMEDIR $ENV{HOME})
 set(RTXI_SETTINGS_DIR ${RTXI_USER_HOMEDIR}/rtxi/)
 set(RTXI_PLUGIN_DIR ${CMAKE_INSTALL_PREFIX}/rtxi/modules/)
+set(XENOMAI_ROOT_DIR "/usr/xenomai")
 configure_file(rtxiConfig.h.in rtxiConfig.h)
 include(cmake/project-is-top-level.cmake)
 include(cmake/variables.cmake)
@@ -29,14 +30,18 @@ cmake_policy(SET CMP0135 NEW)
 # Find EVL Core library
 include(FindPkgConfig)
 pkg_check_modules(evl evl)
-if(EXISTS /usr/xenomai/bin/xeno-config)
-	set(xenomai3_FOUND)
-	execute_process(
-		COMMAND /usr/xenomai/bin/xeno-config --skin=alchemy --cflags 
-		OUTPUT_VARIABLE xenomai3_ALCHEMY_CFLAGS
-		COMMAND /usr/xenomai/bin/xeno-config --skin=alchemy --ldflags
-		OUTPUT_VARIABLE xenomai3_ALCHEMY_LDFLAGS)
-endif()
+
+#if(EXISTS /usr/xenomai/bin/xeno-config)
+#  set(xenomai3_FOUND ON)
+#	execute_process(
+#		COMMAND /usr/xenomai/bin/xeno-config --skin=alchemy --cflags 
+#		OUTPUT_VARIABLE xenomai3_ALCHEMY_CFLAGS
+#		OUTPUT_STRIP_TRAILING_WHITESPACE)
+#	execute_process(
+#		COMMAND /usr/xenomai/bin/xeno-config --skin=alchemy --ldflags
+#		OUTPUT_VARIABLE xenomai3_ALCHEMY_LDFLAGS
+#		OUTPUT_STRIP_TRAILING_WHITESPACE)
+#endif()
 
 # some libraries do not have cmake config files, so we use pkg-config for those
 pkg_check_modules(git2 REQUIRED libgit2)
@@ -44,6 +49,9 @@ pkg_check_modules(markdown REQUIRED libmarkdown)
 
 # Make sure we can find the rtxiConfig.h generated file in binary directory
 include_directories(${PROJECT_BINARY_DIR})
+
+# Find xenomai 3 library
+find_package(Xenomai 3)
 
 #Find the packages
 find_package(fmt REQUIRED)
