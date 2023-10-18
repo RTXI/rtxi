@@ -920,7 +920,7 @@ void RT::System::execute(void* sys)
       iDevice->write();
     }
 
-    while (system->eventFifo->readRT(&cmd, sizeof(RT::System::CMD*)) != -1) {
+    while (system->eventFifo->readRT(&cmd, sizeof(RT::System::CMD*)) > 0) {
       system->executeCMD(cmd);
     }
     endtime = RT::OS::getTime();
