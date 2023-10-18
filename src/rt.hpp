@@ -269,7 +269,7 @@ public:
   std::vector<RT::Device*> getDevices();
 
   /*!
-   * Get a lsit of threads that are registered with connector class. To
+   * Get a list of threads that are registered with connector class. To
    * the connector class threads are blocks that are dependent of other
    * blocks when connected. They are topologically sorted.
    *

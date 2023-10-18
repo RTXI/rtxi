@@ -58,7 +58,7 @@ public:
 private:
   bool closed=false;
   std::string pipe_name;
-  int fd;  // file descriptor for non-realtime reading and writting
+  int fd;  // file descriptor for non-realtime reading and writing
   int close_event_fd;
   int pipe_number;
   RT_PIPE pipe_handle{};

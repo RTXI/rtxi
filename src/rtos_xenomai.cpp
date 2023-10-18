@@ -210,7 +210,7 @@ double RT::OS::getCpuUsage()
   //    + (proc_time.tv_nsec - last_proc_time.tv_nsec);
   //cpu_user_percent = 100.0 * (proc_time_elapsed) / cpu_time_elapsed;
 
-  //// calcualte cpu usage by real-time therad
+  //// calculate cpu usage by real-time therad
   //rt_time_elapsed = task_info.stat.xtime - last_rt_clock;
   //cpu_rt_percent = 100.0 * rt_time_elapsed / cpu_time_elapsed;
 

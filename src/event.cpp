@@ -244,7 +244,7 @@ Event::Manager::Manager()
         this->available_event_cond.wait(
             event_lock,
             [this] { return !(this->event_q.empty()) || !this->running; });
-        // Avoid undefined behaviour by checkeing whether queue is empty first
+        // Avoid undefined behavior by checkeing whether queue is empty first
         if (this->event_q.empty()) {
           continue;
         }

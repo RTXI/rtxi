@@ -250,7 +250,7 @@ void RTXIWizard::Panel::parseReadme()
       modules[installedListWidget->currentItem()->text()].readme = fileText;
       break;
     default:
-      ERROR_MSG("ERROR: default in swtich block in cloneModule()");
+      ERROR_MSG("ERROR: default in switch block in cloneModule()");
       break;
   }
 
@@ -406,7 +406,7 @@ void RTXIWizard::Panel::installFromString(const std::string& module_name)
   progress->setValue(2);
   // QApplication::processEvents();
 
-  // Compile and instal handled by QProcess.
+  // Compile and install handled by QProcess.
   auto* command = new QProcess();
   command->start(make_cmd, make_config_args);
   command->waitForFinished();

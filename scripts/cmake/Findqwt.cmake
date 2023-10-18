@@ -6,7 +6,7 @@
 #  QWT_INCLUDE_DIR - where to find qwt_plot.h
 #  QWT_INCLUDE_DIRS - qwt includes
 #  QWT_LIBRARY - where to find the Qwt library
-#  QWT_LIBRARIES - aditional libraries
+#  QWT_LIBRARIES - additional libraries
 #  QWT_VERSION_STRING - version (ex. 5.2.1)
 #
 # It also defines this imported target:

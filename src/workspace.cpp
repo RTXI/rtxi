@@ -219,7 +219,7 @@ Widgets::Plugin* Workspace::Manager::loadPlugin(const std::string& library)
           library_loc.c_str(), "getFactories");
 
   if (gen_fact_methods == nullptr) {
-    ERROR_MSG("Plugin::load : failed to retreive getFactories symbol");
+    ERROR_MSG("Plugin::load : failed to retrieve getFactories symbol");
     // If we got here it means we loaded the lirbary but not the symbol.
     // Let's just unload the library and exit before we regret it.
     this->m_plugin_loader->unload(library_loc.c_str());

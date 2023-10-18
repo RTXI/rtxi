@@ -2,5 +2,6 @@
 builtin = clear,rare,en-GB_to_en-US,names,informal,code
 check-filenames =
 check-hidden =
-skip = */.git,*/build,*/prefix, */scripts/all_plugins
+ignore-words-list = weill,sinc,mut,numer,uint,stdio
+skip = */.git,*/build,*/prefix,./scripts/all_plugins,./libs
 quiet-level = 2

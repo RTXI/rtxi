@@ -25,7 +25,7 @@
 
 // These metatype declarations are needed by qt to store
 // the types in QVariant, which is very convenient and reduces
-// unecessary repetiotion in panel construction
+// unnecessary repetiotion in panel construction
 Q_DECLARE_METATYPE(IO::Block*)
 Q_DECLARE_METATYPE(IO::flags_t)
 Q_DECLARE_METATYPE(IO::endpoint)

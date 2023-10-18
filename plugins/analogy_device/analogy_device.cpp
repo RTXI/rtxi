@@ -222,7 +222,7 @@ size_t AnalogyDevice::getAnalogRangeCount(type_t type, index_t channel) const
 
   int err = 0;
   a4l_chinfo_t* chinfo;
-  a4l_desc_t d = dsc;  // Copy descriptior because method is const
+  a4l_desc_t d = dsc;  // Copy descriptor because method is const
 
   err = a4l_get_chinfo(&d, subdevice[type].id, channel, &chinfo);
   if (err < 0)
@@ -267,7 +267,7 @@ std::string AnalogyDevice::getAnalogRangeString(type_t type,
   std::ostringstream rangeString;
   int err = 0;
   a4l_rnginfo_t* range;
-  a4l_desc_t d = dsc;  // Copy descriptior because method is const
+  a4l_desc_t d = dsc;  // Copy descriptor because method is const
 
   err = a4l_get_rnginfo(&d, subdevice[type].id, channel, index, &range);
   if (err < 0)

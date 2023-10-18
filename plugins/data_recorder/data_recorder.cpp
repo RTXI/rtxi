@@ -197,7 +197,7 @@ DataRecorder::Panel::Panel(QMainWindow* mwindow, Event::Manager* ev_manager)
   // Attach layout to child
   listGroup->setLayout(listLayout);
 
-  // Creat child widget and layout for buttons
+  // Create child widget and layout for buttons
 
   auto* buttonLayout = new QHBoxLayout;
 

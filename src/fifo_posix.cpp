@@ -77,13 +77,13 @@ RT::OS::posixFifo::posixFifo(size_t size)
     ERROR_MSG("RT::OS::posixFifo : Unable to create UI to RT buffer");
     return;
   }
-  // Make sure the reads/writes are nonblock to match api behaviour
+  // Make sure the reads/writes are nonblock to match api behavior
   fcntl(this->rt_to_ui[0], F_SETFL, O_NONBLOCK);
   fcntl(this->rt_to_ui[1], F_SETFL, O_NONBLOCK);
   fcntl(this->ui_to_rt[0], F_SETFL, O_NONBLOCK);
   fcntl(this->rt_to_ui[1], F_SETFL, O_NONBLOCK);
 
-  // We can set the size of the pipe. Again we try to match api behaviour
+  // We can set the size of the pipe. Again we try to match api behavior
   fcntl(this->rt_to_ui[1], F_SETPIPE_SZ, size);
   fcntl(this->ui_to_rt[1], F_SETPIPE_SZ, size);
 

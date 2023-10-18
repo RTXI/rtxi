@@ -106,8 +106,8 @@ void RT::Connector::insertBlock(
 
   // This insertion block algorithm makes use of move semantics to insert and
   // delete vector items. This is mainly to avoid allocations in the real-time
-  // thead and std::move allows us to place data without having to allocate
-  // memory again. We should make sure to use reserve() memeber function on
+  // thread and std::move allows us to place data without having to allocate
+  // memory again. We should make sure to use reserve() member function on
   // vectors in the non-rt thread so that further push_back calls are less
   // likely to allocate memory.
   size_t id = 0;
@@ -686,7 +686,7 @@ void RT::System::insertThread(Event::Object* event)
   cmd.wait();
 }
 
-// TODO: come back after figuring out conneciton problems
+// TODO: come back after figuring out connection problems
 void RT::System::removeThread(Event::Object* event)
 {
   auto* thread = std::any_cast<RT::Thread*>(event->getParam("thread"));

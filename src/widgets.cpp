@@ -513,7 +513,7 @@ void Widgets::Plugin::attachComponent(
   }
   this->plugin_component = std::move(component);
   // Let's set the component as active before registering it to rt thread
-  // this avoids unecessary use of event firing which is much slower
+  // this avoids unnecessary use of event firing which is much slower
   this->plugin_component->setActive(/*act=*/true);
   this->registerComponent();
 }

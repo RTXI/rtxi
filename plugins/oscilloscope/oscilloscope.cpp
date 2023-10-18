@@ -715,7 +715,7 @@ Oscilloscope::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
   scopeGroup->setLayout(scopeLayout);
   auto* setBttnLayout = new QHBoxLayout(this);
 
-  // Creat buttons
+  // Create buttons
   pauseButton = new QPushButton("Pause");
   pauseButton->setCheckable(true);
   QObject::connect(pauseButton, SIGNAL(released()), this, SLOT(togglePause()));
@@ -826,7 +826,7 @@ void Oscilloscope::Component::flushFifo()
   }
 }
 
-// TODO: fix rt buffer size adjustements for components
+// TODO: fix rt buffer size adjustments for components
 void Oscilloscope::Panel::adjustDataSize()
 {
   // Event::Object event(Event::Type::RT_GET_PERIOD_EVENT);

@@ -436,7 +436,7 @@ int Device::setChannelActive(DAQ::ChannelType::type_t type,
       }
     }
   }
-  // active channels is an optimization for faster reading/writting in realtime.
+  // active channels is an optimization for faster reading/writing in realtime.
   active_channels.at(type).clear();
   for(auto& channel : physical_channels_registry.at(type)){
     if(channel.active){ active_channels.at(type).push_back(&channel); }

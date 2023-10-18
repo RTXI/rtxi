@@ -119,7 +119,7 @@ public:
 /*!
  * Obtain the Fifo object for this architecture.
  *
- * The Object Returned is a Fifo object that holds an implementatin
+ * The Object Returned is a Fifo object that holds an implementation
  * specific fifo/pipe.
  *
  * \param fifo The fifo object to store the newly created fifo.
