@@ -62,7 +62,7 @@ make -sj`nproc` -C ./
 echo "-----> RTXI compilation successful."
 
 sudo make install -C ./
-echo "-----> RTXI intallation successful."
+echo "-----> RTXI installation successful."
 
 echo "-----> Putting things into place."
 cp -f res/rtxi.desktop ~/Desktop/
@@ -112,7 +112,7 @@ for dir in ${MODS}/*; do
 done
 
 echo ""
-echo "-----> RTXI intallation successful. Reboot may be required."
+echo "-----> RTXI installation successful. Reboot may be required."
 echo "-----> Type '"sudo rtxi"' to start RTXI. Happy Sciencing!"
 echo "-----> Please email help@rtxi.org with any questions/help requests."
 echo "-----> Script developed/last modified by Ivan F. Valerio <ivan@rtxi.org> on May 2021."

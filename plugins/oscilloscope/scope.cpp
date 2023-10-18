@@ -469,7 +469,7 @@ void Oscilloscope::Scope::drawCurves()
       ringbuffer_index = (i + channel.data_indx) % this->buffer_size;
       channel.xbuffer[i] =
           static_cast<double>(channel.timebuffer[i] - min_time);
-      // Thanks to qwt's interface we need the x axis poitns to be sorted
+      // Thanks to qwt's interface we need the x axis points to be sorted
       // and scaled. Shenanigans alert
       channel.xtransformed[i] =
           scaleMapX->transform(channel.xbuffer[ringbuffer_index]);

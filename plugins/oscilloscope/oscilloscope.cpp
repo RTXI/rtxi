@@ -781,7 +781,7 @@ Oscilloscope::Component::Component(Widgets::Plugin* hplugin,
   }
 }
 
-// TODO: Handle trigger synchronization bettween oscilloscope components
+// TODO: Handle trigger synchronization between oscilloscope components
 void Oscilloscope::Component::execute()
 {
   Oscilloscope::sample sample {};

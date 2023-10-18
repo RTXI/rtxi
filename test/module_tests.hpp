@@ -78,7 +78,7 @@ protected:
   ModuleComponetTests() = default;
   ~ModuleComponetTests() = default;
 
-  // Widgets::Component componnent;
+  // Widgets::Component component;
 };
 
 class ModulePanelTests : public ::testing::Test
