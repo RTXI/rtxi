@@ -132,7 +132,7 @@ int32_t physical_channel_t::addToTask(TaskHandle task_handle) const
   int32_t err = 0;
   std::string units = DAQ::get_default_units().at(units_index);
   auto [min, max] = DAQ::get_default_ranges().at(range_index);
-  //DAQmxStopTask(task_handle);
+  // DAQmxStopTask(task_handle);
   switch (type) {
     case DAQ::ChannelType::AI:
       if (units == "volts") {
@@ -196,8 +196,8 @@ int32_t physical_channel_t::addToTask(TaskHandle task_handle) const
       ERROR_MSG("NIDAQ_DRIVER : Channel Type Unknown");
       break;
   }
-  //DAQmxTaskControl(task_handle, DAQmx_Val_Task_Commit);
-  //DAQmxStartTask(task_handle);
+  // DAQmxTaskControl(task_handle, DAQmx_Val_Task_Commit);
+  // DAQmxStartTask(task_handle);
   return err;
 }
 
@@ -286,7 +286,8 @@ public:
 
 private:
   std::array<TaskHandle, DAQ::ChannelType::UNKNOWN> task_list {};
-  std::array<std::vector<physical_channel_t*>, DAQ::ChannelType::UNKNOWN> active_channels;
+  std::array<std::vector<physical_channel_t*>, DAQ::ChannelType::UNKNOWN>
+      active_channels;
   std::string internal_dev_name;
   std::array<std::vector<physical_channel_t>, 4> physical_channels_registry;
   std::array<DAQ::analog_range_t, 7> default_ranges = DAQ::get_default_ranges();
@@ -324,11 +325,12 @@ Device::Device(const std::string& dev_name,
                 task_name,
                 dev_name);
     } else {
-      switch(type){
+      switch (type) {
         case DAQ::ChannelType::AI:
         case DAQ::ChannelType::DI:
           DAQmxCfgInputBuffer(task_list.at(type), 1);
-          DAQmxSetReadOverWrite(task_list.at(type), DAQmx_Val_OverwriteUnreadSamps);
+          DAQmxSetReadOverWrite(task_list.at(type),
+                                DAQmx_Val_OverwriteUnreadSamps);
           break;
         case DAQ::ChannelType::AO:
         case DAQ::ChannelType::DO:
@@ -405,12 +407,13 @@ int Device::setChannelActive(DAQ::ChannelType::type_t type,
     physical_channels_registry.at(type).at(index).active = false;
     DAQmxClearTask(task_list.at(type));
     err = DAQmxCreateTask(DAQ::ChannelType::type2string(type).c_str(),
-                         &task_list.at(type));
-    switch(type){
+                          &task_list.at(type));
+    switch (type) {
       case DAQ::ChannelType::AI:
       case DAQ::ChannelType::DI:
         DAQmxCfgInputBuffer(task_list.at(type), 1);
-        DAQmxSetReadOverWrite(task_list.at(type), DAQmx_Val_OverwriteUnreadSamps);
+        DAQmxSetReadOverWrite(task_list.at(type),
+                              DAQmx_Val_OverwriteUnreadSamps);
         break;
       case DAQ::ChannelType::AO:
       case DAQ::ChannelType::DO:
@@ -438,8 +441,10 @@ int Device::setChannelActive(DAQ::ChannelType::type_t type,
   }
   // active channels is an optimization for faster reading/writing in realtime.
   active_channels.at(type).clear();
-  for(auto& channel : physical_channels_registry.at(type)){
-    if(channel.active){ active_channels.at(type).push_back(&channel); }
+  for (auto& channel : physical_channels_registry.at(type)) {
+    if (channel.active) {
+      active_channels.at(type).push_back(&channel);
+    }
   }
   printError(DAQmxSetSampTimingType(task_list.at(type), DAQmx_Val_OnDemand));
   printError(DAQmxTaskControl(task_list.at(type), DAQmx_Val_Task_Commit));
@@ -689,7 +694,9 @@ int Device::setDigitalDirection(DAQ::index_t /*index*/,
 void Device::read()
 {
   int samples_read = 0;
-  if(this->active_channels.at(DAQ::ChannelType::AI).empty()) { return; }
+  if (this->active_channels.at(DAQ::ChannelType::AI).empty()) {
+    return;
+  }
   DAQmxReadAnalogF64(task_list[DAQ::ChannelType::AI],
                      DAQmx_Val_Auto,
                      DAQmx_Val_WaitInfinitely,
@@ -699,20 +706,23 @@ void Device::read()
                      &samples_read,
                      nullptr);
   size_t value_index = 0;
-  for (auto *chan : this->active_channels.at(DAQ::ChannelType::AI)) {
+  for (auto* chan : this->active_channels.at(DAQ::ChannelType::AI)) {
     writeoutput(chan->id,
                 buffer_arrays.at(DAQ::ChannelType::AI).at(value_index));
     ++value_index;
   }
 }
 
-void Device::write() 
+void Device::write()
 {
-  if(this->active_channels.at(DAQ::ChannelType::AO).empty()) { return; }
+  if (this->active_channels.at(DAQ::ChannelType::AO).empty()) {
+    return;
+  }
   size_t samples_to_write = 0;
-  int samples_written=0;
+  int samples_written = 0;
   for (auto* chan : this->active_channels.at(DAQ::ChannelType::AO)) {
-    buffer_arrays.at(DAQ::ChannelType::AO).at(samples_to_write) = readinput(chan->id);
+    buffer_arrays.at(DAQ::ChannelType::AO).at(samples_to_write) =
+        readinput(chan->id);
     ++samples_to_write;
   }
   DAQmxWriteAnalogF64(task_list[DAQ::ChannelType::AO],
@@ -734,7 +744,7 @@ Driver::Driver()
 void Driver::loadDevices()
 {
   int32_t device_names_buffer_size = DAQmxGetSysDevNames(nullptr, 0);
-  if(device_names_buffer_size < 0){
+  if (device_names_buffer_size < 0) {
     printError(device_names_buffer_size);
     return;
   }

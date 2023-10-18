@@ -39,8 +39,7 @@ int RT::Connector::find_cycle(RT::block_connection_t conn, IO::Block* ref_block)
   }
   for (const auto& temp_conn : this->connections[ref_block->getID()]) {
     if (conn.dest == temp_conn.src
-        && this->find_cycle(temp_conn, ref_block) == -1)
-    {
+        && this->find_cycle(temp_conn, ref_block) == -1) {
       return -1;
     }
   }
@@ -322,8 +321,7 @@ void RT::System::createTelemitryProcessor()
     eventLogger* logger = this->event_manager->getLogger();
     std::vector<RT::Telemitry::Response> responses;
     while (!this->task->task_finished
-           && this->telemitry_processing_thread_running)
-    {
+           && this->telemitry_processing_thread_running) {
       responses = this->getTelemitry();
       for (auto telem : responses) {
         if (telem.cmd != nullptr) {

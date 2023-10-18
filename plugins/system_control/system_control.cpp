@@ -364,7 +364,7 @@ void SystemControl::Panel::apply()
 {
   int64_t freq = freqEdit->text().toInt();
   freq *= freqUnitList->currentData().toInt();
-  int64_t period = RT::OS::SECONDS_TO_NANOSECONDS/freq;
+  int64_t period = RT::OS::SECONDS_TO_NANOSECONDS / freq;
   Event::Object event(Event::Type::RT_PERIOD_EVENT);
   event.setParam("period", std::any(period));
   this->getRTXIEventManager()->postEvent(&event);
@@ -387,7 +387,7 @@ void SystemControl::Panel::apply()
   if (digitalActiveButton->isEnabled()) {
     this->submitDigitalChannelUpdate();
   }
-  this->getRTXIEventManager()->postEvent(&enable_device); 
+  this->getRTXIEventManager()->postEvent(&enable_device);
   // Display changes
   display();
 }

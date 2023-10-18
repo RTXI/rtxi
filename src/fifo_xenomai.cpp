@@ -24,14 +24,15 @@
 
 #include <alchemy/pipe.h>
 #include <fcntl.h>
-#include <unistd.h>
 #include <poll.h>
 #include <sys/eventfd.h>
+#include <unistd.h>
 
 #include "debug.hpp"
 
 int FIFO_COUNT = 0;
-constexpr std::string_view pipe_filesystem_prefix = "/proc/xenomai/registry/rtipc/xddp/";
+constexpr std::string_view pipe_filesystem_prefix =
+    "/proc/xenomai/registry/rtipc/xddp/";
 
 // Generic xenomai fifo based on pipes
 namespace RT::OS
@@ -56,27 +57,27 @@ public:
   size_t getCapacity() override;
 
 private:
-  bool closed=false;
+  bool closed = false;
   std::string pipe_name;
   int fd;  // file descriptor for non-realtime reading and writing
   int close_event_fd;
   int pipe_number;
-  RT_PIPE pipe_handle{};
+  RT_PIPE pipe_handle {};
   size_t fifo_capacity;
   std::array<struct pollfd, 2> xbuf_poll_fd {};
 };
 }  // namespace RT::OS
 
-RT::OS::xenomaiFifo::xenomaiFifo(size_t size) 
-  : pipe_name(std::string("RTXI-pipe-")+std::to_string(FIFO_COUNT++))
-  , fifo_capacity(size)
+RT::OS::xenomaiFifo::xenomaiFifo(size_t size)
+    : pipe_name(std::string("RTXI-pipe-") + std::to_string(FIFO_COUNT++))
+    , fifo_capacity(size)
 {
-  pipe_number = rt_pipe_create(&this->pipe_handle, pipe_name.c_str(), P_MINOR_AUTO, fifo_capacity);
-  if (pipe_number < 0)
-  {
+  pipe_number = rt_pipe_create(
+      &this->pipe_handle, pipe_name.c_str(), P_MINOR_AUTO, fifo_capacity);
+  if (pipe_number < 0) {
     ERROR_MSG("Unable to open real-time X pipe");
   }
-  const std::string filename = std::string(pipe_filesystem_prefix)+pipe_name;
+  const std::string filename = std::string(pipe_filesystem_prefix) + pipe_name;
   this->fd = ::open(filename.c_str(), O_RDWR | O_NONBLOCK);
 
   this->xbuf_poll_fd[0].fd = this->fd;
@@ -84,7 +85,6 @@ RT::OS::xenomaiFifo::xenomaiFifo(size_t size)
   this->close_event_fd = eventfd(0, EFD_NONBLOCK);
   this->xbuf_poll_fd[1].fd = this->close_event_fd;
   this->xbuf_poll_fd[1].events = POLLIN;
-
 }
 
 RT::OS::xenomaiFifo::~xenomaiFifo()
@@ -129,7 +129,6 @@ void RT::OS::xenomaiFifo::poll()
   } else if ((this->xbuf_poll_fd[1].revents & POLLIN) != 0) {
     this->closed = true;
   }
-
 }
 
 int RT::OS::xenomaiFifo::buffer_fd() const
