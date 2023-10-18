@@ -13,7 +13,7 @@ project(
 #if(NOT rtxi_DEVELOPER_MODE)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/scripts/cmake)
 #endif()
-set(RTXI_RT_CORE "xenomai")
+set(RTXI_RT_CORE "posix")
 set(RTXI_USER_HOMEDIR $ENV{HOME})
 set(RTXI_SETTINGS_DIR ${RTXI_USER_HOMEDIR}/rtxi/)
 set(RTXI_PLUGIN_DIR ${CMAKE_INSTALL_PREFIX}/rtxi/modules/)
