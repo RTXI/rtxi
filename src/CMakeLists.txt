@@ -65,29 +65,29 @@ add_library(rtxi SHARED
     logger.hpp logger.cpp
 )
 
-target_include_directories(rtxi 
-  PUBLIC
-  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>"
-  "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
-)
-
-target_include_directories(dlplugin
-  PUBLIC
-  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>"
-  "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
-)
-
-target_include_directories(rtos
-  PUBLIC
-  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>"
-  "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
-)
-
-target_include_directories(xfifo
-  PUBLIC
-  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>"
-  "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
-)
+#target_include_directories(rtxi 
+#  PUBLIC
+#  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>"
+#  "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
+#)
+#
+#target_include_directories(dlplugin
+#  PUBLIC
+#  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>"
+#  "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
+#)
+#
+#target_include_directories(rtos
+#  PUBLIC
+#  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>"
+#  "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
+#)
+#
+#target_include_directories(xfifo
+#  PUBLIC
+#  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>"
+#  "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
+#)
 
 target_link_libraries(rtxi 
   PRIVATE 

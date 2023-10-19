@@ -8,16 +8,15 @@ on:
   pull_request:
     branches:
     - master
-    - dev
 
 jobs:
   lint:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
-    - uses: actions/setup-python@v2
+    - uses: actions/setup-python@v4
       with: { python-version: "3.8" }
 
     - name: Install codespell
@@ -33,7 +32,7 @@ jobs:
   coverage:
     needs: [lint]
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     # To enable coverage, delete the last line from the conditional below and
     # edit the "<name>" placeholder to your GitHub name.
@@ -43,11 +42,21 @@ jobs:
       && false
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Install LCov
       run: sudo apt-get update -q
         && sudo apt-get install lcov -q -y
+
+    - name: Install Python
+      uses: actions/setup-python@v4
+      with: { python-version: "3.8" }
+
+    - name: Install dependencies
+      run: |
+        pip3 install conan
+        bash < .github/scripts/conan-profile.sh
+        conan install . -b missing
 
     - name: Configure
       run: cmake --preset=ci-coverage
@@ -57,26 +66,40 @@ jobs:
 
     - name: Test
       working-directory: build/coverage
-      run: ctest --output-on-failure -j 2
+      run: ctest --output-on-failure --no-tests=error -j 2
 
     - name: Process coverage info
       run: cmake --build build/coverage -t coverage
 
     - name: Submit to codecov.io
-      uses: codecov/codecov-action@v1
+      uses: codecov/codecov-action@v3
       with:
         file: build/coverage/coverage.info
 
   sanitize:
     needs: [lint]
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
+
+    env: { CXX: clang++-14 }
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
+
+    - name: Install Python
+      uses: actions/setup-python@v4
+      with: { python-version: "3.8" }
+
+      #- name: Install dependencies
+      #  run: |
+      #    pip3 install conan
+      #    bash < .github/scripts/conan-profile.sh
+      #    conan install . -b missing
+    - name: Install Dependencies
+      run: sudo apt -y -q install qt5tools5-dev libmarkdown2-dev libgit2-dev libqwt-qt5-dev \
+                               libhdf5-dev libgsl0-dev libboost-dev libgtest-dev libgmock-dev 
 
     - name: Configure
-      env: { CXX: clang++-12 }
       run: cmake --preset=ci-sanitize
 
     - name: Build
@@ -91,23 +114,44 @@ jobs:
           strict_init_order=1:\
           detect_leaks=1"
         UBSAN_OPTIONS: print_stacktrace=1
-      run: ctest --output-on-failure -j 2
+      run: ctest --output-on-failure --no-tests=error -j 2
 
   test:
     needs: [lint]
 
     strategy:
       matrix:
-        os: [macos-latest, ubuntu-latest, windows-2022]
+        #os: [macos-12, ubuntu-22.04, windows-2022]
+        os: [ubuntu-22.04]
 
     runs-on: ${{ matrix.os }}
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Install static analyzers
-      if: matrix.os == 'ubuntu-latest'
-      run: sudo apt-get install clang-tidy cppcheck -y -q
+      if: matrix.os == 'ubuntu-22.04'
+      run: >-
+        sudo apt-get install clang-tidy-14 cppcheck -y -q
+
+        sudo update-alternatives --install
+        /usr/bin/clang-tidy clang-tidy
+        /usr/bin/clang-tidy-14 140
+
+    - name: Install Python
+      uses: actions/setup-python@v4
+      with: { python-version: "3.8" }
+
+    - name: Install dependencies
+      shell: bash
+      run: sudo apt -y -q install qt5tools5-dev libmarkdown2-dev libgit2-dev libqwt-qt5-dev \
+                               libhdf5-dev libgsl0-dev libboost-dev libgtest-dev libgmock-dev 
+
+    - name: Setup MultiToolTask
+      if: matrix.os == 'windows-2022'
+      run: |
+        Add-Content "$env:GITHUB_ENV" 'UseMultiToolTask=true'
+        Add-Content "$env:GITHUB_ENV" 'EnforceProcessCountAcrossBuilds=true'
 
     - name: Configure
       shell: pwsh
@@ -121,13 +165,13 @@ jobs:
 
     - name: Test
       working-directory: build
-      run: ctest --output-on-failure -C Release -j 2
+      run: ctest --output-on-failure --no-tests=error -C Release -j 2
 
   docs:
     # Deploy docs only when builds succeed
     needs: [sanitize, test]
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     # To enable, first you have to create an orphaned gh-pages branch:
     #
@@ -146,9 +190,9 @@ jobs:
       && false
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
-    - uses: actions/setup-python@v2
+    - uses: actions/setup-python@v4
       with: { python-version: "3.8" }
 
     - name: Install m.css dependencies

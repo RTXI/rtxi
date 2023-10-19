@@ -10,9 +10,7 @@ project(
     LANGUAGES CXX
 )
 
-#if(NOT rtxi_DEVELOPER_MODE)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/scripts/cmake)
-#endif()
 set(RTXI_RT_CORE "posix")
 set(RTXI_USER_HOMEDIR $ENV{HOME})
 set(RTXI_SETTINGS_DIR ${RTXI_USER_HOMEDIR}/rtxi/)
@@ -30,18 +28,6 @@ cmake_policy(SET CMP0135 NEW)
 # Find EVL Core library
 include(FindPkgConfig)
 pkg_check_modules(evl evl)
-
-#if(EXISTS /usr/xenomai/bin/xeno-config)
-#  set(xenomai3_FOUND ON)
-#	execute_process(
-#		COMMAND /usr/xenomai/bin/xeno-config --skin=alchemy --cflags 
-#		OUTPUT_VARIABLE xenomai3_ALCHEMY_CFLAGS
-#		OUTPUT_STRIP_TRAILING_WHITESPACE)
-#	execute_process(
-#		COMMAND /usr/xenomai/bin/xeno-config --skin=alchemy --ldflags
-#		OUTPUT_VARIABLE xenomai3_ALCHEMY_LDFLAGS
-#		OUTPUT_STRIP_TRAILING_WHITESPACE)
-#endif()
 
 # some libraries do not have cmake config files, so we use pkg-config for those
 pkg_check_modules(git2 REQUIRED libgit2)
@@ -70,15 +56,15 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-# Clang-tidy is by far the most annoying tool to please. Depending on your development
-# environment you may get useless errors unless you add the line below.
-list(APPEND CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES ${CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES})
-
 include_directories(
   ${CMAKE_SOURCE_DIR}/src 
   ${CMAKE_SOURCE_DIR}/libs
   ${CMAKE_SOURCE_DIR}/plugins
 )
+
+# Clang-tidy is by far the most annoying tool to please. Depending on your development
+# environment you may get useless errors unless you add the line below.
+list(APPEND CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES ${CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES})
 
 add_subdirectory(libs)
 add_subdirectory(src)

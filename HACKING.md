@@ -41,7 +41,7 @@ the project:
     {
       "name": "dev",
       "binaryDir": "${sourceDir}/build/dev",
-      "inherits": ["dev-mode", "ci-<os>"],
+      "inherits": ["dev-mode", "conan", "ci-<os>"],
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug"
       }
@@ -68,18 +68,55 @@ the project:
 ```
 
 You should replace `<os>` in your newly created presets file with the name of
-the operating system you have, which may be `win64` or `unix`. You can see what
-these correspond to in the [`CMakePresets.json`](CMakePresets.json) file.
+the operating system you have, which may be `win64`, `linux` or `darwin`. You
+can see what these correspond to in the
+[`CMakePresets.json`](CMakePresets.json) file.
+
+> **Note**
+> While RTXI was built with corss-platform compilation in mind, it does not yet
+> fully support other platforms. In the future, RTXI will be installable in 
+> Windows and Mac, but only their non-realtime versions. This could change however
+> if there are real-time options available for those platforms. Until then, the
+> only fully supported platform is linux.
 
 `CMakeUserPresets.json` is also the perfect place in which you can put all
 sorts of things that you would otherwise want to pass to the configure command
 in the terminal.
 
+> **Note**
+> Some editors are pretty greedy with how they open projects with presets.
+> Some just randomly pick a preset and start configuring without your consent,
+> which can be confusing. Make sure that your editor configures when you
+> actually want it to, for example in CLion you have to make sure only the
+> `dev-dev preset` has `Enable profile` ticked in
+> `File > Settings... > Build, Execution, Deployment > CMake` and in Visual
+> Studio you have to set the option `Never run configure step automatically`
+> in `Tools > Options > CMake` **prior to opening the project**, after which
+> you can manually configure using `Project > Configure Cache`.
+
+### Dependency manager
+
+The above preset will make use of the [conan][conan] dependency manager. After
+installing it, make sure you have a [Conan profile][profile] setup, then
+download the dependencies and generate the necessary CMake files by running
+this command in the project root:
+
+```sh
+conan install . -s build_type=Debug -b missing
+```
+
+Note that if your conan profile does not specify the same compiler, standard
+level, build type and runtime library as CMake, then that could potentially
+cause issues. See the link above for profiles documentation.
+
+[conan]: https://conan.io/
+[profile]: https://docs.conan.io/2/reference/config_files/profiles.html
+
 ### Configure, build and test
 
-Make sure to install dependencies before building. If you followed the above instructions, 
-then you can configure, build and test the project respectively with the following 
-commands from the project root on any operating system with any build system:
+If you followed the above instructions, then you can configure, build and test
+the project respectively with the following commands from the project root on
+any operating system with any build system:
 
 ```sh
 cmake --preset=dev
@@ -108,7 +145,7 @@ the previously run tests when built with coverage configuration. The commands
 this target runs can be found in the `COVERAGE_TRACE_COMMAND` and
 `COVERAGE_HTML_COMMAND` cache variables. The trace command produces an info
 file by default, which can be submitted to services with CI integration. The
-HTML command uses the trace command's output to generate a HTML document to
+HTML command uses the trace command's output to generate an HTML document to
 `<binary-dir>/coverage_html` by default.
 
 #### `docs`
@@ -125,7 +162,11 @@ fix them respectively. Customization available using the `FORMAT_PATTERNS` and
 
 #### `run-exe`
 
-Runs the executable target `rtxi_exe`.
+Runs the executable target `rtxi_exe`. Understand that this may not
+provide full access to all features of rtxi, and that is mainly because 
+hardware access requires sudo privilages, which may break exe linking with 
+this target. This target is a convenience function for running the binary
+to quickly test whether it runs properly after compilation.
 
 #### `spell-check` and `spell-fix`
 
