@@ -35,7 +35,7 @@ apt-get update
 apt-get -y upgrade
 apt-get -y install \
 	build-essential qttools5-dev libmarkdown2-dev libgit2-dev libqwt-qt5-dev libhdf5-dev \
-	libgsl0-dev libboost-dev libgtest-dev libgmock-dev vim lshw stress \
+	libgsl0-dev libboost-dev libgtest-dev libgmock-dev libfmt-dev vim lshw stress \
 	autotools-dev automake libtool kernel-package binutils-dev zstd \
 	crash kexec-tools makedumpfile kernel-wedge libncurses5-dev libelf-dev \
 	flex bison libssl-dev pkgconf autoconf-archive python3-pip ninja-build dwarves
