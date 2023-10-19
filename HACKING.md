@@ -164,7 +164,7 @@ fix them respectively. Customization available using the `FORMAT_PATTERNS` and
 
 Runs the executable target `rtxi_exe`. Understand that this may not
 provide full access to all features of rtxi, and that is mainly because 
-hardware access requires sudo privilages, which may break exe linking with 
+hardware access requires sudo privileges, which may break exe linking with 
 this target. This target is a convenience function for running the binary
 to quickly test whether it runs properly after compilation.
 
