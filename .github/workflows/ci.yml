@@ -96,8 +96,7 @@ jobs:
       #    bash < .github/scripts/conan-profile.sh
       #    conan install . -b missing
     - name: Install Dependencies
-      run: sudo apt -y -q install qt5tools5-dev libmarkdown2-dev libgit2-dev libqwt-qt5-dev \
-                               libhdf5-dev libgsl0-dev libboost-dev libgtest-dev libgmock-dev 
+      run: sudo apt -y -q install qttools5-dev libmarkdown2-dev libgit2-dev libqwt-qt5-dev libhdf5-dev libgsl0-dev libboost-dev libgtest-dev libgmock-dev 
 
     - name: Configure
       run: cmake --preset=ci-sanitize
@@ -144,8 +143,7 @@ jobs:
 
     - name: Install dependencies
       shell: bash
-      run: sudo apt -y -q install qt5tools5-dev libmarkdown2-dev libgit2-dev libqwt-qt5-dev \
-                               libhdf5-dev libgsl0-dev libboost-dev libgtest-dev libgmock-dev 
+      run: sudo apt -y -q install qttools5-dev libmarkdown2-dev libgit2-dev libqwt-qt5-dev libhdf5-dev libgsl0-dev libboost-dev libgtest-dev libgmock-dev 
 
     - name: Setup MultiToolTask
       if: matrix.os == 'windows-2022'
