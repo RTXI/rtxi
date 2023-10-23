@@ -57,8 +57,11 @@ Workspace::Manager::Manager(Event::Manager* ev_manager)
   this->m_plugin_loader = std::make_unique<DLL::Loader>();
   this->m_driver_loader = std::make_unique<DLL::Loader>();
   const QDir bin_dir = QCoreApplication::applicationDirPath();
-  this->registerDriver(bin_dir.path().toStdString()
-                       + std::string("/librtxinidaqdriver.so"));
+  const std::string nidaq_driver_name = "librtxinidaqdriver.so";
+  if(bin_dir.exists(QString::fromStdString(nidaq_driver_name))){
+    this->registerDriver(bin_dir.path().toStdString()
+                         + std::string("/") + nidaq_driver_name);
+  }
 }
 
 Workspace::Manager::~Manager()
@@ -230,6 +233,7 @@ Widgets::Plugin* Workspace::Manager::loadPlugin(const std::string& library)
   this->rtxi_factories_registry[library] = *fact_methods;
   std::unique_ptr<Widgets::Plugin> plugin =
       fact_methods->createPlugin(this->event_manager);
+  plugin->setLibrary(library);
   if (plugin == nullptr) {
     ERROR_MSG("Plugin::load : failed to create plugin from library {} ",
               library);
@@ -257,6 +261,7 @@ void Workspace::Manager::unloadPlugin(Widgets::Plugin* plugin)
   const std::string library = plugin->getName();
   this->unregisterWidget(plugin);
   if (this->rtxi_widgets_registry[library].empty()) {
+    this->m_plugin_loader->unload(library.c_str());
     this->unregisterFactories(library);
   }
 }
@@ -347,7 +352,7 @@ void Workspace::Manager::unregisterWidget(Widgets::Plugin* plugin)
   if (loc == end_iter) {
     return;
   }
-  this->m_plugin_loader->unload(plugin->getLibrary().c_str());
+  //this->m_plugin_loader->unload(plugin->getLibrary().c_str());
   this->rtxi_widgets_registry[plugin_name].erase(loc);
 }
 

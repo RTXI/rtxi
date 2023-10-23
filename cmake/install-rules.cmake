@@ -10,7 +10,7 @@ install(
 )
 
 install(
-    TARGETS rtxi xfifo rtos dlplugin rtdsp rtgen
+    TARGETS rtxi xfifo rtos dlplugin rtdsp rtgen rtmath rtplot
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/rtxi
     EXPORT rtxiLibraryTargets
 )
@@ -41,6 +41,20 @@ install(
 
 install(
     DIRECTORY libs/gen
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/rtxi
+    COMPONENT rtxiLibraryTargets
+    FILES_MATCHING PATTERN "*.h"
+)
+
+install(
+    DIRECTORY libs/math
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/rtxi
+    COMPONENT rtxiLibraryTargets
+    FILES_MATCHING PATTERN "*.h"
+)
+
+install(
+    DIRECTORY libs/plot
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/rtxi
     COMPONENT rtxiLibraryTargets
     FILES_MATCHING PATTERN "*.h"

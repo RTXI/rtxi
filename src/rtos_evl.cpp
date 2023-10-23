@@ -158,6 +158,11 @@ int64_t RT::OS::getPeriod()
 
 void RT::OS::sleepTimestep(RT::OS::Task* task)
 {
+  const int64_t current_time = RT::OS::getTime();
+  if(task->next_t < current_time){
+    task->next_t = current_time + task->period;
+    return;
+  }
   int64_t wakeup_time = task->next_t;
   task->next_t += task->period;
 

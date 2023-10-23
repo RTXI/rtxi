@@ -20,12 +20,12 @@ target_link_libraries(testing_lib PRIVATE
     Qt5::Gui
     Qt5::Widgets
     Qt5::Network
-    GTest::gtest GTest::gtest_main
-    GTest::gmock GTest::gmock_main 
+    gtest gtest_main
+    gmock gmock_main 
     Boost::headers
     dl
     backtrace
-    fmt::fmt
+    fmt
 )
 
 add_executable(rtxiTests
@@ -41,7 +41,7 @@ target_link_libraries(rtxiTests PRIVATE
     rtos
     xfifo
     rtxi
-    rtmath_lib
+    rtmath
     workspace
     performance_measurement_lib
     userprefs_lib
@@ -64,6 +64,15 @@ target_link_libraries(fakePlugin PRIVATE
     rtxi
     rtos
     dlplugin
+    workspace
+    rtmath
+    performance_measurement_lib
+    userprefs_lib
+    system_control_lib
+    connector_lib
+    oscilloscope_lib
+    data_recorder_lib
+    module_installer_lib
     Qt5::Core
     Qt5::Gui
     Qt5::Widgets

@@ -9,14 +9,14 @@ if(DEFINED evl_FOUND AND RTXI_RT_CORE STREQUAL "evl")
     PRIVATE 
       Threads::Threads
       ${evl_LINK_LIBRARIES}
-      fmt::fmt
+      fmt
   )
   target_include_directories(xfifo SYSTEM PRIVATE ${evl_INCLUDE_DIRS})
   add_library(rtos SHARED "rtos.hpp" "rtos_evl.cpp")
   target_link_libraries(rtos PRIVATE 
     ${evl_LINK_LIBRARIES}
     xfifo
-    fmt::fmt
+    fmt
   )
   target_include_directories(rtos SYSTEM PRIVATE ${evl_INCLUDE_DIRS})
 elseif(DEFINED Xenomai_FOUND AND RTXI_RT_CORE STREQUAL "xenomai")
@@ -29,7 +29,7 @@ elseif(DEFINED Xenomai_FOUND AND RTXI_RT_CORE STREQUAL "xenomai")
     PUBLIC
       ${XENOMAI_LIBRARIES}
     PRIVATE 
-      fmt::fmt
+      fmt
   )
   target_compile_definitions(xfifo PRIVATE ${XENOMAI_DEFINITIONS})
   add_library(rtos SHARED "rtos.hpp" "rtos_xenomai.cpp")
@@ -38,18 +38,18 @@ elseif(DEFINED Xenomai_FOUND AND RTXI_RT_CORE STREQUAL "xenomai")
     xfifo
   PUBLIC
     ${XENOMAI_LIBRARIES}
-    fmt::fmt
+    fmt
   )
   target_compile_definitions(rtos PRIVATE ${XENOMAI_DEFINITIONS})
 else()
   message("RT core Library not found. Reverting to posix Interface.")
   add_library(dlplugin SHARED "dlplugin.hpp" "dlplugin.cpp")
   add_library(xfifo SHARED "fifo.hpp" "fifo_posix.cpp")
-  target_link_libraries(xfifo PRIVATE fmt::fmt)
+  target_link_libraries(xfifo PRIVATE fmt)
   add_library(rtos SHARED "rtos.hpp" "rtos_posix.cpp")
   target_link_libraries(rtos PRIVATE 
       xfifo
-      fmt::fmt
+      fmt
   )
 endif()
 
@@ -92,7 +92,7 @@ add_library(rtxi SHARED
 target_link_libraries(rtxi 
   PRIVATE 
     Threads::Threads
-    fmt::fmt
+    fmt
     qwt::qwt
     xfifo
     dlplugin
@@ -111,7 +111,7 @@ add_library(workspace OBJECT
 target_link_libraries(workspace PRIVATE 
     rtxi
     dlplugin
-    rtmath_lib
+    rtmath
     performance_measurement_lib
     userprefs_lib
     system_control_lib
@@ -148,7 +148,7 @@ target_link_libraries(rtxi_exe PRIVATE
     xfifo
     rtos 
     rtxi
-    rtmath_lib
+    rtmath
     workspace
     performance_measurement_lib
     userprefs_lib
@@ -163,7 +163,7 @@ target_link_libraries(rtxi_exe PRIVATE
     Qt5::Gui
     Qt5::Widgets
     Qt5::Network
-    fmt::fmt
+    fmt
     HDF5::HDF5
     git2
     markdown

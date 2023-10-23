@@ -131,17 +131,25 @@ int RT::OS::setPeriod(RT::OS::Task* task, int64_t period)
 
 int64_t RT::OS::getPeriod()
 {
-  // This function should only ever be accessed withint a real-tim context
+  // This function should only ever be accessed withint a real-time context
+  if (RT_PERIOD == nullptr || !RT::OS::isRealtime()) {
+    return -1;
+  };
   return *(RT_PERIOD);
 }
 
 void RT::OS::sleepTimestep(RT::OS::Task* task)
 {
-  const int64_t sleep_time = task->next_t;
+  const int64_t current_time = RT::OS::getTime();
+  if(task->next_t < current_time){
+    task->next_t = current_time + task->period;
+    return;
+  }
+  const int64_t wakeup_time = task->next_t;
   task->next_t += task->period;
 
-  const struct timespec ts = {sleep_time / RT::OS::SECONDS_TO_NANOSECONDS,
-                              sleep_time % RT::OS::SECONDS_TO_NANOSECONDS};
+  const struct timespec ts = {wakeup_time / RT::OS::SECONDS_TO_NANOSECONDS,
+                              wakeup_time % RT::OS::SECONDS_TO_NANOSECONDS};
 
   clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &ts, nullptr);
 }

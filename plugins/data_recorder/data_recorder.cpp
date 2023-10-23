@@ -532,6 +532,8 @@ void DataRecorder::Plugin::receiveEvent(Event::Object* event)
       for (const auto& endpoint : endpoints) {
         this->destroy_component(endpoint);
       }
+      dynamic_cast<DataRecorder::Panel*>(this->getPanel())->updateBlockInfo();
+      break;
     case Event::Type::RT_THREAD_INSERT_EVENT:
     case Event::Type::RT_DEVICE_INSERT_EVENT:
       dynamic_cast<DataRecorder::Panel*>(this->getPanel())->updateBlockInfo();
@@ -895,7 +897,6 @@ void DataRecorder::Component::execute()
     case RT::State::PAUSE:
       break;
     case RT::State::UNPAUSE:
-      this->setState(RT::State::EXEC);
     case RT::State::INIT:
       this->setState(RT::State::EXEC);
       break;

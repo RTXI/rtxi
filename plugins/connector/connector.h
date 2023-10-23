@@ -49,7 +49,7 @@ private slots:
   void buildInputChannelList();
   void buildOutputFlagList();
   void buildOutputChannelList();
-  void highlightConnectionBox(QListWidgetItem*);
+  void highlightConnectionBox(QListWidgetItem* /*unused*/);
   void toggleConnection(bool down);
   void updateConnectionButton();
   void syncBlockInfo();

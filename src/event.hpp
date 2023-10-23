@@ -178,7 +178,7 @@ private:
   std::vector<param> params;
   std::mutex processing_done_mut;
   std::condition_variable processing_done_cond;
-  const Type event_type;
+  Type event_type;
   bool processed;
 };  // class Object
 

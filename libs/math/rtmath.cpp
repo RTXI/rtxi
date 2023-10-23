@@ -16,7 +16,6 @@
  * Ave, Cambridge, MA 02139, USA.
  */
 
-#include <iostream>
 #include <math.h>
 
 #include "rtmath.h"

@@ -506,6 +506,7 @@ public:
    * \return The library file the object from which the object was created.
    */
   std::string getLibrary() const { return this->library; }
+  void setLibrary(const std::string& lib) { this->library = lib; }
 
   // These functions are here in order to have backwards compatibility
   // with previous versions of RTXI that used DefaultGuiModel

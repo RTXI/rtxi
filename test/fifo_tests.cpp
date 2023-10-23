@@ -28,7 +28,6 @@
 #include "debug.hpp"
 #include "rtos.hpp"
 
-// NOLINTBEGIN(*-avoid-c-arrays)
 TEST_F(FifoTest, getFifo)
 {
   std::unique_ptr<RT::OS::Fifo> fifo;
@@ -45,23 +44,22 @@ TEST_F(FifoTest, roundtrip)
   ASSERT_EQ(result, 0);
   auto task = std::make_unique<RT::OS::Task>();
   auto message_size = this->default_message.size();
-  // char output[this->default_buffer_size];
-  char output[message_size];
-  char input[message_size];
-  strcpy(input, this->default_message.c_str());
+  std::string output;
+  output.reserve(this->default_message.size());
   auto echo = [&fifo](RT::OS::Task* tsk, size_t bufsize)
   {
-    char buf[bufsize];
+    std::string buf;
+    buf.reserve(bufsize);
     RT::OS::initiate(tsk);
-    fifo->readRT(&buf, bufsize);
-    fifo->writeRT(&buf, bufsize);
+    fifo->readRT(buf.data(), bufsize);
+    fifo->writeRT(buf.data(), bufsize);
     RT::OS::shutdown(tsk);
   };
-  fifo->write(&input, message_size);
+  fifo->write(this->default_message.data(), message_size);
   std::thread test_thread(echo, task.get(), message_size);
   test_thread.join();
-  fifo->read(&output, message_size);
-  EXPECT_STREQ(this->default_message.c_str(), output);
+  fifo->read(output.data(), message_size);
+  EXPECT_STREQ(this->default_message.c_str(), output.c_str());
 }
 
 TEST_F(FifoTest, nonblocking)
@@ -72,17 +70,16 @@ TEST_F(FifoTest, nonblocking)
   bool ready = false;
 
   // size_t size = this->default_buffer_size;
-  std::string* input = new std::string(this->default_message);
-  std::string* output = nullptr;
+  std::string output;
+  output.reserve(this->default_message.size());
   int result = RT::OS::getFifo(fifo, this->default_buffer_size);
   ASSERT_EQ(result, 0);
   auto test_task = std::make_unique<RT::OS::Task>();
   RT::OS::setPeriod(test_task.get(), RT::OS::SECONDS_TO_NANOSECONDS);
-  auto sender = [&fifo, &test_task, &input, &mut, &cv, &ready]()
+  auto sender = [&]()
   {
     RT::OS::initiate(test_task.get());
-    // RT::OS::sleepTimestep(test_task.get());
-    fifo->writeRT(&input, sizeof(std::string*));
+    fifo->writeRT(this->default_message.data(), this->default_message.size()*sizeof(char));
     std::unique_lock<std::mutex> lk(mut);
     ready = true;
     lk.unlock();
@@ -90,19 +87,14 @@ TEST_F(FifoTest, nonblocking)
     RT::OS::shutdown(test_task.get());
   };
 
-  int64_t start_time = RT::OS::getTime();
   std::thread sender_thread(sender);
   {
     std::unique_lock<std::mutex> lk(mut);
     cv.wait(lk, [&ready]() { return ready; });
   }
-  ssize_t read_bytes = fifo->read(&output, sizeof(std::string*));
-  int64_t end_time = RT::OS::getTime();
+  ssize_t read_bytes = fifo->read(output.data(), this->default_message.size()*sizeof(char));
   sender_thread.join();
-  int64_t duration = end_time - start_time;
 
   ASSERT_NE(read_bytes, -1);
-  output = nullptr;
-  delete input;
+  ASSERT_STREQ(this->default_message.c_str(), output.c_str());
 }
-// NOLINTEND(*-avoid-c-arrays)

@@ -37,22 +37,32 @@ const std::vector<IO::channel_t> defaultFakeChannelList =
 class fakePlugin : public Widgets::Plugin 
 {
 public:
-    fakePlugin(Event::Manager* ev_manager) : 
-            Widgets::Plugin(ev_manager, "fakeModule") 
-        { std::cout << "Fake Plugin Constructed\n"; }
-    ~fakePlugin() { std::cout << "Fake Plugin Destroyed\n"; }
+  fakePlugin(const fakePlugin&) = delete;
+  fakePlugin(fakePlugin&&) = delete;
+  fakePlugin& operator=(const fakePlugin&) = delete;
+  fakePlugin& operator=(fakePlugin&&) = delete;
+  explicit fakePlugin(Event::Manager* ev_manager)
+      : Widgets::Plugin(ev_manager, "fakeModule")
+  {
+    std::cout << "Fake Plugin Constructed\n"; }
+    ~fakePlugin() override { std::cout << "Fake Plugin Destroyed\n"; }
 };
 
 class fakeComponent : public Widgets::Component
 {
 public:
-    fakeComponent(Widgets::Plugin* hplugin) :
-        Widgets::Component(hplugin, 
-                           "fakeModule", 
-                           defaultFakeChannelList, 
+  fakeComponent(const fakeComponent&) = default;
+  fakeComponent(fakeComponent&&) = delete;
+  fakeComponent& operator=(const fakeComponent&) = default;
+  fakeComponent& operator=(fakeComponent&&) = delete;
+  explicit fakeComponent(Widgets::Plugin* hplugin)
+      : Widgets::Component(hplugin,
+                           "fakeModule",
+                           defaultFakeChannelList,
                            defaultFakeModuleVariables)
-        { std::cout << "Fake Component Created\n"; } 
-    ~fakeComponent() { std::cout << "Fake Component Destroyed\n"; }
+  {
+    std::cout << "Fake Component Created\n"; } 
+    ~fakeComponent() override { std::cout << "Fake Component Destroyed\n"; }
     void execute() override;
 };
 

@@ -94,6 +94,7 @@ TEST_F(RTOSTests, sleepTimestep)
       {
         RT::OS::initiate(test_task.get());
         auto stime = RT::OS::getTime();
+        test_task->next_t += stime + test_task->period;
         RT::OS::sleepTimestep(test_task.get());
         auto etime = RT::OS::getTime();
         duration = etime - stime;

@@ -27,7 +27,6 @@
 
 #include "event.hpp"
 #include "io_tests.hpp"
-#include "main_window.hpp"
 #include "widgets.hpp"
 
 enum TEST_PARAMETER_ID : size_t
@@ -76,7 +75,7 @@ class ModuleComponetTests : public ::testing::Test
 {
 protected:
   ModuleComponetTests() = default;
-  ~ModuleComponetTests() = default;
+  ~ModuleComponetTests() override = default;
 
   // Widgets::Component component;
 };
@@ -85,7 +84,7 @@ class ModulePanelTests : public ::testing::Test
 {
 protected:
   ModulePanelTests() = default;
-  ~ModulePanelTests() = default;
+  ~ModulePanelTests() override = default;
 };
 
 class ModulePluginTests : public ::testing::Test
@@ -102,11 +101,11 @@ protected:
     auto component = std::make_unique<mockModuleComponent>();
     this->plugin = std::make_unique<Widgets::Plugin>(this->event_manager.get(),
                                                      "testname");
-    component->setActive(true);
+    component->setActive(/*act=*/true);
     this->component_ptr = component.get();
     this->plugin->attachComponent(std::move(component));
   }
-  ~ModulePluginTests()
+  ~ModulePluginTests() override
   {
     // Event::Object shutdown_event(Event::Type::RT_SHUTDOWN_EVENT);
     // this->event_manager->postEvent(&shutdown_event);
@@ -119,7 +118,7 @@ protected:
 
   std::unique_ptr<Widgets::Plugin> plugin;
   mockModuleComponent* component_ptr;
-  MainWindow* main_window = nullptr;
+  //MainWindow* main_window = nullptr;
   // Widgets::Plugin plugin;
 };
 
@@ -127,7 +126,7 @@ class ModuleManagerTests : public ::testing::Test
 {
 protected:
   ModuleManagerTests() {}
-  ~ModuleManagerTests() {}
+  ~ModuleManagerTests() override {}
 };
 
 #endif

@@ -48,7 +48,7 @@ static void signal_handler(int signum)
 
   ERROR_MSG("signal_handler : signal type {} received\n", signum);
   std::cerr << boost::stacktrace::stacktrace();
-  exit(0);
+  exit(-1);
 }
 
 void TestEnvironment::TearDown()

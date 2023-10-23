@@ -101,7 +101,7 @@ public:
    *
    * \return The name of the block.
    */
-  std::string getName() const { return name; };
+  std::string getName() const { return name; }
 
   /*!
    * Get the number of channels of the specified type.

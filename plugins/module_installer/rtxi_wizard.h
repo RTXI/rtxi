@@ -59,12 +59,12 @@ private:
     QUrl readme_url;
     QUrl clone_url;
     QString readme;
-    bool installed;
+    bool installed=false;
   };
 
   std::map<QString, module_t> modules;
   void initParameters();
-  static int printGitError(int);
+  static int printGitError(int error);
   enum button_mode_t
   {
     DOWNLOAD,

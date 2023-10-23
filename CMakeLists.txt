@@ -42,7 +42,7 @@ find_package(Xenomai 3)
 #Find the packages
 find_package(fmt REQUIRED)
 find_package(HDF5 REQUIRED COMPONENTS C HL)
-find_package(Qt5 REQUIRED COMPONENTS Core Gui Widgets Network)
+find_package(Qt5 REQUIRED COMPONENTS Core Gui Widgets Network OpenGL Svg Xml)
 find_package(qwt REQUIRED)
 find_package(GTest REQUIRED)
 find_package(Threads REQUIRED)

@@ -7,7 +7,7 @@ add_library(performance_measurement_lib OBJECT
 
 target_link_libraries(performance_measurement_lib PRIVATE 
     rtxi
-    rtmath_lib
+    rtmath
     Qt5::Core
     Qt5::Widgets
 )
