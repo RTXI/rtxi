@@ -58,9 +58,9 @@ Workspace::Manager::Manager(Event::Manager* ev_manager)
   this->m_driver_loader = std::make_unique<DLL::Loader>();
   const QDir bin_dir = QCoreApplication::applicationDirPath();
   const std::string nidaq_driver_name = "librtxinidaqdriver.so";
-  if(bin_dir.exists(QString::fromStdString(nidaq_driver_name))){
-    this->registerDriver(bin_dir.path().toStdString()
-                         + std::string("/") + nidaq_driver_name);
+  if (bin_dir.exists(QString::fromStdString(nidaq_driver_name))) {
+    this->registerDriver(bin_dir.path().toStdString() + std::string("/")
+                         + nidaq_driver_name);
   }
 }
 
@@ -352,7 +352,7 @@ void Workspace::Manager::unregisterWidget(Widgets::Plugin* plugin)
   if (loc == end_iter) {
     return;
   }
-  //this->m_plugin_loader->unload(plugin->getLibrary().c_str());
+  // this->m_plugin_loader->unload(plugin->getLibrary().c_str());
   this->rtxi_widgets_registry[plugin_name].erase(loc);
 }
 

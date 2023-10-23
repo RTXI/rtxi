@@ -89,7 +89,7 @@ private:
   QComboBox* digitalSubdeviceList = nullptr;
   QPushButton* digitalActiveButton = nullptr;
 
-  bool rateUpdate=false;
+  bool rateUpdate = false;
   QComboBox* freqUnitList = nullptr;
   QComboBox* periodUnitList = nullptr;
   QLineEdit* freqEdit = nullptr;

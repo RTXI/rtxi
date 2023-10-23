@@ -59,7 +59,7 @@ private:
     QUrl readme_url;
     QUrl clone_url;
     QString readme;
-    bool installed=false;
+    bool installed = false;
   };
 
   std::map<QString, module_t> modules;

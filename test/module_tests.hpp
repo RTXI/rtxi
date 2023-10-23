@@ -118,8 +118,8 @@ protected:
 
   std::unique_ptr<Widgets::Plugin> plugin;
   mockModuleComponent* component_ptr;
-  //MainWindow* main_window = nullptr;
-  // Widgets::Plugin plugin;
+  // MainWindow* main_window = nullptr;
+  //  Widgets::Plugin plugin;
 };
 
 class ModuleManagerTests : public ::testing::Test

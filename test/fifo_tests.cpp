@@ -79,7 +79,8 @@ TEST_F(FifoTest, nonblocking)
   auto sender = [&]()
   {
     RT::OS::initiate(test_task.get());
-    fifo->writeRT(this->default_message.data(), this->default_message.size()*sizeof(char));
+    fifo->writeRT(this->default_message.data(),
+                  this->default_message.size() * sizeof(char));
     std::unique_lock<std::mutex> lk(mut);
     ready = true;
     lk.unlock();
@@ -92,7 +93,8 @@ TEST_F(FifoTest, nonblocking)
     std::unique_lock<std::mutex> lk(mut);
     cv.wait(lk, [&ready]() { return ready; });
   }
-  ssize_t read_bytes = fifo->read(output.data(), this->default_message.size()*sizeof(char));
+  ssize_t read_bytes =
+      fifo->read(output.data(), this->default_message.size() * sizeof(char));
   sender_thread.join();
 
   ASSERT_NE(read_bytes, -1);
