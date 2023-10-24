@@ -52,10 +52,10 @@ std::vector<std::string> physical_channel_names(
       func = &DAQmxGetDevAIPhysicalChans;
       break;
     case DAQ::ChannelType::DO:
-      func = &DAQmxGetDevDOPorts;
+      func = &DAQmxGetDevDOLines;
       break;
     case DAQ::ChannelType::DI:
-      func = &DAQmxGetDevDIPorts;
+      func = &DAQmxGetDevDILines;
       break;
     default:
       return {};
@@ -694,45 +694,45 @@ int Device::setDigitalDirection(DAQ::index_t /*index*/,
 void Device::read()
 {
   int samples_read = 0;
-  if (this->active_channels.at(DAQ::ChannelType::AI).empty()) {
-    return;
+  if (!this->active_channels.at(DAQ::ChannelType::AI).empty()) {
+    DAQmxReadAnalogF64(task_list[DAQ::ChannelType::AI],
+                       DAQmx_Val_Auto,
+                       DAQmx_Val_WaitInfinitely,
+                       DAQmx_Val_GroupByScanNumber,
+                       buffer_arrays.at(DAQ::ChannelType::AI).data(),
+                       buffer_arrays.at(DAQ::ChannelType::AI).size(),
+                       &samples_read,
+                       nullptr);
+    size_t value_index = 0;
+    for (auto& chan : this->active_channels.at(DAQ::ChannelType::AI)) {
+      writeoutput(chan->id,
+                  buffer_arrays.at(DAQ::ChannelType::AI).at(value_index));
+      ++value_index;
+    }
   }
-  DAQmxReadAnalogF64(task_list[DAQ::ChannelType::AI],
-                     DAQmx_Val_Auto,
-                     DAQmx_Val_WaitInfinitely,
-                     DAQmx_Val_GroupByScanNumber,
-                     buffer_arrays.at(DAQ::ChannelType::AI).data(),
-                     buffer_arrays.at(DAQ::ChannelType::AI).size(),
-                     &samples_read,
-                     nullptr);
-  size_t value_index = 0;
-  for (auto* chan : this->active_channels.at(DAQ::ChannelType::AI)) {
-    writeoutput(chan->id,
-                buffer_arrays.at(DAQ::ChannelType::AI).at(value_index));
-    ++value_index;
+  if (!this->active_channels.at(DAQ::ChannelType::DI).empty()){
   }
 }
 
 void Device::write()
 {
-  if (this->active_channels.at(DAQ::ChannelType::AO).empty()) {
-    return;
+  if (!this->active_channels.at(DAQ::ChannelType::AO).empty()) {
+    size_t samples_to_write = 0;
+    int samples_written = 0;
+    for (auto& chan : this->active_channels.at(DAQ::ChannelType::AO)) {
+      buffer_arrays.at(DAQ::ChannelType::AO).at(samples_to_write) =
+          readinput(chan->id);
+      ++samples_to_write;
+    }
+    DAQmxWriteAnalogF64(task_list[DAQ::ChannelType::AO],
+                        1,
+                        0U,
+                        DAQmx_Val_WaitInfinitely,
+                        DAQmx_Val_GroupByScanNumber,
+                        buffer_arrays.at(DAQ::ChannelType::AO).data(),
+                        &samples_written,
+                        nullptr);
   }
-  size_t samples_to_write = 0;
-  int samples_written = 0;
-  for (auto* chan : this->active_channels.at(DAQ::ChannelType::AO)) {
-    buffer_arrays.at(DAQ::ChannelType::AO).at(samples_to_write) =
-        readinput(chan->id);
-    ++samples_to_write;
-  }
-  DAQmxWriteAnalogF64(task_list[DAQ::ChannelType::AO],
-                      1,
-                      0U,
-                      DAQmx_Val_WaitInfinitely,
-                      DAQmx_Val_GroupByScanNumber,
-                      buffer_arrays.at(DAQ::ChannelType::AO).data(),
-                      &samples_written,
-                      nullptr);
 }
 
 Driver::Driver()
@@ -748,6 +748,7 @@ void Driver::loadDevices()
     printError(device_names_buffer_size);
     return;
   }
+  const std::string alpha = "abcdefghijklmnopqrstuvwxyz";
   std::string string_buffer(static_cast<size_t>(device_names_buffer_size),
                             '\0');
   DAQmxGetSysDevNames(string_buffer.data(),
@@ -770,7 +771,7 @@ void Driver::loadDevices()
         description += " ";
         description += std::string(query_indx % 2 == 0 ? "Output" : "Input");
         description += " ";
-        pos = chan_name.find_first_of("0123456789");
+        pos = chan_name.find_last_of(alpha)+1;
         channel_id = std::stoi(chan_name.substr(pos, chan_name.size() - pos));
         description += std::to_string(channel_id);
         channels.push_back({chan_name,
