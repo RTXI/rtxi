@@ -398,7 +398,7 @@ Qt::PenStyle Oscilloscope::Scope::getChannelStyle(IO::endpoint endpoint)
                                this->channels.end(),
                                [&](const Oscilloscope::scope_channel& chann)
                                { return chann.endpoint == endpoint; });
-  if (chan_loc != channels.end()) {
+  if (chan_loc == channels.end()) {
     return penStyles[Oscilloscope::PenStyleID::SolidLine];
   }
   return chan_loc->curve->pen().style();
@@ -411,7 +411,7 @@ int Oscilloscope::Scope::getChannelWidth(IO::endpoint endpoint)
                                this->channels.end(),
                                [&](const Oscilloscope::scope_channel& chann)
                                { return chann.endpoint == endpoint; });
-  if (chan_loc != channels.end()) {
+  if (chan_loc == channels.end()) {
     return 1;
   }
   return chan_loc->curve->pen().width();
@@ -447,7 +447,7 @@ void Oscilloscope::Scope::drawCurves()
   }
   int64_t max_time = 0;
   int64_t local_max_time = 0;
-  for (auto chan : this->channels) {
+  for (const auto& chan : this->channels) {
     local_max_time =
         *std::max_element(chan.timebuffer.begin(), chan.timebuffer.end());
     if (local_max_time > max_time) {

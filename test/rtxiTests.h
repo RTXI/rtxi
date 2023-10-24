@@ -25,9 +25,9 @@
 
 class TestEnvironment : public ::testing::Environment
 {
-    ~TestEnvironment() override {}
-    void SetUp();
-    void TearDown();
+    ~TestEnvironment() override = default;
+    void SetUp() override;
+    void TearDown() override;
 
     QApplication *app;
     int argc;

@@ -251,6 +251,7 @@ void Oscilloscope::Panel::applyChannelTab()
   }
   scopeWindow->replot();
   this->scopeWindow->setPause(/*value=*/false);
+  this->syncChannelProperties();
   showChannelTab();
 }
 
@@ -453,6 +454,18 @@ QWidget* Oscilloscope::Panel::createChannelTab(QWidget* parent)
   bttnLayout->addLayout(row1Layout, 0, 0);
   bttnLayout->addLayout(row2Layout, 1, 0);
 
+  QObject::connect(blocksListDropdown,
+                   SIGNAL(currentTextChanged(const QString&)),
+                   this,
+                   SLOT(syncChannelProperties()));
+  QObject::connect(typesList,
+                   SIGNAL(currentTextChanged(const QString&)),
+                   this,
+                   SLOT(syncChannelProperties()));
+  QObject::connect(channelsList,
+                   SIGNAL(currentTextChanged(const QString&)),
+                   this,
+                   SLOT(syncChannelProperties()));
   return page;
 }
 
@@ -846,6 +859,40 @@ void Oscilloscope::Panel::removeBlockChannels(IO::Block* block)
   this->scopeWindow->removeBlockChannels(block);
   auto* hplugin = dynamic_cast<Oscilloscope::Plugin*>(this->getHostPlugin());
   hplugin->deleteAllProbes(block);
+}
+
+void Oscilloscope::Panel::syncChannelProperties()
+{
+  IO::endpoint probe_info {};
+  probe_info.block = blocksListDropdown->currentData().value<IO::Block*>();
+  probe_info.direction = typesList->currentData().value<IO::flags_t>();
+  probe_info.port = channelsList->currentData().value<size_t>();
+
+  // we don't bother updating if channel is not active
+  if(!scopeWindow->channelRegistered(probe_info)) { return; }
+
+  const QColor color = scopeWindow->getChannelColor(probe_info);
+  colorsList->setCurrentIndex(colorsList->findData(color));
+  const int width = scopeWindow->getChannelWidth(probe_info);
+  widthsList->setCurrentIndex(widthsList->findData(width));
+  const Qt::PenStyle style = scopeWindow->getChannelStyle(probe_info);
+  stylesList->setCurrentIndex(stylesList->findData(QVariant::fromValue(style)));
+  double offset = scopeWindow->getChannelOffset(probe_info);
+  const double scale = scopeWindow->getChannelScale(probe_info);
+  scalesList->setCurrentIndex(
+      static_cast<int>(round(4 * (log10(1 / scale) + 1))));
+  int offsetUnits = 0;
+  if (offset * std::pow(10, -3 * offsetsList->count() - 3) < 1) {
+    offset = 0;
+    offsetUnits = 0;
+  } else {
+    while (fabs(offset) < 1 && offsetUnits < offsetsList->count()) {
+      offset *= 1000;
+      offsetUnits++;
+    }
+  }
+  offsetsEdit->setText(QString::number(offset));
+  offsetsList->setCurrentIndex(offsetUnits);
 }
 
 Oscilloscope::Plugin::Plugin(Event::Manager* ev_manager)

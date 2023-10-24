@@ -35,17 +35,15 @@ void TestEnvironment::SetUp()
   argv[1] = const_cast<char*>("-platform");
   argv[2] = const_cast<char*>("offscreen");
   app = new QApplication(argc, argv);
-  if (app) {
+  if (app != nullptr) {
     std::cout << "QT Application object initialized." << std::endl;
   } else {
-    std::cout << "Unable to initialized QT application." << std::endl;
+    std::cerr << "Unable to initialized QT application." << std::endl;
   }
 }
 
 static void signal_handler(int signum)
 {
-  static int count = 0;
-
   ERROR_MSG("signal_handler : signal type {} received\n", signum);
   std::cerr << boost::stacktrace::stacktrace();
   exit(-1);

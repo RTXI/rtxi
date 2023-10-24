@@ -106,6 +106,7 @@ private slots:
   void showTab(int);
   void activateChannel(bool);
   void removeBlockChannels(IO::Block* block);
+  void syncChannelProperties();
 
 private:
   void buildBlockList();
