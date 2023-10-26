@@ -753,19 +753,26 @@ void Device::write()
   }
   samples_to_write = 0;
   if (!this->active_channels.at(DAQ::ChannelType::DO).empty()){
+    bool digital_value_changed = false;
+    uint8_t old_value = 0;
+    uint8_t new_value = 0;
     for (auto& chan : this->active_channels.at(DAQ::ChannelType::DO)) {
-      std::get<DAQ::ChannelType::DO>(buffer_arrays).at(samples_to_write) =
-          static_cast<uint8_t>(readinput(chan->id));
+      old_value = std::get<DAQ::ChannelType::DO>(buffer_arrays).at(samples_to_write);
+      new_value = static_cast<uint8_t>(readinput(chan->id));
+      if(old_value != new_value){ digital_value_changed = true; }
+      std::get<DAQ::ChannelType::DO>(buffer_arrays).at(samples_to_write) = new_value;
       ++samples_to_write;
     }
-    DAQmxWriteDigitalLines(task_list[DAQ::ChannelType::DO], 
-                           1,
-                           0U,
-                           DAQmx_Val_WaitInfinitely, 
-                           DAQmx_Val_GroupByScanNumber, 
-                           std::get<DAQ::ChannelType::DO>(buffer_arrays).data(), 
-                           &samples_written, 
-                           nullptr);
+    if(digital_value_changed){
+      DAQmxWriteDigitalLines(task_list[DAQ::ChannelType::DO], 
+                             1,
+                             0U,
+                             DAQmx_Val_WaitInfinitely, 
+                             DAQmx_Val_GroupByScanNumber, 
+                             std::get<DAQ::ChannelType::DO>(buffer_arrays).data(), 
+                             &samples_written, 
+                             nullptr);
+    }
   }
 }
 
