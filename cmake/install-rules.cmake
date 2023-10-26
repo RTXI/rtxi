@@ -18,7 +18,7 @@ install(
 if(nidaqmx)
 install(
     TARGETS rtxinidaqdriver 
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}/rtxi
+    DESTINATION ${CMAKE_INSTALL_BINDIR}
     EXPORT rtxiLibraryTargets
 )
 endif()
