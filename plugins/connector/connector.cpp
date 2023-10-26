@@ -65,16 +65,23 @@ Connector::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
                    SIGNAL(activated(int)),
                    this,
                    SLOT(buildOutputChannelList(void)));
-
+  QObject::connect(outputBlock,
+                   SIGNAL(activated(int)),
+                   this,
+                   SLOT(updateConnectionButton(void)));
   QObject::connect(outputFlag,
                    SIGNAL(activated(int)),
                    this,
                    SLOT(buildOutputChannelList(void)));
+  QObject::connect(outputFlag,
+                   SIGNAL(activated(int)),
+                   this,
+                   SLOT(updateConnectionButton(void)));
 
   outputLayout->addWidget(new QLabel(tr("Channel:")), 3, Qt::Alignment());
   outputLayout->addWidget(outputChannel);
   QObject::connect(outputChannel,
-                   SIGNAL(currentTextChanged(const QString&)),
+                   SIGNAL(activated(int)),
                    this,
                    SLOT(updateConnectionButton(void)));
 
@@ -89,7 +96,7 @@ Connector::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
   connectionButton->setCheckable(true);
   buttonLayout->addWidget(connectionButton);
   QObject::connect(connectionButton,
-                   SIGNAL(toggled(bool)),
+                   SIGNAL(clicked(bool)),
                    this,
                    SLOT(toggleConnection(bool)));
 
@@ -107,11 +114,15 @@ Connector::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
                    SIGNAL(activated(int)),
                    this,
                    SLOT(buildInputChannelList(void)));
+  QObject::connect(inputBlock,
+                   SIGNAL(activated(int)),
+                   this,
+                   SLOT(updateConnectionButton(void)));
 
   inputLayout->addWidget(new QLabel(tr("Channel:")), 2, Qt::Alignment());
   inputLayout->addWidget(inputChannel);
   QObject::connect(inputChannel,
-                   SIGNAL(currentTextChanged(const QString&)),
+                   SIGNAL(activated(int)),
                    this,
                    SLOT(updateConnectionButton(void)));
 
@@ -124,10 +135,10 @@ Connector::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
 
   // Create elements for connection box
   connectionLayout->addWidget(connectionBox);
-  QObject::connect(connectionBox,
-                   SIGNAL(itemClicked(QListWidgetItem*)),
-                   this,
-                   SLOT(highlightConnectionBox(QListWidgetItem*)));
+  //QObject::connect(connectionBox,
+  //                 SIGNAL(itemClicked(QListWidgetItem*)),
+  //                 this,
+  //                 SLOT(highlightConnectionBox(QListWidgetItem*)));
 
   // Assign layout to child widget
   connectionGroup->setLayout(connectionLayout);
@@ -155,6 +166,28 @@ Connector::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
 
   QObject::connect(
       this, SIGNAL(updateBlockInfo(void)), this, SLOT(syncBlockInfo(void)));
+
+  // a change to any of the connection parameters should higlight box or not
+  QObject::connect(inputBlock,
+                   SIGNAL(currentTextChanged(const QString&)),
+                   this,
+                   SLOT(highlightConnectionBox(const QString&)));
+  QObject::connect(outputBlock,
+                   SIGNAL(currentTextChanged(const QString&)),
+                   this,
+                   SLOT(highlightConnectionBox(const QString&)));
+  QObject::connect(inputChannel,
+                   SIGNAL(currentTextChanged(const QString&)),
+                   this,
+                   SLOT(highlightConnectionBox(const QString&)));
+  QObject::connect(outputChannel,
+                   SIGNAL(currentTextChanged(const QString&)),
+                   this,
+                   SLOT(highlightConnectionBox(const QString&)));
+  QObject::connect(outputFlag,
+                   SIGNAL(currentTextChanged(const QString&)),
+                   this,
+                   SLOT(highlightConnectionBox(const QString&)));
 }
 
 void Connector::Panel::buildBlockList()
@@ -298,44 +331,36 @@ void Connector::Panel::buildOutputFlagList()
   outputFlag->addItem(QString("INPUT"), QVariant::fromValue(IO::INPUT));
 }
 
-void Connector::Panel::highlightConnectionBox(QListWidgetItem* /*item*/)
+void Connector::Panel::highlightConnectionBox(const QString& /*item*/)
 {
-  const QVariant connection_variant =
-      this->connectionBox->currentItem()->data(Qt::UserRole);
-  if (!connection_variant.isValid()) {
-    return;
-  }
-  auto conn = connection_variant.value<RT::block_connection_t>();
-
-  // build info in the output group
-  const int src_index =
-      this->outputBlock->findData(QVariant::fromValue(conn.src));
-  const int src_type_index =
-      this->outputBlock->findData(QVariant::fromValue(conn.src_port_type));
-  const int dest_index =
-      this->outputBlock->findData(QVariant::fromValue(conn.dest));
-  if (src_index < 0 || src_type_index < 0 || dest_index < 0) {
+    // build info in the output group
+  const QVariant src_variant = this->outputBlock->currentData();
+  const QVariant src_type_variant = this->outputFlag->currentData();
+  const QVariant src_chan_variant = this->outputChannel->currentData();
+  const QVariant dest_variant = this->inputBlock->currentData();
+  const QVariant dest_chan_variant = this->inputChannel->currentData();
+  if (!src_variant.isValid() || !src_type_variant.isValid() || !dest_variant.isValid() ||
+      !src_chan_variant.isValid() || !dest_chan_variant.isValid()) {
+    connectionBox->setCurrentRow(-1);
     return;
   }
 
-  this->outputBlock->setCurrentIndex(src_index);
-  this->outputFlag->setCurrentIndex(src_type_index);
-  this->inputBlock->setCurrentIndex(dest_index);
-  buildOutputChannelList();
-  buildInputChannelList();
-
-  const int src_port_index =
-      this->outputBlock->findData(QVariant::fromValue(conn.src_port));
-  const int dest_port_index =
-      this->outputBlock->findData(QVariant::fromValue(conn.dest_port));
-  if (src_port_index < 0 || dest_port_index < 0) {
-    return;
-  }
-  outputChannel->setCurrentIndex(src_port_index);
-  inputChannel->setCurrentIndex(dest_port_index);
-
+  RT::block_connection_t current_connection;
+  current_connection.src = src_variant.value<IO::Block*>();
+  current_connection.src_port_type = src_type_variant.value<IO::flags_t>();
+  current_connection.src_port = src_chan_variant.value<size_t>();
+  current_connection.dest = dest_variant.value<IO::Block*>();
+  current_connection.dest_port = dest_chan_variant.value<size_t>();
+  QVariant temp_conn_variant;
   // update connection button state
-  updateConnectionButton();
+  for(int row=0; row < connectionBox->count(); ++row) {
+    temp_conn_variant = this->connectionBox->item(row)->data(Qt::UserRole);
+    if(temp_conn_variant.value<RT::block_connection_t>() == current_connection){
+      connectionBox->setCurrentRow(row);
+      return;
+    };
+  }
+  connectionBox->setCurrentRow(-1);
 }
 
 void Connector::Panel::toggleConnection(bool down)
@@ -349,6 +374,10 @@ void Connector::Panel::toggleConnection(bool down)
   if (!src_block.isValid() || !src_type.isValid() || !src_port.isValid()
       || !dest_block.isValid() || !dest_port.isValid())
   {
+    connectionButton->setDown(false);
+    // Somehow the user was able to click the button when it should be disabled...
+    // let's fix that
+    connectionButton->setEnabled(false);
     return;
   }
   connection.src = src_block.value<IO::Block*>();
@@ -366,12 +395,13 @@ void Connector::Panel::toggleConnection(bool down)
     event.setParam("connection", std::any(connection));
     this->getRTXIEventManager()->postEvent(&event);
   }
+  connectionButton->setDown(down);
+  connectionButton->setChecked(down);
   syncBlockInfo();
 }
 
 void Connector::Panel::updateConnectionButton()
 {
-  RT::block_connection_t connection;
   if (inputChannel->count() == 0 || outputChannel->count() == 0) {
     connectionButton->setEnabled(false);
     return;
@@ -386,10 +416,13 @@ void Connector::Panel::updateConnectionButton()
   if (!src_block.isValid() || !src_type.isValid() || !src_port.isValid()
       || !dest_block.isValid() || !dest_port.isValid())
   {
+    connectionButton->setDown(false);
+    connectionButton->setChecked(false);
     connectionButton->setEnabled(false);
     return;
   }
   connectionButton->setEnabled(true);
+  RT::block_connection_t connection;
   connection.src = src_block.value<IO::Block*>();
   connection.src_port_type = src_type.value<IO::flags_t>();
   connection.src_port = src_port.value<size_t>();
@@ -401,10 +434,13 @@ void Connector::Panel::updateConnectionButton()
     temp_item = connectionBox->item(i);
     if (temp_item->data(Qt::UserRole).value<RT::block_connection_t>()
         == connection) {
-      connectionBox->setCurrentRow(i);
-      break;
+      connectionButton->setDown(true);
+      connectionButton->setChecked(true);
+      return;
     }
   }
+  connectionButton->setDown(false);
+  connectionButton->setChecked(false);
 }
 
 Connector::Plugin::Plugin(Event::Manager* ev_manager)
