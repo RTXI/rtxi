@@ -96,7 +96,7 @@ struct Info
   size_t id = 0;
   std::string name;
   std::string description;
-  Widgets::Variable::variable_t vartype;
+  Widgets::Variable::variable_t vartype = Widgets::Variable::UNKNOWN;
   std::variant<int64_t, double, uint64_t, std::string, RT::State::state_t>
       value;
 };

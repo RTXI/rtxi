@@ -363,6 +363,17 @@ void Connector::Panel::highlightConnectionBox(const QString& /*item*/)
   connectionBox->setCurrentRow(-1);
 }
 
+void Connector::Panel::reverseHighlightConnectionBox(const QListWidgetItem* item)
+{
+  const auto connection = item->data(Qt::UserRole).value<RT::block_connection_t>();
+  outputBlock->setCurrentIndex(outputBlock->findData(QVariant::fromValue(connection.src)));
+  outputFlag->setCurrentIndex(outputFlag->findData(QVariant::fromValue(connection.src_port_type)));
+  outputChannel->setCurrentIndex(outputChannel->findData(QVariant::fromValue(connection.src_port)));
+  inputBlock->setCurrentIndex(inputBlock->findData(QVariant::fromValue(connection.dest)));
+  inputChannel->setCurrentIndex(inputChannel->findData(QVariant::fromValue(connection.dest_port)));
+  updateConnectionButton();
+}
+
 void Connector::Panel::toggleConnection(bool down)
 {
   RT::block_connection_t connection;
