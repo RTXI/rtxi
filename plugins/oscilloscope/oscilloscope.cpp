@@ -223,7 +223,8 @@ void Oscilloscope::Panel::setActivity(IO::endpoint endpoint, bool activity)
 void Oscilloscope::Panel::applyChannelTab()
 {
   if (this->blocksListDropdown->count() <= 0
-      || this->channelsList->count() <= 0) {
+      || this->channelsList->count() <= 0)
+  {
     return;
   }
 
@@ -676,7 +677,8 @@ void Oscilloscope::Panel::showDisplayTab()
     trigThresh = 0;
   } else {
     while (fabs(trigThresh) < 1
-           && trigThreshUnits < this->trigsThreshList->count()) {
+           && trigThreshUnits < this->trigsThreshList->count())
+    {
       trigThresh *= 1000;
       ++trigThreshUnits;
     }
@@ -869,7 +871,9 @@ void Oscilloscope::Panel::syncChannelProperties()
   probe_info.port = channelsList->currentData().value<size_t>();
 
   // we don't bother updating if channel is not active
-  if(!scopeWindow->channelRegistered(probe_info)) { return; }
+  if (!scopeWindow->channelRegistered(probe_info)) {
+    return;
+  }
 
   const QColor color = scopeWindow->getChannelColor(probe_info);
   colorsList->setCurrentIndex(colorsList->findData(color));

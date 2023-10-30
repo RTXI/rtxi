@@ -331,7 +331,8 @@ void MainWindow::aboutQt()
 
 void MainWindow::aboutXeno()
 {
-  QMessageBox::about(this, "About Xenomai", "Running POSIX (non-RT) real-time core");
+  QMessageBox::about(
+      this, "About Xenomai", "Running POSIX (non-RT) real-time core");
 }
 
 void MainWindow::openDocs()

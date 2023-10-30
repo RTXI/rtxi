@@ -4,8 +4,8 @@ extern "C"
 #include <NIDAQmx.h>
 }
 
-#include <utility>
 #include <tuple>
+#include <utility>
 
 #include <fmt/core.h>
 
@@ -293,7 +293,11 @@ private:
   std::array<std::vector<physical_channel_t>, 4> physical_channels_registry;
   std::array<DAQ::analog_range_t, 7> default_ranges = DAQ::get_default_ranges();
   std::array<std::string, 2> default_units = DAQ::get_default_units();
-  std::tuple<std::vector<double>, std::vector<double>, std::vector<uint8_t>, std::vector<uint8_t>> buffer_arrays;
+  std::tuple<std::vector<double>,
+             std::vector<double>,
+             std::vector<uint8_t>,
+             std::vector<uint8_t>>
+      buffer_arrays;
 };
 
 class Driver : public DAQ::Driver
@@ -354,10 +358,14 @@ Device::Device(const std::string& dev_name,
       type % 2 == 0 ? inputs_count++ : outputs_count++;
     }
   }
-  std::get<DAQ::ChannelType::AI>(buffer_arrays).assign(getChannelCount(DAQ::ChannelType::AI), 0);
-  std::get<DAQ::ChannelType::AO>(buffer_arrays).assign(getChannelCount(DAQ::ChannelType::AO), 0);
-  std::get<DAQ::ChannelType::DI>(buffer_arrays).assign(getChannelCount(DAQ::ChannelType::DI), 0);
-  std::get<DAQ::ChannelType::DO>(buffer_arrays).assign(getChannelCount(DAQ::ChannelType::DO), 0);
+  std::get<DAQ::ChannelType::AI>(buffer_arrays)
+      .assign(getChannelCount(DAQ::ChannelType::AI), 0);
+  std::get<DAQ::ChannelType::AO>(buffer_arrays)
+      .assign(getChannelCount(DAQ::ChannelType::AO), 0);
+  std::get<DAQ::ChannelType::DI>(buffer_arrays)
+      .assign(getChannelCount(DAQ::ChannelType::DI), 0);
+  std::get<DAQ::ChannelType::DO>(buffer_arrays)
+      .assign(getChannelCount(DAQ::ChannelType::DO), 0);
 
   for (auto& task : task_list) {
     DAQmxSetSampTimingType(task, DAQmx_Val_OnDemand);
@@ -706,27 +714,29 @@ void Device::read()
                        &samples_read,
                        nullptr);
     for (auto& chan : this->active_channels.at(DAQ::ChannelType::AI)) {
-      writeoutput(chan->id,
-                  std::get<DAQ::ChannelType::AI>(buffer_arrays).at(value_index));
+      writeoutput(
+          chan->id,
+          std::get<DAQ::ChannelType::AI>(buffer_arrays).at(value_index));
       ++value_index;
     }
   }
   samples_read = 0;
   value_index = 0;
   int32_t num_bytes_per_sample = 0;
-  if (!this->active_channels.at(DAQ::ChannelType::DI).empty()){
-    DAQmxReadDigitalLines(task_list[DAQ::ChannelType::DI], 
-                          DAQmx_Val_Auto, 
-                          DAQmx_Val_WaitInfinitely, 
-                          DAQmx_Val_GroupByScanNumber, 
-                          std::get<DAQ::ChannelType::DI>(buffer_arrays).data(), 
-                          std::get<DAQ::ChannelType::DI>(buffer_arrays).size(), 
-                          &samples_read, 
+  if (!this->active_channels.at(DAQ::ChannelType::DI).empty()) {
+    DAQmxReadDigitalLines(task_list[DAQ::ChannelType::DI],
+                          DAQmx_Val_Auto,
+                          DAQmx_Val_WaitInfinitely,
+                          DAQmx_Val_GroupByScanNumber,
+                          std::get<DAQ::ChannelType::DI>(buffer_arrays).data(),
+                          std::get<DAQ::ChannelType::DI>(buffer_arrays).size(),
+                          &samples_read,
                           &num_bytes_per_sample,
                           nullptr);
     for (auto& chan : this->active_channels.at(DAQ::ChannelType::DI)) {
-      writeoutput(chan->id,
-                  std::get<DAQ::ChannelType::DI>(buffer_arrays).at(value_index));
+      writeoutput(
+          chan->id,
+          std::get<DAQ::ChannelType::DI>(buffer_arrays).at(value_index));
       ++value_index;
     }
   }
@@ -752,26 +762,31 @@ void Device::write()
                         nullptr);
   }
   samples_to_write = 0;
-  if (!this->active_channels.at(DAQ::ChannelType::DO).empty()){
+  if (!this->active_channels.at(DAQ::ChannelType::DO).empty()) {
     bool digital_value_changed = false;
     uint8_t old_value = 0;
     uint8_t new_value = 0;
     for (auto& chan : this->active_channels.at(DAQ::ChannelType::DO)) {
-      old_value = std::get<DAQ::ChannelType::DO>(buffer_arrays).at(samples_to_write);
+      old_value =
+          std::get<DAQ::ChannelType::DO>(buffer_arrays).at(samples_to_write);
       new_value = static_cast<uint8_t>(readinput(chan->id));
-      if(old_value != new_value){ digital_value_changed = true; }
-      std::get<DAQ::ChannelType::DO>(buffer_arrays).at(samples_to_write) = new_value;
+      if (old_value != new_value) {
+        digital_value_changed = true;
+      }
+      std::get<DAQ::ChannelType::DO>(buffer_arrays).at(samples_to_write) =
+          new_value;
       ++samples_to_write;
     }
-    if(digital_value_changed){
-      DAQmxWriteDigitalLines(task_list[DAQ::ChannelType::DO], 
-                             1,
-                             0U,
-                             DAQmx_Val_WaitInfinitely, 
-                             DAQmx_Val_GroupByScanNumber, 
-                             std::get<DAQ::ChannelType::DO>(buffer_arrays).data(), 
-                             &samples_written, 
-                             nullptr);
+    if (digital_value_changed) {
+      DAQmxWriteDigitalLines(
+          task_list[DAQ::ChannelType::DO],
+          1,
+          0U,
+          DAQmx_Val_WaitInfinitely,
+          DAQmx_Val_GroupByScanNumber,
+          std::get<DAQ::ChannelType::DO>(buffer_arrays).data(),
+          &samples_written,
+          nullptr);
     }
   }
 }
@@ -812,7 +827,7 @@ void Driver::loadDevices()
         description += " ";
         description += std::string(query_indx % 2 == 0 ? "Output" : "Input");
         description += " ";
-        pos = chan_name.find_last_of(alpha)+1;
+        pos = chan_name.find_last_of(alpha) + 1;
         channel_id = std::stoi(chan_name.substr(pos, chan_name.size() - pos));
         description += std::to_string(channel_id);
         channels.push_back({chan_name,

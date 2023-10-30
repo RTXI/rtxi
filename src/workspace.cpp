@@ -94,14 +94,17 @@ bool Workspace::Manager::isRegistered(const Widgets::Plugin* plugin)
   std::vector<std::unique_ptr<Widgets::Plugin>>::iterator start_iter;
   std::vector<std::unique_ptr<Widgets::Plugin>>::iterator end_iter;
   bool registered = false;
-  for(auto& widgets_list : rtxi_widgets_registry){
+  for (auto& widgets_list : rtxi_widgets_registry) {
     start_iter = widgets_list.second.begin();
     end_iter = widgets_list.second.end();
-    registered = std::any_of(start_iter,
-                             end_iter,
-                             [plugin](const std::unique_ptr<Widgets::Plugin>& temp_plugin)
-                                { return plugin == temp_plugin.get(); });
-    if(registered) { break; }
+    registered = std::any_of(
+        start_iter,
+        end_iter,
+        [plugin](const std::unique_ptr<Widgets::Plugin>& temp_plugin)
+        { return plugin == temp_plugin.get(); });
+    if (registered) {
+      break;
+    }
   }
   return registered;
 }
