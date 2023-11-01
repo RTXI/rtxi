@@ -450,7 +450,7 @@ QWidget* Oscilloscope::Panel::createChannelTab(QWidget* parent)
   activateButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
   QObject::connect(
       activateButton, SIGNAL(toggled(bool)), this, SLOT(activateChannel(bool)));
-  activateChannel(false);
+  activateChannel(/*active=*/false);
 
   bttnLayout->addLayout(row1Layout, 0, 0);
   bttnLayout->addLayout(row2Layout, 1, 0);
@@ -541,8 +541,9 @@ QWidget* Oscilloscope::Panel::createDisplayTab(QWidget* parent)
   sizesEdit->setMaximumWidth(sizesEdit->minimumSizeHint().width() * 3);
   sizesEdit->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Fixed);
   row1Layout->addWidget(sizesEdit);
-  sizesEdit->setText(QString::number(
-      scopeWindow->getDataSize() * sizeof(Oscilloscope::sample) / 1000000.0));
+  const auto total_bytes = 
+    static_cast<double>(scopeWindow->getDataSize() * sizeof(Oscilloscope::sample));
+  sizesEdit->setText(QString::number(total_bytes / 1e6));
   sizesEdit->setEnabled(false);
 
   // Trigger box

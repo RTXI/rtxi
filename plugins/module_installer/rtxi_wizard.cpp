@@ -354,7 +354,7 @@ void RTXIWizard::Panel::installFromString(const std::string& module_name)
   if (!(QDir(source_location)).exists()) {
     git_repository* repo = nullptr;
     git_clone_options opts = GIT_CLONE_OPTIONS_INIT;
-    opts.checkout_branch = "rtxi3";
+    opts.checkout_branch = "master";
     error = printGitError(git_clone(&repo, url, clonepath, &opts));
     git_repository_free(repo);
     if (error != 0) {

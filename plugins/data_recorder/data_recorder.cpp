@@ -39,7 +39,6 @@
 DataRecorder::Panel::Panel(QMainWindow* mwindow, Event::Manager* ev_manager)
     : Widgets::Panel(
         std::string(DataRecorder::MODULE_NAME), mwindow, ev_manager)
-    , downsample_rate(1)
     , buttonGroup(new QGroupBox)
     , blockList(new QComboBox)
     , channelList(new QComboBox)
@@ -306,7 +305,7 @@ void DataRecorder::Panel::changeDataFile()
                      QSettings::SystemScope,
                      "/usr/local/share/rtxi/");
   fileDialog.setDirectory(
-      userprefs.value("/dirs/data", getenv("HOME")).toString());
+      userprefs.value("/dirs/data", getenv("HOME")).toString()); // NOLINT
 
   QStringList filterList;
   filterList.push_back("HDF5 files (*.h5)");
