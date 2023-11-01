@@ -102,8 +102,6 @@ Widgets::Component::Component(
     const std::vector<Widgets::Variable::Info>& variables)
     : RT::Thread(mod_name, channels)
     , hostPlugin(hplugin)
-    , active(false)
-    , component_state(RT::State::INIT)
 {
   for (const auto& var : variables) {
     if (var.id != parameters.size()) {

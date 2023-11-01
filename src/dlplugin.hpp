@@ -83,9 +83,9 @@ public:
    * \return A pointer to the loaded symbol.
    */
   template<typename T>
-  T dlsym(const char* library, const char* symbol)
+  T dlsym(const char* library, const char* symbol) // NOLINT
   {
-    dll_info temp = {std::string(library), nullptr};
+    const dll_info temp = {std::string(library), nullptr};
     auto handle_loc = std::find(
         this->loaded_plugins.begin(), this->loaded_plugins.end(), temp);
     if (handle_loc == this->loaded_plugins.end()) {

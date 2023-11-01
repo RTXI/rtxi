@@ -24,6 +24,8 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include <utility>
+
 #include "rt.hpp"
 // #include <event.h>
 
@@ -46,8 +48,8 @@ protected:
 class MockRTDevice : public RT::Device
 {
 public:
-  MockRTDevice(std::string name, std::vector<IO::channel_t> channel_list)
-      : RT::Device(name, channel_list)
+  MockRTDevice(std::string mockname, const std::vector<IO::channel_t>& channel_list)
+      : RT::Device(std::move(mockname), channel_list)
   {
   }
   MOCK_METHOD(void, read, (), ());
@@ -57,8 +59,8 @@ public:
 class MockRTThread : public RT::Thread
 {
 public:
-  MockRTThread(std::string name, std::vector<IO::channel_t> channel_list)
-      : RT::Thread(name, channel_list)
+  MockRTThread(std::string mockname, const std::vector<IO::channel_t>& channel_list)
+      : RT::Thread(std::move(mockname), channel_list)
   {
   }
   MOCK_METHOD(void, execute, (), ());
@@ -69,7 +71,7 @@ public:
 class RTConnectorTest : public ::testing::Test
 {
 public:
-  std::string defaultBlockName;
+  std::string defaultBlockName{"DEFAULT:BLOCK:NAME"};
   std::string defaultInputChannelName = "CHANNEL INPUT";
   std::string defaultInputChannelDescription =
       "DEFAULT INPUT CHANNEL DESCRIPTION";
@@ -82,7 +84,7 @@ protected:
   RTConnectorTest()
   {
     // Generates a default channels
-    defaultBlockName = "DEFAULT:BLOCK:NAME";
+    
     IO::channel_t defaultInputChannel = {};
     defaultInputChannel.name = defaultInputChannelName;
     defaultInputChannel.description = defaultInputChannelDescription;

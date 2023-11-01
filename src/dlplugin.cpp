@@ -30,7 +30,7 @@ DLL::Loader::~Loader()
 int DLL::Loader::load(const char* library)
 {
   DLL::dll_info dll {std::string(library), nullptr};
-  std::unique_lock<std::mutex> lk(this->m_dll_mutex);
+  const std::unique_lock<std::mutex> lk(this->m_dll_mutex);
   auto loc_iter =
       std::find(this->loaded_plugins.begin(), this->loaded_plugins.end(), dll);
   if (loc_iter != this->loaded_plugins.end()) {
@@ -51,8 +51,8 @@ int DLL::Loader::load(const char* library)
 
 void DLL::Loader::unload(const char* library)
 {
-  DLL::dll_info dll {std::string(library), nullptr};
-  std::unique_lock<std::mutex> lk(this->m_dll_mutex);
+  const DLL::dll_info dll {std::string(library), nullptr};
+  const std::unique_lock<std::mutex> lk(this->m_dll_mutex);
   auto loc_iter =
       std::find(this->loaded_plugins.begin(), this->loaded_plugins.end(), dll);
   if (loc_iter == this->loaded_plugins.end()) {

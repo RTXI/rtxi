@@ -67,7 +67,7 @@ typedef struct record_channel
 {
   std::string name;
   IO::endpoint endpoint;
-  RT::OS::Fifo* data_source;
+  RT::OS::Fifo* data_source=nullptr;
   bool operator==(const record_channel& rhs) const
   {
     return (this->endpoint == rhs.endpoint)
@@ -116,11 +116,11 @@ private slots:
   void removeChannel();
   void addNewTag();
   void processData();
-  void syncEnableRecordingButtons(const QString&);
+  void syncEnableRecordingButtons(const QString& /*unused*/);
 
 private:
   size_t m_buffer_size = DEFAULT_BUFFER_SIZE;
-  size_t downsample_rate;
+  size_t downsample_rate {1};
   std::vector<std::string> dataTags;
 
   QGroupBox* channelGroup = nullptr;

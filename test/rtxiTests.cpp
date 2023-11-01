@@ -42,12 +42,15 @@ void TestEnvironment::SetUp()
   }
 }
 
-static void signal_handler(int signum)
+namespace {
+void signal_handler(int signum)
 {
+  // NOLINTNEXTLINE
   ERROR_MSG("signal_handler : signal type {} received\n", signum);
   std::cerr << boost::stacktrace::stacktrace();
-  exit(-1);
+  exit(-1); // NOLINT
 }
+} // namespace
 
 void TestEnvironment::TearDown()
 {
@@ -56,10 +59,18 @@ void TestEnvironment::TearDown()
 
 int main(int argc, char* argv[])
 {
-  signal(SIGINT, signal_handler);
-  signal(SIGABRT, signal_handler);
-  signal(SIGSEGV, signal_handler);
-
+  if(signal(SIGINT, signal_handler) == SIG_ERR){
+    ERROR_MSG("MAIN: Unable to set SIGINT signal handler");
+    return -1;
+  }
+  if(signal(SIGABRT, signal_handler) == SIG_ERR){
+    ERROR_MSG("MAIN: Unable to set SIGABRT signal handler");
+    return -1;
+  }
+  if(signal(SIGSEGV, signal_handler) == SIG_ERR){
+    ERROR_MSG("MAIN: Unable to set SIGSEGV signal handler");
+    return -1;
+  }  
   ::testing::InitGoogleTest(&argc, argv);
   ::testing::AddGlobalTestEnvironment(new TestEnvironment());
   return RUN_ALL_TESTS();

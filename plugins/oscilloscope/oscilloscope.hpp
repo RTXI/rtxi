@@ -33,7 +33,7 @@
 #include "fifo.hpp"
 #include "io.hpp"
 #include "rt.hpp"
-#include "scope.h"
+#include "scope.hpp"
 #include "widgets.hpp"
 
 namespace Oscilloscope
@@ -103,8 +103,8 @@ private slots:
   void buildChannelList();
   void screenshot();
   void apply();
-  void showTab(int);
-  void activateChannel(bool);
+  void showTab(int index);
+  void activateChannel(bool active);
   void removeBlockChannels(IO::Block* block);
   void syncChannelProperties();
 

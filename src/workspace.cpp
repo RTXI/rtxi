@@ -17,14 +17,14 @@
 
 #include "workspace.hpp"
 
-#include "connector/connector.h"
-#include "data_recorder/data_recorder.h"
-#include "module_installer/rtxi_wizard.h"
-#include "oscilloscope/oscilloscope.h"
+#include "connector/connector.hpp"
+#include "data_recorder/data_recorder.hpp"
+#include "module_installer/rtxi_wizard.hpp"
+#include "oscilloscope/oscilloscope.hpp"
 #include "performance_measurement/performance_measurement.hpp"
 #include "rtxiConfig.h"
-#include "system_control/system_control.h"
-#include "userprefs/userprefs.h"
+#include "system_control/system_control.hpp"
+#include "userprefs/userprefs.hpp"
 
 std::optional<Widgets::FactoryMethods> Workspace::get_core_plugin_factory(
     const std::string& plugin_name)

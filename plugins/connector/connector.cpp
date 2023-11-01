@@ -18,7 +18,7 @@
 
 */
 
-#include "connector.h"
+#include "connector.hpp"
 
 #include "main_window.hpp"
 

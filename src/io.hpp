@@ -29,8 +29,8 @@
 //! Connection Oriented Classes
 /*!
  * Objects contained within this namespace are responsible
- * for managing data sharing between various experimental
- * entities. This is different to the Fifo used for
+ * for managing data sharing between various RTXI entities 
+ * called blocks. This is different to the Fifo used for
  * interprocess communication between rtxi and its realtime
  * thread.
  *
@@ -43,6 +43,10 @@ constexpr size_t INVALID_BLOCK_ID = std::numeric_limits<size_t>::max();
 
 /*!
  * Variable used to specify the type of a channel.
+ *
+ * Blocks can either have INPUT or OUTPUT channels to other blocks.
+ * These channels are usually default constructed to UNKNOWN, which
+ * is an error if used as such
  */
 enum flags_t : size_t
 {
@@ -58,7 +62,6 @@ enum flags_t : size_t
  * \param name The name of the channel
  * \param description short description of the channel
  * \param flags whether the channel is IO::INPUT or IO::OUTPUT type
- * \param data_size accepted data length of the input/output
  *
  * \sa IO::Block::Block()
  */
@@ -70,7 +73,7 @@ typedef struct channel_t
 } channel_t;
 
 /*!
- * Interface for IO data between RTXI devices and plugins.
+ * Interface class for IO data between RTXI devices and plugins.
  */
 class Block
 {
@@ -78,13 +81,14 @@ public:
   /*!
    * The constructor needs to be provided with a specification of the channels
    * that will be embedded in this block in the channels parameter. Fields could
-   * be IO::INPUT, IO::OUTPUT. Size should be the number of total channels,
-   * regardless of type.
+   * be IO::INPUT, IO::OUTPUT. It also needs to specify whether the block is
+   * dependent on other blocks for real-time scheduling. This base class is not
+   * meant to be inherited directly and Widget::Component is recomended instead
    *
    * \param blockname The name of the block.
    * \param channels The lis of channel specifications for this block.
-   * \param size The number of channels in the specification.
    *
+   * \sa Widgets::Component
    * \sa IO::channel_t
    */
   Block(std::string blockname,
@@ -131,34 +135,85 @@ public:
   /*!
    * write the values of the specified input channel.
    *
+   * This function is responsible for writting external values to
+   * the specified input channel. Additional writes to input result in adding  
+   * to existing values in the channel, and is only reset to zero during 
+   * readinput functin call.
+   *
    * \param index The input channel's index.
    * \param data the data to push into the block
    *
    * \return The value of the specified input channel.
+   *
+   * \sa IO::Block::readinput()
    */
   void writeinput(size_t index, const double& data);
 
   /*!
    * Get the values of the specified output channel.
    *
+   * This function can read values from both input and output types. This 
+   * does not reset the values on the channel
+   *
    * \param index The output channel's index.
+   * \param direction The channel direction represented by IO::flags_t
    * \return The value of the specified output channel.
    */
   const double& readPort(IO::flags_t direction, size_t index);
 
+  /*!
+   * Returns the dependency property of the block
+   *
+   * Some blocks are dependent on the output of others. It is crucial for 
+   * these blocks to be scheduled in real-time to follow their dependencies, 
+   * or else risk large errors in time dependent calculations.
+   *
+   * \return True for a dependent IO::Block, false otherwise
+   */
   bool dependent() const { return this->isInputDependent; }
 
+  /*!
+   * Returns activity state of the block
+   *
+   * \return True for active block, false otherwise
+   */
   bool getActive() const { return this->active; }
+
+  /*!
+   * Sets the activity state of the block. Only used by Real-Time thread
+   *
+   * /param act The activity state to set the block to. True if the block
+   *            is in the active state. False otherwise.
+   */
   void setActive(bool act) { this->active = act; }
+
+  /*!
+   * Assign unique ID to the block. Used by the Real-Time thread
+   *
+   * \param block_id The id to assign to the block
+   */
   void assignID(size_t block_id) { this->id = block_id; }
+
+  /*!
+   * Retrieve the assigned id of the block
+   *
+   * \return The id of the block
+   */
   size_t getID() const { return this->id; }
 
 protected:
   /*!
    * Read the input sent to this block. Only the block itself has access.
    *
+   * Reads the buffered values from all external inputs and resets the buffer
+   * to zero. This function should only be accessed once per scope or risk 
+   * getting previously read values overwirten. This function assumes reading
+   * input channels.
+   *
    * \param index The channel to read the sent input from
-   * \returns A vector of values
+   * \returns A reference to input value written
+   *
+   * \sa IO::Block::writeinput()
    */
   double& readinput(size_t index);
 
@@ -166,7 +221,7 @@ protected:
    * Writes output to specified channel. Only the block itself has access.
    *
    * \param index The channel to write the output to
-   * \param data A vector of values to send to the channel
+   * \param data A reference to value to send 
    */
   void writeoutput(size_t index, const double& data);
 

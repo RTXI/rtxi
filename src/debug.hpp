@@ -26,9 +26,12 @@
 
 #include <fmt/core.h>
 
-//! Prints a backtrace to standard error.
-// void PRINT_BACKTRACE(void);
-
+/*!
+ * Prints a backtrace to standard error. Non-realtime usage only.
+ *
+ * \param errmsg A constant reference to string having fmt library formatting
+ * \param args Additional formatting arguments compatible with fmt library
+ */
 template<typename... Args>
 void ERROR_MSG(const std::string& errmsg, Args... args)
 {

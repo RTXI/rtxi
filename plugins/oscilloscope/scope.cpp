@@ -22,7 +22,7 @@
 #include <cmath>
 #include <mutex>
 
-#include "scope.h"
+#include "scope.hpp"
 
 #include <qwt_abstract_scale_draw.h>
 #include <qwt_plot_legenditem.h>

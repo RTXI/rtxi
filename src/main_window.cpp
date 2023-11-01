@@ -34,16 +34,16 @@
 
 #include <fmt/core.h>
 
-#include "connector/connector.h"
-#include "data_recorder/data_recorder.h"
+#include "connector/connector.hpp"
+#include "data_recorder/data_recorder.hpp"
 #include "debug.hpp"
 #include "event.hpp"
-#include "module_installer/rtxi_wizard.h"
-#include "oscilloscope/oscilloscope.h"
+#include "module_installer/rtxi_wizard.hpp"
+#include "oscilloscope/oscilloscope.hpp"
 #include "performance_measurement/performance_measurement.hpp"
 #include "rtxiConfig.h"
-#include "system_control/system_control.h"
-#include "userprefs/userprefs.h"
+#include "system_control/system_control.hpp"
+#include "userprefs/userprefs.hpp"
 #include "widgets.hpp"
 #include "workspace.hpp"
 

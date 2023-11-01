@@ -22,6 +22,7 @@
 #include <iostream>
 #include <memory>
 #include <numeric>
+#include <utility>
 #include <vector>
 
 #include "io_tests.hpp"
@@ -29,11 +30,11 @@
 std::vector<IO::channel_t> generateDefaultChannelList()
 {
   std::string defaultBlockName;
-  std::string defaultInputChannelName = "CHANNEL INPUT";
-  std::string defaultInputChannelDescription =
+  const std::string defaultInputChannelName = "CHANNEL INPUT";
+  const std::string defaultInputChannelDescription =
       "DEFAULT INPUT CHANNEL DESCRIPTION";
-  std::string defaultOutputChannelName = "CHANNEL OUTPUT";
-  std::string defaultOutputChannelDescription =
+  const std::string defaultOutputChannelName = "CHANNEL OUTPUT";
+  const std::string defaultOutputChannelDescription =
       "DEFAULT OUTPUT CHANNEL DESCRIPTION";
   std::vector<IO::channel_t> defaultChannelList;
 
@@ -55,7 +56,7 @@ std::vector<IO::channel_t> generateDefaultChannelList()
 
 TEST_F(IOBlockTest, getName)
 {
-  IO::Block block(this->defaultBlockName, this->defaultChannelList, true);
+  const IO::Block block(this->defaultBlockName, this->defaultChannelList, /*isdependent=*/true);
   ASSERT_EQ(block.getName(), defaultBlockName);
   ASSERT_EQ(block.getChannelName(IO::INPUT, 0), defaultInputChannelName);
   ASSERT_EQ(block.getChannelName(IO::OUTPUT, 0), defaultOutputChannelName);
@@ -63,14 +64,14 @@ TEST_F(IOBlockTest, getName)
 
 TEST_F(IOBlockTest, getCount)
 {
-  IO::Block block(this->defaultBlockName, this->defaultChannelList, true);
+  const IO::Block block(this->defaultBlockName, this->defaultChannelList, /*isdependent=*/true);
   ASSERT_EQ(block.getCount(IO::INPUT), 1);
   ASSERT_EQ(block.getCount(IO::OUTPUT), 1);
 }
 
 TEST_F(IOBlockTest, getDescription)
 {
-  IO::Block block(this->defaultBlockName, this->defaultChannelList, true);
+  const IO::Block block(this->defaultBlockName, this->defaultChannelList, /*isdependent=*/true);
   ASSERT_EQ(block.getChannelDescription(IO::INPUT, 0),
             defaultInputChannelDescription);
   ASSERT_EQ(block.getChannelDescription(IO::OUTPUT, 0),
@@ -79,19 +80,19 @@ TEST_F(IOBlockTest, getDescription)
 
 TEST_F(IOBlockTest, readPort)
 {
-  IO::Block block(this->defaultBlockName, this->defaultChannelList, true);
-  double defaultval = 0.0;
+  IO::Block block(this->defaultBlockName, this->defaultChannelList, /*isdependent=*/true);
+  const double defaultval = 0.0;
   EXPECT_DOUBLE_EQ(defaultval, block.readPort(IO::OUTPUT, 0));
 }
 
 TEST_F(IOBlockTest, writeinput)
 {
-  double values = 1.0;
+  const double values = 1.0;
   class testBlock : public IO::Block
   {
   public:
     testBlock(std::string n, const std::vector<IO::channel_t>& c)
-        : IO::Block(n, c, true)
+        : IO::Block(std::move(n), c, /*isdependent=*/true)
     {
     }
     void echo() { this->writeoutput(0, this->readinput(0)); }

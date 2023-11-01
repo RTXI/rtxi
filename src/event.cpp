@@ -150,14 +150,12 @@ std::string Event::type_to_string(Event::Type event_type)
 
 Event::Object::Object(Event::Type et)
     : event_type(et)
-    , processed(false)
 {
 }
 
 Event::Object::Object(const Event::Object& obj)
     : params(obj.params)
     , event_type(obj.event_type)
-    , processed(false)
 {
 }
 

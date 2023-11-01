@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.24)
 
 add_library(connector_lib OBJECT
-    connector.h
+    connector.hpp
     connector.cpp
 )
 

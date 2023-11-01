@@ -22,7 +22,7 @@
 #include <cmath>
 #include <memory>
 
-#include "system_control.h"
+#include "system_control.hpp"
 
 #include "daq.hpp"
 #include "debug.hpp"
@@ -364,7 +364,7 @@ void SystemControl::Panel::apply()
 {
   int64_t freq = freqEdit->text().toInt();
   freq *= freqUnitList->currentData().toInt();
-  int64_t period = RT::OS::SECONDS_TO_NANOSECONDS / freq;
+  const int64_t period = RT::OS::SECONDS_TO_NANOSECONDS / freq;
   Event::Object event(Event::Type::RT_PERIOD_EVENT);
   event.setParam("period", std::any(period));
   this->getRTXIEventManager()->postEvent(&event);
@@ -539,7 +539,7 @@ void SystemControl::Panel::displayAnalogGroup()
   // Determine the correct prefix for analog gain
   int indx = 8;
   double tmp = NAN;
-  double gain = dev->getAnalogGain(type, chan);
+  const double gain = dev->getAnalogGain(type, chan);
   tmp = fabs(gain);
   while (((tmp >= 1000) && (indx > 0)) || ((tmp < 1) && (indx < 16))) {
     if (tmp >= 1000) {
@@ -557,7 +557,7 @@ void SystemControl::Panel::displayAnalogGroup()
 
   // Determine the correct prefix for analog offset
   indx = 8;
-  double offset = dev->getAnalogZeroOffset(type, chan);
+  const double offset = dev->getAnalogZeroOffset(type, chan);
   tmp = fabs(offset);
   while (((tmp >= 1000) && (indx > 0)) || ((tmp < 1) && (indx < 16))) {
     if (tmp >= 1000) {

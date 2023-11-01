@@ -53,7 +53,7 @@ public:
   virtual ~Fifo() = default;
 
   /*!
-   * Read the data stored in the FIFO written by RT thread. Must be run
+   * Read the data stored in the FIFO written by realtime thread. Must be run
    * from non-rt thread.
    *
    * \param buf The buffer where the data from the buffer should be
@@ -64,7 +64,7 @@ public:
   virtual ssize_t read(void* buf, size_t data_size) = 0;
 
   /*!
-   * Write to the FIFO storage for the RT thread. Must be run from non-rt
+   * Write to the FIFO storage for the realtime thread. Must be run from non-rt
    * thread.
    *
    * \param buf The buffer holding the data to write to the FIFO.
@@ -75,7 +75,7 @@ public:
 
   /*!
    * Read the data stored in the FIFO written by non-RT thread. Must be run
-   * from RT thread.
+   * from realtime thread.
    *
    * \param buf The buffer where the data from the buffer should be
    *     written to
@@ -85,8 +85,8 @@ public:
   virtual ssize_t readRT(void* buf, size_t data_size) = 0;
 
   /*!
-   * Write to the FIFO storage for the non-RT thread. Must be run from RT
-   * thread.
+   * Write to the FIFO storage for the non-RT thread. Must be run from
+   * realtime thread.
    *
    * \param buf The buffer holding the data to write to the FIFO.
    * \param data_size The size of the data to read from the buffer

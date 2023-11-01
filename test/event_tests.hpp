@@ -29,24 +29,23 @@
 class EventObjectTest : public ::testing::Test
 {
 protected:
-  EventObjectTest() {}
-  ~EventObjectTest() {}
+  EventObjectTest() = default;
+  ~EventObjectTest() override = default;
 };
 
 class EventManagerTest : public ::testing::Test
 {
 protected:
-  EventManagerTest() {}
-  ~EventManagerTest() {}
+  EventManagerTest() = default; 
+  ~EventManagerTest() override = default;
 };
 
 class MockEventHandler : public Event::Handler
 {
 public:
   MockEventHandler() = default;
-  ~MockEventHandler() = default;
+  ~MockEventHandler() override = default;
 
-  // void receiveEvent(Event::Object* event) { event->done(); }
   MOCK_METHOD(void, receiveEvent, (Event::Object*), (override));
 };
 

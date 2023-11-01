@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.24)
 
 add_library(system_control_lib OBJECT
-    system_control.h
+    system_control.hpp
     system_control.cpp
 )
 

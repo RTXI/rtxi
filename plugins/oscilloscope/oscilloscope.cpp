@@ -30,13 +30,13 @@
 #include <cmath>
 #include <sstream>
 
-#include "oscilloscope.h"
+#include "oscilloscope.hpp"
 
 #include <qwt_plot_renderer.h>
 
 #include "debug.hpp"
 #include "main_window.hpp"
-#include "oscilloscope/scope.h"
+#include "scope.hpp"
 #include "rt.hpp"
 
 void Oscilloscope::Plugin::receiveEvent(Event::Object* event)

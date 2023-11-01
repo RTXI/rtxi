@@ -12,18 +12,30 @@
 #include "widgets.hpp"
 #include "workspace.hpp"
 
-static void signal_handler(int signum)
+namespace {
+void signal_handler(int signum)
 {
+  // NOLINTNEXTLINE
   ERROR_MSG("signal_handler : signal type {} received\n", ::strsignal(signum));
   std::cerr << boost::stacktrace::stacktrace();
-  exit(-1);
+  exit(-1); // NOLINT 
 }
+} // namespace
 
 int main(int argc, char* argv[])
 {
-  signal(SIGINT, signal_handler);
-  signal(SIGABRT, signal_handler);
-  signal(SIGSEGV, signal_handler);
+  if(signal(SIGINT, signal_handler) == SIG_ERR){
+    ERROR_MSG("MAIN: Unable to set SIGINT signal handler");
+    return -1;
+  }
+  if(signal(SIGABRT, signal_handler) == SIG_ERR){
+    ERROR_MSG("MAIN: Unable to set SIGABRT signal handler");
+    return -1;
+  }
+  if(signal(SIGSEGV, signal_handler) == SIG_ERR){
+    ERROR_MSG("MAIN: Unable to set SIGSEGV signal handler");
+    return -1;
+  }
 
   std::cout << "Welcome to RTXI Version ";
   std::cout << RTXI_VERSION_MAJOR << ".";
@@ -44,7 +56,7 @@ int main(int argc, char* argv[])
   auto* rtxi_window = new MainWindow(event_manager.get());
   auto mod_manager = std::make_unique<Workspace::Manager>(event_manager.get());
   rtxi_window->loadWindow();
-  int retval = QApplication::exec();
+  const int retval = QApplication::exec();
   delete rtxi_window;
   delete app;
   return retval;

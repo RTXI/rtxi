@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.24)
 
 add_library(oscilloscope_lib OBJECT
-    scope.h
+    scope.hpp
     scope.cpp
-    oscilloscope.h
+    oscilloscope.hpp
     oscilloscope.cpp
 )
 

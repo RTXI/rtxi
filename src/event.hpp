@@ -24,12 +24,10 @@
 #include <any>
 #include <atomic>
 #include <condition_variable>
-#include <filesystem>
 #include <list>
 #include <mutex>
 #include <queue>
 #include <shared_mutex>
-#include <sstream>
 #include <string>
 #include <thread>
 #include <vector>
@@ -41,10 +39,18 @@ class eventLogger;
  *
  * Objects contained within this namespace are responsible
  *   for dispatching signals.
+ *
+ * All RTXI plugins and managers use the event system to communicate
+ * with each other. The RT::System also uses the event system to change
+ * it's own state, although it internally changes the format to account
+ * for transmitting information to the real-time thread.
  */
 namespace Event
 {
 
+/*!
+ * All possible event types are enumerated here
+ */
 enum Type
 {
   RT_PERIOD_EVENT = 0,
@@ -103,7 +109,13 @@ std::string type_to_string(Type event_type);
  *
  * This object is able to hold metadata information about the event for
  * handlers to use. In order to properly use the token, the caller must
- * wait for handlers to mark the event processed with wait()
+ * wait for event manager to mark the event processed. The caller and event
+ * handler must agree on parameter names for successfull communication, or
+ * else an exception is thrown. These parameters are stored with string values
+ * as identifiers, and the types of these parameters must be known ahead of
+ * time. Event handlers can potentially give a response through the same event
+ * token by storing the result under a new key. It is not the responsibility 
+ * of the event object class to store failure states.
  */
 class Object
 {
@@ -126,6 +138,7 @@ public:
    * Returns the type of event that was emitted.
    *
    * \return The type of event
+   * \sa Event::Type
    */
   Event::Type getType() const;
 
@@ -146,26 +159,44 @@ public:
   void setParam(const std::string& param_name, const std::any& param_value);
 
   /*!
-   * Forces caller to wait for the event to be processed. This is needed for
-   * events that carry metadata information for the handlers. This function
-   * will block until the event is handled (marked done by handler)
+   * Forces caller to wait for the event to be processed. 
+   *
+   * This is needed for events that carry metadata information for the handlers. 
+   * This function will block until the event is handled (marked done by handler)
+   * The wait function is automatically called by Event::Manager::postEvent() and
+   * any direct call to the wait function will result in blocking forever.
    *
    * \sa Event::Object::done()
+   * \sa Event::Manager::postEvent()
    */
   void wait();
 
   /*!
    * Marks the event object as processed and successfully completed
+   * 
+   * NOTE: Event::Manager automatically handles calling this and should not be
+   * called directly by the user. Doing so will be an error and (hopefully) RTXI 
+   * crashes. If not then good luck.
+   *
+   * \sa Event::Manager::postEvent()
    */
   void done();
 
   /*!
-   * Checks whether the event object has been processed already. Events
-   * that have true value for processed are also handled.
+   * Checks whether the event object has been processed already. 
+   *      Events that have true value for processed are also handled.
+   *
    * \returns true if processed. False otherwise
+   * \sa Event::Manager::postEvent()
    */
   bool isdone() const;
 
+  /*!
+   * Checks whether the given parameter key exists inside event token
+   *
+   * \param param_name The name of the parameter to search for
+   * \return True if it exists, false otherwise.
+   */
   bool paramExists(const std::string& param_name);
 
 private:
@@ -179,13 +210,16 @@ private:
   std::mutex processing_done_mut;
   std::condition_variable processing_done_cond;
   Type event_type;
-  bool processed;
+  bool processed=false;
 };  // class Object
 
 /*!
- * Entity that is signaled when an event is posted. This is an interface
- * that allows rtxi components and plugins to define how they receive those
- * events.
+ * Entity that is signaled when an event is posted. 
+ *
+ * This is an interface that allows rtxi components and plugins to define 
+ * how they receive those events. All objects that hope to interact within
+ * the rtxi environment with other objects in a non-realtime context must
+ * inherit this base class.
  *
  * \sa Event::Manager::postEvent()
  */
@@ -213,6 +247,9 @@ public:
 /*
  * Managaes the collection of all objects waiting to
  *   receive signals from events.
+ *
+ * All event handlers must register themselves with the manager in order to
+ * receive future signals. 
  */
 class Manager
 {
@@ -226,8 +263,15 @@ public:
   ~Manager();
 
   /*!
-   * Function for posting an event to be signaled. This function
-   * should only be called from non-realtime.
+   * Function for posting an event to be signaled. 
+   *
+   * The event manager will take the object and route it to all event
+   * handlers registered. This is done by passing the event through a
+   * thread-safe queue, which is then processed by event handler workers.
+   * This is synchronous, meaning that it blocks until all event handlers
+   * return. In addition, the event manager automatically marks the event
+   * as done right before returning.This function should only be called 
+   * from non-realtime.
    *
    * \param event The event to be posted.
    *
@@ -237,25 +281,17 @@ public:
   void postEvent(Object* event);
 
   /*!
-   * Function for posting multiple events at the same time. The order
-   * at which these events are posted are preserved. This is more
+   * Function for posting multiple events at the same time. 
+   *
+   * The order at which these events are posted are preserved. This is more
    * efficient for situations where multiple events can be generated
    * from a single action(loading multiple plugins, loading settings
-   * file that changes many parameters, unregister module, etc.)
+   * file that changes many parameters, unregister module, etc.).
+   * Will block until all events are processed.
    *
    * \param events A vector of events that will be published
    */
   void postEvent(std::vector<Object>& events);
-
-  /*!
-   * The main processing thread driver. It starts the event processing
-   * loop responsible for routing events to handlers. Will mark the
-   * event as done automatically regardless if it is handled or
-   * not to prevent caller from waiting indefinitely.
-   *
-   * \sa  Event::Object
-   */
-  // void processEvents();
 
   /*!
    * Registers handler in the registry
@@ -271,8 +307,28 @@ public:
    */
   void unregisterHandler(Handler* handler);
 
+  /*!
+   * Checks Whether the handler is registered
+   *
+   * \param handler Pointer to handler to check registration
+   * \return True if handler is registered, false otherwise.
+   */
   bool isRegistered(Handler* handler);
 
+  /*!
+   * Returns a pointer to the event logger
+   *
+   * The event manager class also logs all messages being passed around in
+   * RTXI and sends them to standard output. These logs are automatically 
+   * generated in the event processor thread, and the only other part of
+   * the system that requires access to the logger is the telemitry
+   * processor, which will also log all telemitry received by RTXI from 
+   * the RT::System class in the realtime thread.
+   *
+   * \return Raw pointer to eventLogger class
+   *
+   * \sa RT::System::getTelemitry
+   */
   eventLogger* getLogger() { return this->logger.get(); }
 
 private:

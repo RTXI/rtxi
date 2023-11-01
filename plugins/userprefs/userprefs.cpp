@@ -25,7 +25,7 @@
 
 #include <QFileDialog>
 
-#include "userprefs.h"
+#include "userprefs.hpp"
 
 #include "debug.hpp"
 #include "main_window.hpp"

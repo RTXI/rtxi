@@ -22,7 +22,6 @@
 #include "event.hpp"
 #include "widgets.hpp"
 
-//! Internal Management Oriented Classes
 /*!
  * Objects contained within this namespace are responsible for providing
  *   Manager objects.
@@ -32,7 +31,7 @@ namespace Workspace
 
 /*
  * Returns a set of functions for generating plugin, component, and panel
- * classes for a core RTXI modules
+ * classes for a core RTXI widgets
  *
  */
 std::optional<Widgets::FactoryMethods> get_core_plugin_factory(
@@ -53,28 +52,76 @@ public:
 
   /*!
    * loads plugin
+   *
+   * \param library The name of the core library to load. For dynamically loaded 
+   *                widgets it is the location of the library in the filesystem.
+   * \return Raw pointer to widgets plugin. The plugin is already registered with
+   *         the manager upon return of this function.
    */
   Widgets::Plugin* loadPlugin(const std::string& library);
 
   /*!
    * unloads plugin
+   *
+   * \param plugin Plugin pointer to remove from workspace manager registry
    */
   void unloadPlugin(Widgets::Plugin* plugin);
 
   /*!
    * Handles plugin loading/unloadin gevents from gui thread
+   *
+   * \param event The event to handle. The workspace manager only handles the following
+   *              event types:
+   *                Event::Type::PLUGIN_INSERT_EVENT
+   *                Event::Type::PLUGIN_REMOVE_EVENT
+   *                Event::Type::DAQ_DEVICE_QUERY_EVENT
    */
   void receiveEvent(Event::Object* event) override;
 
   /*!
-   * Checks whether plugin is registered
+   * Checks whether plugin is registered.
+   *
+   * \param plugin Plugin pointer to check registration.
+   *
+   * \return True if registered, false otherwise.
    */
   bool isRegistered(const Widgets::Plugin* plugin);
 
+  /*!
+    * Get the list of all loaded devices in RTXI
+    *
+    * The workspace manager, upon instantiation, will search predefined places
+    * for loadable DAQ device drivers. Once those drivers are successfully loaded,
+    * the manager will store them in a registry. This returns the list of all 
+    * DAQ devices in the registy. 
+    *
+    * \param driver The name of the driver associated with the devices
+    * \return A vector of DAQ::Device pointers associated with the driver
+    *
+    * \sa DAQ::Device
+    * \sa DAQ::Driver
+    */
   std::vector<DAQ::Device*> getDevices(const std::string& driver);
+
+  /*!
+    * Get all devices in registry
+    *
+    * \return A vector of DAQ::Device pointers
+    */
   std::vector<DAQ::Device*> getAllDevices();
 
+  /*!
+    * Save current workspace values and state settings
+    *
+    * \param profile_name The name to save the settings
+    */
   void saveSettings(const QString& profile_name);
+
+  /*!
+    * Restore workspace values and state settings
+    *
+    * \param profile_name The name of the stored settings 
+    */
   void loadSettings(const QString& profile_name);
 
 private:
@@ -88,7 +135,7 @@ private:
   void unregisterWidget(Widgets::Plugin* plugin);
 
   void registerFactories(const std::string& widget_name,
-                         Widgets::FactoryMethods);
+                         Widgets::FactoryMethods fact);
   void unregisterFactories(const std::string& widget_name);
   Widgets::Plugin* loadCorePlugin(const std::string& library);
 

@@ -69,7 +69,7 @@ private:
   {
     DOWNLOAD,
     UPDATE
-  } button_mode;
+  } button_mode {DOWNLOAD};
 
   QNetworkAccessManager qnam;
   QNetworkReply* reposNetworkReply = nullptr;

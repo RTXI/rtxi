@@ -88,6 +88,7 @@ std::string vartype2string(variable_t type);
  * \param name The name of the channel
  * \param description short description of the channel
  * \param vartype type of variable that is stored
+ * \param value The value of the parameter stored in a variant
  *
  * \sa IO::Block::Block()
  */
@@ -122,22 +123,61 @@ class Plugin;
 class Panel;
 
 /*!
- * This structure contains functions for creating instances. It is used when
- * loading and unloading RTXI modules dynamically
+ * This structure contains functions for creating Widget instances. 
+ *
+ * This struct is used when loading and unloading RTXI modules. It 
+ * allows RTXI to use the builder pattern for loading widgets by calling these
+ * functions to generate the widget specific classes, then using relevant
+ * assembly methods to put them together and display them.
+ *
  */
 struct FactoryMethods
 {
+  /*!
+   * \fn std::unique_ptr<Widgets::Plugin> createPlugin(Event::Manager* event)
+   * \brief Function that returns a smart pointer to plugin object
+   *
+   * \param event_manager Raw pointer to Event::Manager object
+   * \return Smart pointer to plugin object
+   *
+   * \sa Widgets::Plugin
+   */
   std::unique_ptr<Widgets::Plugin> (*createPlugin)(Event::Manager*) = nullptr;
+  
+  /*!
+   * \fn std::unique_ptr<Widgets::Component> createComponent(Widgets::Plugin* plugin)
+   * \brief Function that returns a smart pointer to component object
+   *
+   * \param event_manager Raw pointer to Widgets::Plugin object
+   * \return Smart pointer to component object
+   *
+   * \sa Widgets::Component
+   */
   std::unique_ptr<Widgets::Component> (*createComponent)(Widgets::Plugin*) =
       nullptr;
+
+  /*!
+   * \fn Widgets::Panel* createPanel(QMainWindow* window, Event::Manager* event_manager)
+   * \brief Function that creates Widgets::Panel object and returns the pointer
+   *
+   * \param window QMainWindow pointer to attach the panel to
+   * \param event_manager Raw pointer to Event::Manager object
+   * \return Widgets::Plugin pointer to created panel
+   *
+   * \sa Widgets::Panel
+   */
   Widgets::Panel* (*createPanel)(QMainWindow*, Event::Manager*) = nullptr;
 };
 
 /*!
+ * Class responsible for running real-time code.
+ *
  * This is where the magic happens. This class contains the low level logic to
  * interface with the real-time loop, as well as low level facilities for
  * parameter and input/output update. Inherit this class to run a periodic
- * real-time function
+ * real-time function. It inherits the RT::Thread interface and therefore is
+ * considered dependent on inputs from other blocks. It will autoamtically be
+ * scheduled to run after dependency Components from other plugins.
  */
 class Component : public RT::Thread
 {
@@ -192,20 +232,48 @@ public:
    */
   std::string getValueString(const size_t& var_id);
 
+  /*!
+   * Obtain Widget realtime state information
+   *
+   * \return RT::State::state_t representing Widgets::Component state
+   * \sa RT::State::state_t
+   */
   RT::State::state_t getState() const { return this->component_state; }
+
+  /*!
+   * set realtime state
+   *
+   * \param state an RT::State::state_t enum representing new state
+   */
   void setState(RT::State::state_t state) { this->component_state = state; }
+
+  /*!
+   * Get a list of all parameters for this widget
+   *
+   * \return A vector of Widgets::Variable::Info structs representing widget parameters
+   * \sa Widgets::Variable::Info
+   */
   std::vector<Widgets::Variable::Info> getParametersInfo()
   {
     return this->parameters;
   }
 
+  /*!
+   * Get the plugin object that owns this component
+   *
+   * \param Pointer to Widgets::Plugin object that owns this component.
+   */
+  Widgets::Plugin* getHostPlugin() { return this->hostPlugin; }
+
 private:
   std::vector<Widgets::Variable::Info> parameters;
   Widgets::Plugin* hostPlugin;
-  bool active;
-  RT::State::state_t component_state;
+  RT::State::state_t component_state=RT::State::INIT;
 };
 
+/*!
+ * RTXI Widgets UI class
+ */
 class Panel : public QWidget
 {
   Q_OBJECT
@@ -217,7 +285,11 @@ public:
   QMdiSubWindow* getMdiWindow() { return this->m_subwindow; }
 
   /*!
-   * Function that builds the Qt GUI.
+   * Function that builds the Qt GUI for the Widget's panel.
+   *
+   * This is a convenience function that will automatically generate a simple
+   * panel with text fields corresponding to the parameters. It is useful for
+   * quick and dirty gui construction.
    *
    * \param vars The structure defining the module's parameters, states, inputs,
    *    and outputs.
@@ -237,6 +309,10 @@ public:
   void setHostPlugin(Widgets::Plugin* hplugin) { this->hostPlugin = hplugin; }
 
 signals:
+
+  /*!
+   * Signal used for changing the state of the internal component.
+   */
   void signal_state_change(RT::State::state_t state);
 
 public slots:
@@ -253,22 +329,20 @@ public slots:
 
   /*!
    * Function that updates the GUI with new parameter values.
-   *
-   * \sa DefaultGUIModel::update_flags_t
    */
   virtual void refresh();
 
   /*!
    * Function that calls DefaultGUIModel::update with the MODIFY flag
-   *
-   * \sa DefaultGUIModel::update_flags_t
    */
   virtual void modify();
 
   /*!
    * Function that pauses/unpauses the model.
+   *
+   * \param paused True if pausing widget, false otherwise
    */
-  virtual void pause(bool);
+  virtual void pause(bool p);
 
   /*!
    * Callback function that is called when the system state changes.
@@ -288,14 +362,30 @@ protected:
   QString getParameter(const QString& var_name);
 
   /*!
-   * Set the value of this parameter within the Workspace and GUI.
+   * Set the value of double parameter within the Workspace and GUI.
    *
    * \param name The name of the parameter.
    * \param ref A reference to the parameter.
    *
    */
   void setParameter(const QString& var_name, double value);
+
+  /*!
+   * Set the value of unsigned int parameter within the Workspace and GUI.
+   *
+   * \param name The name of the parameter.
+   * \param ref A reference to the parameter.
+   *
+   */
   void setParameter(const QString& var_name, uint64_t value);
+
+  /*!
+   * Set the value of int parameter within the Workspace and GUI.
+   *
+   * \param name The name of the parameter.
+   * \param ref A reference to the parameter.
+   *
+   */
   void setParameter(const QString& var_name, int value);
 
   /*!
@@ -331,7 +421,7 @@ protected:
   std::string getName() { return this->m_name; }
 
   /*!
-   * retrieve the host plugin that controls this panel
+   * retrieve the host plugin that owns this panel
    *
    * \return pointer to host plugin
    */
@@ -346,7 +436,6 @@ protected:
 
   /*!
    * Obtain the event manager attached to this session of the RTXI application.
-   * This is useful for lower level control of RTXI events.
    *
    * \return Pointer to the RTXI event manager
    */
@@ -366,9 +455,9 @@ private:
 
   struct param_t
   {
-    QLabel* label;
+    QLabel* label=nullptr;
     QString str_value;
-    DefaultGUILineEdit* edit;
+    DefaultGUILineEdit* edit=nullptr;
     Widgets::Variable::variable_t type = Widgets::Variable::UNKNOWN;
     Widgets::Variable::Info info;
   };
@@ -397,7 +486,13 @@ public:
   Plugin& operator=(Plugin&&) = delete;  // move assignment operator
   ~Plugin() override;
 
+  /*!
+   * get the component ID
+   *
+   * \return ID of the widget assigned by the realtime system
+   */
   size_t getID();
+
   /*!
    * Attaches a component to this plugin
    *
@@ -442,6 +537,18 @@ public:
    */
   double getComponentDoubleParameter(const Variable::Id& parameter_id);
 
+  /*!
+   * Sets the component parameter
+   *
+   * This function sends an event that will be handled by the realtime system.
+   * The event comprises with the parameter to change and the new value. 
+   * 
+   * \param parameter_id The id of the widget's parameter to change
+   * \param value The new value to change the parameter to. accepted value 
+   *              types are: int, double, uint64_t, and std::string. Anything
+   *              else is considered an error.
+   * \return an error code 0 for success, and -1 for failure
+   */
   template<typename T>
   int setComponentParameter(const Variable::Id& parameter_id, T value)
   {
@@ -506,14 +613,31 @@ public:
    * \return The library file the object from which the object was created.
    */
   std::string getLibrary() const { return this->library; }
+
+  /*!
+    * Sets the library location from which this widget was created.
+    *
+    * \param lib The library location
+    */
   void setLibrary(const std::string& lib) { this->library = lib; }
 
-  // These functions are here in order to have backwards compatibility
-  // with previous versions of RTXI that used DefaultGuiModel
-  // (before RTXI 3.0.0)
-
+  /*!
+    * Register the internal component to RT::System registry
+    */
   void registerComponent();
+
+  /*!
+    * Set the internal component state
+    *
+    * \param state an RT::State::state_t value to set the component to
+    */
   void setComponentState(RT::State::state_t state);
+
+  /*!
+    * Get the list of all widget parameters information
+    *
+    * \return A vector of Widgets::Variable::Info representing parameter information
+    */
   virtual std::vector<Widgets::Variable::Info> getComponentParametersInfo();
 
 protected:

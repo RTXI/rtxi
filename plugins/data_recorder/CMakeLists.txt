@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.24)
 
 add_library(data_recorder_lib OBJECT
-    data_recorder.h
+    data_recorder.hpp
     data_recorder.cpp
 )
 

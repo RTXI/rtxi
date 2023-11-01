@@ -26,7 +26,7 @@ std::vector<std::string> split_string(const std::string& buffer,
   }
   std::string token;
   std::vector<std::string> split_tokens;
-  size_t delim_len = delim.size();
+  const size_t delim_len = delim.size();
   while (true) {
     token = buffer.substr(pos_start, pos_end - pos_start);
     pos_start = pos_end + delim_len;
@@ -61,13 +61,8 @@ std::vector<std::string> physical_channel_names(
     default:
       return {};
   }
-  int32_t buff_size = 0;
-  std::vector<IO::channel_t> channels;
   std::string channel_names;
-  std::vector<std::string> split_channel_names;
-  std::string temp_channel_name;
-  std::string description;
-  buff_size = func(device.c_str(), nullptr, 0);
+  const int32_t buff_size = func(device.c_str(), nullptr, 0);
   if (buff_size <= 0) {
     return {};
   }
@@ -82,13 +77,13 @@ void printError(int32_t status)
     return;
   }
   ERROR_MSG("NIDAQ ERROR : code {}", status);
-  int32_t error_size = DAQmxGetErrorString(status, nullptr, 0);
+  const int32_t error_size = DAQmxGetErrorString(status, nullptr, 0);
   if (error_size < 0) {
     ERROR_MSG("Unable to get code message");
     return;
   }
   std::string err_str(static_cast<size_t>(error_size), '\0');
-  int32_t errcode = DAQmxGetErrorString(
+  const int32_t errcode = DAQmxGetErrorString(
       status, err_str.data(), static_cast<uint32_t>(error_size));
   if (errcode < 0) {
     ERROR_MSG("Unable to parse message");
@@ -99,7 +94,7 @@ void printError(int32_t status)
 
 std::string physical_card_name(const std::string& device_name)
 {
-  int32_t err = DAQmxGetDevProductType(device_name.c_str(), nullptr, 0);
+  const int32_t err = DAQmxGetDevProductType(device_name.c_str(), nullptr, 0);
   std::string result(static_cast<size_t>(err), '\0');
   DAQmxGetDevProductType(
       device_name.c_str(), result.data(), static_cast<uint32_t>(result.size()));
@@ -131,7 +126,7 @@ struct physical_channel_t
 int32_t physical_channel_t::addToTask(TaskHandle task_handle) const
 {
   int32_t err = 0;
-  std::string units = DAQ::get_default_units().at(units_index);
+  const std::string units = DAQ::get_default_units().at(units_index);
   auto [min, max] = DAQ::get_default_ranges().at(range_index);
   // DAQmxStopTask(task_handle);
   switch (type) {
@@ -490,7 +485,7 @@ std::string Device::getAnalogRangeString(DAQ::ChannelType::type_t type,
   if (type == DAQ::ChannelType::DI || type == DAQ::ChannelType::DO) {
     return "";
   }
-  std::string formatting = "{:.1f}";
+  const std::string formatting = "{:.1f}";
   auto [min, max] = default_ranges.at(
       physical_channels_registry.at(type).at(index).range_index);
   return fmt::format(formatting, min) + std::string(" to ")
@@ -504,7 +499,7 @@ std::string Device::getAnalogReferenceString(DAQ::ChannelType::type_t type,
   if (type == DAQ::ChannelType::DI || type == DAQ::ChannelType::DO) {
     return "";
   }
-  int32_t ref = physical_channels_registry.at(type).at(index).reference;
+  const int32_t ref = physical_channels_registry.at(type).at(index).reference;
   std::string refstr;
   switch (ref) {
     case DAQmx_Val_RSE:
@@ -799,7 +794,7 @@ Driver::Driver()
 
 void Driver::loadDevices()
 {
-  int32_t device_names_buffer_size = DAQmxGetSysDevNames(nullptr, 0);
+  const int32_t device_names_buffer_size = DAQmxGetSysDevNames(nullptr, 0);
   if (device_names_buffer_size < 0) {
     printError(device_names_buffer_size);
     return;
@@ -809,11 +804,10 @@ void Driver::loadDevices()
                             '\0');
   DAQmxGetSysDevNames(string_buffer.data(),
                       static_cast<uint32_t>(string_buffer.size()));
-  std::vector<std::string> device_names = split_string(string_buffer, ", ");
+  const std::vector<std::string> device_names = split_string(string_buffer, ", ");
   std::vector<IO::channel_t> channels;
   std::vector<std::string> split_channel_names;
   size_t pos = 0;
-  std::string temp_channel_name;
   std::string physical_daq_name;
   std::string description;
   int channel_id = 0;

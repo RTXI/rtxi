@@ -187,7 +187,7 @@ public:
 
   void clearData();
   size_t getDataSize() const;
-  void setDataSize(size_t);
+  void setDataSize(size_t size);
 
   int64_t getDivT();
   void setDivT(int64_t value);
@@ -196,7 +196,7 @@ public:
   size_t getDivY() const;
 
   size_t getRefresh() const;
-  void setRefresh(size_t);
+  void setRefresh(size_t r);
 
   void setChannelScale(IO::endpoint endpoint, double scale);
   double getChannelScale(IO::endpoint endpoint);

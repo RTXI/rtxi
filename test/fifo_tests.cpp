@@ -31,8 +31,8 @@
 TEST_F(FifoTest, getFifo)
 {
   std::unique_ptr<RT::OS::Fifo> fifo;
-  size_t bufsize = this->default_buffer_size;
-  int result = RT::OS::getFifo(fifo, bufsize);
+  const size_t bufsize = this->default_buffer_size;
+  const int result = RT::OS::getFifo(fifo, bufsize);
   ASSERT_EQ(result, 0);
   EXPECT_EQ(fifo->getCapacity(), bufsize);
 }
@@ -40,7 +40,7 @@ TEST_F(FifoTest, getFifo)
 TEST_F(FifoTest, roundtrip)
 {
   std::unique_ptr<RT::OS::Fifo> fifo;
-  int result = RT::OS::getFifo(fifo, this->default_buffer_size);
+  const int result = RT::OS::getFifo(fifo, this->default_buffer_size);
   ASSERT_EQ(result, 0);
   auto task = std::make_unique<RT::OS::Task>();
   auto message_size = this->default_message.size();
@@ -72,7 +72,7 @@ TEST_F(FifoTest, nonblocking)
   // size_t size = this->default_buffer_size;
   std::string output;
   output.reserve(this->default_message.size());
-  int result = RT::OS::getFifo(fifo, this->default_buffer_size);
+  const int result = RT::OS::getFifo(fifo, this->default_buffer_size);
   ASSERT_EQ(result, 0);
   auto test_task = std::make_unique<RT::OS::Task>();
   RT::OS::setPeriod(test_task.get(), RT::OS::SECONDS_TO_NANOSECONDS);
@@ -93,7 +93,7 @@ TEST_F(FifoTest, nonblocking)
     std::unique_lock<std::mutex> lk(mut);
     cv.wait(lk, [&ready]() { return ready; });
   }
-  ssize_t read_bytes =
+  const ssize_t read_bytes =
       fifo->read(output.data(), this->default_message.size() * sizeof(char));
   sender_thread.join();
 

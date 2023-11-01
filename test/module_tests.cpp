@@ -92,10 +92,10 @@ TEST_F(ModulePluginTests, getName)
 TEST_F(ModulePluginTests, activity)
 {
   ASSERT_EQ(this->plugin->getActive(), this->component_ptr->getActive());
-  int result = this->plugin->setActive(false);
+  int result = this->plugin->setActive(/*state=*/false);
   EXPECT_EQ(result, 0);
   ASSERT_FALSE(this->component_ptr->getActive());
-  result = this->plugin->setActive(true);
+  result = this->plugin->setActive(/*state=*/true);
   EXPECT_EQ(result, 0);
   ASSERT_TRUE(this->component_ptr->getActive());
 }

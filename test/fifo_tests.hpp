@@ -31,7 +31,7 @@
 class FifoTest : public ::testing::Test
 {
 protected:
-  const size_t default_buffer_size = 100;
+  size_t default_buffer_size = 100;
   std::string default_message = "message";
 };
 

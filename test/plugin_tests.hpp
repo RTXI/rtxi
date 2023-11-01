@@ -30,7 +30,7 @@ class PluginObjectTest : public ::testing::Test
 {
 protected:
   PluginObjectTest() = default;
-  ~PluginObjectTest() = default;
+  ~PluginObjectTest() override = default;
 };
 
 class PluginManagerTest : public ::testing::Test
@@ -41,7 +41,7 @@ protected:
     this->ev_manager = std::make_unique<Event::Manager>();
     this->mod_manager = std::make_unique<Workspace::Manager>(ev_manager.get());
   }
-  ~PluginManagerTest() = default;
+  ~PluginManagerTest() override = default;
 
   std::unique_ptr<Event::Manager> ev_manager;
   std::unique_ptr<Workspace::Manager> mod_manager;

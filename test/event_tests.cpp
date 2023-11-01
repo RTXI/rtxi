@@ -25,7 +25,7 @@
 TEST_F(EventObjectTest, ParameterTests)
 {
   const std::string TEST_EVENT_PARAM = "TEST_PARAM";
-  bool TEST_EVENT_PARAM_VALUE = true;
+  const bool TEST_EVENT_PARAM_VALUE = true;
   Event::Object event(Event::Type::NOOP);
   event.setParam(TEST_EVENT_PARAM, std::any(TEST_EVENT_PARAM_VALUE));
   ASSERT_EQ(event.getName(), Event::type_to_string(Event::Type::NOOP));

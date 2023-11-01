@@ -28,7 +28,7 @@
 #include <sstream>
 #include <string>
 
-#include "data_recorder.h"
+#include "data_recorder.hpp"
 
 #include <H5Ipublic.h>
 #include <unistd.h>

@@ -16,13 +16,14 @@ void eventLogger::log(Event::Object* event)
     const auto time_point = std::chrono::system_clock::now();
     const std::time_t now = std::chrono::system_clock::to_time_t(time_point);
     this->ss << "[ ";
-    this->ss << std::put_time(std::localtime(&now), "%F %T");
+    this->ss << std::put_time(std::localtime(&now), "%F %T"); // NOLINT
     this->ss << " ] (EVENT FIRED)\t";
     this->ss << " TYPE -- " << event->getName();
     switch (event->getType()) {
       case Event::Type::RT_PERIOD_EVENT:
         this->ss << "\t VALUE -- ";
         this->ss << std::any_cast<int64_t>(event->getParam("period"));
+        break;
       case Event::Type::RT_PREPERIOD_EVENT:
       case Event::Type::RT_POSTPERIOD_EVENT:
         break;
@@ -107,7 +108,7 @@ void eventLogger::log(RT::Telemitry::Response response)
     const auto time_point = std::chrono::system_clock::now();
     const std::time_t now = std::chrono::system_clock::to_time_t(time_point);
     this->ss << "[ ";
-    this->ss << std::put_time(std::localtime(&now), "%F %T");
+    this->ss << std::put_time(std::localtime(&now), "%F %T"); // NOLINT
     this->ss << " ] (TELEMITRY)\t";
     this->ss << " TYPE -- ";
     switch (response.type) {

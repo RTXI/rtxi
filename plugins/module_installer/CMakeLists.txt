@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.24)
 
 add_library(module_installer_lib OBJECT
-    rtxi_wizard.h
+    rtxi_wizard.hpp
     rtxi_wizard.cpp
 )
 

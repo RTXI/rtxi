@@ -90,15 +90,15 @@ TEST_F(RTConnectorTest, getOutputs)
   for (auto& val : randvals) {
     val = distribution(gen);
   }
-  for (int i = 0; i < 100; i++) {
+  for (size_t i = 0; i < 100; i++) {
     if (randvals[i] == 1) {
       this->connector.connect(
           {&outputThread, IO::OUTPUT, 0, inputThreads[i].get(), 0});
     }
   }
-  std::vector<RT::block_connection_t> output_connections =
+  const std::vector<RT::block_connection_t> output_connections =
       this->connector.getOutputs(&outputThread);
-  int num_of_connections = std::accumulate(randvals.begin(), randvals.end(), 0);
+  const int num_of_connections = std::accumulate(randvals.begin(), randvals.end(), 0);
   EXPECT_EQ(output_connections.size(), num_of_connections);
   for (auto con : output_connections) {
     ASSERT_TRUE(
@@ -114,48 +114,46 @@ TEST_F(RTConnectorTest, getBlocks)
   std::mt19937 gen(rd());
   std::uniform_int_distribution<> distribution(0, 49);
   std::vector<RT::block_connection_t> connection_memory;
-  for (int i = 0; i < 50; i++) {
+  for (size_t i = 0; i < 50; i++) {
     devices[i] =
         std::make_unique<MockRTDevice>("randdevice", this->defaultChannelList);
-    devices[i]->setActive(true);
+    devices[i]->setActive(/*act=*/true);
     threads[i] =
         std::make_unique<MockRTThread>("randthread", this->defaultChannelList);
-    threads[i]->setActive(true);
+    threads[i]->setActive(/*act=*/true);
     this->connector.insertBlock(threads[i].get(), connection_memory);
     connection_memory.clear();
     this->connector.insertBlock(devices[i].get(), connection_memory);
     connection_memory.clear();
   }
-  for (int iter = 0; iter < 50; iter++) {
+  for (size_t iter = 0; iter < 50; iter++) {
     this->connector.connect({threads[iter].get(),
                              IO::OUTPUT,
                              0,
-                             threads[distribution(gen)].get(),
+                             threads[static_cast<size_t>(distribution(gen))].get(),
                              0});
     this->connector.connect({devices[iter].get(),
                              IO::OUTPUT,
                              0,
-                             threads[distribution(gen)].get(),
+                             threads[static_cast<size_t>(distribution(gen))].get(),
                              0});
     this->connector.connect({threads[iter].get(),
                              IO::OUTPUT,
                              0,
-                             devices[distribution(gen)].get(),
+                             devices[static_cast<size_t>(distribution(gen))].get(),
                              0});
   }
   std::vector<RT::Thread*> received_threads = this->connector.getThreads();
-  std::vector<RT::Device*> received_devices = this->connector.getDevices();
+  const std::vector<RT::Device*> received_devices = this->connector.getDevices();
   ASSERT_EQ(received_threads.size(), 50);
   ASSERT_EQ(received_devices.size(), 50);
 
   // verify that thread objects are in topological order
   std::vector<RT::block_connection_t> outputs;
-  bool isthread = false;
   for (auto thread_iter = received_threads.begin();
        thread_iter != received_threads.end();
        thread_iter++)
   {
-    isthread = (*thread_iter)->dependent();
     outputs = this->connector.getOutputs(*thread_iter);
     for (auto output_conn : outputs) {
       auto loc = std::find_if(received_threads.begin(),
@@ -208,7 +206,7 @@ TEST_F(SystemTest, shutdown)
 TEST_F(SystemTest, getPeriod)
 {
   // Check with default period
-  auto period = 1000000ll;
+  auto period = 1000000LL;
   ASSERT_EQ(period, system->getPeriod());
 }
 
@@ -248,11 +246,11 @@ TEST_F(SystemTest, updateDeviceList)
   // Typically we use another thread to handle cmd completion however we
   // need to check whether the rt loop is sending the correct telemitry
   // therefore we handle telemitry ourselves
-  std::string defaultInputChannelName = "CHANNEL INPUT";
-  std::string defaultInputChannelDescription =
+  const std::string defaultInputChannelName = "CHANNEL INPUT";
+  const std::string defaultInputChannelDescription =
       "DEFAULT INPUT CHANNEL DESCRIPTION";
-  std::string defaultOutputChannelName = "CHANNEL OUTPUT";
-  std::string defaultOutputChannelDescription =
+  const std::string defaultOutputChannelName = "CHANNEL OUTPUT";
+  const std::string defaultOutputChannelDescription =
       "DEFAULT OUTPUT CHANNEL DESCRIPTION";
   std::vector<IO::channel_t> defaultChannelList;
 
@@ -316,11 +314,11 @@ TEST_F(SystemTest, updateThreadList)
   // Typically we use another thread to handle cmd completion however we
   // need to check whether the rt loop is sending the correct telemitry
   // therefore we handle telemitry ourselves
-  std::string defaultInputChannelName = "CHANNEL INPUT";
-  std::string defaultInputChannelDescription =
+  const std::string defaultInputChannelName = "CHANNEL INPUT";
+  const std::string defaultInputChannelDescription =
       "DEFAULT INPUT CHANNEL DESCRIPTION";
-  std::string defaultOutputChannelName = "CHANNEL OUTPUT";
-  std::string defaultOutputChannelDescription =
+  const std::string defaultOutputChannelName = "CHANNEL OUTPUT";
+  const std::string defaultOutputChannelDescription =
       "DEFAULT OUTPUT CHANNEL DESCRIPTION";
   std::vector<IO::channel_t> defaultChannelList;
 

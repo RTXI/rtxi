@@ -33,7 +33,7 @@ extern "C"
 #include <QMessageBox>
 #include <QProcess>
 
-#include "rtxi_wizard.h"
+#include "rtxi_wizard.hpp"
 
 /*
  * This module uses the QNetworkManager class to fetch information on our
@@ -41,7 +41,6 @@ extern "C"
  */
 RTXIWizard::Panel::Panel(QMainWindow* mwindow, Event::Manager* ev_manager)
     : Widgets::Panel(std::string(RTXIWizard::MODULE_NAME), mwindow, ev_manager)
-    , button_mode(DOWNLOAD)
     , readmeWindow(new QTextEdit)
     , availableListWidget(new QListWidget(this))
 {

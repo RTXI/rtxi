@@ -28,9 +28,9 @@
 
 TEST_F(PluginManagerTest, LoadandUnload)
 {
-  std::filesystem::path libraryPath =
+  const std::filesystem::path libraryPath =
       std::filesystem::canonical("/proc/self/exe").parent_path();
-  std::filesystem::path library(libraryPath / "libfakePlugin.so");
+  const std::filesystem::path library(libraryPath / "libfakePlugin.so");
   Widgets::Plugin* plugin = this->mod_manager->loadPlugin(library.string());
   ASSERT_NE(plugin, nullptr);
   this->mod_manager->unloadPlugin(plugin);
@@ -41,9 +41,9 @@ TEST_F(PluginManagerTest, getLibrary)
 {
   // TODO: Decouple Plugin::Object from Plugin::Manager and test getLibrary
   // function
-  std::filesystem::path libraryPath =
+  const std::filesystem::path libraryPath =
       std::filesystem::canonical("/proc/self/exe").parent_path();
-  std::filesystem::path library(libraryPath / "libfakePlugin.so");
+  const std::filesystem::path library(libraryPath / "libfakePlugin.so");
   Widgets::Plugin* plugin = this->mod_manager->loadPlugin(library.string());
   EXPECT_EQ(library, plugin->getLibrary());
   this->mod_manager->unloadPlugin(plugin);

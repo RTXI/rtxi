@@ -26,7 +26,7 @@
 
 void temp_function(void* retval)
 {
-  auto returnvalue = static_cast<bool*>(retval);
+  auto *returnvalue = static_cast<bool*>(retval);
   *returnvalue = true;
 }
 
@@ -62,7 +62,7 @@ TEST_F(RTOSTests, setPeriod)
 {
   auto test_task = std::make_unique<RT::OS::Task>();
   ASSERT_EQ(RT::OS::DEFAULT_PERIOD, test_task->period);
-  int64_t period = RT::OS::DEFAULT_PERIOD * 2;
+  const int64_t period = RT::OS::DEFAULT_PERIOD * 2;
   RT::OS::setPeriod(test_task.get(), period);
   ASSERT_EQ(period, test_task->period);
 }

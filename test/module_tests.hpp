@@ -53,7 +53,7 @@ public:
 
   void execute() final
   {
-    std::unique_lock lck(this->mut);
+    const std::unique_lock lck(this->mut);
     this->executed = true;
     this->cond_var.notify_all();
   }
@@ -105,28 +105,21 @@ protected:
     this->component_ptr = component.get();
     this->plugin->attachComponent(std::move(component));
   }
-  ~ModulePluginTests() override
-  {
-    // Event::Object shutdown_event(Event::Type::RT_SHUTDOWN_EVENT);
-    // this->event_manager->postEvent(&shutdown_event);
-  }
+  ~ModulePluginTests() override = default;
 
   std::unique_ptr<RT::Connector> connector;
   std::unique_ptr<Event::Manager> event_manager;
   std::unique_ptr<RT::System> system;
-  // std::unique_ptr<Widgets::Manager> plugin_manager;
 
   std::unique_ptr<Widgets::Plugin> plugin;
   mockModuleComponent* component_ptr;
-  // MainWindow* main_window = nullptr;
-  //  Widgets::Plugin plugin;
 };
 
 class ModuleManagerTests : public ::testing::Test
 {
 protected:
-  ModuleManagerTests() {}
-  ~ModuleManagerTests() override {}
+  ModuleManagerTests() = default;
+  ~ModuleManagerTests() override = default;
 };
 
 #endif

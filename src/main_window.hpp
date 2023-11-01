@@ -37,8 +37,8 @@ class SaveSettingsDialog : public QDialog
 {
 public:
 private:
-  QTextItem* settings_group_desc;
-  QTextEdit* settings_group_edit;
+  QTextItem* settings_group_desc; // NOLINT
+  QTextEdit* settings_group_edit; // NOLINT
 };
 
 /*!
@@ -153,11 +153,11 @@ private slots:
   void resetSettings();
 
   void windowsMenuAboutToShow();
-  void windowsMenuActivated(QAction*);
-  void modulesMenuActivated(QAction*);
-  void fileMenuActivated(QAction*);
-  void utilitiesMenuActivated(QAction*);
-  void systemMenuActivated(QAction*);
+  void windowsMenuActivated(QAction* id);
+  void modulesMenuActivated(QAction* /*unused*/);
+  void fileMenuActivated(QAction* id);
+  void utilitiesMenuActivated(QAction* /*unused*/);
+  void systemMenuActivated(QAction* id);
 
 private:
   void loadWidget(const QString& module_name);
