@@ -37,8 +37,8 @@ class SaveSettingsDialog : public QDialog
 {
 public:
 private:
-  QTextItem* settings_group_desc; // NOLINT
-  QTextEdit* settings_group_edit; // NOLINT
+  QTextItem* settings_group_desc;  // NOLINT
+  QTextEdit* settings_group_edit;  // NOLINT
 };
 
 /*!

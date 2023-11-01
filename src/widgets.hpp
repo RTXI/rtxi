@@ -123,9 +123,9 @@ class Plugin;
 class Panel;
 
 /*!
- * This structure contains functions for creating Widget instances. 
+ * This structure contains functions for creating Widget instances.
  *
- * This struct is used when loading and unloading RTXI modules. It 
+ * This struct is used when loading and unloading RTXI modules. It
  * allows RTXI to use the builder pattern for loading widgets by calling these
  * functions to generate the widget specific classes, then using relevant
  * assembly methods to put them together and display them.
@@ -143,10 +143,10 @@ struct FactoryMethods
    * \sa Widgets::Plugin
    */
   std::unique_ptr<Widgets::Plugin> (*createPlugin)(Event::Manager*) = nullptr;
-  
+
   /*!
-   * \fn std::unique_ptr<Widgets::Component> createComponent(Widgets::Plugin* plugin)
-   * \brief Function that returns a smart pointer to component object
+   * \fn std::unique_ptr<Widgets::Component> createComponent(Widgets::Plugin*
+   * plugin) \brief Function that returns a smart pointer to component object
    *
    * \param event_manager Raw pointer to Widgets::Plugin object
    * \return Smart pointer to component object
@@ -157,8 +157,9 @@ struct FactoryMethods
       nullptr;
 
   /*!
-   * \fn Widgets::Panel* createPanel(QMainWindow* window, Event::Manager* event_manager)
-   * \brief Function that creates Widgets::Panel object and returns the pointer
+   * \fn Widgets::Panel* createPanel(QMainWindow* window, Event::Manager*
+   * event_manager) \brief Function that creates Widgets::Panel object and
+   * returns the pointer
    *
    * \param window QMainWindow pointer to attach the panel to
    * \param event_manager Raw pointer to Event::Manager object
@@ -250,8 +251,8 @@ public:
   /*!
    * Get a list of all parameters for this widget
    *
-   * \return A vector of Widgets::Variable::Info structs representing widget parameters
-   * \sa Widgets::Variable::Info
+   * \return A vector of Widgets::Variable::Info structs representing widget
+   * parameters \sa Widgets::Variable::Info
    */
   std::vector<Widgets::Variable::Info> getParametersInfo()
   {
@@ -268,7 +269,7 @@ public:
 private:
   std::vector<Widgets::Variable::Info> parameters;
   Widgets::Plugin* hostPlugin;
-  RT::State::state_t component_state=RT::State::INIT;
+  RT::State::state_t component_state = RT::State::INIT;
 };
 
 /*!
@@ -455,9 +456,9 @@ private:
 
   struct param_t
   {
-    QLabel* label=nullptr;
+    QLabel* label = nullptr;
     QString str_value;
-    DefaultGUILineEdit* edit=nullptr;
+    DefaultGUILineEdit* edit = nullptr;
     Widgets::Variable::variable_t type = Widgets::Variable::UNKNOWN;
     Widgets::Variable::Info info;
   };
@@ -541,10 +542,10 @@ public:
    * Sets the component parameter
    *
    * This function sends an event that will be handled by the realtime system.
-   * The event comprises with the parameter to change and the new value. 
-   * 
+   * The event comprises with the parameter to change and the new value.
+   *
    * \param parameter_id The id of the widget's parameter to change
-   * \param value The new value to change the parameter to. accepted value 
+   * \param value The new value to change the parameter to. accepted value
    *              types are: int, double, uint64_t, and std::string. Anything
    *              else is considered an error.
    * \return an error code 0 for success, and -1 for failure
@@ -615,29 +616,30 @@ public:
   std::string getLibrary() const { return this->library; }
 
   /*!
-    * Sets the library location from which this widget was created.
-    *
-    * \param lib The library location
-    */
+   * Sets the library location from which this widget was created.
+   *
+   * \param lib The library location
+   */
   void setLibrary(const std::string& lib) { this->library = lib; }
 
   /*!
-    * Register the internal component to RT::System registry
-    */
+   * Register the internal component to RT::System registry
+   */
   void registerComponent();
 
   /*!
-    * Set the internal component state
-    *
-    * \param state an RT::State::state_t value to set the component to
-    */
+   * Set the internal component state
+   *
+   * \param state an RT::State::state_t value to set the component to
+   */
   void setComponentState(RT::State::state_t state);
 
   /*!
-    * Get the list of all widget parameters information
-    *
-    * \return A vector of Widgets::Variable::Info representing parameter information
-    */
+   * Get the list of all widget parameters information
+   *
+   * \return A vector of Widgets::Variable::Info representing parameter
+   * information
+   */
   virtual std::vector<Widgets::Variable::Info> getComponentParametersInfo();
 
 protected:

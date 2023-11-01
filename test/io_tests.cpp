@@ -56,7 +56,8 @@ std::vector<IO::channel_t> generateDefaultChannelList()
 
 TEST_F(IOBlockTest, getName)
 {
-  const IO::Block block(this->defaultBlockName, this->defaultChannelList, /*isdependent=*/true);
+  const IO::Block block(
+      this->defaultBlockName, this->defaultChannelList, /*isdependent=*/true);
   ASSERT_EQ(block.getName(), defaultBlockName);
   ASSERT_EQ(block.getChannelName(IO::INPUT, 0), defaultInputChannelName);
   ASSERT_EQ(block.getChannelName(IO::OUTPUT, 0), defaultOutputChannelName);
@@ -64,14 +65,16 @@ TEST_F(IOBlockTest, getName)
 
 TEST_F(IOBlockTest, getCount)
 {
-  const IO::Block block(this->defaultBlockName, this->defaultChannelList, /*isdependent=*/true);
+  const IO::Block block(
+      this->defaultBlockName, this->defaultChannelList, /*isdependent=*/true);
   ASSERT_EQ(block.getCount(IO::INPUT), 1);
   ASSERT_EQ(block.getCount(IO::OUTPUT), 1);
 }
 
 TEST_F(IOBlockTest, getDescription)
 {
-  const IO::Block block(this->defaultBlockName, this->defaultChannelList, /*isdependent=*/true);
+  const IO::Block block(
+      this->defaultBlockName, this->defaultChannelList, /*isdependent=*/true);
   ASSERT_EQ(block.getChannelDescription(IO::INPUT, 0),
             defaultInputChannelDescription);
   ASSERT_EQ(block.getChannelDescription(IO::OUTPUT, 0),
@@ -80,7 +83,8 @@ TEST_F(IOBlockTest, getDescription)
 
 TEST_F(IOBlockTest, readPort)
 {
-  IO::Block block(this->defaultBlockName, this->defaultChannelList, /*isdependent=*/true);
+  IO::Block block(
+      this->defaultBlockName, this->defaultChannelList, /*isdependent=*/true);
   const double defaultval = 0.0;
   EXPECT_DOUBLE_EQ(defaultval, block.readPort(IO::OUTPUT, 0));
 }

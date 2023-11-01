@@ -36,8 +36,8 @@
 
 #include "debug.hpp"
 #include "main_window.hpp"
-#include "scope.hpp"
 #include "rt.hpp"
+#include "scope.hpp"
 
 void Oscilloscope::Plugin::receiveEvent(Event::Object* event)
 {

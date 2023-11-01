@@ -26,7 +26,7 @@
 
 void temp_function(void* retval)
 {
-  auto *returnvalue = static_cast<bool*>(retval);
+  auto* returnvalue = static_cast<bool*>(retval);
   *returnvalue = true;
 }
 

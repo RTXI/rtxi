@@ -29,7 +29,7 @@
 //! Connection Oriented Classes
 /*!
  * Objects contained within this namespace are responsible
- * for managing data sharing between various RTXI entities 
+ * for managing data sharing between various RTXI entities
  * called blocks. This is different to the Fifo used for
  * interprocess communication between rtxi and its realtime
  * thread.
@@ -83,7 +83,7 @@ public:
    * that will be embedded in this block in the channels parameter. Fields could
    * be IO::INPUT, IO::OUTPUT. It also needs to specify whether the block is
    * dependent on other blocks for real-time scheduling. This base class is not
-   * meant to be inherited directly and Widget::Component is recomended instead
+   * meant to be inherited directly and Widget::Component is recommended instead
    *
    * \param blockname The name of the block.
    * \param channels The lis of channel specifications for this block.
@@ -135,10 +135,10 @@ public:
   /*!
    * write the values of the specified input channel.
    *
-   * This function is responsible for writting external values to
-   * the specified input channel. Additional writes to input result in adding  
-   * to existing values in the channel, and is only reset to zero during 
-   * readinput functin call.
+   * This function is responsible for writing external values to
+   * the specified input channel. Additional writes to input result in adding
+   * to existing values in the channel, and is only reset to zero during
+   * readinput function call.
    *
    * \param index The input channel's index.
    * \param data the data to push into the block
@@ -152,7 +152,7 @@ public:
   /*!
    * Get the values of the specified output channel.
    *
-   * This function can read values from both input and output types. This 
+   * This function can read values from both input and output types. This
    * does not reset the values on the channel
    *
    * \param index The output channel's index.
@@ -164,8 +164,8 @@ public:
   /*!
    * Returns the dependency property of the block
    *
-   * Some blocks are dependent on the output of others. It is crucial for 
-   * these blocks to be scheduled in real-time to follow their dependencies, 
+   * Some blocks are dependent on the output of others. It is crucial for
+   * these blocks to be scheduled in real-time to follow their dependencies,
    * or else risk large errors in time dependent calculations.
    *
    * \return True for a dependent IO::Block, false otherwise
@@ -206,7 +206,7 @@ protected:
    * Read the input sent to this block. Only the block itself has access.
    *
    * Reads the buffered values from all external inputs and resets the buffer
-   * to zero. This function should only be accessed once per scope or risk 
+   * to zero. This function should only be accessed once per scope or risk
    * getting previously read values overwirten. This function assumes reading
    * input channels.
    *
@@ -221,7 +221,7 @@ protected:
    * Writes output to specified channel. Only the block itself has access.
    *
    * \param index The channel to write the output to
-   * \param data A reference to value to send 
+   * \param data A reference to value to send
    */
   void writeoutput(size_t index, const double& data);
 

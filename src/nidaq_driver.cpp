@@ -804,7 +804,8 @@ void Driver::loadDevices()
                             '\0');
   DAQmxGetSysDevNames(string_buffer.data(),
                       static_cast<uint32_t>(string_buffer.size()));
-  const std::vector<std::string> device_names = split_string(string_buffer, ", ");
+  const std::vector<std::string> device_names =
+      split_string(string_buffer, ", ");
   std::vector<IO::channel_t> channels;
   std::vector<std::string> split_channel_names;
   size_t pos = 0;

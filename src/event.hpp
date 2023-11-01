@@ -110,11 +110,11 @@ std::string type_to_string(Type event_type);
  * This object is able to hold metadata information about the event for
  * handlers to use. In order to properly use the token, the caller must
  * wait for event manager to mark the event processed. The caller and event
- * handler must agree on parameter names for successfull communication, or
+ * handler must agree on parameter names for successful communication, or
  * else an exception is thrown. These parameters are stored with string values
  * as identifiers, and the types of these parameters must be known ahead of
  * time. Event handlers can potentially give a response through the same event
- * token by storing the result under a new key. It is not the responsibility 
+ * token by storing the result under a new key. It is not the responsibility
  * of the event object class to store failure states.
  */
 class Object
@@ -159,12 +159,13 @@ public:
   void setParam(const std::string& param_name, const std::any& param_value);
 
   /*!
-   * Forces caller to wait for the event to be processed. 
+   * Forces caller to wait for the event to be processed.
    *
-   * This is needed for events that carry metadata information for the handlers. 
-   * This function will block until the event is handled (marked done by handler)
-   * The wait function is automatically called by Event::Manager::postEvent() and
-   * any direct call to the wait function will result in blocking forever.
+   * This is needed for events that carry metadata information for the handlers.
+   * This function will block until the event is handled (marked done by
+   * handler) The wait function is automatically called by
+   * Event::Manager::postEvent() and any direct call to the wait function will
+   * result in blocking forever.
    *
    * \sa Event::Object::done()
    * \sa Event::Manager::postEvent()
@@ -173,9 +174,9 @@ public:
 
   /*!
    * Marks the event object as processed and successfully completed
-   * 
+   *
    * NOTE: Event::Manager automatically handles calling this and should not be
-   * called directly by the user. Doing so will be an error and (hopefully) RTXI 
+   * called directly by the user. Doing so will be an error and (hopefully) RTXI
    * crashes. If not then good luck.
    *
    * \sa Event::Manager::postEvent()
@@ -183,7 +184,7 @@ public:
   void done();
 
   /*!
-   * Checks whether the event object has been processed already. 
+   * Checks whether the event object has been processed already.
    *      Events that have true value for processed are also handled.
    *
    * \returns true if processed. False otherwise
@@ -210,13 +211,13 @@ private:
   std::mutex processing_done_mut;
   std::condition_variable processing_done_cond;
   Type event_type;
-  bool processed=false;
+  bool processed = false;
 };  // class Object
 
 /*!
- * Entity that is signaled when an event is posted. 
+ * Entity that is signaled when an event is posted.
  *
- * This is an interface that allows rtxi components and plugins to define 
+ * This is an interface that allows rtxi components and plugins to define
  * how they receive those events. All objects that hope to interact within
  * the rtxi environment with other objects in a non-realtime context must
  * inherit this base class.
@@ -249,7 +250,7 @@ public:
  *   receive signals from events.
  *
  * All event handlers must register themselves with the manager in order to
- * receive future signals. 
+ * receive future signals.
  */
 class Manager
 {
@@ -263,14 +264,14 @@ public:
   ~Manager();
 
   /*!
-   * Function for posting an event to be signaled. 
+   * Function for posting an event to be signaled.
    *
    * The event manager will take the object and route it to all event
    * handlers registered. This is done by passing the event through a
    * thread-safe queue, which is then processed by event handler workers.
    * This is synchronous, meaning that it blocks until all event handlers
    * return. In addition, the event manager automatically marks the event
-   * as done right before returning.This function should only be called 
+   * as done right before returning.This function should only be called
    * from non-realtime.
    *
    * \param event The event to be posted.
@@ -281,7 +282,7 @@ public:
   void postEvent(Object* event);
 
   /*!
-   * Function for posting multiple events at the same time. 
+   * Function for posting multiple events at the same time.
    *
    * The order at which these events are posted are preserved. This is more
    * efficient for situations where multiple events can be generated
@@ -319,10 +320,10 @@ public:
    * Returns a pointer to the event logger
    *
    * The event manager class also logs all messages being passed around in
-   * RTXI and sends them to standard output. These logs are automatically 
+   * RTXI and sends them to standard output. These logs are automatically
    * generated in the event processor thread, and the only other part of
    * the system that requires access to the logger is the telemitry
-   * processor, which will also log all telemitry received by RTXI from 
+   * processor, which will also log all telemitry received by RTXI from
    * the RT::System class in the realtime thread.
    *
    * \return Raw pointer to eventLogger class

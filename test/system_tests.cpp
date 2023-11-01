@@ -98,7 +98,8 @@ TEST_F(RTConnectorTest, getOutputs)
   }
   const std::vector<RT::block_connection_t> output_connections =
       this->connector.getOutputs(&outputThread);
-  const int num_of_connections = std::accumulate(randvals.begin(), randvals.end(), 0);
+  const int num_of_connections =
+      std::accumulate(randvals.begin(), randvals.end(), 0);
   EXPECT_EQ(output_connections.size(), num_of_connections);
   for (auto con : output_connections) {
     ASSERT_TRUE(
@@ -127,24 +128,28 @@ TEST_F(RTConnectorTest, getBlocks)
     connection_memory.clear();
   }
   for (size_t iter = 0; iter < 50; iter++) {
-    this->connector.connect({threads[iter].get(),
-                             IO::OUTPUT,
-                             0,
-                             threads[static_cast<size_t>(distribution(gen))].get(),
-                             0});
-    this->connector.connect({devices[iter].get(),
-                             IO::OUTPUT,
-                             0,
-                             threads[static_cast<size_t>(distribution(gen))].get(),
-                             0});
-    this->connector.connect({threads[iter].get(),
-                             IO::OUTPUT,
-                             0,
-                             devices[static_cast<size_t>(distribution(gen))].get(),
-                             0});
+    this->connector.connect(
+        {threads[iter].get(),
+         IO::OUTPUT,
+         0,
+         threads[static_cast<size_t>(distribution(gen))].get(),
+         0});
+    this->connector.connect(
+        {devices[iter].get(),
+         IO::OUTPUT,
+         0,
+         threads[static_cast<size_t>(distribution(gen))].get(),
+         0});
+    this->connector.connect(
+        {threads[iter].get(),
+         IO::OUTPUT,
+         0,
+         devices[static_cast<size_t>(distribution(gen))].get(),
+         0});
   }
   std::vector<RT::Thread*> received_threads = this->connector.getThreads();
-  const std::vector<RT::Device*> received_devices = this->connector.getDevices();
+  const std::vector<RT::Device*> received_devices =
+      this->connector.getDevices();
   ASSERT_EQ(received_threads.size(), 50);
   ASSERT_EQ(received_devices.size(), 50);
 

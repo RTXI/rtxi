@@ -36,7 +36,7 @@ protected:
 class EventManagerTest : public ::testing::Test
 {
 protected:
-  EventManagerTest() = default; 
+  EventManagerTest() = default;
   ~EventManagerTest() override = default;
 };
 

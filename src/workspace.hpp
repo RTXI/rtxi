@@ -53,10 +53,10 @@ public:
   /*!
    * loads plugin
    *
-   * \param library The name of the core library to load. For dynamically loaded 
+   * \param library The name of the core library to load. For dynamically loaded
    *                widgets it is the location of the library in the filesystem.
-   * \return Raw pointer to widgets plugin. The plugin is already registered with
-   *         the manager upon return of this function.
+   * \return Raw pointer to widgets plugin. The plugin is already registered
+   * with the manager upon return of this function.
    */
   Widgets::Plugin* loadPlugin(const std::string& library);
 
@@ -70,9 +70,8 @@ public:
   /*!
    * Handles plugin loading/unloadin gevents from gui thread
    *
-   * \param event The event to handle. The workspace manager only handles the following
-   *              event types:
-   *                Event::Type::PLUGIN_INSERT_EVENT
+   * \param event The event to handle. The workspace manager only handles the
+   * following event types: Event::Type::PLUGIN_INSERT_EVENT
    *                Event::Type::PLUGIN_REMOVE_EVENT
    *                Event::Type::DAQ_DEVICE_QUERY_EVENT
    */
@@ -88,40 +87,40 @@ public:
   bool isRegistered(const Widgets::Plugin* plugin);
 
   /*!
-    * Get the list of all loaded devices in RTXI
-    *
-    * The workspace manager, upon instantiation, will search predefined places
-    * for loadable DAQ device drivers. Once those drivers are successfully loaded,
-    * the manager will store them in a registry. This returns the list of all 
-    * DAQ devices in the registy. 
-    *
-    * \param driver The name of the driver associated with the devices
-    * \return A vector of DAQ::Device pointers associated with the driver
-    *
-    * \sa DAQ::Device
-    * \sa DAQ::Driver
-    */
+   * Get the list of all loaded devices in RTXI
+   *
+   * The workspace manager, upon instantiation, will search predefined places
+   * for loadable DAQ device drivers. Once those drivers are successfully
+   * loaded, the manager will store them in a registry. This returns the list of
+   * all DAQ devices in the registry.
+   *
+   * \param driver The name of the driver associated with the devices
+   * \return A vector of DAQ::Device pointers associated with the driver
+   *
+   * \sa DAQ::Device
+   * \sa DAQ::Driver
+   */
   std::vector<DAQ::Device*> getDevices(const std::string& driver);
 
   /*!
-    * Get all devices in registry
-    *
-    * \return A vector of DAQ::Device pointers
-    */
+   * Get all devices in registry
+   *
+   * \return A vector of DAQ::Device pointers
+   */
   std::vector<DAQ::Device*> getAllDevices();
 
   /*!
-    * Save current workspace values and state settings
-    *
-    * \param profile_name The name to save the settings
-    */
+   * Save current workspace values and state settings
+   *
+   * \param profile_name The name to save the settings
+   */
   void saveSettings(const QString& profile_name);
 
   /*!
-    * Restore workspace values and state settings
-    *
-    * \param profile_name The name of the stored settings 
-    */
+   * Restore workspace values and state settings
+   *
+   * \param profile_name The name of the stored settings
+   */
   void loadSettings(const QString& profile_name);
 
 private:

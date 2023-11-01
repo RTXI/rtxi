@@ -81,11 +81,11 @@ constexpr response_t NO_TELEMITRY = -2;
 /*!
  * Response structure representing state changes in RT::System
  *
- * Response data structure is sent over the event fifo from the 
+ * Response data structure is sent over the event fifo from the
  * realtime thread to the ui threads. It holds information such as
- * the telemitry code, as well as the command pointer associated with the 
+ * the telemitry code, as well as the command pointer associated with the
  * response. The command pointer is then used by the telemitry processor
- * to wake sleeping threads waiting on the success (or failure) of 
+ * to wake sleeping threads waiting on the success (or failure) of
  * such command.
  */
 struct Response
@@ -99,7 +99,7 @@ struct Response
  * Base class for devices that are to interface with System.
  *
  * Classes who inherit this base class are defined as blocks
- * indpendent of other blocks, and define device interface methods 
+ * independent of other blocks, and define device interface methods
  * read() and write().
  *
  * \sa RT::System
@@ -164,15 +164,15 @@ public:
 };  // class Thread
 
 /*!
- * Information about the connections between blocks. 
+ * Information about the connections between blocks.
  *
  * This is meant to represent connection information about blocks and channels.
  * It also defines equality and inequality functions for determining whether a
- * connection is the same as another, and convenient for existance tests.
+ * connection is the same as another, and convenient for existence tests.
  *
  * \param src IO::Block pointer representing the source of data
  * \param src_port_type IO::flags_t for source. Either IO::INPUT, IO::OUTPUT or
- *                      IO::UNKNOWN 
+ *                      IO::UNKNOWN
  * \param src_port Index of the source channel generating the output
  * \param dest IO::Block pointer representing who to send the output to
  * \param dest_port Index of the destination channel taking the output as input
@@ -197,17 +197,18 @@ typedef struct block_connection_t
 } block_connection_t;
 
 /*!
- * Class that manages connections between blocks. 
+ * Class that manages connections between blocks.
  *
  * The connector class, which should not be confused with the connector plugin,
  * is used by RT::System class during runtime to correctly connect and schedule
  * blocks before execution. Most of the connector class functionality is used
- * outside of real-time, but some can and should be used in the real-time context.
- * this class can also differentiate between RT::Device and RT::Thread and keeps a
- * registry of all connections. FInally, Connector class is responsible for
- * moving outputs of blocks to their appropriate inputs during runtime.
+ * outside of real-time, but some can and should be used in the real-time
+ * context. this class can also differentiate between RT::Device and RT::Thread
+ * and keeps a registry of all connections. FInally, Connector class is
+ * responsible for moving outputs of blocks to their appropriate inputs during
+ * runtime.
  *
- * The connector plugin communicates with RT::System through events to query and 
+ * The connector plugin communicates with RT::System through events to query and
  * establish block connections.
  *
  * \sa IO::Block
@@ -296,7 +297,7 @@ public:
 
   /*!
    * Get the list of devices that are registered with connector class.
-   * 
+   *
    * To the connector class devices are io blocks that are independent
    * of other blocks when connected.
    *
@@ -305,7 +306,7 @@ public:
   std::vector<RT::Device*> getDevices();
 
   /*!
-   * Get a list of threads that are registered with connector class. 
+   * Get a list of threads that are registered with connector class.
    *
    * To the connector class threads are blocks that are dependent of other
    * blocks when connected. They are topologically sorted.
@@ -326,11 +327,11 @@ public:
   /*!
    * Copies outputs of the given block
    *
-   * This function is used in the real-time loop to propagate values 
+   * This function is used in the real-time loop to propagate values
    * from one block to another. It works by using the assigned index of
    * the block to quickly access the block, then iterates through all
-   * connections of tha block and copies output values to the input values
-   * of the next block. 
+   * connections of the block and copies output values to the input values
+   * of the next block.
    *
    * \param Pointer to block that is the source of the output.
    */
@@ -342,11 +343,12 @@ public:
    * \param block The IO::Block object pointer to remove connections from
    */
   void clearAllConnections(IO::Block* block);
-  
+
   /*!
    * Query all registered blocks
    *
-   * \return A vector of IO::Block pointers that are registered with the connector
+   * \return A vector of IO::Block pointers that are registered with the
+   * connector
    */
   std::vector<IO::Block*> getRegisteredBlocks();
 
@@ -355,7 +357,7 @@ public:
    *
    * \return A vector of RT::block_connection_t representing all connections in
    *         the connector class registry
-   * 
+   *
    * \sa RT::block_connection_t
    */
   std::vector<RT::block_connection_t> getAllConnections();
@@ -389,7 +391,7 @@ using command_param_t = std::variant<std::monostate,
  * Manages the RTOS as well as all objects that require
  *   realtime execution.
  *
- * The System class is responsible for providing the execution context, 
+ * The System class is responsible for providing the execution context,
  * closed real-time loop, and connection processes. Instantiation of this
  * class automatically creates the real-time thread, and sets up communication
  * with the Event::Manager class. Note that this does not initiate the
@@ -425,13 +427,14 @@ public:
 
   /*!
    * Creates a worker thread that reads telemitry from real-time thread
-   * 
-   * The passing of messages to the real-time thread using RT::System::receiveEvent
-   * is not enough to change system state as the system itself should not 
-   * interact directly with concurrency primitives. The solution is to create a 
-   * thread that will read telemitry struct and wakeup any sleeping threads 
-   * associated with the given internal command. Without this, any caller that 
-   * sends events to the system class will block indefinitely.
+   *
+   * The passing of messages to the real-time thread using
+   * RT::System::receiveEvent is not enough to change system state as the system
+   * itself should not interact directly with concurrency primitives. The
+   * solution is to create a thread that will read telemitry struct and wakeup
+   * any sleeping threads associated with the given internal command. Without
+   * this, any caller that sends events to the system class will block
+   * indefinitely.
    *
    * \sa RT::System::getTelemitry()
    */
@@ -440,11 +443,12 @@ public:
   /*!
    * Processes Event and sends appropriate command to real-time thread
    *
-   * This function not only processes the event object, but it also performs 
+   * This function not only processes the event object, but it also performs
    * computations that do not need to be run in real-time. This offloads heavy
    * computations such as topological sort of threads or allocation of resources
-   * to non-realtime threads and allows the real-time thread to run fast fast fast.
-   *  
+   * to non-realtime threads and allows the real-time thread to run fast fast
+   * fast.
+   *
    * \param event An Event::Object object for the system to process
    * \sa Event::Manager
    * \sa Event::Handler
