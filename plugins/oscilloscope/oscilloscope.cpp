@@ -541,8 +541,8 @@ QWidget* Oscilloscope::Panel::createDisplayTab(QWidget* parent)
   sizesEdit->setMaximumWidth(sizesEdit->minimumSizeHint().width() * 3);
   sizesEdit->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Fixed);
   row1Layout->addWidget(sizesEdit);
-  const auto total_bytes = 
-    static_cast<double>(scopeWindow->getDataSize() * sizeof(Oscilloscope::sample));
+  const auto total_bytes = static_cast<double>(scopeWindow->getDataSize()
+                                               * sizeof(Oscilloscope::sample));
   sizesEdit->setText(QString::number(total_bytes / 1e6));
   sizesEdit->setEnabled(false);
 

@@ -305,7 +305,7 @@ void DataRecorder::Panel::changeDataFile()
                      QSettings::SystemScope,
                      "/usr/local/share/rtxi/");
   fileDialog.setDirectory(
-      userprefs.value("/dirs/data", getenv("HOME")).toString()); // NOLINT
+      userprefs.value("/dirs/data", getenv("HOME")).toString());  // NOLINT
 
   QStringList filterList;
   filterList.push_back("HDF5 files (*.h5)");
