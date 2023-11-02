@@ -67,16 +67,16 @@ enum state_t : int8_t
 namespace Telemitry
 {
 typedef int response_t;
-constexpr response_t RT_PERIOD_UPDATE = 0;
-constexpr response_t RT_THREAD_LIST_UPDATE = 1;
-constexpr response_t RT_DEVICE_LIST_UPDATE = 2;
-constexpr response_t RT_NOOP = 3;
-constexpr response_t RT_SHUTDOWN = 4;
-constexpr response_t RT_WIDGET_PARAM_UPDATE = 5;
-constexpr response_t IO_LINK_UPDATED = 6;
-constexpr response_t RT_WIDGET_STATE_UPDATE = 7;
-constexpr response_t RT_ERROR = -1;
-constexpr response_t NO_TELEMITRY = -2;
+constexpr response_t RT_PERIOD_UPDATE = 0; /*!< The period has been updated*/
+constexpr response_t RT_THREAD_LIST_UPDATE = 1;/*!< Thread list was updated*/
+constexpr response_t RT_DEVICE_LIST_UPDATE = 2;/*!< Device list was updated*/
+constexpr response_t RT_NOOP = 3;/*!< A No-Operation was performed*/
+constexpr response_t RT_SHUTDOWN = 4;/*!< RTXI Real-TIme system is shutting down*/
+constexpr response_t RT_WIDGET_PARAM_UPDATE = 5;/*!< A widget parameter was updated*/
+constexpr response_t IO_LINK_UPDATED = 6;/*!< A interblock connection was updated*/
+constexpr response_t RT_WIDGET_STATE_UPDATE = 7;/*!< The state of a widget was updated*/
+constexpr response_t RT_ERROR = -1;/*!< There was an error with the last event handling*/
+constexpr response_t NO_TELEMITRY = -2;/*!< No Telemitry (placeholder)*/
 
 /*!
  * Response structure representing state changes in RT::System
