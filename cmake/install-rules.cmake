@@ -61,6 +61,14 @@ install(
 )
 
 install(
+    FILES
+        res/icons/RTXI-icon.png
+        res/icons/RTXI-icon.svg
+        res/icons/RTXI-widget-icon.png
+    DESTINATION ${CMAKE_INSTALL_DATADIR}/rtxi
+)
+        
+install(
     EXPORT rtxiLibraryTargets
     NAMESPACE rtxi::
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/rtxi
