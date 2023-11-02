@@ -33,3 +33,6 @@ _CPack_Packages/
 
 #Ignore development script outputs
 scripts/all_plugins/
+
+#Ignore docs related stuff
+doxywarns.txt
