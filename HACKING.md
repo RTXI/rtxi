@@ -12,7 +12,8 @@ Build system targets that are only useful for developers of this project are
 hidden if the `rtxi_DEVELOPER_MODE` option is disabled. Enabling this
 option makes tests and other developer targets and options available. Not
 enabling this option means that you are a consumer of this project and thus you
-have no need for these targets and options.
+have no need for these targets and options. This option is autoamtically added to
+dev preset.
 
 Developer mode is always set to on in CI workflows.
 
@@ -109,6 +110,13 @@ Note that if your conan profile does not specify the same compiler, standard
 level, build type and runtime library as CMake, then that could potentially
 cause issues. See the link above for profiles documentation.
 
+This has been temporarily disabled due to conan migration issues from 1.x to 2.x
+but can be easily added back by editing presets and inheriting the conan preset.
+
+> **Note**
+> Make sure to also enable conan toolchains and settings under the Github workflows
+> for support sanitizer and testing support.
+
 [conan]: https://conan.io/
 [profile]: https://docs.conan.io/2/reference/config_files/profiles.html
 
@@ -166,7 +174,10 @@ Runs the executable target `rtxi_exe`. Understand that this may not
 provide full access to all features of rtxi, and that is mainly because 
 hardware access requires sudo privileges, which may break exe linking with 
 this target. This target is a convenience function for running the binary
-to quickly test whether it runs properly after compilation.
+to quickly test whether it runs properly after compilation. To circumvent 
+this problem, run the build and install targets for dev preset, then directly
+run the binary with sudo. This will ensure that your build process does not 
+create root permissions in build byproducts.
 
 #### `spell-check` and `spell-fix`
 
