@@ -26,7 +26,8 @@
       "hidden": true,
       "inherits": "cmake-pedantic",
       "cacheVariables": {
-        "rtxi_DEVELOPER_MODE": "ON"
+        "rtxi_DEVELOPER_MODE": "ON",
+        "CMAKE_INSTALL_PREFIX": "${sourceDir}/build/Debug"
       }
     },
     {

@@ -5,17 +5,30 @@ include(cmake/prelude.cmake)
 project(
     "rtxi"
     VERSION 3.0.0
-    DESCRIPTION "The Real-Time eXperiment Interface"
+    DESCRIPTION "Real-Time eXperiment Interface"
     HOMEPAGE_URL "http://rtxi.org/"
     LANGUAGES CXX
 )
+
+# --- Some installation shenanigans
+# use, i.e. don't skip the full RPATH for the build tree
+set(CMAKE_SKIP_BUILD_RPATH FALSE)
+ 
+# when building, don't use the install RPATH already
+# (but later on when installing)
+set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+ 
+# add the automatically determined parts of the RPATH
+# which point to directories outside the build tree to the install RPATH
+set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib/rtxi")
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+# ----
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/scripts/cmake)
 set(RTXI_RT_CORE "posix" CACHE STRING 
   "The real-time core to use. Accepted values are posix, evl, and xenomai")
 set(RTXI_USER_HOMEDIR $ENV{HOME})
 set(RTXI_SETTINGS_DIR ${RTXI_USER_HOMEDIR}/rtxi/)
-set(RTXI_PLUGIN_DIR ${CMAKE_INSTALL_PREFIX}/rtxi/modules/)
 set(XENOMAI_ROOT_DIR "/usr/xenomai")
 configure_file(rtxiConfig.h.in rtxiConfig.h)
 include(cmake/project-is-top-level.cmake)

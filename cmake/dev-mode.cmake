@@ -7,7 +7,8 @@ endif()
 
 add_custom_target(
     run-exe
-    COMMAND rtxi_exe
+    COMMAND "${CMAKE_COMMAND}" --install .
+    COMMAND "${CMAKE_INSTALL_PREFIX}/bin/rtxi"
     VERBATIM
 )
 add_dependencies(run-exe rtxi_exe)
