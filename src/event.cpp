@@ -271,7 +271,7 @@ Event::Manager::Manager()
   };
 
   // create event processing workers in the thread pool
-  for (size_t count = 0; count < RT::OS::PROCESSOR_COUNT; count++) {
+  for (size_t count = 0; count < 2; count++) {
     this->thread_pool.emplace_back(task);
   }
   for (auto& thread : this->thread_pool) {
