@@ -90,13 +90,11 @@ jobs:
       uses: actions/setup-python@v4
       with: { python-version: "3.8" }
 
-      #- name: Install dependencies
-      #  run: |
-      #    pip3 install conan
-      #    bash < .github/scripts/conan-profile.sh
-      #    conan install . -b missing
-    - name: Install Dependencies
-      run: sudo apt -y -q install qtbase5-dev qtbase5-dev-tools libqt5svg5-dev libqwt-qt5-dev libhdf5-dev libgsl0-dev libboost-stacktrace-dev libgtest-dev libgmock-dev libfmt-dev git
+    - name: Install dependencies
+      run: |
+        pip3 install conan==1.61
+        bash < .github/scripts/conan-profile.sh
+        conan install . -b missing
 
     - name: Configure
       run: cmake --preset=ci-sanitize
@@ -143,8 +141,10 @@ jobs:
       with: { python-version: "3.8" }
 
     - name: Install dependencies
-      shell: bash
-      run: sudo apt -y -q install qtbase5-dev qtbase5-dev-tools libqt5svg5-dev libqwt-qt5-dev libhdf5-dev libgsl0-dev libboost-stacktrace-dev libgtest-dev libgmock-dev libfmt-dev git
+      run: |
+        pip3 install conan==1.61
+        bash < .github/scripts/conan-profile.sh
+        conan install . -b missing
 
     - name: Setup MultiToolTask
       if: matrix.os == 'windows-2022'
