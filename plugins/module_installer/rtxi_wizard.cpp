@@ -215,6 +215,7 @@ void RTXIWizard::Panel::getReadme()
   } else {
     // Disable buttons until all logic is done.
     readmeWindow->setMarkdown(modules[parent->currentItem()->text()].readme);
+    readmeWindow->show();
     cloneButton->setEnabled(true);
     availableListWidget->setDisabled(false);
     installedListWidget->setDisabled(false);
