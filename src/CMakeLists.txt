@@ -169,7 +169,6 @@ target_link_libraries(rtxi_exe PRIVATE
     Qt5::Network
     fmt::fmt
     HDF5::HDF5
-    libgit2::libgit2
     backtrace
     dl
 )

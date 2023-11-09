@@ -11,7 +11,5 @@ target_link_libraries(module_installer_lib PRIVATE
     Qt5::Widgets
     Qt5::Gui
     Qt5::Network 
-    libgit2::libgit2 
-    discount::libmarkdown
     fmt::fmt
 )

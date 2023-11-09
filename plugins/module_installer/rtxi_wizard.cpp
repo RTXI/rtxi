@@ -20,10 +20,7 @@
 
 #include <git2.h>
 #include <unistd.h>
-extern "C"
-{
-#include <mkdio.h>
-}
+
 #include <QCoreApplication>
 #include <QDir>
 #include <QFileInfo>
@@ -115,8 +112,6 @@ RTXIWizard::Panel::Panel(QMainWindow* mwindow, Event::Manager* ev_manager)
 
 void RTXIWizard::Panel::initParameters()
 {
-  git_libgit2_init();
-
   // syntax here only works in c++11
   exclude_list = std::vector<QString>({QString("rtxi"),
                                        QString("rtxi.github.io"),
@@ -219,7 +214,7 @@ void RTXIWizard::Panel::getReadme()
         readmeNetworkReply, SIGNAL(finished()), this, SLOT(parseReadme()));
   } else {
     // Disable buttons until all logic is done.
-    readmeWindow->setHtml(modules[parent->currentItem()->text()].readme);
+    readmeWindow->setMarkdown(modules[parent->currentItem()->text()].readme);
     cloneButton->setEnabled(true);
     availableListWidget->setDisabled(false);
     installedListWidget->setDisabled(false);
@@ -231,30 +226,22 @@ void RTXIWizard::Panel::getReadme()
 void RTXIWizard::Panel::parseReadme()
 {
   const QByteArray network_reply_data = readmeNetworkReply->readAll();
-  const char* raw_data = network_reply_data.constData();
-  MMIOT* m = mkd_string(raw_data, network_reply_data.size(), 0);
-  mkd_compile(m, 0);
-
-  char* text = nullptr;
-  auto len = static_cast<size_t>(mkd_document(m, &text));
-  const std::string html(text, len);
-
-  mkd_cleanup(m);
-  const QString fileText = QString(html.c_str());
+  const QString markdown_data = QString(network_reply_data.constData());
+  this->readmeWindow->setMarkdown(markdown_data);
 
   switch (button_mode) {
     case DOWNLOAD:
-      modules[availableListWidget->currentItem()->text()].readme = fileText;
+      modules[availableListWidget->currentItem()->text()].readme = markdown_data;
       break;
     case UPDATE:
-      modules[installedListWidget->currentItem()->text()].readme = fileText;
+      modules[installedListWidget->currentItem()->text()].readme = markdown_data;
       break;
     default:
       ERROR_MSG("ERROR: default in switch block in cloneModule()");
       break;
   }
 
-  readmeWindow->setHtml(fileText);
+  //readmeWindow->setHtml(fileText);
   readmeWindow->show();
   readmeNetworkReply->deleteLater();
 
@@ -342,40 +329,31 @@ void RTXIWizard::Panel::installFromString(const std::string& module_name)
    */
   const QByteArray url = modules[name].clone_url.toString().toLatin1();
   const QByteArray installpath = install_prefix.path().toLatin1();
-  const QString source_location = QDir::temp().absolutePath()
-      + QString("/rtxi_modules/") + QString(module_name.c_str());
+  const QString mod_location = QDir::temp().absolutePath() + 
+    QDir::separator() + QString("rtxi_modules");
+  const QString source_location = mod_location + QDir::separator() + QString(module_name.c_str());
   QDir(source_location).removeRecursively();
-  const QByteArray clonepath = source_location.toLatin1();
 
-  int error = 0;
   progress->setLabelText("Downloading extension...");
   progress->setValue(1);
   // QApplication::processEvents();
   //  If the repo already exists, pull from master. If not, clone it.
+  auto* command = new QProcess();
+  const QStringList clone_args = {
+    "clone",
+    "-b",
+    "master",
+    url,
+    source_location,
+  };
+
+  const std::string git_command(GIT_COMMAND);
   if (!(QDir(source_location)).exists()) {
-    git_repository* repo = nullptr;
-    git_clone_options opts = GIT_CLONE_OPTIONS_INIT;
-    opts.checkout_branch = "master";
-    error = printGitError(git_clone(&repo, url, clonepath, &opts));
-    git_repository_free(repo);
-    if (error != 0) {
-      return;
-    }
+    command->start(QString::fromStdString(git_command), clone_args);
+    command->waitForFinished();
   }
 
-  git_repository* repo = nullptr;
-  git_remote* remote = nullptr;
-  git_repository_open(&repo, clonepath);
-  error += printGitError(git_remote_lookup(&remote, repo, "origin"));
-  error += printGitError(git_remote_connect(
-      remote, GIT_DIRECTION_FETCH, nullptr, nullptr, nullptr));
-  error += printGitError(git_remote_download(remote, nullptr, nullptr));
-
-  git_remote_disconnect(remote);
-  git_remote_free(remote);
-  git_repository_free(repo);
-
-  if (error != 0) {
+  if (command->exitStatus() != QProcess::NormalExit) {
     ERROR_MSG("Could not complete installation for module {}",
               name.toStdString());
     // Re-enable buttons only after compilation is done. Otherwise you get race
@@ -411,7 +389,6 @@ void RTXIWizard::Panel::installFromString(const std::string& module_name)
   // QApplication::processEvents();
 
   // Compile and install handled by QProcess.
-  auto* command = new QProcess();
   command->start(make_cmd, make_config_args);
   command->waitForFinished();
   if (command->exitStatus() != QProcess::NormalExit || command->exitCode() != 0)
@@ -496,15 +473,6 @@ void RTXIWizard::Panel::installFromString(const std::string& module_name)
   rebuildListWidgets();
   availableListWidget->setDisabled(false);
   installedListWidget->setDisabled(false);
-}
-
-int RTXIWizard::Panel::printGitError(int error)
-{
-  if (error != 0) {
-    const git_error* e = giterr_last();
-    printf("Error %d/%d: %s\n", error, e->klass, e->message);
-  }
-  return error;
 }
 
 std::unique_ptr<Widgets::Plugin> RTXIWizard::createRTXIPlugin(

@@ -24,7 +24,6 @@ set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib/rtxi")
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 # ----
 
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/scripts/cmake)
 set(RTXI_RT_CORE "posix" CACHE STRING 
   "The real-time core to use. Accepted values are posix, evl, and xenomai")
 set(RTXI_USER_HOMEDIR $ENV{HOME})
@@ -38,6 +37,8 @@ set(XENOMAI_ROOT_DIR "/usr/xenomai")
 set(RTXI_CMAKE_SCRIPTS "")
 if(rtxi_DEVELOPER_MODE)
 set(RTXI_CMAKE_SCRIPTS "${CMAKE_CURRENT_SOURCE_DIR}/conan")
+else()
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/scripts/cmake)
 endif()
 
 configure_file(rtxiConfig.h.in rtxiConfig.h)
@@ -60,8 +61,7 @@ include_directories(${PROJECT_BINARY_DIR})
 find_package(Xenomai 3)
 
 #Find the packages
-find_package(libgit2 REQUIRED)
-find_package(discount REQUIRED)
+find_package(Git REQUIRED)
 find_package(fmt REQUIRED)
 find_package(HDF5 REQUIRED COMPONENTS C HL)
 find_package(Qt5 REQUIRED COMPONENTS Core Gui Widgets Network OpenGL Svg Xml)

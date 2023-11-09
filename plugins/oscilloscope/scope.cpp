@@ -24,9 +24,11 @@
 
 #include "scope.hpp"
 
+#include <qwt/qwt_global.h>
 #include <qwt_abstract_scale_draw.h>
 #include <qwt_plot_legenditem.h>
 #include <qwt_scale_map.h>
+
 #include <stdlib.h>
 
 #include "rt.hpp"
@@ -114,8 +116,20 @@ Oscilloscope::Scope::Scope(QWidget* parent)
   // Create and attach legend
   this->legendItem->attach(this);
   this->legendItem->setMaxColumns(1);
+
+  // Here we have a problem. Plot legends in QWT are
+  // aligned using setAlignment in pre 6.2, but the
+  // function does not exist >= 6.2 and is instead 
+  // replaced by setAlignmentInCanvas. This needs a bit
+  // of preprocessor to fix.
+  #if QWT_VERSION >= 0X060200
   this->legendItem->setAlignmentInCanvas(
       static_cast<Qt::Alignment>(Qt::AlignTop | Qt::AlignRight));
+  #else
+  this->legendItem->setAlignment(
+      static_cast<Qt::Alignment>(Qt::AlignTop | Qt::AlignRight));
+  #endif
+
   this->legendItem->setBorderRadius(8);
   this->legendItem->setMargin(4);
   this->legendItem->setSpacing(2);

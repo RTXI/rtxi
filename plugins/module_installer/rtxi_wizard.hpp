@@ -64,7 +64,6 @@ private:
 
   std::map<QString, module_t> modules;
   void initParameters();
-  static int printGitError(int error);
   enum button_mode_t
   {
     DOWNLOAD,
