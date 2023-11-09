@@ -16,11 +16,6 @@
          along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <iostream>
-
-#include <git2.h>
-#include <unistd.h>
-
 #include <QCoreApplication>
 #include <QDir>
 #include <QFileInfo>
@@ -29,9 +24,14 @@
 #include <QJsonObject>
 #include <QMessageBox>
 #include <QProcess>
+#include <iostream>
+
+#include "rtxi_wizard.hpp"
+
+#include <git2.h>
+#include <unistd.h>
 
 #include "rtxiConfig.h"
-#include "rtxi_wizard.hpp"
 
 /*
  * This module uses the QNetworkManager class to fetch information on our
@@ -231,17 +231,19 @@ void RTXIWizard::Panel::parseReadme()
 
   switch (button_mode) {
     case DOWNLOAD:
-      modules[availableListWidget->currentItem()->text()].readme = markdown_data;
+      modules[availableListWidget->currentItem()->text()].readme =
+          markdown_data;
       break;
     case UPDATE:
-      modules[installedListWidget->currentItem()->text()].readme = markdown_data;
+      modules[installedListWidget->currentItem()->text()].readme =
+          markdown_data;
       break;
     default:
       ERROR_MSG("ERROR: default in switch block in cloneModule()");
       break;
   }
 
-  //readmeWindow->setHtml(fileText);
+  // readmeWindow->setHtml(fileText);
   readmeWindow->show();
   readmeNetworkReply->deleteLater();
 
@@ -329,9 +331,10 @@ void RTXIWizard::Panel::installFromString(const std::string& module_name)
    */
   const QByteArray url = modules[name].clone_url.toString().toLatin1();
   const QByteArray installpath = install_prefix.path().toLatin1();
-  const QString mod_location = QDir::temp().absolutePath() + 
-    QDir::separator() + QString("rtxi_modules");
-  const QString source_location = mod_location + QDir::separator() + QString(module_name.c_str());
+  const QString mod_location =
+      QDir::temp().absolutePath() + QDir::separator() + QString("rtxi_modules");
+  const QString source_location =
+      mod_location + QDir::separator() + QString(module_name.c_str());
   QDir(source_location).removeRecursively();
 
   progress->setLabelText("Downloading extension...");
@@ -340,11 +343,11 @@ void RTXIWizard::Panel::installFromString(const std::string& module_name)
   //  If the repo already exists, pull from master. If not, clone it.
   auto* command = new QProcess();
   const QStringList clone_args = {
-    "clone",
-    "-b",
-    "master",
-    url,
-    source_location,
+      "clone",
+      "-b",
+      "master",
+      url,
+      source_location,
   };
 
   const std::string git_command(GIT_COMMAND);
