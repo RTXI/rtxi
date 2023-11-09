@@ -9,7 +9,7 @@
 #define _INCREMENTALPLOT_H_ 1
 
 #include "basicplot.h"
-//#include <qwt_array.h>
+#include <QVector>
 #include <qwt_plot.h>
 #include <qwt_symbol.h>
 
@@ -30,8 +30,8 @@ public:
 
 private:
   int d_count;
-  QwtArray<double> d_x;
-  QwtArray<double> d_y;
+  QVector<double> d_x;
+  QVector<double> d_y;
 };
 
 class IncrementalPlot : public BasicPlot

@@ -20,12 +20,11 @@ target_link_libraries(testing_lib PRIVATE
     Qt5::Gui
     Qt5::Widgets
     Qt5::Network
-    gtest gtest_main
-    gmock gmock_main 
+    GTest::gtest GTest::gtest_main
+    GTest::gmock GTest::gmock_main 
     Boost::headers
     dl
-    backtrace
-    fmt
+    fmt::fmt
 )
 
 add_executable(rtxiTests
@@ -53,6 +52,10 @@ target_link_libraries(rtxiTests PRIVATE
     Qt5::Core
     Qt5::Gui
     Qt5::Widgets
+    GTest::gtest GTest::gtest_main
+    GTest::gmock GTest::gmock_main 
+    fmt::fmt
+    Boost::headers
 )
 
 add_library(fakePlugin MODULE fakePlugin.h fakePlugin.cpp)
@@ -76,6 +79,9 @@ target_link_libraries(fakePlugin PRIVATE
     Qt5::Core
     Qt5::Gui
     Qt5::Widgets
+    fmt::fmt
+    GTest::gtest GTest::gtest_main
+    GTest::gmock GTest::gmock_main 
 )
 
 target_compile_definitions(rtxiTests PRIVATE BOOST_STACKTRACE_USE_ADDR2LINE)

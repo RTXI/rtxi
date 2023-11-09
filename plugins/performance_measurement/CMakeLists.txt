@@ -10,4 +10,5 @@ target_link_libraries(performance_measurement_lib PRIVATE
     rtmath
     Qt5::Core
     Qt5::Widgets
+    fmt::fmt
 )

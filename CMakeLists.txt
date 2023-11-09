@@ -30,6 +30,16 @@ set(RTXI_RT_CORE "posix" CACHE STRING
 set(RTXI_USER_HOMEDIR $ENV{HOME})
 set(RTXI_SETTINGS_DIR ${RTXI_USER_HOMEDIR}/rtxi/)
 set(XENOMAI_ROOT_DIR "/usr/xenomai")
+
+# Sometimes we want plugins to compile as well when developing. We use the 
+# RTXI_CMAKE_SCRIPTS to pass to plugin configuration where to find our 
+# development packages (conan). This should not be used in Release mode. 
+# This variable is available in rtxiConfig.h header
+set(RTXI_CMAKE_SCRIPTS "")
+if(rtxi_DEVELOPER_MODE)
+set(RTXI_CMAKE_SCRIPTS "${CMAKE_CURRENT_SOURCE_DIR}/conan")
+endif()
+
 configure_file(rtxiConfig.h.in rtxiConfig.h)
 include(cmake/project-is-top-level.cmake)
 include(cmake/variables.cmake)
@@ -43,10 +53,6 @@ cmake_policy(SET CMP0135 NEW)
 include(FindPkgConfig)
 pkg_check_modules(evl evl)
 
-# some libraries do not have cmake config files, so we use pkg-config for those
-pkg_check_modules(git2 REQUIRED libgit2)
-pkg_check_modules(markdown REQUIRED libmarkdown)
-
 # Make sure we can find the rtxiConfig.h generated file in binary directory
 include_directories(${PROJECT_BINARY_DIR})
 
@@ -54,6 +60,8 @@ include_directories(${PROJECT_BINARY_DIR})
 find_package(Xenomai 3)
 
 #Find the packages
+find_package(libgit2 REQUIRED)
+find_package(discount REQUIRED)
 find_package(fmt REQUIRED)
 find_package(HDF5 REQUIRED COMPONENTS C HL)
 find_package(Qt5 REQUIRED COMPONENTS Core Gui Widgets Network OpenGL Svg Xml)
@@ -70,15 +78,15 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
+# Clang-tidy is by far the most annoying tool to please. Depending on your development
+# environment you may get useless errors unless you add the line below.
+list(APPEND CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES ${CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES})
+
 include_directories(
   ${CMAKE_SOURCE_DIR}/src 
   ${CMAKE_SOURCE_DIR}/libs
   ${CMAKE_SOURCE_DIR}/plugins
 )
-
-# Clang-tidy is by far the most annoying tool to please. Depending on your development
-# environment you may get useless errors unless you add the line below.
-list(APPEND CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES ${CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES})
 
 add_subdirectory(libs)
 add_subdirectory(src)

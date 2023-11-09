@@ -13,4 +13,5 @@ target_link_libraries(oscilloscope_lib PRIVATE
     qwt::qwt
     Qt5::Core
     Qt5::Widgets
+    fmt::fmt
 )

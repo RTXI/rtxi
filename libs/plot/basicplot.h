@@ -7,7 +7,6 @@
 #define _BASICPLOT_H_ 1
 
 #include "scrollzoomer.h"
-#include <qwt_compat.h>
 #include <qwt_plot.h>
 #include <qwt_plot_renderer.h>
 #include <qwt_scale_draw.h>
@@ -43,7 +42,7 @@ public slots:
     double rtop = yscalediv->upperBound();
     double rheight = yscalediv->lowerBound() - yscalediv->upperBound();
     double rwidth = xscalediv->upperBound() - xscalediv->lowerBound();
-    QwtDoubleRect boundRect(rleft, rtop, rwidth, rheight);
+    QRectF boundRect(rleft, rtop, rwidth, rheight);
     setZoomBase(boundRect);
   };
 };

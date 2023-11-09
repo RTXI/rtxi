@@ -4,32 +4,34 @@ if(DEFINED evl_FOUND AND RTXI_RT_CORE STREQUAL "evl")
   message("EVL library found. Using EVL rtos interface")
   list(APPEND CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES ${evl_INCLUDE_DIRS})
   add_library(dlplugin SHARED "dlplugin.hpp" "dlplugin.cpp")
+  target_link_libraries(dlplugin PRIVATE fmt::fmt)
   add_library(xfifo SHARED "fifo.hpp" "fifo_evl.cpp")
   target_link_libraries(xfifo 
     PRIVATE 
       Threads::Threads
       ${evl_LINK_LIBRARIES}
-      fmt
+      fmt::fmt
   )
   target_include_directories(xfifo SYSTEM PRIVATE ${evl_INCLUDE_DIRS})
   add_library(rtos SHARED "rtos.hpp" "rtos_evl.cpp")
   target_link_libraries(rtos PRIVATE 
     ${evl_LINK_LIBRARIES}
     xfifo
-    fmt
+    fmt::fmt
   )
   target_include_directories(rtos SYSTEM PRIVATE ${evl_INCLUDE_DIRS})
 elseif(DEFINED Xenomai_FOUND AND RTXI_RT_CORE STREQUAL "xenomai")
   message("Xenomai library found. using Cobalt Alchemy interface")
   #list(APPEND CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES ${xenomai3_ALCHEMY_CFLAGS})
   add_library(dlplugin SHARED "dlplugin.hpp" "dlplugin.cpp")
+  target_link_libraries(dlplugin PRIVATE fmt::fmt)
   add_library(xfifo SHARED "fifo.hpp" "fifo_xenomai.cpp")
   target_include_directories(xfifo PRIVATE ${XENOMAI_INCLUDE_DIRS})
   target_link_libraries(xfifo 
     PUBLIC
       ${XENOMAI_LIBRARIES}
     PRIVATE 
-      fmt
+      fmt::fmt
   )
   target_compile_definitions(xfifo PRIVATE ${XENOMAI_DEFINITIONS})
   add_library(rtos SHARED "rtos.hpp" "rtos_xenomai.cpp")
@@ -38,18 +40,19 @@ elseif(DEFINED Xenomai_FOUND AND RTXI_RT_CORE STREQUAL "xenomai")
     xfifo
   PUBLIC
     ${XENOMAI_LIBRARIES}
-    fmt
+    fmt::fmt
   )
   target_compile_definitions(rtos PRIVATE ${XENOMAI_DEFINITIONS})
 else()
   message("RT core Library not found. Reverting to posix Interface.")
   add_library(dlplugin SHARED "dlplugin.hpp" "dlplugin.cpp")
+  target_link_libraries(dlplugin PRIVATE fmt::fmt)
   add_library(xfifo SHARED "fifo.hpp" "fifo_posix.cpp")
-  target_link_libraries(xfifo PRIVATE fmt)
+  target_link_libraries(xfifo PRIVATE fmt::fmt)
   add_library(rtos SHARED "rtos.hpp" "rtos_posix.cpp")
   target_link_libraries(rtos PRIVATE 
       xfifo
-      fmt
+      fmt::fmt
   )
 endif()
 
@@ -92,7 +95,7 @@ add_library(rtxi SHARED
 target_link_libraries(rtxi 
   PRIVATE 
     Threads::Threads
-    fmt
+    fmt::fmt
     qwt::qwt
     xfifo
     dlplugin
@@ -124,6 +127,7 @@ target_link_libraries(workspace PRIVATE
     Qt5::Gui
     Qt5::Widgets
     Qt5::Network
+    fmt::fmt
     qwt::qwt
     Boost::headers
     backtrace
@@ -163,10 +167,9 @@ target_link_libraries(rtxi_exe PRIVATE
     Qt5::Gui
     Qt5::Widgets
     Qt5::Network
-    fmt
+    fmt::fmt
     HDF5::HDF5
-    git2
-    markdown
+    libgit2::libgit2
     backtrace
     dl
 )

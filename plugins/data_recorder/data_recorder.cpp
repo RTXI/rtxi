@@ -371,11 +371,12 @@ void DataRecorder::Panel::insertChannel()
 
   QListWidgetItem* temp_item = nullptr;
   const std::string formatting = "{} {} direction: {} port: {}";
-  const std::string temp_name = fmt::format(formatting,
-                                            endpoint.block->getName(),
-                                            endpoint.block->getID(),
-                                            endpoint.direction,
-                                            endpoint.port);
+  const std::string temp_name =
+      fmt::format(formatting,
+                  endpoint.block->getName(),
+                  endpoint.block->getID(),
+                  endpoint.direction == IO::INPUT ? "INPUT" : "OUTPUT",
+                  endpoint.port);
   temp_item = new QListWidgetItem(QString(temp_name.c_str()));
   temp_item->setData(Qt::UserRole, QVariant::fromValue(endpoint));
   selectionBox->addItem(temp_item);

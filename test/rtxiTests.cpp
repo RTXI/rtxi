@@ -18,6 +18,7 @@
 
  */
 
+#include <QtPlugin>
 #include <iostream>
 
 #include "rtxiTests.h"

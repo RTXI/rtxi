@@ -10,4 +10,5 @@ target_link_libraries(connector_lib PRIVATE
     Qt5::Core
     Qt5::Widgets
     Qt5::Gui
+    fmt::fmt
 )

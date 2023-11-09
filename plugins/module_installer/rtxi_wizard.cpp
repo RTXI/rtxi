@@ -33,6 +33,7 @@ extern "C"
 #include <QMessageBox>
 #include <QProcess>
 
+#include "rtxiConfig.h"
 #include "rtxi_wizard.hpp"
 
 /*
@@ -397,7 +398,11 @@ void RTXIWizard::Panel::installFromString(const std::string& module_name)
       source_location,
       "-B",
       build_location,
-      QString("-DRTXI_PACKAGE_PATH=") + package_dir.path()};
+      QString("-DRTXI_PACKAGE_PATH=") + package_dir.path(),
+      QString("-DCMAKE_BUILD_TYPE=")
+          + QString::fromStdString(std::string(RTXI_BUILD_TYPE)),
+      QString("-DRTXI_CMAKE_SCRIPTS=")
+          + QString::fromStdString(std::string(RTXI_CMAKE_SCRIPTS))};
   const QStringList make_build_args = {"--build", build_location, "-j2"};
   const QStringList make_install_args = {"--install", build_location};
 

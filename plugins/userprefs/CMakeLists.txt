@@ -9,5 +9,6 @@ target_link_libraries(userprefs_lib PRIVATE
 	rtxi
 	Qt5::Core
 	Qt5::Widgets
+	fmt::fmt
 )
 
