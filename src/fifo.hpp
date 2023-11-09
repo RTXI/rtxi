@@ -61,7 +61,7 @@ public:
    * \param data_size The size of the data to read from the buffer
    * \return n Number of elements read. Same as size.
    */
-  virtual ssize_t read(void* buf, size_t data_size) = 0;
+  virtual int64_t read(void* buf, size_t data_size) = 0;
 
   /*!
    * Write to the FIFO storage for the realtime thread. Must be run from non-rt
@@ -71,7 +71,7 @@ public:
    * \param data_size The size of the data to read from the buffer
    * \return n Number of elements written. Same as size.
    */
-  virtual ssize_t write(void* buf, size_t data_size) = 0;
+  virtual int64_t write(void* buf, size_t data_size) = 0;
 
   /*!
    * Read the data stored in the FIFO written by non-RT thread. Must be run
@@ -82,7 +82,7 @@ public:
    * \param data_size The size of the data to read from the buffer
    * \return n Number of elements read. Same as size.
    */
-  virtual ssize_t readRT(void* buf, size_t data_size) = 0;
+  virtual int64_t readRT(void* buf, size_t data_size) = 0;
 
   /*!
    * Write to the FIFO storage for the non-RT thread. Must be run from
@@ -92,7 +92,7 @@ public:
    * \param data_size The size of the data to read from the buffer
    * \return n Number of elements written. Same as size.
    */
-  virtual ssize_t writeRT(void* buf, size_t data_size) = 0;
+  virtual int64_t writeRT(void* buf, size_t data_size) = 0;
 
   /*!
    * Get the memory capacity of the fifo

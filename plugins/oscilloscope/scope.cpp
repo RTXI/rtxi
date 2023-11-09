@@ -505,7 +505,7 @@ void Oscilloscope::Scope::drawCurves()
 void Oscilloscope::Scope::process_data()
 {
   const std::shared_lock<std::shared_mutex> lock(this->m_channel_mutex);
-  ssize_t bytes = 0;
+  int64_t bytes = 0;
   size_t sample_count = 0;
   size_t array_indx = 0;
   const size_t sample_capacity_bytes =

@@ -44,10 +44,10 @@ public:
   ~posixFifo() override;
 
   size_t getCapacity() override;
-  ssize_t read(void* buf, size_t data_size) override;
-  ssize_t write(void* buf, size_t data_size) override;
-  ssize_t readRT(void* buf, size_t data_size) override;
-  ssize_t writeRT(void* buf, size_t data_size) override;
+  int64_t read(void* buf, size_t data_size) override;
+  int64_t write(void* buf, size_t data_size) override;
+  int64_t readRT(void* buf, size_t data_size) override;
+  int64_t writeRT(void* buf, size_t data_size) override;
   void poll() override;
   void close() override;
   int getErrorCode() const;
@@ -103,22 +103,22 @@ RT::OS::posixFifo::~posixFifo()
   ::close(ui_to_rt[1]);
 }
 
-ssize_t RT::OS::posixFifo::read(void* buf, size_t data_size)
+int64_t RT::OS::posixFifo::read(void* buf, size_t data_size)
 {
   return ::read(rt_to_ui[0], buf, data_size);
 }
 
-ssize_t RT::OS::posixFifo::write(void* buf, size_t data_size)
+int64_t RT::OS::posixFifo::write(void* buf, size_t data_size)
 {
   return ::write(ui_to_rt[1], buf, data_size);
 }
 
-ssize_t RT::OS::posixFifo::readRT(void* buf, size_t data_size)
+int64_t RT::OS::posixFifo::readRT(void* buf, size_t data_size)
 {
   return ::read(ui_to_rt[0], buf, data_size);
 }
 
-ssize_t RT::OS::posixFifo::writeRT(void* buf, size_t data_size)
+int64_t RT::OS::posixFifo::writeRT(void* buf, size_t data_size)
 {
   return ::write(rt_to_ui[1], buf, data_size);
 }

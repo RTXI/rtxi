@@ -28,10 +28,10 @@ public:
   ~evlFifo() override;
 
   int buffer_fd() const;
-  ssize_t read(void* buf, size_t buf_size) override;
-  ssize_t write(void* buf, size_t buf_size) override;
-  ssize_t readRT(void* buf, size_t buf_size) override;
-  ssize_t writeRT(void* buf, size_t buf_size) override;
+  int64_t read(void* buf, size_t buf_size) override;
+  int64_t write(void* buf, size_t buf_size) override;
+  int64_t readRT(void* buf, size_t buf_size) override;
+  int64_t writeRT(void* buf, size_t buf_size) override;
   void poll() override;
   void close() override;
   size_t getCapacity() override;
@@ -70,24 +70,24 @@ RT::OS::evlFifo::~evlFifo()
   ::close(this->xbuf_fd);
 }
 
-ssize_t RT::OS::evlFifo::read(void* buf, size_t buf_size)
+int64_t RT::OS::evlFifo::read(void* buf, size_t buf_size)
 {
   // We need to specify to compiler that we are using read from c lib
   return ::read(this->xbuf_fd, buf, buf_size);
 }
 
-ssize_t RT::OS::evlFifo::write(void* buf, size_t buf_size)
+int64_t RT::OS::evlFifo::write(void* buf, size_t buf_size)
 {
   // we need to specify to compiler that we are using write from c lib
   return ::write(this->xbuf_fd, buf, buf_size);
 }
 
-ssize_t RT::OS::evlFifo::readRT(void* buf, size_t buf_size)
+int64_t RT::OS::evlFifo::readRT(void* buf, size_t buf_size)
 {
   return oob_read(this->xbuf_fd, buf, buf_size);
 }
 
-ssize_t RT::OS::evlFifo::writeRT(void* buf, size_t buf_size)
+int64_t RT::OS::evlFifo::writeRT(void* buf, size_t buf_size)
 {
   return oob_write(this->xbuf_fd, buf, buf_size);
 }

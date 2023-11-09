@@ -93,7 +93,7 @@ TEST_F(FifoTest, nonblocking)
     std::unique_lock<std::mutex> lk(mut);
     cv.wait(lk, [&ready]() { return ready; });
   }
-  const ssize_t read_bytes =
+  const int64_t read_bytes =
       fifo->read(output.data(), this->default_message.size() * sizeof(char));
   sender_thread.join();
 

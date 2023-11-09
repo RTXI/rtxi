@@ -47,10 +47,10 @@ public:
   xenomaiFifo& operator=(xenomaiFifo&&) = default;
   ~xenomaiFifo() override;
 
-  ssize_t read(void* buf, size_t buf_size) override;
-  ssize_t write(void* buf, size_t buf_size) override;
-  ssize_t readRT(void* buf, size_t buf_size) override;
-  ssize_t writeRT(void* buf, size_t buf_size) override;
+  int64_t read(void* buf, size_t buf_size) override;
+  int64_t write(void* buf, size_t buf_size) override;
+  int64_t readRT(void* buf, size_t buf_size) override;
+  int64_t writeRT(void* buf, size_t buf_size) override;
   void poll() override;
   void close() override;
   int buffer_fd() const;
@@ -97,24 +97,24 @@ RT::OS::xenomaiFifo::~xenomaiFifo()
   }
 }
 
-ssize_t RT::OS::xenomaiFifo::read(void* buf, size_t buf_size)
+int64_t RT::OS::xenomaiFifo::read(void* buf, size_t buf_size)
 {
   // We need to specify to compiler that we are using read from c lib
   return ::read(this->fd, buf, buf_size);
 }
 
-ssize_t RT::OS::xenomaiFifo::write(void* buf, size_t buf_size)
+int64_t RT::OS::xenomaiFifo::write(void* buf, size_t buf_size)
 {
   // we need to specify to compiler that we are using write from c lib
   return ::write(this->fd, buf, buf_size);
 }
 
-ssize_t RT::OS::xenomaiFifo::readRT(void* buf, size_t buf_size)
+int64_t RT::OS::xenomaiFifo::readRT(void* buf, size_t buf_size)
 {
   return rt_pipe_read(&this->pipe_handle, buf, buf_size, TM_NONBLOCK);
 }
 
-ssize_t RT::OS::xenomaiFifo::writeRT(void* buf, size_t buf_size)
+int64_t RT::OS::xenomaiFifo::writeRT(void* buf, size_t buf_size)
 {
   return rt_pipe_write(&this->pipe_handle, buf, buf_size, P_NORMAL);
 }

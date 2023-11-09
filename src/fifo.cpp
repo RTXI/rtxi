@@ -40,10 +40,10 @@ public:
   ~xbuffFifo() override;
 
   size_t getCapacity() override;
-  ssize_t read(void* buf, size_t data_size) override;
-  ssize_t write(void* buf, size_t data_size) override;
-  ssize_t readRT(void* buf, size_t data_size) override;
-  ssize_t writeRT(void* buf, size_t data_size) override;
+  int64_t read(void* buf, size_t data_size) override;
+  int64_t write(void* buf, size_t data_size) override;
+  int64_t readRT(void* buf, size_t data_size) override;
+  int64_t writeRT(void* buf, size_t data_size) override;
   void poll() override;
   void close() override;
 
@@ -83,7 +83,7 @@ RT::OS::xbuffFifo::~xbuffFifo()
   delete[] ui_to_rt;
 }
 
-ssize_t RT::OS::xbuffFifo::read(void* buf, size_t data_size)
+int64_t RT::OS::xbuffFifo::read(void* buf, size_t data_size)
 {
   if (rt_wptr == ui_rptr) {
     return -1;
@@ -102,10 +102,10 @@ ssize_t RT::OS::xbuffFifo::read(void* buf, size_t data_size)
   }
   ui_rptr = (ui_rptr + data_size) % this->fifo_capacity;
   ui_available_read_bytes = (fifo_capacity + ui_rptr - rt_wptr) % fifo_capacity;
-  return static_cast<ssize_t>(data_size);
+  return static_cast<int64_t>(data_size);
 }
 
-ssize_t RT::OS::xbuffFifo::write(void* buf, size_t data_size)
+int64_t RT::OS::xbuffFifo::write(void* buf, size_t data_size)
 {
   if (data_size > fifo_capacity - rt_available_read_bytes) {
     ERROR_MSG("FIFO::write : Fifo full, data lost\n");
@@ -121,10 +121,10 @@ ssize_t RT::OS::xbuffFifo::write(void* buf, size_t data_size)
   }
   ui_wptr = (ui_wptr + data_size) % fifo_capacity;
   rt_available_read_bytes = (fifo_capacity + rt_rptr - ui_wptr) % fifo_capacity;
-  return static_cast<ssize_t>(data_size);
+  return static_cast<int64_t>(data_size);
 }
 
-ssize_t RT::OS::xbuffFifo::readRT(void* buf, size_t data_size)
+int64_t RT::OS::xbuffFifo::readRT(void* buf, size_t data_size)
 {
   if (ui_wptr == rt_rptr) {
     return -1;
@@ -143,10 +143,10 @@ ssize_t RT::OS::xbuffFifo::readRT(void* buf, size_t data_size)
   }
   rt_rptr = (rt_rptr + data_size) % this->fifo_capacity;
   rt_available_read_bytes = (fifo_capacity + rt_rptr - ui_wptr) % fifo_capacity;
-  return static_cast<ssize_t>(data_size);
+  return static_cast<int64_t>(data_size);
 }
 
-ssize_t RT::OS::xbuffFifo::writeRT(void* buf, size_t data_size)
+int64_t RT::OS::xbuffFifo::writeRT(void* buf, size_t data_size)
 {
   if (data_size > fifo_capacity - ui_available_read_bytes) {
     ERROR_MSG("FIFO::write : Fifo full, data lost\n");
@@ -163,7 +163,7 @@ ssize_t RT::OS::xbuffFifo::writeRT(void* buf, size_t data_size)
   rt_wptr = (rt_wptr + data_size) % fifo_capacity;
   ui_available_read_bytes = (fifo_capacity + ui_rptr - rt_wptr) % fifo_capacity;
   this->available_read_cond.notify_one();
-  return static_cast<ssize_t>(data_size);
+  return static_cast<int64_t>(data_size);
 }
 
 void RT::OS::xbuffFifo::poll()

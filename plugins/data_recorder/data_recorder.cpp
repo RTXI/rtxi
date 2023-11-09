@@ -844,7 +844,7 @@ void DataRecorder::Plugin::process_data_worker()
   }
   std::vector<DataRecorder::data_token_t> data_buffer(this->m_data_chunk_size);
   const size_t packet_byte_size = sizeof(DataRecorder::data_token_t);
-  ssize_t read_bytes = 0;
+  int64_t read_bytes = 0;
   size_t packet_count = 0;
   const std::shared_lock<std::shared_mutex> lk(this->m_channels_list_mut);
   for (auto& channel : this->m_recording_channels_list) {
