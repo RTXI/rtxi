@@ -24,7 +24,7 @@
 
 #include "scope.hpp"
 
-#include <qwt/qwt_global.h>
+#include <qwt_global.h>
 #include <qwt_abstract_scale_draw.h>
 #include <qwt_plot_legenditem.h>
 #include <qwt_scale_map.h>

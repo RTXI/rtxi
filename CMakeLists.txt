@@ -41,7 +41,6 @@ else()
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/scripts/cmake)
 endif()
 
-configure_file(rtxiConfig.h.in rtxiConfig.h)
 include(cmake/project-is-top-level.cmake)
 include(cmake/variables.cmake)
 include(GNUInstallDirs)
@@ -77,6 +76,8 @@ find_library(nidaqmx NAMES libnidaqmx.so)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
+
+configure_file(rtxiConfig.h.in rtxiConfig.h)
 
 # Clang-tidy is by far the most annoying tool to please. Depending on your development
 # environment you may get useless errors unless you add the line below.

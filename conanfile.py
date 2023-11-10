@@ -6,7 +6,14 @@ class Recipe(ConanFile):
     generators = "CMakeToolchain", "CMakeDeps", "VirtualRunEnv"
     default_options = {
         "qt/*:qtsvg": True,
-        "qt/*:shared": True
+        "qt/*:shared": True,
+        "fmt/*:shared": True,
+        "hdf5/*:shared": True,
+        "qwt/*:shared": True,
+        #"zlib/*:shared": True,
+        #"openssl/*:shared": True,
+        "gsl/*:shared": True,
+        "boost/*:shared": True
     }
 
     def layout(self):
@@ -17,8 +24,8 @@ class Recipe(ConanFile):
         self.requires("fmt/10.0.0")
         self.requires("hdf5/[~1.10]")
         self.requires("qwt/[~6]")
-        self.requires("zlib/1.2.13")
-        self.requires("openssl/1.1.1q")
+        #self.requires("zlib/1.2.13")
+        #self.requires("openssl/[~3]")
         self.requires("gsl/2.7")
         self.requires("boost/1.83.0")
 
