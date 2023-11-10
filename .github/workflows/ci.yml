@@ -92,9 +92,10 @@ jobs:
 
     - name: Install dependencies
       run: |
+        sudo apt install libgl-dev libgl1-mesa-dev
         pip3 install conan
         bash < .github/scripts/conan-profile.sh
-        conan install . -b missing -c tools.system.package_manager:mode=install
+        conan install . -b missing
 
     - name: Configure
       run: cmake --preset=ci-sanitize
@@ -142,9 +143,10 @@ jobs:
 
     - name: Install dependencies
       run: |
+        sudo apt install libgl-dev libgl1-mesa-dev
         pip3 install conan
         bash < .github/scripts/conan-profile.sh
-        conan install . -b missing -c tools.system.package_manager:mode=install
+        conan install . -b missing
 
     - name: Setup MultiToolTask
       if: matrix.os == 'windows-2022'
