@@ -92,7 +92,7 @@ jobs:
 
     - name: Install dependencies
       run: |
-        pip3 install conan==1.61
+        pip3 install conan
         bash < .github/scripts/conan-profile.sh
         conan install . -b missing
 
@@ -142,7 +142,7 @@ jobs:
 
     - name: Install dependencies
       run: |
-        pip3 install conan==1.61
+        pip3 install conan
         bash < .github/scripts/conan-profile.sh
         conan install . -b missing
 
