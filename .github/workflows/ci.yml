@@ -94,7 +94,7 @@ jobs:
       run: |
         pip3 install conan
         bash < .github/scripts/conan-profile.sh
-        conan install . -b missing
+        conan install . -b missing -c tools.system.package_manager:mode=install
 
     - name: Configure
       run: cmake --preset=ci-sanitize
@@ -144,7 +144,7 @@ jobs:
       run: |
         pip3 install conan
         bash < .github/scripts/conan-profile.sh
-        conan install . -b missing
+        conan install . -b missing -c tools.system.package_manager:mode=install
 
     - name: Setup MultiToolTask
       if: matrix.os == 'windows-2022'
