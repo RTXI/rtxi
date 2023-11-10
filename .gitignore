@@ -30,7 +30,6 @@ moc_*
 compile_commands.json
 .cache
 _CPack_Packages/
-Config.cmake.in
 
 #Ignore development script outputs
 scripts/all_plugins/
