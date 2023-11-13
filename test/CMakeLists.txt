@@ -12,8 +12,8 @@ add_library(testing_lib OBJECT
 )
 
 target_link_libraries(testing_lib PRIVATE 
-    rtos
-    xfifo
+    rtxipal
+    rtxififo 
     rtxi
     workspace
     Qt5::Core
@@ -37,10 +37,10 @@ target_include_directories(rtxiTests PRIVATE
 
 target_link_libraries(rtxiTests PRIVATE
     testing_lib
-    rtos
-    xfifo
+    rtxipal
+    rtxififo
     rtxi
-    rtmath
+    rtximath
     workspace
     performance_measurement_lib
     userprefs_lib
@@ -65,10 +65,10 @@ target_include_directories(fakePlugin PRIVATE ${CMAKE_SOURCE_DIR})
 target_link_libraries(fakePlugin PRIVATE 
     testing_lib
     rtxi
-    rtos
-    dlplugin
+    rtxipal
+    rtxiplugin
     workspace
-    rtmath
+    rtximath
     performance_measurement_lib
     userprefs_lib
     system_control_lib

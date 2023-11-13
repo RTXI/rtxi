@@ -1,57 +1,57 @@
 cmake_minimum_required(VERSION 3.24)
 
 if(DEFINED evl_FOUND AND RTXI_RT_CORE STREQUAL "evl")
-  message("EVL library found. Using EVL rtos interface")
+  message("EVL library found. Using EVL rtxipal interface")
   list(APPEND CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES ${evl_INCLUDE_DIRS})
-  add_library(dlplugin SHARED "dlplugin.hpp" "dlplugin.cpp")
-  target_link_libraries(dlplugin PRIVATE fmt::fmt)
-  add_library(xfifo SHARED "fifo.hpp" "fifo_evl.cpp")
-  target_link_libraries(xfifo 
+  add_library(rtxiplugin SHARED "dlplugin.hpp" "dlplugin.cpp")
+  target_link_libraries(rtxiplugin PRIVATE fmt::fmt)
+  add_library(rtxififo SHARED "fifo.hpp" "fifo_evl.cpp")
+  target_link_libraries(rtxififo 
     PRIVATE 
       Threads::Threads
       ${evl_LINK_LIBRARIES}
       fmt::fmt
   )
-  target_include_directories(xfifo SYSTEM PRIVATE ${evl_INCLUDE_DIRS})
-  add_library(rtos SHARED "rtos.hpp" "rtos_evl.cpp")
-  target_link_libraries(rtos PRIVATE 
+  target_include_directories(rtxififo SYSTEM PRIVATE ${evl_INCLUDE_DIRS})
+  add_library(rtxipal SHARED "rtos.hpp" "rtos_evl.cpp")
+  target_link_libraries(rtxipal PRIVATE 
     ${evl_LINK_LIBRARIES}
-    xfifo
+    rtxififo
     fmt::fmt
   )
-  target_include_directories(rtos SYSTEM PRIVATE ${evl_INCLUDE_DIRS})
+  target_include_directories(rtxipal SYSTEM PRIVATE ${evl_INCLUDE_DIRS})
 elseif(DEFINED Xenomai_FOUND AND RTXI_RT_CORE STREQUAL "xenomai")
   message("Xenomai library found. using Cobalt Alchemy interface")
   #list(APPEND CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES ${xenomai3_ALCHEMY_CFLAGS})
-  add_library(dlplugin SHARED "dlplugin.hpp" "dlplugin.cpp")
-  target_link_libraries(dlplugin PRIVATE fmt::fmt)
-  add_library(xfifo SHARED "fifo.hpp" "fifo_xenomai.cpp")
-  target_include_directories(xfifo PRIVATE ${XENOMAI_INCLUDE_DIRS})
-  target_link_libraries(xfifo 
+  add_library(rtxiplugin SHARED "dlplugin.hpp" "dlplugin.cpp")
+  target_link_libraries(rtxiplugin PRIVATE fmt::fmt)
+  add_library(rtxififo SHARED "fifo.hpp" "fifo_xenomai.cpp")
+  target_include_directories(rtxififo PRIVATE ${XENOMAI_INCLUDE_DIRS})
+  target_link_libraries(rtxififo 
     PUBLIC
       ${XENOMAI_LIBRARIES}
     PRIVATE 
       fmt::fmt
   )
-  target_compile_definitions(xfifo PRIVATE ${XENOMAI_DEFINITIONS})
-  add_library(rtos SHARED "rtos.hpp" "rtos_xenomai.cpp")
-  target_include_directories(rtos PRIVATE ${XENOMAI_INCLUDE_DIRS})
-  target_link_libraries(rtos PRIVATE 
-    xfifo
+  target_compile_definitions(rtxififo PRIVATE ${XENOMAI_DEFINITIONS})
+  add_library(rtxipal SHARED "rtos.hpp" "rtos_xenomai.cpp")
+  target_include_directories(rtxipal PRIVATE ${XENOMAI_INCLUDE_DIRS})
+  target_link_libraries(rtxipal PRIVATE 
+    rtxififo
   PUBLIC
     ${XENOMAI_LIBRARIES}
     fmt::fmt
   )
-  target_compile_definitions(rtos PRIVATE ${XENOMAI_DEFINITIONS})
+  target_compile_definitions(rtxipal PRIVATE ${XENOMAI_DEFINITIONS})
 else()
   message("RT core Library not found. Reverting to posix Interface.")
-  add_library(dlplugin SHARED "dlplugin.hpp" "dlplugin.cpp")
-  target_link_libraries(dlplugin PRIVATE fmt::fmt)
-  add_library(xfifo SHARED "fifo.hpp" "fifo_posix.cpp")
-  target_link_libraries(xfifo PRIVATE fmt::fmt)
-  add_library(rtos SHARED "rtos.hpp" "rtos_posix.cpp")
-  target_link_libraries(rtos PRIVATE 
-      xfifo
+  add_library(rtxiplugin SHARED "dlplugin.hpp" "dlplugin.cpp")
+  target_link_libraries(rtxiplugin PRIVATE fmt::fmt)
+  add_library(rtxififo SHARED "fifo.hpp" "fifo_posix.cpp")
+  target_link_libraries(rtxififo PRIVATE fmt::fmt)
+  add_library(rtxipal SHARED "rtos.hpp" "rtos_posix.cpp")
+  target_link_libraries(rtxipal PRIVATE 
+      rtxififo
       fmt::fmt
   )
 endif()
@@ -68,37 +68,13 @@ add_library(rtxi SHARED
     logger.hpp logger.cpp
 )
 
-#target_include_directories(rtxi 
-#  PUBLIC
-#  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>"
-#  "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
-#)
-#
-#target_include_directories(dlplugin
-#  PUBLIC
-#  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>"
-#  "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
-#)
-#
-#target_include_directories(rtos
-#  PUBLIC
-#  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>"
-#  "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
-#)
-#
-#target_include_directories(xfifo
-#  PUBLIC
-#  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>"
-#  "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
-#)
-
 target_link_libraries(rtxi 
   PRIVATE 
     Threads::Threads
     fmt::fmt
     qwt::qwt
-    xfifo
-    dlplugin
+    rtxififo
+    rtxiplugin 
     Boost::headers
     backtrace
     dl
@@ -113,8 +89,8 @@ add_library(workspace OBJECT
 
 target_link_libraries(workspace PRIVATE 
     rtxi
-    dlplugin
-    rtmath
+    rtxiplugin
+    rtximath
     performance_measurement_lib
     userprefs_lib
     system_control_lib
@@ -137,7 +113,7 @@ target_link_libraries(workspace PRIVATE
 # Create RTXI executable
 add_executable(rtxi_exe
     main_window.hpp main_window.cpp
-    tempmain.cpp
+    main.cpp
 )
 
 add_executable(rtxi::exe ALIAS rtxi_exe)
@@ -149,10 +125,10 @@ set_target_properties(
 
 # Link all of the static and dynamic libraries to rtxi
 target_link_libraries(rtxi_exe PRIVATE 
-    xfifo
-    rtos 
+    rtxififo
+    rtxipal 
     rtxi
-    rtmath
+    rtximath
     workspace
     performance_measurement_lib
     userprefs_lib
@@ -185,13 +161,13 @@ target_include_directories(rtxinidaqdriver
   	"$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
 )
 
-target_link_libraries(rtxinidaqdriver PRIVATE nidaqmx rtos)
+target_link_libraries(rtxinidaqdriver PRIVATE nidaqmx rtxipal)
 endif()
 
 target_compile_features(rtxi PUBLIC cxx_std_17)
-target_compile_features(rtos PUBLIC cxx_std_17)
-target_compile_features(xfifo PUBLIC cxx_std_17)
-target_compile_features(dlplugin PUBLIC cxx_std_17)
+target_compile_features(rtxipal PUBLIC cxx_std_17)
+target_compile_features(rtxififo PUBLIC cxx_std_17)
+target_compile_features(rtxiplugin PUBLIC cxx_std_17)
 target_compile_features(rtxi_exe PRIVATE cxx_std_17)
 
 target_compile_definitions(rtxi_exe PRIVATE BOOST_STACKTRACE_USE_ADDR2LINE)

@@ -8,7 +8,7 @@ add_library(oscilloscope_lib OBJECT
 )
 
 target_link_libraries(oscilloscope_lib PRIVATE 
-    rtos
+    rtxipal
     rtxi
     qwt::qwt
     Qt5::Core

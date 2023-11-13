@@ -10,8 +10,8 @@ install(
 )
 
 install(
-    TARGETS rtxi xfifo rtos dlplugin rtdsp rtgen rtmath rtplot
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}/rtxi
+    TARGETS rtxi rtxififo rtxipal rtxiplugin rtxidsp rtxigen rtximath rtxiplot
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}
     EXPORT rtxiLibraryTargets
 )
 
