@@ -60,7 +60,7 @@ int RT::OS::initiate(RT::OS::Task* task)
   task->period = RT::OS::DEFAULT_PERIOD;
   RT_PERIOD = &(task->period);
   task->thread_id = std::any(pthread_self());
-  return retval;
+  return 0;
 }
 
 void RT::OS::shutdown(RT::OS::Task* task)
