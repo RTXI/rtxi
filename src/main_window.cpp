@@ -187,8 +187,8 @@ void MainWindow::createUtilMenu()
           this,
           SLOT(utilitiesMenuActivated(QAction*)));
 
-  QDir libsDir = QCoreApplication::applicationDirPath()
-                + QDir::separator() + QString("rtxi_modules");
+  QDir libsDir = QCoreApplication::applicationDirPath() + QDir::separator()
+      + QString("rtxi_modules");
   if (!libsDir.exists()) {
     return;
   }
@@ -404,11 +404,8 @@ void MainWindow::resetSettings()
 
 void MainWindow::utilitiesMenuActivated(QAction* id)
 {
-  this->loadWidget(QCoreApplication::applicationDirPath() + 
-                   QDir::separator() + 
-                   QString("rtxi_modules") + 
-                   QDir::separator() + 
-                   id->text());
+  this->loadWidget(QCoreApplication::applicationDirPath() + QDir::separator()
+                   + QString("rtxi_modules") + QDir::separator() + id->text());
 }
 
 void MainWindow::loadWidget(const QString& module_name)
@@ -488,12 +485,12 @@ void MainWindow::windowsMenuActivated(QAction* id)
 
 void MainWindow::modulesMenuActivated(QAction* /*unused*/)
 {
-  const QString filename =
-      QFileDialog::getOpenFileName(this,
-                                   tr("Load Plugin"),
-                                   QCoreApplication::applicationDirPath()
-                                       + QDir::separator() + QString("rtxi_modules"),
-                                   tr("Plugins (*.so);;All (*.*)"));
+  const QString filename = QFileDialog::getOpenFileName(
+      this,
+      tr("Load Plugin"),
+      QCoreApplication::applicationDirPath() + QDir::separator()
+          + QString("rtxi_modules"),
+      tr("Plugins (*.so);;All (*.*)"));
   if (!filename.isNull()) {
     this->loadWidget(filename);
   }

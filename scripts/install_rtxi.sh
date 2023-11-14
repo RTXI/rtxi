@@ -29,21 +29,16 @@ if id | grep -q root; then
 fi
 
 # Directories
-# ROOT=../
+SRCDIR=`pwd`
 MODS=/tmp/rtxi_modules/
-
-# Start at top
-#cd ${ROOT}
 
 # Start configuring - by default configured to run on non-RT kernel
 echo "-----> Starting RTXI installation..."
-#./autogen.sh
-# autoreconf -if
 
 echo "-----> Kernel configuration..."
 echo "evl -- Xenomai with EVL library (RT)"
 echo "posix -- Linux based core (Non-RT)"
-echo "-----> Please type your configuration and then press enter:"
+echo "-----> Please type your configuration and then press enter: "
 read kernel
 
 cmake -S . -B ./build/local -D CMAKE_BUILD_TYPE=Release -DRTXI_RT_CORE=${kernel}
@@ -51,29 +46,10 @@ cmake -S . -B ./build/local -D CMAKE_BUILD_TYPE=Release -DRTXI_RT_CORE=${kernel}
 echo "-----> Configuration complete. Building..."
 cmake --build ./build/local -j`nproc`
 echo "-----> RTXI compilation successful. Creating Debian package..."
+cd ./build/local
 cpack -G DEB
 echo "-----> RTXI package creation successful. Installing..."
-
-# Install startup script to load analogy driver at boot
-# if [ $(lsb_release -sc) == "jessie" ] || [ $(lsb_release -sc) == "xenial" ]; then
-# 	echo "-----> Load analogy driver with systemd"
-# 	sudo cp -f ./scripts/services/rtxi_load_analogy.service /etc/systemd/system/
-# 	sudo systemctl enable rtxi_load_analogy.service
-# else
-# 	echo "-----> Load analogy driver with sysvinit/upstart"
-# 	sudo cp -f ./scripts/services/rtxi_load_analogy /etc/init.d/
-# 	sudo update-rc.d rtxi_load_analogy defaults
-# fi
-# sudo ldconfig
-# echo "-----> Successfully placed files.."
-
-# TEMPORARY WORKAROUND
-# echo "-----> Installing basic modules."
-# sudo mkdir -p ${MODS}
-
-# Allow all members of adm (administrator accounts) write access to the 
-# rtxi_modules/ directory. 
-# sudo setfacl -Rm g:adm:rwX,d:g:adm:rwX ${MODS}
+sudo dpkg -i rtxi*.deb
 
 cd ${MODS}
 rm -rf ${MODS}/*
@@ -92,11 +68,13 @@ for dir in ${MODS}/*; do
 		git -C "$dir" pull
 		git -C "$dir" clean -f -d 
 		git -C "$dir" reset --hard
-		cmake -S "$dir" -B "$dir/build" -D CMAKE_BUILD_TYPE=Release
+		cmake -S "$dir" -B "$dir/build" -D CMAKE_BUILD_TYPE=Release -D RTXI_PACKAGE_PATH=/usr
 		cmake --build $dir/build -j`nproc` 
 		sudo cmake --install "$dir"
 	fi
 done
+
+cd ${SRCDIR}
 
 echo ""
 echo "-----> RTXI installation successful. Reboot may be required."
