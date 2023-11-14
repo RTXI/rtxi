@@ -92,10 +92,7 @@ jobs:
 
     - name: Install dependencies
       run: |
-        sudo apt -y -q install qtbase5-dev qtbase5-dev-tools libqt5svg5-dev \
-                       libqwt-qt5-dev libhdf5-dev libgsl0-dev \
-                       libboost-stacktrace-dev libgtest-dev libgmock-dev \
-                       libfmt-dev git
+        sudo ./scripts/install_dependencies.sh 
         #pip3 install conan
         #bash < .github/scripts/conan-profile.sh
         #conan install . -b missing
@@ -146,10 +143,7 @@ jobs:
 
     - name: Install dependencies
       run: |
-        sudo apt -y -q install qtbase5-dev qtbase5-dev-tools libqt5svg5-dev \
-                       libqwt-qt5-dev libhdf5-dev libgsl0-dev \
-                       libboost-stacktrace-dev libgtest-dev libgmock-dev \
-                       libfmt-dev git
+        sudo ./scripts/install_dependencies.sh 
         #pip3 install conan
         #bash < .github/scripts/conan-profile.sh
         #conan install . -b missing
