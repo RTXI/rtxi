@@ -28,7 +28,6 @@
 
 #include "rtxi_wizard.hpp"
 
-#include <git2.h>
 #include <unistd.h>
 
 #include "rtxiConfig.h"
