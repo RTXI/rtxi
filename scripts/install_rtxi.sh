@@ -51,8 +51,10 @@ cpack -G DEB
 echo "-----> RTXI package creation successful. Installing..."
 sudo dpkg -i rtxi*.deb
 
+rm -rf ${MODS}
+mkdir ${MODS}
 cd ${MODS}
-rm -rf ${MODS}/*
+
 # git clone https://github.com/RTXI/analysis-module.git
 # git clone https://github.com/RTXI/iir-filter.git
 # git clone https://github.com/RTXI/fir-window.git
@@ -70,7 +72,7 @@ for dir in ${MODS}/*; do
 		git -C "$dir" reset --hard
 		cmake -S "$dir" -B "$dir/build" -D CMAKE_BUILD_TYPE=Release -D RTXI_PACKAGE_PATH=/usr
 		cmake --build $dir/build -j`nproc` 
-		sudo cmake --install "$dir"
+		sudo cmake --install "$dir/build"
 	fi
 done
 
