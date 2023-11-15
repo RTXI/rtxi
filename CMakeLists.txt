@@ -7,7 +7,7 @@ project(
     VERSION 3.0.0
     DESCRIPTION "Real-Time eXperiment Interface"
     HOMEPAGE_URL "http://rtxi.org/"
-    LANGUAGES CXX
+    LANGUAGES C CXX
 )
 
 # --- Some installation shenanigans
