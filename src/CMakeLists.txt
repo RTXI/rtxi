@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.24)
-
 if(DEFINED evl_FOUND AND RTXI_RT_CORE STREQUAL "evl")
   message("EVL library found. Using EVL rtxipal interface")
   list(APPEND CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES ${evl_INCLUDE_DIRS})

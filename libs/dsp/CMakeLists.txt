@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.24)
-
 file(GLOB DSP_SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
 file(GLOB DSP_HEADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
 

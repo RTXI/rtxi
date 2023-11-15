@@ -1,4 +1,3 @@
-cmake_minimum_required(VERSION 3.24)
 project(rtxiTests LANGUAGES CXX)
 
 add_library(testing_lib OBJECT
