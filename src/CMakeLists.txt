@@ -169,6 +169,4 @@ target_compile_features(rtxiplugin PUBLIC cxx_std_17)
 target_compile_features(rtxi_exe PRIVATE cxx_std_17)
 
 target_compile_definitions(rtxi_exe PRIVATE BOOST_STACKTRACE_USE_ADDR2LINE)
-target_compile_definitions(rtxi_exe PRIVATE BOOST_STACKTRACE_USE_BACKTRACE)
 target_compile_definitions(rtxi PRIVATE BOOST_STACKTRACE_USE_ADDR2LINE)
-target_compile_definitions(rtxi PRIVATE BOOST_STACKTRACE_USE_BACKTRACE)

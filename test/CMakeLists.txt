@@ -84,7 +84,6 @@ target_link_libraries(fakePlugin PRIVATE
 )
 
 target_compile_definitions(rtxiTests PRIVATE BOOST_STACKTRACE_USE_ADDR2LINE)
-target_compile_definitions(rtxiTests PRIVATE BOOST_STACKTRACE_USE_BACKTRACE)
 add_test(NAME rtxiTests COMMAND rtxiTests)
 
 add_folders(Test)
