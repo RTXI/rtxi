@@ -48,7 +48,6 @@ include(GNUInstallDirs)
 
 # We need to let third-party tools know how to compile our project
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-cmake_policy(SET CMP0135 NEW) 
 
 # Find EVL Core library
 include(FindPkgConfig)
