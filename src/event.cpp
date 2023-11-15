@@ -1,167 +1,361 @@
 /*
- 	 The Real-Time eXperiment Interface (RTXI)
-	 Copyright (C) 2011 Georgia Institute of Technology, University of Utah, Weill Cornell Medical College
+         The Real-Time eXperiment Interface (RTXI)
+         Copyright (C) 2011 Georgia Institute of Technology, University of Utah,
+   Will Cornell Medical College
 
-	 This program is free software: you can redistribute it and/or modify
-	 it under the terms of the GNU General Public License as published by
-	 the Free Software Foundation, either version 3 of the License, or
-	 (at your option) any later version.
+         This program is free software: you can redistribute it and/or modify
+         it under the terms of the GNU General Public License as published by
+         the Free Software Foundation, either version 3 of the License, or
+         (at your option) any later version.
 
-	 This program is distributed in the hope that it will be useful,
-	 but WITHOUT ANY WARRANTY; without even the implied warranty of
-	 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	 GNU General Public License for more details.
+         This program is distributed in the hope that it will be useful,
+         but WITHOUT ANY WARRANTY; without even the implied warranty of
+         MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+         GNU General Public License for more details.
 
-	 You should have received a copy of the GNU General Public License
-	 along with this program.  If not, see <http://www.gnu.org/licenses/>.
+         You should have received a copy of the GNU General Public License
+         along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-#include <debug.h>
-#include <event.h>
-#include <string.h>
+#include <algorithm>
+#include <future>
+#include <mutex>
 
-const char *Event::RT_PERIOD_EVENT = "SYSTEM : period";
-const char *Event::RT_PREPERIOD_EVENT = "SYSTEM : pre period";
-const char *Event::RT_POSTPERIOD_EVENT = "SYSTEM : post period";
-const char *Event::RT_THREAD_INSERT_EVENT = "SYSTEM : thread insert";
-const char *Event::RT_THREAD_REMOVE_EVENT = "SYSTEM : thread remove";
-const char *Event::RT_DEVICE_INSERT_EVENT = "SYSTEM : device insert";
-const char *Event::RT_DEVICE_REMOVE_EVENT = "SYSTEM : device remove";
-const char *Event::IO_BLOCK_INSERT_EVENT = "SYSTEM : block insert";
-const char *Event::IO_BLOCK_REMOVE_EVENT = "SYSTEM : block remove";
-const char *Event::IO_LINK_INSERT_EVENT = "SYSTEM : link insert";
-const char *Event::IO_LINK_REMOVE_EVENT = "SYSTEM : link remove";
-const char *Event::WORKSPACE_PARAMETER_CHANGE_EVENT = "SYSTEM : parameter change";
-const char *Event::PLUGIN_INSERT_EVENT = "SYSTEM : plugin insert";
-const char *Event::PLUGIN_REMOVE_EVENT = "SYSTEM : plugin remove";
-const char *Event::SETTINGS_OBJECT_INSERT_EVENT = "SYSTEM : settings object insert";
-const char *Event::SETTINGS_OBJECT_REMOVE_EVENT = "SYSTEM : settings object remove";
-const char *Event::OPEN_FILE_EVENT = "SYSTEM : open file";
-const char *Event::START_RECORDING_EVENT = "SYSTEM : start recording";
-const char *Event::STOP_RECORDING_EVENT = "SYSTEM : stop recording";
-const char *Event::ASYNC_DATA_EVENT = "SYSTEM : async data";
-const char *Event::THRESHOLD_CROSSING_EVENT = "SYSTEM : threshold crossing event";
-const char *Event::START_GENICAM_RECORDING_EVENT = "SYSTEM : start genicam recording";
-const char *Event::PAUSE_GENICAM_RECORDING_EVENT = "SYSTEM : pause genicam recording";
-const char *Event::STOP_GENICAM_RECORDING_EVENT = "SYSTEM : stop genicam recording";
-const char *Event::GENICAM_SNAPSHOT_EVENT = "SYSTEM : genicam snap";
+#include "event.hpp"
 
-Event::Handler::Handler(void)
+#include "debug.hpp"
+#include "logger.hpp"
+
+std::string Event::type_to_string(Event::Type event_type)
 {
-    Event::Manager::getInstance()->registerHandler(this);
+  std::string return_string;
+  switch (event_type) {
+    case Event::Type::RT_PERIOD_EVENT:
+      return_string = "SYSTEM : period";
+      break;
+    case Event::Type::RT_PREPERIOD_EVENT:
+      return_string = "SYSTEM : pre period";
+      break;
+    case Event::Type::RT_POSTPERIOD_EVENT:
+      return_string = "SYSTEM : post period";
+      break;
+    case Event::Type::RT_GET_PERIOD_EVENT:
+      return_string = "SYSTEM : Period value requested";
+      break;
+    case Event::Type::RT_THREAD_INSERT_EVENT:
+      return_string = "SYSTEM : thread insert";
+      break;
+    case Event::Type::RT_THREAD_REMOVE_EVENT:
+      return_string = "SYSTEM : thread remove";
+      break;
+    case Event::Type::RT_DEVICE_INSERT_EVENT:
+      return_string = "SYSTEM : device insert";
+      break;
+    case Event::Type::RT_SHUTDOWN_EVENT:
+      return_string = "SYSTEM : shutdown";
+      break;
+    case Event::Type::RT_DEVICE_REMOVE_EVENT:
+      return_string = "SYSTEM : device remove";
+      break;
+    case Event::Type::RT_THREAD_PAUSE_EVENT:
+      return_string = "SYSTEM : Thread paused";
+      break;
+    case Event::Type::RT_THREAD_UNPAUSE_EVENT:
+      return_string = "SYSTEM : Thread unpaused";
+      break;
+    case Event::Type::RT_DEVICE_PAUSE_EVENT:
+      return_string = "SYSTEM : Device paused";
+      break;
+    case Event::Type::RT_DEVICE_UNPAUSE_EVENT:
+      return_string = "SYSTEM : Device unpaused";
+      break;
+    case Event::Type::RT_WIDGET_PARAMETER_CHANGE_EVENT:
+      return_string = "SYSTEM : parameter change";
+      break;
+    case Event::Type::RT_WIDGET_STATE_CHANGE_EVENT:
+      return_string = "SYSTEM : Widget State change";
+      break;
+    case Event::Type::IO_LINK_INSERT_EVENT:
+      return_string = "CONNECTOR : Blocks Connected";
+      break;
+    case Event::Type::IO_LINK_REMOVE_EVENT:
+      return_string = "CONNECTOR : Blocks Disconnected";
+      break;
+    case Event::Type::IO_BLOCK_QUERY_EVENT:
+      return_string = "CONNECTOR : Block list requested";
+      break;
+    case Event::Type::IO_CONNECTION_QUERY_EVENT:
+      return_string = "CONNECTOR : Request for connection info";
+      break;
+    case Event::Type::IO_ALL_CONNECTIONS_QUERY_EVENT:
+      return_string = "CONNECTOR : Request for all connections";
+      break;
+    case Event::Type::IO_BLOCK_OUTPUTS_QUERY_EVENT:
+      return_string = "CONNECTOR : Request for block output info";
+      break;
+    case Event::Type::PLUGIN_INSERT_EVENT:
+      return_string = "WIDGET : plugin insert";
+      break;
+    case Event::Type::PLUGIN_REMOVE_EVENT:
+      return_string = "WIDGET : plugin remove";
+      break;
+    case Event::Type::DAQ_DEVICE_QUERY_EVENT:
+      return_string = "MANAGER : daq query event";
+      break;
+    case Event::Type::SETTINGS_OBJECT_INSERT_EVENT:
+      return_string = "SYSTEM : settings object insert";
+      break;
+    case Event::Type::SETTINGS_OBJECT_REMOVE_EVENT:
+      return_string = "SYSTEM : settings object remove";
+      break;
+    case Event::Type::OPEN_FILE_EVENT:
+      return_string = "SYSTEM : open file";
+      break;
+    case Event::Type::START_RECORDING_EVENT:
+      return_string = "SYSTEM : start recording";
+      break;
+    case Event::Type::STOP_RECORDING_EVENT:
+      return_string = "SYSTEM : stop recording";
+      break;
+    case Event::Type::ASYNC_DATA_EVENT:
+      return_string = "SYSTEM : async data";
+      break;
+    case Event::Type::THRESHOLD_CROSSING_EVENT:
+      return_string = "SYSTEM : threshold crossing event";
+      break;
+    case Event::Type::START_GENICAM_RECORDING_EVENT:
+      return_string = "SYSTEM : start genicam recording";
+      break;
+    case Event::Type::PAUSE_GENICAM_RECORDING_EVENT:
+      return_string = "SYSTEM : pause genicam recording";
+      break;
+    case Event::Type::STOP_GENICAM_RECORDING_EVENT:
+      return_string = "SYSTEM : stop genicam recording";
+      break;
+    case Event::Type::GENICAM_SNAPSHOT_EVENT:
+      return_string = "SYSTEM : genicam snap";
+      break;
+    case Event::Type::GENERIC_WIDGET_EVENT:
+      return_string = "WIDGET : Generic Widget Event";
+      break;
+    case Event::Type::MANAGER_SHUTDOWN_EVENT:
+      return_string = "EVENT MANAGER : UI Manager shutdown event";
+      break;
+    case Event::Type::NOOP:
+      return_string = "SYSTEM : no operation";
+      break;
+    default:
+      return_string = "UNKNOWN EVENT!";
+  }
+  return return_string;
 }
 
-Event::Handler::~Handler(void)
+Event::Object::Object(Event::Type et)
+    : event_type(et)
 {
-    Event::Manager::getInstance()->unregisterHandler(this);
 }
 
-void Event::Handler::receiveEvent(const Event::Object *) {}
-
-Event::RTHandler::RTHandler(void)
+Event::Object::Object(const Event::Object& obj)
+    : params(obj.params)
+    , event_type(obj.event_type)
 {
-    Event::Manager::getInstance()->registerRTHandler(this);
 }
 
-Event::RTHandler::~RTHandler(void)
+std::string Event::Object::getName()
 {
-    Event::Manager::getInstance()->unregisterRTHandler(this);
+  return Event::type_to_string(this->event_type);
 }
 
-void Event::RTHandler::receiveEventRT(const Event::Object *) {}
-
-Event::Object::Object(const char *nam) : name(nam), nparams(0)
+std::any Event::Object::getParam(const std::string& param_name) const
 {
-    memset(params,0,sizeof(params));
+  for (const auto& parameter : params) {
+    if (parameter.name == param_name) {
+      return parameter.value;
+    }
+  }
+  return std::any {};
 }
 
-Event::Object::~Object(void) {}
-
-void *Event::Object::getParam(const char *nam) const
+bool Event::Object::paramExists(const std::string& param_name)
 {
-    for (size_t i=0; i<nparams; ++i)
-        if (!strcmp(params[i].name,nam))
-            return params[i].value;
-    return 0;
+  bool result = false;
+  for (auto& parameter : params) {
+    if (parameter.name == param_name) {
+      result = true;
+    }
+  }
+  return result;
 }
 
-void Event::Object::setParam(const char *nam,void *val)
+void Event::Object::setParam(const std::string& param_name,
+                             const std::any& param_value)
 {
-    for (size_t i=0; i<nparams; ++i)
-        if (!strcmp(params[i].name,nam))
-            {
-                params[i].value = val;
-                return;
-            }
+  for (auto& parameter : params) {
+    if (parameter.name == param_name) {
+      parameter.value = param_value;
+      return;
+    }
+  }
 
-    if (nparams >= MAX_PARAMS)
-        return;
-
-    params[nparams].name = nam;
-    params[nparams].value = val;
-    ++nparams;
+  param temp = {};
+  temp.name = param_name;
+  temp.value = param_value;
+  params.push_back(temp);
 }
 
-Event::Manager::Manager(void) {}
-
-Event::Manager::~Manager(void) {}
-
-void Event::Manager::postEvent(const Object *event)
+void Event::Object::wait()
 {
-    Mutex::Locker lock(&mutex);
-
-    for (std::list<Handler *>::iterator i = handlerList.begin(),end = handlerList.end(); i != end; ++i)
-        (*i)->receiveEvent(event);
+  std::unique_lock<std::mutex> done_lock(this->processing_done_mut);
+  this->processing_done_cond.wait(done_lock,
+                                  [this]() { return this->processed; });
+  // done_lock.unlock();
 }
 
-void Event::Manager::postEventRT(const Object *event)
+void Event::Object::done()
 {
-    for (RT::List<RTHandler>::iterator i = rthandlerList.begin(),end = rthandlerList.end(); i != end; ++i)
-        i->receiveEventRT(event);
+  std::unique_lock<std::mutex> done_lock(this->processing_done_mut);
+  this->processed = true;
+  done_lock.unlock();
+  this->processing_done_cond.notify_one();
 }
 
-void Event::Manager::registerHandler(Handler *handler)
+bool Event::Object::isdone() const
 {
-    Mutex::Locker lock(&mutex);
-    handlerList.insert(handlerList.end(),handler);
+  return this->processed;
 }
 
-void Event::Manager::unregisterHandler(Handler *handler)
+Event::Type Event::Object::getType() const
 {
-    Mutex::Locker lock(&mutex);
-    handlerList.remove(handler);
+  return this->event_type;
 }
 
-void Event::Manager::registerRTHandler(RTHandler *handler)
+Event::Manager::Manager()
 {
-    rthandlerList.insert(rthandlerList.end(),*handler);
-}
+  // initialize logger before creating event processing workers
+  this->logger = std::make_unique<eventLogger>();
 
-void Event::Manager::unregisterRTHandler(RTHandler *handler)
-{
-    rthandlerList.remove(*handler);
-}
-
-static Mutex mutex;
-Event::Manager *Event::Manager::instance = 0;
-
-Event::Manager *Event::Manager::getInstance(void)
-{
-    if (instance)
-        return instance;
-
-    /*************************************************************************
-     * Seems like alot of hoops to jump through, but static allocation isn't *
-     *   thread-safe. So effort must be taken to ensure mutual exclusion.    *
-     *************************************************************************/
-
-    Mutex::Locker lock(&::mutex);
-    if (!instance)
-        {
-            static Manager manager;
-            instance = &manager;
+  auto task = [this]
+  {
+    Event::Object* event = nullptr;
+    while (this->running) {
+      {
+        // check if there are available events
+        std::unique_lock<std::mutex> event_lock(this->event_mut);
+        this->available_event_cond.wait(
+            event_lock,
+            [this] { return !(this->event_q.empty()) || !this->running; });
+        // Avoid undefined behavior by checking whether queue is empty first
+        if (this->event_q.empty()) {
+          continue;
         }
+        event = this->event_q.front();
+        this->event_q.pop();
+      }
 
-    return instance;
+      // we should log this before letting others know we are done
+      this->logger->log(event);
+      // route the event to all handlers
+      {
+        std::shared_lock<std::shared_mutex> handlerlist_lock(
+            this->handlerlist_mut);
+        for (auto* handler : this->handlerList) {
+          handler->receiveEvent(event);
+        }
+        handlerlist_lock.unlock();
+
+        // mark event as processed
+        event->done();
+      }
+    }
+  };
+
+  // create event processing workers in the thread pool
+  for (size_t count = 0; count < 2; count++) {
+    this->thread_pool.emplace_back(task);
+  }
+  for (auto& thread : this->thread_pool) {
+    RT::OS::renameOSThread(thread, std::string("RTXIEventWorker"));
+  }
+}
+
+Event::Manager::~Manager()
+{
+  Event::Object event(Event::Type::MANAGER_SHUTDOWN_EVENT);
+  this->postEvent(&event);
+  this->running.store(false);
+  this->available_event_cond.notify_all();
+  for (auto& thread : this->thread_pool) {
+    if (thread.joinable()) {
+      thread.join();
+    }
+  }
+  while (!this->event_q.empty()) {
+    event_q.front()->done();
+    event_q.pop();
+  }
+}
+
+void Event::Manager::postEvent(Event::Object* event)
+{
+  // Make sure the event processor is running
+  if (!this->running) {
+    return;
+  }
+
+  std::unique_lock<std::mutex> lk(this->event_mut);
+  this->event_q.push(event);
+  this->available_event_cond.notify_one();
+  lk.unlock();
+  if (!event->isdone()) {
+    event->wait();
+  }
+}
+
+void Event::Manager::postEvent(std::vector<Event::Object>& events)
+{
+  // Make sure the event processor is running
+  if (!this->running) {
+    return;
+  }
+
+  // For performance provide postEvent that accepts multiple events
+  std::unique_lock<std::mutex> lk(this->event_mut);
+  for (auto& event : events) {
+    this->event_q.push(&event);
+  }
+  lk.unlock();
+  this->available_event_cond.notify_all();
+  for (auto& event : events) {
+    if (!event.isdone()) {
+      event.wait();
+    }
+  }
+}
+
+void Event::Manager::registerHandler(Event::Handler* handler)
+{
+  std::unique_lock<std::shared_mutex> write_lock(this->handlerlist_mut);
+  auto location = std::find(handlerList.begin(), handlerList.end(), handler);
+  if (location == handlerList.end()) {
+    handlerList.push_back(handler);
+  }
+  write_lock.unlock();
+}
+
+void Event::Manager::unregisterHandler(Event::Handler* handler)
+{
+  std::unique_lock<std::shared_mutex> write_lock(this->handlerlist_mut);
+  auto location = std::find(handlerList.begin(), handlerList.end(), handler);
+  if (location != handlerList.end()) {
+    handlerList.erase(location);
+  }
+  write_lock.unlock();
+}
+
+bool Event::Manager::isRegistered(Event::Handler* handler)
+{
+  const std::shared_lock<std::shared_mutex> read_lock(this->handlerlist_mut);
+  auto location = std::find(handlerList.begin(), handlerList.end(), handler);
+  return location != handlerList.end();
 }

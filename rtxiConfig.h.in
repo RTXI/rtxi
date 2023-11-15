@@ -1,0 +1,8 @@
+#include <string>
+constexpr int RTXI_VERSION_MAJOR = @rtxi_VERSION_MAJOR@;
+constexpr int RTXI_VERSION_MINOR = @rtxi_VERSION_MINOR@;
+constexpr int RTXI_VERSION_PATCH = @rtxi_VERSION_PATCH@;
+constexpr std::string_view RTXI_RT_CORE = "@RTXI_RT_CORE@";
+constexpr std::string_view RTXI_CMAKE_SCRIPTS = "@RTXI_CMAKE_SCRIPTS@";
+constexpr std::string_view RTXI_BUILD_TYPE = "@CMAKE_BUILD_TYPE@";
+constexpr std::string_view GIT_COMMAND = "@GIT_EXECUTABLE@";

@@ -54,12 +54,10 @@ ScrollBar::isInverted() const
 void
 ScrollBar::setBase(double min, double max)
 {
-  if (min != d_minBase || max != d_maxBase) {
-    d_minBase = min;
-    d_maxBase = max;
+  d_minBase = min;
+  d_maxBase = max;
 
-    moveSlider(minSliderValue(), maxSliderValue());
-  }
+  moveSlider(minSliderValue(), maxSliderValue());
 }
 
 void

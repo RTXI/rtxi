@@ -1,0 +1,71 @@
+<diagram program="umletino" version="14.4.0-SNAPSHOT"><zoom_level>10</zoom_level><help_text>Space for diagram notes</help_text><element><id>UMLClass</id><coordinates><x>340</x><y>330</y><w>310</w><h>190</h></coordinates><panel_attributes>&lt;&lt;Event::Handler&gt;&gt;
+RT::System
+--
+-id: Long
+_-ClassAttribute: Long_
+--
+#Operation(i: int): int
+/+AbstractOperation()/
+--
+Responsibilities
+-- read and write to hardware
+-- run critical functions
+-- perform data changes for 
+   io blocks, parameters, etc
+bg=blue</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>680</x><y>330</y><w>210</w><h>190</h></coordinates><panel_attributes>&lt;&lt;interface&gt;&gt;
+/RT::OS::Fifo/
+--
+/+read()/
+/+write()/
+/+readRT()/
+/+readRT()/
+/+getCapacity()/
+--
+Responsibilities
+-- Transfer data between 
+    realtime and non-realtime threads
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>920</x><y>310</y><w>290</w><h>230</h></coordinates><panel_attributes>Event::Manager
+--
+-handlerList: Event::Handler* [0..*]
+-rthandlerList: Event::Handler* [0..*]
+--
++postEvent(obj: Event::Object)
++postEventRT(obj: Event::Object)
++registerHandler(handler: Event::Handler*)
++unregisterHandler(handler: Event::Handler*)
++registerRTHandler(handler: Event::RTHandler*)
++unregisterRTHandler(handler: Event::RTHandler*)
+--
+Responsibilities
+-- Forward events from publisher to observers
+bg=green</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>670</x><y>20</y><w>230</w><h>250</h></coordinates><panel_attributes>IO::Block
+--
+-name: std::string
+-ports: array&lt;vector&lt;port_t&gt;, 2&gt;
+--
++getName()
++getCount()
++getChannelName()
++getChannelDescription()
++writeinput()
++readoutput()
+#readinput()
+#writeoutput()
+--
+Responsibilities
+-- Provides an interface for exchanging 
+    experimental data
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>940</x><y>70</y><w>320</w><h>190</h></coordinates><panel_attributes>IO::Connector
+--
+-registry: unordered_map&lt;IO::Block*, vector&lt;outputs_con&gt;&gt;
+--
++connect()
++disconnect()
++connected()
++insertBlock()
++removeBlock()
+-topological_sort()
+--
+Responsibilities
+-- Connects IO::Blocks together
+-- Manages block input/output flow</panel_attributes><additional_attributes></additional_attributes></element></diagram>

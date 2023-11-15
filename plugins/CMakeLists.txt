@@ -1,0 +1,7 @@
+add_subdirectory(performance_measurement)
+add_subdirectory(userprefs)
+add_subdirectory(system_control)
+add_subdirectory(connector)
+add_subdirectory(oscilloscope)
+add_subdirectory(data_recorder)
+add_subdirectory(module_installer)

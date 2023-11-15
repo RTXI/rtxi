@@ -27,6 +27,10 @@ class RealTimeMath
 
 public:
   RealTimeMath();
+  RealTimeMath(const RealTimeMath&) = default;
+  RealTimeMath(RealTimeMath&&) = delete;
+  RealTimeMath& operator=(const RealTimeMath&) = default;
+  RealTimeMath& operator=(RealTimeMath&&) = delete;
   ~RealTimeMath();
   double fastEXP(double);
   double fastPOW(double, double);
@@ -34,10 +38,10 @@ public:
 private:
   // PowFast object
   const PowFast* powFast;
-  int powCount;
-  double powAns;
-  double powExp;
-  int n;
+  int powCount=0;
+  double powAns=0;
+  double powExp=0;
+  int n=0;
 };
 
 #endif

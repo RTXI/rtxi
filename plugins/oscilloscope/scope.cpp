@@ -1,458 +1,534 @@
 /*
-	 The Real-Time eXperiment Interface (RTXI)
-	 Copyright (C) 2011 Georgia Institute of Technology, University of Utah, Weill Cornell Medical College
+         The Real-Time eXperiment Interface (RTXI)
+         Copyright (C) 2011 Georgia Institute of Technology, University of Utah,
+   Weill Cornell Medical College
 
-	 This program is free software: you can redistribute it and/or modify
-	 it under the terms of the GNU General Public License as published by
-	 the Free Software Foundation, either version 3 of the License, or
-	 (at your option) any later version.
+         This program is free software: you can redistribute it and/or modify
+         it under the terms of the GNU General Public License as published by
+         the Free Software Foundation, either version 3 of the License, or
+         (at your option) any later version.
 
-	 This program is distributed in the hope that it will be useful,
-	 but WITHOUT ANY WARRANTY; without even the implied warranty of
-	 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	 GNU General Public License for more details.
+         This program is distributed in the hope that it will be useful,
+         but WITHOUT ANY WARRANTY; without even the implied warranty of
+         MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+         GNU General Public License for more details.
 
-	 You should have received a copy of the GNU General Public License
-	 along with this program.  If not, see <http://www.gnu.org/licenses/>.
+         You should have received a copy of the GNU General Public License
+         along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <rt.h>
-#include <debug.h>
+#include <QTimer>
+#include <algorithm>
 #include <cmath>
-#include <stdlib.h>
-#include <main_window.h>
+#include <mutex>
+
+#include "scope.hpp"
 
 #include <qwt_abstract_scale_draw.h>
+#include <qwt_global.h>
+#include <qwt_plot_legenditem.h>
+#include <qwt_scale_map.h>
+#include <stdlib.h>
 
-#include "scope.h"
+#include "rt.hpp"
 
-#define fs 1/(period*1e-3)
-
-// Constructor for a channel
-Scope::Channel::Channel(void) {}
-
-// Destructor for a channel
-Scope::Channel::~Channel(void) {}
-
-// Returns channel information
-void *Scope::Channel::getInfo(void)
+Oscilloscope::LegendItem::LegendItem()
 {
-    return info;
+  setRenderHint(QwtPlotItem::RenderAntialiased);
+  const QColor color(Qt::black);
+  setTextPen(color);
 }
 
-// Return read-only version of channel information
-const void *Scope::Channel::getInfo(void) const
+Oscilloscope::Canvas::Canvas(QwtPlot* plot)
+    : QwtPlotCanvas(plot)
 {
-    return info;
+  setPaintAttribute(QwtPlotCanvas::BackingStore, false);
+  if (QwtPainter::isX11GraphicsSystem()) {
+    if (testPaintAttribute(QwtPlotCanvas::BackingStore)) {
+      setAttribute(Qt::WA_PaintOnScreen, true);
+      setAttribute(Qt::WA_NoSystemBackground, true);
+    }
+  }
+  setupPalette();
 }
 
-// Returns channel pen
-QPen Scope::Channel::getPen(void) const
+void Oscilloscope::Canvas::setupPalette()
 {
-    return this->curve->pen();
-}
-
-// Returns channel scale
-double Scope::Channel::getScale(void) const
-{
-    return scale;
-}
-
-// Returns channel offset
-double Scope::Channel::getOffset(void) const
-{
-    return offset;
-}
-
-// Returns channel label
-QString Scope::Channel::getLabel(void) const
-{
-    return label;
+  QPalette pal = palette();
+  QLinearGradient gradient;
+  gradient.setCoordinateMode(QGradient::StretchToDeviceMode);
+  gradient.setColorAt(1.0, QColor(Qt::white));
+  pal.setBrush(QPalette::Window, QBrush(gradient));
+  pal.setColor(QPalette::WindowText, Qt::green);
+  setPalette(pal);
 }
 
 // Scope constructor; inherits from QwtPlot
-Scope::Scope(QWidget *parent) :	QwtPlot(parent), legendItem(NULL)
+Oscilloscope::Scope::Scope(QWidget* parent)
+    : QwtPlot(parent)
+    , d_directPainter(new QwtPlotDirectPainter())
+    , grid(new QwtPlotGrid())
+    , origin(new QwtPlotMarker())
+    , scaleMapY(new QwtScaleMap())
+    , scaleMapX(new QwtScaleMap())
+    , legendItem(new LegendItem())
+    , timer(new QTimer(this))
 {
+  // Initialize director
+  plotLayout()->setAlignCanvasToScales(true);
+  setAutoReplot(false);
+  setAutoDelete(true);
 
-    // Initialize vars
-    isPaused = false;
-    divX = 10;
-    divY = 10;
-    data_idx = 0;
-    data_size = 100;
-    hScl = 1.0;
-    period = 1.0;
-    dtLabel = "1ms";
-    refresh = 250;
-    triggering = false;
-    triggerDirection = Scope::NONE;
-    triggerThreshold = 0.0;
-    triggerChannel = channels.end();
-    triggerWindow = 10.0;
+  // Set scope canvas
+  setCanvas(new Oscilloscope::Canvas(nullptr));
 
-    // Initialize director
-    d_directPainter = new QwtPlotDirectPainter();
-    plotLayout()->setAlignCanvasToScales(true);
-    setAutoReplot(false);
+  // Setup grid
+  this->grid->setPen(Qt::gray, 0, Qt::DotLine);
+  this->grid->attach(this);
 
-    // Set scope canvas
-    setCanvas(new Canvas());
+  // Set division limits on the scope
+  setAxisMaxMajor(QwtPlot::xBottom, static_cast<int>(divX));
+  setAxisMaxMajor(QwtPlot::yLeft, static_cast<int>(divY));
 
-    // Setup grid
-    grid = new QwtPlotGrid();
-    grid->setPen(Qt::gray, 0, Qt::DotLine);
-    grid->attach(this);
+  // Disable axes
+  enableAxis(QwtPlot::yLeft, false);
+  enableAxis(QwtPlot::xBottom, false);
 
-    // Set division limits on the scope
-    setAxisMaxMajor(QwtPlot::xBottom, divX);
-    setAxisMaxMajor(QwtPlot::yLeft, divY);
+  // Statically set y interval
+  setAxisScale(QwtPlot::yLeft, -1.0, 1.0);
+  setAxisScale(QwtPlot::xBottom, 0.0, 1000.0);
 
-    // Disable axes
-    enableAxis(QwtPlot::yLeft, false);
-    enableAxis(QwtPlot::xBottom, false);
+  // Disable autoscaling
+  setAxisAutoScale(QwtPlot::yLeft, false);
+  setAxisAutoScale(QwtPlot::xBottom, false);
 
-    // Statically set y interval
-    setAxisScale(QwtPlot::yLeft, -1.0, 1.0);
-    setAxisScale(QwtPlot::xBottom, 0.0, 1000.0);
+  // Set origin markers
+  this->origin->setLineStyle(QwtPlotMarker::Cross);
+  this->origin->setValue(500.0, 0.0);
+  this->origin->setLinePen(Qt::gray, 2.0, Qt::DashLine);
+  this->origin->attach(this);
 
-    // Disable autoscaling
-    setAxisAutoScale(QwtPlot::yLeft, false);
-    setAxisAutoScale(QwtPlot::xBottom, false);
+  // Setup scaling map
+  this->scaleMapY->setPaintInterval(-1.0, 1.0);
+  this->scaleMapX->setPaintInterval(0.0, 1000.0);
 
-    // Set origin markers
-    origin = new QwtPlotMarker();
-    origin->setLineStyle(QwtPlotMarker::Cross);
-    origin->setValue(500.0, 0.0);
-    origin->setLinePen(Qt::gray, 2.0, Qt::DashLine);
-    origin->attach(this);
+  // Create and attach legend
+  this->legendItem->attach(this);
+  this->legendItem->setMaxColumns(1);
 
-    // Setup scaling map
-    scaleMapY = new QwtScaleMap();
-    scaleMapY->setPaintInterval(-1.0, 1.0);
-    scaleMapX = new QwtScaleMap();
-    scaleMapX->setPaintInterval(0.0, 1000.0);
+// Here we have a problem. Plot legends in QWT are
+// aligned using setAlignment in pre 6.2, but the
+// function does not exist >= 6.2 and is instead
+// replaced by setAlignmentInCanvas. This needs a bit
+// of preprocessor to fix.
+#if QWT_VERSION >= 0X060200
+  this->legendItem->setAlignmentInCanvas(
+      static_cast<Qt::Alignment>(Qt::AlignTop | Qt::AlignRight));
+#else
+  this->legendItem->setAlignment(
+      static_cast<Qt::Alignment>(Qt::AlignTop | Qt::AlignRight));
+#endif
 
-    // Create and attach legend
-    legendItem = new LegendItem();
-    legendItem->attach(this);
-    legendItem->setMaxColumns(1);
-    legendItem->setAlignment(Qt::Alignment(Qt::AlignTop | Qt::AlignRight));
-    legendItem->setBorderRadius(8);
-    legendItem->setMargin(4);
-    legendItem->setSpacing(2);
-    legendItem->setItemMargin(0);
-    legendItem->setBackgroundBrush(QBrush(QColor(225,225,225)));
+  this->legendItem->setBorderRadius(8);
+  this->legendItem->setMargin(4);
+  this->legendItem->setSpacing(2);
+  this->legendItem->setItemMargin(0);
+  this->legendItem->setBackgroundBrush(QBrush(QColor(225, 225, 225)));
+  this->legendItem->attach(this);
 
-    // Update scope background/scales/axes
-    replot();
+  // Update scope background/scales/axes
+  replot();
 
-    // Timer controls refresh rate of scope
-    timer = new QTimer;
-    timer->setTimerType(Qt::PreciseTimer);
-    QObject::connect(timer,SIGNAL(timeout(void)),this,SLOT(timeoutEvent(void)));
-    timer->start(refresh);
-    resize(sizeHint());
+  resize(sizeHint());
+  // Timer controls refresh rate of scope
+  this->timer->setTimerType(Qt::PreciseTimer);
+  QObject::connect(timer, SIGNAL(timeout()), this, SLOT(process_data()));
+  this->timer->start(static_cast<int>(this->refresh));
 }
 
-// Kill me
-Scope::~Scope(void)
+Oscilloscope::Scope::~Scope()
 {
-    delete d_directPainter;
+  delete d_directPainter;
+  delete scaleMapX;
+  delete scaleMapY;
 }
 
 // Returns pause status of scope
-bool Scope::paused(void) const
+bool Oscilloscope::Scope::paused() const
 {
-    return isPaused;
+  return isPaused;
 }
 
-// Timeout event slot
-void Scope::timeoutEvent(void)
+void Oscilloscope::Scope::setPause(bool value)
 {
-    if(!triggering)
-        drawCurves();
+  this->isPaused.store(value);
 }
 
-// Insert user specified channel into active list of channels with specified settings
-std::list<Scope::Channel>::iterator Scope::insertChannel(QString label, double scale, double offset, const QPen &pen, QwtPlotCurve *curve, void *info)
+void Oscilloscope::Scope::createChannel(IO::endpoint probeInfo,
+                                        RT::OS::Fifo* fifo)
 {
-    struct Channel channel;
-    channel.label = label;
-    channel.scale = scale;
-    channel.offset = offset;
-    channel.info = info;
-    channel.data.resize(data_size,0.0);
-    channel.curve = curve;
-    channel.curve->setPen(pen);
-    channel.curve->setStyle(QwtPlotCurve::Lines);
-    channel.curve->setRenderHint(QwtPlotItem::RenderAntialiased, false);
-    channel.curve->attach(this);
-    channels.push_back(channel);
-    return --channels.end();
+  const std::unique_lock<std::shared_mutex> lock(this->m_channel_mutex);
+  auto iter = std::find_if(this->channels.begin(),
+                           this->channels.end(),
+                           [&](const scope_channel& chan)
+                           { return chan.endpoint == probeInfo; });
+  if (iter != this->channels.end()) {
+    return;
+  }
+  Oscilloscope::scope_channel chan;
+  chan.curve = new QwtPlotCurve;
+  chan.endpoint = probeInfo;
+  chan.timebuffer.assign(this->buffer_size, 0);
+  chan.xbuffer.assign(this->buffer_size, 0.0);
+  chan.ybuffer.assign(this->buffer_size, 0.0);
+  chan.xtransformed.assign(this->buffer_size, 0.0);
+  chan.ytransformed.assign(this->buffer_size, 0.0);
+  chan.scale = 1;
+  chan.offset = 0;
+  chan.data_indx = 0;
+  auto pen = QPen();
+  pen.setColor(Oscilloscope::penColors[0]);
+  pen.setStyle(Oscilloscope::penStyles[0]);
+  chan.fifo = fifo;
+  chan.curve->setPen(pen);
+  chan.curve->attach(this);
+  this->channels.push_back(chan);
 }
 
-// Remove user specified channel from active channels list
-void *Scope::removeChannel(std::list<Scope::Channel>::iterator channel)
+bool Oscilloscope::Scope::channelRegistered(IO::endpoint probeInfo)
 {
-    channel->curve->detach();
-    replot();
-    void *info = channel->info;
-    channels.erase(channel);
-    return info;
+  const std::shared_lock<std::shared_mutex> lock(this->m_channel_mutex);
+  auto iter = std::find_if(this->channels.begin(),
+                           this->channels.end(),
+                           [&](const scope_channel& chan)
+                           { return chan.endpoint == probeInfo; });
+  return iter != this->channels.end();
 }
 
-// Resize event for scope
-void Scope::resizeEvent(QResizeEvent *event)
+void Oscilloscope::Scope::removeChannel(IO::endpoint probeInfo)
 {
-    d_directPainter->reset();
-    QwtPlot::resizeEvent(event);
+  const std::unique_lock<std::shared_mutex> lock(this->m_channel_mutex);
+  auto iter = std::find_if(this->channels.begin(),
+                           this->channels.end(),
+                           [&](const scope_channel& chan)
+                           { return chan.endpoint == probeInfo; });
+  if (iter == this->channels.end()) {
+    return;
+  }
+  iter->curve->detach();
+  delete iter->curve;
+  iter->curve = nullptr;
+  channels.erase(iter);
+  replot();
 }
 
-// Returns count of number of active channels
-size_t Scope::getChannelCount(void) const
+void Oscilloscope::Scope::removeBlockChannels(IO::Block* block)
 {
-    return channels.size();
+  std::vector<IO::endpoint> all_block_endpoints;
+  std::shared_lock<std::shared_mutex> read_lock(this->m_channel_mutex);
+  for (auto& channel : channels) {
+    if (channel.endpoint.block == block) {
+      all_block_endpoints.push_back(channel.endpoint);
+    }
+  }
+  read_lock.unlock();
+  for (const auto& endpoint : all_block_endpoints) {
+    this->removeChannel(endpoint);
+  }
 }
 
-// Returns beginning of channels list
-std::list<Scope::Channel>::iterator Scope::getChannelsBegin(void)
+void Oscilloscope::Scope::resizeEvent(QResizeEvent* event)
 {
-    return channels.begin();
+  this->d_directPainter->reset();
+  QwtPlot::resizeEvent(event);
 }
 
-// Returns end of channels list
-std::list<Scope::Channel>::iterator Scope::getChannelsEnd(void)
+size_t Oscilloscope::Scope::getChannelCount()
 {
-    return channels.end();
+  const std::shared_lock<std::shared_mutex> lock(this->m_channel_mutex);
+  return channels.size();
 }
 
-// Returns read-only pointer to beginning of channel list
-std::list<Scope::Channel>::const_iterator Scope::getChannelsBegin(void) const
+void Oscilloscope::Scope::clearData()
 {
-    return channels.begin();
+  const std::unique_lock<std::shared_mutex> lock(this->m_channel_mutex);
+  for (auto& chan : this->channels) {
+    chan.timebuffer.assign(this->buffer_size, 0);
+    chan.xbuffer.assign(this->buffer_size, 0);
+    chan.ybuffer.assign(this->buffer_size, 0);
+    chan.xtransformed.assign(this->buffer_size, 0);
+    chan.ytransformed.assign(this->buffer_size, 0);
+    chan.data_indx = 0;
+  }
 }
 
-// Returns read-only pointer to end of channels list
-std::list<Scope::Channel>::const_iterator Scope::getChannelsEnd(void) const
+void Oscilloscope::Scope::setDataSize(size_t size)
 {
-    return channels.end();
+  const std::unique_lock<std::shared_mutex> lock(this->m_channel_mutex);
+  this->buffer_size.store(size);
+  this->sample_buffer.assign(buffer_size, {});
+  for (auto& chan : this->channels) {
+    chan.timebuffer.assign(this->buffer_size, 0);
+    chan.xbuffer.assign(this->buffer_size, 0);
+    chan.ybuffer.assign(this->buffer_size, 0);
+    chan.xtransformed.assign(this->buffer_size, 0);
+    chan.ytransformed.assign(this->buffer_size, 0);
+    chan.data_indx = 0;
+  }
 }
 
-// Zeros data
-void Scope::clearData(void)
+size_t Oscilloscope::Scope::getDataSize() const
 {
-    for(std::list<Channel>::iterator i = channels.begin(), end = channels.end(); i != end; ++i)
-        {
-            i->data.assign(data_size, 0);
-        }
+  return this->buffer_size.load();
 }
 
-// Scales data based upon desired settings for the channel
-void Scope::setData(double data[],size_t size)
+int64_t Oscilloscope::Scope::getDivT()
 {
-    if(isPaused)
-        return;
-
-    if(size < getChannelCount())
-        {
-            ERROR_MSG("Scope::setData() : data size mismatch detected\n");
-            return;
-        }
-
-    size_t index = 0;
-    for(std::list<Channel>::iterator i = channels.begin(), end = channels.end(); i != end; ++i)
-        {
-            i->data[data_idx] = data[index++];
-
-            if(triggering && i == triggerChannel &&
-                    ((triggerDirection == POS && i->data[data_idx-1] < triggerThreshold && i->data[data_idx] > triggerThreshold) ||
-                     (triggerDirection == NEG && i->data[data_idx-1] > triggerThreshold && i->data[data_idx] < triggerThreshold)))
-                {
-                    if(data_idx > triggerWindow*fs)
-                        triggerQueue.push_back(data_idx-(triggerWindow*fs));
-                }
-        }
-
-    ++data_idx %= data_size;
-
-    if(triggering && !triggerQueue.empty() && (data_idx+2)%data_size == triggerQueue.front())
-        {
-            triggerQueue.pop_front();
-            drawCurves();
-        }
+  const std::shared_lock<std::shared_mutex> lock(this->m_channel_mutex);
+  return horizontal_scale_ns;
 }
 
-// Returns the data size
-size_t Scope::getDataSize(void) const
+void Oscilloscope::Scope::setDivT(int64_t value)
 {
-    return data_size;
+  const std::unique_lock<std::shared_mutex> lock(this->m_channel_mutex);
+  horizontal_scale_ns = value;
+  if (value >= 1000000000) {
+    dtLabel = "s";
+  } else if (value >= 1000000) {
+    dtLabel = "ms";
+  } else if (value >= 1000) {
+    dtLabel = "µs";
+  } else {
+    dtLabel = "ns";
+  }
 }
 
-void Scope::setDataSize(size_t size)
+size_t Oscilloscope::Scope::getDivX() const
 {
-    for(std::list<Channel>::iterator i = channels.begin(), end = channels.end(); i != end; ++i)
-        i->data.resize(size,0.0);
-    data_idx = 0;
-    data_size = size;
-    triggerQueue.clear();
+  return static_cast<size_t>(divX);
 }
 
-Scope::trig_t Scope::getTriggerDirection(void)
+size_t Oscilloscope::Scope::getDivY() const
 {
-    return triggerDirection;
+  return static_cast<size_t>(divY);
 }
 
-double Scope::getTriggerThreshold(void)
+size_t Oscilloscope::Scope::getRefresh() const
 {
-    return triggerThreshold;
+  return refresh;
 }
 
-double Scope::getTriggerWindow(void)
+void Oscilloscope::Scope::setRefresh(size_t r)
 {
-    return triggerWindow;
+  const std::unique_lock<std::shared_mutex> lock(this->m_channel_mutex);
+  refresh = r;
+  timer->setInterval(static_cast<int>(refresh));
 }
 
-std::list<Scope::Channel>::iterator Scope::getTriggerChannel(void)
+void Oscilloscope::Scope::setChannelScale(IO::endpoint endpoint, double scale)
 {
-    return triggerChannel;
+  const std::unique_lock<std::shared_mutex> lock(this->m_channel_mutex);
+  auto chan_loc = std::find_if(this->channels.begin(),
+                               this->channels.end(),
+                               [&](const Oscilloscope::scope_channel& chann)
+                               { return chann.endpoint == endpoint; });
+  if (chan_loc == channels.end()) {
+    return;
+  }
+  chan_loc->scale = scale;
 }
 
-void Scope::setTrigger(trig_t direction,double threshold,std::list<Channel>::iterator channel, double window)
+double Oscilloscope::Scope::getChannelScale(IO::endpoint endpoint)
 {
-    if(triggerChannel != channel || triggerThreshold != threshold)
-        {
-            triggerChannel = channel;
-            triggerThreshold = threshold;
-        }
-
-    // Update if direction has changed
-    if(triggerDirection != direction)
-        {
-            if(direction == Scope::NONE)
-                {
-                    triggering = false;
-                    timer->start(refresh);
-                    triggerQueue.clear();
-                }
-            else
-                {
-                    triggering = true;
-                    timer->stop();
-                }
-            triggerDirection = direction;
-        }
-    triggerWindow = window;
+  const std::shared_lock<std::shared_mutex> lock(this->m_channel_mutex);
+  auto chan_loc = std::find_if(this->channels.begin(),
+                               this->channels.end(),
+                               [&](const Oscilloscope::scope_channel& chann)
+                               { return chann.endpoint == endpoint; });
+  if (chan_loc == channels.end()) {
+    return 1.0;
+  }
+  return chan_loc->scale;
 }
 
-double Scope::getDivT(void) const
+void Oscilloscope::Scope::setChannelOffset(IO::endpoint endpoint, double offset)
 {
-    return hScl;
+  const std::unique_lock<std::shared_mutex> lock(this->m_channel_mutex);
+  auto chan_loc = std::find_if(this->channels.begin(),
+                               this->channels.end(),
+                               [&](const Oscilloscope::scope_channel& chann)
+                               { return chann.endpoint == endpoint; });
+  if (chan_loc == channels.end()) {
+    return;
+  }
+  chan_loc->offset = offset;
 }
 
-// Set x divisions
-void Scope::setDivT(double divT)
+double Oscilloscope::Scope::getChannelOffset(IO::endpoint endpoint)
 {
-    hScl = divT;
-    if(divT >= 1000.)
-        dtLabel = QString::number(divT*1e-3)+"s";
-    else if(divT >= 1.)
-        dtLabel = QString::number(divT)+"ms";
-    else if(divT >= 1e-3)
-        dtLabel = QString::number(divT*1e3)+"µs";
-    else
-        dtLabel = QString::number(divT*1e6)+"ns";
+  const std::shared_lock<std::shared_mutex> lock(this->m_channel_mutex);
+  auto chan_loc = std::find_if(this->channels.begin(),
+                               this->channels.end(),
+                               [&](const Oscilloscope::scope_channel& chann)
+                               { return chann.endpoint == endpoint; });
+  if (chan_loc == channels.end()) {
+    return 0.0;
+  }
+  return chan_loc->offset;
 }
 
-// Set period
-void Scope::setPeriod(double p)
+void Oscilloscope::Scope::setChannelLabel(IO::endpoint endpoint,
+                                          const QString& label)
 {
-    period = p;
+  const std::unique_lock<std::shared_mutex> lock(this->m_channel_mutex);
+  auto chan_loc = std::find_if(this->channels.begin(),
+                               this->channels.end(),
+                               [&](const Oscilloscope::scope_channel& chann)
+                               { return chann.endpoint == endpoint; });
+  if (chan_loc == channels.end()) {
+    return;
+  }
+  chan_loc->curve->setTitle(label);
 }
 
-// Get number of x divisions on scope
-size_t Scope::getDivX(void) const
+QColor Oscilloscope::Scope::getChannelColor(IO::endpoint endpoint)
 {
-    return divX;
+  const std::shared_lock<std::shared_mutex> lock(this->m_channel_mutex);
+  auto chan_loc = std::find_if(this->channels.begin(),
+                               this->channels.end(),
+                               [&](const Oscilloscope::scope_channel& chann)
+                               { return chann.endpoint == endpoint; });
+  if (chan_loc == channels.end()) {
+    return penColors[Oscilloscope::ColorID::Black];
+  }
+  return chan_loc->curve->pen().color();
 }
 
-// Get number of y divisions on scope
-size_t Scope::getDivY(void) const
+Qt::PenStyle Oscilloscope::Scope::getChannelStyle(IO::endpoint endpoint)
 {
-    return divY;
+  const std::shared_lock<std::shared_mutex> lock(this->m_channel_mutex);
+  auto chan_loc = std::find_if(this->channels.begin(),
+                               this->channels.end(),
+                               [&](const Oscilloscope::scope_channel& chann)
+                               { return chann.endpoint == endpoint; });
+  if (chan_loc == channels.end()) {
+    return penStyles[Oscilloscope::PenStyleID::SolidLine];
+  }
+  return chan_loc->curve->pen().style();
 }
 
-// Get current refresh rate
-size_t Scope::getRefresh(void) const
+int Oscilloscope::Scope::getChannelWidth(IO::endpoint endpoint)
 {
-    return refresh;
+  const std::shared_lock<std::shared_mutex> lock(this->m_channel_mutex);
+  auto chan_loc = std::find_if(this->channels.begin(),
+                               this->channels.end(),
+                               [&](const Oscilloscope::scope_channel& chann)
+                               { return chann.endpoint == endpoint; });
+  if (chan_loc == channels.end()) {
+    return 1;
+  }
+  return chan_loc->curve->pen().width();
 }
 
-// Set new refresh rate
-void Scope::setRefresh(size_t r)
+void Oscilloscope::Scope::setChannelPen(IO::endpoint endpoint, const QPen& pen)
 {
-    refresh = r;
-    timer->setInterval(refresh);
+  const std::shared_lock<std::shared_mutex> lock(this->m_channel_mutex);
+  auto chan_loc = std::find_if(this->channels.begin(),
+                               this->channels.end(),
+                               [&](const Oscilloscope::scope_channel& chann)
+                               { return chann.endpoint == endpoint; });
+  if (chan_loc != channels.end()) {
+    chan_loc->curve->setPen(pen);
+  }
 }
 
-// Set channel scale
-void Scope::setChannelScale(std::list<Channel>::iterator channel,double scale)
+void Oscilloscope::Scope::setTriggerThreshold(double threshold)
 {
-    channel->scale = scale;
+  this->m_trigger_info.threshold = threshold;
 }
 
-// Set channel offset
-void Scope::setChannelOffset(std::list<Channel>::iterator channel,double offset)
+double Oscilloscope::Scope::getTriggerThreshold() const
 {
-    channel->offset = offset;
-}
-
-// Set pen for channel specified by user
-void Scope::setChannelPen(std::list<Channel>::iterator channel,const QPen &pen)
-{
-    channel->curve->setPen(pen);
-}
-
-// Set channel label
-void Scope::setChannelLabel(std::list<Channel>::iterator channel,const QString &label)
-{
-    channel->curve->setTitle(label);
+  return this->m_trigger_info.threshold;
 }
 
 // Draw data on the scope
-void Scope::drawCurves(void)
+void Oscilloscope::Scope::drawCurves()
 {
-    if(isPaused)
-        return;
+  if (isPaused.load() || this->channels.empty()) {
+    return;
+  }
+  int64_t max_time = 0;
+  int64_t local_max_time = 0;
+  for (const auto& chan : this->channels) {
+    local_max_time =
+        *std::max_element(chan.timebuffer.begin(), chan.timebuffer.end());
+    if (local_max_time > max_time) {
+      max_time = local_max_time;
+    }
+  }
+  const int64_t min_time = (max_time - horizontal_scale_ns * divX);
+  // Set X scale map is same for all channels
+  const auto max_window_time = static_cast<double>(max_time - min_time);
+  const double min_window_time = 0.0;
+  scaleMapX->setScaleInterval(min_window_time, max_window_time);
+  size_t ringbuffer_index = 0;
+  for (auto& channel : this->channels) {
+    channel.xtransformed.assign(this->buffer_size, 0);
+    channel.ytransformed.assign(this->buffer_size, 0);
+    scaleMapY->setScaleInterval(-channel.scale * static_cast<double>(divY) / 2,
+                                channel.scale * static_cast<double>(divY) / 2);
+    for (size_t i = 0; i < channel.xbuffer.size(); i++) {
+      ringbuffer_index = (i + channel.data_indx) % this->buffer_size;
+      channel.xbuffer[i] =
+          static_cast<double>(channel.timebuffer[i] - min_time);
+      // Thanks to qwt's interface we need the x axis points to be sorted
+      // and scaled. Shenanigans alert
+      channel.xtransformed[i] =
+          scaleMapX->transform(channel.xbuffer[ringbuffer_index]);
+      channel.ytransformed[i] =
+          scaleMapY->transform(channel.ybuffer[ringbuffer_index]);
+    }
+    // TODO this should not happen each iteration, instead build into channel
+    // Append data to curve
+    // Makes deep copy - which is not optimal
+    // TODO: change to pointer based method
+    channel.curve->setSamples(channel.xtransformed.data(),
+                              channel.ytransformed.data(),
+                              static_cast<int>(channel.ytransformed.size()));
+  }
+  // Update plot
+  replot();
+}
 
-    // Set X scale map is same for all channels
-    scaleMapX->setScaleInterval(0, hScl*divX);
-    for(std::list<Channel>::iterator i = channels.begin(), iend = channels.end(); i != iend; ++i)
-        {
-            // Set data for channel
-            std::vector<double> x (i->data.size());
-            std::vector<double> y (i->data.size());
-            double *x_loc = x.data();
-            double *y_loc = y.data();
+// TODO: look into SIMD for optimize move and calculation of data
+void Oscilloscope::Scope::process_data()
+{
+  const std::shared_lock<std::shared_mutex> lock(this->m_channel_mutex);
+  int64_t bytes = 0;
+  size_t sample_count = 0;
+  size_t array_indx = 0;
+  const size_t sample_capacity_bytes =
+      sample_buffer.size() * sizeof(Oscilloscope::sample);
+  for (auto& channel : this->channels) {
+    // Read as many samples as possible in chunks of buffer size or less.
+    // overwrite old samples from previous write if available
+    while (
+        bytes = channel.fifo->read(sample_buffer.data(), sample_capacity_bytes),
+        bytes > 0)
+    {
+      sample_count = static_cast<size_t>(bytes) / sizeof(Oscilloscope::sample);
+      for (size_t i = 0; i < sample_count; i++) {
+        array_indx = (i + channel.data_indx) % this->buffer_size;
+        channel.timebuffer[array_indx] = sample_buffer[i].time;
+        channel.ybuffer[array_indx] = sample_buffer[i].value;
+      }
+      channel.data_indx =
+          (channel.data_indx + sample_count) % this->buffer_size;
+    };
 
-            // Set Y scale map for channel
-            // TODO this should not happen each iteration, instead build into channel struct
-            scaleMapY->setScaleInterval(-i->scale*divY/2, i->scale*divY/2);
-
-            // Scale data to pixel coordinates
-            for(size_t j = 0; j < i->data.size(); ++j)
-                {
-                    *x_loc = scaleMapX->transform(j*period);
-                    *y_loc = scaleMapY->transform(i->data[(data_idx+j)%i->data.size()]+i->offset);
-                    ++x_loc;
-                    ++y_loc;
-                }
-
-            // Append data to curve
-            // Makes deep copy - which is not optimal
-            // TODO: change to pointer based method
-            i->curve->setSamples(x.data(), y.data(), i->data.size());
-        }
-
-    // Update plot
-    replot();
+    // zero out so the buffer so it doesn't spill over to the next channel
+    sample_buffer.assign(this->buffer_size, {0, 0.0});
+  }
+  this->drawCurves();
 }

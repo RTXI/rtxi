@@ -1,471 +1,532 @@
 /*
-	 The Real-Time eXperiment Interface (RTXI)
-	 Copyright (C) 2011 Georgia Institute of Technology, University of Utah, Weill Cornell Medical College
+         The Real-Time eXperiment Interface (RTXI)
+         Copyright (C) 2011 Georgia Institute of Technology, University of Utah,
+   Will Cornell Medical College
 
-	 This program is free software: you can redistribute it and/or modify
-	 it under the terms of the GNU General Public License as published by
-	 the Free Software Foundation, either version 3 of the License, or
-	 (at your option) any later version.
+         This program is free software: you can redistribute it and/or modify
+         it under the terms of the GNU General Public License as published by
+         the Free Software Foundation, either version 3 of the License, or
+         (at your option) any later version.
 
-	 This program is distributed in the hope that it will be useful,
-	 but WITHOUT ANY WARRANTY; without even the implied warranty of
-	 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	 GNU General Public License for more details.
+         This program is distributed in the hope that it will be useful,
+         but WITHOUT ANY WARRANTY; without even the implied warranty of
+         MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+         GNU General Public License for more details.
 
-	 You should have received a copy of the GNU General Public License
-	 along with this program.  If not, see <http://www.gnu.org/licenses/>.
+         You should have received a copy of the GNU General Public License
+         along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-#include <debug.h>
+#include <QApplication>
+#include <QDesktopServices>
+#include <QDir>
+#include <QFileDialog>
+#include <QMenuBar>
+#include <QMessageBox>
+#include <QSettings>
+#include <QString>
+#include <QUrl>
 #include <algorithm>
-#include <settings.h>
-#include <rtxi_config.h>
-#include <stdlib.h>
-#include <main_window.h>
-#include <mutex.h>
-#include <plugin.h>
+#include <string>
 
-MainWindow::MainWindow (void) : QMainWindow(NULL, Qt::Window)
+#include "main_window.hpp"
+
+#include <fmt/core.h>
+
+#include "connector/connector.hpp"
+#include "data_recorder/data_recorder.hpp"
+#include "debug.hpp"
+#include "event.hpp"
+#include "module_installer/rtxi_wizard.hpp"
+#include "oscilloscope/oscilloscope.hpp"
+#include "performance_measurement/performance_measurement.hpp"
+#include "rtxiConfig.h"
+#include "system_control/system_control.hpp"
+#include "userprefs/userprefs.hpp"
+#include "widgets.hpp"
+#include "workspace.hpp"
+
+MainWindow::MainWindow(Event::Manager* ev_manager)
+    : QMainWindow(nullptr, Qt::Window)
+    , event_manager(ev_manager)
+    , mdiArea(new QMdiArea)
 {
+  // Make central RTXI parent widget
+  setCentralWidget(mdiArea);
 
-    // Make central RTXI parent widget
-    mdiArea = new QMdiArea;
-    setCentralWidget(mdiArea);
+  /* Initialize Window Settings */
+  setWindowTitle("RTXI - Real-time eXperimental Interface");
+  // setWindowIcon(QIcon("/usr/local/share/rtxi/RTXI-icon.png"));
 
-    /* Initialize Window Settings */
-    setWindowTitle("RTXI - Real-time eXperimental Interface");
-    setWindowIcon(QIcon("/usr/local/share/rtxi/RTXI-icon.png"));
+  /* Set Qt Settings Information */
+  QApplication::setOrganizationName("RTXI");
+  QApplication::setOrganizationDomain("rtxi.org");
+  QApplication::setApplicationName("RTXI");
 
-    /* Set Qt Settings Information */
-    QCoreApplication::setOrganizationName("RTXI");
-    QCoreApplication::setOrganizationDomain("rtxi.org");
-    QCoreApplication::setApplicationName("RTXI");
+  /* Initialize Menus */
+  createFileActions();
+  createFileMenu();
 
-    /* Initialize Menus */
-    createFileActions();
-    createFileMenu();
+  /* Initialize Widget Menu */
+  createWidgetMenu();
 
-    /* Initialize Module Menu */
-    createModuleMenu();
+  /* Initialize Utilities menu */
+  createUtilMenu();
 
-    /* Initialize Utilities menu */
-    createUtilMenu();
+  /* Initialize System Menu */
+  createSystemActions();
+  createSystemMenu();
 
-    /* Initialize System Menu */
-    createSystemMenu();
+  /* Initialize Windows Menu */
+  createWindowsMenu();
 
-    /* Initialize Windows Menu */
-    createWindowsMenu();
-
-    /* Initialize Help Menu */
-    createHelpActions();
-    createHelpMenu();
+  /* Initialize Help Menu */
+  createHelpActions();
+  createHelpMenu();
 }
 
-MainWindow::~MainWindow (void)
+QAction* MainWindow::insertWidgetMenuSeparator()
 {
+  return moduleMenu->addSeparator();
 }
 
-QAction* MainWindow::insertModuleMenuSeparator (void)
+QAction* MainWindow::createFileMenuItem(const QString& label)
 {
-    return moduleMenu->addSeparator();
+  return fileMenu->addAction(label);
 }
 
-QAction* MainWindow::createFileMenuItem(const QString &text)
+void MainWindow::clearFileMenu()
 {
-    return fileMenu->addAction(text);
+  // Clear but add back default actions
+  fileMenu->clear();
+  fileMenu->addAction(load);
+  fileMenu->addAction(save);
+  fileMenu->addAction(reset);
+  fileMenu->addSeparator();
+  fileMenu->addAction(quit);
+  fileMenu->addSeparator();
 }
 
-void MainWindow::clearFileMenu(void)
+QAction* MainWindow::createWidgetMenuItem(const QString& text)
 {
-    // Clear but add back default actions
-    fileMenu->clear();
-    fileMenu->addAction(load);
-    fileMenu->addAction(save);
-    fileMenu->addAction(reset);
-    fileMenu->addSeparator();
-    fileMenu->addAction(quit);
-    fileMenu->addSeparator();
+  return moduleMenu->addAction(text);
 }
 
-QAction* MainWindow::createModuleMenuItem(const QString &text)
+QAction* MainWindow::createWidgetMenuItem(const QString& text,
+                                          const QObject* receiver,
+                                          const char* member)
 {
-    return moduleMenu->addAction(text);
+  return moduleMenu->addAction(text, receiver, member);
 }
 
-QAction* MainWindow::createModuleMenuItem(const QString &text, const QObject *receiver, const char *member)
+void MainWindow::setWidgetMenuItemParameter(QAction* action, int parameter)
 {
-    return moduleMenu->addAction(text, receiver, member);
+  action->setData(parameter);
 }
 
-void MainWindow::setModuleMenuItemParameter (QAction *action, int parameter)
+void MainWindow::clearWidgetMenu()
 {
-    action->setData(parameter);
+  moduleMenu->clear();
 }
 
-void MainWindow::clearModuleMenu (void)
+void MainWindow::changeWidgetMenuItem(QAction* action, const QString& text)
 {
-    moduleMenu->clear();
+  action->setText(text);
 }
 
-void MainWindow::changeModuleMenuItem (QAction *action, QString text)
+void MainWindow::removeWidgetMenuItem(QAction* action)
 {
-    action->setText(text);
+  const QList<QAction*> actionList = moduleMenu->actions();
+  if (!actionList.empty()) {
+    moduleMenu->removeAction(action);
+  }
 }
 
-void MainWindow::removeModuleMenuItem (QAction *action)
+QAction* MainWindow::createUtilMenuItem(const QString& label,
+                                        const QObject* handler,
+                                        const char* slot)
 {
-    QList<QAction *> actionList = moduleMenu->actions();
-    if(!actionList.empty())
-        moduleMenu->removeAction(action);
-}
-
-QAction* MainWindow::createUtilMenuItem(const QString &text, const QObject * receiver, const char *member)
-{
-    return utilMenu->addAction (text, receiver, member);
+  return utilMenu->addAction(label, handler, slot);
 }
 
 void MainWindow::createFileMenu()
 {
-    fileMenu = menuBar()->addMenu(tr("&File"));
-    fileMenu->addAction(load);
-    fileMenu->addAction(save);
-    fileMenu->addAction(reset);
-    fileMenu->addSeparator();
-    fileMenu->addAction(quit);
-    fileMenu->addSeparator();
-    connect(fileMenu, SIGNAL(triggered(QAction*)), this, SLOT(fileMenuActivated(QAction*)));
+  fileMenu = menuBar()->addMenu(tr("&File"));
+  fileMenu->addAction(load);
+  fileMenu->addAction(save);
+  fileMenu->addAction(reset);
+  fileMenu->addSeparator();
+  fileMenu->addAction(quit);
+  fileMenu->addSeparator();
+  connect(fileMenu,
+          SIGNAL(triggered(QAction*)),
+          this,
+          SLOT(fileMenuActivated(QAction*)));
 }
 
-void MainWindow::createModuleMenu()
+void MainWindow::createWidgetMenu()
 {
-    moduleMenu = menuBar()->addMenu(tr("&Modules"));
-    connect(moduleMenu, SIGNAL(triggered(QAction*)), this, SLOT(modulesMenuActivated(QAction*)));
+  moduleMenu = menuBar()->addMenu(tr("&Widgets"));
+  this->loadDynamicWidget = new QAction("Load Plugin", this);
+  moduleMenu->addAction(this->loadDynamicWidget);
+  connect(moduleMenu,
+          SIGNAL(triggered(QAction*)),
+          this,
+          SLOT(modulesMenuActivated(QAction*)));
 }
 
 void MainWindow::createUtilMenu()
 {
-    utilMenu = menuBar()->addMenu(tr("&Utilities"));
-    filtersSubMenu = utilMenu->addMenu(tr("&Filters"));
-    signalsSubMenu = utilMenu->addMenu(tr("&Signals"));
-    utilitiesSubMenu = utilMenu->addMenu(tr("&Utilities"));
-    connect(utilMenu, SIGNAL(triggered(QAction*)), this, SLOT(utilitiesMenuActivated(QAction*)));
+  utilMenu = menuBar()->addMenu(tr("&Utilities"));
+  filtersSubMenu = utilMenu->addMenu(tr("&Filters"));
+  signalsSubMenu = utilMenu->addMenu(tr("&Signals"));
+  utilitiesSubMenu = utilMenu->addMenu(tr("&Utilities"));
+  connect(utilMenu,
+          SIGNAL(triggered(QAction*)),
+          this,
+          SLOT(utilitiesMenuActivated(QAction*)));
 
-    QDir libsDir("/usr/local/lib/rtxi/");
-    if(!libsDir.exists())
-        return;
-
-    libsDir.setNameFilters(QStringList("*.so"));
-    for(int i = 0; i < libsDir.entryList().size(); i++)
-        {
-            utilItem = new QAction(libsDir.entryList().at(i), this);
-            if(libsDir.entryList().at(i).contains("analysis"))
-                utilitiesSubMenu->addAction(utilItem);
-            else if(libsDir.entryList().at(i).contains("sync"))
-                utilitiesSubMenu->addAction(utilItem);
-            else if(libsDir.entryList().at(i).contains("mimic"))
-                utilitiesSubMenu->addAction(utilItem);
-            else if(libsDir.entryList().at(i).contains("iir"))
-                filtersSubMenu->addAction(utilItem);
-            else if(libsDir.entryList().at(i).contains("fir"))
-                filtersSubMenu->addAction(utilItem);
-            else if(libsDir.entryList().at(i).contains("signal"))
-                signalsSubMenu->addAction(utilItem);
-            else if(libsDir.entryList().at(i).contains("noise"))
-                signalsSubMenu->addAction(utilItem);
-            else if(libsDir.entryList().at(i).contains("ttl"))
-                signalsSubMenu->addAction(utilItem);
-            else if(libsDir.entryList().at(i).contains("maker"))
-                signalsSubMenu->addAction(utilItem);
-        }
+  QDir libsDir = QCoreApplication::applicationDirPath() + QDir::separator()
+      + QString("rtxi_modules");
+  if (!libsDir.exists()) {
+    return;
+  }
+  libsDir.setNameFilters(QStringList("*.so"));
+  for (const auto& entryItem : libsDir.entryList()) {
+    utilItem = new QAction(entryItem, this);
+    if (entryItem.contains("analysis") || entryItem.contains("sync")
+        || entryItem.contains("mimic"))
+    {
+      utilitiesSubMenu->addAction(utilItem);
+    } else if (entryItem.contains("iir") || entryItem.contains("fir")) {
+      filtersSubMenu->addAction(utilItem);
+    } else if (entryItem.contains("signal") || entryItem.contains("noise")
+               || entryItem.contains("ttl") || entryItem.contains("maker"))
+    {
+      signalsSubMenu->addAction(utilItem);
+    } else {
+      delete utilItem;
+    }
+  }
 }
 
 void MainWindow::createSystemMenu()
 {
-    systemMenu = menuBar()->addMenu(tr("&System"));
+  this->systemMenu = menuBar()->addMenu(tr("&System"));
+  this->systemMenu->addAction(this->openRTBenchmarks);
+  this->systemMenu->addAction(this->openUserPrefs);
+  this->systemMenu->addAction(this->openControlPanel);
+  this->systemMenu->addAction(this->openConnector);
+  this->systemMenu->addAction(this->openOscilloscope);
+  this->systemMenu->addAction(this->openDataRecorder);
+  this->systemMenu->addAction(this->openRTXIWizard);
+  connect(systemMenu,
+          SIGNAL(triggered(QAction*)),
+          this,
+          SLOT(systemMenuActivated(QAction*)));
 }
 
 void MainWindow::createWindowsMenu()
 {
-    windowsMenu = menuBar()->addMenu(tr("&Windows"));
-    connect(windowsMenu,SIGNAL(aboutToShow(void)),this,SLOT(windowsMenuAboutToShow(void)));
+  windowsMenu = menuBar()->addMenu(tr("&Windows"));
+  connect(
+      windowsMenu, SIGNAL(aboutToShow()), this, SLOT(windowsMenuAboutToShow()));
 }
 
 void MainWindow::createHelpMenu()
 {
-    helpMenu = menuBar()->addMenu(tr("&Help"));
-    helpMenu->addSeparator();
-    helpMenu->addAction(artxi);
-    helpMenu->addAction(axeno);
-    helpMenu->addAction(aqt);
-    helpMenu->addSeparator();
-    helpMenu->addAction(adocs);
-    helpMenu->addAction(sub_issue);
+  this->helpMenu = menuBar()->addMenu(tr("&Help"));
+  this->helpMenu->addSeparator();
+  this->helpMenu->addAction(artxi);
+  this->helpMenu->addAction(axeno);
+  this->helpMenu->addAction(aqt);
+  this->helpMenu->addSeparator();
+  this->helpMenu->addAction(adocs);
+  this->helpMenu->addAction(sub_issue);
 }
 
 void MainWindow::createFileActions()
 {
-    load = new QAction(tr("&Load Workspace"), this);
-    load->setShortcuts(QKeySequence::Open);
-    load->setStatusTip(tr("Load a saved workspace"));
-    connect(load, SIGNAL(triggered()), this, SLOT(loadSettings()));
+  this->load = new QAction(tr("&Load Workspace"), this);
+  this->load->setShortcuts(QKeySequence::Open);
+  this->load->setStatusTip(tr("Load a saved workspace"));
+  connect(load, SIGNAL(triggered()), this, SLOT(loadSettings()));
 
-    save = new QAction(tr("&Save Workspace"), this);
-    save->setShortcuts(QKeySequence::Save);
-    save->setStatusTip(tr("Save current workspace"));
-    connect(save, SIGNAL(triggered()), this, SLOT(saveSettings()));
+  this->save = new QAction(tr("&Save Workspace"), this);
+  this->save->setShortcuts(QKeySequence::Save);
+  this->save->setStatusTip(tr("Save current workspace"));
+  connect(save, SIGNAL(triggered()), this, SLOT(saveSettings()));
 
-    reset = new QAction(tr("&Reset Workspace"), this);
-    reset->setStatusTip(tr("Reset to default RTXI workspace"));
-    connect(reset, SIGNAL(triggered()), this, SLOT(resetSettings()));
+  this->reset = new QAction(tr("&Reset Workspace"), this);
+  this->reset->setStatusTip(tr("Reset to default RTXI workspace"));
+  connect(reset, SIGNAL(triggered()), this, SLOT(resetSettings()));
 
-    quit = new QAction(tr("&Quit"), this);
-    quit->setShortcut(tr("Ctrl+Q"));
-    quit->setStatusTip(tr("Quit RTXI"));
-    connect(qApp, SIGNAL(aboutToQuit()), mdiArea, SLOT(closeAllSubWindows()));
-    connect(quit, SIGNAL(triggered()), this, SLOT(close()));
+  this->quit = new QAction(tr("&Quit"), this);
+  this->quit->setShortcut(tr("Ctrl+Q"));
+  this->quit->setStatusTip(tr("Quit RTXI"));
+  connect(QCoreApplication::instance(),
+          SIGNAL(aboutToQuit()),
+          mdiArea,
+          SLOT(closeAllSubWindows()));
+  connect(quit, SIGNAL(triggered()), this, SLOT(close()));
 }
 
-void MainWindow::createMdi(QMdiSubWindow *subWindow)
-{
-    mdiArea->addSubWindow(subWindow);
-}
+// void MainWindow::createMdi(QMdiSubWindow* subWindow)
+//{
+//   mdiArea->addSubWindow(subWindow);
+// }
 
 void MainWindow::createHelpActions()
 {
-    artxi = new QAction(tr("About &RTXI"),this);
-    connect(artxi, SIGNAL(triggered()), this, SLOT(about()));
+  artxi = new QAction(tr("About &RTXI"), this);
+  connect(artxi, SIGNAL(triggered()), this, SLOT(about()));
 
-    axeno = new QAction(tr("About &Xenomai"),this);
-    connect(axeno, SIGNAL(triggered()), this, SLOT(aboutXeno()));
+  axeno = new QAction(tr("About &Xenomai"), this);
+  connect(axeno, SIGNAL(triggered()), this, SLOT(aboutXeno()));
 
-    aqt = new QAction(tr("About &Qt"),this);
-    connect(aqt, SIGNAL(triggered()), this, SLOT(aboutQt()));
+  aqt = new QAction(tr("About &Qt"), this);
+  connect(aqt, SIGNAL(triggered()), this, SLOT(aboutQt()));
 
-    adocs = new QAction(tr("&Documentation"), this);
-    connect(adocs, SIGNAL(triggered()), this, SLOT(openDocs()));
+  adocs = new QAction(tr("&Documentation"), this);
+  connect(adocs, SIGNAL(triggered()), this, SLOT(openDocs()));
 
-    sub_issue = new QAction(tr("&Submit Issue"), this);
-    connect(sub_issue, SIGNAL(triggered()), this, SLOT(openSubIssue()));
+  sub_issue = new QAction(tr("&Submit Issue"), this);
+  connect(sub_issue, SIGNAL(triggered()), this, SLOT(openSubIssue()));
 }
 
-QAction* MainWindow::createSystemMenuItem (const QString &text, const QObject *receiver, const char *member)
+void MainWindow::createSystemActions()
 {
-    return systemMenu->addAction(text, receiver, member);
+  this->openRTBenchmarks = new QAction(
+      tr(std::string(PerformanceMeasurement::MODULE_NAME).c_str()), this);
+  this->openUserPrefs =
+      new QAction(tr(std::string(UserPrefs::MODULE_NAME).c_str()), this);
+  this->openControlPanel =
+      new QAction(tr(std::string(SystemControl::MODULE_NAME).c_str()), this);
+  this->openConnector =
+      new QAction(tr(std::string(Connector::MODULE_NAME).c_str()), this);
+  this->openOscilloscope =
+      new QAction(tr(std::string(Oscilloscope::MODULE_NAME).c_str()), this);
+  this->openDataRecorder =
+      new QAction(tr(std::string(DataRecorder::MODULE_NAME).c_str()), this);
+  this->openRTXIWizard =
+      new QAction(tr(std::string(RTXIWizard::MODULE_NAME).c_str()), this);
 }
 
-void MainWindow::about(void)
+void MainWindow::about()
 {
-    QMessageBox::about(this, "About RTXI", "RTXI Version " + QString(VERSION)
-                        +	"\n\nReleased under the GPLv3.\nSee www.rtxi.org for details.");
+  const std::string version_str = fmt::format(
+      "{}.{}.{}", RTXI_VERSION_MAJOR, RTXI_VERSION_MINOR, RTXI_VERSION_PATCH);
+  QMessageBox::about(
+      this,
+      "About RTXI",
+      QString("RTXI Version ") + QString(version_str.c_str())
+          + QString(
+              "\n\nReleased under the GPLv3.\nSee www.rtxi.org for details."));
 }
 
-void MainWindow::aboutQt (void)
+void MainWindow::aboutQt()
 {
-    QMessageBox::aboutQt(this);
+  QMessageBox::aboutQt(this);
 }
 
-void MainWindow::aboutXeno (void)
+void MainWindow::aboutXeno()
 {
-#if CONFIG_XENO_VERSION_MAJOR
-	FILE *fp;
-	char xeno_buff[8];
-	fp = fopen("/proc/xenomai/version","r");
-	fscanf(fp, "%s", xeno_buff);
-	fclose(fp);
-	QMessageBox::about(this, "About Xenomai", "Xenomai Version " + QString(xeno_buff));
-#else
-	QMessageBox::about(this, "About Xenomai", "Running POSIX (non-RT)");
-#endif
+  QMessageBox::about(
+      this, "About Xenomai", "Running POSIX (non-RT) real-time core");
 }
 
-void MainWindow::openDocs(void)
+void MainWindow::openDocs()
 {
-    QDesktopServices::openUrl(QUrl("http://rtxi.org/docs/", QUrl::TolerantMode));
+  QDesktopServices::openUrl(QUrl("http://rtxi.org/docs/", QUrl::TolerantMode));
 }
 
-void MainWindow::openSubIssue(void)
+void MainWindow::openSubIssue()
 {
-    QDesktopServices::openUrl(QUrl("https://github.com/rtxi/rtxi/issues", QUrl::TolerantMode));
+  QDesktopServices::openUrl(
+      QUrl("https://github.com/rtxi/rtxi/issues", QUrl::TolerantMode));
 }
 
 /*
  * Load MainWindow settings
  */
-void MainWindow::loadWindow(void)
+void MainWindow::loadWindow()
 {
-    QSettings userprefs;
-    userprefs.setPath (QSettings::NativeFormat, QSettings::SystemScope, "/usr/local/share/rtxi/");
-    userprefs.beginGroup("MainWindow");
-    restoreGeometry(userprefs.value("geometry", saveGeometry()).toByteArray());
-    move(userprefs.value("pos", pos()).toPoint());
-    resize(userprefs.value("size", size()).toSize());
-    if(userprefs.value("maximized", isMaximized()).toBool())
-        showMaximized();
-    userprefs.endGroup();
-    show();
+  QSettings userprefs;
+  userprefs.beginGroup("MainWindow");
+  restoreGeometry(userprefs.value("geometry", saveGeometry()).toByteArray());
+  move(userprefs.value("pos", pos()).toPoint());
+  resize(userprefs.value("size", size()).toSize());
+  if (userprefs.value("maximized", isMaximized()).toBool()) {
+    showMaximized();
+  }
+  userprefs.endGroup();
+  show();
 }
 
-void MainWindow::loadSettings (void)
+void MainWindow::loadSettings()
 {
-    QSettings userprefs;
-    userprefs.setPath (QSettings::NativeFormat, QSettings::SystemScope, "/usr/local/share/rtxi/");
+  const QSettings userprefs;
+  const QString env_var = QString::fromLocal8Bit(qgetenv("HOME"));
 
-    QString filename = QFileDialog::getOpenFileName(this,
-                       tr("Load saved workspace"), userprefs.value("/dirs/setfiles", getenv("HOME")).toString(), tr("Settings (*.set)"));
+  const QString filename = QFileDialog::getOpenFileName(
+      this,
+      tr("Load saved workspace"),
+      userprefs.value("/dirs/setfiles", env_var).toString(),
+      tr("Settings (*.set)"));
 
-    if (QFile(filename).exists())
-        {
-            systemMenu->clear();
-            mdiArea->closeAllSubWindows();
-            Settings::Manager::getInstance()->load(filename.toStdString());
-        }
-}
-
-void MainWindow::saveSettings(void)
-{
-    QSettings userprefs;
-    userprefs.setPath (QSettings::NativeFormat, QSettings::SystemScope, "/usr/local/share/rtxi/");
-
-    QString filename = QFileDialog::getSaveFileName(this,
-                       tr("Save current workspace"), userprefs.value("/dirs/setfiles", getenv("HOME")).toString(), tr("Settings (*.set)"));
-
-    if (!filename.isEmpty())
-        {
-            if (!filename.endsWith(".set"))
-                filename = filename+".set";
-            if (QFileInfo (filename).exists() && QMessageBox::warning(this,
-                    "File Exists", "Do you wish to overwrite " + filename + "?",
-                    QMessageBox::Yes | QMessageBox::Default,
-                    QMessageBox::No | QMessageBox::Escape) != QMessageBox::Yes)
-                {
-                    //DEBUG_MSG ("MainWindow::saveSettings : canceled overwrite\n");
-                    return;
-                }
-            Settings::Manager::getInstance()->save(filename.toStdString());
-        }
-}
-
-void MainWindow::resetSettings(void)
-{
+  if (QFile(filename).exists()) {
     systemMenu->clear();
     mdiArea->closeAllSubWindows();
-    Settings::Manager::getInstance()->load("/usr/local/share/rtxi/rtxi.conf");
+  }
 }
 
-void MainWindow::utilitiesMenuActivated(QAction *id)
+void MainWindow::saveSettings()
 {
-    Plugin::Manager::getInstance()->load(id->text());
+  QSettings userprefs;
+  userprefs.beginGroup("Workspaces");
+  auto* save_settings_dialog = new QInputDialog(this);
+  save_settings_dialog->setInputMode(QInputDialog::TextInput);
+  save_settings_dialog->setComboBoxEditable(true);
+  save_settings_dialog->setComboBoxItems(userprefs.childGroups());
+  save_settings_dialog->setLabelText("Profile");
+  save_settings_dialog->setOkButtonText("Save");
+  userprefs.endGroup();
+  save_settings_dialog->exec();
 }
 
-void MainWindow::windowsMenuAboutToShow(void)
+void MainWindow::resetSettings()
 {
-
-    // Clear previous entries
-    windowsMenu->clear();
-
-    // Add default options
-    windowsMenu->addAction(tr("Cascade"),mdiArea,SLOT(cascadeSubWindows()));
-    windowsMenu->addAction(tr("Tile"),mdiArea,SLOT(tileSubWindows()));
-    windowsMenu->addSeparator();
-
-    // Get list of open subwindows in Mdi Area
-    subWindows = mdiArea->subWindowList();
-
-    // Make sure it isn't empty
-    if(subWindows.isEmpty())
-        return;
-
-    // Create windows list based off of what's open
-    for(int i = 0; i < subWindows.size(); i++)
-        {
-            QAction *item = new QAction(subWindows.at(i)->widget()->windowTitle(), this);
-            windowsMenu->addAction(item);
-        }
-    connect(windowsMenu, SIGNAL(triggered(QAction*)), this, SLOT(windowsMenuActivated(QAction*)));
+  // systemMenu->clear();
+  // mdiArea->closeAllSubWindows();
+  // Settings::Manager::getInstance()->load("/usr/local/share/rtxi/rtxi.conf");
 }
 
-void MainWindow::windowsMenuActivated(QAction *id)
+void MainWindow::utilitiesMenuActivated(QAction* id)
 {
-
-    // Get list of open subwindows in Mdi Area
-    subWindows = mdiArea->subWindowList();
-
-    // Make sure it isn't empty
-    if(subWindows.isEmpty())
-        return;
-
-    for(uint16_t i = 0; i < subWindows.size(); i++)
-        if(subWindows.at(i)->widget()->windowTitle() == id->text())
-            mdiArea->setActiveSubWindow(subWindows.at(i));
+  this->loadWidget(QCoreApplication::applicationDirPath() + QDir::separator()
+                   + QString("rtxi_modules") + QDir::separator() + id->text());
 }
 
-void MainWindow::modulesMenuActivated(QAction *id)
+void MainWindow::loadWidget(const QString& module_name)
 {
-    // Annoying but the best way to do it is to tie an action to the entire menu
-    // so we have to tell it to ignore the first two modules
-    if(id->text().contains("Load Plugin"))
-        return;
+  Event::Object event(Event::Type::PLUGIN_INSERT_EVENT);
+  event.setParam("pluginName", std::any(module_name.toStdString()));
+  this->event_manager->postEvent(&event);
 
-    // Have to trim the first three characters before loading
-    // or else parser will include qstring formatting
-    Plugin::Manager::getInstance()->load(id->text().remove(0,3));
+  // If something goes wrong just give up
+  auto status = std::any_cast<std::string>(event.getParam("status"));
+  if (status == "failure") {
+    return;
+  }
+
+  auto create_rtxi_panel_func =
+      std::any_cast<Widgets::Panel* (*)(QMainWindow*, Event::Manager*)>(
+          event.getParam("createRTXIPanel"));
+  auto* rtxi_plugin_pointer =
+      std::any_cast<Widgets::Plugin*>(event.getParam("pluginPointer"));
+  auto* rtxi_panel_pointer = create_rtxi_panel_func(this, this->event_manager);
+  rtxi_plugin_pointer->attachPanel(rtxi_panel_pointer);
+  // finally plugins can also receive events so make sure to register them
+  this->event_manager->registerHandler(rtxi_plugin_pointer);
+
+  // show the panel please
+  rtxi_panel_pointer->show();
 }
 
-void MainWindow::fileMenuActivated(QAction *id)
+void MainWindow::systemMenuActivated(QAction* id)
 {
-    // Annoying but the best way to do it is to tie an action to the entire menu
-    // so we have to tell it to ignore the first three items
-    if(id->text().contains("Load Workspace") ||
-            id->text().contains("Save Workspace") ||
-            id->text().contains("Reset Workspace") ||
-            id->text().contains("Quit"))
-        return;
-
-    // Have to trim the first three characters before loading
-    // or else parser will include qstring formatting
-    systemMenu->clear();
-    mdiArea->closeAllSubWindows();
-    Settings::Manager::getInstance()->load(id->text().remove(0,3).toStdString());
+  this->loadWidget(id->text());
 }
 
-void MainWindow::closeEvent(QCloseEvent *)
+void MainWindow::windowsMenuAboutToShow()
 {
-    /*
-     * Save MainWindow settings
-     */
-    QSettings userprefs;
-    userprefs.setPath (QSettings::NativeFormat, QSettings::SystemScope, "/usr/local/share/rtxi/");
-    userprefs.beginGroup("MainWindow");
-    userprefs.setValue("geometry", saveGeometry());
-    userprefs.setValue("maximized", isMaximized());
-    if(!isMaximized())
-        {
-            userprefs.setValue("pos", pos());
-            userprefs.setValue("size", size());
-        }
-    userprefs.endGroup();
+  // Clear previous entries
+  windowsMenu->clear();
+
+  // Add default options
+  windowsMenu->addAction(tr("Cascade"), mdiArea, SLOT(cascadeSubWindows()));
+  windowsMenu->addAction(tr("Tile"), mdiArea, SLOT(tileSubWindows()));
+  windowsMenu->addSeparator();
+
+  // Get list of open subwindows in Mdi Area
+  subWindows = mdiArea->subWindowList();
+
+  // Make sure it isn't empty
+  if (subWindows.isEmpty()) {
+    return;
+  }
+  // Create windows list based off of what's open
+  for (auto* subwin : subWindows) {
+    // auto* item = new QAction(subwin->widget()->windowTitle(), this);
+    windowsMenu->addAction(new QAction(subwin->widget()->windowTitle(), this));
+  }
+  connect(windowsMenu,
+          SIGNAL(triggered(QAction*)),
+          this,
+          SLOT(windowsMenuActivated(QAction*)));
 }
 
-static Mutex mutex;
-MainWindow * MainWindow::instance = 0;
-
-MainWindow * MainWindow::getInstance (void)
+void MainWindow::windowsMenuActivated(QAction* id)
 {
-    if (instance)
-        return instance;
+  // Get list of open subwindows in Mdi Area
+  subWindows = mdiArea->subWindowList();
 
-    /*************************************************************************
-     * Seems like alot of hoops to jump through, but static allocation isn't *
-     *   thread-safe. So effort must be taken to ensure mutual exclusion.    *
-     *************************************************************************/
+  // Make sure it isn't empty
+  if (subWindows.isEmpty()) {
+    return;
+  }
+  for (QMdiSubWindow* subwindow : this->subWindows) {
+    if (subwindow->widget()->windowTitle() == id->text()) {
+      mdiArea->setActiveSubWindow(subwindow);
+    }
+  }
+}
 
-    Mutex::Locker lock (&::mutex);
-    if (!instance)
-        {
-            static MainWindow mainwindow;
-            instance = &mainwindow;
-        }
-    return instance;
+void MainWindow::modulesMenuActivated(QAction* /*unused*/)
+{
+  const QString filename = QFileDialog::getOpenFileName(
+      this,
+      tr("Load Plugin"),
+      QCoreApplication::applicationDirPath() + QDir::separator()
+          + QString("rtxi_modules"),
+      tr("Plugins (*.so);;All (*.*)"));
+  if (!filename.isNull()) {
+    this->loadWidget(filename);
+  }
+}
+
+void MainWindow::fileMenuActivated(QAction* id)
+{
+  // Annoying but the best way to do it is to tie an action to the entire menu
+  // so we have to tell it to ignore the first three items
+  if (id->text().contains("Load Workspace")
+      || id->text().contains("Save Workspace")
+      || id->text().contains("Reset Workspace") || id->text().contains("Quit"))
+  {
+    return;
+  }
+
+  // Have to trim the first three characters before loading
+  // or else parser will include qstring formatting
+  systemMenu->clear();
+  mdiArea->closeAllSubWindows();
+  // Settings::Manager::getInstance()->load(id->text().remove(0,
+  // 3).toStdString());
+}
+
+void MainWindow::closeEvent(QCloseEvent* /*event*/)
+{
+  /*
+   * Save MainWindow settings
+   */
+  QSettings userprefs;
+  userprefs.beginGroup("MainWindow");
+  userprefs.setValue("geometry", saveGeometry());
+  userprefs.setValue("maximized", isMaximized());
+  if (!isMaximized()) {
+    userprefs.setValue("pos", pos());
+    userprefs.setValue("size", size());
+  }
+  userprefs.endGroup();
 }

@@ -1,172 +1,64 @@
-/*
- 	 The Real-Time eXperiment Interface (RTXI)
-	 Copyright (C) 2011 Georgia Institute of Technology, University of Utah, Weill Cornell Medical College
-
-	 This program is free software: you can redistribute it and/or modify
-	 it under the terms of the GNU General Public License as published by
-	 the Free Software Foundation, either version 3 of the License, or
-	 (at your option) any later version.
-
-	 This program is distributed in the hope that it will be useful,
-	 but WITHOUT ANY WARRANTY; without even the implied warranty of
-	 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	 GNU General Public License for more details.
-
-	 You should have received a copy of the GNU General Public License
-	 along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
- */
-
 #include <QApplication>
-#include <QtWidgets>
-
 #include <iostream>
-#include <cstdlib>
-#include <dirent.h>
-#include <errno.h>
-#include <getopt.h>
+
+#include <boost/stacktrace.hpp>
 #include <signal.h>
-#include <string>
-#include <unistd.h>
-#include <ctype.h>
-#include <daq.h>
-#include <debug.h>
-#include <main_window.h>
-#include <plugin.h>
+#include <string.h>
 
-#if XENOMAI
-#include <rtdk.h>
-#endif
+#include "debug.hpp"
+#include "main_window.hpp"
+#include "rt.hpp"
+#include "rtxiConfig.h"
+#include "widgets.hpp"
+#include "workspace.hpp"
 
-static pid_t parentThread;
-
-struct cli_options_t
+namespace
 {
-    std::string config_file;
-    std::string plugins_path;
-};
-
-static bool parse_cli_options(int,char *[],cli_options_t *);
-static void signal_handler(int);
-
-int main(int argc,char *argv[])
+void signal_handler(int signum)
 {
-    int retval = 0;
-
-#if XENOMAI
-    /* Initialize rtdk */
-    rt_print_auto_init(1);
-#endif
-
-    /* Try to Exit Cleanly on Signals */
-    parentThread = getpid();
-    signal(SIGINT,signal_handler);
-    signal(SIGABRT,signal_handler);
-    signal(SIGSEGV,signal_handler);
-
-    /* Handle Command-Line Options */
-    cli_options_t cli_options;
-    if (!parse_cli_options(argc,argv,&cli_options))
-        return -EINVAL;
-
-    /* Find Configuration File */
-    std::string config_file;
-    if (cli_options.config_file.length())
-        config_file = cli_options.config_file;
-    else if (getenv("RTXI_CONF"))
-        config_file = getenv("RTXI_CONF");
-    else
-        config_file = "/usr/local/share/rtxi/rtxi.conf";
-
-    /************************************************************
-     * Create Main System Components                            *
-     *                                                          *
-     *  These need to be created early because they should have *
-     *  Settings::IDs of 0 and 1.                               *
-     ************************************************************/
-
-    /* Create GUI Objects */
-    QApplication::setDesktopSettingsAware(false);
-    QApplication *app = new QApplication(argc,argv);
-    app->connect(app,SIGNAL(lastWindowClosed()),app,SLOT(quit()));
-    MainWindow::getInstance()->loadWindow();;
-
-    RT::System::getInstance();
-    IO::Connector::getInstance();
-
-    /* Bootstrap the System */
-    Settings::Manager::getInstance()->load(config_file);
-    retval = app->exec();
-
-    Plugin::Manager::getInstance()->unloadAll();
-    return retval;
+  // NOLINTNEXTLINE
+  ERROR_MSG("signal_handler : signal type {} received\n", ::strsignal(signum));
+  std::cerr << boost::stacktrace::stacktrace();
+  exit(-1);  // NOLINT
 }
+}  // namespace
 
-static void error_msg(const std::string &self)
+int main(int argc, char* argv[])
 {
-    std::cout << "Try \'" << self << " --help\' for more information.\n";
-}
+  if (signal(SIGINT, signal_handler) == SIG_ERR) {
+    ERROR_MSG("MAIN: Unable to set SIGINT signal handler");
+    return -1;
+  }
+  if (signal(SIGABRT, signal_handler) == SIG_ERR) {
+    ERROR_MSG("MAIN: Unable to set SIGABRT signal handler");
+    return -1;
+  }
+  if (signal(SIGSEGV, signal_handler) == SIG_ERR) {
+    ERROR_MSG("MAIN: Unable to set SIGSEGV signal handler");
+    return -1;
+  }
 
-static void help_msg(const std::string &self)
-{
-    std::cout << "Usage: " << self << " [options]\n";
-    std::cout << "  where options include:\n";
-    std::cout << "    --help,         -h  - Displays this message\n";
-    std::cout << "    --config-file,  -c  - Pick a custom configuration file\n";
-    std::cout << "    --plugins-path, -p  - Specify a plugins directory\n";
-}
+  std::cout << "Welcome to RTXI Version ";
+  std::cout << RTXI_VERSION_MAJOR << ".";
+  std::cout << RTXI_VERSION_MINOR << ".";
+  std::cout << RTXI_VERSION_PATCH << "\n";
 
-static bool parse_cli_options(int argc,char *argv[],cli_options_t *cli_options)
-{
-    int opt, index;
+  // Initializing core classes
+  auto event_manager = std::make_unique<Event::Manager>();
+  auto rt_connector = std::make_unique<RT::Connector>();
+  auto rt_system =
+      std::make_unique<RT::System>(event_manager.get(), rt_connector.get());
+  rt_system->createTelemitryProcessor();
+  // Initializing GUI
+  // QApplication::setDesktopSettingsAware(false);
+  auto* app = new QApplication(argc, argv);
+  QApplication::connect(app, SIGNAL(lastWindowClosed()), app, SLOT(quit()));
 
-    struct option options[] =
-    {
-        { "help",        no_argument,       0, 'h' },
-        { "config-file", required_argument, 0, 'c' },
-        { "plugins-path", required_argument, 0, 'p' },
-        { "models-path",  required_argument, 0, 'm' },
-        { 0,0,0,0 }
-    };
-
-    for (;;)
-        {
-            opt = getopt_long(argc,argv,"hc:p:m:",options,&index);
-
-            if (opt < 0) break;
-
-            switch (opt)
-                {
-                case 'c':
-                    cli_options->config_file = optarg;
-                    break;
-                case 'h':
-                    help_msg(argv[0]);
-                    return false;
-                case 'p':
-                    cli_options->plugins_path = optarg;
-                    break;
-                default:
-                    error_msg(argv[0]);
-                    return false;
-                }
-        }
-
-    return true;
-}
-
-static void signal_handler(int signum)
-{
-    static int count = 0;
-
-    /* Only handler handle signals in the parent */
-    if (getpid() != parentThread) return;
-
-    ERROR_MSG("signal_handler : signal type %i received\n", signum);
-    PRINT_BACKTRACE();
-
-    if (count++) _exit(-EFAULT);
-
-    //DEBUG_MSG("signal_handler : finished\n");
-    exit(0);
+  auto* rtxi_window = new MainWindow(event_manager.get());
+  auto mod_manager = std::make_unique<Workspace::Manager>(event_manager.get());
+  rtxi_window->loadWindow();
+  const int retval = QApplication::exec();
+  delete rtxi_window;
+  delete app;
+  return retval;
 }

@@ -16,16 +16,12 @@
  * Ave, Cambridge, MA 02139, USA.
  */
 
-#include <iostream>
 #include <math.h>
 
 #include "rtmath.h"
 
-using namespace std;
-
-RealTimeMath::RealTimeMath()
+RealTimeMath::RealTimeMath() : powFast(new PowFast(18))
 {
-  powFast = new PowFast(18);
 }
 
 RealTimeMath::~RealTimeMath()
@@ -33,16 +29,16 @@ RealTimeMath::~RealTimeMath()
   delete powFast;
 }
 
-double
-RealTimeMath::fastEXP(double x)
+double RealTimeMath::fastEXP(double x)
 {
   if (x > 88.5 ||
       x < -87) { // Overflow prevention due to powFast library's use of float
 
     // Close to 0 shortcut: If x < -746, math.h exp(x) function returns 0 due to
     // truncation
-    if (x < -746)
+    if (x < -746) {
       return 0;
+    }
 
     // Infinity shortcut: If x > 710, math.h exp(x) returns infinity
     if (x > 710) {
@@ -63,20 +59,19 @@ RealTimeMath::fastEXP(double x)
     }
 
     for (n = 1; n <= powCount; n++) {
-      powAns = powAns * powFast->e(powExp);
+      powAns = powAns * powFast->e(static_cast<float>(powExp));
     }
 
     return powAns;
   } // end overflow prevention
 
-  else // call powFast e^x function
-    return powFast->e(x);
+  // call powFast e^x function
+  return powFast->e(static_cast<float>(x));
 }
 
 // POWER OPTIMIZATION
 // x^y = e^(y*ln(x))
-double
-RealTimeMath::fastPOW(double x, double y)
+double RealTimeMath::fastPOW(double x, double y)
 {
   return fastEXP(y * log(x)); // Pow function using fastEXP
 }

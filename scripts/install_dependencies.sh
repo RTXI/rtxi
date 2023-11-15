@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/bin/bash
 set -eu
 
 #
@@ -21,6 +21,7 @@ set -eu
 # this program. If not, see <http://www.gnu.org/licenses/>.
 #
 # Created by Yogi Patel <yapatel@gatech.edu> 2014.1.31
+# Modified by Ivan Valerio <valerioif@gmail.com> 2023.09.20
 #
 
 if ! id | grep -q root; then
@@ -28,59 +29,16 @@ if ! id | grep -q root; then
 	exit 1
 fi
 
-# Set directory variable for compilation
-DIR=$PWD
-ROOT=${DIR}/../
-DEPS=${ROOT}/deps
-
-# Some easy to use defines
-QWT_VERSION=6.1.3
-
 # Install RTXI dependencies
 echo "-----> Installing dependencies..."
 apt-get update
 apt-get -y upgrade
 apt-get -y install \
-	autotools-dev automake libtool kernel-package gcc g++ gdb fakeroot \
+	build-essential qtbase5-dev qtbase5-dev-tools \
+	libqwt-qt5-dev libqt5svg5-dev libhdf5-dev \
+	libgsl-dev libboost-dev libgtest-dev libgmock-dev libfmt-dev vim lshw stress \
+	binutils-dev zstd git cmake libboost-stacktrace-dev\
 	crash kexec-tools makedumpfile kernel-wedge libncurses5-dev libelf-dev \
-	binutils-dev libgsl0-dev libboost-dev libgtest-dev libgmock-dev git vim lshw stress \
-	libqt5svg5-dev libqt5opengl5 libqt5gui5 libqt5core5a libqt5xml5 \
-	qt5-default qttools5-dev-tools qttools5-dev libhdf5-dev libgit2-dev libqwt-qt5-dev \
-	libmarkdown2-dev cmake flex bison libssl-dev pkgconf autoconf-archive
-#apt-get -y build-dep linux
+	flex bison pkgconf python3-pip ninja-build dwarves
 echo "-----> Package dependencies installed."
-
-# Install libgit2 from source
-# echo "-----> Installing libgit2..."
-# cd $DEPS
-# if [ ! -d "libgit2" ]; then
-# 	git clone https://github.com/libgit2/libgit2.git && cd libgit2
-# 	mkdir build && cd build
-# 	cmake .. -DCURL=OFF
-# 	cmake --build . --target install
-# 	ldconfig
-# else
-# 	cd libgit2
-# 	rm -rf build && mkdir build && cd build
-# 	cmake .. -DCURL=OFF
-# 	cmake --build . --target install
-# 	ldconfig
-# fi
-# echo "-----> libgit2 installed."
-
-# Install Qwt package if available in repos, compile if not.
-# echo "-----> Installing qwt..."
-# if [ $(apt-cache show libqwt-qt5-dev) > /dev/null ]; then 
-# 	apt-get -y install libqwt-qt5-dev
-# else 
-# 	cd ${DEPS}
-# 	tar xf qwt-${QWT_VERSION}.tar.bz2
-# 	cd qwt-${QWT_VERSION}
-# 	qmake qwt.pro
-# 	make -sj`nproc`
-# 	make install
-# 	ldconfig
-# fi 
-# echo "-----> Qwt installed."
-
 echo "-----> Done."
