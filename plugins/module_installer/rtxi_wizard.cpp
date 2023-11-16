@@ -16,6 +16,7 @@
          along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <QtGlobal>
 #include <QCoreApplication>
 #include <QDir>
 #include <QFileInfo>
@@ -213,7 +214,11 @@ void RTXIWizard::Panel::getReadme()
         readmeNetworkReply, SIGNAL(finished()), this, SLOT(parseReadme()));
   } else {
     // Disable buttons until all logic is done.
+#if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
+    readmeWindow->setText(modules[parent->currentItem()->text()].readme);
+#else
     readmeWindow->setMarkdown(modules[parent->currentItem()->text()].readme);
+#endif
     readmeWindow->show();
     cloneButton->setEnabled(true);
     availableListWidget->setDisabled(false);
@@ -227,7 +232,11 @@ void RTXIWizard::Panel::parseReadme()
 {
   const QByteArray network_reply_data = readmeNetworkReply->readAll();
   const QString markdown_data = QString(network_reply_data.constData());
+#if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
+  this->readmeWindow->setText(markdown_data);
+#else
   this->readmeWindow->setMarkdown(markdown_data);
+#endif
 
   switch (button_mode) {
     case DOWNLOAD:
