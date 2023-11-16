@@ -37,7 +37,7 @@ set(XENOMAI_ROOT_DIR "/usr/xenomai")
 # development packages (conan). This should not be used in Release mode. 
 # This variable is available in rtxiConfig.h header
 set(RTXI_CMAKE_SCRIPTS "")
-if(rtxi_DEVELOPER_MODE)
+if(rtxi_DEVELOPER_MODE AND DEFINED CMAKE_TOOLCHAIN_FILE)
 set(RTXI_CMAKE_SCRIPTS "${CMAKE_CURRENT_SOURCE_DIR}/conan")
 endif()
 
