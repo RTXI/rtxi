@@ -37,7 +37,7 @@ int DLL::Loader::load(const char* library)
     return 0;
   }
 
-  void* handle = ::dlopen(library, RTLD_GLOBAL | RTLD_NOW);
+  void* handle = ::dlopen(library, RTLD_LOCAL | RTLD_NOW);
   if (handle == nullptr) {
     ERROR_MSG("DLL::Loader::load : Unable to load library {}", library);
     // NOLINTNEXTLINE
