@@ -10,11 +10,8 @@ project(
     LANGUAGES C CXX
 )
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# --- Some installation shenanigans
 # use, i.e. don't skip the full RPATH for the build tree
 set(CMAKE_SKIP_BUILD_RPATH FALSE)
  
@@ -42,7 +39,6 @@ set(XENOMAI_ROOT_DIR "/usr/xenomai")
 # This variable is available in rtxiConfig.h header
 set(RTXI_CMAKE_SCRIPTS "")
 if(rtxi_DEVELOPER_MODE AND DEFINED CMAKE_TOOLCHAIN_FILE)
-set(RTXI_CMAKE_SCRIPTS "${CMAKE_CURRENT_SOURCE_DIR}/conan")
 endif()
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/scripts/cmake)
