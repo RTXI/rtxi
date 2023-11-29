@@ -16,7 +16,6 @@
          along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <QtGlobal>
 #include <QCoreApplication>
 #include <QDir>
 #include <QFileInfo>
@@ -25,6 +24,7 @@
 #include <QJsonObject>
 #include <QMessageBox>
 #include <QProcess>
+#include <QtGlobal>
 #include <iostream>
 
 #include "rtxi_wizard.hpp"
