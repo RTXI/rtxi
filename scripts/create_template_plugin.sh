@@ -211,7 +211,7 @@ project(
 # These lines help with third-party tooling integration
 set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set(RTXI_CMAKE_SCRIPTS "" CACHE PATH "In development mode, RTXI uses this to expose conan depenendencies")
+set(RTXI_CMAKE_SCRIPTS "" CACHE PATH "In development mode, RTXI uses this to expose conan dependencies")
 set(CMAKE_PREFIX_PATH "\${RTXI_CMAKE_SCRIPTS}")
 set(RTXI_PACKAGE_PATH "/usr/local/" CACHE PATH "Path hint to RTXI package information")
 set(CMAKE_INSTALL_RPATH "\${RTXI_PACKAGE_PATH}/lib")
