@@ -219,8 +219,6 @@ void RTXIWizard::Panel::getReadme()
 #else
     readmeWindow->setMarkdown(modules[parent->currentItem()->text()].readme);
 #endif
-    readmeWindow->show();
-    cloneButton->setEnabled(true);
     availableListWidget->setDisabled(false);
     installedListWidget->setDisabled(false);
   }
