@@ -165,7 +165,7 @@ Widgets::Panel::Panel(const std::string& mod_name,
   auto* central_widget = dynamic_cast<QMdiArea*>(mw->centralWidget());
   this->m_subwindow = central_widget->addSubWindow(this);
   this->m_subwindow->setWindowIcon(
-      QIcon("/usr/local/share/rtxi/RTXI-widget-icon.png"));
+      QIcon("/usr/share/rtxi/RTXI-widget-icon.png"));
   this->setAttribute(Qt::WA_DeleteOnClose);
   this->setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint
                        | Qt::WindowMinimizeButtonHint);
