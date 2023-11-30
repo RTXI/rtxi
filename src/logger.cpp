@@ -49,13 +49,13 @@ void eventLogger::log(Event::Object* event)
             event->getParam("connection"));
         this->ss << "\t CONNECTION -- {";
         this->ss << "source: " << connection.src->getName();
-        this->ss << "type: "
+        this->ss << " type: "
                  << (connection.src_port_type == IO::OUTPUT ? "Output"
                                                             : "Input");
-        this->ss << "port: " << connection.src_port;
+        this->ss << " port: " << connection.src_port;
         this->ss << "} <==> {";
         this->ss << "destination: " << connection.dest->getName();
-        this->ss << "port; " << connection.dest_port << "}";
+        this->ss << " port: " << connection.dest_port << "}";
         break;
       }
       case Event::Type::PLUGIN_INSERT_EVENT:

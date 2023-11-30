@@ -4,13 +4,14 @@ include(cmake/prelude.cmake)
 
 project(
     "rtxi"
-    VERSION 3.0.0
+    VERSION 3.0.1
     DESCRIPTION "Real-Time eXperiment Interface"
     HOMEPAGE_URL "http://rtxi.org/"
     LANGUAGES C CXX
 )
 
-# --- Some installation shenanigans
+set(CMAKE_CXX_EXTENSIONS OFF)
+
 # use, i.e. don't skip the full RPATH for the build tree
 set(CMAKE_SKIP_BUILD_RPATH FALSE)
  
@@ -37,8 +38,7 @@ set(XENOMAI_ROOT_DIR "/usr/xenomai")
 # development packages (conan). This should not be used in Release mode. 
 # This variable is available in rtxiConfig.h header
 set(RTXI_CMAKE_SCRIPTS "")
-if(rtxi_DEVELOPER_MODE)
-set(RTXI_CMAKE_SCRIPTS "${CMAKE_CURRENT_SOURCE_DIR}/conan")
+if(rtxi_DEVELOPER_MODE AND DEFINED CMAKE_TOOLCHAIN_FILE)
 endif()
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/scripts/cmake)

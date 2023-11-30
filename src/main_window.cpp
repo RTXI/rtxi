@@ -57,7 +57,7 @@ MainWindow::MainWindow(Event::Manager* ev_manager)
 
   /* Initialize Window Settings */
   setWindowTitle("RTXI - Real-time eXperimental Interface");
-  // setWindowIcon(QIcon("/usr/local/share/rtxi/RTXI-icon.png"));
+  setWindowIcon(QIcon("/usr/share/rtxi/RTXI-icon.png"));
 
   /* Set Qt Settings Information */
   QApplication::setOrganizationName("RTXI");

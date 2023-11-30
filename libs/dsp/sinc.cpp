@@ -5,6 +5,7 @@
 #include "sinc.h"
 #include <math.h>
 #include <stdlib.h>
+#include <limits>
 
 double
 sinc(double x)
