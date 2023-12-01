@@ -35,7 +35,10 @@ echo "Description: "
 read PLUGIN_DESCRIPTION
 
 OUTPUT_DIR=${STARTING_DIR}/${PLUGIN_NAME}
-mkdir ${OUTPUT_DIR} && cd ${OUTPUT_DIR}
+if [ -d "${PLUGIN_NAME}" ]; then
+    mkdir ${OUTPUT_DIR}
+fi
+cd ${OUTPUT_DIR}
 
 cat > widget.hpp << EOF
 
@@ -65,7 +68,7 @@ inline  std::vector<Widgets::Variable::Info> get_default_vars()
        "First Parameter Name",
        "First Parameter Description",     
        Widgets::Variable::INT_PARAMETER,
-       0},
+       int64_t{0}},
       {PARAMETER::SECOND_PARAMETER,
        "Second Parameter Name",
        "Second Parameter Description",
@@ -75,7 +78,7 @@ inline  std::vector<Widgets::Variable::Info> get_default_vars()
        "Third Parameter Name",
        "Third Parameter Description",
        Widgets::Variable::UINT_PARAMETER,
-       1}
+       uint64_t{1}}
   };
 }
 
@@ -198,7 +201,7 @@ Widgets::FactoryMethods* getFactories()
 EOF
 
 cat > CMakeLists.txt << EOF
-cmake_minimum_required(VERSION 3.18)
+cmake_minimum_required(VERSION 3.14)
 
 project(
     ${PLUGIN_NAME}
