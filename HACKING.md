@@ -6,6 +6,30 @@ potential contributor.
 If you plan to contribute, please read the [CONTRIBUTING](CONTRIBUTING.md)
 guide.
 
+## Prerequisite
+
+In order to develop and mantain RTXI under Ubuntu you will need the following:
+
+1. **cmake** >= 3.19
+2. **clang-tidy** >= 12
+3. **clang-format** >= 14
+4. **conan** (optional) >= 2.0
+5. **codespell** >= 2.0
+
+Executables like codespell and clang-format can be obtained through python's
+package manager pip, while other like cmake need apt or snap package managers
+to work in older systems (Ubuntu 20.04 and older). Your milage may vary in 
+other plaforms.
+
+Presets were added for cmake 3.19 so it makes sense to make this a strict
+requirement when developing RTXI, however this is not neccessary for consumers
+as they won't need to use presets and therefore can get away with older versions.
+
+Development with the conan package manager can be fickle, especially since their
+update to version 2. Make sure to avoid installing system wide dependencies that will
+be used by RTXI as this may conflict with conan installed packages. As of 12/4/23
+this is still a problem.
+
 ## Developer mode
 
 Build system targets that are only useful for developers of this project are
@@ -35,7 +59,7 @@ the project:
   "version": 2,
   "cmakeMinimumRequired": {
     "major": 3,
-    "minor": 14,
+    "minor": 19,
     "patch": 0
   },
   "configurePresets": [
@@ -78,7 +102,7 @@ can see what these correspond to in the
 > fully support other platforms. In the future, RTXI will be installable in 
 > Windows and Mac, but only their non-realtime versions. This could change however
 > if there are real-time options available for those platforms. Until then, the
-> only fully supported platform is linux.
+> only fully supported platform is **Linux**.
 
 `CMakeUserPresets.json` is also the perfect place in which you can put all
 sorts of things that you would otherwise want to pass to the configure command
@@ -115,7 +139,8 @@ but can be easily added back by editing presets and inheriting the conan preset.
 
 > **Note**
 > Make sure to also enable conan toolchains and settings under the Github workflows
-> for support sanitizer and testing support.
+> for support sanitizer and testing support. Of course do this once conan supporort
+> improves.
 
 [conan]: https://conan.io/
 [profile]: https://docs.conan.io/2/reference/config_files/profiles.html

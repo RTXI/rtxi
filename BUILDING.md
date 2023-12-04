@@ -96,7 +96,7 @@ find_package(rtxi REQUIRED)
 RTXI has the following components provided:
 1.**rtxi** : General RTXI library containing Widget class definitions
 2.**xfifo** : Implementation of realtime and non-realtime message passing structure
-3.**rtos** : A Platform Abstraction Layer (PAL) where RT::OS namespace lives
+3.**rtpal** : A Platform Abstraction Layer (PAL) where RT::OS namespace lives
 4.**dlplugin** : Plugin loading and unloading facilities
 5.**rtdsp** : Realtime digital signals processing library internal to RTXI
 6.**rtgen** : Signal and Filter generation library
