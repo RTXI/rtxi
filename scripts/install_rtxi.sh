@@ -56,14 +56,14 @@ mkdir ${MODS}
 cd ${MODS}
 
 # git clone https://github.com/RTXI/analysis-module.git
-# git clone https://github.com/RTXI/iir-filter.git
-# git clone https://github.com/RTXI/fir-window.git
+git clone https://github.com/RTXI/iir-filter.git
+git clone https://github.com/RTXI/fir-window.git
 # git clone https://github.com/RTXI/sync.git
-# git clone https://github.com/RTXI/mimic-signal.git
+git clone https://github.com/RTXI/mimic-signal.git
 git clone https://github.com/RTXI/signal-generator.git
 # git clone https://github.com/RTXI/ttl-pulses.git
-# git clone https://github.com/RTXI/wave-maker.git
-# git clone https://github.com/RTXI/noise-generator.git
+git clone https://github.com/RTXI/wave-maker.git
+git clone https://github.com/RTXI/noise-generator.git
 
 for dir in ${MODS}/*; do
 	if [ -d "$dir" ]; then
