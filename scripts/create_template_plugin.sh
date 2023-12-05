@@ -35,7 +35,7 @@ echo "Description: "
 read PLUGIN_DESCRIPTION
 
 OUTPUT_DIR=${STARTING_DIR}/${PLUGIN_NAME}
-if [ -d "${PLUGIN_NAME}" ]; then
+if [ ! -d "${OUTPUT_DIR}" ]; then
     mkdir ${OUTPUT_DIR}
 fi
 cd ${OUTPUT_DIR}
