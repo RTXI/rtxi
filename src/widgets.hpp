@@ -334,7 +334,7 @@ public slots:
   virtual void refresh();
 
   /*!
-   * Function that calls DefaultGUIModel::update with the MODIFY flag
+   * Function that calls update_state with the MODIFY flag
    */
   virtual void modify();
 
@@ -353,15 +353,6 @@ public slots:
   virtual void update_state(RT::State::state_t flag);
 
 protected:
-  /*!
-   * Get the value of the parameter in the GUI, and update the value
-   *   within the Workspace.
-   *
-   * \param name The parameter's name.
-   * \return The value of the parameter.
-   */
-  QString getParameter(const QString& var_name);
-
   /*!
    * Set the value of double parameter within the Workspace and GUI.
    *

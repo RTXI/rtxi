@@ -290,7 +290,6 @@ void Widgets::Panel::exit()
   event.setParam("pluginPointer",
                  std::any(static_cast<Widgets::Plugin*>(this->hostPlugin)));
   this->event_manager->postEvent(&event);
-  // this->m_subwindow->close();
 }
 
 void Widgets::Panel::refresh()
@@ -331,7 +330,7 @@ void Widgets::Panel::refresh()
     }
   }
 
-  // Make sure we actually have a pauseButton object (default constructed)
+  // Make sure we actually have a pauseButton object (default constructed with createGUI)
   if (this->pauseButton != nullptr) {
     pauseButton->setChecked(!(this->hostPlugin->getActive()));
   }
@@ -405,7 +404,6 @@ void Widgets::Panel::setParameter(const QString& var_name, double value)
     n->second.str_value = n->second.edit->text();
     auto param_id = static_cast<Widgets::Variable::Id>(n->second.info.id);
     this->hostPlugin->setComponentParameter<double>(param_id, value);
-    // setValue(n->second.index, n->second.edit->text().toDouble());
   }
 }
 
@@ -419,7 +417,6 @@ void Widgets::Panel::setParameter(const QString& var_name, int value)
     n->second.str_value = n->second.edit->text();
     auto param_id = static_cast<Widgets::Variable::Id>(n->second.info.id);
     this->hostPlugin->setComponentParameter<int>(param_id, value);
-    // setValue(n->second.index, n->second.edit->text().toDouble());
   }
 }
 
@@ -433,7 +430,6 @@ void Widgets::Panel::setParameter(const QString& var_name, uint64_t value)
     n->second.str_value = n->second.edit->text();
     auto param_id = static_cast<Widgets::Variable::Id>(n->second.info.id);
     this->hostPlugin->setComponentParameter<uint64_t>(param_id, value);
-    // setValue(n->second.index, n->second.edit->text().toDouble());
   }
 }
 
@@ -442,11 +438,7 @@ void Widgets::Panel::pause(bool p)
   if (pauseButton->isChecked() != p) {
     pauseButton->setDown(p);
   }
-  // const int result = this->hostPlugin->setActive(!p);
-  // if (result != 0) {
-  //   ERROR_MSG("Unable to pause/Unpause Plugin {} ", this->getName());
-  //   return;
-  // }
+  
   if (p) {
     this->update_state(RT::State::PAUSE);
   } else {
