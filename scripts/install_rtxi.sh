@@ -51,7 +51,7 @@ cpack -G DEB
 echo "-----> RTXI package creation successful. Installing..."
 sudo dpkg -i rtxi*.deb
 
-rm -rf ${MODS}
+sudo rm -rf ${MODS}
 mkdir ${MODS}
 cd ${MODS}
 
