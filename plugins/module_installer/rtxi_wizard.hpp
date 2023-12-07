@@ -45,6 +45,7 @@ public:
 
 private slots:
   void cloneModule();
+  void updateAllInstalledModules();
   void getRepos();
   void getReadme();
   void updateButton();
@@ -81,6 +82,7 @@ private:
 
   QPushButton* cloneButton = nullptr;
   QPushButton* syncButton = nullptr;
+  QPushButton* updateAllButton = nullptr;
 
   std::vector<QString> exclude_list;
 };

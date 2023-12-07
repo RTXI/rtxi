@@ -53,6 +53,7 @@ RTXIWizard::Panel::Panel(QMainWindow* mwindow, Event::Manager* ev_manager)
   buttonBox->setLayout(buttonLayout);
   syncButton = new QPushButton("Sync", this);
   cloneButton = new QPushButton("Install", this);
+  updateAllButton = new QPushButton("Update Installed", this);
   cloneButton->setEnabled(false);
   buttonLayout->addWidget(syncButton);
   buttonLayout->addWidget(cloneButton);
@@ -77,14 +78,16 @@ RTXIWizard::Panel::Panel(QMainWindow* mwindow, Event::Manager* ev_manager)
   readmeWindow->show();
 
   customLayout->addWidget(buttonBox, 0, 0);
-  customLayout->addWidget(moduleBox, 1, 0);
-  customLayout->addWidget(installedBox, 2, 0);
-  customLayout->addWidget(readmeWindow, 0, 1, 3, 1);
+  customLayout->addWidget(updateAllButton, 1, 0);
+  customLayout->addWidget(moduleBox, 2, 0);
+  customLayout->addWidget(installedBox, 3, 0);
+  customLayout->addWidget(readmeWindow, 0, 1, 4, 1);
   customLayout->setColumnStretch(0, 0);
   customLayout->setColumnStretch(1, 1);
 
   QObject::connect(syncButton, SIGNAL(clicked()), this, SLOT(getRepos()));
   QObject::connect(cloneButton, SIGNAL(clicked()), this, SLOT(cloneModule()));
+  QObject::connect(updateAllButton, SIGNAL(clicked()), this, SLOT(updateAllInstalledModules()));
   QObject::connect(availableListWidget,
                    SIGNAL(itemClicked(QListWidgetItem*)),
                    this,
@@ -168,6 +171,27 @@ void RTXIWizard::Panel::cloneModule()
   }
 
   installFromString(name.toStdString());
+}
+
+void RTXIWizard::Panel::updateAllInstalledModules()
+{
+  if(installedListWidget->count() <= 0) { return; }
+  int plugin_count = installedListWidget->count();
+  auto* progress =
+      new QProgressDialog("Updating installed plugins", "Cancel", 0, plugin_count+1, this);
+  progress->move(this->pos());
+  progress->setMinimumDuration(0);
+  for(int widget_index=0; widget_index < plugin_count; widget_index++){
+    if(progress->wasCanceled()){
+      progress->close();
+      return;
+    }
+    progress->setLabelText(QString("Installing ") 
+                           + installedListWidget->item(widget_index)->text());
+    installFromString(installedListWidget->item(widget_index)->text().toStdString());
+    progress->setValue(widget_index+1);
+  }
+  progress->close();
 }
 
 // Download the list of repos from GitHub's API. Call parseRepos for the JSON.
@@ -373,6 +397,10 @@ void RTXIWizard::Panel::installFromString(const std::string& module_name)
     progress->close();
     return;
   }
+  if(progress->wasCanceled()) {
+    progress->close();
+    return; 
+  }
   // Define the commands to be run.
   QDir package_dir = install_prefix;
   package_dir.cdUp();
@@ -419,6 +447,10 @@ void RTXIWizard::Panel::installFromString(const std::string& module_name)
     progress->close();
     return;
   }
+  if(progress->wasCanceled()) {
+    progress->close();
+    return; 
+  }
 
   progress->setLabelText("Building...");
   progress->setValue(3);
@@ -441,7 +473,6 @@ void RTXIWizard::Panel::installFromString(const std::string& module_name)
     rebuildListWidgets();
     availableListWidget->setDisabled(false);
     installedListWidget->setDisabled(false);
-    progress->close();
     progress->close();
     return;
   }
@@ -470,7 +501,10 @@ void RTXIWizard::Panel::installFromString(const std::string& module_name)
     progress->close();
     return;
   }
-
+  if(progress->wasCanceled()) {
+    progress->close();
+    return; 
+  }
   // Add module to list of already installed modules.
   modules[name].installed = true;
   progress->setValue(5);
