@@ -630,6 +630,13 @@ public:
    */
   virtual std::vector<Widgets::Variable::Info> getComponentParametersInfo();
 
+  /*!
+    * In some cases we need to know whether a component has been attached
+    * to the plugin. This helps with that.
+    *
+    * \return True if there is an attached component, False otherwise.
+    */
+  bool hasComponent() { return plugin_component != nullptr; }
 protected:
   Widgets::Component* getComponent();
   Event::Manager* getEventManager();

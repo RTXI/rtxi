@@ -16,6 +16,7 @@
 #define WORKSPACE_H
 
 #include <utility>
+#include <optional>
 
 #include "daq.hpp"
 #include "dlplugin.hpp"

@@ -294,6 +294,7 @@ void Widgets::Panel::exit()
 
 void Widgets::Panel::refresh()
 {
+  if(!this->hostPlugin->hasComponent()) { return; }
   Widgets::Variable::Id param_id = Widgets::Variable::INVALID_ID;
   double double_value = 0.0;
   int64_t int_value = 0;
@@ -507,7 +508,6 @@ void Widgets::Plugin::attachComponent(
   // this avoids unnecessary use of event firing which is much slower
   this->plugin_component->setActive(/*act=*/true);
   this->registerComponent();
-  this->widget_panel->refresh();
 }
 
 void Widgets::Plugin::attachPanel(Widgets::Panel* panel)
