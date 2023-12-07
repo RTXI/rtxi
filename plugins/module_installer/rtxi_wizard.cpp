@@ -25,7 +25,6 @@
 #include <QMessageBox>
 #include <QProcess>
 #include <QtGlobal>
-#include <iostream>
 
 #include "rtxi_wizard.hpp"
 
@@ -115,7 +114,6 @@ void RTXIWizard::Panel::initParameters()
   // syntax here only works in c++11
   exclude_list = std::vector<QString>({QString("rtxi"),
                                        QString("rtxi.github.io"),
-                                       QString("genicam-camera"),
                                        QString("rtxi-crawler"),
                                        QString("matlab-tools"),
                                        QString("tutorials"),
