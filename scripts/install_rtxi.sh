@@ -41,6 +41,10 @@ echo "posix -- Linux based core (Non-RT)"
 echo "-----> Please type your configuration and then press enter: "
 read kernel
 
+if [ -d "./build/local" ]; then
+	rm -rf ./build/local
+fi
+
 cmake -S . -B ./build/local -D CMAKE_BUILD_TYPE=Release -DRTXI_RT_CORE=${kernel}
 
 echo "-----> Configuration complete. Building..."
@@ -51,7 +55,11 @@ cpack -G DEB
 echo "-----> RTXI package creation successful. Installing..."
 sudo dpkg -i rtxi*.deb
 
-sudo rm -rf ${MODS}
+# Delete modules directory if it exists from previous rtxi version
+if [ -d "${MODS}" ]; then
+	sudo rm -rf ${MODS}
+fi
+
 mkdir ${MODS}
 cd ${MODS}
 
