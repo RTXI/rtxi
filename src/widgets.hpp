@@ -10,15 +10,12 @@
 #include <QPushButton>
 #include <QValidator>
 #include <limits>
-#include <map>
 #include <memory>
-#include <optional>
 #include <string>
 #include <unordered_map>
 #include <variant>
 #include <vector>
 
-#include "dlplugin.hpp"
 #include "event.hpp"
 #include "io.hpp"
 #include "rt.hpp"

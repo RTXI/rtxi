@@ -379,6 +379,7 @@ void Widgets::Panel::modify()
     }
   }
   this->update_state(RT::State::MODIFY);
+  refresh();
 }
 
 // NOLINTNEXTLINE
@@ -506,6 +507,7 @@ void Widgets::Plugin::attachComponent(
   // this avoids unnecessary use of event firing which is much slower
   this->plugin_component->setActive(/*act=*/true);
   this->registerComponent();
+  this->widget_panel->refresh();
 }
 
 void Widgets::Plugin::attachPanel(Widgets::Panel* panel)
