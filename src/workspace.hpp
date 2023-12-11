@@ -15,8 +15,8 @@
 #ifndef WORKSPACE_H
 #define WORKSPACE_H
 
-#include <utility>
 #include <optional>
+#include <utility>
 
 #include "daq.hpp"
 #include "dlplugin.hpp"

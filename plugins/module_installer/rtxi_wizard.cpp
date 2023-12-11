@@ -87,7 +87,10 @@ RTXIWizard::Panel::Panel(QMainWindow* mwindow, Event::Manager* ev_manager)
 
   QObject::connect(syncButton, SIGNAL(clicked()), this, SLOT(getRepos()));
   QObject::connect(cloneButton, SIGNAL(clicked()), this, SLOT(cloneModule()));
-  QObject::connect(updateAllButton, SIGNAL(clicked()), this, SLOT(updateAllInstalledModules()));
+  QObject::connect(updateAllButton,
+                   SIGNAL(clicked()),
+                   this,
+                   SLOT(updateAllInstalledModules()));
   QObject::connect(availableListWidget,
                    SIGNAL(itemClicked(QListWidgetItem*)),
                    this,
@@ -175,21 +178,24 @@ void RTXIWizard::Panel::cloneModule()
 
 void RTXIWizard::Panel::updateAllInstalledModules()
 {
-  if(installedListWidget->count() <= 0) { return; }
+  if (installedListWidget->count() <= 0) {
+    return;
+  }
   int plugin_count = installedListWidget->count();
-  auto* progress =
-      new QProgressDialog("Updating installed plugins", "Cancel", 0, plugin_count+1, this);
+  auto* progress = new QProgressDialog(
+      "Updating installed plugins", "Cancel", 0, plugin_count + 1, this);
   progress->move(this->pos());
   progress->setMinimumDuration(0);
-  for(int widget_index=0; widget_index < plugin_count; widget_index++){
-    if(progress->wasCanceled()){
+  for (int widget_index = 0; widget_index < plugin_count; widget_index++) {
+    if (progress->wasCanceled()) {
       progress->close();
       return;
     }
-    progress->setLabelText(QString("Installing ") 
+    progress->setLabelText(QString("Installing ")
                            + installedListWidget->item(widget_index)->text());
-    installFromString(installedListWidget->item(widget_index)->text().toStdString());
-    progress->setValue(widget_index+1);
+    installFromString(
+        installedListWidget->item(widget_index)->text().toStdString());
+    progress->setValue(widget_index + 1);
   }
   progress->close();
 }
@@ -397,9 +403,9 @@ void RTXIWizard::Panel::installFromString(const std::string& module_name)
     progress->close();
     return;
   }
-  if(progress->wasCanceled()) {
+  if (progress->wasCanceled()) {
     progress->close();
-    return; 
+    return;
   }
   // Define the commands to be run.
   QDir package_dir = install_prefix;
@@ -447,9 +453,9 @@ void RTXIWizard::Panel::installFromString(const std::string& module_name)
     progress->close();
     return;
   }
-  if(progress->wasCanceled()) {
+  if (progress->wasCanceled()) {
     progress->close();
-    return; 
+    return;
   }
 
   progress->setLabelText("Building...");
@@ -501,9 +507,9 @@ void RTXIWizard::Panel::installFromString(const std::string& module_name)
     progress->close();
     return;
   }
-  if(progress->wasCanceled()) {
+  if (progress->wasCanceled()) {
     progress->close();
-    return; 
+    return;
   }
   // Add module to list of already installed modules.
   modules[name].installed = true;

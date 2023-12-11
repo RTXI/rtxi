@@ -294,7 +294,9 @@ void Widgets::Panel::exit()
 
 void Widgets::Panel::refresh()
 {
-  if(!this->hostPlugin->hasComponent()) { return; }
+  if (!this->hostPlugin->hasComponent()) {
+    return;
+  }
   Widgets::Variable::Id param_id = Widgets::Variable::INVALID_ID;
   double double_value = 0.0;
   int64_t int_value = 0;
@@ -331,7 +333,8 @@ void Widgets::Panel::refresh()
     }
   }
 
-  // Make sure we actually have a pauseButton object (default constructed with createGUI)
+  // Make sure we actually have a pauseButton object (default constructed with
+  // createGUI)
   if (this->pauseButton != nullptr) {
     pauseButton->setChecked(!(this->hostPlugin->getActive()));
   }
@@ -440,7 +443,7 @@ void Widgets::Panel::pause(bool p)
   if (pauseButton->isChecked() != p) {
     pauseButton->setDown(p);
   }
-  
+
   if (p) {
     this->update_state(RT::State::PAUSE);
   } else {
