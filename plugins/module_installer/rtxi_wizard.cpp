@@ -85,28 +85,34 @@ RTXIWizard::Panel::Panel(QMainWindow* mwindow, Event::Manager* ev_manager)
   customLayout->setColumnStretch(0, 0);
   customLayout->setColumnStretch(1, 1);
 
-  QObject::connect(syncButton, SIGNAL(clicked()), this, SLOT(getRepos()));
-  QObject::connect(cloneButton, SIGNAL(clicked()), this, SLOT(cloneModule()));
+  QObject::connect(syncButton, 
+                   &QPushButton::clicked, 
+                   this, 
+                   &RTXIWizard::Panel::getRepos);
+  QObject::connect(cloneButton, 
+                   &QPushButton::clicked, 
+                   this, 
+                   &RTXIWizard::Panel::cloneModule);
   QObject::connect(updateAllButton,
-                   SIGNAL(clicked()),
+                   &QPushButton::clicked,
                    this,
-                   SLOT(updateAllInstalledModules()));
+                   &RTXIWizard::Panel::updateAllInstalledModules);
   QObject::connect(availableListWidget,
-                   SIGNAL(itemClicked(QListWidgetItem*)),
+                   &QListWidget::itemClicked,
                    this,
-                   SLOT(getReadme()));
+                   &RTXIWizard::Panel::getReadme);
   QObject::connect(availableListWidget,
-                   SIGNAL(itemClicked(QListWidgetItem*)),
+                   &QListWidget::itemClicked,
                    this,
-                   SLOT(updateButton()));
+                   &RTXIWizard::Panel::updateButton);
   QObject::connect(installedListWidget,
-                   SIGNAL(itemClicked(QListWidgetItem*)),
+                   &QListWidget::itemClicked,
                    this,
-                   SLOT(getReadme()));
+                   &RTXIWizard::Panel::getReadme);
   QObject::connect(installedListWidget,
-                   SIGNAL(itemClicked(QListWidgetItem*)),
+                   &QListWidget::itemClicked,
                    this,
-                   SLOT(updateButton()));
+                   &RTXIWizard::Panel::updateButton);
 
   setLayout(customLayout);
   setWindowTitle("Module Wizard");
