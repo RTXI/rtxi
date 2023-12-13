@@ -312,9 +312,9 @@ QWidget* Oscilloscope::Panel::createChannelTab(QWidget* parent)
   blocksListDropdown->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
   blocksListDropdown->setSizeAdjustPolicy(QComboBox::AdjustToContents);
   QObject::connect(blocksListDropdown,
-                   SIGNAL(activated(int)),
+                   QOverload<int>::of(&QComboBox::activated),
                    this,
-                   SLOT(buildChannelList()));
+                   &Oscilloscope::Panel::buildChannelList);
   row1Layout->addWidget(blocksListDropdown);
 
   // Create Type box
@@ -324,15 +324,19 @@ QWidget* Oscilloscope::Panel::createChannelTab(QWidget* parent)
   typesList->addItem("Output", QVariant::fromValue(IO::OUTPUT));
   typesList->addItem("Input", QVariant::fromValue(IO::INPUT));
   row1Layout->addWidget(typesList);
-  QObject::connect(
-      typesList, SIGNAL(activated(int)), this, SLOT(buildChannelList()));
+  QObject::connect(typesList, 
+                   QOverload<int>::of(&QComboBox::activated),
+                   this, 
+                   &Oscilloscope::Panel::buildChannelList);
 
   // Create Channels box
   channelsList = new QComboBox(page);
   channelsList->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
   channelsList->setSizeAdjustPolicy(QComboBox::AdjustToContents);
-  QObject::connect(
-      channelsList, SIGNAL(activated(int)), this, SLOT(showChannelTab()));
+  QObject::connect(channelsList, 
+                   QOverload<int>::of(&QComboBox::activated),
+                   this, 
+                   &Oscilloscope::Panel::showChannelTab);
   row1Layout->addWidget(channelsList);
 
   // Create elements for display box
@@ -447,25 +451,27 @@ QWidget* Oscilloscope::Panel::createChannelTab(QWidget* parent)
   row2Layout->addWidget(activateButton);
   activateButton->setCheckable(true);
   activateButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-  QObject::connect(
-      activateButton, SIGNAL(toggled(bool)), this, SLOT(activateChannel(bool)));
+  QObject::connect(activateButton, 
+                   &QPushButton::toggled, 
+                   this, 
+                   &Oscilloscope::Panel::activateChannel);
   activateChannel(/*active=*/false);
 
   bttnLayout->addLayout(row1Layout, 0, 0);
   bttnLayout->addLayout(row2Layout, 1, 0);
 
   QObject::connect(blocksListDropdown,
-                   SIGNAL(currentTextChanged(const QString&)),
+                   &QComboBox::currentTextChanged,
                    this,
-                   SLOT(syncChannelProperties()));
+                   &Oscilloscope::Panel::syncChannelProperties);
   QObject::connect(typesList,
-                   SIGNAL(currentTextChanged(const QString&)),
+                   &QComboBox::currentTextChanged,
                    this,
-                   SLOT(syncChannelProperties()));
+                   &Oscilloscope::Panel::syncChannelProperties);
   QObject::connect(channelsList,
-                   SIGNAL(currentTextChanged(const QString&)),
+                   &QComboBox::currentTextChanged,
                    this,
-                   SLOT(syncChannelProperties()));
+                   &Oscilloscope::Panel::syncChannelProperties);
   return page;
 }
 
@@ -719,8 +725,10 @@ Oscilloscope::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
 
   // Create tab widget
   tabWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-  QObject::connect(
-      tabWidget, SIGNAL(currentChanged(int)), this, SLOT(showTab(int)));
+  QObject::connect(tabWidget, 
+                   &QTabWidget::currentChanged, 
+                   this, 
+                   &Oscilloscope::Panel::showTab);
 
   auto* scopeLayout = new QHBoxLayout(this);
   scopeLayout->addWidget(scopeWindow);
@@ -730,14 +738,22 @@ Oscilloscope::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
   // Create buttons
   pauseButton = new QPushButton("Pause");
   pauseButton->setCheckable(true);
-  QObject::connect(pauseButton, SIGNAL(released()), this, SLOT(togglePause()));
+  QObject::connect(pauseButton, 
+                   &QPushButton::released, 
+                   this, 
+                   &Oscilloscope::Panel::togglePause);
   setBttnLayout->addWidget(pauseButton);
   applyButton = new QPushButton("Apply");
-  QObject::connect(applyButton, SIGNAL(released()), this, SLOT(apply()));
+  QObject::connect(applyButton, 
+                   &QPushButton::released, 
+                   this, 
+                   &Oscilloscope::Panel::apply);
   setBttnLayout->addWidget(applyButton);
   settingsButton = new QPushButton("Screenshot");
-  QObject::connect(
-      settingsButton, SIGNAL(released()), this, SLOT(screenshot()));
+  QObject::connect(settingsButton, 
+                   &QPushButton::released, 
+                   this, 
+                   &Oscilloscope::Panel::screenshot);
   setBttnLayout->addWidget(settingsButton);
 
   // Attach layout
@@ -774,8 +790,10 @@ Oscilloscope::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
                    &Oscilloscope::Panel::updateBlockChannels,
                    this,
                    &Oscilloscope::Panel::removeBlockChannels);
-  QObject::connect(
-      this, SIGNAL(updateBlockInfo()), this, SLOT(syncBlockInfo()));
+  QObject::connect(this, 
+                   &Oscilloscope::Panel::updateBlockInfo, 
+                   this, 
+                   &Oscilloscope::Panel::syncBlockInfo);
 
   this->updateBlockInfo();
   this->buildChannelList();
