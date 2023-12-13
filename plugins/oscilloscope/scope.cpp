@@ -142,7 +142,10 @@ Oscilloscope::Scope::Scope(QWidget* parent)
   resize(sizeHint());
   // Timer controls refresh rate of scope
   this->timer->setTimerType(Qt::PreciseTimer);
-  QObject::connect(timer, SIGNAL(timeout()), this, SLOT(process_data()));
+  QObject::connect(timer, 
+                   &QTimer::timeout, 
+                   this, 
+                   &Oscilloscope::Scope::process_data);
   this->timer->start(static_cast<int>(this->refresh));
 }
 
