@@ -160,9 +160,9 @@ void MainWindow::createFileMenu()
   fileMenu->addAction(quit);
   fileMenu->addSeparator();
   connect(fileMenu,
-          SIGNAL(triggered(QAction*)),
+          &QMenu::triggered,
           this,
-          SLOT(fileMenuActivated(QAction*)));
+          &MainWindow::fileMenuActivated);
 }
 
 void MainWindow::createWidgetMenu()
@@ -171,9 +171,9 @@ void MainWindow::createWidgetMenu()
   this->loadDynamicWidget = new QAction("Load Plugin", this);
   moduleMenu->addAction(this->loadDynamicWidget);
   connect(moduleMenu,
-          SIGNAL(triggered(QAction*)),
+          &QMenu::triggered,
           this,
-          SLOT(modulesMenuActivated(QAction*)));
+          &MainWindow::modulesMenuActivated);
 }
 
 void MainWindow::createUtilMenu()
@@ -183,9 +183,9 @@ void MainWindow::createUtilMenu()
   signalsSubMenu = utilMenu->addMenu(tr("&Signals"));
   utilitiesSubMenu = utilMenu->addMenu(tr("&Utilities"));
   connect(utilMenu,
-          SIGNAL(triggered(QAction*)),
+          &QMenu::triggered,
           this,
-          SLOT(utilitiesMenuActivated(QAction*)));
+          &MainWindow::utilitiesMenuActivated);
 
   QDir libsDir = QCoreApplication::applicationDirPath() + QDir::separator()
       + QString("rtxi_modules");
@@ -222,16 +222,18 @@ void MainWindow::createSystemMenu()
   this->systemMenu->addAction(this->openDataRecorder);
   this->systemMenu->addAction(this->openRTXIWizard);
   connect(systemMenu,
-          SIGNAL(triggered(QAction*)),
+          &QMenu::triggered,
           this,
-          SLOT(systemMenuActivated(QAction*)));
+          &MainWindow::systemMenuActivated);
 }
 
 void MainWindow::createWindowsMenu()
 {
   windowsMenu = menuBar()->addMenu(tr("&Windows"));
-  connect(
-      windowsMenu, SIGNAL(aboutToShow()), this, SLOT(windowsMenuAboutToShow()));
+  connect(windowsMenu, 
+          &QMenu::aboutToShow, 
+          this, 
+          &MainWindow::windowsMenuAboutToShow);
 }
 
 void MainWindow::createHelpMenu()
@@ -251,48 +253,43 @@ void MainWindow::createFileActions()
   this->load = new QAction(tr("&Load Workspace"), this);
   this->load->setShortcuts(QKeySequence::Open);
   this->load->setStatusTip(tr("Load a saved workspace"));
-  connect(load, SIGNAL(triggered()), this, SLOT(loadSettings()));
+  connect(load, &QAction::triggered, this, &MainWindow::loadSettings);
 
   this->save = new QAction(tr("&Save Workspace"), this);
   this->save->setShortcuts(QKeySequence::Save);
   this->save->setStatusTip(tr("Save current workspace"));
-  connect(save, SIGNAL(triggered()), this, SLOT(saveSettings()));
+  connect(save, &QAction::triggered, this, &MainWindow::saveSettings);
 
   this->reset = new QAction(tr("&Reset Workspace"), this);
   this->reset->setStatusTip(tr("Reset to default RTXI workspace"));
-  connect(reset, SIGNAL(triggered()), this, SLOT(resetSettings()));
+  connect(reset, &QAction::triggered, this, &MainWindow::resetSettings);
 
   this->quit = new QAction(tr("&Quit"), this);
   this->quit->setShortcut(tr("Ctrl+Q"));
   this->quit->setStatusTip(tr("Quit RTXI"));
   connect(QCoreApplication::instance(),
-          SIGNAL(aboutToQuit()),
+          &QCoreApplication::aboutToQuit,
           mdiArea,
-          SLOT(closeAllSubWindows()));
-  connect(quit, SIGNAL(triggered()), this, SLOT(close()));
+          &QMdiArea::closeAllSubWindows);
+  connect(quit, &QAction::triggered, this, &MainWindow::close);
 }
-
-// void MainWindow::createMdi(QMdiSubWindow* subWindow)
-//{
-//   mdiArea->addSubWindow(subWindow);
-// }
 
 void MainWindow::createHelpActions()
 {
   artxi = new QAction(tr("About &RTXI"), this);
-  connect(artxi, SIGNAL(triggered()), this, SLOT(about()));
+  connect(artxi, &QAction::triggered, this, &MainWindow::about);
 
   axeno = new QAction(tr("About &Xenomai"), this);
-  connect(axeno, SIGNAL(triggered()), this, SLOT(aboutXeno()));
+  connect(axeno, &QAction::triggered, this, &MainWindow::aboutXeno);
 
   aqt = new QAction(tr("About &Qt"), this);
-  connect(aqt, SIGNAL(triggered()), this, SLOT(aboutQt()));
+  connect(aqt, &QAction::triggered, this, &MainWindow::aboutQt);
 
   adocs = new QAction(tr("&Documentation"), this);
-  connect(adocs, SIGNAL(triggered()), this, SLOT(openDocs()));
+  connect(adocs, &QAction::triggered, this, &MainWindow::openDocs);
 
   sub_issue = new QAction(tr("&Submit Issue"), this);
-  connect(sub_issue, SIGNAL(triggered()), this, SLOT(openSubIssue()));
+  connect(sub_issue, &QAction::triggered, this, &MainWindow::openSubIssue);
 }
 
 void MainWindow::createSystemActions()
@@ -462,9 +459,9 @@ void MainWindow::windowsMenuAboutToShow()
     windowsMenu->addAction(new QAction(subwin->widget()->windowTitle(), this));
   }
   connect(windowsMenu,
-          SIGNAL(triggered(QAction*)),
+          &QMenu::triggered,
           this,
-          SLOT(windowsMenuActivated(QAction*)));
+          &MainWindow::windowsMenuActivated);
 }
 
 void MainWindow::windowsMenuActivated(QAction* id)
