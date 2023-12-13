@@ -87,9 +87,9 @@ SystemControl::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
 
   deviceLayout->addWidget(deviceList, 0, 1, 1, 5);
   buildDAQDeviceList();
-  QObject::connect(deviceList, 
+  QObject::connect(deviceList,
                    QOverload<int>::of(&QComboBox::activated),
-                   this, 
+                   this,
                    &SystemControl::Panel::updateDevice);
 
   // Frequency box
@@ -102,25 +102,25 @@ SystemControl::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
   freqEdit->setText(
       std::to_string(RT::OS::SECONDS_TO_NANOSECONDS / period).c_str());
 
-  QObject::connect(freqEdit, 
-                   &QLineEdit::textEdited, 
-                   this, 
+  QObject::connect(freqEdit,
+                   &QLineEdit::textEdited,
+                   this,
                    &SystemControl::Panel::updatePeriod);
   freqUnitList->setFixedWidth(50);
   freqUnitList->addItem(" Hz", 1);
   freqUnitList->addItem("kHz", 1000);
   deviceLayout->addWidget(freqUnitList, 1, 2);
-  QObject::connect(freqUnitList, 
+  QObject::connect(freqUnitList,
                    QOverload<int>::of(&QComboBox::activated),
-                   this, 
+                   this,
                    &SystemControl::Panel::updatePeriod);
 
   // Period box
   deviceLayout->addWidget(new QLabel(tr("Period:")), 1, 3);
   deviceLayout->addWidget(periodEdit, 1, 4);
-  QObject::connect(periodEdit, 
-                   &QLineEdit::textEdited, 
-                   this, 
+  QObject::connect(periodEdit,
+                   &QLineEdit::textEdited,
+                   this,
                    &SystemControl::Panel::updateFreq);
   deviceLayout->addWidget(periodUnitList, 1, 5);
   periodUnitList->setFixedWidth(50);
@@ -128,9 +128,9 @@ SystemControl::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
   periodUnitList->addItem("ms", 1e-3);
   periodUnitList->addItem("us", 1e-6);
   periodUnitList->addItem("ns", 1e-9);
-  QObject::connect(periodUnitList, 
+  QObject::connect(periodUnitList,
                    QOverload<int>::of(&QComboBox::activated),
-                   this, 
+                   this,
                    &SystemControl::Panel::updateFreq);
   updatePeriod();
 
@@ -148,15 +148,15 @@ SystemControl::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
                                QVariant::fromValue(DAQ::ChannelType::AI));
   analogSubdeviceList->addItem("Output",
                                QVariant::fromValue(DAQ::ChannelType::AO));
-  QObject::connect(analogSubdeviceList, 
+  QObject::connect(analogSubdeviceList,
                    QOverload<int>::of(&QComboBox::activated),
-                   this, 
+                   this,
                    &SystemControl::Panel::updateDevice);
   analogLayout->addWidget(analogSubdeviceList, 1, 1);
 
-  QObject::connect(analogChannelList, 
+  QObject::connect(analogChannelList,
                    QOverload<int>::of(&QComboBox::activated),
-                   this, 
+                   this,
                    &SystemControl::Panel::display);
   analogLayout->addWidget(analogChannelList, 1, 2);
 
@@ -272,15 +272,15 @@ SystemControl::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
   digitalLayout->addWidget(new QLabel(tr("Channel:")), 1, 0, 1, 1);
 
   digitalSubdeviceList->addItem("I/O");
-  QObject::connect(digitalSubdeviceList, 
+  QObject::connect(digitalSubdeviceList,
                    QOverload<int>::of(&QComboBox::activated),
-                   this, 
+                   this,
                    &SystemControl::Panel::updateDevice);
   digitalLayout->addWidget(digitalSubdeviceList, 1, 1, 1, 1);
 
-  QObject::connect(digitalChannelList, 
+  QObject::connect(digitalChannelList,
                    QOverload<int>::of(&QComboBox::activated),
-                   this, 
+                   this,
                    &SystemControl::Panel::display);
   digitalLayout->addWidget(digitalChannelList, 1, 2, 1, 1);
 
@@ -302,16 +302,12 @@ SystemControl::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
 
   // Create elements for buttons
   auto* applyButton = new QPushButton("Apply");
-  QObject::connect(applyButton, 
-                   &QPushButton::released, 
-                   this, 
-                   &SystemControl::Panel::apply);
+  QObject::connect(
+      applyButton, &QPushButton::released, this, &SystemControl::Panel::apply);
   buttonLayout->addWidget(applyButton);
   auto* cancelButton = new QPushButton("Close");
-  QObject::connect(cancelButton, 
-                   &QPushButton::released, 
-                   parentWidget(), 
-                   &QWidget::close);
+  QObject::connect(
+      cancelButton, &QPushButton::released, parentWidget(), &QWidget::close);
   buttonLayout->addWidget(cancelButton);
 
   // Assign layout to child widget

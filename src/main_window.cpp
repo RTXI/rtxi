@@ -159,10 +159,7 @@ void MainWindow::createFileMenu()
   fileMenu->addSeparator();
   fileMenu->addAction(quit);
   fileMenu->addSeparator();
-  connect(fileMenu,
-          &QMenu::triggered,
-          this,
-          &MainWindow::fileMenuActivated);
+  connect(fileMenu, &QMenu::triggered, this, &MainWindow::fileMenuActivated);
 }
 
 void MainWindow::createWidgetMenu()
@@ -170,10 +167,8 @@ void MainWindow::createWidgetMenu()
   moduleMenu = menuBar()->addMenu(tr("&Widgets"));
   this->loadDynamicWidget = new QAction("Load Plugin", this);
   moduleMenu->addAction(this->loadDynamicWidget);
-  connect(moduleMenu,
-          &QMenu::triggered,
-          this,
-          &MainWindow::modulesMenuActivated);
+  connect(
+      moduleMenu, &QMenu::triggered, this, &MainWindow::modulesMenuActivated);
 }
 
 void MainWindow::createUtilMenu()
@@ -182,10 +177,8 @@ void MainWindow::createUtilMenu()
   filtersSubMenu = utilMenu->addMenu(tr("&Filters"));
   signalsSubMenu = utilMenu->addMenu(tr("&Signals"));
   utilitiesSubMenu = utilMenu->addMenu(tr("&Utilities"));
-  connect(utilMenu,
-          &QMenu::triggered,
-          this,
-          &MainWindow::utilitiesMenuActivated);
+  connect(
+      utilMenu, &QMenu::triggered, this, &MainWindow::utilitiesMenuActivated);
 
   QDir libsDir = QCoreApplication::applicationDirPath() + QDir::separator()
       + QString("rtxi_modules");
@@ -221,18 +214,16 @@ void MainWindow::createSystemMenu()
   this->systemMenu->addAction(this->openOscilloscope);
   this->systemMenu->addAction(this->openDataRecorder);
   this->systemMenu->addAction(this->openRTXIWizard);
-  connect(systemMenu,
-          &QMenu::triggered,
-          this,
-          &MainWindow::systemMenuActivated);
+  connect(
+      systemMenu, &QMenu::triggered, this, &MainWindow::systemMenuActivated);
 }
 
 void MainWindow::createWindowsMenu()
 {
   windowsMenu = menuBar()->addMenu(tr("&Windows"));
-  connect(windowsMenu, 
-          &QMenu::aboutToShow, 
-          this, 
+  connect(windowsMenu,
+          &QMenu::aboutToShow,
+          this,
           &MainWindow::windowsMenuAboutToShow);
 }
 
@@ -458,10 +449,8 @@ void MainWindow::windowsMenuAboutToShow()
     // auto* item = new QAction(subwin->widget()->windowTitle(), this);
     windowsMenu->addAction(new QAction(subwin->widget()->windowTitle(), this));
   }
-  connect(windowsMenu,
-          &QMenu::triggered,
-          this,
-          &MainWindow::windowsMenuActivated);
+  connect(
+      windowsMenu, &QMenu::triggered, this, &MainWindow::windowsMenuActivated);
 }
 
 void MainWindow::windowsMenuActivated(QAction* id)

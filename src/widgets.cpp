@@ -75,8 +75,10 @@ std::string Widgets::Variable::vartype2string(
 Widgets::DefaultGUILineEdit::DefaultGUILineEdit(QWidget* parent)
     : QLineEdit(parent)
 {
-  QObject::connect(
-      this, &DefaultGUILineEdit::textChanged, this, &DefaultGUILineEdit::redden);
+  QObject::connect(this,
+                   &DefaultGUILineEdit::textChanged,
+                   this,
+                   &DefaultGUILineEdit::redden);
 }
 
 void Widgets::DefaultGUILineEdit::blacken()
@@ -251,16 +253,20 @@ void Widgets::Panel::createGUI(
   // Create elements
   pauseButton = new QPushButton("Pause", this);
   pauseButton->setCheckable(true);
-  QObject::connect(pauseButton, &QPushButton::toggled, this, &Widgets::Panel::pause);
+  QObject::connect(
+      pauseButton, &QPushButton::toggled, this, &Widgets::Panel::pause);
   buttonLayout->addWidget(pauseButton);
 
   modifyButton = new QPushButton("Modify", this);
-  QObject::connect(modifyButton, &QPushButton::clicked, this, &Widgets::Panel::modify);
+  QObject::connect(
+      modifyButton, &QPushButton::clicked, this, &Widgets::Panel::modify);
   buttonLayout->addWidget(modifyButton);
 
   unloadButton = new QPushButton("Unload", this);
-  QObject::connect(
-      unloadButton, &QPushButton::clicked, parentWidget(), &Widgets::Panel::close);
+  QObject::connect(unloadButton,
+                   &QPushButton::clicked,
+                   parentWidget(),
+                   &Widgets::Panel::close);
   buttonLayout->addWidget(unloadButton);
 
   buttonGroup->setLayout(buttonLayout);

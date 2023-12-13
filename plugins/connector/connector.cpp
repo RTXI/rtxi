@@ -158,9 +158,9 @@ Connector::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
   // populate field with block and connection info
   this->syncBlockInfo();
 
-  QObject::connect(this, 
-                   &Connector::Panel::updateBlockInfo, 
-                   this, 
+  QObject::connect(this,
+                   &Connector::Panel::updateBlockInfo,
+                   this,
                    &Connector::Panel::syncBlockInfo);
 
   // a change to any of the connection parameters should highlight box or not

@@ -85,13 +85,11 @@ RTXIWizard::Panel::Panel(QMainWindow* mwindow, Event::Manager* ev_manager)
   customLayout->setColumnStretch(0, 0);
   customLayout->setColumnStretch(1, 1);
 
-  QObject::connect(syncButton, 
-                   &QPushButton::clicked, 
-                   this, 
-                   &RTXIWizard::Panel::getRepos);
-  QObject::connect(cloneButton, 
-                   &QPushButton::clicked, 
-                   this, 
+  QObject::connect(
+      syncButton, &QPushButton::clicked, this, &RTXIWizard::Panel::getRepos);
+  QObject::connect(cloneButton,
+                   &QPushButton::clicked,
+                   this,
                    &RTXIWizard::Panel::cloneModule);
   QObject::connect(updateAllButton,
                    &QPushButton::clicked,

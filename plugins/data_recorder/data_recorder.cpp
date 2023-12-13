@@ -83,9 +83,9 @@ DataRecorder::Panel::Panel(QMainWindow* mwindow, Event::Manager* ev_manager)
 
   channelLayout->addWidget(new QLabel(tr("Block:")));
   channelLayout->addWidget(blockList);
-  QObject::connect(blockList, 
+  QObject::connect(blockList,
                    QOverload<int>::of(&QComboBox::activated),
-                   this, 
+                   this,
                    &DataRecorder::Panel::buildChannelList);
 
   channelLayout->addWidget(new QLabel(tr("Type:")));
@@ -93,9 +93,9 @@ DataRecorder::Panel::Panel(QMainWindow* mwindow, Event::Manager* ev_manager)
   channelLayout->addWidget(typeList);
   typeList->addItem("Output", QVariant::fromValue(IO::OUTPUT));
   typeList->addItem("Input", QVariant::fromValue(IO::INPUT));
-  QObject::connect(typeList, 
+  QObject::connect(typeList,
                    QOverload<int>::of(&QComboBox::activated),
-                   this, 
+                   this,
                    &DataRecorder::Panel::buildChannelList);
 
   channelLayout->addWidget(new QLabel(tr("Channel:")));
@@ -108,16 +108,16 @@ DataRecorder::Panel::Panel(QMainWindow* mwindow, Event::Manager* ev_manager)
   // Create elements for arrow
   addRecorderButton = new QPushButton("Add");
   channelLayout->addWidget(addRecorderButton);
-  QObject::connect(addRecorderButton, 
-                   &QPushButton::released, 
-                   this, 
+  QObject::connect(addRecorderButton,
+                   &QPushButton::released,
+                   this,
                    &DataRecorder::Panel::insertChannel);
   addRecorderButton->setEnabled(false);
   removeRecorderButton = new QPushButton("Remove");
   channelLayout->addWidget(removeRecorderButton);
-  QObject::connect(removeRecorderButton, 
-                   &QPushButton::released, 
-                   this, 
+  QObject::connect(removeRecorderButton,
+                   &QPushButton::released,
+                   this,
                    &DataRecorder::Panel::removeChannel);
   removeRecorderButton->setEnabled(false);
 
@@ -130,10 +130,8 @@ DataRecorder::Panel::Panel(QMainWindow* mwindow, Event::Manager* ev_manager)
   stampLayout->addWidget(timeStampEdit);
   addTag = new QPushButton(tr("Tag"));
   stampLayout->addWidget(addTag);
-  QObject::connect(addTag, 
-                   &QPushButton::released, 
-                   this, 
-                   &DataRecorder::Panel::addNewTag);
+  QObject::connect(
+      addTag, &QPushButton::released, this, &DataRecorder::Panel::addNewTag);
 
   // Attach layout to child widget
   stampGroup->setLayout(stampLayout);
@@ -180,9 +178,9 @@ DataRecorder::Panel::Panel(QMainWindow* mwindow, Event::Manager* ev_manager)
   fileLayout->addWidget(fileNameEdit);
   auto* fileChangeButton = new QPushButton("Choose File");
   fileLayout->addWidget(fileChangeButton);
-  QObject::connect(fileChangeButton, 
-                   &QPushButton::released, 
-                   this, 
+  QObject::connect(fileChangeButton,
+                   &QPushButton::released,
+                   this,
                    &DataRecorder::Panel::changeDataFile);
 
   fileLayout->addWidget(new QLabel(tr("Downsample \nRate:")));
@@ -215,24 +213,22 @@ DataRecorder::Panel::Panel(QMainWindow* mwindow, Event::Manager* ev_manager)
 
   // Create elements for box
   startRecordButton = new QPushButton("Start Recording");
-  QObject::connect(startRecordButton, 
-                   &QPushButton::released, 
-                   this, 
+  QObject::connect(startRecordButton,
+                   &QPushButton::released,
+                   this,
                    &DataRecorder::Panel::startRecordClicked);
   buttonLayout->addWidget(startRecordButton);
   startRecordButton->setEnabled(false);
   stopRecordButton = new QPushButton("Stop Recording");
-  QObject::connect(stopRecordButton, 
+  QObject::connect(stopRecordButton,
                    &QPushButton::released,
-                   this, 
+                   this,
                    &DataRecorder::Panel::stopRecordClicked);
   buttonLayout->addWidget(stopRecordButton);
   stopRecordButton->setEnabled(false);
   closeButton = new QPushButton("Close");
-  QObject::connect(closeButton, 
-                   &QPushButton::released, 
-                   parentWidget(), 
-                   &QWidget::close);
+  QObject::connect(
+      closeButton, &QPushButton::released, parentWidget(), &QWidget::close);
   buttonLayout->addWidget(closeButton);
 
   buttonLayout->addWidget(recordStatus);
@@ -261,13 +257,13 @@ DataRecorder::Panel::Panel(QMainWindow* mwindow, Event::Manager* ev_manager)
   this->buildChannelList();
 
   this->recording_timer->setInterval(1000);
-  QObject::connect(recording_timer, 
-                   &QTimer::timeout, 
-                   this, 
+  QObject::connect(recording_timer,
+                   &QTimer::timeout,
+                   this,
                    &DataRecorder::Panel::processData);
-  QObject::connect(this, 
-                   &DataRecorder::Panel::updateBlockInfo, 
-                   this, 
+  QObject::connect(this,
+                   &DataRecorder::Panel::updateBlockInfo,
+                   this,
                    &DataRecorder::Panel::buildBlockList);
   QObject::connect(fileNameEdit,
                    &QLineEdit::textChanged,
