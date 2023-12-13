@@ -76,7 +76,10 @@ PerformanceMeasurement::Panel::Panel(const std::string& mod_name,
 
   auto* resetButton = new QPushButton("Reset", this);
   gridLayout->addWidget(resetButton, 7, 1);
-  QObject::connect(resetButton, SIGNAL(released()), this, SLOT(reset()));
+  QObject::connect(resetButton, 
+                   &QPushButton::released, 
+                   this, 
+                   &PerformanceMeasurement::Panel::reset);
 
   // Attach child widget to parent widget
   // box_layout->addLayout(gridLayout);
