@@ -18,13 +18,10 @@
 
 */
 
-#include <algorithm>
-#include <queue>
 #include <string>
 
 #include "io.hpp"
 
-#include "debug.hpp"
 // NOLINTBEGIN(cppcoreguidelines-pro-bounds-constant-array-index)
 IO::Block::Block(std::string blockname,
                  const std::vector<IO::channel_t>& channels,

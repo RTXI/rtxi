@@ -25,8 +25,6 @@
 #include <QMutex>
 #include <QSpinBox>
 #include <QTime>
-#include <mutex>
-#include <optional>
 #include <utility>
 #include <vector>
 

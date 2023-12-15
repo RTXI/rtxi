@@ -27,7 +27,6 @@
 #include <QSettings>
 #include <QString>
 #include <QUrl>
-#include <algorithm>
 #include <string>
 
 #include "main_window.hpp"
@@ -36,7 +35,6 @@
 
 #include "connector/connector.hpp"
 #include "data_recorder/data_recorder.hpp"
-#include "debug.hpp"
 #include "event.hpp"
 #include "module_installer/rtxi_wizard.hpp"
 #include "oscilloscope/oscilloscope.hpp"
@@ -45,7 +43,6 @@
 #include "system_control/system_control.hpp"
 #include "userprefs/userprefs.hpp"
 #include "widgets.hpp"
-#include "workspace.hpp"
 
 MainWindow::MainWindow(Event::Manager* ev_manager)
     : QMainWindow(nullptr, Qt::Window)

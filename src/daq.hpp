@@ -21,12 +21,11 @@
 #ifndef DAQ_DEVICE_H
 #define DAQ_DEVICE_H
 
-#include <cmath>
 #include <cstddef>
-#include <map>
 
 #include "io.hpp"
 #include "rt.hpp"
+#include "debug.hpp"
 
 //! DAQ Oriented Classes
 /*!

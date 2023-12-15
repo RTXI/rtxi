@@ -17,7 +17,6 @@
 #include <qmdisubwindow.h>
 
 #include "debug.hpp"
-#include "rtxiConfig.h"
 
 std::string Widgets::Variable::state2string(RT::State::state_t state)
 {

@@ -9,7 +9,6 @@
 #include "main_window.hpp"
 #include "rt.hpp"
 #include "rtxiConfig.h"
-#include "widgets.hpp"
 #include "workspace.hpp"
 
 namespace

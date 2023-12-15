@@ -19,9 +19,6 @@
 
 */
 
-#include <complex>
-#include <iostream>
-
 #include "rtos.hpp"
 
 #include <alchemy/task.h>
@@ -31,8 +28,6 @@
 #include <sys/mman.h>
 #include <sys/resource.h>
 #include <unistd.h>
-
-#include "fifo.hpp"
 
 thread_local bool realtime_key = false;
 thread_local int64_t* RT_PERIOD = nullptr;

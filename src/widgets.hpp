@@ -19,6 +19,7 @@
 #include "event.hpp"
 #include "io.hpp"
 #include "rt.hpp"
+#include "debug.hpp"
 
 // These metatype declarations are needed by qt to store
 // the types in QVariant, which is very convenient and reduces

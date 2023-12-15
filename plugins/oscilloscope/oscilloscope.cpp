@@ -28,14 +28,12 @@
 #include <QRadioButton>
 #include <QTimer>
 #include <cmath>
-#include <sstream>
 
 #include "oscilloscope.hpp"
 
 #include <qwt_plot_renderer.h>
 
 #include "debug.hpp"
-#include "main_window.hpp"
 #include "rt.hpp"
 #include "scope.hpp"
 

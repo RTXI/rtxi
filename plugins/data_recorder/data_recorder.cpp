@@ -23,9 +23,7 @@
 #include <QTimer>
 #include <cstddef>
 #include <cstring>
-#include <iostream>
 #include <mutex>
-#include <sstream>
 #include <string>
 
 #include "data_recorder.hpp"
@@ -34,7 +32,6 @@
 #include <unistd.h>
 
 #include "debug.hpp"
-#include "main_window.hpp"
 
 DataRecorder::Panel::Panel(QMainWindow* mwindow, Event::Manager* ev_manager)
     : Widgets::Panel(

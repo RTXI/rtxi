@@ -22,7 +22,6 @@
 
 #include "fifo.hpp"
 
-#include <errno.h>
 #include <fcntl.h>
 #include <sys/eventfd.h>
 #include <sys/poll.h>

@@ -18,7 +18,6 @@
 
 */
 
-#include <iostream>
 
 #include "rtos.hpp"
 
@@ -28,8 +27,6 @@
 #include <sched.h>
 #include <string.h>
 #include <unistd.h>
-
-#include "fifo.hpp"
 
 // NOLINTNEXTLINE
 thread_local bool realtime_key = false;

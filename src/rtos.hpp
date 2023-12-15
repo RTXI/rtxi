@@ -2,14 +2,9 @@
 #define RTOS_H
 
 #include <any>
-#include <functional>
 #include <thread>
 
-#include <errno.h>
 #include <string.h>
-
-#include "debug.hpp"
-#include "fifo.hpp"
 
 namespace RT::OS
 {

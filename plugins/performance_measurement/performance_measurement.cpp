@@ -17,13 +17,10 @@
 
  */
 
-#include <functional>
-
 #include "performance_measurement.hpp"
 
 #include "debug.hpp"
 #include "event.hpp"
-#include "main_window.hpp"
 #include "rt.hpp"
 #include "widgets.hpp"
 
