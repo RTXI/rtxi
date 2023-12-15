@@ -18,8 +18,6 @@
 
  */
 
-#include <functional>
-#include <iostream>
 #include <queue>
 
 #include "rt.hpp"
