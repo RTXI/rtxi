@@ -57,6 +57,7 @@ enum state_t : int8_t
   PAUSE, /*!< The Pause button has been activated            */
   UNPAUSE, /*!< When the pause button has been deactivated     */
   EXIT, /*!< When the module has been told to exit        */
+  UNDEFINED /*!< State used for widgets without relevant thread objects */
 };
 }  // namespace State
 
