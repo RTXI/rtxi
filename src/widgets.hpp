@@ -431,6 +431,9 @@ protected:
    */
   Event::Manager* getRTXIEventManager() { return this->event_manager; }
 
+private slots:
+  void updatePauseButton();
+
 private:
   QMainWindow* main_window = nullptr;
   std::string m_name;
@@ -442,6 +445,7 @@ private:
   QPushButton* pauseButton = nullptr;
   QPushButton* modifyButton = nullptr;
   QPushButton* unloadButton = nullptr;
+  QTimer* defaultPauseUpdateTimer = nullptr;
 
   struct param_t
   {
@@ -622,6 +626,8 @@ public:
    * \param state an RT::State::state_t value to set the component to
    */
   void setComponentState(RT::State::state_t state);
+
+  RT::State::state_t getComponentState();
 
   /*!
    * Get the list of all widget parameters information
