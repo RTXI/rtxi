@@ -910,12 +910,14 @@ void DataRecorder::Component::execute()
       data_sample.value = value;
       this->m_fifo->writeRT(&data_sample, sizeof(DataRecorder::data_token_t));
       break;
-    case RT::State::PAUSE:
-      break;
     case RT::State::UNPAUSE:
     case RT::State::INIT:
       this->setState(RT::State::EXEC);
       break;
+    case RT::State::PAUSE:
+    case RT::State::EXIT:
+    case RT::State::UNDEFINED:
+    case RT::State::MODIFY:
     default:
       break;
   }

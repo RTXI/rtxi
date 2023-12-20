@@ -828,6 +828,7 @@ void Oscilloscope::Component::execute()
     case RT::State::MODIFY:
     case RT::State::EXIT:
     case RT::State::PERIOD:
+    case RT::State::UNDEFINED:
       break;
   }
 }

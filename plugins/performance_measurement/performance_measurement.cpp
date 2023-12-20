@@ -145,6 +145,7 @@ void PerformanceMeasurement::Component::execute()
     case RT::State::PAUSE:
     case RT::State::UNPAUSE:
     case RT::State::EXIT:
+    case RT::State::UNDEFINED:
       break;
   }
   last_start_ticks = *start_ticks;
