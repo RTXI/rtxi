@@ -16,15 +16,191 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <sstream>
 
-#include <analogy_device.h>
-#include <analogy_driver.h>
-#include <debug.h>
+#include <rtdm/analogy.h>
 
-extern "C" Plugin::Object* createRTXIPlugin(void)
+#include <string>
+
+#include <errno.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include "debug.hpp"
+#include "daq.hpp"
+
+constexpr std::string_view DEFAULT_DRIVER_NAME = "Analogy";
+
+class AnalogyDevice : public DAQ::Device
 {
-  return new AnalogyDriver();
+public:
+  AnalogyDevice(a4l_desc_t*, std::string, IO::channel_t*, size_t);
+  AnalogyDevice(const std::string& dev_name,
+                const std::vector<IO::channel_t>& channels,
+                std::string internal_name);
+  ~AnalogyDevice(void);
+
+  size_t getChannelCount(DAQ::ChannelType::type_t type) const final;
+  bool getChannelActive(DAQ::ChannelType::type_t type,
+                        DAQ::index_t index) const final;
+  int setChannelActive(DAQ::ChannelType::type_t type,
+                       DAQ::index_t index,
+                       bool state) final;
+  size_t getAnalogRangeCount(DAQ::index_t index) const final;
+  size_t getAnalogReferenceCount(DAQ::index_t index) const final;
+  size_t getAnalogUnitsCount(DAQ::index_t index) const final;
+  size_t getAnalogDownsample(DAQ::ChannelType::type_t type,
+                             DAQ::index_t index) const final;
+  std::string getAnalogRangeString(DAQ::ChannelType::type_t type,
+                                   DAQ::index_t index,
+                                   DAQ::index_t range) const final;
+  std::string getAnalogReferenceString(DAQ::ChannelType::type_t type,
+                                       DAQ::index_t index,
+                                       DAQ::index_t reference) const final;
+  std::string getAnalogUnitsString(DAQ::ChannelType::type_t type,
+                                   DAQ::index_t index,
+                                   DAQ::index_t units) const final;
+  double getAnalogGain(DAQ::ChannelType::type_t type,
+                       DAQ::index_t index) const final;
+  double getAnalogZeroOffset(DAQ::ChannelType::type_t type,
+                             DAQ::index_t index) const final;
+  DAQ::index_t getAnalogRange(DAQ::ChannelType::type_t type,
+                              DAQ::index_t index) const final;
+  DAQ::index_t getAnalogReference(DAQ::ChannelType::type_t type,
+                                  DAQ::index_t index) const final;
+  DAQ::index_t getAnalogUnits(DAQ::ChannelType::type_t type,
+                              DAQ::index_t index) const final;
+  DAQ::index_t getAnalogOffsetUnits(DAQ::ChannelType::type_t type,
+                                    DAQ::index_t index) const final;
+  int setAnalogGain(DAQ::ChannelType::type_t type,
+                    DAQ::index_t index,
+                    double gain) final;
+  int setAnalogRange(DAQ::ChannelType::type_t type,
+                     DAQ::index_t index,
+                     DAQ::index_t range) final;
+  int setAnalogZeroOffset(DAQ::ChannelType::type_t type,
+                          DAQ::index_t index,
+                          double offset) final;
+  int setAnalogReference(DAQ::ChannelType::type_t type,
+                         DAQ::index_t index,
+                         DAQ::index_t reference) final;
+  int setAnalogUnits(DAQ::ChannelType::type_t type,
+                     DAQ::index_t index,
+                     DAQ::index_t units) final;
+  int setAnalogOffsetUnits(DAQ::ChannelType::type_t type,
+                           DAQ::index_t index,
+                           DAQ::index_t units) final;
+  int setAnalogDownsample(DAQ::ChannelType::type_t type,
+                          DAQ::index_t index,
+                          size_t downsample) final;
+  int setAnalogCounter(DAQ::ChannelType::type_t type, DAQ::index_t index) final;
+  int setAnalogCalibrationValue(DAQ::ChannelType::type_t type,
+                                DAQ::index_t index,
+                                double value) final;
+  double getAnalogCalibrationValue(DAQ::ChannelType::type_t type,
+                                   DAQ::index_t index) const final;
+  int setAnalogCalibrationActive(DAQ::ChannelType::type_t type,
+                                 DAQ::index_t index,
+                                 bool state) final;
+  bool getAnalogCalibrationActive(DAQ::ChannelType::type_t type,
+                                  DAQ::index_t index) const final;
+  bool getAnalogCalibrationState(DAQ::ChannelType::type_t type,
+                                 DAQ::index_t index) const final;
+  int setDigitalDirection(DAQ::index_t index, DAQ::direction_t direction) final;
+
+  void read() final;
+  void write() final;
+
+private:
+  bool analog_exists(ChannelType::type_t, DAQ::index_t) const;
+
+  struct analog_channel_t
+  {
+    double gain;
+    DAQ::index_t range;
+    DAQ::index_t reference;
+    DAQ::index_t units;
+    double conv;
+    double offset;
+    double zerooffset;
+    lsampl_t maxdata;
+    DAQ::index_t offsetunits;
+    size_t downsample;
+    size_t counter;
+    bool calibrationActive;
+    double calOffset;
+  };
+
+  struct digital_channel_t
+  {
+    DAQ::direction_t direction;
+    int previous_value;
+  };
+
+  struct channel_t
+  {
+    bool active;
+    union
+    {
+      analog_channel_t analog;
+      digital_channel_t digital;
+    };
+  };
+
+  struct subdevice_t
+  {
+    int id;
+    DAQ::index_t active;
+    DAQ::index_t count;
+    channel_t* chan;
+  };
+
+  std::string deviceName;
+  subdevice_t subdevice[3];
+  a4l_desc_t dsc;
+};
+
+
+class AnalogyDriver
+    : public DAQ::Driver
+{
+public:
+  AnalogyDriver(void)
+      : DAQ::Driver(std::string(DEFAULT_DRIVER_NAME)) {}
+  virtual ~AnalogyDriver(void);
+
+  static DAQ::Driver* getInstance();
+  void loadDevices() final;
+  void unloadDevices() final;
+  std::vector<DAQ::Device*> getDevices() final;
+
+private:
+  std::vector<AnalogyDevice*> devices;
+};
+
+namespace
+{
+AnalogyDriver* instance = nullptr;
+}  // namespace
+
+DAQ::Driver* AnalogyDriver::getInstance()
+{
+  if (instance == nullptr) {
+    instance = new AnalogyDriver();
+  }
+  return instance;
+}
+
+extern "C"
+{
+DAQ::Driver* getRTXIDAQDriver()
+{
+  return Driver::getInstance();
+}
+
+void deleteRTXIDAQDriver()
+{
+  delete instance;
+}
+
 }
 
 AnalogyDriver::~AnalogyDriver(void)
