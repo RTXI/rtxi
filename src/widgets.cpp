@@ -274,7 +274,7 @@ void Widgets::Panel::createGUI(
 
   main_layout->addWidget(buttonGroup, 1);
 
-  defaultPauseUpdateTimer = new QTimer(this); 
+  defaultPauseUpdateTimer = new QTimer(this);
   QObject::connect(defaultPauseUpdateTimer,
                    &QTimer::timeout,
                    this,
@@ -286,14 +286,16 @@ void Widgets::Panel::createGUI(
 
 void Widgets::Panel::updatePauseButton()
 {
-  if(hostPlugin == nullptr) { return; }
+  if (hostPlugin == nullptr) {
+    return;
+  }
   const RT::State::state_t state = hostPlugin->getComponentState();
-  if(state == RT::State::UNDEFINED) { 
+  if (state == RT::State::UNDEFINED) {
     defaultPauseUpdateTimer->stop();
     return;
   }
   const bool paused = state == RT::State::PAUSE;
-  pauseButton->setChecked(paused); 
+  pauseButton->setChecked(paused);
 }
 
 void Widgets::Panel::update_state(RT::State::state_t flag)
@@ -518,7 +520,7 @@ void Widgets::Plugin::setComponentState(RT::State::state_t state)
 
 RT::State::state_t Widgets::Plugin::getComponentState()
 {
-  if (this->plugin_component == nullptr){
+  if (this->plugin_component == nullptr) {
     return RT::State::UNDEFINED;
   }
   return this->plugin_component->getState();

@@ -23,9 +23,9 @@
 
 #include <cstddef>
 
+#include "debug.hpp"
 #include "io.hpp"
 #include "rt.hpp"
-#include "debug.hpp"
 
 //! DAQ Oriented Classes
 /*!

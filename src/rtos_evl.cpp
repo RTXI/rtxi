@@ -18,7 +18,6 @@
 
 */
 
-
 #include "rtos.hpp"
 
 #include <errno.h>

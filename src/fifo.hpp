@@ -97,7 +97,7 @@ public:
   /*!
    * Get the memory capacity of the fifo
    *
-   * \returns The maximum amount of memory the fifo can hold in bytes 
+   * \returns The maximum amount of memory the fifo can hold in bytes
    */
   virtual size_t getCapacity() = 0;
 
