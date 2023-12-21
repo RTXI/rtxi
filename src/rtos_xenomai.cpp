@@ -20,6 +20,7 @@
 */
 
 #include "rtos.hpp"
+#include "debug.hpp"
 
 #include <alchemy/task.h>
 #include <alchemy/timer.h>

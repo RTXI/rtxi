@@ -162,21 +162,6 @@ target_include_directories(rtxinidaqdriver
 target_link_libraries(rtxinidaqdriver PRIVATE nidaqmx rtxipal)
 endif()
 
-if(xenomai)
-message("Creating analogy drivers for xenomai 3")
-add_library(rtxianalogydriver MODULE
-  analogy_driver.cpp
-)
-
-target_include_directories(rtxianalogydriver
- 	PUBLIC	
-	"$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>"
-  	"$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
-)
-
-target_link_libraries(rtxianalogydriver PRIVATE xenomai rtxipal)
-endif()
-
 target_compile_features(rtxi PUBLIC cxx_std_17)
 target_compile_features(rtxipal PUBLIC cxx_std_17)
 target_compile_features(rtxififo PUBLIC cxx_std_17)
