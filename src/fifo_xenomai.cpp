@@ -18,11 +18,11 @@
 
 */
 
-#include <filesystem>
-
 #include "fifo.hpp"
 
+extern "C" {
 #include <alchemy/pipe.h>
+}
 #include <fcntl.h>
 #include <poll.h>
 #include <sys/eventfd.h>
