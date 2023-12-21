@@ -57,7 +57,7 @@ pkg_check_modules(evl evl)
 include_directories(${PROJECT_BINARY_DIR})
 
 # Find xenomai 3 library
-find_package(Xenomai 3)
+find_package(XENOMAI 3)
 
 #Find the packages
 find_package(Git REQUIRED)

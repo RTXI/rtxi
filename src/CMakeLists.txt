@@ -18,7 +18,7 @@ if(DEFINED evl_FOUND AND RTXI_RT_CORE STREQUAL "evl")
     fmt::fmt
   )
   target_include_directories(rtxipal SYSTEM PRIVATE ${evl_INCLUDE_DIRS})
-elseif(DEFINED Xenomai_FOUND AND RTXI_RT_CORE STREQUAL "xenomai")
+elseif(DEFINED XENOMAI_FOUND AND RTXI_RT_CORE STREQUAL "xenomai")
   message("Xenomai library found. using Cobalt Alchemy interface")
   #list(APPEND CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES ${xenomai3_ALCHEMY_CFLAGS})
   add_library(rtxiplugin SHARED "dlplugin.hpp" "dlplugin.cpp")
@@ -26,18 +26,16 @@ elseif(DEFINED Xenomai_FOUND AND RTXI_RT_CORE STREQUAL "xenomai")
   add_library(rtxififo SHARED "fifo.hpp" "fifo_xenomai.cpp")
   target_include_directories(rtxififo PRIVATE ${XENOMAI_INCLUDE_DIRS})
   target_link_libraries(rtxififo 
-    PUBLIC
-      ${XENOMAI_LIBRARIES}
     PRIVATE 
+      ${XENOMAI_LIBRARIES}
       fmt::fmt
   )
   target_compile_definitions(rtxififo PRIVATE ${XENOMAI_DEFINITIONS})
   add_library(rtxipal SHARED "rtos.hpp" "rtos_xenomai.cpp")
   target_include_directories(rtxipal PRIVATE ${XENOMAI_INCLUDE_DIRS})
   target_link_libraries(rtxipal PRIVATE 
-    rtxififo
-  PUBLIC
     ${XENOMAI_LIBRARIES}
+    rtxififo
     fmt::fmt
   )
   target_compile_definitions(rtxipal PRIVATE ${XENOMAI_DEFINITIONS})
