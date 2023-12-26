@@ -20,9 +20,8 @@
 
 #include "fifo.hpp"
 
-extern "C" {
 #include <alchemy/pipe.h>
-}
+#include <alchemy/task.h>
 #include <fcntl.h>
 #include <poll.h>
 #include <sys/eventfd.h>
@@ -72,10 +71,33 @@ RT::OS::xenomaiFifo::xenomaiFifo(size_t size)
     : pipe_name(std::string("RTXI-pipe-") + std::to_string(FIFO_COUNT++))
     , fifo_capacity(size)
 {
-  pipe_number = rt_pipe_create(
-      &this->pipe_handle, pipe_name.c_str(), P_MINOR_AUTO, fifo_capacity);
+  RT_TASK task_handle;
+  struct arg_struct{
+    RT_PIPE* pipe_handle;
+    const char* pipe_name;
+    int* pipe_number;
+    size_t capacity;
+  };
+  arg_struct args{&PIPE_CREATION_TASK, pipe_name.c_str(), &pipe_number, fifo_capacity};
+  void (*create_pipe_task)(void* args) = [](void* args){
+    auto* pipe_args = reinterpret_cast<arg_struct*>(args);
+    *pipe_args->pipe_number = rt_pipe_create(pipe_args->pipe_handle, 
+                                          pipe_args->pipe_name, 
+                                          P_MINOR_AUTO, 
+                                          pipe_args->capacity);
+  };
+  result = rt_task_start(&task_handle, create_pipe_task, &args); 
+  if(result < 0){
+    ERROR_MSG("RT::OS::xenomaiFifo : Unable to start pipe-creation task");
+    ERROR_MSG("errno: {}", result);
+    return;
+  }
+  rt_task_delete(&task_handle);
+  rt_task_join(&task_handle);
   if (pipe_number < 0) {
-    ERROR_MSG("Unable to open real-time X pipe");
+    ERROR_MSG("RT::OS::xenomaiFifo : Unable to open real-time X pipe");
+    ERROR_MSG("errno: {}", pipe_number);
+    return;
   }
   const std::string filename = std::string(pipe_filesystem_prefix) + pipe_name;
   this->fd = ::open(filename.c_str(), O_RDWR | O_NONBLOCK);

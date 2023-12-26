@@ -33,6 +33,12 @@
 thread_local bool realtime_key = false;
 thread_local int64_t* RT_PERIOD = nullptr;
 
+// unforutnately xenomai doesn't allow creation of pipes outsdie
+// realtime context (xthread) so we should create the pipe cration
+// task early on.
+
+RT_TASK PIPE_CREATION_TASK=0;
+
 int RT::OS::initiate(RT::OS::Task* task)
 {
   // Kernel limitations on memory lock are no longer present, however
@@ -69,6 +75,11 @@ int RT::OS::createTask(RT::OS::Task* task, void (*func)(void*), void* arg)
   retval = rt_task_create(&xenomai_task, "Real-Time Task", 0, 50, 0);
   if (retval != 0) {
     ERROR_MSG("RT::OS::createTask : failed to create task\n");
+    return retval;
+  }
+  retval = rt_task_create(&PIPE_CREATION_TASK, "pipe-creation-task", 0, 50, 0);
+  if (retval != 0) {
+    ERROR_MSG("RT::OS::createTask : failed to create pipe-creation task\n");
     return retval;
   }
 
