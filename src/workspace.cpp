@@ -22,7 +22,6 @@
 #include "module_installer/rtxi_wizard.hpp"
 #include "oscilloscope/oscilloscope.hpp"
 #include "performance_measurement/performance_measurement.hpp"
-#include "rtxiConfig.h"
 #include "system_control/system_control.hpp"
 #include "userprefs/userprefs.hpp"
 
