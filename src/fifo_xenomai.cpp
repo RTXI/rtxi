@@ -26,6 +26,7 @@
 #include <poll.h>
 #include <sys/eventfd.h>
 #include <unistd.h>
+#include <future>
 
 #include "debug.hpp"
 
@@ -71,29 +72,10 @@ RT::OS::xenomaiFifo::xenomaiFifo(size_t size)
     : pipe_name(std::string("RTXI-pipe-") + std::to_string(FIFO_COUNT++))
     , fifo_capacity(size)
 {
-  RT_TASK task_handle;
-  struct arg_struct{
-    RT_PIPE* pipe_handle;
-    const char* pipe_name;
-    int* pipe_number;
-    size_t capacity;
-  };
-  arg_struct args{&PIPE_CREATION_TASK, pipe_name.c_str(), &pipe_number, fifo_capacity};
-  void (*create_pipe_task)(void* args) = [](void* args){
-    auto* pipe_args = reinterpret_cast<arg_struct*>(args);
-    *pipe_args->pipe_number = rt_pipe_create(pipe_args->pipe_handle, 
-                                          pipe_args->pipe_name, 
-                                          P_MINOR_AUTO, 
-                                          pipe_args->capacity);
-  };
-  result = rt_task_start(&task_handle, create_pipe_task, &args); 
-  if(result < 0){
-    ERROR_MSG("RT::OS::xenomaiFifo : Unable to start pipe-creation task");
-    ERROR_MSG("errno: {}", result);
-    return;
-  }
-  rt_task_delete(&task_handle);
-  rt_task_join(&task_handle);
+  pipe_number = rt_pipe_create(&pipe_handle, 
+                               pipe_name.c_str(), 
+                               P_MINOR_AUTO, 
+                               fifo_capacity);
   if (pipe_number < 0) {
     ERROR_MSG("RT::OS::xenomaiFifo : Unable to open real-time X pipe");
     ERROR_MSG("errno: {}", pipe_number);
@@ -145,7 +127,7 @@ void RT::OS::xenomaiFifo::poll()
 {
   int errcode = ::poll(this->xbuf_poll_fd.data(), 2, -1);
   if (errcode < 0) {
-    ERROR_MSG("RT::OS::FIFO(evl)::poll : returned with failure code {} : ",
+    ERROR_MSG("RT::OS::FIFO(xenomai)::poll : returned with failure code {} : ",
               errcode);
     ERROR_MSG("{}", strerror(errcode));
   } else if ((this->xbuf_poll_fd[1].revents & POLLIN) != 0) {
@@ -172,7 +154,12 @@ size_t RT::OS::xenomaiFifo::getCapacity()
 
 int RT::OS::getFifo(std::unique_ptr<Fifo>& fifo, size_t fifo_size)
 {
-  auto tmp_fifo = std::make_unique<RT::OS::xenomaiFifo>(fifo_size);
-  fifo = std::move(tmp_fifo);
+  // We can only create rt pipes from a xenomai thread. 
+  auto create_pipe_task = [&](){
+    rt_task_shadow(nullptr, "create-pipe-task", 0, 0);
+    fifo = std::make_unique<RT::OS::xenomaiFifo>(fifo_size);
+  };
+  std::future task_future = std::async(std::launch::async, create_pipe_task);
+  task_future.wait();
   return 0;
 }
