@@ -37,6 +37,7 @@ echo "-----> Starting RTXI installation..."
 
 echo "-----> Kernel configuration..."
 echo "evl -- Xenomai with EVL library (RT)"
+echo "xenomai -- Legacy Xenomai with Alchemy skin (RT)"
 echo "posix -- Linux based core (Non-RT)"
 echo "-----> Please type your configuration and then press enter: "
 read kernel
@@ -66,7 +67,7 @@ cd ${MODS}
 # git clone https://github.com/RTXI/analysis-module.git
 git clone https://github.com/RTXI/iir-filter.git
 git clone https://github.com/RTXI/fir-window.git
-# git clone https://github.com/RTXI/sync.git
+git clone https://github.com/RTXI/sync.git
 git clone https://github.com/RTXI/mimic-signal.git
 git clone https://github.com/RTXI/signal-generator.git
 # git clone https://github.com/RTXI/ttl-pulses.git
