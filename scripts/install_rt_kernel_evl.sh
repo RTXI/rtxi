@@ -30,7 +30,8 @@ fi
 
 # Export environment variables
 echo  "-----> Setting up variables."
-export linux_version=$( uname -r | sed -r 's/([0-9]+\.[0-9]+).*/\1/' )
+#export linux_version=$( uname -r | sed -r 's/([0-9]+\.[0-9]+).*/\1/' )
+export linux_version=6.6
 export xenomai_root=/opt/libevl
 export xenomai_build_dir="$xenomai_root/build"
 export scripts_dir=`pwd`
@@ -49,11 +50,18 @@ cd $opt
 echo "-----> Downloading main line kernel"
 if [ ! -d $linux_tree ] ; then
   git clone --branch v$linux_version.y-evl-rebase https://git.xenomai.org/xenomai4/linux-evl.git
+else
+  git fetch
+  git pull
+  git checkout --branch v$linux_version.y-evl-rebase
 fi 
 
 echo  "-----> Downloading Xenomai."
 if [ ! -d $xenomai_root ] ; then
   git clone https://source.denx.de/Xenomai/xenomai4/libevl.git 
+else
+  git fetch
+  git pull
 fi
 echo  "-----> Downloads complete."
 
