@@ -51,6 +51,7 @@ echo "-----> Downloading main line kernel"
 if [ ! -d $linux_tree ] ; then
   git clone --branch v$linux_version.y-evl-rebase https://git.xenomai.org/xenomai4/linux-evl.git
 else
+  cd $linux_tree
   git fetch
   git pull
   git checkout --branch v$linux_version.y-evl-rebase
@@ -60,6 +61,7 @@ echo  "-----> Downloading Xenomai."
 if [ ! -d $xenomai_root ] ; then
   git clone https://source.denx.de/Xenomai/xenomai4/libevl.git 
 else
+  cd $xenomai_root
   git fetch
   git pull
 fi
