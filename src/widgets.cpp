@@ -328,34 +328,29 @@ void Widgets::Panel::refresh()
   double double_value = 0.0;
   int64_t int_value = 0;
   uint64_t uint_value = 0ULL;
-  std::stringstream sstream;
   for (auto& i : this->parameter) {
     switch (i.second.type) {
       case Widgets::Variable::STATE:
         param_id = static_cast<Widgets::Variable::Id>(i.second.info.id);
         uint_value = this->hostPlugin->getComponentUIntParameter(param_id);
-        sstream << uint_value;
-        i.second.edit->setText(QString(sstream.str().c_str()));
+        i.second.edit->setText(QString::number(uint_value));
         palette.setBrush(i.second.edit->foregroundRole(), Qt::darkGray);
         i.second.edit->setPalette(palette);
         break;
       case Widgets::Variable::UINT_PARAMETER:
         param_id = static_cast<Widgets::Variable::Id>(i.second.info.id);
         uint_value = this->hostPlugin->getComponentUIntParameter(param_id);
-        sstream << uint_value;
-        i.second.edit->setText(QString(sstream.str().c_str()));
+        i.second.edit->setText(QString::number(uint_value));
         break;
       case Widgets::Variable::INT_PARAMETER:
         param_id = static_cast<Widgets::Variable::Id>(i.second.info.id);
         int_value = this->hostPlugin->getComponentIntParameter(param_id);
-        sstream << int_value;
-        i.second.edit->setText(QString(sstream.str().c_str()));
+        i.second.edit->setText(QString::number(int_value));
         break;
       case Widgets::Variable::DOUBLE_PARAMETER:
         param_id = static_cast<Widgets::Variable::Id>(i.second.info.id);
         double_value = this->hostPlugin->getComponentDoubleParameter(param_id);
-        sstream << double_value;
-        i.second.edit->setText(QString(sstream.str().c_str()));
+        i.second.edit->setText(QString::number(double_value));
         break;
       default:
         ERROR_MSG("Unable to determine refresh type for component {}",
@@ -377,14 +372,12 @@ void Widgets::Panel::refreshUserStates()
   }
   Widgets::Variable::Id param_id = Widgets::Variable::INVALID_ID;
   uint64_t uint_value = 0ULL;
-  std::stringstream sstream;
   for (auto& i : this->parameter) {
     switch (i.second.type) {
       case Widgets::Variable::STATE:
         param_id = static_cast<Widgets::Variable::Id>(i.second.info.id);
         uint_value = this->hostPlugin->getComponentUIntParameter(param_id);
-        sstream << uint_value;
-        i.second.edit->setText(QString(sstream.str().c_str()));
+        i.second.edit->setText(QString::number(uint_value));
         palette.setBrush(i.second.edit->foregroundRole(), Qt::darkGray);
         i.second.edit->setPalette(palette);
         break;
@@ -405,7 +398,6 @@ void Widgets::Panel::modify()
   double double_value = 0.0;
   int int_value = 0;
   uint64_t uint_value = 0ULL;
-  std::stringstream sstream;
   this->update_state(RT::State::PAUSE);
   for (auto& var : this->parameter) {
     if (!var.second.edit->isModified()) {
@@ -416,24 +408,21 @@ void Widgets::Panel::modify()
         param_id = static_cast<Widgets::Variable::Id>(var.second.info.id);
         uint_value = var.second.edit->text().toUInt();
         this->hostPlugin->setComponentParameter<uint64_t>(param_id, uint_value);
-        sstream << uint_value;
-        var.second.edit->setText(QString(sstream.str().c_str()));
+        var.second.edit->setText(QString::number(uint_value));
         var.second.edit->blacken();
         break;
       case Widgets::Variable::INT_PARAMETER:
         param_id = static_cast<Widgets::Variable::Id>(var.second.info.id);
         int_value = var.second.edit->text().toInt();
         this->hostPlugin->setComponentParameter<int>(param_id, int_value);
-        sstream << int_value;
-        var.second.edit->setText(QString(sstream.str().c_str()));
+        var.second.edit->setText(QString::number(int_value));
         var.second.edit->blacken();
         break;
       case Widgets::Variable::DOUBLE_PARAMETER:
         param_id = static_cast<Widgets::Variable::Id>(var.second.info.id);
         double_value = var.second.edit->text().toDouble();
         this->hostPlugin->setComponentParameter(param_id, double_value);
-        sstream << double_value;
-        var.second.edit->setText(QString(sstream.str().c_str()));
+        var.second.edit->setText(QString::number(double_value));
         var.second.edit->blacken();
         break;
       case Widgets::Variable::STATE:
