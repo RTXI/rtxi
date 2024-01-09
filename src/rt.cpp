@@ -18,6 +18,7 @@
 
  */
 
+#include <cstdint>
 #include <queue>
 
 #include "rt.hpp"
@@ -451,14 +452,10 @@ void RT::System::changeWidgetParametersCMD(RT::System::CMD* cmd)
                                    std::get<int64_t>(param_value_any));
       break;
     case Widgets::Variable::UINT_PARAMETER:
-      component->setValue<uint64_t>(param_id,
-                                    std::get<uint64_t>(param_value_any));
-      break;
     case Widgets::Variable::STATE:
-      component->setValue<RT::State::state_t>(
+      component->setValue<uint64_t>(
           param_id,
-          static_cast<RT::State::state_t>(
-              std::get<State::state_t>(param_value_any)));
+          std::get<uint64_t>(param_value_any));
       break;
     default:
       ERROR_MSG(
@@ -816,11 +813,9 @@ void RT::System::changeWidgetParameters(Event::Object* event)
 
       break;
     case Widgets::Variable::UINT_PARAMETER:
-      cmd.setRTParam("paramValue", std::any_cast<uint64_t>(param_value_any));
-      break;
     case Widgets::Variable::STATE:
       cmd.setRTParam("paramValue",
-                     std::any_cast<RT::State::state_t>(param_value_any));
+                     std::any_cast<uint64_t>(param_value_any));
       break;
     default:
       ERROR_MSG(

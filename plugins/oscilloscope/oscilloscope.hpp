@@ -52,7 +52,7 @@ inline std::vector<Widgets::Variable::Info> get_default_vars()
            "Trigger State",
            "Trigger activity for the oscilloscope",
            Widgets::Variable::STATE,
-           RT::State::INIT}};
+           0}};
 }
 
 inline std::vector<IO::channel_t> get_default_channels()

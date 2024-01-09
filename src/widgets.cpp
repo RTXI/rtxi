@@ -127,6 +127,7 @@ std::string Widgets::Component::getValueString(const size_t& var_id)
 {
   std::string value;
   switch (this->parameters[var_id].vartype) {
+    case Widgets::Variable::STATE:
     case Widgets::Variable::UINT_PARAMETER:
       value =
           std::to_string(std::get<uint64_t>(this->parameters[var_id].value));
@@ -136,9 +137,6 @@ std::string Widgets::Component::getValueString(const size_t& var_id)
       break;
     case Widgets::Variable::DOUBLE_PARAMETER:
       value = std::to_string(std::get<double>(this->parameters[var_id].value));
-      break;
-    case Widgets::Variable::STATE:
-      value = "";
       break;
     case Widgets::Variable::COMMENT:
       value = std::get<std::string>(this->parameters[var_id].value);
@@ -402,6 +400,8 @@ void Widgets::Panel::modify()
         sstream << double_value;
         var.second.edit->setText(QString(sstream.str().c_str()));
         var.second.edit->blacken();
+        break;
+      case Widgets::Variable::STATE:
         break;
       default:
         ERROR_MSG("Unable to determine refresh type for component {}",
