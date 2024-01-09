@@ -279,7 +279,7 @@ void Widgets::Panel::createGUI(
   QObject::connect(defaultPauseUpdateTimer,
                    &QTimer::timeout,
                    this,
-                   &Widgets::Panel::refresh);
+                   &Widgets::Panel::refreshUserStates);
   // the timer updates pause state every second
   defaultPauseUpdateTimer->start(1000);
   this->setLayout(main_layout);
@@ -367,6 +367,35 @@ void Widgets::Panel::refresh()
   // createGUI)
   if (this->pauseButton != nullptr) {
     pauseButton->setChecked(hostPlugin->getComponentState() != RT::State::EXEC);
+  }
+}
+
+void Widgets::Panel::refreshUserStates()
+{
+  if (hostPlugin == nullptr || !this->hostPlugin->hasComponent()) {
+    return;
+  }
+  Widgets::Variable::Id param_id = Widgets::Variable::INVALID_ID;
+  uint64_t uint_value = 0ULL;
+  std::stringstream sstream;
+  for (auto& i : this->parameter) {
+    switch (i.second.type) {
+      case Widgets::Variable::STATE:
+        param_id = static_cast<Widgets::Variable::Id>(i.second.info.id);
+        uint_value = this->hostPlugin->getComponentUIntParameter(param_id);
+        sstream << uint_value;
+        i.second.edit->setText(QString(sstream.str().c_str()));
+        palette.setBrush(i.second.edit->foregroundRole(), Qt::darkGray);
+        i.second.edit->setPalette(palette);
+        break;
+      case Widgets::Variable::UINT_PARAMETER:
+      case Widgets::Variable::INT_PARAMETER:
+      case Widgets::Variable::DOUBLE_PARAMETER:
+        break;
+      default:
+        ERROR_MSG("Unable to determine refresh type for component {}",
+                  this->getName());
+    }
   }
 }
 

@@ -332,6 +332,11 @@ public slots:
   virtual void refresh();
 
   /*!
+   * FUnction that updates GUI user States only.
+   */
+  virtual void refreshUserStates();
+
+  /*!
    * Function that calls update_state with the MODIFY flag
    */
   virtual void modify();
