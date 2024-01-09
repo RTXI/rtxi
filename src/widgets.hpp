@@ -450,7 +450,6 @@ private:
   struct param_t
   {
     QLabel* label = nullptr;
-    QString str_value;
     DefaultGUILineEdit* edit = nullptr;
     Widgets::Variable::variable_t type = Widgets::Variable::UNKNOWN;
     Widgets::Variable::Info info;

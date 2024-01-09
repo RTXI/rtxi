@@ -200,7 +200,6 @@ void Widgets::Panel::createGUI(
     param_t param;
     param.label = new QLabel(QString(varinfo.name.c_str()), customParamArea);
     param.edit = new DefaultGUILineEdit(customParamArea);
-    param.str_value = QString();
     param.type = varinfo.vartype;
     param.info = varinfo;
     switch (varinfo.vartype) {
@@ -220,6 +219,7 @@ void Widgets::Panel::createGUI(
         param.edit->setReadOnly(true);
         palette.setBrush(param.edit->foregroundRole(), Qt::darkGray);
         param.edit->setPalette(palette);
+        param.edit->setText(QString::number(std::get<uint64_t>(varinfo.value)));
         break;
       case Widgets::Variable::COMMENT:
         break;
@@ -235,7 +235,6 @@ void Widgets::Panel::createGUI(
     }
     param.label->setToolTip(QString(varinfo.description.c_str()));
     param.edit->setToolTip(QString(varinfo.description.c_str()));
-    param.str_value = param.edit->text();
     parameter[varinfo.name] = param;
     customParamLayout->addWidget(param.label, param_count, 0);
     customParamLayout->addWidget(param.edit, param_count, 1);
@@ -277,6 +276,10 @@ void Widgets::Panel::createGUI(
                    &QTimer::timeout,
                    this,
                    &Widgets::Panel::updatePauseButton);
+  QObject::connect(defaultPauseUpdateTimer,
+                   &QTimer::timeout,
+                   this,
+                   &Widgets::Panel::refresh);
   // the timer updates pause state every second
   defaultPauseUpdateTimer->start(1000);
   this->setLayout(main_layout);
@@ -318,7 +321,7 @@ void Widgets::Panel::exit()
 
 void Widgets::Panel::refresh()
 {
-  if (!this->hostPlugin->hasComponent()) {
+  if (hostPlugin == nullptr || !this->hostPlugin->hasComponent()) {
     return;
   }
   Widgets::Variable::Id param_id = Widgets::Variable::INVALID_ID;
@@ -329,7 +332,10 @@ void Widgets::Panel::refresh()
   for (auto& i : this->parameter) {
     switch (i.second.type) {
       case Widgets::Variable::STATE:
-        i.second.edit->setText(i.second.str_value);
+        param_id = static_cast<Widgets::Variable::Id>(i.second.info.id);
+        uint_value = this->hostPlugin->getComponentUIntParameter(param_id);
+        sstream << uint_value;
+        i.second.edit->setText(QString(sstream.str().c_str()));
         palette.setBrush(i.second.edit->foregroundRole(), Qt::darkGray);
         i.second.edit->setPalette(palette);
         break;
@@ -360,7 +366,7 @@ void Widgets::Panel::refresh()
   // Make sure we actually have a pauseButton object (default constructed with
   // createGUI)
   if (this->pauseButton != nullptr) {
-    pauseButton->setChecked(!(this->hostPlugin->getActive()));
+    pauseButton->setChecked(hostPlugin->getComponentState() != RT::State::EXEC);
   }
 }
 
@@ -432,7 +438,6 @@ void Widgets::Panel::setParameter(const QString& var_name, double value)
       && (n->second.type == Widgets::Variable::DOUBLE_PARAMETER))
   {
     n->second.edit->setText(QString::number(value));
-    n->second.str_value = n->second.edit->text();
     auto param_id = static_cast<Widgets::Variable::Id>(n->second.info.id);
     this->hostPlugin->setComponentParameter<double>(param_id, value);
   }
@@ -445,7 +450,6 @@ void Widgets::Panel::setParameter(const QString& var_name, int value)
       && (n->second.type == Widgets::Variable::INT_PARAMETER))
   {
     n->second.edit->setText(QString::number(value));
-    n->second.str_value = n->second.edit->text();
     auto param_id = static_cast<Widgets::Variable::Id>(n->second.info.id);
     this->hostPlugin->setComponentParameter<int>(param_id, value);
   }
@@ -458,7 +462,6 @@ void Widgets::Panel::setParameter(const QString& var_name, uint64_t value)
       && (n->second.type == Widgets::Variable::UINT_PARAMETER))
   {
     n->second.edit->setText(QString::number(value));
-    n->second.str_value = n->second.edit->text();
     auto param_id = static_cast<Widgets::Variable::Id>(n->second.info.id);
     this->hostPlugin->setComponentParameter<uint64_t>(param_id, value);
   }
