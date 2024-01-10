@@ -67,7 +67,6 @@ find_package(Qt5 REQUIRED COMPONENTS Core Gui Widgets Network OpenGL Svg Xml)
 find_package(qwt REQUIRED)
 find_package(GTest REQUIRED)
 find_package(Threads REQUIRED)
-find_package(Boost REQUIRED)
 find_package(GSL REQUIRED)
 #Some libraries are harder to find as package, so this solves that
 find_library(nidaqmx NAMES libnidaqmx.so)

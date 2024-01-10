@@ -76,8 +76,6 @@ target_link_libraries(rtxi
     qwt::qwt
     rtxififo
     rtxiplugin 
-    Boost::headers
-    backtrace
     dl
     Qt5::Core
     Qt5::Gui
@@ -106,8 +104,6 @@ target_link_libraries(workspace PRIVATE
     Qt5::Network
     fmt::fmt
     qwt::qwt
-    Boost::headers
-    backtrace
     dl
 )
 
@@ -138,7 +134,6 @@ target_link_libraries(rtxi_exe PRIVATE
     oscilloscope_lib
     data_recorder_lib
     module_installer_lib
-    Boost::headers
     qwt::qwt
     Qt5::Core
     Qt5::Gui
@@ -146,7 +141,6 @@ target_link_libraries(rtxi_exe PRIVATE
     Qt5::Network
     fmt::fmt
     HDF5::HDF5
-    backtrace
     dl
 )
 
@@ -170,6 +164,3 @@ target_compile_features(rtxipal PUBLIC cxx_std_17)
 target_compile_features(rtxififo PUBLIC cxx_std_17)
 target_compile_features(rtxiplugin PUBLIC cxx_std_17)
 target_compile_features(rtxi_exe PRIVATE cxx_std_17)
-
-target_compile_definitions(rtxi_exe PRIVATE BOOST_STACKTRACE_USE_ADDR2LINE)
-target_compile_definitions(rtxi PRIVATE BOOST_STACKTRACE_USE_ADDR2LINE)
