@@ -749,7 +749,9 @@ int DataRecorder::Plugin::create_component(IO::endpoint endpoint)
   DataRecorder::record_channel chan;
   chan.name = endpoint.block->getName();
   chan.name += " ";
-  chan.name += std::to_string(endpoint.block->getID());
+  chan.name += endpoint.direction == IO::INPUT ? "INPUT" : "OUTPUT";
+  chan.name += " ";
+  chan.name += std::to_string(endpoint.port);
   chan.name += " ";
   chan.name += "Recording Component";
   chan.endpoint = endpoint;
@@ -895,7 +897,7 @@ DataRecorder::Component::Component(Widgets::Plugin* hplugin,
                          DataRecorder::get_default_vars())
 {
   if (RT::OS::getFifo(this->m_fifo, DataRecorder::DEFAULT_BUFFER_SIZE) != 0) {
-    ERROR_MSG("Unable to create xfifo for Oscilloscope Component {}",
+    ERROR_MSG("Unable to create xfifo for Data Recorder Component {}",
               probe_name);
   }
 }
