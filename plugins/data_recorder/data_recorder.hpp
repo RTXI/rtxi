@@ -99,8 +99,10 @@ public:
 
 signals:
   void updateBlockInfo();
+  void record_signal(bool record);
 
 public slots:
+  void record_slot(bool record);
   void startRecordClicked();
   void stopRecordClicked();
   void updateDownsampleRate(size_t rate);

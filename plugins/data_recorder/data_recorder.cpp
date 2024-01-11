@@ -266,7 +266,16 @@ DataRecorder::Panel::Panel(QMainWindow* mwindow, Event::Manager* ev_manager)
                    &QLineEdit::textChanged,
                    this,
                    &DataRecorder::Panel::syncEnableRecordingButtons);
+  QObject::connect(this,
+                   &DataRecorder::Panel::record_signal,
+                   this,
+                   &DataRecorder::Panel::record_slot);
   recording_timer->start();
+}
+
+void DataRecorder::Panel::record_slot(bool record)
+{
+  record ? startRecordClicked() : stopRecordClicked();
 }
 
 void DataRecorder::Panel::buildBlockList()
@@ -553,6 +562,12 @@ void DataRecorder::Plugin::receiveEvent(Event::Object* event)
     case Event::Type::RT_THREAD_INSERT_EVENT:
     case Event::Type::RT_DEVICE_INSERT_EVENT:
       dynamic_cast<DataRecorder::Panel*>(this->getPanel())->updateBlockInfo();
+      break;
+    case Event::Type::START_RECORDING_EVENT:
+      dynamic_cast<DataRecorder::Panel*>(this->getPanel())->record_signal(/*record=*/true);
+      break;
+    case Event::Type::STOP_RECORDING_EVENT:
+      dynamic_cast<DataRecorder::Panel*>(this->getPanel())->record_signal(/*record=*/false);
       break;
     default:
       break;
