@@ -111,7 +111,7 @@ Widgets::Component::Component(
                 var.name,
                 var.id,
                 parameters.size());
-      return;
+      throw std::invalid_argument("Invalid variable id used during plugin load");
     }
     this->parameters.push_back(var);
   }
