@@ -100,6 +100,13 @@ struct Info
       value;
 };
 
+template<typename... Types, typename T>
+void var_assert(Types... args, T last_var){
+  if constexpr(sizeof...(args) > 0){ var_assert(args...); } 
+  static_assert(last_var.id == sizeof...(args),
+                "RTXI Plugin ID order does not match. Make sure ENUM IDs matches Info ID");
+}
+
 }  // namespace Variable
 
 class DefaultGUILineEdit : public QLineEdit
