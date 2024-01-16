@@ -470,7 +470,7 @@ void Widgets::Panel::setParameter(const QString& var_name, double value)
   }
 }
 
-void Widgets::Panel::setParameter(const QString& var_name, int value)
+void Widgets::Panel::setParameter(const QString& var_name, int64_t value)
 {
   auto n = parameter.find(var_name.toStdString());
   if ((n != parameter.end())
@@ -478,7 +478,7 @@ void Widgets::Panel::setParameter(const QString& var_name, int value)
   {
     n->second.edit->setText(QString::number(value));
     auto param_id = static_cast<Widgets::Variable::Id>(n->second.info.id);
-    this->hostPlugin->setComponentParameter<int>(param_id, value);
+    this->hostPlugin->setComponentParameter<int64_t>(param_id, value);
   }
 }
 

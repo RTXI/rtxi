@@ -388,7 +388,7 @@ protected:
    * \param ref A reference to the parameter.
    *
    */
-  void setParameter(const QString& var_name, int value);
+  void setParameter(const QString& var_name, int64_t value);
 
   /*!
    * retrieves the comment storedabout the component parameter
