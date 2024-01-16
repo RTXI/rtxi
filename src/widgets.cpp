@@ -448,6 +448,16 @@ void Widgets::Panel::setComment(const QString& var_name, const QString& comment)
   }
 }
 
+QString Widgets::Panel::getComment(const QString& name)
+{
+  QString result;
+  auto n = parameter.find(name.toStdString());
+  if (n != parameter.end() && (n->second.type == Widgets::Variable::COMMENT)) {
+    result = n->second.edit->text();
+  }
+  return result;
+}
+
 void Widgets::Panel::setParameter(const QString& var_name, double value)
 {
   auto n = parameter.find(var_name.toStdString());
