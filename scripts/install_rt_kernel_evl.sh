@@ -54,7 +54,7 @@ else
   cd $linux_tree
   git fetch
   git pull
-  git checkout --branch v$linux_version.y-evl-rebase
+  git checkout v$linux_version.y-evl-rebase
 fi 
 
 echo  "-----> Downloading Xenomai."
@@ -92,11 +92,13 @@ make menuconfig
 
 scripts/config --disable SYSTEM_TRUSTED_KEYS
 scripts/config --disable SYSTEM_REVOCATION_KEYS
-#scripts/config --disable DEBUG_INFO
+scripts/config --disable DEBUG_INFO
 echo  "-----> Configuration complete."
 
 # Compile kernel
 echo  "-----> Compiling kernel."
+rm -rf /opt/linux-*.deb
+rm -rf /opt/linux-upstream*
 cd $linux_tree
 #export CONCURRENCY_LEVEL=$(grep -c ^processor /proc/cpuinfo)
 make -j`nproc` bindeb-pkg LOCALVERSION=-xenomai-$xenomai_version-$linux_version
