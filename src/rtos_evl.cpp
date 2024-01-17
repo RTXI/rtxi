@@ -27,6 +27,8 @@
 #include <string.h>
 #include <unistd.h>
 
+#include <debug.hpp>
+
 // NOLINTNEXTLINE
 thread_local bool realtime_key = false;
 // NOLINTNEXTLINE
