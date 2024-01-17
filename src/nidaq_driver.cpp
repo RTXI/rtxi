@@ -13,7 +13,9 @@ extern "C"
 
 const std::string_view DEFAULT_DRIVER_NAME = "National Instruments";
 
-std::vector<std::string> split_string(const std::string& buffer,
+namespace {
+
+inline std::vector<std::string> split_string(const std::string& buffer,
                                       const std::string& delim)
 {
   if (buffer.empty()) {
@@ -41,7 +43,7 @@ std::vector<std::string> split_string(const std::string& buffer,
   return split_tokens;
 }
 
-std::vector<std::string> physical_channel_names(
+inline std::vector<std::string> physical_channel_names(
     const std::string& device, DAQ::ChannelType::type_t chan_type)
 {
   int32_t (*func)(const char*, char*, uint32_t) = nullptr;
@@ -71,7 +73,7 @@ std::vector<std::string> physical_channel_names(
   return split_string(channel_names, ", ");
 }
 
-void printError(int32_t status)
+inline void printError(int32_t status)
 {
   if (status == 0) {
     return;
@@ -92,7 +94,7 @@ void printError(int32_t status)
   ERROR_MSG("Message : {}", err_str);
 }
 
-std::string physical_card_name(const std::string& device_name)
+inline std::string physical_card_name(const std::string& device_name)
 {
   const int32_t err = DAQmxGetDevProductType(device_name.c_str(), nullptr, 0);
   std::string result(static_cast<size_t>(err), '\0');
@@ -705,7 +707,7 @@ void Device::read()
                        DAQmx_Val_WaitInfinitely,
                        DAQmx_Val_GroupByScanNumber,
                        std::get<DAQ::ChannelType::AI>(buffer_arrays).data(),
-                       std::get<DAQ::ChannelType::AI>(buffer_arrays).size(),
+                       static_cast<uint32_t>(std::get<DAQ::ChannelType::AI>(buffer_arrays).size()),
                        &samples_read,
                        nullptr);
     for (auto& chan : this->active_channels.at(DAQ::ChannelType::AI)) {
@@ -724,7 +726,7 @@ void Device::read()
                           DAQmx_Val_WaitInfinitely,
                           DAQmx_Val_GroupByScanNumber,
                           std::get<DAQ::ChannelType::DI>(buffer_arrays).data(),
-                          std::get<DAQ::ChannelType::DI>(buffer_arrays).size(),
+                          static_cast<uint32_t>(std::get<DAQ::ChannelType::DI>(buffer_arrays).size()),
                           &samples_read,
                           &num_bytes_per_sample,
                           nullptr);
@@ -847,18 +849,17 @@ std::vector<DAQ::Device*> Driver::getDevices()
   return devices;
 }
 
-namespace
-{
-Driver* instance = nullptr;
-}  // namespace
-
 DAQ::Driver* Driver::getInstance()
 {
-  if (instance == nullptr) {
-    instance = new Driver();
-  }
-  return instance;
+  //if (instance == nullptr) {
+  //  instance = new Driver();
+  //}
+  static Driver instance;
+  return &instance;
 }
+
+}  // namespace
+
 
 extern "C"
 {
@@ -869,6 +870,5 @@ DAQ::Driver* getRTXIDAQDriver()
 
 void deleteRTXIDAQDriver()
 {
-  delete instance;
 }
 }
