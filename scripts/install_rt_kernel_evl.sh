@@ -31,7 +31,7 @@ fi
 # Export environment variables
 echo  "-----> Setting up variables."
 #export linux_version=$( uname -r | sed -r 's/([0-9]+\.[0-9]+).*/\1/' )
-export linux_version=6.6
+export linux_version=5.15
 export xenomai_root=/opt/libevl
 export xenomai_build_dir="$xenomai_root/build"
 export scripts_dir=`pwd`
@@ -62,8 +62,9 @@ if [ ! -d $xenomai_root ] ; then
   git clone https://source.denx.de/Xenomai/xenomai4/libevl.git 
 else
   cd $xenomai_root
-  git fetch
+  git fetch --all --tags --prune
   git pull
+  git checkout tags/r46
 fi
 echo  "-----> Downloads complete."
 
@@ -92,7 +93,7 @@ make menuconfig
 
 scripts/config --disable SYSTEM_TRUSTED_KEYS
 scripts/config --disable SYSTEM_REVOCATION_KEYS
-scripts/config --disable DEBUG_INFO
+#scripts/config --disable DEBUG_INFO
 echo  "-----> Configuration complete."
 
 # Compile kernel
@@ -101,7 +102,7 @@ rm -rf /opt/linux-*.deb
 rm -rf /opt/linux-upstream*
 cd $linux_tree
 #export CONCURRENCY_LEVEL=$(grep -c ^processor /proc/cpuinfo)
-make -j`nproc` bindeb-pkg LOCALVERSION=-xenomai-$xenomai_version-$linux_version
+make -j`nproc` bindeb-pkg LOCALVERSION=-xenomai-$xenomai_version
 echo  "-----> Kernel compilation complete."
 
 # Install compiled kernel
