@@ -60,6 +60,9 @@ fi
 echo  "-----> Downloading Xenomai."
 if [ ! -d $xenomai_root ] ; then
   git clone https://source.denx.de/Xenomai/xenomai4/libevl.git 
+  git fetch --all --tags --prune
+  git pull
+  git checkout tags/r46
 else
   cd $xenomai_root
   git fetch --all --tags --prune
