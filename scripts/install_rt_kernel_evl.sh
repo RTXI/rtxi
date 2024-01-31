@@ -32,6 +32,7 @@ fi
 echo  "-----> Setting up variables."
 #export linux_version=$( uname -r | sed -r 's/([0-9]+\.[0-9]+).*/\1/' )
 export linux_version=5.15
+export evl_revision=46
 export xenomai_root=/opt/libevl
 export xenomai_build_dir="$xenomai_root/build"
 export scripts_dir=`pwd`
@@ -53,7 +54,6 @@ if [ ! -d $linux_tree ] ; then
 else
   cd $linux_tree
   git fetch
-  git pull
   git checkout v$linux_version.y-evl-rebase
 fi 
 
@@ -61,13 +61,11 @@ echo  "-----> Downloading Xenomai."
 if [ ! -d $xenomai_root ] ; then
   git clone https://source.denx.de/Xenomai/xenomai4/libevl.git 
   git fetch --all --tags --prune
-  git pull
-  git checkout tags/r46
+  git checkout tags/r$evl_revision
 else
   cd $xenomai_root
   git fetch --all --tags --prune
-  git pull
-  git checkout tags/r46
+  git checkout tags/r$evl_revision
 fi
 echo  "-----> Downloads complete."
 
@@ -91,12 +89,11 @@ make mrproper
 make distclean
 
 yes "" | make oldconfig
-yes "" | make localmodconfig
 make menuconfig
 
 scripts/config --disable SYSTEM_TRUSTED_KEYS
 scripts/config --disable SYSTEM_REVOCATION_KEYS
-#scripts/config --disable DEBUG_INFO
+scripts/config --disable DEBUG_INFO
 echo  "-----> Configuration complete."
 
 # Compile kernel
@@ -112,7 +109,7 @@ echo  "-----> Kernel compilation complete."
 echo  "-----> Installing compiled kernel"
 sudo dpkg -i ../linux-image*.deb
 sudo dpkg -i ../linux-headers*.deb
-#sudo dpkg -i ../linux-glibc*.deb
+sudo dpkg -i ../linux-libc*.deb
 echo  "-----> Kernel installation complete."
 
 # Update
