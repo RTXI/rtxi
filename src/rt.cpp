@@ -39,7 +39,8 @@ int RT::Connector::find_cycle(RT::block_connection_t conn, IO::Block* ref_block)
   }
   for (const auto& temp_conn : this->connections[conn.dest->getID()]) {
     if (ref_block == temp_conn.src
-        || this->find_cycle(temp_conn, ref_block) == -1) {
+        || this->find_cycle(temp_conn, ref_block) == -1)
+    {
       return -1;
     }
   }
@@ -156,23 +157,17 @@ std::vector<RT::Thread*> RT::Connector::topological_sort()
   auto sources_per_block = std::unordered_map<IO::Block*, int>();
   // auto valid_threads = std::vector<IO::Block*>();
 
-  // initialize counts
-  for (auto* block : this->block_registry) {
-    if (block == nullptr) {
-      continue;
-    }
-    sources_per_block[block] = 0;
-  }
-
   // Calculate number of sources per block
   for (const auto& entry : this->connections) {
     for (const auto& conn : entry) {
-      sources_per_block[conn.dest] += 1;
+      // unordered_map automatically zero initializes with operator[] for ints
+      sources_per_block[conn.src];
+      sources_per_block[conn.dest]++;
     }
   }
 
   // Initialize queue for processing nodes in graph
-  for (auto block_count : sources_per_block) {
+  for (const auto& block_count : sources_per_block) {
     if (block_count.second == 0) {
       processing_q.push(block_count.first);
     }
@@ -244,8 +239,9 @@ void RT::Connector::clearAllConnections(IO::Block* block)
   for (auto& entry : this->connections) {
     entry.erase(std::remove_if(entry.begin(),
                                entry.end(),
-                               [&](RT::block_connection_t conn)
-                               { return conn.dest == block; }),
+                               [&](RT::block_connection_t conn) {
+                                 return conn.dest == block || conn.src == block;
+                               }),
                 entry.end());
   }
 }
@@ -321,7 +317,8 @@ void RT::System::createTelemitryProcessor()
     eventLogger* logger = this->event_manager->getLogger();
     std::vector<RT::Telemitry::Response> responses;
     while (!this->task->task_finished
-           && this->telemitry_processing_thread_running) {
+           && this->telemitry_processing_thread_running)
+    {
       responses = this->getTelemitry();
       for (auto telem : responses) {
         if (telem.cmd != nullptr) {
@@ -453,9 +450,8 @@ void RT::System::changeWidgetParametersCMD(RT::System::CMD* cmd)
       break;
     case Widgets::Variable::UINT_PARAMETER:
     case Widgets::Variable::STATE:
-      component->setValue<uint64_t>(
-          param_id,
-          std::get<uint64_t>(param_value_any));
+      component->setValue<uint64_t>(param_id,
+                                    std::get<uint64_t>(param_value_any));
       break;
     default:
       ERROR_MSG(
@@ -814,8 +810,7 @@ void RT::System::changeWidgetParameters(Event::Object* event)
       break;
     case Widgets::Variable::UINT_PARAMETER:
     case Widgets::Variable::STATE:
-      cmd.setRTParam("paramValue",
-                     std::any_cast<uint64_t>(param_value_any));
+      cmd.setRTParam("paramValue", std::any_cast<uint64_t>(param_value_any));
       break;
     default:
       ERROR_MSG(
