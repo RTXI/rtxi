@@ -50,9 +50,9 @@ RT::OS::evlFifo::evlFifo(size_t size)
 {
   this->xbuf_fd = evl_create_xbuf(fifo_capacity,
                                   fifo_capacity,
-                                  EVL_CLONE_PRIVATE | EVL_CLONE_NONBLOCK,
-                                  "RTXI Fifo %d",
-                                  FIFO_COUNT++);
+                                  EVL_CLONE_PUBLIC | EVL_CLONE_NONBLOCK,
+                                  "RTXI_Fifo_%d",
+                                  ++FIFO_COUNT);
   if (this->xbuf_fd <= 0) {
     ERROR_MSG("RT::OS::FIFO(evl) : Unable to create real-time buffer\n");
     ERROR_MSG("evl core : {}", strerror(this->xbuf_fd));
