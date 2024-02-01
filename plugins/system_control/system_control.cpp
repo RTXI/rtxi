@@ -25,8 +25,6 @@
 #include "system_control.hpp"
 
 #include "daq.hpp"
-#include "debug.hpp"
-#include "main_window.hpp"
 #include "rt.hpp"
 
 SystemControl::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
@@ -46,7 +44,6 @@ SystemControl::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
     , digitalChannelList(new QComboBox)
     , digitalDirectionList(new QComboBox)
     , digitalSubdeviceList(new QComboBox)
-    , rateUpdate(false)
     , freqUnitList(new QComboBox)
     , periodUnitList(new QComboBox)
     , freqEdit(new QLineEdit)
