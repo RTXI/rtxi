@@ -629,7 +629,7 @@ int Device::setAnalogReference(DAQ::ChannelType::type_t type,
   if (type == DAQ::ChannelType::DI || type == DAQ::ChannelType::DO) {
     return -1;
   }
-  physical_channels_registry.at(type).at(index).range_index = reference;
+  physical_channels_registry.at(type).at(index).reference_index = reference;
   return 0;
 }
 
