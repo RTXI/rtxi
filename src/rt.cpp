@@ -155,14 +155,16 @@ std::vector<RT::Thread*> RT::Connector::topological_sort()
   auto processing_q = std::queue<IO::Block*>();
   auto sorted_blocks = std::vector<IO::Block*>();
   auto sources_per_block = std::unordered_map<IO::Block*, int>();
-  // auto valid_threads = std::vector<IO::Block*>();
+
+  for(auto* block : this->block_registry){
+    if(block == nullptr) { continue; }
+    sources_per_block[block] = 0;
+  }
 
   // Calculate number of sources per block
   for (const auto& entry : this->connections) {
     for (const auto& conn : entry) {
-      // unordered_map automatically zero initializes with operator[] for ints
-      sources_per_block[conn.src];
-      sources_per_block[conn.dest]++;
+      sources_per_block[conn.dest]+=1;
     }
   }
 
@@ -178,11 +180,10 @@ std::vector<RT::Thread*> RT::Connector::topological_sort()
     sorted_blocks.push_back(processing_q.front());
     for (const auto& entry : this->connections) {
       for (const auto& conn : entry) {
-        if (processing_q.front() == conn.src) {
-          sources_per_block[conn.dest] -= 1;
-          if (sources_per_block[conn.dest] == 0) {
-            processing_q.push(conn.dest);
-          }
+        if (processing_q.front() != conn.src) { continue; }
+        sources_per_block[conn.dest] -= 1;
+        if (sources_per_block[conn.dest] == 0) {
+          processing_q.push(conn.dest);
         }
       }
     }
