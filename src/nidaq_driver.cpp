@@ -13,10 +13,11 @@ extern "C"
 
 const std::string_view DEFAULT_DRIVER_NAME = "National Instruments";
 
-namespace {
+namespace
+{
 
 inline std::vector<std::string> split_string(const std::string& buffer,
-                                      const std::string& delim)
+                                             const std::string& delim)
 {
   if (buffer.empty()) {
     return {};
@@ -41,6 +42,46 @@ inline std::vector<std::string> split_string(const std::string& buffer,
   token = buffer.substr(pos_start, buffer.size() - pos_start);
   split_tokens.push_back(token);
   return split_tokens;
+}
+
+inline int32_t index_to_reference(DAQ::index_t index)
+{
+  int32_t result = 0;
+  switch (static_cast<DAQ::Reference::reference_t>(index)) {
+    case DAQ::Reference::GROUND:
+      result = DAQmx_Val_RSE;
+      break;
+    case DAQ::Reference::COMMON:
+      result = DAQmx_Val_NRSE;
+      break;
+    case DAQ::Reference::DIFFERENTIAL:
+      result = DAQmx_Val_Diff;
+      break;
+    default:
+      result = DAQmx_Val_Cfg_Default;
+      break;
+  }
+  return result;
+}
+
+inline DAQ::Reference::reference_t reference_to_index(int32_t ni_daq_reference)
+{
+  DAQ::Reference::reference_t result = DAQ::Reference::UNKNOWN;
+  switch (ni_daq_reference) {
+    case DAQmx_Val_RSE:
+      result = DAQ::Reference::GROUND;
+      break;
+    case DAQmx_Val_NRSE:
+      result = DAQ::Reference::COMMON;
+      break;
+    case DAQmx_Val_Diff:
+      result = DAQ::Reference::DIFFERENTIAL;
+      break;
+    default:
+      result = DAQ::Reference::OTHER;
+      break;
+  }
+  return result;
 }
 
 inline std::vector<std::string> physical_channel_names(
@@ -130,7 +171,6 @@ int32_t physical_channel_t::addToTask(TaskHandle task_handle) const
   int32_t err = 0;
   const std::string units = DAQ::get_default_units().at(units_index);
   auto [min, max] = DAQ::get_default_ranges().at(range_index);
-  // DAQmxStopTask(task_handle);
   switch (type) {
     case DAQ::ChannelType::AI:
       if (units == "volts") {
@@ -194,8 +234,6 @@ int32_t physical_channel_t::addToTask(TaskHandle task_handle) const
       ERROR_MSG("NIDAQ_DRIVER : Channel Type Unknown");
       break;
   }
-  // DAQmxTaskControl(task_handle, DAQmx_Val_Task_Commit);
-  // DAQmxStartTask(task_handle);
   return err;
 }
 
@@ -398,32 +436,34 @@ int Device::setChannelActive(DAQ::ChannelType::type_t type,
   // Unfortunately National Instruments DAQ cards under nidaqmx library best
   // work under tasks, which are more efficient at reading when started before
   // any action. The bad thing is that NI does not make it easy to just remove a
-  // channel. Adding is easy, but removing means clearing the task, then
+  // channel. Removing means clearing the task, then
   // starting the task again, and adding all of the other channels.
   int32_t err = 0;
-  if (physical_channels_registry.at(type).at(index).active == state) {
-    return err;
+  TaskHandle& task = task_list.at(type);
+  physical_channel_t& chan = physical_channels_registry.at(type).at(index); 
+  if (chan.active == state) {
+    return 0;
   }
-  DAQmxStopTask(task_list.at(type));
+  DAQmxStopTask(task);
   if (state) {
-    err = physical_channels_registry.at(type).at(index).addToTask(
-        task_list.at(type));
-    physical_channels_registry.at(type).at(index).active = err == 0;
+    err = chan.addToTask(
+        task);
+    chan.active = err == 0;
   } else {
-    physical_channels_registry.at(type).at(index).active = false;
-    DAQmxClearTask(task_list.at(type));
+    chan.active = false;
+    DAQmxClearTask(task);
     err = DAQmxCreateTask(DAQ::ChannelType::type2string(type).c_str(),
-                          &task_list.at(type));
+                          &task);
     switch (type) {
       case DAQ::ChannelType::AI:
       case DAQ::ChannelType::DI:
-        DAQmxCfgInputBuffer(task_list.at(type), 1);
-        DAQmxSetReadOverWrite(task_list.at(type),
+        DAQmxCfgInputBuffer(task, 1);
+        DAQmxSetReadOverWrite(task,
                               DAQmx_Val_OverwriteUnreadSamps);
         break;
       case DAQ::ChannelType::AO:
       case DAQ::ChannelType::DO:
-        DAQmxCfgOutputBuffer(task_list.at(type), 1);
+        DAQmxCfgOutputBuffer(task, 1);
         break;
       default:
         break;
@@ -439,12 +479,13 @@ int Device::setChannelActive(DAQ::ChannelType::type_t type,
       if (!channel.active) {
         continue;
       }
-      err = channel.addToTask(task_list.at(type));
+      err = channel.addToTask(task);
       if (err != 0) {
         break;
       }
     }
   }
+  printError(err);
   // active channels is an optimization for faster reading/writing in realtime.
   active_channels.at(type).clear();
   for (auto& channel : physical_channels_registry.at(type)) {
@@ -452,10 +493,11 @@ int Device::setChannelActive(DAQ::ChannelType::type_t type,
       active_channels.at(type).push_back(&channel);
     }
   }
-  printError(DAQmxSetSampTimingType(task_list.at(type), DAQmx_Val_OnDemand));
-  printError(DAQmxTaskControl(task_list.at(type), DAQmx_Val_Task_Commit));
-  printError(DAQmxStartTask(task_list.at(type)));
-  printError(err);
+  if(DAQmxGetTaskChannels(task, nullptr, 0) > 0){
+    printError(DAQmxSetSampTimingType(task, DAQmx_Val_OnDemand));
+    printError(DAQmxTaskControl(task, DAQmx_Val_Task_Commit));
+    printError(DAQmxStartTask(task));
+  }
   return err;
 }
 
@@ -567,8 +609,7 @@ DAQ::index_t Device::getAnalogReference(DAQ::ChannelType::type_t type,
   if (type == DAQ::ChannelType::DI || type == DAQ::ChannelType::DO) {
     return 0;
   }
-  return static_cast<size_t>(
-      physical_channels_registry.at(type).at(index).reference);
+  return reference_to_index(physical_channels_registry.at(type).at(index).reference);
 }
 
 DAQ::index_t Device::getAnalogUnits(DAQ::ChannelType::type_t type,
@@ -596,6 +637,7 @@ int Device::setAnalogGain(DAQ::ChannelType::type_t type,
   if (type == DAQ::ChannelType::DI || type == DAQ::ChannelType::DO) {
     return -1;
   }
+  // gain is handled by DAQ class and not nidaqmx
   physical_channels_registry.at(type).at(index).gain = gain;
   return 0;
 }
@@ -607,7 +649,37 @@ int Device::setAnalogRange(DAQ::ChannelType::type_t type,
   if (type == DAQ::ChannelType::DI || type == DAQ::ChannelType::DO) {
     return -1;
   }
-  physical_channels_registry.at(type).at(index).range_index = range;
+  physical_channel_t& chan = physical_channels_registry.at(type).at(index);
+  if(!chan.active) { 
+    chan.range_index = range;
+    return 0;
+  }
+  int32_t (*set_analog_max)(TaskHandle, const char*, float64) = nullptr;
+  int32_t (*set_analog_min)(TaskHandle, const char*, float64) = nullptr;
+  auto [min, max] = DAQ::get_default_ranges().at(range);
+  TaskHandle task = task_list.at(type);
+  const char* chan_name = chan.name.c_str();
+  switch(type){
+    case DAQ::ChannelType::AI:
+      set_analog_max = DAQmxSetAIMax;
+      set_analog_min = DAQmxSetAIMin;
+      break;
+    case DAQ::ChannelType::AO:
+      set_analog_max = DAQmxSetAOMax;
+      set_analog_min = DAQmxSetAOMin;
+      break;
+    default:
+      return -1;
+  }
+  // We attempt to change the range 
+  printError(DAQmxStopTask(task));
+  const int32_t max_result = set_analog_max(task, chan_name, max); 
+  printError(max_result);
+  const int32_t min_result = set_analog_min(task, chan_name, min); 
+  printError(min_result);
+  printError(DAQmxStartTask(task));
+  if(max_result != 0 || min_result != 0) { return -1; }
+  chan.range_index = range;
   return 0;
 }
 
@@ -629,7 +701,32 @@ int Device::setAnalogReference(DAQ::ChannelType::type_t type,
   if (type == DAQ::ChannelType::DI || type == DAQ::ChannelType::DO) {
     return -1;
   }
-  physical_channels_registry.at(type).at(index).reference_index = reference;
+  physical_channel_t& chan = physical_channels_registry.at(type).at(index);
+  int32_t ref = index_to_reference(reference);
+  if(!chan.active) { 
+    chan.reference = ref;
+    return 0;
+  }
+  int32_t (*set_analog_ref)(TaskHandle, const char*, int32_t) = nullptr;
+  TaskHandle task = task_list.at(type);
+  const char* chan_name = chan.name.c_str();
+  switch(type){
+    case DAQ::ChannelType::AI:
+      set_analog_ref = DAQmxSetAITermCfg;
+      break;
+    case DAQ::ChannelType::AO:
+      set_analog_ref = DAQmxSetAOTermCfg;
+      break;
+    default:
+      return -1;
+  }
+  // We attempt to change the range 
+  printError(DAQmxStopTask(task));
+  const int32_t ref_result = set_analog_ref(task, chan_name, ref); 
+  printError(ref_result);
+  printError(DAQmxStartTask(task));
+  if(ref_result != 0) { return -1; }
+  chan.reference = ref;
   return 0;
 }
 
@@ -640,7 +737,17 @@ int Device::setAnalogUnits(DAQ::ChannelType::type_t type,
   if (type == DAQ::ChannelType::DI || type == DAQ::ChannelType::DO) {
     return -1;
   }
+  // RTXI only supports voltage and current for now
+  if (units > 1) { return -1; }
+  physical_channel_t& chan = physical_channels_registry.at(type).at(index);
+  if(!chan.active){
+    chan.units_index = units;
+    return 0;
+  }
+  // To set the units, we have to change shutdown and recreate the channel
+  setChannelActive(type, index, /*state=*/false);
   physical_channels_registry.at(type).at(index).units_index = units;
+  setChannelActive(type, index, /*state=*/true);
   return 0;
 }
 
@@ -702,18 +809,20 @@ void Device::read()
   int samples_read = 0;
   size_t value_index = 0;
   if (!this->active_channels.at(DAQ::ChannelType::AI).empty()) {
-    DAQmxReadAnalogF64(task_list[DAQ::ChannelType::AI],
-                       DAQmx_Val_Auto,
-                       DAQmx_Val_WaitInfinitely,
-                       DAQmx_Val_GroupByScanNumber,
-                       std::get<DAQ::ChannelType::AI>(buffer_arrays).data(),
-                       static_cast<uint32_t>(std::get<DAQ::ChannelType::AI>(buffer_arrays).size()),
-                       &samples_read,
-                       nullptr);
-    for (auto& chan : this->active_channels.at(DAQ::ChannelType::AI)) {
+    DAQmxReadAnalogF64(
+        task_list[DAQ::ChannelType::AI],
+        DAQmx_Val_Auto,
+        DAQmx_Val_WaitInfinitely,
+        DAQmx_Val_GroupByScanNumber,
+        std::get<DAQ::ChannelType::AI>(buffer_arrays).data(),
+        static_cast<uint32_t>(
+            std::get<DAQ::ChannelType::AI>(buffer_arrays).size()),
+        &samples_read,
+        nullptr);
+    for (const auto& chan : this->active_channels.at(DAQ::ChannelType::AI)) {
       writeoutput(
           chan->id,
-          std::get<DAQ::ChannelType::AI>(buffer_arrays).at(value_index));
+          std::get<DAQ::ChannelType::AI>(buffer_arrays)[value_index]*chan->gain + chan->offset);
       ++value_index;
     }
   }
@@ -721,16 +830,18 @@ void Device::read()
   value_index = 0;
   int32_t num_bytes_per_sample = 0;
   if (!this->active_channels.at(DAQ::ChannelType::DI).empty()) {
-    DAQmxReadDigitalLines(task_list[DAQ::ChannelType::DI],
-                          DAQmx_Val_Auto,
-                          DAQmx_Val_WaitInfinitely,
-                          DAQmx_Val_GroupByScanNumber,
-                          std::get<DAQ::ChannelType::DI>(buffer_arrays).data(),
-                          static_cast<uint32_t>(std::get<DAQ::ChannelType::DI>(buffer_arrays).size()),
-                          &samples_read,
-                          &num_bytes_per_sample,
-                          nullptr);
-    for (auto& chan : this->active_channels.at(DAQ::ChannelType::DI)) {
+    DAQmxReadDigitalLines(
+        task_list[DAQ::ChannelType::DI],
+        DAQmx_Val_Auto,
+        DAQmx_Val_WaitInfinitely,
+        DAQmx_Val_GroupByScanNumber,
+        std::get<DAQ::ChannelType::DI>(buffer_arrays).data(),
+        static_cast<uint32_t>(
+            std::get<DAQ::ChannelType::DI>(buffer_arrays).size()),
+        &samples_read,
+        &num_bytes_per_sample,
+        nullptr);
+    for (const auto& chan : this->active_channels.at(DAQ::ChannelType::DI)) {
       writeoutput(
           chan->id,
           std::get<DAQ::ChannelType::DI>(buffer_arrays).at(value_index));
@@ -744,9 +855,9 @@ void Device::write()
   size_t samples_to_write = 0;
   int samples_written = 0;
   if (!this->active_channels.at(DAQ::ChannelType::AO).empty()) {
-    for (auto& chan : this->active_channels.at(DAQ::ChannelType::AO)) {
+    for (const auto& chan : this->active_channels.at(DAQ::ChannelType::AO)) {
       std::get<DAQ::ChannelType::AO>(buffer_arrays).at(samples_to_write) =
-          readinput(chan->id);
+          readinput(chan->id)*chan->gain + chan->offset;
       ++samples_to_write;
     }
     DAQmxWriteAnalogF64(task_list[DAQ::ChannelType::AO],
@@ -763,7 +874,7 @@ void Device::write()
     bool digital_value_changed = false;
     uint8_t old_value = 0;
     uint8_t new_value = 0;
-    for (auto& chan : this->active_channels.at(DAQ::ChannelType::DO)) {
+    for (const auto& chan : this->active_channels.at(DAQ::ChannelType::DO)) {
       old_value =
           std::get<DAQ::ChannelType::DO>(buffer_arrays).at(samples_to_write);
       new_value = static_cast<uint8_t>(readinput(chan->id));
@@ -851,15 +962,14 @@ std::vector<DAQ::Device*> Driver::getDevices()
 
 DAQ::Driver* Driver::getInstance()
 {
-  //if (instance == nullptr) {
-  //  instance = new Driver();
-  //}
+  // if (instance == nullptr) {
+  //   instance = new Driver();
+  // }
   static Driver instance;
   return &instance;
 }
 
 }  // namespace
-
 
 extern "C"
 {
@@ -868,7 +978,5 @@ DAQ::Driver* getRTXIDAQDriver()
   return Driver::getInstance();
 }
 
-void deleteRTXIDAQDriver()
-{
-}
+void deleteRTXIDAQDriver() {}
 }
