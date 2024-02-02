@@ -55,6 +55,7 @@ else
   cd $linux_tree
   git fetch
   git checkout v$linux_version.y-evl-rebase
+  git pull
 fi 
 
 echo  "-----> Downloading Xenomai."
@@ -109,7 +110,7 @@ echo  "-----> Kernel compilation complete."
 echo  "-----> Installing compiled kernel"
 sudo dpkg -i ../linux-image*.deb
 sudo dpkg -i ../linux-headers*.deb
-sudo dpkg -i ../linux-libc*.deb
+#sudo dpkg -i ../linux-libc*.deb
 echo  "-----> Kernel installation complete."
 
 # Update

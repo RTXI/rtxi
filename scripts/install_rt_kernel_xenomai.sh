@@ -31,7 +31,7 @@ fi
 # Export environment variables
 echo  "-----> Setting up variables."
 #export linux_version=$( uname -r | sed -r 's/([0-9]+\.[0-9]+).*/\1/' )
-export linux_version=6.6
+export linux_version=5.15
 export xenomai_version="3.2"
 export xenomai_root=/opt/xenomai-$xenomai_version
 export xenomai_build_dir="$xenomai_root/build"
@@ -93,7 +93,6 @@ $xenomai_root/scripts/prepare-kernel.sh \
 	--verbose
 
 yes "" | make oldconfig
-yes "" | make localmodconfig
 make menuconfig
 scripts/config --disable SYSTEM_TRUSTED_KEYS
 scripts/config --disable SYSTEM_REVOCATION_KEYS
