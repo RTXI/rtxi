@@ -8,7 +8,7 @@ guide.
 
 ## Prerequisite
 
-In order to develop and mantain RTXI under Ubuntu you will need the following:
+In order to develop and maintain RTXI under Ubuntu you will need the following:
 
 1. **cmake** >= 3.19
 2. **clang-tidy** >= 12
@@ -18,11 +18,11 @@ In order to develop and mantain RTXI under Ubuntu you will need the following:
 
 Executables like codespell and clang-format can be obtained through python's
 package manager pip, while other like cmake need apt or snap package managers
-to work in older systems (Ubuntu 20.04 and older). Your milage may vary in 
-other plaforms.
+to work in older systems (Ubuntu 20.04 and older). Your mileage may vary in 
+other platforms.
 
 Presets were added for cmake 3.19 so it makes sense to make this a strict
-requirement when developing RTXI, however this is not neccessary for consumers
+requirement when developing RTXI, however this is not necessary for consumers
 as they won't need to use presets and therefore can get away with older versions.
 
 Development with the conan package manager can be fickle, especially since their
