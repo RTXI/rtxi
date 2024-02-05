@@ -23,7 +23,6 @@
 
 #include "rtxiTests.h"
 
-#include <boost/stacktrace.hpp>
 #include <signal.h>
 
 #include "debug.hpp"
@@ -49,7 +48,7 @@ void signal_handler(int signum)
 {
   // NOLINTNEXTLINE
   ERROR_MSG("signal_handler : signal type {} received\n", signum);
-  std::cerr << boost::stacktrace::stacktrace();
+  PRINT_BACKTRACE();
   exit(-1);  // NOLINT
 }
 }  // namespace
