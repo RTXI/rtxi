@@ -20,7 +20,6 @@
 */
 
 #include "rtos.hpp"
-#include "debug.hpp"
 
 #include <alchemy/task.h>
 #include <alchemy/timer.h>
@@ -29,6 +28,8 @@
 #include <sys/mman.h>
 #include <sys/resource.h>
 #include <unistd.h>
+
+#include "debug.hpp"
 
 thread_local int64_t* RT_PERIOD = nullptr;
 

@@ -24,8 +24,8 @@
 #include <iostream>
 #include <string>
 
-#include <fmt/core.h>
 #include <execinfo.h>
+#include <fmt/core.h>
 
 /*!
  * Prints a backtrace to standard error. Non-realtime usage only.

@@ -564,10 +564,12 @@ void DataRecorder::Plugin::receiveEvent(Event::Object* event)
       dynamic_cast<DataRecorder::Panel*>(this->getPanel())->updateBlockInfo();
       break;
     case Event::Type::START_RECORDING_EVENT:
-      dynamic_cast<DataRecorder::Panel*>(this->getPanel())->record_signal(/*record=*/true);
+      dynamic_cast<DataRecorder::Panel*>(this->getPanel())
+          ->record_signal(/*record=*/true);
       break;
     case Event::Type::STOP_RECORDING_EVENT:
-      dynamic_cast<DataRecorder::Panel*>(this->getPanel())->record_signal(/*record=*/false);
+      dynamic_cast<DataRecorder::Panel*>(this->getPanel())
+          ->record_signal(/*record=*/false);
       break;
     default:
       break;

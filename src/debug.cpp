@@ -18,16 +18,16 @@
 
 */
 
-#include "debug.hpp"
 #include <array>
+
+#include "debug.hpp"
 
 void PRINT_BACKTRACE()
 {
   int buffer_size = 0;
-  std::array<void*, 256> buffer{};
+  std::array<void*, 256> buffer {};
 
-  buffer_size = backtrace(buffer.data(),buffer.size()*sizeof(void*));
+  buffer_size = backtrace(buffer.data(), buffer.size() * sizeof(void*));
   ERROR_MSG("Backtrace:\n");
-  backtrace_symbols_fd(buffer.data(),buffer_size,2);
+  backtrace_symbols_fd(buffer.data(), buffer_size, 2);
 }
-

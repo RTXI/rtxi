@@ -39,8 +39,7 @@ int RT::Connector::find_cycle(RT::block_connection_t conn, IO::Block* ref_block)
   }
   for (const auto& temp_conn : this->connections[conn.dest->getID()]) {
     if (ref_block == temp_conn.src
-        || this->find_cycle(temp_conn, ref_block) == -1)
-    {
+        || this->find_cycle(temp_conn, ref_block) == -1) {
       return -1;
     }
   }
@@ -156,15 +155,17 @@ std::vector<RT::Thread*> RT::Connector::topological_sort()
   auto sorted_blocks = std::vector<IO::Block*>();
   auto sources_per_block = std::unordered_map<IO::Block*, int>();
 
-  for(auto* block : this->block_registry){
-    if(block == nullptr) { continue; }
+  for (auto* block : this->block_registry) {
+    if (block == nullptr) {
+      continue;
+    }
     sources_per_block[block] = 0;
   }
 
   // Calculate number of sources per block
   for (const auto& entry : this->connections) {
     for (const auto& conn : entry) {
-      sources_per_block[conn.dest]+=1;
+      sources_per_block[conn.dest] += 1;
     }
   }
 
@@ -180,7 +181,9 @@ std::vector<RT::Thread*> RT::Connector::topological_sort()
     sorted_blocks.push_back(processing_q.front());
     for (const auto& entry : this->connections) {
       for (const auto& conn : entry) {
-        if (processing_q.front() != conn.src) { continue; }
+        if (processing_q.front() != conn.src) {
+          continue;
+        }
         sources_per_block[conn.dest] -= 1;
         if (sources_per_block[conn.dest] == 0) {
           processing_q.push(conn.dest);
@@ -318,8 +321,7 @@ void RT::System::createTelemitryProcessor()
     eventLogger* logger = this->event_manager->getLogger();
     std::vector<RT::Telemitry::Response> responses;
     while (!this->task->task_finished
-           && this->telemitry_processing_thread_running)
-    {
+           && this->telemitry_processing_thread_running) {
       responses = this->getTelemitry();
       for (auto telem : responses) {
         if (telem.cmd != nullptr) {

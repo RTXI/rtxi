@@ -251,7 +251,7 @@ Widgets::Plugin* Workspace::Manager::loadPlugin(const std::string& library)
   std::unique_ptr<Widgets::Component> component;
   try {
     component = fact_methods->createComponent(plugin.get());
-  } catch (const std::invalid_argument& e){
+  } catch (const std::invalid_argument& e) {
     this->m_plugin_loader->unload(library_loc.c_str());
     return nullptr;
   }

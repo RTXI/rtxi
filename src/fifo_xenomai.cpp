@@ -18,6 +18,8 @@
 
 */
 
+#include <future>
+
 #include "fifo.hpp"
 
 #include <alchemy/pipe.h>
@@ -26,7 +28,6 @@
 #include <poll.h>
 #include <sys/eventfd.h>
 #include <unistd.h>
-#include <future>
 
 #include "debug.hpp"
 
@@ -72,10 +73,8 @@ RT::OS::xenomaiFifo::xenomaiFifo(size_t size)
     : pipe_name(std::string("RTXI-pipe-") + std::to_string(FIFO_COUNT++))
     , fifo_capacity(size)
 {
-  pipe_number = rt_pipe_create(&pipe_handle, 
-                               pipe_name.c_str(), 
-                               P_MINOR_AUTO, 
-                               fifo_capacity);
+  pipe_number = rt_pipe_create(
+      &pipe_handle, pipe_name.c_str(), P_MINOR_AUTO, fifo_capacity);
   if (pipe_number < 0) {
     ERROR_MSG("RT::OS::xenomaiFifo : Unable to open real-time X pipe");
     ERROR_MSG("errno: {}", pipe_number);
@@ -154,8 +153,9 @@ size_t RT::OS::xenomaiFifo::getCapacity()
 
 int RT::OS::getFifo(std::unique_ptr<Fifo>& fifo, size_t fifo_size)
 {
-  // We can only create rt pipes from a xenomai thread. 
-  auto create_pipe_task = [&](){
+  // We can only create rt pipes from a xenomai thread.
+  auto create_pipe_task = [&]()
+  {
     rt_task_shadow(nullptr, "create-pipe-task", 0, 0);
     fifo = std::make_unique<RT::OS::xenomaiFifo>(fifo_size);
   };

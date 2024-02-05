@@ -96,15 +96,18 @@ struct Info
   std::string name;
   std::string description;
   Widgets::Variable::variable_t vartype = Widgets::Variable::UNKNOWN;
-  std::variant<int64_t, double, uint64_t, std::string>
-      value;
+  std::variant<int64_t, double, uint64_t, std::string> value;
 };
 
 template<typename... Types, typename T>
-void var_assert(Types... args, T last_var){
-  if constexpr(sizeof...(args) > 0){ var_assert(args...); } 
+void var_assert(Types... args, T last_var)
+{
+  if constexpr (sizeof...(args) > 0) {
+    var_assert(args...);
+  }
   static_assert(last_var.id == sizeof...(args),
-                "RTXI Plugin ID order does not match. Make sure ENUM IDs matches Info ID");
+                "RTXI Plugin ID order does not match. Make sure ENUM IDs "
+                "matches Info ID");
 }
 
 }  // namespace Variable

@@ -20,14 +20,13 @@
 
 #include "rtos.hpp"
 
+#include <debug.hpp>
 #include <errno.h>
 #include <evl/evl.h>
 #include <pthread.h>
 #include <sched.h>
 #include <string.h>
 #include <unistd.h>
-
-#include <debug.hpp>
 
 // NOLINTNEXTLINE
 thread_local bool realtime_key = false;
