@@ -1,7 +1,6 @@
 #include <QApplication>
 #include <iostream>
 
-#include <boost/stacktrace.hpp>
 #include <signal.h>
 #include <string.h>
 
