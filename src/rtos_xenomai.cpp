@@ -34,7 +34,7 @@
 thread_local int64_t* RT_PERIOD = nullptr;
 
 // unforutnately xenomai doesn't allow creation of pipes outsdie
-// realtime context (xthread) so we should create the pipe cration
+// realtime context (xthread) so we should create the pipe creation
 // task early on.
 
 int RT::OS::initiate(RT::OS::Task* task)
