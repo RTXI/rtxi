@@ -9,7 +9,6 @@
 #include <algorithm>
 #include <any>
 #include <memory>
-#include <sstream>
 
 #include "widgets.hpp"
 
@@ -17,7 +16,6 @@
 #include <qmdisubwindow.h>
 
 #include "debug.hpp"
-#include "rtxiConfig.h"
 
 std::string Widgets::Variable::state2string(RT::State::state_t state)
 {
@@ -75,8 +73,10 @@ std::string Widgets::Variable::vartype2string(
 Widgets::DefaultGUILineEdit::DefaultGUILineEdit(QWidget* parent)
     : QLineEdit(parent)
 {
-  QObject::connect(
-      this, SIGNAL(textChanged(const QString&)), this, SLOT(redden()));
+  QObject::connect(this,
+                   &DefaultGUILineEdit::textChanged,
+                   this,
+                   &DefaultGUILineEdit::redden);
 }
 
 void Widgets::DefaultGUILineEdit::blacken()
@@ -111,7 +111,8 @@ Widgets::Component::Component(
                 var.name,
                 var.id,
                 parameters.size());
-      return;
+      throw std::invalid_argument(
+          "Invalid variable id used during plugin load");
     }
     this->parameters.push_back(var);
   }
@@ -126,6 +127,7 @@ std::string Widgets::Component::getValueString(const size_t& var_id)
 {
   std::string value;
   switch (this->parameters[var_id].vartype) {
+    case Widgets::Variable::STATE:
     case Widgets::Variable::UINT_PARAMETER:
       value =
           std::to_string(std::get<uint64_t>(this->parameters[var_id].value));
@@ -135,9 +137,6 @@ std::string Widgets::Component::getValueString(const size_t& var_id)
       break;
     case Widgets::Variable::DOUBLE_PARAMETER:
       value = std::to_string(std::get<double>(this->parameters[var_id].value));
-      break;
-    case Widgets::Variable::STATE:
-      value = "";
       break;
     case Widgets::Variable::COMMENT:
       value = std::get<std::string>(this->parameters[var_id].value);
@@ -201,7 +200,6 @@ void Widgets::Panel::createGUI(
     param_t param;
     param.label = new QLabel(QString(varinfo.name.c_str()), customParamArea);
     param.edit = new DefaultGUILineEdit(customParamArea);
-    param.str_value = QString();
     param.type = varinfo.vartype;
     param.info = varinfo;
     switch (varinfo.vartype) {
@@ -221,6 +219,7 @@ void Widgets::Panel::createGUI(
         param.edit->setReadOnly(true);
         palette.setBrush(param.edit->foregroundRole(), Qt::darkGray);
         param.edit->setPalette(palette);
+        param.edit->setText(QString::number(std::get<uint64_t>(varinfo.value)));
         break;
       case Widgets::Variable::COMMENT:
         break;
@@ -236,7 +235,6 @@ void Widgets::Panel::createGUI(
     }
     param.label->setToolTip(QString(varinfo.description.c_str()));
     param.edit->setToolTip(QString(varinfo.description.c_str()));
-    param.str_value = param.edit->text();
     parameter[varinfo.name] = param;
     customParamLayout->addWidget(param.label, param_count, 0);
     customParamLayout->addWidget(param.edit, param_count, 1);
@@ -251,16 +249,20 @@ void Widgets::Panel::createGUI(
   // Create elements
   pauseButton = new QPushButton("Pause", this);
   pauseButton->setCheckable(true);
-  QObject::connect(pauseButton, SIGNAL(toggled(bool)), this, SLOT(pause(bool)));
+  QObject::connect(
+      pauseButton, &QPushButton::toggled, this, &Widgets::Panel::pause);
   buttonLayout->addWidget(pauseButton);
 
   modifyButton = new QPushButton("Modify", this);
-  QObject::connect(modifyButton, SIGNAL(clicked()), this, SLOT(modify()));
+  QObject::connect(
+      modifyButton, &QPushButton::clicked, this, &Widgets::Panel::modify);
   buttonLayout->addWidget(modifyButton);
 
   unloadButton = new QPushButton("Unload", this);
-  QObject::connect(
-      unloadButton, SIGNAL(clicked()), parentWidget(), SLOT(close()));
+  QObject::connect(unloadButton,
+                   &QPushButton::clicked,
+                   parentWidget(),
+                   &Widgets::Panel::close);
   buttonLayout->addWidget(unloadButton);
 
   buttonGroup->setLayout(buttonLayout);
@@ -269,7 +271,32 @@ void Widgets::Panel::createGUI(
 
   main_layout->addWidget(buttonGroup, 1);
 
+  defaultPauseUpdateTimer = new QTimer(this);
+  QObject::connect(defaultPauseUpdateTimer,
+                   &QTimer::timeout,
+                   this,
+                   &Widgets::Panel::updatePauseButton);
+  QObject::connect(defaultPauseUpdateTimer,
+                   &QTimer::timeout,
+                   this,
+                   &Widgets::Panel::refreshUserStates);
+  // the timer updates pause state every second
+  defaultPauseUpdateTimer->start(1000);
   this->setLayout(main_layout);
+}
+
+void Widgets::Panel::updatePauseButton()
+{
+  if (hostPlugin == nullptr) {
+    return;
+  }
+  const RT::State::state_t state = hostPlugin->getComponentState();
+  if (state == RT::State::UNDEFINED) {
+    defaultPauseUpdateTimer->stop();
+    return;
+  }
+  const bool paused = state == RT::State::PAUSE;
+  pauseButton->setChecked(paused);
 }
 
 void Widgets::Panel::update_state(RT::State::state_t flag)
@@ -290,40 +317,40 @@ void Widgets::Panel::exit()
   event.setParam("pluginPointer",
                  std::any(static_cast<Widgets::Plugin*>(this->hostPlugin)));
   this->event_manager->postEvent(&event);
-  // this->m_subwindow->close();
 }
 
 void Widgets::Panel::refresh()
 {
+  if (hostPlugin == nullptr || !this->hostPlugin->hasComponent()) {
+    return;
+  }
   Widgets::Variable::Id param_id = Widgets::Variable::INVALID_ID;
   double double_value = 0.0;
   int64_t int_value = 0;
   uint64_t uint_value = 0ULL;
-  std::stringstream sstream;
   for (auto& i : this->parameter) {
     switch (i.second.type) {
       case Widgets::Variable::STATE:
-        i.second.edit->setText(i.second.str_value);
+        param_id = static_cast<Widgets::Variable::Id>(i.second.info.id);
+        uint_value = this->hostPlugin->getComponentUIntParameter(param_id);
+        i.second.edit->setText(QString::number(uint_value));
         palette.setBrush(i.second.edit->foregroundRole(), Qt::darkGray);
         i.second.edit->setPalette(palette);
         break;
       case Widgets::Variable::UINT_PARAMETER:
         param_id = static_cast<Widgets::Variable::Id>(i.second.info.id);
         uint_value = this->hostPlugin->getComponentUIntParameter(param_id);
-        sstream << uint_value;
-        i.second.edit->setText(QString(sstream.str().c_str()));
+        i.second.edit->setText(QString::number(uint_value));
         break;
       case Widgets::Variable::INT_PARAMETER:
         param_id = static_cast<Widgets::Variable::Id>(i.second.info.id);
         int_value = this->hostPlugin->getComponentIntParameter(param_id);
-        sstream << int_value;
-        i.second.edit->setText(QString(sstream.str().c_str()));
+        i.second.edit->setText(QString::number(int_value));
         break;
       case Widgets::Variable::DOUBLE_PARAMETER:
         param_id = static_cast<Widgets::Variable::Id>(i.second.info.id);
         double_value = this->hostPlugin->getComponentDoubleParameter(param_id);
-        sstream << double_value;
-        i.second.edit->setText(QString(sstream.str().c_str()));
+        i.second.edit->setText(QString::number(double_value));
         break;
       default:
         ERROR_MSG("Unable to determine refresh type for component {}",
@@ -331,9 +358,37 @@ void Widgets::Panel::refresh()
     }
   }
 
-  // Make sure we actually have a pauseButton object (default constructed)
+  // Make sure we actually have a pauseButton object (default constructed with
+  // createGUI)
   if (this->pauseButton != nullptr) {
-    pauseButton->setChecked(!(this->hostPlugin->getActive()));
+    pauseButton->setChecked(hostPlugin->getComponentState() != RT::State::EXEC);
+  }
+}
+
+void Widgets::Panel::refreshUserStates()
+{
+  if (hostPlugin == nullptr || !this->hostPlugin->hasComponent()) {
+    return;
+  }
+  Widgets::Variable::Id param_id = Widgets::Variable::INVALID_ID;
+  uint64_t uint_value = 0ULL;
+  for (auto& i : this->parameter) {
+    switch (i.second.type) {
+      case Widgets::Variable::STATE:
+        param_id = static_cast<Widgets::Variable::Id>(i.second.info.id);
+        uint_value = this->hostPlugin->getComponentUIntParameter(param_id);
+        i.second.edit->setText(QString::number(uint_value));
+        palette.setBrush(i.second.edit->foregroundRole(), Qt::darkGray);
+        i.second.edit->setPalette(palette);
+        break;
+      case Widgets::Variable::UINT_PARAMETER:
+      case Widgets::Variable::INT_PARAMETER:
+      case Widgets::Variable::DOUBLE_PARAMETER:
+        break;
+      default:
+        ERROR_MSG("Unable to determine refresh type for component {}",
+                  this->getName());
+    }
   }
 }
 
@@ -343,7 +398,6 @@ void Widgets::Panel::modify()
   double double_value = 0.0;
   int int_value = 0;
   uint64_t uint_value = 0ULL;
-  std::stringstream sstream;
   this->update_state(RT::State::PAUSE);
   for (auto& var : this->parameter) {
     if (!var.second.edit->isModified()) {
@@ -354,25 +408,24 @@ void Widgets::Panel::modify()
         param_id = static_cast<Widgets::Variable::Id>(var.second.info.id);
         uint_value = var.second.edit->text().toUInt();
         this->hostPlugin->setComponentParameter<uint64_t>(param_id, uint_value);
-        sstream << uint_value;
-        var.second.edit->setText(QString(sstream.str().c_str()));
+        var.second.edit->setText(QString::number(uint_value));
         var.second.edit->blacken();
         break;
       case Widgets::Variable::INT_PARAMETER:
         param_id = static_cast<Widgets::Variable::Id>(var.second.info.id);
         int_value = var.second.edit->text().toInt();
         this->hostPlugin->setComponentParameter<int>(param_id, int_value);
-        sstream << int_value;
-        var.second.edit->setText(QString(sstream.str().c_str()));
+        var.second.edit->setText(QString::number(int_value));
         var.second.edit->blacken();
         break;
       case Widgets::Variable::DOUBLE_PARAMETER:
         param_id = static_cast<Widgets::Variable::Id>(var.second.info.id);
         double_value = var.second.edit->text().toDouble();
         this->hostPlugin->setComponentParameter(param_id, double_value);
-        sstream << double_value;
-        var.second.edit->setText(QString(sstream.str().c_str()));
+        var.second.edit->setText(QString::number(double_value));
         var.second.edit->blacken();
+        break;
+      case Widgets::Variable::STATE:
         break;
       default:
         ERROR_MSG("Unable to determine refresh type for component {}",
@@ -380,6 +433,7 @@ void Widgets::Panel::modify()
     }
   }
   this->update_state(RT::State::MODIFY);
+  refresh();
 }
 
 // NOLINTNEXTLINE
@@ -395,6 +449,16 @@ void Widgets::Panel::setComment(const QString& var_name, const QString& comment)
   }
 }
 
+QString Widgets::Panel::getComment(const QString& name)
+{
+  QString result;
+  auto n = parameter.find(name.toStdString());
+  if (n != parameter.end() && (n->second.type == Widgets::Variable::COMMENT)) {
+    result = n->second.edit->text();
+  }
+  return result;
+}
+
 void Widgets::Panel::setParameter(const QString& var_name, double value)
 {
   auto n = parameter.find(var_name.toStdString());
@@ -402,24 +466,20 @@ void Widgets::Panel::setParameter(const QString& var_name, double value)
       && (n->second.type == Widgets::Variable::DOUBLE_PARAMETER))
   {
     n->second.edit->setText(QString::number(value));
-    n->second.str_value = n->second.edit->text();
     auto param_id = static_cast<Widgets::Variable::Id>(n->second.info.id);
     this->hostPlugin->setComponentParameter<double>(param_id, value);
-    // setValue(n->second.index, n->second.edit->text().toDouble());
   }
 }
 
-void Widgets::Panel::setParameter(const QString& var_name, int value)
+void Widgets::Panel::setParameter(const QString& var_name, int64_t value)
 {
   auto n = parameter.find(var_name.toStdString());
   if ((n != parameter.end())
       && (n->second.type == Widgets::Variable::INT_PARAMETER))
   {
     n->second.edit->setText(QString::number(value));
-    n->second.str_value = n->second.edit->text();
     auto param_id = static_cast<Widgets::Variable::Id>(n->second.info.id);
-    this->hostPlugin->setComponentParameter<int>(param_id, value);
-    // setValue(n->second.index, n->second.edit->text().toDouble());
+    this->hostPlugin->setComponentParameter<int64_t>(param_id, value);
   }
 }
 
@@ -430,10 +490,8 @@ void Widgets::Panel::setParameter(const QString& var_name, uint64_t value)
       && (n->second.type == Widgets::Variable::UINT_PARAMETER))
   {
     n->second.edit->setText(QString::number(value));
-    n->second.str_value = n->second.edit->text();
     auto param_id = static_cast<Widgets::Variable::Id>(n->second.info.id);
     this->hostPlugin->setComponentParameter<uint64_t>(param_id, value);
-    // setValue(n->second.index, n->second.edit->text().toDouble());
   }
 }
 
@@ -442,11 +500,7 @@ void Widgets::Panel::pause(bool p)
   if (pauseButton->isChecked() != p) {
     pauseButton->setDown(p);
   }
-  // const int result = this->hostPlugin->setActive(!p);
-  // if (result != 0) {
-  //   ERROR_MSG("Unable to pause/Unpause Plugin {} ", this->getName());
-  //   return;
-  // }
+
   if (p) {
     this->update_state(RT::State::PAUSE);
   } else {
@@ -493,6 +547,14 @@ void Widgets::Plugin::setComponentState(RT::State::state_t state)
       std::any(static_cast<Widgets::Component*>(this->plugin_component.get())));
   event.setParam("state", std::any(state));
   this->event_manager->postEvent(&event);
+}
+
+RT::State::state_t Widgets::Plugin::getComponentState()
+{
+  if (this->plugin_component == nullptr) {
+    return RT::State::UNDEFINED;
+  }
+  return this->plugin_component->getState();
 }
 
 std::vector<Widgets::Variable::Info>

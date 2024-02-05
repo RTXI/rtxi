@@ -185,14 +185,14 @@ else()
     set(XENOMAI_RTDM_FOUND FALSE)
 endif()
 
-if(Xenomai_FIND_QUIETLY)
+if(XENOMAI_FIND_QUIETLY)
     set(XENOMAI_FIND_QUIETLY True)
     set(XENOMAI_POSIX_FIND_QUIETLY True)
     set(XENOMAI_RTDM_FIND_QUIETLY True)
 endif()
 
-find_package_handle_standard_args(Xenomai VERSION_VAR XENOMAI_VERSION REQUIRED_VARS XENOMAI_XENO_CONFIG)
+find_package_handle_standard_args(XENOMAI VERSION_VAR XENOMAI_VERSION REQUIRED_VARS XENOMAI_XENO_CONFIG)
 
-handle_standard_args(Xenomai)
+handle_standard_args(XENOMAI)
 #handle_standard_args(XENOMAI_POSIX)
 #handle_standard_args(XENOMAI_RTDM)

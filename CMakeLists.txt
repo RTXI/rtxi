@@ -1,10 +1,10 @@
-cmake_minimum_required(VERSION 3.18)
+cmake_minimum_required(VERSION 3.16)
 
 include(cmake/prelude.cmake)
 
 project(
     "rtxi"
-    VERSION 3.0.1
+    VERSION 3.0.2
     DESCRIPTION "Real-Time eXperiment Interface"
     HOMEPAGE_URL "http://rtxi.org/"
     LANGUAGES C CXX
@@ -57,7 +57,7 @@ pkg_check_modules(evl evl)
 include_directories(${PROJECT_BINARY_DIR})
 
 # Find xenomai 3 library
-find_package(Xenomai 3)
+find_package(XENOMAI 3)
 
 #Find the packages
 find_package(Git REQUIRED)
@@ -67,7 +67,6 @@ find_package(Qt5 REQUIRED COMPONENTS Core Gui Widgets Network OpenGL Svg Xml)
 find_package(qwt REQUIRED)
 find_package(GTest REQUIRED)
 find_package(Threads REQUIRED)
-find_package(Boost REQUIRED)
 find_package(GSL REQUIRED)
 #Some libraries are harder to find as package, so this solves that
 find_library(nidaqmx NAMES libnidaqmx.so)

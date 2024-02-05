@@ -30,7 +30,9 @@ fi
 
 # Export environment variables
 echo  "-----> Setting up variables."
-export linux_version=$( uname -r | sed -r 's/([0-9]+\.[0-9]+).*/\1/' )
+#export linux_version=$( uname -r | sed -r 's/([0-9]+\.[0-9]+).*/\1/' )
+export linux_version=5.15
+export evl_revision=46
 export xenomai_root=/opt/libevl
 export xenomai_build_dir="$xenomai_root/build"
 export scripts_dir=`pwd`
@@ -49,11 +51,22 @@ cd $opt
 echo "-----> Downloading main line kernel"
 if [ ! -d $linux_tree ] ; then
   git clone --branch v$linux_version.y-evl-rebase https://git.xenomai.org/xenomai4/linux-evl.git
+else
+  cd $linux_tree
+  git fetch
+  git checkout v$linux_version.y-evl-rebase
+  git pull
 fi 
 
 echo  "-----> Downloading Xenomai."
 if [ ! -d $xenomai_root ] ; then
   git clone https://source.denx.de/Xenomai/xenomai4/libevl.git 
+  git fetch --all --tags --prune
+  git checkout tags/r$evl_revision
+else
+  cd $xenomai_root
+  git fetch --all --tags --prune
+  git checkout tags/r$evl_revision
 fi
 echo  "-----> Downloads complete."
 
@@ -77,26 +90,27 @@ make mrproper
 make distclean
 
 yes "" | make oldconfig
-yes "" | make localmodconfig
 make menuconfig
 
 scripts/config --disable SYSTEM_TRUSTED_KEYS
 scripts/config --disable SYSTEM_REVOCATION_KEYS
-#scripts/config --disable DEBUG_INFO
+scripts/config --disable DEBUG_INFO
 echo  "-----> Configuration complete."
 
 # Compile kernel
 echo  "-----> Compiling kernel."
+rm -rf /opt/linux-*.deb
+rm -rf /opt/linux-upstream*
 cd $linux_tree
 #export CONCURRENCY_LEVEL=$(grep -c ^processor /proc/cpuinfo)
-make -j`nproc` bindeb-pkg LOCALVERSION=-xenomai-$xenomai_version-$linux_version
+make -j`nproc` bindeb-pkg LOCALVERSION=-xenomai-$xenomai_version
 echo  "-----> Kernel compilation complete."
 
 # Install compiled kernel
 echo  "-----> Installing compiled kernel"
 sudo dpkg -i ../linux-image*.deb
 sudo dpkg -i ../linux-headers*.deb
-#sudo dpkg -i ../linux-glibc*.deb
+#sudo dpkg -i ../linux-libc*.deb
 echo  "-----> Kernel installation complete."
 
 # Update

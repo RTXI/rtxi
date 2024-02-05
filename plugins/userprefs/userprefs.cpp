@@ -27,9 +27,6 @@
 
 #include "userprefs.hpp"
 
-#include "debug.hpp"
-#include "main_window.hpp"
-
 UserPrefs::Plugin::Plugin(Event::Manager* ev_manager)
     : Widgets::Plugin(ev_manager, std::string(UserPrefs::MODULE_NAME))
 {
@@ -67,9 +64,9 @@ UserPrefs::Panel::Panel(QMainWindow* mwindow, Event::Manager* ev_manager)
   auto* chooseSettingsDirButton = new QPushButton("Browse", this);
   dirLayout->addWidget(chooseSettingsDirButton, 0, 2, 1, 2);
   QObject::connect(chooseSettingsDirButton,
-                   SIGNAL(released()),
+                   &QPushButton::released,
                    this,
-                   SLOT(chooseSettingsDir()));
+                   &UserPrefs::Panel::chooseSettingsDir);
 
   dataDirEdit->setText(
       user_preferences.value("/dirs/data", env_var).toString());
@@ -78,8 +75,10 @@ UserPrefs::Panel::Panel(QMainWindow* mwindow, Event::Manager* ev_manager)
   dirLayout->addWidget(dataDirEdit, 1, 1, 1, 1);
   auto* chooseDataDirButton = new QPushButton("Browse", this);
   dirLayout->addWidget(chooseDataDirButton, 1, 2, 1, 2);
-  QObject::connect(
-      chooseDataDirButton, SIGNAL(released()), this, SLOT(chooseDataDir()));
+  QObject::connect(chooseDataDirButton,
+                   &QPushButton::released,
+                   this,
+                   &UserPrefs::Panel::chooseDataDir);
 
   // Attach layout to group
   dirGroup->setLayout(dirLayout);
@@ -102,12 +101,14 @@ UserPrefs::Panel::Panel(QMainWindow* mwindow, Event::Manager* ev_manager)
 
   // Create elements for child widget
   auto* resetButton = new QPushButton("Reset");
-  QObject::connect(resetButton, SIGNAL(released()), this, SLOT(reset()));
+  QObject::connect(
+      resetButton, &QPushButton::released, this, &UserPrefs::Panel::reset);
   auto* applyButton = new QPushButton("Save");
-  QObject::connect(applyButton, SIGNAL(released()), this, SLOT(apply()));
+  QObject::connect(
+      applyButton, &QPushButton::released, this, &UserPrefs::Panel::apply);
   auto* cancelButton = new QPushButton("Close");
   QObject::connect(
-      cancelButton, SIGNAL(released()), parentWidget(), SLOT(close()));
+      cancelButton, &QPushButton::released, parentWidget(), &QWidget::close);
 
   status->setText("Defaults \nloaded");
   // NOLINTNEXTLINE

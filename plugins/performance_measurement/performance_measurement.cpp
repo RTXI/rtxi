@@ -17,13 +17,10 @@
 
  */
 
-#include <functional>
-
 #include "performance_measurement.hpp"
 
 #include "debug.hpp"
 #include "event.hpp"
-#include "main_window.hpp"
 #include "rt.hpp"
 #include "widgets.hpp"
 
@@ -76,7 +73,10 @@ PerformanceMeasurement::Panel::Panel(const std::string& mod_name,
 
   auto* resetButton = new QPushButton("Reset", this);
   gridLayout->addWidget(resetButton, 7, 1);
-  QObject::connect(resetButton, SIGNAL(released()), this, SLOT(reset()));
+  QObject::connect(resetButton,
+                   &QPushButton::released,
+                   this,
+                   &PerformanceMeasurement::Panel::reset);
 
   // Attach child widget to parent widget
   // box_layout->addLayout(gridLayout);
@@ -145,6 +145,7 @@ void PerformanceMeasurement::Component::execute()
     case RT::State::PAUSE:
     case RT::State::UNPAUSE:
     case RT::State::EXIT:
+    case RT::State::UNDEFINED:
       break;
   }
   last_start_ticks = *start_ticks;

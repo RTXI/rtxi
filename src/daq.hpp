@@ -21,10 +21,9 @@
 #ifndef DAQ_DEVICE_H
 #define DAQ_DEVICE_H
 
-#include <cmath>
 #include <cstddef>
-#include <map>
 
+#include "debug.hpp"
 #include "io.hpp"
 #include "rt.hpp"
 

@@ -26,7 +26,6 @@
 #include <vector>
 
 #include "event.hpp"
-#include "fifo.hpp"
 #include "io.hpp"
 #include "widgets.hpp"
 

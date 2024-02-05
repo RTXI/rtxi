@@ -18,8 +18,7 @@
 
  */
 
-#include <functional>
-#include <iostream>
+#include <cstdint>
 #include <queue>
 
 #include "rt.hpp"
@@ -155,9 +154,7 @@ std::vector<RT::Thread*> RT::Connector::topological_sort()
   auto processing_q = std::queue<IO::Block*>();
   auto sorted_blocks = std::vector<IO::Block*>();
   auto sources_per_block = std::unordered_map<IO::Block*, int>();
-  // auto valid_threads = std::vector<IO::Block*>();
 
-  // initialize counts
   for (auto* block : this->block_registry) {
     if (block == nullptr) {
       continue;
@@ -173,7 +170,7 @@ std::vector<RT::Thread*> RT::Connector::topological_sort()
   }
 
   // Initialize queue for processing nodes in graph
-  for (auto block_count : sources_per_block) {
+  for (const auto& block_count : sources_per_block) {
     if (block_count.second == 0) {
       processing_q.push(block_count.first);
     }
@@ -184,11 +181,12 @@ std::vector<RT::Thread*> RT::Connector::topological_sort()
     sorted_blocks.push_back(processing_q.front());
     for (const auto& entry : this->connections) {
       for (const auto& conn : entry) {
-        if (processing_q.front() == conn.src) {
-          sources_per_block[conn.dest] -= 1;
-          if (sources_per_block[conn.dest] == 0) {
-            processing_q.push(conn.dest);
-          }
+        if (processing_q.front() != conn.src) {
+          continue;
+        }
+        sources_per_block[conn.dest] -= 1;
+        if (sources_per_block[conn.dest] == 0) {
+          processing_q.push(conn.dest);
         }
       }
     }
@@ -245,8 +243,9 @@ void RT::Connector::clearAllConnections(IO::Block* block)
   for (auto& entry : this->connections) {
     entry.erase(std::remove_if(entry.begin(),
                                entry.end(),
-                               [&](RT::block_connection_t conn)
-                               { return conn.dest == block; }),
+                               [&](RT::block_connection_t conn) {
+                                 return conn.dest == block || conn.src == block;
+                               }),
                 entry.end());
   }
 }
@@ -453,14 +452,9 @@ void RT::System::changeWidgetParametersCMD(RT::System::CMD* cmd)
                                    std::get<int64_t>(param_value_any));
       break;
     case Widgets::Variable::UINT_PARAMETER:
+    case Widgets::Variable::STATE:
       component->setValue<uint64_t>(param_id,
                                     std::get<uint64_t>(param_value_any));
-      break;
-    case Widgets::Variable::STATE:
-      component->setValue<RT::State::state_t>(
-          param_id,
-          static_cast<RT::State::state_t>(
-              std::get<State::state_t>(param_value_any)));
       break;
     default:
       ERROR_MSG(
@@ -818,11 +812,8 @@ void RT::System::changeWidgetParameters(Event::Object* event)
 
       break;
     case Widgets::Variable::UINT_PARAMETER:
-      cmd.setRTParam("paramValue", std::any_cast<uint64_t>(param_value_any));
-      break;
     case Widgets::Variable::STATE:
-      cmd.setRTParam("paramValue",
-                     std::any_cast<RT::State::state_t>(param_value_any));
+      cmd.setRTParam("paramValue", std::any_cast<uint64_t>(param_value_any));
       break;
     default:
       ERROR_MSG(

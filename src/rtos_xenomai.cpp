@@ -19,9 +19,6 @@
 
 */
 
-#include <complex>
-#include <iostream>
-
 #include "rtos.hpp"
 
 #include <alchemy/task.h>
@@ -32,10 +29,13 @@
 #include <sys/resource.h>
 #include <unistd.h>
 
-#include "fifo.hpp"
+#include "debug.hpp"
 
-thread_local bool realtime_key = false;
 thread_local int64_t* RT_PERIOD = nullptr;
+
+// unforutnately xenomai doesn't allow creation of pipes outsdie
+// realtime context (xthread) so we should create the pipe creation
+// task early on.
 
 int RT::OS::initiate(RT::OS::Task* task)
 {
@@ -50,7 +50,6 @@ int RT::OS::initiate(RT::OS::Task* task)
     return -EPERM;
   }
 
-  realtime_key = true;
   task->period = RT::OS::DEFAULT_PERIOD;
   RT_PERIOD = &(task->period);
   return 0;
@@ -58,7 +57,6 @@ int RT::OS::initiate(RT::OS::Task* task)
 
 void RT::OS::shutdown(RT::OS::Task* task)
 {
-  realtime_key = false;
   task->task_finished = true;
   RT_PERIOD = nullptr;
 }
@@ -75,7 +73,6 @@ int RT::OS::createTask(RT::OS::Task* task, void (*func)(void*), void* arg)
     ERROR_MSG("RT::OS::createTask : failed to create task\n");
     return retval;
   }
-
   // Xenomai 3 uses heavy C syntax, so this is dealing with void* shenanigans
   struct wrapper_args_t
   {
@@ -125,7 +122,7 @@ void RT::OS::deleteTask(RT::OS::Task* task)
 
 bool RT::OS::isRealtime()
 {
-  return (realtime_key && rt_task_self() != nullptr);
+  return (rt_task_self() != nullptr);
 }
 
 int64_t RT::OS::getTime()
@@ -141,7 +138,7 @@ int RT::OS::setPeriod(RT::OS::Task* task, int64_t period)
 
 int64_t RT::OS::getPeriod()
 {
-  // This function should only ever be accessed withint a real-tim context
+  // This function should only ever be accessed withint a real-time context
   if (RT_PERIOD == nullptr || !RT::OS::isRealtime()) {
     return -1;
   };

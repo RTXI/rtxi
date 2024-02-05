@@ -18,23 +18,16 @@
 
 */
 
-#include <iostream>
+#include <array>
 
 #include "debug.hpp"
 
-//
-// void PRINT_BACKTRACE(void)
-//{
-//    std::cerr << boost::stacktrace::stacktrace();
-//}
+void PRINT_BACKTRACE()
+{
+  int buffer_size = 0;
+  std::array<void*, 256> buffer {};
 
-// void ERROR_MSG(const std::string errmsg, ...)
-//{
-//   va_list args;
-//   va_start(args, errmsg);
-//   char buf[256] = "";
-//   vsprintf(buf, errmsg.c_str(), args);
-//   std::cerr << std::string(buf);
-//   std::cerr << "\n";
-//   va_end(args);
-// }
+  buffer_size = backtrace(buffer.data(), buffer.size() * sizeof(void*));
+  ERROR_MSG("Backtrace:\n");
+  backtrace_symbols_fd(buffer.data(), buffer_size, 2);
+}

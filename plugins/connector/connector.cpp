@@ -20,8 +20,6 @@
 
 #include "connector.hpp"
 
-#include "main_window.hpp"
-
 Connector::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
     : Widgets::Panel(std::string(Connector::MODULE_NAME), mw, ev_manager)
     , buttonGroup(new QGroupBox)
@@ -62,28 +60,28 @@ Connector::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
   buildOutputFlagList();
 
   QObject::connect(outputBlock,
-                   SIGNAL(activated(int)),
+                   QOverload<int>::of(&QComboBox::activated),
                    this,
-                   SLOT(buildOutputChannelList(void)));
+                   &Connector::Panel::buildOutputChannelList);
   QObject::connect(outputBlock,
-                   SIGNAL(activated(int)),
+                   QOverload<int>::of(&QComboBox::activated),
                    this,
-                   SLOT(updateConnectionButton(void)));
+                   &Connector::Panel::updateConnectionButton);
   QObject::connect(outputFlag,
-                   SIGNAL(activated(int)),
+                   QOverload<int>::of(&QComboBox::activated),
                    this,
-                   SLOT(buildOutputChannelList(void)));
+                   &Connector::Panel::buildOutputChannelList);
   QObject::connect(outputFlag,
-                   SIGNAL(activated(int)),
+                   QOverload<int>::of(&QComboBox::activated),
                    this,
-                   SLOT(updateConnectionButton(void)));
+                   &Connector::Panel::updateConnectionButton);
 
   outputLayout->addWidget(new QLabel(tr("Channel:")), 3, Qt::Alignment());
   outputLayout->addWidget(outputChannel);
   QObject::connect(outputChannel,
-                   SIGNAL(activated(int)),
+                   QOverload<int>::of(&QComboBox::activated),
                    this,
-                   SLOT(updateConnectionButton(void)));
+                   &Connector::Panel::updateConnectionButton);
 
   // Assign layout to child widget
   outputGroup->setLayout(outputLayout);
@@ -96,9 +94,9 @@ Connector::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
   connectionButton->setCheckable(true);
   buttonLayout->addWidget(connectionButton);
   QObject::connect(connectionButton,
-                   SIGNAL(clicked(bool)),
+                   &QPushButton::clicked,
                    this,
-                   SLOT(toggleConnection(bool)));
+                   &Connector::Panel::toggleConnection);
 
   // Assign layout to child widget
   buttonGroup->setLayout(buttonLayout);
@@ -111,20 +109,20 @@ Connector::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
   inputLayout->addWidget(new QLabel(tr("Block:")), 1, Qt::Alignment());
   inputLayout->addWidget(inputBlock);
   QObject::connect(inputBlock,
-                   SIGNAL(activated(int)),
+                   QOverload<int>::of(&QComboBox::activated),
                    this,
-                   SLOT(buildInputChannelList(void)));
+                   &Connector::Panel::buildInputChannelList);
   QObject::connect(inputBlock,
-                   SIGNAL(activated(int)),
+                   QOverload<int>::of(&QComboBox::activated),
                    this,
-                   SLOT(updateConnectionButton(void)));
+                   &Connector::Panel::updateConnectionButton);
 
   inputLayout->addWidget(new QLabel(tr("Channel:")), 2, Qt::Alignment());
   inputLayout->addWidget(inputChannel);
   QObject::connect(inputChannel,
-                   SIGNAL(activated(int)),
+                   QOverload<int>::of(&QComboBox::activated),
                    this,
-                   SLOT(updateConnectionButton(void)));
+                   &Connector::Panel::updateConnectionButton);
 
   // Assign layout to child widget
   inputGroup->setLayout(inputLayout);
@@ -135,10 +133,6 @@ Connector::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
 
   // Create elements for connection box
   connectionLayout->addWidget(connectionBox);
-  // QObject::connect(connectionBox,
-  //                  SIGNAL(itemClicked(QListWidgetItem*)),
-  //                  this,
-  //                  SLOT(highlightConnectionBox(QListWidgetItem*)));
 
   // Assign layout to child widget
   connectionGroup->setLayout(connectionLayout);
@@ -164,30 +158,32 @@ Connector::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
   // populate field with block and connection info
   this->syncBlockInfo();
 
-  QObject::connect(
-      this, SIGNAL(updateBlockInfo(void)), this, SLOT(syncBlockInfo(void)));
+  QObject::connect(this,
+                   &Connector::Panel::updateBlockInfo,
+                   this,
+                   &Connector::Panel::syncBlockInfo);
 
   // a change to any of the connection parameters should highlight box or not
   QObject::connect(inputBlock,
-                   SIGNAL(currentTextChanged(const QString&)),
+                   &QComboBox::currentTextChanged,
                    this,
-                   SLOT(highlightConnectionBox(const QString&)));
+                   &Connector::Panel::highlightConnectionBox);
   QObject::connect(outputBlock,
-                   SIGNAL(currentTextChanged(const QString&)),
+                   &QComboBox::currentTextChanged,
                    this,
-                   SLOT(highlightConnectionBox(const QString&)));
+                   &Connector::Panel::highlightConnectionBox);
   QObject::connect(inputChannel,
-                   SIGNAL(currentTextChanged(const QString&)),
+                   &QComboBox::currentTextChanged,
                    this,
-                   SLOT(highlightConnectionBox(const QString&)));
+                   &Connector::Panel::highlightConnectionBox);
   QObject::connect(outputChannel,
-                   SIGNAL(currentTextChanged(const QString&)),
+                   &QComboBox::currentTextChanged,
                    this,
-                   SLOT(highlightConnectionBox(const QString&)));
+                   &Connector::Panel::highlightConnectionBox);
   QObject::connect(outputFlag,
-                   SIGNAL(currentTextChanged(const QString&)),
+                   &QComboBox::currentTextChanged,
                    this,
-                   SLOT(highlightConnectionBox(const QString&)));
+                   &Connector::Panel::highlightConnectionBox);
 }
 
 void Connector::Panel::buildBlockList()

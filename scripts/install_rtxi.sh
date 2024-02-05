@@ -37,9 +37,14 @@ echo "-----> Starting RTXI installation..."
 
 echo "-----> Kernel configuration..."
 echo "evl -- Xenomai with EVL library (RT)"
+echo "xenomai -- Legacy Xenomai with Alchemy skin (RT)"
 echo "posix -- Linux based core (Non-RT)"
 echo "-----> Please type your configuration and then press enter: "
 read kernel
+
+if [ -d "./build/local" ]; then
+	rm -rf ./build/local
+fi
 
 cmake -S . -B ./build/local -D CMAKE_BUILD_TYPE=Release -DRTXI_RT_CORE=${kernel}
 
@@ -51,19 +56,23 @@ cpack -G DEB
 echo "-----> RTXI package creation successful. Installing..."
 sudo dpkg -i rtxi*.deb
 
-rm -rf ${MODS}
+# Delete modules directory if it exists from previous rtxi version
+if [ -d "${MODS}" ]; then
+	sudo rm -rf ${MODS}
+fi
+
 mkdir ${MODS}
 cd ${MODS}
 
 # git clone https://github.com/RTXI/analysis-module.git
-# git clone https://github.com/RTXI/iir-filter.git
-# git clone https://github.com/RTXI/fir-window.git
-# git clone https://github.com/RTXI/sync.git
-# git clone https://github.com/RTXI/mimic-signal.git
+git clone https://github.com/RTXI/iir-filter.git
+git clone https://github.com/RTXI/fir-window.git
+git clone https://github.com/RTXI/sync.git
+git clone https://github.com/RTXI/mimic-signal.git
 git clone https://github.com/RTXI/signal-generator.git
-# git clone https://github.com/RTXI/ttl-pulses.git
-# git clone https://github.com/RTXI/wave-maker.git
-# git clone https://github.com/RTXI/noise-generator.git
+git clone https://github.com/RTXI/ttl-pulses.git
+git clone https://github.com/RTXI/wave-maker.git
+git clone https://github.com/RTXI/noise-generator.git
 
 for dir in ${MODS}/*; do
 	if [ -d "$dir" ]; then

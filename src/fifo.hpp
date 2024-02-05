@@ -58,7 +58,7 @@ public:
    *
    * \param buf The buffer where the data from the buffer should be
    *     written to
-   * \param data_size The size of the data to read from the buffer
+   * \param data_size The size of the data to read from the buffer in bytes
    * \return n Number of elements read. Same as size.
    */
   virtual int64_t read(void* buf, size_t data_size) = 0;
@@ -68,7 +68,7 @@ public:
    * thread.
    *
    * \param buf The buffer holding the data to write to the FIFO.
-   * \param data_size The size of the data to read from the buffer
+   * \param data_size The size of the data to read from the buffer in bytes
    * \return n Number of elements written. Same as size.
    */
   virtual int64_t write(void* buf, size_t data_size) = 0;
@@ -79,7 +79,7 @@ public:
    *
    * \param buf The buffer where the data from the buffer should be
    *     written to
-   * \param data_size The size of the data to read from the buffer
+   * \param data_size The size of the data to read from the buffer in bytes
    * \return n Number of elements read. Same as size.
    */
   virtual int64_t readRT(void* buf, size_t data_size) = 0;
@@ -89,7 +89,7 @@ public:
    * realtime thread.
    *
    * \param buf The buffer holding the data to write to the FIFO.
-   * \param data_size The size of the data to read from the buffer
+   * \param data_size The size of the data to read from the buffer in bytes
    * \return n Number of elements written. Same as size.
    */
   virtual int64_t writeRT(void* buf, size_t data_size) = 0;
@@ -97,7 +97,7 @@ public:
   /*!
    * Get the memory capacity of the fifo
    *
-   * \returns The maximum amount of memory the fifo can hold
+   * \returns The maximum amount of memory the fifo can hold in bytes
    */
   virtual size_t getCapacity() = 0;
 
@@ -123,7 +123,7 @@ public:
  * specific fifo/pipe.
  *
  * \param fifo The fifo object to store the newly created fifo.
- * \param fifo_size The size of the fifo to create
+ * \param fifo_size The size of the fifo to create in bytes
  * \returns 0 if successful, and errno otherwise.
  */
 int getFifo(std::unique_ptr<Fifo>& fifo, size_t fifo_size);

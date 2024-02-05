@@ -1,7 +1,6 @@
 #include <QApplication>
 #include <iostream>
 
-#include <boost/stacktrace.hpp>
 #include <signal.h>
 #include <string.h>
 
@@ -9,7 +8,6 @@
 #include "main_window.hpp"
 #include "rt.hpp"
 #include "rtxiConfig.h"
-#include "widgets.hpp"
 #include "workspace.hpp"
 
 namespace
@@ -18,7 +16,7 @@ void signal_handler(int signum)
 {
   // NOLINTNEXTLINE
   ERROR_MSG("signal_handler : signal type {} received\n", ::strsignal(signum));
-  std::cerr << boost::stacktrace::stacktrace();
+  PRINT_BACKTRACE();
   exit(-1);  // NOLINT
 }
 }  // namespace

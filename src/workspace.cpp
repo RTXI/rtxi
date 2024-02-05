@@ -22,7 +22,6 @@
 #include "module_installer/rtxi_wizard.hpp"
 #include "oscilloscope/oscilloscope.hpp"
 #include "performance_measurement/performance_measurement.hpp"
-#include "rtxiConfig.h"
 #include "system_control/system_control.hpp"
 #include "userprefs/userprefs.hpp"
 
@@ -249,8 +248,13 @@ Widgets::Plugin* Workspace::Manager::loadPlugin(const std::string& library)
     this->m_plugin_loader->unload(library_loc.c_str());
     return nullptr;
   }
-  std::unique_ptr<Widgets::Component> component =
-      fact_methods->createComponent(plugin.get());
+  std::unique_ptr<Widgets::Component> component;
+  try {
+    component = fact_methods->createComponent(plugin.get());
+  } catch (const std::invalid_argument& e) {
+    this->m_plugin_loader->unload(library_loc.c_str());
+    return nullptr;
+  }
   plugin->attachComponent(std::move(component));
   // if (plugin->magic_number != Plugin::Object::MAGIC_NUMBER) {
   //   ERROR_MSG(

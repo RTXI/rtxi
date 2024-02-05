@@ -25,8 +25,6 @@
 #include "system_control.hpp"
 
 #include "daq.hpp"
-#include "debug.hpp"
-#include "main_window.hpp"
 #include "rt.hpp"
 
 SystemControl::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
@@ -46,7 +44,6 @@ SystemControl::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
     , digitalChannelList(new QComboBox)
     , digitalDirectionList(new QComboBox)
     , digitalSubdeviceList(new QComboBox)
-    , rateUpdate(false)
     , freqUnitList(new QComboBox)
     , periodUnitList(new QComboBox)
     , freqEdit(new QLineEdit)
@@ -87,8 +84,10 @@ SystemControl::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
 
   deviceLayout->addWidget(deviceList, 0, 1, 1, 5);
   buildDAQDeviceList();
-  QObject::connect(
-      deviceList, SIGNAL(activated(int)), this, SLOT(updateDevice()));
+  QObject::connect(deviceList,
+                   QOverload<int>::of(&QComboBox::activated),
+                   this,
+                   &SystemControl::Panel::updateDevice);
 
   // Frequency box
   deviceLayout->addWidget(new QLabel(tr("Frequency:")), 1, 0);
@@ -100,28 +99,36 @@ SystemControl::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
   freqEdit->setText(
       std::to_string(RT::OS::SECONDS_TO_NANOSECONDS / period).c_str());
 
-  QObject::connect(
-      freqEdit, SIGNAL(textEdited(const QString&)), this, SLOT(updatePeriod()));
+  QObject::connect(freqEdit,
+                   &QLineEdit::textEdited,
+                   this,
+                   &SystemControl::Panel::updatePeriod);
   freqUnitList->setFixedWidth(50);
   freqUnitList->addItem(" Hz", 1);
   freqUnitList->addItem("kHz", 1000);
   deviceLayout->addWidget(freqUnitList, 1, 2);
-  QObject::connect(
-      freqUnitList, SIGNAL(activated(int)), this, SLOT(updatePeriod()));
+  QObject::connect(freqUnitList,
+                   QOverload<int>::of(&QComboBox::activated),
+                   this,
+                   &SystemControl::Panel::updatePeriod);
 
   // Period box
   deviceLayout->addWidget(new QLabel(tr("Period:")), 1, 3);
   deviceLayout->addWidget(periodEdit, 1, 4);
-  QObject::connect(
-      periodEdit, SIGNAL(textEdited(const QString&)), this, SLOT(updateFreq()));
+  QObject::connect(periodEdit,
+                   &QLineEdit::textEdited,
+                   this,
+                   &SystemControl::Panel::updateFreq);
   deviceLayout->addWidget(periodUnitList, 1, 5);
   periodUnitList->setFixedWidth(50);
   periodUnitList->addItem(" s", 1.0);
   periodUnitList->addItem("ms", 1e-3);
   periodUnitList->addItem("us", 1e-6);
   periodUnitList->addItem("ns", 1e-9);
-  QObject::connect(
-      periodUnitList, SIGNAL(activated(int)), this, SLOT(updateFreq()));
+  QObject::connect(periodUnitList,
+                   QOverload<int>::of(&QComboBox::activated),
+                   this,
+                   &SystemControl::Panel::updateFreq);
   updatePeriod();
 
   // Assign layout to child widget
@@ -138,12 +145,16 @@ SystemControl::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
                                QVariant::fromValue(DAQ::ChannelType::AI));
   analogSubdeviceList->addItem("Output",
                                QVariant::fromValue(DAQ::ChannelType::AO));
-  QObject::connect(
-      analogSubdeviceList, SIGNAL(activated(int)), this, SLOT(updateDevice()));
+  QObject::connect(analogSubdeviceList,
+                   QOverload<int>::of(&QComboBox::activated),
+                   this,
+                   &SystemControl::Panel::updateDevice);
   analogLayout->addWidget(analogSubdeviceList, 1, 1);
 
-  QObject::connect(
-      analogChannelList, SIGNAL(activated(int)), this, SLOT(display()));
+  QObject::connect(analogChannelList,
+                   QOverload<int>::of(&QComboBox::activated),
+                   this,
+                   &SystemControl::Panel::display);
   analogLayout->addWidget(analogChannelList, 1, 2);
 
   analogActiveButton = new QPushButton("Active");
@@ -258,12 +269,16 @@ SystemControl::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
   digitalLayout->addWidget(new QLabel(tr("Channel:")), 1, 0, 1, 1);
 
   digitalSubdeviceList->addItem("I/O");
-  QObject::connect(
-      digitalSubdeviceList, SIGNAL(activated(int)), this, SLOT(updateDevice()));
+  QObject::connect(digitalSubdeviceList,
+                   QOverload<int>::of(&QComboBox::activated),
+                   this,
+                   &SystemControl::Panel::updateDevice);
   digitalLayout->addWidget(digitalSubdeviceList, 1, 1, 1, 1);
 
-  QObject::connect(
-      digitalChannelList, SIGNAL(activated(int)), this, SLOT(display()));
+  QObject::connect(digitalChannelList,
+                   QOverload<int>::of(&QComboBox::activated),
+                   this,
+                   &SystemControl::Panel::display);
   digitalLayout->addWidget(digitalChannelList, 1, 2, 1, 1);
 
   digitalDirectionList->addItem("Input",
@@ -284,11 +299,12 @@ SystemControl::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
 
   // Create elements for buttons
   auto* applyButton = new QPushButton("Apply");
-  QObject::connect(applyButton, SIGNAL(released()), this, SLOT(apply()));
+  QObject::connect(
+      applyButton, &QPushButton::released, this, &SystemControl::Panel::apply);
   buttonLayout->addWidget(applyButton);
   auto* cancelButton = new QPushButton("Close");
   QObject::connect(
-      cancelButton, SIGNAL(released()), parentWidget(), SLOT(close()));
+      cancelButton, &QPushButton::released, parentWidget(), &QWidget::close);
   buttonLayout->addWidget(cancelButton);
 
   // Assign layout to child widget

@@ -19,7 +19,6 @@
 
 #include <QTimer>
 #include <algorithm>
-#include <cmath>
 #include <mutex>
 
 #include "scope.hpp"
@@ -29,8 +28,6 @@
 #include <qwt_plot_legenditem.h>
 #include <qwt_scale_map.h>
 #include <stdlib.h>
-
-#include "rt.hpp"
 
 Oscilloscope::LegendItem::LegendItem()
 {
@@ -142,7 +139,8 @@ Oscilloscope::Scope::Scope(QWidget* parent)
   resize(sizeHint());
   // Timer controls refresh rate of scope
   this->timer->setTimerType(Qt::PreciseTimer);
-  QObject::connect(timer, SIGNAL(timeout()), this, SLOT(process_data()));
+  QObject::connect(
+      timer, &QTimer::timeout, this, &Oscilloscope::Scope::process_data);
   this->timer->start(static_cast<int>(this->refresh));
 }
 

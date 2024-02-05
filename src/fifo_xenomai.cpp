@@ -18,11 +18,12 @@
 
 */
 
-#include <filesystem>
+#include <future>
 
 #include "fifo.hpp"
 
 #include <alchemy/pipe.h>
+#include <alchemy/task.h>
 #include <fcntl.h>
 #include <poll.h>
 #include <sys/eventfd.h>
@@ -73,9 +74,11 @@ RT::OS::xenomaiFifo::xenomaiFifo(size_t size)
     , fifo_capacity(size)
 {
   pipe_number = rt_pipe_create(
-      &this->pipe_handle, pipe_name.c_str(), P_MINOR_AUTO, fifo_capacity);
+      &pipe_handle, pipe_name.c_str(), P_MINOR_AUTO, fifo_capacity);
   if (pipe_number < 0) {
-    ERROR_MSG("Unable to open real-time X pipe");
+    ERROR_MSG("RT::OS::xenomaiFifo : Unable to open real-time X pipe");
+    ERROR_MSG("errno: {}", pipe_number);
+    return;
   }
   const std::string filename = std::string(pipe_filesystem_prefix) + pipe_name;
   this->fd = ::open(filename.c_str(), O_RDWR | O_NONBLOCK);
@@ -123,7 +126,7 @@ void RT::OS::xenomaiFifo::poll()
 {
   int errcode = ::poll(this->xbuf_poll_fd.data(), 2, -1);
   if (errcode < 0) {
-    ERROR_MSG("RT::OS::FIFO(evl)::poll : returned with failure code {} : ",
+    ERROR_MSG("RT::OS::FIFO(xenomai)::poll : returned with failure code {} : ",
               errcode);
     ERROR_MSG("{}", strerror(errcode));
   } else if ((this->xbuf_poll_fd[1].revents & POLLIN) != 0) {
@@ -150,7 +153,13 @@ size_t RT::OS::xenomaiFifo::getCapacity()
 
 int RT::OS::getFifo(std::unique_ptr<Fifo>& fifo, size_t fifo_size)
 {
-  auto tmp_fifo = std::make_unique<RT::OS::xenomaiFifo>(fifo_size);
-  fifo = std::move(tmp_fifo);
+  // We can only create rt pipes from a xenomai thread.
+  auto create_pipe_task = [&]()
+  {
+    rt_task_shadow(nullptr, "create-pipe-task", 0, 0);
+    fifo = std::make_unique<RT::OS::xenomaiFifo>(fifo_size);
+  };
+  std::future task_future = std::async(std::launch::async, create_pipe_task);
+  task_future.wait();
   return 0;
 }

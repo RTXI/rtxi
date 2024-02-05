@@ -21,11 +21,9 @@
 #define SYSTEM_CONTROL_H
 
 #include <QComboBox>
-#include <utility>
 
 #include "daq.hpp"
 #include "event.hpp"
-#include "main_window.hpp"
 #include "widgets.hpp"
 
 Q_DECLARE_METATYPE(DAQ::ChannelType::type_t)

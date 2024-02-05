@@ -19,12 +19,10 @@
 */
 
 #include <algorithm>
-#include <future>
 #include <mutex>
 
 #include "event.hpp"
 
-#include "debug.hpp"
 #include "logger.hpp"
 
 std::string Event::type_to_string(Event::Type event_type)

@@ -24,6 +24,7 @@
 #include <iostream>
 #include <string>
 
+#include <execinfo.h>
 #include <fmt/core.h>
 
 /*!
@@ -38,5 +39,8 @@ void ERROR_MSG(const std::string& errmsg, Args... args)
   std::cerr << fmt::format(errmsg, args...);
   std::cerr << "\n";
 }
+
+//! Prints a backtrace to standard error.
+void PRINT_BACKTRACE();
 
 #endif /* DEBUG_H */

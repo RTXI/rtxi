@@ -10,15 +10,13 @@
 #include <QPushButton>
 #include <QValidator>
 #include <limits>
-#include <map>
 #include <memory>
-#include <optional>
 #include <string>
 #include <unordered_map>
 #include <variant>
 #include <vector>
 
-#include "dlplugin.hpp"
+#include "debug.hpp"
 #include "event.hpp"
 #include "io.hpp"
 #include "rt.hpp"
@@ -98,9 +96,19 @@ struct Info
   std::string name;
   std::string description;
   Widgets::Variable::variable_t vartype = Widgets::Variable::UNKNOWN;
-  std::variant<int64_t, double, uint64_t, std::string, RT::State::state_t>
-      value;
+  std::variant<int64_t, double, uint64_t, std::string> value;
 };
+
+template<typename... Types, typename T>
+void var_assert(Types... args, T last_var)
+{
+  if constexpr (sizeof...(args) > 0) {
+    var_assert(args...);
+  }
+  static_assert(last_var.id == sizeof...(args),
+                "RTXI Plugin ID order does not match. Make sure ENUM IDs "
+                "matches Info ID");
+}
 
 }  // namespace Variable
 
@@ -334,7 +342,12 @@ public slots:
   virtual void refresh();
 
   /*!
-   * Function that calls DefaultGUIModel::update with the MODIFY flag
+   * FUnction that updates GUI user States only.
+   */
+  virtual void refreshUserStates();
+
+  /*!
+   * Function that calls update_state with the MODIFY flag
    */
   virtual void modify();
 
@@ -353,15 +366,6 @@ public slots:
   virtual void update_state(RT::State::state_t flag);
 
 protected:
-  /*!
-   * Get the value of the parameter in the GUI, and update the value
-   *   within the Workspace.
-   *
-   * \param name The parameter's name.
-   * \return The value of the parameter.
-   */
-  QString getParameter(const QString& var_name);
-
   /*!
    * Set the value of double parameter within the Workspace and GUI.
    *
@@ -387,7 +391,7 @@ protected:
    * \param ref A reference to the parameter.
    *
    */
-  void setParameter(const QString& var_name, int value);
+  void setParameter(const QString& var_name, int64_t value);
 
   /*!
    * retrieves the comment storedabout the component parameter
@@ -442,6 +446,9 @@ protected:
    */
   Event::Manager* getRTXIEventManager() { return this->event_manager; }
 
+private slots:
+  void updatePauseButton();
+
 private:
   QMainWindow* main_window = nullptr;
   std::string m_name;
@@ -453,11 +460,11 @@ private:
   QPushButton* pauseButton = nullptr;
   QPushButton* modifyButton = nullptr;
   QPushButton* unloadButton = nullptr;
+  QTimer* defaultPauseUpdateTimer = nullptr;
 
   struct param_t
   {
     QLabel* label = nullptr;
-    QString str_value;
     DefaultGUILineEdit* edit = nullptr;
     Widgets::Variable::variable_t type = Widgets::Variable::UNKNOWN;
     Widgets::Variable::Info info;
@@ -634,6 +641,8 @@ public:
    */
   void setComponentState(RT::State::state_t state);
 
+  RT::State::state_t getComponentState();
+
   /*!
    * Get the list of all widget parameters information
    *
@@ -641,6 +650,14 @@ public:
    * information
    */
   virtual std::vector<Widgets::Variable::Info> getComponentParametersInfo();
+
+  /*!
+   * In some cases we need to know whether a component has been attached
+   * to the plugin. This helps with that.
+   *
+   * \return True if there is an attached component, False otherwise.
+   */
+  bool hasComponent() { return plugin_component != nullptr; }
 
 protected:
   Widgets::Component* getComponent();
