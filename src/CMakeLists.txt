@@ -159,6 +159,21 @@ target_include_directories(rtxinidaqdriver
 target_link_libraries(rtxinidaqdriver PRIVATE nidaqmx rtxipal)
 endif()
 
+if(16aio168)
+message("General Standards Corporation 16aio168 Driver API found")
+add_library(rtxi_gsc16aio168_driver MODULE
+  gsc_aio168_driver.cpp
+)
+
+target_include_directories(rtxi_gsc16aio168_driver 
+ 	PUBLIC	
+	"$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>"
+  	"$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
+)
+
+target_link_libraries(rtxi_gsc16aio168_driver PRIVATE 16aio168 rtxipal)
+endif()
+
 target_compile_features(rtxi PUBLIC cxx_std_17)
 target_compile_features(rtxipal PUBLIC cxx_std_17)
 target_compile_features(rtxififo PUBLIC cxx_std_17)
