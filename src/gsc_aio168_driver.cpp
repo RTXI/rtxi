@@ -6,6 +6,7 @@
 #include <filesystem>
 #include <fstream>
 
+#include <GSC/16aio168.h>
 #include <GSC/16aio168_main.h>
 #include <fmt/core.h>
 
@@ -15,6 +16,26 @@ constexpr std::string_view DEFAULT_DRIVER_NAME = "General Standards";
 
 namespace
 {
+
+constexpr int MAX_DIGITAL_LANES =
+    4;  // 16aio168 devices only have 4 digital lanes
+constexpr int BYTE_RESOLUTION = 65536;  // 2 ^ 16 bit symbols
+
+inline constexpr double binary_to_voltage(DAQ::analog_range_t volt_range,
+                                          int32_t value)
+{
+  const double width = (volt_range.second - volt_range.first) / BYTE_RESOLUTION;
+  const double offset = volt_range.first;
+  return (value & BYTE_RESOLUTION) * width - offset;
+}
+
+inline constexpr int32_t voltage_to_binary(DAQ::analog_range_t volt_range,
+                                           double value)
+{
+  const double width = (volt_range.second - volt_range.first) / BYTE_RESOLUTION;
+  const double offset = volt_range.first;
+  return static_cast<int32_t>((value + offset) / width);
+}
 
 inline std::vector<std::string> split_string(const std::string& buffer,
                                              const std::string& delim)
@@ -47,9 +68,9 @@ inline std::vector<std::string> split_string(const std::string& buffer,
 inline void printError(int errcode)
 {
   constexpr int ARRAY_SIZE = 1024;
-  std::array<char, ARRAY_SIZE> BUFFER {};
+  std::string BUFFER(ARRAY_SIZE, '\0');
   strerror_r(errcode, BUFFER.data(), ARRAY_SIZE);
-  ERROR_MSG("16aio168 driver error with code {} : {}", errcode, BUFFER);
+  ERROR_MSG("AIO168 driver error with code {} : {}", errcode, BUFFER);
 }
 
 // Define the struct that represents a physical channel, which is different than
@@ -129,6 +150,24 @@ inline DAQ::index_t range_to_index(int32_t aio168_range_id)
   const auto* iter =
       std::find(default_ranges.begin(), default_ranges.end(), range);
   return iter == default_ranges.end() ? 0 : iter - default_ranges.begin();
+}
+
+inline int32_t index_to_range(DAQ::index_t index)
+{
+  int32_t range;
+  switch (index) {
+    case 2:
+      range = AIO168_RANGE_2_5V;
+      break;
+    case 1:
+      range = AIO168_RANGE_5V;
+      break;
+    case 0:
+    default:
+      range = AIO168_RANGE_10V;
+      break;
+  }
+  return range;
 }
 
 class Device final : public DAQ::Device
@@ -217,19 +256,16 @@ public:
 private:
   int fd;
   std::array<std::vector<physical_channel_t>, 4> physical_channels_registry;
-  // Used a tuple here because we want buffers to be in one place, and since not all
-  // IO is flaot, that meant we could not use a plain vector of vectors. Maybe we can
-  // just split them out to their own variables of same type for speed.
-  std::tuple<std::vector<double>,
-             std::vector<double>,
-             std::vector<uint8_t>,
-             std::vector<uint8_t>>
-      buffer_arrays;
-  // Just trying to keep track of active channels for efficiency
-  std::array<std::vector<int>, DAQ::ChannelType::UNKNOWN>
-      active_channels;
+  std::vector<int32_t> ai_channels_buffer;
+  std::vector<int32_t> ao_channels_buffer;
+  std::vector<int8_t> di_channels_buffer;
+  std::vector<int8_t> do_channels_buffer;
+  std::array<DAQ::analog_range_t, 7> default_ranges;
 
-  int CURRENT_SCAN_SIZE=1;
+  // Just trying to keep track of active channels for efficiency
+  std::array<std::vector<int>, DAQ::ChannelType::UNKNOWN> active_channels;
+
+  size_t CURRENT_SCAN_SIZE = 16;
 };
 
 class Driver : public DAQ::Driver
@@ -255,6 +291,57 @@ Device::Device(const std::string& dev_name,
     : DAQ::Device(dev_name, channels)
     , fd(device_file_descriptor)
 {
+  int32_t max_ai_count = AIO168_QUERY_CHAN_AI_MAX;
+  int32_t max_ao_count = AIO168_QUERY_CHAN_AO_MAX;
+  int result = aio168_ioctl(fd, AIO168_IOCTL_QUERY, &max_ai_count);
+  if (result < 0) {
+    printError(result);
+    throw std::runtime_error(
+        "AIO168 DRIVER : Unable to obtain max AI channel count");
+  }
+  result = aio168_ioctl(fd, AIO168_IOCTL_QUERY, &max_ao_count);
+  if (result < 0) {
+    printError(result);
+    throw std::runtime_error(
+        "AIO168 DRIVER : Unable to obtain max AO channel count");
+  }
+  std::string chan_name;
+  for (int ai_count = 0; ai_count < max_ai_count; ai_count++) {
+    physical_channels_registry.at(DAQ::ChannelType::AI)
+        .emplace_back(
+            fmt::format("AI{}", ai_count), DAQ::ChannelType::AI, ai_count);
+  }
+  for (int ao_count = 0; ao_count < max_ao_count; ao_count++) {
+    physical_channels_registry.at(DAQ::ChannelType::AO)
+        .emplace_back(
+            fmt::format("AO{}", ao_count), DAQ::ChannelType::AO, ao_count);
+  }
+  for (int digital_lane = 0; digital_lane < MAX_DIGITAL_LANES; digital_lane++) {
+    physical_channels_registry.at(DAQ::ChannelType::DI)
+        .emplace_back(fmt::format("DI{}", digital_lane),
+                      DAQ::ChannelType::DI,
+                      digital_lane);
+    physical_channels_registry.at(DAQ::ChannelType::DO)
+        .emplace_back(fmt::format("DO{}", digital_lane),
+                      DAQ::ChannelType::DO,
+                      digital_lane);
+  }
+
+  // We need to tell the board that channel scanning is software timed.
+  // Check 16aio168 manual for explenation of this setting
+  int32_t scan_setting = AIO168_AI_SCAN_CLK_SRC_BCR;
+  result = aio168_ioctl(fd, AIO168_IOCTL_AI_SCAN_CLK_SRC, &scan_setting);
+  if(result < 0){
+    ERROR_MSG("16QIO168 DRIVER : Unable to set the channel scan to software trigger for device");
+    printError(result);
+  }
+
+  ai_channels_buffer.assign(getChannelCount(DAQ::ChannelType::AI), 0);
+  ao_channels_buffer.assign(getChannelCount(DAQ::ChannelType::AO), 0);
+  di_channels_buffer.assign(getChannelCount(DAQ::ChannelType::DI), 0);
+  do_channels_buffer.assign(getChannelCount(DAQ::ChannelType::DO), 0);
+  default_ranges = DAQ::get_default_ranges();
+  this->setActive(/*act=*/true);
 }
 
 Device::~Device()
@@ -279,17 +366,19 @@ int Device::setChannelActive(DAQ::ChannelType::type_t type,
 {
   physical_channels_registry.at(type).at(index).active = state;
   active_channels.at(type).push_back(static_cast<int>(index));
-  if(type != DAQ::ChannelType::AI) { return 0; }
+  if (type != DAQ::ChannelType::AI) {
+    return 0;
+  }
   const int32_t max_input_port = *std::max(active_channels.at(type).begin(),
                                            active_channels.at(type).end());
   int32_t scan_size = -1;
-  if(max_input_port <= 2){
+  if (max_input_port <= 2) {
     scan_size = AIO168_AI_SCAN_SIZE_0_1;
     CURRENT_SCAN_SIZE = 2;
-  } else if(max_input_port <= 4) {
+  } else if (max_input_port <= 4) {
     scan_size = AIO168_AI_SCAN_SIZE_0_3;
     CURRENT_SCAN_SIZE = 4;
-  } else if(max_input_port <= 8) {
+  } else if (max_input_port <= 8) {
     scan_size = AIO168_AI_SCAN_SIZE_0_7;
     CURRENT_SCAN_SIZE = 8;
   } else {
@@ -297,25 +386,25 @@ int Device::setChannelActive(DAQ::ChannelType::type_t type,
     CURRENT_SCAN_SIZE = 16;
   }
   int result = aio168_ioctl(fd, AIO168_IOCTL_AI_SCAN_SIZE, &scan_size);
-  if(result < 0){
+  if (result < 0) {
     printError(result);
   }
   return result;
 }
 
-size_t Device::getAnalogRangeCount(DAQ::index_t /*index*/) const 
+size_t Device::getAnalogRangeCount(DAQ::index_t /*index*/) const
 {
   // this device only supports 2.5, 5, and 10 ranges
   return 3;
 }
 
-size_t Device::getAnalogReferenceCount(DAQ::index_t /*index*/) const 
+size_t Device::getAnalogReferenceCount(DAQ::index_t /*index*/) const
 {
   // this device only supports single ended and differential
   return 2;
 }
 
-size_t Device::getAnalogUnitsCount(DAQ::index_t /*index*/) const 
+size_t Device::getAnalogUnitsCount(DAQ::index_t /*index*/) const
 {
   // this device only supports voltage
   return 1;
@@ -362,7 +451,6 @@ std::string Device::getAnalogReferenceString(DAQ::ChannelType::type_t type,
       break;
   }
   return refstr;
-
 }
 
 std::string Device::getAnalogUnitsString(DAQ::ChannelType::type_t type,
@@ -427,8 +515,6 @@ DAQ::index_t Device::getAnalogOffsetUnits(DAQ::ChannelType::type_t type,
   return physical_channels_registry.at(type).at(index).units_index;
 }
 
-
-
 int Device::setAnalogGain(DAQ::ChannelType::type_t type,
                           DAQ::index_t index,
                           double gain)
@@ -453,27 +539,14 @@ int Device::setAnalogRange(DAQ::ChannelType::type_t type,
     chan.range_index = range;
     return 0;
   }
-  switch (range) {
-    case DAQ::ChannelType::AI:
-      set_analog_max = DAQmxSetAIMax;
-      set_analog_min = DAQmxSetAIMin;
-      break;
-    case DAQ::ChannelType::AO:
-      set_analog_max = DAQmxSetAOMax;
-      set_analog_min = DAQmxSetAOMin;
-      break;
-    default:
-      return -1;
-  }
-  // We attempt to change the range
-  printError(DAQmxStopTask(task));
-  const int32_t max_result = set_analog_max(task, chan_name, max);
-  printError(max_result);
-  const int32_t min_result = set_analog_min(task, chan_name, min);
-  printError(min_result);
-  printError(DAQmxStartTask(task));
-  if (max_result != 0 || min_result != 0) {
-    return -1;
+  int gsc_range_value = index_to_range(range);
+  int result = aio168_ioctl(fd, AIO168_IOCTL_RANGE, &gsc_range_value);
+  if (result < 0) {
+    ERROR_MSG("AIO168 ERROR : Unable to set range for device {}", getName());
+    printError(result);
+    int32_t retrieve = -1;
+    result = aio168_ioctl(fd, AIO168_IOCTL_RANGE, &retrieve);
+    chan.range_index = range_to_index(retrieve);
   }
   chan.range_index = range;
   return 0;
@@ -483,18 +556,22 @@ int Device::setAnalogZeroOffset(DAQ::ChannelType::type_t type,
                                 DAQ::index_t index,
                                 double offset)
 {
+  physical_channel_t& chan = physical_channels_registry.at(type).at(index);
+  chan.offset = offset;
 }
 
 int Device::setAnalogReference(DAQ::ChannelType::type_t type,
                                DAQ::index_t index,
                                DAQ::index_t reference)
 {
+  return 0;
 }
 
 int Device::setAnalogUnits(DAQ::ChannelType::type_t type,
                            DAQ::index_t index,
                            DAQ::index_t units)
 {
+  return 0;
 }
 
 int Device::setAnalogOffsetUnits(DAQ::ChannelType::type_t /*type*/,
@@ -516,6 +593,7 @@ int Device::setAnalogCounter(DAQ::ChannelType::type_t /*type*/,
 {
   return 0;
 }
+
 int Device::setAnalogCalibrationValue(DAQ::ChannelType::type_t /*type*/,
                                       DAQ::index_t /*index*/,
                                       double /*value*/)
@@ -550,9 +628,48 @@ int Device::setDigitalDirection(DAQ::index_t /*index*/,
   return 0;
 }
 
-void Device::read() {}
+void Device::read()
+{
+  // initiate scan
+  aio168_ioctl(fd, AIO168_IOCTL_AI_SYNC, nullptr);
+  DAQ::analog_range_t range {};
+  int samples_read = 0;
+  double gain = 1.0;
+  double offset = 0.0;
+  samples_read = aio168_read(
+      fd, ai_channels_buffer.data(), CURRENT_SCAN_SIZE * sizeof(int32_t));
+  // we have to convert some stuff to float first before we continue
+  for (size_t chan_id = 0; chan_id < CURRENT_SCAN_SIZE; chan_id++) {
+    auto& chan_info = physical_channels_registry[DAQ::ChannelType::AI][chan_id];
+    range = default_ranges[chan_info.range_index];
+    gain = chan_info.gain;
+    offset = chan_info.offset;
+    writeoutput(
+        chan_id,
+        binary_to_voltage(range, ai_channels_buffer[chan_id]) * gain + offset);
+  }
+}
 
-void Device::write() {}
+void Device::write()
+{
+  DAQ::analog_range_t range {};
+  int samples_written = 0;
+  double gain = 1.0;
+  double offset = 0.0;
+  double value = 0.0;
+  for (size_t chan_id = 0; chan_id < ao_channels_buffer.size(); chan_id++) {
+    // we have to saturate value before pushing to output
+    value = std::min(std::max(readinput(chan_id), range.first), range.second);
+
+  }
+  int samples_written = 0;
+  samples_written = aio168_write(
+      fd, ai_channels_buffer.data(), CURRENT_SCAN_SIZE * sizeof(int32_t), );
+  for (int chan_id = 0; chan_id < ai_channels_buffer.size(); chan_id++) {
+    writeoutput(chan_id,
+                ai_channels_buffer[chan_id] * chan->gain + chan->offset);
+  }
+}
 
 Driver::Driver()
     : DAQ::Driver(std::string(DEFAULT_DRIVER_NAME))
@@ -605,17 +722,19 @@ void Driver::loadDevices()
                 installed_boards[device_id]);
       continue;
     }
-    result = aio168_ioctl(fd, AIO168_QUERY_CHAN_AI_MAX, &channel_count);
+    channel_count = AIO168_QUERY_CHAN_AI_MAX;
+    result = aio168_ioctl(fd, AIO168_IOCTL_QUERY, &channel_count);
     for (int channel_id = 0; channel_id < channel_count; channel_id++) {
-      channels.emplace_back(fmt::format("AI {}", channel_id),
-                            fmt::format("Analog Input {}", channel_id),
-                            IO::OUTPUT);
+      channels.push_back({fmt::format("AI {}", channel_id),
+                          fmt::format("Analog Input {}", channel_id),
+                          IO::OUTPUT});
     }
-    result = aio168_ioctl(fd, AIO168_QUERY_CHAN_AO_MAX, &channel_count);
+    channel_count = AIO168_QUERY_CHAN_AO_MAX;
+    result = aio168_ioctl(fd, AIO168_IOCTL_QUERY, &channel_count);
     for (int channel_id = 0; channel_id < channel_count; channel_id++) {
-      channels.emplace_back(fmt::format("AO {}", channel_id),
-                            fmt::format("Analog Output {}", channel_id),
-                            IO::INPUT);
+      channels.push_back({fmt::format("AO {}", channel_id),
+                          fmt::format("Analog Output {}", channel_id),
+                          IO::INPUT});
     }
     m_devices.emplace_back(
         fmt::format("{}-{}", installed_boards[device_id], device_id),
