@@ -556,7 +556,7 @@ void SystemControl::Panel::displayAnalogGroup()
       indx++;
     }
   }
-  analogGainEdit->setText(QString::number(gain));
+  analogGainEdit->setText(QString::number(tmp));
 
   // Set gain prefix to computed index
   analogUnitPrefixList->setCurrentIndex(indx);
@@ -574,7 +574,7 @@ void SystemControl::Panel::displayAnalogGroup()
       indx++;
     }
   }
-  analogZeroOffsetEdit->setText(QString::number(offset));
+  analogZeroOffsetEdit->setText(QString::number(tmp));
   // Set offset prefix to computed index
   analogUnitPrefixList2->setCurrentIndex(indx);
 }
