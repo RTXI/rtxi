@@ -28,7 +28,7 @@ Design:
 nidaqmx driver dynamically detects installed devices by querying
 the library and instantiating Driver and Device classes as
 necessary. Upon finding a device and getting the list of channels
-avaialble, the initialization then creates internal buffers inside
+available, the initialization then creates internal buffers inside
 device class that correspond to IO::INPUT and IO::OUTPUT. This code
 relies on the fact that the order with which the channel_t structs
 in the driver discovery process is preserved and is generated in the
@@ -39,7 +39,7 @@ and outputs. In addition, the driver only supports software timing. More efficie
 ways may become obvious in the future, so keep this in mind if making
 changes.
 
-The final crucial concept in the design is the use of indices throught the
+The final crucial concept in the design is the use of indices throughout the
 interface. This was inherited from past driver designs, primarliy the obsolete
 analogy driver. This driver simply continues that tradition, and most values
 regarding range, units, and ranges, are stored as DAQ::index_t values that
