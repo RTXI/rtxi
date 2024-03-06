@@ -357,8 +357,7 @@ void RTXIWizard::Panel::installFromString(const std::string& module_name)
 {
   const QString name = QString(module_name.c_str());
   // Let the user know that RTXI is installing the plugin.
-  auto progress =
-      QProgressDialog("Installing plugin", "Cancel", 0, 5, this);
+  auto progress = QProgressDialog("Installing plugin", "Cancel", 0, 5, this);
   progress.setMinimumDuration(0);
   progress.setWindowModality(Qt::WindowModal);
   progress.setLabelText("Starting...");
@@ -379,8 +378,8 @@ void RTXIWizard::Panel::installFromString(const std::string& module_name)
   // QApplication::processEvents();
   //  If the repo already exists, pull from master. If not, clone it.
   QStringList clone_args;
-  if(!(QDir(source_location).exists())){
-    clone_args = QStringList{
+  if (!(QDir(source_location).exists())) {
+    clone_args = QStringList {
         "clone",
         "-b",
         "master",
@@ -388,24 +387,20 @@ void RTXIWizard::Panel::installFromString(const std::string& module_name)
         source_location,
     };
   } else {
-    clone_args = QStringList{
-      "-C",
-      source_location,
-      "pull"
-    };
+    clone_args = QStringList {"-C", source_location, "pull"};
   }
   const std::string git_command(GIT_COMMAND);
-  int status = system((git_command + " " + clone_args.join(" ").toStdString()).c_str());
+  int status =
+      system((git_command + " " + clone_args.join(" ").toStdString()).c_str());
 
   if (status != 0) {
     ERROR_MSG("Could not complete installation for module {}",
               name.toStdString());
     // Re-enable buttons only after compilation is done. Otherwise you get race
     // conditions if buttons are pressed before modules are done compiling.
-    ERROR_MSG("Repo update failed with command: {}", 
-              git_command + 
-              std::string(" ") + 
-              clone_args.join(" ").toStdString());
+    ERROR_MSG(
+        "Repo update failed with command: {}",
+        git_command + std::string(" ") + clone_args.join(" ").toStdString());
     cloneButton->setEnabled(true);
     rebuildListWidgets();
     availableListWidget->setDisabled(false);
@@ -439,9 +434,10 @@ void RTXIWizard::Panel::installFromString(const std::string& module_name)
   progress.setLabelText("Configuring...");
   progress.setValue(2);
 
-  status = system((make_cmd.toStdString()+" "+make_config_args.join(" ").toStdString()).c_str());
-  if (status != 0)
-  {
+  status = system(
+      (make_cmd.toStdString() + " " + make_config_args.join(" ").toStdString())
+          .c_str());
+  if (status != 0) {
     QMessageBox::critical(
         nullptr,
         "Error",
@@ -465,9 +461,10 @@ void RTXIWizard::Panel::installFromString(const std::string& module_name)
 
   progress.setLabelText("Building...");
   progress.setValue(3);
-  status = system((make_cmd.toStdString()+" "+make_build_args.join(" ").toStdString()).c_str());
-  if (status != 0)
-  {
+  status = system(
+      (make_cmd.toStdString() + " " + make_build_args.join(" ").toStdString())
+          .c_str());
+  if (status != 0) {
     QMessageBox::critical(
         nullptr,
         "Error",
@@ -487,9 +484,10 @@ void RTXIWizard::Panel::installFromString(const std::string& module_name)
   progress.setLabelText("Installing...");
   progress.setValue(4);
   // QApplication::processEvents();
-  status = system((make_cmd.toStdString()+" "+make_install_args.join(" ").toStdString()).c_str());
-  if (status != 0)
-  {
+  status = system(
+      (make_cmd.toStdString() + " " + make_install_args.join(" ").toStdString())
+          .c_str());
+  if (status != 0) {
     QMessageBox::critical(
         nullptr,
         "Error",
