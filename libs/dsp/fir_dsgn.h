@@ -5,10 +5,12 @@
 #ifndef _FIR_DSGN_H_
 #define _FIR_DSGN_H_
 
-#include "typedefs.h"
+#include <cstdint>
+
 #include "gen_win.h"
 
-typedef enum {
+typedef enum
+{
   FIR_SYM_NONE,
   FIR_SYM_EVEN_LEFT,
   FIR_SYM_EVEN_RIGHT,
@@ -21,11 +23,11 @@ class FirFilterDesign
 public:
   // default constructor
 
-  FirFilterDesign();
+  FirFilterDesign() = default;
 
   // constructor that allocates array of length num_taps to hold coefficients
 
-  FirFilterDesign(int num_taps);
+  explicit FirFilterDesign(std::size_t num_taps);
 
   // constructor that allocates array of length num_taps and initializes impulse
   // response
@@ -48,17 +50,17 @@ public:
   //  scale coefficients so that magnitude response has unity gain at passband
   //  peak
 
-  void NormalizeFilter(void);
+  void NormalizeFilter();
 
   // set impulse response to values in input array
 
   void CopyCoefficients(double* coeff);
 
-  double* GetCoefficients(void);
+  double* GetCoefficients();
 
   // get number of filter taps
 
-  int GetNumTaps(void);
+  int GetNumTaps();
 
   // apply discrete-time window to filter coefficients
 
@@ -69,12 +71,12 @@ public:
 
   void ExtractPolyphaseSet(double* coeff, int decim_rate, int rho);
 
-protected:
-  int Num_Taps;
+private:
+  std::size_t Num_Taps;
 
-  double* Imp_Resp_Coeff;
-  double* Original_Coeff;
-  long* Quant_Coeff;
+  std::vector<double> Imp_Resp_Coeff;
+  std::vector<double> Original_Coeff;
+  std::vector<std::int64_t> Quant_Coeff;
   FIR_SYM_T Coeff_Symmetry;
 };
 

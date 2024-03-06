@@ -3,25 +3,16 @@
  */
 
 #include <gsl/gsl_math.h>
-#include <math.h>
-#include <stdlib.h>
 
-#include "misdefs.h"
 #include "fir_dsgn.h"
 #include "fir_resp.h"
 
-// default constructor
-
-FirFilterDesign::FirFilterDesign(void)
+FirFilterDesign::FirFilterDesign(size_t num_taps)
+  : Num_Taps(num_taps)
+  , Coeff_Symmetry(FIR_SYM_NONE)
 {
-  return;
-}
-
-FirFilterDesign::FirFilterDesign(int num_taps)
-{
-  Num_Taps = num_taps;
-  Imp_Resp_Coeff = new double[num_taps];
-  Original_Coeff = new double[num_taps];
+  Imp_Resp_Coeff.resize(num_taps);
+  Original_Coeff.resize(num_taps);
 }
 
 FirFilterDesign::FirFilterDesign(int num_taps, double* imp_resp_coeff)
@@ -95,7 +86,7 @@ FirFilterDesign::ScaleCoefficients(double scale_factor)
 //  peak
 
 void
-FirFilterDesign::NormalizeFilter(void)
+FirFilterDesign::NormalizeFilter()
 {
   int n;
   double passband_peak;
@@ -120,13 +111,13 @@ FirFilterDesign::CopyCoefficients(double* coeff)
 }
 
 int
-FirFilterDesign::GetNumTaps(void)
+FirFilterDesign::GetNumTaps()
 {
   return (Num_Taps);
 }
 
 double*
-FirFilterDesign::GetCoefficients(void)
+FirFilterDesign::GetCoefficients()
 {
   // std::cout << "in fs_dsgn, Imp_Resp_Coeff = " << (void*)Imp_Resp_Coeff <<
   // std::endl;

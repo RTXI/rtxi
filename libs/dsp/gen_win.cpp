@@ -3,99 +3,80 @@
  */
 
 #include "gen_win.h"
-#include "misdefs.h"
+
 #include <gsl/gsl_math.h>
-#include <math.h>
 #include <stdio.h>
 
-GenericWindow::GenericWindow(void)
+GenericWindow::GenericWindow()
+    : Length(0)
+    , Half_Length(0)
 {
-  Length = 0;
-  Half_Length = 0;
-  Half_Lag_Win = NULL;
-  Data_Win = NULL;
 }
 
-GenericWindow::GenericWindow(int length)
+GenericWindow::GenericWindow(std::size_t length)
 {
+  if (length < 0) {
+    length = 0;
+  }
   Initialize(length);
 }
 
-void
-GenericWindow::Initialize(int length)
+void GenericWindow::Initialize(std::size_t length)
 {
-  Length = length;
-  if (length % 2) {
-    Half_Length = (length + 1) / 2;
+  if (length < 0) {
+    length = 0;
+  }
+  Length = static_cast<size_t>(length);
+  if ((length % 2) != 0) {
+    Half_Length = (Length + 1) / 2;
   } else {
-    Half_Length = length / 2;
+    Half_Length = Length / 2;
   }
 
-  Half_Lag_Win = new double[Half_Length];
-  Data_Win = NULL;
-
-  return;
+  Half_Lag_Win.resize(static_cast<size_t>(Half_Length));
 }
 
-double
-GenericWindow::GetDataWinCoeff(int samp_indx)
+double GenericWindow::GetDataWinCoeff(std::size_t samp_indx)
 {
-  int middle;
+  size_t middle = 0;
 
-  if (Length % 2) {
+  if ((Length % 2) != 0) {
     middle = (Length - 1) / 2;
     if (samp_indx < middle) {
       return (Half_Lag_Win[middle - samp_indx]);
-    } else {
-      return (Half_Lag_Win[samp_indx - middle]);
     }
-  } else {
-    middle = Length / 2;
-    if (samp_indx < middle) {
-      return (Half_Lag_Win[middle - 1 - samp_indx]);
-    } else {
-      return (Half_Lag_Win[samp_indx - middle]);
-    }
+    return (Half_Lag_Win[samp_indx - middle]);
   }
+  middle = Length / 2;
+  if (samp_indx < middle) {
+    return (Half_Lag_Win[middle - 1 - samp_indx]);
+  }
+  return (Half_Lag_Win[samp_indx - middle]);
 }
 
-void
-GenericWindow::NormalizeWindow(void)
+void GenericWindow::NormalizeWindow()
 {
-  double peak;
-  peak = Half_Lag_Win[0];
-  for (int n = 0; n < Half_Length; n++) {
+  const double peak = Half_Lag_Win[0];
+  for (size_t n = 0; n < Half_Length; n++) {
     Half_Lag_Win[n] /= peak;
   }
-  return;
 }
 
-double*
-GenericWindow::GetDataWindow(void)
+double* GenericWindow::GetDataWindow()
 {
-  if (Data_Win == NULL) {
-    Data_Win = new double[Length];
-    for (int n = 0; n < Length; n++) {
-      Data_Win[n] = GetDataWinCoeff(n);
-    }
+  Data_Win.clear();
+  for (size_t n = 0; n < Length; n++) {
+    Data_Win.push_back(GetDataWinCoeff(n));
   }
-  return (Data_Win);
+  return Data_Win.data();
 }
 
-double*
-GenericWindow::GetHalfLagWindow(void)
+double* GenericWindow::GetHalfLagWindow()
 {
-  return (Half_Lag_Win);
+  return Half_Lag_Win.data();
 }
 
-int
-GenericWindow::GetNumTaps(void)
+size_t GenericWindow::GetHalfLength() const
 {
-  return (Length);
-}
-
-int
-GenericWindow::GetHalfLength(void)
-{
-  return (Half_Length);
+  return Half_Length;
 }
