@@ -8,13 +8,14 @@
 //
 
 #include "dit_sino.h"
+
+#include <math.h>
+
 #include "cbitrev.h"
 #include "log2.h"
 #include "misdefs.h"
-#include <math.h>
 
-void
-IfftDitSino(complex* array, int fft_size)
+void IfftDitSino(complex* array, int fft_size)
 {
   double trig_arg;
   int log2_size;
@@ -30,8 +31,8 @@ IfftDitSino(complex* array, int fft_size)
 
   pts_in_right_dft = 1;
   for (stage = 1; stage <= log2_size; stage++) {
-    pts_in_left_dft = pts_in_right_dft; // set pts_in_left_dft = 2**(stage-1)
-    pts_in_right_dft *= 2;              // set pts_in_right_dft = 2**stage
+    pts_in_left_dft = pts_in_right_dft;  // set pts_in_left_dft = 2**(stage-1)
+    pts_in_right_dft *= 2;  // set pts_in_right_dft = 2**stage
 
     twiddle = complex(1.0, 0.0);
     trig_arg = PI / pts_in_left_dft;
@@ -39,23 +40,23 @@ IfftDitSino(complex* array, int fft_size)
 
     for (bfly_pos = 0; bfly_pos < pts_in_left_dft; bfly_pos++) {
       for (top_node = bfly_pos; top_node < fft_size;
-           top_node += pts_in_right_dft) {
+           top_node += pts_in_right_dft)
+      {
         bot_node = top_node + pts_in_left_dft;
         temp = array[bot_node] * twiddle;
         array[bot_node] = array[top_node] - temp;
         array[top_node] += temp;
-      } // end of loop over top_node
+      }  // end of loop over top_node
 
       twiddle *= w_fact;
 
-    } // end of loop over bfly_pos
-  }   // end of loop over stage
+    }  // end of loop over bfly_pos
+  }  // end of loop over stage
 
   return;
 }
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-void
-FftDitSino(complex* array, int fft_size)
+void FftDitSino(complex* array, int fft_size)
 {
   double trig_arg;
   int log2_size;
@@ -71,8 +72,8 @@ FftDitSino(complex* array, int fft_size)
 
   pts_in_right_dft = 1;
   for (stage = 1; stage <= log2_size; stage++) {
-    pts_in_left_dft = pts_in_right_dft; // set pts_in_left_dft = 2**(stage-1)
-    pts_in_right_dft *= 2;              // set pts_in_right_dft = 2**stage
+    pts_in_left_dft = pts_in_right_dft;  // set pts_in_left_dft = 2**(stage-1)
+    pts_in_right_dft *= 2;  // set pts_in_right_dft = 2**stage
 
     twiddle = complex(1.0, 0.0);
     trig_arg = PI / pts_in_left_dft;
@@ -80,17 +81,18 @@ FftDitSino(complex* array, int fft_size)
 
     for (bfly_pos = 0; bfly_pos < pts_in_left_dft; bfly_pos++) {
       for (top_node = bfly_pos; top_node < fft_size;
-           top_node += pts_in_right_dft) {
+           top_node += pts_in_right_dft)
+      {
         bot_node = top_node + pts_in_left_dft;
         temp = array[bot_node] * twiddle;
         array[bot_node] = array[top_node] - temp;
         array[top_node] += temp;
-      } // end of loop over top_node
+      }  // end of loop over top_node
 
       twiddle *= w_fact;
 
-    } // end of loop over bfly_pos
-  }   // end of loop over stage
+    }  // end of loop over bfly_pos
+  }  // end of loop over stage
 
   return;
 }

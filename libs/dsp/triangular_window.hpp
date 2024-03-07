@@ -2,10 +2,10 @@
  * Triangular window
  */
 
-#ifndef _TRIANGLR_H_
-#define _TRIANGLR_H_
+#ifndef TRIANGULAR_WINDOW_HPP
+#define TRIANGULAR_WINDOW_HPP
 
-#include "gen_win.h"
+#include "generic_window.hpp"
 
 class TriangularWindow : public GenericWindow
 {
@@ -13,7 +13,7 @@ public:
   // constructors
 
   TriangularWindow(int length, int zero_ends);
-  void GenerateWindow(int length, int zero_ends);
+  std::vector<double> GenerateHalfLagWindow(int length, int zero_ends);
 
   // private:
 
