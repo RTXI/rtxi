@@ -317,8 +317,11 @@ void MainWindow::aboutQt()
 
 void MainWindow::aboutXeno()
 {
+  const std::string realtime = RTXI_RT_CORE == "posix" ? "(non-RT)" : "";
   QMessageBox::about(
-      this, "About Xenomai", "Running POSIX (non-RT) real-time core");
+      this,
+      "About Xenomai",
+      fmt::format("Running {}{} core", RTXI_RT_CORE, realtime).c_str());
 }
 
 void MainWindow::openDocs()
@@ -443,7 +446,6 @@ void MainWindow::windowsMenuAboutToShow()
   }
   // Create windows list based off of what's open
   for (auto* subwin : subWindows) {
-    // auto* item = new QAction(subwin->widget()->windowTitle(), this);
     windowsMenu->addAction(new QAction(subwin->widget()->windowTitle(), this));
   }
   connect(
