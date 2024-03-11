@@ -2,22 +2,18 @@
  * Hann window, not to be confused with Hanning window
  */
 
-#ifndef _HANN_H_
-#define _HANN_H_
+#ifndef HANN_WINDOW_HPP
+#define HANN_WINDOW_HPP
 
-#include "gen_win.h"
+#include <vector>
+#include "generic_window.hpp"
 
-class HannWindow : public GenericWindow
+namespace rtxi::dsp{
+class HannWindow : public rtxi::dsp::GenericWindow
 {
 public:
-  // constructors
-
-  HannWindow(int length, int zero_ends);
-  void GenerateWindow(int length, int zero_ends);
-
-private:
-  int Num_Taps;
-  double* Half_Lag_Window;
+  HannWindow(int length, bool zero_ends);
+  std::vector<double> GenerateWindow(int length, bool zero_ends);
 };
-
+}  // namespace rtxi::dsp
 #endif
