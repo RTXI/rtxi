@@ -10,8 +10,6 @@
 class GenericWindow
 {
 public:
-  // constructors
-
   GenericWindow();
   explicit GenericWindow(int length);
 
