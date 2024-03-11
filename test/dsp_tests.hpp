@@ -18,18 +18,19 @@
 
  */
 
-#ifndef FIFO_TESTS_H
-#define FIFO_TESTS_H
-
-#include <string>
+#ifndef DSP_TESTS_HPP
+#define DSP_TESTS_HPP
 
 #include <gtest/gtest.h>
 
-class FifoTest : public ::testing::Test
+class GenericWindowTests : public ::testing::Test
 {
 protected:
-  size_t default_buffer_size = 100;
-  std::string default_message = "message";
+  size_t even_window_size = 10;
 };
 
+class TriangularWindowTests : public ::testing::Test
+{
+
+};
 #endif

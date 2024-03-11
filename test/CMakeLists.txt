@@ -8,6 +8,7 @@ add_library(testing_lib OBJECT
     system_tests.hpp system_tests.cpp
     module_tests.hpp module_tests.cpp
     plugin_tests.hpp plugin_tests.cpp
+    dsp_tests.hpp dsp_tests.cpp
 )
 
 target_link_libraries(testing_lib PRIVATE 

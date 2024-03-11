@@ -19,14 +19,13 @@
  */
 
 #include <condition_variable>
-#include <functional>
 #include <mutex>
 #include <thread>
 
 #include "fifo_tests.hpp"
 
-#include "debug.hpp"
 #include "rtos.hpp"
+#include "fifo.hpp"
 
 TEST_F(FifoTest, getFifo)
 {
