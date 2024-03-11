@@ -4,17 +4,15 @@
 
 #include "generic_window.hpp"
 
-#include <gsl/gsl_math.h>
-
 #include <algorithm>
 #include <utility>
 
-GenericWindow::GenericWindow(std::vector<double> half_lag_window)
+rtxi::dsp::GenericWindow::GenericWindow(std::vector<double> half_lag_window)
 {
   Initialize(std::move(half_lag_window));
 }
 
-void GenericWindow::Initialize(std::vector<double> half_lag_window)
+void rtxi::dsp::GenericWindow::Initialize(std::vector<double> half_lag_window)
 {
   window.clear();
   const int even = static_cast<int>(half_lag_window.size() % 2);
@@ -22,7 +20,7 @@ void GenericWindow::Initialize(std::vector<double> half_lag_window)
   window.insert(window.end(), half_lag_window.begin(), half_lag_window.end());
 }
 
-void GenericWindow::NormalizeWindow()
+void rtxi::dsp::GenericWindow::NormalizeWindow()
 {
   const double peak = *std::max_element(window.begin(), window.end());
   for (auto& val : window) {
@@ -30,7 +28,7 @@ void GenericWindow::NormalizeWindow()
   }
 }
 
-const std::vector<double>& GenericWindow::GetDataWindow()
+const std::vector<double>& rtxi::dsp::GenericWindow::GetDataWindow()
 {
   return window;
 }

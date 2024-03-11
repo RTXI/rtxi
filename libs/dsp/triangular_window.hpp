@@ -7,18 +7,12 @@
 
 #include "generic_window.hpp"
 
+namespace rtxi::dsp {
 class TriangularWindow : public GenericWindow
 {
 public:
-  // constructors
-
-  TriangularWindow(int length, int zero_ends);
-  std::vector<double> GenerateHalfLagWindow(int length, int zero_ends);
-
-  // private:
-
-  // int Num_Taps;
-  // double *Half_Lag_Window;
+  TriangularWindow(int length, bool zero_ends);
+  static std::vector<double> GenerateHalfLagWindow(int length, bool zero_ends);
 };
-
+}  // namespace rtxi::dsp
 #endif
