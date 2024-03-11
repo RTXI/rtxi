@@ -5,33 +5,35 @@
 #ifndef _GEN_WIN_H_
 #define _GEN_WIN_H_
 
+#include <vector>
+
 class GenericWindow
 {
 public:
   // constructors
 
-  GenericWindow(void);
-  GenericWindow(int length);
+  GenericWindow();
+  explicit GenericWindow(int length);
 
   void Initialize(int length);
 
   double GetDataWinCoeff(int samp_indx);
 
-  void NormalizeWindow(void);
+  void NormalizeWindow();
 
-  double* GetDataWindow(void);
+  double* GetDataWindow();
 
-  double* GetHalfLagWindow(void);
+  double* GetHalfLagWindow();
 
-  int GetNumTaps(void);
-  int GetHalfLength(void);
-
-protected:
-  int Length;
-  int Half_Length;
-  double* Half_Lag_Win;
-  double* Lag_Win;
-  double* Data_Win;
+  int GetNumTaps() const;
+  int GetHalfLength() const;
+  int GetLength() const;
+private:
+  std::size_t Length;
+  std::size_t Half_Length;
+  std::vector<double> Half_Lag_Win;
+  std::vector<double> Lag_Win;
+  std::vector<double> Data_Win;
 };
 
 #endif
