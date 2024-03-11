@@ -2,12 +2,7 @@
 // file = psd_est.cpp
 //
 
-#include <iostream>
-#include <stdlib.h>
-
-#include "psd_est.h"
-
-using namespace std;
+#include "psd_estimate.hpp"
 
 PsdEstimate::PsdEstimate(int num_samps, double samp_intvl)
 {
@@ -16,8 +11,7 @@ PsdEstimate::PsdEstimate(int num_samps, double samp_intvl)
   Delta_T = samp_intvl;
   Psd_Est = new double[Num_Samps];
 }
-void
-PsdEstimate::DumpNumeric(ofstream* out_file, CpfskSpectrum* ref_spec)
+void PsdEstimate::DumpNumeric(ofstream* out_file, CpfskSpectrum* ref_spec)
 {
   int samp_idx;
   double freq, value, theor_val;
@@ -29,8 +23,7 @@ PsdEstimate::DumpNumeric(ofstream* out_file, CpfskSpectrum* ref_spec)
   }
 };
 
-void
-PsdEstimate::DumpNumeric(ofstream* out_file)
+void PsdEstimate::DumpNumeric(ofstream* out_file)
 {
   int samp_idx;
   double freq, value;
@@ -41,8 +34,7 @@ PsdEstimate::DumpNumeric(ofstream* out_file)
   }
 };
 
-void
-PsdEstimate::DumpDecibels(ofstream* out_file, CpfskSpectrum* ref_spec)
+void PsdEstimate::DumpDecibels(ofstream* out_file, CpfskSpectrum* ref_spec)
 {
   int samp_idx;
   double freq, value, theor_val;
@@ -53,8 +45,7 @@ PsdEstimate::DumpDecibels(ofstream* out_file, CpfskSpectrum* ref_spec)
     (*out_file) << freq << ",  " << value << ", " << theor_val << std::endl;
   }
 };
-void
-PsdEstimate::DumpDecibels(ofstream* out_file)
+void PsdEstimate::DumpDecibels(ofstream* out_file)
 {
   int samp_idx;
   double freq, value;

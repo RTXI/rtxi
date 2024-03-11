@@ -1,14 +1,20 @@
 //
 //  File = thy_spec.h
 //
-#ifndef _THY_SPEC_H_
-#define _THY_SPEC_H_
+#ifndef THEORETICAL_SPECTRUM_HPP
+#define THEORETICAL_SPECTRUM_HPP
 
+namespace rtxi::dsp {
 class TheoreticalSpectrum
 {
 public:
-  TheoreticalSpectrum(){};
+  TheoreticalSpectrum() = default;
+  TheoreticalSpectrum(const TheoreticalSpectrum&) = default;
+  TheoreticalSpectrum(TheoreticalSpectrum&&) = default;
+  TheoreticalSpectrum& operator=(const TheoreticalSpectrum&) = default;
+  TheoreticalSpectrum& operator=(TheoreticalSpectrum&&) = default;
+  virtual ~TheoreticalSpectrum() = default;
   virtual double GetPsdValue(double freq) = 0;
-  // double GetPsdValue( double freq );
 };
+}  // namespace rtxi::dsp
 #endif

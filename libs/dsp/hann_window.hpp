@@ -13,7 +13,7 @@ class HannWindow : public rtxi::dsp::GenericWindow
 {
 public:
   HannWindow(int length, bool zero_ends);
-  std::vector<double> GenerateWindow(int length, bool zero_ends);
+  static std::vector<double> GenerateWindow(int length, bool zero_ends);
 };
 }  // namespace rtxi::dsp
 #endif

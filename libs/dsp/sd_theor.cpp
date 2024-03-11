@@ -2,22 +2,13 @@
 //  File = sd_filt.cpp
 //
 
-#include <fstream>
-#include <math.h>
-#include <iostream>
-
 #include "sd_theor.h"
-#include "misdefs.h"
 
-using namespace std;
-
-#ifdef _DEBUG
-extern std::ofstream DebugFile;
-#endif
-
-void
-SteepestDescentTheoretic(double start_pt_0, double start_pt_1, double mu,
-                         int num_pts, double min_dist)
+void SteepestDescentTheoretic(double start_pt_0,
+                              double start_pt_1,
+                              double mu,
+                              int num_pts,
+                              double min_dist)
 {
   int n;
   double w0, w1, old_w0, old_w1, grad_0, grad_1;

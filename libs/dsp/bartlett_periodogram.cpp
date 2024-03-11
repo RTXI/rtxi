@@ -2,11 +2,8 @@
 // File = bartpdgm.cpp
 //
 
-#include "bartpdgm.h"
-#include "complex.h"
-#include "fft.h"
-#include <stdlib.h>
-
+#include "bartlett_periodogram.hpp"
+#include "generic_window.hpp"
 BartlettPeriodogram::BartlettPeriodogram(SignalSource* signal_source,
                                          double samp_intvl,
                                          int num_samps_per_seg, int fft_len,

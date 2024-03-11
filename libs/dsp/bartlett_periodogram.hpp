@@ -2,18 +2,21 @@
 // File = bartpdgm.h
 //
 
-#ifndef _BARTPDGM_H_
-#define _BARTPDGM_H_
+#ifndef BARTLETT_PERIODOGRAM_HPP
+#define BARTLETT_PERIODOGRAM_HPP
 
-#include "gen_win.h"
-#include "psd_est.h"
-#include "sig_src.h"
+#include "generic_window.hpp"
+#include "psd_estimate.hpp"
+#include "signal_source.hpp"
 
 class BartlettPeriodogram : public PsdEstimate
 {
 public:
-  BartlettPeriodogram(SignalSource* signal_source, double samp_intvl,
-                      int num_samps_per_seg, int fft_len,
-                      GenericWindow* data_wind, int num_segs_to_avg);
+  BartlettPeriodogram(SignalSource* signal_source,
+                      double samp_intvl,
+                      int num_samps_per_seg,
+                      int fft_len,
+                      const rtxi::dsp::GenericWindow& data_wind,
+                      int num_segs_to_avg);
 };
-#endif // _BARTPDGM_H_
+#endif  // _BARTPDGM_H_

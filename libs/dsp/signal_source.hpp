@@ -2,24 +2,24 @@
 //  File = sig_src.h
 //
 
-#ifndef _SIG_SRC_H_
-#define _SIG_SRC_H_
+#ifndef SIGNAL_SOURCE_HPP
+#define SIGNAL_SOURCE_HPP
 
-#include "complex.h"
-#include "sig_src.h"
+#include <complex>
 
 class SignalSource
 {
 public:
-  SignalSource(){};
+  SignalSource(const SignalSource&) = default;
+  SignalSource(SignalSource&&) = delete;
+  SignalSource& operator=(const SignalSource&) = default;
+  SignalSource& operator=(SignalSource&&) = delete;
+  virtual ~SignalSource() = default;
 
-  ~SignalSource(){};
+  virtual void GetNextSegment(std::complex<double>, int);
 
-  //  float_complex* GetNextSegment(void);
-  virtual void GetNextSegment(complex*, int){};
+  virtual void GetNextSegment(double*, int);
 
-  virtual void GetNextSegment(double*, int){};
-
-  virtual void ResetSource(void){};
+  virtual void ResetSource();
 };
-#endif // _SIG_SRC_H_
+#endif  // _SIG_SRC_H_
