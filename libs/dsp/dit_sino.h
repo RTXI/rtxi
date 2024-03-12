@@ -4,7 +4,7 @@
 #ifndef _DIT_SINO_H_
 #define _DIT_SINO_H_
 
-#include "complex.h"
+#include "complex.h" 
 
 void FftDitSino(complex* array, int fft_size);
 void IfftDitSino(complex* array, int fft_size);
