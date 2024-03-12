@@ -3,7 +3,7 @@
  */
 
 #include <stdexcept>
-
+#include <algorithm>
 #include "trianglr.h"
 
 TriangularWindow::TriangularWindow(int length, int zero_ends)
@@ -18,8 +18,7 @@ void TriangularWindow::GenerateWindow(int length, int zero_ends)
     throw std::invalid_argument(
         "TriangularWindow::GenerateWindow : Negative length provided");
   }
-  std::vector<double> half_lag_window(GetHalfLagWindow(),
-                                      GetHalfLagWindow() + GetHalfLength());
+  std::vector<double> half_lag_window(static_cast<size_t>(GetHalfLength()));
   if (zero_ends != 0) {
     if ((length % 2) != 0)  // odd length window centered at zero
     {
@@ -49,4 +48,5 @@ void TriangularWindow::GenerateWindow(int length, int zero_ends)
       }
     }
   }
+  std::iter_swap(GetHalfLagWindow(), half_lag_window.data());
 }

@@ -98,8 +98,8 @@ public:
   int GetLength() const;
 
 private:
-  std::size_t Length;
-  std::size_t Half_Length;
+  std::size_t Length=0;
+  std::size_t Half_Length=0;
   std::vector<double> Half_Lag_Win;
   std::vector<double> Lag_Win;
   std::vector<double> Data_Win;

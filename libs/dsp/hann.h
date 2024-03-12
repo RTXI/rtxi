@@ -7,17 +7,38 @@
 
 #include "gen_win.h"
 
+/*!
+  * Hann Window class
+  *
+  * Generates a Hann window used for DFT input windowing
+  */
 class HannWindow : public GenericWindow
 {
 public:
-  // constructors
 
-  HannWindow(int length, int zero_ends);
+  /*!
+   * Creates a Hann window
+   *
+   * Hann windows can have zero at each end, or the user
+   * can choose to only have nonzero values for the window.
+   *
+   * \param num_taps The size of the window
+   * \param zero_ends set to 1 if you wish to append a zero at both ends, 0
+   *                  otherwise
+   */
+  HannWindow(int num_taps, int zero_ends);
+  
+  /*!
+   * Generate the hann window
+   *
+   * This creates the half of the lag window buffer needed to fully specify
+   * the hann window.
+   *
+   * \param length The size of the window
+   * \param zero_ends set to 1 if you wish to append a zero at both ends, 0
+   *                  otherwise
+   */
   void GenerateWindow(int length, int zero_ends);
-
-private:
-  int Num_Taps;
-  double* Half_Lag_Window;
 };
 
 #endif

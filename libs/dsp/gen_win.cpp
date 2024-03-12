@@ -2,8 +2,9 @@
  * Generic window for filter
  */
 
-#include <stdexcept>
 #include <algorithm>
+#include <stdexcept>
+
 #include "gen_win.h"
 
 GenericWindow::GenericWindow() = default;
@@ -15,8 +16,10 @@ GenericWindow::GenericWindow(int length)
 
 void GenericWindow::Initialize(int length)
 {
-  if(length < 0) { throw std::invalid_argument("GenericWindow::Initialize : Negative length given");}
-  size_t Half_Length = 0;
+  if (length < 0) {
+    throw std::invalid_argument(
+        "GenericWindow::Initialize : Negative length given");
+  }
   if ((length % 2) != 0) {
     Half_Length = (static_cast<size_t>(length) + 1) / 2;
   } else {
@@ -50,7 +53,7 @@ double GenericWindow::GetDataWinCoeff(int samp_indx)
 void GenericWindow::NormalizeWindow()
 {
   double peak = *std::max_element(Half_Lag_Win.begin(), Half_Lag_Win.end());
-  for (double & n : Half_Lag_Win) {
+  for (double& n : Half_Lag_Win) {
     n /= peak;
   }
 }

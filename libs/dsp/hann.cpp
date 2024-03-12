@@ -2,36 +2,44 @@
  * Hann window, not to be confused with Hanning window
  */
 
-#include "hann.h"
-#include "misdefs.h"
+#include <stdexcept>
+#include <algorithm>
 #include <gsl/gsl_math.h>
-#include <math.h>
+#include <gsl/gsl_sf_trig.h>
+#include "hann.h"
 
 HannWindow::HannWindow(int num_taps, int zero_ends)
-  : GenericWindow(num_taps)
+    : GenericWindow(num_taps)
 {
   GenerateWindow(num_taps, zero_ends);
 }
 
-void
-HannWindow::GenerateWindow(int length, int zero_ends)
+void HannWindow::GenerateWindow(int length, int zero_ends)
 {
-  for (int n = 0; n < Half_Length; n++) {
-    if (length % 2) // odd length
+  if (length < 0) {
+    throw std::invalid_argument(
+        "HannWindow::GenerateWindow : Negative length provided");
+  }
+  std::vector<double> half_lag_win(static_cast<size_t>(GetHalfLength()));
+  for (int n = 0; n < GetHalfLength(); n++) {
+    if ((length % 2) != 0)  // odd length
     {
-      if (zero_ends) {
-        Half_Lag_Win[n] = 0.5 + 0.5 * cos(M_PI * 2 * n / (length - 1));
+      if (zero_ends != 0) {
+        half_lag_win.at(static_cast<size_t>(n)) =
+            0.5 + 0.5 * gsl_sf_cos(M_PI * 2 * n / (length - 1));
       } else {
-        Half_Lag_Win[n] = 0.5 + 0.5 * cos(M_PI * 2 * n / (length + 1));
+        half_lag_win.at(static_cast<size_t>(n)) =
+            0.5 + 0.5 * gsl_sf_cos(M_PI * 2 * n / (length + 1));
       }
     } else {
-      if (zero_ends) {
-        Half_Lag_Win[n] = 0.5 + 0.5 * cos((2 * n + 1) * M_PI / (length - 1));
+      if (zero_ends != 0) {
+        half_lag_win.at(static_cast<size_t>(n)) =
+            0.5 + 0.5 * gsl_sf_cos((2 * n + 1) * M_PI / (length - 1));
       } else {
-        Half_Lag_Win[n] = 0.5 + 0.5 * cos((2 * n + 1) * M_PI / (length + 1));
+        half_lag_win.at(static_cast<size_t>(n)) =
+            0.5 + 0.5 * gsl_sf_cos((2 * n + 1) * M_PI / (length + 1));
       }
     }
-    //    std::cout << n << "  " << Half_Lag_Win[n] << std::endl;
   }
-  return;
+  std::iter_swap(GetHalfLagWindow(), half_lag_win.data());
 }
