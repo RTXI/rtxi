@@ -5,7 +5,7 @@
 #ifndef _SIG_SRC_H_
 #define _SIG_SRC_H_
 
-#include <complex>
+#include "complex.h" 
 
 /*!
 * Signal Source Interface
@@ -27,7 +27,7 @@ public:
     * \param data Pointer to the segment data requested in complex form
     * \param size The size of the segment data buffer
     */
-  virtual void GetNextSegment(std::complex<double>* data, int size) = 0;
+  virtual void GetNextSegment(complex* data, int size) = 0;
 
   /*!
     * Obtain the following segment.
