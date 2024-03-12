@@ -6,12 +6,48 @@
 
 #include "complex.h"
 
-void fft(complex* input, complex* output, int size);
+/*!
+  * Fast Fourier Transform
+  *
+  * \param time_signal Input signal in time domain
+  * \param sample_spectrum Output spectrum in frequency domain
+  * \param num_samps Number of samples in the buffers
+  *
+  * \sa ifft()
+  */
+void fft(complex* time_signal, complex* sample_spectrum, int num_samps);
 
-void ifft(complex* input, complex* output, int size);
+/*!
+  * Inverse Fast Fourier Transform
+  *
+  * \param sample_spectrum Input spectrum in frequency domain
+  * \param time_signal Output signal in time domain
+  * \param num_samps Number of samples in the buffers
+  *
+  * \sa fft()
+  */
+void ifft(complex* sample_spectrum, complex* time_signal, int num_samps);
 
-void fft(complex* input, complex* output, int num_samps, int fft_len);
+/*!
+  * Fast Fourier Transform
+  *
+  * \param time_signal Input signal in time domain
+  * \param sample_spectrum Output spectrum in frequency domain
+  * \param num_samps Number of samples in the input signal 
+  * \param fft_len Length of the fft spectrum in frequency bins
+  *
+  * \sa ifft()
+  */
+void fft(complex* time_signal, complex* sample_spectrum, int num_samps, int fft_len);
 
-void fft(complex* signal, int size);
+/*!
+  * Inverse Fast Fourier Transform
+  *
+  * \param time_signal Input signal in time domain
+  * \param num_samps Number of samples in the input signal 
+  *
+  * \sa ifft()
+  */
+void fft(complex* signal, int num_samps);
 
 #endif // _FFT_H_
