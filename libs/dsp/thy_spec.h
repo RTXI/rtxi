@@ -7,8 +7,11 @@
 class TheoreticalSpectrum
 {
 public:
-  TheoreticalSpectrum(){};
+  TheoreticalSpectrum(const TheoreticalSpectrum&) = default;
+  TheoreticalSpectrum(TheoreticalSpectrum&&) = delete;
+  TheoreticalSpectrum& operator=(const TheoreticalSpectrum&) = default;
+  TheoreticalSpectrum& operator=(TheoreticalSpectrum&&) = delete;
+  virtual ~TheoreticalSpectrum() = default;
   virtual double GetPsdValue(double freq) = 0;
-  // double GetPsdValue( double freq );
 };
 #endif
