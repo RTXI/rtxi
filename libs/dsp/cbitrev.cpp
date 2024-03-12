@@ -2,14 +2,17 @@
 //  File = cbitrev.cpp
 //
 
-#include "cbitrev.h"
 #include "complex.h"
+#include "cbitrev.h"
 
-void
-ComplexBitReverse(complex* array, int size)
+void ComplexBitReverse(complex* array, int size)
 {
   complex tt;
-  int nv2, nm1, i, j, k;
+  int nv2 = 0;
+  int nm1 = 0;
+  int i = 0;
+  int j = 0;
+  int k = 0;
 
   nv2 = size / 2;
   nm1 = size - 1;
