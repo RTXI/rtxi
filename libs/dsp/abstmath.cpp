@@ -5,131 +5,109 @@
 //  Mathematical Operations for Abstract Algebra
 //
 
+#include <cstddef>
+#include <vector>
+
 #include "abstmath.h"
-#include "misdefs.h"
-#include <fstream>
-#include <iostream>
+
 #include <math.h>
-#include <stdlib.h>
 
-//======================================================
-//  constructor
-
+// NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 PrimeFactorSet::PrimeFactorSet(int num_factors, int* factors)
+    : Num_Factors(num_factors)
+    , Num_Distinct_Factors(1)
 {
-  int n1, n2, match;
-  int distinct_factor_tally;
-  Num_Factors = num_factors;
-  Num_Distinct_Factors = 1;
+  size_t n1 = 0;
+  size_t n2 = 0;
+  int match = 0;
+  int distinct_factor_tally = 0;
+
   for (n1 = 1; n1 < num_factors; n1++) {
     match = 0;
     for (n2 = 0; n2 < n1; n2++) {
       // compare factor n1 to all other factors that
       // come before it in the vector factors[].
       // if no match, increment count of distinct factors
-      if (factors[n1] == factors[n2])
+      if (factors[n1] == factors[n2]) {
         match = 1;
+      }
     }
-    if (match == 1)
+    if (match == 1) {
       continue;
+    }
     Num_Distinct_Factors++;
   }
-  Factor_Vector = new int[Num_Distinct_Factors];
-  Factor_Multiplicity = new int[Num_Distinct_Factors];
+  Factor_Vector.resize(static_cast<size_t>(Num_Distinct_Factors));
+  Factor_Multiplicity.resize(static_cast<size_t>(Num_Distinct_Factors));
   Factor_Vector[0] = factors[0];
   Factor_Multiplicity[0] = 1;
   distinct_factor_tally = 1;
-  for (n1 = 1; n1 < num_factors; n1++) {
+  for (n1 = 1; n1 < static_cast<size_t>(num_factors); n1++) {
     match = 0;
-    for (n2 = 0; n2 < distinct_factor_tally; n2++) {
-      if (factors[n1] != Factor_Vector[n2])
+    for (n2 = 0; n2 < static_cast<size_t>(distinct_factor_tally); n2++) {
+      if (factors[n1] != Factor_Vector[n2]) {
         continue;
-      Factor_Multiplicity[n2]++;
+      }
+      Factor_Multiplicity[static_cast<size_t>(n2)]++;
       match = 1;
       break;
     }
-    if (match)
+    if (match != 0) {
       continue;
-    Factor_Vector[distinct_factor_tally] = factors[n1];
-    Factor_Multiplicity[distinct_factor_tally] = 1;
+    }
+    Factor_Vector[static_cast<size_t>(distinct_factor_tally)] = factors[n1];
+    Factor_Multiplicity[static_cast<size_t>(distinct_factor_tally)] = 1;
     distinct_factor_tally++;
   }
-  for (n1 = 0; n1 < Num_Distinct_Factors; n1++) {
-    std::cout << Factor_Vector[n1] << " ** " << Factor_Multiplicity[n1]
-              << std::endl;
-  }
-  return;
-};
-
-PrimeFactorSet::~PrimeFactorSet(void)
-{
-  delete[] Factor_Vector;
-  delete[] Factor_Multiplicity;
 }
 
-//======================================================
-//  constructor
-
-OrderedFactorSet::OrderedFactorSet(int num_factors, int* factors)
+OrderedFactorSet::OrderedFactorSet(int num_factors, const int* factors)
+    : Num_Factors(static_cast<size_t>(num_factors))
 {
-  int n;
-  Num_Factors = num_factors;
-
-  Factor_Vector = new int[Num_Factors];
-
-  for (n = 0; n < num_factors; n++) {
+  Factor_Vector.resize(Num_Factors);
+  for (size_t n = 0; n < static_cast<size_t>(num_factors); n++) {
     Factor_Vector[n] = factors[n];
   }
-  return;
 }
 
-OrderedFactorSet::~OrderedFactorSet(void)
+PrimeFactorSet PrimeFactorization(int number)
 {
-  delete[] Factor_Vector;
-}
+  size_t num_factors = 0;
+  size_t first_n = 2;
+  int geom_middle = 0;
+  int residue = number;
+  int factor_not_found = 1;
+  std::vector<int> temp_factors(20);
 
-PrimeFactorSet*
-PrimeFactorization(int number)
-{
-  int num_factors;
-  int first_n, geom_middle;
-  int residue;
-  int factor_not_found;
-  int* temp_factors = new int[20];
-
-  residue = number;
-
-  geom_middle = (int)ceil(sqrt(double(residue)));
-  factor_not_found = 1;
-  num_factors = 0;
-  first_n = 2;
+  geom_middle = static_cast<int>(ceil(sqrt(static_cast<double>(residue))));
 
   for (;;) {
-    for (int n = first_n; n <= geom_middle; n++) {
-      if (residue % n != 0)
+    for (size_t n = first_n; n <= static_cast<size_t>(geom_middle); n++) {
+      if (static_cast<size_t>(residue) % n != 0) {
         continue;
+      }
       factor_not_found = 0;
-      temp_factors[num_factors] = n;
+      temp_factors[num_factors] = static_cast<int>(n);
       num_factors++;
-      residue /= n;
-      geom_middle = (int)ceil(sqrt(double(residue)));
+      residue /= static_cast<int>(n);
+      geom_middle = static_cast<int>(ceil(sqrt(static_cast<double>(residue))));
       first_n = n;
-      std::cout << "found factor " << n << std::endl;
       break;
     }
-    if (residue == 1)
+    if (residue == 1) {
       break;
-    if (factor_not_found)
+    }
+    if (factor_not_found != 0) {
       break;
+    }
     factor_not_found = 1;
   }
   if (residue != 1) {
     temp_factors[num_factors] = residue;
     num_factors++;
   }
-  std::cout << "final residue is " << residue << std::endl;
-  PrimeFactorSet* factor_set = new PrimeFactorSet(num_factors, temp_factors);
+  PrimeFactorSet factor_set(static_cast<int>(num_factors), temp_factors.data());
 
-  delete[] temp_factors;
   return factor_set;
 }
+// NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
