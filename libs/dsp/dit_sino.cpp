@@ -10,8 +10,6 @@
 
 #include <gsl/gsl_sf_trig.h>
 
-#include <cmath>
-
 #include "cbitrev.h"
 #include "complex.h"
 #include "log2.h"
