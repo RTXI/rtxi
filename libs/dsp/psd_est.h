@@ -57,10 +57,14 @@ public:
     */
   void DumpDecibels(std::ofstream* out_stream);
 
+protected:
+  std::vector<double>& GetPsdEstimate(){ return Psd_Est; }
+
 private:
   int Num_Samps = 0;
   double Delta_F = 0.0;
   double Delta_T = 0.0;
   std::vector<double> Psd_Est;
 };
+
 #endif
