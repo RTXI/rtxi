@@ -5,21 +5,41 @@
 #ifndef _SIG_SRC_H_
 #define _SIG_SRC_H_
 
-#include "complex.h"
-#include "sig_src.h"
+#include <complex>
 
+/*!
+* Signal Source Interface
+*
+* Classes that hope to simulate a signal derive this class
+*/
 class SignalSource
 {
 public:
-  SignalSource(){};
+  SignalSource(const SignalSource&) = default;
+  SignalSource(SignalSource&&) = delete;
+  SignalSource& operator=(const SignalSource&) = default;
+  SignalSource& operator=(SignalSource&&) = delete;
+  virtual ~SignalSource() = default;
 
-  ~SignalSource(){};
+  /*!
+    * Obtain the following segment.
+    *
+    * \param data Pointer to the segment data requested in complex form
+    * \param size The size of the segment data buffer
+    */
+  virtual void GetNextSegment(std::complex<double>* data, int size) = 0;
 
-  //  float_complex* GetNextSegment(void);
-  virtual void GetNextSegment(complex*, int){};
+  /*!
+    * Obtain the following segment.
+    *
+    * \param data Pointer to the segment data requested in real form
+    * \param size The size of the segment data buffer
+    */
+  virtual void GetNextSegment(double* data, int size) = 0;
 
-  virtual void GetNextSegment(double*, int){};
-
-  virtual void ResetSource(void){};
+  /*!
+    * Reset the internal buffer.
+    */
+  virtual void ResetSource() = 0;
 };
 #endif // _SIG_SRC_H_
