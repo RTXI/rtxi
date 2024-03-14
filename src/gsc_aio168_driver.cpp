@@ -96,10 +96,10 @@ struct physical_channel_t
   bool active = false;
 };
 
-inline int32_t index_to_reference(DAQ::index_t index)
+inline int32_t daqref_to_gslref(DAQ::Reference::reference_t index)
 {
   int32_t result = 0;
-  switch (static_cast<DAQ::Reference::reference_t>(index)) {
+  switch (index) {
     case DAQ::Reference::GROUND:
     case DAQ::Reference::COMMON:
       result = AIO168_AI_MODE_SINGLE;
@@ -114,7 +114,7 @@ inline int32_t index_to_reference(DAQ::index_t index)
   return result;
 }
 
-inline DAQ::Reference::reference_t reference_to_index(int32_t aio168_reference)
+inline DAQ::Reference::reference_t gslref_to_daqref(int32_t aio168_reference)
 {
   DAQ::Reference::reference_t result = DAQ::Reference::UNKNOWN;
   switch (aio168_reference) {
@@ -154,7 +154,7 @@ inline DAQ::index_t range_to_index(int32_t aio168_range_id)
 
 inline int32_t index_to_range(DAQ::index_t index)
 {
-  int32_t range;
+  int32_t range = 0;
   switch (index) {
     case 2:
       range = AIO168_RANGE_2_5V;
@@ -331,8 +331,10 @@ Device::Device(const std::string& dev_name,
   // Check 16aio168 manual for explenation of this setting
   int32_t scan_setting = AIO168_AI_SCAN_CLK_SRC_BCR;
   result = aio168_ioctl(fd, AIO168_IOCTL_AI_SCAN_CLK_SRC, &scan_setting);
-  if(result < 0){
-    ERROR_MSG("16QIO168 DRIVER : Unable to set the channel scan to software trigger for device");
+  if (result < 0) {
+    ERROR_MSG(
+        "16QIO168 DRIVER : Unable to set the channel scan to software trigger "
+        "for device");
     printError(result);
   }
 
@@ -493,7 +495,7 @@ DAQ::index_t Device::getAnalogReference(DAQ::ChannelType::type_t type,
   if (type == DAQ::ChannelType::DI || type == DAQ::ChannelType::DO) {
     return 0;
   }
-  return reference_to_index(
+  return gslref_to_daqref(
       physical_channels_registry.at(type).at(index).reference);
 }
 
@@ -558,18 +560,21 @@ int Device::setAnalogZeroOffset(DAQ::ChannelType::type_t type,
 {
   physical_channel_t& chan = physical_channels_registry.at(type).at(index);
   chan.offset = offset;
+  return 0;
 }
 
 int Device::setAnalogReference(DAQ::ChannelType::type_t type,
                                DAQ::index_t index,
                                DAQ::index_t reference)
 {
+  physical_channel_t& chan = physical_channels_registry.at(type).at(index);
+  chan.reference = static_cast<DAQ::Reference::reference_t>(reference);
   return 0;
 }
 
-int Device::setAnalogUnits(DAQ::ChannelType::type_t type,
-                           DAQ::index_t index,
-                           DAQ::index_t units)
+int Device::setAnalogUnits(DAQ::ChannelType::type_t /*type*/,
+                           DAQ::index_t /*index*/,
+                           DAQ::index_t /*units*/)
 {
   return 0;
 }
@@ -633,10 +638,9 @@ void Device::read()
   // initiate scan
   aio168_ioctl(fd, AIO168_IOCTL_AI_SYNC, nullptr);
   DAQ::analog_range_t range {};
-  int samples_read = 0;
   double gain = 1.0;
   double offset = 0.0;
-  samples_read = aio168_read(
+  aio168_read(
       fd, ai_channels_buffer.data(), CURRENT_SCAN_SIZE * sizeof(int32_t));
   // we have to convert some stuff to float first before we continue
   for (size_t chan_id = 0; chan_id < CURRENT_SCAN_SIZE; chan_id++) {
@@ -653,22 +657,21 @@ void Device::read()
 void Device::write()
 {
   DAQ::analog_range_t range {};
-  int samples_written = 0;
   double gain = 1.0;
   double offset = 0.0;
   double value = 0.0;
   for (size_t chan_id = 0; chan_id < ao_channels_buffer.size(); chan_id++) {
     // we have to saturate value before pushing to output
+    auto& chan_info = physical_channels_registry[DAQ::ChannelType::AO][chan_id];
+    range = default_ranges[chan_info.range_index];
+    gain = chan_info.gain;
+    offset = chan_info.offset;
     value = std::min(std::max(readinput(chan_id), range.first), range.second);
-
+    ao_channels_buffer[chan_id] =
+        voltage_to_binary(range, value * gain + offset);
   }
-  int samples_written = 0;
-  samples_written = aio168_write(
-      fd, ai_channels_buffer.data(), CURRENT_SCAN_SIZE * sizeof(int32_t), );
-  for (int chan_id = 0; chan_id < ai_channels_buffer.size(); chan_id++) {
-    writeoutput(chan_id,
-                ai_channels_buffer[chan_id] * chan->gain + chan->offset);
-  }
+  aio168_write(
+      fd, ai_channels_buffer.data(), CURRENT_SCAN_SIZE * sizeof(int32_t));
 }
 
 Driver::Driver()
