@@ -23,7 +23,6 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QMessageBox>
-#include <QProcess>
 #include <QtGlobal>
 
 #include "rtxi_wizard.hpp"
@@ -358,11 +357,10 @@ void RTXIWizard::Panel::installFromString(const std::string& module_name)
 {
   const QString name = QString(module_name.c_str());
   // Let the user know that RTXI is installing the plugin.
-  auto* progress =
-      new QProgressDialog("Installing plugin", "Cancel", 0, 5, this);
-  progress->setMinimumDuration(0);
-  progress->setWindowModality(Qt::WindowModal);
-  progress->setLabelText("Starting...");
+  auto progress = QProgressDialog("Installing plugin", "Cancel", 0, 5, this);
+  progress.setMinimumDuration(0);
+  progress.setWindowModality(Qt::WindowModal);
+  progress.setLabelText("Starting...");
   /*
    * Two QByteArray variables are needed due to the way Qt stores binary data.
    * Calling module->getCloneUrl().toString().toLatin1().data() will produce
@@ -374,41 +372,44 @@ void RTXIWizard::Panel::installFromString(const std::string& module_name)
       QDir::temp().absolutePath() + QDir::separator() + QString("rtxi_modules");
   const QString source_location =
       mod_location + QDir::separator() + QString(module_name.c_str());
-  QDir(source_location).removeRecursively();
 
-  progress->setLabelText("Downloading extension...");
-  progress->setValue(1);
+  progress.setLabelText("Downloading extension...");
+  progress.setValue(1);
   // QApplication::processEvents();
   //  If the repo already exists, pull from master. If not, clone it.
-  auto* command = new QProcess();
-  const QStringList clone_args = {
-      "clone",
-      "-b",
-      "master",
-      url,
-      source_location,
-  };
-
-  const std::string git_command(GIT_COMMAND);
-  if (!(QDir(source_location)).exists()) {
-    command->start(QString::fromStdString(git_command), clone_args);
-    command->waitForFinished();
+  QStringList clone_args;
+  if (!(QDir(source_location).exists())) {
+    clone_args = QStringList {
+        "clone",
+        "-b",
+        "master",
+        url,
+        source_location,
+    };
+  } else {
+    clone_args = QStringList {"-C", source_location, "pull"};
   }
+  const std::string git_command(GIT_COMMAND);
+  int status =
+      system((git_command + " " + clone_args.join(" ").toStdString()).c_str());
 
-  if (command->exitStatus() != QProcess::NormalExit) {
+  if (status != 0) {
     ERROR_MSG("Could not complete installation for module {}",
               name.toStdString());
     // Re-enable buttons only after compilation is done. Otherwise you get race
     // conditions if buttons are pressed before modules are done compiling.
+    ERROR_MSG(
+        "Repo update failed with command: {}",
+        git_command + std::string(" ") + clone_args.join(" ").toStdString());
     cloneButton->setEnabled(true);
     rebuildListWidgets();
     availableListWidget->setDisabled(false);
     installedListWidget->setDisabled(false);
-    progress->close();
+    progress.close();
     return;
   }
-  if (progress->wasCanceled()) {
-    progress->close();
+  if (progress.wasCanceled()) {
+    progress.close();
     return;
   }
   // Define the commands to be run.
@@ -430,21 +431,17 @@ void RTXIWizard::Panel::installFromString(const std::string& module_name)
   const QStringList make_build_args = {"--build", build_location, "-j2"};
   const QStringList make_install_args = {"--install", build_location};
 
-  progress->setLabelText("Configuring...");
-  progress->setValue(2);
-  // QApplication::processEvents();
+  progress.setLabelText("Configuring...");
+  progress.setValue(2);
 
-  // Compile and install handled by QProcess.
-  command->start(make_cmd, make_config_args);
-  command->waitForFinished();
-  if (command->exitStatus() != QProcess::NormalExit || command->exitCode() != 0)
-  {
+  status = system(
+      (make_cmd.toStdString() + " " + make_config_args.join(" ").toStdString())
+          .c_str());
+  if (status != 0) {
     QMessageBox::critical(
         nullptr,
         "Error",
         "Could not Configure plugin. Email help@rtxi.org for assistance");
-    const QByteArray err_str = command->readAllStandardError();
-    ERROR_MSG("{}", err_str.toStdString());
     ERROR_MSG("Configure command for module {} failed with command {}",
               name.toStdString(),
               make_cmd.toStdString() + std::string(" ")
@@ -453,28 +450,25 @@ void RTXIWizard::Panel::installFromString(const std::string& module_name)
     rebuildListWidgets();
     availableListWidget->setDisabled(false);
     installedListWidget->setDisabled(false);
-    progress->close();
-    progress->close();
+    progress.close();
+    progress.close();
     return;
   }
-  if (progress->wasCanceled()) {
-    progress->close();
+  if (progress.wasCanceled()) {
+    progress.close();
     return;
   }
 
-  progress->setLabelText("Building...");
-  progress->setValue(3);
-  // QApplication::processEvents();
-  command->start(make_cmd, make_build_args);
-  command->waitForFinished();
-  if (command->exitStatus() != QProcess::NormalExit || command->exitCode() != 0)
-  {
+  progress.setLabelText("Building...");
+  progress.setValue(3);
+  status = system(
+      (make_cmd.toStdString() + " " + make_build_args.join(" ").toStdString())
+          .c_str());
+  if (status != 0) {
     QMessageBox::critical(
         nullptr,
         "Error",
         "Could not build plugin. Email help@rtxi.org for assistance");
-    const QByteArray err_str = command->readAllStandardError();
-    ERROR_MSG("{}", err_str.toStdString());
     ERROR_MSG("Build command for module {} failed with command {}",
               name.toStdString(),
               make_cmd.toStdString() + std::string(" ")
@@ -483,23 +477,21 @@ void RTXIWizard::Panel::installFromString(const std::string& module_name)
     rebuildListWidgets();
     availableListWidget->setDisabled(false);
     installedListWidget->setDisabled(false);
-    progress->close();
+    progress.close();
     return;
   }
 
-  progress->setLabelText("Installing...");
-  progress->setValue(4);
+  progress.setLabelText("Installing...");
+  progress.setValue(4);
   // QApplication::processEvents();
-  command->start(make_cmd, make_install_args);
-  command->waitForFinished();
-  if (command->exitStatus() != QProcess::NormalExit || command->exitCode() != 0)
-  {
+  status = system(
+      (make_cmd.toStdString() + " " + make_install_args.join(" ").toStdString())
+          .c_str());
+  if (status != 0) {
     QMessageBox::critical(
         nullptr,
         "Error",
         "Could not install plugin. Email help@rtxi.org for assistance");
-    const QByteArray err_str = command->readAllStandardError();
-    ERROR_MSG("{}", err_str.toStdString());
     ERROR_MSG("Install command for module {} failed with command {}",
               name.toStdString(),
               make_cmd.toStdString() + std::string(" ")
@@ -508,19 +500,18 @@ void RTXIWizard::Panel::installFromString(const std::string& module_name)
     rebuildListWidgets();
     availableListWidget->setDisabled(false);
     installedListWidget->setDisabled(false);
-    progress->close();
+    progress.close();
     return;
   }
-  if (progress->wasCanceled()) {
-    progress->close();
+  if (progress.wasCanceled()) {
+    progress.close();
     return;
   }
   // Add module to list of already installed modules.
   modules[name].installed = true;
-  progress->setValue(5);
+  progress.setValue(5);
   // QApplication::processEvents();
-  command->close();
-  progress->close();
+  progress.close();
   cloneButton->setEnabled(true);
   rebuildListWidgets();
   availableListWidget->setDisabled(false);

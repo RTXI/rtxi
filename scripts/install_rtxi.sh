@@ -64,7 +64,7 @@ fi
 mkdir ${MODS}
 cd ${MODS}
 
-# git clone https://github.com/RTXI/analysis-module.git
+git clone https://github.com/RTXI/analysis-module.git
 git clone https://github.com/RTXI/iir-filter.git
 git clone https://github.com/RTXI/fir-window.git
 git clone https://github.com/RTXI/sync.git

@@ -340,9 +340,6 @@ void SystemControl::Panel::submitAnalogChannelUpdate()
       * analogUnitPrefixList2->currentData().toDouble();
 
   dev->setChannelActive(a_type, a_chan, analogActiveButton->isChecked());
-  if (!analogActiveButton->isChecked()) {
-    return;
-  }
   dev->setAnalogGain(a_type, a_chan, a_gain);
   dev->setAnalogZeroOffset(a_type, a_chan, a_zerooffset);
   dev->setAnalogRange(
@@ -368,9 +365,6 @@ void SystemControl::Panel::submitDigitalChannelUpdate()
       d_dir == DAQ::INPUT ? DAQ::ChannelType::DI : DAQ::ChannelType::DO;
 
   dev->setChannelActive(d_type, d_chan, digitalActiveButton->isChecked());
-  if (!digitalActiveButton->isChecked()) {
-    return;
-  }
   if (d_type == DAQ::ChannelType::DI || d_type == DAQ::ChannelType::DO) {
     dev->setDigitalDirection(d_chan, d_dir);
   }
@@ -397,12 +391,8 @@ void SystemControl::Panel::apply()
   enable_device.setParam("device", std::any(static_cast<RT::Device*>(device)));
 
   this->getRTXIEventManager()->postEvent(&disable_device);
-  if (analogActiveButton->isEnabled()) {
-    this->submitAnalogChannelUpdate();
-  }
-  if (digitalActiveButton->isEnabled()) {
-    this->submitDigitalChannelUpdate();
-  }
+  this->submitAnalogChannelUpdate();
+  this->submitDigitalChannelUpdate();
   this->getRTXIEventManager()->postEvent(&enable_device);
   // Display changes
   display();
@@ -566,7 +556,7 @@ void SystemControl::Panel::displayAnalogGroup()
       indx++;
     }
   }
-  analogGainEdit->setText(QString::number(gain));
+  analogGainEdit->setText(QString::number(tmp));
 
   // Set gain prefix to computed index
   analogUnitPrefixList->setCurrentIndex(indx);
@@ -584,7 +574,7 @@ void SystemControl::Panel::displayAnalogGroup()
       indx++;
     }
   }
-  analogZeroOffsetEdit->setText(QString::number(offset));
+  analogZeroOffsetEdit->setText(QString::number(tmp));
   // Set offset prefix to computed index
   analogUnitPrefixList2->setCurrentIndex(indx);
 }
