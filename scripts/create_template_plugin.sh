@@ -243,7 +243,7 @@ add_library(
 # Consult library website for how to link them to your plugin using cmake
 target_link_libraries(${PLUGIN_NAME} PUBLIC 
     rtxi::rtxi rtxi::rtxidsp rtxi::rtxigen rtxi::rtxififo Qt5::Core Qt5::Gui Qt5::Widgets 
-    Boost::headers dl fmt::fmt
+    dl fmt::fmt
 )
 
 ################################################################################################ 
