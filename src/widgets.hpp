@@ -555,11 +555,15 @@ public:
    * \param value The new value to change the parameter to. accepted value
    *              types are: int, double, uint64_t, and std::string. Anything
    *              else is considered an error.
-   * \return an error code 0 for success, and -1 for failure
+   * \return an error code 0 for success, and -1 for failure (no attached
+   *         component)
    */
   template<typename T>
   int setComponentParameter(const Variable::Id& parameter_id, T value)
   {
+    if (this->plugin_component == nullptr) {
+      return -1;
+    }
     const int result = 0;
     Widgets::Variable::variable_t param_type = Widgets::Variable::UNKNOWN;
     if (typeid(T) == typeid(int64_t)) {
