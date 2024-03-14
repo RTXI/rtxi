@@ -9,7 +9,7 @@
 class PrimeFactorSet
 {
 public:
-  PrimeFactorSet(int num_factors, int* factors);
+  PrimeFactorSet(int num_factors, const int* factors);
 
 private:
   int Num_Factors;

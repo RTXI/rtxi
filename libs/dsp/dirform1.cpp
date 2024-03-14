@@ -2,38 +2,35 @@
 //  File = dirform1.cpp
 //
 
-#include "dirform1.h"
-#include <fstream>
-#include <stdlib.h>
-#ifdef _DEBUG
-extern std::ofstream DebugFile;
-#endif
+#include <stdexcept>
 
-DirectFormFir::DirectFormFir(int num_taps, double* coeff, logical quan_enab,
-                             long coeff_quan_factor, long input_quan_factor)
+#include "dirform1.h"
+
+DirectFormFir::DirectFormFir(int num_taps,
+                             double* coeff,
+                             bool quan_enab,
+                             int64_t coeff_quan_factor,
+                             int64_t input_quan_factor)
 {
-  int n;
-  Num_Taps = num_taps;
+  if (num_taps < 0) {
+    throw std::invalid_argument(
+        "DirectFormFir::DirectFormFir : Negative Value given for num_taps");
+  }
+  Num_Taps = static_cast<size_t>(num_taps);
   Write_Indx = 0;
   Quan_Enab = quan_enab;
 
   if (quan_enab) {
-    Quan_In_Buf = new long[num_taps];
-    Quan_Coeff = new long[num_taps];
+    Quan_In_Buf.resize(Num_Taps);
+    Quan_Coeff.resize(Num_Taps);
     Input_Quan_Factor = input_quan_factor;
     Long_Out_Quan_Factor = coeff_quan_factor;
     Output_Quan_Factor = double(coeff_quan_factor * input_quan_factor);
-    for (n = 0; n < num_taps; n++) {
+    for (size_t n = 0; n < num_taps; n++) {
       Quan_Coeff[n] = long((coeff_quan_factor * coeff[n]) + 0.5);
-#ifdef _DEBUG
-      DebugFile << coeff[n] << " quantized to " << Quan_Coeff[n] << std::endl;
-#endif
       Quan_In_Buf[n] = 0;
     }
   } else {
-#ifdef _DEBUG
-    DebugFile << "Initializing DirectFormFir unquantized" << std::endl;
-#endif
     Input_Quan_Factor = 32768;
     Long_Out_Quan_Factor = 32768;
     Unquan_In_Buf = new double[num_taps];
@@ -51,8 +48,7 @@ DirectFormFir::DirectFormFir(int num_taps, double* coeff, logical quan_enab,
   return;
 }
 
-double
-DirectFormFir::ProcessSample(double input_val)
+double DirectFormFir::ProcessSample(double input_val)
 {
   double output_val;
   int read_indx, tap_indx;
@@ -104,8 +100,7 @@ DirectFormFir::ProcessSample(double input_val)
 }
 //-----------------------------------------------------
 //
-long
-DirectFormFir::ProcessSample(long input_val)
+long DirectFormFir::ProcessSample(long input_val)
 {
   long output_val;
   int read_indx, tap_indx;
@@ -132,8 +127,7 @@ DirectFormFir::ProcessSample(long input_val)
   return (output_val);
 }
 
-int
-DirectFormFir::GetNumTaps(void)
+int DirectFormFir::GetNumTaps(void)
 {
   return (Num_Taps);
 }

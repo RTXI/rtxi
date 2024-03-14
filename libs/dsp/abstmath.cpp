@@ -13,7 +13,7 @@
 #include <math.h>
 
 // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-PrimeFactorSet::PrimeFactorSet(int num_factors, int* factors)
+PrimeFactorSet::PrimeFactorSet(int num_factors, const int* factors)
     : Num_Factors(num_factors)
     , Num_Distinct_Factors(1)
 {
@@ -22,7 +22,7 @@ PrimeFactorSet::PrimeFactorSet(int num_factors, int* factors)
   int match = 0;
   int distinct_factor_tally = 0;
 
-  for (n1 = 1; n1 < num_factors; n1++) {
+  for (n1 = 1; n1 < static_cast<size_t>(num_factors); n1++) {
     match = 0;
     for (n2 = 0; n2 < n1; n2++) {
       // compare factor n1 to all other factors that
