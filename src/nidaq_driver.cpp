@@ -214,6 +214,7 @@ struct physical_channel_t
   size_t units_index = 0;
   bool active = false;
   size_t downsample = 1;
+  size_t io_count = 0; // for keeping track of downsampling
 };
 
 int32_t physical_channel_t::addToTask(TaskHandle task_handle) const
@@ -879,6 +880,8 @@ void Device::read()
         &samples_read,
         nullptr);
     for (const auto& chan : this->active_channels.at(DAQ::ChannelType::AI)) {
+      chan->io_count += 1;
+      if(chan->io_count % chan->downsample != 0) { continue; }
       writeoutput(chan->id,
                   std::get<DAQ::ChannelType::AI>(buffer_arrays)[value_index]
                           * chan->gain
@@ -916,6 +919,8 @@ void Device::write()
   int samples_written = 0;
   if (!this->active_channels.at(DAQ::ChannelType::AO).empty()) {
     for (const auto& chan : this->active_channels.at(DAQ::ChannelType::AO)) {
+      chan->io_count += 1;
+      if(chan->io_count % chan->downsample != 0) { continue; }
       std::get<DAQ::ChannelType::AO>(buffer_arrays).at(samples_to_write) =
           readinput(chan->id) * chan->gain + chan->offset;
       ++samples_to_write;
