@@ -880,6 +880,10 @@ void Device::read()
         &samples_read,
         nullptr);
     for (const auto& chan : this->active_channels.at(DAQ::ChannelType::AI)) {
+      // not calling writeoutput means that the output value already there
+      // from a previous call is held. This is convenient in downsampling and
+      // allows us to just skip the channel if we are downsampling the analog
+      // channel
       chan->io_count += 1;
       if(chan->io_count % chan->downsample != 0) { continue; }
       writeoutput(chan->id,
@@ -919,8 +923,14 @@ void Device::write()
   int samples_written = 0;
   if (!this->active_channels.at(DAQ::ChannelType::AO).empty()) {
     for (const auto& chan : this->active_channels.at(DAQ::ChannelType::AO)) {
+      // Because of downsampling, we need to check whether the analog channel
+      // is being downsampled. If so, then we have to decide whether to 
+      // hold the voltage or to update it.
       chan->io_count += 1;
-      if(chan->io_count % chan->downsample != 0) { continue; }
+      if(chan->io_count % chan->downsample != 0) { 
+        ++samples_to_wrute;
+        continue; 
+      }
       std::get<DAQ::ChannelType::AO>(buffer_arrays).at(samples_to_write) =
           readinput(chan->id) * chan->gain + chan->offset;
       ++samples_to_write;
