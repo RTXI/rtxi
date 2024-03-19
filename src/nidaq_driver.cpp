@@ -213,6 +213,7 @@ struct physical_channel_t
   size_t range_index = 0;
   size_t units_index = 0;
   bool active = false;
+  size_t downsample = 1;
 };
 
 int32_t physical_channel_t::addToTask(TaskHandle task_handle) const
@@ -562,10 +563,10 @@ size_t Device::getAnalogUnitsCount(DAQ::index_t /*index*/) const
   return default_units.size();
 }
 
-size_t Device::getAnalogDownsample(DAQ::ChannelType::type_t /*type*/,
-                                   DAQ::index_t /*index*/) const
+size_t Device::getAnalogDownsample(DAQ::ChannelType::type_t type,
+                                   DAQ::index_t index) const
 {
-  return 0;
+  return physical_channels_registry.at(type).at(index);
 }
 
 std::string Device::getAnalogRangeString(DAQ::ChannelType::type_t type,
@@ -811,10 +812,14 @@ int Device::setAnalogOffsetUnits(DAQ::ChannelType::type_t /*type*/,
   return 0;
 }
 
-int Device::setAnalogDownsample(DAQ::ChannelType::type_t /*type*/,
-                                DAQ::index_t /*index*/,
-                                size_t /*downsample*/)
+int Device::setAnalogDownsample(DAQ::ChannelType::type_t type,
+                                DAQ::index_t index,
+                                size_t downsample)
 {
+  if(type == DAQ::ChannelType::DI || type == DAQ::ChannelType::DO){
+    return -1;
+  }
+  physical_channels_registry.at(type).at(index).downsample = downsample;
   return 0;
 }
 
@@ -823,6 +828,7 @@ int Device::setAnalogCounter(DAQ::ChannelType::type_t /*type*/,
 {
   return 0;
 }
+
 int Device::setAnalogCalibrationValue(DAQ::ChannelType::type_t /*type*/,
                                       DAQ::index_t /*index*/,
                                       double /*value*/)
