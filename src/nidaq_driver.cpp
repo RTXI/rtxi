@@ -567,7 +567,7 @@ size_t Device::getAnalogUnitsCount(DAQ::index_t /*index*/) const
 size_t Device::getAnalogDownsample(DAQ::ChannelType::type_t type,
                                    DAQ::index_t index) const
 {
-  return physical_channels_registry.at(type).at(index);
+  return physical_channels_registry.at(type).at(index).downsample;
 }
 
 std::string Device::getAnalogRangeString(DAQ::ChannelType::type_t type,
@@ -923,14 +923,6 @@ void Device::write()
   int samples_written = 0;
   if (!this->active_channels.at(DAQ::ChannelType::AO).empty()) {
     for (const auto& chan : this->active_channels.at(DAQ::ChannelType::AO)) {
-      // Because of downsampling, we need to check whether the analog channel
-      // is being downsampled. If so, then we have to decide whether to 
-      // hold the voltage or to update it.
-      chan->io_count += 1;
-      if(chan->io_count % chan->downsample != 0) { 
-        ++samples_to_wrute;
-        continue; 
-      }
       std::get<DAQ::ChannelType::AO>(buffer_arrays).at(samples_to_write) =
           readinput(chan->id) * chan->gain + chan->offset;
       ++samples_to_write;
