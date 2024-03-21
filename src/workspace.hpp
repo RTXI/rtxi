@@ -111,18 +111,11 @@ public:
   std::vector<DAQ::Device*> getAllDevices();
 
   /*!
-   * Save current workspace values and state settings
+   * Get list of loaded plugins
    *
-   * \param profile_name The name to save the settings
+   * \return A vector of pointers to constant Widget::Plugin objects
    */
-  void saveSettings(const QString& profile_name);
-
-  /*!
-   * Restore workspace values and state settings
-   *
-   * \param profile_name The name of the stored settings
-   */
-  void loadSettings(const QString& profile_name);
+  std::vector<const Widgets::Plugin*> getLoadedPlugins();
 
 private:
   using driver_registry_entry = std::pair<std::string, DAQ::Driver*>;

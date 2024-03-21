@@ -361,7 +361,7 @@ void MainWindow::loadSettings()
       this,
       tr("Load saved workspace"),
       userprefs.value("/dirs/setfiles", env_var).toString(),
-      tr("Settings (*.set)"));
+      tr("Settings (*.ini)"));
 
   if (QFile(filename).exists()) {
     systemMenu->clear();
@@ -369,6 +369,13 @@ void MainWindow::loadSettings()
   }
 }
 
+template<class... Ts>
+struct overload : Ts...
+{
+  using Ts::operator()...;
+};
+template<class... Ts>
+overload(Ts...) -> overload<Ts...>;
 void MainWindow::saveSettings()
 {
   QSettings userprefs;
@@ -379,8 +386,63 @@ void MainWindow::saveSettings()
   save_settings_dialog->setComboBoxItems(userprefs.childGroups());
   save_settings_dialog->setLabelText("Profile");
   save_settings_dialog->setOkButtonText("Save");
-  userprefs.endGroup();
   save_settings_dialog->exec();
+
+  const QString profile_name = save_settings_dialog->textValue();
+  if(userprefs.childGroups().contains(profile_name)) { userprefs.remove(profile_name); }
+  userprefs.beginGroup(profile_name);
+
+  // get period and save
+  Event::Object get_period_event(Event::Type::RT_GET_PERIOD_EVENT);
+  event_manager->postEvent(&get_period_event);
+  const auto period = std::any_cast<int64_t>(get_period_event.getParam("period"));
+  userprefs.setValue("period", QString::number(period));
+
+  // Safe DAQ userprefs
+  userprefs.beginGroup("DAQs");
+  userprefs.endGroup();
+
+  // Safe Widget userprefs
+  userprefs.beginGroup("Widgets");
+  QString widget_name;
+  int widget_count = 0;
+  Event::Object loaded_plugins_query(Event::Type::PLUGIN_LIST_QUERY_EVENT);
+  this->event_manager->postEvent(&loaded_plugins_query);
+  const auto plugin_list = std::any_cast<std::vector<const Widgets::Plugin*>>(loaded_plugins_query.getParam("plugins"));
+  for (const auto& entry : plugin_list) {
+    widget_name = QString::fromStdString(entry->getName());
+    userprefs.beginGroup(widget_name);
+    for (const auto& plugin : entry.second) {
+      userprefs.setValue("library", QString::fromStdString(plugin->getLibrary()));
+      userprefs.beginGroup(QString::number(widget_count));
+      for (const auto& param_info : plugin->getComponentParametersInfo()) {
+        userprefs.setValue(
+            QString::fromStdString(param_info.name),
+            std::visit(overload {[](const int64_t& val) -> QString
+                                 { return QString::number(val); },
+                                 [](const double& val) -> QString
+                                 { return QString::number(val); },
+                                 [](const uint64_t& val) -> QString
+                                 { return QString::number(val); },
+                                 [](const std::string& val) -> QString
+                                 { return QString::fromStdString(val); },
+                                 [](const RT::State::state_t& val) -> QString {
+                                   return QString::number(
+                                       static_cast<int8_t>(val));
+                                 }},
+                       param_info.value));
+      }
+      userprefs.endGroup();
+      widget_count++;
+    }
+    userprefs.endGroup();
+  }
+  userprefs.endGroup(); // Widgets
+
+  userprefs.beginGroup("Connections");
+  userprefs.endGroup(); // Connections
+  userprefs.endGroup(); // profile
+  userprefs.endGroup(); // Workspaces
 }
 
 void MainWindow::resetSettings()
