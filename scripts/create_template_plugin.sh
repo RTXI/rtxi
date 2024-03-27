@@ -129,7 +129,7 @@ ${PLUGIN_NAME_CLEANED}::Panel::Panel(QMainWindow* main_window, Event::Manager* e
     : Widgets::Panel(std::string(${PLUGIN_NAME_CLEANED}::MODULE_NAME), main_window, ev_manager)
 {
   setWhatsThis("Template Plugin");
-  createGUI(${PLUGIN_NAME_CLEANED}::get_default_vars());  // this is required to create the GUI
+  createGUI(${PLUGIN_NAME_CLEANED}::get_default_vars(), {});  // this is required to create the GUI
 }
 
 ${PLUGIN_NAME_CLEANED}::Component::Component(Widgets::Plugin* hplugin)
