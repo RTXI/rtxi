@@ -303,11 +303,12 @@ public:
    * \param vars The structure defining the module's parameters, states, inputs,
    *    and outputs.
    * \param skip_ids A vector of IDs that this function should not consider
-   *    building interface for.
+   *    building interface for. If not provided the function does not skip any
+   *    IDs.
    *
    */
-  virtual void createGUI(const std::vector<Widgets::Variable::Info>& vars,
-                         const std::vector<Widgets::Variable::Id>& skip_ids);
+  void createGUI(const std::vector<Widgets::Variable::Info>& vars,
+                 const std::vector<Widgets::Variable::Id>& skip_ids = {});
 
   /*!
    * Assigns a plugin to this panel. Typically used during construction of the
@@ -342,7 +343,7 @@ public slots:
   virtual void refresh();
 
   /*!
-   * FUnction that updates GUI user States only.
+   * Function that updates GUI user States only.
    */
   virtual void refreshUserStates();
 
