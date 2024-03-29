@@ -558,7 +558,7 @@ RT::State::state_t Widgets::Plugin::getComponentState()
 }
 
 std::vector<Widgets::Variable::Info>
-Widgets::Plugin::getComponentParametersInfo()
+Widgets::Plugin::getComponentParametersInfo() const
 {
   return this->plugin_component->getParametersInfo();
 }

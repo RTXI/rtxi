@@ -653,7 +653,7 @@ public:
    * \return A vector of Widgets::Variable::Info representing parameter
    * information
    */
-  virtual std::vector<Widgets::Variable::Info> getComponentParametersInfo();
+  std::vector<Widgets::Variable::Info> getComponentParametersInfo() const;
 
   /*!
    * In some cases we need to know whether a component has been attached

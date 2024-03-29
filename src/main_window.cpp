@@ -354,19 +354,20 @@ void MainWindow::loadWindow()
 
 void MainWindow::loadSettings()
 {
-  const QSettings userprefs;
-  const QString env_var = QString::fromLocal8Bit(qgetenv("HOME"));
+  QSettings userprefs;
+  userprefs.beginGroup("Workspaces");
+  auto* load_settings_dialog = new QInputDialog(this);
+  load_settings_dialog->setInputMode(QInputDialog::TextInput);
+  load_settings_dialog->setComboBoxEditable(false);
+  load_settings_dialog->setComboBoxItems(userprefs.childGroups());
+  load_settings_dialog->setLabelText("Profile");
+  load_settings_dialog->setOkButtonText("Load");
+  load_settings_dialog->exec();
 
-  const QString filename = QFileDialog::getOpenFileName(
-      this,
-      tr("Load saved workspace"),
-      userprefs.value("/dirs/setfiles", env_var).toString(),
-      tr("Settings (*.ini)"));
-
-  if (QFile(filename).exists()) {
-    systemMenu->clear();
-    mdiArea->closeAllSubWindows();
+  if (load_settings_dialog->result() == QDialog::Rejected) {
+    return;  
   }
+  mdiArea->closeAllSubWindows();
 }
 
 template<class... Ts>
@@ -411,31 +412,26 @@ void MainWindow::saveSettings()
   const auto plugin_list = std::any_cast<std::vector<const Widgets::Plugin*>>(loaded_plugins_query.getParam("plugins"));
   for (const auto& entry : plugin_list) {
     widget_name = QString::fromStdString(entry->getName());
-    userprefs.beginGroup(widget_name);
-    for (const auto& plugin : entry.second) {
-      userprefs.setValue("library", QString::fromStdString(plugin->getLibrary()));
-      userprefs.beginGroup(QString::number(widget_count));
-      for (const auto& param_info : plugin->getComponentParametersInfo()) {
-        userprefs.setValue(
-            QString::fromStdString(param_info.name),
-            std::visit(overload {[](const int64_t& val) -> QString
-                                 { return QString::number(val); },
-                                 [](const double& val) -> QString
-                                 { return QString::number(val); },
-                                 [](const uint64_t& val) -> QString
-                                 { return QString::number(val); },
-                                 [](const std::string& val) -> QString
-                                 { return QString::fromStdString(val); },
-                                 [](const RT::State::state_t& val) -> QString {
-                                   return QString::number(
-                                       static_cast<int8_t>(val));
-                                 }},
-                       param_info.value));
-      }
-      userprefs.endGroup();
-      widget_count++;
+    userprefs.beginGroup(QString::number(widget_count++));
+    userprefs.setValue("library", QString::fromStdString(entry->getLibrary()));
+    for (const auto& param_info : entry->getComponentParametersInfo()) {
+      userprefs.setValue(
+          QString::fromStdString(param_info.name),
+          std::visit(overload {[](const int64_t& val) -> QString
+                               { return QString::number(val); },
+                               [](const double& val) -> QString
+                               { return QString::number(val); },
+                               [](const uint64_t& val) -> QString
+                               { return QString::number(val); },
+                               [](const std::string& val) -> QString
+                               { return QString::fromStdString(val); },
+                               [](const RT::State::state_t& val) -> QString {
+                                 return QString::number(
+                                     static_cast<int8_t>(val));
+                               }},
+                     param_info.value));
     }
-    userprefs.endGroup();
+    userprefs.endGroup(); //widget count
   }
   userprefs.endGroup(); // Widgets
 
@@ -447,9 +443,7 @@ void MainWindow::saveSettings()
 
 void MainWindow::resetSettings()
 {
-  // systemMenu->clear();
-  // mdiArea->closeAllSubWindows();
-  // Settings::Manager::getInstance()->load("/usr/local/share/rtxi/rtxi.conf");
+  mdiArea->closeAllSubWindows();
 }
 
 void MainWindow::utilitiesMenuActivated(QAction* id)
