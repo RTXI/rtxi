@@ -34,7 +34,9 @@
 int RT::Connector::find_cycle(RT::block_connection_t conn, IO::Block* ref_block)
 {
   // devices can be connected recursively
-  if(!ref_block->dependent()){ return 0; }
+  if (!ref_block->dependent()) {
+    return 0;
+  }
   // Cannot connect a block with itself
   if (conn.dest == ref_block) {
     return -1;

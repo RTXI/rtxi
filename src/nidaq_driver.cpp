@@ -214,7 +214,7 @@ struct physical_channel_t
   size_t units_index = 0;
   bool active = false;
   size_t downsample = 1;
-  size_t io_count = 0; // for keeping track of downsampling
+  size_t io_count = 0;  // for keeping track of downsampling
 };
 
 int32_t physical_channel_t::addToTask(TaskHandle task_handle) const
@@ -817,7 +817,7 @@ int Device::setAnalogDownsample(DAQ::ChannelType::type_t type,
                                 DAQ::index_t index,
                                 size_t downsample)
 {
-  if(type == DAQ::ChannelType::DI || type == DAQ::ChannelType::DO){
+  if (type == DAQ::ChannelType::DI || type == DAQ::ChannelType::DO) {
     return -1;
   }
   physical_channels_registry.at(type).at(index).downsample = downsample;
@@ -885,7 +885,9 @@ void Device::read()
       // allows us to just skip the channel if we are downsampling the analog
       // channel
       chan->io_count += 1;
-      if(chan->io_count % chan->downsample != 0) { continue; }
+      if (chan->io_count % chan->downsample != 0) {
+        continue;
+      }
       writeoutput(chan->id,
                   std::get<DAQ::ChannelType::AI>(buffer_arrays)[value_index]
                           * chan->gain
