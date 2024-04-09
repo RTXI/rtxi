@@ -352,6 +352,14 @@ void MainWindow::loadWindow()
   show();
 }
 
+template<class... Ts>
+struct overload : Ts...
+{
+  using Ts::operator()...;
+};
+template<class... Ts>
+overload(Ts...) -> overload<Ts...>;
+
 void MainWindow::loadSettings()
 {
   QSettings userprefs;
@@ -365,18 +373,38 @@ void MainWindow::loadSettings()
   load_settings_dialog->exec();
 
   if (load_settings_dialog->result() == QDialog::Rejected) {
-    return;  
+    userprefs.endGroup();
+    return;
   }
+  const QString profile = load_settings_dialog->textValue();
   mdiArea->closeAllSubWindows();
+  userprefs.beginGroup(profile);
+  const auto period =
+      userprefs.value("period", QVariant::fromValue(RT::OS::DEFAULT_PERIOD))
+          .value<int64_t>();
+  Event::Object event(Event::Type::RT_PERIOD_EVENT);
+  event.setParam("period", std::any(period));
+  this->event_manager->postEvent(&event);
+
+  userprefs.beginGroup("Widgets");
+  QString plugin_name;
+  for(const auto& plugin_instance_id :  userprefs.childGroups()){
+    userprefs.beginGroup(plugin_instance_id);
+    plugin_name = userprefs.value("library").value<QString>(); 
+    Event::Object plugin_insert_event(Event::Type::PLUGIN_INSERT_EVENT);
+    event.setParam("pluginName", std::any(plugin_name.toStdString()));
+    this->event_manager->postEvent(&plugin_insert_event);
+    for(const auto& variable_info : userprefs.childGroups()){
+          
+    }
+    userprefs.endGroup(); // plugin_instance_id
+  }
+
+  userprefs.endGroup(); // profile 
+  userprefs.endGroup(); // widgets
+  userprefs.endGroup(); // workspaces
 }
 
-template<class... Ts>
-struct overload : Ts...
-{
-  using Ts::operator()...;
-};
-template<class... Ts>
-overload(Ts...) -> overload<Ts...>;
 void MainWindow::saveSettings()
 {
   QSettings userprefs;
@@ -390,13 +418,16 @@ void MainWindow::saveSettings()
   save_settings_dialog->exec();
 
   const QString profile_name = save_settings_dialog->textValue();
-  if(userprefs.childGroups().contains(profile_name)) { userprefs.remove(profile_name); }
+  if (userprefs.childGroups().contains(profile_name)) {
+    userprefs.remove(profile_name);
+  }
   userprefs.beginGroup(profile_name);
 
   // get period and save
   Event::Object get_period_event(Event::Type::RT_GET_PERIOD_EVENT);
   event_manager->postEvent(&get_period_event);
-  const auto period = std::any_cast<int64_t>(get_period_event.getParam("period"));
+  const auto period =
+      std::any_cast<int64_t>(get_period_event.getParam("period"));
   userprefs.setValue("period", QString::number(period));
 
   // Safe DAQ userprefs
@@ -409,7 +440,8 @@ void MainWindow::saveSettings()
   int widget_count = 0;
   Event::Object loaded_plugins_query(Event::Type::PLUGIN_LIST_QUERY_EVENT);
   this->event_manager->postEvent(&loaded_plugins_query);
-  const auto plugin_list = std::any_cast<std::vector<const Widgets::Plugin*>>(loaded_plugins_query.getParam("plugins"));
+  const auto plugin_list = std::any_cast<std::vector<const Widgets::Plugin*>>(
+      loaded_plugins_query.getParam("plugins"));
   for (const auto& entry : plugin_list) {
     widget_name = QString::fromStdString(entry->getName());
     userprefs.beginGroup(QString::number(widget_count++));
@@ -417,33 +449,36 @@ void MainWindow::saveSettings()
     for (const auto& param_info : entry->getComponentParametersInfo()) {
       userprefs.setValue(
           QString::fromStdString(param_info.name),
-          std::visit(overload {[](const int64_t& val) -> QString
-                               { return QString::number(val); },
-                               [](const double& val) -> QString
-                               { return QString::number(val); },
-                               [](const uint64_t& val) -> QString
-                               { return QString::number(val); },
-                               [](const std::string& val) -> QString
-                               { return QString::fromStdString(val); },
-                               [](const RT::State::state_t& val) -> QString {
-                                 return QString::number(
-                                     static_cast<int8_t>(val));
-                               }},
-                     param_info.value));
+          std::visit(
+              overload {[](const int64_t& val) -> QString
+                        { return QString::number(val); },
+                        [](const double& val) -> QString
+                        { return QString::number(val); },
+                        [](const uint64_t& val) -> QString
+                        { return QString::number(val); },
+                        [](const std::string& val) -> QString
+                        { return QString::fromStdString(val); },
+                        [](const RT::State::state_t& val) -> QString
+                        { return QString::number(static_cast<int8_t>(val)); }},
+              param_info.value));
     }
-    userprefs.endGroup(); //widget count
+    userprefs.endGroup();  // widget count
   }
-  userprefs.endGroup(); // Widgets
+  userprefs.endGroup();  // Widgets
 
   userprefs.beginGroup("Connections");
-  userprefs.endGroup(); // Connections
-  userprefs.endGroup(); // profile
-  userprefs.endGroup(); // Workspaces
+  userprefs.endGroup();  // Connections
+  userprefs.endGroup();  // profile
+  userprefs.endGroup();  // Workspaces
 }
 
 void MainWindow::resetSettings()
 {
   mdiArea->closeAllSubWindows();
+  // reset period to default
+  Event::Object set_period_event(Event::Type::RT_PERIOD_EVENT);
+  set_period_event.setParam("period", std::any(RT::OS::DEFAULT_PERIOD));
+  event_manager->postEvent(&set_period_event);
 }
 
 void MainWindow::utilitiesMenuActivated(QAction* id)
