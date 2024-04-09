@@ -33,10 +33,13 @@
 // TODO: convert cycle detection into non-recursive version
 int RT::Connector::find_cycle(RT::block_connection_t conn, IO::Block* ref_block)
 {
+  // devices can be connected recursively
+  if(!ref_block->dependent()){ return 0; }
   // Cannot connect a block with itself
   if (conn.dest == ref_block) {
     return -1;
   }
+  // walk the connection graph and find a loop
   for (const auto& temp_conn : this->connections[conn.dest->getID()]) {
     if (ref_block == temp_conn.src
         || this->find_cycle(temp_conn, ref_block) == -1) {
