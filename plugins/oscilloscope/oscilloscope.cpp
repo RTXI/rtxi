@@ -630,10 +630,7 @@ void Oscilloscope::Panel::showChannelTab()
   scalesList->setCurrentIndex(
       static_cast<int>(round(4 * (log10(1 / scale) + 1))));
   int offsetUnits = 0;
-  if (offset * std::pow(10, -3 * offsetsList->count() - 3) < 1) {
-    offset = 0;
-    offsetUnits = 0;
-  } else {
+  if(offset > 0.0 && offset < 1.0) {
     while (fabs(offset) < 1 && offsetUnits < offsetsList->count()) {
       offset *= 1000;
       offsetUnits++;
