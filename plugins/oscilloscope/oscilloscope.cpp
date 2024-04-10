@@ -188,13 +188,15 @@ void Oscilloscope::Panel::buildChannelList()
   }
 
   auto* block = this->blocksListDropdown->currentData().value<IO::Block*>();
+  auto chanport = this->channelsList->currentData().value<size_t>();
   auto type = this->typesList->currentData().value<IO::flags_t>();
   channelsList->clear();
   for (size_t i = 0; i < block->getCount(type); ++i) {
     channelsList->addItem(QString(block->getChannelName(type, i).c_str()),
                           QVariant::fromValue(i));
   }
-  channelsList->setCurrentIndex(0);
+  channelsList->setCurrentIndex(
+      this->channelsList->findData(QVariant::fromValue(chanport)));
   showChannelTab();
 }
 
