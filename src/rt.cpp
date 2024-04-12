@@ -62,6 +62,7 @@ int RT::Connector::connect(RT::block_connection_t connection)
     return -1;
   }
   if (this->find_cycle(connection, connection.src) == -1) {
+    ERROR_MSG("RT::Connector : The Connection would have caused a cycle");
     return -1;
   }
 
@@ -161,15 +162,11 @@ std::vector<RT::Thread*> RT::Connector::topological_sort()
   auto sources_per_block = std::unordered_map<IO::Block*, int>();
 
   for (auto* block : this->block_registry) {
-    if (block == nullptr) {
-      continue;
-    }
-    sources_per_block[block] = 0;
-  }
-
-  // Calculate number of sources per block
-  for (const auto& entry : this->connections) {
-    for (const auto& conn : entry) {
+    if (block == nullptr) { continue; }
+    if(!block->dependent()){ continue; }
+    sources_per_block[block] += 0; // initialize please
+    for(const auto& conn : getOutputs(block)){
+      if(!conn.dest->dependent()) { continue; }
       sources_per_block[conn.dest] += 1;
     }
   }
@@ -183,25 +180,21 @@ std::vector<RT::Thread*> RT::Connector::topological_sort()
 
   // Process the graph nodes.
   while (!processing_q.empty()) {
-    sorted_blocks.push_back(processing_q.front());
-    for (const auto& entry : this->connections) {
-      for (const auto& conn : entry) {
-        if (processing_q.front() != conn.src) {
-          continue;
-        }
-        sources_per_block[conn.dest] -= 1;
-        if (sources_per_block[conn.dest] == 0) {
-          processing_q.push(conn.dest);
-        }
+    for (const auto& conn : getOutputs(processing_q.front())) {
+      if(!conn.dest->dependent()) { continue; }
+      sources_per_block[conn.dest] -= 1;
+      if (sources_per_block[conn.dest] == 0) {
+        processing_q.push(conn.dest);
       }
     }
+    sorted_blocks.push_back(processing_q.front());
     processing_q.pop();
   }
 
   // System only cares about active threads
   std::vector<RT::Thread*> sorted_active_threads;
   for (auto* block : sorted_blocks) {
-    if (block->getActive() && block->dependent()) {
+    if (block->getActive()) {
       sorted_active_threads.push_back(dynamic_cast<RT::Thread*>(block));
     }
   }
@@ -237,7 +230,7 @@ std::vector<RT::block_connection_t> RT::Connector::getOutputs(IO::Block* src)
 
 void RT::Connector::propagateBlockConnections(IO::Block* block)
 {
-  for (const auto& conn : this->connections[block->getID()]) {
+  for (auto& conn : this->connections[block->getID()]) {
     conn.dest->writeinput(
         conn.dest_port, conn.src->readPort(conn.src_port_type, conn.src_port));
   }
