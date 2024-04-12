@@ -184,6 +184,10 @@ Connector::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
                    &QComboBox::currentTextChanged,
                    this,
                    &Connector::Panel::highlightConnectionBox);
+  QObject::connect(connectionBox,
+                   &QListWidget::itemClicked,
+                   this,
+                   &Connector::Panel::reverseHighlightConnectionBox);
 }
 
 void Connector::Panel::buildBlockList()

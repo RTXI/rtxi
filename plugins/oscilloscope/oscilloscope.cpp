@@ -188,13 +188,15 @@ void Oscilloscope::Panel::buildChannelList()
   }
 
   auto* block = this->blocksListDropdown->currentData().value<IO::Block*>();
+  auto chanport = this->channelsList->currentData().value<size_t>();
   auto type = this->typesList->currentData().value<IO::flags_t>();
   channelsList->clear();
   for (size_t i = 0; i < block->getCount(type); ++i) {
     channelsList->addItem(QString(block->getChannelName(type, i).c_str()),
                           QVariant::fromValue(i));
   }
-  channelsList->setCurrentIndex(0);
+  channelsList->setCurrentIndex(
+      this->channelsList->findData(QVariant::fromValue(chanport)));
   showChannelTab();
 }
 
@@ -628,10 +630,7 @@ void Oscilloscope::Panel::showChannelTab()
   scalesList->setCurrentIndex(
       static_cast<int>(round(4 * (log10(1 / scale) + 1))));
   int offsetUnits = 0;
-  if (offset * std::pow(10, -3 * offsetsList->count() - 3) < 1) {
-    offset = 0;
-    offsetUnits = 0;
-  } else {
+  if(offset > 0.0 && offset < 1.0) {
     while (fabs(offset) < 1 && offsetUnits < offsetsList->count()) {
       offset *= 1000;
       offsetUnits++;
