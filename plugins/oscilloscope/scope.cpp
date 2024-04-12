@@ -519,7 +519,7 @@ void Oscilloscope::Scope::process_data()
       for (size_t i = 0; i < sample_count; i++) {
         array_indx = (i + channel.data_indx) % this->buffer_size;
         channel.timebuffer[array_indx] = sample_buffer[i].time;
-        channel.ybuffer[array_indx] = sample_buffer[i].value;
+        channel.ybuffer[array_indx] = sample_buffer[i].value + channel.offset;
       }
       channel.data_indx =
           (channel.data_indx + sample_count) % this->buffer_size;

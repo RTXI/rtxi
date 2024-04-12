@@ -184,6 +184,10 @@ Connector::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
                    &QComboBox::currentTextChanged,
                    this,
                    &Connector::Panel::highlightConnectionBox);
+  QObject::connect(connectionBox,
+                   &QListWidget::itemClicked,
+                   this,
+                   &Connector::Panel::reverseHighlightConnectionBox);
 }
 
 void Connector::Panel::buildBlockList()
@@ -274,7 +278,6 @@ void Connector::Panel::syncBlockInfo()
 
 void Connector::Panel::buildInputChannelList()
 {
-  auto prev_channel = inputChannel->currentData();
   inputChannel->clear();
   if (inputBlock->count() == 0) {
     return;
@@ -291,13 +294,11 @@ void Connector::Panel::buildInputChannelList()
     inputChannel->addItem(QString(block->getChannelName(IO::INPUT, i).c_str()),
                           QVariant::fromValue(i));
   }
-  inputChannel->setCurrentIndex(inputChannel->findData(prev_channel));
   updateConnectionButton();
 }
 
 void Connector::Panel::buildOutputChannelList()
 {
-  auto prev_channel = outputChannel->currentData();
   outputChannel->clear();
   if (outputBlock->count() == 0) {
     return;
@@ -317,7 +318,6 @@ void Connector::Panel::buildOutputChannelList()
     outputChannel->addItem(QString(block->getChannelName(direction, i).c_str()),
                            QVariant::fromValue(i));
   }
-  outputChannel->setCurrentIndex(outputChannel->findData(prev_channel));
   updateConnectionButton();
 }
 
@@ -371,10 +371,12 @@ void Connector::Panel::reverseHighlightConnectionBox(
       outputBlock->findData(QVariant::fromValue(connection.src)));
   outputFlag->setCurrentIndex(
       outputFlag->findData(QVariant::fromValue(connection.src_port_type)));
+  buildInputChannelList();
   outputChannel->setCurrentIndex(
       outputChannel->findData(QVariant::fromValue(connection.src_port)));
   inputBlock->setCurrentIndex(
       inputBlock->findData(QVariant::fromValue(connection.dest)));
+  buildOutputChannelList();
   inputChannel->setCurrentIndex(
       inputChannel->findData(QVariant::fromValue(connection.dest_port)));
   updateConnectionButton();

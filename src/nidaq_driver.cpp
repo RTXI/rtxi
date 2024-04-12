@@ -213,6 +213,8 @@ struct physical_channel_t
   size_t range_index = 0;
   size_t units_index = 0;
   bool active = false;
+  size_t downsample = 1;
+  size_t io_count = 0;  // for keeping track of downsampling
 };
 
 int32_t physical_channel_t::addToTask(TaskHandle task_handle) const
@@ -562,10 +564,10 @@ size_t Device::getAnalogUnitsCount(DAQ::index_t /*index*/) const
   return default_units.size();
 }
 
-size_t Device::getAnalogDownsample(DAQ::ChannelType::type_t /*type*/,
-                                   DAQ::index_t /*index*/) const
+size_t Device::getAnalogDownsample(DAQ::ChannelType::type_t type,
+                                   DAQ::index_t index) const
 {
-  return 0;
+  return physical_channels_registry.at(type).at(index).downsample;
 }
 
 std::string Device::getAnalogRangeString(DAQ::ChannelType::type_t type,
@@ -811,10 +813,14 @@ int Device::setAnalogOffsetUnits(DAQ::ChannelType::type_t /*type*/,
   return 0;
 }
 
-int Device::setAnalogDownsample(DAQ::ChannelType::type_t /*type*/,
-                                DAQ::index_t /*index*/,
-                                size_t /*downsample*/)
+int Device::setAnalogDownsample(DAQ::ChannelType::type_t type,
+                                DAQ::index_t index,
+                                size_t downsample)
 {
+  if (type == DAQ::ChannelType::DI || type == DAQ::ChannelType::DO) {
+    return -1;
+  }
+  physical_channels_registry.at(type).at(index).downsample = downsample;
   return 0;
 }
 
@@ -823,6 +829,7 @@ int Device::setAnalogCounter(DAQ::ChannelType::type_t /*type*/,
 {
   return 0;
 }
+
 int Device::setAnalogCalibrationValue(DAQ::ChannelType::type_t /*type*/,
                                       DAQ::index_t /*index*/,
                                       double /*value*/)
@@ -873,6 +880,14 @@ void Device::read()
         &samples_read,
         nullptr);
     for (const auto& chan : this->active_channels.at(DAQ::ChannelType::AI)) {
+      // not calling writeoutput means that the output value already there
+      // from a previous call is held. This is convenient in downsampling and
+      // allows us to just skip the channel if we are downsampling the analog
+      // channel
+      chan->io_count += 1;
+      if (chan->io_count % chan->downsample != 0) {
+        continue;
+      }
       writeoutput(chan->id,
                   std::get<DAQ::ChannelType::AI>(buffer_arrays)[value_index]
                           * chan->gain
