@@ -162,11 +162,17 @@ std::vector<RT::Thread*> RT::Connector::topological_sort()
   auto sources_per_block = std::unordered_map<IO::Block*, int>();
 
   for (auto* block : this->block_registry) {
-    if (block == nullptr) { continue; }
-    if(!block->dependent()){ continue; }
-    sources_per_block[block] += 0; // initialize please
-    for(const auto& conn : getOutputs(block)){
-      if(!conn.dest->dependent()) { continue; }
+    if (block == nullptr) {
+      continue;
+    }
+    if (!block->dependent()) {
+      continue;
+    }
+    sources_per_block[block] += 0;  // initialize please
+    for (const auto& conn : getOutputs(block)) {
+      if (!conn.dest->dependent()) {
+        continue;
+      }
       sources_per_block[conn.dest] += 1;
     }
   }
@@ -181,7 +187,9 @@ std::vector<RT::Thread*> RT::Connector::topological_sort()
   // Process the graph nodes.
   while (!processing_q.empty()) {
     for (const auto& conn : getOutputs(processing_q.front())) {
-      if(!conn.dest->dependent()) { continue; }
+      if (!conn.dest->dependent()) {
+        continue;
+      }
       sources_per_block[conn.dest] -= 1;
       if (sources_per_block[conn.dest] == 0) {
         processing_q.push(conn.dest);
