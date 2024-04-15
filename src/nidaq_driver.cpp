@@ -174,23 +174,21 @@ inline void printError(int32_t status)
     ERROR_MSG("Unable to get code message");
     return;
   }
-  std::string err_str(static_cast<size_t>(error_size), '\0');
+  std::vector<char> err_buff(static_cast<size_t>(error_size));
   const int32_t errcode = DAQmxGetErrorString(
-      status, err_str.data(), static_cast<uint32_t>(error_size));
+      status, err_buff.data(), static_cast<uint32_t>(error_size));
   if (errcode < 0) {
     ERROR_MSG("Unable to parse message");
     return;
   }
-  ERROR_MSG("Message : {}", err_str);
+  ERROR_MSG("Message : {}", std::string(err_buff.data()));
 }
 
 inline std::string physical_card_name(const std::string& device_name)
 {
-  const int32_t err = DAQmxGetDevProductType(device_name.c_str(), nullptr, 0);
-  std::string result(static_cast<size_t>(err), '\0');
-  DAQmxGetDevProductType(
-      device_name.c_str(), result.data(), static_cast<uint32_t>(result.size()));
-  return result;
+  std::array<char, 1024> buffer{};
+  DAQmxGetDevProductType(device_name.c_str(), buffer.data(), 1024);
+  return std::string{buffer.data()};
 }
 
 struct physical_channel_t
@@ -982,10 +980,10 @@ void Driver::loadDevices()
     return;
   }
   const std::string alpha = "abcdefghijklmnopqrstuvwxyz";
-  std::string string_buffer(static_cast<size_t>(device_names_buffer_size),
-                            '\0');
-  DAQmxGetSysDevNames(string_buffer.data(),
-                      static_cast<uint32_t>(string_buffer.size()));
+  std::vector<char> buffer(static_cast<size_t>(device_names_buffer_size));
+  DAQmxGetSysDevNames(buffer.data(),
+                      static_cast<uint32_t>(buffer.size()));
+  std::string string_buffer(buffer.data());
   const std::vector<std::string> device_names =
       split_string(string_buffer, ", ");
   std::vector<IO::channel_t> channels;
