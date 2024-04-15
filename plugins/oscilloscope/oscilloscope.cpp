@@ -223,7 +223,8 @@ void Oscilloscope::Panel::setActivity(IO::endpoint endpoint, bool activity)
 void Oscilloscope::Panel::applyChannelTab()
 {
   if (this->blocksListDropdown->count() <= 0
-      || this->channelsList->count() <= 0) {
+      || this->channelsList->count() <= 0)
+  {
     return;
   }
 
@@ -680,7 +681,8 @@ void Oscilloscope::Panel::showDisplayTab()
     trigThresh = 0;
   } else {
     while (fabs(trigThresh) < 1
-           && trigThreshUnits < this->trigsThreshList->count()) {
+           && trigThreshUnits < this->trigsThreshList->count())
+    {
       trigThresh *= 1000;
       ++trigThreshUnits;
     }
@@ -688,7 +690,10 @@ void Oscilloscope::Panel::showDisplayTab()
   trigsThreshList->setCurrentIndex(trigThreshUnits);
   trigsThreshEdit->setText(QString::number(trigThresh));
 
-  sizesEdit->setText(QString::number(scopeWindow->getDataSize()));
+  sizesEdit->setText(
+      QString::number(static_cast<double>(scopeWindow->getDataSize()
+                                          * sizeof(Oscilloscope::sample))
+                      / 1e6));
 }
 
 Oscilloscope::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
