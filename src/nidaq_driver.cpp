@@ -186,9 +186,9 @@ inline void printError(int32_t status)
 
 inline std::string physical_card_name(const std::string& device_name)
 {
-  std::array<char, 1024> buffer{};
+  std::array<char, 1024> buffer {};
   DAQmxGetDevProductType(device_name.c_str(), buffer.data(), 1024);
-  return std::string{buffer.data()};
+  return std::string {buffer.data()};
 }
 
 struct physical_channel_t
@@ -494,45 +494,41 @@ int Device::setChannelActive(DAQ::ChannelType::type_t type,
     return 0;
   }
   DAQmxStopTask(task);
-  if (state) {
-    err = chan.addToTask(task);
-    chan.active = err == 0;
-  } else {
-    chan.active = false;
-    DAQmxClearTask(task);
-    err = DAQmxCreateTask(DAQ::ChannelType::type2string(type).c_str(), &task);
-    switch (type) {
-      case DAQ::ChannelType::AI:
-      case DAQ::ChannelType::DI:
-        DAQmxCfgInputBuffer(task, 1);
-        DAQmxSetReadOverWrite(task, DAQmx_Val_OverwriteUnreadSamps);
-        break;
-      case DAQ::ChannelType::AO:
-      case DAQ::ChannelType::DO:
-        DAQmxCfgOutputBuffer(task, 1);
-        break;
-      default:
-        break;
+  chan.active = state;
+  DAQmxClearTask(task);
+  err = DAQmxCreateTask(DAQ::ChannelType::type2string(type).c_str(), &task);
+  if (err != 0) {
+    printError(err);
+    for (auto& channel : physical_channels_registry.at(type)) {
+      channel.active = false;
     }
+    active_channels.at(type).clear();
+    return err;
+  }
+  switch (type) {
+    case DAQ::ChannelType::AI:
+    case DAQ::ChannelType::DI:
+      DAQmxCfgInputBuffer(task, 1);
+      DAQmxSetReadOverWrite(task, DAQmx_Val_OverwriteUnreadSamps);
+      break;
+    case DAQ::ChannelType::AO:
+    case DAQ::ChannelType::DO:
+      DAQmxCfgOutputBuffer(task, 1);
+      break;
+    default:
+      break;
+  }
+  for (auto& channel : physical_channels_registry.at(type)) {
+    if (!channel.active) {
+      continue;
+    }
+    err = channel.addToTask(task);
     if (err != 0) {
-      for (auto& channel : physical_channels_registry.at(type)) {
-        channel.active = false;
-      }
-      active_channels.at(type).clear();
-      return err;
-    }
-    for (const auto& channel : physical_channels_registry.at(type)) {
-      if (!channel.active) {
-        continue;
-      }
-      err = channel.addToTask(task);
-      if (err != 0) {
-        break;
-      }
+      printError(err);
+      channel.active = false;
     }
   }
-  printError(err);
-  // active channels is an optimization for faster reading/writing in realtime.
+  // active_channels is an optimization for faster reading/writing in realtime.
   active_channels.at(type).clear();
   for (auto& channel : physical_channels_registry.at(type)) {
     if (channel.active) {
@@ -981,8 +977,7 @@ void Driver::loadDevices()
   }
   const std::string alpha = "abcdefghijklmnopqrstuvwxyz";
   std::vector<char> buffer(static_cast<size_t>(device_names_buffer_size));
-  DAQmxGetSysDevNames(buffer.data(),
-                      static_cast<uint32_t>(buffer.size()));
+  DAQmxGetSysDevNames(buffer.data(), static_cast<uint32_t>(buffer.size()));
   std::string string_buffer(buffer.data());
   const std::vector<std::string> device_names =
       split_string(string_buffer, ", ");
