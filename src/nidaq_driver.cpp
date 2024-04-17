@@ -518,7 +518,7 @@ int Device::setChannelActive(DAQ::ChannelType::type_t type,
     default:
       break;
   }
-  for (const auto& channel : physical_channels_registry.at(type)) {
+  for (auto& channel : physical_channels_registry.at(type)) {
     if (!channel.active) {
       continue;
     }
