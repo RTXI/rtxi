@@ -160,6 +160,16 @@ Event::Object::Object(const Event::Object& obj)
 {
 }
 
+Event::Object& Event::Object::operator=(const Object& obj)
+{
+  if(this != &obj) {
+    this->params.clear();
+    this->params = obj.params;
+    this->event_type = obj.event_type;
+  }
+  return *this;
+}
+
 std::string Event::Object::getName()
 {
   return Event::type_to_string(this->event_type);

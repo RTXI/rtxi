@@ -122,8 +122,8 @@ class Object
 public:
   explicit Object(Event::Type et);
   Object(const Object& obj);  // copy constructor
-  Object& operator=(const Object& obj) = delete;  // copy assignment operator
-  Object(Object&&) = delete;  // move constructor
+  Object& operator=(const Object& obj);  // copy assignment operator
+  Object(Object&&) = default;  // move constructor
   Object& operator=(Object&&) = delete;  // move assignment operator
   ~Object() = default;
 
@@ -346,6 +346,17 @@ private:
 
   std::unique_ptr<eventLogger> logger;
 };  // class Manager
+
+template<Event::Type EVENT, typename... PARAMS>
+Event::Object construct_event(PARAMS... parameters)
+{
+  Event::Object event(EVENT);
+  switch(EVENT){
+
+  }
+  return event;
+}
+
 
 }  // namespace Event
 
