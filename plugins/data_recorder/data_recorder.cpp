@@ -764,7 +764,9 @@ int DataRecorder::Plugin::create_component(IO::endpoint endpoint)
     return 0;
   }
   DataRecorder::record_channel chan;
-  chan.name = endpoint.block->getName();
+  chan.name = std::to_string(endpoint.block->getID());
+  chan.name += " ";
+  chan.name += endpoint.block->getName();
   chan.name += " ";
   chan.name += endpoint.direction == IO::INPUT ? "INPUT" : "OUTPUT";
   chan.name += " ";
