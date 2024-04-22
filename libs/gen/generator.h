@@ -18,43 +18,24 @@
 #ifndef GENERATOR_H_
 #define GENERATOR_H_
 
-#include <math.h>
-#include <vector>
-
 class Generator
 {
 
 public:
-  // default constructor
-  Generator();
-  ~Generator();
+  Generator() = default;
+  Generator(const Generator&) = default;
+  Generator(Generator&&) = default;
+  Generator& operator=(const Generator&) = default;
+  Generator& operator=(Generator&&) = default;
+  virtual ~Generator() = default;
 
-  // clear the waveform
-  void clear();
+  // get readout for random number generator
+  virtual double get() = 0;
 
-  // initialize waveform
-  void init();
-
-  // get readout for continuous signal, repeating cycle
-  double get();
-
-  // get readout for single cycle
-  double getOne();
-
-  // get number of samples
-  int numSamples() const;
-
-  // get current index for readout
-  int getIndex() const;
-
-  // set index
-  void setIndex(int value);
-
-protected:
-  std::vector<double> wave;
-  int index;
-  int numsamples;
-  double dt;
+  double getDeltaTime() const { return dt; }
+  void setDeltaTime(double delta) { dt = delta; }
+private:
+  double dt{};
 };
 
 #endif /* GENERATOR_H_ */

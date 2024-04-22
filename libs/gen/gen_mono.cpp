@@ -20,54 +20,40 @@
 // default constructor
 
 GeneratorMono::GeneratorMono()
-  : delay(1)
-  , width(1)
-  , amplitude(1)
+    : m_delay(1)
+    , m_width(1)
+    , m_amplitude(1)
 {
-  dt = 1e-3;
-  numsamples = floor(delay / dt) + 2 * floor(width / dt) + 1;
-  wave.clear();
-  for (int i = 0; i < floor(delay / dt); i++) {
-    wave.push_back(0); // initial delay
-  }
-  for (int i = 0; i < floor(width / dt); i++) {
-    wave.push_back(amplitude); // positive part
-  }
-  numsamples = wave.size();
-  index = 0;
+  setDeltaTime(1e-3);
 }
 
-GeneratorMono::GeneratorMono(double delay, double width, double amplitude,
+GeneratorMono::GeneratorMono(double delay,
+                             double width,
+                             double amplitude,
                              double dt)
-  : Generator()
+    : m_width(width)
+    , m_amplitude(amplitude)
+    , m_delay(delay)
+
 {
-  numsamples = floor(delay / dt) + 2 * floor(width / dt) + 1;
-  wave.clear();
-  for (int i = 0; i < floor(delay / dt); i++) {
-    wave.push_back(0); // initial delay
-  }
-  for (int i = 0; i < floor(width / dt); i++) {
-    wave.push_back(amplitude); // positive part
-  }
-  numsamples = wave.size();
-  index = 0;
+  setDeltaTime(dt);
 }
 
-GeneratorMono::~GeneratorMono()
+void GeneratorMono::init(double delay,
+                         double width,
+                         double amplitude,
+                         double dt)
 {
+  m_delay = delay;
+  m_width = width;
+  m_amplitude = amplitude;
+  setDeltaTime(dt);
+  count = 0;
 }
 
-void
-GeneratorMono::init(double delay, double width, double amplitude, double dt)
+double GeneratorMono::get()
 {
-  numsamples = floor(delay / dt) + 2 * floor(width / dt) + 1;
-  wave.clear();
-  for (int i = 0; i < floor(delay / dt); i++) {
-    wave.push_back(0); // initial delay
-  }
-  for (int i = 0; i < floor(width / dt); i++) {
-    wave.push_back(amplitude); // positive part
-  }
-  numsamples = wave.size();
-  index = 0;
+  const double time = count * getDeltaTime() - m_delay;
+  ++count;
+  return m_amplitude * static_cast<int>(time > 0.0 && time < m_width); 
 }

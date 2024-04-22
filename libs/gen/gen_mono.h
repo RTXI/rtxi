@@ -27,15 +27,19 @@ public:
   // default constructor
   GeneratorMono();
   GeneratorMono(double delay, double width, double amplitude, double dt);
-  ~GeneratorMono();
 
   // initialize waveform
   void init(double delay, double width, double amplitude, double dt);
 
-protected:
-  double delay; // s
-  double width; // s
-  double amplitude;
+  double get() override;
+
+  void reset() { count = 0; }
+
+private:
+  double m_delay; // s
+  double m_width; // s
+  double m_amplitude;
+  int count = 0;
 };
 
 #endif /* GEN_MONO_H_ */

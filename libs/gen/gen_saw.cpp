@@ -20,67 +20,53 @@
 // default constructor
 
 GeneratorSaw::GeneratorSaw()
-  : delay(1)
-  , width(1)
-  , amplitude(1)
+    : m_delay(1)
+    , m_width(1)
+    , m_amplitude(1)
 {
-  dt = 1e-3;
-  numsamples = floor(width / 2 / dt) + 1;
-  double inc = amplitude / numsamples;
-  wave.clear();
-  for (int i = 0; i < floor(delay / dt); i++) {
-    wave.push_back(0); // initial delay
-  }
-  while (wave.back() < amplitude) {
-    wave.push_back(wave.back() + inc); // up
-  }
-  while (wave.back() > 0) {
-    wave.push_back(wave.back() - inc); // down
-  }
-  numsamples = wave.size();
-  index = 0;
+  setDeltaTime(1e-3);
+  slopes[0] = 2 * m_amplitude / m_width;
+  slopes[1] = -slopes[0];
+  intersects[0] = 0;
+  intersects[1] = 2 * m_amplitude;
 }
 
-GeneratorSaw::GeneratorSaw(double delay, double width, double amplitude,
+GeneratorSaw::GeneratorSaw(double delay,
+                           double width,
+                           double amplitude,
                            double dt)
-  : Generator()
+    : m_delay(delay)
+    , m_width(width)
+    , m_amplitude(amplitude)
+
 {
-  numsamples = floor(width / 2 / dt) + 1;
-  double inc = amplitude / numsamples;
-  wave.clear();
-  for (int i = 0; i < floor(delay / dt); i++) {
-    wave.push_back(0); // initial delay
-  }
-  while (wave.back() < amplitude) {
-    wave.push_back(wave.back() + inc); // up
-  }
-  while (wave.back() > 0) {
-    wave.push_back(wave.back() - inc); // down
-  }
-  numsamples = wave.size();
-  index = 0;
+  setDeltaTime(dt);
+  slopes[0] = 2 * m_amplitude / m_width;
+  slopes[1] = -slopes[0];
+  intersects[0] = 0;
+  intersects[1] = 2 * m_amplitude;
 }
 
-GeneratorSaw::~GeneratorSaw()
+void GeneratorSaw::init(double delay, double width, double amplitude, double dt)
 {
+  m_delay = delay;
+  m_width = width;
+  m_amplitude = amplitude;
+  setDeltaTime(dt);
+  count = 0;
+  slopes[0] = 2 * m_amplitude / m_width;
+  slopes[1] = -slopes[0];
+  intersects[0] = 0;
+  intersects[1] = 2 * m_amplitude;
 }
 
-void
-GeneratorSaw::init(double delay, double width, double amplitude, double dt)
+double GeneratorSaw::get()
 {
-  numsamples = floor(width / 2 / dt) + 1;
-  double inc = amplitude / numsamples;
-  wave.clear();
-
-  for (int i = 0; i < floor(delay / dt); i++) {
-    wave.push_back(0); // initial delay
+  const double time = count * getDeltaTime() - m_delay;
+  ++count;
+  if (time < 0.0) {
+    return 0.0;
   }
-  while (wave.back() < amplitude) {
-    wave.push_back(wave.back() + inc); // up
-  }
-  while (wave.back() > 0) {
-    wave.push_back(wave.back() - inc); // down
-  }
-  numsamples = wave.size();
-  index = 0;
+  return slopes[static_cast<std::size_t>(time > m_delay)] * time
+      + intersects[static_cast<std::size_t>(time > m_delay)];
 }

@@ -27,15 +27,19 @@ public:
   // default constructor
   GeneratorBiphase();
   GeneratorBiphase(double delay, double width, double amplitude, double dt);
-  ~GeneratorBiphase();
 
   // initialize waveform
   void init(double delay, double width, double amplitude, double dt);
 
-protected:
-  double width; // s
-  double amplitude;
-  double delay; // s
+  double get() override;
+
+  void reset() { count = 0; }
+
+private:
+  double m_width; // s
+  double m_amplitude;
+  double m_delay; // s
+  int count = 0;
 };
 
 #endif /* GEN_BIPHASE_H_ */

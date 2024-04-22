@@ -19,84 +19,79 @@
  * Generates white noise using the Box-Muller method
  */
 
+#include <utility>
+#include <math.h>
 #include "gen_whitenoise.h"
 
-// default constructor
-
-GeneratorWNoise::GeneratorWNoise()
-  : variance(1)
+GeneratorWNoise::GeneratorWNoise(double variance)
+    : m_variance(variance)
+    , range_type(gsl_rng_default)
+    , random_number_generator(gsl_rng_alloc(range_type))
 {
-  numsamples = 1;
-  wave.clear();
-  gsl_rng_env_setup();  // get default generator type and random seed
-  T = gsl_rng_default;  // mt
-  r = gsl_rng_alloc(T); // default seed = 0
-
-  for (int i = 0; i < numsamples; i++) {
-    wave.push_back(gsl_ran_gaussian(r, sqrt(variance)));
-  }
-
-  numsamples = wave.size();
-  index = 0;
-  genstate = gsl_rng_clone(r);
-  gsl_rng_free(r);
+  gsl_rng_set(random_number_generator, m_seed);
 }
 
-GeneratorWNoise::GeneratorWNoise(double variance)
-  : Generator()
+GeneratorWNoise::GeneratorWNoise(const GeneratorWNoise& gen)
+ : Generator(gen) 
 {
-  numsamples = 1;
-  wave.clear();
-  gsl_rng_env_setup();  // get default generator type and random seed
-  T = gsl_rng_default;  // mt
-  r = gsl_rng_alloc(T); // default seed = 0
+  if(this == &gen) { return; }
+  m_variance = gen.m_variance;
+  m_seed = gen.m_seed;
+  range_type = gen.range_type;
+  random_number_generator = gsl_rng_clone(gen.random_number_generator); 
+}
 
-  for (int i = 0; i < numsamples; i++) {
-    wave.push_back(gsl_ran_gaussian(r, sqrt(variance)));
-  }
+GeneratorWNoise::GeneratorWNoise(GeneratorWNoise&& gen) noexcept
+    : m_variance(1.0)
+{
+  if(this == &gen) { return; }
+  std::swap(m_variance, gen.m_variance);
+  std::swap(m_seed, gen.m_seed);
+  range_type = gen.range_type;
+  std::swap(random_number_generator, gen.random_number_generator);
+}
 
-  numsamples = wave.size();
-  index = 0;
-  genstate = gsl_rng_clone(r);
-  gsl_rng_free(r);
+GeneratorWNoise& GeneratorWNoise::operator=(const GeneratorWNoise& gen)
+{
+  if(this == &gen) { return *this; }
+  m_variance = gen.m_variance;
+  m_seed = gen.m_seed;
+  range_type = gen.range_type;
+  random_number_generator = gsl_rng_clone(gen.random_number_generator); 
+  return *this;
+}
+
+GeneratorWNoise& GeneratorWNoise::operator=(GeneratorWNoise&& gen) noexcept
+{
+  if(this == &gen) { return *this; }
+  std::swap(m_variance, gen.m_variance);
+  std::swap(m_seed, gen.m_seed);
+  range_type = gen.range_type;
+  std::swap(random_number_generator, gen.random_number_generator);
+  return *this;
 }
 
 GeneratorWNoise::~GeneratorWNoise()
 {
+  gsl_rng_free(random_number_generator);
 }
 
-void
-GeneratorWNoise::init(double variance)
+void GeneratorWNoise::init(uint64_t seed)
 {
-  numsamples = 1;
-  wave.clear();
-  r = gsl_rng_alloc(T); // default seed = 0
-  gsl_rng_memcpy(r, genstate);
-
-  for (int i = 0; i < numsamples; i++) {
-    wave.push_back(gsl_ran_gaussian(r, sqrt(variance)));
-  }
-
-  numsamples = wave.size();
-  index = 0;
-  gsl_rng_memcpy(genstate, r);
-  gsl_rng_free(r);
+  gsl_rng_set(random_number_generator, seed);
 }
 
-double
-GeneratorWNoise::get()
+double GeneratorWNoise::get()
 {
-  double value = wave[index];
-  index++;
-  if (index >= numsamples) {
-    index = 0;
-    init(variance);
-  }
-  return value;
+  return gsl_ran_gaussian(random_number_generator, sqrt(m_variance));
 }
 
-void
-GeneratorWNoise::setVariance(double var)
+void GeneratorWNoise::setVariance(double var)
 {
-  variance = var;
+  m_variance = var;
+}
+
+double GeneratorWNoise::getVariance() const
+{
+  return m_variance;
 }

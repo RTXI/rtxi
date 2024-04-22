@@ -17,67 +17,42 @@
 
 #include "gen_biphase.h"
 
-// default constructor
-
 GeneratorBiphase::GeneratorBiphase()
-  : width(1)
-  , amplitude(1)
-  , delay(1)
+    : m_width(1)
+    , m_amplitude(1)
+    , m_delay(1)
 {
-  dt = 1e-3;
-  numsamples = floor(delay / dt) + 2 * floor(width / dt) + 1;
-  wave.clear();
-  for (int i = 0; i < floor(delay / dt); i++) {
-    wave.push_back(0); // initial delay
-  }
-  for (int i = 0; i < floor(width / dt); i++) {
-    wave.push_back(amplitude); // positive part
-  }
-  for (int i = 0; i < floor(width / dt); i++) {
-    wave.push_back(-amplitude); // negative part
-  }
-  numsamples = wave.size();
-  index = 0;
+  setDeltaTime(1e-3);
 }
 
-GeneratorBiphase::GeneratorBiphase(double delay, double width, double amplitude,
+GeneratorBiphase::GeneratorBiphase(double delay,
+                                   double width,
+                                   double amplitude,
                                    double dt)
-  : Generator()
+    : m_width(width)
+    , m_amplitude(amplitude)
+    , m_delay(delay)
 {
-  numsamples = floor(delay / dt) + 2 * floor(width / dt) + 1;
-  wave.clear();
-  for (int i = 0; i < floor(delay / dt); i++) {
-    wave.push_back(0); // initial delay
-  }
-  for (int i = 0; i < floor(width / dt); i++) {
-    wave.push_back(amplitude); // positive part
-  }
-  for (int i = 0; i < floor(width / dt); i++) {
-    wave.push_back(-amplitude); // negative part
-  }
-  numsamples = wave.size();
-  index = 0;
+  setDeltaTime(dt);
 }
 
-GeneratorBiphase::~GeneratorBiphase()
+void GeneratorBiphase::init(double delay,
+                            double width,
+                            double amplitude,
+                            double dt)
 {
+  m_delay = delay;
+  m_width = width;
+  m_amplitude = amplitude;
+  setDeltaTime(dt);
+  count = 0;
 }
 
-void
-GeneratorBiphase::init(double delay, double width, double amplitude, double dt)
+double GeneratorBiphase::get()
 {
-  numsamples = floor(delay / dt) + 2 * floor(width / dt) + 1;
-  wave.clear();
-
-  for (int i = 0; i < floor(delay / dt); i++) {
-    wave.push_back(0); // initial delay
-  }
-  for (int i = 0; i < floor(width / dt); i++) {
-    wave.push_back(amplitude); // positive part
-  }
-  for (int i = 0; i < floor(width / dt); i++) {
-    wave.push_back(-amplitude); // negative part
-  }
-  numsamples = wave.size();
-  index = 0;
+  const double time = count * getDeltaTime() - m_delay;
+  ++count;
+  if(time < 0.0) { return 0.0; }
+  const int sign = time < m_width/2 ? 1 : -1; 
+  return m_amplitude * sign; 
 }
