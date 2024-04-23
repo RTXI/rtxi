@@ -33,13 +33,10 @@ public:
   // initialize waveform
   void init(double delay, double width, double amplitude, double dt);
 
-  void reset() { count = 0; }
-
 private:
   double m_delay;
   double m_width;
   double m_amplitude;
-  int count = 0;
   std::array<double, 2> slopes;
   std::array<double, 2> intersects;
 };

@@ -33,13 +33,10 @@ public:
 
   double get() override;
 
-  void reset() { count = 0; }
-
 private:
   double m_delay; // s
   double m_width; // s
   double m_amplitude;
-  int count = 0;
 };
 
 #endif /* GEN_MONO_H_ */

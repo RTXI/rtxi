@@ -16,6 +16,7 @@
  */
 
 #include "gen_biphase.h"
+#include <cmath>
 
 GeneratorBiphase::GeneratorBiphase()
     : m_width(1)
@@ -45,14 +46,14 @@ void GeneratorBiphase::init(double delay,
   m_width = width;
   m_amplitude = amplitude;
   setDeltaTime(dt);
-  count = 0;
+  setIndex(0);
 }
 
 double GeneratorBiphase::get()
 {
-  const double time = count * getDeltaTime() - m_delay;
-  ++count;
+  const double time = getIndex() * getDeltaTime() - m_delay;
+  getIndex()++;
   if(time < 0.0) { return 0.0; }
-  const int sign = time < m_width/2 ? 1 : -1; 
+  const int sign = std::fmod(time,m_width) < m_width/2 ? 1 : -1; 
   return m_amplitude * sign; 
 }

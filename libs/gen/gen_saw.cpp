@@ -15,6 +15,7 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <cmath>
 #include "gen_saw.h"
 
 // default constructor
@@ -53,7 +54,7 @@ void GeneratorSaw::init(double delay, double width, double amplitude, double dt)
   m_width = width;
   m_amplitude = amplitude;
   setDeltaTime(dt);
-  count = 0;
+  setIndex(0);
   slopes[0] = 2 * m_amplitude / m_width;
   slopes[1] = -slopes[0];
   intersects[0] = 0;
@@ -62,11 +63,12 @@ void GeneratorSaw::init(double delay, double width, double amplitude, double dt)
 
 double GeneratorSaw::get()
 {
-  const double time = count * getDeltaTime() - m_delay;
-  ++count;
+  double time = getIndex() * getDeltaTime() - m_delay;
+  getIndex()++;
   if (time < 0.0) {
     return 0.0;
   }
-  return slopes[static_cast<std::size_t>(time > m_delay)] * time
-      + intersects[static_cast<std::size_t>(time > m_delay)];
+  time = fmod(time, m_width);
+  return slopes[static_cast<std::size_t>(time > m_width/2)] * time
+      + intersects[static_cast<std::size_t>(time > m_width/2)];
 }

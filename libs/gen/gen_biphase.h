@@ -33,13 +33,10 @@ public:
 
   double get() override;
 
-  void reset() { count = 0; }
-
 private:
   double m_width; // s
   double m_amplitude;
   double m_delay; // s
-  int count = 0;
 };
 
 #endif /* GEN_BIPHASE_H_ */

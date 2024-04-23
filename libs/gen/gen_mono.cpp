@@ -15,9 +15,9 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "gen_mono.h"
+#include <cmath>
 
-// default constructor
+#include "gen_mono.h"
 
 GeneratorMono::GeneratorMono()
     : m_delay(1)
@@ -31,9 +31,9 @@ GeneratorMono::GeneratorMono(double delay,
                              double width,
                              double amplitude,
                              double dt)
-    : m_width(width)
+    : m_delay(delay)
+    , m_width(width)
     , m_amplitude(amplitude)
-    , m_delay(delay)
 
 {
   setDeltaTime(dt);
@@ -48,12 +48,13 @@ void GeneratorMono::init(double delay,
   m_width = width;
   m_amplitude = amplitude;
   setDeltaTime(dt);
-  count = 0;
+  setIndex(0);
 }
 
 double GeneratorMono::get()
 {
-  const double time = count * getDeltaTime() - m_delay;
-  ++count;
-  return m_amplitude * static_cast<int>(time > 0.0 && time < m_width); 
+  const double time = getIndex() * getDeltaTime();
+  getIndex()++;
+  return m_amplitude
+      * static_cast<int>(std::fmod(time, m_width + m_delay) < m_delay);
 }

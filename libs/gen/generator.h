@@ -32,10 +32,14 @@ public:
   // get readout for random number generator
   virtual double get() = 0;
 
+  virtual void clear() { index = 0; }
+  void setIndex(int ind) { index = ind; }
+  int& getIndex() { return index; }
   double getDeltaTime() const { return dt; }
   void setDeltaTime(double delta) { dt = delta; }
 private:
   double dt{};
+  int index=0;
 };
 
 #endif /* GENERATOR_H_ */
