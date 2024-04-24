@@ -37,8 +37,7 @@ private:
   double m_delay;
   double m_width;
   double m_amplitude;
-  std::array<double, 2> slopes;
-  std::array<double, 2> intersects;
+  double slope;
 };
 
 #endif /* GEN_SAW_H_ */

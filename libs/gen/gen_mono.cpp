@@ -56,5 +56,5 @@ double GeneratorMono::get()
   const double time = getIndex() * getDeltaTime();
   getIndex()++;
   return m_amplitude
-      * static_cast<int>(std::fmod(time, m_width + m_delay) < m_delay);
+      * static_cast<int>(std::fmod(time, m_width + m_delay) > m_delay);
 }
