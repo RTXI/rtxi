@@ -27,58 +27,49 @@
  * frequency was varied from 20 to 0 or 40 to 10 Hz.
  */
 
+#include <gsl/gsl_sf_trig.h>
+#include <gsl/gsl_math.h>
 #include "gen_zap.h"
 
-#define TWOPI 6.28318531
+constexpr double TWOPI = 2 * M_PI;
 
 // default constructor
 
 GeneratorZap::GeneratorZap()
-  : freq(1)
-  , freq2(20)
-  , duration(10)
-  , amplitude(1)
+    : m_freq(1)
+    , m_freq2(20)
+    , m_duration(10)
+    , m_amplitude(1)
 {
-  index = 0;
-  dt = 1e-3;
-  numsamples = floor(duration / dt);
-  wave.clear();
-  for (int i = 0; i < numsamples; i++) {
-    double freqtime = freq + (freq2 - freq) * (i * dt / duration);
-    wave.push_back(amplitude * sin(TWOPI * freqtime * i * dt));
-  }
-  numsamples = wave.size();
-  index = 0;
+  setDeltaTime(1e-3);
 }
 
-GeneratorZap::GeneratorZap(double freq, double freq2, double amplitude,
-                           double duration, double dt)
-  : Generator()
+GeneratorZap::GeneratorZap(
+    double freq, double freq2, double amplitude, double duration, double dt)
+    : m_freq(freq)
+    , m_freq2(freq2)
+    , m_duration(duration)
+    , m_amplitude(amplitude)
 {
-  numsamples = floor(duration / dt);
-  wave.clear();
-  for (int i = 0; i < numsamples; i++) {
-    double freqtime = freq + (freq2 - freq) * (i * dt / duration);
-    wave.push_back(amplitude * sin(TWOPI * freqtime * i * dt));
-  }
-  numsamples = wave.size();
-  index = 0;
+  setDeltaTime(dt);
 }
 
-GeneratorZap::~GeneratorZap()
+void GeneratorZap::init(
+    double freq, double freq2, double amplitude, double duration, double dt)
 {
+  setDeltaTime(dt);
+  m_freq = freq;
+  m_freq2 = freq2;
+  m_duration = duration;
+  m_amplitude = amplitude;
+  setIndex(0);
 }
 
-void
-GeneratorZap::init(double freq, double freq2, double amplitude, double duration,
-                   double dt)
+double GeneratorZap::get()
 {
-  numsamples = floor(duration / dt);
-  wave.clear();
-  for (int i = 0; i < numsamples; i++) {
-    double freqtime = freq + (freq2 - freq) * (i * dt / duration);
-    wave.push_back(amplitude * sin(TWOPI * freqtime * i * dt));
-  }
-  numsamples = wave.size();
-  index = 0;
+  const double dt = getDeltaTime();
+  if(getIndex() > m_duration / dt) { setIndex(0); }
+  const double freqtime = m_freq + (m_freq2 - m_freq) * ( getIndex() * dt / m_duration);
+  return m_amplitude * gsl_sf_sin(TWOPI * freqtime * dt * getIndex()++);
 }
+

@@ -15,72 +15,49 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <cmath>
+
 #include "gen_saw.h"
 
 // default constructor
 
 GeneratorSaw::GeneratorSaw()
-  : delay(1)
-  , width(1)
-  , amplitude(1)
+    : m_delay(1)
+    , m_width(1)
+    , m_amplitude(1)
+    , slope(2 * m_amplitude / m_width)
 {
-  dt = 1e-3;
-  numsamples = floor(width / 2 / dt) + 1;
-  double inc = amplitude / numsamples;
-  wave.clear();
-  for (int i = 0; i < floor(delay / dt); i++) {
-    wave.push_back(0); // initial delay
-  }
-  while (wave.back() < amplitude) {
-    wave.push_back(wave.back() + inc); // up
-  }
-  while (wave.back() > 0) {
-    wave.push_back(wave.back() - inc); // down
-  }
-  numsamples = wave.size();
-  index = 0;
+  setDeltaTime(1e-3);
 }
 
-GeneratorSaw::GeneratorSaw(double delay, double width, double amplitude,
+GeneratorSaw::GeneratorSaw(double delay,
+                           double width,
+                           double amplitude,
                            double dt)
-  : Generator()
+    : m_delay(delay)
+    , m_width(width)
+    , m_amplitude(amplitude), slope(2 * m_amplitude / m_width)
+
 {
-  numsamples = floor(width / 2 / dt) + 1;
-  double inc = amplitude / numsamples;
-  wave.clear();
-  for (int i = 0; i < floor(delay / dt); i++) {
-    wave.push_back(0); // initial delay
-  }
-  while (wave.back() < amplitude) {
-    wave.push_back(wave.back() + inc); // up
-  }
-  while (wave.back() > 0) {
-    wave.push_back(wave.back() - inc); // down
-  }
-  numsamples = wave.size();
-  index = 0;
+  setDeltaTime(dt);
 }
 
-GeneratorSaw::~GeneratorSaw()
+void GeneratorSaw::init(double delay, double width, double amplitude, double dt)
 {
+  m_delay = delay;
+  m_width = width;
+  m_amplitude = amplitude;
+  setDeltaTime(dt);
+  setIndex(0);
+  slope = 2 * m_amplitude / m_width;
 }
 
-void
-GeneratorSaw::init(double delay, double width, double amplitude, double dt)
+double GeneratorSaw::get()
 {
-  numsamples = floor(width / 2 / dt) + 1;
-  double inc = amplitude / numsamples;
-  wave.clear();
-
-  for (int i = 0; i < floor(delay / dt); i++) {
-    wave.push_back(0); // initial delay
+  const double time = fmod(getIndex() * getDeltaTime() - m_delay, m_width);
+  getIndex()++;
+  if (time < 0.0) {
+    return 0.0;
   }
-  while (wave.back() < amplitude) {
-    wave.push_back(wave.back() + inc); // up
-  }
-  while (wave.back() > 0) {
-    wave.push_back(wave.back() - inc); // down
-  }
-  numsamples = wave.size();
-  index = 0;
+  return slope * time;
 }

@@ -28,16 +28,18 @@ public:
   GeneratorZap();
   GeneratorZap(double freq, double freq2, double amplitude, double duration,
                double dt);
-  ~GeneratorZap();
+
+  double get() override;
+
   // initialize waveform
   void init(double freq, double freq2, double amplitude, double duration,
             double dt);
 
-protected:
-  double freq; // Hz
-  double freq2;
-  double duration;
-  double amplitude;
+private:
+  double m_freq; // Hz
+  double m_freq2;
+  double m_duration;
+  double m_amplitude;
 };
 
 #endif /* GEN_ZAP_H_ */
