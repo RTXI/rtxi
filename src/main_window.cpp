@@ -388,14 +388,19 @@ void MainWindow::loadSettings()
 
   userprefs.beginGroup("Widgets");
   QString plugin_name;
+
+  auto vartype=static_cast<size_t>(Widgets::Variable::UNKNOWN);
+  std::variant<int64_t, double, uint64_t, std::string> value;
   for(const auto& plugin_instance_id :  userprefs.childGroups()){
     userprefs.beginGroup(plugin_instance_id);
     plugin_name = userprefs.value("library").value<QString>(); 
     Event::Object plugin_insert_event(Event::Type::PLUGIN_INSERT_EVENT);
     event.setParam("pluginName", std::any(plugin_name.toStdString()));
     this->event_manager->postEvent(&plugin_insert_event);
-    for(const auto& variable_info : userprefs.childGroups()){
-          
+    for(const auto& variable_id : userprefs.childGroups()){
+      vartype = userprefs.value("type").value<QString>().toULong();
+      if(userprefs.value(
+      userprefs.endGroup(); // variable info
     }
     userprefs.endGroup(); // plugin_instance_id
   }
@@ -436,19 +441,18 @@ void MainWindow::saveSettings()
 
   // Safe Widget userprefs
   userprefs.beginGroup("Widgets");
-  QString widget_name;
   int widget_count = 0;
   Event::Object loaded_plugins_query(Event::Type::PLUGIN_LIST_QUERY_EVENT);
   this->event_manager->postEvent(&loaded_plugins_query);
   const auto plugin_list = std::any_cast<std::vector<const Widgets::Plugin*>>(
       loaded_plugins_query.getParam("plugins"));
   for (const auto& entry : plugin_list) {
-    widget_name = QString::fromStdString(entry->getName());
     userprefs.beginGroup(QString::number(widget_count++));
     userprefs.setValue("library", QString::fromStdString(entry->getLibrary()));
     for (const auto& param_info : entry->getComponentParametersInfo()) {
+      userprefs.setValue("type", QString::number(param_info.id));
       userprefs.setValue(
-          QString::fromStdString(param_info.name),
+          QString::number(static_cast<size_t>(param_info.vartype)),
           std::visit(
               overload {[](const int64_t& val) -> QString
                         { return QString::number(val); },
