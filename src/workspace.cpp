@@ -61,6 +61,11 @@ Workspace::Manager::Manager(Event::Manager* ev_manager)
     this->registerDriver(bin_dir.path().toStdString() + std::string("/")
                          + nidaq_driver_name);
   }
+  const std::string gsc_driver_name = "librtxi_gsc16aio168_driver.so";
+  if (bin_dir.exists(QString::fromStdString(gsc_driver_name))) {
+    this->registerDriver(bin_dir.path().toStdString() + std::string("/")
+                         + gsc_driver_name);
+  }
 }
 
 Workspace::Manager::~Manager()

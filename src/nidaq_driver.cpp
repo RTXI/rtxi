@@ -370,13 +370,29 @@ public:
   void write() final;
 
 private:
+  // RTXI uses 4 tasks, each with it's own different type: AI, AO, DI, DO. This is
+  // not our choice... it is required by NIDAQmx to get things going
   std::array<TaskHandle, DAQ::ChannelType::UNKNOWN> task_list {};
+
+  // NIDAQmx channels are NOT the same as IO::Block channels used by RTXI. For example AI channels
+  // on NIDAQmx are physically entering the machine, but they are seen as output signals
+  // from the DAQ IO block in the read phase. 
   std::array<std::vector<physical_channel_t*>, DAQ::ChannelType::UNKNOWN>
       active_channels;
+
+  // NIDAQmx will assign a unique name related to discovery order. Something like
+  // Dev1, Dev2, etc and two cards of the same type can be accessed with this.
   std::string internal_dev_name;
+
+  // Some defaults that we don't bother providing flexibility for even though
+  // NIDAQmx can do that for us
   std::array<std::vector<physical_channel_t>, 4> physical_channels_registry;
   std::array<DAQ::analog_range_t, 7> default_ranges = DAQ::get_default_ranges();
   std::array<std::string, 2> default_units = DAQ::get_default_units();
+
+  // Used a tuple here because we want buffers to be in one place, and since not all
+  // IO is flaot, that meant we could not use a plain vector of vectors. Maybe we can
+  // just split them out to their own variables of same type for speed.
   std::tuple<std::vector<double>,
              std::vector<double>,
              std::vector<uint8_t>,
