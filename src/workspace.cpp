@@ -58,13 +58,21 @@ Workspace::Manager::Manager(Event::Manager* ev_manager)
   const QDir bin_dir = QCoreApplication::applicationDirPath();
   const std::string nidaq_driver_name = "librtxinidaqdriver.so";
   if (bin_dir.exists(QString::fromStdString(nidaq_driver_name))) {
-    this->registerDriver(bin_dir.path().toStdString() + std::string("/")
-                         + nidaq_driver_name);
+    try{
+      this->registerDriver(bin_dir.path().toStdString() + std::string("/")
+                           + nidaq_driver_name);
+    } catch (std::runtime_error& exception){
+      ERROR_MSG("Unable to load NIDAQ rtxi driver");
+    }
   }
   const std::string gsc_driver_name = "librtxi_gsc16aio168_driver.so";
   if (bin_dir.exists(QString::fromStdString(gsc_driver_name))) {
-    this->registerDriver(bin_dir.path().toStdString() + std::string("/")
-                         + gsc_driver_name);
+    try {
+      this->registerDriver(bin_dir.path().toStdString() + std::string("/")
+                           + gsc_driver_name);
+    } catch (std::runtime_error& excepttion){
+      ERROR_MSG("Unable to load GSC aio168 rtxi driver");
+    }
   }
 }
 
