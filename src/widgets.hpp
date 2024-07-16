@@ -30,6 +30,7 @@ Q_DECLARE_METATYPE(IO::endpoint)
 Q_DECLARE_METATYPE(RT::block_connection_t)
 Q_DECLARE_METATYPE(RT::State::state_t)
 
+class QSettings;
 /*!
  * Contains all the classes and structures relevant to Widgets
  */
@@ -273,6 +274,7 @@ public:
    * \param Pointer to Widgets::Plugin object that owns this component.
    */
   Widgets::Plugin* getHostPlugin() { return this->hostPlugin; }
+
 
 private:
   std::vector<Widgets::Variable::Info> parameters;
@@ -662,6 +664,11 @@ public:
    * \return True if there is an attached component, False otherwise.
    */
   bool hasComponent() { return plugin_component != nullptr; }
+
+  void loadParameterSettings(QSettings& userprefs);
+  virtual void loadCustomParameterSettings(QSettings& userprefs) {}
+  void saveParameterSettings(QSettings& userprefs) const ;
+  virtual void saveCustomParameterSettings(QSettings& userprefs) const {}
 
 protected:
   Widgets::Component* getComponent();

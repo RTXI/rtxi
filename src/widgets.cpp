@@ -5,6 +5,7 @@
 #include <QIntValidator>
 #include <QMdiArea>
 #include <QScrollArea>
+#include <QSettings>
 #include <QTimer>
 #include <algorithm>
 #include <any>
@@ -658,4 +659,38 @@ Event::Manager* Widgets::Plugin::getEventManager()
 Widgets::Panel* Widgets::Plugin::getPanel()
 {
   return this->widget_panel;
+}
+
+// Helper definitions for visitor pattern with std::visit
+template<class... Ts>
+struct overload : Ts...
+{
+  using Ts::operator()...;
+};
+template<class... Ts>
+overload(Ts...) -> overload<Ts...>;
+
+void Widgets::Plugin::loadParameterSettings(QSettings& userprefs) {}
+
+void Widgets::Plugin::saveParameterSettings(QSettings& userprefs) const
+{
+  userprefs.setValue("library", QString::fromStdString(this->getLibrary()));
+  for (const auto& param_info : this->getComponentParametersInfo()) {
+    userprefs.beginGroup("standardParams");
+    userprefs.setValue(
+        QString::number(static_cast<size_t>(param_info.id)),
+        std::visit(overload {[](const int64_t& val) -> QString
+                             { return QString::number(val); },
+                             [](const double& val) -> QString
+                             { return QString::number(val); },
+                             [](const uint64_t& val) -> QString
+                             { return QString::number(val); },
+                             [](const std::string& val) -> QString
+                             { return QString::fromStdString(val); },
+                             [](const RT::State::state_t& val) -> QString {
+                               return QString::number(static_cast<int8_t>(val));
+                             }},
+                   param_info.value));
+  }
+  userprefs.endGroup();  // standardParams
 }

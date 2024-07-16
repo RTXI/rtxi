@@ -352,14 +352,6 @@ void MainWindow::loadWindow()
   show();
 }
 
-template<class... Ts>
-struct overload : Ts...
-{
-  using Ts::operator()...;
-};
-template<class... Ts>
-overload(Ts...) -> overload<Ts...>;
-
 void MainWindow::loadSettings()
 {
   QSettings userprefs;
@@ -389,25 +381,24 @@ void MainWindow::loadSettings()
   userprefs.beginGroup("Widgets");
   QString plugin_name;
 
-  auto vartype=static_cast<size_t>(Widgets::Variable::UNKNOWN);
+  auto vartype = static_cast<size_t>(Widgets::Variable::UNKNOWN);
   std::variant<int64_t, double, uint64_t, std::string> value;
-  for(const auto& plugin_instance_id :  userprefs.childGroups()){
+  Widgets::Plugin* plugin_ptr=nullptr;
+  for (const auto& plugin_instance_id : userprefs.childGroups()) {
     userprefs.beginGroup(plugin_instance_id);
-    plugin_name = userprefs.value("library").value<QString>(); 
+    plugin_name = userprefs.value("library").value<QString>();
     Event::Object plugin_insert_event(Event::Type::PLUGIN_INSERT_EVENT);
     event.setParam("pluginName", std::any(plugin_name.toStdString()));
     this->event_manager->postEvent(&plugin_insert_event);
-    for(const auto& variable_id : userprefs.childGroups()){
-      vartype = userprefs.value("type").value<QString>().toULong();
-      if(userprefs.value(
-      userprefs.endGroup(); // variable info
-    }
-    userprefs.endGroup(); // plugin_instance_id
+    // Load the settings
+    plugin_ptr = std::any_cast<Widgets::Plugin*>(event.getParam("pluginPointer"));
+    plugin_ptr->loadParameterSettings(userprefs);
+    userprefs.endGroup();  // plugin_instance_id
   }
 
-  userprefs.endGroup(); // profile 
-  userprefs.endGroup(); // widgets
-  userprefs.endGroup(); // workspaces
+  userprefs.endGroup();  // profile
+  userprefs.endGroup();  // widgets
+  userprefs.endGroup();  // workspaces
 }
 
 void MainWindow::saveSettings()
@@ -448,24 +439,7 @@ void MainWindow::saveSettings()
       loaded_plugins_query.getParam("plugins"));
   for (const auto& entry : plugin_list) {
     userprefs.beginGroup(QString::number(widget_count++));
-    userprefs.setValue("library", QString::fromStdString(entry->getLibrary()));
-    for (const auto& param_info : entry->getComponentParametersInfo()) {
-      userprefs.setValue("type", QString::number(param_info.id));
-      userprefs.setValue(
-          QString::number(static_cast<size_t>(param_info.vartype)),
-          std::visit(
-              overload {[](const int64_t& val) -> QString
-                        { return QString::number(val); },
-                        [](const double& val) -> QString
-                        { return QString::number(val); },
-                        [](const uint64_t& val) -> QString
-                        { return QString::number(val); },
-                        [](const std::string& val) -> QString
-                        { return QString::fromStdString(val); },
-                        [](const RT::State::state_t& val) -> QString
-                        { return QString::number(static_cast<int8_t>(val)); }},
-              param_info.value));
-    }
+    entry->saveParameterSettings(userprefs);
     userprefs.endGroup();  // widget count
   }
   userprefs.endGroup();  // Widgets
