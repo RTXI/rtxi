@@ -17,6 +17,7 @@
 #include <qmdisubwindow.h>
 
 #include "debug.hpp"
+#include "event.hpp"
 
 std::string Widgets::Variable::state2string(RT::State::state_t state)
 {
@@ -661,36 +662,50 @@ Widgets::Panel* Widgets::Plugin::getPanel()
   return this->widget_panel;
 }
 
-// Helper definitions for visitor pattern with std::visit
-template<class... Ts>
-struct overload : Ts...
+void Widgets::Plugin::loadParameterSettings(QSettings& userprefs)
 {
-  using Ts::operator()...;
-};
-template<class... Ts>
-overload(Ts...) -> overload<Ts...>;
-
-void Widgets::Plugin::loadParameterSettings(QSettings& userprefs) {}
+  QString id_str;
+  QVariant value;
+  for (const auto& param_info : this->getComponentParametersInfo()) {
+    id_str = QString::number(param_info.id);
+    value = userprefs.value(id_str);
+    if(!value.isValid()){
+      ERROR_MSG("Widgets::Plugin::loadParameterSettings : The loaded setting for "
+                "parameter {} is not valid! skipping...", param_info.name);
+      continue;
+    }
+    // NOTE: Here we will assume that the type of the stored parameter matches the 
+    // one stored inside the component. This may not be true in the future if the
+    // plugin developer decides to change the types of parameters. In this case, the
+    // QVariant will return 0 instead.
+    switch (param_info.vartype) {
+      case Widgets::Variable::INT_PARAMETER:
+        this->setComponentParameter(
+            param_info.id,
+            static_cast<int64_t>(userprefs.value(id_str).toInt()));
+        break;
+      case Variable::DOUBLE_PARAMETER:
+        this->setComponentParameter(
+            param_info.id,
+            static_cast<double>(userprefs.value(id_str).toDouble()));
+        break;
+      case Variable::UINT_PARAMETER:
+      case Variable::STATE:
+        this->setComponentParameter(
+            param_info.id,
+            static_cast<uint64_t>(userprefs.value(id_str).toUInt()));
+        break;
+      case Variable::COMMENT:
+      case Variable::UNKNOWN:
+        break;
+    }
+  }
+}
 
 void Widgets::Plugin::saveParameterSettings(QSettings& userprefs) const
 {
-  userprefs.setValue("library", QString::fromStdString(this->getLibrary()));
   for (const auto& param_info : this->getComponentParametersInfo()) {
-    userprefs.beginGroup("standardParams");
-    userprefs.setValue(
-        QString::number(static_cast<size_t>(param_info.id)),
-        std::visit(overload {[](const int64_t& val) -> QString
-                             { return QString::number(val); },
-                             [](const double& val) -> QString
-                             { return QString::number(val); },
-                             [](const uint64_t& val) -> QString
-                             { return QString::number(val); },
-                             [](const std::string& val) -> QString
-                             { return QString::fromStdString(val); },
-                             [](const RT::State::state_t& val) -> QString {
-                               return QString::number(static_cast<int8_t>(val));
-                             }},
-                   param_info.value));
+    userprefs.setValue(QString::number(static_cast<size_t>(param_info.id)),
+                       QVariant::fromStdVariant(param_info.value));
   }
-  userprefs.endGroup();  // standardParams
 }

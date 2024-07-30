@@ -29,6 +29,7 @@ Q_DECLARE_METATYPE(IO::flags_t)
 Q_DECLARE_METATYPE(IO::endpoint)
 Q_DECLARE_METATYPE(RT::block_connection_t)
 Q_DECLARE_METATYPE(RT::State::state_t)
+Q_DECLARE_METATYPE(std::string)
 
 class QSettings;
 /*!

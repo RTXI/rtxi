@@ -380,19 +380,20 @@ void MainWindow::loadSettings()
 
   userprefs.beginGroup("Widgets");
   QString plugin_name;
-
-  auto vartype = static_cast<size_t>(Widgets::Variable::UNKNOWN);
   std::variant<int64_t, double, uint64_t, std::string> value;
-  Widgets::Plugin* plugin_ptr=nullptr;
+  Widgets::Plugin* plugin_ptr = nullptr;
+  std::string event_status;
   for (const auto& plugin_instance_id : userprefs.childGroups()) {
     userprefs.beginGroup(plugin_instance_id);
     plugin_name = userprefs.value("library").value<QString>();
-    Event::Object plugin_insert_event(Event::Type::PLUGIN_INSERT_EVENT);
-    event.setParam("pluginName", std::any(plugin_name.toStdString()));
-    this->event_manager->postEvent(&plugin_insert_event);
+    this->loadWidget(plugin_name, plugin_ptr);
     // Load the settings
-    plugin_ptr = std::any_cast<Widgets::Plugin*>(event.getParam("pluginPointer"));
+    userprefs.beginGroup("standardParams");
     plugin_ptr->loadParameterSettings(userprefs);
+    userprefs.endGroup();  // standardParams
+    userprefs.beginGroup("customParams");
+    plugin_ptr->loadCustomParameterSettings(userprefs);
+    userprefs.endGroup();  // customParams
     userprefs.endGroup();  // plugin_instance_id
   }
 
@@ -439,13 +440,20 @@ void MainWindow::saveSettings()
       loaded_plugins_query.getParam("plugins"));
   for (const auto& entry : plugin_list) {
     userprefs.beginGroup(QString::number(widget_count++));
+    userprefs.setValue("library", QString::fromStdString(entry->getLibrary()));
+    userprefs.beginGroup("standardParams");
     entry->saveParameterSettings(userprefs);
+    userprefs.endGroup();  // standardParams
+    userprefs.beginGroup("customParams");
+    entry->saveCustomParameterSettings(userprefs);
+    userprefs.endGroup();  // customParams
     userprefs.endGroup();  // widget count
   }
   userprefs.endGroup();  // Widgets
 
   userprefs.beginGroup("Connections");
   userprefs.endGroup();  // Connections
+
   userprefs.endGroup();  // profile
   userprefs.endGroup();  // Workspaces
 }
@@ -467,6 +475,13 @@ void MainWindow::utilitiesMenuActivated(QAction* id)
 
 void MainWindow::loadWidget(const QString& module_name)
 {
+  Widgets::Plugin* unused_pointer = nullptr;
+  this->loadWidget(module_name, unused_pointer);
+}
+
+void MainWindow::loadWidget(const QString& module_name,
+                            Widgets::Plugin*& rtxi_plugin_pointer)
+{
   Event::Object event(Event::Type::PLUGIN_INSERT_EVENT);
   event.setParam("pluginName", std::any(module_name.toStdString()));
   this->event_manager->postEvent(&event);
@@ -480,8 +495,7 @@ void MainWindow::loadWidget(const QString& module_name)
   auto create_rtxi_panel_func =
       std::any_cast<Widgets::Panel* (*)(QMainWindow*, Event::Manager*)>(
           event.getParam("createRTXIPanel"));
-  auto* rtxi_plugin_pointer =
-      std::any_cast<Widgets::Plugin*>(event.getParam("pluginPointer"));
+  rtxi_plugin_pointer = std::any_cast<Widgets::Plugin*>(event.getParam("pluginPointer"));
   auto* rtxi_panel_pointer = create_rtxi_panel_func(this, this->event_manager);
   rtxi_plugin_pointer->attachPanel(rtxi_panel_pointer);
   // finally plugins can also receive events so make sure to register them

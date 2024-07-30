@@ -28,10 +28,13 @@
 #include <QMenu>
 #include <QTextEdit>
 #include <QTextItem>
-
-#include <qdialog.h>
+#include <QDialog>
 
 #include "event.hpp"
+
+namespace Widgets{
+class Plugin;
+} // namespace Widgets
 
 class SaveSettingsDialog : public QDialog
 {
@@ -161,6 +164,7 @@ private slots:
 
 private:
   void loadWidget(const QString& module_name);
+  void loadWidget(const QString& module_name, Widgets::Plugin*& rtxi_plugin_pointer);
   Event::Manager* event_manager;
   QMdiArea* mdiArea = nullptr;
   QList<QMdiSubWindow*> subWindows;
