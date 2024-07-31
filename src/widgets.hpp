@@ -667,9 +667,9 @@ public:
   bool hasComponent() { return plugin_component != nullptr; }
 
   void loadParameterSettings(QSettings& userprefs);
-  virtual void loadCustomParameterSettings(QSettings& userprefs) {}
+  virtual void loadCustomParameterSettings(QSettings& userprefs);
   void saveParameterSettings(QSettings& userprefs) const ;
-  virtual void saveCustomParameterSettings(QSettings& userprefs) const {}
+  virtual void saveCustomParameterSettings(QSettings& userprefs) const;
 
 protected:
   Widgets::Component* getComponent();

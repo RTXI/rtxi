@@ -669,15 +669,17 @@ void Widgets::Plugin::loadParameterSettings(QSettings& userprefs)
   for (const auto& param_info : this->getComponentParametersInfo()) {
     id_str = QString::number(param_info.id);
     value = userprefs.value(id_str);
-    if(!value.isValid()){
-      ERROR_MSG("Widgets::Plugin::loadParameterSettings : The loaded setting for "
-                "parameter {} is not valid! skipping...", param_info.name);
+    if (!value.isValid()) {
+      ERROR_MSG(
+          "Widgets::Plugin::loadParameterSettings : The loaded setting for "
+          "parameter {} is not valid! skipping...",
+          param_info.name);
       continue;
     }
-    // NOTE: Here we will assume that the type of the stored parameter matches the 
-    // one stored inside the component. This may not be true in the future if the
-    // plugin developer decides to change the types of parameters. In this case, the
-    // QVariant will return 0 instead.
+    // NOTE: Here we will assume that the type of the stored parameter matches
+    // the one stored inside the component. This may not be true in the future
+    // if the plugin developer decides to change the types of parameters. In
+    // this case, the QVariant will return 0 instead.
     switch (param_info.vartype) {
       case Widgets::Variable::INT_PARAMETER:
         this->setComponentParameter(
@@ -700,7 +702,11 @@ void Widgets::Plugin::loadParameterSettings(QSettings& userprefs)
         break;
     }
   }
+  // We should reflect the changes in the panel
+  this->getPanel()->refresh();
 }
+
+void Widgets::Plugin::loadCustomParameterSettings(QSettings& /*userprefs*/) {}
 
 void Widgets::Plugin::saveParameterSettings(QSettings& userprefs) const
 {
@@ -709,3 +715,5 @@ void Widgets::Plugin::saveParameterSettings(QSettings& userprefs) const
                        QVariant::fromStdVariant(param_info.value));
   }
 }
+
+void Widgets::Plugin::saveCustomParameterSettings(QSettings& /*userprefs*/) const {}
