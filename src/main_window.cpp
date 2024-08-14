@@ -30,7 +30,6 @@
 #include <string>
 
 #include "main_window.hpp"
-
 #include <fmt/core.h>
 
 #include "connector/connector.hpp"
@@ -352,32 +351,142 @@ void MainWindow::loadWindow()
   show();
 }
 
-void MainWindow::loadSettings()
+void MainWindow::savePeriodSettings(QSettings& userprefs)
 {
-  QSettings userprefs;
-  userprefs.beginGroup("Workspaces");
-  auto* load_settings_dialog = new QInputDialog(this);
-  load_settings_dialog->setInputMode(QInputDialog::TextInput);
-  load_settings_dialog->setComboBoxEditable(false);
-  load_settings_dialog->setComboBoxItems(userprefs.childGroups());
-  load_settings_dialog->setLabelText("Profile");
-  load_settings_dialog->setOkButtonText("Load");
-  load_settings_dialog->exec();
+  Event::Object get_period_event(Event::Type::RT_GET_PERIOD_EVENT);
+  event_manager->postEvent(&get_period_event);
+  const auto period =
+      std::any_cast<int64_t>(get_period_event.getParam("period"));
+  userprefs.setValue("period", QString::number(period));
+}
 
-  if (load_settings_dialog->result() == QDialog::Rejected) {
-    userprefs.endGroup();
-    return;
-  }
-  const QString profile = load_settings_dialog->textValue();
-  mdiArea->closeAllSubWindows();
-  userprefs.beginGroup(profile);
+void MainWindow::loadPeriodSettings(QSettings& userprefs)
+{
   const auto period =
       userprefs.value("period", QVariant::fromValue(RT::OS::DEFAULT_PERIOD))
           .value<int64_t>();
   Event::Object event(Event::Type::RT_PERIOD_EVENT);
   event.setParam("period", std::any(period));
   this->event_manager->postEvent(&event);
+}
 
+void MainWindow::saveDAQSettings(QSettings& userprefs)
+{
+  userprefs.beginGroup("DAQs");
+
+  Event::Object get_devices_event(Event::Type::DAQ_DEVICE_QUERY_EVENT);
+  this->event_manager->postEvent(&get_devices_event);
+  auto devices = std::any_cast<std::vector<DAQ::Device*>>(
+      get_devices_event.getParam("devices"));
+  QString channel_name;
+  QString dev_name;
+  for (const auto& device : devices) {
+    dev_name = QString::fromStdString(device->getName());
+    userprefs.beginGroup(dev_name);
+    channel_name = "ai_";
+    for (size_t ai_channel = 0;
+         ai_channel < device->getChannelCount(DAQ::ChannelType::AI);
+         ++ai_channel)
+    {
+      userprefs.beginGroup(channel_name + QString::number(ai_channel));
+      userprefs.setValue(
+          "active", device->getChannelActive(DAQ::ChannelType::AI, ai_channel));
+      userprefs.setValue("downsample",
+                         static_cast<quint64>(device->getAnalogDownsample(
+                             DAQ::ChannelType::AI, ai_channel)));
+      userprefs.setValue(
+          "gain", device->getAnalogGain(DAQ::ChannelType::AI, ai_channel));
+      userprefs.setValue(
+          "offset",
+          device->getAnalogZeroOffset(DAQ::ChannelType::AI, ai_channel));
+      userprefs.setValue("range",
+                         static_cast<quint64>(device->getAnalogRange(
+                             DAQ::ChannelType::AI, ai_channel)));
+      userprefs.setValue("reference",
+                         static_cast<quint64>(device->getAnalogReference(
+                             DAQ::ChannelType::AI, ai_channel)));
+      userprefs.setValue("units",
+                         static_cast<quint64>(device->getAnalogUnits(
+                             DAQ::ChannelType::AI, ai_channel)));
+      userprefs.endGroup();
+    }
+    channel_name = "ao_";
+    for (size_t ao_channel = 0;
+         ao_channel < device->getChannelCount(DAQ::ChannelType::AO);
+         ++ao_channel)
+    {
+      userprefs.beginGroup(channel_name + QString::number(ao_channel));
+      userprefs.setValue(
+          "active", device->getChannelActive(DAQ::ChannelType::AO, ao_channel));
+      userprefs.setValue("downsample",
+                         static_cast<quint64>(device->getAnalogDownsample(
+                             DAQ::ChannelType::AO, ao_channel)));
+      userprefs.setValue(
+          "gain", device->getAnalogGain(DAQ::ChannelType::AO, ao_channel));
+      userprefs.setValue(
+          "offset",
+          device->getAnalogZeroOffset(DAQ::ChannelType::AO, ao_channel));
+      userprefs.setValue("range",
+                         static_cast<quint64>(device->getAnalogRange(
+                             DAQ::ChannelType::AO, ao_channel)));
+      userprefs.setValue("reference",
+                         static_cast<quint64>(device->getAnalogReference(
+                             DAQ::ChannelType::AO, ao_channel)));
+      userprefs.setValue("units",
+                         static_cast<quint64>(device->getAnalogUnits(
+                             DAQ::ChannelType::AO, ao_channel)));
+      userprefs.endGroup();
+    }
+    channel_name = "di_";
+    for (size_t di_channel = 0;
+         di_channel < device->getChannelCount(DAQ::ChannelType::DI);
+         ++di_channel)
+    {
+      userprefs.beginGroup(channel_name + QString::number(di_channel));
+      userprefs.setValue(
+          "active", device->getChannelActive(DAQ::ChannelType::DI, di_channel));
+      userprefs.endGroup();
+    }
+    channel_name = "do_";
+    for (size_t do_channel = 0;
+         do_channel < device->getChannelCount(DAQ::ChannelType::DO);
+         ++do_channel)
+    {
+      userprefs.beginGroup(channel_name + QString::number(do_channel));
+      userprefs.setValue(
+          "active", device->getChannelActive(DAQ::ChannelType::DO, do_channel));
+      userprefs.endGroup();
+    }
+    userprefs.endGroup();  // Device name
+  }
+  userprefs.endGroup();  // DAQ
+}
+
+void MainWindow::loadDAQSettings(QSettings& userprefs) {}
+
+void MainWindow::saveWidgetSettings(QSettings& userprefs)
+{
+  userprefs.beginGroup("Widgets");
+  Event::Object loaded_plugins_query(Event::Type::PLUGIN_LIST_QUERY_EVENT);
+  this->event_manager->postEvent(&loaded_plugins_query);
+  const auto plugin_list = std::any_cast<std::vector<const Widgets::Plugin*>>(
+      loaded_plugins_query.getParam("plugins"));
+  for (const auto& entry : plugin_list) {
+    userprefs.beginGroup(QString::number(entry->getID()));
+    userprefs.setValue("library", QString::fromStdString(entry->getLibrary()));
+    userprefs.beginGroup("standardParams");
+    entry->saveParameterSettings(userprefs);
+    userprefs.endGroup();  // standardParams
+    userprefs.beginGroup("customParams");
+    entry->saveCustomParameterSettings(userprefs);
+    userprefs.endGroup();  // customParams
+    userprefs.endGroup();  // widget count
+  }
+  userprefs.endGroup();  // Widgets
+}
+
+void MainWindow::loadWidgetSettings(QSettings& userprefs)
+{
   userprefs.beginGroup("Widgets");
   QString plugin_name;
   std::variant<int64_t, double, uint64_t, std::string> value;
@@ -396,9 +505,57 @@ void MainWindow::loadSettings()
     userprefs.endGroup();  // customParams
     userprefs.endGroup();  // plugin_instance_id
   }
+  userprefs.endGroup();
+}
+
+void MainWindow::saveConnectionSettings(QSettings& userprefs)
+{
+  userprefs.beginGroup("Connections");
+  userprefs.endGroup();
+}
+
+void MainWindow::loadConnectionSettings(QSettings& userprefs)
+{
+  Event::Object all_connections_event(Event::Type::IO_CONNECTION_QUERY_EVENT);
+  event_manager->postEvent(&all_connections_event);
+  auto connections = std::any_cast<std::vector<RT::block_connection_t>>(
+      all_connections_event.getParam("connections"));
+  std::unordered_map<size_t, std::vector<RT::block_connection_t>> block_connections;
+  for(const auto& conn : connections){
+    block_connections[conn.src->getID()].push_back(conn);
+  }
+}
+
+void MainWindow::loadSettings()
+{
+  QSettings userprefs;
+  userprefs.beginGroup("Workspaces");
+  auto* load_settings_dialog = new QInputDialog(this);
+  load_settings_dialog->setInputMode(QInputDialog::TextInput);
+  load_settings_dialog->setComboBoxEditable(false);
+  load_settings_dialog->setComboBoxItems(userprefs.childGroups());
+  load_settings_dialog->setLabelText("Profile");
+  load_settings_dialog->setOkButtonText("Load");
+  load_settings_dialog->exec();
+
+  if (load_settings_dialog->result() == QDialog::Rejected) {
+    userprefs.endGroup();
+    return;
+  }
+
+  const QString profile = load_settings_dialog->textValue();
+  mdiArea->closeAllSubWindows();
+  userprefs.beginGroup(profile);
+
+  this->loadPeriodSettings(userprefs);
+
+  this->loadDAQSettings(userprefs);
+
+  this->loadWidgetSettings(userprefs);
+
+  this->loadConnectionSettings(userprefs);
 
   userprefs.endGroup();  // profile
-  userprefs.endGroup();  // widgets
   userprefs.endGroup();  // workspaces
 }
 
@@ -414,45 +571,25 @@ void MainWindow::saveSettings()
   save_settings_dialog->setOkButtonText("Save");
   save_settings_dialog->exec();
 
+  if (save_settings_dialog->result() == QDialog::Rejected) {
+    userprefs.endGroup();
+    return;
+  }
+
   const QString profile_name = save_settings_dialog->textValue();
   if (userprefs.childGroups().contains(profile_name)) {
     userprefs.remove(profile_name);
   }
+
   userprefs.beginGroup(profile_name);
 
-  // get period and save
-  Event::Object get_period_event(Event::Type::RT_GET_PERIOD_EVENT);
-  event_manager->postEvent(&get_period_event);
-  const auto period =
-      std::any_cast<int64_t>(get_period_event.getParam("period"));
-  userprefs.setValue("period", QString::number(period));
+  this->savePeriodSettings(userprefs);
 
-  // Safe DAQ userprefs
-  userprefs.beginGroup("DAQs");
-  userprefs.endGroup();
+  this->saveDAQSettings(userprefs);
 
-  // Safe Widget userprefs
-  userprefs.beginGroup("Widgets");
-  int widget_count = 0;
-  Event::Object loaded_plugins_query(Event::Type::PLUGIN_LIST_QUERY_EVENT);
-  this->event_manager->postEvent(&loaded_plugins_query);
-  const auto plugin_list = std::any_cast<std::vector<const Widgets::Plugin*>>(
-      loaded_plugins_query.getParam("plugins"));
-  for (const auto& entry : plugin_list) {
-    userprefs.beginGroup(QString::number(widget_count++));
-    userprefs.setValue("library", QString::fromStdString(entry->getLibrary()));
-    userprefs.beginGroup("standardParams");
-    entry->saveParameterSettings(userprefs);
-    userprefs.endGroup();  // standardParams
-    userprefs.beginGroup("customParams");
-    entry->saveCustomParameterSettings(userprefs);
-    userprefs.endGroup();  // customParams
-    userprefs.endGroup();  // widget count
-  }
-  userprefs.endGroup();  // Widgets
+  this->saveWidgetSettings(userprefs);
 
-  userprefs.beginGroup("Connections");
-  userprefs.endGroup();  // Connections
+  this->saveConnectionSettings(userprefs);
 
   userprefs.endGroup();  // profile
   userprefs.endGroup();  // Workspaces
@@ -495,7 +632,8 @@ void MainWindow::loadWidget(const QString& module_name,
   auto create_rtxi_panel_func =
       std::any_cast<Widgets::Panel* (*)(QMainWindow*, Event::Manager*)>(
           event.getParam("createRTXIPanel"));
-  rtxi_plugin_pointer = std::any_cast<Widgets::Plugin*>(event.getParam("pluginPointer"));
+  rtxi_plugin_pointer =
+      std::any_cast<Widgets::Plugin*>(event.getParam("pluginPointer"));
   auto* rtxi_panel_pointer = create_rtxi_panel_func(this, this->event_manager);
   rtxi_plugin_pointer->attachPanel(rtxi_panel_pointer);
   // finally plugins can also receive events so make sure to register them

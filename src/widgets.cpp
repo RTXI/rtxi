@@ -567,6 +567,14 @@ Widgets::Plugin::getComponentParametersInfo() const
       : this->plugin_component->getParametersInfo();
 }
 
+size_t Widgets::Plugin::getID() const
+{
+  if(this->hasComponent()){
+    return plugin_component->getID(); 
+  }
+  return 0;
+}
+
 void Widgets::Plugin::attachComponent(
     std::unique_ptr<Widgets::Component> component)
 {
@@ -716,4 +724,7 @@ void Widgets::Plugin::saveParameterSettings(QSettings& userprefs) const
   }
 }
 
-void Widgets::Plugin::saveCustomParameterSettings(QSettings& /*userprefs*/) const {}
+void Widgets::Plugin::saveCustomParameterSettings(
+    QSettings& /*userprefs*/) const
+{
+}

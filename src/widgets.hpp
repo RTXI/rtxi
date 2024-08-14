@@ -276,7 +276,6 @@ public:
    */
   Widgets::Plugin* getHostPlugin() { return this->hostPlugin; }
 
-
 private:
   std::vector<Widgets::Variable::Info> parameters;
   Widgets::Plugin* hostPlugin;
@@ -502,7 +501,7 @@ public:
    *
    * \return ID of the widget assigned by the realtime system
    */
-  size_t getID();
+  size_t getID() const;
 
   /*!
    * Attaches a component to this plugin
@@ -664,11 +663,46 @@ public:
    *
    * \return True if there is an attached component, False otherwise.
    */
-  bool hasComponent() { return plugin_component != nullptr; }
+  bool hasComponent() const { return plugin_component != nullptr; }
 
+  /*!
+   * Function called my the main window when loading settings to automatically
+   * retrieve parameter values in widget.
+   *
+   * \param userprefs A reference to QSettings object where the settings will be
+   *                  dumped
+   */
   void loadParameterSettings(QSettings& userprefs);
+
+  /*!
+   * Pass in a QSetting object for the plugin to load custom values loaded by the
+   * custom parameters.
+   *
+   * \param userprefs a standard QSettings object that the plugin can use to
+   *                  dump all of the settings as key/value pairs where the key
+   *                  is the name of the parameter and the value is the actual
+   *                  parameter value to store in the QSetting
+   */
   virtual void loadCustomParameterSettings(QSettings& userprefs);
-  void saveParameterSettings(QSettings& userprefs) const ;
+
+  /*!
+   * Function called my the main window when saving settings to automatically
+   * store parameter from widget.
+   *
+   * \param userprefs A reference to QSettings object where the settings will be
+   *                  dumped
+   */
+  void saveParameterSettings(QSettings& userprefs) const;
+
+  /*!
+   * Pass in a QSetting object for the plugin to save custom parameters    
+   *
+   *
+   * \param userprefs a standard QSettings object that the plugin can use to
+   *                  dump all of the settings as key/value pairs where the key
+   *                  is the name of the parameter and the value is the actual
+   *                  parameter value to store in the QSetting
+   */
   virtual void saveCustomParameterSettings(QSettings& userprefs) const;
 
 protected:

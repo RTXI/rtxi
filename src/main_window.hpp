@@ -32,6 +32,8 @@
 
 #include "event.hpp"
 
+class QSettings;
+
 namespace Widgets{
 class Plugin;
 } // namespace Widgets
@@ -165,6 +167,14 @@ private slots:
 private:
   void loadWidget(const QString& module_name);
   void loadWidget(const QString& module_name, Widgets::Plugin*& rtxi_plugin_pointer);
+  inline void savePeriodSettings(QSettings& userprefs);
+  inline void loadPeriodSettings(QSettings& userprefs);
+  inline void saveDAQSettings(QSettings& userprefs);
+  inline void loadDAQSettings(QSettings& userprefs);
+  inline void saveWidgetSettings(QSettings& userprefs);
+  inline void loadWidgetSettings(QSettings& userprefs);
+  inline void saveConnectionSettings(QSettings& userprefs);
+  inline void loadConnectionSettings(QSettings& userprefs);
   Event::Manager* event_manager;
   QMdiArea* mdiArea = nullptr;
   QList<QMdiSubWindow*> subWindows;
