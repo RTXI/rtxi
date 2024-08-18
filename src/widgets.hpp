@@ -675,8 +675,8 @@ public:
   void loadParameterSettings(QSettings& userprefs);
 
   /*!
-   * Pass in a QSetting object for the plugin to load custom values loaded by the
-   * custom parameters.
+   * Pass in a QSetting object for the plugin to load custom values loaded by
+   * the custom parameters.
    *
    * \param userprefs a standard QSettings object that the plugin can use to
    *                  dump all of the settings as key/value pairs where the key
@@ -695,7 +695,7 @@ public:
   void saveParameterSettings(QSettings& userprefs) const;
 
   /*!
-   * Pass in a QSetting object for the plugin to save custom parameters    
+   * Pass in a QSetting object for the plugin to save custom parameters
    *
    *
    * \param userprefs a standard QSettings object that the plugin can use to
@@ -704,6 +704,13 @@ public:
    *                  parameter value to store in the QSetting
    */
   virtual void saveCustomParameterSettings(QSettings& userprefs) const;
+
+  /*!
+   * get a pointer to the internal block of the plugin
+   *
+   * \return IO::Block pointer to the internal structure
+   */
+  IO::Block* getBlock() { return plugin_component.get(); }
 
 protected:
   Widgets::Component* getComponent();

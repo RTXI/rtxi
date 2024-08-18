@@ -19,6 +19,7 @@
 */
 
 #include <QApplication>
+#include <QDataStream>
 #include <QDesktopServices>
 #include <QDir>
 #include <QFileDialog>
@@ -30,6 +31,7 @@
 #include <string>
 
 #include "main_window.hpp"
+
 #include <fmt/core.h>
 
 #include "connector/connector.hpp"
@@ -38,10 +40,48 @@
 #include "module_installer/rtxi_wizard.hpp"
 #include "oscilloscope/oscilloscope.hpp"
 #include "performance_measurement/performance_measurement.hpp"
+#include "rt.hpp"
 #include "rtxiConfig.h"
 #include "system_control/system_control.hpp"
 #include "userprefs/userprefs.hpp"
 #include "widgets.hpp"
+
+// This is defined here because top level function is the only other class
+// in entire RTXI that needs to deal with connections, but I don't want to
+// use block pointers directly here
+// NOTE: In order to save this for serialization, we need to define stream
+// operators so that Qt can serialize it for use inside the settings, and
+// deserialize it back when loading settings.
+struct plugin_connection
+{
+  quint64 src_id;
+  quint64 src_direction;
+  quint64 src_port;
+  quint64 dest_id;
+  quint64 dest_port;
+};
+
+QDataStream& operator<<(QDataStream& out, const plugin_connection& conn)
+{
+  out << conn.src_id;
+  out << conn.src_direction;
+  out << conn.src_port;
+  out << conn.dest_id;
+  out << conn.dest_port;
+  return out;
+}
+
+QDataStream& operator>>(QDataStream& in, plugin_connection& conn)
+{
+  in >> conn.dest_port;
+  in >> conn.dest_id;
+  in >> conn.src_port;
+  in >> conn.src_direction;
+  in >> conn.src_id;
+  return in;
+}
+
+Q_DECLARE_METATYPE(plugin_connection)
 
 MainWindow::MainWindow(Event::Manager* ev_manager)
     : QMainWindow(nullptr, Qt::Window)
@@ -80,6 +120,11 @@ MainWindow::MainWindow(Event::Manager* ev_manager)
   /* Initialize Help Menu */
   createHelpActions();
   createHelpMenu();
+
+  // Define a custom type to qt type system for settings management
+  qRegisterMetaType<plugin_connection>();
+  qRegisterMetaTypeStreamOperators<plugin_connection>();
+
 }
 
 QAction* MainWindow::insertWidgetMenuSeparator()
@@ -466,6 +511,7 @@ void MainWindow::loadDAQSettings(QSettings& userprefs) {}
 
 void MainWindow::saveWidgetSettings(QSettings& userprefs)
 {
+  ///////////////////// Save Widget parameters ////////////////////////
   userprefs.beginGroup("Widgets");
   Event::Object loaded_plugins_query(Event::Type::PLUGIN_LIST_QUERY_EVENT);
   this->event_manager->postEvent(&loaded_plugins_query);
@@ -483,13 +529,33 @@ void MainWindow::saveWidgetSettings(QSettings& userprefs)
     userprefs.endGroup();  // widget count
   }
   userprefs.endGroup();  // Widgets
+  ///////////////////// Save connections /////////////////////////
+  Event::Object all_connections_event(
+      Event::Type::IO_ALL_CONNECTIONS_QUERY_EVENT);
+  event_manager->postEvent(&all_connections_event);
+  auto connections = std::any_cast<std::vector<RT::block_connection_t>>(
+      all_connections_event.getParam("connections"));
+  plugin_connection id_connection {};
+  userprefs.beginGroup("Connections");
+  int connection_count = 0;
+  for (const auto& conn : connections) {
+    id_connection.src_id = conn.src->getID();
+    id_connection.src_direction = conn.src_port_type;
+    id_connection.src_port = conn.src_port;
+    id_connection.dest_id = conn.dest->getID();
+    id_connection.dest_port = conn.dest_port;
+    userprefs.setValue(QString::number(connection_count++),
+                       QVariant::fromValue(id_connection));
+  }
+  userprefs.endGroup();  // Connections
 }
 
 void MainWindow::loadWidgetSettings(QSettings& userprefs)
 {
+  ///////////////////// Load Widget parameters ////////////////////////
+  std::unordered_map<size_t, IO::Block*> blocks;
   userprefs.beginGroup("Widgets");
   QString plugin_name;
-  std::variant<int64_t, double, uint64_t, std::string> value;
   Widgets::Plugin* plugin_ptr = nullptr;
   std::string event_status;
   for (const auto& plugin_instance_id : userprefs.childGroups()) {
@@ -504,26 +570,35 @@ void MainWindow::loadWidgetSettings(QSettings& userprefs)
     plugin_ptr->loadCustomParameterSettings(userprefs);
     userprefs.endGroup();  // customParams
     userprefs.endGroup();  // plugin_instance_id
+    blocks[plugin_instance_id.toUInt()] = plugin_ptr->getBlock();
   }
-  userprefs.endGroup();
-}
-
-void MainWindow::saveConnectionSettings(QSettings& userprefs)
-{
+  userprefs.endGroup();  // Widgets
+  ///////////////////// Load connections /////////////////////////
+  RT::block_connection_t connection;
+  std::vector<Event::Object> connection_events;
+  plugin_connection id_connection {};
   userprefs.beginGroup("Connections");
-  userprefs.endGroup();
-}
-
-void MainWindow::loadConnectionSettings(QSettings& userprefs)
-{
-  Event::Object all_connections_event(Event::Type::IO_CONNECTION_QUERY_EVENT);
-  event_manager->postEvent(&all_connections_event);
-  auto connections = std::any_cast<std::vector<RT::block_connection_t>>(
-      all_connections_event.getParam("connections"));
-  std::unordered_map<size_t, std::vector<RT::block_connection_t>> block_connections;
-  for(const auto& conn : connections){
-    block_connections[conn.src->getID()].push_back(conn);
+  for (const auto& conn_count : userprefs.childGroups()) {
+    id_connection = userprefs.value(conn_count).value<plugin_connection>();
+    if (blocks.find(id_connection.src_id) == blocks.end()
+        || blocks.find(id_connection.dest_id) == blocks.end())
+    {
+      ERROR_MSG(
+          "MainWindow::loadWidgetSettings : invalid connection found. "
+          "Skipping");
+      continue;
+    }
+    connection.src = blocks[id_connection.src_id];
+    connection.src_port_type =
+        static_cast<IO::flags_t>(id_connection.src_direction);
+    connection.src_port = id_connection.src_port;
+    connection.dest = blocks[id_connection.dest_id];
+    connection.dest_port = id_connection.dest_port;
+    connection_events.emplace_back(Event::Type::IO_LINK_INSERT_EVENT);
+    connection_events.back().setParam("connection", std::any(connection));
   }
+  userprefs.endGroup();  // Connections
+  event_manager->postEvent(connection_events);
 }
 
 void MainWindow::loadSettings()
@@ -552,8 +627,6 @@ void MainWindow::loadSettings()
   this->loadDAQSettings(userprefs);
 
   this->loadWidgetSettings(userprefs);
-
-  this->loadConnectionSettings(userprefs);
 
   userprefs.endGroup();  // profile
   userprefs.endGroup();  // workspaces
@@ -588,8 +661,6 @@ void MainWindow::saveSettings()
   this->saveDAQSettings(userprefs);
 
   this->saveWidgetSettings(userprefs);
-
-  this->saveConnectionSettings(userprefs);
 
   userprefs.endGroup();  // profile
   userprefs.endGroup();  // Workspaces
