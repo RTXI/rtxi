@@ -578,7 +578,7 @@ void MainWindow::loadWidgetSettings(QSettings& userprefs)
   std::vector<Event::Object> connection_events;
   plugin_connection id_connection {};
   userprefs.beginGroup("Connections");
-  for (const auto& conn_count : userprefs.childGroups()) {
+  for (const auto& conn_count : userprefs.childKeys()) {
     id_connection = userprefs.value(conn_count).value<plugin_connection>();
     if (blocks.find(id_connection.src_id) == blocks.end()
         || blocks.find(id_connection.dest_id) == blocks.end())
