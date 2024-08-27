@@ -99,13 +99,10 @@ std::string Event::type_to_string(Event::Type event_type)
       return_string = "WIDGET : plugin remove";
       break;
     case Event::Type::DAQ_DEVICE_QUERY_EVENT:
-      return_string = "MANAGER : daq query event";
+      return_string = "WORKSPACE : daq query event";
       break;
-    case Event::Type::SETTINGS_OBJECT_INSERT_EVENT:
-      return_string = "SYSTEM : settings object insert";
-      break;
-    case Event::Type::SETTINGS_OBJECT_REMOVE_EVENT:
-      return_string = "SYSTEM : settings object remove";
+    case Event::Type::PLUGIN_LIST_QUERY_EVENT:
+      return_string = "WORKSPACE : plugin list request event";
       break;
     case Event::Type::OPEN_FILE_EVENT:
       return_string = "SYSTEM : open file";

@@ -29,7 +29,9 @@ Q_DECLARE_METATYPE(IO::flags_t)
 Q_DECLARE_METATYPE(IO::endpoint)
 Q_DECLARE_METATYPE(RT::block_connection_t)
 Q_DECLARE_METATYPE(RT::State::state_t)
+Q_DECLARE_METATYPE(std::string)
 
+class QSettings;
 /*!
  * Contains all the classes and structures relevant to Widgets
  */
@@ -500,7 +502,7 @@ public:
    *
    * \return ID of the widget assigned by the realtime system
    */
-  size_t getID();
+  size_t getID() const;
 
   /*!
    * Attaches a component to this plugin
@@ -654,7 +656,7 @@ public:
    * \return A vector of Widgets::Variable::Info representing parameter
    * information
    */
-  virtual std::vector<Widgets::Variable::Info> getComponentParametersInfo();
+  std::vector<Widgets::Variable::Info> getComponentParametersInfo() const;
 
   /*!
    * In some cases we need to know whether a component has been attached
@@ -662,7 +664,54 @@ public:
    *
    * \return True if there is an attached component, False otherwise.
    */
-  bool hasComponent() { return plugin_component != nullptr; }
+  bool hasComponent() const { return plugin_component != nullptr; }
+
+  /*!
+   * Function called my the main window when loading settings to automatically
+   * retrieve parameter values in widget.
+   *
+   * \param userprefs A reference to QSettings object where the settings will be
+   *                  dumped
+   */
+  void loadParameterSettings(QSettings& userprefs);
+
+  /*!
+   * Pass in a QSetting object for the plugin to load custom values loaded by
+   * the custom parameters.
+   *
+   * \param userprefs a standard QSettings object that the plugin can use to
+   *                  dump all of the settings as key/value pairs where the key
+   *                  is the name of the parameter and the value is the actual
+   *                  parameter value to store in the QSetting
+   */
+  virtual void loadCustomParameterSettings(QSettings& userprefs);
+
+  /*!
+   * Function called my the main window when saving settings to automatically
+   * store parameter from widget.
+   *
+   * \param userprefs A reference to QSettings object where the settings will be
+   *                  dumped
+   */
+  void saveParameterSettings(QSettings& userprefs) const;
+
+  /*!
+   * Pass in a QSetting object for the plugin to save custom parameters
+   *
+   *
+   * \param userprefs a standard QSettings object that the plugin can use to
+   *                  dump all of the settings as key/value pairs where the key
+   *                  is the name of the parameter and the value is the actual
+   *                  parameter value to store in the QSetting
+   */
+  virtual void saveCustomParameterSettings(QSettings& userprefs) const;
+
+  /*!
+   * get a pointer to the internal block of the plugin
+   *
+   * \return IO::Block pointer to the internal structure
+   */
+  IO::Block* getBlock() { return plugin_component.get(); }
 
 protected:
   Widgets::Component* getComponent();
