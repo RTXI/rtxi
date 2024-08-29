@@ -7,10 +7,10 @@
 
 #include <vector>
 
-namespace rtxi::dsp{
 class GenericWindow
 {
 public:
+  // constructors
 
   explicit GenericWindow(std::vector<double> half_lag_window);
   void Initialize(std::vector<double> half_lag_window);
@@ -24,5 +24,5 @@ public:
 private:
   std::vector<double> window;
 };
-}  // namespace rtxi::dsp
+
 #endif

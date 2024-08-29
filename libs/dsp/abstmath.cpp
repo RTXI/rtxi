@@ -5,33 +5,35 @@
 //  Mathematical Operations for Abstract Algebra
 //
 
-#include "abstmath.h"
-#include "misdefs.h"
-#include <fstream>
 #include <iostream>
+
+#include "abstmath.hpp"
+
 #include <math.h>
-#include <stdlib.h>
 
 //======================================================
 //  constructor
 
 PrimeFactorSet::PrimeFactorSet(int num_factors, int* factors)
 {
-  int n1, n2, match;
-  int distinct_factor_tally;
-  Num_Factors = num_factors;
-  Num_Distinct_Factors = 1;
+  int n1 = 0;
+  int n2 = 0;
+  int match = 0;
+  int distinct_factor_tally = 0;
+
   for (n1 = 1; n1 < num_factors; n1++) {
     match = 0;
     for (n2 = 0; n2 < n1; n2++) {
       // compare factor n1 to all other factors that
       // come before it in the vector factors[].
       // if no match, increment count of distinct factors
-      if (factors[n1] == factors[n2])
+      if (factors[n1] == factors[n2]) {
         match = 1;
+      }
     }
-    if (match == 1)
+    if (match == 1) {
       continue;
+    }
     Num_Distinct_Factors++;
   }
   Factor_Vector = new int[Num_Distinct_Factors];
@@ -88,8 +90,7 @@ OrderedFactorSet::~OrderedFactorSet(void)
   delete[] Factor_Vector;
 }
 
-PrimeFactorSet*
-PrimeFactorization(int number)
+PrimeFactorSet* PrimeFactorization(int number)
 {
   int num_factors;
   int first_n, geom_middle;

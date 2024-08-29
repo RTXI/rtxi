@@ -2,12 +2,9 @@
 //  File = con_hamm.cpp
 //
 
-#include <iostream>
 #include <math.h>
-#include "typedefs.h"
-#include "con_hamm.h"
-#include "misdefs.h"
-#include "sinc.h"
+#include "con_hamm.hpp"
+#include "sinc.hpp"
 
 using namespace std;
 

@@ -4,30 +4,37 @@
 #ifndef _ABSTMATH_H_
 #define _ABSTMATH_H_
 
+#include <vector>
+
 class PrimeFactorSet
 {
 public:
+  PrimeFactorSet(const PrimeFactorSet&) = default;
+  PrimeFactorSet(PrimeFactorSet&&) = delete;
+  PrimeFactorSet& operator=(const PrimeFactorSet&) = default;
+  PrimeFactorSet& operator=(PrimeFactorSet&&) = delete;
   // constructor
   PrimeFactorSet(int num_factors, int* factors);
-  ~PrimeFactorSet(void);
+  ~PrimeFactorSet();
 
 private:
-  int Num_Factors;
-  int Num_Distinct_Factors;
-  int* Factor_Vector;
-  int* Factor_Multiplicity;
+  std::vector<int> Factor_Vector;
+  std::vector<int> Factor_Multiplicity;
 };
 
 class OrderedFactorSet
 {
 public:
+  OrderedFactorSet(const OrderedFactorSet&) = default;
+  OrderedFactorSet(OrderedFactorSet&&) = delete;
+  OrderedFactorSet& operator=(const OrderedFactorSet&) = default;
+  OrderedFactorSet& operator=(OrderedFactorSet&&) = delete;
   // constructor
   OrderedFactorSet(int num_factors, int* factors);
-  ~OrderedFactorSet(void);
+  ~OrderedFactorSet();
 
 private:
-  int Num_Factors;
-  int* Factor_Vector;
+  std::vector<int> Factor_Vector;
 };
 
 PrimeFactorSet* PrimeFactorization(int number);
