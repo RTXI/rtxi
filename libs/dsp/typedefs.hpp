@@ -11,4 +11,5 @@ enum typesOfResponse
 };
 typedef enum typesOfResponse BAND_CONFIG_TYPE;
 
+using complex = struct { double dat[2]; };
 #endif // _TYPEDEFS_H_

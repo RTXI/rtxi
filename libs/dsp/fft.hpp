@@ -4,14 +4,13 @@
 #ifndef _FFT_H_
 #define _FFT_H_
 
-#include "complex.h"
+#include <vector>
+#include <complex>
 
-void fft(complex* input, complex* output, int size);
+void fft(std::vector<std::complex<double>>& input,
+         std::vector<std::complex<double>>& output);
+void ifft(std::vector<std::complex<double>>& input,
+          std::vector<std::complex<double>>& output);
+void fft(std::vector<std::complex<double>>& signal);
 
-void ifft(complex* input, complex* output, int size);
-
-void fft(complex* input, complex* output, int num_samps, int fft_len);
-
-void fft(complex* signal, int size);
-
-#endif // _FFT_H_
+#endif  // _FFT_H_

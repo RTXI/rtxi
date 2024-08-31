@@ -2,10 +2,9 @@
 //  File = ar_src.cpp
 //
 
-#include <fstream>
 #include <stdlib.h>
-#include "ar_src.h"
-#include "sig_type.h"
+#include "ar_src.hpp"
+#include "sig_type.hpp"
 
 //======================================================
 //  ArSource - subclass of ArProcess for the case where

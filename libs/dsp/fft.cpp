@@ -1,54 +1,56 @@
-//
-//  File = fft.cpp
-//
 
-#include <fstream>
-#include <iostream>
 
-#include "complex.h"
-#include "dit_sino.h"
-#include "fft.h"
+#include "fft.hpp"
 
-void
-ifft(complex* sample_spectrum, complex* time_signal, int num_samps)
+#include <gsl/gsl_complex.h>
+#include <gsl/gsl_fft.h>
+#include <gsl/gsl_fft_complex.h>
+
+#include "debug.hpp"
+
+void ifft(std::vector<std::complex<double>>& input,
+          std::vector<std::complex<double>>& output)
 {
-  int i;
-  for (i = 0; i < num_samps; i++) {
-    time_signal[i] = sample_spectrum[i];
+  if (input.size() != output.size()) {
+    ERROR_MSG("dsp::ifft : input and output arrays do not match!");
+    return;
   }
-  IfftDitSino(time_signal, num_samps);
-  return;
+  std::copy(input.begin(), input.end(), output.begin());
+  int err =
+      gsl_fft_complex_radix2_transform(reinterpret_cast<double*>(output.data()),
+                                       1,
+                                       output.size(),
+                                       gsl_fft_backward);
+  if (err != 0) {
+    ERROR_MSG("dsp::fft : Unable to perform inverse transform");
+  }
 }
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-void
-fft(complex* time_signal, complex* sample_spectrum, int num_samps)
+
+void fft(std::vector<std::complex<double>>& input,
+         std::vector<std::complex<double>>& output)
 {
-  int i;
-  for (i = 0; i < num_samps; i++) {
-    sample_spectrum[i] = time_signal[i];
+  if (input.size() > output.size()) {
+    ERROR_MSG(
+        "dsp::ifft : input buffer size must be smaller or equal to the output "
+        "buffer size");
+    return;
   }
-  FftDitSino(sample_spectrum, num_samps);
-  return;
+  std::copy(input.begin(), input.end(), output.begin());
+  int err =
+      gsl_fft_complex_radix2_transform(reinterpret_cast<double*>(output.data()),
+                                       1,
+                                       output.size(),
+                                       gsl_fft_forward);
+  if (err != 0) {
+    ERROR_MSG("dsp::fft : Unable to perform forward transform");
+  }
 }
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-void
-fft(complex* time_signal, complex* sample_spectrum, int num_samps, int fft_len)
+
+void fft(std::vector<std::complex<double>>& signal)
 {
-  int i;
-  for (i = 0; i < num_samps; i++) {
-    sample_spectrum[i] = time_signal[i];
+  int err = gsl_fft_complex_radix2_forward(
+      reinterpret_cast<double*>(signal.data()), 1, signal.size());
+  if (err != 0) {
+    ERROR_MSG("dsp::fft : Unable to perform forward transform");
   }
-  for (i = num_samps; i < fft_len; i++) {
-    sample_spectrum[i] = complex(0.0, 0.0);
-  }
-  FftDitSino(sample_spectrum, fft_len);
-  return;
 }
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-void
-fft(complex* signal, int num_samps)
-{
-  FftDitSino(signal, num_samps);
-  return;
-}
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

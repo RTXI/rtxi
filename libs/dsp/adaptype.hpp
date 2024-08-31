@@ -6,25 +6,25 @@
 #define _ADAPTYPE_H_
 
 typedef enum {
-  _UNKNOWN_SIG = -1,
-  _AR_PROC,
-  _SINES_AWGN,
-  _CPFSK
+  UNKNOWN_SIG = -1,
+  AR_PROC,
+  SINES_AWGN,
+  CPFSK
 } TEST_SIGNAL_KIND_T;
 
 typedef enum {
-  _UNKNOWN_EM = -1,
-  _BURG_EM,
-  _YULE_WALKER_EM,
-  _MOD_YULE_WALKER_EM
+  UNKNOWN_EM = -1,
+  BURG_EM,
+  YULE_WALKER_EM,
+  MOD_YULE_WALKER_EM
 } ESTIM_METHOD_T;
 
 typedef enum {
-  _UNKNOWN_FILT = -1,
-  _LMS_FILT,
-  _RLS_FILT,
-  _SD_FILT_PRACT,
-  _SD_FILT_THEORY
+  UNKNOWN_FILT = -1,
+  LMS_FILT,
+  RLS_FILT,
+  SD_FILT_PRACT,
+  SD_FILT_THEORY
 } ADAPT_FILTER_KIND_T;
 
 #endif

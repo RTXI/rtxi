@@ -5,7 +5,7 @@
 #ifndef _AR_PROC_H_
 #define _AR_PROC_H_
 
-#include "complex.h"
+#include <complex>
 
 template <class T>
 class ArProcess

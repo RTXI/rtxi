@@ -5,7 +5,7 @@
 #ifndef _AR_SRC_H_
 #define _AR_SRC_H_
 
-#include "ar_proc.h"
+#include "ar_proc.hpp"
 
 template <class T>
 class ArSource : public ArProcess<T>
