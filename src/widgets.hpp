@@ -648,6 +648,11 @@ public:
    */
   void setComponentState(RT::State::state_t state);
 
+  /*!
+   * Obtain the state of the components attached to the plugin
+   *
+   * \return An RT::State::state_t value representing the current state of the component
+   */
   RT::State::state_t getComponentState();
 
   /*!
