@@ -2,49 +2,37 @@
 //  File = bilinear.cpp
 //
 
-#include "bilinear.h"
-#include "complex.h"
-#include "misdefs.h"
-#include "typedefs.h"
-#include <fstream>
-#include <iostream>
-#include <stdlib.h>
-#ifdef _DEBUG
-extern std::ofstream DebugFile;
-#endif
+#include <cmath>
 
-//====================================================
-//
-//----------------------------------------------------
-IirFilterDesign*
-BilinearTransf(FilterTransFunc* analog_filter, double sampling_interval)
+#include "bilinear.hpp"
+
+IirFilterDesign BilinearTransf(const FilterTransFunc& analog_filter,
+                               double sampling_interval)
 
 {
-  int max_poles;
-  int num_poles, num_zeros;
-  int j, m, n;
-  int max_coeff, num_numer_coeff;
-  double h_const, h_sub_zero, denom_mu_zero;
-  complex *pole, *zero;
-  complex* mu;
-  complex alpha;
-  complex beta;
-  complex gamma;
-  complex delta;
-  complex eta;
-  complex work;
-  complex c_two;
-  double *a, *b;
-  IirFilterDesign* iir_filter;
+  size_t max_poles = 0;
+  size_t num_poles = 0;
+  size_t num_zeros = 0;
+  size_t max_coeff = 0;
+  size_t num_numer_coeff = 0;
+  double h_const = NAN;
+  double h_sub_zero = NAN;
+  double denom_mu_zero = NAN;
+  std::vector<std::complex<double>> pole;
+  std::vector<std::complex<double>> zero;
+  std::vector<std::complex<double>> mu;
+  std::complex<double> alpha;
+  std::complex<double> beta;
+  std::complex<double> gamma;
+  std::complex<double> delta;
+  std::complex<double> work;
+  std::complex<double> c_two;
+  std::vector<double> a;
+  std::vector<double> b;
 
-  pole = analog_filter->GetPoles(&num_poles);
-  zero = analog_filter->GetZeros(&num_zeros);
-  h_sub_zero = analog_filter->GetHSubZero();
-#ifdef _DEBUG
-  DebugFile << "num analog poles = " << num_poles << std::endl;
-  DebugFile << "num analog zeros = " << num_zeros << std::endl;
-#endif
-
+  pole = analog_filter.GetPoles();
+  zero = analog_filter.GetZeros();
+  h_sub_zero = static_cast<double>(analog_filter.GetHSubZero());
   if (num_poles > num_zeros) {
     max_poles = num_poles;
   } else {
@@ -54,118 +42,79 @@ BilinearTransf(FilterTransFunc* analog_filter, double sampling_interval)
   //--------------------------------------------
   // allocate and initialize working storage
 
-  mu = new complex[max_poles + 1];
-  a = new double[max_poles + 1];
-  b = new double[max_poles + 1];
+  mu.resize(max_poles + 1);
+  a.resize(max_poles + 1);
+  b.resize(max_poles + 1);
 
-  for (j = 0; j <= max_poles; j++) {
-    mu[j] = complex(0.0, 0.0);
-    a[j] = 0.0;
-    b[j] = 0.0;
+  for (size_t j = 0; j <= max_poles; j++) {
+    mu.at(j) = std::complex {0.0, 0.0};
+    a.at(j) = 0.0;
+    b.at(j) = 0.0;
   }
 
   //-------------------------------------------
   // compute constant gain factor
-
   h_const = 1.0;
-  work = complex(1.0, 0.0);
-  c_two = complex(2.0, 0.0);
+  work = std::complex {1.0, 0.0};
+  c_two = std::complex {2.0, 0.0};
 
-  for (n = 1; n <= num_poles; n++) {
-    work = work * (c_two - (sampling_interval * pole[n]));
-#ifdef _DEBUG
-    DebugFile << "work = " << work << std::endl;
-#endif
+  for (size_t n = 1; n <= num_poles; n++) {
+    work = work * (c_two - (sampling_interval * pole.at(n)));
     h_const = h_const * sampling_interval;
   }
-#ifdef _DEBUG
-  DebugFile << "T**2 = " << h_const << std::endl;
-#endif
   h_const = h_sub_zero * h_const / real(work);
-
-#ifdef _DEBUG
-  DebugFile << "in BilinearTransf, h_const = " << h_const << std::endl;
-  DebugFile << "work = " << work << std::endl;
-#endif
 
   //--------------------------------------------------
   // compute denominator coefficients
+  mu.at(0) = std::complex<double> {1.0, 0.0};
 
-  mu[0] = complex(1.0, 0.0);
-
-  for (n = 1; n <= num_poles; n++) {
-#ifdef _DEBUG
-    DebugFile << "in BilinearTransf, pole [" << n << "] = " << pole[n]
-              << std::endl;
-#endif
-
-    gamma = complex((2.0 / sampling_interval), 0.0) - pole[n];
-    delta = complex((-2.0 / sampling_interval), 0.0) - pole[n];
-
-#ifdef _DEBUG
-    DebugFile << "gamma = " << gamma << std::endl;
-    DebugFile << "delta = " << delta << std::endl;
-#endif
-
-    for (j = n; j >= 1; j--) {
-      mu[j] = gamma * mu[j] + (delta * mu[j - 1]);
+  for (size_t n = 1; n <= num_poles; n++) {
+    gamma = std::complex<double> {(2.0 / sampling_interval), 0.0} - pole.at(n);
+    delta = std::complex<double> {(-2.0 / sampling_interval), 0.0} - pole.at(n);
+    for (size_t j = n; j >= 1; j--) {
+      mu.at(j) = gamma * mu.at(j) + (delta * mu.at(j - 1));
     }
-    mu[0] = gamma * mu[0];
+    mu.at(0) = gamma * mu.at(0);
   }
-#ifdef _DEBUG
-  DebugFile << "for denom, mu[0] = " << mu[0] << std::endl;
-#endif
-  denom_mu_zero = real(mu[0]);
-  for (j = 1; j <= num_poles; j++) {
-    a[j] = -1.0 * real(mu[j]) / denom_mu_zero;
-#ifdef _DEBUG
-    DebugFile << "a[" << j << "] = " << a[j] << std::endl;
-    DebugFile << "imag(mu[" << j << "]) = " << imag(mu[j]) << std::endl;
-#endif
+
+  denom_mu_zero = real(mu.at(0));
+  for (size_t j = 1; j <= num_poles; j++) {
+    a.at(j) = -1.0 * real(mu.at(j)) / denom_mu_zero;
   }
+
   //-----------------------------------------------------
   //  compute numerator coeffcients
-
-  mu[0] = complex(1.0, 0.0);
-  for (n = 1; n <= max_poles; n++) {
-    mu[n] = complex(0.0, 0.0);
+  mu.at(0) = std::complex<double> {1.0, 0.0};
+  for (size_t n = 1; n <= max_poles; n++) {
+    mu.at(n) = std::complex<double> {0.0, 0.0};
   }
 
   max_coeff = 0;
 
   //- - - - - - - - - - - - - - - - - - - - -
   //  compute (1+z**(-1)) ** (N-M)
-
-  for (m = 1; m <= (num_poles - num_zeros); m++) {
+  for (size_t m = 1; m <= (num_poles - num_zeros); m++) {
     max_coeff++;
-    for (j = max_coeff; j >= 1; j--) {
-      mu[j] = mu[j] + mu[j - 1];
+    for (size_t j = max_coeff; j >= 1; j--) {
+      mu.at(j) = mu.at(j) + mu.at(j - 1);
     }
   }
-  for (m = 1; m <= num_zeros; m++) {
+  for (size_t m = 1; m <= num_zeros; m++) {
     max_coeff++;
-#ifdef _DEBUG
-    DebugFile << "zero[" << m << "] = " << zero[m] << std::endl;
-#endif
-    alpha = complex((2.0 / sampling_interval), 0.0) - zero[m];
-    beta = complex((-2.0 / sampling_interval), 0.0) - zero[m];
+    alpha = std::complex<double>((2.0 / sampling_interval), 0.0) - zero.at(m);
+    beta = std::complex<double>((-2.0 / sampling_interval), 0.0) - zero.at(m);
 
-    for (j = max_coeff; j >= 1; j--) {
-      mu[j] = alpha * mu[j] + (beta * mu[j - 1]);
+    for (size_t j = max_coeff; j >= 1; j--) {
+      mu.at(j) = alpha * mu.at(j) + (beta * mu.at(j - 1));
     }
-    mu[0] = alpha * mu[0];
+    mu.at(0) = alpha * mu.at(0);
   }
   num_numer_coeff = max_coeff + 1;
-  for (j = 0; j < num_numer_coeff; j++) {
-    b[j] = h_sub_zero * real(mu[j]) / denom_mu_zero;
-#ifdef _DEBUG
-    DebugFile << "b[" << j << "] = " << b[j] << std::endl;
-    DebugFile << "imag(mu[" << j << "]) = " << imag(mu[j]) << std::endl;
-#endif
+  for (size_t j = 0; j < num_numer_coeff; j++) {
+    b.at(j) = h_sub_zero * real(mu.at(j)) / denom_mu_zero;
   }
 
-  delete[] mu;
-  iir_filter = new IirFilterDesign(num_numer_coeff, num_poles, b, a);
-  iir_filter->SetSamplingInterval(sampling_interval);
-  return (iir_filter);
+  IirFilterDesign iir_filter(num_numer_coeff, num_poles, b, a);
+  iir_filter.SetSamplingInterval(sampling_interval);
+  return iir_filter;
 }

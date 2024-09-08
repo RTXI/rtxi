@@ -4,26 +4,21 @@
 #ifndef _POLY_H_
 #define _POLY_H_
 
-#include "cmpxpoly.h"
-#include <fstream>
+#include "cmpxpoly.hpp"
+
+// TODO: Figure out if Polynomial class is redundant. Seems like it does everything a
+// complex polynomial class does.
+
+// TODO: Define multiplication, division, summation, and subtraction overloads for
+// Polynomial class
 
 class Polynomial
 {
 public:
-  //  default constructor
-  Polynomial();
-
-  //  copy constructor
-  Polynomial(const Polynomial& original);
-
+  Polynomial()=default;
+  Polynomial(std::initializer_list<double> coefficients);
   //  conversion constructor
-  Polynomial(const CmplxPolynomial& original);
-
-  // constructor for initializing a binomial
-  Polynomial(const double coeff_1, const double coeff_0);
-
-  // assignment operator
-  Polynomial& operator=(const Polynomial& right);
+  explicit Polynomial(const CmplxPolynomial& original);
 
   //  multiply assign operator
   Polynomial& operator*=(const Polynomial& right);
@@ -31,17 +26,13 @@ public:
   //  divide assign operator
   Polynomial& operator/=(const Polynomial& right);
 
-  // dump polynomial to an output stream
-  void DumpToStream(std::ofstream* output_stream);
-
   // get degree of polynomial
-  int GetDegree(void);
+  int GetDegree() const;
 
   // return specified coefficient
-  double GetCoefficient(int k);
+  double GetCoefficient(size_t k) const;
 
 private:
-  int Degree;
-  double* Coefficient;
+  std::vector<double> Coefficients;
 };
 #endif

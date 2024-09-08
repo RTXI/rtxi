@@ -5,29 +5,16 @@
 #ifndef _IIR_DSGN_H_
 #define _IIR_DSGN_H_
 
-#include <fstream>
-
-#include "typedefs.h"
+#include <cstdint>
+#include <vector>
 
 class IirFilterDesign
 {
 public:
-  //---------------------
-  // default constructor
-
-  IirFilterDesign();
-
-  //----------------------------
-  // constructor that provides
-  // interactive initialization
-
-  IirFilterDesign(std::istream& uin, std::ostream& uout);
-
   //-------------------------------------
   // constructor that allocates arrays
   // to hold coefficients
-
-  IirFilterDesign(int num_numer_coeffs, int num_denom_coeffs);
+  IirFilterDesign(size_t num_numer_coeffs, size_t num_denom_coeffs);
 
   //-------------------------------------
   // constructor that allocates arrays of
@@ -36,61 +23,49 @@ public:
   // these arrays to values contained in
   // input arrays *numer_coeffs and
   // *denom_coeffs
-
-  IirFilterDesign(int num_numer_coeffs, int num_denom_coeffs,
-                  double* numer_coeffs, double* denom_coeffs);
+  IirFilterDesign(size_t num_numer_coeffs,
+                  size_t num_denom_coeffs,
+                  std::vector<double> numer_coeffs,
+                  std::vector<double> denom_coeffs);
 
   //------------------------------------------
   // allocate coefficient array *Imp_Resp_Coeff
   // after default constructor has been used
-
-  void Initialize(int num_numer_coeffs, int num_denom_coeffs);
+  void Initialize(size_t num_numer_coeffs, size_t num_denom_coeffs);
 
   //-------------------------------------------
   //  method to quantize coefficients
-
-  void QuantizeCoefficients(long quant_factor, logical rounding_enabled);
+  void QuantizeCoefficients(int quant_factor, bool rounding_enabled);
 
   //-------------------------------------------
   //  method to scale coefficients
-
   void ScaleCoefficients(double scale_factor);
 
   //----------------------------------------
   // copy coefficients from input array
   // *coeff into array *Imp_Resp_Coeff
-
-  void CopyCoefficients(double* numer_coeff, double* denom_coeff);
-
-  //----------------------------------------------
-  // dump coefficient set to output_stream
-
-  void DumpCoefficients(std::ofstream* output_stream);
+  void CopyCoefficients(std::vector<double>& numer_coeff,
+                        std::vector<double>& denom_coeff) const;
 
   //----------------------------------
   // get pointers to coefficient arrays
-
-  double* GetNumerCoefficients(void);
-  double* GetDenomCoefficients(void);
-  void SetDenomCoefficients(int num_coeffs, double* coeffs);
+  std::vector<double> GetNumerCoefficients() const;
+  std::vector<double> GetDenomCoefficients() const;
+  void SetDenomCoefficients(const std::vector<double>& coeffs);
 
   //---------------------------
   // get number of filter coefficients
+  size_t GetNumNumerCoeffs();
+  size_t GetNumDenomCoeffs();
 
-  int GetNumNumerCoeffs(void);
-  int GetNumDenomCoeffs(void);
-
-  double GetSamplingInterval(void);
+  double GetSamplingInterval() const;
   void SetSamplingInterval(double sampling_interval);
 
-protected:
-  int Num_Numer_Coeffs;
-  int Num_Denom_Coeffs;
-
-  double* Numer_Coeffs;
-  double* Denom_Coeffs;
-  double* Orig_Numer_Coeffs;
-  double* Orig_Denom_Coeffs;
+private:
+  std::vector<double> Numer_Coeffs;
+  std::vector<double> Denom_Coeffs;
+  std::vector<double> Orig_Numer_Coeffs;
+  std::vector<double> Orig_Denom_Coeffs;
   double Sampling_Interval;
 };
 

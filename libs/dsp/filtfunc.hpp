@@ -7,70 +7,63 @@
 #ifndef _FILTFUNC_H_
 #define _FILTFUNC_H_
 
-#include "poly.h"
-#include "typedefs.h"
-#include <fstream>
+#include <vector>
+#include <complex>
+#include "poly.hpp"
 
 class FilterTransFunc
 {
 public:
-  FilterTransFunc(void);
+  FilterTransFunc()=default;
+  explicit FilterTransFunc(int order);
 
-  FilterTransFunc(int order);
+  void FilterFrequencyResponse();
 
-  void FilterFrequencyResponse(void);
+  std::vector<std::complex<double>> GetPrototypePoles() const;
 
-  complex* GetPrototypePoles(int* num_poles);
+  std::vector<std::complex<double>> GetPoles() const;
 
-  complex* GetPoles(int* num_poles);
+  std::complex<double> GetPole(size_t pole_indx) const;
 
-  complex GetPole(int pole_indx);
+  std::vector<std::complex<double>> GetPrototypeZeros() const;
 
-  complex* GetPrototypeZeros(int* num_zeros);
+  std::vector<std::complex<double>> GetZeros() const;
 
-  complex* GetZeros(int* num_zeros);
-
-  complex GetZero(int zero_indx);
+  std::complex<double> GetZero(size_t zero_indx);
 
   void LowpassDenorm(double cutoff_freq_hz);
 
-  int GetNumPoles(void);
+  size_t GetNumPoles() const;
 
-  int GetNumZeros(void);
+  size_t GetNumZeros() const;
 
-  float GetHSubZero(void);
+  double GetHSubZero() const;
 
-  void DumpBiquads(std::ofstream* output_stream);
+  void SetHSubZero(double hsub);
 
-  Polynomial GetDenomPoly(void);
+  Polynomial GetDenomPoly() const;
 
-  Polynomial GetNumerPoly(void);
+  Polynomial GetNumerPoly() const;
 
   void FrequencyPrewarp(double sampling_interval);
 
-protected:
-  int Filter_Order;
-  int Num_Denorm_Poles;
-  int Num_Denorm_Zeros;
-  int Degree_Of_Denom;
-  int Degree_Of_Numer;
-  int Num_Prototype_Poles;
-  int Num_Prototype_Zeros;
-  int Num_Biquad_Sects;
-  logical Filter_Is_Denormalized;
-  // double Denorm_Cutoff_Freq_Hz;
-  double Denorm_Cutoff_Freq_Rad;
-  double* A_Biquad_Coef;
-  double* B_Biquad_Coef;
-  double* C_Biquad_Coef;
-  double H_Sub_Zero;
-  complex* Prototype_Pole_Locs;
-  complex* Prototype_Zero_Locs;
-  complex* Denorm_Pole_Locs;
-  complex* Denorm_Zero_Locs;
+  void SetNumerPoly(const Polynomial& poly);
+
+  void SetDenomPoly(const Polynomial& poly);
+private:
   Polynomial Denom_Poly;
   Polynomial Numer_Poly;
-  std::ofstream* Response_File;
+  std::vector<double> A_Biquad_Coef;
+  std::vector<double> B_Biquad_Coef;
+  std::vector<double> C_Biquad_Coef;
+  std::vector<std::complex<double>> prototype_poles;
+  std::vector<std::complex<double>> Prototype_Zero_Locs;
+  std::vector<std::complex<double>> Denorm_Pole_Locs;
+  std::vector<std::complex<double>> Denorm_Zero_Locs;
+  double Denorm_Cutoff_Freq_Rad{};
+  double H_Sub_Zero{};
+  int Filter_Order{};
+  bool Filter_Is_Denormalized{};
 };
 
 #endif

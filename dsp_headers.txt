@@ -1,0 +1,17 @@
+bilinear.h
+buttfunc.h
+ghebfunc.h
+dolph.h
+elipfunc.h
+fft.h
+fir_dsgn.h
+firideal.h
+gen_win.h
+hamming.h
+hann.h
+iir_dsgn.h
+kaiser.h
+lin_dsgn.h
+rectnglr.h
+trianglr.h
+unq_iir.h

@@ -5,64 +5,58 @@
 //  Chebyshev Filter Function
 //
 
-#include "chebfunc.h"
-#include "complex.h"
-#include "misdefs.h"
-#include <math.h>
 
-//======================================================
-//  constructor
+#include "chebfunc.hpp"
 
-ChebyshevTransFunc::ChebyshevTransFunc(int order, double ripple,
-                                       int ripple_bw_norm)
-  : FilterTransFunc(order)
+ChebyshevTransFunc::ChebyshevTransFunc(size_t order,
+                                       double ripple,
+                                       size_t ripple_bw_norm)
+    : FilterTransFunc(order)
 {
-  double x;
-  int k;
-  double epsilon, gamma;
-  double big_r, big_a;
-  double sigma_mult, omega_mult;
-  complex work;
+  double x = NAN;
+  double epsilon = NAN;
+  double gamma = NAN;
+  double big_r = NAN;
+  double big_a = NAN;
+  double sigma_mult = NAN;
+  double omega_mult = NAN;
+  std::complex<double> work;
 
-  Prototype_Pole_Locs = new complex[order + 1];
-  Num_Prototype_Poles = order;
-  Prototype_Zero_Locs = new complex[1];
-  Num_Prototype_Zeros = 0;
+  std::vector<std::complex<double>> prototype_poles(order + 1);
+  std::vector<std::complex<double>> prototype_zero(1);
 
-  epsilon = sqrt(pow(10.0, (double)(ripple / 10.0)) - 1.0);
-  gamma =
-    pow((1 + sqrt(1.0 + epsilon * epsilon)) / epsilon, 1.0 / (double)order);
-  if (ripple_bw_norm) {
+  epsilon = sqrt(pow(10.0, (ripple / 10.0)) - 1.0);
+  gamma = pow((1 + sqrt(1.0 + epsilon * epsilon)) / epsilon,
+              1.0 / static_cast<double>(order));
+  if (ripple_bw_norm != 0U) {
     big_r = 1.0;
   } else {
-    big_a = log((1.0 + sqrt(1.0 - epsilon * epsilon)) / epsilon) / order;
+    big_a = std::log((1.0 + sqrt(1.0 - epsilon * epsilon)) / epsilon) / order;
     big_r = (exp(big_a) + exp(-big_a)) / 2.0;
-    std::cout << "big_r = " << big_r << std::endl;
   }
 
   sigma_mult = ((1.0 / gamma) - gamma) / (2.0 * big_r);
 
   omega_mult = ((1.0 / gamma) + gamma) / (2.0 * big_r);
 
-  for (k = 1; k <= order; k++) {
-    x = PI * ((2 * k) - 1) / (2 * order);
+  for (size_t k = 1; k <= order; k++) {
+    x = M_PI * ((2 * k) - 1) / (2 * order);
 
-    Prototype_Pole_Locs[k] = complex(sigma_mult * sin(x), omega_mult * cos(x));
+    prototype_poles.at(k) =
+        std::complex<double>(sigma_mult * sin(x), omega_mult * cos(x));
   }
   //------------------------------------------------
   //  compute gain factor Ho
 
-  work = complex(1.0, 0.0);
-  for (k = 1; k <= order; k++) {
-    work *= (-Prototype_Pole_Locs[k]);
+  work = std::complex<double> {1.0, 0.0};
+  for (size_t k = 0; k < order; k++) {
+    work *= -prototype_poles.at(k);
   }
 
-  H_Sub_Zero = real(work);
+  SetHSubZero(work.real());
 
-  if (order % 2 == 0) // if order is even
+  if (order % 2 == 0)  // if order is even
   {
-    H_Sub_Zero /= sqrt(1.0 + epsilon * epsilon);
+    SetHSubZero(GetHSubZero() / sqrt(1.0 + epsilon * epsilon));
   }
-
-  return;
-};
+}

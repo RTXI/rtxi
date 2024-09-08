@@ -28,7 +28,7 @@ AllPoleTransFunc::AllPoleTransFunc(istream& uin, ostream& uout)
   uout << "number of poles?" << std::endl;
   uin >> order;
   Filter_Order = order;
-  Prototype_Pole_Locs = new complex[order + 1];
+  prototype_poles = new complex[order + 1];
   Num_Prototype_Poles = order;
   Prototype_Zero_Locs = new complex[1];
   Num_Prototype_Zeros = 0;
@@ -47,8 +47,8 @@ AllPoleTransFunc::AllPoleTransFunc(istream& uin, ostream& uout)
       uin >> real_part;
       uout << "pos imag part of pole pair " << k << "?" << std::endl;
       uin >> imag_part;
-      Prototype_Pole_Locs[k] = complex(real_part, imag_part);
-      Prototype_Pole_Locs[order + 1 - k] = complex(real_part, -imag_part);
+      prototype_poles[k] = complex(real_part, imag_part);
+      prototype_poles[order + 1 - k] = complex(real_part, -imag_part);
     }
   } else { // order is odd
     uout << "one pole will be real" << std::endl;
@@ -60,15 +60,15 @@ AllPoleTransFunc::AllPoleTransFunc(istream& uin, ostream& uout)
          << std::endl;
     uout << "\nenter value for real pole" << std::endl;
     uin >> real_part;
-    Prototype_Pole_Locs[(order + 1) / 2] = complex(real_part, 0.0);
+    prototype_poles[(order + 1) / 2] = complex(real_part, 0.0);
 
     for (k = 1; k <= ((order - 1) / 2); k++) {
       uout << "real part of pole pair " << k << "?" << std::endl;
       uin >> real_part;
       uout << "pos imag part of pole pair " << k << "?" << std::endl;
       uin >> imag_part;
-      Prototype_Pole_Locs[k] = complex(real_part, imag_part);
-      Prototype_Pole_Locs[order + 1 - k] = complex(real_part, -imag_part);
+      prototype_poles[k] = complex(real_part, imag_part);
+      prototype_poles[order + 1 - k] = complex(real_part, -imag_part);
     }
   }
   return;

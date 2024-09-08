@@ -5,84 +5,73 @@
 //  Laguerre method for finding polynomial roots
 //
 
-#include "laguerre.h"
-#include "complex.h"
-#include <fstream>
-#include <iostream>
-#include <math.h>
-#include <stdlib.h>
+#include "laguerre.hpp"
 
-#ifdef _DEBUG
-extern std::ofstream DebugFile;
-#endif
+#include <cmath>
 
-int
-LaguerreMethod(CmplxPolynomial* poly, complex* root_ptr, double epsilon,
-               double epsilon2, int max_iter)
+using complex_v = std::complex<double>;
+int LaguerreMethod(const std::vector<std::complex<double>>& coeff,
+                   std::complex<double>& root,
+                   double epsilon,
+                   double epsilon2,
+                   int max_iter)
 {
-  int iter, j, order;
-  complex p_eval, p_prime, p_double_prime;
-  complex root, f, f_sqrd, g, radical;
-  complex f_plus_rad, f_minus_rad, delta_root;
-  double old_delta_mag, root_mag, error;
-  complex* coeff;
-  order = poly->GetDegree();
-  coeff = new complex[order + 1];
-  poly->CopyCoeffs(coeff);
-  root = *root_ptr;
+  complex_v p_eval;
+  complex_v p_prime;
+  complex_v p_double_prime;
+  complex_v f;
+  complex_v f_sqrd;
+  complex_v g;
+  complex_v radical;
+  complex_v f_plus_rad;
+  complex_v f_minus_rad;
+  complex_v delta_root;
+  double old_delta_mag = NAN;
+  double root_mag = NAN;
+  double error = NAN;
   old_delta_mag = 1000.0;
+  const auto order = coeff.size();
 
-  for (iter = 1; iter <= max_iter; iter++) {
-    p_double_prime = complex(0.0, 0.0);
-    p_prime = complex(0.0, 0.0);
-    p_eval = coeff[order];
-    error = mag(p_eval);
-    root_mag = mag(root);
+  for (size_t iter = 1; iter <= max_iter; iter++) {
+    p_double_prime = complex_v(0.0, 0.0);
+    p_prime = complex_v(0.0, 0.0);
+    p_eval = coeff.back();
+    error = std::abs(p_eval);
+    root_mag = std::abs(root);
 
-    for (j = order - 1; j >= 0; j--) {
+    for (auto j = coeff.size() - 1; j >= 0; j--) {
       p_double_prime = p_prime + root * p_double_prime;
       p_prime = p_eval + root * p_prime;
-      p_eval = coeff[j] + root * p_eval;
-      error = mag(p_eval) + root_mag * error;
+      p_eval = coeff.at(j) + root * p_eval;
+      error = std::abs(p_eval) + root_mag * error;
     }
     error = epsilon2 * error;
     p_double_prime = 2.0 * p_double_prime;
 
-    if (mag(p_eval) < error) {
-      std::cout << "mag(p_eval) = " << mag(p_eval) << "  error = " << error
-                << std::endl;
-      *root_ptr = root;
-      delete[] coeff;
+    if (std::abs(p_eval) < error) {
       return (1);
     }
     f = p_prime / p_eval;
     f_sqrd = f * f;
     g = f_sqrd - p_double_prime / p_eval;
-    radical = (order - 1) * (order * g - f_sqrd);
+    radical = (order - 1) * ((g * order) - f_sqrd);
     radical = sqrt(radical);
     f_plus_rad = f + radical;
     f_minus_rad = f - radical;
-    if (mag(f_plus_rad) > mag(f_minus_rad)) {
-      delta_root = complex(double(order), 0.0) / f_plus_rad;
+    if (std::abs(f_plus_rad) > std::abs(f_minus_rad)) {
+      delta_root = complex_v(static_cast<double>(order), 0.0) / f_plus_rad;
     } else {
-      delta_root = complex(double(order), 0.0) / f_minus_rad;
+      delta_root = complex_v(static_cast<double>(order), 0.0) / f_minus_rad;
     }
     root = root - delta_root;
-    if ((iter > 6) && (mag(delta_root) > old_delta_mag)) {
-      *root_ptr = root;
-      delete[] coeff;
-      return (2);
+    if ((iter > 6) && (std::abs(delta_root) > old_delta_mag)) {
+      return 2;
     }
-    if (mag(delta_root) < (epsilon * mag(root))) {
-      *root_ptr = root;
-      delete[] coeff;
-      return (3);
+    if (std::abs(delta_root) < (epsilon * std::abs(root))) {
+      return 3;
     }
-    old_delta_mag = mag(delta_root);
+    old_delta_mag = std::abs(delta_root);
   }
-#ifdef _DEBUG
-  DebugFile << "Laguerre method failed to converge" << std::endl;
-#endif
-  delete[] coeff;
-  return (-1);
+
+  return -1;
 }

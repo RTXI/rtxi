@@ -5,24 +5,17 @@
 //  Elliptical Filter Function
 //
 
-#include "elipfunc.h"
-#include "complex.h"
-#include "misdefs.h"
-#include <math.h>
-#include <stdlib.h>
-#ifdef _DEBUG
-extern std::ofstream DebugFile;
-#endif
+#include "elipfunc.hpp"
 
-//======================================================
-//  constructor
+#include "debug.hpp"
 
-EllipticalTransFunc::EllipticalTransFunc(int order, double passband_ripple,
+EllipticalTransFunc::EllipticalTransFunc(int order,
+                                         double passband_ripple,
                                          double stopband_ripple,
                                          double passband_edge,
                                          double stopband_edge,
                                          int upper_summation_limit)
-  : FilterTransFunc(order)
+    : FilterTransFunc(order)
 {
   int m;
   int min_order;
@@ -38,7 +31,7 @@ EllipticalTransFunc::EllipticalTransFunc(int order, double passband_ripple,
   double mu;
   int i, i_mirror, r;
   double aa, bb, cc;
-  complex cmplx_work, work2;
+  std::complex<double> cmplx_work, work2;
 
   //------------------------------------
   // Check viability of parameter set
@@ -53,30 +46,29 @@ EllipticalTransFunc::EllipticalTransFunc(int order, double passband_ripple,
   // modular_const = u + 2u**5 + 15u**9 + 150u**13
 
   modular_const =
-    u * (1. + (2 * u * u4 * (1. + (7.5 * u4 * (1 + (10. * u4))))));
+      u * (1. + (2 * u * u4 * (1. + (7.5 * u4 * (1 + (10. * u4))))));
 
-  discrim_factor = (pow(10.0, stopband_ripple / 10.0) - 1.0) /
-                   (pow(10.0, passband_ripple / 10.0) - 1.0);
+  discrim_factor = (pow(10.0, stopband_ripple / 10.0) - 1.0)
+      / (pow(10.0, passband_ripple / 10.0) - 1.0);
 
   min_order =
-    (int)ceil(log10(16.0 * discrim_factor) / log10(1.0 / modular_const));
+      (int)ceil(log10(16.0 * discrim_factor) / log10(1.0 / modular_const));
 
   if (order < min_order) {
-    std::cout << "Fatal error -- minimum order of " << min_order << " required"
-              << std::endl;
+    ERROR_MSG("Fatal error -- minimum order of {} required", min_order);
     exit(1);
   }
 
   //------------------------------------------------------
   // compute transfer function
 
-  Num_Prototype_Poles = order;
-  Prototype_Pole_Locs = new complex[order + 1];
+  size_t Num_Prototype_Poles = GetNumPoles();
+  std::vector<std::complex<double>> prototype_poles(order);
 
-  if (order % 2) // order is odd
+  if (order % 2)  // order is odd
   {
     Num_Prototype_Zeros = order - 1;
-  } else // order is even
+  } else  // order is even
   {
     Num_Prototype_Zeros = order;
   }
@@ -134,10 +126,10 @@ EllipticalTransFunc::EllipticalTransFunc(int order, double passband_ripple,
   H_Sub_Zero = 1.0;
 
   for (i = 1; i <= r; i++) {
-    if (order % 2) // if order is odd
+    if (order % 2)  // if order is odd
     {
       mu = i;
-    } else // order is even
+    } else  // order is even
     {
       mu = i - 0.5;
     }
@@ -217,14 +209,14 @@ EllipticalTransFunc::EllipticalTransFunc(int order, double passband_ripple,
     double_temp = sqrt(4.0 * cc - bb * bb);
     cmplx_work = complex(0.0, double_temp);
 
-    Prototype_Pole_Locs[i] = (complex(-bb, 0.0) - cmplx_work) / 2.0;
+    prototype_poles[i] = (complex(-bb, 0.0) - cmplx_work) / 2.0;
 
 #ifdef _DEBUG
     DebugFile << "in ellip response, pole[" << i
               << "] = " << Prototype_Pole_Locs[i] << std::endl;
 #endif
 
-    Prototype_Pole_Locs[order + 1 - i] = (complex(-bb, 0.0) + cmplx_work) / 2.0;
+    prototype_poles[order + 1 - i] = (complex(-bb, 0.0) + cmplx_work) / 2.0;
     //-----------------------------------------------------------
     // compute pair of zero locations
     // by finding roots of s**2 + a = 0
@@ -246,34 +238,22 @@ EllipticalTransFunc::EllipticalTransFunc(int order, double passband_ripple,
       Prototype_Zero_Locs[i] = complex(0.0, double_temp);
       Prototype_Zero_Locs[i_mirror] = complex(0.0, (-double_temp));
     }
-#ifdef _DEBUG
-    DebugFile << "in ellip response, zero[" << i
-              << "] = " << Prototype_Zero_Locs[i] << std::endl;
-#endif
   }
+
   //---------------------------
   //  Finish up Ho
-
   if (order % 2) {
     // p_sub_zero *= stopband_edge;
     p_sub_zero *= passband_edge;
     H_Sub_Zero *= p_sub_zero;
-    Prototype_Pole_Locs[(order + 1) / 2] = complex(-p_sub_zero, 0.0);
-#ifdef _DEBUG
-    DebugFile << "p_sub_zero = " << p_sub_zero << std::endl;
-    DebugFile << "in ellip, H_Sub_Zero = " << H_Sub_Zero << std::endl;
-#endif
+    prototype_poles[(order + 1) / 2] = complex(-p_sub_zero, 0.0);
+
   } else {
     H_Sub_Zero *= pow(10.0, passband_ripple / (-20.0));
   }
-  return;
 };
 
-//-----------------------------------------------------
-// raise double to an integer power
-
-double
-ipow(double x, int m)
+double ipow(double x, int m)
 {
   int i;
   double result;

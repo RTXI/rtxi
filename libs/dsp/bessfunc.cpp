@@ -38,7 +38,7 @@ BesselTransFunc::BesselTransFunc(int order, int norm_for_delay)
   double renorm_factor[9] = { 0.0,     0.0,     0.72675, 0.57145, 0.46946,
                               0.41322, 0.37038, 0.33898, 0.31546 };
 
-  Prototype_Pole_Locs = new complex[order + 1];
+  prototype_poles = new complex[order + 1];
   Num_Prototype_Poles = order;
   Prototype_Zero_Locs = new complex[1];
   Num_Prototype_Zeros = 0;
@@ -135,7 +135,7 @@ BesselTransFunc::BesselTransFunc(int order, int norm_for_delay)
     if (fabs(imag(root)) < epsilon * fabs(real(root))) {
       root = complex(real(root), 0.0);
     }
-    Prototype_Pole_Locs[order + 1 - i] = root;
+    prototype_poles[order + 1 - i] = root;
 
     //---------------------------------------------
     // deflate working polynomial by removing
@@ -153,7 +153,7 @@ BesselTransFunc::BesselTransFunc(int order, int norm_for_delay)
   DebugFile << "work_coeff[0] = " << work_coeff[0] << std::endl;
 #endif
 
-  Prototype_Pole_Locs[order] = -work_coeff[0];
+  prototype_poles[order] = -work_coeff[0];
 
 #ifdef _DEBUG
   DebugFile << "pole[" << order << "] = " << Prototype_Pole_Locs[order]
@@ -165,13 +165,13 @@ BesselTransFunc::BesselTransFunc(int order, int norm_for_delay)
   // sucessful operation of ImpulseResponse().
 
   for (i = 1; i < order; i++) {
-    smallest = imag(Prototype_Pole_Locs[i]);
+    smallest = imag(prototype_poles[i]);
     for (ii = i + 1; ii <= order; ii++) {
-      if (smallest <= imag(Prototype_Pole_Locs[ii]))
+      if (smallest <= imag(prototype_poles[ii]))
         continue;
-      work1 = Prototype_Pole_Locs[ii];
-      Prototype_Pole_Locs[ii] = Prototype_Pole_Locs[i];
-      Prototype_Pole_Locs[i] = work1;
+      work1 = prototype_poles[ii];
+      prototype_poles[ii] = prototype_poles[i];
+      prototype_poles[i] = work1;
       smallest = imag(work1);
     }
   }

@@ -2,291 +2,147 @@
 //  File = iir_dsgn.cpp
 //
 
-#include <iostream>
-#include <math.h>
-#include <stdlib.h>
+#include <cmath>
 
-#include "iir_dsgn.h"
-#include "misdefs.h"
-#ifdef _DEBUG
-extern std::ofstream DebugFile;
-#endif
+#include "iir_dsgn.hpp"
 
-//=========================================
-// default constructor
-//-----------------------------------------
-
-IirFilterDesign::IirFilterDesign(void)
+IirFilterDesign::IirFilterDesign(size_t num_numer_coeffs,
+                                 size_t num_denom_coeffs)
 {
-  return;
-}
-//======================================================
-// constructor that provides interactive initialization
-//------------------------------------------------------
-
-IirFilterDesign::IirFilterDesign(std::istream&, std::ostream& uout)
-{
-  uout << "We made it into interactive constructor" << std::endl;
-}
-//===============================================
-//  constructor that allocates arrays of
-//  length num_taps to hold coefficients
-//-----------------------------------------------
-
-IirFilterDesign::IirFilterDesign(int num_numer_coeffs, int num_denom_coeffs)
-{
-  Num_Numer_Coeffs = num_numer_coeffs;
-  Num_Denom_Coeffs = num_denom_coeffs;
-  Numer_Coeffs = new double[num_numer_coeffs];
-  Denom_Coeffs = new double[num_denom_coeffs + 1];
-  Orig_Numer_Coeffs = new double[num_numer_coeffs];
-  Orig_Denom_Coeffs = new double[num_denom_coeffs + 1];
+  Numer_Coeffs.resize(num_numer_coeffs);
+  Denom_Coeffs.resize(num_denom_coeffs + 1);
+  Orig_Numer_Coeffs.resize(num_numer_coeffs);
+  Orig_Denom_Coeffs.resize(num_denom_coeffs + 1);
 }
 
-//==========================================================
-// constructor that allocates array of length num_taps
-// and initializes this array to values contained in
-// input array *imp_resp_coeff
-//----------------------------------------------------------
-
-IirFilterDesign::IirFilterDesign(int num_numer_coeffs, int num_denom_coeffs,
-                                 double* numer_coeffs, double* denom_coeffs)
+IirFilterDesign::IirFilterDesign(size_t num_numer_coeffs,
+                                 size_t num_denom_coeffs,
+                                 std::vector<double> numer_coeffs,
+                                 std::vector<double> denom_coeffs)
 {
-  int n;
-  Num_Numer_Coeffs = num_numer_coeffs;
-#ifdef _DEBUG
-  DebugFile << "in IirFilterDesign, num_numer_coeffs = " << num_numer_coeffs
-            << std::endl;
-#endif
-  Num_Denom_Coeffs = num_denom_coeffs;
-#ifdef _DEBUG
-  DebugFile << "in IirFilterDesign, num_denom_coeffs = " << num_denom_coeffs
-            << std::endl;
-#endif
-  Numer_Coeffs = new double[num_numer_coeffs];
-  Denom_Coeffs = new double[num_denom_coeffs + 1];
-  Orig_Numer_Coeffs = new double[num_numer_coeffs];
-  Orig_Denom_Coeffs = new double[num_denom_coeffs + 1];
+  Numer_Coeffs.resize(num_numer_coeffs);
+  Denom_Coeffs.resize(num_denom_coeffs + 1);
+  Orig_Numer_Coeffs.resize(num_numer_coeffs);
+  Orig_Denom_Coeffs.resize(num_denom_coeffs + 1);
 
-  for (n = 0; n < num_numer_coeffs; n++) {
-    Numer_Coeffs[n] = numer_coeffs[n];
-    Orig_Numer_Coeffs[n] = numer_coeffs[n];
+  for (size_t n = 0; n < num_numer_coeffs; n++) {
+    Numer_Coeffs.at(n) = numer_coeffs.at(n);
+    Orig_Numer_Coeffs.at(n) = numer_coeffs.at(n);
+  }
+  if (num_numer_coeffs == 0 || num_denom_coeffs == 0) {
+    return;
   }
   Denom_Coeffs[0] = 0.0;
   Orig_Denom_Coeffs[0] = 0.0;
-  for (n = 1; n <= num_denom_coeffs; n++) {
-    Denom_Coeffs[n] = denom_coeffs[n];
-    Orig_Denom_Coeffs[n] = denom_coeffs[n];
+  for (size_t n = 1; n <= num_denom_coeffs; n++) {
+    Denom_Coeffs.at(n) = denom_coeffs.at(n);
+    Orig_Denom_Coeffs.at(n) = denom_coeffs.at(n);
   }
-  return;
 }
 
-//==============================================
-// method to allocate coefficient arrays
-// after default constructor has been used
-//----------------------------------------------
-
-void
-IirFilterDesign::Initialize(int num_numer_coeffs, int num_denom_coeffs)
+void IirFilterDesign::Initialize(size_t num_numer_coeffs,
+                                 size_t num_denom_coeffs)
 {
-  Num_Numer_Coeffs = num_numer_coeffs;
-  Num_Denom_Coeffs = num_denom_coeffs;
-  Numer_Coeffs = new double[num_numer_coeffs];
-  Denom_Coeffs = new double[num_denom_coeffs + 1];
-  Orig_Numer_Coeffs = new double[num_numer_coeffs];
-  Orig_Denom_Coeffs = new double[num_denom_coeffs + 1];
+  Numer_Coeffs.resize(num_numer_coeffs);
+  Denom_Coeffs.resize(num_denom_coeffs + 1);
+  Orig_Numer_Coeffs.resize(num_numer_coeffs);
+  Orig_Denom_Coeffs.resize(num_denom_coeffs + 1);
 }
 
-//============================================================
-//  method to quantize coefficients
-//------------------------------------------------------------
-
-void
-IirFilterDesign::QuantizeCoefficients(long quant_factor,
-                                      logical rounding_enabled)
+void IirFilterDesign::QuantizeCoefficients(int quant_factor,
+                                           bool rounding_enabled)
 {
-  int n;
-  long work_long;
-
+  int64_t work_long = NAN;
   //-----------------------------------
   // if quant_factor == 0, then restore
   // coefficients to their original,
   // unquantized values
-
   if (quant_factor == 0) {
-    for (n = 0; n < Num_Numer_Coeffs; n++) {
-      Numer_Coeffs[n] = Orig_Numer_Coeffs[n];
+    for (size_t n = 0; n < Numer_Coeffs.size(); n++) {
+      Numer_Coeffs.at(n) = Orig_Numer_Coeffs.at(n);
     }
-    for (n = 1; n <= Num_Denom_Coeffs; n++) {
-      Denom_Coeffs[n] = Orig_Denom_Coeffs[n];
+    for (size_t n = 1; n <= Denom_Coeffs.size(); n++) {
+      Denom_Coeffs.at(n) = Orig_Denom_Coeffs.at(n);
     }
-    return;
   }
 
   //-------------------------------------------
   // quantize the original coefficient values
-
-  for (n = 0; n < Num_Numer_Coeffs; n++) {
+  for (size_t n = 0; n < Numer_Coeffs.size(); n++) {
     if (rounding_enabled) {
-      work_long = long((quant_factor * Orig_Numer_Coeffs[n]) + 0.5);
+      work_long =
+          static_cast<int64_t>(quant_factor * Orig_Numer_Coeffs.at(n)) + 0.5;
     } else {
-      work_long = long(quant_factor * Orig_Numer_Coeffs[n]);
+      work_long = static_cast<int64_t>(quant_factor * Orig_Numer_Coeffs.at(n));
     }
 
-    Numer_Coeffs[n] = double(work_long) / double(quant_factor);
-#ifdef _DEBUG
-    double quan_err;
-    quan_err = (Numer_Coeffs[n] - Orig_Numer_Coeffs[n]) / Orig_Numer_Coeffs[n];
-    DebugFile << "numer coeff " << n << " quant from " << Orig_Numer_Coeffs[n]
-              << "\n    to " << Numer_Coeffs[n] << " error is " << quan_err
-              << std::endl;
-#endif
+    Numer_Coeffs.at(n) =
+        static_cast<double>(work_long) / static_cast<double>(quant_factor);
   }
-  for (n = 1; n <= Num_Denom_Coeffs; n++) {
+  for (size_t n = 1; n <= Denom_Coeffs.size(); n++) {
     if (rounding_enabled) {
-      work_long = long((quant_factor * Orig_Denom_Coeffs[n]) + 0.5);
+      work_long =
+          static_cast<int64_t>((quant_factor * Orig_Denom_Coeffs.at(n)) + 0.5);
     } else {
-      work_long = long(quant_factor * Orig_Denom_Coeffs[n]);
+      work_long = static_cast<int64_t>(quant_factor * Orig_Denom_Coeffs.at(n));
     }
 
-    Denom_Coeffs[n] = double(work_long) / double(quant_factor);
-#ifdef _DEBUG
-    quan_err = (Denom_Coeffs[n] - Orig_Denom_Coeffs[n]) / Orig_Denom_Coeffs[n];
-    DebugFile << "denom coeff " << n << " quant from " << Orig_Denom_Coeffs[n]
-              << "\n   to " << Denom_Coeffs[n] << " error is " << quan_err
-              << std::endl;
-#endif
+    Denom_Coeffs.at(n) =
+        static_cast<double>(work_long) / static_cast<double>(quant_factor);
   }
-  return;
 }
 
-//============================================================
-//  method to scale coefficients
-//------------------------------------------------------------
-
-void
-IirFilterDesign::ScaleCoefficients(double scale_factor)
+void IirFilterDesign::ScaleCoefficients(double scale_factor)
 {
-  int n;
-  for (n = 0; n < Num_Numer_Coeffs; n++) {
-    Orig_Numer_Coeffs[n] = scale_factor * Orig_Numer_Coeffs[n];
-    Numer_Coeffs[n] = Orig_Numer_Coeffs[n];
+  for (size_t n = 0; n < Numer_Coeffs.size(); n++) {
+    Orig_Numer_Coeffs.at(n) = scale_factor * Orig_Numer_Coeffs.at(n);
+    Numer_Coeffs.at(n) = Orig_Numer_Coeffs.at(n);
   }
-  for (n = 1; n <= Num_Denom_Coeffs; n++) {
-    Orig_Denom_Coeffs[n] = scale_factor * Orig_Denom_Coeffs[n];
-    Denom_Coeffs[n] = Orig_Denom_Coeffs[n];
+  for (size_t n = 1; n <= Denom_Coeffs.size(); n++) {
+    Orig_Denom_Coeffs.at(n) = scale_factor * Orig_Denom_Coeffs.at(n);
+    Denom_Coeffs.at(n) = Orig_Denom_Coeffs.at(n);
   }
-  return;
 }
 
-//======================================================
-// copy coefficient values from internal arrays
-// to output arrays *numer_coeff and *denom_coeff
-//------------------------------------------------------
-
-void
-IirFilterDesign::CopyCoefficients(double* numer_coeff, double* denom_coeff)
+void IirFilterDesign::CopyCoefficients(std::vector<double>& numer_coeff,
+                                       std::vector<double>& denom_coeff) const
 {
-  int n;
-  for (n = 0; n < Num_Numer_Coeffs; n++) {
-    numer_coeff[n] = Numer_Coeffs[n];
-  }
-  for (n = 0; n <= Num_Denom_Coeffs; n++) {
-    denom_coeff[n] = Denom_Coeffs[n];
-  }
-  return;
+  numer_coeff = Numer_Coeffs;
+  denom_coeff = Denom_Coeffs; 
 }
 
-//==============================================
-//  get pointer to numerator coefficient array
-//----------------------------------------------
-double*
-IirFilterDesign::GetNumerCoefficients(void)
+std::vector<double> IirFilterDesign::GetNumerCoefficients() const
 {
-  std::cout << "in iir_dsgn, Numer_Coeffs = " << (void*)Numer_Coeffs
-            << std::endl;
-  return (Numer_Coeffs);
+  return Numer_Coeffs;
 }
 
-//==============================================
-//  get a copy of the denominator coeffcients
-//----------------------------------------------
-double*
-IirFilterDesign::GetDenomCoefficients(void)
+std::vector<double> IirFilterDesign::GetDenomCoefficients() const
 {
-  std::cout << "in iir_dsgn, Denom_Coeffs = " << (void*)Denom_Coeffs
-            << std::endl;
-  double* ret_ptr = new double[Num_Denom_Coeffs + 1];
-  for (int i = 0; i <= Num_Denom_Coeffs; i++)
-    ret_ptr[i] = Denom_Coeffs[i];
-  return (ret_ptr);
+  return Denom_Coeffs;
 }
 
-//==============================================
-//  set the denominator coeffcients
-//----------------------------------------------
-void
-IirFilterDesign::SetDenomCoefficients(int num_coeffs, double* coeffs)
+void IirFilterDesign::SetDenomCoefficients(const std::vector<double>& coeffs)
 {
-  Num_Denom_Coeffs = num_coeffs;
-  delete[] Denom_Coeffs;
-  Denom_Coeffs = new double[num_coeffs + 1];
-  for (int i = 0; i <= Num_Denom_Coeffs; i++)
-    Denom_Coeffs[i] = coeffs[i];
-  return;
+  Denom_Coeffs = coeffs;
 }
 
-//==========================================
-void
-IirFilterDesign::SetSamplingInterval(double samp_intvl)
+void IirFilterDesign::SetSamplingInterval(double sampling_interval)
 {
-  Sampling_Interval = samp_intvl;
-  return;
+  Sampling_Interval = sampling_interval;
 }
 
-double
-IirFilterDesign::GetSamplingInterval(void)
+double IirFilterDesign::GetSamplingInterval() const
 {
-  return (Sampling_Interval);
+  return Sampling_Interval;
 }
 
-//==========================================
-//  get number of numerator coefficients
-//------------------------------------------
-
-int
-IirFilterDesign::GetNumNumerCoeffs(void)
+size_t IirFilterDesign::GetNumNumerCoeffs()
 {
-  return (Num_Numer_Coeffs);
+  return Numer_Coeffs.size();
 }
 
-//==========================================
-//  get number of denominator coefficients
-//------------------------------------------
-
-int
-IirFilterDesign::GetNumDenomCoeffs(void)
+size_t IirFilterDesign::GetNumDenomCoeffs()
 {
-  return (Num_Denom_Coeffs);
+  return Denom_Coeffs.size();
 }
 
-//==============================================================
-// dump complete set of coefficients to output_stream
-//--------------------------------------------------------------
-
-void
-IirFilterDesign::DumpCoefficients(std::ofstream* output_stream)
-{
-  int n;
-  // output_stream->setf(ios::fixed, ios::floatfield);
-  // output_stream->precision(11);
-  for (n = 0; n < Num_Numer_Coeffs; n++) {
-    (*output_stream) << "b[" << n << "] = " << Numer_Coeffs[n] << std::endl;
-  }
-  for (n = 1; n <= Num_Denom_Coeffs; n++) {
-    (*output_stream) << "a[" << n << "] = " << Denom_Coeffs[n] << std::endl;
-  }
-  // output_stream->precision(0);
-  // output_stream->setf(0, ios::floatfield);
-  return;
-}

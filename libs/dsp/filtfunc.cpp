@@ -4,365 +4,237 @@
 //
 //
 
-#include "filtfunc.h"
-#include "cmpxpoly.h"
-#include "misdefs.h"
-#include "unwrap.h"
-#include <iostream>
-#include <math.h>
-#include <stdlib.h>
+#include <array>
+#include <cmath>
+#include <complex>
 
-#ifdef _DEBUG
-extern std::ofstream DebugFile;
-#endif
+#include "filtfunc.hpp"
 
-//===========================================================
-//  constructor
+#include <gsl/gsl_sf_trig.h>
 
-FilterTransFunc::FilterTransFunc(void)
-{
-  Num_Denorm_Poles = 0;
-  Num_Denorm_Zeros = 0;
-  Degree_Of_Denom = -1;
-  Degree_Of_Numer = -1;
-  Filter_Is_Denormalized = FALSE;
-  return;
-};
-
-//===========================================================
-//  constructor
+#include "cmpxpoly.hpp"
+#include "poly.hpp"
+#include "unwrap.hpp"
 
 FilterTransFunc::FilterTransFunc(int order)
+    : Denorm_Cutoff_Freq_Rad(NAN)
+    , H_Sub_Zero(NAN)
+    , Filter_Order(order)
 {
-  Filter_Order = order;
-  Num_Denorm_Poles = 0;
-  Num_Denorm_Zeros = 0;
-  Degree_Of_Denom = -1;
-  Degree_Of_Numer = -1;
-  Filter_Is_Denormalized = FALSE;
-  return;
-};
+}
 
-//==========================================================
-//
-complex*
-FilterTransFunc::GetPrototypePoles(int* num_poles)
+std::vector<std::complex<double>> FilterTransFunc::GetPrototypePoles() const
 {
-  *num_poles = Num_Prototype_Poles;
-  return (Prototype_Pole_Locs);
-};
+  return (prototype_poles);
+}
 
-//==========================================================
-//
-complex*
-FilterTransFunc::GetPoles(int* num_poles)
+std::vector<std::complex<double>> FilterTransFunc::GetPoles() const
 {
   if (Filter_Is_Denormalized) {
-    *num_poles = Num_Denorm_Poles;
-    return (Denorm_Pole_Locs);
-  } else {
-    *num_poles = Num_Prototype_Poles;
-    return (Prototype_Pole_Locs);
+    return Denorm_Pole_Locs;
   }
-};
-//==========================================================
-//
-complex
-FilterTransFunc::GetPole(int pole_indx)
+  return prototype_poles;
+}
+
+std::complex<double> FilterTransFunc::GetPole(size_t pole_indx) const
 {
   if (Filter_Is_Denormalized) {
-    if (pole_indx > Num_Denorm_Poles) {
-      return (complex(0.0, 0.0));
-    } else {
-      return (Denorm_Pole_Locs[pole_indx]);
-    }
-  } else {
-    if (pole_indx > Num_Prototype_Poles) {
-      return (complex(0.0, 0.0));
-    } else {
-      return (Prototype_Pole_Locs[pole_indx]);
-    }
+    return (Denorm_Pole_Locs.at(pole_indx));
   }
-};
-//==========================================================
-//
-complex
-FilterTransFunc::GetZero(int zero_indx)
+  return (prototype_poles.at(pole_indx));
+}
+
+std::complex<double> FilterTransFunc::GetZero(size_t zero_indx)
 {
   if (Filter_Is_Denormalized) {
-    if (zero_indx > Num_Denorm_Zeros) {
-      return (complex(0.0, 0.0));
-    } else {
-      return (Denorm_Zero_Locs[zero_indx]);
-    }
-  } else {
-    if (zero_indx > Num_Prototype_Zeros) {
-      return (complex(0.0, 0.0));
-    } else {
-      return (Prototype_Zero_Locs[zero_indx]);
-    }
+    return (Denorm_Zero_Locs.at(zero_indx));
   }
-};
+  return (Prototype_Zero_Locs.at(zero_indx));
+}
 
 //========================================================
-void
-FilterTransFunc::FrequencyPrewarp(double sampling_interval)
+void FilterTransFunc::FrequencyPrewarp(double sampling_interval)
 {
-  int n;
-  double freq_scale, warped_analog_cutoff;
-  double desired_digital_cutoff;
+  double freq_scale = NAN;
+  double warped_analog_cutoff = NAN;
+  double desired_digital_cutoff = NAN;
 
   desired_digital_cutoff = Denorm_Cutoff_Freq_Rad;
-  warped_analog_cutoff = (2.0 / sampling_interval) *
-                         tan(desired_digital_cutoff * sampling_interval / 2.0);
+  warped_analog_cutoff = (2.0 / sampling_interval)
+      * tan(desired_digital_cutoff * sampling_interval / 2.0);
   freq_scale = warped_analog_cutoff / desired_digital_cutoff;
 
-#ifdef _DEBUG
-  DebugFile << "freq_scale = " << freq_scale << std::endl;
-  DebugFile << "Num_Denorm_Poles = " << Num_Denorm_Poles << std::endl;
-  DebugFile << "Num_Denorm_Zeros = " << Num_Denorm_Zeros << std::endl;
-  DebugFile << "in prewarp, orig H_Sub_Zero = " << H_Sub_Zero << std::endl;
-#endif
-
-  for (n = 1; n <= Num_Denorm_Poles; n++) {
-    Denorm_Pole_Locs[n] *= freq_scale;
+  for (auto& denorm_pole : Denorm_Pole_Locs) {
+    denorm_pole *= freq_scale;
   }
-  for (n = 1; n <= Num_Denorm_Zeros; n++) {
-    Denorm_Zero_Locs[n] *= freq_scale;
+  for (auto& denorm_zero : Denorm_Zero_Locs) {
+    denorm_zero *= freq_scale;
   }
-  for (n = 1; n <= (Num_Denorm_Poles - Num_Denorm_Zeros); n++) {
+  const int num = static_cast<int>(Denorm_Pole_Locs.size())
+      - static_cast<int>(Denorm_Zero_Locs.size());
+  for (int i = 0; i < num; i++) {
     H_Sub_Zero *= freq_scale;
   }
-#ifdef _DEBUG
-  DebugFile << "scaled H_Sub_Zero = " << H_Sub_Zero << std::endl;
-#endif
-  return;
 }
 
 //=========================================================
-void
-FilterTransFunc::FilterFrequencyResponse(void)
+void FilterTransFunc::FilterFrequencyResponse()
 {
-  complex numer, denom;
-  complex transfer_function;
-  complex s_val, pole;
-  double delta_freq, magnitude, phase;
-  double peak_magnitude;
-  double *mag_resp, *phase_resp, *group_dly;
-  int i, k;
+  std::complex<double> numer;
+  std::complex<double> denom;
+  std::complex<double> transfer_function;
+  std::complex<double> s_val;
+  double delta_freq = NAN;
+  double magnitude = NAN;
+  double phase = NAN;
+  double peak_magnitude = NAN;
+  std::array<double, 800> mag_resp {};
+  std::array<double, 800> phase_resp {};
+  std::array<double, 800> group_dly {};
 
   delta_freq = 0.0125;
   peak_magnitude = -1000.0;
 
-  Response_File = new std::ofstream("anlg_rsp.txt", std::ios::out);
-  mag_resp = new double[800];
-  phase_resp = new double[800];
-  group_dly = new double[800];
+  for (size_t i = 1; i < 800; i++) {
+    numer = std::complex<double>(1.0, 0.0);
+    denom = std::complex<double>(1.0, 0.0);
+    s_val = std::complex<double>(0.0, static_cast<double>(i) * delta_freq);
 
-  for (i = 1; i < 800; i++) {
-    numer = complex(1.0, 0.0);
-    denom = complex(1.0, 0.0);
-    s_val = complex(0.0, i * delta_freq);
-
-    for (k = 1; k <= Num_Denorm_Zeros; k++) {
-      numer *= (s_val - Denorm_Zero_Locs[k]);
+    for (const auto& denorm_zero : Denorm_Zero_Locs) {
+      numer *= (s_val - denorm_zero);
     }
 
-    for (k = 1; k <= Num_Denorm_Poles; k++) {
-      denom *= (s_val - Denorm_Pole_Locs[k]);
+    for (auto denorm_pole : Denorm_Pole_Locs) {
+      denom *= (s_val - denorm_pole);
     }
+
     transfer_function = numer / denom;
-    magnitude = 10.0 * log10(mag_sqrd(transfer_function));
-    mag_resp[i] = magnitude;
+    magnitude =
+        10.0 * log10(std::abs(transfer_function) * std::abs(transfer_function));
+    mag_resp.at(i) = magnitude;
     if (magnitude > peak_magnitude) {
       peak_magnitude = magnitude;
     }
-    phase = 180.0 * arg(transfer_function) / PI;
-    phase_resp[i] = phase;
+    phase = 180.0 * arg(transfer_function) / M_PI;
+    phase_resp.at(i) = phase;
   }
-  UnwrapPhase(0, &(phase_resp[1]));
-  for (i = 2; i < 800; i++) {
-    UnwrapPhase(1, &(phase_resp[i]));
+  UnwrapPhase(0, phase_resp.front());
+  for (size_t i = 1; i < 800; i++) {
+    UnwrapPhase(1, phase_resp.at(i));
   }
-  group_dly[1] = PI * (phase_resp[1] - phase_resp[2]) / (180.0 * delta_freq);
-  for (i = 2; i < 800; i++) {
-    group_dly[i] =
-      PI * (phase_resp[i - 1] - phase_resp[i]) / (180.0 * delta_freq);
+  group_dly.at(0) =
+      M_PI * (phase_resp.at(0) - phase_resp.at(1)) / (180.0 * delta_freq);
+  for (size_t i = 1; i < 800; i++) {
+    group_dly.at(i) =
+        M_PI * (phase_resp.at(i - 1) - phase_resp.at(i)) / (180.0 * delta_freq);
   }
-  for (i = 1; i < 800; i++) {
-    (*Response_File) << i * delta_freq << ",  "
-                     << (mag_resp[i] - peak_magnitude) << ",  " << phase_resp[i]
-                     << ",  " << group_dly[i] << std::endl;
-  }
-  Response_File->close();
-  delete[] phase_resp;
-  delete[] mag_resp;
-  delete[] group_dly;
-  return;
 }
 
-//==========================================================
-int
-FilterTransFunc::GetNumPoles(void)
+size_t FilterTransFunc::GetNumPoles() const
 {
   if (Filter_Is_Denormalized) {
-    return (Num_Denorm_Poles);
-  } else {
-    return (Num_Prototype_Poles);
+    return Denorm_Pole_Locs.size() + 1;
   }
-};
+  return prototype_poles.size() + 1;
+}
 
-//==========================================================
-int
-FilterTransFunc::GetNumZeros(void)
+size_t FilterTransFunc::GetNumZeros() const
 {
   if (Filter_Is_Denormalized) {
-    return (Num_Denorm_Zeros);
-  } else {
-    return (Num_Prototype_Zeros);
+    return Denorm_Zero_Locs.size() + 1;
   }
-};
-
-//===============================================================
-//
-complex*
-FilterTransFunc::GetPrototypeZeros(int* num_zeros)
-{
-  *num_zeros = Num_Prototype_Zeros;
-  return (Prototype_Zero_Locs);
+  return Prototype_Zero_Locs.size() + 1;
 }
 
-//===============================================================
-//
-complex*
-FilterTransFunc::GetZeros(int* num_zeros)
+std::vector<std::complex<double>> FilterTransFunc::GetPrototypeZeros() const
+{
+  return Prototype_Zero_Locs;
+}
+
+std::vector<std::complex<double>> FilterTransFunc::GetZeros() const
 {
   if (Filter_Is_Denormalized) {
-    *num_zeros = Num_Denorm_Zeros;
-    return (Denorm_Zero_Locs);
-  } else {
-    *num_zeros = Num_Prototype_Zeros;
-    return (Prototype_Zero_Locs);
+    return Denorm_Zero_Locs;
   }
+  return Prototype_Zero_Locs;
 }
 
-//==================================================================
-//
-
-float
-FilterTransFunc::GetHSubZero(void)
+double FilterTransFunc::GetHSubZero() const
 {
-  return ((float)H_Sub_Zero);
+  return H_Sub_Zero;
 }
 
-//===============================================================
-//
-
-void
-FilterTransFunc::DumpBiquads(std::ofstream* output_stream)
+void FilterTransFunc::SetHSubZero(double hsub)
 {
-  (*output_stream) << "\nBiquad Coefficients\n" << std::endl;
-
-  for (int i = 1; i <= Num_Biquad_Sects; i++) {
-    (*output_stream) << i << ") a = " << A_Biquad_Coef[i]
-                     << "    b = " << B_Biquad_Coef[i]
-                     << "    c = " << C_Biquad_Coef[i] << std::endl;
-  }
-  return;
+  H_Sub_Zero = hsub;
 }
-//=======================================================
-//
-void
-FilterTransFunc::LowpassDenorm(double cutoff_freq)
+
+void FilterTransFunc::LowpassDenorm(double cutoff_freq_hz)
 {
-  int j;
-  Filter_Is_Denormalized = TRUE;
-  Num_Denorm_Poles = Num_Prototype_Poles;
-  Num_Denorm_Zeros = Num_Prototype_Zeros;
-  Denorm_Pole_Locs = new complex[Num_Denorm_Poles + 1];
-  Denorm_Zero_Locs = new complex[Num_Denorm_Zeros + 1];
-  Denorm_Cutoff_Freq_Rad = cutoff_freq;
+  Filter_Is_Denormalized = true;
+  Denorm_Pole_Locs =
+      std::vector<std::complex<double>>(prototype_poles.size());
+  Denorm_Zero_Locs =
+      std::vector<std::complex<double>>(Prototype_Zero_Locs.size());
+  Denorm_Cutoff_Freq_Rad = cutoff_freq_hz;
 
-  for (j = 1; j <= Num_Denorm_Poles; j++) {
-    Denorm_Pole_Locs[j] = Prototype_Pole_Locs[j] * cutoff_freq;
+  for (size_t j = 0; j < Denorm_Pole_Locs.size(); j++) {
+    Denorm_Pole_Locs.at(j) = prototype_poles.at(j) * cutoff_freq_hz;
   }
-  for (j = 1; j <= Num_Denorm_Zeros; j++) {
-    Denorm_Zero_Locs[j] = Prototype_Zero_Locs[j] * cutoff_freq;
+  for (size_t j = 0; j < Denorm_Zero_Locs.size(); j++) {
+    Denorm_Zero_Locs.at(j) = Prototype_Zero_Locs.at(j) * cutoff_freq_hz;
   }
-  for (j = 0; j < (Num_Denorm_Poles - Num_Denorm_Zeros); j++) {
-    H_Sub_Zero *= cutoff_freq;
+  for (size_t j = 0; j < (Denorm_Pole_Locs.size() - Denorm_Zero_Locs.size());
+       j++)
+  {
+    H_Sub_Zero *= cutoff_freq_hz;
   }
-#ifdef _DEBUG
-  DebugFile << "in LP denorm, H_Sub_Zero scaled to " << H_Sub_Zero << std::endl;
-#endif
-  return;
 }
 
-//=========================================================
-//
-
-Polynomial
-FilterTransFunc::GetDenomPoly(void)
+Polynomial FilterTransFunc::GetDenomPoly() const
 {
   //-----------------------------------------------------
   //  if denominator polynomial is not built yet,
-  //  build it by multiplying together (s-p[i]) binomial
-  //  factors where the p[i] are the poles of the filter
+  //  build it by multiplying together (s-p.at(i)) binomial
+  //  factors where the p.at(i) are the poles of the filter
 
-  if (Degree_Of_Denom < 0) {
-    CmplxPolynomial cmplx_denom_poly =
-      CmplxPolynomial(complex(1.0, 0.0), -Prototype_Pole_Locs[1]);
-    for (int ii = 2; ii <= Num_Prototype_Poles; ii++) {
+  if (Denom_Poly.GetDegree() < 0) {
+    CmplxPolynomial cmplx_denom_poly {std::complex<double>(1.0, 0.0),
+                                      -prototype_poles[1]};
+    for (const auto& prototype_pole : prototype_poles) {
       cmplx_denom_poly *=
-        CmplxPolynomial(complex(1.0, 0.0), -Prototype_Pole_Locs[ii]);
+          CmplxPolynomial {std::complex<double>(1.0, 0.0), -prototype_pole};
     }
-#ifdef _DEBUG
-    cmplx_denom_poly.DumpToStream(&DebugFile);
-#endif
-
-    Denom_Poly = Polynomial(cmplx_denom_poly);
-
-    Degree_Of_Denom = Denom_Poly.GetDegree();
-
-#ifdef _DEBUG
-    DebugFile << "\nreal-valued version:" << std::endl;
-    Denom_Poly.DumpToStream(&DebugFile);
-#endif
+    return Polynomial(cmplx_denom_poly);
   }
-
-  return (Denom_Poly);
+  return Denom_Poly;
 }
 
-//================================================================
-//
-
-Polynomial
-FilterTransFunc::GetNumerPoly()
+Polynomial FilterTransFunc::GetNumerPoly() const
 {
   //---------------------------------------------------
   //  if numerator polynomial is not built yet,
-  //  build it by multiplying together (s-z[i]) binomial
-  //  factors where the z[i] are the zeros of the filter.
+  //  build it by multiplying together (s-z.at(i)) binomial
+  //  factors where the z.at(i) are the zeros of the filter.
 
-  if (Degree_Of_Numer < 0) {
-    CmplxPolynomial cmplx_poly =
-      CmplxPolynomial(complex(1.0, 0.0), -Prototype_Zero_Locs[1]);
-    for (int ii = 2; ii <= Num_Prototype_Zeros; ii++) {
+  if (Numer_Poly.GetDegree() < 0) {
+    CmplxPolynomial cmplx_poly {std::complex<double>(1.0, 0.0),
+                                -Prototype_Zero_Locs[1]};
+    for (const auto& prototype_zero : Prototype_Zero_Locs) {
       cmplx_poly *=
-        CmplxPolynomial(complex(1.0, 0.0), -Prototype_Zero_Locs[ii]);
+          CmplxPolynomial {std::complex<double>(1.0, 0.0), -prototype_zero};
     }
-#ifdef _DEBUG
-    cmplx_poly.DumpToStream(&DebugFile);
-#endif
-
-    Numer_Poly = Polynomial(cmplx_poly);
-
-    Degree_Of_Numer = Numer_Poly.GetDegree();
-
-#ifdef _DEBUG
-    DebugFile << "\nreal-valued version:" << std::endl;
-    Numer_Poly.DumpToStream(&DebugFile);
-#endif
+    return Polynomial(cmplx_poly);
   }
-  return (Numer_Poly);
+  return Numer_Poly;
+}
+
+void FilterTransFunc::SetNumerPoly(const Polynomial& poly)
+{
+  Numer_Poly = poly;
+}
+
+void FilterTransFunc::SetDenomPoly(const Polynomial& poly)
+{
+  Denom_Poly = poly;
 }

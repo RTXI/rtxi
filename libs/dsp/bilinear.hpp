@@ -4,10 +4,10 @@
 
 #ifndef _BILINEAR_H_
 #define _BILINEAR_H_
-#include "filtfunc.h"
-#include "iir_dsgn.h"
+#include "filtfunc.hpp"
+#include "iir_dsgn.hpp"
 
-IirFilterDesign* BilinearTransf(FilterTransFunc* analog_filter,
-                                double sampling_interval);
+IirFilterDesign BilinearTransf(const FilterTransFunc& analog_filter,
+                               double sampling_interval);
 
 #endif

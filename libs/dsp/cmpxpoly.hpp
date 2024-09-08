@@ -4,29 +4,18 @@
 #ifndef _CMPXPOLY_H_
 #define _CMPXPOLY_H_
 
-#include "complex.h"
-#include <fstream>
+#include <complex>
+#include <vector>
 
+// TODO: CmplxPolynomial class is missing implementation of multiplication,
+// addition, subtraction, and division of polynomials. Also missing Correct
+// remainder handling
 class CmplxPolynomial
 {
 public:
-  //  default constructor
-  CmplxPolynomial();
-
-  //  copy constructor
-  CmplxPolynomial(const CmplxPolynomial& original);
-
-  // constructor for initializing a binomial
-  CmplxPolynomial(const complex coeff_1, const complex coeff_0);
-
-  //  initializing constructor
-  CmplxPolynomial(const complex* coeff, const int degree);
-
-  //  initializing constructor
-  CmplxPolynomial(const double* coeff, const int degree);
-
-  // assignment operator
-  CmplxPolynomial& operator=(const CmplxPolynomial& right);
+  CmplxPolynomial() = default;
+  CmplxPolynomial(std::initializer_list<std::complex<double>> complex_values);
+  explicit CmplxPolynomial(const std::vector<std::complex<double>>& coeff);
 
   //  multiply assign operator
   CmplxPolynomial& operator*=(const CmplxPolynomial& right);
@@ -35,35 +24,30 @@ public:
   CmplxPolynomial& operator/=(const CmplxPolynomial& divisor);
 
   // return array of polynomial root values
-  complex* GetRoots(void);
+  std::vector<std::complex<double>> GetRoots();
 
   // reflect root across the unit circle
-  void ReflectRoot(int root_idx);
-
-  // dump polynomial to an output stream
-  void DumpToStream(std::ostream* output_stream);
+  void ReflectRoot(size_t root_idx);
 
   // get degree of polynomial
-  int GetDegree(void);
+  int GetDegree() const;
 
   // return specified coefficient
-  complex GetCoeff(int k);
+  std::complex<double> GetCoeff(size_t k);
 
-  // return pointer to copy of coefficients
-  void CopyCoeffs(complex*);
-
-  friend class Polynomial;
+  // copy internal coefficients to input
+  void CopyCoeffs(std::vector<std::complex<double>>& coeff) const;
 
 private:
   // find roots of the polynomial
-  void FindRoots(void);
+  void FindRoots();
 
   // build sum of powers coefficients from roots
-  void BuildFromRoots(void);
+  void BuildFromRoots();
 
-  int Degree;
-  complex* Coeff;
-  complex* RemCoeff;
-  complex* Root;
+  std::vector<std::complex<double>> Coeff;
+  std::vector<std::complex<double>> RemCoeff;
+  std::vector<std::complex<double>> Root;
 };
+
 #endif
