@@ -5,8 +5,11 @@
 #include <mutex>
 #include <sstream>
 
-#include "event.hpp"
 #include "rt.hpp"
+
+namespace Event{
+class Object;
+} // namespace Event
 
 /*!
  * Class responsible for logging all events and telemitry

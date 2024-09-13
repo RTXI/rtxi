@@ -16,12 +16,21 @@
 #define WORKSPACE_H
 
 #include <optional>
-#include <utility>
 
-#include "daq.hpp"
-#include "dlplugin.hpp"
-#include "event.hpp"
 #include "widgets.hpp"
+
+namespace Event{
+class Object;
+} // namespace Event
+
+namespace DLL{
+class Loader;
+} // namespace DLL
+
+namespace DAQ{
+class Device;
+class Driver;
+} // namespace DAQ
 
 /*!
  * Objects contained within this namespace are responsible for providing

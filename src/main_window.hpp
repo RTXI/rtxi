@@ -21,18 +21,17 @@
 #ifndef MAIN_WINDOW_H
 #define MAIN_WINDOW_H
 
-#include <QAction>
-#include <QMainWindow>
-#include <QMdiArea>
-#include <QMdiSubWindow>
-#include <QMenu>
-#include <QTextEdit>
-#include <QTextItem>
 #include <QDialog>
-
+#include <QMainWindow>
 #include "event.hpp"
 
 class QSettings;
+class QAction;
+class QMdiArea;
+class QMdiSubWindow;
+class QMenu;
+class QTextEdit;
+class QTextItem;
 
 namespace Widgets{
 class Plugin;

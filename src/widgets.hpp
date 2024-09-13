@@ -1,14 +1,7 @@
 #ifndef WIDGET_HPP
 #define WIDGET_HPP
 
-#include <QGridLayout>
-#include <QGroupBox>
-#include <QLabel>
 #include <QLineEdit>
-#include <QMainWindow>
-#include <QMdiSubWindow>
-#include <QPushButton>
-#include <QValidator>
 #include <limits>
 #include <memory>
 #include <string>
@@ -20,6 +13,14 @@
 #include "event.hpp"
 #include "io.hpp"
 #include "rt.hpp"
+
+class QGridLayout;
+class QGroupBox;
+class QLabel;
+class QMainWindow;
+class QMdiSubWindow;
+class QPushButton;
+class QValidator;
 
 // These metatype declarations are needed by qt to store
 // the types in QVariant, which is very convenient and reduces
@@ -651,7 +652,8 @@ public:
   /*!
    * Obtain the state of the components attached to the plugin
    *
-   * \return An RT::State::state_t value representing the current state of the component
+   * \return An RT::State::state_t value representing the current state of the
+   * component
    */
   RT::State::state_t getComponentState();
 

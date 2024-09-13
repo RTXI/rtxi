@@ -24,6 +24,7 @@
 #include "event.hpp"
 
 #include "logger.hpp"
+#include "rtos.hpp"
 
 std::string Event::type_to_string(Event::Type event_type)
 {

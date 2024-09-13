@@ -2,11 +2,18 @@
 #include <QApplication>
 #include <QCloseEvent>
 #include <QDoubleValidator>
+#include <QGroupBox>
 #include <QIntValidator>
+#include <QLabel>
+#include <QMainWindow>
 #include <QMdiArea>
+#include <QMdiSubWindow>
+#include <QPushButton>
 #include <QScrollArea>
 #include <QSettings>
 #include <QTimer>
+#include <QVBoxLayout>
+#include <QWidget>
 #include <algorithm>
 #include <any>
 #include <memory>
@@ -14,7 +21,6 @@
 #include "widgets.hpp"
 
 #include <dlfcn.h>
-#include <qmdisubwindow.h>
 
 #include "debug.hpp"
 #include "event.hpp"
@@ -569,8 +575,8 @@ Widgets::Plugin::getComponentParametersInfo() const
 
 size_t Widgets::Plugin::getID() const
 {
-  if(this->hasComponent()){
-    return plugin_component->getID(); 
+  if (this->hasComponent()) {
+    return plugin_component->getID();
   }
   return 0;
 }

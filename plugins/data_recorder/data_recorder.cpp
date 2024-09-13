@@ -17,25 +17,32 @@
 
 */
 
+#include <QComboBox>
 #include <QFileDialog>
+#include <QListWidget>
 #include <QMessageBox>
 #include <QSettings>
+#include <QSpinBox>
 #include <QTimer>
-#include <cstddef>
-#include <cstring>
+#include <QGroupBox>
+#include <QLabel>
+#include <QGridLayout>
+#include <QPushButton>
+#include <QMdiSubWindow>
 #include <mutex>
 #include <string>
 
 #include "data_recorder.hpp"
 
 #include <H5Ipublic.h>
-#include <unistd.h>
 
 #include "debug.hpp"
+#include "fifo.hpp"
+#include "rtos.hpp"
 
 DataRecorder::Panel::Panel(QMainWindow* mwindow, Event::Manager* ev_manager)
     : Widgets::Panel(
-        std::string(DataRecorder::MODULE_NAME), mwindow, ev_manager)
+          std::string(DataRecorder::MODULE_NAME), mwindow, ev_manager)
     , buttonGroup(new QGroupBox)
     , blockList(new QComboBox)
     , channelList(new QComboBox)

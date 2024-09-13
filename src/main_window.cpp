@@ -23,6 +23,9 @@
 #include <QDesktopServices>
 #include <QDir>
 #include <QFileDialog>
+#include <QInputDialog>
+#include <QMdiArea>
+#include <QMdiSubWindow>
 #include <QMenuBar>
 #include <QMessageBox>
 #include <QSettings>
@@ -41,6 +44,7 @@
 #include "oscilloscope/oscilloscope.hpp"
 #include "performance_measurement/performance_measurement.hpp"
 #include "rt.hpp"
+#include "rtos.hpp"
 #include "rtxiConfig.h"
 #include "system_control/system_control.hpp"
 #include "userprefs/userprefs.hpp"
@@ -124,7 +128,6 @@ MainWindow::MainWindow(Event::Manager* ev_manager)
   // Define a custom type to qt type system for settings management
   qRegisterMetaType<plugin_connection>();
   qRegisterMetaTypeStreamOperators<plugin_connection>();
-
 }
 
 QAction* MainWindow::insertWidgetMenuSeparator()

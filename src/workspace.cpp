@@ -16,8 +16,11 @@
 
 #include "workspace.hpp"
 
+#include <QApplication>
+
 #include "connector/connector.hpp"
 #include "data_recorder/data_recorder.hpp"
+#include "dlplugin.hpp"
 #include "module_installer/rtxi_wizard.hpp"
 #include "oscilloscope/oscilloscope.hpp"
 #include "performance_measurement/performance_measurement.hpp"
@@ -57,10 +60,10 @@ Workspace::Manager::Manager(Event::Manager* ev_manager)
   const QDir bin_dir = QCoreApplication::applicationDirPath();
   const std::string nidaq_driver_name = "librtxinidaqdriver.so";
   if (bin_dir.exists(QString::fromStdString(nidaq_driver_name))) {
-    try{
+    try {
       this->registerDriver(bin_dir.path().toStdString() + std::string("/")
                            + nidaq_driver_name);
-    } catch (std::runtime_error& exception){
+    } catch (std::runtime_error& exception) {
       ERROR_MSG("Unable to load NIDAQ rtxi driver");
     }
   }
@@ -69,7 +72,7 @@ Workspace::Manager::Manager(Event::Manager* ev_manager)
     try {
       this->registerDriver(bin_dir.path().toStdString() + std::string("/")
                            + gsc_driver_name);
-    } catch (std::runtime_error& excepttion){
+    } catch (std::runtime_error& excepttion) {
       ERROR_MSG("Unable to load GSC aio168 rtxi driver");
     }
   }
@@ -145,12 +148,11 @@ std::vector<DAQ::Device*> Workspace::Manager::getAllDevices()
   return devices;
 }
 
-
 std::vector<const Widgets::Plugin*> Workspace::Manager::getLoadedPlugins()
 {
   std::vector<const Widgets::Plugin*> result;
-  for(const auto& entry : this->rtxi_widgets_registry){
-    for(const auto& plugin : entry.second){
+  for (const auto& entry : this->rtxi_widgets_registry) {
+    for (const auto& plugin : entry.second) {
       result.push_back(plugin.get());
     }
   }

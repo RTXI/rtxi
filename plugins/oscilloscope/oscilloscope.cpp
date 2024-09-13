@@ -25,6 +25,11 @@
  */
 
 #include <QButtonGroup>
+#include <QGridLayout>
+#include <QGroupBox>
+#include <QLabel>
+#include <QMdiSubWindow>
+#include <QPushButton>
 #include <QRadioButton>
 #include <QTimer>
 #include <cmath>
@@ -35,6 +40,7 @@
 
 #include "debug.hpp"
 #include "rt.hpp"
+#include "rtos.hpp"
 #include "scope.hpp"
 
 void Oscilloscope::Plugin::receiveEvent(Event::Object* event)
