@@ -542,6 +542,14 @@ void MainWindow::saveWidgetSettings(QSettings& userprefs)
   userprefs.beginGroup("Connections");
   int connection_count = 0;
   for (const auto& conn : connections) {
+    // NOTE: We don't handle connections that are managed by plugins themselves.
+    // Namely connections related to probes from oscilloscope and recorders from
+    // the recorder plugin
+    if (conn.dest->getName().find("Probe") != std::string::npos
+        || conn.dest->getName().find("Recording") != std::string::npos)
+    {
+      continue;
+    }
     id_connection.src_id = conn.src->getID();
     id_connection.src_direction = conn.src_port_type;
     id_connection.src_port = conn.src_port;
