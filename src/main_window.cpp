@@ -31,13 +31,16 @@
 #include <QSettings>
 #include <QString>
 #include <QUrl>
+#include <cstddef>
 #include <string>
+#include <unordered_map>
 
 #include "main_window.hpp"
 
 #include <fmt/core.h>
 
 #include "connector/connector.hpp"
+#include "daq.hpp"
 #include "data_recorder/data_recorder.hpp"
 #include "event.hpp"
 #include "module_installer/rtxi_wizard.hpp"
@@ -426,17 +429,17 @@ void MainWindow::saveDAQSettings(QSettings& userprefs)
   this->event_manager->postEvent(&get_devices_event);
   auto devices = std::any_cast<std::vector<DAQ::Device*>>(
       get_devices_event.getParam("devices"));
-  QString channel_name;
   QString dev_name;
   for (const auto& device : devices) {
     dev_name = QString::fromStdString(device->getName());
-    userprefs.beginGroup(dev_name);
-    channel_name = "ai_";
+    userprefs.beginGroup(QString::number(device->getID()));
+    userprefs.setValue("name", QString::fromStdString(device->getName()));
+    userprefs.beginGroup("AI");
     for (size_t ai_channel = 0;
          ai_channel < device->getChannelCount(DAQ::ChannelType::AI);
          ++ai_channel)
     {
-      userprefs.beginGroup(channel_name + QString::number(ai_channel));
+      userprefs.beginGroup(QString::number(ai_channel));
       userprefs.setValue(
           "active", device->getChannelActive(DAQ::ChannelType::AI, ai_channel));
       userprefs.setValue("downsample",
@@ -456,14 +459,15 @@ void MainWindow::saveDAQSettings(QSettings& userprefs)
       userprefs.setValue("units",
                          static_cast<quint64>(device->getAnalogUnits(
                              DAQ::ChannelType::AI, ai_channel)));
-      userprefs.endGroup();
+      userprefs.endGroup();  // channel
     }
-    channel_name = "ao_";
+    userprefs.endGroup();  // Analog Input
+    userprefs.beginGroup("AO");
     for (size_t ao_channel = 0;
          ao_channel < device->getChannelCount(DAQ::ChannelType::AO);
          ++ao_channel)
     {
-      userprefs.beginGroup(channel_name + QString::number(ao_channel));
+      userprefs.beginGroup(QString::number(ao_channel));
       userprefs.setValue(
           "active", device->getChannelActive(DAQ::ChannelType::AO, ao_channel));
       userprefs.setValue("downsample",
@@ -485,36 +489,160 @@ void MainWindow::saveDAQSettings(QSettings& userprefs)
                              DAQ::ChannelType::AO, ao_channel)));
       userprefs.endGroup();
     }
-    channel_name = "di_";
+    userprefs.endGroup();  // Analog Output
+    userprefs.beginGroup("DI");
     for (size_t di_channel = 0;
          di_channel < device->getChannelCount(DAQ::ChannelType::DI);
          ++di_channel)
     {
-      userprefs.beginGroup(channel_name + QString::number(di_channel));
+      userprefs.beginGroup(QString::number(di_channel));
       userprefs.setValue(
           "active", device->getChannelActive(DAQ::ChannelType::DI, di_channel));
       userprefs.endGroup();
     }
-    channel_name = "do_";
+    userprefs.endGroup();  // Digitial Input
+    userprefs.beginGroup("DO");
     for (size_t do_channel = 0;
          do_channel < device->getChannelCount(DAQ::ChannelType::DO);
          ++do_channel)
     {
-      userprefs.beginGroup(channel_name + QString::number(do_channel));
+      userprefs.beginGroup(QString::number(do_channel));
       userprefs.setValue(
           "active", device->getChannelActive(DAQ::ChannelType::DO, do_channel));
       userprefs.endGroup();
     }
-    userprefs.endGroup();  // Device name
+    userprefs.endGroup();  // Digital Output
+    userprefs.endGroup();  // Device ID
   }
   userprefs.endGroup();  // DAQ
 }
 
-void MainWindow::loadDAQSettings(QSettings& userprefs) {}
+void MainWindow::loadDAQSettings(
+    QSettings& userprefs, std::unordered_map<size_t, IO::Block*> block_cache)
+{
+  userprefs.beginGroup("DAQs");
+  Event::Object get_devices_event(Event::Type::DAQ_DEVICE_QUERY_EVENT);
+  this->event_manager->postEvent(&get_devices_event);
+  auto devices = std::any_cast<std::vector<DAQ::Device*>>(
+      get_devices_event.getParam("devices"));
+  QString device_name;
+  QString channel_name;
+  DAQ::Device* tmp_device = nullptr;
+  DAQ::index_t current_channel_id = 0;
+  for (const auto& device_id : userprefs.childGroups()) {
+    userprefs.beginGroup(device_id);
+    device_name = userprefs.value("name").value<QString>();
+    // NOTE: We need to make sure that the settings we are about to load are
+    // not reloaded for other devices. Therefore we check whether the name
+    // exists in the loaded devices registry and whether we already used
+    // the block in a previous iteration (could be the case when using multiple
+    // devices of the same type)
+    auto iter =
+        std::find_if(devices.begin(),
+                     devices.end(),
+                     [device_name, device_id, block_cache](IO::Block* block)
+                     {
+                       return (block->getName() == device_name.toStdString())
+                           && (std::find_if(block_cache.begin(),
+                                            block_cache.end(),
+                                            [block](const auto& entry)
+                                            { return entry.second == block; })
+                               != block_cache.end());
+                     });
+    if (iter == devices.end()) {
+      ERROR_MSG("Unable to find DAQ device {} from the list of loaded devices.",
+                device_name.toStdString());
+      userprefs.endGroup();  // device
+      continue;
+    }
+    tmp_device = *iter;
+    userprefs.beginGroup("AI");
+    for (const auto& channel_id : userprefs.childGroups()) {
+      current_channel_id = channel_id.toUInt();
+      userprefs.beginGroup(channel_id);
+      tmp_device->setChannelActive(DAQ::ChannelType::AI,
+                                   current_channel_id,
+                                   userprefs.value("active").value<bool>());
+      tmp_device->setAnalogDownsample(
+          DAQ::ChannelType::AI,
+          current_channel_id,
+          userprefs.value("downsample").value<quint64>());
+      tmp_device->setAnalogGain(DAQ::ChannelType::AI,
+                                current_channel_id,
+                                userprefs.value("gain").value<double>());
+      tmp_device->setAnalogZeroOffset(
+          DAQ::ChannelType::AI,
+          current_channel_id,
+          userprefs.value("offset").value<double>());
+      tmp_device->setAnalogRange(DAQ::ChannelType::AI,
+                                 current_channel_id,
+                                 userprefs.value("range").value<quint64>());
+      tmp_device->setAnalogReference(
+          DAQ::ChannelType::AI,
+          current_channel_id,
+          userprefs.value("reference").value<quint64>());
+      tmp_device->setAnalogUnits(DAQ::ChannelType::AI,
+                                 current_channel_id,
+                                 userprefs.value("units").value<quint64>());
+      userprefs.endGroup();  // channel
+    }
+    userprefs.endGroup();  // Analog Input
+    userprefs.beginGroup("AO");
+
+    for (const auto& channel_id : userprefs.childGroups()) {
+      current_channel_id = channel_id.toUInt();
+      userprefs.beginGroup(channel_id);
+      tmp_device->setChannelActive(DAQ::ChannelType::AO,
+                                   current_channel_id,
+                                   userprefs.value("active").value<bool>());
+      tmp_device->setAnalogDownsample(
+          DAQ::ChannelType::AO,
+          current_channel_id,
+          userprefs.value("downsample").value<quint64>());
+      tmp_device->setAnalogGain(DAQ::ChannelType::AO,
+                                current_channel_id,
+                                userprefs.value("gain").value<double>());
+      tmp_device->setAnalogZeroOffset(
+          DAQ::ChannelType::AO,
+          current_channel_id,
+          userprefs.value("offset").value<double>());
+      tmp_device->setAnalogRange(DAQ::ChannelType::AO,
+                                 current_channel_id,
+                                 userprefs.value("range").value<quint64>());
+      tmp_device->setAnalogReference(
+          DAQ::ChannelType::AO,
+          current_channel_id,
+          userprefs.value("reference").value<quint64>());
+      tmp_device->setAnalogUnits(DAQ::ChannelType::AO,
+                                 current_channel_id,
+                                 userprefs.value("units").value<quint64>());
+      userprefs.endGroup();  // channel
+    }
+    userprefs.endGroup();  // Analog Output
+    userprefs.beginGroup("DI");
+    for (const auto& channel_id : userprefs.childGroups()) {
+      current_channel_id = channel_id.toUInt();
+      userprefs.beginGroup(channel_id);
+      tmp_device->setActive(userprefs.value("active").value<bool>());
+      userprefs.endGroup();
+    }
+    userprefs.endGroup();  // Digital Input
+    userprefs.beginGroup("DO");
+    for (const auto& channel_id : userprefs.childGroups()) {
+      current_channel_id = channel_id.toUInt();
+      userprefs.beginGroup(channel_name);
+      tmp_device->setActive(userprefs.value("active").value<bool>());
+      userprefs.endGroup();
+    }
+    userprefs.endGroup();  // Digital Output
+    userprefs.endGroup();  // Device name
+    block_cache[device_id.toUInt()] = tmp_device;
+  }
+  userprefs.endGroup();  // DAQ
+}
 
 void MainWindow::saveWidgetSettings(QSettings& userprefs)
 {
-  ///////////////////// Save Widget parameters ////////////////////////
   userprefs.beginGroup("Widgets");
   Event::Object loaded_plugins_query(Event::Type::PLUGIN_LIST_QUERY_EVENT);
   this->event_manager->postEvent(&loaded_plugins_query);
@@ -532,39 +660,11 @@ void MainWindow::saveWidgetSettings(QSettings& userprefs)
     userprefs.endGroup();  // widget count
   }
   userprefs.endGroup();  // Widgets
-  ///////////////////// Save connections /////////////////////////
-  Event::Object all_connections_event(
-      Event::Type::IO_ALL_CONNECTIONS_QUERY_EVENT);
-  event_manager->postEvent(&all_connections_event);
-  auto connections = std::any_cast<std::vector<RT::block_connection_t>>(
-      all_connections_event.getParam("connections"));
-  plugin_connection id_connection {};
-  userprefs.beginGroup("Connections");
-  int connection_count = 0;
-  for (const auto& conn : connections) {
-    // NOTE: We don't handle connections that are managed by plugins themselves.
-    // Namely connections related to probes from oscilloscope and recorders from
-    // the recorder plugin
-    if (conn.dest->getName().find("Probe") != std::string::npos
-        || conn.dest->getName().find("Recording") != std::string::npos)
-    {
-      continue;
-    }
-    id_connection.src_id = conn.src->getID();
-    id_connection.src_direction = conn.src_port_type;
-    id_connection.src_port = conn.src_port;
-    id_connection.dest_id = conn.dest->getID();
-    id_connection.dest_port = conn.dest_port;
-    userprefs.setValue(QString::number(connection_count++),
-                       QVariant::fromValue(id_connection));
-  }
-  userprefs.endGroup();  // Connections
 }
 
-void MainWindow::loadWidgetSettings(QSettings& userprefs)
+void MainWindow::loadWidgetSettings(
+    QSettings& userprefs, std::unordered_map<size_t, IO::Block*> block_cache)
 {
-  ///////////////////// Load Widget parameters ////////////////////////
-  std::unordered_map<size_t, IO::Block*> blocks;
   userprefs.beginGroup("Widgets");
   QString plugin_name;
   Widgets::Plugin* plugin_ptr = nullptr;
@@ -581,9 +681,44 @@ void MainWindow::loadWidgetSettings(QSettings& userprefs)
     plugin_ptr->loadCustomParameterSettings(userprefs);
     userprefs.endGroup();  // customParams
     userprefs.endGroup();  // plugin_instance_id
-    blocks[plugin_instance_id.toUInt()] = plugin_ptr->getBlock();
+    block_cache[plugin_instance_id.toUInt()] = plugin_ptr->getBlock();
   }
   userprefs.endGroup();  // Widgets
+}
+
+void MainWindow::saveConnectionSettings(QSettings& userprefs)
+{
+  Event::Object all_connections_event(
+      Event::Type::IO_ALL_CONNECTIONS_QUERY_EVENT);
+  event_manager->postEvent(&all_connections_event);
+  auto connections = std::any_cast<std::vector<RT::block_connection_t>>(
+      all_connections_event.getParam("connections"));
+  plugin_connection id_connection {};
+  userprefs.beginGroup("Connections");
+  int connection_count = 0;
+  for (const auto& conn : connections) {
+    // NOTE: We don't handle connections that are managed by plugins
+    // themselves. Namely connections related to probes from oscilloscope and
+    // recorders from the recorder plugin
+    if (conn.dest->getName().find("Probe") != std::string::npos
+        || conn.dest->getName().find("Recording") != std::string::npos)
+    {
+      continue;
+    }
+    id_connection.src_id = conn.src->getID();
+    id_connection.src_direction = conn.src_port_type;
+    id_connection.src_port = conn.src_port;
+    id_connection.dest_id = conn.dest->getID();
+    id_connection.dest_port = conn.dest_port;
+    userprefs.setValue(QString::number(connection_count++),
+                       QVariant::fromValue(id_connection));
+  }
+  userprefs.endGroup();  // Connections
+}
+
+void MainWindow::loadConnectionSettings(
+    QSettings& userprefs, std::unordered_map<size_t, IO::Block*> block_cache)
+{
   ///////////////////// Load connections /////////////////////////
   RT::block_connection_t connection;
   std::vector<Event::Object> connection_events;
@@ -591,19 +726,19 @@ void MainWindow::loadWidgetSettings(QSettings& userprefs)
   userprefs.beginGroup("Connections");
   for (const auto& conn_count : userprefs.childKeys()) {
     id_connection = userprefs.value(conn_count).value<plugin_connection>();
-    if (blocks.find(id_connection.src_id) == blocks.end()
-        || blocks.find(id_connection.dest_id) == blocks.end())
+    if (block_cache.find(id_connection.src_id) == block_cache.end()
+        || block_cache.find(id_connection.dest_id) == block_cache.end())
     {
       ERROR_MSG(
           "MainWindow::loadWidgetSettings : invalid connection found. "
           "Skipping");
       continue;
     }
-    connection.src = blocks[id_connection.src_id];
+    connection.src = block_cache[id_connection.src_id];
     connection.src_port_type =
         static_cast<IO::flags_t>(id_connection.src_direction);
     connection.src_port = id_connection.src_port;
-    connection.dest = blocks[id_connection.dest_id];
+    connection.dest = block_cache[id_connection.dest_id];
     connection.dest_port = id_connection.dest_port;
     connection_events.emplace_back(Event::Type::IO_LINK_INSERT_EVENT);
     connection_events.back().setParam("connection", std::any(connection));
@@ -633,11 +768,14 @@ void MainWindow::loadSettings()
   mdiArea->closeAllSubWindows();
   userprefs.beginGroup(profile);
 
+  std::unordered_map<size_t, IO::Block*> blocks;
   this->loadPeriodSettings(userprefs);
 
-  this->loadDAQSettings(userprefs);
+  this->loadDAQSettings(userprefs, blocks);
 
-  this->loadWidgetSettings(userprefs);
+  this->loadWidgetSettings(userprefs, blocks);
+
+  this->loadConnectionSettings(userprefs, blocks);
 
   userprefs.endGroup();  // profile
   userprefs.endGroup();  // workspaces
