@@ -29,7 +29,7 @@
 
 namespace RT::OS
 {
-class Task;
+struct Task;
 class Fifo;
 }  // namespace RT::OS
 
