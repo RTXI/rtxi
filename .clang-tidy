@@ -1,7 +1,7 @@
 ---
 # Enable relevant things!
 # cpp core guidelines is our main check that we try to follow as close as possible.
-# The following are disabled checks becuase they don't make any sesne for our
+# The following are disabled checks because they don't make any sesne for our
 # project:
 # readability-identifier-naming: Should be enabled after main refactoring is done
 # *-vararg: we are dealing with variable argument c functions. cannot be helped

@@ -328,7 +328,7 @@ Device::Device(const std::string& dev_name,
   }
 
   // We need to tell the board that channel scanning is software timed.
-  // Check 16aio168 manual for explenation of this setting
+  // Check 16aio168 manual for explanation of this setting
   int32_t scan_setting = AIO168_AI_SCAN_CLK_SRC_BCR;
   result = aio168_ioctl(fd, AIO168_IOCTL_AI_SCAN_CLK_SRC, &scan_setting);
   if (result < 0) {
@@ -350,7 +350,7 @@ Device::Device(const std::string& dev_name,
   //result = aio168_ioctl(fd, AIO168_IOCTL_AO_TIMING, &timing);
   //if (result < 0) {
   //  ERROR_MSG(
-  //      "16QIO168 DRIVER : Unable to set the channel sync to simultanous output "
+  //      "16QIO168 DRIVER : Unable to set the channel sync to simultaneous output "
   //      "for device");
   //  printError(result);
   //}
@@ -711,7 +711,7 @@ void Device::write()
   ao_channels_buffer.back() |= 1 << 19;
   aio168_write(
       fd, ao_channels_buffer.data(), ao_channels_buffer.size() * sizeof(int32_t));
-  // initate output sync
+  // initiate output sync
   // aio168_ioctl(fd, AIO168_IOCTL_AO_SYNC, nullptr);
 }
 
@@ -730,7 +730,7 @@ Driver::Driver()
     throw std::runtime_error(fmt::format(
         "DAQ::16aio168 : {} does not exist! Cannot discover driver information \n{}",
         device_info_file,
-	"Make sure that the 16aio168 module is loaded before continuing. You can do this by runnign ./script in the driver directory."));
+	"Make sure that the 16aio168 module is loaded before continuing. You can do this by running ./script in the driver directory."));
   }
   // Parse Driver Information
   std::ifstream file_stream(device_info_file);

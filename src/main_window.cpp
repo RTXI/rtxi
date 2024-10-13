@@ -500,7 +500,7 @@ void MainWindow::saveDAQSettings(QSettings& userprefs)
           "active", device->getChannelActive(DAQ::ChannelType::DI, di_channel));
       userprefs.endGroup();
     }
-    userprefs.endGroup();  // Digitial Input
+    userprefs.endGroup();  // Digital Input
     userprefs.beginGroup("DO");
     for (size_t do_channel = 0;
          do_channel < device->getChannelCount(DAQ::ChannelType::DO);

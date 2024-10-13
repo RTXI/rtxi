@@ -391,7 +391,7 @@ private:
   std::array<std::string, 2> default_units = DAQ::get_default_units();
 
   // Used a tuple here because we want buffers to be in one place, and since not all
-  // IO is flaot, that meant we could not use a plain vector of vectors. Maybe we can
+  // IO is float, that meant we could not use a plain vector of vectors. Maybe we can
   // just split them out to their own variables of same type for speed.
   std::tuple<std::vector<double>,
              std::vector<double>,
