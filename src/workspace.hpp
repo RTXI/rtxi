@@ -78,7 +78,7 @@ public:
   void unloadPlugin(Widgets::Plugin* plugin);
 
   /*!
-   * Handles plugin loading/unloadin gevents from gui thread
+   * Handles plugin loading/unloading gevents from gui thread
    *
    * \param event The event to handle. The workspace manager only handles the
    * following event types: Event::Type::PLUGIN_INSERT_EVENT
