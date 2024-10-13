@@ -338,22 +338,22 @@ Device::Device(const std::string& dev_name,
     printError(result);
   }
 
-  //int32_t sync_setting = AIO168_AO_BURST_CLK_SRC_BCR;
-  //result = aio168_ioctl(fd, AIO168_IOCTL_AO_BURST_CLK_SRC, &sync_setting);
-  //if (result < 0) {
-  //  ERROR_MSG(
-  //      "16QIO168 DRIVER : Unable to set the channel sync to software trigger "
-  //      "for device");
-  //  printError(result);
-  //}
-  //int32_t timing = AIO168_AO_TIMING_SIMUL;
-  //result = aio168_ioctl(fd, AIO168_IOCTL_AO_TIMING, &timing);
-  //if (result < 0) {
-  //  ERROR_MSG(
-  //      "16QIO168 DRIVER : Unable to set the channel sync to simultaneous output "
-  //      "for device");
-  //  printError(result);
-  //}
+  // int32_t sync_setting = AIO168_AO_BURST_CLK_SRC_BCR;
+  // result = aio168_ioctl(fd, AIO168_IOCTL_AO_BURST_CLK_SRC, &sync_setting);
+  // if (result < 0) {
+  //   ERROR_MSG(
+  //       "16QIO168 DRIVER : Unable to set the channel sync to software trigger
+  //       " "for device");
+  //   printError(result);
+  // }
+  // int32_t timing = AIO168_AO_TIMING_SIMUL;
+  // result = aio168_ioctl(fd, AIO168_IOCTL_AO_TIMING, &timing);
+  // if (result < 0) {
+  //   ERROR_MSG(
+  //       "16QIO168 DRIVER : Unable to set the channel sync to simultaneous
+  //       output " "for device");
+  //   printError(result);
+  // }
 
   ai_channels_buffer.assign(getChannelCount(DAQ::ChannelType::AI), 0);
   ao_channels_buffer.assign(getChannelCount(DAQ::ChannelType::AO), 0);
@@ -367,8 +367,8 @@ Device::Device(const std::string& dev_name,
   // Don't let the device sleep when reading and just return immediately
   int32_t timeout = 0;
   result = aio168_ioctl(fd, AIO168_IOCTL_RX_IO_TIMEOUT, &timeout);
-  //timeout = 0;
-  //result = aio168_ioctl(fd, AIO168_IOCTL_TX_IO_TIMEOUT, &timeout);
+  // timeout = 0;
+  // result = aio168_ioctl(fd, AIO168_IOCTL_TX_IO_TIMEOUT, &timeout);
   this->setActive(/*act=*/true);
 }
 
@@ -396,16 +396,20 @@ int Device::setChannelActive(DAQ::ChannelType::type_t type,
                         active_channels.at(type).end(),
                         static_cast<int>(index));
   physical_channels_registry.at(type).at(index).active = state;
-  if(state){
-    if(iter == active_channels.at(type).end()) { active_channels.at(type).push_back(static_cast<int>(index)); }
+  if (state) {
+    if (iter == active_channels.at(type).end()) {
+      active_channels.at(type).push_back(static_cast<int>(index));
+    }
   } else {
-    if(iter != active_channels.at(type).end()) { active_channels.at(type).erase(iter); }
+    if (iter != active_channels.at(type).end()) {
+      active_channels.at(type).erase(iter);
+    }
   }
 
   if (type != DAQ::ChannelType::AI) {
     return 0;
   }
-  if(active_channels.at(type).empty()) { 
+  if (active_channels.at(type).empty()) {
     CURRENT_SCAN_SIZE = 0;
     return 0;
   }
@@ -683,7 +687,9 @@ void Device::read()
   // we have to convert some stuff to float first before we continue
   for (size_t chan_id = 0; chan_id < CURRENT_SCAN_SIZE; chan_id++) {
     auto& chan_info = physical_channels_registry[DAQ::ChannelType::AI][chan_id];
-    if(!chan_info.active) { continue; }
+    if (!chan_info.active) {
+      continue;
+    }
     range = default_ranges[chan_info.range_index];
     gain = chan_info.gain;
     offset = chan_info.offset;
@@ -705,12 +711,15 @@ void Device::write()
     range = default_ranges[chan_info.range_index];
     gain = chan_info.gain;
     offset = chan_info.offset;
-    value = std::min(std::max(readinput(chan_id) * gain + offset, range.first), range.second);
-    ao_channels_buffer[chan_id] = voltage_to_binary(range, value) | chan_id << 16;
+    value = std::min(std::max(readinput(chan_id) * gain + offset, range.first),
+                     range.second);
+    ao_channels_buffer[chan_id] =
+        voltage_to_binary(range, value) | chan_id << 16;
   }
   ao_channels_buffer.back() |= 1 << 19;
-  aio168_write(
-      fd, ao_channels_buffer.data(), ao_channels_buffer.size() * sizeof(int32_t));
+  aio168_write(fd,
+               ao_channels_buffer.data(),
+               ao_channels_buffer.size() * sizeof(int32_t));
   // initiate output sync
   // aio168_ioctl(fd, AIO168_IOCTL_AO_SYNC, nullptr);
 }
@@ -728,9 +737,11 @@ Driver::Driver()
   if (!std::filesystem::exists(device_info_file)) {
     printError(result);
     throw std::runtime_error(fmt::format(
-        "DAQ::16aio168 : {} does not exist! Cannot discover driver information \n{}",
+        "DAQ::16aio168 : {} does not exist! Cannot discover driver information "
+        "\n{}",
         device_info_file,
-	"Make sure that the 16aio168 module is loaded before continuing. You can do this by running ./script in the driver directory."));
+        "Make sure that the 16aio168 module is loaded before continuing. You "
+        "can do this by running ./script in the driver directory."));
   }
   // Parse Driver Information
   std::ifstream file_stream(device_info_file);

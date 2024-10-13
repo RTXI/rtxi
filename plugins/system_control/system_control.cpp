@@ -21,18 +21,18 @@
 #include <QGridLayout>
 #include <QGroupBox>
 #include <QLabel>
+#include <QLineEdit>
 #include <QMdiSubWindow>
 #include <QPushButton>
-#include <QLineEdit>
 #include <cmath>
 #include <memory>
 
 #include "system_control.hpp"
 
 #include "daq.hpp"
+#include "event.hpp"
 #include "rt.hpp"
 #include "rtos.hpp"
-#include "event.hpp"
 
 SystemControl::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
     : Widgets::Panel(std::string(SystemControl::MODULE_NAME), mw, ev_manager)

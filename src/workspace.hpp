@@ -19,18 +19,21 @@
 
 #include "widgets.hpp"
 
-namespace Event{
+namespace Event
+{
 class Object;
-} // namespace Event
+}  // namespace Event
 
-namespace DLL{
+namespace DLL
+{
 class Loader;
-} // namespace DLL
+}  // namespace DLL
 
-namespace DAQ{
+namespace DAQ
+{
 class Device;
 class Driver;
-} // namespace DAQ
+}  // namespace DAQ
 
 /*!
  * Objects contained within this namespace are responsible for providing

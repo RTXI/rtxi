@@ -12,11 +12,10 @@
    see <http://www.gnu.org/licenses/>.
 */
 
+#include <QApplication>
 #include <optional>
 
 #include "workspace.hpp"
-
-#include <QApplication>
 
 #include "connector/connector.hpp"
 #include "data_recorder/data_recorder.hpp"

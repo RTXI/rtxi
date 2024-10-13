@@ -7,9 +7,10 @@
 
 #include "rt.hpp"
 
-namespace Event{
+namespace Event
+{
 class Object;
-} // namespace Event
+}  // namespace Event
 
 /*!
  * Class responsible for logging all events and telemitry

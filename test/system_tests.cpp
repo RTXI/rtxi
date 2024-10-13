@@ -24,6 +24,7 @@
 #include "system_tests.hpp"
 
 #include <gmock/gmock.h>
+
 #include "rtos.hpp"
 
 TEST_F(RTConnectorTest, connections)

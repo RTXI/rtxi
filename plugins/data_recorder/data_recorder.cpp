@@ -19,16 +19,16 @@
 
 #include <QComboBox>
 #include <QFileDialog>
+#include <QGridLayout>
+#include <QGroupBox>
+#include <QLabel>
 #include <QListWidget>
+#include <QMdiSubWindow>
 #include <QMessageBox>
+#include <QPushButton>
 #include <QSettings>
 #include <QSpinBox>
 #include <QTimer>
-#include <QGroupBox>
-#include <QLabel>
-#include <QGridLayout>
-#include <QPushButton>
-#include <QMdiSubWindow>
 #include <mutex>
 #include <string>
 
