@@ -174,23 +174,21 @@ inline void printError(int32_t status)
     ERROR_MSG("Unable to get code message");
     return;
   }
-  std::string err_str(static_cast<size_t>(error_size), '\0');
+  std::vector<char> err_buff(static_cast<size_t>(error_size));
   const int32_t errcode = DAQmxGetErrorString(
-      status, err_str.data(), static_cast<uint32_t>(error_size));
+      status, err_buff.data(), static_cast<uint32_t>(error_size));
   if (errcode < 0) {
     ERROR_MSG("Unable to parse message");
     return;
   }
-  ERROR_MSG("Message : {}", err_str);
+  ERROR_MSG("Message : {}", std::string(err_buff.data()));
 }
 
 inline std::string physical_card_name(const std::string& device_name)
 {
-  const int32_t err = DAQmxGetDevProductType(device_name.c_str(), nullptr, 0);
-  std::string result(static_cast<size_t>(err), '\0');
-  DAQmxGetDevProductType(
-      device_name.c_str(), result.data(), static_cast<uint32_t>(result.size()));
-  return result;
+  std::array<char, 1024> buffer {};
+  DAQmxGetDevProductType(device_name.c_str(), buffer.data(), 1024);
+  return std::string {buffer.data()};
 }
 
 struct physical_channel_t
@@ -372,13 +370,31 @@ public:
   void write() final;
 
 private:
+  // RTXI uses 4 tasks, each with it's own different type: AI, AO, DI, DO. This
+  // is not our choice... it is required by NIDAQmx to get things going
   std::array<TaskHandle, DAQ::ChannelType::UNKNOWN> task_list {};
+
+  // NIDAQmx channels are NOT the same as IO::Block channels used by RTXI. For
+  // example AI channels on NIDAQmx are physically entering the machine, but
+  // they are seen as output signals from the DAQ IO block in the read phase.
   std::array<std::vector<physical_channel_t*>, DAQ::ChannelType::UNKNOWN>
       active_channels;
+
+  // NIDAQmx will assign a unique name related to discovery order. Something
+  // like Dev1, Dev2, etc and two cards of the same type can be accessed with
+  // this.
   std::string internal_dev_name;
+
+  // Some defaults that we don't bother providing flexibility for even though
+  // NIDAQmx can do that for us
   std::array<std::vector<physical_channel_t>, 4> physical_channels_registry;
   std::array<DAQ::analog_range_t, 7> default_ranges = DAQ::get_default_ranges();
   std::array<std::string, 2> default_units = DAQ::get_default_units();
+
+  // Used a tuple here because we want buffers to be in one place, and since not
+  // all IO is float, that meant we could not use a plain vector of vectors.
+  // Maybe we can just split them out to their own variables of same type for
+  // speed.
   std::tuple<std::vector<double>,
              std::vector<double>,
              std::vector<uint8_t>,
@@ -496,45 +512,41 @@ int Device::setChannelActive(DAQ::ChannelType::type_t type,
     return 0;
   }
   DAQmxStopTask(task);
-  if (state) {
-    err = chan.addToTask(task);
-    chan.active = err == 0;
-  } else {
-    chan.active = false;
-    DAQmxClearTask(task);
-    err = DAQmxCreateTask(DAQ::ChannelType::type2string(type).c_str(), &task);
-    switch (type) {
-      case DAQ::ChannelType::AI:
-      case DAQ::ChannelType::DI:
-        DAQmxCfgInputBuffer(task, 1);
-        DAQmxSetReadOverWrite(task, DAQmx_Val_OverwriteUnreadSamps);
-        break;
-      case DAQ::ChannelType::AO:
-      case DAQ::ChannelType::DO:
-        DAQmxCfgOutputBuffer(task, 1);
-        break;
-      default:
-        break;
+  chan.active = state;
+  DAQmxClearTask(task);
+  err = DAQmxCreateTask(DAQ::ChannelType::type2string(type).c_str(), &task);
+  if (err != 0) {
+    printError(err);
+    for (auto& channel : physical_channels_registry.at(type)) {
+      channel.active = false;
     }
+    active_channels.at(type).clear();
+    return err;
+  }
+  switch (type) {
+    case DAQ::ChannelType::AI:
+    case DAQ::ChannelType::DI:
+      DAQmxCfgInputBuffer(task, 1);
+      DAQmxSetReadOverWrite(task, DAQmx_Val_OverwriteUnreadSamps);
+      break;
+    case DAQ::ChannelType::AO:
+    case DAQ::ChannelType::DO:
+      DAQmxCfgOutputBuffer(task, 1);
+      break;
+    default:
+      break;
+  }
+  for (auto& channel : physical_channels_registry.at(type)) {
+    if (!channel.active) {
+      continue;
+    }
+    err = channel.addToTask(task);
     if (err != 0) {
-      for (auto& channel : physical_channels_registry.at(type)) {
-        channel.active = false;
-      }
-      active_channels.at(type).clear();
-      return err;
-    }
-    for (const auto& channel : physical_channels_registry.at(type)) {
-      if (!channel.active) {
-        continue;
-      }
-      err = channel.addToTask(task);
-      if (err != 0) {
-        break;
-      }
+      printError(err);
+      channel.active = false;
     }
   }
-  printError(err);
-  // active channels is an optimization for faster reading/writing in realtime.
+  // active_channels is an optimization for faster reading/writing in realtime.
   active_channels.at(type).clear();
   for (auto& channel : physical_channels_registry.at(type)) {
     if (channel.active) {
@@ -982,10 +994,9 @@ void Driver::loadDevices()
     return;
   }
   const std::string alpha = "abcdefghijklmnopqrstuvwxyz";
-  std::string string_buffer(static_cast<size_t>(device_names_buffer_size),
-                            '\0');
-  DAQmxGetSysDevNames(string_buffer.data(),
-                      static_cast<uint32_t>(string_buffer.size()));
+  std::vector<char> buffer(static_cast<size_t>(device_names_buffer_size));
+  DAQmxGetSysDevNames(buffer.data(), static_cast<uint32_t>(buffer.size()));
+  std::string string_buffer(buffer.data());
   const std::vector<std::string> device_names =
       split_string(string_buffer, ", ");
   std::vector<IO::channel_t> channels;

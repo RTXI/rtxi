@@ -17,11 +17,19 @@
 
  */
 
+#include <QGridLayout>
+#include <QLabel>
+#include <QMdiSubWindow>
+#include <QPushButton>
+#include <QTimer>
+
 #include "performance_measurement.hpp"
 
 #include "debug.hpp"
 #include "event.hpp"
+#include "fifo.hpp"
 #include "rt.hpp"
+#include "rtos.hpp"
 #include "widgets.hpp"
 
 PerformanceMeasurement::Panel::Panel(const std::string& mod_name,

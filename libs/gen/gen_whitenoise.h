@@ -18,37 +18,37 @@
 #ifndef GEN_WHITENOISE_H_
 #define GEN_WHITENOISE_H_
 
-#include "generator.h"
+#include <cstdint>
 #include <gsl/gsl_randist.h>
 #include <gsl/gsl_rng.h>
+#include "generator.h"
 
 class GeneratorWNoise : public Generator
 {
 
 public:
-  // default constructor
-  GeneratorWNoise();
-  GeneratorWNoise(double variance);
-  ~GeneratorWNoise();
-  // initialize waveform
-  void init(double variance);
+  explicit GeneratorWNoise(double variance=1.0);
+  GeneratorWNoise(const GeneratorWNoise& gen);
+  GeneratorWNoise(GeneratorWNoise&& gen) noexcept ;
+  GeneratorWNoise& operator=(const GeneratorWNoise&);
+  GeneratorWNoise& operator=(GeneratorWNoise&&) noexcept ;
+  ~GeneratorWNoise() override;
+
+  void init(uint64_t seed);
+
   // get readout
-  double get();
+  double get() override;
+
   // set the variance of the generator
   void setVariance(double var);
 
-protected:
-  double variance;
-  double s;
-  double u1;
-  double u2;
-  double v1;
-  double v2;
-  double x;
-  double y;
-  const gsl_rng_type* T;
-  gsl_rng* r;
-  gsl_rng* genstate;
+  double getVariance() const;
+
+private:
+  double m_variance;
+  uint64_t m_seed = 0;
+  const gsl_rng_type* range_type;
+  gsl_rng* random_number_generator = nullptr;
 };
 
 #endif /* GEN_WHITENOISE_H_ */

@@ -29,12 +29,21 @@
 
 #include <QComboBox>
 
-#include "event.hpp"
-#include "fifo.hpp"
 #include "io.hpp"
-#include "rt.hpp"
 #include "scope.hpp"
 #include "widgets.hpp"
+
+namespace Event{
+class Manager;
+class Object;
+} // namespace Event
+
+namespace RT::OS{
+class Fifo;
+} // namespace RT::OS
+
+class QVBoxLayout;
+class QButtonGroup;
 
 namespace Oscilloscope
 {

@@ -21,17 +21,28 @@
 #ifndef MAIN_WINDOW_H
 #define MAIN_WINDOW_H
 
-#include <QAction>
+#include <QDialog>
 #include <QMainWindow>
-#include <QMdiArea>
-#include <QMdiSubWindow>
-#include <QMenu>
-#include <QTextEdit>
-#include <QTextItem>
-
-#include <qdialog.h>
 
 #include "event.hpp"
+
+class QSettings;
+class QAction;
+class QMdiArea;
+class QMdiSubWindow;
+class QMenu;
+class QTextEdit;
+class QTextItem;
+
+namespace Widgets
+{
+class Plugin;
+}  // namespace Widgets
+
+namespace IO
+{
+class Block;
+}  // namespace IO
 
 class SaveSettingsDialog : public QDialog
 {
@@ -161,6 +172,19 @@ private slots:
 
 private:
   void loadWidget(const QString& module_name);
+  void loadWidget(const QString& module_name,
+                  Widgets::Plugin*& rtxi_plugin_pointer);
+  inline void savePeriodSettings(QSettings& userprefs);
+  inline void loadPeriodSettings(QSettings& userprefs);
+  inline void saveDAQSettings(QSettings& userprefs);
+  inline void loadDAQSettings(
+      QSettings& userprefs, std::unordered_map<size_t, IO::Block*> block_cache);
+  inline void saveWidgetSettings(QSettings& userprefs);
+  inline void loadWidgetSettings(
+      QSettings& userprefs, std::unordered_map<size_t, IO::Block*> block_cache);
+  inline void saveConnectionSettings(QSettings& userprefs);
+  inline void loadConnectionSettings(
+      QSettings& userprefs, std::unordered_map<size_t, IO::Block*> block_cache);
   Event::Manager* event_manager;
   QMdiArea* mdiArea = nullptr;
   QList<QMdiSubWindow*> subWindows;

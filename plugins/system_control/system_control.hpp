@@ -20,10 +20,8 @@
 #ifndef SYSTEM_CONTROL_H
 #define SYSTEM_CONTROL_H
 
-#include <QComboBox>
 
 #include "daq.hpp"
-#include "event.hpp"
 #include "widgets.hpp"
 
 Q_DECLARE_METATYPE(DAQ::ChannelType::type_t)
@@ -31,6 +29,12 @@ Q_DECLARE_METATYPE(DAQ::Device*)
 Q_DECLARE_METATYPE(DAQ::direction_t)
 Q_DECLARE_METATYPE(DAQ::Reference::reference_t)
 Q_DECLARE_METATYPE(DAQ::analog_range_t)
+
+class QComboBox;
+namespace Event{
+class Manager;
+class Object;
+} // namespace Event
 
 namespace SystemControl
 {

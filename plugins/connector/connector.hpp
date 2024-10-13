@@ -21,13 +21,15 @@
 #ifndef CONNECTOR_H
 #define CONNECTOR_H
 
-#include <QComboBox>
-#include <QListWidget>
 #include <vector>
 
 #include "event.hpp"
 #include "io.hpp"
 #include "widgets.hpp"
+
+class QComboBox;
+class QListWidget;
+class QListWidgetItem;
 
 namespace Connector
 {

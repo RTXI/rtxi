@@ -25,6 +25,8 @@
 
 #include <gmock/gmock.h>
 
+#include "rtos.hpp"
+
 TEST_F(RTConnectorTest, connections)
 {
   // Have to build example blocks to test connector

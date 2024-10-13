@@ -21,12 +21,14 @@
 #ifndef PERFORMANCE_MEASUREMENT_H
 #define PERFORMANCE_MEASUREMENT_H
 
-#include <QtWidgets>
-
 #include "math/runningstat.h"
 #include "widgets.hpp"
-#include "rt.hpp"
 
+namespace RT::OS{
+class Fifo;
+} // namespace RT::OS
+
+class QLineEdit;
 
 namespace PerformanceMeasurement
 {

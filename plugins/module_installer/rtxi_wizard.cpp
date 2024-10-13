@@ -19,10 +19,18 @@
 #include <QCoreApplication>
 #include <QDir>
 #include <QFileInfo>
+#include <QGridLayout>
+#include <QGroupBox>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QListWidget>
+#include <QMdiSubWindow>
 #include <QMessageBox>
+#include <QNetworkReply>
+#include <QProgressDialog>
+#include <QPushButton>
+#include <QTextEdit>
 #include <QtGlobal>
 
 #include "rtxi_wizard.hpp"

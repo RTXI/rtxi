@@ -25,9 +25,14 @@
 
 #include <qwt_abstract_scale_draw.h>
 #include <qwt_global.h>
+#include <qwt_painter.h>
+#include <qwt_plot_curve.h>
+#include <qwt_plot_directpainter.h>
+#include <qwt_plot_grid.h>
+#include <qwt_plot_layout.h>
 #include <qwt_plot_legenditem.h>
+#include <qwt_plot_marker.h>
 #include <qwt_scale_map.h>
-#include <stdlib.h>
 
 Oscilloscope::LegendItem::LegendItem()
 {

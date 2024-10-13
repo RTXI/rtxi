@@ -27,14 +27,15 @@ public:
   // default constructor
   GeneratorSine();
   GeneratorSine(double freq, double amplitude, double dt);
-  ~GeneratorSine();
+
+  double get() override;
 
   // initialize waveform
   void init(double freq, double amplitude, double dt);
 
-protected:
-  double freq; // Hz
-  double amplitude;
+private:
+  double m_freq; // Hz
+  double m_amplitude;
 };
 
 #endif /* GEN_SINE_H_ */

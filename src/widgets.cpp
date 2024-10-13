@@ -2,10 +2,18 @@
 #include <QApplication>
 #include <QCloseEvent>
 #include <QDoubleValidator>
+#include <QGroupBox>
 #include <QIntValidator>
+#include <QLabel>
+#include <QMainWindow>
 #include <QMdiArea>
+#include <QMdiSubWindow>
+#include <QPushButton>
 #include <QScrollArea>
+#include <QSettings>
 #include <QTimer>
+#include <QVBoxLayout>
+#include <QWidget>
 #include <algorithm>
 #include <any>
 #include <memory>
@@ -13,9 +21,9 @@
 #include "widgets.hpp"
 
 #include <dlfcn.h>
-#include <qmdisubwindow.h>
 
 #include "debug.hpp"
+#include "event.hpp"
 
 std::string Widgets::Variable::state2string(RT::State::state_t state)
 {
@@ -558,9 +566,19 @@ RT::State::state_t Widgets::Plugin::getComponentState()
 }
 
 std::vector<Widgets::Variable::Info>
-Widgets::Plugin::getComponentParametersInfo()
+Widgets::Plugin::getComponentParametersInfo() const
 {
-  return this->plugin_component->getParametersInfo();
+  return plugin_component == nullptr
+      ? std::vector<Widgets::Variable::Info>({})
+      : this->plugin_component->getParametersInfo();
+}
+
+size_t Widgets::Plugin::getID() const
+{
+  if (this->hasComponent()) {
+    return plugin_component->getID();
+  }
+  return 0;
 }
 
 void Widgets::Plugin::attachComponent(
@@ -656,4 +674,63 @@ Event::Manager* Widgets::Plugin::getEventManager()
 Widgets::Panel* Widgets::Plugin::getPanel()
 {
   return this->widget_panel;
+}
+
+void Widgets::Plugin::loadParameterSettings(QSettings& userprefs)
+{
+  QString id_str;
+  QVariant value;
+  for (const auto& param_info : this->getComponentParametersInfo()) {
+    id_str = QString::number(param_info.id);
+    value = userprefs.value(id_str);
+    if (!value.isValid()) {
+      ERROR_MSG(
+          "Widgets::Plugin::loadParameterSettings : The loaded setting for "
+          "parameter {} is not valid! skipping...",
+          param_info.name);
+      continue;
+    }
+    // NOTE: Here we will assume that the type of the stored parameter matches
+    // the one stored inside the component. This may not be true in the future
+    // if the plugin developer decides to change the types of parameters. In
+    // this case, the QVariant will return 0 instead.
+    switch (param_info.vartype) {
+      case Widgets::Variable::INT_PARAMETER:
+        this->setComponentParameter(
+            param_info.id,
+            static_cast<int64_t>(userprefs.value(id_str).toInt()));
+        break;
+      case Variable::DOUBLE_PARAMETER:
+        this->setComponentParameter(
+            param_info.id,
+            static_cast<double>(userprefs.value(id_str).toDouble()));
+        break;
+      case Variable::UINT_PARAMETER:
+      case Variable::STATE:
+        this->setComponentParameter(
+            param_info.id,
+            static_cast<uint64_t>(userprefs.value(id_str).toUInt()));
+        break;
+      case Variable::COMMENT:
+      case Variable::UNKNOWN:
+        break;
+    }
+  }
+  // We should reflect the changes in the panel
+  this->getPanel()->refresh();
+}
+
+void Widgets::Plugin::loadCustomParameterSettings(QSettings& /*userprefs*/) {}
+
+void Widgets::Plugin::saveParameterSettings(QSettings& userprefs) const
+{
+  for (const auto& param_info : this->getComponentParametersInfo()) {
+    userprefs.setValue(QString::number(static_cast<size_t>(param_info.id)),
+                       QVariant::fromStdVariant(param_info.value));
+  }
+}
+
+void Widgets::Plugin::saveCustomParameterSettings(
+    QSettings& /*userprefs*/) const
+{
 }

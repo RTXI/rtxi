@@ -12,13 +12,14 @@
    see <http://www.gnu.org/licenses/>.
 */
 
+#include <QApplication>
 #include <optional>
-#include <variant>
 
 #include "workspace.hpp"
 
 #include "connector/connector.hpp"
 #include "data_recorder/data_recorder.hpp"
+#include "dlplugin.hpp"
 #include "module_installer/rtxi_wizard.hpp"
 #include "oscilloscope/oscilloscope.hpp"
 #include "performance_measurement/performance_measurement.hpp"
@@ -58,8 +59,21 @@ Workspace::Manager::Manager(Event::Manager* ev_manager)
   const QDir bin_dir = QCoreApplication::applicationDirPath();
   const std::string nidaq_driver_name = "librtxinidaqdriver.so";
   if (bin_dir.exists(QString::fromStdString(nidaq_driver_name))) {
-    this->registerDriver(bin_dir.path().toStdString() + std::string("/")
-                         + nidaq_driver_name);
+    try {
+      this->registerDriver(bin_dir.path().toStdString() + std::string("/")
+                           + nidaq_driver_name);
+    } catch (std::runtime_error& exception) {
+      ERROR_MSG("Unable to load NIDAQ rtxi driver");
+    }
+  }
+  const std::string gsc_driver_name = "librtxi_gsc16aio168_driver.so";
+  if (bin_dir.exists(QString::fromStdString(gsc_driver_name))) {
+    try {
+      this->registerDriver(bin_dir.path().toStdString() + std::string("/")
+                           + gsc_driver_name);
+    } catch (std::runtime_error& excepttion) {
+      ERROR_MSG("Unable to load GSC aio168 rtxi driver");
+    }
   }
 }
 
@@ -133,52 +147,15 @@ std::vector<DAQ::Device*> Workspace::Manager::getAllDevices()
   return devices;
 }
 
-template<class... Ts>
-struct overload : Ts...
+std::vector<const Widgets::Plugin*> Workspace::Manager::getLoadedPlugins()
 {
-  using Ts::operator()...;
-};
-template<class... Ts>
-overload(Ts...) -> overload<Ts...>;
-void Workspace::Manager::saveSettings(const QString& profile_name)
-{
-  QSettings settings(settings_prefix + profile_name, QSettings::IniFormat);
-  settings.beginGroup("widgets");
-  QString widget_name;
-  int widget_count = 0;
+  std::vector<const Widgets::Plugin*> result;
   for (const auto& entry : this->rtxi_widgets_registry) {
-    widget_name = QString::fromStdString(entry.first);
-    settings.beginGroup(widget_name);
     for (const auto& plugin : entry.second) {
-      settings.beginGroup(QString::number(widget_count));
-      for (const auto& param_info : plugin->getComponentParametersInfo()) {
-        settings.setValue(
-            QString::fromStdString(param_info.name),
-            std::visit(overload {[](const int64_t& val) -> QString
-                                 { return QString::number(val); },
-                                 [](const double& val) -> QString
-                                 { return QString::number(val); },
-                                 [](const uint64_t& val) -> QString
-                                 { return QString::number(val); },
-                                 [](const std::string& val) -> QString
-                                 { return QString::fromStdString(val); },
-                                 [](const RT::State::state_t& val) -> QString {
-                                   return QString::number(
-                                       static_cast<int8_t>(val));
-                                 }},
-                       param_info.value));
-      }
-      settings.endGroup();
-      widget_count++;
+      result.push_back(plugin.get());
     }
-    settings.endGroup();
   }
-  settings.endGroup();
-}
-
-void Workspace::Manager::loadSettings(const QString& profile_name)
-{
-  QSettings settings(profile_name, QSettings::IniFormat);
+  return result;
 }
 
 Widgets::Plugin* Workspace::Manager::loadCorePlugin(const std::string& library)
@@ -409,6 +386,9 @@ void Workspace::Manager::receiveEvent(Event::Object* event)
       break;
     case Event::Type::DAQ_DEVICE_QUERY_EVENT:
       event->setParam("devices", std::any(this->getAllDevices()));
+      break;
+    case Event::Type::PLUGIN_LIST_QUERY_EVENT:
+      event->setParam("plugins", std::any(this->getLoadedPlugins()));
       break;
     default:
       return;

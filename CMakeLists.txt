@@ -70,6 +70,7 @@ find_package(Threads REQUIRED)
 find_package(GSL REQUIRED)
 #Some libraries are harder to find as package, so this solves that
 find_library(nidaqmx NAMES libnidaqmx.so)
+find_library(16aio168_api NAMES lib16aio168_api.so)
 
 #Handle QT and boost libraries shenanigans
 set(CMAKE_AUTOMOC ON)
