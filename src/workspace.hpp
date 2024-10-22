@@ -16,12 +16,24 @@
 #define WORKSPACE_H
 
 #include <optional>
-#include <utility>
 
-#include "daq.hpp"
-#include "dlplugin.hpp"
-#include "event.hpp"
 #include "widgets.hpp"
+
+namespace Event
+{
+class Object;
+}  // namespace Event
+
+namespace DLL
+{
+class Loader;
+}  // namespace DLL
+
+namespace DAQ
+{
+class Device;
+class Driver;
+}  // namespace DAQ
 
 /*!
  * Objects contained within this namespace are responsible for providing
@@ -69,7 +81,7 @@ public:
   void unloadPlugin(Widgets::Plugin* plugin);
 
   /*!
-   * Handles plugin loading/unloadin gevents from gui thread
+   * Handles plugin loading/unloading gevents from gui thread
    *
    * \param event The event to handle. The workspace manager only handles the
    * following event types: Event::Type::PLUGIN_INSERT_EVENT
@@ -111,18 +123,11 @@ public:
   std::vector<DAQ::Device*> getAllDevices();
 
   /*!
-   * Save current workspace values and state settings
+   * Get list of loaded plugins
    *
-   * \param profile_name The name to save the settings
+   * \return A vector of pointers to constant Widget::Plugin objects
    */
-  void saveSettings(const QString& profile_name);
-
-  /*!
-   * Restore workspace values and state settings
-   *
-   * \param profile_name The name of the stored settings
-   */
-  void loadSettings(const QString& profile_name);
+  std::vector<const Widgets::Plugin*> getLoadedPlugins();
 
 private:
   using driver_registry_entry = std::pair<std::string, DAQ::Driver*>;

@@ -18,6 +18,14 @@
 
 */
 
+#include <QComboBox>
+#include <QGridLayout>
+#include <QGroupBox>
+#include <QLabel>
+#include <QListWidget>
+#include <QMdiSubWindow>
+#include <QPushButton>
+
 #include "connector.hpp"
 
 Connector::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
@@ -452,7 +460,8 @@ void Connector::Panel::updateConnectionButton()
   for (int i = 0; i < connectionBox->count(); i++) {
     temp_item = connectionBox->item(i);
     if (temp_item->data(Qt::UserRole).value<RT::block_connection_t>()
-        == connection) {
+        == connection)
+    {
       connectionButton->setDown(true);
       connectionButton->setChecked(true);
       return;

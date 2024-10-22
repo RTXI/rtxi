@@ -20,20 +20,24 @@
 #ifndef DATA_RECORDER_H
 #define DATA_RECORDER_H
 
-#include <QComboBox>
-#include <QListWidget>
-#include <QMutex>
-#include <QSpinBox>
 #include <QTime>
-#include <utility>
 #include <vector>
 
 #include <hdf5_hl.h>
-#include <time.h>
 
-#include "event.hpp"
 #include "io.hpp"
 #include "widgets.hpp"
+#include "fifo.hpp"
+
+class QComboBox;
+class QListWidget;
+class QMutex;
+class QSpinBox;
+
+namespace Event
+{
+class Manager;
+}  // namespace Event
 
 namespace DataRecorder
 {
@@ -65,7 +69,7 @@ typedef struct record_channel
 {
   std::string name;
   IO::endpoint endpoint;
-  RT::OS::Fifo* data_source=nullptr;
+  RT::OS::Fifo* data_source = nullptr;
   bool operator==(const record_channel& rhs) const
   {
     return (this->endpoint == rhs.endpoint)

@@ -119,7 +119,7 @@ void eventLogger::log(RT::Telemitry::Response response)
         this->ss << "System Threadlist Updated";
         break;
       case RT::Telemitry::RT_DEVICE_LIST_UPDATE:
-        this->ss << " System Devicelist Updated";
+        this->ss << "System Devicelist Updated";
         break;
       case RT::Telemitry::RT_NOOP:
         this->ss << "NO-OP Acknowledged";

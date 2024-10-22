@@ -25,9 +25,13 @@
 #include <vector>
 
 #include "event.hpp"
-#include "fifo.hpp"
 #include "io.hpp"
-#include "rtos.hpp"
+
+namespace RT::OS
+{
+struct Task;
+class Fifo;
+}  // namespace RT::OS
 
 // forward declaration
 namespace Widgets

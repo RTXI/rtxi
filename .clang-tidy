@@ -1,41 +1,32 @@
 ---
-# Enable ALL the things! Except not really
-# misc-non-private-member-variables-in-classes: the options don't do anything
+# Enable relevant things!
+# cpp core guidelines is our main check that we try to follow as close as possible.
+# The following are disabled checks because they don't make any sesne for our
+# project:
 # readability-identifier-naming: Should be enabled after main refactoring is done
 # *-vararg: we are dealing with variable argument c functions. cannot be helped
 # -modernize-deprecated-headers: dealing with c headers
 # -modernize-use-nodiscard: We are dealing with legacy code so this is too much.
 # -modernize-use-using: Conflicts with another warning. 
-# -hicpp-signed-bitwise: There are c functions that will fire this warning. bye bye.
 # -cppcoreguidelines-owning-memory: Qt uses parent widget relationships. 
 # -readability-identifier-nanme: shorter names can make sense in some cases.
 # -cppcoreguidelines-avoid-magic-numbers: Qt design is littered with these unfortunately.
 # -readability-magic-numbers: Same reason as above - cannot be helped due to Qt
 # -readability-redundant-access-specifiers: Qt's slot specifier produces this warning
-# -abseil-string-find-str-contains: we don't use abseil strings in this project 
-Checks: "*,\
-  -abseil-string-find-str-contains,\
+Checks: "bugprone-*, concurrency-*, cppcoreguidelines-*,\
+         modernize-*, performance-*, readability-*,\
   -readability-redundant-access-specifiers,\
   -readability-magic-numbers,\
   -cppcoreguidelines-avoid-magic-numbers,\
   -readability-identifier-length,\
   -cppcoreguidelines-owning-memory,\
-  -hicpp-signed-bitwise,\
-  -hicpp-deprecated-headers,\
   -*-vararg,\
   -modernize-deprecated-headers,\
   -modernize-use-trailing-return-type,\
   -modernize-use-nodiscard,\
   -modernize-use-using,\
   -google-readability-todo,\
-  -readability-identifier-naming,\
-  -altera-*,\
-  -fuchsia-*,\
-  fuchsia-multiple-inheritance,\
-  -llvm-header-guard,\
-  -llvm-include-order,\
-  -llvmlibc-*,\
-  -misc-non-private-member-variables-in-classes"
+  -readability-identifier-naming"
 WarningsAsErrors: ''
 CheckOptions:
   - key: 'bugprone-argument-comment.StrictMode'

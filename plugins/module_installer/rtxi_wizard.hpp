@@ -20,14 +20,15 @@
 #define RTXI_WIZARD_H
 
 #include <QDir>
-#include <QListWidget>
 #include <QNetworkAccessManager>
-#include <QNetworkReply>
-#include <QProgressDialog>
-#include <QTextEdit>
 #include <map>
 
 #include "widgets.hpp"
+
+class QListWidget;
+class QProgressDialog;
+class QTextEdit;
+class QNetworkReply;
 
 namespace RTXIWizard
 {

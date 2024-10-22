@@ -23,6 +23,14 @@ install(
 )
 endif()
 
+if(16aio168_api)
+install(
+    TARGETS rtxi_gsc16aio168_driver
+    DESTINATION ${CMAKE_INSTALL_BINDIR}
+    EXPORT rtxiLibraryTargets
+)
+endif()
+
 install(
     FILES 
         src/debug.hpp src/event.hpp src/io.hpp src/rt.hpp 

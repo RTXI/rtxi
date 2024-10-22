@@ -24,6 +24,12 @@
  */
 
 #include <QFileDialog>
+#include <QGroupBox>
+#include <QLabel>
+#include <QLineEdit>
+#include <QMdiSubWindow>
+#include <QPushButton>
+#include <QVBoxLayout>
 
 #include "userprefs.hpp"
 

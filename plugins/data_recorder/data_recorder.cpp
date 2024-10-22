@@ -17,25 +17,32 @@
 
 */
 
+#include <QComboBox>
 #include <QFileDialog>
+#include <QGridLayout>
+#include <QGroupBox>
+#include <QLabel>
+#include <QListWidget>
+#include <QMdiSubWindow>
 #include <QMessageBox>
+#include <QPushButton>
 #include <QSettings>
+#include <QSpinBox>
 #include <QTimer>
-#include <cstddef>
-#include <cstring>
 #include <mutex>
 #include <string>
 
 #include "data_recorder.hpp"
 
 #include <H5Ipublic.h>
-#include <unistd.h>
 
 #include "debug.hpp"
+#include "fifo.hpp"
+#include "rtos.hpp"
 
 DataRecorder::Panel::Panel(QMainWindow* mwindow, Event::Manager* ev_manager)
     : Widgets::Panel(
-        std::string(DataRecorder::MODULE_NAME), mwindow, ev_manager)
+          std::string(DataRecorder::MODULE_NAME), mwindow, ev_manager)
     , buttonGroup(new QGroupBox)
     , blockList(new QComboBox)
     , channelList(new QComboBox)
@@ -764,7 +771,9 @@ int DataRecorder::Plugin::create_component(IO::endpoint endpoint)
     return 0;
   }
   DataRecorder::record_channel chan;
-  chan.name = endpoint.block->getName();
+  chan.name = std::to_string(endpoint.block->getID());
+  chan.name += " ";
+  chan.name += endpoint.block->getName();
   chan.name += " ";
   chan.name += endpoint.direction == IO::INPUT ? "INPUT" : "OUTPUT";
   chan.name += " ";

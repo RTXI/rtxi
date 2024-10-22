@@ -34,23 +34,16 @@
 #include <shared_mutex>
 #include <vector>
 
-#include <qwt.h>
-#include <qwt_curve_fitter.h>
-#include <qwt_interval.h>
-#include <qwt_painter.h>
-#include <qwt_plot.h>
 #include <qwt_plot_canvas.h>
-#include <qwt_plot_curve.h>
-#include <qwt_plot_directpainter.h>
-#include <qwt_plot_grid.h>
-#include <qwt_plot_layout.h>
 #include <qwt_plot_legenditem.h>
-#include <qwt_plot_marker.h>
-#include <qwt_scale_engine.h>
-#include <qwt_system_clock.h>
-
+#include <qwt_plot.h>
 #include "fifo.hpp"
 #include "io.hpp"
+
+class QwtPlotCurve;
+class QwtPlotDirectPainter;
+class QwtPlotGrid;
+class QwtPlotMarker;
 
 namespace Oscilloscope
 {

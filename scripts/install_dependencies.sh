@@ -37,7 +37,7 @@ apt-get -y install \
 	build-essential qtbase5-dev qtbase5-dev-tools \
 	libqwt-qt5-dev libqt5svg5-dev libhdf5-dev \
 	libgsl-dev libgtest-dev libgmock-dev libfmt-dev vim lshw stress \
-	binutils-dev zstd git cmake \
+	binutils-dev zstd git cmake\
 	crash kexec-tools makedumpfile kernel-wedge libncurses5-dev libelf-dev \
 	flex bison pkgconf python3-pip ninja-build dwarves
 echo "-----> Package dependencies installed."
