@@ -547,7 +547,7 @@ void MainWindow::loadDAQSettings(
                                             block_cache.end(),
                                             [block](const auto& entry)
                                             { return entry.second == block; })
-                               != block_cache.end());
+                               == block_cache.end());
                      });
     if (iter == devices.end()) {
       ERROR_MSG("Unable to find DAQ device {} from the list of loaded devices.",
