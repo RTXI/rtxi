@@ -170,6 +170,7 @@ Widgets::Plugin* Workspace::Manager::loadCorePlugin(const std::string& library)
   this->registerFactories(library, *fact_methods);
   plugin = this->rtxi_factories_registry[library].createPlugin(event_manager);
   plugin_ptr = this->registerWidget(std::move(plugin));
+  plugin_ptr->setLibrary(library);
   return plugin_ptr;
 }
 

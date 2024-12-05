@@ -39,6 +39,7 @@
 #include "debug.hpp"
 #include "fifo.hpp"
 #include "rtos.hpp"
+#include "userprefs/userprefs.hpp"
 
 DataRecorder::Panel::Panel(QMainWindow* mwindow, Event::Manager* ev_manager)
     : Widgets::Panel(
@@ -333,11 +334,11 @@ void DataRecorder::Panel::changeDataFile()
   fileDialog.setWindowTitle("Select Data File");
 
   QSettings userprefs;
-  QSettings::setPath(QSettings::NativeFormat,
-                     QSettings::SystemScope,
-                     "/usr/local/share/rtxi/");
-  fileDialog.setDirectory(
-      userprefs.value("/dirs/data", getenv("HOME")).toString());  // NOLINT
+
+  fileDialog.setDirectory(userprefs
+                              .value(QString::fromStdString(std::string(
+                                  UserPrefs::HDF5_SAVE_LOCATION_KEY)))
+                              .toString());  // NOLINT
 
   QStringList filterList;
   filterList.push_back("HDF5 files (*.h5)");
@@ -361,9 +362,6 @@ void DataRecorder::Panel::changeDataFile()
   if (!filename.toLower().endsWith(QString(".h5"))) {
     filename += ".h5";
   }
-
-  // Write this directory to the user prefs as most recently used
-  userprefs.setValue("/dirs/data", fileDialog.directory().path());
 
   auto* hplugin = dynamic_cast<DataRecorder::Plugin*>(this->getHostPlugin());
   hplugin->change_file(filename.toStdString());
