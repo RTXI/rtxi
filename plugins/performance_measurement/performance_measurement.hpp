@@ -24,9 +24,10 @@
 #include "math/runningstat.h"
 #include "widgets.hpp"
 
-namespace RT::OS{
+namespace RT::OS
+{
 class Fifo;
-} // namespace RT::OS
+}  // namespace RT::OS
 
 class QLineEdit;
 
@@ -36,22 +37,39 @@ namespace PerformanceMeasurement
 constexpr std::string_view MODULE_NAME = "RT Benchmarks";
 
 inline std::vector<Widgets::Variable::Info> get_default_vars()
-{ 
-  return 
-  {
-    {
-    }
-  };
+{
+  return {{}};
 }
 
-struct performance_stats_t{
-  double duration=0.0;
-  double timestep=0.0;
-  double latency=0.0;
-  double max_duration=0.0;
-  double max_timestep=0.0;
-  double max_latency=0.0;
-  double jitter=0.0;
+inline std::vector<IO::channel_t> get_default_channels()
+{
+  return {
+      {"Duration",
+       "Real-Time measurement of time elapsed time (ns) for calculations each period",
+       IO::OUTPUT},
+      {"Time Step", "Real-Time measurement of system period", IO::OUTPUT},
+      {"Latency", "Time between intended wake-up and real wake-up", IO::OUTPUT},
+      {"Max Duration",
+       "Maximum computation time measured since last reset",
+       IO::OUTPUT},
+      {"Max Time Step",
+       "Maximum realtime period measured since last reset",
+       IO::OUTPUT},
+      {"Max Latency", "Maximum latency measured since last reset", IO::OUTPUT},
+      {"Jitter",
+       "Standard Deviation of the real-time period measured since last reset",
+       IO::OUTPUT}};
+}
+
+struct performance_stats_t
+{
+  double duration = 0.0;
+  double timestep = 0.0;
+  double latency = 0.0;
+  double max_duration = 0.0;
+  double max_timestep = 0.0;
+  double max_latency = 0.0;
+  double jitter = 0.0;
 };
 
 class Plugin : public Widgets::Plugin
@@ -59,28 +77,29 @@ class Plugin : public Widgets::Plugin
 public:
   explicit Plugin(Event::Manager* ev_manager);
   performance_stats_t getSampleStat();
+
 private:
   RT::OS::Fifo* component_fifo;
 };  // class Plugin
 
 class Component : public Widgets::Component
 {
-public: 
-  explicit Component(Widgets::Plugin* hplugin); 
+public:
+  explicit Component(Widgets::Plugin* hplugin);
 
   void setTickPointers(int64_t* s_ticks, int64_t* e_ticks);
   void execute() override;
-  RT::OS::Fifo* getFIfoPtr(){ return this->fifo.get(); }
+  RT::OS::Fifo* getFIfoPtr() { return this->fifo.get(); }
 
 private:
   performance_stats_t stats;
 
-  //RunningStat timestepStat;
+  // RunningStat timestepStat;
   RunningStat latencyStat;
 
-  int64_t *start_ticks=nullptr; // only accessed in rt
-  int64_t *end_ticks=nullptr; // only accessed in rt
-  int64_t last_start_ticks=0;
+  int64_t* start_ticks = nullptr;  // only accessed in rt
+  int64_t* end_ticks = nullptr;  // only accessed in rt
+  int64_t last_start_ticks = 0;
   std::unique_ptr<RT::OS::Fifo> fifo;
 };
 
@@ -89,19 +108,20 @@ class Panel : public Widgets::Panel
   Q_OBJECT
 
 public:
-  Panel(const std::string& mod_name, QMainWindow* mwindow, Event::Manager* ev_manager);
+  Panel(const std::string& mod_name,
+        QMainWindow* mwindow,
+        Event::Manager* ev_manager);
 
 public slots:
   /*!
    * Starts the statistics over
    */
   void reset();
-  //void resetMaxTimeStep();
+  // void resetMaxTimeStep();
   /*!
    * Updates the GUI with the latest values
    */
   void refresh() override;
-
 
 private:
   QLineEdit* durationEdit;
@@ -114,10 +134,12 @@ private:
 
 std::unique_ptr<Widgets::Plugin> createRTXIPlugin(Event::Manager* ev_manager);
 
-Widgets::Panel* createRTXIPanel(QMainWindow* main_window, Event::Manager* ev_manager);
+Widgets::Panel* createRTXIPanel(QMainWindow* main_window,
+                                Event::Manager* ev_manager);
 
-std::unique_ptr<Widgets::Component> createRTXIComponent(Widgets::Plugin* host_plugin);
+std::unique_ptr<Widgets::Component> createRTXIComponent(
+    Widgets::Plugin* host_plugin);
 
 Widgets::FactoryMethods getFactories();
-} // namespace PerformanceMeasurement
+}  // namespace PerformanceMeasurement
 #endif /* PERFORMANCE_MEASUREMENT_H */
