@@ -48,6 +48,7 @@ DataRecorder::Panel::Panel(QMainWindow* mwindow, Event::Manager* ev_manager)
     , blockList(new QComboBox)
     , channelList(new QComboBox)
     , typeList(new QComboBox)
+    , timeTagType(new QComboBox())
     , selectionBox(new QListWidget)
     , recordStatus(new QLabel)
     , downsampleSpin(new QSpinBox(this))
@@ -131,10 +132,20 @@ DataRecorder::Panel::Panel(QMainWindow* mwindow, Event::Manager* ev_manager)
   auto* stampLayout = new QHBoxLayout;
 
   // Add timestamp elements
-
   stampLayout->addWidget(timeStampEdit);
   addTag = new QPushButton(tr("Tag"));
   stampLayout->addWidget(addTag);
+
+  auto* timeTagLabel = new QLabel(tr("Time Tag Type:"));
+  stampLayout->addWidget(timeTagLabel);
+  timeTagType->addItem("Index", TIME_TAG_TYPE::INDEX);
+  timeTagType->addItem("Time Stamp", TIME_TAG_TYPE::TIME);
+  timeTagType->addItem("No Tag", TIME_TAG_TYPE::NONE);
+  stampLayout->addWidget(timeTagType);
+  QObject::connect(timeTagType,
+                   QOverload<int>::of(&QComboBox::activated),
+                   this,
+                   &DataRecorder::Panel::setTimeTagType);
   QObject::connect(
       addTag, &QPushButton::released, this, &DataRecorder::Panel::addNewTag);
 
@@ -523,6 +534,11 @@ void DataRecorder::Panel::syncEnableRecordingButtons(const QString& /*unused*/)
   startRecordButton->setEnabled(ready);
   stopRecordButton->setEnabled(ready);
   this->recordStatus->setText(ready ? "Ready" : "Not ready");
+}
+
+void DataRecorder::Panel::setTimeTagType()
+{
+  this->time_type = static_cast<TIME_TAG_TYPE>(timeTagType->currentData().toInt());
 }
 
 DataRecorder::Plugin::Plugin(Event::Manager* ev_manager)

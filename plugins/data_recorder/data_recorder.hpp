@@ -25,9 +25,9 @@
 
 #include <hdf5_hl.h>
 
+#include "fifo.hpp"
 #include "io.hpp"
 #include "widgets.hpp"
-#include "fifo.hpp"
 
 class QComboBox;
 class QListWidget;
@@ -93,6 +93,13 @@ class Panel : public Widgets::Panel
 {
   Q_OBJECT
 
+  enum TIME_TAG_TYPE
+  {
+    INDEX = 0,
+    TIME,
+    NONE
+  };
+
 public:
   Panel(const Panel&) = delete;
   Panel(Panel&&) = delete;
@@ -121,11 +128,13 @@ private slots:
   void addNewTag();
   void processData();
   void syncEnableRecordingButtons(const QString& /*unused*/);
+  void setTimeTagType();
 
 private:
   size_t m_buffer_size = DEFAULT_BUFFER_SIZE;
   size_t downsample_rate {1};
   std::vector<std::string> dataTags;
+  int time_type=TIME_TAG_TYPE::INDEX;
 
   QGroupBox* channelGroup = nullptr;
   QGroupBox* stampGroup = nullptr;
@@ -137,6 +146,7 @@ private:
   QComboBox* blockList = nullptr;
   QComboBox* channelList = nullptr;
   QComboBox* typeList = nullptr;
+  QComboBox* timeTagType = nullptr;
   QListWidget* selectionBox = nullptr;
   QLabel* recordStatus = nullptr;
   QPushButton* addRecorderButton = nullptr;
