@@ -538,7 +538,13 @@ void DataRecorder::Panel::syncEnableRecordingButtons(const QString& /*unused*/)
 
 void DataRecorder::Panel::setTimeTagType()
 {
-  this->time_type = static_cast<TIME_TAG_TYPE>(timeTagType->currentData().toInt());
+  this->time_type =
+      static_cast<TIME_TAG_TYPE>(timeTagType->currentData().toInt());
+}
+
+int DataRecorder::Panel::getTimeTagType() const
+{
+  return static_cast<int>(this->time_type);
 }
 
 DataRecorder::Plugin::Plugin(Event::Manager* ev_manager)
@@ -691,15 +697,30 @@ void DataRecorder::Plugin::open_trial_group()
                 H5P_DEFAULT,
                 H5P_DEFAULT,
                 H5P_DEFAULT);
-  for (auto& channel : this->m_recording_channels_list) {
-    compression_property = H5Pcreate(H5P_DATASET_CREATE);
-    H5Pset_deflate(compression_property, 7);
-    channel.hdf5_data_handle =
-        H5PTcreate(this->hdf5_handles.sync_group_handle,
-                   channel.channel.name.c_str(),
-                   this->hdf5_handles.channel_datatype_handle,
-                   this->m_data_chunk_size,
-                   compression_property);
+  const int data_type =
+      dynamic_cast<DataRecorder::Panel*>(this->getPanel())->getTimeTagType();
+  if (data_type == 2) {
+    for (auto& channel : this->m_recording_channels_list) {
+      compression_property = H5Pcreate(H5P_DATASET_CREATE);
+      H5Pset_deflate(compression_property, 7);
+      channel.hdf5_data_handle =
+          H5PTcreate(this->hdf5_handles.sync_group_handle,
+                     channel.channel.name.c_str(),
+                     H5T_IEEE_F64LE,
+                     this->m_data_chunk_size,
+                     compression_property);
+    }
+  } else {
+    for (auto& channel : this->m_recording_channels_list) {
+      compression_property = H5Pcreate(H5P_DATASET_CREATE);
+      H5Pset_deflate(compression_property, 7);
+      channel.hdf5_data_handle =
+          H5PTcreate(this->hdf5_handles.sync_group_handle,
+                     channel.channel.name.c_str(),
+                     this->hdf5_handles.channel_datatype_handle,
+                     this->m_data_chunk_size,
+                     compression_property);
+    }
   }
 }
 
@@ -921,6 +942,17 @@ void DataRecorder::Plugin::save_data(
     hid_t data_id,
     const std::vector<DataRecorder::data_token_t>& data,
     size_t packet_count)
+{
+  const herr_t err =
+      H5PTappend(data_id, static_cast<hsize_t>(packet_count), data.data());
+  if (err < 0) {
+    ERROR_MSG("Unable to write data into hdf5 file!");
+  }
+}
+
+void DataRecorder::Plugin::save_data(hid_t data_id,
+                                     const std::vector<double>& data,
+                                     size_t packet_count)
 {
   const herr_t err =
       H5PTappend(data_id, static_cast<hsize_t>(packet_count), data.data());

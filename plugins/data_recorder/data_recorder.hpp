@@ -108,6 +108,8 @@ public:
   Panel(QMainWindow* mwindow, Event::Manager* ev_manager);
   ~Panel() override = default;
 
+  int getTimeTagType() const;
+
 signals:
   void updateBlockInfo();
   void record_signal(bool record);
