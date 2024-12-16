@@ -212,6 +212,9 @@ private:
   static void save_data(hid_t data_id,
                         const std::vector<data_token_t>& data,
                         size_t packet_count);
+  static void save_data(hid_t data_id,
+                        const std::vector<double>& data,
+                        size_t packet_count);
   hsize_t m_data_chunk_size = static_cast<hsize_t>(1000);
   int m_compression_factor = 5;
   struct hdf5_handles
@@ -243,6 +246,7 @@ private:
   int trial_count = 0;
   std::string hdf5_filename;
   std::vector<recorder_t> m_recording_channels_list;
+  std::vector<int64_t> m_channel_data_counts;
   std::shared_mutex m_channels_list_mut;
   std::atomic<bool> open_file = false;
 };  // class Plugin

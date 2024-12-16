@@ -479,6 +479,7 @@ void DataRecorder::Panel::startRecordClicked()
     this->starting_record_time = QTime::currentTime();
     this->trialNum->setNum(hplugin->getTrialCount());
     this->trialLength->setText("Recording...");
+    this->timeTagType->setDisabled(true);
   }
 }
 
@@ -496,6 +497,7 @@ void DataRecorder::Panel::stopRecordClicked()
     this->fileSize->setNum(
         static_cast<double>(QFile(fileNameEdit->text()).size())
         / (1024.0 * 1024.0));
+    this->timeTagType->setDisabled(false);
   }
 }
 
@@ -612,10 +614,12 @@ void DataRecorder::Plugin::startRecording()
   this->append_new_trial();
   const Event::Type event_type = Event::Type::RT_THREAD_UNPAUSE_EVENT;
   std::vector<Event::Object> start_recording_event;
+  m_channel_data_counts.clear();
   for (auto& rec_channel : this->m_recording_channels_list) {
     start_recording_event.emplace_back(event_type);
     start_recording_event.back().setParam(
         "thread", static_cast<RT::Thread*>(rec_channel.component.get()));
+    m_channel_data_counts.push_back(0);
   }
   this->getEventManager()->postEvent(start_recording_event);
   this->recording.store(true);
@@ -699,6 +703,7 @@ void DataRecorder::Plugin::open_trial_group()
                 H5P_DEFAULT);
   const int data_type =
       dynamic_cast<DataRecorder::Panel*>(this->getPanel())->getTimeTagType();
+  m_channel_data_counts.clear();
   if (data_type == 2) {
     for (auto& channel : this->m_recording_channels_list) {
       compression_property = H5Pcreate(H5P_DATASET_CREATE);
@@ -712,6 +717,7 @@ void DataRecorder::Plugin::open_trial_group()
     }
   } else {
     for (auto& channel : this->m_recording_channels_list) {
+      m_channel_data_counts.push_back(0);
       compression_property = H5Pcreate(H5P_DATASET_CREATE);
       H5Pset_deflate(compression_property, 7);
       channel.hdf5_data_handle =
@@ -922,19 +928,64 @@ void DataRecorder::Plugin::process_data_worker()
     return;
   }
   std::vector<DataRecorder::data_token_t> data_buffer(this->m_data_chunk_size);
+  std::vector<double> data_buffer_doubles;
+  data_buffer_doubles.reserve(this->m_data_chunk_size);
   const size_t packet_byte_size = sizeof(DataRecorder::data_token_t);
   int64_t read_bytes = 0;
   size_t packet_count = 0;
+  size_t channel_id = 0;
+  const int time_type =
+      dynamic_cast<DataRecorder::Panel*>(this->getPanel())->getTimeTagType();
   const std::shared_lock<std::shared_mutex> lk(this->m_channels_list_mut);
-  for (auto& channel : this->m_recording_channels_list) {
-    while (read_bytes = channel.channel.data_source->read(
-               data_buffer.data(), packet_byte_size * data_buffer.size()),
-           read_bytes > 0)
-    {
-      packet_count = static_cast<size_t>(read_bytes) / packet_byte_size;
-      DataRecorder::Plugin::save_data(
-          channel.hdf5_data_handle, data_buffer, packet_count);
-    }
+  switch (time_type) {
+    case 0:
+
+      for (auto& channel : this->m_recording_channels_list) {
+        while (read_bytes = channel.channel.data_source->read(
+                   data_buffer.data(), packet_byte_size * data_buffer.size()),
+               read_bytes > 0)
+        {
+          packet_count = static_cast<size_t>(read_bytes) / packet_byte_size;
+          DataRecorder::Plugin::save_data(
+              channel.hdf5_data_handle, data_buffer, packet_count);
+        }
+      }
+      break;
+    case 1:
+
+      for (auto& channel : this->m_recording_channels_list) {
+        while (read_bytes = channel.channel.data_source->read(
+                   data_buffer.data(), packet_byte_size * data_buffer.size()),
+               read_bytes > 0)
+        {
+          for (auto& token : data_buffer) {
+            token.time = m_channel_data_counts[channel_id++]++;
+          }
+          packet_count = static_cast<size_t>(read_bytes) / packet_byte_size;
+          DataRecorder::Plugin::save_data(
+              channel.hdf5_data_handle, data_buffer, packet_count);
+        }
+      }
+      break;
+    case 2:
+
+      for (auto& channel : this->m_recording_channels_list) {
+        while (read_bytes = channel.channel.data_source->read(
+                   data_buffer.data(), packet_byte_size * data_buffer.size()),
+               read_bytes > 0)
+        {
+          for (auto& token : data_buffer) {
+            data_buffer_doubles.push_back(token.value);
+          }
+          packet_count = static_cast<size_t>(read_bytes) / packet_byte_size;
+          DataRecorder::Plugin::save_data(
+              channel.hdf5_data_handle, data_buffer_doubles, packet_count);
+        }
+      }
+      break;
+    default:
+      ERROR_MSG("DataRecorder::Plugin::process_data_worker : Bad time tagging type detected. Unable to save data to hdf5 file");
+      break;
   }
 }
 
