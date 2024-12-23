@@ -399,6 +399,24 @@ void MainWindow::loadWindow()
     showMaximized();
   }
   userprefs.endGroup();
+  userprefs.beginGroup("settings");
+  const auto workspace_dir_key = QString::fromStdString(
+      std::string(UserPrefs::WORKSPACE_SAVE_LOCATION_KEY));
+  const auto data_dir_key = QString::fromStdString(
+      std::string(UserPrefs::HDF5_SAVE_LOCATION_KEY));
+  auto workspace_dir = userprefs.value(workspace_dir_key).toString();
+  auto data_dir = userprefs.value(data_dir_key).toString();
+  const QString env_var = QString::fromLocal8Bit(qgetenv("HOME"));
+  if (workspace_dir == "") {
+    userprefs.setValue(workspace_dir_key, env_var);
+  }
+  if (data_dir == ""){
+    userprefs.setValue(
+        QString::fromStdString(std::string(UserPrefs::HDF5_SAVE_LOCATION_KEY)),
+        env_var);
+  }
+  userprefs.endGroup();
+
   show();
 }
 
@@ -531,7 +549,7 @@ void MainWindow::loadDAQSettings(
   DAQ::index_t current_channel_id = 0;
   for (const auto& device_id : userprefs.childGroups()) {
     userprefs.beginGroup(device_id);
-    device_name = userprefs.value("name").value<QString>();
+    device_name = userprefs.value("name").toString();
     // NOTE: We need to make sure that the settings we are about to load are
     // not reloaded for other devices. Therefore we check whether the name
     // exists in the loaded devices registry and whether we already used
@@ -671,7 +689,7 @@ void MainWindow::loadWidgetSettings(
   std::string event_status;
   for (const auto& plugin_instance_id : userprefs.childGroups()) {
     userprefs.beginGroup(plugin_instance_id);
-    plugin_name = userprefs.value("library").value<QString>();
+    plugin_name = userprefs.value("library").toString();
     this->loadWidget(plugin_name, plugin_ptr);
     // Load the settings
     userprefs.beginGroup("standardParams");
@@ -766,8 +784,8 @@ void MainWindow::loadSettings()
 
   const QString profile = load_settings_dialog->textValue();
   mdiArea->closeAllSubWindows();
-  const auto workspace_filename = userprefs.value(profile).value<QString>();
-  QSettings workspaceprefs(workspace_filename);
+  const auto workspace_filename = userprefs.value(profile).toString();
+  QSettings workspaceprefs(workspace_filename, QSettings::IniFormat);
   std::unordered_map<size_t, IO::Block*> blocks;
   this->loadPeriodSettings(workspaceprefs);
 
@@ -783,11 +801,18 @@ void MainWindow::loadSettings()
 void MainWindow::saveSettings()
 {
   QSettings userprefs;
+  userprefs.beginGroup("settings");
+  const auto workspace_dir_loc =
+      userprefs
+          .value(QString::fromStdString(
+              std::string(UserPrefs::WORKSPACE_SAVE_LOCATION_KEY)))
+          .toString();
+  userprefs.endGroup();
   userprefs.beginGroup("Workspaces");
   auto* save_settings_dialog = new QInputDialog(this);
   save_settings_dialog->setInputMode(QInputDialog::TextInput);
   save_settings_dialog->setComboBoxEditable(true);
-  save_settings_dialog->setComboBoxItems(userprefs.childGroups());
+  save_settings_dialog->setComboBoxItems(userprefs.childKeys());
   save_settings_dialog->setLabelText("Profile");
   save_settings_dialog->setOkButtonText("Save");
   save_settings_dialog->exec();
@@ -801,16 +826,12 @@ void MainWindow::saveSettings()
   if (userprefs.childGroups().contains(profile_name)) {
     userprefs.remove(profile_name);
   }
-  const auto workspace_dir_loc =
-      userprefs
-          .value(QString::fromStdString(
-              std::string(UserPrefs::WORKSPACE_SAVE_LOCATION_KEY)))
-          .value<QString>();
-  const QString workspace_filename = workspace_dir_loc + "/" + profile_name + ".ws";
-  userprefs.setValue(profile_name,
-                     workspace_filename);
-  //userprefs.beginGroup(profile_name);
-  QSettings workspaceprefs(workspace_filename);
+  const QString workspace_filename =
+      workspace_dir_loc + "/" + profile_name;
+  userprefs.setValue(profile_name, workspace_filename);
+  // userprefs.beginGroup(profile_name);
+  QSettings workspaceprefs(workspace_filename, QSettings::IniFormat);
+  workspaceprefs.clear();
   this->savePeriodSettings(workspaceprefs);
 
   this->saveDAQSettings(workspaceprefs);
