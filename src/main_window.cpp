@@ -754,7 +754,7 @@ void MainWindow::loadSettings()
   auto* load_settings_dialog = new QInputDialog(this);
   load_settings_dialog->setInputMode(QInputDialog::TextInput);
   load_settings_dialog->setComboBoxEditable(false);
-  load_settings_dialog->setComboBoxItems(userprefs.childGroups());
+  load_settings_dialog->setComboBoxItems(userprefs.childKeys());
   load_settings_dialog->setLabelText("Profile");
   load_settings_dialog->setOkButtonText("Load");
   load_settings_dialog->exec();
@@ -766,18 +766,17 @@ void MainWindow::loadSettings()
 
   const QString profile = load_settings_dialog->textValue();
   mdiArea->closeAllSubWindows();
-  userprefs.beginGroup(profile);
-
+  const auto workspace_filename = userprefs.value(profile).value<QString>();
+  QSettings workspaceprefs(workspace_filename);
   std::unordered_map<size_t, IO::Block*> blocks;
-  this->loadPeriodSettings(userprefs);
+  this->loadPeriodSettings(workspaceprefs);
 
-  this->loadDAQSettings(userprefs, blocks);
+  this->loadDAQSettings(workspaceprefs, blocks);
 
-  this->loadWidgetSettings(userprefs, blocks);
+  this->loadWidgetSettings(workspaceprefs, blocks);
 
-  this->loadConnectionSettings(userprefs, blocks);
+  this->loadConnectionSettings(workspaceprefs, blocks);
 
-  userprefs.endGroup();  // profile
   userprefs.endGroup();  // workspaces
 }
 
@@ -802,16 +801,22 @@ void MainWindow::saveSettings()
   if (userprefs.childGroups().contains(profile_name)) {
     userprefs.remove(profile_name);
   }
+  const auto workspace_dir_loc =
+      userprefs
+          .value(QString::fromStdString(
+              std::string(UserPrefs::WORKSPACE_SAVE_LOCATION_KEY)))
+          .value<QString>();
+  const QString workspace_filename = workspace_dir_loc + "/" + profile_name + ".ws";
+  userprefs.setValue(profile_name,
+                     workspace_filename);
+  //userprefs.beginGroup(profile_name);
+  QSettings workspaceprefs(workspace_filename);
+  this->savePeriodSettings(workspaceprefs);
 
-  userprefs.beginGroup(profile_name);
+  this->saveDAQSettings(workspaceprefs);
 
-  this->savePeriodSettings(userprefs);
+  this->saveWidgetSettings(workspaceprefs);
 
-  this->saveDAQSettings(userprefs);
-
-  this->saveWidgetSettings(userprefs);
-
-  userprefs.endGroup();  // profile
   userprefs.endGroup();  // Workspaces
 }
 
