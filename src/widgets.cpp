@@ -325,6 +325,7 @@ void Widgets::Panel::exit()
   event.setParam("pluginPointer",
                  std::any(static_cast<Widgets::Plugin*>(this->hostPlugin)));
   this->event_manager->postEvent(&event);
+  this->hostPlugin = nullptr;
 }
 
 void Widgets::Panel::refresh()
