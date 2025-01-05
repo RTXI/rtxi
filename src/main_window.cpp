@@ -828,7 +828,7 @@ void MainWindow::saveSettings()
     userprefs.remove(profile_name);
   }
   const QString workspace_filename =
-      workspace_dir_loc + "/" + profile_name;
+      workspace_dir_loc + "/" + profile_name + ".ws";
   userprefs.setValue(profile_name, workspace_filename);
   // userprefs.beginGroup(profile_name);
   QSettings workspaceprefs(workspace_filename, QSettings::IniFormat);
