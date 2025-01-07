@@ -346,11 +346,12 @@ void DataRecorder::Panel::changeDataFile()
 
   QSettings userprefs;
 
+  userprefs.beginGroup("settings");
   fileDialog.setDirectory(userprefs
                               .value(QString::fromStdString(std::string(
                                   UserPrefs::HDF5_SAVE_LOCATION_KEY)))
                               .toString());  // NOLINT
-
+  userprefs.endGroup();
   QStringList filterList;
   filterList.push_back("HDF5 files (*.h5)");
   filterList.push_back("All files (*.*)");

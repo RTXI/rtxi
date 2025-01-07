@@ -402,18 +402,16 @@ void MainWindow::loadWindow()
   userprefs.beginGroup("settings");
   const auto workspace_dir_key = QString::fromStdString(
       std::string(UserPrefs::WORKSPACE_SAVE_LOCATION_KEY));
-  const auto data_dir_key = QString::fromStdString(
-      std::string(UserPrefs::HDF5_SAVE_LOCATION_KEY));
+  const auto data_dir_key =
+      QString::fromStdString(std::string(UserPrefs::HDF5_SAVE_LOCATION_KEY));
   auto workspace_dir = userprefs.value(workspace_dir_key).toString();
   auto data_dir = userprefs.value(data_dir_key).toString();
   const QString env_var = QString::fromLocal8Bit(qgetenv("HOME"));
   if (workspace_dir == "") {
     userprefs.setValue(workspace_dir_key, env_var);
   }
-  if (data_dir == ""){
-    userprefs.setValue(
-        QString::fromStdString(std::string(UserPrefs::HDF5_SAVE_LOCATION_KEY)),
-        env_var);
+  if (data_dir == "") {
+    userprefs.setValue(data_dir_key, env_var);
   }
   userprefs.endGroup();
 
