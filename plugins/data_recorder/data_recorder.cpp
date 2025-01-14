@@ -34,12 +34,15 @@
 
 #include "data_recorder.hpp"
 
-#include <H5Ipublic.h>
+#include <H5Dpublic.h>
+#include <H5Spublic.h>
+#include <hdf5.h>
 
 #include "debug.hpp"
 #include "fifo.hpp"
 #include "rtos.hpp"
 #include "userprefs/userprefs.hpp"
+#include "widgets.hpp"
 
 DataRecorder::Panel::Panel(QMainWindow* mwindow, Event::Manager* ev_manager)
     : Widgets::Panel(
@@ -143,7 +146,7 @@ DataRecorder::Panel::Panel(QMainWindow* mwindow, Event::Manager* ev_manager)
   timeTagType->addItem("No Tag", TIME_TAG_TYPE::NONE);
   stampLayout->addWidget(timeTagType);
   QObject::connect(timeTagType,
-                   QOverload<int>::of(&QComboBox::activated),
+                   QOverload<int>::of(&QComboBox::currentIndexChanged),
                    this,
                    &DataRecorder::Panel::setTimeTagType);
   QObject::connect(
@@ -289,6 +292,10 @@ DataRecorder::Panel::Panel(QMainWindow* mwindow, Event::Manager* ev_manager)
                    &DataRecorder::Panel::record_signal,
                    this,
                    &DataRecorder::Panel::record_slot);
+  QObject::connect(this,
+                   &DataRecorder::Panel::record_signal,
+                   timeTagType,
+                   &QComboBox::setDisabled);
   recording_timer->start();
 }
 
@@ -539,15 +546,19 @@ void DataRecorder::Panel::syncEnableRecordingButtons(const QString& /*unused*/)
   this->recordStatus->setText(ready ? "Ready" : "Not ready");
 }
 
-void DataRecorder::Panel::setTimeTagType()
+void DataRecorder::Panel::setTimeTagType(int tag_type)
 {
-  this->time_type =
-      static_cast<TIME_TAG_TYPE>(timeTagType->currentData().toInt());
+  // Update our local copy of tag type if succesfully changed in RT thread
+  if (dynamic_cast<DataRecorder::Plugin*>(this->getHostPlugin())
+          ->changeIndexingType(tag_type))
+  {
+    this->time_type = static_cast<TIME_TAG_TYPE>(tag_type);
+  };
 }
 
-int DataRecorder::Panel::getTimeTagType() const
+DataRecorder::TIME_TAG_TYPE DataRecorder::Panel::getTimeTagType() const
 {
-  return static_cast<int>(this->time_type);
+  return this->time_type;
 }
 
 DataRecorder::Plugin::Plugin(Event::Manager* ev_manager)
@@ -614,13 +625,18 @@ void DataRecorder::Plugin::startRecording()
   const std::unique_lock<std::shared_mutex> lk(this->m_channels_list_mut);
   this->append_new_trial();
   const Event::Type event_type = Event::Type::RT_THREAD_UNPAUSE_EVENT;
+  const Event::Type unpause_event_type =
+      Event::Type::RT_WIDGET_STATE_CHANGE_EVENT;
   std::vector<Event::Object> start_recording_event;
-  m_channel_data_counts.clear();
   for (auto& rec_channel : this->m_recording_channels_list) {
+    start_recording_event.emplace_back(unpause_event_type);
+    start_recording_event.back().setParam(
+        "component",
+        static_cast<Widgets::Component*>(rec_channel.component.get()));
+    start_recording_event.back().setParam("state", RT::State::UNPAUSE);
     start_recording_event.emplace_back(event_type);
     start_recording_event.back().setParam(
         "thread", static_cast<RT::Thread*>(rec_channel.component.get()));
-    m_channel_data_counts.push_back(0);
   }
   this->getEventManager()->postEvent(start_recording_event);
   this->recording.store(true);
@@ -633,14 +649,56 @@ void DataRecorder::Plugin::stopRecording()
   }
   const std::unique_lock<std::shared_mutex> lk(this->m_channels_list_mut);
   const Event::Type event_type = Event::Type::RT_THREAD_PAUSE_EVENT;
+  const Event::Type pause_event_type =
+      Event::Type::RT_WIDGET_STATE_CHANGE_EVENT;
   std::vector<Event::Object> stop_recording_event;
   for (auto& rec_chan : this->m_recording_channels_list) {
+    stop_recording_event.emplace_back(pause_event_type);
+    stop_recording_event.back().setParam(
+        "component",
+        static_cast<Widgets::Component*>(rec_chan.component.get()));
+    stop_recording_event.back().setParam("state", RT::State::PAUSE);
     stop_recording_event.emplace_back(event_type);
     stop_recording_event.back().setParam(
         "thread", static_cast<RT::Thread*>(rec_chan.component.get()));
   }
   this->getEventManager()->postEvent(stop_recording_event);
   this->recording.store(false);
+}
+
+bool DataRecorder::Plugin::changeIndexingType(int tag_type)
+{
+  // We only change the index type while not recording!
+  if (this->recording.load()) {
+    ERROR_MSG(
+        "DataRecorder::Plugin::changeIndexingType : Unable to change index "
+        "type while recording.");
+    return false;
+  }
+  if (tag_type < 0) {
+    ERROR_MSG(
+        "DataRecorderr::Plugin::changeIndexingType : Invalid index provided. "
+        "Unable to change index type");
+    return false;
+  }
+  std::vector<Event::Object> change_index_type_events;
+  change_index_type_events.reserve(this->m_recording_channels_list.size());
+  for (auto& rec_chan : this->m_recording_channels_list) {
+    change_index_type_events.emplace_back(
+        Event::Type::RT_WIDGET_PARAMETER_CHANGE_EVENT);
+    change_index_type_events.back().setParam(
+        "paramID", std::any(static_cast<size_t>(PARAMETER::INDEXING)));
+    change_index_type_events.back().setParam(
+        "paramType", std::any(Widgets::Variable::UINT_PARAMETER));
+    change_index_type_events.back().setParam(
+        "paramValue", std::any(static_cast<uint64_t>(tag_type)));
+    change_index_type_events.back().setParam(
+        "paramWidget",
+        std::any(static_cast<Widgets::Component*>(rec_chan.component.get())));
+  }
+  this->getEventManager()->postEvent(change_index_type_events);
+
+  return true;
 }
 
 void DataRecorder::Plugin::close_trial_group()
@@ -702,10 +760,9 @@ void DataRecorder::Plugin::open_trial_group()
                 H5P_DEFAULT,
                 H5P_DEFAULT,
                 H5P_DEFAULT);
-  const int data_type =
+  const TIME_TAG_TYPE data_type =
       dynamic_cast<DataRecorder::Panel*>(this->getPanel())->getTimeTagType();
-  m_channel_data_counts.clear();
-  if (data_type == 2) {
+  if (data_type == NONE) {
     for (auto& channel : this->m_recording_channels_list) {
       compression_property = H5Pcreate(H5P_DATASET_CREATE);
       H5Pset_deflate(compression_property, 7);
@@ -718,13 +775,12 @@ void DataRecorder::Plugin::open_trial_group()
     }
   } else {
     for (auto& channel : this->m_recording_channels_list) {
-      m_channel_data_counts.push_back(0);
       compression_property = H5Pcreate(H5P_DATASET_CREATE);
       H5Pset_deflate(compression_property, 7);
       channel.hdf5_data_handle =
           H5PTcreate(this->hdf5_handles.sync_group_handle,
                      channel.channel.name.c_str(),
-                     this->hdf5_handles.channel_datatype_handle,
+                     this->hdf5_handles.channel_index_datatype_handle,
                      this->m_data_chunk_size,
                      compression_property);
     }
@@ -764,17 +820,16 @@ void DataRecorder::Plugin::openFile(const std::string& file_name)
   }
   this->hdf5_filename = file_name;
   this->trial_count = 0;
-  this->hdf5_handles.channel_datatype_handle =
+  this->hdf5_handles.channel_index_datatype_handle =
       H5Tcreate(H5T_COMPOUND, sizeof(DataRecorder::data_token_t));
-  H5Tinsert(this->hdf5_handles.channel_datatype_handle,
+  H5Tinsert(this->hdf5_handles.channel_index_datatype_handle,
             "time",
             HOFFSET(DataRecorder::data_token_t, time),
             H5T_STD_I64LE);
-  H5Tinsert(this->hdf5_handles.channel_datatype_handle,
+  H5Tinsert(this->hdf5_handles.channel_index_datatype_handle,
             "value",
             HOFFSET(DataRecorder::data_token_t, value),
             H5T_IEEE_F64LE);
-  // this->open_trial_group();
   this->open_file.store(true);
 }
 
@@ -784,9 +839,10 @@ void DataRecorder::Plugin::closeFile()
     return;
   }
   const std::unique_lock<std::shared_mutex> lk(this->m_channels_list_mut);
-  // Attempt to close all group and dataset handles in hdf5 before closing file
+  // Attempt to close all group and dataset handles in hdf5 before closing
+  // file
   close_trial_group();
-  H5Tclose(this->hdf5_handles.channel_datatype_handle);
+  H5Tclose(this->hdf5_handles.channel_index_datatype_handle);
   if (H5Fclose(this->hdf5_handles.file_handle) != 0) {
     ERROR_MSG("DataRecorder::Plugin::closeFile : Unable to close file {}",
               this->hdf5_filename);
@@ -841,17 +897,17 @@ int DataRecorder::Plugin::create_component(IO::endpoint endpoint)
   this->getEventManager()->postEvent(&connect_event);
   hid_t data_handle = H5I_INVALID_HID;
   const std::unique_lock<std::shared_mutex> lk(this->m_channels_list_mut);
-  if (this->hdf5_handles.file_handle != H5I_INVALID_HID
-      && this->hdf5_handles.sync_group_handle != H5I_INVALID_HID)
-  {
-    const hid_t compression_property = H5Pcreate(H5P_DATASET_CREATE);
-    H5Pset_deflate(compression_property, 7);
-    data_handle = H5PTcreate(this->hdf5_handles.sync_group_handle,
-                             chan.name.c_str(),
-                             this->hdf5_handles.channel_datatype_handle,
-                             this->m_data_chunk_size,
-                             compression_property);
-  }
+  // if (this->hdf5_handles.file_handle != H5I_INVALID_HID
+  //     && this->hdf5_handles.sync_group_handle != H5I_INVALID_HID)
+  // {
+  //   const hid_t compression_property = H5Pcreate(H5P_DATASET_CREATE);
+  //   H5Pset_deflate(compression_property, 7);
+  //   data_handle = H5PTcreate(this->hdf5_handles.sync_group_handle,
+  //                            chan.name.c_str(),
+  //                            this->hdf5_handles.channel_index_datatype_handle,
+  //                            this->m_data_chunk_size,
+  //                            compression_property);
+  // }
   this->m_recording_channels_list.emplace_back(
       chan, std::move(component), data_handle);
   return 0;
@@ -920,6 +976,23 @@ DataRecorder::Plugin::get_recording_channels()
 
 int DataRecorder::Plugin::apply_tag(const std::string& tag)
 {
+  // const std::string tag_key =
+  //     std::string("TAG") + std::to_string(this->tag_count++);
+  // std::array<hsize_t, 1> string_dims = {tag.length()};
+  // const hid_t tag_group_handle =
+  // H5Gcreate(this->hdf5_handles.sync_group_handle,
+  //                                          tag_key.c_str(),
+  //                                          H5P_DEFAULT,
+  //                                          H5P_DEFAULT,
+  //                                          H5P_DEFAULT);
+  // const hid_t dataspace_id = H5Screate_simple(1, string_dims.data(),
+  // nullptr); const hid_t tag_name_handle = H5Dcreate(tag_group_handle,
+  //                                         tag.c_str(),
+  //                                         H5T_C_S1,
+  //                                         dataspace_id,
+  //                                         H5P_DEFAULT,
+  //                                         H5P_DEFAULT,
+  //                                         H5P_DEFAULT);
   return 0;
 }
 
@@ -934,13 +1007,12 @@ void DataRecorder::Plugin::process_data_worker()
   const size_t packet_byte_size = sizeof(DataRecorder::data_token_t);
   int64_t read_bytes = 0;
   size_t packet_count = 0;
-  size_t channel_id = 0;
-  const int time_type =
+  const TIME_TAG_TYPE time_type =
       dynamic_cast<DataRecorder::Panel*>(this->getPanel())->getTimeTagType();
   const std::shared_lock<std::shared_mutex> lk(this->m_channels_list_mut);
   switch (time_type) {
-    case 0:
-
+    case INDEX:
+    case TIME:
       for (auto& channel : this->m_recording_channels_list) {
         while (read_bytes = channel.channel.data_source->read(
                    data_buffer.data(), packet_byte_size * data_buffer.size()),
@@ -952,40 +1024,29 @@ void DataRecorder::Plugin::process_data_worker()
         }
       }
       break;
-    case 1:
-
+    case NONE:
       for (auto& channel : this->m_recording_channels_list) {
         while (read_bytes = channel.channel.data_source->read(
                    data_buffer.data(), packet_byte_size * data_buffer.size()),
                read_bytes > 0)
         {
-          for (auto& token : data_buffer) {
-            token.time = m_channel_data_counts[channel_id++]++;
-          }
           packet_count = static_cast<size_t>(read_bytes) / packet_byte_size;
-          DataRecorder::Plugin::save_data(
-              channel.hdf5_data_handle, data_buffer, packet_count);
-        }
-      }
-      break;
-    case 2:
-
-      for (auto& channel : this->m_recording_channels_list) {
-        while (read_bytes = channel.channel.data_source->read(
-                   data_buffer.data(), packet_byte_size * data_buffer.size()),
-               read_bytes > 0)
-        {
-          for (auto& token : data_buffer) {
-            data_buffer_doubles.push_back(token.value);
+          if (packet_count > data_buffer_doubles.size()) {
+            data_buffer_doubles.resize(packet_count);
           }
-          packet_count = static_cast<size_t>(read_bytes) / packet_byte_size;
+          for (size_t i = 0; i < packet_count; i++) {
+            data_buffer_doubles.at(i) = data_buffer.at(i).value;
+          }
           DataRecorder::Plugin::save_data(
               channel.hdf5_data_handle, data_buffer_doubles, packet_count);
+          data_buffer_doubles.clear();
         }
       }
       break;
     default:
-      ERROR_MSG("DataRecorder::Plugin::process_data_worker : Bad time tagging type detected. Unable to save data to hdf5 file");
+      ERROR_MSG(
+          "DataRecorder::Plugin::process_data_worker : Bad time tagging type "
+          "detected. Unable to save data to hdf5 file");
       break;
   }
 }
@@ -1032,12 +1093,23 @@ void DataRecorder::Component::execute()
   const double value = readinput(0);
   switch (this->getState()) {
     case RT::State::EXEC:
-      data_sample.time = RT::OS::getTime();
+      switch (this->getValue<uint64_t>(PARAMETER::INDEXING)) {
+        case INDEXING:
+          data_sample.time = index++;
+          break;
+        case TIME:
+          data_sample.time = RT::OS::getTime();
+          break;
+        case NONE:
+        default:
+          break;
+      }
       data_sample.value = value;
       this->m_fifo->writeRT(&data_sample, sizeof(DataRecorder::data_token_t));
       break;
     case RT::State::UNPAUSE:
     case RT::State::INIT:
+      index = 0;
       this->setState(RT::State::EXEC);
       break;
     case RT::State::PAUSE:
