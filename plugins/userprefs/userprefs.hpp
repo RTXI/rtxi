@@ -29,6 +29,8 @@ namespace UserPrefs
 {
 
 constexpr std::string_view MODULE_NAME = "User Preferences";
+constexpr std::string_view WORKSPACE_SAVE_LOCATION_KEY = "wokrspace_dir";
+constexpr std::string_view HDF5_SAVE_LOCATION_KEY = "hdf5_dir";
 
 class Plugin : public Widgets::Plugin
 {
@@ -56,12 +58,10 @@ private:
   QSettings userprefs;
 
   QGroupBox* dirGroup = nullptr;
-  QGroupBox* HDF = nullptr;
   QGroupBox* buttons = nullptr;
 
   QLineEdit* settingsDirEdit = nullptr;  // directory for settings files
   QLineEdit* dataDirEdit = nullptr;  // directory of most recent data file
-  QLineEdit* HDFBufferEdit = nullptr;  // buffer size for HDF Data Recorder
 };  // class Panel
 
 std::unique_ptr<Widgets::Plugin> createRTXIPlugin(Event::Manager* ev_manager);

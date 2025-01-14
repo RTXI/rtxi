@@ -105,7 +105,7 @@ PerformanceMeasurement::Panel::Panel(const std::string& mod_name,
 PerformanceMeasurement::Component::Component(Widgets::Plugin* hplugin)
     : Widgets::Component(hplugin,
                          std::string(MODULE_NAME),
-                         std::vector<IO::channel_t>(),
+                         PerformanceMeasurement::get_default_channels(),
                          PerformanceMeasurement::get_default_vars())
 {
   if (RT::OS::getFifo(this->fifo,
@@ -137,6 +137,13 @@ void PerformanceMeasurement::Component::execute()
 
   switch (this->getState()) {
     case RT::State::EXEC:
+      writeoutput(0, stats.duration);
+      writeoutput(1, stats.timestep);
+      writeoutput(2, stats.latency);
+      writeoutput(3, stats.max_timestep);
+      writeoutput(4, stats.max_duration);
+      writeoutput(5, stats.max_latency);
+      writeoutput(6, stats.jitter);
       this->fifo->writeRT(&this->stats,
                           sizeof(PerformanceMeasurement::performance_stats_t));
       break;

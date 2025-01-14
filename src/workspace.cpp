@@ -170,47 +170,48 @@ Widgets::Plugin* Workspace::Manager::loadCorePlugin(const std::string& library)
   this->registerFactories(library, *fact_methods);
   plugin = this->rtxi_factories_registry[library].createPlugin(event_manager);
   plugin_ptr = this->registerWidget(std::move(plugin));
+  plugin_ptr->setLibrary(library);
   return plugin_ptr;
 }
 
 // TODO: extract plugin dynamic loading to another class
 Widgets::Plugin* Workspace::Manager::loadPlugin(const std::string& library)
 {
-  const std::string& library_loc = library;
   Widgets::Plugin* plugin_ptr = nullptr;
   // if widget factory is already registered then all we have to do is run it
-  if (this->rtxi_factories_registry.find(library_loc)
+  if (this->rtxi_factories_registry.find(library)
       != this->rtxi_factories_registry.end())
   {
     std::unique_ptr<Widgets::Plugin> plugin =
-        this->rtxi_factories_registry[library_loc].createPlugin(
+        this->rtxi_factories_registry[library].createPlugin(
             this->event_manager);
     plugin_ptr = this->registerWidget(std::move(plugin));
     plugin_ptr->attachComponent(
-        this->rtxi_factories_registry[library_loc].createComponent(plugin_ptr));
+        this->rtxi_factories_registry[library].createComponent(plugin_ptr));
+    plugin_ptr->setLibrary(library);
     return plugin_ptr;
   }
 
   // If it is just a core plugin then handle that elsewhere and return
-  plugin_ptr = this->loadCorePlugin(library_loc);
+  plugin_ptr = this->loadCorePlugin(library);
   if (plugin_ptr != nullptr) {
     return plugin_ptr;
   }
 
-  if (this->m_plugin_loader->load(library_loc.c_str()) != 0) {
-    ERROR_MSG("Plugin::load : failed to load {}", library_loc.c_str());
+  if (this->m_plugin_loader->load(library.c_str()) != 0) {
+    ERROR_MSG("Plugin::load : failed to load {}", library.c_str());
     return nullptr;
   }
 
   auto gen_fact_methods =
       this->m_plugin_loader->dlsym<Widgets::FactoryMethods* (*)()>(
-          library_loc.c_str(), "getFactories");
+          library.c_str(), "getFactories");
 
   if (gen_fact_methods == nullptr) {
     ERROR_MSG("Plugin::load : failed to retrieve getFactories symbol");
     // If we got here it means we loaded the lirbary but not the symbol.
     // Let's just unload the library and exit before we regret it.
-    this->m_plugin_loader->unload(library_loc.c_str());
+    this->m_plugin_loader->unload(library.c_str());
     return nullptr;
   }
 
@@ -218,18 +219,18 @@ Widgets::Plugin* Workspace::Manager::loadPlugin(const std::string& library)
   this->rtxi_factories_registry[library] = *fact_methods;
   std::unique_ptr<Widgets::Plugin> plugin =
       fact_methods->createPlugin(this->event_manager);
-  plugin->setLibrary(library);
   if (plugin == nullptr) {
     ERROR_MSG("Plugin::load : failed to create plugin from library {} ",
               library);
-    this->m_plugin_loader->unload(library_loc.c_str());
+    this->m_plugin_loader->unload(library.c_str());
     return nullptr;
   }
+  plugin->setLibrary(library);
   std::unique_ptr<Widgets::Component> component;
   try {
     component = fact_methods->createComponent(plugin.get());
   } catch (const std::invalid_argument& e) {
-    this->m_plugin_loader->unload(library_loc.c_str());
+    this->m_plugin_loader->unload(library.c_str());
     return nullptr;
   }
   plugin->attachComponent(std::move(component));
