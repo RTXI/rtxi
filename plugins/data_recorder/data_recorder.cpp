@@ -548,7 +548,7 @@ void DataRecorder::Panel::syncEnableRecordingButtons(const QString& /*unused*/)
 
 void DataRecorder::Panel::setTimeTagType(int tag_type)
 {
-  // Update our local copy of tag type if succesfully changed in RT thread
+  // Update our local copy of tag type if successfully changed in RT thread
   if (dynamic_cast<DataRecorder::Plugin*>(this->getHostPlugin())
           ->changeIndexingType(tag_type))
   {
