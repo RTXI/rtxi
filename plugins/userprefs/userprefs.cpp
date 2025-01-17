@@ -84,7 +84,7 @@ UserPrefs::Panel::Panel(QMainWindow* mwindow, Event::Manager* ev_manager)
   // Attach layout to group
   dirGroup->setLayout(dirLayout);
 
-    // Create new child widget
+  // Create new child widget
   auto* buttonLayout = new QHBoxLayout;
 
   // Create elements for child widget
