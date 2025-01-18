@@ -884,6 +884,11 @@ void Oscilloscope::Panel::removeBlockChannels(IO::Block* block)
 {
   this->scopeWindow->removeBlockChannels(block);
   auto* hplugin = dynamic_cast<Oscilloscope::Plugin*>(this->getHostPlugin());
+  // Sometimes fired events may trigger this function after the plugin has been
+  // unloaded. in that case just return and don't crash please.
+  if (hplugin == nullptr) {
+    return;
+  }
   hplugin->deleteAllProbes(block);
 }
 

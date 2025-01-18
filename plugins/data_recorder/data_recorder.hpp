@@ -23,11 +23,12 @@
 #include <QTime>
 #include <vector>
 
+#include <H5Ipublic.h>
 #include <hdf5_hl.h>
 
+#include "fifo.hpp"
 #include "io.hpp"
 #include "widgets.hpp"
-#include "fifo.hpp"
 
 class QComboBox;
 class QListWidget;
@@ -48,12 +49,35 @@ typedef struct data_token_t
   double value;
 } data_token_t;
 
+enum TIME_TAG_TYPE
+{
+  INDEX = 0,
+  TIME,
+  NONE
+};
+
+enum PARAMETER
+{
+  INDEXING = 0
+};
+
 constexpr size_t DEFAULT_BUFFER_SIZE = 10000 * sizeof(data_token_t);
 constexpr std::string_view MODULE_NAME = "Data Recorder";
 
 inline std::vector<Widgets::Variable::Info> get_default_vars()
 {
-  return {};
+  return {
+      {PARAMETER::INDEXING,
+       "Indexing Scheme",
+       "Used to specify what type of indexing to use when recording. Options "
+       "are:\n"
+       "Index(0): add index to each value. resets after recorder is stopped\n"
+       "Time(1): Attaches current time in nanoseconds since some arbitrary "
+       "value. useful"
+       "for knowing the time between each data point.\n"
+       "None(3): Do not index the values. Just record them.",
+       Widgets::Variable::UINT_PARAMETER,
+       uint64_t {DataRecorder::TIME_TAG_TYPE::INDEX}}};
 }
 
 inline std::vector<IO::channel_t> get_default_channels()
@@ -87,6 +111,7 @@ public:
 
 private:
   std::unique_ptr<RT::OS::Fifo> m_fifo;
+  int64_t index=0;
 };
 
 class Panel : public Widgets::Panel
@@ -100,6 +125,8 @@ public:
   Panel& operator=(Panel&&) = delete;
   Panel(QMainWindow* mwindow, Event::Manager* ev_manager);
   ~Panel() override = default;
+
+  TIME_TAG_TYPE getTimeTagType() const;
 
 signals:
   void updateBlockInfo();
@@ -121,11 +148,13 @@ private slots:
   void addNewTag();
   void processData();
   void syncEnableRecordingButtons(const QString& /*unused*/);
+  void setTimeTagType(int tag_type);
 
 private:
   size_t m_buffer_size = DEFAULT_BUFFER_SIZE;
   size_t downsample_rate {1};
   std::vector<std::string> dataTags;
+  TIME_TAG_TYPE time_type = TIME_TAG_TYPE::INDEX;
 
   QGroupBox* channelGroup = nullptr;
   QGroupBox* stampGroup = nullptr;
@@ -137,6 +166,7 @@ private:
   QComboBox* blockList = nullptr;
   QComboBox* channelList = nullptr;
   QComboBox* typeList = nullptr;
+  QComboBox* timeTagType = nullptr;
   QListWidget* selectionBox = nullptr;
   QLabel* recordStatus = nullptr;
   QPushButton* addRecorderButton = nullptr;
@@ -176,6 +206,7 @@ public:
   void receiveEvent(Event::Object* event) override;
   void startRecording();
   void stopRecording();
+  bool changeIndexingType(int tag_type);
   void openFile(const std::string& file_name);
   void closeFile();
   void change_file(const std::string& file_name);
@@ -200,8 +231,12 @@ private:
   static void save_data(hid_t data_id,
                         const std::vector<data_token_t>& data,
                         size_t packet_count);
+  static void save_data(hid_t data_id,
+                        const std::vector<double>& data,
+                        size_t packet_count);
   hsize_t m_data_chunk_size = static_cast<hsize_t>(1000);
   int m_compression_factor = 5;
+  int tag_count = 0;
   struct hdf5_handles
   {
     hid_t file_handle = H5I_INVALID_HID;
@@ -210,7 +245,7 @@ private:
     hid_t sync_group_handle = H5I_INVALID_HID;
     hid_t async_group_handle = H5I_INVALID_HID;
     hid_t sys_data_group_handle = H5I_INVALID_HID;
-    hid_t channel_datatype_handle = H5I_INVALID_HID;
+    hid_t channel_index_datatype_handle = H5I_INVALID_HID;
   } hdf5_handles;
 
   struct recorder_t

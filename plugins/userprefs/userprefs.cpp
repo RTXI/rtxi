@@ -1,20 +1,20 @@
 /*
-         The Real-Time eXperiment Interface (RTXI)
-         Copyright (C) 2011 Georgia Institute of Technology, University of Utah,
-   Will Cornell Medical College
+The Real-Time eXperiment Interface (RTXI)
+Copyright (C) 2011 Georgia Institute of Technology, University of Utah,
+Will Cornell Medical College
 
-         This program is free software: you can redistribute it and/or modify
-         it under the terms of the GNU General Public License as published by
-         the Free Software Foundation, either version 3 of the License, or
-         (at your option) any later version.
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
-         This program is distributed in the hope that it will be useful,
-         but WITHOUT ANY WARRANTY; without even the implied warranty of
-         MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-         GNU General Public License for more details.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-         You should have received a copy of the GNU General Public License
-         along with this program.  If not, see <http://www.gnu.org/licenses/>.
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
@@ -42,18 +42,12 @@ UserPrefs::Panel::Panel(QMainWindow* mwindow, Event::Manager* ev_manager)
     : Widgets::Panel(std::string(UserPrefs::MODULE_NAME), mwindow, ev_manager)
     , status(new QLabel)
     , dirGroup(new QGroupBox)
-    , HDF(new QGroupBox)
     , buttons(new QGroupBox)
     , settingsDirEdit(new QLineEdit(dirGroup))
     , dataDirEdit(new QLineEdit(dirGroup))
-    , HDFBufferEdit(new QLineEdit(HDF))
 {
   // Preferences structure
-  const QSettings user_preferences;
-  QSettings::setPath(QSettings::NativeFormat,
-                     QSettings::SystemScope,
-                     "/usr/local/share/rtxi/");
-
+  userprefs.beginGroup("settings");
   // Main layout
   auto* box_layout = new QVBoxLayout;
 
@@ -61,9 +55,11 @@ UserPrefs::Panel::Panel(QMainWindow* mwindow, Event::Manager* ev_manager)
   auto* dirLayout = new QGridLayout;
 
   // Create elements for directory paths
-  const QString env_var = QString::fromLocal8Bit(qgetenv("HOME"));
-  settingsDirEdit->setText(
-      user_preferences.value("/dirs/setfiles", env_var).toString());
+  const QString workspace_dir =
+      QString::fromStdString(std::string(WORKSPACE_SAVE_LOCATION_KEY));
+  const QString hdf5_dir =
+      QString::fromStdString(std::string(HDF5_SAVE_LOCATION_KEY));
+  settingsDirEdit->setText(userprefs.value(workspace_dir).toString());
   dirLayout->addWidget(
       new QLabel(tr("Default settings directory:")), 0, 0, 1, 1);
   dirLayout->addWidget(settingsDirEdit, 0, 1, 1, 1);
@@ -74,8 +70,7 @@ UserPrefs::Panel::Panel(QMainWindow* mwindow, Event::Manager* ev_manager)
                    this,
                    &UserPrefs::Panel::chooseSettingsDir);
 
-  dataDirEdit->setText(
-      user_preferences.value("/dirs/data", env_var).toString());
+  dataDirEdit->setText(userprefs.value(hdf5_dir).toString());
   dirLayout->addWidget(
       new QLabel(tr("Default HDF5 data directory:")), 1, 0, 1, 1);
   dirLayout->addWidget(dataDirEdit, 1, 1, 1, 1);
@@ -88,19 +83,6 @@ UserPrefs::Panel::Panel(QMainWindow* mwindow, Event::Manager* ev_manager)
 
   // Attach layout to group
   dirGroup->setLayout(dirLayout);
-
-  // Create new child widget and layout
-  auto* hdfLayout = new QGridLayout;
-
-  // Create elements for child widget
-  hdfLayout->addWidget(
-      new QLabel(tr("HDF Data Recorder Buffer Size (MB):")), 0, 0, 1, 1);
-  hdfLayout->addWidget(HDFBufferEdit, 0, 1, 1, 1);
-  HDFBufferEdit->setText(
-      QString::number(user_preferences.value("/system/HDFbuffer", 10).toInt()));
-
-  // Attach child to parent
-  HDF->setLayout(hdfLayout);
 
   // Create new child widget
   auto* buttonLayout = new QHBoxLayout;
@@ -132,39 +114,38 @@ UserPrefs::Panel::Panel(QMainWindow* mwindow, Event::Manager* ev_manager)
 
   // Attach child widget to parent widget
   box_layout->addWidget(dirGroup);
-  box_layout->addWidget(HDF);
   box_layout->addWidget(buttons);
 
   // Attach layout to widget
   setLayout(box_layout);
   setWindowTitle(QString(this->getName().c_str()));
 
+  userprefs.endGroup();
   // Set layout to Mdi
   this->getMdiWindow()->setFixedSize(500, this->sizeHint().height() + 50);
 }
 
 void UserPrefs::Panel::reset()
 {
+  userprefs.beginGroup("settings");
   const QString env_var = QString::fromLocal8Bit(qgetenv("HOME"));
   settingsDirEdit->setText(env_var);
   dataDirEdit->setText(env_var);
-  HDFBufferEdit->setText(QString::number(10));
-  userprefs.setValue("/dirs/setfiles", settingsDirEdit->text());
-  userprefs.setValue("/dirs/data", dataDirEdit->text());
-  bool ok = false;
-  const QString buffer = HDFBufferEdit->text();
-  userprefs.setValue("/system/HDFbuffer", buffer.toInt(&ok));
   status->setText("Preferences \nreset");
+  userprefs.endGroup();
 }
 
 void UserPrefs::Panel::apply()
 {
-  userprefs.setValue("/dirs/setfiles", settingsDirEdit->text());
-  userprefs.setValue("/dirs/data", dataDirEdit->text());
-  bool ok = false;
-  const QString buffer = HDFBufferEdit->text();
-  userprefs.setValue("/system/HDFbuffer", buffer.toInt(&ok));
+  userprefs.beginGroup("settings");
+  userprefs.setValue(QString::fromStdString(
+                         std::string(UserPrefs::WORKSPACE_SAVE_LOCATION_KEY)),
+                     settingsDirEdit->text());
+  userprefs.setValue(
+      QString::fromStdString(std::string(UserPrefs::HDF5_SAVE_LOCATION_KEY)),
+      dataDirEdit->text());
   status->setText("Preferences \napplied");
+  userprefs.endGroup();
 }
 
 void UserPrefs::Panel::chooseSettingsDir()
@@ -173,18 +154,17 @@ void UserPrefs::Panel::chooseSettingsDir()
   const QString dir_name = QFileDialog::getExistingDirectory(
       this,
       tr("Choose default directory for settings files"),
-      userprefs.value("/dirs/setfiles", env_var).toString(),
+      settingsDirEdit->text(),
       QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
   settingsDirEdit->setText(dir_name);
 }
 
 void UserPrefs::Panel::chooseDataDir()
 {
-  const QString env_var = QString::fromLocal8Bit(qgetenv("HOME"));
   const QString dir_name = QFileDialog::getExistingDirectory(
       this,
       tr("Choose default directory for HDF5 data files"),
-      userprefs.value("/dirs/data", env_var).toString(),
+      dataDirEdit->text(),
       QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
   dataDirEdit->setText(dir_name);
 }
