@@ -4,7 +4,7 @@ include(cmake/prelude.cmake)
 
 project(
     "rtxi"
-    VERSION 3.1.0
+    VERSION 3.2.0
     DESCRIPTION "Real-Time eXperiment Interface"
     HOMEPAGE_URL "http://rtxi.org/"
     LANGUAGES C CXX
