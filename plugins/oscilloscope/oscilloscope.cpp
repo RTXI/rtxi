@@ -938,6 +938,8 @@ void Oscilloscope::Panel::syncChannelProperties()
   widthsList->setCurrentIndex(widthsList->findData(width));
   const Qt::PenStyle style = scopeWindow->getChannelStyle(probe_info);
   stylesList->setCurrentIndex(stylesList->findData(QVariant::fromValue(style)));
+  const QwtPlotCurve::CurveStyle curveStyle = scopeWindow->getChannelCurveStyle(probe_info);
+  curveStylesList->setCurrentIndex(curveStylesList->findData(QVariant::fromValue(curveStyle)));
   double offset = scopeWindow->getChannelOffset(probe_info);
   const double scale = scopeWindow->getChannelScale(probe_info);
   scalesList->setCurrentIndex(

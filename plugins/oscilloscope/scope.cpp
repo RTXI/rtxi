@@ -421,6 +421,19 @@ Qt::PenStyle Oscilloscope::Scope::getChannelStyle(IO::endpoint endpoint)
   return chan_loc->curve->pen().style();
 }
 
+QwtPlotCurve::CurveStyle Oscilloscope::Scope::getChannelCurveStyle(IO::endpoint endpoint)
+{
+  const std::shared_lock<std::shared_mutex> lock(this->m_channel_mutex);
+  auto chan_loc = std::find_if(this->channels.begin(),
+                               this->channels.end(),
+                               [&](const Oscilloscope::scope_channel& chann)
+                               { return chann.endpoint == endpoint; });
+  if (chan_loc == channels.end()) {
+    return curveStyles[Oscilloscope::CurveStyleID::Line];
+  }
+  return chan_loc->curve->style();
+}
+
 int Oscilloscope::Scope::getChannelWidth(IO::endpoint endpoint)
 {
   const std::shared_lock<std::shared_mutex> lock(this->m_channel_mutex);

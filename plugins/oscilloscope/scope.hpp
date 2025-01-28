@@ -214,6 +214,7 @@ public:
   void setChannelLabel(IO::endpoint endpoint, const QString& label);
   QColor getChannelColor(IO::endpoint endpoint);
   Qt::PenStyle getChannelStyle(IO::endpoint endpoint);
+  QwtPlotCurve::CurveStyle getChannelCurveStyle(IO::endpoint endpoint);
   void setChannelPen(IO::endpoint endpoint, const QPen& pen);
   void setChannelCurveStyle(IO::endpoint endpoint, const QwtPlotCurve::CurveStyle& curveStyle);
   int getChannelWidth(IO::endpoint endpoint);
