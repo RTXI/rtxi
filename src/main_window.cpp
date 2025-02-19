@@ -836,6 +836,8 @@ void MainWindow::saveSettings()
   this->saveDAQSettings(workspaceprefs);
 
   this->saveWidgetSettings(workspaceprefs);
+  
+  this->saveConnectionSettings(workspaceprefs);
 
   userprefs.endGroup();  // Workspaces
 }
