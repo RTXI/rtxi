@@ -534,7 +534,7 @@ void MainWindow::saveDAQSettings(QSettings& userprefs)
 }
 
 void MainWindow::loadDAQSettings(
-    QSettings& userprefs, std::unordered_map<size_t, IO::Block*> block_cache)
+    QSettings& userprefs, std::unordered_map<size_t, IO::Block*>& block_cache)
 {
   userprefs.beginGroup("DAQs");
   Event::Object get_devices_event(Event::Type::DAQ_DEVICE_QUERY_EVENT);
@@ -664,9 +664,8 @@ void MainWindow::saveWidgetSettings(QSettings& userprefs)
   this->event_manager->postEvent(&loaded_plugins_query);
   const auto plugin_list = std::any_cast<std::vector<const Widgets::Plugin*>>(
       loaded_plugins_query.getParam("plugins"));
-  int widget_count = 0;
   for (const auto& entry : plugin_list) {
-    userprefs.beginGroup(QString::number(widget_count++));
+    userprefs.beginGroup(QString::number(entry->getID()));
     userprefs.setValue("library", QString::fromStdString(entry->getLibrary()));
     userprefs.beginGroup("standardParams");
     entry->saveParameterSettings(userprefs);
@@ -680,7 +679,7 @@ void MainWindow::saveWidgetSettings(QSettings& userprefs)
 }
 
 void MainWindow::loadWidgetSettings(
-    QSettings& userprefs, std::unordered_map<size_t, IO::Block*> block_cache)
+    QSettings& userprefs, std::unordered_map<size_t, IO::Block*>& block_cache)
 {
   userprefs.beginGroup("Widgets");
   QString plugin_name;
@@ -734,7 +733,7 @@ void MainWindow::saveConnectionSettings(QSettings& userprefs)
 }
 
 void MainWindow::loadConnectionSettings(
-    QSettings& userprefs, std::unordered_map<size_t, IO::Block*> block_cache)
+    QSettings& userprefs, std::unordered_map<size_t, IO::Block*>& block_cache)
 {
   ///////////////////// Load connections /////////////////////////
   RT::block_connection_t connection;
