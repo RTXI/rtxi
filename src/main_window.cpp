@@ -665,6 +665,14 @@ void MainWindow::saveWidgetSettings(QSettings& userprefs)
   const auto plugin_list = std::any_cast<std::vector<const Widgets::Plugin*>>(
       loaded_plugins_query.getParam("plugins"));
   for (const auto& entry : plugin_list) {
+    // entry->getID, 0 index occupied by a System Plugin
+    // block_cache[0]  0 index occupied by the Device
+    // connections from 0(device) to any plugin will crash. 
+    // So skip the 0 index in widgets, don't save System Plugins   
+    if (entry->getID() == 0) 
+    {
+      continue;
+    }
     userprefs.beginGroup(QString::number(entry->getID()));
     userprefs.setValue("library", QString::fromStdString(entry->getLibrary()));
     userprefs.beginGroup("standardParams");
