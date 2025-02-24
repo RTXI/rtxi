@@ -725,7 +725,7 @@ void MainWindow::saveConnectionSettings(QSettings& userprefs)
     // themselves. Namely connections related to probes from oscilloscope and
     // recorders from the recorder plugin
     if (conn.dest->getName().find("Probe") != std::string::npos
-    || conn.dest->getName().find("Recording") != std::string::npos)
+        || conn.dest->getName().find("Recording") != std::string::npos)
     {
       continue;
     }
@@ -760,7 +760,7 @@ void MainWindow::loadConnectionSettings(
     }
     connection.src = block_cache[id_connection.src_id];
     connection.src_port_type =
-    static_cast<IO::flags_t>(id_connection.src_direction);
+        static_cast<IO::flags_t>(id_connection.src_direction);
     connection.src_port = id_connection.src_port;
     connection.dest = block_cache[id_connection.dest_id];
     connection.dest_port = id_connection.dest_port;
