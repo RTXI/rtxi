@@ -80,11 +80,11 @@ QDataStream& operator<<(QDataStream& out, const plugin_connection& conn)
 
 QDataStream& operator>>(QDataStream& in, plugin_connection& conn)
 {
-  in >> conn.dest_port;
-  in >> conn.dest_id;
-  in >> conn.src_port;
+  in >> conn.src_id;          // Match order of << operator
   in >> conn.src_direction;
-  in >> conn.src_id;
+  in >> conn.src_port;
+  in >> conn.dest_id;
+  in >> conn.dest_port;
   return in;
 }
 
@@ -534,7 +534,7 @@ void MainWindow::saveDAQSettings(QSettings& userprefs)
 }
 
 void MainWindow::loadDAQSettings(
-    QSettings& userprefs, std::unordered_map<size_t, IO::Block*> block_cache)
+    QSettings& userprefs, std::unordered_map<size_t, IO::Block*>& block_cache)
 {
   userprefs.beginGroup("DAQs");
   Event::Object get_devices_event(Event::Type::DAQ_DEVICE_QUERY_EVENT);
@@ -664,9 +664,16 @@ void MainWindow::saveWidgetSettings(QSettings& userprefs)
   this->event_manager->postEvent(&loaded_plugins_query);
   const auto plugin_list = std::any_cast<std::vector<const Widgets::Plugin*>>(
       loaded_plugins_query.getParam("plugins"));
-  int widget_count = 0;
   for (const auto& entry : plugin_list) {
-    userprefs.beginGroup(QString::number(widget_count++));
+    // entry->getID, 0 index occupied by a System Plugin
+    // block_cache[0]  0 index occupied by the Device
+    // connections from 0(device) to any plugin will crash. 
+    // So skip the 0 index in widgets, don't save System Plugins   
+    if (entry->getID() == 0) 
+    {
+      continue;
+    }
+    userprefs.beginGroup(QString::number(entry->getID()));
     userprefs.setValue("library", QString::fromStdString(entry->getLibrary()));
     userprefs.beginGroup("standardParams");
     entry->saveParameterSettings(userprefs);
@@ -680,7 +687,7 @@ void MainWindow::saveWidgetSettings(QSettings& userprefs)
 }
 
 void MainWindow::loadWidgetSettings(
-    QSettings& userprefs, std::unordered_map<size_t, IO::Block*> block_cache)
+    QSettings& userprefs, std::unordered_map<size_t, IO::Block*>& block_cache)
 {
   userprefs.beginGroup("Widgets");
   QString plugin_name;
@@ -734,7 +741,7 @@ void MainWindow::saveConnectionSettings(QSettings& userprefs)
 }
 
 void MainWindow::loadConnectionSettings(
-    QSettings& userprefs, std::unordered_map<size_t, IO::Block*> block_cache)
+    QSettings& userprefs, std::unordered_map<size_t, IO::Block*>& block_cache)
 {
   ///////////////////// Load connections /////////////////////////
   RT::block_connection_t connection;
@@ -836,6 +843,8 @@ void MainWindow::saveSettings()
   this->saveDAQSettings(workspaceprefs);
 
   this->saveWidgetSettings(workspaceprefs);
+  
+  this->saveConnectionSettings(workspaceprefs);
 
   userprefs.endGroup();  // Workspaces
 }
