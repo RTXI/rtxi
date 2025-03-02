@@ -23,6 +23,7 @@
 
 #include <QDialog>
 #include <QMainWindow>
+#include <unordered_map>
 
 #include "event.hpp"
 
@@ -178,13 +179,16 @@ private:
   inline void loadPeriodSettings(QSettings& userprefs);
   inline void saveDAQSettings(QSettings& userprefs);
   inline void loadDAQSettings(
-      QSettings& userprefs, std::unordered_map<size_t, IO::Block*> block_cache);
+      QSettings& userprefs,
+      std::unordered_map<size_t, IO::Block*>& block_cache);
   inline void saveWidgetSettings(QSettings& userprefs);
   inline void loadWidgetSettings(
-      QSettings& userprefs, std::unordered_map<size_t, IO::Block*> block_cache);
+      QSettings& userprefs,
+      std::unordered_map<size_t, IO::Block*>& block_cache);
   inline void saveConnectionSettings(QSettings& userprefs);
   inline void loadConnectionSettings(
-      QSettings& userprefs, std::unordered_map<size_t, IO::Block*> block_cache);
+      QSettings& userprefs,
+      std::unordered_map<size_t, IO::Block*>& block_cache);
   Event::Manager* event_manager;
   QMdiArea* mdiArea = nullptr;
   QList<QMdiSubWindow*> subWindows;

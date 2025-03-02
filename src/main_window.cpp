@@ -437,7 +437,8 @@ void MainWindow::loadPeriodSettings(QSettings& userprefs)
   this->event_manager->postEvent(&event);
 }
 
-void MainWindow::saveDAQSettings(QSettings& userprefs)
+void MainWindow::saveDAQSettings(
+    QSettings& userprefs)
 {
   userprefs.beginGroup("DAQs");
 
@@ -534,7 +535,7 @@ void MainWindow::saveDAQSettings(QSettings& userprefs)
 }
 
 void MainWindow::loadDAQSettings(
-    QSettings& userprefs, std::unordered_map<size_t, IO::Block*> block_cache)
+    QSettings& userprefs, std::unordered_map<size_t, IO::Block*>& block_cache)
 {
   userprefs.beginGroup("DAQs");
   Event::Object get_devices_event(Event::Type::DAQ_DEVICE_QUERY_EVENT);
@@ -657,16 +658,24 @@ void MainWindow::loadDAQSettings(
   userprefs.endGroup();  // DAQ
 }
 
-void MainWindow::saveWidgetSettings(QSettings& userprefs)
+void MainWindow::saveWidgetSettings(
+    QSettings& userprefs)
 {
   userprefs.beginGroup("Widgets");
   Event::Object loaded_plugins_query(Event::Type::PLUGIN_LIST_QUERY_EVENT);
   this->event_manager->postEvent(&loaded_plugins_query);
   const auto plugin_list = std::any_cast<std::vector<const Widgets::Plugin*>>(
       loaded_plugins_query.getParam("plugins"));
-  int widget_count = 0;
+  int non_component_plugin_id = -1;
+  int plugin_id = 0;
   for (const auto& entry : plugin_list) {
-    userprefs.beginGroup(QString::number(widget_count++));
+    // We don't expect the number of blocks in the system to exceed the max positive value of int
+    // In 2025 you would run out of memory first before that happens.
+    // Additionally we are saving negative values to indicate to the workspace loading system 
+    // that the negative valued plugins do not contain a component and therefore should be left
+    // out of the connection loading step.
+    plugin_id = entry->hasComponent() ? static_cast<int>(entry->getID()) : non_component_plugin_id--;
+    userprefs.beginGroup(QString::number(plugin_id));
     userprefs.setValue("library", QString::fromStdString(entry->getLibrary()));
     userprefs.beginGroup("standardParams");
     entry->saveParameterSettings(userprefs);
@@ -680,7 +689,7 @@ void MainWindow::saveWidgetSettings(QSettings& userprefs)
 }
 
 void MainWindow::loadWidgetSettings(
-    QSettings& userprefs, std::unordered_map<size_t, IO::Block*> block_cache)
+    QSettings& userprefs, std::unordered_map<size_t, IO::Block*>& block_cache)
 {
   userprefs.beginGroup("Widgets");
   QString plugin_name;
@@ -703,7 +712,8 @@ void MainWindow::loadWidgetSettings(
   userprefs.endGroup();  // Widgets
 }
 
-void MainWindow::saveConnectionSettings(QSettings& userprefs)
+void MainWindow::saveConnectionSettings(
+    QSettings& userprefs)
 {
   Event::Object all_connections_event(
       Event::Type::IO_ALL_CONNECTIONS_QUERY_EVENT);
@@ -722,6 +732,8 @@ void MainWindow::saveConnectionSettings(QSettings& userprefs)
     {
       continue;
     }
+    // We need to match the block id with the id already stored in the
+    // settings file when saveWidgets was called.
     id_connection.src_id = conn.src->getID();
     id_connection.src_direction = conn.src_port_type;
     id_connection.src_port = conn.src_port;
@@ -734,7 +746,7 @@ void MainWindow::saveConnectionSettings(QSettings& userprefs)
 }
 
 void MainWindow::loadConnectionSettings(
-    QSettings& userprefs, std::unordered_map<size_t, IO::Block*> block_cache)
+    QSettings& userprefs, std::unordered_map<size_t, IO::Block*>& block_cache)
 {
   ///////////////////// Load connections /////////////////////////
   RT::block_connection_t connection;
@@ -836,6 +848,8 @@ void MainWindow::saveSettings()
   this->saveDAQSettings(workspaceprefs);
 
   this->saveWidgetSettings(workspaceprefs);
+
+  this->saveConnectionSettings(workspaceprefs);
 
   userprefs.endGroup();  // Workspaces
 }
