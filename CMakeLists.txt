@@ -30,7 +30,7 @@ endif()
 # ----
 
 set(RTXI_RT_CORE "posix" CACHE STRING 
-  "The real-time core to use. Accepted values are posix, evl, and xenomai")
+  "The real-time core to use. Accepted values are posix, preempt_rt, evl, and xenomai")
 set(XENOMAI_ROOT_DIR "/usr/xenomai")
 
 # Sometimes we want plugins to compile as well when developing. We use the 

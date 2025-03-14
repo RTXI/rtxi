@@ -39,6 +39,7 @@ echo "-----> Kernel configuration..."
 echo "evl -- Xenomai with EVL library (RT)"
 echo "xenomai -- Legacy Xenomai with Alchemy skin (RT)"
 echo "posix -- Linux based core (Non-RT)"
+echo "preempt_rt -- Linux based core (RT)"
 echo "-----> Please type your configuration and then press enter: "
 read kernel
 
