@@ -45,65 +45,16 @@ int RT::OS::initiate(RT::OS::Task* task)
 {
   std::string strbuf(256, '\0');
   int retval = mlockall(MCL_CURRENT | MCL_FUTURE);  // NOLINT
-  pthread_attr_t attr;
-  pthread_t thread;
-  pthread_id_np_t   tid;
-  struct sched_param param;
-
   strerror_r(errno, strbuf.data(), strbuf.size());
   if (retval != 0) {
-    ERROR_MSG("RT::OS(PREEMPT_RT)::initiate : failed to lock memory : {}",
-              strbuf);
+    ERROR_MSG("RT::OS(POSIX)::initiate : failed to lock memory : {}", strbuf);
   }
-  param.sched_priority = 80;
-
-  retval = pthread_attr_init(&attr);
-  if (retval) {
-    ERROR_MSG("RT::OS(PREEMPT_RT)::initiate : Init pthread attributes failed");
-    return retval;
-  }
-
-  retval = pthread_attr_setstacksize(&attr, PTHREAD_STACK_MIN);
-  if (retval) {
-    ERROR_MSG("RT::OS(PREEMPT_RT)::initiate : Pthread setstacksize failed");
-    return retval;
-  }
-
-  retval = pthread_attr_setschedpolicy(&attr, SCHED_FIFO);
-  if (retval) {
-    ERROR_MSG("RT::OS(PREEMPT_RT)::initiate : Pthread setschedpolicy failed");
-    return retval;
-  }
-
-  retval = pthread_attr_setschedparam(&attr, &param);
-  if (retval) {
-    ERROR_MSG("RT::OS(PREEMPT_RT)::initiate : Pthread setschedparam failed");
-    return retval;
-  }
-
-  retval = pthread_attr_setinheritsched(&attr, PTHREAD_EXPLICIT_SCHED);
-  if (retval) {
-    ERROR_MSG("RT::OS(PREEMPT_RT)::initiate : Pthread setinheritsched failed");
-    return retval;
-  }
-
-  retval = pthread_create(&thread, &attr, thread_func, NULL);
-  if (retval) {
-    ERROR_MSG("RT::OS(PREEMPT_RT)::initiate : Create pthread failed");
-    return retval;
-  }
-
-
-
   realtime_key = true;
   task->period = RT::OS::DEFAULT_PERIOD;
   RT_PERIOD = &(task->period);
+  task->thread_id = std::any(pthread_self());
 
-  pthread_getunique_np(&thread, &tid);
-
-  task->thread_id = std::any(tid);
-
-  return retval;
+  return 0;
 }
 
 void RT::OS::shutdown(RT::OS::Task* task)
@@ -114,11 +65,18 @@ void RT::OS::shutdown(RT::OS::Task* task)
   RT_PERIOD = nullptr;
 }
 
+struct Pthread_args {
+  RT::OS::Task* tsk;
+  void (*fn)(void*);
+  void* args;
+};
+
+
 int RT::OS::createTask(Task* task, void (*func)(void*), void* arg)
 {
   int result = 0;
-  pthread_t* thread_obj;
-
+  int policy;
+   sched_param param;
   // Should not be creating real-time tasks from another real-time task
   if (RT::OS::isRealtime()) {
     ERROR_MSG("RT::OS::createTask : Task cannot be created from rt context");
@@ -135,8 +93,11 @@ int RT::OS::createTask(Task* task, void (*func)(void*), void* arg)
     fn(args);
     RT::OS::shutdown(tsk);
   };
-
-  thread_obj = (pthread_t*)&(task->thread_id);
+  std::thread thread_obj(wrapper, task, func, arg);
+   pthread_getschedparam(thread_obj.native_handle(), &policy, &param); 
+   policy = SCHED_RR;
+   param.sched_priority = 50;   
+   pthread_setschedparam(thread_obj.native_handle(), policy, &param); 
 
   RT::OS::renameOSThread(thread_obj, std::string("RealTimeThread"));
   if (thread_obj.joinable()) {
@@ -159,6 +120,7 @@ void RT::OS::deleteTask(RT::OS::Task* task)
     task->rt_thread.join();
   }
 }
+
 
 bool RT::OS::isRealtime()
 {
