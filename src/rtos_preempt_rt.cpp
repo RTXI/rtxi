@@ -96,7 +96,7 @@ int RT::OS::createTask(Task* task, void (*func)(void*), void* arg)
   std::thread thread_obj(wrapper, task, func, arg);
    pthread_getschedparam(thread_obj.native_handle(), &policy, &param); 
    policy = SCHED_FIFO;
-   param.sched_priority = 50;   
+   param.sched_priority = 80;   
    pthread_setschedparam(thread_obj.native_handle(), policy, &param); 
 
   RT::OS::renameOSThread(thread_obj, std::string("RealTimeThread"));
