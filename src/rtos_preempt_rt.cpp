@@ -95,7 +95,7 @@ int RT::OS::createTask(Task* task, void (*func)(void*), void* arg)
   };
   std::thread thread_obj(wrapper, task, func, arg);
    pthread_getschedparam(thread_obj.native_handle(), &policy, &param); 
-   policy = SCHED_RR;
+   policy = SCHED_FIFO;
    param.sched_priority = 50;   
    pthread_setschedparam(thread_obj.native_handle(), policy, &param); 
 
