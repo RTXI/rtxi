@@ -81,18 +81,6 @@ target_link_libraries(fakePlugin PRIVATE
     GTest::gmock GTest::gmock_main 
 )
 
-add_library(rtxifakedriver MODULE fakeDriver.cpp)
-
-target_include_directories(rtxifakedriver PRIVATE ${CMAKE_SOURCE_DIR})
-
-target_link_libraries(rtxifakedriver PRIVATE rtxi rtxipal)
-
-install(
-    TARGETS rtxifakedriver 
-    DESTINATION ${CMAKE_INSTALL_BINDIR}
-    EXPORT rtxiLibraryTargets
-)
-
 add_test(NAME rtxiTests COMMAND rtxiTests)
 
 add_folders(Test)
