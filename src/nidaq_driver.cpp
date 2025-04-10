@@ -1017,6 +1017,9 @@ void Driver::loadDevices()
     printError(device_names_buffer_size);
     return;
   }
+  if (device_names_buffer_size == 0) {
+    return;
+  }
   const std::string alpha = "abcdefghijklmnopqrstuvwxyz";
   std::vector<char> buffer(static_cast<size_t>(device_names_buffer_size));
   DAQmxGetSysDevNames(buffer.data(), static_cast<uint32_t>(buffer.size()));
