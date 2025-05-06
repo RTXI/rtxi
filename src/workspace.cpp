@@ -75,7 +75,7 @@ Workspace::Manager::Manager(Event::Manager* ev_manager)
       ERROR_MSG("Unable to load GSC aio168 rtxi driver");
     }
   }
-  #ifdef DEBUG_DRIVERS
+#ifdef DEBUG_DRIVERS
   const std::string fake_driver_name = "librtxifakedriver.so";
   if (bin_dir.exists(QString::fromStdString(fake_driver_name))) {
     try {
@@ -85,7 +85,7 @@ Workspace::Manager::Manager(Event::Manager* ev_manager)
       ERROR_MSG("Unable to load fake rtxi driver");
     }
   }
-  #endif
+#endif
 }
 
 Workspace::Manager::~Manager()

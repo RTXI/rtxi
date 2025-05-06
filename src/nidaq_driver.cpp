@@ -255,13 +255,14 @@ int32_t physical_channel_t::addToTask(TaskHandle task_handle) const
                                        DAQmx_Val_Volts,
                                        nullptr);
       } else if (units == "amps") {
-        DAQmxGetAICurrentShuntLoc(task_handle, name.c_str(), &shunt_resistance_location);
+        DAQmxGetAICurrentShuntLoc(
+            task_handle, name.c_str(), &shunt_resistance_location);
         err = DAQmxCreateAICurrentChan(task_handle,
                                        name.c_str(),
                                        nullptr,
                                        DAQmx_Val_Diff,
-                                       min/1000.0,
-                                       max/1000.0,
+                                       min / 1000.0,
+                                       max / 1000.0,
                                        DAQmx_Val_Amps,
                                        shunt_resistance_location,
                                        249.0,
