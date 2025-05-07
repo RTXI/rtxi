@@ -18,9 +18,6 @@
 
 */
 
-#include <chrono>
-#include <iostream>
-
 #include "rtos.hpp"
 
 #include <errno.h>
@@ -65,18 +62,18 @@ void RT::OS::shutdown(RT::OS::Task* task)
   RT_PERIOD = nullptr;
 }
 
-struct Pthread_args {
+struct Pthread_args
+{
   RT::OS::Task* tsk;
   void (*fn)(void*);
   void* args;
 };
 
-
 int RT::OS::createTask(Task* task, void (*func)(void*), void* arg)
 {
   int result = 0;
   int policy;
-   sched_param param;
+  sched_param param;
   // Should not be creating real-time tasks from another real-time task
   if (RT::OS::isRealtime()) {
     ERROR_MSG("RT::OS::createTask : Task cannot be created from rt context");
@@ -94,10 +91,10 @@ int RT::OS::createTask(Task* task, void (*func)(void*), void* arg)
     RT::OS::shutdown(tsk);
   };
   std::thread thread_obj(wrapper, task, func, arg);
-   pthread_getschedparam(thread_obj.native_handle(), &policy, &param); 
-   policy = SCHED_FIFO;
-   param.sched_priority = 9;   
-   pthread_setschedparam(thread_obj.native_handle(), policy, &param); 
+  pthread_getschedparam(thread_obj.native_handle(), &policy, &param);
+  policy = SCHED_FIFO;
+  param.sched_priority = 9;
+  pthread_setschedparam(thread_obj.native_handle(), policy, &param);
 
   RT::OS::renameOSThread(thread_obj, std::string("RealTimeThread"));
   if (thread_obj.joinable()) {
@@ -121,7 +118,6 @@ void RT::OS::deleteTask(RT::OS::Task* task)
   }
 }
 
-
 bool RT::OS::isRealtime()
 {
   return realtime_key;
@@ -129,12 +125,10 @@ bool RT::OS::isRealtime()
 
 int64_t RT::OS::getTime()
 {
-
   timespec tp = {};
 
   clock_gettime(CLOCK_MONOTONIC, &tp);
   return RT::OS::SECONDS_TO_NANOSECONDS * tp.tv_sec + tp.tv_nsec;
-
 }
 
 int RT::OS::setPeriod(RT::OS::Task* task, int64_t period)
@@ -170,8 +164,7 @@ void RT::OS::sleepTimestep(RT::OS::Task* task)
 
 void RT::OS::renameOSThread(std::thread& thread, const std::string& name)
 {
-
-    if (RT::OS::isRealtime()) {
+  if (RT::OS::isRealtime()) {
     return;
   }
   if (pthread_setname_np(thread.native_handle(), name.c_str()) != 0) {

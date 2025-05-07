@@ -48,7 +48,7 @@ elseif(RTXI_RT_CORE STREQUAL "preempt_rt")
   message("Preempt-RT core Library found.")
   add_library(rtxiplugin SHARED "dlplugin.hpp" "dlplugin.cpp")
   target_link_libraries(rtxiplugin PRIVATE fmt::fmt)
-  add_library(rtxififo SHARED "fifo.hpp" "fifo_posix.cpp")
+  add_library(rtxififo SHARED "fifo.hpp" "fifo_preempt_rt.cpp")
   target_link_libraries(rtxififo PRIVATE fmt::fmt)
   add_library(rtxipal SHARED "rtos.hpp" "rtos_preempt_rt.cpp")
   target_link_libraries(rtxipal PRIVATE 
