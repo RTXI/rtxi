@@ -88,6 +88,12 @@ void Oscilloscope::Panel::updateChannelPen(IO::endpoint endpoint)
   this->scopeWindow->setChannelPen(endpoint, pen);
 }
 
+void Oscilloscope::Panel::updateChannelCurveStyle(IO::endpoint endpoint)
+{
+  auto curveStyle = this->curveStylesList->currentData().value<QwtPlotCurve::CurveStyle>();
+  this->scopeWindow->setChannelCurveStyle(endpoint, curveStyle);
+}
+
 void Oscilloscope::Panel::updateChannelLabel(IO::endpoint probe_info)
 {
   const QString chanlabel = QString::number(probe_info.block->getID()) + " "
@@ -135,6 +141,7 @@ void Oscilloscope::Panel::enableChannel()
   this->updateChannelOffset(endpoint);
   this->updateChannelScale(endpoint);
   this->updateChannelPen(endpoint);
+  this->updateChannelCurveStyle(endpoint);
 }
 
 void Oscilloscope::Panel::disableChannel()
@@ -166,6 +173,7 @@ void Oscilloscope::Panel::activateChannel(bool active)
   colorsList->setEnabled(enable);
   widthsList->setEnabled(enable);
   stylesList->setEnabled(enable);
+  curveStylesList->setEnabled(enable);
   this->activateButton->setChecked(enable);
 }
 
@@ -254,6 +262,7 @@ void Oscilloscope::Panel::applyChannelTab()
     this->updateChannelScale(probeInfo);
     this->updateChannelOffset(probeInfo);
     this->updateChannelPen(probeInfo);
+    this->updateChannelCurveStyle(probeInfo);
     this->updateChannelLabel(probeInfo);
   }
   scopeWindow->replot();
@@ -431,7 +440,7 @@ QWidget* Oscilloscope::Panel::createChannelTab(QWidget* parent)
   }
 
   // Create styles list
-  auto* styleLabel = new QLabel(tr("Style:"), page);
+  auto* styleLabel = new QLabel(tr("Line Style:"), page);
   row2Layout->addWidget(styleLabel);
   stylesList = new QComboBox(page);
   stylesList->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
@@ -449,6 +458,25 @@ QWidget* Oscilloscope::Panel::createChannelTab(QWidget* parent)
     stylesList->addItem(tmp,
                         QString(temp_name.c_str()),
                         QVariant::fromValue(Oscilloscope::penStyles.at(i)));
+  }
+
+  // Create curve styles list
+  auto* curveStyleLabel = new QLabel(tr("Curve Style:"), page);
+  row2Layout->addWidget(curveStyleLabel);
+  curveStylesList = new QComboBox(page);
+  curveStylesList->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+  curveStylesList->setSizeAdjustPolicy(QComboBox::AdjustToContents);
+  row2Layout->addWidget(curveStylesList);
+  for (size_t i = 0; i < Oscilloscope::curveStyles.size(); i++) {
+    temp_name = Oscilloscope::curvestyles2string.at(i);
+    tmp.fill(Qt::white);
+    painter.setPen(
+      QPen(Oscilloscope::penColors.at(Oscilloscope::ColorID::Black),
+      3));
+    (i == 0) ? painter.drawLine(0, 12, 25, 12) : painter.drawPoint(12, 12);
+    curveStylesList->addItem(tmp,
+                        QString(temp_name.c_str()),
+                        QVariant::fromValue(Oscilloscope::curveStyles.at(i)));
   }
 
   // Activate button
@@ -910,6 +938,8 @@ void Oscilloscope::Panel::syncChannelProperties()
   widthsList->setCurrentIndex(widthsList->findData(width));
   const Qt::PenStyle style = scopeWindow->getChannelStyle(probe_info);
   stylesList->setCurrentIndex(stylesList->findData(QVariant::fromValue(style)));
+  const QwtPlotCurve::CurveStyle curveStyle = scopeWindow->getChannelCurveStyle(probe_info);
+  curveStylesList->setCurrentIndex(curveStylesList->findData(QVariant::fromValue(curveStyle)));
   double offset = scopeWindow->getChannelOffset(probe_info);
   const double scale = scopeWindow->getChannelScale(probe_info);
   scalesList->setCurrentIndex(

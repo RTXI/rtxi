@@ -34,6 +34,7 @@
 #include <shared_mutex>
 #include <vector>
 
+#include <qwt_plot_curve.h>
 #include <qwt_plot_canvas.h>
 #include <qwt_plot_legenditem.h>
 #include <qwt_plot.h>
@@ -143,6 +144,21 @@ enum penstyle_id : size_t
 };
 }  // namespace PenStyleID
 
+constexpr std::array<QwtPlotCurve::CurveStyle, 2> curveStyles = {QwtPlotCurve::Lines, QwtPlotCurve::Dots};
+
+constexpr std::array<std::string_view, 2> curvestyles2string {
+    "Lines", "Dots"};
+
+namespace CurveStyleID
+{
+enum curvestyle_id : size_t
+{
+  Line = 0,
+  Dot,
+};
+}  // namespace CurveStyleID
+
+
 class LegendItem : public QwtPlotLegendItem
 {
 public:
@@ -198,7 +214,9 @@ public:
   void setChannelLabel(IO::endpoint endpoint, const QString& label);
   QColor getChannelColor(IO::endpoint endpoint);
   Qt::PenStyle getChannelStyle(IO::endpoint endpoint);
+  QwtPlotCurve::CurveStyle getChannelCurveStyle(IO::endpoint endpoint);
   void setChannelPen(IO::endpoint endpoint, const QPen& pen);
+  void setChannelCurveStyle(IO::endpoint endpoint, const QwtPlotCurve::CurveStyle& curveStyle);
   int getChannelWidth(IO::endpoint endpoint);
   double getTriggerThreshold() const;
   void setTriggerThreshold(double threshold);
@@ -252,4 +270,5 @@ private:
 
 }  // namespace Oscilloscope
 
+Q_DECLARE_METATYPE(QwtPlotCurve::CurveStyle)
 #endif  // SCOPE_H

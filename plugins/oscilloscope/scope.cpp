@@ -194,6 +194,7 @@ void Oscilloscope::Scope::createChannel(IO::endpoint probeInfo,
   pen.setStyle(Oscilloscope::penStyles[0]);
   chan.fifo = fifo;
   chan.curve->setPen(pen);
+  chan.curve->setStyle(Oscilloscope::curveStyles[0]);
   chan.curve->attach(this);
   this->channels.push_back(chan);
 }
@@ -420,6 +421,19 @@ Qt::PenStyle Oscilloscope::Scope::getChannelStyle(IO::endpoint endpoint)
   return chan_loc->curve->pen().style();
 }
 
+QwtPlotCurve::CurveStyle Oscilloscope::Scope::getChannelCurveStyle(IO::endpoint endpoint)
+{
+  const std::shared_lock<std::shared_mutex> lock(this->m_channel_mutex);
+  auto chan_loc = std::find_if(this->channels.begin(),
+                               this->channels.end(),
+                               [&](const Oscilloscope::scope_channel& chann)
+                               { return chann.endpoint == endpoint; });
+  if (chan_loc == channels.end()) {
+    return curveStyles[Oscilloscope::CurveStyleID::Line];
+  }
+  return chan_loc->curve->style();
+}
+
 int Oscilloscope::Scope::getChannelWidth(IO::endpoint endpoint)
 {
   const std::shared_lock<std::shared_mutex> lock(this->m_channel_mutex);
@@ -442,6 +456,18 @@ void Oscilloscope::Scope::setChannelPen(IO::endpoint endpoint, const QPen& pen)
                                { return chann.endpoint == endpoint; });
   if (chan_loc != channels.end()) {
     chan_loc->curve->setPen(pen);
+  }
+}
+
+void Oscilloscope::Scope::setChannelCurveStyle(IO::endpoint endpoint, const QwtPlotCurve::CurveStyle& curveStyle)
+{
+  const std::shared_lock<std::shared_mutex> lock(this->m_channel_mutex);
+  auto chan_loc = std::find_if(this->channels.begin(),
+                               this->channels.end(),
+                               [&](const Oscilloscope::scope_channel& chann)
+                               { return chann.endpoint == endpoint; });
+  if (chan_loc != channels.end()) {
+    chan_loc->curve->setStyle(curveStyle);
   }
 }
 
