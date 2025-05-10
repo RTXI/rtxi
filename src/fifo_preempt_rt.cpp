@@ -18,22 +18,22 @@
 
 */
 
-#include <algorithm>
 #include <array>
-#include <cstring>
-#include <memory>
 
 #include "fifo.hpp"
 
+#include <fcntl.h>
 #include <sys/eventfd.h>
+#include <sys/mman.h>
 #include <sys/poll.h>
 #include <unistd.h>
 
 #include "debug.hpp"
+#include "rtos.hpp"
 
+// Generic posix fifo based on pipes
 namespace RT::OS
 {
-
 class preemptRTFifo : public RT::OS::Fifo
 {
 public:
@@ -54,152 +54,101 @@ public:
   int getErrorCode() const;
 
 private:
-  static constexpr size_t ENTRY_SIZE = 256;
-  static constexpr size_t RING_CAPACITY = 1024;
+  std::array<int, 2> ui_to_rt {};
+  std::array<int, 2> rt_to_ui {};
 
-  struct Entry
-  {
-    uint8_t data[ENTRY_SIZE];
-    size_t size;
-  };
-
-  class RingBuffer
-  {
-  public:
-    bool push(const Entry& e)
-    {
-      const size_t next = (head + 1) % RING_CAPACITY;
-      if (next == tail)
-        return false;
-      buffer[head] = e;
-      head = next;
-      return true;
-    }
-
-    bool pop(Entry& e)
-    {
-      if (head == tail)
-        return false;
-      e = buffer[tail];
-      tail = (tail + 1) % RING_CAPACITY;
-      return true;
-    }
-
-    bool empty() const { return head == tail; }
-
-  private:
-    std::array<Entry, RING_CAPACITY> buffer {};
-    size_t head = 0;
-    size_t tail = 0;
-  };
-
-  RingBuffer rt_to_ui_ring;
-  RingBuffer ui_to_rt_ring;
-
-  size_t fifo_capacity;
+  size_t fifo_capacity = 0;
   int close_event_fd;
-  std::array<struct pollfd, 1> xbuf_poll_fd {};
+  std::array<struct pollfd, 2> xbuf_poll_fd {};
   bool closed = false;
   int errcode = 0;
 };
-
 }  // namespace RT::OS
 
-using namespace RT::OS;
-
-preemptRTFifo::preemptRTFifo(size_t size)
+RT::OS::preemptRTFifo::preemptRTFifo(size_t size)
     : fifo_capacity(size)
+    , errcode(pipe2(this->rt_to_ui.data(), O_CLOEXEC))
 {
-  this->close_event_fd = eventfd(0, EFD_NONBLOCK);
-  if (close_event_fd == -1) {
-    ERROR_MSG("RT::OS::preemptRTFifo : eventfd creation failed");
-    errcode = errno;
+  if (this->errcode != 0) {
+    ERROR_MSG("RT::OS::preemptRTFifo : Unable to create RT to UI buffer");
     return;
   }
+  this->errcode = pipe2(this->ui_to_rt.data(), O_CLOEXEC);
+  if (this->errcode != 0) {
+    ERROR_MSG("RT::OS::preemptRTFifo : Unable to create UI to RT buffer");
+    return;
+  }
+  // Make sure the reads/writes are nonblock to match api behavior
+  fcntl(this->rt_to_ui[0], F_SETFL, O_NONBLOCK);
+  fcntl(this->rt_to_ui[1], F_SETFL, O_NONBLOCK);
+  fcntl(this->ui_to_rt[0], F_SETFL, O_NONBLOCK);
+  fcntl(this->rt_to_ui[1], F_SETFL, O_NONBLOCK);
 
-  this->xbuf_poll_fd[0].fd = this->close_event_fd;
+  // We can set the size of the pipe. Again we try to match api behavior
+  fcntl(this->rt_to_ui[1], F_SETPIPE_SZ, size);
+  fcntl(this->ui_to_rt[1], F_SETPIPE_SZ, size);
+
+  this->xbuf_poll_fd[0].fd = this->rt_to_ui[0];
   this->xbuf_poll_fd[0].events = POLLIN;
+  this->close_event_fd = eventfd(0, EFD_NONBLOCK);
+  this->xbuf_poll_fd[1].fd = this->close_event_fd;
+  this->xbuf_poll_fd[1].events = POLLIN;
 }
 
-preemptRTFifo::~preemptRTFifo()
+RT::OS::preemptRTFifo::~preemptRTFifo()
 {
-  ::close(close_event_fd);
+  ::close(rt_to_ui[0]);
+  ::close(rt_to_ui[1]);
+  ::close(ui_to_rt[0]);
+  ::close(ui_to_rt[1]);
 }
 
-int64_t preemptRTFifo::writeRT(void* buf, size_t data_size)
+int64_t RT::OS::preemptRTFifo::read(void* buf, size_t data_size)
 {
-  Entry e;
-  if (data_size > ENTRY_SIZE)
-    return -1;
-  std::memcpy(e.data, buf, data_size);
-  e.size = data_size;
-
-  if (!rt_to_ui_ring.push(e))
-    return 0;
-
-  uint64_t notify = 1;
-  ::write(close_event_fd, &notify, sizeof(notify));
-  return static_cast<int64_t>(data_size);
+  return ::read(rt_to_ui[0], buf, data_size);
 }
 
-int64_t preemptRTFifo::read(void* buf, size_t data_size)
+int64_t RT::OS::preemptRTFifo::write(void* buf, size_t data_size)
 {
-  Entry e;
-  if (!rt_to_ui_ring.pop(e))
-    return 0;
-
-  std::memcpy(buf, e.data, std::min(data_size, e.size));
-  return static_cast<int64_t>(std::min(data_size, e.size));
+  return ::write(ui_to_rt[1], buf, data_size);
 }
 
-int64_t preemptRTFifo::write(void* buf, size_t data_size)
+int64_t RT::OS::preemptRTFifo::readRT(void* buf, size_t data_size)
 {
-  Entry e;
-  if (data_size > ENTRY_SIZE)
-    return -1;
-  std::memcpy(e.data, buf, data_size);
-  e.size = data_size;
-
-  if (!ui_to_rt_ring.push(e))
-    return 0;
-  return static_cast<int64_t>(data_size);
+  return ::read(ui_to_rt[0], buf, data_size);
 }
 
-int64_t preemptRTFifo::readRT(void* buf, size_t data_size)
+int64_t RT::OS::preemptRTFifo::writeRT(void* buf, size_t data_size)
 {
-  Entry e;
-  if (!ui_to_rt_ring.pop(e))
-    return 0;
-
-  std::memcpy(buf, e.data, std::min(data_size, e.size));
-  return static_cast<int64_t>(std::min(data_size, e.size));
+  return ::write(rt_to_ui[1], buf, data_size);
 }
 
-void preemptRTFifo::poll()
+void RT::OS::preemptRTFifo::poll()
 {
-  this->errcode = ::poll(this->xbuf_poll_fd.data(), 1, -1);
+  this->errcode = ::poll(this->xbuf_poll_fd.data(), 2, -1);
   if (errcode < 0) {
     std::string errbuff(255, '\0');
-    ERROR_MSG(
-        "RT::OS::FIFO(preempt_rt)::poll : returned with failure code {} : ",
-        errcode);
+    ERROR_MSG("RT::OS::FIFO(evl)::poll : returned with failure code {} : ",
+              errcode);
     ERROR_MSG("{}", strerror_r(this->errcode, errbuff.data(), errbuff.size()));
+  } else if ((this->xbuf_poll_fd[1].revents & POLLIN) != 0) {
+    this->closed = true;
   }
 }
 
-void preemptRTFifo::close()
+void RT::OS::preemptRTFifo::close()
 {
   std::array<int64_t, 1> buf = {1};
   this->closed = true;
   ::write(this->close_event_fd, buf.data(), sizeof(int64_t));
 }
 
-size_t preemptRTFifo::getCapacity()
+size_t RT::OS::preemptRTFifo::getCapacity()
 {
   return this->fifo_capacity;
 }
 
-int preemptRTFifo::getErrorCode() const
+int RT::OS::preemptRTFifo::getErrorCode() const
 {
   return this->errcode;
 }

@@ -72,13 +72,14 @@ struct Pthread_args
 int RT::OS::createTask(Task* task, void (*func)(void*), void* arg)
 {
   int result = 0;
-  int policy;
-  sched_param param;
+  int policy = SCHED_FIFO;
+  struct sched_param param = {50};
+  ;
   // Should not be creating real-time tasks from another real-time task
-  if (RT::OS::isRealtime()) {
-    ERROR_MSG("RT::OS::createTask : Task cannot be created from rt context");
-    return -1;
-  }
+  // if (RT::OS::isRealtime()) {
+  //   ERROR_MSG("RT::OS::createTask : Task cannot be created from rt context");
+  //   return -1;
+  // }
   auto wrapper = [](RT::OS::Task* tsk, void (*fn)(void*), void* args)
   {
     std::string strbuf(256, '\0');
@@ -93,7 +94,7 @@ int RT::OS::createTask(Task* task, void (*func)(void*), void* arg)
   std::thread thread_obj(wrapper, task, func, arg);
   pthread_getschedparam(thread_obj.native_handle(), &policy, &param);
   policy = SCHED_FIFO;
-  param.sched_priority = 9;
+  param.sched_priority = 50;
   pthread_setschedparam(thread_obj.native_handle(), policy, &param);
 
   RT::OS::renameOSThread(thread_obj, std::string("RealTimeThread"));
@@ -108,10 +109,10 @@ int RT::OS::createTask(Task* task, void (*func)(void*), void* arg)
 void RT::OS::deleteTask(RT::OS::Task* task)
 {
   // Should not be deleting real-time tasks from another real-time task
-  if (RT::OS::isRealtime()) {
-    ERROR_MSG("RT::OS::createTask : Task cannot be deleted from rt context");
-    return;
-  }
+  // if (RT::OS::isRealtime()) {
+  //   ERROR_MSG("RT::OS::createTask : Task cannot be deleted from rt context");
+  //   return;
+  // }
   task->task_finished = true;
   if (task->rt_thread.joinable()) {
     task->rt_thread.join();
@@ -128,7 +129,7 @@ int64_t RT::OS::getTime()
   timespec tp = {};
 
   clock_gettime(CLOCK_MONOTONIC, &tp);
-  return RT::OS::SECONDS_TO_NANOSECONDS * tp.tv_sec + tp.tv_nsec;
+  return (RT::OS::SECONDS_TO_NANOSECONDS * tp.tv_sec) + tp.tv_nsec;
 }
 
 int RT::OS::setPeriod(RT::OS::Task* task, int64_t period)
