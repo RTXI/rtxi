@@ -29,7 +29,6 @@
 #include <unistd.h>
 
 #include "debug.hpp"
-#include "rtos.hpp"
 
 // Generic posix fifo based on pipes
 namespace RT::OS
