@@ -304,7 +304,7 @@ void Widgets::Panel::updatePauseButton()
     return;
   }
   const bool paused = state == RT::State::PAUSE;
-  pauseButton->setChecked(paused);
+  pauseButton->setDown(paused);
 }
 
 void Widgets::Panel::update_state(RT::State::state_t flag)

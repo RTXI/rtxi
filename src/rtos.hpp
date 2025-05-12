@@ -82,7 +82,7 @@ int setPeriod(Task* task, int64_t period);
  * real-time loop. Available inside execute().
  *
  * \returns Period of the realtime thread the calling function is
- *    runninng from, -1 otherwise.
+ *    running from, -1 otherwise.
  *
  * \sa RT::OS::sleepTimestep
  */

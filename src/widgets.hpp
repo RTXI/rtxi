@@ -719,6 +719,7 @@ public:
    * \return IO::Block pointer to the internal structure
    */
   IO::Block* getBlock() { return plugin_component.get(); }
+  const IO::Block* getBlock() const { return plugin_component.get(); }
 
 protected:
   Widgets::Component* getComponent();

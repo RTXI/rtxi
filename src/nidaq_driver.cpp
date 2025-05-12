@@ -184,6 +184,27 @@ inline void printError(int32_t status)
   ERROR_MSG("Message : {}", std::string(err_buff.data()));
 }
 
+inline void printExtendedError(int32_t status)
+{
+  if (status == 0) {
+    return;
+  }
+  ERROR_MSG("NIDAQ ERROR : code {}", status);
+  const int32_t error_size = DAQmxGetExtendedErrorInfo(nullptr, 0);
+  if (error_size < 0) {
+    ERROR_MSG("Unable to get code message");
+    return;
+  }
+  std::vector<char> err_buff(static_cast<size_t>(error_size));
+  const int32_t errcode = DAQmxGetExtendedErrorInfo(
+      err_buff.data(), static_cast<uint32_t>(error_size));
+  if (errcode < 0) {
+    ERROR_MSG("Unable to parse message");
+    return;
+  }
+  ERROR_MSG("Message : {}", std::string(err_buff.data()));
+}
+
 inline std::string physical_card_name(const std::string& device_name)
 {
   std::array<char, 1024> buffer {};
@@ -218,6 +239,8 @@ struct physical_channel_t
 int32_t physical_channel_t::addToTask(TaskHandle task_handle) const
 {
   int32_t err = 0;
+  int32_t shunt_resistance_location = 0;
+  int32_t shunt_resisntance_value = 0;
   const std::string units = DAQ::get_default_units().at(units_index);
   auto [min, max] = DAQ::get_default_ranges().at(range_index);
   switch (type) {
@@ -232,20 +255,22 @@ int32_t physical_channel_t::addToTask(TaskHandle task_handle) const
                                        DAQmx_Val_Volts,
                                        nullptr);
       } else if (units == "amps") {
+        DAQmxGetAICurrentShuntLoc(
+            task_handle, name.c_str(), &shunt_resistance_location);
         err = DAQmxCreateAICurrentChan(task_handle,
                                        name.c_str(),
                                        nullptr,
-                                       reference,
-                                       min,
-                                       max,
+                                       DAQmx_Val_Diff,
+                                       min / 1000.0,
+                                       max / 1000.0,
                                        DAQmx_Val_Amps,
-                                       DAQmx_Val_Default,
-                                       0,
+                                       shunt_resistance_location,
+                                       249.0,
                                        nullptr);
       } else {
         ERROR_MSG("NIDAQ : Virtual Channel Creation : Unknown units {}", units);
       }
-      printError(err);
+      printExtendedError(err);
       break;
     case DAQ::ChannelType::AO:
       if (units == "volts") {
@@ -267,17 +292,17 @@ int32_t physical_channel_t::addToTask(TaskHandle task_handle) const
       } else {
         ERROR_MSG("NIDAQ : Virtual Channel Creation : Unknown units {}", units);
       }
-      printError(err);
+      printExtendedError(err);
       break;
     case DAQ::ChannelType::DI:
       err = DAQmxCreateDIChan(
           task_handle, name.c_str(), nullptr, DAQmx_Val_ChanPerLine);
-      printError(err);
+      printExtendedError(err);
       break;
     case DAQ::ChannelType::DO:
       err = DAQmxCreateDOChan(
           task_handle, name.c_str(), nullptr, DAQmx_Val_ChanPerLine);
-      printError(err);
+      printExtendedError(err);
       break;
     default:
       ERROR_MSG("NIDAQ_DRIVER : Channel Type Unknown");
@@ -516,7 +541,7 @@ int Device::setChannelActive(DAQ::ChannelType::type_t type,
   DAQmxClearTask(task);
   err = DAQmxCreateTask(DAQ::ChannelType::type2string(type).c_str(), &task);
   if (err != 0) {
-    printError(err);
+    printExtendedError(err);
     for (auto& channel : physical_channels_registry.at(type)) {
       channel.active = false;
     }
@@ -554,9 +579,9 @@ int Device::setChannelActive(DAQ::ChannelType::type_t type,
     }
   }
   if (DAQmxGetTaskChannels(task, nullptr, 0) > 0) {
-    printError(DAQmxSetSampTimingType(task, DAQmx_Val_OnDemand));
-    printError(DAQmxTaskControl(task, DAQmx_Val_Task_Commit));
-    printError(DAQmxStartTask(task));
+    printExtendedError(DAQmxSetSampTimingType(task, DAQmx_Val_OnDemand));
+    printExtendedError(DAQmxTaskControl(task, DAQmx_Val_Task_Commit));
+    printExtendedError(DAQmxStartTask(task));
   }
   return err;
 }
@@ -991,6 +1016,9 @@ void Driver::loadDevices()
   const int32_t device_names_buffer_size = DAQmxGetSysDevNames(nullptr, 0);
   if (device_names_buffer_size < 0) {
     printError(device_names_buffer_size);
+    return;
+  }
+  if (device_names_buffer_size == 0) {
     return;
   }
   const std::string alpha = "abcdefghijklmnopqrstuvwxyz";

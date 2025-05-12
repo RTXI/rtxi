@@ -35,7 +35,7 @@ IO::Block::Block(std::string blockname,
     port.value = 0.0;
     port.buff_value = 0.0;
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
-    ports[channel.flags].push_back(port);
+    ports.at(channel.flags).push_back(port);
     port = {};
   }
 }
@@ -43,44 +43,44 @@ IO::Block::Block(std::string blockname,
 size_t IO::Block::getCount(IO::flags_t type) const
 {
   // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
-  return this->ports[type].size();
+  return this->ports.at(type).size();
 }
 
 std::string IO::Block::getChannelName(IO::flags_t type, size_t index) const
 {
   // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
-  return this->ports[type][index].channel_info.name;
+  return this->ports.at(type).at(index).channel_info.name;
 }
 
 std::string IO::Block::getChannelDescription(IO::flags_t type,
                                              size_t index) const
 {
   // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
-  return this->ports[type][index].channel_info.description;
+  return this->ports.at(type).at(index).channel_info.description;
 }
 
 void IO::Block::writeinput(size_t index, const double& data)
 {
-  this->ports[IO::INPUT][index].buff_value += data;
+  this->ports.at(IO::INPUT).at(index).buff_value += data;
 }
 
 double& IO::Block::readinput(size_t index)
 {
   // We must reset input values to zero so that the next cycle doesn't use these
   // values
-  this->ports[IO::INPUT][index].value =
-      this->ports[IO::INPUT][index].buff_value;
-  this->ports[IO::INPUT][index].buff_value = 0.0;
-  return this->ports[IO::INPUT][index].value;
+  this->ports.at(IO::INPUT).at(index).value =
+      this->ports.at(IO::INPUT).at(index).buff_value;
+  this->ports.at(IO::INPUT).at(index).buff_value = 0.0;
+  return this->ports.at(IO::INPUT).at(index).value;
 }
 
 void IO::Block::writeoutput(size_t index, const double& data)
 {
-  this->ports[IO::OUTPUT][index].value = data;
+  this->ports.at(IO::OUTPUT).at(index).value = data;
 }
 
 const double& IO::Block::readPort(IO::flags_t direction, size_t index)
 {
-  return this->ports[direction][index].value;
+  return this->ports.at(direction).at(index).value;
 }
 // NOLINTEND(cppcoreguidelines-pro-bounds-constant-array-index)
