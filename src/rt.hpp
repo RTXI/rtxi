@@ -185,6 +185,7 @@ public:
  * \param src_port Index of the source channel generating the output
  * \param dest IO::Block pointer representing who to send the output to
  * \param dest_port Index of the destination channel taking the output as input
+ * \param check_cycle Whether or not to check for cycles
  */
 typedef struct block_connection_t
 {
@@ -193,6 +194,7 @@ typedef struct block_connection_t
   size_t src_port = 0;
   IO::Block* dest = nullptr;
   size_t dest_port = 0;
+  bool check_cycle = false;
   bool operator==(const block_connection_t& rhs) const
   {
     return (this->src == rhs.src) && (this->src_port_type == rhs.src_port_type)
