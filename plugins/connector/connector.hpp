@@ -71,6 +71,7 @@ private:
   QComboBox* outputChannel;
   QListWidget* connectionBox;
   QPushButton* connectionButton;
+  QPushButton* checkCycleButton;
   std::vector<IO::Block*> blocks;
   std::vector<RT::block_connection_t> links;
 };  // class Panel

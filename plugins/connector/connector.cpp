@@ -31,6 +31,7 @@
 Connector::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
     : Widgets::Panel(std::string(Connector::MODULE_NAME), mw, ev_manager)
     , buttonGroup(new QGroupBox)
+    , checkCycleButton(new QPushButton)
     , inputBlock(new QComboBox)
     , inputChannel(new QComboBox)
     , outputBlock(new QComboBox)
@@ -105,6 +106,12 @@ Connector::Panel::Panel(QMainWindow* mw, Event::Manager* ev_manager)
                    &QPushButton::clicked,
                    this,
                    &Connector::Panel::toggleConnection);
+
+  // Create elements for button
+  checkCycleButton->setText("Check Cycle");
+  checkCycleButton->setCheckable(true);
+  checkCycleButton->setChecked(true);  // Default: activated
+  buttonLayout->addWidget(checkCycleButton);
 
   // Assign layout to child widget
   buttonGroup->setLayout(buttonLayout);
@@ -343,6 +350,8 @@ void Connector::Panel::highlightConnectionBox(const QString& /*item*/)
   const QVariant src_chan_variant = this->outputChannel->currentData();
   const QVariant dest_variant = this->inputBlock->currentData();
   const QVariant dest_chan_variant = this->inputChannel->currentData();
+  bool check_cycle = this->checkCycleButton->isChecked();
+
   if (!src_variant.isValid() || !src_type_variant.isValid()
       || !dest_variant.isValid() || !src_chan_variant.isValid()
       || !dest_chan_variant.isValid())
@@ -357,6 +366,7 @@ void Connector::Panel::highlightConnectionBox(const QString& /*item*/)
   current_connection.src_port = src_chan_variant.value<size_t>();
   current_connection.dest = dest_variant.value<IO::Block*>();
   current_connection.dest_port = dest_chan_variant.value<size_t>();
+  current_connection.check_cycle = check_cycle;
   QVariant temp_conn_variant;
   // update connection button state
   for (int row = 0; row < connectionBox->count(); ++row) {
@@ -398,6 +408,8 @@ void Connector::Panel::toggleConnection(bool down)
   const QVariant src_port = outputChannel->currentData();
   const QVariant dest_block = inputBlock->currentData();
   const QVariant dest_port = inputChannel->currentData();
+  bool check_cycle = this->checkCycleButton->isChecked();
+
   if (!src_block.isValid() || !src_type.isValid() || !src_port.isValid()
       || !dest_block.isValid() || !dest_port.isValid())
   {
@@ -412,6 +424,7 @@ void Connector::Panel::toggleConnection(bool down)
   connection.src_port = src_port.value<size_t>();
   connection.dest = dest_block.value<IO::Block*>();
   connection.dest_port = dest_port.value<size_t>();
+  connection.check_cycle = check_cycle;
 
   if (down) {
     Event::Object event(Event::Type::IO_LINK_INSERT_EVENT);
@@ -440,6 +453,7 @@ void Connector::Panel::updateConnectionButton()
   const QVariant src_port = outputChannel->currentData();
   const QVariant dest_block = inputBlock->currentData();
   const QVariant dest_port = inputChannel->currentData();
+  bool check_cycle = checkCycleButton->isChecked();
   if (!src_block.isValid() || !src_type.isValid() || !src_port.isValid()
       || !dest_block.isValid() || !dest_port.isValid())
   {
@@ -455,6 +469,7 @@ void Connector::Panel::updateConnectionButton()
   connection.src_port = src_port.value<size_t>();
   connection.dest = dest_block.value<IO::Block*>();
   connection.dest_port = dest_port.value<size_t>();
+  connection.check_cycle = check_cycle;
 
   QListWidgetItem* temp_item = nullptr;
   for (int i = 0; i < connectionBox->count(); i++) {

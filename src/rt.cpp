@@ -62,7 +62,9 @@ int RT::Connector::connect(RT::block_connection_t connection)
         "RT::Connector : source or destination blocks are not registered");
     return -1;
   }
-  if (this->find_cycle(connection, connection.src) == -1) {
+  if (connection.check_cycle
+      && this->find_cycle(connection, connection.src) == -1)
+  {
     ERROR_MSG("RT::Connector : The Connection would have caused a cycle");
     return -1;
   }
@@ -248,12 +250,12 @@ void RT::Connector::propagateBlockConnections(IO::Block* block)
 void RT::Connector::clearAllConnections(IO::Block* block)
 {
   for (auto& entry : this->connections) {
-    entry.erase(std::remove_if(entry.begin(),
-                               entry.end(),
-                               [&](RT::block_connection_t conn) {
-                                 return conn.dest == block || conn.src == block;
-                               }),
-                entry.end());
+    entry.erase(
+        std::remove_if(entry.begin(),
+                       entry.end(),
+                       [&](RT::block_connection_t conn)
+                       { return conn.dest == block || conn.src == block; }),
+        entry.end());
   }
 }
 
