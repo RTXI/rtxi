@@ -4,15 +4,15 @@ if(DEFINED evl_FOUND AND RTXI_RT_CORE STREQUAL "evl")
   add_library(rtxiplugin SHARED "dlplugin.hpp" "dlplugin.cpp")
   target_link_libraries(rtxiplugin PRIVATE fmt::fmt)
   add_library(rtxififo SHARED "fifo.hpp" "fifo_evl.cpp")
-  target_link_libraries(rtxififo
-    PRIVATE
+  target_link_libraries(rtxififo 
+    PRIVATE 
       Threads::Threads
       ${evl_LINK_LIBRARIES}
       fmt::fmt
   )
   target_include_directories(rtxififo SYSTEM PRIVATE ${evl_INCLUDE_DIRS})
   add_library(rtxipal SHARED "rtos.hpp" "rtos_evl.cpp")
-  target_link_libraries(rtxipal PRIVATE
+  target_link_libraries(rtxipal PRIVATE 
     ${evl_LINK_LIBRARIES}
     rtxififo
     fmt::fmt
@@ -25,8 +25,8 @@ elseif(DEFINED XENOMAI_FOUND AND RTXI_RT_CORE STREQUAL "xenomai")
   target_link_libraries(rtxiplugin PRIVATE fmt::fmt)
   add_library(rtxififo SHARED "fifo.hpp" "fifo_xenomai.cpp")
   target_include_directories(rtxififo PRIVATE ${XENOMAI_INCLUDE_DIRS})
-  target_link_libraries(rtxififo
-    PRIVATE
+  target_link_libraries(rtxififo 
+    PRIVATE 
       ${XENOMAI_LIBRARIES}
       fmt::fmt
   )
@@ -48,10 +48,10 @@ elseif(RTXI_RT_CORE STREQUAL "preempt_rt")
   message("Preempt-RT core Library found.")
   add_library(rtxiplugin SHARED "dlplugin.hpp" "dlplugin.cpp")
   target_link_libraries(rtxiplugin PRIVATE fmt::fmt)
-  add_library(rtxififo SHARED "fifo.hpp" "fifo_posix.cpp")
+  add_library(rtxififo SHARED "fifo.hpp" "fifo_preempt_rt.cpp")
   target_link_libraries(rtxififo PRIVATE fmt::fmt)
   add_library(rtxipal SHARED "rtos.hpp" "rtos_preempt_rt.cpp")
-  target_link_libraries(rtxipal PRIVATE
+  target_link_libraries(rtxipal PRIVATE 
       rtxififo
       fmt::fmt
   )
@@ -62,7 +62,7 @@ else()
   add_library(rtxififo SHARED "fifo.hpp" "fifo_posix.cpp")
   target_link_libraries(rtxififo PRIVATE fmt::fmt)
   add_library(rtxipal SHARED "rtos.hpp" "rtos_posix.cpp")
-  target_link_libraries(rtxipal PRIVATE
+  target_link_libraries(rtxipal PRIVATE 
       rtxififo
       fmt::fmt
   )
@@ -70,7 +70,7 @@ endif()
 
 
 # Create static library for rtxi core components
-add_library(rtxi SHARED
+add_library(rtxi SHARED 
     debug.hpp debug.cpp
     event.hpp event.cpp
     io.hpp io.cpp
@@ -80,13 +80,13 @@ add_library(rtxi SHARED
     logger.hpp logger.cpp
 )
 
-target_link_libraries(rtxi
-  PRIVATE
+target_link_libraries(rtxi 
+  PRIVATE 
     Threads::Threads
     fmt::fmt
     qwt::qwt
     rtxififo
-    rtxiplugin
+    rtxiplugin 
     dl
     Qt5::Core
     Qt5::Gui
@@ -97,7 +97,7 @@ add_library(workspace OBJECT
     workspace.hpp workspace.cpp
 )
 
-target_link_libraries(workspace PRIVATE
+target_link_libraries(workspace PRIVATE 
     rtxi
     rtxiplugin
     rtximath
@@ -132,9 +132,9 @@ set_target_properties(
 )
 
 # Link all of the static and dynamic libraries to rtxi
-target_link_libraries(rtxi_exe PRIVATE
+target_link_libraries(rtxi_exe PRIVATE 
     rtxififo
-    rtxipal
+    rtxipal 
     rtxi
     rtximath
     workspace
@@ -156,33 +156,33 @@ target_link_libraries(rtxi_exe PRIVATE
 )
 
 if(nidaqmx)
-  message("National Instruments Library found")
-  add_library(rtxinidaqdriver MODULE
+message("National Instruments Library found")
+add_library(rtxinidaqdriver MODULE
   nidaq_driver.cpp
 )
 
-  target_include_directories(rtxinidaqdriver
-  PUBLIC
- "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>"
-   "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
+target_include_directories(rtxinidaqdriver
+ 	PUBLIC	
+	"$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>"
+  	"$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
 )
 
-  target_link_libraries(rtxinidaqdriver PRIVATE nidaqmx rtxipal)
+target_link_libraries(rtxinidaqdriver PRIVATE nidaqmx rtxipal)
 endif()
 
 if(16aio168_api)
-  message("General Standards Corporation 16aio168 Driver API found")
-  add_library(rtxi_gsc16aio168_driver MODULE
+message("General Standards Corporation 16aio168 Driver API found")
+add_library(rtxi_gsc16aio168_driver MODULE
   gsc_aio168_driver.cpp
 )
 
-  target_include_directories(rtxi_gsc16aio168_driver
-  PUBLIC
- "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>"
-   "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
+target_include_directories(rtxi_gsc16aio168_driver 
+ 	PUBLIC	
+	"$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>"
+  	"$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
 )
 
-  target_link_libraries(rtxi_gsc16aio168_driver PRIVATE 16aio168_api rtxipal)
+target_link_libraries(rtxi_gsc16aio168_driver PRIVATE 16aio168_api rtxipal)
 endif()
 
 target_compile_features(rtxi PUBLIC cxx_std_17)
