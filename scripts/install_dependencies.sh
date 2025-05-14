@@ -22,6 +22,7 @@ set -eu
 #
 # Created by Yogi Patel <yapatel@gatech.edu> 2014.1.31
 # Modified by Ivan Valerio <valerioif@gmail.com> 2023.09.20
+# Modified by Sergio Hidalgo <sergiohg.dev@gmail.com> 2025.03.19
 #
 
 if ! id | grep -q root; then
@@ -39,6 +40,6 @@ apt-get -y install \
 	libgsl-dev libgtest-dev libgmock-dev libfmt-dev vim lshw stress \
 	binutils-dev zstd git cmake\
 	crash kexec-tools makedumpfile kernel-wedge libncurses5-dev libelf-dev \
-	flex bison pkgconf python3-pip ninja-build dwarves
+	flex bison pkgconf python3-pip ninja-build dwarves libboost-all-dev
 echo "-----> Package dependencies installed."
 echo "-----> Done."
