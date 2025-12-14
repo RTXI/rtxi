@@ -127,6 +127,7 @@ private:
   void updateChannelScale(IO::endpoint probe_info);
   void updateChannelOffset(IO::endpoint probe_info);
   void updateChannelPen(IO::endpoint endpoint);
+  void updateChannelCurveStyle(IO::endpoint endpoint);
   void updateWindowTimeDiv();
 
   // Tab Widget
@@ -170,6 +171,7 @@ private:
   QComboBox* offsetsList = nullptr;
   QComboBox* scalesList = nullptr;
   QComboBox* stylesList = nullptr;
+  QComboBox* curveStylesList = nullptr;
   QComboBox* widthsList = nullptr;
   QLineEdit* offsetsEdit = nullptr;
 
